@@ -496,6 +496,7 @@ export class ReceivableDetailsComponent {
   // }  
 
   DownloadAsPDF() {
+    console.log("gf")
     this.showPDF = true;
     setTimeout(() => {
       this.pdfComponentRef.downloadPDF();
@@ -562,7 +563,8 @@ export class ReceivableDetailsComponent {
         { key: 'Document Type', value: this.receivable.receivableDocTypesName || '' },
         { key: 'Document Number', value: this.receivable.docNumber || '' },
         { key: 'Date', value: this.receivable.date || '' },
-        { key: 'Total Amount', value: this.totalAmount || 0 }
+        { key: 'Total Amount', value: this.totalAmount || 0 },
+        { key: 'Note', value: this.receivable.notes || "No Notes" }
       ],
       reportImage: '', // Add image URL if available
       filename: "Receivable_Report.xlsx",
