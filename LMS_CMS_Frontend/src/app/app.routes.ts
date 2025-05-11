@@ -153,15 +153,15 @@ export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate:[noNavigateToLoginIfLoginGuard] },
     { path: "Octa/login", component: OctaLoginComponent, title: "login", canActivate:[noNavigateToLoginIfLoginGuard] },
     { path: "SignUp", component: SignUpComponent, title: "SignUp", canActivate:[noNavigateToLoginIfLoginGuard] },
-    { path: "Home", component: EmployeeHomeComponent, title: "EmployeeHome" }, 
-
-
+    
+    
     { 
         path: "Employee",     
         component: MainLayoutComponent, 
         title: "Employee Home", 
         canActivate:[navigateIfEmployeeGuard, noNavigateWithoutLoginGuard], 
         children: [
+            { path: "", component: EmployeeHomeComponent, title: "EmployeeHome" }, 
             { path: "Hygiene Types", component: HygieneTypesComponent, title: "Hygiene Types", canActivate:[noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Diagnosis", component: DiagnosisComponent, title: "Diagnosis" },
             { path: "Drugs", component: DrugsComponent, title: "Drugs" },
