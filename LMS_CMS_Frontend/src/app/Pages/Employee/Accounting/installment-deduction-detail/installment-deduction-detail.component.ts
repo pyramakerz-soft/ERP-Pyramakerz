@@ -167,7 +167,6 @@ export class InstallmentDeductionDetailComponent {
         this.installmentDeductionMasterServ.Add(this.Data, this.DomainName).subscribe((d) => {
           this.MasterId = d
           this.isLoading = false
-
           Swal.fire({
             icon: 'success',
             title: 'Done',

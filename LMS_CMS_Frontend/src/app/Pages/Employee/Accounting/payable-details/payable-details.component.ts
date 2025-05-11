@@ -316,34 +316,43 @@ export class PayableDetailsComponent {
   Save() {
     if (this.isFormValid()) {
       this.isSaveLoading = true;
+  
       if (this.isCreate) {
         this.payableService.Add(this.payable, this.DomainName).subscribe(
           (data) => {
-            let id = JSON.parse(data).id
-            this.router.navigateByUrl(`Employee/Payable Details/${id}`)
+            let id = JSON.parse(data).id;
+            this.router.navigateByUrl(`Employee/Payable Details/${id}`);
             this.isSaveLoading = false;
+  
             Swal.fire({
               title: 'Saved Successfully',
               icon: 'success',
               confirmButtonColor: '#FF7519',
-            })
+            });
+          },
+          (error) => {
+            this.isSaveLoading = false;
           }
-        )
+        );
       } else if (this.isEdit) {
         this.payableService.Edit(this.payable, this.DomainName).subscribe(
           (data) => {
-            this.GetPayableByID()
+            this.GetPayableByID();
+            this.isSaveLoading = false;
+  
             Swal.fire({
               icon: 'success',
               title: 'Done!',
               text: 'The Payable has been edited successfully.',
               confirmButtonColor: '#FF7519',
             });
+          },
+          (error) => {
+            this.isSaveLoading = false;
           }
-        )
+        );
       }
     }
-    this.isSaveLoading = false;
   }
 
   GetPayableDetails() {
