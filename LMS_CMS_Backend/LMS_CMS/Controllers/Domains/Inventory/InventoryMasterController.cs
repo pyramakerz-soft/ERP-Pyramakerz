@@ -18,10 +18,8 @@ using System.Diagnostics.Metrics;
 using System.Xml;
 using System.Xml.Linq;
 using Zatca.EInvoice.SDK.Contracts.Models;
+using static Org.BouncyCastle.Math.EC.ECCurve;
 using static System.Runtime.InteropServices.JavaScript.JSType;
-//using Zatca.EInvoice.SDK;
-//using Zatca.EInvoice.SDK.Contracts;
-//using Zatca.EInvoice.SDK.Contracts.Models;
 
 namespace LMS_CMS_PL.Controllers.Domains.Inventory
 {
@@ -34,20 +32,15 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         IMapper mapper;
         public  InVoiceNumberCreate _InVoiceNumberCreate;
         private readonly CheckPageAccessService _checkPageAccessService;
-        //private readonly IEInvoiceHashGenerator _eInvoiceHashGenerator;
-        //private readonly ICsrGenerator _csrGenerator;
-        //private readonly RequestResult _requestResult;
+        private readonly IConfiguration _config;
 
-        //public InventoryMasterController(DbContextFactoryService dbContextFactory, IMapper mapper  , InVoiceNumberCreate inVoiceNumberCreate, CheckPageAccessService checkPageAccessService, IEInvoiceHashGenerator eInvoiceHashGenerator, ICsrGenerator csrGenerator, RequestResult requestResult)
-        public InventoryMasterController(DbContextFactoryService dbContextFactory, IMapper mapper  , InVoiceNumberCreate inVoiceNumberCreate, CheckPageAccessService checkPageAccessService)
+        public InventoryMasterController(DbContextFactoryService dbContextFactory, IMapper mapper  , InVoiceNumberCreate inVoiceNumberCreate, CheckPageAccessService checkPageAccessService, IConfiguration config)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             this._InVoiceNumberCreate = inVoiceNumberCreate;
             _checkPageAccessService = checkPageAccessService;
-            //_eInvoiceHashGenerator = eInvoiceHashGenerator;
-            //_csrGenerator = csrGenerator;
-            //_requestResult = requestResult;
+            _config = config;
         }
 
 
@@ -473,7 +466,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 return BadRequest("Total should be sum up all the totalPrice values in InventoryDetails");
 
             }
-            newData.FlagId = 12;
+            newData.FlagId = 11;
 
             if (newData.FlagId == 8 || newData.FlagId == 9 || newData.FlagId == 10 || newData.FlagId == 11 || newData.FlagId == 12)
             {
@@ -572,7 +565,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                         lastInvoiceHash = masters[masters.Count - 2].InvoiceHash;
                 }
 
-                bool result = InvoicingServices.GenerateInvoiceXML(Master, lastInvoiceHash);
+                S3Service s3 = new S3Service(_config, "AWS:Region");
+                bool result = await InvoicingServices.GenerateInvoiceXML(Master, lastInvoiceHash, s3);
 
                 if (!result)
                     return BadRequest("Failed to generate XML file.");
@@ -591,7 +585,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 Master.InvoiceHash = InvoicingServices.GetInvoiceHash(xml);
                 Master.QRCode = InvoicingServices.GetQRCode(xml);
                 Master.uuid = InvoicingServices.GetUUID(xml);
-                Master.XmlInvoiceFile = xml;
+                //Master.XmlInvoiceFile = xml;
                 Master.QrImage = InvoicingServices.GenerateQrImage(Master.QRCode);
 
                 Unit_Of_Work.inventoryMaster_Repository.Update(Master);

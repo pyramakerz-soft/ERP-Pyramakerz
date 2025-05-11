@@ -69,7 +69,7 @@ export class PayableDetailsComponent {
   editedRowData: PayableDetails = new PayableDetails()
 
   isLoading = false;
-
+  isSaveLoading = false;
 
   @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;
   showPDF = false;
@@ -315,11 +315,13 @@ export class PayableDetailsComponent {
 
   Save() {
     if (this.isFormValid()) {
+      this.isSaveLoading = true;
       if (this.isCreate) {
         this.payableService.Add(this.payable, this.DomainName).subscribe(
           (data) => {
             let id = JSON.parse(data).id
             this.router.navigateByUrl(`Employee/Payable Details/${id}`)
+            this.isSaveLoading = false;
             Swal.fire({
               title: 'Saved Successfully',
               icon: 'success',
@@ -341,6 +343,7 @@ export class PayableDetailsComponent {
         )
       }
     }
+    this.isSaveLoading = false;
   }
 
   GetPayableDetails() {
