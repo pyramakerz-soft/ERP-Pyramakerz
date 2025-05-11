@@ -34,7 +34,7 @@ export class SideMenuComponent {
     this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
-    this.isRtl = document.documentElement.dir === 'rtl';
+    this.isRtl = document.documentElement.dir === 'rtl'; 
   }
 
   ngOnDestroy(): void {
@@ -65,5 +65,9 @@ export class SideMenuComponent {
  
   onSearchBlur() {
     this.IsSearchFocus = false;
+  } 
+  
+  getImageSrc(item: any): string {
+    return `Icons/SideMenuIcons/${item.en_name.trim().replace(/ /g, '_')}.png`;
   }
 }

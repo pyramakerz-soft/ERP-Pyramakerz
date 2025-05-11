@@ -102,11 +102,11 @@ export class RegistrationConfirmationDetailsComponent {
       }
     )
   }
-
+  
   getRegistrationFormSubmissionConfirmationData(){
     this.registrationFormSubmissionService.GetByRegistrationParentID(this.registrationParentID, this.DomainName).subscribe(
       (data) => {
-        this.registrationFormSubmissionConfirmationData = data;
+        this.registrationFormSubmissionConfirmationData = data; 
       }
     )
   }

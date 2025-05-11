@@ -1,7 +1,10 @@
 ﻿using AutoMapper;
 using LMS_CMS_BL.DTO.Registration;
 using LMS_CMS_BL.UOW;
+using LMS_CMS_DAL.Models.Domains;
+using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_DAL.Models.Domains.RegisterationModule;
+using LMS_CMS_DAL.Models.Octa;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -18,11 +21,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
     {
         private readonly DbContextFactoryService _dbContextFactory;
         IMapper mapper;
+        private readonly UOW _Unit_Of_Work_Octa;
 
-        public RegisterationFormSubmittionController(DbContextFactoryService dbContextFactory, IMapper mapper)
+        public RegisterationFormSubmittionController(DbContextFactoryService dbContextFactory, IMapper mapper, UOW unit_Of_Work_Octa)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
+            _Unit_Of_Work_Octa = unit_Of_Work_Octa;
         }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -66,6 +71,55 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                 }
             }
             List<RegisterationFormSubmittionGetDTO> registerationFormSubmittionDTO = mapper.Map<List<RegisterationFormSubmittionGetDTO>>(registerationFormSubmittions);
+
+            foreach (var item in registerationFormSubmittionDTO)
+            {
+                switch (item.CategoryFieldID)
+                {
+                    case 3:
+                        Gender gender = Unit_Of_Work.gender_Repository.First_Or_Default(s => s.ID.ToString() == item.TextAnswer);
+                        if (gender != null)
+                        {
+                            item.TextAnswer = gender.Name;
+                        }
+                        break;
+
+                    case 5:
+                        Nationality nationality = _Unit_Of_Work_Octa.nationality_Repository.First_Or_Default_Octa(s => s.ID.ToString() == item.TextAnswer);
+                        if (nationality != null)
+                        {
+                            item.TextAnswer = nationality.Name;
+                        }
+                        break;
+
+                    case 7:
+                        School school = Unit_Of_Work.school_Repository.First_Or_Default(s => s.ID.ToString() == item.TextAnswer);
+                        if (school != null)
+                        {
+                            item.TextAnswer = school.Name;
+                        }
+                        break;
+
+                    case 8:
+                        AcademicYear year = Unit_Of_Work.academicYear_Repository.First_Or_Default(s => s.ID.ToString() == item.TextAnswer);
+                        if (year != null)
+                        {
+                            item.TextAnswer = year.Name;
+                        }
+                        break;
+
+                    case 9:
+                        Grade grade = Unit_Of_Work.grade_Repository.First_Or_Default(s => s.ID.ToString() == item.TextAnswer);
+                        if (grade != null)
+                        {
+                            item.TextAnswer = grade.Name;
+                        }
+                        break;
+
+                    default: 
+                        break;
+                }
+            }
 
 
             return Ok(registerationFormSubmittionDTO);
