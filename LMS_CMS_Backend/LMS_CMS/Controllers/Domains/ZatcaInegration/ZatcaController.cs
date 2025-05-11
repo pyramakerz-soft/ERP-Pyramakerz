@@ -1,5 +1,8 @@
-﻿using LMS_CMS_BL.UOW;
+﻿using Amazon.S3;
+using Amazon.SecretsManager;
+using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains.Inventory;
+using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_DAL.Models.Domains.Zatca;
 using LMS_CMS_PL.Services;
 using LMS_CMS_PL.Services.Invoice;
@@ -7,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.Text;
+using System.Xml.Linq;
 using Zatca.EInvoice.SDK.Contracts;
 using Zatca.EInvoice.SDK.Contracts.Models;
 
@@ -18,13 +22,15 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
     {
         private readonly ICsrGenerator _csrGenerator;
         private readonly DbContextFactoryService _dbContextFactory;
-        private readonly IConfiguration _configuration;
+        private readonly IConfiguration _config;
+        private readonly IAmazonSecretsManager _secretsManager;
 
-        public ZatcaController(ICsrGenerator csrGenerator, DbContextFactoryService dbContextFactory, IConfiguration configuration)
+        public ZatcaController(ICsrGenerator csrGenerator, DbContextFactoryService dbContextFactory, IConfiguration config, IAmazonSecretsManager secretsManager)
         {
             _csrGenerator = csrGenerator;
             _dbContextFactory = dbContextFactory;
-            _configuration = configuration;
+            _config = config;
+            _secretsManager = secretsManager;
         }
 
         #region Generate PCSID
@@ -80,17 +86,40 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                 industryBusinessCategory
             );
 
-            InvoicingServices.GenerateCSRandPrivateKey(csrGeneration, privateKeyPath, csrPath);
+            string pcName = $"PC{schoolPc.ID}{schoolPc.School.ID}";
+            AmazonS3Client amazonS3Client = new AmazonS3Client();
+            S3Service s3SecretManager = new S3Service(amazonS3Client, _secretsManager, _config, "AWS:Bucket", "AWS:Folder");
 
-            await InvoicingServices.GeneratePublicKey(publicKeyPath, privateKeyPath);
+            var csrSteps = InvoicingServices.GenerateCSRandPrivateKey(csrGeneration);
+            string csrContent = csrSteps[1].ResultedValue;
+            string privateKeyContent = csrSteps[2].ResultedValue;
+
+            bool addCSR = await s3SecretManager.CreateOrUpdateSecretAsync($"{pcName}CSR", csrContent);
+            if (!addCSR)
+                return BadRequest("Adding CSR failed!");
+
+            bool addPrivateKey = await s3SecretManager.CreateOrUpdateSecretAsync($"{pcName}PrivateKey", privateKeyContent);
+            if (!addPrivateKey)
+                return BadRequest("Adding Private Key failed!");
+
+            //await InvoicingServices.GeneratePublicKey(publicKeyPath, privateKeyPath);
 
             string version = "V2";
 
-            string csid = await InvoicingServices.GenerateCSID(csrPath, otp, version, _configuration);
+            string csrPayload = Convert.ToBase64String(Encoding.UTF8.GetBytes(csrContent));
+            var csrObj = new { csr = csrPayload };
+            string csrJson = JsonConvert.SerializeObject(csrObj);
+
+            string csid = await InvoicingServices.GenerateCSID(csrJson, otp, version, _config);
+
+            bool addCSID = await s3SecretManager.CreateOrUpdateSecretAsync($"{pcName}CSID", csid);
+
+            if (!addCSID)
+                return BadRequest("Adding CSID failed!");
 
             dynamic csidJson = JsonConvert.DeserializeObject(csid);
-            string formattedCsid = JsonConvert.SerializeObject(csidJson, Formatting.Indented);
-            await System.IO.File.WriteAllTextAsync(csidPath, formattedCsid);
+            //string formattedCsid = JsonConvert.SerializeObject(csidJson, Formatting.Indented);
+            //await System.IO.File.WriteAllTextAsync(csidPath, formattedCsid);
 
             string user = csidJson.binarySecurityToken;
             string secret = csidJson.secret;
@@ -101,65 +130,111 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
             string requestId = csidJson.requestID.ToString();
 
-            string pcsid = await InvoicingServices.GeneratePCSID(tokenBase64, version, requestId, _configuration);
+            string pcsid = await InvoicingServices.GeneratePCSID(tokenBase64, version, requestId, _config);
 
-            string formattedPcsid = JsonConvert.SerializeObject(JsonConvert.DeserializeObject(pcsid), Formatting.Indented);
+            //string formattedPcsid = JsonConvert.SerializeObject(JsonConvert.DeserializeObject(pcsid), Formatting.Indented);
 
-            await System.IO.File.WriteAllTextAsync(pcsidPath, formattedPcsid);
+            //await System.IO.File.WriteAllTextAsync(pcsidPath, formattedPcsid);
+
+            //S3Service s3 = new S3Service(amazonS3Client, _config, "AWS:Bucket", "AWS:Folder");
+
+            //var secretsClient = new AmazonSecretsManagerClient(); 
+            //var service = new AwsSecretsService(secretsClient);
+
+            bool addPCSID = await s3SecretManager.CreateOrUpdateSecretAsync($"{pcName}PCSID", pcsid);
+
+            if (!addPCSID)
+                return BadRequest("Adding PCSID failed!");
+
+            //string subFolder = $"Certificates/PC-{schoolPc.ID}-{schoolPc.School.ID}/";
+
+            //bool uploaded = await s3.UploadAsync(csr, subFolder);
+            //if (!uploaded)
+            //    return BadRequest("Uploading Certificates failed!");
+
+
+            //bool migrateKeys = await s3SecretManager.MigrateKeyAsync($"{subFolder}PCSID.json", $"PC{schoolPc.ID}{schoolPc.School.ID}PCSIDKeys");
+
+            //bool isDeleted = await DeleteDirectoryOrFile.DeleteAsync(csr);
+
+            //if (!isDeleted)
+            //    return BadRequest("Deleting CSR directory failed!");
 
             string certificateDate = InvoicingServices.GetCertificateDate(pcsid);
 
             schoolPc.CertificateDate = DateOnly.Parse(certificateDate);
+            schoolPc.UpdatedAt = DateTime.Now;
 
             Unit_Of_Work.schoolPCs_Repository.Update(schoolPc);
             Unit_Of_Work.SaveChanges();
 
-            return Ok(formattedPcsid);
+            return Ok(certificateDate);
         }
         #endregion
 
         #region Update PCSID
-        [HttpPost("UpdatePCSID")]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "" }
-        //)]
-        public async Task<IActionResult> UpdatePCSID(string version, long otp)
-        {
-            string invoices = Path.Combine(Directory.GetCurrentDirectory(), "Invoices/CSR");
-            string csrPath = Path.Combine(invoices, "CSR.csr");
-            string csidPath = Path.Combine(invoices, "CSID.json");
-            string pcsidPath = Path.Combine(invoices, "PCSID.json");
+        //[HttpPost("UpdatePCSID")]
+        ////[Authorize_Endpoint_(
+        ////    allowedTypes: new[] { "octa", "employee" },
+        ////    pages: new[] { "" }
+        ////)]
+        //public async Task<IActionResult> UpdatePCSID(string version, long otp, long schoolPcId)
+        //{
+        //    UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            string csid = await InvoicingServices.GenerateCSID(csrPath, otp, version, _configuration);
+        //    SchoolPCs schoolPc = await Unit_Of_Work.schoolPCs_Repository.FindByIncludesAsync(
+        //        d => d.ID == schoolPcId && d.IsDeleted != true,
+        //        query => query.Include(s => s.School)
+        //    );
 
-            dynamic csidJson = JsonConvert.DeserializeObject(csid);
-            string formattedCsid = JsonConvert.SerializeObject(csidJson, Newtonsoft.Json.Formatting.Indented);
-            await System.IO.File.WriteAllTextAsync(csidPath, formattedCsid);
+        //    if (schoolPc is null)
+        //        return NotFound("School PC not found.");
 
-            string oldPcsidContent = await System.IO.File.ReadAllTextAsync(pcsidPath);
-            dynamic oldPcsidJson = JsonConvert.DeserializeObject(oldPcsidContent);
-            string formattedOldPcsid = JsonConvert.SerializeObject(oldPcsidJson, Newtonsoft.Json.Formatting.Indented);
+        //    string invoices = Path.Combine(Directory.GetCurrentDirectory(), "Invoices/CSR");
+        //    string csrPath = Path.Combine(invoices, "CSR.csr");
+        //    string csidPath = Path.Combine(invoices, "CSID.json");
+        //    string pcsidPath = Path.Combine(invoices, "PCSID.json");
 
-            string user = oldPcsidJson.binarySecurityToken;
-            string secret = oldPcsidJson.secret;
+        //    string pcName = $"PC{schoolPc.ID}{schoolPc.School.ID}";
 
-            string token = $"{user}:{secret}";
-            byte[] tokenBytes = Encoding.UTF8.GetBytes(token);
-            string tokenBase64 = Convert.ToBase64String(tokenBytes);
+        //    S3Service s3 = new S3Service(_config, "AWS:Region");
+        //    string csrContent = await s3.GetSecret($"{pcName}CSR");
 
-            string csrContent = await System.IO.File.ReadAllTextAsync(csrPath);
+        //    string csrPayload = Convert.ToBase64String(Encoding.UTF8.GetBytes(csrContent));
+        //    var csrObj = new { csr = csrPayload };
+        //    string csrJson = JsonConvert.SerializeObject(csrObj);
 
-            string csrContentEncoded = Convert.ToBase64String(Encoding.UTF8.GetBytes(csrContent));
+        //    string csid = await InvoicingServices.GenerateCSID(csrJson, otp, version, _config);
 
-            string pcsid = await InvoicingServices.UpdatePCSID(tokenBase64, csrContentEncoded, version, otp.ToString(), _configuration);
 
-            string formattedPcsid = JsonConvert.SerializeObject(JsonConvert.DeserializeObject(pcsid), Newtonsoft.Json.Formatting.Indented);
 
-            await System.IO.File.WriteAllTextAsync(pcsidPath, formattedPcsid);
+        //    dynamic csidJson = JsonConvert.DeserializeObject(csid);
+        //    string formattedCsid = JsonConvert.SerializeObject(csidJson, Newtonsoft.Json.Formatting.Indented);
+        //    await System.IO.File.WriteAllTextAsync(csidPath, formattedCsid);
 
-            return Ok(formattedPcsid);
-        }
+        //    string oldPcsidContent = await System.IO.File.ReadAllTextAsync(pcsidPath);
+        //    dynamic oldPcsidJson = JsonConvert.DeserializeObject(oldPcsidContent);
+        //    string formattedOldPcsid = JsonConvert.SerializeObject(oldPcsidJson, Newtonsoft.Json.Formatting.Indented);
+
+        //    string user = oldPcsidJson.binarySecurityToken;
+        //    string secret = oldPcsidJson.secret;
+
+        //    string token = $"{user}:{secret}";
+        //    byte[] tokenBytes = Encoding.UTF8.GetBytes(token);
+        //    string tokenBase64 = Convert.ToBase64String(tokenBytes);
+
+        //    string csrContent = await System.IO.File.ReadAllTextAsync(csrPath);
+
+        //    string csrContentEncoded = Convert.ToBase64String(Encoding.UTF8.GetBytes(csrContent));
+
+        //    string pcsid = await InvoicingServices.UpdatePCSID(tokenBase64, csrContentEncoded, version, otp.ToString(), _config);
+
+        //    string formattedPcsid = JsonConvert.SerializeObject(JsonConvert.DeserializeObject(pcsid), Newtonsoft.Json.Formatting.Indented);
+
+        //    await System.IO.File.WriteAllTextAsync(pcsidPath, formattedPcsid);
+
+        //    return Ok(formattedPcsid);
+        //}
         #endregion
 
         #region Report Invoice
@@ -175,7 +250,8 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             InventoryMaster master = await Unit_Of_Work.inventoryMaster_Repository.FindByIncludesAsync(
-                d => d.ID == masterId && 
+                d => d.ID == masterId &&
+                d.IsDeleted != true &&
                 (d.FlagId == 11 || d.FlagId == 12) && 
                 d.IsDeleted != true,
                 query => query.Include(s => s.School)
@@ -197,7 +273,19 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
             if (master.IsValid == 0 || master.IsValid == null)
             {
-                HttpResponseMessage response = await InvoicingServices.InvoiceReporting(xmlPath, master.InvoiceHash, master.uuid, (long)master.SchoolPCId, (long)master.SchoolId, _configuration);
+                string pcName = $"PC{master.SchoolPCId}{master.School.ID}";
+
+                AmazonS3Client secretS3Client = new AmazonS3Client();
+                S3Service s3 = new S3Service(_config, "AWS:Region");
+
+                string certContent = await s3.GetSecret($"{pcName}PCSID");
+
+                dynamic certObject = JsonConvert.DeserializeObject(certContent);
+                string token = certObject.binarySecurityToken;
+                string secret = certObject.secret;
+
+                HttpResponseMessage response = await InvoicingServices.InvoiceReporting(xmlPath, token, secret, _config);
+                response.EnsureSuccessStatusCode();
 
                 string responseContent = await response.Content.ReadAsStringAsync();
                 dynamic responseJson = JsonConvert.DeserializeObject(responseContent);
@@ -214,6 +302,18 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
                 Unit_Of_Work.inventoryMaster_Repository.Update(master);
                 Unit_Of_Work.SaveChanges();
+
+                S3Service s3Client = new S3Service(secretS3Client, _config, "AWS:Bucket", "AWS:Folder");
+
+                bool uploaded = await s3Client.UploadAsync(xmlPath, "Invoices/");
+
+                if (!uploaded)
+                    return BadRequest("Uploading Invoice failed!");
+
+                if (System.IO.File.Exists(xmlPath))
+                {
+                    System.IO.File.Delete(xmlPath);
+                }
             }
 
             return master.IsValid == 1 ? Ok(master.Status) : BadRequest(master.Status);
@@ -226,13 +326,13 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
         //    allowedTypes: new[] { "octa", "employee" },
         //    pages: new[] { "" }
         //)]
-        public async Task<IActionResult> ReportInvoices(long schoolId, long schoolPcId)
+        public async Task<IActionResult> ReportInvoices(long schoolId)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             List<InventoryMaster> masters = await Unit_Of_Work.inventoryMaster_Repository.Select_All_With_IncludesById<List<InventoryMaster>>(
                 d => d.SchoolId == schoolId && 
-                d.SchoolPCId == schoolPcId && 
+                d.IsDeleted != true &&
                 (d.FlagId == 11 || d.FlagId == 12) && 
                 d.IsDeleted != true,
                 query => query.Include(s => s.School)
@@ -251,10 +351,25 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                         string date = invDate.ToString("yyyy-MM-dd");
                         string time = invDate.ToString("HH:mm:ss").Replace(":", "");
 
-                        string csr = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/CSR/PC-{master.SchoolPCId}-{master.SchoolId}");
-                        string xmlPath = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/XML/{master.School.CRN}_{date.Replace("-", "")}T{time}_{date}-{master.ID}.xml");
+                        string xmlPath = string.Empty;
+                        if (master.FlagId == 11)
+                            xmlPath = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/XMLInvoices/{master.School.CRN}_{date.Replace("-", "")}T{time}_{date}-{master.StoreID}_{master.FlagId}_{master.ID}.xml");
 
-                        HttpResponseMessage response = await InvoicingServices.InvoiceReporting(xmlPath, master.InvoiceHash, master.uuid, (long)master.SchoolPCId, (long)master.SchoolId, _configuration);
+                        if (master.FlagId == 12)
+                            xmlPath = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/XMLCredits/{master.School.CRN}_{date.Replace("-", "")}T{time}_{date}-{master.StoreID}_{master.FlagId}_{master.ID}.xml");
+
+                        string pcName = $"PC{master.SchoolPCId}{master.School.ID}";
+
+                        AmazonS3Client secretS3Client = new AmazonS3Client();
+                        S3Service s3Secret = new S3Service(_config, "AWS:Region");
+
+                        string certContent = await s3Secret.GetSecret($"{pcName}PCSID");
+
+                        dynamic certObject = JsonConvert.DeserializeObject(certContent);
+                        string token = certObject.binarySecurityToken;
+                        string secret = certObject.secret;
+
+                        HttpResponseMessage response = await InvoicingServices.InvoiceReporting(xmlPath, token, secret, _config);
 
                         string responseContent = await response.Content.ReadAsStringAsync();
                         dynamic responseJson = JsonConvert.DeserializeObject(responseContent);
@@ -269,6 +384,19 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                             master.IsValid = 0;
                         }
                         Unit_Of_Work.inventoryMaster_Repository.Update(master);
+
+                        AmazonS3Client amazonS3Client = new AmazonS3Client();
+                        S3Service s3 = new S3Service(amazonS3Client, _config, "AWS:Bucket", "AWS:Folder");
+
+                        bool uploaded = await s3.UploadAsync(xmlPath, "Invoices/");
+
+                        if (!uploaded)
+                            return BadRequest("Uploading Invoice failed!");
+
+                        if (System.IO.File.Exists(xmlPath))
+                        {
+                            System.IO.File.Delete(xmlPath);
+                        }
                     }
                     catch (Exception ex)
                     {

@@ -32,7 +32,7 @@ namespace LMS_CMS_DAL.Models.Domains.Inventory
         public string? InvoiceHash { get; set; }
         public string? QRCode { get; set; }
         public string? uuid { get; set; }
-        public string? XmlInvoiceFile { get; set; }
+        //public string? XmlInvoiceFile { get; set; }
         public string? Status { get; set; }
         public byte? IsValid { get; set; }
         public byte[]? QrImage { get; set; }

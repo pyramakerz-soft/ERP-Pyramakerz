@@ -18,12 +18,11 @@ namespace LMS_CMS_PL.Services.Invoice
 {
     public static class InvoicingServices
     {
-        public static void GenerateCSRandPrivateKey(CsrGenerationDto csrGeneration, string privateKeyPath, string csrPath)
+        public static List<StepResult> GenerateCSRandPrivateKey(CsrGenerationDto csrGeneration)
         {
             CsrGenerator csrGene = new();
             CsrResult csr = csrGene.GenerateCsr(csrGeneration, EnvironmentType.Production, true);
-            csr.SavePrivateKeyToFile(privateKeyPath);
-            csr.SaveCsrToFile(csrPath);
+            return csr.Steps;
         }
 
         public static async Task GeneratePublicKey(string publicKeyPath, string privateKeyPath)
@@ -54,16 +53,11 @@ namespace LMS_CMS_PL.Services.Invoice
                     await process.WaitForExitAsync();
                 }
             }
-            
+
         }
 
-        public static async Task<string> GenerateCSID(string csrPath, long OTP, string version, IConfiguration configuration)
+        public static async Task<string> GenerateCSID(string csrJson, long OTP, string version, IConfiguration configuration)
         {
-            string csrContent = await File.ReadAllTextAsync(csrPath);
-
-            string payload = Convert.ToBase64String(Encoding.UTF8.GetBytes(csrContent));
-            var payloadObj = new { csr = payload };
-            string jsonPayload = JsonConvert.SerializeObject(payloadObj);
 
             using (HttpClient client = new HttpClient())
             {
@@ -85,7 +79,7 @@ namespace LMS_CMS_PL.Services.Invoice
                 request.Headers.Add("OTP", OTP.ToString());
                 request.Headers.Add("Accept-Version", version);
 
-                request.Content = new StringContent(jsonPayload);
+                request.Content = new StringContent(csrJson);
                 request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
                 HttpResponseMessage response = await client.SendAsync(request);
@@ -93,7 +87,7 @@ namespace LMS_CMS_PL.Services.Invoice
 
                 string responseContent = await response.Content.ReadAsStringAsync();
 
-                return responseContent; 
+                return responseContent;
             }
         }
 
@@ -125,7 +119,7 @@ namespace LMS_CMS_PL.Services.Invoice
                 response.EnsureSuccessStatusCode();
                 string responseBody = await response.Content.ReadAsStringAsync();
 
-                return responseBody; 
+                return responseBody;
             }
             catch (Exception ex)
             {
@@ -186,7 +180,7 @@ namespace LMS_CMS_PL.Services.Invoice
             return response;
         }
 
-        public static bool GenerateInvoiceXML(InventoryMaster master, string lastInvoiceHash)
+        public static async Task<bool> GenerateInvoiceXML(InventoryMaster master, string lastInvoiceHash, S3Service s3)
         {
             string invoices = string.Empty;
 
@@ -197,7 +191,6 @@ namespace LMS_CMS_PL.Services.Invoice
                 invoices = Path.Combine(Directory.GetCurrentDirectory(), "Invoices/XMLCredits");
 
             string examplePath = Path.Combine(Directory.GetCurrentDirectory(), "Services/Invoice");
-            string csr = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/CSRs/PC-{master.SchoolPCId}-{master.SchoolId}");
 
             if (!Directory.Exists(invoices))
             {
@@ -205,13 +198,13 @@ namespace LMS_CMS_PL.Services.Invoice
             }
 
             DateTime invDate = DateTime.Parse(master.Date);
-            
+
             string date = invDate.ToString("yyyy-MM-dd");
             string time = invDate.ToString("HH:mm:ss");
 
+            string pcName = $"PC{master.SchoolPCId}{master.SchoolId}";
+
             string newXmlPath = Path.Combine(invoices, $"{master.School.CRN}_{date.Replace("-", "")}T{time.Replace(":", "")}_{date}-{master.StoreID}_{master.FlagId}_{master.ID}.xml");
-            string certPath = Path.Combine(csr, "PCSID.json");
-            string privateKeyPath = Path.Combine(csr, "PrivateKey.pem");
 
             string tempXmlPath = string.Empty;
             if (master.FlagId == 11)
@@ -233,8 +226,8 @@ namespace LMS_CMS_PL.Services.Invoice
             XmlNamespaceManager nsMgr = RegisterAllNamespaces(inv);
 
             AddValue(inv, "//cbc:UUID", master.uuid, nsMgr);
-            AddValue(inv, "//cbc:IssueDate", date, nsMgr); 
-            AddValue(inv, "//cbc:IssueTime", time, nsMgr); 
+            AddValue(inv, "//cbc:IssueDate", date, nsMgr);
+            AddValue(inv, "//cbc:IssueTime", time, nsMgr);
 
             if (lastInvoiceHash.IsNullOrEmpty())
             {
@@ -273,7 +266,7 @@ namespace LMS_CMS_PL.Services.Invoice
             AddValue(inv, "//cac:AdditionalDocumentReference/cbc:UUID", master.InvoiceNumber, nsMgr);
             AddValue(inv, "//cac:AccountingSupplierParty/cac:Party/cac:PartyIdentification/cbc:ID", master.School.CRN, nsMgr);
             AddValue(inv, "//cac:AccountingSupplierParty/cac:Party/cac:PostalAddress/cbc:StreetName", master.School.StreetName, nsMgr);
-            AddValue(inv, "//cac:AccountingSupplierParty/cac:Party/cac:PostalAddress/cbc:BuildingNumber", "00"+master.School.BuildingNumber, nsMgr);
+            AddValue(inv, "//cac:AccountingSupplierParty/cac:Party/cac:PostalAddress/cbc:BuildingNumber", "00" + master.School.BuildingNumber, nsMgr);
             AddValue(inv, "//cac:AccountingSupplierParty/cac:Party/cac:PostalAddress/cbc:CitySubdivisionName", master.School.CitySubdivision, nsMgr);
             AddValue(inv, "//cac:AccountingSupplierParty/cac:Party/cac:PostalAddress/cbc:CityName", master.School.City, nsMgr);
             AddValue(inv, "//cac:AccountingSupplierParty/cac:Party/cac:PostalAddress/cbc:PostalZone", master.School.PostalZone, nsMgr);
@@ -283,7 +276,7 @@ namespace LMS_CMS_PL.Services.Invoice
             AddValue(inv, "(//cac:TaxTotal)[2]/cbc:TaxAmount", master.VatAmount.ToString(), nsMgr);
             AddValue(inv, "//cac:TaxSubtotal/cbc:TaxableAmount", master.Total.ToString(), nsMgr);
             AddValue(inv, "//cac:TaxSubtotal/cbc:TaxAmount", master.VatAmount.ToString(), nsMgr);
-            
+
             AddValue(inv, "//cac:LegalMonetaryTotal/cbc:LineExtensionAmount", master.Total.ToString(), nsMgr);
             AddValue(inv, "//cac:LegalMonetaryTotal/cbc:TaxExclusiveAmount", master.Total.ToString(), nsMgr);
             AddValue(inv, "//cac:LegalMonetaryTotal/cbc:TaxInclusiveAmount", master.TotalWithVat.ToString(), nsMgr);
@@ -393,7 +386,23 @@ namespace LMS_CMS_PL.Services.Invoice
 
             SaveFormatted(inv, newXmlPath);
 
-            SignResult signer = InvoiceSigning(newXmlPath, certPath, privateKeyPath);
+            string certContent = await s3.GetSecret($"{pcName}PCSID");
+
+            dynamic certObject = JsonConvert.DeserializeObject(certContent);
+            string base64Cert = certObject.binarySecurityToken;
+
+            byte[] certBytes = Convert.FromBase64String(base64Cert);
+            string certDecoded = Encoding.UTF8.GetString(certBytes);
+
+            string privateKeyContent = await s3.GetSecret($"{pcName}PrivateKey");
+
+            privateKeyContent = privateKeyContent
+                .Replace("-----BEGIN EC PRIVATE KEY-----", "")
+                .Replace("-----END EC PRIVATE KEY-----", "")
+                .Replace("\n", "")
+                .Replace("\r", "");
+
+            SignResult signer = InvoiceSigning(newXmlPath, certDecoded, privateKeyContent);
 
             if (!signer.IsValid)
                 return false;
@@ -435,6 +444,53 @@ namespace LMS_CMS_PL.Services.Invoice
             string responseBody = await response.Content.ReadAsStringAsync();
 
             return responseBody;
+        }
+
+        public static async Task<HttpResponseMessage> InvoiceReporting(string xmlPath, string token, string secret, IConfiguration configuration)
+        {
+            string version = "V2";
+
+            XmlDocument doc = new XmlDocument();
+            doc.PreserveWhitespace = true;
+            doc.Load(xmlPath);
+
+            string authorization = Convert.ToBase64String(Encoding.UTF8.GetBytes(token + ":" + secret));
+
+            HttpClient client = new HttpClient();
+
+            bool isProduction = configuration.GetValue<bool>("IsProduction");
+            HttpRequestMessage request;
+
+            if (isProduction)
+            {
+                request = new HttpRequestMessage(HttpMethod.Post, "https://gw-fatoora.zatca.gov.sa/e-invoicing/core/invoices/reporting/single");
+            }
+            else
+            {
+                request = new HttpRequestMessage(HttpMethod.Post, "https://gw-fatoora.zatca.gov.sa/e-invoicing/developer-portal/invoices/reporting/single");
+            }
+
+            request.Headers.Add("accept", "application/json");
+            request.Headers.Add("accept-language", "en");
+            request.Headers.Add("Clearance-Status", "0");
+            request.Headers.Add("Accept-Version", version);
+            request.Headers.Add("Authorization", $"Basic {authorization}");
+
+            string invoiceEncoded = Convert.ToBase64String(Encoding.UTF8.GetBytes(doc.InnerXml));
+
+            string jsonPayload = $@"
+            {{
+              ""invoiceHash"": ""{GetInvoiceHash(xmlPath)}"",
+              ""uuid"": ""{GetUUID(xmlPath)}"",
+              ""invoice"": ""{invoiceEncoded}""
+            }}";
+
+            request.Content = new StringContent(jsonPayload);
+            request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            HttpResponseMessage response = await client.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+            return response;
         }
 
         public static string GetInvoiceHash(string xmlPath)
@@ -480,7 +536,26 @@ namespace LMS_CMS_PL.Services.Invoice
             return expires;
         }
 
-        private static SignResult InvoiceSigning(string xmlPath, string certPath, string privateKeyPath)
+        public static byte[] GenerateQrImage(string qrCode)
+        {
+            var writer = new BarcodeWriter
+            {
+                Format = ZXing.BarcodeFormat.QR_CODE,
+                Options = new ZXing.Common.EncodingOptions
+                {
+                    Width = 100,
+                    Height = 100,
+                    Margin = 1
+                }
+            };
+
+            using Bitmap qrBitmap = writer.Write(qrCode);
+            using MemoryStream ms = new MemoryStream();
+            qrBitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+            return ms.ToArray();
+        }
+
+        private static SignResult InvoiceSigning(string xmlPath, string certDecoded, string privateKeyContent)
         {
             if (!File.Exists(xmlPath))
                 throw new FileNotFoundException();
@@ -488,20 +563,6 @@ namespace LMS_CMS_PL.Services.Invoice
             XmlDocument doc = new XmlDocument();
             doc.PreserveWhitespace = true;
             doc.Load(xmlPath);
-
-            string jsonContent = File.ReadAllText(certPath);
-            dynamic jsonObject = JsonConvert.DeserializeObject(jsonContent);
-            string base64Cert = jsonObject.binarySecurityToken;
-
-            byte[] certBytes = Convert.FromBase64String(base64Cert);
-            string certDecoded = Encoding.UTF8.GetString(certBytes);
-
-            string privateKeyContent = File.ReadAllText(privateKeyPath);
-            privateKeyContent = privateKeyContent
-                .Replace("-----BEGIN EC PRIVATE KEY-----", "")
-                .Replace("-----END EC PRIVATE KEY-----", "")
-                .Replace("\n", "")
-                .Replace("\r", "");
 
             EInvoiceSigner signer = new EInvoiceSigner();
 
@@ -516,10 +577,10 @@ namespace LMS_CMS_PL.Services.Invoice
 
             var settings = new XmlWriterSettings
             {
-                Indent = false, 
+                Indent = false,
                 NewLineHandling = NewLineHandling.None,
                 NewLineChars = "",
-                OmitXmlDeclaration = false, 
+                OmitXmlDeclaration = false,
                 Encoding = Encoding.UTF8
             };
 
@@ -529,63 +590,6 @@ namespace LMS_CMS_PL.Services.Invoice
             }
 
             return signed;
-        }
-
-        public static async Task<HttpResponseMessage> InvoiceReporting(string xmlPath, string invoiceHash, string uuid, long pcId, long schoolId, IConfiguration configuration)
-        {
-            string csr = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/CSRs/PC-{pcId}-{schoolId}");
-            string certPath = Path.Combine(csr, "PCSID.json");
-
-            string version = "V2";
-
-            XmlDocument doc = new XmlDocument();
-            doc.PreserveWhitespace = true;
-            doc.Load(xmlPath);
-
-            string csidContent = await File.ReadAllTextAsync(certPath);
-
-            JObject obj = JObject.Parse(csidContent);
-            string token = (string)obj["binarySecurityToken"];
-            string secret = (string)obj["secret"];
-
-            string authorization = Convert.ToBase64String(Encoding.UTF8.GetBytes(token + ":" + secret));
-
-            HttpClient client = new HttpClient();
-
-            bool isProduction = configuration.GetValue<bool>("IsProduction");
-            HttpRequestMessage request;
-
-            if (isProduction)
-            {
-                request = new HttpRequestMessage(HttpMethod.Post, "https://gw-fatoora.zatca.gov.sa/e-invoicing/core/invoices/reporting/single");
-            }
-            else
-            {
-                request = new HttpRequestMessage(HttpMethod.Post, "https://gw-fatoora.zatca.gov.sa/e-invoicing/developer-portal/invoices/reporting/single");
-            }
-            
-
-            request.Headers.Add("accept", "application/json");
-            request.Headers.Add("accept-language", "en");
-            request.Headers.Add("Clearance-Status", "0");
-            request.Headers.Add("Accept-Version", version);
-            request.Headers.Add("Authorization", $"Basic {authorization}");
-
-            string invoiceEncoded = Convert.ToBase64String(Encoding.UTF8.GetBytes(doc.InnerXml));
-
-            string jsonPayload = $@"
-            {{
-              ""invoiceHash"": ""{invoiceHash}"",
-              ""uuid"": ""{uuid}"",
-              ""invoice"": ""{invoiceEncoded}""
-            }}";
-
-            request.Content = new StringContent(jsonPayload);
-            request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-
-            HttpResponseMessage response = await client.SendAsync(request);
-            response.EnsureSuccessStatusCode();
-            return response;
         }
 
         private static void SaveFormatted(XmlDocument doc, string filePath, bool omitXmlDeclaration = true)
@@ -686,25 +690,6 @@ namespace LMS_CMS_PL.Services.Invoice
             elem.InnerText = innerText;
             parent.AppendChild(elem);
             return elem;
-        }
-
-        public static byte[] GenerateQrImage(string qrCode)
-        {
-            var writer = new BarcodeWriter
-            {
-                Format = ZXing.BarcodeFormat.QR_CODE,
-                Options = new ZXing.Common.EncodingOptions
-                {
-                    Width = 100,
-                    Height = 100,
-                    Margin = 1
-                }
-            };
-
-            using Bitmap qrBitmap = writer.Write(qrCode);
-            using MemoryStream ms = new MemoryStream();
-            qrBitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
-            return ms.ToArray();
         }
     }
 }

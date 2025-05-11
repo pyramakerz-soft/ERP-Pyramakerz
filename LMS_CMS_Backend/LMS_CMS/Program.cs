@@ -16,6 +16,8 @@ using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Zatca.EInvoice.SDK.Contracts;
 using Zatca.EInvoice.SDK;
+using Amazon.S3;
+using Amazon.SecretsManager;
 
 namespace LMS_CMS
 {
@@ -114,6 +116,8 @@ namespace LMS_CMS
             builder.Services.AddScoped<SchoolHeaderService>();
             builder.Services.AddScoped<ICsrGenerator, CsrGenerator>();
             builder.Services.AddScoped<IEInvoiceSigner, EInvoiceSigner>();
+            builder.Services.AddSingleton<IAmazonS3, AmazonS3Client>();
+            builder.Services.AddSingleton<IAmazonSecretsManager, AmazonSecretsManagerClient>();
 
 
             /// 2)
