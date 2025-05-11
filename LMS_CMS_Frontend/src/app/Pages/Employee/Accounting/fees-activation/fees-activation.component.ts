@@ -91,7 +91,7 @@ export class FeesActivationComponent {
   IsOpenStudentandClassroom: boolean = false
 
   IsEdit = false;
-  editingRowId: any = 0;
+  editingRowId: any = null;
   IsOpenTable:boolean=false;
 
   constructor(
