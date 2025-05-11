@@ -299,7 +299,8 @@
                 { keyEn: 'Date: ' + accountingEntries.date },
                 { keyEn: 'Total Credit: ' + totalCredit },
                 { keyEn: 'Total Debit: ' + totalDebit },
-                { keyEn: 'Difference: ' + theDifference }
+                { keyEn: 'Difference: ' + theDifference },
+                { keyEn: 'Note: ' + accountingEntries.notes }
             ]"
             [tableHeaders]="['id', 'debitAmount', 'creditAmount', 'accountingTreeChartName', 'subAccountingName', 'note']"
             [tableData]="accountingEntriesDetailsData" #pdfComponentRef>
