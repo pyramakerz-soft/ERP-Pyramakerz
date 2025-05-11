@@ -20,7 +20,11 @@ namespace LMS_CMS_BL.DTO.LMS
         public bool HideFromGradeReport { get; set; }
         public string IconLink { get; set; }
         public int NumberOfSessionPerWeek { get; set; }
+        public long SchoolID { get; set; }
+        public long SectionID { get; set; }
         public long GradeID { get; set; }
+        public string SchoolName { get; set; }
+        public string SectionName { get; set; }
         public string GradeName { get; set; }
         public long SubjectCategoryID { get; set; }
         public string SubjectCategoryName { get; set; }

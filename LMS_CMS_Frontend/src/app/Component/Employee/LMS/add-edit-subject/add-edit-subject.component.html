@@ -24,9 +24,9 @@
             <div class="flex flex-col w-[49%] mb-4">
                 <label class="mb-2" for="school" [ngClass]="{ 'text-gray-400': editSubject, 'primaryTxt': !editSubject}">Choose School</label>
                 <select
-                class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="school" [(ngModel)]="selectedSchool" (change)="onSchoolChange($event)"
+                class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="school" [(ngModel)]="subject.schoolID" (change)="onSchoolChange($event)"
                 [disabled]="editSubject" [ngClass]="{ 'bg-[#EBEBEB]': editSubject}">
-                    <option [value]="null" disabled selected hidden>Choose School</option>
+                    <option [value]=0 disabled selected hidden>Choose School</option>
                     <option *ngFor="let school of Schools" [value]="school.id">{{ school.name }}</option>
                     <option *ngIf="Schools.length === 0" disabled selected>No Data Found</option>
                 </select>
@@ -34,9 +34,9 @@
             <div class="flex flex-col w-[49%] mb-4">
                 <label class="mb-2" for="section" [ngClass]="{ 'text-gray-400': !selectedSchool || editSubject, 'primaryTxt': selectedSchool && !editSubject }">Choose Section</label>
                 <select
-                class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="section" [(ngModel)]="selectedSection" (change)="onSectionChange($event)"
+                class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="section" [(ngModel)]="subject.sectionID" (change)="onSectionChange($event)"
                 [disabled]="!selectedSchool || editSubject" [ngClass]="{ 'bg-[#EBEBEB]': !selectedSchool || editSubject }">
-                    <option [value]="null" disabled selected hidden>Choose Section</option>
+                    <option [value]=0 disabled selected hidden>Choose Section</option>
                     <option *ngFor="let section of Sections" [value]="section.id">{{ section.name }}</option>
                     <option *ngIf="Sections.length === 0" disabled selected>No Data Found</option>
                 </select>
@@ -47,7 +47,7 @@
                 class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="grade" [(ngModel)]="subject.gradeID"
                 (ngModelChange)="onInputValueChange({ field: 'gradeID', value: $event })"
                 [disabled]="!selectedSection || editSubject" [ngClass]="{ 'bg-[#EBEBEB]': !selectedSection || editSubject }">
-                    <option [value]="0" disabled selected hidden>Choose Grade</option>
+                    <option [value]=0 disabled selected hidden>Choose Grade</option>
                     <option *ngFor="let grade of Grades" [value]="grade.id">{{ grade.name }}</option>
                     <option *ngIf="Grades.length === 0" disabled selected>No Data Found</option>
                 </select>

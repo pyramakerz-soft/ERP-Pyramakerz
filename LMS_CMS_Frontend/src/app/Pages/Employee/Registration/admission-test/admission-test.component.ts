@@ -354,4 +354,14 @@ export class AdmissionTestComponent {
       this.Data = [];
     }
   }
+
+  validateNumber(event: any, field: keyof Test): void {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = ''; 
+      if (typeof this.test[field] === 'string') {
+        this.test[field] = '' as never;  
+      }
+    }
+  }
 }

@@ -105,7 +105,7 @@
             <h6 class="font-medium text-base leading-6 mb-1 mt-3">{{ 'Total Mark' | translate }}</h6>
             <div class="flex justify-start  gap-2 items-start">
                 <div class="flex flex-col">
-                    <input type="text"
+                    <input type="text" (input)="validateNumber($event, 'totalMark')"
                         class="w-[500px] h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"
                         [(ngModel)]="test.totalMark" placeholder="{{ 'Enter' | translate }} {{ 'Total Mark' | translate }}"  (ngModelChange)="onInputValueChange({ field: 'totalMark', value: $event })"/>
                 <span *ngIf="validationErrors['totalMark']" class="text-red-500 ml-3 font-normal">{{ validationErrors['totalMark'] }}</span>

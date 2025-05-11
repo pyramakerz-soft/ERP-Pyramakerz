@@ -44,6 +44,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             List<Subject> subjects = await Unit_Of_Work.subject_Repository.Select_All_With_IncludesById<Subject>(
                     f => f.IsDeleted != true,
                     query => query.Include(emp => emp.Grade),
+                    query => query.Include(emp => emp.Grade.Section),
+                    query => query.Include(emp => emp.Grade.Section.school),
                     query => query.Include(emp => emp.SubjectCategory)
                     );
 
@@ -80,6 +82,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             List<Subject> subjects = await Unit_Of_Work.subject_Repository.Select_All_With_IncludesById<Subject>(
                     f => f.IsDeleted != true && f.GradeID == gradeId,
                     query => query.Include(emp => emp.Grade),
+                    query => query.Include(emp => emp.Grade.Section),
+                    query => query.Include(emp => emp.Grade.Section.school),
                     query => query.Include(emp => emp.SubjectCategory)
                     );
 
@@ -119,6 +123,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             Subject subject = await Unit_Of_Work.subject_Repository.FindByIncludesAsync(
                 t => t.IsDeleted != true && t.ID == id, 
                 query => query.Include(e => e.Grade),
+                query => query.Include(emp => emp.Grade.Section),
+                query => query.Include(emp => emp.Grade.Section.school),
                 query => query.Include(e => e.SubjectCategory)
                 );
 

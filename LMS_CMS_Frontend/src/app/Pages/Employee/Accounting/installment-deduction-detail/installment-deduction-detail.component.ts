@@ -117,7 +117,7 @@ export class InstallmentDeductionDetailComponent {
     if (this.mode == "Create") {
 
     }
-    this.GetAllEmployees() 
+    this.GetAllEmployees()
     this.GetAllTuitionFeesType()
   }
 
@@ -161,20 +161,20 @@ export class InstallmentDeductionDetailComponent {
   }
 
   Save() {
-    if(this.isFormValid()){
+    if (this.isFormValid()) {
       this.isLoading = true
       if (this.mode == "Create") {
         this.installmentDeductionMasterServ.Add(this.Data, this.DomainName).subscribe((d) => {
           this.MasterId = d
           this.isLoading = false
-  
+
           Swal.fire({
             icon: 'success',
             title: 'Done',
             text: 'Done Succeessfully',
             confirmButtonColor: '#FF7519',
           });
-          
+
           this.router.navigateByUrl(`Employee/Installment Deduction Details/Edit/${this.MasterId}`)
         },
           err => {
@@ -208,10 +208,10 @@ export class InstallmentDeductionDetailComponent {
   }
   onEmployeeChange() {
     this.emplyeeStudents = []
-    this.Data.studentID = 0 
- 
+    this.Data.studentID = 0
+
     if (this.Data.employeeID) {
-      this.GetAllStudents(); 
+      this.GetAllStudents();
     }
   }
 
@@ -231,10 +231,12 @@ export class InstallmentDeductionDetailComponent {
   GetMasterInfo() {
     this.installmentDeductionMasterServ.GetById(this.MasterId, this.DomainName).subscribe((d) => {
       this.Data = d
+      console.log(this.Data)
     })
   }
 
   GetTableDataByID() {
+    this.TableData = [];
     this.installmentDeductionDetailServ.GetByMasterId(this.MasterId, this.DomainName).subscribe((d) => {
       this.TableData = d;
     })
@@ -261,6 +263,12 @@ export class InstallmentDeductionDetailComponent {
       if (result.isConfirmed) {
         this.installmentDeductionDetailServ.Delete(id, this.DomainName).subscribe((D) => {
           this.GetTableDataByID();
+          Swal.fire({
+            icon: 'success',
+            title: 'Done',
+            text: 'Installment Deduction Details Deleted Succeessfully',
+            confirmButtonColor: '#FF7519',
+          });
         })
       }
     });
