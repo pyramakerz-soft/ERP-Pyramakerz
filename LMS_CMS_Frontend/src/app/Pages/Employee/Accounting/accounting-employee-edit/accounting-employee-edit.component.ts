@@ -86,7 +86,7 @@ export class AccountingEmployeeEditComponent {
   EndDate: boolean = false;
   emplyeeStudent: EmplyeeStudent = new EmplyeeStudent();
   TableData: EmplyeeStudent[] = [];
-  Student: Student = new Student();
+  Student: EmplyeeStudent = new EmplyeeStudent();
   NationalID: string = "";
 
   selectedDays: { id: number; name: string }[] = [];
@@ -126,8 +126,7 @@ export class AccountingEmployeeEditComponent {
     public DaysServ: DaysService,
     public ReasonsServ: ReasonsforleavingworkService,
     public jobCategoryServ: JobCategoriesService,
-    public EmplyeeStudentServ: EmployeeStudentService,
-    public StudentServ: StudentService,
+    public EmplyeeStudentServ: EmployeeStudentService
   ) { }
 
   ngOnInit() {
@@ -329,9 +328,9 @@ export class AccountingEmployeeEditComponent {
   }
 
   SelectChild(nationalId: string) {
-    this.Student = new Student()
+    this.Student = new EmplyeeStudent()
     this.emplyeeStudent = new EmplyeeStudent()
-    this.StudentServ.GetByNationalID(nationalId, this.DomainName).subscribe((d) => {
+    this.EmplyeeStudentServ.GetByNationalID(nationalId, this.DomainName).subscribe((d) => {
       this.Student = d
       this.emplyeeStudent.studentID = d.id
       this.emplyeeStudent.employeeID = this.UserID
@@ -342,7 +341,7 @@ export class AccountingEmployeeEditComponent {
   CreateOREdit() {
     if (this.emplyeeStudent.studentID != 0) {
       var EmployeeStudent = new EmplyeeStudent()
-      EmployeeStudent.studentName = this.Student.user_Name;
+      EmployeeStudent.studentName = this.Student.studentName;
       EmployeeStudent.studentID = this.emplyeeStudent.id;
       this.TableData.push(EmployeeStudent)
       this.Data.students.push(this.emplyeeStudent.studentID)
@@ -368,7 +367,7 @@ export class AccountingEmployeeEditComponent {
 
   Create() {
     this.mode = 'Create';
-    this.Student = new Student()
+    this.Student = new EmplyeeStudent()
     this.NationalID = ""
     this.emplyeeStudent = new EmplyeeStudent()
     this.openModal();

@@ -57,7 +57,7 @@ export class AddChildComponent {
   value: any = '';
   keysArray: string[] = ['id', 'studentName'];
   NationalID: string = "";
-  Student: Student = new Student();
+  Student: EmplyeeStudent = new EmplyeeStudent();
   emplyeeStudent: EmplyeeStudent = new EmplyeeStudent();
 
   validationErrors: { [key in keyof EmplyeeStudent]?: string } = {};
@@ -71,8 +71,7 @@ export class AddChildComponent {
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
-    public EmplyeeStudentServ: EmployeeStudentService,
-    public StudentServ: StudentService,
+    public EmplyeeStudentServ: EmployeeStudentService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -103,7 +102,7 @@ export class AddChildComponent {
 
   Create() {
     this.mode = 'Create';
-    this.Student = new Student()
+    this.Student = new EmplyeeStudent()
     this.NationalID = ""
     this.emplyeeStudent = new EmplyeeStudent()
     this.openModal();
@@ -193,9 +192,9 @@ export class AddChildComponent {
   }
 
   SelectChild(nationalId: string) {
-    this.Student = new Student()
+    this.Student = new EmplyeeStudent()
     this.emplyeeStudent = new EmplyeeStudent()
-    this.StudentServ.GetByNationalID(nationalId, this.DomainName).subscribe((d) => {
+    this.EmplyeeStudentServ.GetByNationalID(nationalId, this.DomainName).subscribe((d) => {
       this.Student = d
       this.emplyeeStudent.studentID = d.id
       this.emplyeeStudent.employeeID = this.UserID

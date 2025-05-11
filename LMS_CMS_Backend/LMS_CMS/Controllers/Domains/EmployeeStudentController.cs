@@ -55,6 +55,33 @@ namespace LMS_CMS_PL.Controllers.Domains
             return Ok(StudentDTO);
         }
 
+        ////
+
+        //[HttpGet("SearchByNationalID/{NationalID}")]
+        //public async Task<IActionResult> GetByNationalityAsync(string NationalID)
+        //{
+        //    UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+        //    Student student = Unit_Of_Work.student_Repository.First_Or_Default(query => query.IsDeleted != true && query.NationalID == NationalID);
+        //    EmployeeStudent student = await Unit_Of_Work.employeeStudent_Repository.FindByIncludesAsync(
+        //         query => query.IsDeleted != true && query.Student.NationalID == NationalID,
+        //         query => query.Include(stu => stu.Student),
+        //         query => query.Include(stu => stu.employee));
+
+        //    if (student == null)
+        //    {
+        //        return NotFound("No Student found");
+        //    }
+        //    else
+        //    {
+        //        Student student = Unit_Of_Work.student_Repository.First_Or_Default(query => query.IsDeleted != true && query.NationalID == NationalID);
+        //    }
+
+        //    EmployeeStudentGetDTO StudentDTO = mapper.Map<EmployeeStudentGetDTO>(student); 
+
+        //    return Ok(StudentDTO);
+        //}
+
         //////
 
         [HttpPost]
