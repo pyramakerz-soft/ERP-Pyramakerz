@@ -148,6 +148,8 @@ import { LessonResourceComponent } from './Pages/Employee/LMS/lesson-resource/le
 import { LessonActivityComponent } from './Pages/Employee/LMS/lesson-activity/lesson-activity.component';
 import { LessonLiveComponent } from './Pages/Employee/LMS/lesson-live/lesson-live.component';
 import { StudentLessonLiveComponent } from './Pages/Student/LMS/student-lesson-live/student-lesson-live.component';
+import { AssignmentDetailsComponent } from './Pages/Employee/LMS/assignment/assignment-details/assignment-details.component';
+import { AssignmentEditComponent } from './Pages/Employee/LMS/assignment/assignment-edit/assignment-edit.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate:[noNavigateToLoginIfLoginGuard] },
@@ -342,6 +344,8 @@ export const routes: Routes = [
             { path: "Lesson Activity/:id", component: LessonActivityComponent, title: "Lesson Activity", canActivate:[noNavigateWithoutLoginGuard ] },
             { path: "Lesson Resource/:id", component: LessonResourceComponent, title: "Lesson Resource", canActivate:[noNavigateWithoutLoginGuard ] },
             { path: "Lesson Live", component: LessonLiveComponent, title: "Lesson Live", canActivate:[noNavigateWithoutLoginGuard ] },
+            { path: "Assignment Details", component: AssignmentDetailsComponent, title: "Assignment Details", canActivate:[noNavigateWithoutLoginGuard ] },
+            { path: "Assignment Edit", component: AssignmentEditComponent, title: "Assignment Edit", canActivate:[noNavigateWithoutLoginGuard ] },
         ]
 },
     { 

@@ -1,0 +1,137 @@
+<div class="flex justify-between items-center mb-6">
+    <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
+        <i class="fa-solid fa-chevron-left rtl:rotate-180 cursor-pointer" (click)="goBack()"></i>
+        <h1 class="primaryTxt font-semibold text-2xl leading-9">Edit Assignment</h1>
+    </div>
+    <button class="text-white px-4 py-2 rounded-lg font-medium">
+            <img src="Images/classroom.png" class="w-5" alt="Upload Icon" />
+            </button>
+</div>
+
+<div class="bg-white rounded-lg shadow-sm p-6">
+    <!-- Basic Information Section -->
+    <div class="flex flex-wrap justify-between gap-4 mb-6">
+        <div class="bg-[#EBEBEB] p-4  w-[32%]">
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-2">Assignment Name</p>
+            <p class="font-medium text-base text-[#1E1E1E]">
+                Primary
+            </p>
+        </div>
+
+        <!-- Assignment Type -->
+        <div class="bg-[#EBEBEB] p-4  w-[32%]">
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-2">Assignment Type</p>
+            <p class="font-medium text-base text-[#1E1E1E]">
+                {{'N/A' }}
+            </p>
+        </div>
+
+        <div class="bg-[#EBEBEB] p-4  w-[32%]">
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-2">Open Date</p>
+            <p class="font-medium text-base text-[#1E1E1E]">
+                22 ,May 2024
+            </p>
+        </div>
+    </div>
+
+    <!-- Dates Section -->
+    <div class="flex flex-wrap justify-between gap-4 mb-6">
+        <div class="bg-[#EBEBEB] p-4  w-[32%]">
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-2">Due Date</p>
+            <p class="font-medium text-base text-[#1E1E1E]">
+                Primary
+            </p>
+        </div>
+    
+        <!-- Assignment Type -->
+        <div class="bg-[#EBEBEB] p-4  w-[32%]">
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-2">Cut Off Date</p>
+            <p class="font-medium text-base text-[#1E1E1E]">
+                22 ,May 2024
+            </p>
+        </div>
+    
+        <div class="bg-[#EBEBEB] p-4  w-[32%]">
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-2">Class</p>
+            <p class="font-medium text-base text-[#1E1E1E]">
+                Class1 (5)
+            </p>
+    </div>
+
+    <!-- Classes Section -->
+    <!-- <div class="mb-6">
+        <label class="block font-semibold text-sm text-[#6F6F6F] mb-2">Classes</label>
+        <div class="flex flex-wrap gap-2">
+            <div *ngFor="let class of assignment.classes"
+                class="bg-gray-200 rounded-lg px-3 py-1 text-sm flex items-center gap-2">
+                {{ class.name }} ({{ class.count }})
+                <i class="fa-solid fa-xmark text-gray-500 cursor-pointer hover:text-gray-700"></i>
+            </div>
+        </div>
+        <button class="mt-2 text-[#A020F0] font-medium text-sm hover:underline flex items-center gap-1">
+            <i class="fa-solid fa-plus"></i> Add Class
+        </button>
+    </div> -->
+
+    <!-- Description Section -->
+    <!-- <div class="mb-6">
+        <label class="block font-semibold text-sm text-[#6F6F6F] mb-2">Description</label>
+        <textarea class="w-full p-3 border rounded-lg min-h-[100px]" [(ngModel)]="assignment.description"
+            placeholder="Enter assignment description"></textarea>
+    </div> -->
+
+    <!-- Attached Files Section -->
+    <div class="mb-6">
+        <h2 class="font-semibold text-lg text-[#1E1E1E] mb-4">Attached Files</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- File Box -->
+            <div *ngIf="assignment.file" class="bg-[#EBEBEB] p-4 rounded-lg shadow-sm relative">
+                <div class="absolute top-2 right-2">
+                    <i class="fa-solid fa-trash text-red-500 cursor-pointer hover:text-red-700"
+                        (click)="removeFile()"></i>
+                </div>
+                <div class="flex items-start space-x-3">
+                    <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+                        <i class="fa-regular fa-file text-[#6F6F6F]"></i>
+                    </div>
+                    <div>
+                        <p class="font-medium text-base text-[#1E1E1E] mb-2">
+                            {{ getFileName(assignment.file) }}
+                        </p>
+                        <p class="font-medium text-sm text-[#6F6F6F] mb-1">File Name</p>
+                        <a [href]="assignment.file" target="_blank"
+                            class="text-[#A020F0] font-medium text-sm hover:underline">
+                            Click to view
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upload Button -->
+            <div
+                class="bg-[#EBEBEB] p-4 rounded-lg shadow-sm flex items-center justify-center cursor-pointer hover:bg-gray-200">
+                <label class="flex flex-col items-center justify-center cursor-pointer">
+                    <i class="fa-solid fa-cloud-arrow-up text-2xl text-[#6F6F6F] mb-2"></i>
+                    <span class="text-[#6F6F6F] font-medium">Upload File</span>
+                    <input type="file" class="hidden" (change)="handleFileUpload($event)">
+                </label>
+            </div>
+
+            <!-- No Files Message -->
+            <div *ngIf="!assignment.file" class="col-span-2 text-center py-4">
+                <p class="text-[#6F6F6F] font-medium">No attached files</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <!-- <div class="flex justify-end gap-4">
+        <button class="px-6 py-2 border border-gray-300 rounded-lg font-medium text-[#6F6F6F] hover:bg-gray-100">
+            Cancel
+        </button>
+        <button class="px-6 py-2 bg-[#A020F0] text-white rounded-lg font-medium hover:bg-[#8c1ad1]">
+            Save Changes
+        </button>
+    </div> -->
+</div>
