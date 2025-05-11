@@ -2,7 +2,6 @@
 using Amazon.SecretsManager;
 using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains.Inventory;
-using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_DAL.Models.Domains.Zatca;
 using LMS_CMS_PL.Services;
 using LMS_CMS_PL.Services.Invoice;
@@ -10,7 +9,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.Text;
-using System.Xml.Linq;
 using Zatca.EInvoice.SDK.Contracts;
 using Zatca.EInvoice.SDK.Contracts.Models;
 
@@ -51,19 +49,6 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
             if (schoolPc is null)
                 return NotFound("School PC not found.");
 
-            string invoices = Path.Combine(Directory.GetCurrentDirectory(), "Invoices/CSRs");
-            string csr = Path.Combine(invoices, $"PC-{schoolPc.ID}-{schoolPc.School.ID}");
-            string privateKeyPath = Path.Combine(csr, "PrivateKey.pem");
-            string csrPath = Path.Combine(csr, "CSR.csr");
-            string publicKeyPath = Path.Combine(csr, "PublicKey.pem");
-            string csidPath = Path.Combine(csr, "CSID.json");
-            string pcsidPath = Path.Combine(csr, "PCSID.json");
-
-            if (!Directory.Exists(csr))
-            {
-                Directory.CreateDirectory(csr);
-            }
-
             string commonName = schoolPc.School.Name;
             string serialNumber = $"1-{schoolPcId}|2-{schoolPc.PCName}|3-{schoolPc.SerialNumber}";
             string organizationIdentifier = schoolPc.School.VatNumber;
@@ -88,7 +73,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
             string pcName = $"PC{schoolPc.ID}{schoolPc.School.ID}";
             AmazonS3Client amazonS3Client = new AmazonS3Client();
-            S3Service s3SecretManager = new S3Service(amazonS3Client, _secretsManager, _config, "AWS:Bucket", "AWS:Folder");
+            S3Service s3SecretManager = new S3Service(amazonS3Client, _secretsManager);
 
             var csrSteps = InvoicingServices.GenerateCSRandPrivateKey(csrGeneration);
             string csrContent = csrSteps[1].ResultedValue;
@@ -118,8 +103,6 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                 return BadRequest("Adding CSID failed!");
 
             dynamic csidJson = JsonConvert.DeserializeObject(csid);
-            //string formattedCsid = JsonConvert.SerializeObject(csidJson, Formatting.Indented);
-            //await System.IO.File.WriteAllTextAsync(csidPath, formattedCsid);
 
             string user = csidJson.binarySecurityToken;
             string secret = csidJson.secret;
@@ -132,33 +115,10 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
             string pcsid = await InvoicingServices.GeneratePCSID(tokenBase64, version, requestId, _config);
 
-            //string formattedPcsid = JsonConvert.SerializeObject(JsonConvert.DeserializeObject(pcsid), Formatting.Indented);
-
-            //await System.IO.File.WriteAllTextAsync(pcsidPath, formattedPcsid);
-
-            //S3Service s3 = new S3Service(amazonS3Client, _config, "AWS:Bucket", "AWS:Folder");
-
-            //var secretsClient = new AmazonSecretsManagerClient(); 
-            //var service = new AwsSecretsService(secretsClient);
-
             bool addPCSID = await s3SecretManager.CreateOrUpdateSecretAsync($"{pcName}PCSID", pcsid);
 
             if (!addPCSID)
                 return BadRequest("Adding PCSID failed!");
-
-            //string subFolder = $"Certificates/PC-{schoolPc.ID}-{schoolPc.School.ID}/";
-
-            //bool uploaded = await s3.UploadAsync(csr, subFolder);
-            //if (!uploaded)
-            //    return BadRequest("Uploading Certificates failed!");
-
-
-            //bool migrateKeys = await s3SecretManager.MigrateKeyAsync($"{subFolder}PCSID.json", $"PC{schoolPc.ID}{schoolPc.School.ID}PCSIDKeys");
-
-            //bool isDeleted = await DeleteDirectoryOrFile.DeleteAsync(csr);
-
-            //if (!isDeleted)
-            //    return BadRequest("Deleting CSR directory failed!");
 
             string certificateDate = InvoicingServices.GetCertificateDate(pcsid);
 
