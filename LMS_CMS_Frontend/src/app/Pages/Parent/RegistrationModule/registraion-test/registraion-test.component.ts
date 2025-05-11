@@ -117,6 +117,7 @@ export class RegistraionTestComponent {
       .subscribe(
         (d: any) => {
           this.Data = d.questionWithAnswer;
+          console.log(d,this.Data )
           this.TestName = d.testName;
           this.mark = d.mark;
           this.TotalMark = d.totalmark;

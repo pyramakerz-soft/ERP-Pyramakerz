@@ -8,20 +8,23 @@
                 <h1 *ngIf="isView" class="primaryTxt font-semibold text-2xl leading-9"> Receivable</h1>
             </div>
         </div>
-    
+
         <div class="mt-6">
             <div class="flex justify-between">
                 <div class="flex flex-col w-[30%]">
                     <label class="mb-2 primaryTxt font-medium" for="receivableDocTypesID">Doc Type</label>
-                    <select *ngIf="!isView"  (ngModelChange)="onInputValueChange({ field: 'receivableDocTypesID', value: $event })"
-                        [disabled]="isView" class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto text-lg"
+                    <select *ngIf="!isView"
+                        (ngModelChange)="onInputValueChange({ field: 'receivableDocTypesID', value: $event })"
+                        [disabled]="isView"
+                        class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto text-lg"
                         id="receivableDocTypesID" [(ngModel)]="receivable.receivableDocTypesID">
                         <option [value]="0" disabled selected hidden>Choose Doc Type</option>
-                        <option *ngFor="let dataType of dataTypesData" [value]="dataType.id">{{ dataType.name }}</option>
+                        <option *ngFor="let dataType of dataTypesData" [value]="dataType.id">{{ dataType.name }}
+                        </option>
                         <option *ngIf="dataTypesData.length === 0" disabled selected>No Data Found</option>
                     </select>
-                    <div *ngIf="isView"  
-                    class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto text-lg">
+                    <div *ngIf="isView"
+                        class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto text-lg">
                         {{receivable.receivableDocTypesName}}
                     </div>
                     <span *ngIf="validationErrors['receivableDocTypesID']" class="text-red-500 ml-3 font-normal">{{
@@ -29,9 +32,10 @@
                 </div>
                 <div class="flex flex-col w-[30%]">
                     <label class="mb-2 primaryTxt font-medium" for="DocType">Doc Number</label>
-                    <input id="DocType" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3 text-lg"
-                        [disabled]="isView" (input)="validateNumberReceivable($event, 'docNumber')"
-                        placeholder="Enter Doc Number" [(ngModel)]="receivable.docNumber" />
+                    <input id="DocType" type="text"
+                        class="rounded-lg border border-solid border-gray-300 px-4 py-3 text-lg" [disabled]="isView"
+                        (input)="validateNumberReceivable($event, 'docNumber')" placeholder="Enter Doc Number"
+                        [(ngModel)]="receivable.docNumber" />
                 </div>
                 <div class="flex flex-col w-[30%]">
                     <div class="mb-2 flex justify-evenly">
@@ -42,7 +46,7 @@
                                 [value]="5" />
                             <label for="save" class="ml-2 font-medium">Safe ID</label>
                         </div>
-    
+
                         <div class="flex space-x-2 items-center">
                             <input type="radio" [disabled]="isView" id="bank" class="square-radio" name="linkFile"
                                 [(ngModel)]="receivable.linkFileID"
@@ -54,7 +58,8 @@
                             validationErrors['linkFileID'] }}</span>
                     </div>
                     <select (ngModelChange)="onInputValueChange({ field: 'bankOrSaveID', value: $event })"
-                        [disabled]="isView" class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto text-lg"
+                        [disabled]="isView"
+                        class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto text-lg"
                         id="bankOrSaveID" [(ngModel)]="receivable.bankOrSaveID">
                         <option [value]="0" disabled selected hidden>Choose Data</option>
                         <option *ngFor="let bankOrSave of bankOrSaveData" [value]="bankOrSave.id">{{ bankOrSave.name }}
@@ -65,24 +70,27 @@
                         validationErrors['bankOrSaveID'] }}</span>
                 </div>
             </div>
-    
+
             <div class="mt-5 flex justify-between">
                 <div class="flex flex-col w-[45%]">
                     <label class="mb-2 primaryTxt font-medium" for="date">Date</label>
-                    <input id="date" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3 text-lg"
+                    <input id="date" type="date"
+                        class="rounded-lg border border-solid border-gray-300 px-4 py-3 text-lg"
                         [(ngModel)]="receivable.date" [disabled]="isView"
                         (ngModelChange)="onInputValueChange({ field: 'date', value: $event })" />
-                    <span *ngIf="validationErrors['date']" class="text-red-500 ml-3 font-normal">{{ validationErrors['date']
+                    <span *ngIf="validationErrors['date']" class="text-red-500 ml-3 font-normal">{{
+                        validationErrors['date']
                         }}</span>
                 </div>
-    
+
                 <div class="flex flex-col w-[45%]" *ngIf="!isCreate">
                     <label class="mb-2 primaryTxt font-medium" for="total">Total</label>
-                    <input id="total" type="text" disabled class="rounded-lg border border-solid border-gray-300 px-4 py-3 text-lg"
+                    <input id="total" type="text" disabled
+                        class="rounded-lg border border-solid border-gray-300 px-4 py-3 text-lg"
                         [(ngModel)]="totalAmount" />
                 </div>
             </div>
-    
+
             <div class="mt-5 flex flex-col">
                 <label class="mb-2 primaryTxt font-medium" for="notes">Notes</label>
                 <textarea id="notes" class="w-full rounded-lg border border-solid border-gray-300 px-4 py-3"
@@ -90,22 +98,24 @@
                 </textarea>
             </div>
         </div>
-    
 
-        <div class="no-print flex justify-end mt-5 space-x-4 items-center"> 
+
+        <div class="no-print flex justify-end mt-5 space-x-4 items-center">
             <div class="flex space-x-4" *ngIf="!isCreate">
-                <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="DownloadAsExcel()" title="Export to Excel">
+                <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="DownloadAsExcel()"
+                    title="Export to Excel">
                 <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()" title="Download as PDF">
                 <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()" title="Print">
             </div>
-              
-            <button *ngIf="!isView" [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg" (click)="Save()">
+
+            <button *ngIf="!isView" [disabled]="isLoading"
+                class="secondaryBg text-white font-medium px-4 py-2 rounded-lg" (click)="Save()">
                 <span *ngIf="!isLoading">Save</span>
                 <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
             </button>
         </div>
     </div>
-    
+
     <div class="mt-6" *ngIf="!isCreate">
         <div class="no-print flex justify-end" *ngIf="!isView">
             <button class="secondaryTxt secondaryBorder px-4 py-2 rounded-lg flex items-center space-x-2"
@@ -114,26 +124,29 @@
                 <p>Add Row</p>
             </button>
         </div>
-    
+
         <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD] max-w-full">
             <table class="overflow-auto w-full bg-[#EBEBEB] text-left text-[#6F6F6F]">
                 <thead class="bg-[##EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
                     <tr>
-                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        <th
+                            class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                             ID
                         </th>
                         <th
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
                             Amount
                         </th>
-                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        <th
+                            class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                             Link File
                         </th>
                         <th
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
                             Link File Data
                         </th>
-                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        <th
+                            class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                             Notes
                         </th>
                         <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0"
@@ -150,15 +163,19 @@
                             No Data Found
                         </td>
                     </tr>
-    
+
                     <!-- New Row with Inputs -->
                     <tr *ngIf="isNewDetails" class="no-print bg-white border-t border-gray-300 text-xs md:text-sm">
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            <input id="amount" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                            <input id="amount" type="number"
+                                class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                                 (input)="validateNumberDetails($event, 'amount')" [(ngModel)]="newDetails.amount"
+                                [attr.placeholder]="!newDetails.amount ? 'Enter Amount' : ''"
                                 (ngModelChange)="onInputValueChangeForDetails({ field: 'amount', value: $event })" />
+                            <span *ngIf="validationErrorsForDetails['amount']" class="text-red-500 ml-3 font-normal">{{
+                                validationErrorsForDetails['amount'] }}</span>
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             <select (change)="GetLinkFilesTypeData()"
@@ -170,6 +187,9 @@
                                 </option>
                                 <option *ngIf="linkFilesData.length === 0" disabled selected>No Data Found</option>
                             </select>
+                            <span *ngIf="validationErrorsForDetails['linkFileID']"
+                                class="text-red-500 ml-3 font-normal">{{
+                                validationErrorsForDetails['linkFileID'] }}</span>
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             <select [disabled]="this.newDetails.linkFileID == 0"
@@ -177,10 +197,14 @@
                                 class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
                                 id="linkFileTypeID" [(ngModel)]="newDetails.linkFileTypeID">
                                 <option [value]="0" disabled selected hidden>Choose Link File Data</option>
-                                <option *ngFor="let linkFile of linkFileTypesData" [value]="linkFile.id">{{ linkFile.name ?
+                                <option *ngFor="let linkFile of linkFileTypesData" [value]="linkFile.id">{{
+                                    linkFile.name ?
                                     linkFile.name : linkFile.en_name }}</option>
                                 <option *ngIf="linkFileTypesData.length === 0" disabled selected>No Data Found</option>
                             </select>
+                            <span *ngIf="validationErrorsForDetails['linkFileTypeID']"
+                                class="text-red-500 ml-3 font-normal">{{
+                                validationErrorsForDetails['linkFileTypeID'] }}</span>
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             <textarea id="notes" class="w-full rounded-lg border border-solid border-gray-300 px-4 py-3"
@@ -188,28 +212,31 @@
                             </textarea>
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            <div class="flex space-x-4"> 
-                                <button [disabled]="!isDetailsValid || isLoading" [ngClass]="{'cursor-not-allowed opacity-50' : !isDetailsValid}">
-                                    <i (click)="SaveNewDetails()" *ngIf="!isLoading" class="fa-solid fa-check secondaryTxt secondaryBorder rounded-full p-1"></i>
+                            <div class="flex space-x-4">
+                                <button>
+                                    <i (click)="SaveNewDetails()" *ngIf="!isLoading"
+                                        class="fa-solid fa-check secondaryTxt secondaryBorder rounded-full p-1"></i>
                                     <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
-                                </button> 
+                                </button>
                             </div>
                         </td>
                     </tr>
-    
+
                     <!-- Data Rows -->
                     <tr *ngFor="let row of receivableDetailsData; let i = index"
                         [ngClass]="{'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1}"
                         class="border-t border-gray-300 text-xs md:text-sm">
-    
+
                         <!-- If the row is being edited, show inputs -->
                         <ng-container *ngIf="editingRowId === row.id; else normalRow" class="no-print">
                             <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{ row.id }}
                             </td>
                             <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                                 <input type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                                    (input)="validateNumberEditDetails($event, 'amount')" [(ngModel)]="editedRowData.amount"
+                                    (input)="validateNumberEditDetails($event, 'amount')"
+                                    [(ngModel)]="editedRowData.amount"
                                     (ngModelChange)="onInputValueChangeForDetails({ field: 'amount', value: $event })" />
+                                <span *ngIf="validationErrorsForDetails['amount']" class="text-red-500 ml-3 font-normal">{{validationErrorsForDetails['amount'] }}</span>
                             </td>
                             <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                                 <select (change)="GetLinkFilesTypeData()"
@@ -221,6 +248,8 @@
                                     </option>
                                     <option *ngIf="linkFilesData.length === 0" disabled selected>No Data Found</option>
                                 </select>
+                                <span *ngIf="validationErrorsForDetails['linkFileID']" class="text-red-500 ml-3 font-normal">{{
+                                    validationErrorsForDetails['linkFileID'] }}</span>
                             </td>
                             <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                                 <select [disabled]="this.editedRowData.linkFileID == 0"
@@ -230,8 +259,11 @@
                                     <option [value]="0" disabled selected hidden>Choose Link File Data</option>
                                     <option *ngFor="let linkFile of linkFileTypesData" [value]="linkFile.id">{{
                                         linkFile.name ? linkFile.name : linkFile.en_name }}</option>
-                                    <option *ngIf="linkFileTypesData.length === 0" disabled selected>No Data Found</option>
+                                    <option *ngIf="linkFileTypesData.length === 0" disabled selected>No Data Found
+                                    </option>
                                 </select>
+                                <span *ngIf="validationErrorsForDetails['linkFileTypeID']" class="text-red-500 ml-3 font-normal">{{
+                                    validationErrorsForDetails['linkFileTypeID'] }}</span>
                             </td>
                             <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                                 <textarea class="w-full rounded-lg border border-solid border-gray-300 px-4 py-3"
@@ -243,21 +275,21 @@
                                         (click)="DeleteDetail(row.id)">
                                         <i class="fa-regular fa-trash-can"></i>
                                     </button>
-                                    <button (click)="SaveEditedDetail()" [disabled]="!isDetailsValid"
-                                        [ngClass]="{'cursor-not-allowed opacity-50' : !isDetailsValid}">
+                                    <button (click)="SaveEditedDetail()">
                                         <i class="fa-solid fa-check secondaryTxt secondaryBorder rounded-full p-1"></i>
                                     </button>
                                 </div>
                             </td>
                         </ng-container>
-    
+
                         <!-- Normal row display -->
                         <ng-template #normalRow>
-                            <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{ row.id }}
+                            <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{ row.id}}
                             </td>
                             <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.amount }}</td>
-                            <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.linkFileName }}</td>
-                            <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.linkFileTypeName }}
+                            <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.linkFileName }}
+                            </td>
+                            <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.linkFileTypeName}}
                             </td>
                             <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.notes }}</td>
                             <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0" *ngIf="!isView">
@@ -278,7 +310,7 @@
             </table>
         </div>
     </div>
-</div> 
+</div>
 
 
 <div class="absolute -top-[9999px] -left-[9999px]">
@@ -292,7 +324,8 @@
                 { keyEn: 'Document Type: ' + receivable.receivableDocTypesName },
                 { keyEn: 'Document Number: ' + receivable.docNumber },
                 { keyEn: 'Date: ' + receivable.date },
-                { keyEn: 'Total Amount: ' + totalAmount }
+                { keyEn: 'Total Amount: ' + totalAmount },
+                { keyEn: 'Note: ' + receivable.notes }
             ]" [tableHeaders]="['id', 'amount', 'linkFileName', 'linkFileTypeName', 'notes']"
             [tableData]="receivableDetailsData" #pdfComponentRef>
         </app-pdf-print>

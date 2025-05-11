@@ -186,8 +186,8 @@ export class QuestionsComponent {
   }
 
   CreateOREdit() {
-    this.question.options = this.options;
-    this.question.testID = this.testId; 
+    this.question.options = this.options; 
+    this.question.testID = this.testId;  
     if (this.isFormValid()) {
       this.isLoading = true
       if (this.mode == 'Create') {
@@ -241,17 +241,21 @@ export class QuestionsComponent {
   }
 
   AddOption() {
-    this.options.push(this.NewOption);
-    this.NewOption = '';
+    if(this.NewOption !=""){
+      this.options.push(this.NewOption);
+      this.NewOption = '';
+    }
+    else{
+      this.validationErrors['options']="option is required"
+    }
   }
 
   checkOnType() {
+    this.question.correctAnswerName=""
+    this.options = [];
     if (this.question.questionTypeID == 1) {
-      this.options = [];
       this.options.push('True');
       this.options.push('False');
-    } else {
-      this.options = [];
     }
   }
 
@@ -284,7 +288,7 @@ export class QuestionsComponent {
         )} is required`;
         isValid = false;
       }
-      if (this.question.correctAnswerName == '') {
+      if (this.question.correctAnswerName == '' || this.question.correctAnswerName == null) {
         this.validationErrors['correctAnswerName'] = `*${this.capitalizeField(
           'correctAnswerName'
         )} is required`;

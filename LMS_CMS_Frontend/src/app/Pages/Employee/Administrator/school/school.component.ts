@@ -59,7 +59,7 @@ export class SchoolComponent {
     public activeRoute: ActivatedRoute,
     public schoolService: SchoolService,
     public router: Router
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -83,7 +83,7 @@ export class SchoolComponent {
   }
 
   getSchoolData() {
-    this.schoolData=[]
+    this.schoolData = []
     this.schoolService.Get(this.DomainName).subscribe((data) => {
       this.schoolData = data;
     });
@@ -217,6 +217,16 @@ export class SchoolComponent {
           'Invalid file type. Only JPEG, JPG and PNG are allowed.';
         this.school.reportImageFile = null;
         return;
+      }
+    }
+  }
+
+  validateNumber(event: any, field: keyof School): void {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+      if (typeof this.school[field] === 'string') {
+        this.school[field] = '' as never;
       }
     }
   }
