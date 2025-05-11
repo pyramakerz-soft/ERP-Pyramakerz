@@ -54,4 +54,4 @@ export class EmployeeStudentService {
       .set('Content-Type', 'application/json');
     return this.http.delete(`${this.baseUrl}/EmployeeStudent/${id}`, { headers })
   }
-  }
+}

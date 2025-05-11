@@ -179,7 +179,7 @@
                     id="test" [(ngModel)]="question.questionTypeID">
                     <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Question Type' | translate }}</option>
                     <option *ngFor="let type of QuestionTypes" [value]="type.id">{{ type.name }}</option>
-                    <option *ngIf="QuestionTypes.length === 0" disabled selected>{{ 'No Data Found' | translate }}/option>
+                    <option *ngIf="QuestionTypes.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
                 </select>
                 <span *ngIf="validationErrors['questionTypeID']" class="text-red-500 ml-3 font-normal">{{ validationErrors['questionTypeID'] }}</span>
             </div>

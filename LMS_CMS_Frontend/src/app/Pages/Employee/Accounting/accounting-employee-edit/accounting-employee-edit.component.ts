@@ -345,13 +345,25 @@ export class AccountingEmployeeEditComponent {
 
 
   CreateOREdit() {
-    if (this.emplyeeStudent.studentID != 0) {
-      var EmployeeStudent = new EmplyeeStudent()
-      EmployeeStudent.studentName = this.Student.user_Name;
-      EmployeeStudent.studentID = this.emplyeeStudent.id;
-      this.TableData.push(EmployeeStudent)
-      this.Data.students.push(this.emplyeeStudent.studentID)
-      this.closeModal()
+    if (this.emplyeeStudent.studentID != 0) { 
+      if (!this.Data.students.includes(this.emplyeeStudent.studentID)) {
+        var EmployeeStudent = new EmplyeeStudent();
+        EmployeeStudent.studentName = this.Student.user_Name;
+        EmployeeStudent.studentID = this.emplyeeStudent.id; 
+        this.TableData.push(EmployeeStudent); 
+        console.log(this.Data.students);
+        console.log(this.emplyeeStudent.studentID); 
+        this.Data.students.push(this.emplyeeStudent.studentID);
+        this.closeModal();
+      }else{
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'Student Already Assigned To This Employee',
+          confirmButtonText: 'Okay',
+          customClass: { confirmButton: 'secondaryBg' },
+        });
+      }
     }
     else {
       Swal.fire({

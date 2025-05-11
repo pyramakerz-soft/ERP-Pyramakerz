@@ -1082,7 +1082,7 @@ namespace LMS_CMS_PL.Controllers.Domains
 
         ////
 
-        [HttpGet("SearchByNationality/{NationalID}")]
+        [HttpGet("SearchByNationalID/{NationalID}")]
         public async Task<IActionResult> GetByNationalityAsync(string NationalID)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);

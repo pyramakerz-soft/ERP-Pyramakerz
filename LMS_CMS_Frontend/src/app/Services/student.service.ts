@@ -82,14 +82,14 @@ export class StudentService {
     return this.http.get<any>(`${this.baseUrl}/Student/GetStudentByYearID?yearId=${Yearid}&stuId=${StudentId}&schoolId=${SchoolId}`, { headers })
   }
 
-GetByClassID(id: number, DomainName: string): Observable<Student[]> {
-  const headers = new HttpHeaders()
-    .set('Domain-Name', DomainName)
-    .set('Authorization', `Bearer ${localStorage.getItem('current_token')}`)
-    .set('Content-Type', 'application/json');
+  GetByClassID(id: number, DomainName: string): Observable<Student[]> {
+    const headers = new HttpHeaders()
+      .set('Domain-Name', DomainName)
+      .set('Authorization', `Bearer ${localStorage.getItem('current_token')}`)
+      .set('Content-Type', 'application/json');
 
-  return this.http.get<Student[]>(`${this.baseUrl}/Student/Get_By_ClassID/${id}`, { headers });
-}
+    return this.http.get<Student[]>(`${this.baseUrl}/Student/Get_By_ClassID/${id}`, { headers });
+  }
 
   GetByStudentID(id:number,DomainName:string){
     this.header=DomainName 
@@ -122,7 +122,7 @@ GetByClassID(id: number, DomainName: string): Observable<Student[]> {
     .set('domain-name', this.header)
     .set('Content-Type', 'application/json');
 
-    return this.http.get<Student>(`${this.baseUrl}/Student/SearchByNationality/${NationalID}`, { headers })
+    return this.http.get<Student>(`${this.baseUrl}/Student/SearchByNationalID/${NationalID}`, { headers })
   }
   
   GetBySchoolGradeClassID(schoolId: number, gradeId: number, classId: number, DomainName: string){
