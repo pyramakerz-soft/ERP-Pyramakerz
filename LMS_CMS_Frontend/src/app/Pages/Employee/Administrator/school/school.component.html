@@ -162,14 +162,14 @@
             </div>
             <div class="flex flex-col mb-4 w-[49%]">
                 <label class="mb-2 primaryTxt" for="maximumPeriodCountTimeTable">{{ 'Maximum Period Count (Time Table)' | translate }}</label>
-                <input id="maximumPeriodCountTimeTable" type="number" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'Maximum Period Count (Time Table)' | translate }}"
-                [(ngModel)]="school.maximumPeriodCountTimeTable" 
+                <input id="maximumPeriodCountTimeTable" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'Maximum Period Count (Time Table)' | translate }}"
+                [(ngModel)]="school.maximumPeriodCountTimeTable"   (input)="validateNumber($event, 'maximumPeriodCountTimeTable')"
                 (ngModelChange)="onInputValueChange({ field: 'maximumPeriodCountTimeTable', value: $event })"/>
             </div>
             <div class="flex flex-col mb-4 w-[49%]">
                 <label class="mb-2 primaryTxt" for="maximumPeriodCountRemedials">{{ 'Maximum Period Count (remedials)' | translate }}</label>
-                <input id="maximumPeriodCountRemedials" type="number" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'Maximum Period Count (remedials)' | translate }}"
-                [(ngModel)]="school.maximumPeriodCountRemedials" 
+                <input id="maximumPeriodCountRemedials" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'Maximum Period Count (remedials)' | translate }}"
+                [(ngModel)]="school.maximumPeriodCountRemedials"  (input)="validateNumber($event, 'maximumPeriodCountRemedials')"
                 (ngModelChange)="onInputValueChange({ field: 'maximumPeriodCountRemedials', value: $event })"/>
             </div>
         </div>
