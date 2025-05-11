@@ -61,7 +61,6 @@ export class EmployeeAddEditComponent {
           this.EmpId = Number(this.activeRoute.snapshot.paramMap.get('id'))
           this.EmpServ.Get_Employee_By_ID(this.EmpId, this.DomainName).subscribe(async (data) => {
             this.Data = data;
-            console.log(this.Data)
             if (data.files == null) {
               this.Data.files = []
             }
@@ -259,7 +258,6 @@ export class EmployeeAddEditComponent {
             await this.EmpServ.DeleteFile(id, this.DomainName).toPromise();
           }
         }
-        console.log(this.Data)
         return this.EmpServ.Edit(this.Data, this.DomainName).toPromise().then(
           (data) => {
             Swal.fire({
@@ -316,8 +314,10 @@ export class EmployeeAddEditComponent {
   }
 
   changeFileName(index: number, event: Event): void {
-    const input = event.target as HTMLInputElement; 
-    const newName = input.value; 
-    this.Data.files[index].name = newName;
+    const input = event.target as HTMLInputElement; // Cast EventTarget to HTMLInputElement
+    const newName = input.value; // Access the value property
+    const oldFile = this.Data.files[index];
+    const newFile = new File([oldFile], newName, { type: oldFile.type, lastModified: oldFile.lastModified });
+    this.Data.files[index] = newFile;
   }
 }
