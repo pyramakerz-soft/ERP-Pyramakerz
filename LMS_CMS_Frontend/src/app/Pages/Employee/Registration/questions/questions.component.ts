@@ -186,9 +186,8 @@ export class QuestionsComponent {
   }
 
   CreateOREdit() {
-    this.question.options = this.options;
-    this.question.testID = this.testId;
-    console.log(this.question)
+    this.question.options = this.options; 
+    this.question.testID = this.testId;  
     if (this.isFormValid()) {
       this.isLoading = true
       if (this.mode == 'Create') {

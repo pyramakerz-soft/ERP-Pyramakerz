@@ -2,7 +2,7 @@
     <div>
         <div class="no-print flex justify-between items-center">
             <div class="flex justify-between items-center space-x-5">
-                <i class="fa-solid fa-chevron-left" (click)="moveToPayable()"></i>
+                <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToPayable()"></i>
                 <h1 *ngIf="isCreate" class="primaryTxt font-semibold text-2xl leading-9"> Create Payable</h1>
                 <h1 *ngIf="isEdit" class="primaryTxt font-semibold text-2xl leading-9"> Edit Payable</h1>
                 <h1 *ngIf="isView" class="primaryTxt font-semibold text-2xl leading-9"> Payable</h1>

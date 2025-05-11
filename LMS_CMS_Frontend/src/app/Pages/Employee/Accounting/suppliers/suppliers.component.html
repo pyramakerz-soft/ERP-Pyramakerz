@@ -53,7 +53,7 @@
         <tbody>
           <!-- No Data Row -->
           <tr *ngIf="TableData.length === 0">
-            <td colspan="15"
+            <td colspan="11"
               class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
               No Data Found
             </td>
@@ -137,7 +137,7 @@
         <div class="flex flex-col w-[48%]">
           <h6 class="font-medium text-base leading-6 mb-1 mt-3">Account Number</h6>
           <select class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"
-            [(ngModel)]="Supplier.accountNumberID">
+            [(ngModel)]="Supplier.accountNumberID" (ngModelChange)="onInputValueChange({ field: 'accountNumberID', value: $event })">
             <option [value]="0" disabled selected hidden>Choose Account Number</option>
             <option *ngFor="let Acc of AccountNumbers" [value]="Acc.id">{{ Acc.name }}</option>
             <option *ngIf="AccountNumbers.length === 0" disabled>No Data Found</option>

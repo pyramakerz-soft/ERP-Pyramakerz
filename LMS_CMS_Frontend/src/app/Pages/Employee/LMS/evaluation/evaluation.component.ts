@@ -50,12 +50,14 @@ export class EvaluationComponent {
 
   isNarrationOpen = true
   isCorrectionOpen = true
-
+  IsViewTemplate = false
+  
   selectedStudentIds: number[] = [];
   allSelected: boolean = false;  
   studentEvaluationCorectionBooks: EvaluationEmployeeStudentBookCorrectionAdd[] = [];
-
+  
   currentStep = 1
+  isLoading=false
 
   constructor(
     public account: AccountService, 
@@ -122,7 +124,7 @@ export class EvaluationComponent {
   }
   
   getTemplateGroupQuestionData() {
-    this.EvaluationTemplateGroups = [];
+    this.EvaluationTemplateGroups = []; 
     this.evaluationTemplateGroupService.GetByTemplateID(this.EvaluationEmployee.evaluationTemplateID, this.DomainName).subscribe((data) => {
       this.EvaluationTemplateGroups = data;  
       for (let group = 0; group < this.EvaluationTemplateGroups.length; group++) {
@@ -130,10 +132,14 @@ export class EvaluationComponent {
         for (let question = 0; question < this.EvaluationTemplateGroups[group].evaluationTemplateGroupQuestions.length; question++){
           let evaluationEmployeeQuestionAdd = new EvaluationEmployeeQuestionAdd()
           evaluationEmployeeQuestionAdd.evaluationTemplateGroupQuestionID = this.EvaluationTemplateGroups[group].evaluationTemplateGroupQuestions[question].id
-          this.EvaluationEmployee.evaluationEmployeeQuestionsList.push(evaluationEmployeeQuestionAdd)
+          const exists = this.EvaluationEmployee.evaluationEmployeeQuestionsList.find(q => q.evaluationTemplateGroupQuestionID === evaluationEmployeeQuestionAdd.evaluationTemplateGroupQuestionID);
+          
+          if (!exists) {
+            this.EvaluationEmployee.evaluationEmployeeQuestionsList.push(evaluationEmployeeQuestionAdd);
+          }
         } 
       }  
-    });
+    }); 
   }
  
   getCorrectionBookData() {
@@ -148,6 +154,7 @@ export class EvaluationComponent {
     this.Periods = []
     this.EvaluationEmployee.period = 0
     this.EvaluationEmployee.classroomID = 0
+    this.IsViewTemplate = false
 
     const selectedValue = (event.target as HTMLSelectElement).value;
     this.SchoolID = Number(selectedValue)
@@ -171,6 +178,7 @@ export class EvaluationComponent {
     this.Students = []
     this.EvaluationEmployee.evaluationEmployeeStudentBookCorrectionsList = []
     this.getStudentData()
+    this.IsViewTemplate = false
   }
 
   onTemplateChange(){
@@ -179,10 +187,12 @@ export class EvaluationComponent {
     this.EvaluationEmployee.evaluationEmployeeStudentBookCorrectionsList = []
     this.EvaluationEmployee.narration = ''
     this.EvaluationEmployee.evaluationBookCorrectionID = 0
+    this.IsViewTemplate = false
   } 
 
   ViewTemplate(){
-    this.EvaluationEmployee.evaluatorID = this.UserID
+    this.IsViewTemplate = true
+    this.EvaluationEmployee.evaluatorID = this.UserID 
     this.getTemplateGroupQuestionData()
   }
 
@@ -289,7 +299,7 @@ export class EvaluationComponent {
 
   ////////////////////////////////////////// Submit ///////////////////////////////////////////////
 
-  Submit(){
+  Submit(){ 
     if(this.EvaluationEmployee.evaluationBookCorrectionID == 0){
       Swal.fire({
         icon: 'error',
@@ -300,7 +310,7 @@ export class EvaluationComponent {
       });
     } else{
       this.EvaluationEmployee.evaluationEmployeeStudentBookCorrectionsList = this.studentEvaluationCorectionBooks
-      
+      this.isLoading=true
       this.evaluationEmployeeService.Add(this.EvaluationEmployee, this.DomainName).subscribe(
         data => { 
           Swal.fire({
@@ -310,6 +320,7 @@ export class EvaluationComponent {
             customClass: { confirmButton: 'secondaryBg' },
           }).then(() => {
             window.location.reload();
+            this.isLoading=false
           });
         }
       )

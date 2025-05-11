@@ -1,7 +1,7 @@
 export class InstallmentDeductionMaster {
     constructor(
         public id: number = 0,
-        public docNumber: number = 0,
+        public docNumber: number |null = null,
         public date: string = '',
         public notes: string = '',
         public employeeID: number = 0,
