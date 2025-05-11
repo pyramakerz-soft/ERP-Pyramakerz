@@ -57,7 +57,7 @@ export class AddChildComponent {
   value: any = '';
   keysArray: string[] = ['id', 'studentName'];
   NationalID: string = "";
-  Student: EmplyeeStudent = new EmplyeeStudent();
+  Student: Student = new Student();
   emplyeeStudent: EmplyeeStudent = new EmplyeeStudent();
 
   validationErrors: { [key in keyof EmplyeeStudent]?: string } = {};
@@ -71,7 +71,8 @@ export class AddChildComponent {
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
-    public EmplyeeStudentServ: EmployeeStudentService
+    public EmplyeeStudentServ: EmployeeStudentService,
+    public StudentServ: StudentService,
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -102,7 +103,7 @@ export class AddChildComponent {
 
   Create() {
     this.mode = 'Create';
-    this.Student = new EmplyeeStudent()
+    this.Student = new Student()
     this.NationalID = ""
     this.emplyeeStudent = new EmplyeeStudent()
     this.openModal();
@@ -137,10 +138,23 @@ export class AddChildComponent {
   }
   CreateOREdit() {
     if (this.emplyeeStudent.studentID != 0) {
-      this.EmplyeeStudentServ.Add(this.emplyeeStudent, this.DomainName).subscribe((d) => {
-        this.GetAllData();
-        this.closeModal()
-      })
+      this.EmplyeeStudentServ.Add(this.emplyeeStudent, this.DomainName).subscribe(
+        (d) => {
+          this.GetAllData();
+          this.closeModal()
+        }, 
+        (error) => {
+          if(error.error == "Student Already Assigned To This Employee"){
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'Student Already Assigned To This Employee',
+              confirmButtonText: 'Okay',
+              customClass: { confirmButton: 'secondaryBg' },
+            });
+          }
+        }
+      )
     }
     else {
       Swal.fire({
@@ -192,9 +206,9 @@ export class AddChildComponent {
   }
 
   SelectChild(nationalId: string) {
-    this.Student = new EmplyeeStudent()
+    this.Student = new Student()
     this.emplyeeStudent = new EmplyeeStudent()
-    this.EmplyeeStudentServ.GetByNationalID(nationalId, this.DomainName).subscribe((d) => {
+    this.StudentServ.GetByNationalID(nationalId, this.DomainName).subscribe((d) => {
       this.Student = d
       this.emplyeeStudent.studentID = d.id
       this.emplyeeStudent.employeeID = this.UserID

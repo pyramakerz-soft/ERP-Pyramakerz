@@ -86,7 +86,7 @@ export class AccountingEmployeeEditComponent {
   EndDate: boolean = false;
   emplyeeStudent: EmplyeeStudent = new EmplyeeStudent();
   TableData: EmplyeeStudent[] = [];
-  Student: EmplyeeStudent = new EmplyeeStudent();
+  Student: Student = new Student();
   NationalID: string = "";
 
   selectedDays: { id: number; name: string }[] = [];
@@ -126,7 +126,8 @@ export class AccountingEmployeeEditComponent {
     public DaysServ: DaysService,
     public ReasonsServ: ReasonsforleavingworkService,
     public jobCategoryServ: JobCategoriesService,
-    public EmplyeeStudentServ: EmployeeStudentService
+    public EmplyeeStudentServ: EmployeeStudentService,
+    public StudentServ: StudentService,
   ) { }
 
   ngOnInit() {
@@ -328,9 +329,9 @@ export class AccountingEmployeeEditComponent {
   }
 
   SelectChild(nationalId: string) {
-    this.Student = new EmplyeeStudent()
+    this.Student = new Student()
     this.emplyeeStudent = new EmplyeeStudent()
-    this.EmplyeeStudentServ.GetByNationalID(nationalId, this.DomainName).subscribe((d) => {
+    this.StudentServ.GetByNationalID(nationalId, this.DomainName).subscribe((d) => {
       this.Student = d
       this.emplyeeStudent.studentID = d.id
       this.emplyeeStudent.employeeID = this.UserID
@@ -339,13 +340,25 @@ export class AccountingEmployeeEditComponent {
 
 
   CreateOREdit() {
-    if (this.emplyeeStudent.studentID != 0) {
-      var EmployeeStudent = new EmplyeeStudent()
-      EmployeeStudent.studentName = this.Student.studentName;
-      EmployeeStudent.studentID = this.emplyeeStudent.id;
-      this.TableData.push(EmployeeStudent)
-      this.Data.students.push(this.emplyeeStudent.studentID)
-      this.closeModal()
+    if (this.emplyeeStudent.studentID != 0) { 
+      if (!this.Data.students.includes(this.emplyeeStudent.studentID)) {
+        var EmployeeStudent = new EmplyeeStudent();
+        EmployeeStudent.studentName = this.Student.user_Name;
+        EmployeeStudent.studentID = this.emplyeeStudent.id; 
+        this.TableData.push(EmployeeStudent); 
+        console.log(this.Data.students);
+        console.log(this.emplyeeStudent.studentID); 
+        this.Data.students.push(this.emplyeeStudent.studentID);
+        this.closeModal();
+      }else{
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'Student Already Assigned To This Employee',
+          confirmButtonText: 'Okay',
+          customClass: { confirmButton: 'secondaryBg' },
+        });
+      }
     }
     else {
       Swal.fire({
@@ -367,7 +380,7 @@ export class AccountingEmployeeEditComponent {
 
   Create() {
     this.mode = 'Create';
-    this.Student = new EmplyeeStudent()
+    this.Student = new Student()
     this.NationalID = ""
     this.emplyeeStudent = new EmplyeeStudent()
     this.openModal();

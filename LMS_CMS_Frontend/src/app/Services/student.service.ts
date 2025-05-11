@@ -113,7 +113,18 @@ export class StudentService {
     .set('Content-Type', 'application/json');
     return this.http.put(`${this.baseUrl}/Student/StudentAccounting`, student, { headers });
   }
-     
+    
+  GetByNationalID(NationalID:string,DomainName:string){
+    this.header=DomainName 
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+    .set('Authorization', `Bearer ${token}`)
+    .set('domain-name', this.header)
+    .set('Content-Type', 'application/json');
+
+    return this.http.get<Student>(`${this.baseUrl}/Student/SearchByNationalID/${NationalID}`, { headers })
+  }
+  
   GetBySchoolGradeClassID(schoolId: number, gradeId: number, classId: number, DomainName: string){
     if(DomainName!=null) {
       this.header=DomainName 

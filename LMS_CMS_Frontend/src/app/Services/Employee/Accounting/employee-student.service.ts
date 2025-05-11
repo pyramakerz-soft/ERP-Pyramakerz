@@ -54,15 +54,4 @@ export class EmployeeStudentService {
       .set('Content-Type', 'application/json');
     return this.http.delete(`${this.baseUrl}/EmployeeStudent/${id}`, { headers })
   }
-
-  GetByNationalID(NationalID:string,DomainName:string){
-    this.header=DomainName 
-    const token = localStorage.getItem("current_token");
-    const headers = new HttpHeaders()
-    .set('Authorization', `Bearer ${token}`)
-    .set('domain-name', this.header)
-    .set('Content-Type', 'application/json');
-
-    return this.http.get<EmplyeeStudent>(`${this.baseUrl}/EmployeeStudent/SearchByNationalID/${NationalID}`, { headers })
-  }
 }
