@@ -17,7 +17,7 @@
 <div class="mt-6 mb-4 rounded-3xl flex justify-between flex-wrap py-3">
     <div class="flex flex-col mb-4 w-[24%]">
         <label class="mb-2 primaryTxt" for="docNumber">Doc Number</label>
-        <input id="docNumber" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+        <input id="docNumber" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" [disabled]="mode=='View' "
             placeholder="Enter Doc Number" [(ngModel)]="Data.docNumber" (ngModelChange)="onInputValueChange({ field: 'docNumber', value: $event })" />
         <span *ngIf="validationErrors['docNumber']" class="text-red-500 ml-3 font-normal">{{ validationErrors["docNumber"]}}</span>
     </div>
@@ -25,13 +25,13 @@
     <div class="flex flex-col mb-4 w-[24%]">
         <label class="mb-2 primaryTxt" for="date">Date</label>
         <input id="date" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-            placeholder="Enter Date" [(ngModel)]="Data.date" (ngModelChange)="onInputValueChange({ field: 'date', value: $event })" />
+            placeholder="Enter Date" [(ngModel)]="Data.date" (ngModelChange)="onInputValueChange({ field: 'date', value: $event })" [disabled]="mode=='View' "/>
             <span *ngIf="validationErrors['date']" class="text-red-500 ml-3 font-normal">{{ validationErrors["date"]}}</span>
     </div>
 
     <div class="flex flex-col w-[24%] mb-4">
         <label class="mb-2" for="employeeID">Employees</label>
-        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="employeeID"
+        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="employeeID"  [disabled]="mode=='View' "
             [(ngModel)]="Data.employeeID" (ngModelChange)="onInputValueChange({ field: 'employeeID', value: $event })" (change)="onEmployeeChange()">
             <option [value]=0 disabled selected hidden>Choose Employee</option>
             <option *ngFor="let emp of employees" [value]="emp.id">{{ emp.user_Name }}</option>
@@ -43,7 +43,7 @@
     <div class="flex flex-col w-[24%] mb-4">
         <label class="mb-2" for="studentID" [ngClass]="{ 'text-gray-400': !Data.employeeID, 'primaryTxt': Data.employeeID }">Students</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="studentID"
-            [disabled]="!Data.employeeID" [ngClass]="{ 'bg-[#EBEBEB]': !Data.employeeID }"
+            [disabled]="!Data.employeeID || mode=='View' " [ngClass]="{ 'bg-[#EBEBEB]': !Data.employeeID }"
             [(ngModel)]="Data.studentID" (ngModelChange)="onInputValueChange({ field: 'studentID', value: $event })">
             <option [value]=0 disabled selected hidden>Choose Student</option>
             <option *ngFor="let stu of emplyeeStudents" [value]="stu.studentID">{{ stu.studentName }}</option>
@@ -56,7 +56,7 @@
         <label class="mb-2 primaryTxt" for="name">Notes</label>
         <div class="flex justify-start gap-2 items-start">
             <div class="flex flex-col w-full">
-                <textarea
+                <textarea [disabled]="mode=='View' "
                     class="w-full h-[100px] rounded-lg border border-solid border-gray-300 px-2 py-1 mb-3 resize-none"
                     [(ngModel)]="Data.notes" placeholder="Enter Notes"></textarea>
             </div>

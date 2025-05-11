@@ -237,7 +237,11 @@ namespace LMS_CMS_BL.Config
 
             CreateMap<Subject, SubjectGetDTO>()
                 .ForMember(dest => dest.GradeName, opt => opt.MapFrom(src => src.Grade.Name))
+                .ForMember(dest => dest.SchoolName, opt => opt.MapFrom(src => src.Grade.Section.school.Name))
+                .ForMember(dest => dest.SectionName, opt => opt.MapFrom(src => src.Grade.Section.Name))
                 .ForMember(dest => dest.GradeID, opt => opt.MapFrom(src => src.Grade.ID))
+                .ForMember(dest => dest.SchoolID, opt => opt.MapFrom(src => src.Grade.Section.school.ID))
+                .ForMember(dest => dest.SectionID, opt => opt.MapFrom(src => src.Grade.Section.ID))
                 .ForMember(dest => dest.SubjectCategoryID, opt => opt.MapFrom(src => src.SubjectCategory.ID))
                 .ForMember(dest => dest.SubjectCategoryName, opt => opt.MapFrom(src => src.SubjectCategory.Name));
             CreateMap<SubjectAddDTO, Subject>();
@@ -862,6 +866,7 @@ namespace LMS_CMS_BL.Config
             CreateMap<LessonAddDTO, Lesson>();
             CreateMap<LessonPutDTO, Lesson>();
 
+            CreateMap<Tag, TagGetDTO>();
             CreateMap<Tag, TagGetDTO>();
 
             CreateMap<LessonActivity, LessonActivityGetDTO>()

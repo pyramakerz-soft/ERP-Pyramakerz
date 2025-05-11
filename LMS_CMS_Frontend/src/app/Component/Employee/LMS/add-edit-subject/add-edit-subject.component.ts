@@ -46,18 +46,19 @@ export class AddEditSubjectComponent {
       
   ngOnInit(){
     this.DomainName = this.ApiServ.GetHeader();
-
-    this.getSubjectCategoryData() 
-    this.getSchools()
-
     if(this.editSubject){
       this.GetSubjectById(this.subjectId)
     }
+    this.getSubjectCategoryData() 
+    this.getSchools()
   }
 
   GetSubjectById(subjectId: number) {
     this.subjectService.GetByID(subjectId, this.DomainName).subscribe((data) => {
       this.subject = data;
+      console.log(this.subject)
+      this.getSections()
+      this.getGrades()
     });
   }
 
@@ -108,16 +109,18 @@ export class AddEditSubjectComponent {
     this.gradeService.Get(this.DomainName).subscribe(
       (data) => {
         this.Grades = data.filter((grade) => this.checkSection(grade))
+        console.log(this.Grades)
       }
     )
   }
 
   checkSchool(section:Section) {
-    return section.schoolID == this.selectedSchool
+    return section.schoolID == this.subject.schoolID
   }
  
   checkSection(grade:Grade) {
-    return grade.sectionID == this.selectedSection
+    console.log( this.subject.sectionID)
+    return grade.sectionID == this.subject.sectionID
   }
 
   onSchoolChange(event: Event) {
