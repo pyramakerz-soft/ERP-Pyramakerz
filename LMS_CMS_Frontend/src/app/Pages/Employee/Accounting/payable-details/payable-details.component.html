@@ -2,7 +2,7 @@
     <div>
         <div class="no-print flex justify-between items-center">
             <div class="flex justify-between items-center space-x-5">
-                <i class="fa-solid fa-chevron-left" (click)="moveToPayable()"></i>
+                <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToPayable()"></i>
                 <h1 *ngIf="isCreate" class="primaryTxt font-semibold text-2xl leading-9"> Create Payable</h1>
                 <h1 *ngIf="isEdit" class="primaryTxt font-semibold text-2xl leading-9"> Edit Payable</h1>
                 <h1 *ngIf="isView" class="primaryTxt font-semibold text-2xl leading-9"> Payable</h1>
@@ -101,12 +101,18 @@
 
         <div class="no-print flex justify-end mt-5 space-x-4 items-center">
             <div class="flex space-x-4" *ngIf="!isCreate">
-                <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="DownloadAsExcel()" title="Export to Excel">
+                <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="DownloadAsExcel()"
+                    title="Export to Excel">
                 <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()" title="Download as PDF">
                 <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()" title="Print">
             </div>
-            <button *ngIf="!isView" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg" (click)="Save()">
-                Save </button>
+            <!-- <button *ngIf="!isView" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg" (click)="Save()">
+                Save </button> -->
+            <button *ngIf="!isView" [disabled]="isSaveLoading" 
+                class="secondaryBg text-white font-medium px-4 py-2 rounded-lg" (click)="Save()">
+                <span *ngIf="!isSaveLoading">Save </span>
+                <i *ngIf="isSaveLoading" class="fas fa-spinner fa-spin"></i>
+            </button>
         </div>
     </div>
 
@@ -168,8 +174,8 @@
                                 [attr.placeholder]="!newDetails.amount ? 'Enter Amount' : ''"
                                 (input)="validateNumberDetails($event, 'amount')" [(ngModel)]="newDetails.amount"
                                 (ngModelChange)="onInputValueChangeForDetails({ field: 'amount', value: $event })" />
-                                <span *ngIf="validationErrorsForDetails['amount']" class="text-red-500 ml-3 font-normal">{{
-                                    validationErrorsForDetails['amount'] }}</span>
+                            <span *ngIf="validationErrorsForDetails['amount']" class="text-red-500 ml-3 font-normal">{{
+                                validationErrorsForDetails['amount'] }}</span>
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             <select (change)="GetLinkFilesTypeData(newDetails.linkFileID)"
@@ -181,7 +187,8 @@
                                 </option>
                                 <option *ngIf="linkFilesData.length === 0" disabled selected>No Data Found</option>
                             </select>
-                            <span *ngIf="validationErrorsForDetails['linkFileID']" class="text-red-500 ml-3 font-normal">{{
+                            <span *ngIf="validationErrorsForDetails['linkFileID']"
+                                class="text-red-500 ml-3 font-normal">{{
                                 validationErrorsForDetails['linkFileID'] }}</span>
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
@@ -194,7 +201,8 @@
                                     linkFile.name ? linkFile.name : linkFile.en_name }}</option>
                                 <option *ngIf="linkFileTypesData.length === 0" disabled selected>No Data Found</option>
                             </select>
-                            <span *ngIf="validationErrorsForDetails['linkFileTypeID']" class="text-red-500 ml-3 font-normal">{{
+                            <span *ngIf="validationErrorsForDetails['linkFileTypeID']"
+                                class="text-red-500 ml-3 font-normal">{{
                                 validationErrorsForDetails['linkFileTypeID'] }}</span>
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
@@ -220,15 +228,17 @@
 
                         <!-- If the row is being edited, show inputs -->
                         <ng-container *ngIf="editingRowId === row.id; else normalRow" class="no-print">
-                            <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{ row.id}}</td>
+                            <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{
+                                row.id}}</td>
                             <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                                 <input type="number" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                                     [attr.placeholder]="!editedRowData.amount ? 'Enter Amount' : ''"
                                     (input)="validateNumberEditDetails($event, 'amount')"
                                     [(ngModel)]="editedRowData.amount"
                                     (ngModelChange)="onInputValueChangeForEditDetails({ field: 'amount', value: $event })" />
-                                    <span *ngIf="validationErrorsForDetails['amount']" class="text-red-500 ml-3 font-normal">{{
-                                        validationErrorsForDetails['amount'] }}</span>
+                                <span *ngIf="validationErrorsForDetails['amount']"
+                                    class="text-red-500 ml-3 font-normal">{{
+                                    validationErrorsForDetails['amount'] }}</span>
                             </td>
                             <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                                 <select (change)="GetLinkFilesTypeData(editedRowData.linkFileID)"
@@ -240,7 +250,8 @@
                                         linkFile.name }}</option>
                                     <option *ngIf="linkFilesData.length === 0" disabled selected>No Data Found</option>
                                 </select>
-                                <span *ngIf="validationErrorsForDetails['linkFileID']" class="text-red-500 ml-3 font-normal">{{
+                                <span *ngIf="validationErrorsForDetails['linkFileID']"
+                                    class="text-red-500 ml-3 font-normal">{{
                                     validationErrorsForDetails['linkFileID'] }}</span>
                             </td>
                             <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
@@ -254,7 +265,8 @@
                                     <option *ngIf="linkFileTypesData.length === 0" disabled selected>No Data Found
                                     </option>
                                 </select>
-                                <span *ngIf="validationErrorsForDetails['linkFileTypeID']" class="text-red-500 ml-3 font-normal">{{
+                                <span *ngIf="validationErrorsForDetails['linkFileTypeID']"
+                                    class="text-red-500 ml-3 font-normal">{{
                                     validationErrorsForDetails['linkFileTypeID'] }}</span>
                             </td>
                             <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">

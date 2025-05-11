@@ -1,6 +1,6 @@
 <div class="flex justify-between items-center">
     <div class="flex justify-between items-center space-x-5">
-        <i class="fa-solid fa-chevron-left" (click)="moveToMaster()"></i>
+        <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToMaster()"></i>
         <h1 *ngIf="mode=='Create'" class="font-semibold text-2xl leading-9">
             Create Installment Deduction
         </h1>
@@ -16,35 +16,39 @@
 
 <div class="mt-6 mb-4 rounded-3xl flex justify-between flex-wrap py-3">
     <div class="flex flex-col mb-4 w-[24%]">
-        <label class="mb-2 primaryTxt" for="name">Doc Number</label>
-        <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-            placeholder="Enter Doc Number" [(ngModel)]="Data.docNumber" />
+        <label class="mb-2 primaryTxt" for="docNumber">Doc Number</label>
+        <input id="docNumber" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+            placeholder="Enter Doc Number" [(ngModel)]="Data.docNumber" (ngModelChange)="onInputValueChange({ field: 'docNumber', value: $event })" />
+        <span *ngIf="validationErrors['docNumber']" class="text-red-500 ml-3 font-normal">{{ validationErrors["docNumber"]}}</span>
     </div>
 
     <div class="flex flex-col mb-4 w-[24%]">
-        <label class="mb-2 primaryTxt" for="name">Date</label>
-        <input id="name" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-            placeholder="Enter Date" [(ngModel)]="Data.date" />
+        <label class="mb-2 primaryTxt" for="date">Date</label>
+        <input id="date" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+            placeholder="Enter Date" [(ngModel)]="Data.date" (ngModelChange)="onInputValueChange({ field: 'date', value: $event })" />
+            <span *ngIf="validationErrors['date']" class="text-red-500 ml-3 font-normal">{{ validationErrors["date"]}}</span>
     </div>
 
     <div class="flex flex-col w-[24%] mb-4">
-        <label class="mb-2" for="bus">Students</label>
-        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="student"
-            [(ngModel)]="Data.studentID">
+        <label class="mb-2" for="studentID">Students</label>
+        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="studentID"
+            [(ngModel)]="Data.studentID" (ngModelChange)="onInputValueChange({ field: 'studentID', value: $event })">
             <option [value]=0 disabled selected hidden>Choose Student</option>
             <option *ngFor="let stu of students" [value]="stu.id">{{ stu.user_Name }}</option>
             <option *ngIf="students.length === 0" disabled selected>No Data Found</option>
         </select>
+        <span *ngIf="validationErrors['studentID']" class="text-red-500 ml-3 font-normal">{{ validationErrors["studentID"]}}</span>
     </div>
 
     <div class="flex flex-col w-[24%] mb-4">
-        <label class="mb-2" for="bus">Employees</label>
-        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="employee"
-            [(ngModel)]="Data.employeeID">
+        <label class="mb-2" for="employeeID">Employees</label>
+        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="employeeID"
+            [(ngModel)]="Data.employeeID" (ngModelChange)="onInputValueChange({ field: 'employeeID', value: $event })">
             <option [value]=0 disabled selected hidden>Choose Employee</option>
             <option *ngFor="let emp of employees" [value]="emp.id">{{ emp.user_Name }}</option>
             <option *ngIf="employees.length === 0" disabled selected>No Data Found</option>
         </select>
+        <span *ngIf="validationErrors['employeeID']" class="text-red-500 ml-3 font-normal">{{ validationErrors["employeeID"]}}</span>
     </div>
 
     <div class="flex flex-col mb-4 w-full">
@@ -104,7 +108,7 @@
             <tbody>
                 <!-- No Data Row -->
                 <tr *ngIf="TableData.length === 0 && IsOpenToAdd==false">
-                    <td colspan="11"
+                    <td colspan="6"
                         class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
                         No Data Found
                     </td>

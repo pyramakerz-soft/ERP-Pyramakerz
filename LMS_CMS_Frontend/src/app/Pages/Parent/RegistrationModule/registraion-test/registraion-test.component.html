@@ -1,6 +1,6 @@
 <div class="flex justify-between items-center">
   <div class="flex justify-between items-center space-x-5">
-    <i class="fa-solid fa-chevron-left" (click)="moveToEmployee()"></i>
+    <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToEmployee()"></i>
     <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ TestName }}</h1>
   </div>
   <div class="flex justify-between items-center">
@@ -43,7 +43,7 @@
           <div class="bg-[#EBEBEB] p-4 rounded-xl mb-2">
             <div class="text-[#6F6F6F] font-semibold">{{ q.description }} ?</div>
             <div>
-              {{ q.answerName ? q.answerName : 'Not Answerd' }}
+              {{ q.essayAnswer ? q.essayAnswer : 'Not Answerd' }}
             </div>
           </div>
         </div>

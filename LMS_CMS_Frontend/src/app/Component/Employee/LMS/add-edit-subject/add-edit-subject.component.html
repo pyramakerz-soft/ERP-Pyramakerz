@@ -45,6 +45,7 @@
                 <label class="mb-2" for="grade" [ngClass]="{ 'text-gray-400': !selectedSection || editSubject, 'primaryTxt': selectedSection && !editSubject }">Choose Grade</label>
                 <select
                 class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="grade" [(ngModel)]="subject.gradeID"
+                (ngModelChange)="onInputValueChange({ field: 'gradeID', value: $event })"
                 [disabled]="!selectedSection || editSubject" [ngClass]="{ 'bg-[#EBEBEB]': !selectedSection || editSubject }">
                     <option [value]="0" disabled selected hidden>Choose Grade</option>
                     <option *ngFor="let grade of Grades" [value]="grade.id">{{ grade.name }}</option>

@@ -72,6 +72,7 @@ export class AccountingEntriesDetailsComponent {
   editedRowData:AccountingEntriesDetails = new AccountingEntriesDetails() 
 
   isLoading = false;
+  isSaveLoading = false;
 
 
   @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;
@@ -265,6 +266,7 @@ export class AccountingEntriesDetailsComponent {
 
   Save(){ 
     if(this.isFormValid()){
+      this.isSaveLoading = true;
       if(this.isCreate){
         this.accountingEntriesService.Add(this.accountingEntries, this.DomainName).subscribe(
           (data) => {
@@ -292,6 +294,7 @@ export class AccountingEntriesDetailsComponent {
         )
       }
     }
+    this.isSaveLoading = false;
   }
 
   GetAccountingEntriesDetails(){

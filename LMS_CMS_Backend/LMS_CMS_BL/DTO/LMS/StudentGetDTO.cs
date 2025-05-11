@@ -19,6 +19,7 @@ namespace LMS_CMS_BL.DTO.LMS
         public string? Phone { get; set; }
         public string? Address { get; set; }
         public string? Note { get; set; }
+        public string? NationalID { get; set; }
         public long? Nationality { get; set; }
         public string? NationalityEnName { get; set; }
         public string? NationalityArName { get; set; }

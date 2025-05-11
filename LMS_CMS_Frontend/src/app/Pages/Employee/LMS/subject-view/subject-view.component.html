@@ -1,6 +1,6 @@
 <div class="flex justify-between items-center">
     <div class="flex justify-between items-center space-x-5">
-        <i class="fa-solid fa-chevron-left" (click)="moveToSubjects()"></i>
+        <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToSubjects()"></i>
         <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ subject.en_name }}</h1>
     </div>
     <button (click)="editModal()" *ngIf="AllowEdit && IsAllowEdit(subject.insertedByUserId)"
