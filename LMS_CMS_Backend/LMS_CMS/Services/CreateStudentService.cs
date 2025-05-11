@@ -19,6 +19,7 @@ namespace LMS_CMS_PL.Services
             var submittionGender = GetSubmissionByCategory(Unit_Of_Work, registrationFormParentID, 3);
             var submittionNationality = GetSubmissionByCategory(Unit_Of_Work, registrationFormParentID, 5);
             var submittionBirthDate = GetSubmissionByCategory(Unit_Of_Work, registrationFormParentID, 4);
+            var submittionNationalID = GetSubmissionByCategory(Unit_Of_Work, registrationFormParentID, 11);
             var submittionPassport = GetSubmissionByCategory(Unit_Of_Work, registrationFormParentID, 12);
             var submittionReligion = GetSubmissionByCategory(Unit_Of_Work, registrationFormParentID, 6);
             var submittionMotherName = GetSubmissionByCategory(Unit_Of_Work, registrationFormParentID, 22);
@@ -42,6 +43,7 @@ namespace LMS_CMS_PL.Services
             {
                 en_name = submittionEName?.TextAnswer,
                 ar_name = submittionAName?.TextAnswer,
+                NationalID = submittionNationalID?.TextAnswer,
                 User_Name = registerationFormParent.StudentName,
                 Nationality = Convert.ToInt64(submittionNationality?.TextAnswer),
                 GenderId = Convert.ToInt64(submittionGender?.TextAnswer),
@@ -80,6 +82,7 @@ namespace LMS_CMS_PL.Services
                 en_name = studentDto.en_name,
                 ar_name = studentDto.ar_name,
                 User_Name = studentDto.User_Name,
+                NationalID = studentDto.NationalID,
                 Nationality = studentDto.Nationality,
                 Parent_Id = studentDto.Parent_Id,
                 GenderId = studentDto.GenderId,

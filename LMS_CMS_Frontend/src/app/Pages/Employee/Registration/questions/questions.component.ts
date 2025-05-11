@@ -187,7 +187,7 @@ export class QuestionsComponent {
 
   CreateOREdit() {
     this.question.options = this.options;
-    this.question.testID = this.testId;
+    this.question.testID = this.testId; 
     if (this.isFormValid()) {
       this.isLoading = true
       if (this.mode == 'Create') {
@@ -282,11 +282,13 @@ export class QuestionsComponent {
         this.validationErrors['options'] = `*${this.capitalizeField(
           'options'
         )} is required`;
+        isValid = false;
       }
       if (this.question.correctAnswerName == '') {
         this.validationErrors['correctAnswerName'] = `*${this.capitalizeField(
           'correctAnswerName'
         )} is required`;
+        isValid = false;
       }
     }
     return isValid;
