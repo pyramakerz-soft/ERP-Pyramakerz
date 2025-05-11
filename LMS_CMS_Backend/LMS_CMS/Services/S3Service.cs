@@ -16,6 +16,11 @@ namespace LMS_CMS_PL.Services
         private readonly string _folder;
         private readonly string _region;
 
+        public S3Service()
+        {
+            
+        }
+
         public S3Service(IConfiguration config, string region)
         {
             _region = config[region] ?? "";

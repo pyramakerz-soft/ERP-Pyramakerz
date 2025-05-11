@@ -116,6 +116,7 @@ namespace LMS_CMS
             builder.Services.AddScoped<SchoolHeaderService>();
             builder.Services.AddScoped<ICsrGenerator, CsrGenerator>();
             builder.Services.AddScoped<IEInvoiceSigner, EInvoiceSigner>();
+            builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
             builder.Services.AddSingleton<IAmazonS3, AmazonS3Client>();
             builder.Services.AddSingleton<IAmazonSecretsManager, AmazonSecretsManagerClient>();
 

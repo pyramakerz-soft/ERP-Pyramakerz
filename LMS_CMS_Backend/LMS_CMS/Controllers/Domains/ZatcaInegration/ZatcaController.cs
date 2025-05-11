@@ -73,7 +73,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
             string pcName = $"PC{schoolPc.ID}{schoolPc.School.ID}";
             AmazonS3Client amazonS3Client = new AmazonS3Client();
-            S3Service s3SecretManager = new S3Service(amazonS3Client, _secretsManager);
+            S3Service s3SecretManager = new S3Service();
 
             var csrSteps = InvoicingServices.GenerateCSRandPrivateKey(csrGeneration);
             string csrContent = csrSteps[1].ResultedValue;
