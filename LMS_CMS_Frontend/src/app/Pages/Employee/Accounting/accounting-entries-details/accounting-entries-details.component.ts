@@ -264,37 +264,46 @@ export class AccountingEntriesDetailsComponent {
     }
   }
 
-  Save(){ 
-    if(this.isFormValid()){
+  Save() { 
+    if (this.isFormValid()) {
       this.isSaveLoading = true;
-      if(this.isCreate){
+  
+      if (this.isCreate) {
         this.accountingEntriesService.Add(this.accountingEntries, this.DomainName).subscribe(
           (data) => {
-            let id = JSON.parse(data).id 
-            this.router.navigateByUrl(`Employee/Accounting Entries Details/${id}`)
+            let id = JSON.parse(data).id;
+            this.router.navigateByUrl(`Employee/Accounting Entries Details/${id}`);
+            this.isSaveLoading = false;
+  
             Swal.fire({
               title: 'Saved Successfully',
               icon: 'success', 
               confirmButtonColor: '#FF7519',  
-            })
+            });
+          },
+          (error) => {
+            this.isSaveLoading = false;
           }
-        )
-      } else if(this.isEdit){
+        );
+      } else if (this.isEdit) {
         this.accountingEntriesService.Edit(this.accountingEntries, this.DomainName).subscribe(
           (data) => {
-            this.GetAccountingEntriesByID() 
-            this.router.navigateByUrl(`Employee/Accounting Entries Details/${this.AccountingEntriesID}`)
+            this.GetAccountingEntriesByID(); 
+            this.router.navigateByUrl(`Employee/Accounting Entries Details/${this.AccountingEntriesID}`);
+            this.isSaveLoading = false;
+  
             Swal.fire({
               title: 'Updated Successfully',
               icon: 'success', 
               confirmButtonColor: '#FF7519',  
-            }
-          )
-        } 
-        )
+            });
+          },
+          (error) => {
+            this.isSaveLoading = false;
+          }
+        );
       }
     }
-    this.isSaveLoading = false;
   }
 
   GetAccountingEntriesDetails(){
