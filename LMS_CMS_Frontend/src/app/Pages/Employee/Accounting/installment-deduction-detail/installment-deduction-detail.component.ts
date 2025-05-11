@@ -20,6 +20,8 @@ import { InstallmentDeductionMasterService } from '../../../../Services/Employee
 import { TuitionFeesType } from '../../../../Models/Accounting/tuition-fees-type';
 import { TuitionFeesTypeService } from '../../../../Services/Employee/Accounting/tuition-fees-type.service';
 import Swal from 'sweetalert2';
+import { EmployeeStudentService } from '../../../../Services/Employee/Accounting/employee-student.service';
+import { EmplyeeStudent } from '../../../../Models/Accounting/emplyee-student';
 
 @Component({
   selector: 'app-installment-deduction-detail',
@@ -49,7 +51,7 @@ export class InstallmentDeductionDetailComponent {
   mode: string = "Create"
 
   employees: Employee[] = []
-  students: Student[] = []
+  emplyeeStudents: EmplyeeStudent[] = []
   FeesType: TuitionFeesType[] = []
 
   TableData: InstallmentDeductionDetail[] = []
@@ -71,7 +73,7 @@ export class InstallmentDeductionDetailComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public EmployeeServ: EmployeeService,
-    public StudentServ: StudentService,
+    public EmployeeStudentServ: EmployeeStudentService,
     public installmentDeductionDetailServ: InstallmentDeductionDetailService,
     public installmentDeductionMasterServ: InstallmentDeductionMasterService,
     public TuitionFeesTypeServ: TuitionFeesTypeService
@@ -115,8 +117,7 @@ export class InstallmentDeductionDetailComponent {
     if (this.mode == "Create") {
 
     }
-    this.GetAllEmployees()
-    this.GetAllStudents()
+    this.GetAllEmployees() 
     this.GetAllTuitionFeesType()
   }
 
@@ -205,6 +206,14 @@ export class InstallmentDeductionDetailComponent {
       }
     }
   }
+  onEmployeeChange() {
+    this.emplyeeStudents = []
+    this.Data.studentID = 0 
+ 
+    if (this.Data.employeeID) {
+      this.GetAllStudents(); 
+    }
+  }
 
   GetAllEmployees() {
     this.EmployeeServ.Get_Employees(this.DomainName).subscribe((d) => {
@@ -213,8 +222,9 @@ export class InstallmentDeductionDetailComponent {
   }
 
   GetAllStudents() {
-    this.StudentServ.GetAll(this.DomainName).subscribe((d) => {
-      this.students = d
+    this.emplyeeStudents = []
+    this.EmployeeStudentServ.Get(this.Data.employeeID, this.DomainName).subscribe((d) => {
+      this.emplyeeStudents = d
     })
   }
 

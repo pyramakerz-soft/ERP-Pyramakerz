@@ -92,6 +92,15 @@ namespace LMS_CMS_PL.Controllers.Domains
                 return NotFound();
             }
 
+            EmployeeStudent empStu = Unit_Of_Work.employeeStudent_Repository.First_Or_Default(
+                s => s.EmployeeID == newChild.EmployeeID && s.IsDeleted != true && s.StudentID == newChild.StudentID
+                );
+
+            if( empStu != null )
+            {
+                return BadRequest("Student Already Assigned To This Employee");
+            }
+
             EmployeeStudent employeeStudent = mapper.Map<EmployeeStudent>(newChild);
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
