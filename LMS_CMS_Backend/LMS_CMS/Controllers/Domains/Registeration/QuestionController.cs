@@ -179,9 +179,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
 
         [HttpPost]
         [Authorize_Endpoint_(
-    allowedTypes: new[] { "octa", "employee" },
-    pages: new[] { "Admission Test" }
-)]
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Admission Test" }
+        )]
         public async Task<IActionResult> Add([FromForm] QuestionAddDTO newQuestion)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -374,6 +374,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                 {
                     return BadRequest("CorrectAnswer in msq question is required");
                 }
+            }
+            else
+            {
+                question.CorrectAnswerID = null;
             }
              
             if (userTypeClaim == "employee")

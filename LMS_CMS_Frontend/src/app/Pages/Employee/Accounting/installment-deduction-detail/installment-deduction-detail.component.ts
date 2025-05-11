@@ -230,8 +230,8 @@ export class InstallmentDeductionDetailComponent {
 
   GetMasterInfo() {
     this.installmentDeductionMasterServ.GetById(this.MasterId, this.DomainName).subscribe((d) => {
-      this.Data = d
-      console.log(this.Data)
+      this.Data = d 
+      this.GetAllStudents()
     })
   }
 

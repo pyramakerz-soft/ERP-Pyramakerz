@@ -134,7 +134,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
         public IActionResult Add(RegisterationFormInterviewAddDTO NewRegisterationFormInterview)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-            DateTime currentDateTime = DateTime.Now;
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            DateTime currentDateTime = TimeZoneInfo.ConvertTime(DateTime.UtcNow, cairoZone);
 
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
             long.TryParse(userIdClaim, out long userId);
@@ -175,10 +176,12 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                 }
 
                 string[] formats = {
-                    "MM/dd/yyyy HH:mm",  // e.g., 05/15/2025 13:00
-                    "M/d/yyyy HH:mm",    // e.g., 5/5/2025 13:00
-                    "MM/dd/yyyy hh:mm tt", // e.g., 05/15/2025 01:00 PM
-                    "M/d/yyyy hh:mm tt"   // e.g., 5/5/2025 01:00 PM
+                    "MM/dd/yyyy HH:mm",
+                    "M/d/yyyy HH:mm",
+                    "MM/dd/yyyy hh:mm tt",
+                    "M/d/yyyy hh:mm tt",
+                    "M/d/yyyy h:mm tt",   
+                    "MM/dd/yyyy h:mm tt" 
                 };
 
                 string fromDateTimeStr = interviewTime.Date + " " + interviewTime.FromTime;
@@ -203,13 +206,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                     out NewInterviewDateTimeTo
                 );
 
-                if (currentDateTime >= NewInterviewDateTimeFrom && currentDateTime >= NewInterviewDateTimeTo)
+                if (currentDateTime >= NewInterviewDateTimeTo)
                 {
-                    return BadRequest("Interview time passed already");
+                    return BadRequest("Interview time has already ended");
                 }
 
                 // Make sure he is requesting the correct interview according to the year id
-                if(registrationFormParent.AcademicYearID != interviewTime.AcademicYearID.ToString())
+                if (registrationFormParent.AcademicYearID != interviewTime.AcademicYearID.ToString())
                 {
                     return BadRequest("You Can't register this interview");
                 }
@@ -229,8 +232,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
             }
 
             RegisterationFormInterview registerationFormInterview = mapper.Map<RegisterationFormInterview>(NewRegisterationFormInterview);
-
-            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+             
             registerationFormInterview.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
 
             if (userTypeClaim == "octa")
@@ -354,7 +356,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
         public async Task<IActionResult> EditInterviewDateByParent(RegistrationFormInterviewPutByParentDTO EditedRegistrationFormInterviewPutByParentDTO)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-            DateTime currentDateTime = DateTime.Now;
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            DateTime currentDateTime = TimeZoneInfo.ConvertTime(DateTime.UtcNow, cairoZone);
+
             string dateFormat = "M/d/yyyy";
             string timeFormat = "h:mm tt";
 
@@ -400,10 +404,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                 $"{dateFormat} {timeFormat}",
                 CultureInfo.InvariantCulture
             );
-              
-            if (currentDateTime >= NewInterviewDateTimeFrom && currentDateTime >= NewInterviewDateTimeTo)
+               
+            if (currentDateTime >= NewInterviewDateTimeTo)
             {
-                return BadRequest("Interview time passed already");
+                return BadRequest("Interview time has already ended");
             }
 
             RegisterationFormInterview RegisterationFormInterviewExists = await Unit_Of_Work.registerationFormInterview_Repository.FindByIncludesAsync(
@@ -436,7 +440,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                 CultureInfo.InvariantCulture
             );
              
-            if (currentDateTime >= OldInterviewDateTimeFrom && currentDateTime >= OldInterviewDateTimeTo)
+            if (currentDateTime >= OldInterviewDateTimeTo)
             {
                 return BadRequest("Interview time passed already");
             } 
@@ -457,7 +461,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
             }
 
             mapper.Map(EditedRegistrationFormInterviewPutByParentDTO, RegisterationFormInterviewExists);
-            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             RegisterationFormInterviewExists.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
             if (userTypeClaim == "octa")
             {
