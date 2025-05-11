@@ -329,7 +329,8 @@
                 { keyEn: 'Document Type: ' + payable.payableDocTypesName },
                 { keyEn: 'Document Number: ' + payable.docNumber },
                 { keyEn: 'Date: ' + payable.date },
-                { keyEn: 'Total Amount: ' + totalAmount }
+                { keyEn: 'Total Amount: ' + totalAmount },
+                { keyEn: 'Note: ' + payable.notes }
             ]" [tableHeaders]="['id', 'amount', 'linkFileName', 'linkFileTypeName', 'notes']"
             [tableData]="payableDetailsData" #pdfComponentRef>
         </app-pdf-print>

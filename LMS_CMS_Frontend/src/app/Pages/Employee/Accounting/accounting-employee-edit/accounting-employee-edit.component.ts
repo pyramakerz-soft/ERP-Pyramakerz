@@ -161,6 +161,7 @@ export class AccountingEmployeeEditComponent {
   GetAllData() {
     this.employeeServ.GetAcountingEmployee(this.EmployeeId, this.DomainName).subscribe((d: any) => {
       this.Data = d; 
+      console.log(d,this.Data )
       this.JobCategoryId = this.Data.jobCategoryId; 
       this.GetAllJobs()
       this.selectedDays = this.days
@@ -235,6 +236,7 @@ export class AccountingEmployeeEditComponent {
     if(this.isFormValid()){
       this.getFormattedTime() 
       this.isLoading = true
+      console.log("cd",this.Data)
       this.employeeServ.EditAccountingEmployee(this.Data, this.DomainName).subscribe((d) => {
         this.GetAllData();
         Swal.fire({
@@ -247,6 +249,7 @@ export class AccountingEmployeeEditComponent {
         this.isLoading = false
       },
         err => {
+          console.log(err)
           this.isLoading = false
           Swal.fire({
             icon: 'error',
@@ -290,16 +293,18 @@ export class AccountingEmployeeEditComponent {
     this.isDropdownOpen = !this.isDropdownOpen;
   }
 
-  getFormattedTime() { 
+  getFormattedTime() {
     const { hours, minutes, periods } = this.attendanceTime;
-    if (hours && minutes && periods) {
-      this.Data.attendanceTime = `${hours}:${minutes} ${periods}`;
+    console.log({ hours, minutes, periods }, this.attendanceTime);
+    if (hours != null && minutes != null && periods) {
+      this.Data.attendanceTime = `${hours}:${minutes.toString().padStart(2, '0')} ${periods}`;
     }
-
     const { hour, minute, period } = this.departureTime;
-    if (hour && minute && period) {
-      this.Data.departureTime = `${hour}:${minute} ${period}`;
-    } 
+    console.log({ hour, minute, period }, this.departureTime);
+    if (hour != null && minute != null && period) {
+      this.Data.departureTime = `${hour}:${minute.toString().padStart(2, '0')} ${period}`;
+    }
+    console.log(this.Data.departureTime, this.Data.attendanceTime);
   }
 
   parseDepartureTime(departureTimeString: string) {

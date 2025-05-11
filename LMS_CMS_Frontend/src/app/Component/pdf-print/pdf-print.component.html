@@ -20,12 +20,12 @@
 
     <div class="my-10 space-y-2">
         <div *ngFor="let info of infoRows" class="flex justify-between text-xl">
-            <div class="w-1/2 text-left mb-1">
+            <div class="w-full text-left mb-1">
                 <span class="font-semibold mr-2">{{ info.keyEn }} </span>
             </div>
-            <div class="w-1/2 rtl text-right " *ngIf="info.keyAr ">
+            <!-- <div class="w-1/2 rtl text-right " *ngIf="info.keyAr ">
                 <span class="font-semibold ">{{ info.keyAr }} </span>
-            </div>
+            </div> -->
         </div>
     </div>
 

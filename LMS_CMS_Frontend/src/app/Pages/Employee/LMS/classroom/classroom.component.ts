@@ -40,6 +40,7 @@ export class ClassroomComponent {
   key: string= "id";
   value: any = "";
 
+  OriginclassroomData:Classroom[] = []
   classroomData:Classroom[] = []
   classroom:Classroom = new Classroom()
   editClassroom:boolean = false
@@ -195,6 +196,7 @@ export class ClassroomComponent {
     this.classroomService.GetByActiveAcYear(this.DomainName).subscribe(
       (data) => {
         this.classroomData = data;
+        this.OriginclassroomData = data;
         if(this.classroomData.length != 0){
           this.activeAcademicYearID = this.classroomData[0].academicYearID
           this.getSchoolIDForActiveAcademicYear()
@@ -487,5 +489,11 @@ export class ClassroomComponent {
         }
       );
     }
+  }
+
+  ResetFilter(){
+   this.classroomData = this.OriginclassroomData;
+   this.activeAcademicYearID =0
+   this.SelectedSchoolIdForFilteration =0
   }
 }
