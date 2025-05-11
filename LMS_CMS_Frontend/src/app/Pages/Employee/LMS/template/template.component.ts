@@ -43,7 +43,7 @@ export class TemplateComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'name'];
+  keysArray: string[] = ['id', 'englishTitle', 'arabicTitle'];
 
   template: Template = new Template();
 

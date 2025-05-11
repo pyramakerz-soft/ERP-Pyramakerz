@@ -264,7 +264,7 @@ export class EvaluationTemplateGroupQuestionComponent {
    }
 
    moveToGroup() {
-    this.router.navigateByUrl('Employee/EvaluationTemplateGroup/'+this.GroupId);
+    this.router.navigateByUrl('Employee/EvaluationTemplateGroup/'+this.group.evaluationTemplateID);
   }
  }
  

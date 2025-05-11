@@ -1,7 +1,7 @@
 <div id="DataToDownload">
     <div class="no-print flex justify-between items-center">
         <div class="flex justify-between items-center space-x-5">
-            <i class="fa-solid fa-chevron-left" (click)="moveToAccountingEntries()"></i>
+            <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToAccountingEntries()"></i>
             <h1 *ngIf="isCreate" class="primaryTxt font-semibold text-2xl leading-9"> Create Accounting Entries</h1>
             <h1 *ngIf="isEdit" class="primaryTxt font-semibold text-2xl leading-9"> Edit Accounting Entries</h1>
             <h1 *ngIf="isView" class="primaryTxt font-semibold text-2xl leading-9"> Accounting Entries</h1>

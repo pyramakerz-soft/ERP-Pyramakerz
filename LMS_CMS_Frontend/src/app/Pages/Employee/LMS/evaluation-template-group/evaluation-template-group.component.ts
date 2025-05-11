@@ -29,9 +29,7 @@ export class EvaluationTemplateGroupComponent {
    AllowEdit: boolean = false;
    AllowDelete: boolean = false;
    AllowEditForOthers: boolean = false;
-   AllowDeleteForOthers: boolean = false;
- 
-   TableData: Template[] = [];
+   AllowDeleteForOthers: boolean = false; 
  
    DomainName: string = '';
    UserID: number = 0;
@@ -42,7 +40,7 @@ export class EvaluationTemplateGroupComponent {
    path: string = '';
    key: string = 'id';
    value: any = '';
-   keysArray: string[] = ['id', 'name'];
+   keysArray: string[] = ['id', 'englishTitle', 'arabicTitle'];
  
    template: Template = new Template();
    group: EvaluationTemplateGroups = new EvaluationTemplateGroups();
@@ -252,7 +250,7 @@ export class EvaluationTemplateGroupComponent {
            ? this.value
            : parseInt(this.value, 10);
  
-         this.TableData = this.TableData.filter((t) => {
+         this.template.evaluationTemplateGroups = this.template.evaluationTemplateGroups.filter((t) => {
            const fieldValue = t[this.key as keyof typeof t];
            if (typeof fieldValue === 'string') {
              return fieldValue.toLowerCase().includes(this.value.toLowerCase());
@@ -264,7 +262,7 @@ export class EvaluationTemplateGroupComponent {
          });
        }
      } catch (error) {
-       this.TableData = [];
+      this.template.evaluationTemplateGroups = [];
      }
    }
 
