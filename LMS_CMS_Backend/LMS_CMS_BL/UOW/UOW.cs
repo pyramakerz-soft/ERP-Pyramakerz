@@ -168,6 +168,14 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<SemesterWorkingWeek> SemesterWorkingWeek_Repository;
         GenericRepo<Tag> Tag_Repository;
         GenericRepo<PerformanceType> PerformanceType_Repository;
+        GenericRepo<DailyPerformance> DailyPerformance_Repository;
+        GenericRepo<QuestionBank> QuestionBank_Repository;
+        GenericRepo<QuestionBankTags> QuestionBankTags_Repository;
+        GenericRepo<QuestionBankOption> QuestionBankOption_Repository;
+        GenericRepo<SubBankQuestion> SubBankQuestion_Repository;
+        GenericRepo<DragAndDropAnswer> DragAndDropAnswer_Repository;
+        GenericRepo<QuestionBankType> QuestionBankType_Repository;
+
 
 
 
@@ -1808,7 +1816,19 @@ namespace LMS_CMS_BL.UOW
                 return StudentPerformance_Repository;
             }
         }
-        
+
+        public GenericRepo<DailyPerformance> dailyPerformance_Repository
+        {
+            get
+            {
+                if (DailyPerformance_Repository == null)
+                {
+                    DailyPerformance_Repository = new GenericRepo<DailyPerformance>(db);
+                }
+                return DailyPerformance_Repository;
+            }
+        }
+
         public GenericRepo<WeightType> weightType_Repository
         {
             get
@@ -1869,6 +1889,74 @@ namespace LMS_CMS_BL.UOW
             }
         }
 
+        public GenericRepo<QuestionBank> questionBank_Repository
+        {
+            get
+            {
+                if (QuestionBank_Repository == null)
+                {
+                    QuestionBank_Repository = new GenericRepo<QuestionBank>(db);
+                }
+                return QuestionBank_Repository;
+            }
+        }
+
+        public GenericRepo<QuestionBankTags> questionBankTags_Repository
+        {
+            get
+            {
+                if (QuestionBankTags_Repository == null)
+                {
+                    QuestionBankTags_Repository = new GenericRepo<QuestionBankTags>(db);
+                }
+                return QuestionBankTags_Repository;
+            }
+        }
+        public GenericRepo<QuestionBankOption> questionBankOption_Repository
+        {
+            get
+            {
+                if (QuestionBankOption_Repository == null)
+                {
+                    QuestionBankOption_Repository = new GenericRepo<QuestionBankOption>(db);
+                }
+                return QuestionBankOption_Repository;
+            }
+        }
+        public GenericRepo<SubBankQuestion> subBankQuestion_Repository
+        {
+            get
+            {
+                if (SubBankQuestion_Repository == null)
+                {
+                    SubBankQuestion_Repository = new GenericRepo<SubBankQuestion>(db);
+                }
+                return SubBankQuestion_Repository;
+            }
+        }
+        public GenericRepo<DragAndDropAnswer> dragAndDropAnswer_Repository
+        {
+            get
+            {
+                if (DragAndDropAnswer_Repository == null)
+                {
+                    DragAndDropAnswer_Repository = new GenericRepo<DragAndDropAnswer>(db);
+                }
+                return DragAndDropAnswer_Repository;
+            }
+        }
+
+        public GenericRepo<QuestionBankType> questionBankType_Repository
+        {
+            get
+            {
+                if (QuestionBankType_Repository == null)
+                {
+                    QuestionBankType_Repository = new GenericRepo<QuestionBankType>(db);
+                }
+                return QuestionBankType_Repository;
+            }
+        }
         public void SaveChanges()
         {
             db.SaveChanges();

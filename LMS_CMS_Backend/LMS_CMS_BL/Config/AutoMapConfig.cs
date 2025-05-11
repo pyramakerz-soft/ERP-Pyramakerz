@@ -873,9 +873,7 @@ namespace LMS_CMS_BL.Config
             CreateMap<LessonActivityPutDTO, LessonActivity>();
 
             CreateMap<StudentPerformance, StudentPerformanceGetDTO>()
-                 .ForMember(dest => dest.SubjectName, opt => opt.MapFrom(src => src.Subject.en_name))
-                 .ForMember(dest => dest.PerformanceTypeName, opt => opt.MapFrom(src => src.PerformanceType.EnglishName))
-                 .ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => src.Student.en_name));
+                 .ForMember(dest => dest.PerformanceTypeName, opt => opt.MapFrom(src => src.PerformanceType.EnglishName));
 
             CreateMap<StudentPerformanceAddDTO, StudentPerformance>();
 
@@ -896,6 +894,19 @@ namespace LMS_CMS_BL.Config
 
             CreateMap<SemesterWorkingWeek, SemesterWorkingWeekGetDTO>()
                .ForMember(dest => dest.SemesterName, opt => opt.MapFrom(src => src.Semester.Name));
+
+            CreateMap<DailyPerformanceAddDTO, DailyPerformance>();
+
+            CreateMap<QuestionBank, QuestionBankGetDTO>()
+                 .ForMember(dest => dest.LessonName, opt => opt.MapFrom(src => src.Lesson.EnglishTitle))
+                 .ForMember(dest => dest.BloomLevelName, opt => opt.MapFrom(src => src.BloomLevel.EnglishName))
+                 .ForMember(dest => dest.DokLevelName, opt => opt.MapFrom(src => src.DokLevel.EnglishName))
+                 .ForMember(dest => dest.QuestionTypeName, opt => opt.MapFrom(src => src.QuestionType.Name));
+            CreateMap<QuestionBankEditDTO, QuestionBank>();
+            CreateMap<DTO.LMS.QuestionBankAddDTO, QuestionBank>();
+
+            CreateMap<QuestionBankOptionAddDTO, QuestionBankOption>();
+
         }
     } 
 }

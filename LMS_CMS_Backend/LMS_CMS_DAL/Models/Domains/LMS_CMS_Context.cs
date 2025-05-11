@@ -157,7 +157,13 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<StudentPerformance> StudentPerformance { get; set; }
         public DbSet<StudentMedal> StudentMedal { get; set; }
         public DbSet<SchoolPCs> SchoolPCs { get; set; }
-
+        public DbSet<DailyPerformance> DailyPerformance { get; set; }
+        public DbSet<QuestionBank> QuestionBank { get; set; }
+        public DbSet<QuestionBankTags> QuestionBankTags { get; set; }
+        public DbSet<QuestionBankOption> QuestionBankOption { get; set; }
+        public DbSet<SubBankQuestion> SubBankQuestion { get; set; }
+        public DbSet<DragAndDropAnswer> DragAndDropAnswer { get; set; }
+        public DbSet<LMS.QuestionBankType> QuestionBankType { get; set; }
 
 
         public LMS_CMS_Context(DbContextOptions<LMS_CMS_Context> options)
@@ -241,6 +247,10 @@ namespace LMS_CMS_DAL.Models.Domains
                 .ValueGeneratedNever();
             
             modelBuilder.Entity<QuestionType>()
+                .Property(p => p.ID)
+                .ValueGeneratedNever();
+
+            modelBuilder.Entity<QuestionBankType>()
                 .Property(p => p.ID)
                 .ValueGeneratedNever();
 
@@ -1328,23 +1338,88 @@ namespace LMS_CMS_DAL.Models.Domains
                 .OnDelete(DeleteBehavior.Restrict);
             
             modelBuilder.Entity<StudentPerformance>()
-                .HasOne(p => p.Student)
-                .WithMany(p => p.StudentPerformances)
-                .HasForeignKey(p => p.StudentID)
-                .OnDelete(DeleteBehavior.Restrict);
-            
-            modelBuilder.Entity<StudentPerformance>()
                 .HasOne(p => p.PerformanceType)
                 .WithMany(p => p.StudentPerformances)
                 .HasForeignKey(p => p.PerformanceTypeID)
                 .OnDelete(DeleteBehavior.Restrict);
-            
-            modelBuilder.Entity<StudentPerformance>()
+
+            modelBuilder.Entity<DailyPerformance>()
                 .HasOne(p => p.Subject)
-                .WithMany(p => p.StudentPerformances)
+                .WithMany(p => p.DailyPerformance)
                 .HasForeignKey(p => p.SubjectID)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<DailyPerformance>()
+              .HasOne(p => p.Student)
+              .WithMany(p => p.DailyPerformance)
+              .HasForeignKey(p => p.StudentID)
+              .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<StudentPerformance>()
+                .HasOne(p => p.DailyPerformance)
+                .WithMany(p => p.StudentPerformance)
+                .HasForeignKey(p => p.DailyPerformanceID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<QuestionBank>()
+                .HasOne(p => p.Lesson)
+                .WithMany(p => p.QuestionBanks)
+                .HasForeignKey(p => p.LessonID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<QuestionBank>()
+                .HasOne(p => p.DokLevel)
+                .WithMany(p => p.QuestionBanks)
+                .HasForeignKey(p => p.DokLevelID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<QuestionBank>()
+                .HasOne(p => p.BloomLevel)
+                .WithMany(p => p.QuestionBanks)
+                .HasForeignKey(p => p.BloomLevelID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<QuestionBank>()
+                .HasOne(p => p.QuestionType)
+                .WithMany(p => p.QuestionBanks)
+                .HasForeignKey(p => p.QuestionTypeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<QuestionBank>()
+                .HasOne(p => p.QuestionBankOption)
+                .WithMany(p => p.QuestionBanks)
+                .HasForeignKey(p => p.CorrectAnswerID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<QuestionBankTags>()
+                .HasOne(p => p.QuestionBank)
+                .WithMany(p => p.QuestionBankTags)
+                .HasForeignKey(p => p.QuestionBankID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<QuestionBankTags>()
+                .HasOne(p => p.Tag)
+                .WithMany(p => p.QuestionBankTags)
+                .HasForeignKey(p => p.TagID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<QuestionBankOption>()
+                .HasOne(p => p.QuestionBank)
+                .WithMany(p => p.QuestionBankOptions)
+                .HasForeignKey(p => p.QuestionBankID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<SubBankQuestion>()
+                .HasOne(p => p.QuestionBank)
+                .WithMany(p => p.SubBankQuestions)
+                .HasForeignKey(p => p.QuestionBankID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<DragAndDropAnswer>()
+                .HasOne(p => p.SubBankQuestion)
+                .WithMany(p => p.DragAndDropAnswers)
+                .HasForeignKey(p => p.SubBankQuestionID)
+                .OnDelete(DeleteBehavior.Restrict);
 
             ///////////////////////// Exception: /////////////////////////
             modelBuilder.Entity<Bus>()
@@ -1445,10 +1520,6 @@ namespace LMS_CMS_DAL.Models.Domains
                .Ignore(r => r.Employee)
                .Ignore(r => r.Student)
                .Ignore(r => r.Save);
-
-            modelBuilder.Entity<SchoolPCs>()
-               .Property(e => e.ID)
-               .ValueGeneratedNever();
         }
     }
 }
