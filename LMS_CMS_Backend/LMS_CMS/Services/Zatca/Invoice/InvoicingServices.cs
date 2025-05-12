@@ -14,7 +14,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Drawing;
 using ZXing.Windows.Compatibility;
 
-namespace LMS_CMS_PL.Services.Invoice
+namespace LMS_CMS_PL.Services.Zatca.Invoice
 {
     public static class InvoicingServices
     {
@@ -185,10 +185,10 @@ namespace LMS_CMS_PL.Services.Invoice
             string invoices = string.Empty;
 
             if (master.FlagId == 11)
-                invoices = Path.Combine(Directory.GetCurrentDirectory(), "Invoices/XMLInvoices");
+                invoices = Path.Combine(Directory.GetCurrentDirectory(), "Invoices/Zatca/XMLInvoices");
 
             if (master.FlagId == 12)
-                invoices = Path.Combine(Directory.GetCurrentDirectory(), "Invoices/XMLCredits");
+                invoices = Path.Combine(Directory.GetCurrentDirectory(), "Invoices/Zatca/XMLCredits");
 
             string examplePath = Path.Combine(Directory.GetCurrentDirectory(), "Services/Invoice");
 
