@@ -163,6 +163,7 @@ export class InstallmentDeductionDetailComponent {
   Save() {
     if (this.isFormValid()) {
       this.isLoading = true
+      console.log(this.Data)
       if (this.mode == "Create") {
         this.installmentDeductionMasterServ.Add(this.Data, this.DomainName).subscribe((d) => {
           this.MasterId = d
@@ -177,6 +178,7 @@ export class InstallmentDeductionDetailComponent {
           this.router.navigateByUrl(`Employee/Installment Deduction Details/Edit/${this.MasterId}`)
         },
           err => {
+            console.log(err)
             this.isLoading = false
             Swal.fire({
               icon: 'error',
@@ -229,7 +231,7 @@ export class InstallmentDeductionDetailComponent {
 
   GetMasterInfo() {
     this.installmentDeductionMasterServ.GetById(this.MasterId, this.DomainName).subscribe((d) => {
-      this.Data = d 
+      this.Data = d
       this.GetAllStudents()
     })
   }
@@ -315,5 +317,15 @@ export class InstallmentDeductionDetailComponent {
     this.installmentDeductionDetailServ.Edit(row, this.DomainName).subscribe((d) => {
       this.GetTableDataByID();
     })
+  }
+
+  validateNumber(event: any, field: keyof InstallmentDeductionMaster): void {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+      if (typeof this.Data[field] === 'string') {
+        this.Data[field] = '' as never;
+      }
+    }
   }
 }

@@ -56,7 +56,6 @@ export class AddEditSubjectComponent {
   GetSubjectById(subjectId: number) {
     this.subjectService.GetByID(subjectId, this.DomainName).subscribe((data) => {
       this.subject = data;
-      console.log(this.subject)
       this.getSections()
       this.getGrades()
     });
@@ -109,7 +108,6 @@ export class AddEditSubjectComponent {
     this.gradeService.Get(this.DomainName).subscribe(
       (data) => {
         this.Grades = data.filter((grade) => this.checkSection(grade))
-        console.log(this.Grades)
       }
     )
   }
@@ -119,7 +117,6 @@ export class AddEditSubjectComponent {
   }
  
   checkSection(grade:Grade) {
-    console.log( this.subject.sectionID)
     return grade.sectionID == this.subject.sectionID
   }
 
