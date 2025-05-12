@@ -1,3 +1,5 @@
+import { EmployeeAttachment } from "./employee-attachment";
+
 export class EmployeeGet {
     constructor(
         public id: number = 0,
@@ -17,7 +19,7 @@ export class EmployeeGet {
         public busCompanyName: string = '',
         public employeeTypeID: number = 0,
         public employeeTypeName: string = '',
-        public files :File []=[],
+        public files :EmployeeAttachment []=[],
         public insertedByUserId :number =0,
         public canReceiveRequest: boolean = false,
         public canReceiveMessage: boolean = false,
