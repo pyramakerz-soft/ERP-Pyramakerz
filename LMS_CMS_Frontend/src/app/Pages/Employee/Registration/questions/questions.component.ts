@@ -229,6 +229,7 @@ export class QuestionsComponent {
 
   closeModal() {
     this.isModalVisible = false;
+    this.validationErrors = {}
   }
 
   CorrectAnswer(option: string) {

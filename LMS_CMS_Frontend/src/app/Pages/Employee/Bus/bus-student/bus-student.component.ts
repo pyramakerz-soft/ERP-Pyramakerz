@@ -125,9 +125,29 @@ export class BusStudentComponent {
   GetbyId(busStuId: number) {
     this.busStudentService.GetbyId(busStuId, this.DomainName).subscribe((data) => {
       this.id = data.studentID
-      this.busStudent = data;
-      this.selectedClass = this.busStudent.classID
-      this.onClassChange()
+      this.busStudent = data; 
+      this.selectedSchool = this.busStudent.schoolID
+      this.selectedSection = this.busStudent.sectionID
+      this.selectedGrade = this.busStudent.gradeID
+      this.selectedClass = this.busStudent.classID 
+      this.sectionService.GetBySchoolId(this.selectedSchool?this.selectedSchool:0, this.DomainName).subscribe(
+        (data) => {
+          this.filteredSections = data.filter((section) => this.checkSchool(section))
+          this.gradeService.Get(this.DomainName).subscribe(
+            (data) => {
+              this.filteredGrades = data.filter((grade) => this.checkSection(grade))
+              this.classroomService.Get(this.DomainName).subscribe(
+                (data) => {
+                  this.filteredClasses = data.filter((cls) => this.checkGrade(cls))
+                  this.studentService.GetByClassID(this.selectedClass?this.selectedClass:0, this.DomainName).subscribe((data) => {
+                    this.Students = data
+                  });
+                }
+              )
+            }
+          )
+        }
+      )  
     });
   }
 
@@ -135,7 +155,7 @@ export class BusStudentComponent {
     this.busStudentData = []
     this.OriginBusStudent = []
     this.busStudentService.GetbyBusId(busId, this.DomainName).subscribe((data) => {
-      this.busStudentData = data;
+      this.busStudentData = data;  
       this.OriginBusStudent = data;
     });
   }

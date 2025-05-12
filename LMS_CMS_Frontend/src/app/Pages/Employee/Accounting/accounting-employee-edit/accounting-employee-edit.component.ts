@@ -160,8 +160,7 @@ export class AccountingEmployeeEditComponent {
 
   GetAllData() {
     this.employeeServ.GetAcountingEmployee(this.EmployeeId, this.DomainName).subscribe((d: any) => {
-      this.Data = d; 
-      console.log(d,this.Data )
+      this.Data = d;  
       this.JobCategoryId = this.Data.jobCategoryId; 
       this.GetAllJobs()
       this.selectedDays = this.days
@@ -235,8 +234,7 @@ export class AccountingEmployeeEditComponent {
   Save() {
     if(this.isFormValid()){
       this.getFormattedTime() 
-      this.isLoading = true
-      console.log("cd",this.Data)
+      this.isLoading = true 
       this.employeeServ.EditAccountingEmployee(this.Data, this.DomainName).subscribe((d) => {
         this.GetAllData();
         Swal.fire({
@@ -248,8 +246,7 @@ export class AccountingEmployeeEditComponent {
         this.router.navigateByUrl(`Employee/Employee Accounting`)
         this.isLoading = false
       },
-        err => {
-          console.log(err)
+        err => { 
           this.isLoading = false
           Swal.fire({
             icon: 'error',

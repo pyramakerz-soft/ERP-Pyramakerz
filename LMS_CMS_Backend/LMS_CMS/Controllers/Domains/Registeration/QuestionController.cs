@@ -179,9 +179,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
 
         [HttpPost]
         [Authorize_Endpoint_(
-    allowedTypes: new[] { "octa", "employee" },
-    pages: new[] { "Admission Test" }
-)]
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Admission Test" }
+        )]
         public async Task<IActionResult> Add([FromForm] QuestionAddDTO newQuestion)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -454,6 +454,12 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                     question.CorrectAnswerID = corectId;
 
                 }
+            }
+            else
+            {
+                newQuestion.correctAnswerName = null;
+                question.CorrectAnswerID = null;
+                question.mCQQuestionOption = null; 
             }
             var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Questions");
 
