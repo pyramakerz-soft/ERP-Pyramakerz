@@ -357,11 +357,6 @@ export class FeesActivationComponent {
       this.SelectedStudents=[]
       this.SelectedStudents=this.StudentsOriginal.filter(s=>s.studentID==this.StudentId)
     }
-    console.log("this.StudentsOriginal",this.StudentsOriginal)
-    console.log("this.SelectedStudents",this.SelectedStudents)
-    console.log("this.Students",this.Students)
-    console.log("this.StudentId",this.StudentId)
-
   }
 
   Search() {
@@ -426,7 +421,6 @@ export class FeesActivationComponent {
 
   async Activate() {
     this.FeesForAdd = [];
-    console.log("aa",this.SelectedStudents)
     this.SelectedStudents.forEach(stu => {
       var fee: FeesActivationAddPut = new FeesActivationAddPut();
       fee.academicYearId = this.Fees.academicYearId;

@@ -82,7 +82,6 @@ export class BookCorrectionComponent {
     this.TableData = [];
     this.BookCorrectionServ.Get(this.DomainName).subscribe((d) => {
       this.TableData = d;
-      console.log(this.TableData)
     });
   }
 

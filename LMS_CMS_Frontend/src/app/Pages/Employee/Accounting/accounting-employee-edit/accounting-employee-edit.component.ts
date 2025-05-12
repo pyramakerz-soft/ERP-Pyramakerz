@@ -161,7 +161,6 @@ export class AccountingEmployeeEditComponent {
   GetAllData() {
     this.employeeServ.GetAcountingEmployee(this.EmployeeId, this.DomainName).subscribe((d: any) => {
       this.Data = d;  
-      this.JobCategoryId = this.Data.jobCategoryId; 
       this.GetAllJobs()
       this.selectedDays = this.days
       this.selectedDays = this.days.filter(day => this.Data.days.includes(day.id));
@@ -292,16 +291,13 @@ export class AccountingEmployeeEditComponent {
 
   getFormattedTime() {
     const { hours, minutes, periods } = this.attendanceTime;
-    console.log({ hours, minutes, periods }, this.attendanceTime);
     if (hours != null && minutes != null && periods) {
       this.Data.attendanceTime = `${hours}:${minutes.toString().padStart(2, '0')} ${periods}`;
     }
     const { hour, minute, period } = this.departureTime;
-    console.log({ hour, minute, period }, this.departureTime);
     if (hour != null && minute != null && period) {
       this.Data.departureTime = `${hour}:${minute.toString().padStart(2, '0')} ${period}`;
     }
-    console.log(this.Data.departureTime, this.Data.attendanceTime);
   }
 
   parseDepartureTime(departureTimeString: string) {
@@ -348,8 +344,6 @@ export class AccountingEmployeeEditComponent {
         EmployeeStudent.studentName = this.Student.user_Name;
         EmployeeStudent.studentID = this.emplyeeStudent.id; 
         this.TableData.push(EmployeeStudent); 
-        console.log(this.Data.students);
-        console.log(this.emplyeeStudent.studentID); 
         this.Data.students.push(this.emplyeeStudent.studentID);
         this.closeModal();
       }else{

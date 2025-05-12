@@ -67,7 +67,6 @@ export class MedicalHistoryService {
     } else {
       formData.append('SecReport', medicalHistory.secReport); // Retain existing link
     }
-    console.log("doctor")
     return this.http.post(`${this.baseUrl}/MedicalHistory/AddByDoctor`, formData, { headers });
   }
 

@@ -333,7 +333,7 @@ namespace LMS_CMS_PL.Controllers.Domains
             allowEdit: 1,
             pages: new[] { "Employee Edit" }
         )]
-        public async Task<IActionResult> EditAsync([FromForm] EmployeePutDTO newEmployee, [FromForm] List<EmployeeAttachmentAddDTO> files)
+        public async Task<IActionResult> EditAsync([FromForm] EmployeePutDTO newEmployee, [FromForm] List<EmployeeAttachmentAddDTO> files , [FromForm] List<EmployeeAttachmentAddDTO> editedFiles)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
             var userClaims = HttpContext.User.Claims;
@@ -518,6 +518,19 @@ namespace LMS_CMS_PL.Controllers.Domains
                     await Unit_Of_Work.SaveChangesAsync();
                 }
             }
+
+            foreach (var filee in editedFiles)
+            {
+                var existingAttachment = await Unit_Of_Work.employeeAttachment_Repository
+                    .Select_By_IdAsync(filee.ID); 
+
+                if (existingAttachment != null)
+                {
+                    existingAttachment.Name = filee.Name;
+                    Unit_Of_Work.employeeAttachment_Repository.Update(existingAttachment);
+                }
+            }
+            await Unit_Of_Work.SaveChangesAsync();
             return Ok(newEmployee);
         }
 

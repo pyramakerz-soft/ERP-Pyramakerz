@@ -228,8 +228,6 @@ export class ViolationTypesComponent {
   }
 
   selectEmployeeType(employeeType: EmployeeTypeGet): void {
-    console.log(employeeType)
-    console.log(this.empTypesSelected)
     if (!this.empTypesSelected.some((e) => e.id === employeeType.id)) {
       this.empTypesSelected.push(employeeType);
     }

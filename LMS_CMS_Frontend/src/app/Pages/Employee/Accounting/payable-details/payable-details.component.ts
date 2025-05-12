@@ -199,7 +199,6 @@ export class PayableDetailsComponent {
   }
 
   isDetailsFormValid(detail: PayableDetails): boolean {
-    console.log(detail)
     let isValid = true;
     for (const key in detail) {
       if (this.hasOwnProperty(key)) {
@@ -381,7 +380,6 @@ export class PayableDetailsComponent {
     this.linkFileTypesData = []
     this.dataAccordingToLinkFileService.GetTableDataAccordingToLinkFile(this.DomainName, id).subscribe(
       (data) => {
-        console.log(this.linkFileTypesData)
         this.linkFileTypesData = data
       }
     )
@@ -397,7 +395,6 @@ export class PayableDetailsComponent {
 
   SaveNewDetails() {
     this.newDetails.payableMasterID = this.PayableID
-    console.log(1)
     if (this.isDetailsFormValid(this.newDetails)) {
       this.isLoading = true;
       this.payableDetailsService.Add(this.newDetails, this.DomainName).subscribe(

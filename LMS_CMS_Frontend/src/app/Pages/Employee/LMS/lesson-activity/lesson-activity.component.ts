@@ -109,7 +109,6 @@ export class LessonActivityComponent {
   GetLessonActivityById(id:number){
     this.lessonActivityService.GetByID(id, this.DomainName).subscribe((data) => {
       this.lessonActivity = data;
-      console.log(this.lessonActivity.attachmentLink)
       if(this.lessonActivity.attachmentLink != null && this.lessonActivity.attachmentLink != ''){
         if (this.lessonActivity.attachmentLink?.includes('Uploads/')) {
           this.selectedAttachmentType = 'file'

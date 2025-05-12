@@ -190,7 +190,7 @@
                     <label class="mb-2 primaryTxt" for="name-{{ i }}">Add Name</label>
                     <input id="name-{{ i }}" type="text" [value]="file.name"
                         class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                        placeholder="Enter Attachment Name" (change)="changeFileName(i, $event)" />
+                        placeholder="Enter Attachment Name" (change)="changeFileName(file.id, $event)" />
                 </div>
             </div>
         </div>

@@ -54,7 +54,6 @@ async loadHygieneForm(id: number) {
       next: (hygieneForm) => {
         this.hygieneForm = hygieneForm;
         this.students = hygieneForm.studentHygieneTypes ?? []; 
-        console.log(this.students)
       },
       error: (error) => {
         console.error('Error loading hygiene form:', error);

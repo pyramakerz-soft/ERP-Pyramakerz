@@ -73,7 +73,6 @@ export class EvaluationFeedbackComponent {
     });
     if(this.path=="Received Evaluations"){
       this.mode="Evaluated"
-      console.log(this.path)
       this.GetAllDataForEvaluated();
     }else if(this.path=="Created Evaluations"){
       this.mode="Evaluator"

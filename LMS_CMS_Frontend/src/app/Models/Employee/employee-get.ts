@@ -20,6 +20,7 @@ export class EmployeeGet {
         public employeeTypeID: number = 0,
         public employeeTypeName: string = '',
         public files :EmployeeAttachment []=[],
+        public editedFiles :EmployeeAttachment []=[],
         public insertedByUserId :number =0,
         public canReceiveRequest: boolean = false,
         public canReceiveMessage: boolean = false,

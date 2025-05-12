@@ -199,7 +199,6 @@ export class ReceivableDetailsComponent {
   }
 
   isDetailsFormValid(detail: ReceivableDetails): boolean {
-    console.log("edit is valid",detail)
     let isValid = true;
     for (const key in detail) {
       if (this.hasOwnProperty(key)) {
@@ -295,7 +294,6 @@ export class ReceivableDetailsComponent {
 
   Save() {
     if (this.isFormValid()) {
-      console.log("2")
       this.isLoading = true
       if (this.isCreate) {
         this.receivableService.Add(this.receivable, this.DomainName).subscribe(
@@ -391,11 +389,9 @@ export class ReceivableDetailsComponent {
   }
 
   SaveNewDetails() {
-    console.log("save")
     this.newDetails.receivableMasterID = this.ReceivableID
     if (this.isDetailsFormValid(this.newDetails)) {
       this.isLoading = true
-      console.log(this.newDetails)
       this.receivableDetailsService.Add(this.newDetails, this.DomainName).subscribe(
         (data) => {
           this.isLoading = false
@@ -418,7 +414,6 @@ export class ReceivableDetailsComponent {
     this.GetLinkFiles()
     this.editingRowId = row.id
     this.editedRowData = { ...row }
-    console.log(row ,this.editedRowData )
     if (this.editedRowData.linkFileID) {
       this.dataAccordingToLinkFileService.GetTableDataAccordingToLinkFile(this.DomainName, +this.editedRowData.linkFileID).subscribe(
         (data) => {
@@ -431,7 +426,6 @@ export class ReceivableDetailsComponent {
 
   SaveEditedDetail() {
     this.newDetails.receivableMasterID = this.ReceivableID
-    console.log(1)
     if (this.isDetailsFormValid(this.editedRowData)) {
       this.receivableDetailsService.Edit(this.editedRowData, this.DomainName).subscribe(
         (data) => {
@@ -496,7 +490,6 @@ export class ReceivableDetailsComponent {
   // }  
 
   DownloadAsPDF() {
-    console.log("gf")
     this.showPDF = true;
     setTimeout(() => {
       this.pdfComponentRef.downloadPDF();

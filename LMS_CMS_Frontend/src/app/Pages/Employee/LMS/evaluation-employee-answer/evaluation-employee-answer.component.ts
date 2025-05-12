@@ -70,10 +70,8 @@ export class EvaluationEmployeeAnswerComponent {
     });
     if (this.path == "Received Evaluations") {
       this.mode = "Evaluated"
-      console.log(this.path)
     } else if (this.path == "Created Evaluations") {
       this.mode = "Evaluator"
-      console.log(this.path)
     }
     this.EvaluationId = Number(this.activeRoute.snapshot.paramMap.get('id'));
     this.GetData()
@@ -85,7 +83,6 @@ export class EvaluationEmployeeAnswerComponent {
       if(this.data.feedback===null){
         this.data.feedback=''
       }
-      console.log( this.data.feedback )
     });
   }
 

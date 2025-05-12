@@ -122,7 +122,6 @@ export class StudentMedalComponent {
     this.students=[]
     this.SelectedStudentId=0
     this.studentServ.GetBySchoolGradeClassID(this.SelectedSchoolId,this.SelectedGradeId,this.SelectedClassId, this.DomainName).subscribe((d: any) => {
-      console.log(d)
       this.students=d.students
     })
   }
@@ -164,7 +163,6 @@ export class StudentMedalComponent {
       this.TableData = [];
       this.studentMedalServ.GetByStudentID(this.SelectedStudentId ,this.DomainName).subscribe((d) => {
         this.TableData = d;
-        console.log(this.TableData)
       });
     }
   
@@ -180,7 +178,6 @@ export class StudentMedalComponent {
     CreateOREdit() {
       if(this.isFormValid()){
         this.isLoading = true;
-        console.log(this.stuMedal)
           this.studentMedalServ.Add(
             this.stuMedal,
             this.DomainName
@@ -220,11 +217,9 @@ export class StudentMedalComponent {
       this.TableData=[]
       this.studentServ.GetByID(this.SelectedStudentId,this.DomainName).subscribe((d)=>{
         this.SelectedStudent=d
-        console.log( this.SelectedStudent)
       })
       this.studentMedalServ.GetByStudentID(this.SelectedStudentId,this.DomainName).subscribe((d=>{
           this.TableData=d
-          console.log(this.TableData,d)
       }))
     }
   

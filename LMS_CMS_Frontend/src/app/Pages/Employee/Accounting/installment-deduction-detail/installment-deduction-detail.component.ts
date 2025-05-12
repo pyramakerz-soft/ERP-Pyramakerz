@@ -163,7 +163,6 @@ export class InstallmentDeductionDetailComponent {
   Save() {
     if (this.isFormValid()) {
       this.isLoading = true
-      console.log(this.Data)
       if (this.mode == "Create") {
         this.installmentDeductionMasterServ.Add(this.Data, this.DomainName).subscribe((d) => {
           this.MasterId = d
@@ -178,7 +177,6 @@ export class InstallmentDeductionDetailComponent {
           this.router.navigateByUrl(`Employee/Installment Deduction Details/Edit/${this.MasterId}`)
         },
           err => {
-            console.log(err)
             this.isLoading = false
             Swal.fire({
               icon: 'error',

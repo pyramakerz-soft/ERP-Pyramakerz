@@ -116,21 +116,25 @@ export class EmployeeService {
       employee.files.forEach((file) => {
         if (file.file instanceof File) {
           formData.append(`files[${uploadIndex}].file`, file.file, file.name);
-          formData.append(`files[${uploadIndex}].Name`, file.name);
+          formData.append(`files[${uploadIndex}].name`, file.name);
           uploadIndex++;
         }
       });
     }
 
-    console.log('FormData contents:');
-    formData.forEach((value, key) => {
-      if (value instanceof File) {
-        console.log(`${key}: FILE -> name: ${value.name}, size: ${value.size}, type: ${value.type}`);
-      } else {
-        console.log(`${key}: ${value}`);
-      }
-    });
-
+    if (employee.editedFiles && employee.editedFiles.length > 0) {
+      let uploadIndex = 0;
+      employee.files.forEach((file) => {
+          formData.append(`editedFiles[${uploadIndex}].id`, file.id.toString());
+          formData.append(`editedFiles[${uploadIndex}].name`, file.name);
+          formData.append(`editedFiles[${uploadIndex}].link`, file.link);
+          formData.append(`editedFiles[${uploadIndex}].lastModified`, file.lastModified.toString());
+          formData.append(`editedFiles[${uploadIndex}].size`, file.size.toString());
+          formData.append(`editedFiles[${uploadIndex}].type`, file.type);
+          formData.append(`editedFiles[${uploadIndex}].employeeID`, file.employeeID.toString());
+          uploadIndex++;
+      });
+    }
     return this.http.put<EmployeeGet>(`${this.baseUrl}/Employee`, formData, { headers });
   }
 
