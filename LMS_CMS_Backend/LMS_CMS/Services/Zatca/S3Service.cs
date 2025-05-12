@@ -6,7 +6,7 @@ using Amazon.SecretsManager;
 using Newtonsoft.Json;
 using Amazon;
 
-namespace LMS_CMS_PL.Services
+namespace LMS_CMS_PL.Services.Zatca
 {
     public class S3Service
     {
@@ -16,9 +16,9 @@ namespace LMS_CMS_PL.Services
         private readonly string _folder;
         private readonly string _region;
 
-        public S3Service()
+        public S3Service(IAmazonSecretsManager secretsManager)
         {
-            
+            _secretsManager = secretsManager;
         }
 
         public S3Service(IConfiguration config, string region)

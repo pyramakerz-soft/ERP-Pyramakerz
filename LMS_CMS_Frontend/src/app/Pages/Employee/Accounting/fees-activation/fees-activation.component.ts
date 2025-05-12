@@ -80,6 +80,7 @@ export class FeesActivationComponent {
 
   StudentsOriginal: StudentAcademicYear[] = [];
   Students: StudentAcademicYear[] = [];
+  SelectedStudents: StudentAcademicYear[] = [];
 
   FeesTypes: TuitionFeesType[] = []
   FeesDiscountType: TuitionDiscountTypes[] = []
@@ -348,11 +349,18 @@ export class FeesActivationComponent {
           (this.ClassRoomId == 0 || item.classID == this.ClassRoomId)
         );
       });
+      this.SelectedStudents=this.Students
     }
     else {
       this.TableData = [];
       this.TableData = this.TableDataStudentOriginal.filter(s => s.studentID == this.StudentId);
+      this.SelectedStudents=[]
+      this.SelectedStudents=this.StudentsOriginal.filter(s=>s.studentID==this.StudentId)
     }
+    console.log("this.StudentsOriginal",this.StudentsOriginal)
+    console.log("this.SelectedStudents",this.SelectedStudents)
+    console.log("this.Students",this.Students)
+    console.log("this.StudentId",this.StudentId)
 
   }
 
@@ -418,7 +426,8 @@ export class FeesActivationComponent {
 
   async Activate() {
     this.FeesForAdd = [];
-    this.Students.forEach(stu => {
+    console.log("aa",this.SelectedStudents)
+    this.SelectedStudents.forEach(stu => {
       var fee: FeesActivationAddPut = new FeesActivationAddPut();
       fee.academicYearId = this.Fees.academicYearId;
       fee.amount = this.Fees.amount;
