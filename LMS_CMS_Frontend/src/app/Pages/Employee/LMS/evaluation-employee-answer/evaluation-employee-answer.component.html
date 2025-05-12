@@ -29,12 +29,13 @@
             <div *ngFor="let q of row.evaluationEmployeeQuestions; let i = index" class="w-[29%]">
                 <div class="bg-[#EBEBEB] p-4 rounded-xl mb-2 border">
                     <div>{{ q.questionEnglishTitle }}</div>
-                    <div class="flex mt-2">
+                    <div class="flex my-2">
                         <ng-container *ngFor="let star of [1, 2, 3, 4, 5]; let j = index">
                             <i class="fa-star text-[#6F6F6F]" [class.fa-solid]="j < q.mark"
                                 [class.fa-regular]="j >= q.mark" [class.text-yellow-400]="j < q.mark"></i>
                         </ng-container>
                     </div>
+                    <p class="text-gray-600">{{q.note}}</p>
                 </div>
             </div>
         </div>

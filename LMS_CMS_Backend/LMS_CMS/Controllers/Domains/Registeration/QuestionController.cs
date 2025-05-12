@@ -375,6 +375,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                     return BadRequest("CorrectAnswer in msq question is required");
                 }
             }
+            else
+            {
+                question.CorrectAnswerID = null;
+            }
              
             if (userTypeClaim == "employee")
             {

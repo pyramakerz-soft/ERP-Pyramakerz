@@ -41,11 +41,11 @@
     </div>  
 
     <div class="flex flex-col w-[24%] mb-4">
-        <label class="mb-2" for="studentID" [ngClass]="{ 'text-gray-400': !Data.employeeID, 'primaryTxt': Data.employeeID }">Students</label>
+        <label class="mb-2" for="studentID" [ngClass]="{ 'text-gray-400': !Data.employeeID, 'primaryTxt': Data.employeeID }">Child</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="studentID"
             [disabled]="!Data.employeeID || mode=='View' " [ngClass]="{ 'bg-[#EBEBEB]': !Data.employeeID }"
             [(ngModel)]="Data.studentID" (ngModelChange)="onInputValueChange({ field: 'studentID', value: $event })">
-            <option [value]=0 disabled selected hidden>Choose Student</option>
+            <option [value]=0 disabled selected hidden>Choose Child</option>
             <option *ngFor="let stu of emplyeeStudents" [value]="stu.studentID">{{ stu.studentName }}</option>
             <option *ngIf="emplyeeStudents.length === 0" disabled selected>No Data Found</option>
         </select>
@@ -90,7 +90,7 @@
                         ID
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Student Name
+                        Child Name
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         Fees Type
