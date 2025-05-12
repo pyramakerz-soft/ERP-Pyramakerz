@@ -18,6 +18,8 @@ using Zatca.EInvoice.SDK.Contracts;
 using Zatca.EInvoice.SDK;
 using Amazon.S3;
 using Amazon.SecretsManager;
+using Amazon;
+using LMS_CMS_PL.Services.Zatca.Invoice;
 
 namespace LMS_CMS
 {
@@ -118,7 +120,15 @@ namespace LMS_CMS
             builder.Services.AddScoped<IEInvoiceSigner, EInvoiceSigner>();
             builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
             builder.Services.AddSingleton<IAmazonS3, AmazonS3Client>();
-            builder.Services.AddSingleton<IAmazonSecretsManager, AmazonSecretsManagerClient>();
+            //builder.Services.AddSingleton<IAmazonSecretsManager, AmazonSecretsManagerClient>();
+
+            builder.Services.AddAWSService<IAmazonSecretsManager>(new Amazon.Extensions.NETCore.Setup.AWSOptions
+            {
+                Region = RegionEndpoint.USEast1 // change to your region
+            });
+
+            // Register your SecretsService
+            builder.Services.AddScoped<ISecretsService, SecretsService>();
 
 
             /// 2)

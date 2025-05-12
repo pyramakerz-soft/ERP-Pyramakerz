@@ -60,9 +60,9 @@
 <div>
     <div class="flex justify-between my-8">
         <h1 class="primaryTxt font-semibold text-2xl leading-9 mb-5">Students</h1>
-        <div class="flex items-center space-x-3" *ngIf="busStudentData.length < bus.capacity &&!bus.isCapacityRestricted">
-            <app-search [key]="key" [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
-            <button class="secondaryBg rounded-lg py-3 px-4 text-white" (click)="OpenModal()">Add Student</button>
+        <div class="flex items-center space-x-3">
+            <app-search [key]="key" [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search> 
+            <button class="secondaryBg rounded-lg py-3 px-4 text-white" (click)="OpenModal()"  *ngIf="!(bus.isCapacityRestricted && busStudentData.length >= bus.capacity)">Add Student</button>
         </div>
     </div>
 

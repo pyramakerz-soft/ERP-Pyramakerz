@@ -4,7 +4,8 @@ using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains.Inventory;
 using LMS_CMS_DAL.Models.Domains.Zatca;
 using LMS_CMS_PL.Services;
-using LMS_CMS_PL.Services.Invoice;
+using LMS_CMS_PL.Services.Zatca;
+using LMS_CMS_PL.Services.Zatca.Invoice;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -22,13 +23,29 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
         private readonly DbContextFactoryService _dbContextFactory;
         private readonly IConfiguration _config;
         private readonly IAmazonSecretsManager _secretsManager;
+        private readonly ISecretsService _secretsService;
 
-        public ZatcaController(ICsrGenerator csrGenerator, DbContextFactoryService dbContextFactory, IConfiguration config, IAmazonSecretsManager secretsManager)
+        public ZatcaController(ICsrGenerator csrGenerator, DbContextFactoryService dbContextFactory, IConfiguration config, IAmazonSecretsManager secretsManager, ISecretsService secretsService)
         {
             _csrGenerator = csrGenerator;
             _dbContextFactory = dbContextFactory;
             _config = config;
             _secretsManager = secretsManager;
+            _secretsService = secretsService;
+        }
+
+        [HttpGet("{secretName}")]
+        public async Task<IActionResult> GetSecret(string secretName)
+        {
+            try
+            {
+                var secret = await _secretsService.GetSecretAsync(secretName);
+                return Ok(new { Secret = secret });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error retrieving secret: {ex.Message}");
+            }
         }
 
         #region Generate PCSID
@@ -72,8 +89,8 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
             );
 
             string pcName = $"PC{schoolPc.ID}{schoolPc.School.ID}";
-            AmazonS3Client amazonS3Client = new AmazonS3Client();
-            S3Service s3SecretManager = new S3Service();
+            //AmazonS3Client amazonS3Client = new AmazonS3Client();
+            S3Service s3SecretManager = new S3Service(_secretsManager);
 
             var csrSteps = InvoicingServices.GenerateCSRandPrivateKey(csrGeneration);
             string csrContent = csrSteps[1].ResultedValue;
