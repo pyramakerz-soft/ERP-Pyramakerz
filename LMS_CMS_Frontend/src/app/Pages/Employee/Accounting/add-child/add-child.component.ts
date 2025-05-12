@@ -96,6 +96,7 @@ export class AddChildComponent {
   }
 
   GetAllData() {
+    this.TableData = []
     this.EmplyeeStudentServ.Get(this.UserID, this.DomainName).subscribe((d) => {
       this.TableData = d
     })

@@ -156,6 +156,8 @@ export class ClassroomComponent {
   }
 
   async onSearchEvent(event: { key: string, value: any }) {
+    this.SelectedSchoolIdForFilteration = 0
+    this.activeAcademicYearID = 0
     this.key = event.key;
     this.value = event.value;
     try {
@@ -194,9 +196,8 @@ export class ClassroomComponent {
   getClassroomData(){
     this.classroomData=[]
     this.classroomService.GetByActiveAcYear(this.DomainName).subscribe(
-      (data) => {
-        this.classroomData = data;
-        this.OriginclassroomData = data;
+      (data) => { 
+        this.classroomData = data; 
         if(this.classroomData.length != 0){
           this.activeAcademicYearID = this.classroomData[0].academicYearID
           this.getSchoolIDForActiveAcademicYear()
@@ -213,6 +214,16 @@ export class ClassroomComponent {
         if(this.classroomData.length != 0){
           this.activeAcademicYearID = this.classroomData[0].academicYearID
         }
+      }
+    )
+  }
+  
+  getAllClassroomData(){
+    this.OriginclassroomData=[]
+    this.classroomService.Get(this.DomainName).subscribe(
+      (data) => {
+        this.OriginclassroomData = data; 
+        this.classroomData = this.OriginclassroomData;
       }
     )
   }
@@ -492,8 +503,8 @@ export class ClassroomComponent {
   }
 
   ResetFilter(){
-   this.classroomData = this.OriginclassroomData;
-   this.activeAcademicYearID =0
-   this.SelectedSchoolIdForFilteration =0
+    this.activeAcademicYearID =0
+    this.SelectedSchoolIdForFilteration =0
+   this.getAllClassroomData()
   }
 }

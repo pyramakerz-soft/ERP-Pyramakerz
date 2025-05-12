@@ -459,6 +459,12 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
 
                 }
             }
+            else
+            {
+                newQuestion.correctAnswerName = null;
+                question.CorrectAnswerID = null;
+                question.mCQQuestionOption = null; 
+            }
             var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Questions");
 
             if (newQuestion.ImageFile != null || newQuestion.VideoFile != null)
