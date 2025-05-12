@@ -333,7 +333,7 @@ namespace LMS_CMS_PL.Controllers.Domains
             allowEdit: 1,
             pages: new[] { "Employee Edit" }
         )]
-        public async Task<IActionResult> EditAsync([FromForm] EmployeePutDTO newEmployee, [FromForm] List<IFormFile> files)
+        public async Task<IActionResult> EditAsync([FromForm] EmployeePutDTO newEmployee, [FromForm] List<EmployeeAttachmentAddDTO> files)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
             var userClaims = HttpContext.User.Claims;
@@ -489,34 +489,37 @@ namespace LMS_CMS_PL.Controllers.Domains
             }
 
             // Handle new files
-            if (files != null && files.Any())
+            foreach (var file in files)
             {
-                foreach (var file in files)
+                if (file.file == null)
                 {
-                    if (file.Length > 0)
+                    Console.WriteLine($"File object for '{file.Name}' is null.");
+                    continue; // skip it
+                }
+
+                Console.WriteLine($"Saving file: {file.Name}, size: {file.file.Length}");
+
+                if (file.file.Length > 0)
+                {
+                    var filePath = Path.Combine(employeeFolder, file.Name);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
                     {
-                        var filePath = Path.Combine(employeeFolder, file.FileName);
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await file.CopyToAsync(stream);
-                        }
-
-                        var uploadedFile = new EmployeeAttachment
-                        {
-                            EmployeeID = oldEmp.ID,
-                            Link = $"{Request.Scheme}://{Request.Host}/Uploads/Attachments/{sanitizedUserName}/{file.FileName}",
-                            Name = file.FileName,
-                        };
-
-                        Unit_Of_Work.employeeAttachment_Repository.Add(uploadedFile);
-                        await Unit_Of_Work.SaveChangesAsync();
+                        await file.file.CopyToAsync(stream);
                     }
+
+                    var uploadedFile = new EmployeeAttachment
+                    {
+                        EmployeeID = oldEmp.ID,
+                        Link = $"{Request.Scheme}://{Request.Host}/Uploads/Attachments/{sanitizedUserName}/{file.Name}",
+                        Name = file.Name,
+                    };
+
+                    Unit_Of_Work.employeeAttachment_Repository.Add(uploadedFile);
+                    await Unit_Of_Work.SaveChangesAsync();
                 }
             }
-
             return Ok(newEmployee);
         }
-
 
 
         //////////////////////////////////////////////////////

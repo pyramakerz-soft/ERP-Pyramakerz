@@ -169,7 +169,7 @@
                         <div class="flex items-center space-x-2">
                             <i class="fa-solid fa-file"></i>
                             <p class="text-sm font-medium text-gray-700 truncate max-w-[150px]">
-                                {{ file.file?.name || file.name }}
+                                {{  file.name }}
                             </p>
                         </div>
                         <button (click)="deleteFile(i)">
@@ -177,7 +177,7 @@
                         </button>
                     </div>
                     <p class="text-sm font-medium text-gray-700 mb-4">
-                        {{ file.file?.size || file.size * 1024 }} bytes
+                        {{  file.size * 1024 }} bytes
                     </p>
                     <p class="secondaryTxt cursor-pointer hover:underline mt-2" (click)="downloadFile(file)">
                         Click to View

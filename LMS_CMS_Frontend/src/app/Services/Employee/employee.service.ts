@@ -87,7 +87,7 @@ export class EmployeeService {
       this.header = DomainName;
     }
 
-
+    console.log(employee)
     const token = localStorage.getItem('current_token');
     const headers = new HttpHeaders()
       .set('Authorization', `Bearer ${token}`)
@@ -112,14 +112,24 @@ export class EmployeeService {
     formData.append('canReceiveRequest', employee.canReceiveRequest?.toString() ?? 'false');
 
     if (employee.files && employee.files.length > 0) {
-      employee.files.forEach((file, index) => {
-        if (file instanceof File) {
-          formData.append('files', file, file.name);
-        } else {
-          console.error(`File at index ${index} is not valid:`, file);
+      let uploadIndex = 0;
+      employee.files.forEach((file) => {
+        if (file.file instanceof File) {
+          formData.append(`files[${uploadIndex}].file`, file.file, file.name);
+          formData.append(`files[${uploadIndex}].Name`, file.name);
+          uploadIndex++;
         }
       });
     }
+
+    console.log('FormData contents:');
+    formData.forEach((value, key) => {
+      if (value instanceof File) {
+        console.log(`${key}: FILE -> name: ${value.name}, size: ${value.size}, type: ${value.type}`);
+      } else {
+        console.log(`${key}: ${value}`);
+      }
+    });
 
     return this.http.put<EmployeeGet>(`${this.baseUrl}/Employee`, formData, { headers });
   }
