@@ -439,6 +439,7 @@ export class ClassroomComponent {
     this.gradeService.Get(this.DomainName).subscribe(
       (data) => {
         this.Grades = data.filter((grade) => this.checkSection(grade))
+        // console.log(this.Grades)
       }
     )
   }
