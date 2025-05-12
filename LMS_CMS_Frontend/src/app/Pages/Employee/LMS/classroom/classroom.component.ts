@@ -438,8 +438,7 @@ export class ClassroomComponent {
   getGrade(){
     this.gradeService.Get(this.DomainName).subscribe(
       (data) => {
-        this.Grades = data.filter((grade) => this.checkSection(grade))
-        // console.log(this.Grades)
+        this.Grades = data.filter((grade) => this.checkSection(grade)) 
       }
     )
   }
@@ -473,7 +472,7 @@ export class ClassroomComponent {
   }
   
   checkSection(element:any) {
-    return element.sectionI  == this.selectedSection
+    return element.sectionID  == this.selectedSection
   }
 
   SaveCopy(){
