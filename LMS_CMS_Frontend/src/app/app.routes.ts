@@ -150,6 +150,7 @@ import { LessonLiveComponent } from './Pages/Employee/LMS/lesson-live/lesson-liv
 import { StudentLessonLiveComponent } from './Pages/Student/LMS/student-lesson-live/student-lesson-live.component';
 import { AssignmentDetailsComponent } from './Pages/Employee/LMS/assignment/assignment-details/assignment-details.component';
 import { AssignmentEditComponent } from './Pages/Employee/LMS/assignment/assignment-edit/assignment-edit.component';
+import { ZatcaDevicesComponent } from './Pages/Employee/Zatca/zatca-devices/zatca-devices.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate:[noNavigateToLoginIfLoginGuard] },
@@ -347,6 +348,7 @@ export const routes: Routes = [
             { path: "Lesson Live", component: LessonLiveComponent, title: "Lesson Live", canActivate:[noNavigateWithoutLoginGuard ] },
             { path: "Assignment Details", component: AssignmentDetailsComponent, title: "Assignment Details", canActivate:[noNavigateWithoutLoginGuard ] },
             { path: "Assignment Edit", component: AssignmentEditComponent, title: "Assignment Edit", canActivate:[noNavigateWithoutLoginGuard ] },
+            { path: "Zatca Devices", component: ZatcaDevicesComponent, title: "Zatca Devices", canActivate:[noNavigateWithoutLoginGuard ] },
         ]
 },
     { 
