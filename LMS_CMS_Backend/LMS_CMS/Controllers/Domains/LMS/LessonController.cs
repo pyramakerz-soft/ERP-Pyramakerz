@@ -159,6 +159,38 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+        [HttpGet("GetBySubjectID/{SubjectId}")]
+        //[Authorize_Endpoint_(
+        //    allowedTypes: new[] { "octa", "employee" },
+        //    pages: new[] { "Lesson" }
+        //)]
+        public async Task<IActionResult> GetBySubjectIDAsync(long SubjectId)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            Subject subject = Unit_Of_Work.subject_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == SubjectId);
+            if (subject == null)
+            {
+                return NotFound("No Subject with this ID");
+            }
+
+            List<Lesson> lessons = await Unit_Of_Work.lesson_Repository.Select_All_With_IncludesById<Lesson>(
+                    b => b.IsDeleted != true && b.SubjectID == SubjectId,
+                    query => query.Include(d => d.Subject)
+                    );
+
+            if (lessons == null || lessons.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<LessonGetDTO> lessonsDTO = mapper.Map<List<LessonGetDTO>>(lessons);
+
+            return Ok(lessonsDTO);
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
         [HttpPost]
         //[Authorize_Endpoint_(
         //    allowedTypes: new[] { "octa", "employee" },

@@ -912,6 +912,10 @@ namespace LMS_CMS_BL.Config
 
             CreateMap<QuestionBankOptionAddDTO, QuestionBankOption>();
 
+            CreateMap<BloomLevel, BloomLevelGetDTO>();
+            CreateMap<DokLevel, DokLevelGetDTO>();
+            CreateMap<QuestionBankType, QuestionBankTypeGetDTO>();
+
         }
     } 
 }

@@ -148,6 +148,7 @@ import { LessonResourceComponent } from './Pages/Employee/LMS/lesson-resource/le
 import { LessonActivityComponent } from './Pages/Employee/LMS/lesson-activity/lesson-activity.component';
 import { LessonLiveComponent } from './Pages/Employee/LMS/lesson-live/lesson-live.component';
 import { StudentLessonLiveComponent } from './Pages/Student/LMS/student-lesson-live/student-lesson-live.component';
+import { QuestionBankComponent } from './Pages/Employee/LMS/question-bank/question-bank.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate:[noNavigateToLoginIfLoginGuard] },
@@ -343,6 +344,7 @@ export const routes: Routes = [
             { path: "Lesson Activity/:id", component: LessonActivityComponent, title: "Lesson Activity", canActivate:[noNavigateWithoutLoginGuard ] },
             { path: "Lesson Resource/:id", component: LessonResourceComponent, title: "Lesson Resource", canActivate:[noNavigateWithoutLoginGuard ] },
             { path: "Lesson Live", component: LessonLiveComponent, title: "Lesson Live", canActivate:[noNavigateWithoutLoginGuard ] },
+            { path: "Question Bank", component: QuestionBankComponent, title: "Question Bank", canActivate:[noNavigateWithoutLoginGuard ] },
         ]
 },
     { 
