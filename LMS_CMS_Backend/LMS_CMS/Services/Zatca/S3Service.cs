@@ -33,14 +33,6 @@ namespace LMS_CMS_PL.Services.Zatca
             _folder = config[folder] ?? "";
         }
 
-        public S3Service(IAmazonS3 s3Client, IAmazonSecretsManager secretsManager)
-        {
-            _s3Client = s3Client;
-            _secretsManager = secretsManager;
-            //_bucketName = config[bucketName] ?? throw new ArgumentNullException(bucketName);
-            //_folder = config[folder] ?? "";
-        }
-
         public async Task<bool> UploadAsync(string path, string? subDirectory = null)
         {
             try
