@@ -23,29 +23,13 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
         private readonly DbContextFactoryService _dbContextFactory;
         private readonly IConfiguration _config;
         private readonly IAmazonSecretsManager _secretsManager;
-        private readonly ISecretsService _secretsService;
 
-        public ZatcaController(ICsrGenerator csrGenerator, DbContextFactoryService dbContextFactory, IConfiguration config, IAmazonSecretsManager secretsManager, ISecretsService secretsService)
+        public ZatcaController(ICsrGenerator csrGenerator, DbContextFactoryService dbContextFactory, IConfiguration config, IAmazonSecretsManager secretsManager)
         {
             _csrGenerator = csrGenerator;
             _dbContextFactory = dbContextFactory;
             _config = config;
             _secretsManager = secretsManager;
-            _secretsService = secretsService;
-        }
-
-        [HttpGet("{secretName}")]
-        public async Task<IActionResult> GetSecret(string secretName)
-        {
-            try
-            {
-                var secret = await _secretsService.GetSecretAsync(secretName);
-                return Ok(new { Secret = secret });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Error retrieving secret: {ex.Message}");
-            }
         }
 
         #region Generate PCSID
