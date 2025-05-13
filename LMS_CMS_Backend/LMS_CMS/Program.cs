@@ -126,9 +126,6 @@ namespace LMS_CMS
                 Region = RegionEndpoint.USEast1 
             });
 
-            //builder.Services.AddScoped<ISecretsService, SecretsService>();
-
-
             /// 2)
             builder.Services.AddCors(option =>
             {

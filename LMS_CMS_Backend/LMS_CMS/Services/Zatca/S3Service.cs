@@ -33,14 +33,14 @@ namespace LMS_CMS_PL.Services.Zatca
             _folder = config[folder] ?? "";
         }
 
-        public async Task<bool> UploadAsync(string path, string? subDirectory = null)
+        public async Task<bool> UploadAsync(string path, string subDirectory, string domain)
         {
             try
             {
                 if (File.Exists(path))
                 {
                     using var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read);
-                    return await UploadFileAsync(fileStream, Path.GetFileName(path), subDirectory);
+                    return await UploadFileAsync(fileStream, Path.GetFileName(path), subDirectory, domain);
                 }
                 else if (Directory.Exists(path))
                 {
@@ -49,7 +49,7 @@ namespace LMS_CMS_PL.Services.Zatca
                     {
                         var relativePath = Path.GetRelativePath(path, file).Replace("\\", "/");
                         using var fileStream = new FileStream(file, FileMode.Open, FileAccess.Read);
-                        await UploadFileAsync(fileStream, relativePath, subDirectory);
+                        await UploadFileAsync(fileStream, relativePath, subDirectory, domain);
                     }
 
                     return true;
@@ -65,11 +65,9 @@ namespace LMS_CMS_PL.Services.Zatca
             }
         }
 
-        private async Task<bool> UploadFileAsync(FileStream fileStream, string fileName, string? subDirectory = null)
+        private async Task<bool> UploadFileAsync(FileStream fileStream, string fileName, string subDirectory, string domain)
         {
-            var key = string.IsNullOrWhiteSpace(subDirectory)
-                ? $"{_folder}{fileName}"
-                : $"{_folder}{subDirectory}{fileName}";
+            var key = $"{domain}/{_folder}{subDirectory}{fileName}";
 
             var request = new PutObjectRequest
             {
