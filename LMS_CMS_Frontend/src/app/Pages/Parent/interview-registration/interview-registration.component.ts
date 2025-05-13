@@ -42,6 +42,7 @@ export class InterviewRegistrationComponent {
 
   currentMonth = 0;
   currentYear = 0;
+  isLoading = false
 
   constructor(public account: AccountService, public ApiServ: ApiService, public registerationFormParentService:RegisterationFormParentService, 
     public interviewTimeTableService:InterviewTimeTableService, public registrationFormInterview: RegistrationFormInterviewService){}
@@ -109,6 +110,7 @@ export class InterviewRegistrationComponent {
     this.ToChooseFromInterviewTimeTable = []
     this.currentMonth = 0;
     this.currentYear = 0;
+    this.isLoading = false
 
     this.closeModalcalender()
   }
@@ -153,12 +155,14 @@ export class InterviewRegistrationComponent {
  
   Register() {
     if(!this.registrationFormInterviewID){
+      this.isLoading = true
       this.registrationFormInterview.Add(this.registrationFormParentID, this.InterviewTimeID, this.DomainName).subscribe(
         (data) => {
           this.closeModal()
           this.getRegistrationFormParentIncludeRegistrationFormInterviewData()
         },
         (error) => {
+          this.isLoading = false
           Swal.fire({
             title: 'Error',
             text: error.error,
@@ -175,6 +179,7 @@ export class InterviewRegistrationComponent {
           this.getRegistrationFormParentIncludeRegistrationFormInterviewData()
         },
         (error) => {
+          this.isLoading = false
           Swal.fire({
             title: 'Error',
             text: error.error,

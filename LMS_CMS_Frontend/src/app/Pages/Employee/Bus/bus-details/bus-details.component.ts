@@ -287,12 +287,12 @@ export class BusDetailsComponent {
             this.busService.Get(this.DomainName).subscribe(
               (data: any) => {
                 this.busData = data;
-                this.isLoading = false; // Hide spinner
+                this.isLoading = false;  
               }
             );
           },
           error => {
-            this.isLoading = false; // Hide spinner
+            this.isLoading = false;  
           }
         );
       } else{
@@ -303,12 +303,18 @@ export class BusDetailsComponent {
             this.busService.Get(this.DomainName).subscribe(
               (data: any) => {
                 this.busData = data;
-                this.isLoading = false; // Hide spinner
+                this.isLoading = false;  
               }
             );
           },
           error => {
-            this.isLoading = false; // Hide spinner
+            this.isLoading = false;  
+            Swal.fire({
+              icon: 'error',
+              text: error.error,
+              confirmButtonText: 'Okay',
+              customClass: { confirmButton: 'secondaryBg' },
+            });
           }
         );
       }  

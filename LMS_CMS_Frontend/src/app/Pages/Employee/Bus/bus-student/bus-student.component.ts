@@ -126,6 +126,9 @@ export class BusStudentComponent {
     this.busStudentService.GetbyId(busStuId, this.DomainName).subscribe((data) => {
       this.id = data.studentID
       this.busStudent = data; 
+      if(this.busStudent.isException == true){
+        this.exception = true
+      }
       this.selectedSchool = this.busStudent.schoolID
       this.selectedSection = this.busStudent.sectionID
       this.selectedGrade = this.busStudent.gradeID
@@ -228,7 +231,7 @@ export class BusStudentComponent {
     this.filteredSections = [];
     this.filteredClasses = [];
     this.Students = [];
-    this.validationErrors = {};
+    this.validationErrors = {}; 
   }
 
   onIsExceptionChange(event: Event) {
@@ -261,7 +264,7 @@ export class BusStudentComponent {
           this.filteredSections = data.filter((section) => this.checkSchool(section))
         }
       )
-
+      
     this.selectedGrade = null;
     this.selectedClass = null;
     this.selectedSection = null;
@@ -357,17 +360,7 @@ export class BusStudentComponent {
             this.validationErrors[field] = `This student already exists in this bus for this semester.`
             isValid = false;
           }
-        }
-        if (this.OriginBusStudent.length > this.bus.capacity) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Capacity Exceeded',
-            text: `You have selected ${this.OriginBusStudent.length} students, but the bus capacity is only ${this.bus.capacity}.`,
-            confirmButtonText: 'Okay',
-            customClass: { confirmButton: 'secondaryBg' },
-          });
-          isValid = false;
-        }
+        } 
       }
     }
     return isValid;
@@ -395,6 +388,42 @@ export class BusStudentComponent {
     }
   }
 
+  save(){
+    this.isLoading = true;
+    if (this.editBusStudent == false) {
+      this.busStudentService.Add(this.busStudent, this.DomainName).subscribe((data) => {
+        this.closeModal()
+        this.isLoading = false; 
+        this.GetStudentsByBusId(this.busId);
+      },
+        error => {
+          this.isLoading = false;  
+          Swal.fire({
+            icon: 'error',
+            text: error.error,
+            confirmButtonText: 'Okay',
+            customClass: { confirmButton: 'secondaryBg' },
+          });
+        });
+    } else {
+      this.busStudentService.Edit(this.busStudent, this.DomainName).subscribe((data) => {
+        this.closeModal()
+        this.isLoading = false; 
+        this.GetStudentsByBusId(this.busId);
+      },
+        error => {
+          this.isLoading = false;  
+          Swal.fire({
+            icon: 'error',
+            text: error.error,
+            confirmButtonText: 'Okay',
+            customClass: { confirmButton: 'secondaryBg' },
+          });
+        }
+      );
+    }
+  }
+
   SaveBusStudent() {  
     this.busStudent.busID = this.busId
     if (this.editBusStudent == true) {
@@ -405,27 +434,35 @@ export class BusStudentComponent {
       this.busStudent.exceptionFromDate = null
       this.busStudent.exceptionToDate = null
     }
+     
+    if (this.isFormValid()) { 
+      if(this.busStudent.isException == true){ 
+        let semesteer = this.Semesters.filter(s => s.id == this.busStudent.semseterID) 
 
-    if (this.isFormValid()) {
-      this.isLoading = true;
-      if (this.editBusStudent == false) {
-        this.busStudentService.Add(this.busStudent, this.DomainName).subscribe((data) => {
-          this.closeModal()
-          this.isLoading = false; // Hide spinner
-          this.GetStudentsByBusId(this.busId);
-        },
-          error => {
-            this.isLoading = false; // Hide spinner
+        const fromDate = new Date(this.busStudent.exceptionFromDate?this.busStudent.exceptionFromDate:0);
+        const toDate = new Date(this.busStudent.exceptionToDate?this.busStudent.exceptionToDate:0);
+        const semesterStart = new Date(semesteer[0].dateFrom);
+        const semesterEnd = new Date(semesteer[0].dateTo);
+
+        if (fromDate > toDate) { 
+          Swal.fire({
+            title: 'Date From can not be after Date To',
+            icon: 'warning',
+            confirmButtonColor: '#FF7519',
+            confirmButtonText: 'Ok',
           });
-      } else {
-        this.busStudentService.Edit(this.busStudent, this.DomainName).subscribe((data) => {
-          this.closeModal()
-          this.isLoading = false; // Hide spinner
-          this.GetStudentsByBusId(this.busId);
-        },
-          error => {
-            this.isLoading = false; // Hide spinner
+        }else if (fromDate < semesterStart || fromDate > semesterEnd || toDate < semesterStart || toDate > semesterEnd) { 
+          Swal.fire({
+            title: `Exception Date must be within the Semester Year Range from ${semesteer[0].dateFrom} to ${semesteer[0].dateTo}`,
+            icon: 'warning',
+            confirmButtonColor: '#FF7519',
+            confirmButtonText: 'Ok',
           });
+        } else{
+          this.save()
+        }
+      }else{
+        this.save()
       }
     }
   }
@@ -493,8 +530,7 @@ export class BusStudentComponent {
       this.closeTransferBusStudentModal()
       this.GetStudentsByBusId(this.busId)
     },
-    error => {
-      console.log(error)
+    error => { 
       Swal.fire({
         icon: 'error',
         text: error.error,

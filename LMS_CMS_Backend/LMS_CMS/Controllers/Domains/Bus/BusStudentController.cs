@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices.JavaScript;
 using BusModel = LMS_CMS_DAL.Models.Domains.BusModule.Bus;
@@ -74,6 +75,29 @@ namespace LMS_CMS_PL.Controllers.Domains.Bus
                 return NotFound();
             }
 
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            DateTime currentDateTime = TimeZoneInfo.ConvertTime(DateTime.UtcNow, cairoZone);
+            string todayString = currentDateTime.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+            foreach (var busStudent in busStudents)
+            {
+                if(busStudent.IsException == true)
+                {
+                    if (!string.IsNullOrEmpty(busStudent.ExceptionFromDate) && !string.IsNullOrEmpty(busStudent.ExceptionToDate))
+                    {
+                        if (string.Compare(busStudent.ExceptionToDate, todayString) < 0)
+                        {
+                            busStudent.IsDeleted = true;
+                            busStudent.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                            Unit_Of_Work.busStudent_Repository.Update(busStudent);
+                        }
+                    }
+                }
+            }
+            Unit_Of_Work.SaveChanges();
+
+            busStudents = busStudents.Where(bs => bs.IsDeleted != true).ToList();
+
             List<BusStudentGetDTO> busStudentDTOs = mapper.Map<List<BusStudentGetDTO>>(busStudents);
 
             foreach (var dto in busStudentDTOs)
@@ -81,8 +105,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Bus
                 var busStudent = Unit_Of_Work.busStudent_Repository.Select_By_Id(dto.ID);
                 if (busStudent != null)
                 {
+                    Semester semester = Unit_Of_Work.semester_Repository.First_Or_Default(s => s.ID == dto.SemseterID);
+
                     var studentAcademicYear = Unit_Of_Work.studentAcademicYear_Repository
-                        .First_Or_Default(s => s.StudentID == busStudent.StudentID && s.SchoolID == dto.SchoolID);
+                        .Last_Or_Default(s => s.StudentID == busStudent.StudentID && s.SchoolID == dto.SchoolID && s.IsDeleted != true &&
+                        s.Classroom.AcademicYearID == semester.AcademicYearID,
+                        s => s.ID);
+
                     if (studentAcademicYear != null)
                     {
                         dto.GradeID = studentAcademicYear.GradeID;
@@ -142,11 +171,12 @@ namespace LMS_CMS_PL.Controllers.Domains.Bus
             }
 
             BusStudentGetDTO busStudentDTO = mapper.Map<BusStudentGetDTO>(busStudent);
+            Semester semester = Unit_Of_Work.semester_Repository.First_Or_Default(s => s.ID == busStudentDTO.SemseterID);
 
-            //var studentAcademicYear = Unit_Of_Work.studentAcademicYear_Repository
-            //        .First_Or_Default(s => s.SemesterID == busStudent.SemseterID);
             var studentAcademicYear = Unit_Of_Work.studentAcademicYear_Repository
-                    .First_Or_Default(s => s.StudentID == busStudent.StudentID && s.SchoolID == busStudentDTO.SchoolID);
+                    .Last_Or_Default(s => s.StudentID == busStudent.StudentID && s.SchoolID == busStudentDTO.SchoolID && s.IsDeleted != true &&
+                    s.Classroom.AcademicYearID == semester.AcademicYearID,
+                    s => s.ID);
 
             if (studentAcademicYear != null)
             {
@@ -220,13 +250,26 @@ namespace LMS_CMS_PL.Controllers.Domains.Bus
                 }
             }
 
-            BusStudent busStudedntExists = Unit_Of_Work.busStudent_Repository.First_Or_Default(
-                d => d.StudentID == busStudentAddDTO.StudentID && d.BusID == busStudentAddDTO.BusID && d.SemseterID == busStudentAddDTO.SemseterID
+            BusStudent busStudedntExists = Unit_Of_Work.busStudent_Repository.First_Or_Default( 
+                d => d.IsDeleted != true && d.StudentID == busStudentAddDTO.StudentID && d.BusID == busStudentAddDTO.BusID && d.SemseterID == busStudentAddDTO.SemseterID
                 );
 
             if (busStudedntExists != null)
             {
                 return BadRequest("Student Already Exists In This Bus For This Semester");
+            }
+
+            // Check Capacity Per Semester
+            if(bus.IsCapacityRestricted == true)
+            {
+                List<BusStudent> busStudents = Unit_Of_Work.busStudent_Repository.FindBy(
+                    b => b.SemseterID == busStudentAddDTO.SemseterID && b.IsDeleted != true && b.BusID == busStudentAddDTO.BusID
+                    );
+
+                if(busStudents.Count >= bus.Capacity)
+                {
+                    return BadRequest("You Exceeded bus Capacity for this Semester");
+                }
             }
 
             BusStudent busStudent = mapper.Map<BusStudent>(busStudentAddDTO);
@@ -320,12 +363,25 @@ namespace LMS_CMS_PL.Controllers.Domains.Bus
             }
 
             BusStudent whatWeWantToTransferTo = Unit_Of_Work.busStudent_Repository.First_Or_Default(
-                d => d.StudentID == busStudentPutDTO.StudentID && d.BusID == busStudentPutDTO.BusID && d.ID != busStudentPutDTO.ID && d.SemseterID == busStudentPutDTO.SemseterID
+                d => d.IsDeleted != true && d.StudentID == busStudentPutDTO.StudentID && d.BusID == busStudentPutDTO.BusID && d.ID != busStudentPutDTO.ID && d.SemseterID == busStudentPutDTO.SemseterID
                 );
 
             if(whatWeWantToTransferTo != null)
             { 
                 return BadRequest("Student Already Exists In This Bus For This Semester");
+            }
+
+            // Check Capacity Per Semester
+            if (bus.IsCapacityRestricted == true)
+            {
+                List<BusStudent> busStudents = Unit_Of_Work.busStudent_Repository.FindBy(
+                    b => b.SemseterID == busStudentPutDTO.SemseterID && b.IsDeleted != true && b.BusID == busStudentPutDTO.BusID
+                    );
+
+                if (busStudents.Count >= bus.Capacity)
+                {
+                    return BadRequest("You Exceeded bus Capacity for this Semester");
+                }
             }
 
             mapper.Map(busStudentPutDTO, busStudentExists);
