@@ -41,6 +41,7 @@ export class InterviewRegistrationComponent {
   today: Date = new Date();
 
   currentMonth = 0;
+  currentYear = 0;
 
   constructor(public account: AccountService, public ApiServ: ApiService, public registerationFormParentService:RegisterationFormParentService, 
     public interviewTimeTableService:InterviewTimeTableService, public registrationFormInterview: RegistrationFormInterviewService){}
@@ -66,6 +67,7 @@ export class InterviewRegistrationComponent {
     this.interviewTimeTableService.GetByYearId(this.academicYearIdID, this.DomainName).subscribe(
       (data) => { 
         this.interviewTimeTable = data
+
         this.filterFutureDates()
         this.generateCalendar()
       }
@@ -106,6 +108,7 @@ export class InterviewRegistrationComponent {
 
     this.ToChooseFromInterviewTimeTable = []
     this.currentMonth = 0;
+    this.currentYear = 0;
 
     this.closeModalcalender()
   }
@@ -182,14 +185,15 @@ export class InterviewRegistrationComponent {
         }
       )
     }
-  }
-    
+  } 
+
   filterFutureDates() {
-    const today = new Date(); 
+    const now = new Date();  
+  
     this.interviewTimeTable = this.interviewTimeTable.filter((interviewTime) => {
-      const interviewDate = new Date(interviewTime.date);
-      return interviewDate >= today; // Only include dates today or later
-    });
+      const interviewDateTime = new Date(`${interviewTime.date} ${interviewTime.fromTime}`);
+      return interviewDateTime >= now;
+    }); 
   }
 
   generateCalendar() {
@@ -199,7 +203,7 @@ export class InterviewRegistrationComponent {
     let currentMonth = new Date(this.today.getFullYear(), this.today.getMonth(), 1); 
     
     const endMonth = new Date(lastDate.getFullYear(), lastDate.getMonth(), 1); 
- 
+    this.calendarMonths = []
     while (currentMonth <= endMonth) {
       const month = currentMonth.getMonth();
       const year = currentMonth.getFullYear();
@@ -208,17 +212,17 @@ export class InterviewRegistrationComponent {
     }
     
     this.currentMonth = this.calendarMonths[0].month
-
+    this.currentYear = this.calendarMonths[0].year 
   }
 
   getDaysInMonth(month: number, year: number): DayWithInterviews[] { 
     const totalDays = new Date(year, month + 1, 0).getDate();
-
     let plainDays: DayWithInterviews[] = [];
-  
+    
+    
     for (let day = 1; day <= totalDays; day++) {
       const date = new Date(year, month, day);
-       
+      
       const dayObj: DayWithInterviews = {
         day: date.getDate(),
         interviews: []
@@ -231,7 +235,7 @@ export class InterviewRegistrationComponent {
       });
 
       plainDays.push(dayObj); 
-    }
+    } 
 
     return plainDays;
   }
@@ -245,10 +249,20 @@ export class InterviewRegistrationComponent {
   }
 
   lastMonth(){
-    this.currentMonth--
+    if (this.currentMonth == 0) {
+      this.currentMonth = 11;
+      this.currentYear -= 1;
+    } else {
+      this.currentMonth -= 1;
+    }
   }
   nextMonth(){
-    this.currentMonth++
+    if (this.currentMonth == 11) {
+      this.currentMonth = 0;
+      this.currentYear += 1;
+    } else {
+      this.currentMonth += 1;
+    }
   }
 
   isGreen(day: DayWithInterviews): boolean {

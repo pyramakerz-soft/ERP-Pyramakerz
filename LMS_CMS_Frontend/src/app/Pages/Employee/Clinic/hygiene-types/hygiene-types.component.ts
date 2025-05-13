@@ -148,10 +148,6 @@ private formatDate(date: Date | string): string {
       if (result.isConfirmed) {
         this.hygieneTypesService.Delete(row.id, this.DomainName).subscribe({
           next: (response) => {
-            
-            console.log('Delete response:', response);
-
-            
             this.getHygieneTypes();
           },
           error: (error) => {

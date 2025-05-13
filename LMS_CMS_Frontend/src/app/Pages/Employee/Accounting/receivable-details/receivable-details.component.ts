@@ -71,7 +71,7 @@ export class ReceivableDetailsComponent {
 
   @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;
   showPDF = false;
-  
+
   constructor(
     private router: Router, private menuService: MenuService, public activeRoute: ActivatedRoute, public account: AccountService, public receivableDocTypeService: ReceivableDocTypeService,
     public DomainServ: DomainService, public EditDeleteServ: DeleteEditPermissionService, public ApiServ: ApiService, public receivableService: ReceivableService,
@@ -194,6 +194,42 @@ export class ReceivableDetailsComponent {
     return isValid;
   }
 
+  DetailsCapitalizeField(field: keyof ReceivableDetails): string {
+    return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
+  }
+
+  isDetailsFormValid(detail: ReceivableDetails): boolean {
+    let isValid = true;
+    for (const key in detail) {
+      if (this.hasOwnProperty(key)) {
+        const field = key as keyof ReceivableDetails;
+        if (!detail[field]) {
+          if (field == "amount" || field == "linkFileName") {
+
+            this.validationErrorsForDetails[field] = `*${this.DetailsCapitalizeField(field)} is required`
+            isValid = false;
+          }
+        }
+        else {
+          this.validationErrorsForDetails[field] = '';
+        }
+      }
+    }
+    if (detail.linkFileID == 0) {
+      this.validationErrorsForDetails["linkFileID"] = 'link File is required'
+      isValid = false;
+    }
+    if (detail.linkFileTypeID == 0) {
+      this.validationErrorsForDetails["linkFileTypeID"] = 'Link File Data is required'
+      isValid = false;
+    }
+    if (detail.amount == null || detail.amount == "") {
+      this.validationErrorsForDetails["amount"] = 'amount is required'
+      isValid = false;
+    }
+    return isValid;
+  }
+
   onInputValueChange(event: { field: keyof Receivable, value: any }) {
     const { field, value } = event;
     (this.receivable as any)[field] = value;
@@ -266,8 +302,8 @@ export class ReceivableDetailsComponent {
             this.router.navigateByUrl(`Employee/Receivable Details/${id}`)
             Swal.fire({
               title: 'Saved Successfully',
-              icon: 'success', 
-              confirmButtonColor: '#FF7519',  
+              icon: 'success',
+              confirmButtonColor: '#FF7519',
             })
             this.isLoading = false
           },
@@ -335,6 +371,8 @@ export class ReceivableDetailsComponent {
 
   GetLinkFilesTypeData() {
     this.linkFileTypesData = []
+    this.newDetails.linkFileTypeID=0
+    this.editedRowData.linkFileTypeID=0
     this.dataAccordingToLinkFileService.GetTableDataAccordingToLinkFile(this.DomainName, +this.newDetails.linkFileID).subscribe(
       (data) => {
         this.linkFileTypesData = data
@@ -351,19 +389,22 @@ export class ReceivableDetailsComponent {
   }
 
   SaveNewDetails() {
-    this.isLoading = true
     this.newDetails.receivableMasterID = this.ReceivableID
-    this.receivableDetailsService.Add(this.newDetails, this.DomainName).subscribe(
-      (data) => {
-        this.isLoading = false
-        this.isNewDetails = false
-        this.newDetails = new ReceivableDetails()
-        this.GetReceivableDetails()
-        this.editingRowId = null;
-        this.editedRowData = new ReceivableDetails();
-        this.isDetailsValid = false
-      }
-    )
+    if (this.isDetailsFormValid(this.newDetails)) {
+      this.isLoading = true
+      this.receivableDetailsService.Add(this.newDetails, this.DomainName).subscribe(
+        (data) => {
+          this.isLoading = false
+          this.isNewDetails = false
+          this.newDetails = new ReceivableDetails()
+          this.GetReceivableDetails()
+          this.editingRowId = null;
+          this.editedRowData = new ReceivableDetails();
+          this.isDetailsValid = false
+        }
+      )
+    }
+    this.isLoading = false
   }
 
   EditDetail(row: ReceivableDetails) {
@@ -384,16 +425,20 @@ export class ReceivableDetailsComponent {
   }
 
   SaveEditedDetail() {
-    this.receivableDetailsService.Edit(this.editedRowData, this.DomainName).subscribe(
-      (data) => {
-        this.editingRowId = null;
-        this.editedRowData = new ReceivableDetails();
-        this.isDetailsValid = false
-        this.isNewDetails = false
-        this.newDetails = new ReceivableDetails()
-        this.GetReceivableDetails()
-      }
-    )
+    this.newDetails.receivableMasterID = this.ReceivableID
+    if (this.isDetailsFormValid(this.editedRowData)) {
+      this.receivableDetailsService.Edit(this.editedRowData, this.DomainName).subscribe(
+        (data) => {
+          this.editingRowId = null;
+          this.editedRowData = new ReceivableDetails();
+          this.isDetailsValid = false
+          this.isNewDetails = false
+          this.newDetails = new ReceivableDetails()
+          this.GetReceivableDetails()
+        }
+      )
+    }
+    this.isLoading = false;
   }
 
   DeleteDetail(id: number) {
@@ -490,7 +535,7 @@ export class ReceivableDetailsComponent {
 
       document.body.appendChild(printContainer);
       window.print();
-      
+
       setTimeout(() => {
         document.body.removeChild(printContainer);
         this.showPDF = false;
@@ -511,7 +556,8 @@ export class ReceivableDetailsComponent {
         { key: 'Document Type', value: this.receivable.receivableDocTypesName || '' },
         { key: 'Document Number', value: this.receivable.docNumber || '' },
         { key: 'Date', value: this.receivable.date || '' },
-        { key: 'Total Amount', value: this.totalAmount || 0 }
+        { key: 'Total Amount', value: this.totalAmount || 0 },
+        { key: 'Note', value: this.receivable.notes || "No Notes" }
       ],
       reportImage: '', // Add image URL if available
       filename: "Receivable_Report.xlsx",
@@ -520,10 +566,10 @@ export class ReceivableDetailsComponent {
           title: "Receivable Details",
           headers: ['id', 'amount', 'linkFileName', 'linkFileTypeName', 'notes'],
           data: this.receivableDetailsData.map((row) => [
-            row.id || 0, 
-            row.amount || 0, 
-            row.linkFileName || '', 
-            row.linkFileTypeName || '', 
+            row.id || 0,
+            row.amount || 0,
+            row.linkFileName || '',
+            row.linkFileTypeName || '',
             row.notes || ''
           ])
         }

@@ -278,7 +278,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
         ///
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
-        allowedTypes: new[] { "octa", "employee" },
+        allowedTypes: new[] { "octa", "employee", "parent" },
         pages: new[] { "Admission Test" }
         )]
         public async Task<IActionResult> GetAsyncbyId(int id)

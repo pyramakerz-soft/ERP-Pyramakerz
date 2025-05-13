@@ -82,7 +82,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                         Amount = fee?.Amount ?? 0,
                         Discount = fee?.Discount ?? 0,
                         Net = fee?.Net ?? 0,
-                        AcademicYearId =fee?.ID ?? 0,
+                        AcademicYearId =fee?.AcademicYearId ?? 0,
                         AcademicYearName = fee?.AcademicYear?.Name?? "",
                         Date = fee?.Date ?? "",
                         FeeTypeID = fee?.FeeTypeID ?? 0,
@@ -205,24 +205,24 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             FeesActivation feesActivation = Unit_Of_Work.feesActivation_Repository.First_Or_Default(f=>f.ID==newActivation.FeeActivationID && f.IsDeleted !=true);
             if (feesActivation == null) 
             {
-                return NotFound();
+                return NotFound("feesActivation");
             }
             TuitionFeesType tuitionFeesType = Unit_Of_Work.tuitionFeesType_Repository.First_Or_Default(t => t.ID == newActivation.FeeTypeID && t.IsDeleted != true);
             if (tuitionFeesType == null)
             {
-                return NotFound();
+                return NotFound("TuitionFeesType");
             }
 
             AcademicYear academicYear = Unit_Of_Work.academicYear_Repository.First_Or_Default(t => t.ID == newActivation.AcademicYearId && t.IsDeleted != true);
             if (academicYear == null)
             {
-                return NotFound();
+                return NotFound("AcademicYear");
             }
 
             Student student = Unit_Of_Work.student_Repository.First_Or_Default(t => t.ID == newActivation.StudentID && t.IsDeleted != true);
             if (student == null)
             {
-                return NotFound();
+                return NotFound("Student");
             }
 
             if (newActivation.FeeDiscountTypeID != 0 && newActivation.FeeDiscountTypeID != null)
@@ -230,7 +230,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 TuitionDiscountType tuitionDiscountType = Unit_Of_Work.tuitionDiscountType_Repository.First_Or_Default(t => t.ID == newActivation.FeeDiscountTypeID && t.IsDeleted != true);
                 if (tuitionDiscountType == null)
                 {
-                    return NotFound();
+                    return NotFound("tuitionDiscountType");
                 }
 
             }

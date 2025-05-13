@@ -151,20 +151,6 @@ namespace LMS_CMS_PL.Controllers.Domains
             }
 
             Employee_GetDTO employeeDTO = mapper.Map<Employee_GetDTO>(employee);
-            //string folderPath = Path.Combine(Directory.GetCurrentDirectory(), "Uploads", "Attachments", employee.User_Name.Trim());
-            //if (Directory.Exists(folderPath))
-            //{
-            //    var fileInfos = new DirectoryInfo(folderPath).GetFiles();
-
-            //    employeeDTO.Files = fileInfos.Select(fileInfo => new EmployeeAttachmentDTO
-            //    {
-            //        Name = fileInfo.Name,
-            //        Type = GetMimeType(fileInfo.FullName),
-            //        Size = fileInfo.Length,
-            //        LastModified = new DateTimeOffset(fileInfo.LastWriteTimeUtc).ToUnixTimeMilliseconds(),
-            //        Link = $"{Request.Scheme}://{Request.Host}/Uploads/Attachments/{employee.User_Name.Trim()}/{fileInfo.Name}"
-            //    }).ToList();
-            //}
             List<EmployeeAttachment> employeeAttachments = Unit_Of_Work.employeeAttachment_Repository.FindBy(s => s.EmployeeID == employeeDTO.ID &&s.IsDeleted!=true);
             List<EmployeeAttachmentDTO> filesDTO = mapper.Map<List<EmployeeAttachmentDTO>>(employeeAttachments);
             if (filesDTO != null)
@@ -174,8 +160,6 @@ namespace LMS_CMS_PL.Controllers.Domains
 
             foreach (var file in filesDTO)
             {
-                //file.Size = Math.Round(file.Size / (1024.0 * 1024.0), 2);
-
                 string filePath = Path.Combine("Uploads", "Attachments", employee.User_Name.Trim(), file.Name);
 
                 if (System.IO.File.Exists(filePath))
@@ -204,7 +188,7 @@ namespace LMS_CMS_PL.Controllers.Domains
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Employee Create" }
         )]
-        public async Task<IActionResult> Add([FromForm] EmployeeAddDTO NewEmployee, [FromForm] List<IFormFile> files)
+        public async Task<IActionResult> Add([FromForm] EmployeeAddDTO NewEmployee, [FromForm] List<EmployeeAttachmentAddDTO> files)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -318,19 +302,19 @@ namespace LMS_CMS_PL.Controllers.Domains
             {
                 foreach (var file in files)
                 {
-                    if (file.Length > 0)
+                    if (file.file.Length > 0)
                     {
-                        var filePath = Path.Combine(employeeFolder, file.FileName);
+                        var filePath = Path.Combine(employeeFolder, file.file.FileName);
                         using (var stream = new FileStream(filePath, FileMode.Create))
                         {
-                            await file.CopyToAsync(stream);
+                            await file.file.CopyToAsync(stream);
                         }
                     }
                     EmployeeAttachment uploadedFile = new EmployeeAttachment
                     {
                         EmployeeID = employee.ID,
-                        Link = $"{Request.Scheme}://{Request.Host}/Uploads/Attachments/{employee.User_Name}/{file.FileName}",
-                        Name = file.FileName,
+                        Link = $"{Request.Scheme}://{Request.Host}/Uploads/Attachments/{employee.User_Name}/{file.file.FileName}",
+                        Name = file.Name,
                     };
 
                     Unit_Of_Work.employeeAttachment_Repository.Add(uploadedFile);
@@ -349,7 +333,7 @@ namespace LMS_CMS_PL.Controllers.Domains
             allowEdit: 1,
             pages: new[] { "Employee Edit" }
         )]
-        public async Task<IActionResult> EditAsync([FromForm] EmployeePutDTO newEmployee, [FromForm] List<IFormFile> files)
+        public async Task<IActionResult> EditAsync([FromForm] EmployeePutDTO newEmployee, [FromForm] List<EmployeeAttachmentAddDTO> files , [FromForm] List<EmployeeAttachmentAddDTO> editedFiles)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
             var userClaims = HttpContext.User.Claims;
@@ -459,24 +443,6 @@ namespace LMS_CMS_PL.Controllers.Domains
             }
 
 
-            // Folder and File Management
-            //var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Attachments");
-
-            // Handle old folder if User_Name changed
-            //if (oldEmp.User_Name != newEmployee.User_Name)
-            //{
-            //var oldEmployeeFolder = Path.Combine(baseFolder, oldEmp.User_Name.Trim());
-            //if (Directory.Exists(oldEmployeeFolder))
-            //{
-            //    var filesInFolder = Directory.GetFiles(oldEmployeeFolder);
-            //    foreach (var file in filesInFolder)
-            //    {
-            //        System.IO.File.Delete(file);
-            //    }
-            //    Directory.Delete(oldEmployeeFolder);
-            //}
-            //}
-
             if (userTypeClaim == "employee")
             {
                 IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Employee", roleId, userId, oldEmp);
@@ -513,14 +479,6 @@ namespace LMS_CMS_PL.Controllers.Domains
             Unit_Of_Work.employee_Repository.Update(oldEmp);
             await Unit_Of_Work.SaveChangesAsync();
 
-            //// Delete existing employee attachments
-            //var existingAttachments = Unit_Of_Work.employeeAttachment_Repository.FindBy(s => s.EmployeeID == oldEmp.ID);
-            //foreach (var item in existingAttachments)
-            //{
-            //    Unit_Of_Work.employeeAttachment_Repository.Delete(item.ID);
-            //    await Unit_Of_Work.SaveChangesAsync();
-            //}
-
             // Create new folder for employee
             var sanitizedUserName = newEmployee.User_Name.Trim();
             var employeeFolder = Path.Combine(baseFolder, sanitizedUserName);
@@ -531,34 +489,50 @@ namespace LMS_CMS_PL.Controllers.Domains
             }
 
             // Handle new files
-            if (files != null && files.Any())
+            foreach (var file in files)
             {
-                foreach (var file in files)
+                if (file.file == null)
                 {
-                    if (file.Length > 0)
+                    Console.WriteLine($"File object for '{file.Name}' is null.");
+                    continue; // skip it
+                }
+
+                Console.WriteLine($"Saving file: {file.Name}, size: {file.file.Length}");
+
+                if (file.file.Length > 0)
+                {
+                    var filePath = Path.Combine(employeeFolder, file.Name);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
                     {
-                        var filePath = Path.Combine(employeeFolder, file.FileName);
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await file.CopyToAsync(stream);
-                        }
-
-                        var uploadedFile = new EmployeeAttachment
-                        {
-                            EmployeeID = oldEmp.ID,
-                            Link = $"{Request.Scheme}://{Request.Host}/Uploads/Attachments/{sanitizedUserName}/{file.FileName}",
-                            Name = file.FileName,
-                        };
-
-                        Unit_Of_Work.employeeAttachment_Repository.Add(uploadedFile);
-                        await Unit_Of_Work.SaveChangesAsync();
+                        await file.file.CopyToAsync(stream);
                     }
+
+                    var uploadedFile = new EmployeeAttachment
+                    {
+                        EmployeeID = oldEmp.ID,
+                        Link = $"{Request.Scheme}://{Request.Host}/Uploads/Attachments/{sanitizedUserName}/{file.Name}",
+                        Name = file.Name,
+                    };
+
+                    Unit_Of_Work.employeeAttachment_Repository.Add(uploadedFile);
+                    await Unit_Of_Work.SaveChangesAsync();
                 }
             }
 
+            foreach (var filee in editedFiles)
+            {
+                var existingAttachment = await Unit_Of_Work.employeeAttachment_Repository
+                    .Select_By_IdAsync(filee.ID); 
+
+                if (existingAttachment != null)
+                {
+                    existingAttachment.Name = filee.Name;
+                    Unit_Of_Work.employeeAttachment_Repository.Update(existingAttachment);
+                }
+            }
+            await Unit_Of_Work.SaveChangesAsync();
             return Ok(newEmployee);
         }
-
 
 
         //////////////////////////////////////////////////////
@@ -638,37 +612,8 @@ namespace LMS_CMS_PL.Controllers.Domains
     {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            //var userClaims = HttpContext.User.Claims;
-            //var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-            //long.TryParse(userIdClaim, out long userId);
-            //var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
-
-            //if (userIdClaim == null || userTypeClaim == null)
-            //{
-            //    return Unauthorized("User ID or Type claim not found.");
-            //}
-
             //TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             EmployeeAttachment employeeAttachment = Unit_Of_Work.employeeAttachment_Repository.First_Or_Default(s => s.ID == id);
-            //employeeAttachment.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
-            //if (userTypeClaim == "octa")
-            //{
-            //    employeeAttachment.DeletedByOctaId = userId;
-            //    if (employeeAttachment.DeletedByUserId != null)
-            //    {
-            //        employeeAttachment.DeletedByUserId = null;
-            //    }
-            //}
-            //else if (userTypeClaim == "employee")
-            //{
-            //    employeeAttachment.DeletedByUserId = userId;
-            //    if (employeeAttachment.DeletedByOctaId != null)
-            //    {
-            //        employeeAttachment.DeletedByOctaId = null;
-            //    }
-            //}
-            //employeeAttachment.IsDeleted = true;
-
             Unit_Of_Work.employeeAttachment_Repository.Delete(id);
             Unit_Of_Work.SaveChanges();
             Uri uri = new Uri(employeeAttachment.Link);

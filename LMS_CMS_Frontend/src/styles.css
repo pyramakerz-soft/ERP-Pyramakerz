@@ -60,3 +60,34 @@ html[dir='rtl'] {
 .quill-editor-wrapper .ql-editor {
     min-height: 200px; 
 }
+
+.square-radio {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid #FF7519;
+    background-color: transparent;
+
+    display: inline-block; /* Ensure it's treated like a block element */
+    vertical-align: middle; /* Helps with vertical alignment */
+    position: relative;
+    margin: 0; /* Remove default margin */
+    padding: 0; /* Remove padding if any */
+}
+
+.square-radio:checked::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Perfectly center the dot */
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #FF7519;
+}
+  

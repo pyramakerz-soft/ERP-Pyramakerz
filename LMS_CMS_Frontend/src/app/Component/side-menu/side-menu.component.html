@@ -2,7 +2,8 @@
     <img class="w-3 lg:w-fit" src="Images/logo-orange 1 1.png" (click)="toggleMenu()">
     <i class="fa-solid fa-magnifying-glass p-3" (click)="toggleSearch()"></i> 
     <div *ngFor="let item of menuItemsForEmployee" (click)="toggleMenu()"> 
-        <img class="w-3 lg:w-fit" [src]="'Icons/SideMenuIcons/' + item.en_name.replace(' ',  '_') + '.png'" />
+        <!-- <img class="w-3 lg:w-fit" [src]="'Icons/SideMenuIcons/' + item.en_name.replace(' ',  '_') + '.png'" /> -->
+        <img class="w-3 lg:w-fit" [src]="getImageSrc(item)" />
     </div>
     <div *ngFor="let item of menuItems" (click)="toggleMenu()"> 
         <img *ngIf="item.icon" class="w-3 lg:w-fit" [src]="'Icons/SideMenuIcons/' + item.icon.replace(' ',  '_') + '.png'" />

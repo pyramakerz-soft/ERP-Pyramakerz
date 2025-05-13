@@ -72,6 +72,7 @@ export class AccountingEntriesDetailsComponent {
   editedRowData:AccountingEntriesDetails = new AccountingEntriesDetails() 
 
   isLoading = false;
+  isSaveLoading = false;
 
 
   @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;
@@ -263,33 +264,44 @@ export class AccountingEntriesDetailsComponent {
     }
   }
 
-  Save(){ 
-    if(this.isFormValid()){
-      if(this.isCreate){
+  Save() { 
+    if (this.isFormValid()) {
+      this.isSaveLoading = true;
+  
+      if (this.isCreate) {
         this.accountingEntriesService.Add(this.accountingEntries, this.DomainName).subscribe(
           (data) => {
-            let id = JSON.parse(data).id 
-            this.router.navigateByUrl(`Employee/Accounting Entries Details/${id}`)
+            let id = JSON.parse(data).id;
+            this.router.navigateByUrl(`Employee/Accounting Entries Details/${id}`);
+            this.isSaveLoading = false;
+  
             Swal.fire({
               title: 'Saved Successfully',
               icon: 'success', 
               confirmButtonColor: '#FF7519',  
-            })
+            });
+          },
+          (error) => {
+            this.isSaveLoading = false;
           }
-        )
-      } else if(this.isEdit){
+        );
+      } else if (this.isEdit) {
         this.accountingEntriesService.Edit(this.accountingEntries, this.DomainName).subscribe(
           (data) => {
-            this.GetAccountingEntriesByID() 
-            this.router.navigateByUrl(`Employee/Accounting Entries Details/${this.AccountingEntriesID}`)
+            this.GetAccountingEntriesByID(); 
+            this.router.navigateByUrl(`Employee/Accounting Entries Details/${this.AccountingEntriesID}`);
+            this.isSaveLoading = false;
+  
             Swal.fire({
               title: 'Updated Successfully',
               icon: 'success', 
               confirmButtonColor: '#FF7519',  
-            }
-          )
-        } 
-        )
+            });
+          },
+          (error) => {
+            this.isSaveLoading = false;
+          }
+        );
       }
     }
   }

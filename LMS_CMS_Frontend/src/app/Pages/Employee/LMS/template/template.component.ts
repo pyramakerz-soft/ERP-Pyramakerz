@@ -43,7 +43,7 @@ export class TemplateComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'name'];
+  keysArray: string[] = ['id', 'englishTitle', 'arabicTitle'];
 
   template: Template = new Template();
 
@@ -85,7 +85,6 @@ export class TemplateComponent {
     this.TableData = [];
     this.templateServ.Get(this.DomainName).subscribe((d) => {
       this.TableData = d;
-      console.log(this.TableData)
     });
   }
 

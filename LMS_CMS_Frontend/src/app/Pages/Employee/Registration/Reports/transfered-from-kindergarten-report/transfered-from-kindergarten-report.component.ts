@@ -198,7 +198,6 @@ export class TransferedFromKindergartenReportComponent {
 
   DownloadAsPDF() {
     this.showPDF = true;
-    console.log(this.school)
     setTimeout(() => {
       this.pdfComponentRef.downloadPDF(); // Call manual download
       setTimeout(() => this.showPDF = false, 2000);

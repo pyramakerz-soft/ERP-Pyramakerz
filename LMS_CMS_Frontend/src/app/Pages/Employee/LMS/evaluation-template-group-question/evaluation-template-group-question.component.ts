@@ -40,7 +40,7 @@ export class EvaluationTemplateGroupQuestionComponent {
    path: string = '';
    key: string = 'id';
    value: any = '';
-   keysArray: string[] = ['id', 'name'];
+   keysArray: string[] = ['id', 'englishTitle', 'arabicTitle', 'mark'];
  
    question: EvaluationTemplateGroupQuestion = new EvaluationTemplateGroupQuestion();
    group: EvaluationTemplateGroups = new EvaluationTemplateGroups();
@@ -264,7 +264,7 @@ export class EvaluationTemplateGroupQuestionComponent {
    }
 
    moveToGroup() {
-    this.router.navigateByUrl('Employee/EvaluationTemplateGroup/'+this.GroupId);
+    this.router.navigateByUrl('Employee/EvaluationTemplateGroup/'+this.group.evaluationTemplateID);
   }
  }
  

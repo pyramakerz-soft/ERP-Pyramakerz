@@ -3900,9 +3900,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<decimal?>("VisaAmount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("XmlInvoiceFile")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("uuid")
                         .HasColumnType("nvarchar(max)");
 

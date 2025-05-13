@@ -239,7 +239,6 @@ async loadMHByParentData() {
   try {
     const domainName = this.apiService.GetHeader();
     const data = await firstValueFrom(this.medicalreportService.getAllMHByParent(domainName));
-    console.log(data)
     this.mhByParentData = data.map((item) => ({
       id: item.id,
       date: new Date(item.insertedAt).toLocaleDateString(),
@@ -332,7 +331,6 @@ async loadFollowUps() {
     try {
         const domainName = this.apiService.GetHeader();
         const data = await firstValueFrom(this.followUpService.Get(domainName));
-        console.log(data)
         this.followUps = data.map((item) => ({
             id: item.id,
             schoolId: item.schoolId,
@@ -503,7 +501,6 @@ prepareStudentsData() {
         const domainName = this.apiService.GetHeader();
         this.medicalHistoryService.Delete(row.id, domainName).subscribe({
           next: (response) => {
-            console.log('Delete response:', response);
             this.loadMHByParentData();
             this.loadMHByDoctorData();
           },

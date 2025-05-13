@@ -74,5 +74,8 @@ export class SideMenuItemComponent {
     }
     return false;
   } 
-  
+
+  getImageSrc(item: any): string {
+    return `Icons/SideMenuIcons/${item.en_name.trim().replace(/ /g, '_')}.png`;
+  }
 }

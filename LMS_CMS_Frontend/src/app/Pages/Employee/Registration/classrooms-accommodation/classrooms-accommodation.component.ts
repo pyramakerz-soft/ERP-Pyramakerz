@@ -167,6 +167,7 @@ export class ClassroomsAccommodationComponent {
 
   closeModal() {
     this.isModalVisible = false;
+    this.ClassroomId = 0;
   }
 
   getAllSchools() {
@@ -207,6 +208,7 @@ export class ClassroomsAccommodationComponent {
     this.SelectedGradeId = 0;
     this.SelectedSchoolId = 0;
     this.SelectedYearId = 0;
+    this.SelectedRegistrationFormStateId=0
     this.Data = this.OriginalData
   }
 

@@ -94,8 +94,6 @@ export class JobComponent {
       }
     });
 
-    console.log(this.UserID)
-    console.log(this.AllowDeleteForOthers)
     this.GetAllData();
   }
 
@@ -151,9 +149,6 @@ export class JobComponent {
   }
 
   IsAllowDelete(InsertedByID: number) {
-    console.log(InsertedByID)
-    console.log(this.UserID)
-    console.log(this.AllowDeleteForOthers)
     const IsAllow = this.EditDeleteServ.IsAllowDelete(
       InsertedByID,
       this.UserID,

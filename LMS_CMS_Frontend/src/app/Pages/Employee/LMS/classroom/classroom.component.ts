@@ -40,6 +40,7 @@ export class ClassroomComponent {
   key: string= "id";
   value: any = "";
 
+  OriginclassroomData:Classroom[] = []
   classroomData:Classroom[] = []
   classroom:Classroom = new Classroom()
   editClassroom:boolean = false
@@ -155,6 +156,8 @@ export class ClassroomComponent {
   }
 
   async onSearchEvent(event: { key: string, value: any }) {
+    this.SelectedSchoolIdForFilteration = 0
+    this.activeAcademicYearID = 0
     this.key = event.key;
     this.value = event.value;
     try {
@@ -193,8 +196,8 @@ export class ClassroomComponent {
   getClassroomData(){
     this.classroomData=[]
     this.classroomService.GetByActiveAcYear(this.DomainName).subscribe(
-      (data) => {
-        this.classroomData = data;
+      (data) => { 
+        this.classroomData = data; 
         if(this.classroomData.length != 0){
           this.activeAcademicYearID = this.classroomData[0].academicYearID
           this.getSchoolIDForActiveAcademicYear()
@@ -211,6 +214,16 @@ export class ClassroomComponent {
         if(this.classroomData.length != 0){
           this.activeAcademicYearID = this.classroomData[0].academicYearID
         }
+      }
+    )
+  }
+  
+  getAllClassroomData(){
+    this.OriginclassroomData=[]
+    this.classroomService.Get(this.DomainName).subscribe(
+      (data) => {
+        this.OriginclassroomData = data; 
+        this.classroomData = this.OriginclassroomData;
       }
     )
   }
@@ -425,7 +438,7 @@ export class ClassroomComponent {
   getGrade(){
     this.gradeService.Get(this.DomainName).subscribe(
       (data) => {
-        this.Grades = data.filter((grade) => this.checkSection(grade))
+        this.Grades = data.filter((grade) => this.checkSection(grade)) 
       }
     )
   }
@@ -459,7 +472,7 @@ export class ClassroomComponent {
   }
   
   checkSection(element:any) {
-    return element.sectionI  == this.selectedSection
+    return element.sectionID  == this.selectedSection
   }
 
   SaveCopy(){
@@ -487,5 +500,11 @@ export class ClassroomComponent {
         }
       );
     }
+  }
+
+  ResetFilter(){
+    this.activeAcademicYearID =0
+    this.SelectedSchoolIdForFilteration =0
+   this.getAllClassroomData()
   }
 }

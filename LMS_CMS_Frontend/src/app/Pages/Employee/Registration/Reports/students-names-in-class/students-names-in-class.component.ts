@@ -176,7 +176,6 @@ export class StudentsNamesInClassComponent {
         this.StudentData = d.students
         this.class = d.class
         this.school = d.school
-        console.log("fdfd",this.school)
         this.studentsCount = d.studentsCount
         this.date = d.date
         this.date = this.formatDate(this.date, this.direction);
@@ -246,7 +245,6 @@ export class StudentsNamesInClassComponent {
 
   DownloadAsPDF() {
     this.showPDF = true;
-    console.log(this.school)
     setTimeout(() => {
       this.pdfComponentRef.downloadPDF(); // Call manual download
       setTimeout(() => this.showPDF = false, 2000);

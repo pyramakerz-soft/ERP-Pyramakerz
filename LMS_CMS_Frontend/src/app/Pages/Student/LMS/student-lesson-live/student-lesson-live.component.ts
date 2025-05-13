@@ -85,7 +85,6 @@ User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '',
     this.TableData = [];
     this.LessonLiveServ.GetByStudentID(this.UserID,this.DomainName).subscribe((d) => {
       this.TableData = d;
-      console.log(this.TableData)
     });
   }
 

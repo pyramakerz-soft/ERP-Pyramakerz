@@ -69,7 +69,7 @@ export class PayableDetailsComponent {
   editedRowData: PayableDetails = new PayableDetails()
 
   isLoading = false;
-
+  isSaveLoading = false;
 
   @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;
   showPDF = false;
@@ -199,7 +199,6 @@ export class PayableDetailsComponent {
   }
 
   isDetailsFormValid(detail: PayableDetails): boolean {
-    console.log(detail)
     let isValid = true;
     for (const key in detail) {
       if (this.hasOwnProperty(key)) {
@@ -315,30 +314,42 @@ export class PayableDetailsComponent {
 
   Save() {
     if (this.isFormValid()) {
+      this.isSaveLoading = true;
+  
       if (this.isCreate) {
         this.payableService.Add(this.payable, this.DomainName).subscribe(
           (data) => {
-            let id = JSON.parse(data).id
-            this.router.navigateByUrl(`Employee/Payable Details/${id}`)
+            let id = JSON.parse(data).id;
+            this.router.navigateByUrl(`Employee/Payable Details/${id}`);
+            this.isSaveLoading = false;
+  
             Swal.fire({
               title: 'Saved Successfully',
               icon: 'success',
               confirmButtonColor: '#FF7519',
-            })
+            });
+          },
+          (error) => {
+            this.isSaveLoading = false;
           }
-        )
+        );
       } else if (this.isEdit) {
         this.payableService.Edit(this.payable, this.DomainName).subscribe(
           (data) => {
-            this.GetPayableByID()
+            this.GetPayableByID();
+            this.isSaveLoading = false;
+  
             Swal.fire({
               icon: 'success',
               title: 'Done!',
               text: 'The Payable has been edited successfully.',
               confirmButtonColor: '#FF7519',
             });
+          },
+          (error) => {
+            this.isSaveLoading = false;
           }
-        )
+        );
       }
     }
   }
@@ -369,7 +380,6 @@ export class PayableDetailsComponent {
     this.linkFileTypesData = []
     this.dataAccordingToLinkFileService.GetTableDataAccordingToLinkFile(this.DomainName, id).subscribe(
       (data) => {
-        console.log(this.linkFileTypesData)
         this.linkFileTypesData = data
       }
     )
@@ -385,7 +395,6 @@ export class PayableDetailsComponent {
 
   SaveNewDetails() {
     this.newDetails.payableMasterID = this.PayableID
-    console.log(1)
     if (this.isDetailsFormValid(this.newDetails)) {
       this.isLoading = true;
       this.payableDetailsService.Add(this.newDetails, this.DomainName).subscribe(

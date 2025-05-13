@@ -83,7 +83,6 @@ export class MedalComponent {
     this.TableData = [];
     this.medalServ.Get(this.DomainName).subscribe((d) => {
       this.TableData = d;
-      console.log(this.TableData)
     });
   }
 
@@ -141,7 +140,6 @@ export class MedalComponent {
   CreateOREdit() {
     if (this.isFormValid()) {
       this.isLoading = true;
-      console.log(this.medal)
       if (this.mode == 'Create') {
         this.medalServ.Add(
           this.medal,

@@ -11,27 +11,27 @@ import { AccountingEmployee } from '../../Models/Accounting/accounting-employee'
 })
 export class EmployeeService {
 
-  baseUrl=""
-  header=""
-  
-  constructor(public http: HttpClient, public ApiServ:ApiService){  
-    this.baseUrl=ApiServ.BaseUrl
+  baseUrl = ""
+  header = ""
+
+  constructor(public http: HttpClient, public ApiServ: ApiService) {
+    this.baseUrl = ApiServ.BaseUrl
     this.header = ApiServ.GetHeader();
   }
 
-  GetWithTypeId(typeId: number,DomainName?:string){
-    if(DomainName!=null) {
-      this.header=DomainName 
+  GetWithTypeId(typeId: number, DomainName?: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
-    .set('Authorization', `Bearer ${token}`)
-    .set('domain-name', this.header)
-    .set('Content-Type', 'application/json');
+      .set('Authorization', `Bearer ${token}`)
+      .set('domain-name', this.header)
+      .set('Content-Type', 'application/json');
 
     return this.http.get<Employee[]>(`${this.baseUrl}/Employee/GetByTypeId/${typeId}`, { headers })
   }
-  
+
   // GetByID(empID: number,DomainName?:string){
   //   if(DomainName!=null) {
   //     this.header=DomainName 
@@ -49,7 +49,7 @@ export class EmployeeService {
     if (DomainName != null) {
       this.header = DomainName;
     }
-
+    console.log(employee)
     const token = localStorage.getItem('current_token');
     const headers = new HttpHeaders()
       .set('Authorization', `Bearer ${token}`)
@@ -59,7 +59,7 @@ export class EmployeeService {
 
     formData.append('user_Name', employee.user_Name);
     formData.append('en_name', employee.en_name);
-    formData.append('ar_name', employee.ar_name || ''); 
+    formData.append('ar_name', employee.ar_name || '');
     formData.append('password', employee.password);
     formData.append('mobile', employee.mobile || '');
     formData.append('phone', employee.phone || '');
@@ -75,10 +75,10 @@ export class EmployeeService {
 
     if (employee.files && employee.files.length > 0) {
       employee.files.forEach((file, index) => {
-        formData.append('files', file, file.name);
+        formData.append(`files[${index}].file`, file.file, file.name); // File (IFormFile)
+        formData.append(`files[${index}].Name`, file.name);            // Name (string)
       });
     }
-
     return this.http.post<EmployeeGet>(`${this.baseUrl}/Employee`, formData, { headers });
   }
 
@@ -87,7 +87,7 @@ export class EmployeeService {
       this.header = DomainName;
     }
 
-
+    console.log(employee)
     const token = localStorage.getItem('current_token');
     const headers = new HttpHeaders()
       .set('Authorization', `Bearer ${token}`)
@@ -97,7 +97,7 @@ export class EmployeeService {
     formData.append('id', employee.id?.toString() ?? '');
     formData.append('user_Name', employee.user_Name);
     formData.append('en_name', employee.en_name);
-    formData.append('ar_name', employee.ar_name || ''); 
+    formData.append('ar_name', employee.ar_name || '');
     formData.append('password', employee.password);
     formData.append('mobile', employee.mobile || '');
     formData.append('phone', employee.phone || '');
@@ -112,100 +112,114 @@ export class EmployeeService {
     formData.append('canReceiveRequest', employee.canReceiveRequest?.toString() ?? 'false');
 
     if (employee.files && employee.files.length > 0) {
-      employee.files.forEach((file, index) => {
-        if (file instanceof File) {
-          formData.append('files', file, file.name);
-        } else {
-          console.error(`File at index ${index} is not valid:`, file);
+      let uploadIndex = 0;
+      employee.files.forEach((file) => {
+        if (file.file instanceof File) {
+          formData.append(`files[${uploadIndex}].file`, file.file, file.name);
+          formData.append(`files[${uploadIndex}].name`, file.name);
+          uploadIndex++;
         }
       });
     }
 
+    if (employee.editedFiles && employee.editedFiles.length > 0) {
+      let uploadIndex = 0;
+      employee.files.forEach((file) => {
+          formData.append(`editedFiles[${uploadIndex}].id`, file.id.toString());
+          formData.append(`editedFiles[${uploadIndex}].name`, file.name);
+          formData.append(`editedFiles[${uploadIndex}].link`, file.link);
+          formData.append(`editedFiles[${uploadIndex}].lastModified`, file.lastModified.toString());
+          formData.append(`editedFiles[${uploadIndex}].size`, file.size.toString());
+          formData.append(`editedFiles[${uploadIndex}].type`, file.type);
+          formData.append(`editedFiles[${uploadIndex}].employeeID`, file.employeeID.toString());
+          uploadIndex++;
+      });
+    }
     return this.http.put<EmployeeGet>(`${this.baseUrl}/Employee`, formData, { headers });
   }
 
-  Get_Employees(DomainName?:string){
-    if(DomainName!=null) {
-      this.header=DomainName 
+  Get_Employees(DomainName?: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
-    .set('domain-name', this.header) 
-    .set('Authorization', `Bearer ${token}`)
-    .set('Content-Type', 'application/json');
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
     return this.http.get<EmployeeGet[]>(`${this.baseUrl}/Employee`, { headers });
   }
 
-  Get_Employee_By_ID(id :number ,DomainName?:string){
-    if(DomainName!=null) {
-      this.header=DomainName 
+  Get_Employee_By_ID(id: number, DomainName?: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
-    .set('domain-name', this.header) 
-    .set('Authorization', `Bearer ${token}`)
-    .set('Content-Type', 'application/json');
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
     return this.http.get<EmployeeGet>(`${this.baseUrl}/Employee/${id}`, { headers });
   }
 
-  DeleteFile(id :number ,DomainName?:string){
-    if(DomainName!=null) {
-      this.header=DomainName 
+  DeleteFile(id: number, DomainName?: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
-    .set('domain-name', this.header) 
-    .set('Authorization', `Bearer ${token}`)
-    .set('Content-Type', 'application/json');
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
     return this.http.delete(`${this.baseUrl}/Employee/DeleteFiles/${id}`, { headers });
   }
 
-  Delete(id :number ,DomainName?:string){
-    if(DomainName!=null) {
-      this.header=DomainName 
+  Delete(id: number, DomainName?: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
-    .set('domain-name', this.header) 
-    .set('Authorization', `Bearer ${token}`)
-    .set('Content-Type', 'application/json');
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
     return this.http.delete(`${this.baseUrl}/Employee/${id}`, { headers });
   }
 
-  EditPassword(editpass:EditPass,DomainName?:string){
-    if(DomainName!=null) {
-      this.header=DomainName 
+  EditPassword(editpass: EditPass, DomainName?: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
-    .set('domain-name', this.header) 
-    .set('Authorization', `Bearer ${token}`)
-    .set('Content-Type', 'application/json');
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
     return this.http.put(`${this.baseUrl}/Employee/${editpass.Id}`, editpass, { headers });
   }
 
-  EditAccountingEmployee(employee:AccountingEmployee,DomainName?:string){
-    if(DomainName!=null) {
-      this.header=DomainName 
+  EditAccountingEmployee(employee: AccountingEmployee, DomainName?: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
-    .set('domain-name', this.header) 
-    .set('Authorization', `Bearer ${token}`)
-    .set('Content-Type', 'application/json');
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
     return this.http.put(`${this.baseUrl}/Employee/EmpployeeAccounting`, employee, { headers });
   }
-  
 
-  GetAcountingEmployee(id :number ,DomainName?:string){
-    if(DomainName!=null) {
-      this.header=DomainName 
+
+  GetAcountingEmployee(id: number, DomainName?: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
-    .set('domain-name', this.header) 
-    .set('Authorization', `Bearer ${token}`)
-    .set('Content-Type', 'application/json');
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
     return this.http.get<AccountingEmployee>(`${this.baseUrl}/Employee/getByAccountingEmployee/${id}`, { headers });
   }
 }

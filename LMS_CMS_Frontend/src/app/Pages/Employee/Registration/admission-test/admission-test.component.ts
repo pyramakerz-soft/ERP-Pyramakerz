@@ -111,7 +111,6 @@ export class AdmissionTestComponent {
     });
 
     this.GetAllData();
-    this.GetAllSchools();  
 
     this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
@@ -215,7 +214,11 @@ export class AdmissionTestComponent {
   Edit(row: Test) {
     this.mode = 'Edit';
     this.testServ.GetByID(row.id, this.DomainName).subscribe((d) => {
-      this.test = d
+      this.test = d 
+      this.SchoolId = this.test.schoolID 
+      this.GetYearsBySchoolId()
+      this.GetGradesBySchoolId()
+      this.GetSubjectsByGradeId()
     })
     this.openModal();
   }
@@ -283,6 +286,8 @@ export class AdmissionTestComponent {
   }
 
   openModal() {
+    this.GetAllSchools();  
+
     this.isModalVisible = true;
   }
 
@@ -347,6 +352,16 @@ export class AdmissionTestComponent {
       }
     } catch (error) {
       this.Data = [];
+    }
+  }
+
+  validateNumber(event: any, field: keyof Test): void {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = ''; 
+      if (typeof this.test[field] === 'string') {
+        this.test[field] = '' as never;  
+      }
     }
   }
 }

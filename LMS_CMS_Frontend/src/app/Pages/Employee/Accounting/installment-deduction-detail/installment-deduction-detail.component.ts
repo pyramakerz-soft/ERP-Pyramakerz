@@ -20,6 +20,8 @@ import { InstallmentDeductionMasterService } from '../../../../Services/Employee
 import { TuitionFeesType } from '../../../../Models/Accounting/tuition-fees-type';
 import { TuitionFeesTypeService } from '../../../../Services/Employee/Accounting/tuition-fees-type.service';
 import Swal from 'sweetalert2';
+import { EmployeeStudentService } from '../../../../Services/Employee/Accounting/employee-student.service';
+import { EmplyeeStudent } from '../../../../Models/Accounting/emplyee-student';
 
 @Component({
   selector: 'app-installment-deduction-detail',
@@ -49,7 +51,7 @@ export class InstallmentDeductionDetailComponent {
   mode: string = "Create"
 
   employees: Employee[] = []
-  students: Student[] = []
+  emplyeeStudents: EmplyeeStudent[] = []
   FeesType: TuitionFeesType[] = []
 
   TableData: InstallmentDeductionDetail[] = []
@@ -59,6 +61,7 @@ export class InstallmentDeductionDetailComponent {
 
   IsOpenToAdd: boolean = false
   isLoading = false
+  validationErrors: { [key in keyof InstallmentDeductionMaster]?: string } = {};
 
   constructor(
     private router: Router,
@@ -70,7 +73,7 @@ export class InstallmentDeductionDetailComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public EmployeeServ: EmployeeService,
-    public StudentServ: StudentService,
+    public EmployeeStudentServ: EmployeeStudentService,
     public installmentDeductionDetailServ: InstallmentDeductionDetailService,
     public installmentDeductionMasterServ: InstallmentDeductionMasterService,
     public TuitionFeesTypeServ: TuitionFeesTypeService
@@ -115,7 +118,6 @@ export class InstallmentDeductionDetailComponent {
 
     }
     this.GetAllEmployees()
-    this.GetAllStudents()
     this.GetAllTuitionFeesType()
   }
 
@@ -123,48 +125,92 @@ export class InstallmentDeductionDetailComponent {
     this.router.navigateByUrl(`Employee/Installment Deduction`)
   }
 
-  Save() {
-    this.isLoading = true
-    if (this.mode == "Create") {
-      this.installmentDeductionMasterServ.Add(this.Data, this.DomainName).subscribe((d) => {
-        this.MasterId = d
-        this.isLoading = false
-
-        Swal.fire({
-          icon: 'success',
-          title: 'Done',
-          text: 'Done Succeessfully',
-          confirmButtonColor: '#FF7519',
-        });
-        
-        this.router.navigateByUrl(`Employee/Installment Deduction Details/Edit/${this.MasterId}`)
-      },
-        err => {
-          this.isLoading = false
-          Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: 'Try Again Later!',
-            confirmButtonText: 'Okay',
-            customClass: { confirmButton: 'secondaryBg' },
-          });
-        })
+  isFormValid(): boolean {
+    let isValid = true;
+    for (const key in this.Data) {
+      if (this.Data.hasOwnProperty(key)) {
+        const field = key as keyof InstallmentDeductionMaster;
+        if (!this.Data[field]) {
+          if (
+            field == 'docNumber' ||
+            field == 'employeeID' ||
+            field == 'studentID' ||
+            field == 'date'
+          ) {
+            this.validationErrors[field] = `*${this.capitalizeField(
+              field
+            )} is required`;
+            isValid = false;
+          }
+        }
+      }
     }
-    if (this.mode == "Edit") {
-      this.installmentDeductionMasterServ.Edit(this.Data, this.DomainName).subscribe((d) => {
-        this.GetMasterInfo()
-        this.isLoading = false
-      },
-        err => {
+    return isValid;
+  }
+
+  capitalizeField(field: keyof InstallmentDeductionMaster): string {
+    return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
+  }
+
+  onInputValueChange(event: { field: keyof InstallmentDeductionMaster; value: any }) {
+    const { field, value } = event;
+    (this.Data as any)[field] = value;
+    if (value) {
+      this.validationErrors[field] = '';
+    }
+  }
+
+  Save() {
+    if (this.isFormValid()) {
+      this.isLoading = true
+      if (this.mode == "Create") {
+        this.installmentDeductionMasterServ.Add(this.Data, this.DomainName).subscribe((d) => {
+          this.MasterId = d
           this.isLoading = false
           Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: 'Try Again Later!',
-            confirmButtonText: 'Okay',
-            customClass: { confirmButton: 'secondaryBg' },
+            icon: 'success',
+            title: 'Done',
+            text: 'Done Succeessfully',
+            confirmButtonColor: '#FF7519',
           });
-        })
+
+          this.router.navigateByUrl(`Employee/Installment Deduction Details/Edit/${this.MasterId}`)
+        },
+          err => {
+            this.isLoading = false
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'Try Again Later!',
+              confirmButtonText: 'Okay',
+              customClass: { confirmButton: 'secondaryBg' },
+            });
+          })
+      }
+      else if (this.mode == "Edit") {
+        this.installmentDeductionMasterServ.Edit(this.Data, this.DomainName).subscribe((d) => {
+          this.GetMasterInfo()
+          this.isLoading = false
+        },
+          err => {
+            this.isLoading = false
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'Try Again Later!',
+              confirmButtonText: 'Okay',
+              customClass: { confirmButton: 'secondaryBg' },
+            });
+          })
+      }
+    }
+  }
+  onEmployeeChange() {
+    this.emplyeeStudents = []
+    this.Data.studentID = 0
+
+    if (this.Data.employeeID) {
+      this.GetAllStudents();
     }
   }
 
@@ -175,18 +221,21 @@ export class InstallmentDeductionDetailComponent {
   }
 
   GetAllStudents() {
-    this.StudentServ.GetAll(this.DomainName).subscribe((d) => {
-      this.students = d
+    this.emplyeeStudents = []
+    this.EmployeeStudentServ.Get(this.Data.employeeID, this.DomainName).subscribe((d) => {
+      this.emplyeeStudents = d
     })
   }
 
   GetMasterInfo() {
     this.installmentDeductionMasterServ.GetById(this.MasterId, this.DomainName).subscribe((d) => {
       this.Data = d
+      this.GetAllStudents()
     })
   }
 
   GetTableDataByID() {
+    this.TableData = [];
     this.installmentDeductionDetailServ.GetByMasterId(this.MasterId, this.DomainName).subscribe((d) => {
       this.TableData = d;
     })
@@ -213,6 +262,12 @@ export class InstallmentDeductionDetailComponent {
       if (result.isConfirmed) {
         this.installmentDeductionDetailServ.Delete(id, this.DomainName).subscribe((D) => {
           this.GetTableDataByID();
+          Swal.fire({
+            icon: 'success',
+            title: 'Done',
+            text: 'Installment Deduction Details Deleted Succeessfully',
+            confirmButtonColor: '#FF7519',
+          });
         })
       }
     });
@@ -260,5 +315,15 @@ export class InstallmentDeductionDetailComponent {
     this.installmentDeductionDetailServ.Edit(row, this.DomainName).subscribe((d) => {
       this.GetTableDataByID();
     })
+  }
+
+  validateNumber(event: any, field: keyof InstallmentDeductionMaster): void {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+      if (typeof this.Data[field] === 'string') {
+        this.Data[field] = '' as never;
+      }
+    }
   }
 }

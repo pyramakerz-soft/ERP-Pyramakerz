@@ -160,8 +160,7 @@ export class AccountingEmployeeEditComponent {
 
   GetAllData() {
     this.employeeServ.GetAcountingEmployee(this.EmployeeId, this.DomainName).subscribe((d: any) => {
-      this.Data = d; 
-      this.JobCategoryId = this.Data.jobCategoryId; 
+      this.Data = d;  
       this.GetAllJobs()
       this.selectedDays = this.days
       this.selectedDays = this.days.filter(day => this.Data.days.includes(day.id));
@@ -234,7 +233,7 @@ export class AccountingEmployeeEditComponent {
   Save() {
     if(this.isFormValid()){
       this.getFormattedTime() 
-      this.isLoading = true
+      this.isLoading = true 
       this.employeeServ.EditAccountingEmployee(this.Data, this.DomainName).subscribe((d) => {
         this.GetAllData();
         Swal.fire({
@@ -246,7 +245,7 @@ export class AccountingEmployeeEditComponent {
         this.router.navigateByUrl(`Employee/Employee Accounting`)
         this.isLoading = false
       },
-        err => {
+        err => { 
           this.isLoading = false
           Swal.fire({
             icon: 'error',
@@ -290,16 +289,15 @@ export class AccountingEmployeeEditComponent {
     this.isDropdownOpen = !this.isDropdownOpen;
   }
 
-  getFormattedTime() { 
+  getFormattedTime() {
     const { hours, minutes, periods } = this.attendanceTime;
-    if (hours && minutes && periods) {
-      this.Data.attendanceTime = `${hours}:${minutes} ${periods}`;
+    if (hours != null && minutes != null && periods) {
+      this.Data.attendanceTime = `${hours}:${minutes.toString().padStart(2, '0')} ${periods}`;
     }
-
     const { hour, minute, period } = this.departureTime;
-    if (hour && minute && period) {
-      this.Data.departureTime = `${hour}:${minute} ${period}`;
-    } 
+    if (hour != null && minute != null && period) {
+      this.Data.departureTime = `${hour}:${minute.toString().padStart(2, '0')} ${period}`;
+    }
   }
 
   parseDepartureTime(departureTimeString: string) {
@@ -340,13 +338,23 @@ export class AccountingEmployeeEditComponent {
 
 
   CreateOREdit() {
-    if (this.emplyeeStudent.studentID != 0) {
-      var EmployeeStudent = new EmplyeeStudent()
-      EmployeeStudent.studentName = this.Student.user_Name;
-      EmployeeStudent.studentID = this.emplyeeStudent.id;
-      this.TableData.push(EmployeeStudent)
-      this.Data.students.push(this.emplyeeStudent.studentID)
-      this.closeModal()
+    if (this.emplyeeStudent.studentID != 0) { 
+      if (!this.Data.students.includes(this.emplyeeStudent.studentID)) {
+        var EmployeeStudent = new EmplyeeStudent();
+        EmployeeStudent.studentName = this.Student.user_Name;
+        EmployeeStudent.studentID = this.emplyeeStudent.id; 
+        this.TableData.push(EmployeeStudent); 
+        this.Data.students.push(this.emplyeeStudent.studentID);
+        this.closeModal();
+      }else{
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'Student Already Assigned To This Employee',
+          confirmButtonText: 'Okay',
+          customClass: { confirmButton: 'secondaryBg' },
+        });
+      }
     }
     else {
       Swal.fire({

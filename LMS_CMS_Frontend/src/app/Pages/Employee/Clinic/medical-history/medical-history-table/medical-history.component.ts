@@ -60,7 +60,6 @@ export class MedicalHistoryComponent implements OnInit {
     try {
       const domainName = this.apiService.GetHeader();
       const data = await firstValueFrom(this.medicalHistoryService.GetByDoctor(domainName));
-        console.log(data)
       this.medicalHistories = data.map(item => ({
         ...item,
         insertedAt: new Date(item.insertedAt).toLocaleDateString(),

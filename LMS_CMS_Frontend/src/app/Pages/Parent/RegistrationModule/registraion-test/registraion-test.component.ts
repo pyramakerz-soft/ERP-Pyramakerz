@@ -17,6 +17,8 @@ import { TestWithQuestion } from '../../../../Models/Registration/test-with-ques
 import { Answer } from '../../../../Models/Registration/answer';
 import { QuestionOption } from '../../../../Models/Registration/question-option';
 import Swal from 'sweetalert2';
+import { TestService } from '../../../../Services/Employee/Registration/test.service';
+import { RegisterationFormParentService } from '../../../../Services/Employee/Registration/registeration-form-parent.service';
 
 @Component({
   selector: 'app-registraion-test',
@@ -76,6 +78,8 @@ export class RegistraionTestComponent {
     private router: Router,
     public registerServ: RegisterationFormTestAnswerService,
     public registrationserv: RegisterationFormTestService,
+    public testService: TestService,
+    public registerationFormParentService: RegisterationFormParentService,
     public questionServ: QuestionService
   ) {}
 
@@ -91,6 +95,8 @@ export class RegistraionTestComponent {
         );
         this.TestId = Number(params.get('TestId'));
         // this.registerationFormID = Number(params.get('registerationFormID'));
+         
+        this.checkForTestAvailabilityForParent()
       });
     });
 
@@ -116,7 +122,7 @@ export class RegistraionTestComponent {
       )
       .subscribe(
         (d: any) => {
-          this.Data = d.questionWithAnswer;
+          this.Data = d.questionWithAnswer; 
           this.TestName = d.testName;
           this.mark = d.mark;
           this.TotalMark = d.totalmark;
@@ -127,7 +133,7 @@ export class RegistraionTestComponent {
           this.questionServ
             .GetByTestIDGroupBy(this.TestId, this.DomainName)
             .subscribe((d: any) => {
-              this.questions = d.groupedByQuestionType ;
+              this.questions = d.groupedByQuestionType ; 
               this.TestName=d.testName;
               this.questionServ
                 .GetByTestID(this.TestId, this.DomainName)
@@ -154,9 +160,11 @@ export class RegistraionTestComponent {
         }
       );
   }
-  moveToEmployee() {
+
+  moveToTest() {
     this.router.navigateByUrl(`Parent/Admission Test`);
   }
+
   selectOption(questionId: number, OptionId: number, a: number) {
     const answer = this.Answers.find((a) => a.questionID === questionId);
     if (answer) {
@@ -198,4 +206,19 @@ export class RegistraionTestComponent {
         this.router.navigateByUrl(`Parent/Admission Test`);
       });
   }
+
+  checkForTestAvailabilityForParent(){
+    this.registerationFormParentService.GetById(this.registerationFormParentID, this.DomainName).subscribe(
+      registrationParent => { 
+        this.testService.GetByID(this.TestId, this.DomainName).subscribe(
+          test => {
+            if(test.gradeID != registrationParent.gradeID){
+              this.moveToTest()
+            }
+          }
+        )
+      }
+    )
+
+  } 
 }

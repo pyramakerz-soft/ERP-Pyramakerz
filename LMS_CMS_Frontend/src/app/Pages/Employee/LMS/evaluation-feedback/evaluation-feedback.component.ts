@@ -40,7 +40,8 @@ export class EvaluationFeedbackComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'englishName' ,'arabicName'];
+  keysArrayEvaluator: string[] = ['id', 'evaluatorEnglishName', 'evaluationTemplateEnglishTitle'];
+  keysArrayEvaluated: string[] = ['id', 'evaluatedEnglishName', 'evaluationTemplateEnglishTitle'];
 
 
   constructor(
@@ -72,7 +73,6 @@ export class EvaluationFeedbackComponent {
     });
     if(this.path=="Received Evaluations"){
       this.mode="Evaluated"
-      console.log(this.path)
       this.GetAllDataForEvaluated();
     }else if(this.path=="Created Evaluations"){
       this.mode="Evaluator"
@@ -83,16 +83,14 @@ export class EvaluationFeedbackComponent {
   GetAllDataForEvaluated() {
     this.TableData = [];
     this.EvaluationEmployeeServ.GetEvaluatedEvaluations(this.UserID,this.DomainName).subscribe((d) => {
-      this.TableData = d;
-      console.log(this.TableData)
+      this.TableData = d; 
     });
   }
 
   GetAllDataForEvaluator() {
     this.TableData = [];
     this.EvaluationEmployeeServ.GetEvaluatorEvaluations(this.UserID,this.DomainName).subscribe((d) => {
-      this.TableData = d;
-      console.log(this.TableData)
+      this.TableData = d; 
     });
   }
 
@@ -100,10 +98,20 @@ export class EvaluationFeedbackComponent {
     this.key = event.key;
     this.value = event.value;
     try {
-      const data: EvaluationEmployeeAdd[] = await firstValueFrom(
-        this.EvaluationEmployeeServ.GetEvaluatorEvaluations(this.UserID,this.DomainName)
-      );
-      this.TableData = data || [];
+      let data: EvaluationEmployeeAdd[] 
+      if(this.mode=="Evaluator"){
+        data = await firstValueFrom(
+          this.EvaluationEmployeeServ.GetEvaluatorEvaluations(this.UserID,this.DomainName)
+        );
+
+        this.TableData = data || [];
+      } else if(this.mode == 'Evaluated'){
+        data = await firstValueFrom(
+          this.EvaluationEmployeeServ.GetEvaluatedEvaluations(this.UserID,this.DomainName)
+        )
+        
+        this.TableData = data || [];
+      }
 
       if (this.value !== '') {
         const numericValue = isNaN(Number(this.value))

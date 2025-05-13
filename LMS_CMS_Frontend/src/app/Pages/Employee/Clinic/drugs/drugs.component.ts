@@ -138,12 +138,7 @@ saveDrug() {
       if (result.isConfirmed) {
         this.drugService.Delete(row.id, this.DomainName).subscribe({
           next: (response) => {
-            
-            console.log('Delete response:', response);
-
-            
             this.getDrugs();
-            
           },
           error: (error) => {
             console.error('Error deleting drug:', error);

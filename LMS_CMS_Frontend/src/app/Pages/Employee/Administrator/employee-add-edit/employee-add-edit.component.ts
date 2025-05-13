@@ -16,6 +16,7 @@ import { Role } from '../../../../Models/Administrator/role';
 import { EmployeeTypeService } from '../../../../Services/Employee/employee-type.service';
 import { EmployeeTypeGet } from '../../../../Models/Administrator/employee-type-get';
 import Swal from 'sweetalert2';
+import { EmployeeAttachment } from '../../../../Models/Employee/employee-attachment';
 
 @Component({
   selector: 'app-employee-add-edit',
@@ -39,9 +40,10 @@ export class EmployeeAddEditComponent {
   EmpType: number = 0;
   EmpId: number = 0;
   validationErrors: { [key in keyof EmployeeGet]?: string } = {};
-  emailPattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/; 
+  emailPattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
   DeletedFiles: number[] = []
-  SelectedFiles :File [] = []
+  SelectedFiles: EmployeeAttachment[] = []
+  NewFile: EmployeeAttachment = new EmployeeAttachment()
   isLoading = false;
 
   constructor(public RoleServ: RoleService, public empTypeServ: EmployeeTypeService, public BusCompanyServ: BusCompanyService, public activeRoute: ActivatedRoute, public account: AccountService, public ApiServ: ApiService, private menuService: MenuService, public EditDeleteServ: DeleteEditPermissionService, private router: Router, public EmpServ: EmployeeService) { }
@@ -61,13 +63,14 @@ export class EmployeeAddEditComponent {
           this.EmpId = Number(this.activeRoute.snapshot.paramMap.get('id'))
           this.EmpServ.Get_Employee_By_ID(this.EmpId, this.DomainName).subscribe(async (data) => {
             this.Data = data;
+            this.Data.editedFiles = []
+            console.log(this.Data)
             if (data.files == null) {
               this.Data.files = []
             }
             this.Data.id = this.EmpId;
           })
         }
-
         this.GetBusCompany();
         this.GetRole();
         this.GetEmployeeType();
@@ -93,14 +96,19 @@ export class EmployeeAddEditComponent {
     });
   }
 
-  onFilesSelected(event: Event): void { 
+  onFilesSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files) {
       for (let i = 0; i < input.files.length; i++) {
-        const file = input.files[i]; 
-        this.SelectedFiles.push(file);
+        const file = input.files[i];
+        this.NewFile = new EmployeeAttachment()
+        this.NewFile.file = file
+        this.NewFile.name = file.name
+        this.NewFile.link = ''
+        this.NewFile.id = Date.now() + Math.floor(Math.random() * 10000);
+        this.SelectedFiles.push(this.NewFile);
       }
-    } 
+    }
     input.value = '';
   }
 
@@ -108,14 +116,14 @@ export class EmployeeAddEditComponent {
     const file: any = this.Data.files[id];
     this.DeletedFiles.push(file.id);
     this.Data.files.splice(id, 1);
-  } 
-  
-  deleteFileFromSelectedFile(file: File): void { 
-    const index = this.SelectedFiles.indexOf(file);
+  }
+
+  deleteFileFromSelectedFile(file: File): void {
+    const index = this.SelectedFiles.findIndex(item => item.file === file);
     if (index !== -1) {
       this.SelectedFiles.splice(index, 1);
-    } 
-  } 
+    }
+  }
 
   downloadFile(file: any): void {
     if (this.mode == "Create") {
@@ -164,8 +172,8 @@ export class EmployeeAddEditComponent {
     if (this.Data.email && !this.emailPattern.test(this.Data.email)) {
       this.validationErrors["email"] = `*Email is not valid`;
       isValid = false;
-    } 
-    
+    }
+
     return isValid;
   }
 
@@ -192,12 +200,13 @@ export class EmployeeAddEditComponent {
   }
 
   async Save() {
-    if (this.isFormValid()) { 
+    if (this.isFormValid()) {
       this.isLoading = true;
       for (let i = 0; i < this.SelectedFiles.length; i++) {
         this.Data.files.push(this.SelectedFiles[i]);
       }
       if (this.mode == "Create") {
+        console.log(this.Data)
         return this.EmpServ.Add(this.Data, this.DomainName).toPromise().then(
           (data) => {
             Swal.fire({
@@ -210,8 +219,8 @@ export class EmployeeAddEditComponent {
             this.isLoading = false;
             return true;
           },
-          (error) => {   
-            switch(true) {
+          (error) => {
+            switch (true) {
               case error.error == 'This User Name Already Exist':
                 Swal.fire({
                   icon: 'error',
@@ -220,7 +229,7 @@ export class EmployeeAddEditComponent {
                   confirmButtonColor: '#FF7519',
                 });
                 break;
-              
+
               case error.error.errors?.Password !== undefined:
                 Swal.fire({
                   icon: 'error',
@@ -229,7 +238,7 @@ export class EmployeeAddEditComponent {
                   confirmButtonColor: '#FF7519',
                 });
                 break;
-              
+
               case error.error === "This Email Already Exist":
                 Swal.fire({
                   icon: 'error',
@@ -238,7 +247,7 @@ export class EmployeeAddEditComponent {
                   confirmButtonColor: '#FF7519',
                 });
                 break;
-              
+
               default:
                 Swal.fire({
                   icon: 'error',
@@ -258,6 +267,7 @@ export class EmployeeAddEditComponent {
             await this.EmpServ.DeleteFile(id, this.DomainName).toPromise();
           }
         }
+        console.log(this.Data)
         return this.EmpServ.Edit(this.Data, this.DomainName).toPromise().then(
           (data) => {
             Swal.fire({
@@ -270,9 +280,9 @@ export class EmployeeAddEditComponent {
             this.isLoading = false;
             return true;
           },
-          (error) => { 
+          (error) => {
             this.isLoading = false;
-            switch(true) { 
+            switch (true) {
               case error.error == 'This User Name Already Exist':
                 Swal.fire({
                   icon: 'error',
@@ -281,7 +291,7 @@ export class EmployeeAddEditComponent {
                   confirmButtonColor: '#FF7519',
                 });
                 break;
-                
+
               case error.error === "This Email Already Exist":
                 Swal.fire({
                   icon: 'error',
@@ -290,7 +300,7 @@ export class EmployeeAddEditComponent {
                   confirmButtonColor: '#FF7519',
                 });
                 break;
-              
+
               default:
                 Swal.fire({
                   icon: 'error',
@@ -314,10 +324,30 @@ export class EmployeeAddEditComponent {
   }
 
   changeFileName(index: number, event: Event): void {
-    const input = event.target as HTMLInputElement; // Cast EventTarget to HTMLInputElement
-    const newName = input.value; // Access the value property
-    const oldFile = this.Data.files[index];
-    const newFile = new File([oldFile], newName, { type: oldFile.type, lastModified: oldFile.lastModified });
-    this.Data.files[index] = newFile;
+    const input = event.target as HTMLInputElement;
+    const newName = input.value.trim();
+    if (!newName) return;
+
+    let selectedFile: EmployeeAttachment | undefined;
+
+    if (this.SelectedFiles.length > 0) {
+      selectedFile = this.SelectedFiles[index];
+    } else {
+      selectedFile = this.Data.files.find(f => f.id === index); // ✅ use `find`, not `filter`
+    }
+
+    if (!selectedFile) return;
+
+    selectedFile.name = newName;
+
+    const isExistingFile = !(selectedFile.file instanceof File) && selectedFile.link !== '';
+    const alreadyTracked = this.Data.editedFiles.some(f => f.id === selectedFile!.id);
+
+    if (isExistingFile && !alreadyTracked) {
+      this.Data.editedFiles.push(selectedFile);
+    }
+
+    console.log('editedFiles:', this.Data.editedFiles);
   }
+
 }

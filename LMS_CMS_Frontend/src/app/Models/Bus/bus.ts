@@ -2,7 +2,7 @@ export class Bus {
     constructor(
         public id: number = 0,
         public name: string = '',
-        public capacity: number | null = null,
+        public capacity: number  = 0,
         public isCapacityRestricted: boolean = false,
         public busTypeID: number | null = null,
         public backPrice: number | null = null,

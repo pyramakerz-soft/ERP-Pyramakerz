@@ -96,6 +96,7 @@ export class AddChildComponent {
   }
 
   GetAllData() {
+    this.TableData = []
     this.EmplyeeStudentServ.Get(this.UserID, this.DomainName).subscribe((d) => {
       this.TableData = d
     })
@@ -138,10 +139,23 @@ export class AddChildComponent {
   }
   CreateOREdit() {
     if (this.emplyeeStudent.studentID != 0) {
-      this.EmplyeeStudentServ.Add(this.emplyeeStudent, this.DomainName).subscribe((d) => {
-        this.GetAllData();
-        this.closeModal()
-      })
+      this.EmplyeeStudentServ.Add(this.emplyeeStudent, this.DomainName).subscribe(
+        (d) => {
+          this.GetAllData();
+          this.closeModal()
+        }, 
+        (error) => {
+          if(error.error == "Student Already Assigned To This Employee"){
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'Student Already Assigned To This Employee',
+              confirmButtonText: 'Okay',
+              customClass: { confirmButton: 'secondaryBg' },
+            });
+          }
+        }
+      )
     }
     else {
       Swal.fire({

@@ -1,6 +1,6 @@
 <div>
     <div class="flex items-center space-x-5 mb-5">
-        <i class="fa-solid fa-chevron-left" (click)="moveToBus()"></i> 
+        <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToBus()"></i> 
         <h1 class="primaryTxt font-semibold text-2xl">{{ bus.name }}</h1>
     </div>
     <div class="flex flex-wrap justify-between">
@@ -61,8 +61,8 @@
     <div class="flex justify-between my-8">
         <h1 class="primaryTxt font-semibold text-2xl leading-9 mb-5">Students</h1>
         <div class="flex items-center space-x-3">
-            <app-search [key]="key" [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
-            <button class="secondaryBg rounded-lg py-3 px-4 text-white" (click)="OpenModal()">Add Student</button>
+            <app-search [key]="key" [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search> 
+            <button class="secondaryBg rounded-lg py-3 px-4 text-white" (click)="OpenModal()"  *ngIf="!(bus.isCapacityRestricted && busStudentData.length >= bus.capacity)">Add Student</button>
         </div>
     </div>
 
@@ -263,7 +263,7 @@
                 </select>
             </div>
             <div class="flex flex-col w-[49%] mb-4">
-                <label class="mb-2" [ngClass]="{ 'text-gray-400': !selectedClass || editBusStudent, 'primaryTxt': selectedClass && !editBusStudent}" for="student">Choose Student</label>
+                <label class="mb-2" [ngClass]="{ 'text-gray-400': !selectedClass || editBusStudent, 'primaryTxt': selectedClass && !editBusStudent}" for="student" >Choose Student</label>
                 <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="student" 
                 [(ngModel)]="busStudent.studentID" [disabled]="!selectedClass || editBusStudent" [ngClass]="{ 'bg-[#EBEBEB]': !selectedClass || editBusStudent }"
                 (ngModelChange)="onInputValueChange({ field: 'studentID', value: $event })">
@@ -287,7 +287,7 @@
             <div class="flex flex-col w-[49%] mb-4">
                 <label class="mb-2 primaryTxt" for="semester">Semester</label>
                 <select 
-                class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="semester" [(ngModel)]="busStudent.semseterID"
+                class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="semester" [(ngModel)]="busStudent.semseterID" 
                 (ngModelChange)="onInputValueChange({ field: 'semseterID', value: $event })">
                     <option [value]="null" disabled selected hidden>Choose Semester</option>
                     <option *ngFor="let semester of Semesters" [value]="semester.id">{{ semester.name }}</option>
