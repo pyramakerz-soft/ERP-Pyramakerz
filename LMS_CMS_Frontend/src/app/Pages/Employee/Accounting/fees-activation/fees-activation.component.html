@@ -68,16 +68,17 @@
 
     <div class="w-[22%] mr-5 mb-3">
         <label for="FeesTypes" class=" mb-2 text-sm font-medium text-gray-900">Fees Types</label>
-        <select [(ngModel)]="Fees.feeTypeID"
+        <select [(ngModel)]="Fees.feeTypeID" (ngModelChange)="onInputValueChange({ field: 'feeTypeID', value: $event })"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5">
             <option [value]="0" disabled hidden>Select a Type</option>
             <option *ngFor="let S of FeesTypes" [value]="S.id">{{ S.name }}</option>
         </select>
+        <span *ngIf="validationErrors['feeTypeID']" class="text-red-500 ml-3 font-normal">{{ validationErrors["feeTypeID"]}}</span>
     </div>
 
     <div class="w-[22%] mr-5 mb-3">
         <label for="FeesDiscountType" class=" mb-2 text-sm font-medium text-gray-900">Fees Discount Type</label>
-        <select [(ngModel)]="Fees.feeDiscountTypeID" [disabled]="SchoolId == 0" 
+        <select [(ngModel)]="Fees.feeDiscountTypeID" [disabled]="SchoolId == 0"  
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5">
             <option [value]="0" disabled hidden>Select a Type</option>
             <option *ngFor="let S of FeesDiscountType" [value]="S.id">{{ S.name }}</option>
@@ -86,23 +87,26 @@
 
     <div class="w-[22%] mr-5 mb-3">
         <label for="Grades" class=" mb-2 text-sm font-medium text-gray-900">Date</label>
-        <input type="date" [(ngModel)]="Fees.date"
+        <input type="date" [(ngModel)]="Fees.date" (ngModelChange)="onInputValueChange({ field: 'date', value: $event })"
             class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2" placeholder="Enter date">
+        <span *ngIf="validationErrors['date']" class="text-red-500 ml-3 font-normal">{{ validationErrors["date"]}}</span>
     </div>
 
     <div class="w-[22%] mr-5 mb-3">
         <label for="academicYear" class=" mb-2 text-sm font-medium text-gray-900">Academic Year</label>
-        <select [(ngModel)]="Fees.academicYearId" 
+        <select [(ngModel)]="Fees.academicYearId"  (ngModelChange)="onInputValueChange({ field: 'academicYearId', value: $event })"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5">
             <option [value]="0" disabled hidden>Select a Year</option>
             <option *ngFor="let S of academicYear" [value]="S.id">{{ S.name }}</option>
         </select>
+        <span *ngIf="validationErrors['academicYearId']" class="text-red-500 ml-3 font-normal">{{ validationErrors["academicYearId"]}}</span>
     </div>
 
     <div class="w-[20%] mr-5 mb-3">
         <label class="mb-2 text-sm font-medium text-gray-900">Amount</label>
-        <input  (input)="validateNumber($event, 'amount')" [(ngModel)]="Fees.amount" (input)="CalculateNet()"
+        <input  (input)="validateNumber($event, 'amount')" [(ngModel)]="Fees.amount" (input)="CalculateNet()" (ngModelChange)="onInputValueChange({ field: 'amount', value: $event })"
             class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2" placeholder="Enter Amount">
+        <span *ngIf="validationErrors['amount']" class="text-red-500 ml-3 font-normal">{{ validationErrors["amount"]}}</span>
     </div>
 
     <div class="w-[20%] mr-5 mb-3">

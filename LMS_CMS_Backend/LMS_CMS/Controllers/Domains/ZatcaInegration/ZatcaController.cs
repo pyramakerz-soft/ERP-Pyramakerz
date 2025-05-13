@@ -8,6 +8,7 @@ using LMS_CMS_PL.Services.Zatca;
 using LMS_CMS_PL.Services.Zatca.Invoice;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 using System.Text;
 using Zatca.EInvoice.SDK.Contracts;
@@ -23,29 +24,13 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
         private readonly DbContextFactoryService _dbContextFactory;
         private readonly IConfiguration _config;
         private readonly IAmazonSecretsManager _secretsManager;
-        private readonly ISecretsService _secretsService;
 
-        public ZatcaController(ICsrGenerator csrGenerator, DbContextFactoryService dbContextFactory, IConfiguration config, IAmazonSecretsManager secretsManager, ISecretsService secretsService)
+        public ZatcaController(ICsrGenerator csrGenerator, DbContextFactoryService dbContextFactory, IConfiguration config, IAmazonSecretsManager secretsManager)
         {
             _csrGenerator = csrGenerator;
             _dbContextFactory = dbContextFactory;
             _config = config;
             _secretsManager = secretsManager;
-            _secretsService = secretsService;
-        }
-
-        [HttpGet("{secretName}")]
-        public async Task<IActionResult> GetSecret(string secretName)
-        {
-            try
-            {
-                var secret = await _secretsService.GetSecretAsync(secretName);
-                return Ok(new { Secret = secret });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Error retrieving secret: {ex.Message}");
-            }
         }
 
         #region Generate PCSID
@@ -280,9 +265,20 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                 Unit_Of_Work.inventoryMaster_Repository.Update(master);
                 Unit_Of_Work.SaveChanges();
 
+                var request = HttpContext.Request;
+                var domain = request.Host.Host;
+                var hostParts = request.Host.Value.Split('.');
+                string subDomain = hostParts.Length > 2 ? hostParts[0] : "test";
+
                 S3Service s3Client = new S3Service(secretS3Client, _config, "AWS:Bucket", "AWS:Folder");
 
-                bool uploaded = await s3Client.UploadAsync(xmlPath, "Invoices/");
+                string subDirectory = string.Empty;
+                if (master.FlagId == 11)
+                    subDirectory = "Invoices/";
+                else if (master.FlagId == 12)
+                    subDirectory = "Credits/";
+
+                bool uploaded = await s3Client.UploadAsync(xmlPath, subDirectory, $"{domain}/{subDomain}");
 
                 if (!uploaded)
                     return BadRequest("Uploading Invoice failed!");
@@ -317,6 +313,11 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
             if (masters is null || masters.Count == 0)
                 return NotFound("No invoices found.");
+
+            var request = HttpContext.Request;
+            var domain = request.Host.Host;
+            var hostParts = request.Host.Value.Split('.');
+            string subDomain = hostParts.Length > 2 ? hostParts[0] : "test";
 
             foreach (var master in masters)
             {
@@ -365,7 +366,13 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                         AmazonS3Client amazonS3Client = new AmazonS3Client();
                         S3Service s3 = new S3Service(amazonS3Client, _config, "AWS:Bucket", "AWS:Folder");
 
-                        bool uploaded = await s3.UploadAsync(xmlPath, "Invoices/");
+                        string subDirectory = string.Empty;
+                        if (master.FlagId == 11)
+                            subDirectory = "Invoices/";
+                        else if (master.FlagId == 12)
+                            subDirectory = "Credits/";
+
+                        bool uploaded = await s3.UploadAsync(xmlPath, subDirectory, $"{domain}/{subDomain}");
 
                         if (!uploaded)
                             return BadRequest("Uploading Invoice failed!");

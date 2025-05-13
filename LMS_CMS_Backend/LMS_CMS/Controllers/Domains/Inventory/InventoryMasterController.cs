@@ -467,7 +467,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 return BadRequest("Total should be sum up all the totalPrice values in InventoryDetails");
 
             }
-            newData.FlagId = 11;
 
             if (newData.FlagId == 8 || newData.FlagId == 9 || newData.FlagId == 10 || newData.FlagId == 11 || newData.FlagId == 12)
             {
