@@ -101,7 +101,6 @@ export class LessonLiveComponent {
     this.TableData = [];
     this.LessonLiveServ.Get(this.DomainName).subscribe((d) => {
       this.TableData = d;
-      console.log(this.TableData)
     });
   }
 

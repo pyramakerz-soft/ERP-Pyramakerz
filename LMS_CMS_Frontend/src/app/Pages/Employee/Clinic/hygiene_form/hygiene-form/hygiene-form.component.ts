@@ -143,8 +143,6 @@ deleteHygieneForm(row: any) {
     if (result.isConfirmed) {
       this.hygieneFormService.Delete(row.id, this.DomainName).subscribe({
         next: (response) => {
-          console.log('Delete response:', response);
-          // Check if this was the last item
           if (this.hygieneForms.length === 1) {
             this.hygieneForms = []; // Clear the array immediately
           }

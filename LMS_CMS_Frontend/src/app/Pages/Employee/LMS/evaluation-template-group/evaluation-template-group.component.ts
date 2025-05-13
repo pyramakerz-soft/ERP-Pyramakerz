@@ -86,7 +86,6 @@ export class EvaluationTemplateGroupComponent {
      this.template = new Template();
      this.templateServ.GetByID(this.TemplateID,this.DomainName).subscribe((d) => {
        this.template = d;
-       console.log(this.template)
      });
    }
  
@@ -271,7 +270,6 @@ export class EvaluationTemplateGroupComponent {
   }
 
   moveToQuestions(Id: number) {
-    console.log(`Employee/EvaluationTemplateGroupQuestion/${Id}`)
     this.router.navigateByUrl(`Employee/EvaluationTemplateGroupQuestion/${Id}`);
   }
  }

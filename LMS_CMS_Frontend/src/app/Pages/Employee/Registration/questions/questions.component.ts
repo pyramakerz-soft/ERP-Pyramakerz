@@ -188,7 +188,6 @@ export class QuestionsComponent {
   CreateOREdit() {
     this.question.options = this.options; 
     this.question.testID = this.testId;  
-    console.log(this.question)
     if(this.question.questionTypeID == 3){
       this.question.correctAnswerName = '' 
     }

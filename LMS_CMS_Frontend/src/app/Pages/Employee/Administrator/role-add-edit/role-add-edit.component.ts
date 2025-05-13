@@ -297,7 +297,6 @@ export class RoleAddEditComponent {
             this.router.navigateByUrl("Employee/Role")
           },
           error: (error) => {
-            console.log(error)
             this.isLoading=false
             const errorMessage = error?.error || 'An unexpected error occurred';
             Swal.fire({

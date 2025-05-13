@@ -494,7 +494,6 @@ export class StockingDetailsComponent {
           (originItem) =>
             this.HasBallance == true && originItem.currentStock == 0
         );
-        console.log(this.DetailsToDeleted);
         this.DetailsToDeleted.forEach((element) => {
           this.StockingDetailsServ.Delete(
             element.id,

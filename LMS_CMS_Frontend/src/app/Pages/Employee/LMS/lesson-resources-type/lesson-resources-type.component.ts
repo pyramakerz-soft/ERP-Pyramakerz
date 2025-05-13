@@ -82,7 +82,6 @@ export class LessonResourcesTypeComponent {
     this.TableData = [];
     this.TypeServ.Get(this.DomainName).subscribe((d) => {
       this.TableData = d;
-      console.log(this.TableData)
     });
   }
 

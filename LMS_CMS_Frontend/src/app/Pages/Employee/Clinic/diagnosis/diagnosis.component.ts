@@ -139,7 +139,6 @@ deleteDiagnosis(row: any) {
     if (result.isConfirmed) {
       this.diagnosisService.Delete(row.id, this.DomainName).subscribe({
         next: (response) => {
-          console.log('Delete response:', response);
           this.getDiagnoses();
           
         },

@@ -93,7 +93,8 @@ export class FeesActivationComponent {
 
   IsEdit = false;
   editingRowId: any = null;
-  IsOpenTable:boolean=false;
+  IsOpenTable: boolean = false;
+  validationErrors: { [key in keyof FeesActivationAddPut]?: string } = {};
 
   constructor(
     private router: Router,
@@ -175,22 +176,21 @@ export class FeesActivationComponent {
   validateNumber(event: any, field: keyof FeesActivationAddPut): void {
     const value = event.target.value;
     if (isNaN(value) || value === '') {
-      event.target.value = ''; 
+      event.target.value = '';
       if (typeof this.Fees[field] === 'string') {
-        this.Fees[field] = '' as never;  
+        this.Fees[field] = '' as never;
       }
     }
   }
-  
 
   validateNumberForDiscount(event: any): void {
     const value = event.target.value;
     if (isNaN(value) || value === '') {
-      event.target.value = ''; 
+      event.target.value = '';
       this.DiscountPercentage = 0
     }
   }
-  
+
   IsAllowDelete(InsertedByID: number) {
     const IsAllow = this.EditDeleteServ.IsAllowDelete(
       InsertedByID,
@@ -210,7 +210,7 @@ export class FeesActivationComponent {
   }
 
   async onSearchEvent(event: { key: string; value: any }) {
-    this.IsOpenTable=true
+    this.IsOpenTable = true
     this.key = event.key;
     this.value = event.value;
 
@@ -284,9 +284,10 @@ export class FeesActivationComponent {
     this.GetStudents();
     this.GetAllAcademicYear();
     this.IsOpenStudentandClassroom = false;
-    this.IsOpenTable=false
-    this.key=""
-    this.value=""
+    this.IsOpenTable = false
+    this.key = ""
+    this.value = ""
+    this.IsSearch = false
   }
 
   SectionIsChanged(event: Event) {
@@ -299,6 +300,7 @@ export class FeesActivationComponent {
     this.Students = [];
     this.GetAllGradeBySectionId();
     this.GetStudents();
+    this.IsSearch = false
   }
 
   GradeIsChanged(event: Event) {
@@ -309,6 +311,7 @@ export class FeesActivationComponent {
     this.Students = [];
     this.GetAllClassRoomByGradeID();
     this.GetStudents();
+    this.IsSearch = false
     this.IsOpenStudentandClassroom = true
   }
 
@@ -316,11 +319,13 @@ export class FeesActivationComponent {
     this.ClassRoomId = Number((event.target as HTMLSelectElement).value);
     this.StudentId = 0;
     this.GetStudents();
+    this.IsSearch = false
   }
 
   StudentChanged(event: Event) {
     this.StudentId = Number((event.target as HTMLSelectElement).value);
     this.GetStudents();
+    this.IsSearch = false
   }
 
   async GetStudents() {
@@ -349,23 +354,18 @@ export class FeesActivationComponent {
           (this.ClassRoomId == 0 || item.classID == this.ClassRoomId)
         );
       });
-      this.SelectedStudents=this.Students
+      this.SelectedStudents = this.Students
     }
     else {
       this.TableData = [];
       this.TableData = this.TableDataStudentOriginal.filter(s => s.studentID == this.StudentId);
-      this.SelectedStudents=[]
-      this.SelectedStudents=this.StudentsOriginal.filter(s=>s.studentID==this.StudentId)
+      this.SelectedStudents = []
+      this.SelectedStudents = this.StudentsOriginal.filter(s => s.studentID == this.StudentId)
     }
-    console.log("this.StudentsOriginal",this.StudentsOriginal)
-    console.log("this.SelectedStudents",this.SelectedStudents)
-    console.log("this.Students",this.Students)
-    console.log("this.StudentId",this.StudentId)
-
   }
 
   Search() {
-    this.IsOpenTable=false
+    this.IsOpenTable = false
     if (this.SchoolId == 0 || this.SectionId == 0 || this.GradeId == 0) {
       if (this.SchoolId == 0) {
         Swal.fire({
@@ -425,26 +425,32 @@ export class FeesActivationComponent {
   }
 
   async Activate() {
-    this.FeesForAdd = [];
-    console.log("aa",this.SelectedStudents)
-    this.SelectedStudents.forEach(stu => {
-      var fee: FeesActivationAddPut = new FeesActivationAddPut();
-      fee.academicYearId = this.Fees.academicYearId;
-      fee.amount = this.Fees.amount;
-      fee.date = this.Fees.date;
-      fee.discount = this.Fees.discount;
-      fee.feeDiscountTypeID = this.Fees.feeDiscountTypeID;
-      fee.feeTypeID = this.Fees.feeTypeID;
-      fee.net = this.Fees.net;
-      fee.studentID = stu.studentID;
-
-      this.FeesForAdd.push(fee);
-    });
-    try {
-      await lastValueFrom(this.feesActivationServ.Add(this.FeesForAdd, this.DomainName));
-      this.GetStudents();
-    } catch (error) {
-      console.error("Error while activating fees:", error);
+    if(this.isFormValid()){
+      this.FeesForAdd = [];
+      this.SelectedStudents.forEach(stu => {
+        var fee: FeesActivationAddPut = new FeesActivationAddPut();
+        fee.academicYearId = this.Fees.academicYearId;
+        fee.amount = this.Fees.amount;
+        fee.date = this.Fees.date;
+        fee.discount = this.Fees.discount;
+        fee.feeDiscountTypeID = this.Fees.feeDiscountTypeID;
+        fee.feeTypeID = this.Fees.feeTypeID;
+        fee.net = this.Fees.net;
+        fee.studentID = stu.studentID;
+  
+        this.FeesForAdd.push(fee);
+      });
+      try {
+        await lastValueFrom(this.feesActivationServ.Add(this.FeesForAdd, this.DomainName));
+        this.GetStudents();
+        Swal.fire({
+          title: 'Fees Added Successfully',
+          icon: 'success',
+          confirmButtonColor: '#FF7519',
+        });
+      } catch (error) {
+        console.error("Error while activating fees:", error);
+      }
     }
   }
 
@@ -491,6 +497,46 @@ export class FeesActivationComponent {
     this.feesActivationServ.Edit(fee, this.DomainName).subscribe((d) => {
       this.GetAllFeesData();
       this.GetStudents();
+      Swal.fire({
+        title: 'Fees Updated Successfully',
+        icon: 'success',
+        confirmButtonColor: '#FF7519',
+      });
     })
+  }
+
+  isFormValid(): boolean {
+    let isValid = true;
+    for (const key in this.Fees) {
+      if (this.Fees.hasOwnProperty(key)) {
+        const field = key as keyof FeesActivationAddPut;
+        if (!this.Fees[field]) {
+          if (
+            field == 'feeTypeID' ||
+            field == 'date' ||
+            field == 'amount' ||
+            field == 'academicYearId'
+          ) {
+            this.validationErrors[field] = `*${this.capitalizeField(
+              field
+            )} is required`;
+            isValid = false;
+          }
+        }
+      }
+    }
+    return isValid;
+  }
+
+  capitalizeField(field: keyof FeesActivationAddPut): string {
+    return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
+  }
+
+  onInputValueChange(event: { field: keyof FeesActivationAddPut; value: any }) {
+    const { field, value } = event;
+    (this.Fees as any)[field] = value;
+    if (value) {
+      this.validationErrors[field] = '';
+    }
   }
 }

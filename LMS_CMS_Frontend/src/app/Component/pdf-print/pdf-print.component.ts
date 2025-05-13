@@ -127,12 +127,10 @@ export class PdfPrintComponent {
     if (this.school?.reportImage?.startsWith('http')) {
       this.convertImgToBase64URL(this.school.reportImage).then((base64Img) => {
         this.school.reportImage = base64Img;
-        console.log("gf",this.school.reportImage)
         setTimeout(() => this.printPDF(), 100);
       });
     } else {
       setTimeout(() => this.printPDF(), 100);
-      console.log("gf",this.school.reportImage)
     }
   }
   

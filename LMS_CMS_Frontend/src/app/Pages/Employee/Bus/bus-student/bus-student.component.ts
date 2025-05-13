@@ -118,7 +118,7 @@ export class BusStudentComponent {
 
   GetBusById(busId: number) {
     this.busService.GetbyBusId(busId, this.DomainName).subscribe((data) => {
-      this.bus = data;
+      this.bus = data; 
     });
   }
 
@@ -155,7 +155,7 @@ export class BusStudentComponent {
     this.busStudentData = []
     this.OriginBusStudent = []
     this.busStudentService.GetbyBusId(busId, this.DomainName).subscribe((data) => {
-      this.busStudentData = data;  
+      this.busStudentData = data;   
       this.OriginBusStudent = data;
     });
   }
@@ -349,10 +349,14 @@ export class BusStudentComponent {
             }
           }
         }
-        const stu = this.OriginBusStudent.filter(s => s.studentID == this.busStudent.studentID && s.semseterID == this.busStudent.semseterID)
-        if (stu) {
-          this.validationErrors[field] = `This student already exists in this bus for this semester.`
-          isValid = false;
+
+        if(field == 'studentID'){
+          const stu = this.OriginBusStudent.filter(s => s.studentID == this.busStudent.studentID && s.semseterID == this.busStudent.semseterID)
+           
+          if (stu.length != 0) {
+            this.validationErrors[field] = `This student already exists in this bus for this semester.`
+            isValid = false;
+          }
         }
         if (this.OriginBusStudent.length > this.bus.capacity) {
           Swal.fire({
@@ -391,7 +395,7 @@ export class BusStudentComponent {
     }
   }
 
-  SaveBusStudent() {
+  SaveBusStudent() {  
     this.busStudent.busID = this.busId
     if (this.editBusStudent == true) {
       this.busStudent.studentID = this.id
@@ -467,7 +471,7 @@ export class BusStudentComponent {
     this.getBusesForTransfer()
 
     this.busStudentService.GetbyId(busStudentId, this.DomainName).subscribe((data) => {
-      this.busStudentTransfer = data
+      this.busStudentTransfer = data 
     });
   }
 
@@ -484,11 +488,21 @@ export class BusStudentComponent {
     this.isTransfer = true
   }
 
-  SaveTransfer() {
+  SaveTransfer() { 
     this.busStudentService.Edit(this.busStudentTransfer, this.DomainName).subscribe((data) => {
       this.closeTransferBusStudentModal()
       this.GetStudentsByBusId(this.busId)
-    });
+    },
+    error => {
+      console.log(error)
+      Swal.fire({
+        icon: 'error',
+        text: error.error,
+        confirmButtonText: 'Okay',
+        customClass: { confirmButton: 'secondaryBg' },
+      });
+    }
+  );
   }
 
   GetAllAcademicYears() {
@@ -498,8 +512,7 @@ export class BusStudentComponent {
   }
 
   async getDataByAcademicYear(event: Event) {
-    const selectedValue: string = ((event.target as HTMLSelectElement).value);
-    console.log(selectedValue)
+    const selectedValue: string = ((event.target as HTMLSelectElement).value); 
     this.busStudentData = this.OriginBusStudent
     if (selectedValue != "default") {
       this.busStudentData = this.OriginBusStudent.filter(t => t.studentAcademicYear == selectedValue)

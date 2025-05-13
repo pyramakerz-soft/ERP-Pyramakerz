@@ -161,7 +161,6 @@ export class DailyPerformanceComponent {
           }))
         });
       }
-      console.log(this.RatedStudent);
     });
   }
 
@@ -184,7 +183,6 @@ export class DailyPerformanceComponent {
   }
 
   saveSelection() {
-    console.log('Selected Type IDs:', this.selectedTypeIds);
   }
 
   getAllClassByGradeId() {
@@ -270,7 +268,6 @@ export class DailyPerformanceComponent {
   }
 
   submitRatings() {
-    console.log(this.RatedStudent)
       if(this.PerformanceTypesSelected.length==0){
        this.IsStudentPerformance=false
       } 

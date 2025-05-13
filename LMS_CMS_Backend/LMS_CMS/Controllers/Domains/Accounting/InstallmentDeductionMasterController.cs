@@ -54,7 +54,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                     query => query.Include(Income => Income.Employee))
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
-                .ToListAsync();
+                .ToListAsync();    
 
             if (installmentDeductionMasters == null || installmentDeductionMasters.Count == 0)
             {

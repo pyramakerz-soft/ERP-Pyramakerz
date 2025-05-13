@@ -212,7 +212,6 @@ saveHygieneForm() {
 
     this.http.post(`${this.apiService.BaseUrl}/HygieneForm`, requestBody, { headers }).subscribe({
       next: (response) => {
-        console.log('Hygiene form saved successfully:', response);
         Swal.fire('Success', 'Hygiene form saved successfully!', 'success');
         this.router.navigate(['/Employee/Hygiene Form Medical Report']);
       },

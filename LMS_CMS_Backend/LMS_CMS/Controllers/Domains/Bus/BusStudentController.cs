@@ -220,6 +220,15 @@ namespace LMS_CMS_PL.Controllers.Domains.Bus
                 }
             }
 
+            BusStudent busStudedntExists = Unit_Of_Work.busStudent_Repository.First_Or_Default(
+                d => d.StudentID == busStudentAddDTO.StudentID && d.BusID == busStudentAddDTO.BusID && d.SemseterID == busStudentAddDTO.SemseterID
+                );
+
+            if (busStudedntExists != null)
+            {
+                return BadRequest("Student Already Exists In This Bus For This Semester");
+            }
+
             BusStudent busStudent = mapper.Map<BusStudent>(busStudentAddDTO);
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             busStudent.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
@@ -308,6 +317,15 @@ namespace LMS_CMS_PL.Controllers.Domains.Bus
                 {
                     return accessCheck;
                 }
+            }
+
+            BusStudent whatWeWantToTransferTo = Unit_Of_Work.busStudent_Repository.First_Or_Default(
+                d => d.StudentID == busStudentPutDTO.StudentID && d.BusID == busStudentPutDTO.BusID && d.ID != busStudentPutDTO.ID && d.SemseterID == busStudentPutDTO.SemseterID
+                );
+
+            if(whatWeWantToTransferTo != null)
+            { 
+                return BadRequest("Student Already Exists In This Bus For This Semester");
             }
 
             mapper.Map(busStudentPutDTO, busStudentExists);

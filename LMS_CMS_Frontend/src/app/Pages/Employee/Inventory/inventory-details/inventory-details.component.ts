@@ -206,7 +206,6 @@ export class InventoryDetailsComponent {
       (this.FlagId == 13 && this.mode == 'Create')
     ) {
       //CanEditPrice
-      console.log(this.FlagId)
       this.IsPriceEditable = true;
     }
 
@@ -267,7 +266,6 @@ export class InventoryDetailsComponent {
       if(this.schoolPCs.length==1){
         this.Data.schoolPCId=this.schoolPCs[0].id
       }
-      console.log(this.schoolPCs)
     })
   }
 
@@ -424,15 +422,11 @@ export class InventoryDetailsComponent {
     if (this.isFormValid()) {
       this.isLoading = true;
       // await this.SaveRow();
-      console.log(this.Data)
       if (this.mode == 'Create') {
-        console.log("0", this.EditedShopItems)
         this.salesServ.Add(this.Data, this.DomainName).subscribe(
           (d) => {
             this.MasterId = d;
-            console.log("1", this.EditedShopItems)
             if (this.EditedShopItems.length > 0) {
-              console.log("2", this.EditedShopItems)
               this.EditedShopItems.forEach((element) => {
                 if (element.id !== 0) {
                   this.shopitemServ.Edit(element, this.DomainName).subscribe({
@@ -448,7 +442,6 @@ export class InventoryDetailsComponent {
           },
           (error) => {
             this.isLoading = false;
-            console.log(error)
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
@@ -991,10 +984,7 @@ export class InventoryDetailsComponent {
   }
 
   getStoreNameById(id: number | string): string {
-    console.log('Looking for storeID:', id);
-    console.log('Available stores:', this.Stores);
     const store = this.Stores.find((s) => s.id === +id);
-    console.log('Found store:', store);
     return store ? store.name : '—';
   }
 }
