@@ -316,6 +316,8 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
             var request = HttpContext.Request;
             var domain = request.Host.Host;
+            var hostParts = request.Host.Value.Split('.');
+            string subDomain = hostParts.Length > 2 ? hostParts[0] : "test";
 
             foreach (var master in masters)
             {
@@ -364,7 +366,13 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                         AmazonS3Client amazonS3Client = new AmazonS3Client();
                         S3Service s3 = new S3Service(amazonS3Client, _config, "AWS:Bucket", "AWS:Folder");
 
-                        bool uploaded = await s3.UploadAsync(xmlPath, "Invoices/", domain);
+                        string subDirectory = string.Empty;
+                        if (master.FlagId == 11)
+                            subDirectory = "Invoices/";
+                        else if (master.FlagId == 12)
+                            subDirectory = "Credits/";
+
+                        bool uploaded = await s3.UploadAsync(xmlPath, subDirectory, $"{domain}/{subDomain}");
 
                         if (!uploaded)
                             return BadRequest("Uploading Invoice failed!");
