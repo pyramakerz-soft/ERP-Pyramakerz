@@ -117,6 +117,13 @@ namespace LMS_CMS_BL.Repository
             return db.Set<TEntity>().FirstOrDefault(predicate);
         }
 
+        public TEntity Last_Or_Default<TKey>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TKey>> orderBy)
+        {
+            return db.Set<TEntity>()
+                     .Where(predicate)
+                     .OrderByDescending(orderBy)
+                     .FirstOrDefault();
+        }
 
         public async Task<TEntity> FindByIncludesAsync(
             Expression<Func<TEntity, bool>> predicate,

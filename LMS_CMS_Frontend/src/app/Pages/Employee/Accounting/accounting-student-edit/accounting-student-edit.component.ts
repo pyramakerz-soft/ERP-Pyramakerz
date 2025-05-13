@@ -114,6 +114,15 @@ export class AccountingStudentEditComponent {
     });
   }
 
+  validateNumber(event: any, field: keyof Student): void {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = ''; 
+      if (typeof this.Data[field] === 'string') {
+        this.Data[field] = '' as never;  
+      }
+    }
+  }
 
   moveToEmployee() {
     this.router.navigateByUrl(`Employee/Student Accounting`)

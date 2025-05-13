@@ -238,7 +238,7 @@ export class SemesterComponent {
     ) {
       valid = false;
       Swal.fire({
-        title: 'Semester dates must be within the Academic yYear Range',
+        title: 'Semester dates must be within the Academic Year Range',
         icon: 'warning',
         confirmButtonColor: '#FF7519',
         confirmButtonText: 'Ok',
