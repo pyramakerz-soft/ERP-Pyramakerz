@@ -51,7 +51,6 @@ export class QuestionsComponent {
   AllowDeleteForOthers: boolean = false;
 
   mode: string = 'Create';
-  FileUploaded: string = '';
 
   isModalVisible: boolean = false;
   Data: Question[] = [];
@@ -123,11 +122,25 @@ export class QuestionsComponent {
       }
     );
   }
+
+  GetByID(id:number) {
+    this.question = new QuestionAddEdit(); 
+    this.QuestionServ.GetByID(id, this.DomainName).subscribe(
+      (d: any) => {
+        this.question = d;
+        console.log(this.question.options)
+        this.options = this.question.options
+        console.log(this.options)
+      }
+    );
+  }
+
   GetQuestionType() {
     this.QuestionTypeServ.Get(this.DomainName).subscribe((d) => {
       this.QuestionTypes = d;
     });
   }
+
   getTestInfo() {
     this.testServ.GetByID(this.testId, this.DomainName).subscribe((d) => {
       this.test = d;
@@ -135,8 +148,7 @@ export class QuestionsComponent {
   }
 
   Create() {
-    this.mode = 'Create';
-    this.FileUploaded = '';
+    this.mode = 'Create'; 
     this.question = new QuestionAddEdit();
     this.options = [];
     this.openModal();
@@ -162,9 +174,8 @@ export class QuestionsComponent {
 
   Edit(row: Question) {
     this.mode = 'Edit';
-    this.question = row as unknown as QuestionAddEdit;
-    this.options = row.options.map((option) => option.name);
     this.openModal();
+    this.GetByID(row.id) 
   }
 
   IsAllowDelete(InsertedByID: number) {
@@ -233,6 +244,7 @@ export class QuestionsComponent {
   closeModal() {
     this.isModalVisible = false;
     this.validationErrors = {}
+    this.question = new QuestionAddEdit();
   }
 
   CorrectAnswer(option: string) {
@@ -320,17 +332,21 @@ export class QuestionsComponent {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
       const file = input.files[0];
-      const fileType = file.type;
-      this.FileUploaded = file.name;
+      const fileType = file.type; 
+
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
 
       if (fileType.startsWith('image/')) {
         this.question.videoFile = null;
+        this.question.video = "";
         this.question.image = file.name;
         this.question.imageFile = file;
       } else if (fileType.startsWith('video/')) {
         this.question.videoFile = file;
         this.question.video = file.name;
         this.question.imageFile = null;
+        this.question.image = "";
       } else {
         alert('Invalid file type. Please upload an image or video.');
       }

@@ -79,9 +79,10 @@
                 </td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     <div class="flex space-x-4 rtl:space-x-reverse">
-                        <button (click)="openModal(row.id)">
+                        <button (click)="openModal(row.id)" *ngIf="!row.isDeleted">
                             <i class="fa-solid fa-pencil"></i>
                         </button>
+                        <p *ngIf="row.isDeleted">Already Assigned To Class</p>
                     </div>
                 </td>
             </tr>

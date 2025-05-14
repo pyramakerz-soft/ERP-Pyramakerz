@@ -65,8 +65,8 @@ export class InterviewRegistrationComponent {
   }
 
   getInterviewByYearID(){
-    this.interviewTimeTableService.GetByYearId(this.academicYearIdID, this.DomainName).subscribe(
-      (data) => { 
+        this.interviewTimeTableService.GetByYearId(this.academicYearIdID, this.DomainName).subscribe(
+          (data) => { 
         this.interviewTimeTable = data
 
         this.filterFutureDates()
@@ -82,6 +82,7 @@ export class InterviewRegistrationComponent {
       this.selectedDate = date
       this.selectedTime = `From ${fromTime} To ${toTime}`
     }
+
     this.registrationFormParentID = id
     this.academicYearIdID = academicYearId
  

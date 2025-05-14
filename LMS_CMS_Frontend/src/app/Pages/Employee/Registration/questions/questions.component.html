@@ -112,7 +112,7 @@
 <!-- Modal -->
 <div id="default-modal" tabindex="-1" aria-hidden="true" [ngClass]="{'hidden': !isModalVisible}"
     class="fixed top-0 left-0 right-0 z-50 flex justify-center items-center w-full h-full bg-black/50">
-    <div class="relative bg-white rounded-2xl p-12 gap-4 shadow-md overflow-y-auto max-h-[90vh]">
+    <div class="relative bg-white rounded-2xl p-12 gap-4 shadow-md overflow-y-auto max-h-[90vh] w-1/2">
         <div class="flex justify-between">
             <h1 *ngIf="mode=='Create'" class="font-semibold text-2xl leading-9">{{ 'Create' | translate }} {{ 'Question' | translate }}</h1>
             <h1 *ngIf="mode=='Edit'" class="font-semibold text-2xl leading-9">{{ 'Edit' | translate }} {{ 'Question' | translate }}</h1>
@@ -142,8 +142,13 @@
             <div class="bg-[#F6F6F6] flex items-center space-x-4 w-full rounded-md border-dashed mb-4 border-2">
                 <div class="flex justify-center w-full">
                     <label for="file-upload"
-                        class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
-                        <img src="Images/Icon frame.png" class="w-1/4" alt="Upload Icon">
+                        class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5"> 
+                        <img *ngIf="!question.image && !question.imageFile && !question.video && !question.videoFile" src="Images/Icon frame.png" class="w-1/4">
+                        <img *ngIf="(question.videoFile || question.imageFile)" src="Images/FileAttached.png" class="w-1/4">
+                        <img *ngIf="question.image && (!question.videoFile && !question.imageFile)" [src]="question.image" class="w-1/3 object-cover"> 
+                        <video *ngIf="question.video && (!question.videoFile && !question.imageFile)" class="w-1/3 object-cover" controls>
+                            <source [src]="question.video" type="video/mp4"> 
+                        </video>
                         <p class="font-normal text-xs md:text-sm text-[#8E8E93] mt-3">
                             <span class="secondaryTxt">{{ 'Click To Upload' | translate }}</span> 
                         </p>
@@ -155,20 +160,7 @@
                         accept="image/*,video/*"
                         (change)="onFileUpload($event)" />
                 </div>
-            </div>
-            <div *ngIf=" mode=='Create' && question.videoFile!=null || mode=='Create'&&question.imageFile!=null">
-                <p class="font-semibold text-sm text-[#6F6F6F] mb-3">{{FileUploaded}}</p>
-            </div>
-
-            <div *ngIf="question.video && mode=='Edit'" class="bg-[#F6F6F6] rounded-md border-dashed border-2 w-[80%] px-6 py-3 lg:py-5">
-                <p class="font-semibold text-sm text-[#6F6F6F] mb-3">video</p>
-                <video *ngIf="question.video" [src]="question.video" class="object-cover w-2/3" controls>
-                </video>
-            </div>
-            <div  *ngIf="question.image && mode=='Edit'" class="bg-[#F6F6F6] rounded-md border-dashed border-2 w-[30%] px-6 py-3 lg:py-5">
-                <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Image</p>
-                <img *ngIf="question.image" [src]="question.image" class="object-cover w-1/2">
-            </div>
+            </div>  
            
             <h6 class="font-medium text-base leading-6 mb-2 mt-3">{{ 'Question Type' | translate }}</h6>
             <div class="flex flex-col mb-4">
@@ -240,9 +232,7 @@
                 <span *ngIf="!isLoading">{{ 'Save' | translate }}</span>
                 <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
               </button>
-            </div>
-
-
+            </div> 
         </div>
     </div>
 </div>

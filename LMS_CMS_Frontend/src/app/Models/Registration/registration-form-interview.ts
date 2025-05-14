@@ -13,5 +13,6 @@ export class RegistrationFormInterview {
         public gradeID: number = 0,
         public gradeName: string = "",
         public email: string = "",
+        public isDeleted: boolean = false
     ) {}
 }

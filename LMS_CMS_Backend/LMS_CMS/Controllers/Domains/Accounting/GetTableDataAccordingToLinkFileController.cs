@@ -23,11 +23,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
     {
         private readonly DbContextFactoryService _dbContextFactory;
         IMapper mapper;
+        private readonly UOW _Unit_Of_Work_Octa;
 
-        public GetTableDataAccordingToLinkFileController(DbContextFactoryService dbContextFactory, IMapper mapper)
+        public GetTableDataAccordingToLinkFileController(DbContextFactoryService dbContextFactory, IMapper mapper, UOW Unit_Of_Work)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
+            _Unit_Of_Work_Octa = Unit_Of_Work;
         }
          
         [HttpGet("GetTableDataAccordingToLinkFileAndSubAccount/{linkFileId}/{subAccountId}")]
@@ -442,7 +444,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 List<StudentGetDTO> StudentDTO = mapper.Map<List<StudentGetDTO>>(students);
                 foreach (var item in StudentDTO)
                 {
-                    Nationality nationality = Unit_Of_Work.nationality_Repository.Select_By_Id_Octa(item.Nationality);
+                    Nationality nationality = _Unit_Of_Work_Octa.nationality_Repository.Select_By_Id_Octa(item.Nationality);
                     if (nationality != null)
                     {
                         item.NationalityEnName = nationality.Name;

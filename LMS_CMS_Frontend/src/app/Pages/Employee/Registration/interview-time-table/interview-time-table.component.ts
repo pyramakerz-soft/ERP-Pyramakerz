@@ -431,7 +431,7 @@ export class InterviewTimeTableComponent {
       } else {
         if (!timeCheck) {
           this.interviewTimeTable.fromTime += ":00"
-          this.interviewTimeTable.toTime += ":00"
+          this.interviewTimeTable.toTime += ":00" 
           this.isLoading = true
           this.interviewTimeTableService.Edit(this.interviewTimeTable, this.DomainName).subscribe(
             (result: any) => {
@@ -440,14 +440,19 @@ export class InterviewTimeTableComponent {
               this.isLoading = false
             },
             error => {
-              this.isLoading = false
+              this.isLoading = false 
               Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'Try Again Later!',
+                icon: 'error', 
+                text: error.error,
                 confirmButtonText: 'Okay',
                 customClass: { confirmButton: 'secondaryBg' },
               });
+              if (this.interviewTimeTable.fromTime.endsWith(":00")) {
+                this.interviewTimeTable.fromTime = this.interviewTimeTable.fromTime.slice(0, -3);
+              }
+              if (this.interviewTimeTable.toTime.endsWith(":00")) {
+                this.interviewTimeTable.toTime = this.interviewTimeTable.toTime.slice(0, -3);
+              }
             }
           );
         }

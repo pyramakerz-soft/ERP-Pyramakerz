@@ -23,5 +23,6 @@ namespace LMS_CMS_BL.DTO.Registration
         public string GradeID { get; set; }
         public string GradeName { get; set; }
         public string Email { get; set; }
+        public bool? IsDeleted { get; set; }
     }
 }
