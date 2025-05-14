@@ -166,7 +166,7 @@ export class AccountingEmployeeEditComponent {
       this.selectedDays = this.days.filter(day => this.Data.days.includes(day.id));
       this.parseDepartureTime(this.Data.departureTime);
       this.parseAttendanceTime(this.Data.attendanceTime);
-      if(this.Data.dateOfLeavingWork!=""){
+      if(this.Data.dateOfLeavingWork!="" && this.Data.dateOfLeavingWork != null){
         this.EndDate=true
       }
 
@@ -231,6 +231,12 @@ export class AccountingEmployeeEditComponent {
   }
 
   Save() {
+    console.log(this.Data) 
+    Object.keys(this.Data).forEach(key => {
+      if ((this.Data as any)[key] === '') {
+        (this.Data as any)[key] = null;
+      }
+    });
     if(this.isFormValid()){
       this.getFormattedTime() 
       this.isLoading = true 
@@ -261,6 +267,11 @@ export class AccountingEmployeeEditComponent {
   onIsActiveChange(event: Event) {
     const isChecked = (event.target as HTMLInputElement).checked;
     this.EndDate = isChecked
+    if(this.EndDate == false){
+      this.Data.reasonForLeavingWork= ''
+      this.Data.reasonOfLeavingID= 0
+      this.Data.dateOfLeavingWork= ''
+    }
   }
 
   onHasAttendanceChange(event: Event) {

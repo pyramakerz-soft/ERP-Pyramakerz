@@ -207,7 +207,7 @@ export class EmployeeService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.put(`${this.baseUrl}/Employee/EmpployeeAccounting`, employee, { headers });
+    return this.http.put(`${this.baseUrl}/Employee/EmployeeAccounting`, employee, { headers });
   }
 
 
