@@ -167,7 +167,7 @@
                 <select 
                 (ngModelChange)="onInputValueChange({ field: 'questionTypeID', value: $event })" 
                 (ngModelChange)="checkOnType()"
-                    class="rounded-lg border border-solid border-gray-300  py-1 overflow-y-auto w-[500px] h-[45px]  mb-3"
+                    class="rounded-lg border border-solid border-gray-300  py-1 overflow-y-auto w-full h-[45px]  mb-3"
                     id="test" [(ngModel)]="question.questionTypeID">
                     <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Question Type' | translate }}</option>
                     <option *ngFor="let type of QuestionTypes" [value]="type.id">{{ type.name }}</option>
@@ -183,7 +183,7 @@
                         <div class="flex flex-col">
                             <input type="text"
                                 [(ngModel)]="NewOption"
-                                class="w-[450px] h-[45px] rounded-lg border border-solid border-gray-300 px-2"
+                                class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2"
                                 (ngModelChange)="onInputValueChange({ field: 'options', value: $event })"
                                 placeholder="{{ 'Enter' | translate }} {{ 'Options' | translate }}" />
                                 <span *ngIf="validationErrors['options']" class="text-red-500 ml-3 font-normal">{{ validationErrors['options'] }}</span>

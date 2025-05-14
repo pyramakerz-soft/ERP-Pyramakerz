@@ -10,7 +10,7 @@ export class PagesWithRoleId {
         public allow_Delete: boolean = false,
         public allow_Edit_For_Others: boolean = false,
         public allow_Delete_For_Others: boolean = false,
-        public IsDisplay:boolean=false,
+        public isDisplay:boolean=false,
         public children: PagesWithRoleId[] = []
     ) {}
 }

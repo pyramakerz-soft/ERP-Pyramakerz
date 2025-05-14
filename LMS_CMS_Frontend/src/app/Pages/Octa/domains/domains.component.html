@@ -65,7 +65,7 @@
 
 <!-- Add-Edit Domain Modal -->
 <div id="Add_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
-    <div class="bg-white rounded-2xl p-12 w-[669px]">
+    <div class="bg-white rounded-2xl p-12 w-[669px] max-h-[90%] overflow-auto">
         <div class="flex justify-between items-center">
             <h1 *ngIf="!editDomain" class="font-semibold text-2xl leading-9">Create Domain</h1>
             <h1 *ngIf="editDomain" class="font-semibold text-2xl leading-9">Edit Domain</h1>
@@ -107,6 +107,15 @@
                 
                     <div *ngIf="isDropdownOpen" class=" w-full border border-[#E5E5EA] rounded-md bg-white mt-1 max-h-60 overflow-y-auto">
                         @if(ModulesData.length !==0 ) {
+                            <div class="p-2 hover:bg-gray-100 flex items-center space-x-3 border-b">
+                                <input
+                                    type="checkbox"
+                                    id="selectAllModules"
+                                    class="mr-2"
+                                    (change)="toggleSelectAll($event)"
+                                    [checked]="domain.pages.length === ModulesData.length" />
+                                <label for="selectAllModules" class="text-xs md:text-sm w-full font-semibold">Select All</label>
+                            </div>  
                             <div *ngFor="let module of ModulesData" class="p-2 hover:bg-gray-100 flex items-center space-x-3">
                                 <input type="checkbox" 
                                 id="module{{module.en_name}}" 
@@ -142,7 +151,7 @@
 
 <!-- View Domain Modal -->
 <div id="View_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
-    <div class="bg-white rounded-2xl p-12 w-[669px]">
+    <div class="bg-white rounded-2xl p-12 w-[669px] max-h-[90%] overflow-auto">
         <div class="flex justify-between items-center">
             <h1 class="font-semibold text-2xl leading-9">{{ domain.name }}</h1>
             <div class="flex space-x-3">

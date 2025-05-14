@@ -127,10 +127,7 @@ export class QuestionsComponent {
     this.question = new QuestionAddEdit(); 
     this.QuestionServ.GetByID(id, this.DomainName).subscribe(
       (d: any) => {
-        this.question = d;
-        console.log(this.question.options)
-        this.options = this.question.options
-        console.log(this.options)
+        this.question = d; 
       }
     );
   }
@@ -176,6 +173,7 @@ export class QuestionsComponent {
     this.mode = 'Edit';
     this.openModal();
     this.GetByID(row.id) 
+    this.options = row.options.map((option) => option.name);
   }
 
   IsAllowDelete(InsertedByID: number) {
@@ -202,7 +200,21 @@ export class QuestionsComponent {
     if(this.question.questionTypeID == 3){
       this.question.correctAnswerName = '' 
     }
-    if (this.isFormValid()) {
+
+    if (this.question.video != null) {
+      const index = this.question.video.indexOf('Uploads');
+      if (index !== -1) {
+        this.question.video = this.question.video.substring(index);
+      }
+    }
+
+    if (this.question.image != null) {
+      const index = this.question.image.indexOf('Uploads');
+      if (index !== -1) {
+        this.question.image = this.question.image.substring(index);
+      }
+    }
+    if (this.isFormValid()) { 
       this.isLoading = true
       if (this.mode == 'Create') {
         this.QuestionServ.Add(this.question, this.DomainName).subscribe(() => {
@@ -245,6 +257,7 @@ export class QuestionsComponent {
     this.isModalVisible = false;
     this.validationErrors = {}
     this.question = new QuestionAddEdit();
+     this.options = []
   }
 
   CorrectAnswer(option: string) {
