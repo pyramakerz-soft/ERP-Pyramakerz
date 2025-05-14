@@ -14,9 +14,9 @@ using Microsoft.IdentityModel.Tokens;
 using System.Drawing;
 using ZXing.Windows.Compatibility;
 
-namespace LMS_CMS_PL.Services.Zatca.Invoice
+namespace LMS_CMS_PL.Services.Zatca
 {
-    public static class InvoicingServices
+    public static class ZatcaServices
     {
         public static List<StepResult> GenerateCSRandPrivateKey(CsrGenerationDto csrGeneration)
         {

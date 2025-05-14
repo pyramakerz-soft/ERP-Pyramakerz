@@ -11,6 +11,9 @@ namespace LMS_CMS_BL.DTO
         public long ID { get; set; }
         public string en_name { get; set; }
         public string ar_name { get; set; }
+        public string? arDisplayName_name { get; set; }
+        public string? enDisplayName_name { get; set; }
+
         public bool IsDisplay { get; set; }
         public long? Page_ID { get; set; }
         public bool Allow_Edit { get; set; }

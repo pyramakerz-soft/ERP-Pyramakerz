@@ -3,6 +3,7 @@ using LMS_CMS_DAL.Models.Domains.Administration;
 using LMS_CMS_DAL.Models.Domains.BusModule;
 using LMS_CMS_DAL.Models.Domains.ClinicModule;
 using LMS_CMS_DAL.Models.Domains.ECommerce;
+using LMS_CMS_DAL.Models.Domains.ETA;
 using LMS_CMS_DAL.Models.Domains.Inventory;
 using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_DAL.Models.Domains.RegisterationModule;
@@ -163,6 +164,8 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<QuestionBankOption> QuestionBankOption { get; set; }
         public DbSet<SubBankQuestion> SubBankQuestion { get; set; }
         public DbSet<LMS.QuestionBankType> QuestionBankType { get; set; }
+        public DbSet<TaxIssuer> TaxIssuers { get; set; }
+        public DbSet<TaxReceiver> TaxReceivers { get; set; }
 
 
         public LMS_CMS_Context(DbContextOptions<LMS_CMS_Context> options)
