@@ -3,6 +3,8 @@ export class PagesWithRoleId {
         public id: number = 0,
         public en_name: string = '',
         public ar_name: string = '',
+        public enDisplayName_name: string = '',
+        public arDisplayName_name: string = '',
         public page_ID: number  = 0,
         public allow_Edit: boolean = false,
         public allow_Delete: boolean = false,
