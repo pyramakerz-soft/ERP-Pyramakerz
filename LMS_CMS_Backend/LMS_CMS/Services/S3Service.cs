@@ -6,7 +6,7 @@ using Amazon.SecretsManager;
 using Newtonsoft.Json;
 using Amazon;
 
-namespace LMS_CMS_PL.Services.Zatca
+namespace LMS_CMS_PL.Services
 {
     public class S3Service
     {
@@ -159,53 +159,6 @@ namespace LMS_CMS_PL.Services.Zatca
             }
 
             return response.SecretString;
-        }
-
-        public async Task<bool> MigrateKeyAsync(string objectKey, string secretName, string? subDirectory = null)
-        {
-            // Step 1: Read the key from S3
-            var getObjectResponse = await _s3Client.GetObjectAsync(_bucketName, $"{_folder}{objectKey}");
-            using var reader = new StreamReader(getObjectResponse.ResponseStream);
-            var jsonContent = await reader.ReadToEndAsync();
-            var pcsid = JsonConvert.DeserializeObject<dynamic>(jsonContent);
-
-            try
-            {
-                // Step 2: Create or update secret in Secrets Manager
-                var putSecretRequest = new CreateSecretRequest
-                {
-                    Name = secretName,
-                    SecretString = pcsid.secret
-                };
-
-                await _secretsManager.CreateSecretAsync(putSecretRequest);
-
-                return true;
-            }
-            catch (ResourceExistsException)
-            {
-                // Secret already exists: update it
-                var updateRequest = new UpdateSecretRequest
-                {
-                    SecretId = secretName,
-                    SecretString = pcsid.secret
-                };
-
-                await _secretsManager.UpdateSecretAsync(updateRequest);
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                return false;
-            }
-        }
-
-        private async Task<string> ReadS3ObjectAsync(string bucket, string key)
-        {
-            var response = await _s3Client.GetObjectAsync(bucket, key);
-            using var reader = new StreamReader(response.ResponseStream);
-            return await reader.ReadToEndAsync();
         }
 
         private string GetContentType(FileStream fileStream)
