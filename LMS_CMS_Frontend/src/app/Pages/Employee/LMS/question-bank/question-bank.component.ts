@@ -28,6 +28,7 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { QuillModule } from 'ngx-quill';
 import { FormsModule } from '@angular/forms';
 import { QuestionBankOption } from '../../../../Models/LMS/question-bank-option';
+import { SubBankQuestion } from '../../../../Models/LMS/sub-bank-question';
 
 @Component({
   selector: 'app-question-bank',
@@ -71,6 +72,7 @@ export class QuestionBankComponent {
   isDeleting: boolean = false;
   validationErrors: { [key in keyof QuestionBank]?: string } = {};
   isLoading = false;
+  isAddSubQuestion = false;
   questionBank: QuestionBank = new QuestionBank()
   NewOption: string = ""
   SelectedSubjectId: number = 0
@@ -280,7 +282,7 @@ export class QuestionBankComponent {
     }
   }
 
-  validateNumber(event: any): void {
+  validatePageNumber(event: any): void {
     const value = event.target.value;
     this.PageSize = 0
   }
@@ -288,35 +290,36 @@ export class QuestionBankComponent {
   CreateOREdit() {
     if (this.isFormValid()) {
       this.isLoading = true;
+      console.log(this.questionBank)
       if (this.mode == 'Create') {
-        // this.medalServ.Add(
-        //   this.medal,
-        //   this.DomainName
-        // ).subscribe(
-        //   (d) => {
-        //     this.GetAllData();
-        //     this.isLoading = false;
-        //     this.closeModal();
-        //   },
-        //   (error) => {
-        //     this.isLoading = false; // Hide spinner
-        //     Swal.fire({
-        //       icon: 'error',
-        //       title: 'Oops...',
-        //       text: 'Try Again Later!',
-        //       confirmButtonText: 'Okay',
-        //       customClass: { confirmButton: 'secondaryBg' }
-        //     });
-        //   }
-        // );
+        this.QuestionBankServ.Add(
+          this.questionBank,
+          this.DomainName
+        ).subscribe(
+          (d) => {
+            this.GetAllData(this.CurrentPage, this.PageSize)
+            this.isLoading = false;
+            this.closeModal();
+          },
+          (error) => {
+            this.isLoading = false; // Hide spinner
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'Try Again Later!',
+              confirmButtonText: 'Okay',
+              customClass: { confirmButton: 'secondaryBg' }
+            });
+          }
+        );
       }
       if (this.mode == 'Edit') {
-        // this.medalServ.Edit(
-        //   this.medal,
+        // this.QuestionBankServ.Edit(
+        //   this.questionBank,
         //   this.DomainName
         // ).subscribe(
         //   (d) => {
-        //     this.GetAllData();
+        //     this.GetAllData(this.CurrentPage, this.PageSize)
         //     this.isLoading = false;
         //     this.closeModal();
         //   },
@@ -476,6 +479,36 @@ export class QuestionBankComponent {
       opt.questionBankID = 0
       this.questionBank.questionBankOptionsDTO.push(opt);
     }
+  }
+
+  addSubQuestion(): void {
+    this.questionBank.subBankQuestionsDTO.push(new SubBankQuestion());
+  }
+
+  addOptionOrder() {
+    this.questionBank.questionBankOptionsDTO.push(new QuestionBankOption());
+  }
+
+  validateNumber(event: any, field: keyof QuestionBank): void {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+      if (typeof this.questionBank[field] === 'string') {
+        this.questionBank[field] = '' as never;
+      }
+    }
+  }
+
+  validateQuestionBankOptionNumber(event: any, field: keyof QuestionBankOption, option: QuestionBankOption): void {
+    const value = event.target.value;
+    const existedOption = this.questionBank.questionBankOptionsDTO.find(s => s === option);
+    if (existedOption)
+      if (isNaN(value) || value === '') {
+        event.target.value = '';
+        if (typeof existedOption[field] === 'string') {
+          existedOption[field] = '' as never;
+        }
+      }
   }
 
 }

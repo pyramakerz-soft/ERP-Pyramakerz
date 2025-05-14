@@ -110,8 +110,8 @@
   </div>
 
   <div class="flex items-center space-x-2">
-    <input (input)="validateNumber($event)" class="rounded-lg border py-3 px-4 w-[73px]" [(ngModel)]="PageSize" min="1"
-      (input)="validatePageSize($event)" (ngModelChange)="changeCurrentPage(CurrentPage)">
+    <input (input)="validatePageNumber($event)" class="rounded-lg border py-3 px-4 w-[73px]" [(ngModel)]="PageSize"
+      min="1" (input)="validatePageSize($event)" (ngModelChange)="changeCurrentPage(CurrentPage)">
     <p>items Per Page</p>
   </div>
 
@@ -223,7 +223,7 @@
 
       <div class="flex flex-col mb-4 w-[49%]">
         <label class="mb-2 primaryTxt" for="mark">Mark</label>
-        <input id="mark" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+        <input id="mark" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" (input)="validateNumber($event,'mark')"
           placeholder="Enter English Name" [(ngModel)]="questionBank.mark"
           (ngModelChange)="onInputValueChange({ field: 'mark', value: $event })" />
         <span *ngIf="validationErrors['mark']" class="text-red-500 ml-3 font-normal">{{validationErrors['mark']}}</span>
@@ -250,6 +250,7 @@
             placeholder="Enter description">
           </quill-editor>
         </div>
+
 
         <div *ngIf="questionBank.questionTypeID ==1 ||questionBank.questionTypeID==2"> <!-- Msq , TF-->
           <div *ngIf="questionBank.questionTypeID==2">
@@ -340,25 +341,46 @@
           </div>
         </div>
 
-        <div *ngIf="questionBank.questionTypeID ==4"> <!-- Drag and Drop-->
-          <div class="flex justify-center gap-4">
+
+        <div *ngIf="questionBank.questionTypeID == 4" class="flex flex-col"> <!-- Drag and Drop -->
+          <div *ngFor="let subQuestion of questionBank.subBankQuestionsDTO; let i = index"
+            class="flex justify-center gap-6 mb-4">
             <div class="flex flex-col w-[50%]">
-              <label class="mb-2 primaryTxt" for="mark">Add Question 1</label>
-              <input id="mark" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                placeholder="Enter Question" [(ngModel)]="questionBank.mark" />
+              <label class="mb-2 primaryTxt">Question {{ i + 1 }}</label>
+              <input type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                placeholder="Enter Question" [(ngModel)]="subQuestion.Description" />
             </div>
             <div class="flex flex-col w-[50%]">
-              <label class="mb-2 primaryTxt" for="mark">Answer</label>
-              <input id="mark" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                placeholder="Enter Answer" [(ngModel)]="questionBank.mark" />
+              <label class="mb-2 primaryTxt">Answer</label>
+              <input type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                placeholder="Enter Answer" [(ngModel)]="subQuestion.Answer" />
             </div>
           </div>
-          <div class="flex justify-end items-center space-x-2 my-3">
-            <i class="fa-solid fa-square-plus"></i>
-            <p class=" primaryTxt">Add Another Question </p>
+          <div class="flex justify-start items-center space-x-2 my-3 cursor-pointer" (click)="addSubQuestion()">
+            <i class="fa-regular fa-square-plus"></i>
+            <p class="primaryTxt">Add Question</p>
           </div>
         </div>
 
+
+        <div *ngIf="questionBank.questionTypeID == 5" class="flex flex-col"> <!-- Order - Sequencing -->
+          <div *ngFor="let option of questionBank.questionBankOptionsDTO; let i = index"
+            class="flex justify-center gap-6 mb-4">
+            <div class="flex flex-col w-[50%]">
+              <label class="mb-2 primaryTxt">Option {{ i + 1 }}</label>
+              <input type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                placeholder="Enter Option" [(ngModel)]="option.option" />
+            </div>
+            <div class="flex flex-col w-[50%]">
+              <label class="mb-2 primaryTxt">Order</label>
+              <input type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Order" [(ngModel)]="option.order"(input)="validateQuestionBankOptionNumber($event,'order',  option)"/>
+            </div>
+          </div>
+          <div class="flex justify-start items-center space-x-2 my-3 cursor-pointer" (click)="addOptionOrder()">
+            <i class="fa-regular fa-square-plus"></i>
+            <p class="primaryTxt">Add Option</p>
+          </div>
+        </div>
       </div>
 
       <div class="w-full mb-4">
