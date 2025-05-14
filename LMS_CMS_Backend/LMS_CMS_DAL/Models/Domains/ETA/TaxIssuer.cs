@@ -2,7 +2,7 @@
 
 namespace LMS_CMS_DAL.Models.Domains.ETA
 {
-    public class TaxIssuer
+    public class TaxIssuer : AuditableEntity
     {
         [Key]
         public string ID { get; set; }

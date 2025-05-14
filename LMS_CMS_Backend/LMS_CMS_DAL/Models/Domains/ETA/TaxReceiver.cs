@@ -2,7 +2,7 @@
 
 namespace LMS_CMS_DAL.Models.Domains.ETA
 {
-    public class TaxReceiver
+    public class TaxReceiver : AuditableEntity
     {
         [Key]
         public string? ID { get; set; }
