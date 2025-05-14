@@ -162,7 +162,6 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<QuestionBankTags> QuestionBankTags { get; set; }
         public DbSet<QuestionBankOption> QuestionBankOption { get; set; }
         public DbSet<SubBankQuestion> SubBankQuestion { get; set; }
-        public DbSet<DragAndDropAnswer> DragAndDropAnswer { get; set; }
         public DbSet<LMS.QuestionBankType> QuestionBankType { get; set; }
 
 
@@ -1413,12 +1412,6 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasOne(p => p.QuestionBank)
                 .WithMany(p => p.SubBankQuestions)
                 .HasForeignKey(p => p.QuestionBankID)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<DragAndDropAnswer>()
-                .HasOne(p => p.SubBankQuestion)
-                .WithMany(p => p.DragAndDropAnswers)
-                .HasForeignKey(p => p.SubBankQuestionID)
                 .OnDelete(DeleteBehavior.Restrict);
 
             ///////////////////////// Exception: /////////////////////////

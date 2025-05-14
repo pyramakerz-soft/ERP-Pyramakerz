@@ -173,7 +173,6 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<QuestionBankTags> QuestionBankTags_Repository;
         GenericRepo<QuestionBankOption> QuestionBankOption_Repository;
         GenericRepo<SubBankQuestion> SubBankQuestion_Repository;
-        GenericRepo<DragAndDropAnswer> DragAndDropAnswer_Repository;
         GenericRepo<QuestionBankType> QuestionBankType_Repository;
 
 
@@ -1932,17 +1931,6 @@ namespace LMS_CMS_BL.UOW
                     SubBankQuestion_Repository = new GenericRepo<SubBankQuestion>(db);
                 }
                 return SubBankQuestion_Repository;
-            }
-        }
-        public GenericRepo<DragAndDropAnswer> dragAndDropAnswer_Repository
-        {
-            get
-            {
-                if (DragAndDropAnswer_Repository == null)
-                {
-                    DragAndDropAnswer_Repository = new GenericRepo<DragAndDropAnswer>(db);
-                }
-                return DragAndDropAnswer_Repository;
             }
         }
 
