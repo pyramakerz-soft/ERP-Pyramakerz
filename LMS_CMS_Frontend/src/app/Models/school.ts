@@ -8,6 +8,7 @@ export class School {
         public address: string = '',
         public postalZone: string = '',
         public city: string = '',
+        public crn: string = '',
         public citySubdivision: string = '',
         public buildingNumber: string = '',
         public streetName: string = '',

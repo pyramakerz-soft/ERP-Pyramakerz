@@ -355,7 +355,6 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             if (NewData.SubBankQuestionsDTO.Count != 0 && NewData.QuestionTypeID==4)
             {
                 List<SubBankQuestion> subQuestions = new List<SubBankQuestion>();
-                List<DragAndDropAnswer> dragAnswers = new List<DragAndDropAnswer>();
 
                 foreach (SubBankQuestionAddDTO item in NewData.SubBankQuestionsDTO)
                 {
@@ -363,24 +362,24 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     {
                         QuestionBankID = questionBank.ID,
                         Description = item.Description,
+                        Answer = item.Answer,
                         InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone),
                         InsertedByOctaId = userTypeClaim == "octa" ? userId : (int?)null,
                         InsertedByUserId = userTypeClaim == "employee" ? userId : (int?)null
                     };
                     subQuestions.Add(subQuestion);
-                    DragAndDropAnswer answer = new DragAndDropAnswer
-                    {
-                        Answer = item.Answer,
-                        SubBankQuestion = subQuestion, // navigation property
-                        InsertedAt = subQuestion.InsertedAt,
-                        InsertedByOctaId = subQuestion.InsertedByOctaId,
-                        InsertedByUserId = subQuestion.InsertedByUserId
-                    };
+                    //DragAndDropAnswer answer = new DragAndDropAnswer
+                    //{
+                    //    Answer = item.Answer,
+                    //    SubBankQuestion = subQuestion, // navigation property
+                    //    InsertedAt = subQuestion.InsertedAt,
+                    //    InsertedByOctaId = subQuestion.InsertedByOctaId,
+                    //    InsertedByUserId = subQuestion.InsertedByUserId
+                    //};
 
-                    dragAnswers.Add(answer);
+                    //dragAnswers.Add(answer);
                 }
                 Unit_Of_Work.subBankQuestion_Repository.AddRange(subQuestions);
-                Unit_Of_Work.dragAndDropAnswer_Repository.AddRange(dragAnswers);
                 Unit_Of_Work.SaveChanges();
             }
 
@@ -622,12 +621,12 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 .Select(sbq => sbq.ID)
                 .ToList();
 
-            // Step 2: Delete all DragAndDropAnswers for those sub-question IDs
-            var dragAnswers = Unit_Of_Work.dragAndDropAnswer_Repository
-                .FindBy(ans => subQuestionIds.Contains(ans.SubBankQuestionID))
-                .ToList();
+            //// Step 2: Delete all DragAndDropAnswers for those sub-question IDs
+            //var dragAnswers = Unit_Of_Work.dragAndDropAnswer_Repository
+            //    .FindBy(ans => subQuestionIds.Contains(ans.SubBankQuestionID))
+            //    .ToList();
 
-            Unit_Of_Work.dragAndDropAnswer_Repository.RemoveRange(dragAnswers);
+            //Unit_Of_Work.dragAndDropAnswer_Repository.RemoveRange(dragAnswers);
 
             // Step 3: Delete the sub-questions themselves
             var subQuestions = Unit_Of_Work.subBankQuestion_Repository
@@ -705,7 +704,6 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             if (NewData.SubBankQuestionsDTO.Count != 0 && NewData.QuestionTypeID == 4)
             {
                 List<SubBankQuestion> newsubQuestions = new List<SubBankQuestion>();
-                List<DragAndDropAnswer> newdragAnswers = new List<DragAndDropAnswer>();
 
                 foreach (SubBankQuestionAddDTO item in NewData.SubBankQuestionsDTO)
                 {
@@ -713,24 +711,24 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     {
                         QuestionBankID = questionBank.ID,
                         Description = item.Description,
+                        Answer = item.Answer,
                         InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone),
                         InsertedByOctaId = userTypeClaim == "octa" ? userId : (int?)null,
                         InsertedByUserId = userTypeClaim == "employee" ? userId : (int?)null
                     };
                     newsubQuestions.Add(subQuestion);
-                    DragAndDropAnswer answer = new DragAndDropAnswer
-                    {
-                        Answer = item.Answer,
-                        SubBankQuestion = subQuestion, // navigation property
-                        InsertedAt = subQuestion.InsertedAt,
-                        InsertedByOctaId = subQuestion.InsertedByOctaId,
-                        InsertedByUserId = subQuestion.InsertedByUserId
-                    };
+                    //DragAndDropAnswer answer = new DragAndDropAnswer
+                    //{
+                    //    Answer = item.Answer,
+                    //    SubBankQuestion = subQuestion, // navigation property
+                    //    InsertedAt = subQuestion.InsertedAt,
+                    //    InsertedByOctaId = subQuestion.InsertedByOctaId,
+                    //    InsertedByUserId = subQuestion.InsertedByUserId
+                    //};
 
-                    newdragAnswers.Add(answer);
+                    //newdragAnswers.Add(answer);
                 }
                 Unit_Of_Work.subBankQuestion_Repository.AddRange(newsubQuestions);
-                Unit_Of_Work.dragAndDropAnswer_Repository.AddRange(newdragAnswers);
                 Unit_Of_Work.SaveChanges();
             }
 

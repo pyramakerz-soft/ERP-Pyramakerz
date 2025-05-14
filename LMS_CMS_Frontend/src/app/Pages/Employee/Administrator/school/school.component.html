@@ -139,6 +139,12 @@
                 (ngModelChange)="onInputValueChange({ field: 'city', value: $event })"/>
             </div>
             <div class="flex flex-col mb-4 w-[49%]">
+                <label class="mb-2 primaryTxt" for="crn">{{ 'CRN' | translate }}</label>
+                <input id="crn" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'crn' | translate }}"
+                [(ngModel)]="school.crn" 
+                (ngModelChange)="onInputValueChange({ field: 'crn', value: $event })"/>
+            </div>
+            <div class="flex flex-col mb-4 w-[49%]">
                 <label class="mb-2 primaryTxt" for="PostalZone">{{ 'Postal Zone' | translate }}</label>
                 <input id="PostalZone" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'Postal Zone' | translate }}"
                 [(ngModel)]="school.postalZone" 
