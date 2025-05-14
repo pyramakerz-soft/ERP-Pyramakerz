@@ -18,7 +18,7 @@ namespace LMS_CMS_BL.DTO.Accounting
         public string BankAccountName { get; set; }
         public string BankName { get; set; }
         public string IBAN { get; set; }
-        public int BankAccountNumber { get; set; }
+        public string BankAccountNumber { get; set; }
         public string AccountOpeningDate { get; set; }
         public string AccountClosingDate { get; set; }
         public long AccountNumberID { get; set; }

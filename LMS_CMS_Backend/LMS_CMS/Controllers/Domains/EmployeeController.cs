@@ -772,7 +772,7 @@ namespace LMS_CMS_PL.Controllers.Domains
         }
         //////////////////////////////////////////////////////////////////////////////
 
-        [HttpPut("EmpployeeAccounting")]
+        [HttpPut("EmployeeAccounting")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             allowEdit: 1,

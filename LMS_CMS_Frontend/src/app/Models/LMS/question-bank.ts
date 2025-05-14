@@ -5,9 +5,9 @@ import { SubBankQuestion } from "./sub-bank-question";
 export class QuestionBank {
   constructor(
     public id: number = 0,
-    public description?: string,
+    public description: string="",
     public image?: string,
-    public imageForm?: Form,
+    public imageForm: File|null = null,
     public difficultyLevel: number = 0,
     public mark: number = 0,
     public essayAnswer?: string,
@@ -19,11 +19,12 @@ export class QuestionBank {
     public dokLevelName: string = '',
     public questionTypeID: number = 0,
     public questionTypeName: string = '',
+    public correctAnswerName: string = '',
     public correctAnswerID: number= 0,
     public insertedByUserId: number = 0,
     public questionBankTagsDTO: number[] = [],
-    public QuestionBankOptionsDTO: QuestionBankOption[] = [],
-    public SubBankQuestionsDTO: SubBankQuestion[] = [],
+    public questionBankOptionsDTO: QuestionBankOption[] = [],
+    public subBankQuestionsDTO: SubBankQuestion[] = [],
   ) {}
 }
 

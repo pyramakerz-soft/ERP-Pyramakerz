@@ -4,6 +4,7 @@ using LMS_CMS_DAL.Models.Domains;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LMS_CMS_DAL.Migrations.Domains
 {
     [DbContext(typeof(LMS_CMS_Context))]
-    partial class LMS_CMS_ContextModelSnapshot : ModelSnapshot
+    [Migration("20250514095902_NoDragandDrop")]
+    partial class NoDragandDrop
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -186,8 +189,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<long?>("DeletedByUserId")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("DocNumber")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("DocNumber")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("InsertedAt")
                         .HasColumnType("datetime2");
@@ -387,9 +390,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("BankAccountNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("BankAccountNumber")
+                        .HasColumnType("int");
 
                     b.Property<string>("BankName")
                         .IsRequired()
@@ -867,8 +869,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<long?>("DeletedByUserId")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("DocNumber")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("DocNumber")
+                        .HasColumnType("int");
 
                     b.Property<long>("EmployeeID")
                         .HasColumnType("bigint");
@@ -1162,8 +1164,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<long?>("DeletedByUserId")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("DocNumber")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("DocNumber")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("InsertedAt")
                         .HasColumnType("datetime2");
@@ -1356,8 +1358,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<long?>("DeletedByUserId")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("DocNumber")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("DocNumber")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("InsertedAt")
                         .HasColumnType("datetime2");

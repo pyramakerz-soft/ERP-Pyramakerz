@@ -1,8 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { QuestionBank } from '../../../../Models/LMS/question-bank';
 import { QuestionBankService } from '../../../../Services/Employee/LMS/question-bank.service';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
@@ -26,11 +25,15 @@ import { DomainService } from '../../../../Services/Employee/domain.service';
 import { SubjectService } from '../../../../Services/Employee/LMS/subject.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
+import { QuillModule } from 'ngx-quill';
+import { FormsModule } from '@angular/forms';
+import { QuestionBankOption } from '../../../../Models/LMS/question-bank-option';
+import { SubBankQuestion } from '../../../../Models/LMS/sub-bank-question';
 
 @Component({
   selector: 'app-question-bank',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, QuillModule],
   templateUrl: './question-bank.component.html',
   styleUrl: './question-bank.component.css'
 })
@@ -69,10 +72,31 @@ export class QuestionBankComponent {
   isDeleting: boolean = false;
   validationErrors: { [key in keyof QuestionBank]?: string } = {};
   isLoading = false;
+  isAddSubQuestion = false;
   questionBank: QuestionBank = new QuestionBank()
-
+  NewOption: string = ""
   SelectedSubjectId: number = 0
-
+  TagsSelected: Tag[] = [];
+  dropdownOpen = false;
+  @ViewChild('quillEditor') quillEditor!: ElementRef;
+  editorModules = {
+    toolbar: [
+      ['bold', 'italic', 'underline', 'strike'],
+      ['blockquote', 'code-block'],
+      [{ 'header': 1 }, { 'header': 2 }],
+      [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+      [{ 'script': 'sub' }, { 'script': 'super' }],
+      [{ 'indent': '-1' }, { 'indent': '+1' }],
+      [{ 'direction': 'rtl' }],
+      [{ 'size': ['small', false, 'large', 'huge'] }],
+      [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+      [{ 'color': [] }, { 'background': [] }],
+      [{ 'font': [] }],
+      [{ 'align': [] }],
+      ['link', 'image', 'video'],
+      ['clean']
+    ]
+  };
   constructor(
     private router: Router,
     private menuService: MenuService,
@@ -89,9 +113,8 @@ export class QuestionBankComponent {
     public BloomLevelServ: BloomLevelService,
     public DokLevelServ: DokLevelService,
     public QuestionBankTypeServ: QuestionBankTypeService,
-
-
   ) { }
+
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
@@ -115,7 +138,6 @@ export class QuestionBankComponent {
     this.GetAllQuestionBankType()
     this.GetAllBloomLevel()
     this.GetAllSubject()
-    this.GetAllLesson()
     this.GetAllTag()
   }
 
@@ -146,6 +168,7 @@ export class QuestionBankComponent {
   GetAllQuestionBankType() {
     this.QuestionBankTypeServ.Get(this.DomainName).subscribe((d) => {
       this.questionBankType = d
+      console.log(this.questionBankType)
     })
   }
 
@@ -259,7 +282,7 @@ export class QuestionBankComponent {
     }
   }
 
-  validateNumber(event: any): void {
+  validatePageNumber(event: any): void {
     const value = event.target.value;
     this.PageSize = 0
   }
@@ -267,35 +290,36 @@ export class QuestionBankComponent {
   CreateOREdit() {
     if (this.isFormValid()) {
       this.isLoading = true;
+      console.log(this.questionBank)
       if (this.mode == 'Create') {
-        // this.medalServ.Add(
-        //   this.medal,
-        //   this.DomainName
-        // ).subscribe(
-        //   (d) => {
-        //     this.GetAllData();
-        //     this.isLoading = false;
-        //     this.closeModal();
-        //   },
-        //   (error) => {
-        //     this.isLoading = false; // Hide spinner
-        //     Swal.fire({
-        //       icon: 'error',
-        //       title: 'Oops...',
-        //       text: 'Try Again Later!',
-        //       confirmButtonText: 'Okay',
-        //       customClass: { confirmButton: 'secondaryBg' }
-        //     });
-        //   }
-        // );
+        this.QuestionBankServ.Add(
+          this.questionBank,
+          this.DomainName
+        ).subscribe(
+          (d) => {
+            this.GetAllData(this.CurrentPage, this.PageSize)
+            this.isLoading = false;
+            this.closeModal();
+          },
+          (error) => {
+            this.isLoading = false; // Hide spinner
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'Try Again Later!',
+              confirmButtonText: 'Okay',
+              customClass: { confirmButton: 'secondaryBg' }
+            });
+          }
+        );
       }
       if (this.mode == 'Edit') {
-        // this.medalServ.Edit(
-        //   this.medal,
+        // this.QuestionBankServ.Edit(
+        //   this.questionBank,
         //   this.DomainName
         // ).subscribe(
         //   (d) => {
-        //     this.GetAllData();
+        //     this.GetAllData(this.CurrentPage, this.PageSize)
         //     this.isLoading = false;
         //     this.closeModal();
         //   },
@@ -384,4 +408,107 @@ export class QuestionBankComponent {
     this.validationErrors = {};
     this.isModalVisible = true;
   }
+
+  onImageFileSelected(event: any) {
+    const file: File = event.target.files[0];
+    this.questionBank.image = ""
+    if (file) {
+      if (file.size > 25 * 1024 * 1024) {
+        this.validationErrors['imageForm'] = 'The file size exceeds the maximum limit of 25 MB.';
+        this.questionBank.imageForm = null;
+        return;
+      }
+      if (file.type === 'image/jpeg' || file.type === 'image/png') {
+        this.questionBank.imageForm = file;
+        this.validationErrors['imageForm'] = '';
+
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+      } else {
+        this.validationErrors['imageForm'] = 'Invalid file type. Only JPEG, JPG and PNG are allowed.';
+        this.questionBank.imageForm = null;
+        return;
+      }
+    }
+  }
+
+  toggleDropdown(): void {
+    this.dropdownOpen = !this.dropdownOpen;
+  }
+
+  selectType(Type: Tag): void {
+    if (!this.TagsSelected.some((e) => e.id === Type.id)) {
+      this.TagsSelected.push(Type);
+    }
+    this.dropdownOpen = false;
+  }
+
+  removeSelected(id: number): void {
+    this.TagsSelected = this.TagsSelected.filter((e) => e.id !== id);
+  }
+
+  CorrectAnswer(option: string) {
+    this.questionBank.correctAnswerName = option;
+    this.validationErrors['correctAnswerName'] = '';
+  }
+
+  AddOption() {
+    if (this.NewOption != "") {
+      var opt = new QuestionBankOption()
+      opt.questionBankID = 0
+      opt.option = this.NewOption
+      opt.questionBankID = 0
+      this.questionBank.questionBankOptionsDTO.push(opt);
+      this.NewOption = '';
+    }
+  }
+
+  checkOnType() {
+    console.log(this.questionBank.questionTypeID)
+    this.questionBank.correctAnswerName = ""
+    this.questionBank.questionBankOptionsDTO = [];
+    if (this.questionBank.questionTypeID == 1) {
+      var opt = new QuestionBankOption()
+      opt.questionBankID = 0
+      opt.option = "True"
+      opt.questionBankID = 0
+      this.questionBank.questionBankOptionsDTO.push(opt);
+      var opt = new QuestionBankOption()
+      opt.questionBankID = 0
+      opt.option = "False"
+      opt.questionBankID = 0
+      this.questionBank.questionBankOptionsDTO.push(opt);
+    }
+  }
+
+  addSubQuestion(): void {
+    this.questionBank.subBankQuestionsDTO.push(new SubBankQuestion());
+  }
+
+  addOptionOrder() {
+    this.questionBank.questionBankOptionsDTO.push(new QuestionBankOption());
+  }
+
+  validateNumber(event: any, field: keyof QuestionBank): void {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+      if (typeof this.questionBank[field] === 'string') {
+        this.questionBank[field] = '' as never;
+      }
+    }
+  }
+
+  validateQuestionBankOptionNumber(event: any, field: keyof QuestionBankOption, option: QuestionBankOption): void {
+    const value = event.target.value;
+    const existedOption = this.questionBank.questionBankOptionsDTO.find(s => s === option);
+    if (existedOption)
+      if (isNaN(value) || value === '') {
+        event.target.value = '';
+        if (typeof existedOption[field] === 'string') {
+          existedOption[field] = '' as never;
+        }
+      }
+  }
+
 }

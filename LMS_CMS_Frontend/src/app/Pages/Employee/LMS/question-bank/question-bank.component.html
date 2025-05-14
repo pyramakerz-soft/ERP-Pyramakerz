@@ -110,8 +110,8 @@
   </div>
 
   <div class="flex items-center space-x-2">
-    <input (input)="validateNumber($event)" class="rounded-lg border py-3 px-4 w-[73px]" [(ngModel)]="PageSize" min="1"
-      (input)="validatePageSize($event)" (ngModelChange)="changeCurrentPage(CurrentPage)">
+    <input (input)="validatePageNumber($event)" class="rounded-lg border py-3 px-4 w-[73px]" [(ngModel)]="PageSize"
+      min="1" (input)="validatePageSize($event)" (ngModelChange)="changeCurrentPage(CurrentPage)">
     <p>items Per Page</p>
   </div>
 
@@ -121,7 +121,7 @@
 </div>
 
 <!-- Modal -->
-<!-- <div id="default-modal" tabindex="-1" aria-hidden="true" [ngClass]="{ hidden: !isModalVisible }"
+<div id="default-modal" tabindex="-1" aria-hidden="true" [ngClass]="{ hidden: !isModalVisible }"
   class="fixed top-0 left-0 right-0 z-50 flex justify-center items-center w-full h-full bg-black/50">
   <div class="bg-white rounded-2xl p-12 w-1/2 max-h-[95%] overflow-y-auto">
     <div class="flex justify-between items-center">
@@ -133,127 +133,282 @@
 
     <div class="mt-6 mb-4 rounded-3xl flex justify-between flex-wrap">
       <div class="flex flex-col mb-4 w-[49%]">
-        <div class="flex flex-col mb-4 w-[49%]">
-          <label class="mb-2 primaryTxt" for="SelectedSubjectId">Subject</label>
-          <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
-            id="SelectedSubjectId" [(ngModel)]="questionBank.">
-            <option [value]="0" disabled selected hidden>Choose Subject</option>
-            <option *ngFor="let c of subject" [value]="c.id">{{ c.name }}</option>
-            <option *ngIf="subject.length === 0" disabled selected>No Data Found</option>
-          </select>
+        <label class="mb-2 primaryTxt" for="SelectedSubjectId">Subject</label>
+        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="SelectedSubjectId"
+          (change)="GetAllLesson();" [(ngModel)]="SelectedSubjectId">
+          <option [value]="0" disabled selected hidden>Choose Subject</option>
+          <option *ngFor="let c of subject" [value]="c.id">{{ c.en_name }}</option>
+          <option *ngIf="subject.length === 0" disabled selected>No Data Found</option>
+        </select>
+      </div>
+
+      <div class="flex flex-col mb-4 w-[49%]">
+        <label class="mb-2 primaryTxt" for="lessonID">Lesson</label>
+        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="lessonID"
+          [disabled]="!SelectedSubjectId" [(ngModel)]="questionBank.lessonID">
+          <option [value]="0" disabled selected hidden>Choose Lesson</option>
+          <option *ngFor="let c of lesson" [value]="c.id">{{ c.englishTitle }}</option>
+          <option *ngIf="lesson.length === 0" disabled selected>No Data Found</option>
+        </select>
+      </div>
+
+      <div class="flex flex-col mb-4 w-[49%]">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="ac">Tags</label>
+        <div class="relative">
+          <div class="border border-gray-300 rounded-lg px-4 py-3 cursor-pointer min-h-[48px]"
+            (click)="toggleDropdown()" tabindex="0">
+            <ng-container *ngIf="TagsSelected.length > 0; else placeholder">
+              <div class="flex flex-wrap">
+                <span class="mr-2 mb-1 bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center"
+                  *ngFor="let selected of TagsSelected">
+                  {{ selected.name }}
+                  <span class="ml-2 cursor-pointer text-red-500" (click)="removeSelected(selected.id)">
+                    &times;
+                  </span>
+                </span>
+              </div>
+            </ng-container>
+            <ng-template #placeholder>
+              <span class="text-gray-400">Choose Type</span>
+            </ng-template>
+          </div>
+          <div class="absolute bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10"
+            *ngIf="dropdownOpen">
+            <ul>
+              <li *ngFor="let Type of tag" class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                (click)="selectType(Type)">
+                {{ Type.name }}
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
+
       <div class="flex flex-col mb-4 w-[49%]">
-        <div class="flex flex-col mb-4 w-[49%]">
-          <label class="mb-2 primaryTxt" for="lessonID">Lesson</label>
-          <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
-            id="lessonID" [(ngModel)]="questionBank.lessonID" >
-            <option [value]="0" disabled selected hidden>Choose Lesson</option>
-            <option *ngFor="let c of lesson" [value]="c.id">{{ c.name }}</option>
-            <option *ngIf="lesson.length === 0" disabled selected>No Data Found</option>
-          </select>
-          <span *ngIf="validationErrors['lessonID']"
-            class="text-red-500 ml-3 font-normal">{{validationErrors['lessonID'] }}</span>
-        </div>
+        <label class="mb-2 primaryTxt" for="difficultyLevel">Difficulty Level</label>
+        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="difficultyLevel"
+          [(ngModel)]="questionBank.difficultyLevel">
+          <option [value]="0" disabled selected hidden>Choose Difficulty Level</option>
+          <option *ngFor="let level of [1, 2, 3, 4, 5, 6]" [value]="level">
+            {{ level }}
+          </option>
+        </select>
+        <span *ngIf="validationErrors['difficultyLevel']"
+          class="text-red-500 ml-3 font-normal">{{validationErrors['difficultyLevel'] }}</span>
       </div>
+
       <div class="flex flex-col mb-4 w-[49%]">
-        <div class="flex flex-col mb-4 w-[49%]">
-          <label class="mb-2 primaryTxt" for="schoolModalImportTo">Tags</label>
-          <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
-            id="schoolModalImportTo" [(ngModel)]="SchoolModalImportToId" >
-            <option [value]="0" disabled selected hidden>Choose School</option>
-            <option *ngFor="let c of tag" [value]="c.id">{{ c.name }}</option>
-            <option *ngIf="tag.length === 0" disabled selected>No Data Found</option>
-          </select>
-          <span *ngIf="validationErrors['arabicName']"
-            class="text-red-500 ml-3 font-normal">{{validationErrors['arabicName'] }}</span>
-        </div>
+        <label class="mb-2 primaryTxt" for="bloomLevelID">Bloom Level</label>
+        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="bloomLevelID"
+          [(ngModel)]="questionBank.bloomLevelID">
+          <option [value]="0" disabled selected hidden>Choose Bloom Level</option>
+          <option *ngFor="let c of bloomLevel" [value]="c.id">{{ c.englishName }}</option>
+          <option *ngIf="bloomLevel.length === 0" disabled selected>No Data Found</option>
+        </select>
+        <span *ngIf="validationErrors['bloomLevelID']"
+          class="text-red-500 ml-3 font-normal">{{validationErrors['bloomLevelID']}}</span>
       </div>
+
       <div class="flex flex-col mb-4 w-[49%]">
-        <div class="flex flex-col mb-4 w-[49%]">
-          <label class="mb-2 primaryTxt" for="schoolModalImportTo">Difficulty Level</label>
-          <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
-            id="schoolModalImportTo" [(ngModel)]="SchoolModalImportToId" >
-            <option [value]="0" disabled selected hidden>Choose School</option>
-            <option *ngFor="let c of SchoolsModal" [value]="c.id">{{ c.name }}</option>
-            <option *ngIf="SchoolsModal.length === 0" disabled selected>No Data Found</option>
-          </select>
-          <span *ngIf="validationErrors['arabicName']"
-            class="text-red-500 ml-3 font-normal">{{validationErrors['arabicName']}}</span>
-        </div>
+        <label class="mb-2 primaryTxt" for="dokLevelID">Dok Level</label>
+        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="dokLevelID"
+          [(ngModel)]="questionBank.dokLevelID">
+          <option [value]="0" disabled selected hidden>Choose Dok Level</option>
+          <option *ngFor="let c of dokLevel" [value]="c.id">{{ c.englishName }}</option>
+          <option *ngIf="dokLevel.length === 0" disabled selected>No Data Found</option>
+        </select>
+        <span *ngIf="validationErrors['dokLevelID']"
+          class="text-red-500 ml-3 font-normal">{{validationErrors['dokLevelID']}}</span>
       </div>
+
       <div class="flex flex-col mb-4 w-[49%]">
-        <div class="flex flex-col mb-4 w-[49%]">
-          <label class="mb-2 primaryTxt" for="schoolModalImportTo">Bloom Level</label>
-          <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
-            id="schoolModalImportTo" [(ngModel)]="SchoolModalImportToId" >
-            <option [value]="0" disabled selected hidden>Choose School</option>
-            <option *ngFor="let c of bloomLevel" [value]="c.id">{{ c.name }}</option>
-            <option *ngIf="bloomLevel.length === 0" disabled selected>No Data Found</option>
-          </select>
-          <span *ngIf="validationErrors['arabicName']"
-            class="text-red-500 ml-3 font-normal">{{validationErrors['arabicName']}}</span>
-        </div>
+        <label class="mb-2 primaryTxt" for="mark">Mark</label>
+        <input id="mark" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" (input)="validateNumber($event,'mark')"
+          placeholder="Enter English Name" [(ngModel)]="questionBank.mark"
+          (ngModelChange)="onInputValueChange({ field: 'mark', value: $event })" />
+        <span *ngIf="validationErrors['mark']" class="text-red-500 ml-3 font-normal">{{validationErrors['mark']}}</span>
       </div>
-      <div class="flex flex-col mb-4 w-[49%]">
-        <div class="flex flex-col mb-4 w-[49%]">
-          <label class="mb-2 primaryTxt" for="schoolModalImportTo">Dok Level</label>
-          <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
-            id="schoolModalImportTo" [(ngModel)]="SchoolModalImportToId" >
-            <option [value]="0" disabled selected hidden>Choose School</option>
-            <option *ngFor="let c of dokLevel" [value]="c.id">{{ c.name }}</option>
-            <option *ngIf="dokLevel.length === 0" disabled selected>No Data Found</option>
-          </select>
-          <span *ngIf="validationErrors['arabicName']"
-            class="text-red-500 ml-3 font-normal">{{validationErrors['arabicName']}}</span>
-        </div>
+
+      <div class="flex flex-col mb-4 w-full">
+        <label class="mb-2 primaryTxt" for="questionTypeID">Question Type</label>
+        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="questionTypeID"
+          [(ngModel)]="questionBank.questionTypeID" (ngModelChange)="checkOnType()">
+          <option [value]="0" disabled selected hidden>Choose Question Type</option>
+          <option *ngFor="let c of questionBankType" [value]="c.id">{{ c.name }}</option>
+          <option *ngIf="questionBankType.length === 0" disabled selected>No Data Found</option>
+        </select>
+        <span *ngIf="validationErrors['questionTypeID']"
+          class="text-red-500 ml-3 font-normal">{{validationErrors['questionTypeID']}}</span>
       </div>
-      <div class="flex flex-col mb-4 w-[49%]">
-        <label class="mb-2 primaryTxt" for="englishName">Mark</label>
-        <input id="englishName" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-          placeholder="Enter English Name" [(ngModel)]="medal.englishName"
-          (ngModelChange)="onInputValueChange({ field: 'englishName', value: $event })" />
-        <span *ngIf="validationErrors['englishName']" class="text-red-500 ml-3 font-normal">{{
-          validationErrors['englishName']}}</span>
-      </div>
-      <div class="flex flex-col mb-4 w-[49%]">
-        <div class="flex flex-col mb-4 w-[49%]">
-          <label class="mb-2 primaryTxt" for="schoolModalImportTo">Question Type</label>
-          <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
-            id="schoolModalImportTo" [(ngModel)]="SchoolModalImportToId" >
-            <option [value]="0" disabled selected hidden>Choose School</option>
-            <option *ngFor="let c of questionBankType" [value]="c.id">{{ c.name }}</option>
-            <option *ngIf="questionBankType.length === 0" disabled selected>No Data Found</option>
-          </select>
-          <span *ngIf="validationErrors['arabicName']"
-            class="text-red-500 ml-3 font-normal">{{validationErrors['arabicName']}}</span>
+
+      <div>
+        <div class="flex flex-col mb-4 w-full"
+          *ngIf="questionBank.questionTypeID!=4 &&questionBank.questionTypeID!=5 &&questionBank.questionTypeID!=0">
+          <label class="mb-2 primaryTxt">description</label>
+          <quill-editor (ngModelChange)="onInputValueChange({ field: 'description', value: $event })"
+            [(ngModel)]="questionBank.description" [modules]="editorModules" theme="snow" class="quill-editor-wrapper"
+            placeholder="Enter description">
+          </quill-editor>
         </div>
 
-        <div class="w-full mb-4">
-          <div class="bg-[#F6F6F6] flex items-center space-x-4 w-full rounded-md border-dashed border-2">
-            <div class="flex justify-center w-full">
-              <label for="file-upload" class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
-                <img *ngIf="!medal.imageLink && !medal.imageForm" src="Images/Icon frame.png" class="w-1/4">
-                <img *ngIf="!medal.imageLink && medal.imageForm" src="Images/FileAttached.png" class="w-1/4">
-                <img *ngIf="medal.imageLink" [src]="medal.imageLink" class="w-1/3 object-cover">
-                <p class="font-normal text-xs md:text-sm text-[#8E8E93] mt-3"><span class="secondaryTxt">Click to Upload
-                  </span></p>
-                <p class="font-normal text-xs md:text-sm text-[#8E8E93]"> (Max. File size: 25 MB)</p>
-              </label>
-              <input id="file-upload" type="file" class="hidden" (change)="onImageFileSelected($event)"
-                accept="image/jpeg, image/png" />
+
+        <div *ngIf="questionBank.questionTypeID ==1 ||questionBank.questionTypeID==2"> <!-- Msq , TF-->
+          <div *ngIf="questionBank.questionTypeID==2">
+            <h6 class="font-medium text-base leading-6 mb-2 mt-3">Options</h6>
+            <div class="flex justify-start gap-2 items-center">
+              <div class="flex flex-col">
+                <input type="text" [(ngModel)]="NewOption"
+                  class="w-[450px] h-[45px] rounded-lg border border-solid border-gray-300 px-2"
+                  placeholder="Enter Option" />
+                <!-- <span *ngIf="validationErrors['options']" class="text-red-500 ml-3 font-normal">{{
+                validationErrors['options'] }}</span> -->
+              </div>
+              <button class="secondaryBg text-white font-medium px-5 py-2 rounded-lg" (click)="AddOption()">
+                Add
+              </button>
             </div>
           </div>
-          <span *ngIf="validationErrors['imageForm']" class="text-red-500  font-normal text-xs md:text-sm">{{
-            validationErrors['imageForm'] }}</span>
+          <div class="w-full">
+            <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD] max-w-full">
+              <table class="overflow-auto w-full bg-[#EBEBEB] ltr:text-left rtl:text-right text-[#6F6F6F]">
+                <thead class="bg-[##EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+                  <tr>
+                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                      Correct
+                    </th>
+                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                      Option
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let row of questionBank.questionBankOptionsDTO; let i = index"
+                    [ngClass]="{'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1}"
+                    class="border-t border-gray-300 text-xs md:text-sm">
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                      <i [ngClass]="{'secondaryTxt': questionBank.correctAnswerName === row.option, 'text-gray-500': questionBank.correctAnswerName !== row.option}"
+                        (ngModelChange)="onInputValueChange({ field: 'correctAnswerName', value: $event })"
+                        class="fa-regular fa-circle-dot a-3x" (click)="CorrectAnswer(row.option)"></i>
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.option }}</td>
+                  </tr>
+                </tbody>
+                <!-- <span *ngIf="validationErrors['correctAnswerName']" class="text-red-500 ml-3 font-normal">{{
+                validationErrors['correctAnswerName'] }}</span> -->
+              </table>
+            </div>
+          </div>
+        </div>
+
+
+        <div *ngIf="questionBank.questionTypeID ==3"> <!-- fill in blank-->
+          <div>
+            <h6 class="font-medium text-base leading-6 mb-2 mt-3">Answer</h6>
+            <div class="flex justify-start gap-2 items-center">
+              <div class="flex flex-col">
+                <input type="text" [(ngModel)]="NewOption"
+                  class="w-[450px] h-[45px] rounded-lg border border-solid border-gray-300 px-2"
+                  placeholder="Enter Option" />
+                <!-- <span *ngIf="validationErrors['options']" class="text-red-500 ml-3 font-normal">{{
+                validationErrors['options'] }}</span> -->
+              </div>
+              <button class="secondaryBg text-white font-medium px-5 py-2 rounded-lg" (click)="AddOption()">
+                Add
+              </button>
+            </div>
+          </div>
+          <div class="w-full">
+            <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD] max-w-full">
+              <table class="overflow-auto w-full bg-[#EBEBEB] ltr:text-left rtl:text-right text-[#6F6F6F]">
+                <thead class="bg-[##EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+                  <tr>
+                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                      Answer
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let row of questionBank.questionBankOptionsDTO; let i = index"
+                    [ngClass]="{'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1}"
+                    class="border-t border-gray-300 text-xs md:text-sm">
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.option }}</td>
+                  </tr>
+                </tbody>
+                <!-- <span *ngIf="validationErrors['correctAnswerName']" class="text-red-500 ml-3 font-normal">{{
+                validationErrors['correctAnswerName'] }}</span> -->
+              </table>
+            </div>
+          </div>
+        </div>
+
+
+        <div *ngIf="questionBank.questionTypeID == 4" class="flex flex-col"> <!-- Drag and Drop -->
+          <div *ngFor="let subQuestion of questionBank.subBankQuestionsDTO; let i = index"
+            class="flex justify-center gap-6 mb-4">
+            <div class="flex flex-col w-[50%]">
+              <label class="mb-2 primaryTxt">Question {{ i + 1 }}</label>
+              <input type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                placeholder="Enter Question" [(ngModel)]="subQuestion.Description" />
+            </div>
+            <div class="flex flex-col w-[50%]">
+              <label class="mb-2 primaryTxt">Answer</label>
+              <input type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                placeholder="Enter Answer" [(ngModel)]="subQuestion.Answer" />
+            </div>
+          </div>
+          <div class="flex justify-start items-center space-x-2 my-3 cursor-pointer" (click)="addSubQuestion()">
+            <i class="fa-regular fa-square-plus"></i>
+            <p class="primaryTxt">Add Question</p>
+          </div>
+        </div>
+
+
+        <div *ngIf="questionBank.questionTypeID == 5" class="flex flex-col"> <!-- Order - Sequencing -->
+          <div *ngFor="let option of questionBank.questionBankOptionsDTO; let i = index"
+            class="flex justify-center gap-6 mb-4">
+            <div class="flex flex-col w-[50%]">
+              <label class="mb-2 primaryTxt">Option {{ i + 1 }}</label>
+              <input type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                placeholder="Enter Option" [(ngModel)]="option.option" />
+            </div>
+            <div class="flex flex-col w-[50%]">
+              <label class="mb-2 primaryTxt">Order</label>
+              <input type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Order" [(ngModel)]="option.order"(input)="validateQuestionBankOptionNumber($event,'order',  option)"/>
+            </div>
+          </div>
+          <div class="flex justify-start items-center space-x-2 my-3 cursor-pointer" (click)="addOptionOrder()">
+            <i class="fa-regular fa-square-plus"></i>
+            <p class="primaryTxt">Add Option</p>
+          </div>
         </div>
       </div>
-      <div class="flex justify-end">
-        <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
-          (click)="CreateOREdit()">
-          <span *ngIf="!isLoading">Save</span>
-          <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
-        </button>
+
+      <div class="w-full mb-4">
+        <div class="bg-[#F6F6F6] flex items-center space-x-4 w-full rounded-md border-dashed border-2">
+          <div class="flex justify-center w-full">
+            <label for="file-upload" class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
+              <img *ngIf="!questionBank.image && !questionBank.imageForm" src="Images/Icon frame.png" class="w-1/4">
+              <img *ngIf="!questionBank.image && questionBank.imageForm" src="Images/FileAttached.png" class="w-1/4">
+              <img *ngIf="questionBank.image" [src]="questionBank.image" class="w-1/3 object-cover">
+              <p class="font-normal text-xs md:text-sm text-[#8E8E93] mt-3"><span class="secondaryTxt">Click to Upload
+                </span></p>
+              <p class="font-normal text-xs md:text-sm text-[#8E8E93]"> (Max. File size: 25 MB)</p>
+            </label>
+            <input id="file-upload" type="file" class="hidden" (change)="onImageFileSelected($event)"
+              accept="image/jpeg, image/png" />
+          </div>
+        </div>
+        <span *ngIf="validationErrors['imageForm']" class="text-red-500  font-normal text-xs md:text-sm">{{
+          validationErrors['imageForm'] }}</span>
       </div>
+
     </div>
-  </div> -->
+    <div class="w-full flex justify-end">
+      <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
+        (click)="CreateOREdit()">
+        <span *ngIf="!isLoading">Save</span>
+        <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+      </button>
+    </div>
+  </div>
+</div>

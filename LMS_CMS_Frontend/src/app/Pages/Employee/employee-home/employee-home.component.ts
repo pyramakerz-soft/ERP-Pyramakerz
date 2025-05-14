@@ -5,6 +5,10 @@ import { ChartPieComponent } from '../../../Component/Employee/Home/chart-pie/ch
 import { RevenueChartComponent } from '../../../Component/Employee/Home/revenue-chart/revenue-chart.component';
 import { SalesAnalyticsComponent } from '../../../Component/Employee/Home/sales-analytics/sales-analytics.component';
 import { FilterHeaderComponent } from '../../../Component/Employee/Home/filter-header/filter-header.component';
+import { EmployeeService } from '../../../Services/Employee/employee.service';
+import { ApiService } from '../../../Services/api.service';
+import { Employee } from '../../../Models/Employee/employee';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-employee-home',
@@ -14,12 +18,32 @@ import { FilterHeaderComponent } from '../../../Component/Employee/Home/filter-h
     RevenueChartComponent,
     SalesAnalyticsComponent,
     FilterHeaderComponent,
+    CommonModule
   ],
   templateUrl: './employee-home.component.html',
   styleUrl: './employee-home.component.css',
 })
 export class EmployeeHomeComponent {
   tab: 'Week' | 'Month' | 'Year' | 'Custom' = 'Month';
+  User_Data_After_Login :TokenData =new TokenData("", 0, 0, 0, 0, "", "", "", "", "") 
+  DomainName: string = "";
+  employee:Employee = new Employee()
+
+  constructor(public account:AccountService, public employeeService:EmployeeService, public ApiServ:ApiService){}
+
+  ngOnInit(){
+    this.User_Data_After_Login = this.account.Get_Data_Form_Token(); 
+    this.DomainName=this.ApiServ.GetHeader();
+    this.getEmployeeByID()
+  }
+
+  getEmployeeByID(){
+    this.employeeService.Get_Employee_By_ID(this.User_Data_After_Login.id, this.DomainName).subscribe(
+      data =>{
+        this.employee = data 
+      }
+    )
+  }
 
   selectTab(tab: 'Week' | 'Month' | 'Year' | 'Custom') {
     this.tab = tab;

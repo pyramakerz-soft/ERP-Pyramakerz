@@ -16,8 +16,8 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
 
         [ForeignKey("QuestionBank")]
         public long QuestionBankID { get; set; }
+        public string Answer { get; set; }
         public QuestionBank QuestionBank { get; set; }
-        public ICollection<DragAndDropAnswer> DragAndDropAnswers { get; set; } = new HashSet<DragAndDropAnswer>();
-
+        //public ICollection<DragAndDropAnswer> DragAndDropAnswers { get; set; } = new HashSet<DragAndDropAnswer>();
     }
 }
