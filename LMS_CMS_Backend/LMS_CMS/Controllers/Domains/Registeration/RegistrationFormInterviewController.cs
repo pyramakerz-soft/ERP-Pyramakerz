@@ -57,8 +57,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                 return NotFound("No Interviews with this ID");
             }
 
+            // NOTE ==> no IsDelete To get the students even if they are assigned to class
             List<RegisterationFormInterview> registerationFormInterview = await Unit_Of_Work.registerationFormInterview_Repository.Select_All_With_IncludesById<RegisterationFormInterview>(
-                    i => i.IsDeleted != true && i.InterviewTimeID == interviewID,
+                    i => i.InterviewTimeID == interviewID,
                     query => query.Include(r => r.RegisterationFormParent),
                     query => query.Include(r => r.InterviewState)
                     );
@@ -567,27 +568,28 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
             Unit_Of_Work.interviewTime_Repository.Update( interviewTime );
             Unit_Of_Work.SaveChanges();
 
-            registerationFormInterview.IsDeleted = true;
-            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-            registerationFormInterview.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
-            if (userTypeClaim == "octa")
-            {
-                registerationFormInterview.DeletedByOctaId = userId;
-                if (registerationFormInterview.DeletedByUserId != null)
-                {
-                    registerationFormInterview.DeletedByUserId = null;
-                }
-            }
-            else if (userTypeClaim == "employee")
-            {
-                registerationFormInterview.DeletedByUserId = userId;
-                if (registerationFormInterview.DeletedByOctaId != null)
-                {
-                    registerationFormInterview.DeletedByOctaId = null;
-                }
-            }
+            //registerationFormInterview.IsDeleted = true;
+            //TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            //registerationFormInterview.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            //if (userTypeClaim == "octa")
+            //{
+            //    registerationFormInterview.DeletedByOctaId = userId;
+            //    if (registerationFormInterview.DeletedByUserId != null)
+            //    {
+            //        registerationFormInterview.DeletedByUserId = null;
+            //    }
+            //}
+            //else if (userTypeClaim == "employee")
+            //{
+            //    registerationFormInterview.DeletedByUserId = userId;
+            //    if (registerationFormInterview.DeletedByOctaId != null)
+            //    {
+            //        registerationFormInterview.DeletedByOctaId = null;
+            //    }
+            //}
 
-            Unit_Of_Work.registerationFormInterview_Repository.Update(registerationFormInterview);
+            //Unit_Of_Work.registerationFormInterview_Repository.Update(registerationFormInterview);
+            Unit_Of_Work.registerationFormInterview_Repository.Delete(registerationFormInterview.ID);
             Unit_Of_Work.SaveChanges();
 
             return Ok();

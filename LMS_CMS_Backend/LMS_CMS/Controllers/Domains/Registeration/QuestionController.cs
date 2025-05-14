@@ -73,6 +73,48 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
 
             return Ok(questionDTO);
         }
+        
+        //////////////////////////////////////////////////////////////////////////////
+        
+        [HttpGet("GetByID/{id}")]
+        [Authorize_Endpoint_(
+         allowedTypes: new[] { "octa", "employee" }
+         ,
+         pages: new[] { "Admission Test" }
+         )]
+        public async Task<IActionResult> GetByID(long id)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            Question questions = await Unit_Of_Work.question_Repository.FindByIncludesAsync(
+                    b => b.IsDeleted != true && b.ID == id,
+                    query => query.Include(emp => emp.QuestionType),
+                    query => query.Include(emp => emp.mCQQuestionOption),
+                    query => query.Include(emp => emp.test),
+                    query => query.Include(emp => emp.MCQQuestionOptions)
+                    );
+
+            if (questions == null)
+            {
+                return NotFound();
+            }
+
+            questionGetDTO questionDTO = mapper.Map<questionGetDTO>(questions);
+
+            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+
+            if (!string.IsNullOrEmpty(questionDTO.Image))
+            {
+                questionDTO.Image = $"{serverUrl}{questionDTO.Image.Replace("\\", "/")}";
+            }
+            if (!string.IsNullOrEmpty(questionDTO.Video))
+            {
+                questionDTO.Video = $"{serverUrl}{questionDTO.Video.Replace("\\", "/")}";
+            }
+
+            return Ok(questionDTO);
+        }
+
         //////////////////////////////////////////////////////////////////////////////
 
         [HttpGet("ByTest/{id}")]

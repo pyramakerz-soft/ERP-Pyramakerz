@@ -16,6 +16,8 @@ namespace LMS_CMS_BL.DTO.LMS
         public string DateTo { get; set; }
         public long AcademicYearID { get; set; }
         public string AcademicYearName { get; set; }
+        public long? WeekStartDayID { get; set; } 
+        public long? WeekEndDayID { get; set; }
         public long? InsertedByUserId { get; set; }
     }
 }

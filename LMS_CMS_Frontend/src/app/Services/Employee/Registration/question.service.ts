@@ -113,6 +113,7 @@ export class QuestionService {
        .set('Content-Type', 'application/json');
      return this.http.get<Question[]>(`${this.baseUrl}/Question`, { headers })
    }
+
    GetByTestID(id:number,DomainName:string) {
      if(DomainName!=null) {
        this.header=DomainName 
@@ -123,6 +124,18 @@ export class QuestionService {
        .set('Authorization', `Bearer ${token}`)
        .set('Content-Type', 'application/json');
      return this.http.get<Question[]>(`${this.baseUrl}/Question/ByTest/${id}`, { headers })
+   }
+   
+   GetByID(id:number,DomainName:string) {
+     if(DomainName!=null) {
+       this.header=DomainName 
+     }
+     const token = localStorage.getItem("current_token");
+     const headers = new HttpHeaders()
+       .set('domain-name', this.header)
+       .set('Authorization', `Bearer ${token}`)
+       .set('Content-Type', 'application/json');
+     return this.http.get<Question>(`${this.baseUrl}/Question/GetByID/${id}`, { headers })
    }
 
    GetByTestIDGroupBy(id:number,DomainName:string) {
