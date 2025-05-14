@@ -142,10 +142,10 @@ export class AccountingTreeComponent {
 
   GetDataByID() {
     let id = this.accountingTreeChart.id
-    this.validationErrors = {}
     if (this.accountingTreeChart.id && this.accountingTreeChart.id != null && this.accountingTreeChart.id != 0) {
       this.accountingTreeChartService.GetByID(this.accountingTreeChart.id, this.DomainName).subscribe(
         (data) => {
+          this.validationErrors = {}
           this.isEdit = true
           this.accountingTreeChart = data
           if (this.accountingTreeChart.id)
@@ -154,7 +154,7 @@ export class AccountingTreeComponent {
         (err) => {
           this.isEdit = false
           this.accountingTreeChart = new AccountingTreeChart()
-          this.accountingTreeChart.id = id
+          this.accountingTreeChart.id = id 
           this.GetMainData()
         }
       )
@@ -222,16 +222,18 @@ export class AccountingTreeComponent {
     this.GetDataByID()
   }
 
-  validateNumber(event: any, field: keyof AccountingTreeChart): void {
+  validateNumber(event: any, field?: keyof AccountingTreeChart): void {
     const value = event.target.value;
     if (isNaN(value) || value === '') {
       event.target.value = '';
-      if (typeof this.accountingTreeChart[field] === 'string') {
-        this.accountingTreeChart[field] = '' as never;
+      if (field) {
+        if (typeof this.accountingTreeChart[field] === 'string') {
+          this.accountingTreeChart[field] = '' as never;
+        }
       }
     }
-  }
-
+  } 
+ 
   capitalizeField(field: keyof AccountingTreeChart): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
@@ -257,6 +259,17 @@ export class AccountingTreeComponent {
           } else {
             this.validationErrors[field] = '';
           }
+
+          if (field == "id") { 
+            if(this.accountingTreeChart.id != null){
+              if(isNaN(this.accountingTreeChart.id)){
+                this.validationErrors["id"] = 'Id Can Only Contain Numbers' 
+                isValid = false;
+              }else{
+                this.validationErrors["id"] = ''
+              }
+            }             
+          }
         }
       }
     }
@@ -273,6 +286,16 @@ export class AccountingTreeComponent {
     if (field == "subTypeID") {
       this.validationErrors["mainAccountNumberID"] = ''
       this.validationErrors["linkFileID"] = ''
+    }
+    if (field == "id") { 
+      if(this.accountingTreeChart.id != null){
+        if(isNaN(this.accountingTreeChart.id)){
+          this.validationErrors["id"] = 'Id Can Only Contain Numbers'
+          this.accountingTreeChart.id = null
+        }else{
+          this.validationErrors["id"] = ''
+        }
+      } 
     }
     if (field == "mainAccountNumberID") {
       this.validationErrors["motionTypeID"] = ''
