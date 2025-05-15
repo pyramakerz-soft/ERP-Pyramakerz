@@ -139,7 +139,7 @@ namespace LMS_CMS_PL.Controllers.Octa
                 LMS_CMS_DAL.Models.Domains.Page pageNew = new LMS_CMS_DAL.Models.Domains.Page
                 {
                     ID = page.ID,
-                    en_name = page.en_name,
+                    en_name = page.en_name, 
                     ar_name = page.ar_name,
                     enDisplayName_name = page.enDisplayName_name,
                     arDisplayName_name = page.arDisplayName_name,
@@ -162,16 +162,28 @@ namespace LMS_CMS_PL.Controllers.Octa
         private void DeletePageWithChildren(LMS_CMS_DAL.Models.Octa.Page page, UOW Unit_Of_Work)
         {
             if (page == null) return;
+            var pageInDomain = Unit_Of_Work.page_Repository.Select_By_Id(page.ID);
+            if (pageInDomain == null) return;
              
             var childPages = GetPagesByParentId(page.ID);
-             
+            //var childPages = GetPagesByParentId(page.ID) ?? new List<LMS_CMS_DAL.Models.Octa.Page>();
+
             foreach (var childPage in childPages)
             {
                 DeletePageWithChildren(childPage, Unit_Of_Work);  
             }
 
             // After deleting all children, delete the current page
-            Unit_Of_Work.page_Repository.Delete(page.ID);
+            //Unit_Of_Work.page_Repository.Delete(page.ID);
+            try
+            {
+                Unit_Of_Work.page_Repository.Delete(page.ID);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception if needed
+                throw new InvalidOperationException("Error deleting page with ID: " + page.ID, ex);
+            }
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -468,14 +480,17 @@ namespace LMS_CMS_PL.Controllers.Octa
             }
 
             // 3) Get The Deleted Ones (By Default it will delete the role details as on delete cascade
-            if (existingPages != null || existingPages.Count != 0)
+            if (existingPages != null && existingPages.Count != 0)
             {
                 for (int i = 0; i < existingPages.Count; i++)
                 {
                     if (!domain.Pages.Contains(existingPages[i].ID) && existingPages[i].Page_ID == null)
                     { 
                         var page = _Unit_Of_Work.page_Octa_Repository.Select_By_Id_Octa(existingPages[i].ID);
-                        DeletePageWithChildren(page, Unit_Of_Work);
+                        if (page != null)
+                        {
+                            DeletePageWithChildren(page, Unit_Of_Work);
+                        }
                     } 
                 }
                 Unit_Of_Work.SaveChanges();

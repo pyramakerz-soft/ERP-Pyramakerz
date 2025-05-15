@@ -354,7 +354,7 @@ export class BusStudentComponent {
         }
 
         if(field == 'studentID'){
-          const stu = this.OriginBusStudent.filter(s => s.studentID == this.busStudent.studentID && s.semseterID == this.busStudent.semseterID)
+          const stu = this.OriginBusStudent.filter(s => s.studentID == this.busStudent.studentID && s.semseterID == this.busStudent.semseterID && s.id != this.busStudent.id)
            
           if (stu.length != 0) {
             this.validationErrors[field] = `This student already exists in this bus for this semester.`
