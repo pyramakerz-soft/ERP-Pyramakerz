@@ -19,6 +19,8 @@ namespace LMS_CMS_DAL.Models.Octa
         [Required(ErrorMessage = "الاسم مطلوب")]
         [StringLength(100, ErrorMessage = "لا يمكن أن يكون الاسم أطول من 100 حرف")]
         public string ar_name { get; set; }
+        public string? arDisplayName_name { get; set; }
+        public string? enDisplayName_name { get; set; }
         public bool IsDisplay { get; set; }
         [ForeignKey("Parent")]
         public long? Page_ID { get; set; }
@@ -26,3 +28,4 @@ namespace LMS_CMS_DAL.Models.Octa
         public ICollection<Page> ChildPages { get; set; } = new List<Page>();
     }
 }
+

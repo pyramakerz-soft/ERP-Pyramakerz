@@ -16,6 +16,6 @@ export class Classroom {
         public schoolID: number = 0,
         public buildingName: string = '',
         public buildingID: number = 0,
-        public homeroomTeacherID: number = 0,
+        public homeroomTeacherID: number | null = null,
     ) { }
 }

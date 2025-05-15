@@ -322,6 +322,40 @@ namespace LMS_CMS_PL.Controllers.Domains.Bus
                 }
             }
 
+            // Check Student Bus For Capacity Per Semester
+            if(busExists.IsCapacityRestricted == false && busPutDTO.IsCapacityRestricted == true)
+            {
+                List<BusStudent> busStudents = Unit_Of_Work.busStudent_Repository.FindBy(
+                    d => d.IsDeleted != true && d.BusID == busPutDTO.ID
+                    );
+
+                var overCapacityGroup = busStudents
+                    .GroupBy(bs => bs.SemseterID)
+                    .FirstOrDefault(group => group.Count() > busExists.Capacity);
+
+                if (overCapacityGroup != null)
+                {
+                    return BadRequest("One or more semesters already have students exceeding bus capacity.");
+                }
+            }
+
+            // Check Student Bus For Capacity Per Semester
+            if(busPutDTO.IsCapacityRestricted == true)
+            {
+                List<BusStudent> busStudents = Unit_Of_Work.busStudent_Repository.FindBy(
+                    d => d.IsDeleted != true && d.BusID == busPutDTO.ID
+                    );
+
+                var overCapacityGroup = busStudents
+                    .GroupBy(bs => bs.SemseterID)
+                    .FirstOrDefault(group => group.Count() > busPutDTO.Capacity);
+
+                if (overCapacityGroup != null)
+                {
+                    return BadRequest("One or more semesters already have students exceeding bus capacity.");
+                }
+            }
+
             mapper.Map(busPutDTO, busExists);
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             busExists.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);

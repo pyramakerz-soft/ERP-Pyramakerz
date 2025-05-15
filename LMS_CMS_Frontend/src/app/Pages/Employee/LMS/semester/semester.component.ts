@@ -17,6 +17,8 @@ import { School } from '../../../../Models/school';
 import { SchoolService } from '../../../../Services/Employee/school.service';
 import { firstValueFrom } from 'rxjs';
 import { WeekDay } from '../../../../Models/week-day';
+import { DaysService } from '../../../../Services/Octa/days.service';
+import { Day } from '../../../../Models/day';
 
 @Component({
   selector: 'app-semester',
@@ -41,16 +43,16 @@ export class SemesterComponent {
   AllowEditForOthers: boolean = false;
   AllowDeleteForOthers: boolean = false;
   path: string = ""
-  WeekDays:WeekDay[]=[]
+  WeekDays:Day[]=[]
 
   DomainName: string = "";
   UserID: number = 0;
   academicYearId: number = 0;
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
-  isLoading = false;
-  
+  isLoading = false; 
+    
   constructor(public account: AccountService, public semesterService: SemesterService, public acadimicYearService: AcadimicYearService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService, 
-    private menuService: MenuService, public activeRoute: ActivatedRoute, public router:Router){}
+    private menuService: MenuService, public activeRoute: ActivatedRoute, public router:Router, public DaysServ: DaysService){}
   
   ngOnInit(){
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -66,8 +68,7 @@ export class SemesterComponent {
     this.DomainName = String(this.activeRoute.snapshot.paramMap.get('domainName'))
 
     this.getAcademicYearData()
-    this.getSemesterData()
-    this.GetAllWeeks()
+    this.getSemesterData() 
 
     this.menuService.menuItemsForEmployee$.subscribe((items) => {
       const settingsPage = this.menuService.findByPageName(this.path, items);
@@ -77,6 +78,12 @@ export class SemesterComponent {
         this.AllowDeleteForOthers = settingsPage.allow_Delete_For_Others
         this.AllowEditForOthers = settingsPage.allow_Edit_For_Others
       }
+    });
+  }
+
+  GetAllDays() {
+    this.DaysServ.Get(this.DomainName).subscribe((d) => {
+      this.WeekDays = d;
     });
   }
 
@@ -95,15 +102,11 @@ export class SemesterComponent {
         this.semesterData = data;
       }
     )
-  }
-
-  GetAllWeeks(){
-
-  }
+  } 
 
   GetSemesterById(Id: number) {
     this.semesterService.GetByID(Id, this.DomainName).subscribe((data) => {
-      this.semester = data;
+      this.semester = data; 
     });
   }
 
@@ -112,7 +115,7 @@ export class SemesterComponent {
       this.editSemester = true;
       this.GetSemesterById(Id); 
     }
-
+    this.GetAllDays()
     document.getElementById("Add_Modal")?.classList.remove("hidden");
     document.getElementById("Add_Modal")?.classList.add("flex");
   }
@@ -238,7 +241,7 @@ export class SemesterComponent {
     ) {
       valid = false;
       Swal.fire({
-        title: 'Semester dates must be within the Academic yYear Range',
+        title: 'Semester dates must be within the Academic Year Range',
         icon: 'warning',
         confirmButtonColor: '#FF7519',
         confirmButtonText: 'Ok',

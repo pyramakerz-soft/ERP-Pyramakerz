@@ -19,7 +19,6 @@ using Zatca.EInvoice.SDK;
 using Amazon.S3;
 using Amazon.SecretsManager;
 using Amazon;
-using LMS_CMS_PL.Services.Zatca.Invoice;
 
 namespace LMS_CMS
 {
@@ -125,9 +124,6 @@ namespace LMS_CMS
             {
                 Region = RegionEndpoint.USEast1 
             });
-
-            //builder.Services.AddScoped<ISecretsService, SecretsService>();
-
 
             /// 2)
             builder.Services.AddCors(option =>

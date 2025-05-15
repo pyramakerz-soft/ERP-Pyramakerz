@@ -30,6 +30,7 @@ namespace LMS_CMS_DAL.Models.Domains.Inventory
         public string? MainImage { get; set; }
         public string? OtherImage { get; set; }
         public string BarCode { get; set; }
+        public string? ItemType { get; set; }
 
         [ForeignKey("Gender")]
         public long? GenderID { get; set; }

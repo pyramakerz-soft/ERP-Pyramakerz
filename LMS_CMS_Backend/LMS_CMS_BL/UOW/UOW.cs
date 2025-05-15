@@ -5,6 +5,7 @@ using LMS_CMS_DAL.Models.Domains.Administration;
 using LMS_CMS_DAL.Models.Domains.BusModule;
 using LMS_CMS_DAL.Models.Domains.ClinicModule;
 using LMS_CMS_DAL.Models.Domains.ECommerce;
+using LMS_CMS_DAL.Models.Domains.ETA;
 using LMS_CMS_DAL.Models.Domains.Inventory;
 using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_DAL.Models.Domains.RegisterationModule;
@@ -173,8 +174,9 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<QuestionBankTags> QuestionBankTags_Repository;
         GenericRepo<QuestionBankOption> QuestionBankOption_Repository;
         GenericRepo<SubBankQuestion> SubBankQuestion_Repository;
-        GenericRepo<DragAndDropAnswer> DragAndDropAnswer_Repository;
         GenericRepo<QuestionBankType> QuestionBankType_Repository;
+        GenericRepo<TaxIssuer> TaxIssuer_Repository;
+        GenericRepo<TaxReceiver> TaxReceiver_Repository;
 
 
 
@@ -1934,17 +1936,6 @@ namespace LMS_CMS_BL.UOW
                 return SubBankQuestion_Repository;
             }
         }
-        public GenericRepo<DragAndDropAnswer> dragAndDropAnswer_Repository
-        {
-            get
-            {
-                if (DragAndDropAnswer_Repository == null)
-                {
-                    DragAndDropAnswer_Repository = new GenericRepo<DragAndDropAnswer>(db);
-                }
-                return DragAndDropAnswer_Repository;
-            }
-        }
 
         public GenericRepo<QuestionBankType> questionBankType_Repository
         {
@@ -1957,6 +1948,31 @@ namespace LMS_CMS_BL.UOW
                 return QuestionBankType_Repository;
             }
         }
+
+        public GenericRepo<TaxIssuer> taxIssuer_Repository
+        {
+            get
+            {
+                if (TaxIssuer_Repository == null)
+                {
+                    TaxIssuer_Repository = new GenericRepo<TaxIssuer>(db);
+                }
+                return TaxIssuer_Repository;
+            }
+        }
+
+        public GenericRepo<TaxReceiver> taxReceiver_Repository
+        {
+            get
+            {
+                if (TaxReceiver_Repository == null)
+                {
+                    TaxReceiver_Repository = new GenericRepo<TaxReceiver>(db);
+                }
+                return TaxReceiver_Repository;
+            }
+        }
+
         public void SaveChanges()
         {
             db.SaveChanges();

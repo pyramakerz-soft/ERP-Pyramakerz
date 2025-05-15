@@ -1,12 +1,11 @@
-<div *ngIf="!IsMenuOpen" class="primaryBg rounded-lg text-[#919191] h-[89vh] py-10 px-3 flex flex-col items-center text-sm lg:text-xl space-y-4">
+<div *ngIf="!IsMenuOpen" class="primaryBg rounded-lg text-[#919191] h-[89vh] overflow-y-hidden py-10 px-3 flex flex-col items-center text-sm lg:text-xl space-y-4">
     <img class="w-3 lg:w-fit" src="Images/logo-orange 1 1.png" (click)="toggleMenu()">
-    <i class="fa-solid fa-magnifying-glass p-3" (click)="toggleSearch()"></i> 
-    <div *ngFor="let item of menuItemsForEmployee" (click)="toggleMenu()"> 
-        <!-- <img class="w-3 lg:w-fit" [src]="'Icons/SideMenuIcons/' + item.en_name.replace(' ',  '_') + '.png'" /> -->
+    <i class="fa-solid fa-magnifying-glass p-3" (click)="toggleSearch()"></i>  
+    <div *ngFor="let item of menuItemsForEmployee" (click)="toggleMenu()">   
         <img class="w-3 lg:w-fit" [src]="getImageSrc(item)" />
     </div>
     <div *ngFor="let item of menuItems" (click)="toggleMenu()"> 
-        <img *ngIf="item.icon" class="w-3 lg:w-fit" [src]="'Icons/SideMenuIcons/' + item.icon.replace(' ',  '_') + '.png'" />
+        <img *ngIf="item.icon" class="w-3 lg:w-fit" [src]="'Icons/SideMenuIcons/' + item.icon.replace(' ',  '_') + '.png'" /> 
     </div> 
 </div>
 
@@ -40,12 +39,17 @@
                     </div>
                     <img *ngIf="item.subItems" class="w-3 lg:w-fit" src="Icons/Drop-Down.png">
                 </summary>
+
                 <div *ngIf="item.subItems"  class="pl-20 p-2 flex flex-col space-y-3 w-max">
                     <a *ngFor="let subItem of item.subItems; let i = index" class="cursor-pointer hover:opacity-30" [routerLink]="subItem.route">{{ subItem.label }}</a>
                 </div>
             </details>
         </div>
-        <div class="text-xl w-full">
+        <div class="text-xl w-full" *ngIf="menuItemsForEmployee">
+            <div class="px-9 py-3 w-full flex items-center space-x-3 rtl:space-x-reverse">
+                <img class="w-3 lg:w-fit" src="Icons/SideMenuIcons/Dashboard.png" />
+                <a class="cursor-pointer hover:opacity-30" routerLink="#">Dashboard</a>
+            </div>
             <app-side-menu-item *ngFor="let item of menuItemsForEmployee" [item]="item"></app-side-menu-item>
         </div>  
     </section>

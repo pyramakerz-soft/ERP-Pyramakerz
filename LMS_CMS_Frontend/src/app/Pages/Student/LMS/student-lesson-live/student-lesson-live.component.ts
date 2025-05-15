@@ -10,15 +10,14 @@ import { ApiService } from '../../../../Services/api.service';
 import { DomainService } from '../../../../Services/Employee/domain.service';
 import { ClassroomService } from '../../../../Services/Employee/LMS/classroom.service';
 import { LessonLiveService } from '../../../../Services/Employee/LMS/lesson-live.service';
-import { SubjectService } from '../../../../Services/Employee/LMS/subject.service';
-import { DaysService } from '../../../../Services/Octa/days.service';
+import { SubjectService } from '../../../../Services/Employee/LMS/subject.service'; 
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 
 @Component({
   selector: 'app-student-lesson-live',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule],
   templateUrl: './student-lesson-live.component.html',
   styleUrl: './student-lesson-live.component.css'
 })
@@ -56,8 +55,7 @@ User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '',
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public LessonLiveServ: LessonLiveService ,
-    public ClassroomServ :ClassroomService ,
-    public weekdaysServ : DaysService ,
+    public ClassroomServ :ClassroomService , 
     public SubjectServ : SubjectService 
   ) { }
   ngOnInit() {

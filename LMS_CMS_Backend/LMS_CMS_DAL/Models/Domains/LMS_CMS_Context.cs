@@ -3,6 +3,7 @@ using LMS_CMS_DAL.Models.Domains.Administration;
 using LMS_CMS_DAL.Models.Domains.BusModule;
 using LMS_CMS_DAL.Models.Domains.ClinicModule;
 using LMS_CMS_DAL.Models.Domains.ECommerce;
+using LMS_CMS_DAL.Models.Domains.ETA;
 using LMS_CMS_DAL.Models.Domains.Inventory;
 using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_DAL.Models.Domains.RegisterationModule;
@@ -162,8 +163,10 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<QuestionBankTags> QuestionBankTags { get; set; }
         public DbSet<QuestionBankOption> QuestionBankOption { get; set; }
         public DbSet<SubBankQuestion> SubBankQuestion { get; set; }
-        public DbSet<DragAndDropAnswer> DragAndDropAnswer { get; set; }
         public DbSet<LMS.QuestionBankType> QuestionBankType { get; set; }
+        public DbSet<TaxIssuer> TaxIssuers { get; set; }
+        public DbSet<TaxReceiver> TaxReceivers { get; set; }
+        public DbSet<TaxType> TaxTypes { get; set; }
 
 
         public LMS_CMS_Context(DbContextOptions<LMS_CMS_Context> options)
@@ -1413,12 +1416,6 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasOne(p => p.QuestionBank)
                 .WithMany(p => p.SubBankQuestions)
                 .HasForeignKey(p => p.QuestionBankID)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<DragAndDropAnswer>()
-                .HasOne(p => p.SubBankQuestion)
-                .WithMany(p => p.DragAndDropAnswers)
-                .HasForeignKey(p => p.SubBankQuestionID)
                 .OnDelete(DeleteBehavior.Restrict);
 
             ///////////////////////// Exception: /////////////////////////

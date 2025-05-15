@@ -356,6 +356,8 @@ export const routes: Routes = [
             { path: "Subjects", component: SubjectsComponent, title: "Subjects", canActivate:[noNavigateWithoutLoginGuard ] },
             { path: "Subject-Details/:subjectId", component: SubjectDetailsComponent, title: "Subject-Details", canActivate:[noNavigateWithoutLoginGuard] },
             { path: "week-details/:subjectId/:weekId", component: WeekDetailsComponent, title: "Week Details", canActivate:[noNavigateWithoutLoginGuard] }, 
+
+            
                ]
 },
     { 

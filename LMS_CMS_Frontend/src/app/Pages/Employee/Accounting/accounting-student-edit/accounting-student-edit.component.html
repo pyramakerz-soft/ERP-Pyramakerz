@@ -42,12 +42,14 @@
     <div class="flex flex-col mb-4 w-[49%]">
         <label class="mb-2 primaryTxt" for="mobile">Mobile Number</label>
         <input id="mobile" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+            (input)="validateNumber($event, 'mobile')"
             placeholder="Enter User mobile" [(ngModel)]="Data.mobile" />
     </div>
 
     <div class="flex flex-col mb-4 w-full">
         <label class="mb-2 primaryTxt" for="name">Phone</label>
         <input id="phone" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+            (input)="validateNumber($event, 'phone')"
             placeholder="Enter User phone" [(ngModel)]="Data.phone" />
     </div>
 

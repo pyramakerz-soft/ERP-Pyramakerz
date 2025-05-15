@@ -137,6 +137,18 @@ export class DomainsComponent {
     }
   }
 
+  toggleSelectAll(event: Event) {
+    const isChecked = (event.target as HTMLInputElement).checked;
+
+    if (isChecked) {
+      this.domain.pages = this.ModulesData.map(m => m.id);  
+    } else {
+      this.domain.pages = [];  
+    }
+
+    this.validationErrors['pages'] = '';
+}
+
   async onSearchEvent(event: { key: string, value: any }) {
     this.key = event.key;
     this.value = event.value;

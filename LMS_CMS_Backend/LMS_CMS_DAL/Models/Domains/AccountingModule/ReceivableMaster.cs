@@ -12,7 +12,7 @@ namespace LMS_CMS_DAL.Models.Domains.AccountingModule
     {
         [Key]
         public long ID { get; set; }
-        public int? DocNumber { get; set; }
+        public string? DocNumber { get; set; }
         public string Date { get; set; }
         public string? Notes { get; set; }
         [ForeignKey("ReceivableDocType")]   

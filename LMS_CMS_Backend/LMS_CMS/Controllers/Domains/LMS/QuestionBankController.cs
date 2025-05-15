@@ -36,11 +36,16 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             //,
             //pages: new[] { "Template" }
         )]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> Get([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             List<LMS_CMS_DAL.Models.Domains.LMS.QuestionBank> Questions;
+            // Get total record count
+            int totalRecords = await Unit_Of_Work.installmentDeductionMaster_Repository
+                .CountAsync(f => f.IsDeleted != true);
 
             var userClaims = HttpContext.User.Claims;
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
@@ -52,15 +57,17 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            Questions =await Unit_Of_Work.questionBank_Repository.Select_All_With_IncludesById<LMS_CMS_DAL.Models.Domains.LMS.QuestionBank>(
+            Questions =await Unit_Of_Work.questionBank_Repository.Select_All_With_IncludesById_Pagination<LMS_CMS_DAL.Models.Domains.LMS.QuestionBank>(
                     f => f.IsDeleted != true,
                     query => query.Include(emp => emp.BloomLevel),
                     query => query.Include(emp => emp.DokLevel),
                     query => query.Include(emp => emp.QuestionType),
                     query => query.Include(emp => emp.QuestionBankOption),
                     query => query.Include(emp => emp.Lesson.Subject),
-                    query => query.Include(emp => emp.Lesson)
-                    );
+                    query => query.Include(emp => emp.Lesson))
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
 
             if (Questions == null || Questions.Count == 0)
             {
@@ -69,7 +76,15 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             List<QuestionBankGetDTO> Dto = mapper.Map<List<QuestionBankGetDTO>>(Questions);
 
-            return Ok(Dto);
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+            return Ok(new { Data = Dto, Pagination = paginationMetadata });
+
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -340,7 +355,6 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             if (NewData.SubBankQuestionsDTO.Count != 0 && NewData.QuestionTypeID==4)
             {
                 List<SubBankQuestion> subQuestions = new List<SubBankQuestion>();
-                List<DragAndDropAnswer> dragAnswers = new List<DragAndDropAnswer>();
 
                 foreach (SubBankQuestionAddDTO item in NewData.SubBankQuestionsDTO)
                 {
@@ -348,24 +362,24 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     {
                         QuestionBankID = questionBank.ID,
                         Description = item.Description,
+                        Answer = item.Answer,
                         InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone),
                         InsertedByOctaId = userTypeClaim == "octa" ? userId : (int?)null,
                         InsertedByUserId = userTypeClaim == "employee" ? userId : (int?)null
                     };
                     subQuestions.Add(subQuestion);
-                    DragAndDropAnswer answer = new DragAndDropAnswer
-                    {
-                        Answer = item.Answer,
-                        SubBankQuestion = subQuestion, // navigation property
-                        InsertedAt = subQuestion.InsertedAt,
-                        InsertedByOctaId = subQuestion.InsertedByOctaId,
-                        InsertedByUserId = subQuestion.InsertedByUserId
-                    };
+                    //DragAndDropAnswer answer = new DragAndDropAnswer
+                    //{
+                    //    Answer = item.Answer,
+                    //    SubBankQuestion = subQuestion, // navigation property
+                    //    InsertedAt = subQuestion.InsertedAt,
+                    //    InsertedByOctaId = subQuestion.InsertedByOctaId,
+                    //    InsertedByUserId = subQuestion.InsertedByUserId
+                    //};
 
-                    dragAnswers.Add(answer);
+                    //dragAnswers.Add(answer);
                 }
                 Unit_Of_Work.subBankQuestion_Repository.AddRange(subQuestions);
-                Unit_Of_Work.dragAndDropAnswer_Repository.AddRange(dragAnswers);
                 Unit_Of_Work.SaveChanges();
             }
 
@@ -607,12 +621,12 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 .Select(sbq => sbq.ID)
                 .ToList();
 
-            // Step 2: Delete all DragAndDropAnswers for those sub-question IDs
-            var dragAnswers = Unit_Of_Work.dragAndDropAnswer_Repository
-                .FindBy(ans => subQuestionIds.Contains(ans.SubBankQuestionID))
-                .ToList();
+            //// Step 2: Delete all DragAndDropAnswers for those sub-question IDs
+            //var dragAnswers = Unit_Of_Work.dragAndDropAnswer_Repository
+            //    .FindBy(ans => subQuestionIds.Contains(ans.SubBankQuestionID))
+            //    .ToList();
 
-            Unit_Of_Work.dragAndDropAnswer_Repository.RemoveRange(dragAnswers);
+            //Unit_Of_Work.dragAndDropAnswer_Repository.RemoveRange(dragAnswers);
 
             // Step 3: Delete the sub-questions themselves
             var subQuestions = Unit_Of_Work.subBankQuestion_Repository
@@ -690,7 +704,6 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             if (NewData.SubBankQuestionsDTO.Count != 0 && NewData.QuestionTypeID == 4)
             {
                 List<SubBankQuestion> newsubQuestions = new List<SubBankQuestion>();
-                List<DragAndDropAnswer> newdragAnswers = new List<DragAndDropAnswer>();
 
                 foreach (SubBankQuestionAddDTO item in NewData.SubBankQuestionsDTO)
                 {
@@ -698,29 +711,97 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     {
                         QuestionBankID = questionBank.ID,
                         Description = item.Description,
+                        Answer = item.Answer,
                         InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone),
                         InsertedByOctaId = userTypeClaim == "octa" ? userId : (int?)null,
                         InsertedByUserId = userTypeClaim == "employee" ? userId : (int?)null
                     };
                     newsubQuestions.Add(subQuestion);
-                    DragAndDropAnswer answer = new DragAndDropAnswer
-                    {
-                        Answer = item.Answer,
-                        SubBankQuestion = subQuestion, // navigation property
-                        InsertedAt = subQuestion.InsertedAt,
-                        InsertedByOctaId = subQuestion.InsertedByOctaId,
-                        InsertedByUserId = subQuestion.InsertedByUserId
-                    };
+                    //DragAndDropAnswer answer = new DragAndDropAnswer
+                    //{
+                    //    Answer = item.Answer,
+                    //    SubBankQuestion = subQuestion, // navigation property
+                    //    InsertedAt = subQuestion.InsertedAt,
+                    //    InsertedByOctaId = subQuestion.InsertedByOctaId,
+                    //    InsertedByUserId = subQuestion.InsertedByUserId
+                    //};
 
-                    newdragAnswers.Add(answer);
+                    //newdragAnswers.Add(answer);
                 }
                 Unit_Of_Work.subBankQuestion_Repository.AddRange(newsubQuestions);
-                Unit_Of_Work.dragAndDropAnswer_Repository.AddRange(newdragAnswers);
                 Unit_Of_Work.SaveChanges();
             }
 
             return Ok(NewData);
         }
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+        [HttpDelete("{id}")]
+        [Authorize_Endpoint_(
+          allowedTypes: new[] { "octa", "employee" }
+          //,
+          //allowDelete: 1,
+          //pages: new[] { "Section" }
+      )]
+        public IActionResult Delete(long id)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            if (id == null)
+            {
+                return BadRequest("id cannot be null");
+            }
+            LMS_CMS_DAL.Models.Domains.LMS.QuestionBank questionBank = Unit_Of_Work.questionBank_Repository.Select_By_Id(id);
+
+            if (questionBank == null || questionBank.IsDeleted == true)
+            {
+                return NotFound("No Question Bank with this ID");
+            }
+
+            //if (userTypeClaim == "employee")
+            //{
+            //    IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Section", roleId, userId, section);
+            //    if (accessCheck != null)
+            //    {
+            //        return accessCheck;
+            //    }
+            //}
+
+            questionBank.IsDeleted = true;
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            questionBank.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            if (userTypeClaim == "octa")
+            {
+                questionBank.DeletedByOctaId = userId;
+                if (questionBank.DeletedByUserId != null)
+                {
+                    questionBank.DeletedByUserId = null;
+                }
+            }
+            else if (userTypeClaim == "employee")
+            {
+                questionBank.DeletedByUserId = userId;
+                if (questionBank.DeletedByOctaId != null)
+                {
+                    questionBank.DeletedByOctaId = null;
+                }
+            }
+
+            Unit_Of_Work.questionBank_Repository.Update(questionBank);
+            Unit_Of_Work.SaveChanges();
+            return Ok();
+        }
     }
 }

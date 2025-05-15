@@ -1,4 +1,4 @@
-<div class=" min-h-screen">
+<div class=" min-h-screen" *ngIf="employee.role_ID == 1">
   
   <app-filter-header></app-filter-header>
 
@@ -354,4 +354,8 @@
       </table>
     </div>
   </div>
+</div>
+
+<div *ngIf="employee.role_ID != 1">
+  <p>Welcome</p>
 </div>

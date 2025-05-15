@@ -6,6 +6,7 @@ using LMS_CMS_BL.DTO.Administration;
 using LMS_CMS_BL.DTO.Bus;
 using LMS_CMS_BL.DTO.Clinic;
 using LMS_CMS_BL.DTO.ECommerce;
+using LMS_CMS_BL.DTO.ETA;
 using LMS_CMS_BL.DTO.Inventory;
 using LMS_CMS_BL.DTO.LMS;
 using LMS_CMS_BL.DTO.Octa;
@@ -18,6 +19,7 @@ using LMS_CMS_DAL.Models.Domains.Administration;
 using LMS_CMS_DAL.Models.Domains.BusModule;
 using LMS_CMS_DAL.Models.Domains.ClinicModule;
 using LMS_CMS_DAL.Models.Domains.ECommerce;
+using LMS_CMS_DAL.Models.Domains.ETA;
 using LMS_CMS_DAL.Models.Domains.Inventory;
 using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_DAL.Models.Domains.RegisterationModule;
@@ -911,6 +913,20 @@ namespace LMS_CMS_BL.Config
             CreateMap<DTO.LMS.QuestionBankAddDTO, QuestionBank>();
 
             CreateMap<QuestionBankOptionAddDTO, QuestionBankOption>();
+
+            CreateMap<BloomLevel, BloomLevelGetDTO>();
+            CreateMap<DokLevel, DokLevelGetDTO>();
+            CreateMap<QuestionBankType, QuestionBankTypeGetDTO>();
+
+            CreateMap<TaxIssuer, TaxIssuerGetDTO>();
+            CreateMap<TaxIssuerAddDTO, TaxIssuer>();
+            CreateMap<TaxIssuerEditDTO, TaxIssuer>();
+
+            CreateMap<TaxReceiver, TaxReceiverGetDTO>()
+                .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.TaxReceiverType.Type));
+                //.ForMember(dest => dest.Country, opt => opt.MapFrom(src => src.Country.Iso));
+            CreateMap<TaxReceiverAddDTO, TaxReceiver>();
+            CreateMap<TaxReceiverEditDTO, TaxReceiver>();
 
         }
     } 

@@ -317,6 +317,19 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                 }
             }
 
+            if(InterviewTimeTableExists.Capacity > EditedInterviewTimeTable.Capacity)
+            {
+                // NOTE ==> Not is Deleted to also put those whose accepted in consideration
+                List<RegisterationFormInterview> registerationFormInterviews = Unit_Of_Work.registerationFormInterview_Repository.FindBy(
+                        d => d.InterviewTimeID == EditedInterviewTimeTable.ID
+                    );
+
+                if(registerationFormInterviews.Count > EditedInterviewTimeTable.Capacity)
+                {
+                    return BadRequest("Number of People Who Reserved This Time Exceed The Selected Capacity");
+                }
+            }
+
             mapper.Map(EditedInterviewTimeTable, InterviewTimeTableExists);
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             InterviewTimeTableExists.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);

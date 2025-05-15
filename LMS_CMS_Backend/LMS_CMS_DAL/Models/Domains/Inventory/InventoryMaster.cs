@@ -1,4 +1,5 @@
 ﻿using LMS_CMS_DAL.Models.Domains.AccountingModule;
+using LMS_CMS_DAL.Models.Domains.ETA;
 using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_DAL.Models.Domains.Zatca;
 using System;
@@ -39,6 +40,12 @@ namespace LMS_CMS_DAL.Models.Domains.Inventory
         public string? Notes { get; set; }
         public List<string>? Attachments { get; set; }
 
+        [ForeignKey("TaxIssuer")]
+        public string? IssuerId { get; set; }
+
+        [ForeignKey("TaxReceiver")]
+        public string? TaxReceiverId { get; set; }
+
         [ForeignKey("Store")]
         public long StoreID { get; set; }
         
@@ -74,6 +81,8 @@ namespace LMS_CMS_DAL.Models.Domains.Inventory
         public Store? StoreToTransform { get; set; }
         public School? School { get; set; }
         public SchoolPCs? SchoolPCs { get; set; }
+        public TaxIssuer? TaxIssuer { get; set; }
+        public TaxReceiver? TaxReceiver { get; set; }
         public ICollection<InventoryDetails> InventoryDetails { get; set; } = new HashSet<InventoryDetails>();
     }
 }

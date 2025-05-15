@@ -9,7 +9,6 @@ using LMS_CMS_DAL.Models.Domains.Zatca;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
 using LMS_CMS_PL.Services.Zatca;
-using LMS_CMS_PL.Services.Zatca.Invoice;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -467,7 +466,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 return BadRequest("Total should be sum up all the totalPrice values in InventoryDetails");
 
             }
-            newData.FlagId = 11;
 
             if (newData.FlagId == 8 || newData.FlagId == 9 || newData.FlagId == 10 || newData.FlagId == 11 || newData.FlagId == 12)
             {
@@ -567,7 +565,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 }
 
                 S3Service s3 = new S3Service(_config, "AWS:Region");
-                bool result = await InvoicingServices.GenerateInvoiceXML(Master, lastInvoiceHash, s3);
+                bool result = await ZatcaServices.GenerateInvoiceXML(Master, lastInvoiceHash, s3);
 
                 if (!result)
                     return BadRequest("Failed to generate XML file.");
@@ -583,11 +581,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 if (Master.FlagId == 12)
                     xml = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/XMLCredits/{Master.School.CRN}_{date.Replace("-", "")}T{time}_{date}-{Master.StoreID}_{Master.FlagId}_{Master.ID}.xml");
 
-                Master.InvoiceHash = InvoicingServices.GetInvoiceHash(xml);
-                Master.QRCode = InvoicingServices.GetQRCode(xml);
-                Master.uuid = InvoicingServices.GetUUID(xml);
+                Master.InvoiceHash = ZatcaServices.GetInvoiceHash(xml);
+                Master.QRCode = ZatcaServices.GetQRCode(xml);
+                Master.uuid = ZatcaServices.GetUUID(xml);
                 //Master.XmlInvoiceFile = xml;
-                Master.QrImage = InvoicingServices.GenerateQrImage(Master.QRCode);
+                Master.QrImage = ZatcaServices.GenerateQrImage(Master.QRCode);
 
                 Unit_Of_Work.inventoryMaster_Repository.Update(Master);
                 await Unit_Of_Work.SaveChangesAsync();

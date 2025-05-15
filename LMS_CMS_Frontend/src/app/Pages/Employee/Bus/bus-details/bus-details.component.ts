@@ -268,13 +268,24 @@ export class BusDetailsComponent {
   
   validateNumber(event: any, field: keyof Bus): void {
     const value = event.target.value;
-    if (isNaN(value) || value === '') {
-      event.target.value = ''; 
-      if (typeof this.bus[field] === 'string') {
-        this.bus[field] = '' as never;  
-      }
+
+    // For capacity field, only allow whole numbers (no decimals)
+    if (field === 'capacity') {
+        if (!/^\d+$/.test(value) && value !== '') {
+            event.target.value = '';  // Clear invalid input
+            this.bus['capacity'] = 0;  // Reset bus field to empty string
+        }
+    } else {
+        // For other fields, check if the value is a valid number
+        if (isNaN(value) || value === '') {
+            event.target.value = '';  // Clear invalid input
+            if (typeof this.bus[field] === 'string') {
+                this.bus[field] = '' as never;  // Reset field to an empty string if it's a string
+            }
+        }
     }
-  }
+}
+
 
   SaveBus(){
     if (this.isFormValid()) {
@@ -287,12 +298,12 @@ export class BusDetailsComponent {
             this.busService.Get(this.DomainName).subscribe(
               (data: any) => {
                 this.busData = data;
-                this.isLoading = false; // Hide spinner
+                this.isLoading = false;  
               }
             );
           },
           error => {
-            this.isLoading = false; // Hide spinner
+            this.isLoading = false;  
           }
         );
       } else{
@@ -303,12 +314,18 @@ export class BusDetailsComponent {
             this.busService.Get(this.DomainName).subscribe(
               (data: any) => {
                 this.busData = data;
-                this.isLoading = false; // Hide spinner
+                this.isLoading = false;  
               }
             );
           },
           error => {
-            this.isLoading = false; // Hide spinner
+            this.isLoading = false;  
+            Swal.fire({
+              icon: 'error',
+              text: error.error,
+              confirmButtonText: 'Okay',
+              customClass: { confirmButton: 'secondaryBg' },
+            });
           }
         );
       }  

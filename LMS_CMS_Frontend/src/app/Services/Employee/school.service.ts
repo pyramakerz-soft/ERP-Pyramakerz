@@ -74,6 +74,7 @@ export class SchoolService {
     formData.append('maximumPeriodCountTimeTable', school.maximumPeriodCountTimeTable?.toString() ?? '');
     formData.append('postalZone', school.postalZone?.toString() ?? '');
     formData.append('city', school.city?.toString() ?? '');
+    formData.append('crn', school.crn?.toString() ?? '');
     formData.append('citySubdivision', school.citySubdivision?.toString() ?? '');
     formData.append('buildingNumber', school.buildingNumber?.toString() ?? '');
     formData.append('streetName', school.streetName?.toString() ?? '');

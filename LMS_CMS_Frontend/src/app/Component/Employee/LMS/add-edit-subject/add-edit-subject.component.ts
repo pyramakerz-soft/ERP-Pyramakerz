@@ -13,6 +13,7 @@ import { Section } from '../../../../Models/LMS/section';
 import { School } from '../../../../Models/school';
 import { ApiService } from '../../../../Services/api.service';
 import { SubjectCategory } from '../../../../Models/LMS/subject-category';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-add-edit-subject',
@@ -223,27 +224,36 @@ export class AddEditSubjectComponent {
   }
 
   SaveSubject(){
-    if(this.isFormValid()){
-      this.isLoading = true;
-      if(this.editSubject == false){
-        (this.subjectService.Add(this.subject, this.DomainName)).subscribe(
-          (result: any) => {
-            this.closeDialog()
-          },
-          error => {
-            this.isLoading = false;
-          }
-        );
-      } else{
-        this.subjectService.Edit(this.subject, this.DomainName).subscribe(
-          (result: any) => {
-            this.closeDialog()
-          },
-          error => {
-            this.isLoading = false;
-          }
-        );
-      }  
+    if(this.isFormValid()){ 
+      if((Number(this.subject.passByDegree)?Number(this.subject.passByDegree):0) > (Number(this.subject.totalMark)?Number(this.subject.totalMark):0)){
+        Swal.fire({
+          icon: 'error',
+          text: "Pass By Degree Can't Be > Total Marks",
+          confirmButtonText: 'Okay',
+          customClass: { confirmButton: 'secondaryBg' },
+        });
+      }else{
+        this.isLoading = true;
+        if(this.editSubject == false){
+          (this.subjectService.Add(this.subject, this.DomainName)).subscribe(
+            (result: any) => {
+              this.closeDialog()
+            },
+            error => {
+              this.isLoading = false;
+            }
+          );
+        } else{
+          this.subjectService.Edit(this.subject, this.DomainName).subscribe(
+            (result: any) => {
+              this.closeDialog()
+            },
+            error => {
+              this.isLoading = false;
+            }
+          );
+        }  
+      }
     }
   } 
 }

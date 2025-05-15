@@ -15,9 +15,9 @@ export class LessonService {
   }
 
 
-  Get(DomainName:string) {
-    if(DomainName!=null) {
-      this.header=DomainName 
+  Get(DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
@@ -27,9 +27,9 @@ export class LessonService {
     return this.http.get<Lesson[]>(`${this.baseUrl}/Lesson`, { headers })
   }
 
-  GetByID(id: number,DomainName:string) {
-    if(DomainName!=null) {
-      this.header=DomainName 
+  GetByID(id: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
@@ -39,9 +39,9 @@ export class LessonService {
     return this.http.get<Lesson>(`${this.baseUrl}/Lesson/GetByID/${id}`, { headers })
   }
 
-  GetBySubjectIDAndSemester(SemesterId: number, SubjectId: number, DomainName:string) {
-    if(DomainName!=null) {
-      this.header=DomainName 
+  GetBySubjectIDAndSemester(SemesterId: number, SubjectId: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
@@ -51,9 +51,21 @@ export class LessonService {
     return this.http.get<Lesson[]>(`${this.baseUrl}/Lesson/GetBySubjectIDAndSemester/${SubjectId}/${SemesterId}`, { headers })
   }
 
-  Add(lesson: Lesson,DomainName:string) {
-    if(DomainName!=null) {
-      this.header=DomainName 
+  GetBySubjectID(SubjectId: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<Lesson[]>(`${this.baseUrl}/Lesson/GetBySubjectID/${SubjectId}`, { headers })
+  }
+
+  Add(lesson: Lesson, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
@@ -67,9 +79,9 @@ export class LessonService {
     });
   }
 
-  ImportLessonFrom(lesson: Lesson,DomainName:string) {
-    if(DomainName!=null) {
-      this.header=DomainName 
+  ImportLessonFrom(lesson: Lesson, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
@@ -83,9 +95,9 @@ export class LessonService {
     });
   }
 
-  Edit(lesson: Lesson,DomainName:string) {
-    if(DomainName!=null) {
-      this.header=DomainName 
+  Edit(lesson: Lesson, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
@@ -95,9 +107,9 @@ export class LessonService {
     return this.http.put(`${this.baseUrl}/Lesson`, lesson, { headers });
   }
 
-  Delete(id: number,DomainName:string) {
-    if(DomainName!=null) {
-      this.header=DomainName 
+  Delete(id: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()

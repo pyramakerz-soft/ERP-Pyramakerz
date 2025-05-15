@@ -27,5 +27,7 @@ namespace LMS_CMS_BL.DTO.LMS
         public string? VatNumber { get; set; }
         public int? MaximumPeriodCountTimeTable { get; set; }
         public int? MaximumPeriodCountRemedials { get; set; }
+        public string? CRN { get; set; } //Commercial Registration Number
+
     }
 }

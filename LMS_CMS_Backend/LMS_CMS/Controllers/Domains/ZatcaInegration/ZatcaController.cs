@@ -5,9 +5,9 @@ using LMS_CMS_DAL.Models.Domains.Inventory;
 using LMS_CMS_DAL.Models.Domains.Zatca;
 using LMS_CMS_PL.Services;
 using LMS_CMS_PL.Services.Zatca;
-using LMS_CMS_PL.Services.Zatca.Invoice;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 using System.Text;
 using Zatca.EInvoice.SDK.Contracts;
@@ -76,7 +76,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
             //AmazonS3Client amazonS3Client = new AmazonS3Client();
             S3Service s3SecretManager = new S3Service(_secretsManager);
 
-            var csrSteps = InvoicingServices.GenerateCSRandPrivateKey(csrGeneration);
+            var csrSteps = ZatcaServices.GenerateCSRandPrivateKey(csrGeneration);
             string csrContent = csrSteps[1].ResultedValue;
             string privateKeyContent = csrSteps[2].ResultedValue;
 
@@ -96,7 +96,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
             var csrObj = new { csr = csrPayload };
             string csrJson = JsonConvert.SerializeObject(csrObj);
 
-            string csid = await InvoicingServices.GenerateCSID(csrJson, otp, version, _config);
+            string csid = await ZatcaServices.GenerateCSID(csrJson, otp, version, _config);
 
             bool addCSID = await s3SecretManager.CreateOrUpdateSecretAsync($"{pcName}CSID", csid);
 
@@ -114,14 +114,14 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
             string requestId = csidJson.requestID.ToString();
 
-            string pcsid = await InvoicingServices.GeneratePCSID(tokenBase64, version, requestId, _config);
+            string pcsid = await ZatcaServices.GeneratePCSID(tokenBase64, version, requestId, _config);
 
             bool addPCSID = await s3SecretManager.CreateOrUpdateSecretAsync($"{pcName}PCSID", pcsid);
 
             if (!addPCSID)
                 return BadRequest("Adding PCSID failed!");
 
-            string certificateDate = InvoicingServices.GetCertificateDate(pcsid);
+            string certificateDate = ZatcaServices.GetCertificateDate(pcsid);
 
             schoolPc.CertificateDate = DateOnly.Parse(certificateDate);
             schoolPc.UpdatedAt = DateTime.Now;
@@ -245,7 +245,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                 string token = certObject.binarySecurityToken;
                 string secret = certObject.secret;
 
-                HttpResponseMessage response = await InvoicingServices.InvoiceReporting(xmlPath, token, secret, _config);
+                HttpResponseMessage response = await ZatcaServices.InvoiceReporting(xmlPath, token, secret, _config);
                 response.EnsureSuccessStatusCode();
 
                 string responseContent = await response.Content.ReadAsStringAsync();
@@ -264,9 +264,20 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                 Unit_Of_Work.inventoryMaster_Repository.Update(master);
                 Unit_Of_Work.SaveChanges();
 
+                var request = HttpContext.Request;
+                var domain = request.Host.Host;
+                var hostParts = request.Host.Value.Split('.');
+                string subDomain = hostParts.Length > 2 ? hostParts[0] : "test";
+
                 S3Service s3Client = new S3Service(secretS3Client, _config, "AWS:Bucket", "AWS:Folder");
 
-                bool uploaded = await s3Client.UploadAsync(xmlPath, "Invoices/");
+                string subDirectory = string.Empty;
+                if (master.FlagId == 11)
+                    subDirectory = "Invoices/";
+                else if (master.FlagId == 12)
+                    subDirectory = "Credits/";
+
+                bool uploaded = await s3Client.UploadAsync(xmlPath, subDirectory, $"{domain}/{subDomain}");
 
                 if (!uploaded)
                     return BadRequest("Uploading Invoice failed!");
@@ -302,6 +313,11 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
             if (masters is null || masters.Count == 0)
                 return NotFound("No invoices found.");
 
+            var request = HttpContext.Request;
+            var domain = request.Host.Host;
+            var hostParts = request.Host.Value.Split('.');
+            string subDomain = hostParts.Length > 2 ? hostParts[0] : "test";
+
             foreach (var master in masters)
             {
                 if (master.IsValid == 0 || master.IsValid == null)
@@ -330,7 +346,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                         string token = certObject.binarySecurityToken;
                         string secret = certObject.secret;
 
-                        HttpResponseMessage response = await InvoicingServices.InvoiceReporting(xmlPath, token, secret, _config);
+                        HttpResponseMessage response = await ZatcaServices.InvoiceReporting(xmlPath, token, secret, _config);
 
                         string responseContent = await response.Content.ReadAsStringAsync();
                         dynamic responseJson = JsonConvert.DeserializeObject(responseContent);
@@ -349,7 +365,13 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                         AmazonS3Client amazonS3Client = new AmazonS3Client();
                         S3Service s3 = new S3Service(amazonS3Client, _config, "AWS:Bucket", "AWS:Folder");
 
-                        bool uploaded = await s3.UploadAsync(xmlPath, "Invoices/");
+                        string subDirectory = string.Empty;
+                        if (master.FlagId == 11)
+                            subDirectory = "Invoices/";
+                        else if (master.FlagId == 12)
+                            subDirectory = "Credits/";
+
+                        bool uploaded = await s3.UploadAsync(xmlPath, subDirectory, $"{domain}/{subDomain}");
 
                         if (!uploaded)
                             return BadRequest("Uploading Invoice failed!");
