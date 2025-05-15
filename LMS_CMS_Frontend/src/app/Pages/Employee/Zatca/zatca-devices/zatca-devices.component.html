@@ -16,15 +16,6 @@
         </div>
     </div>
 
-    <div [ngClass]="{'hidden': IsEmployee}" class="mt-5">
-        <label for="domains" class="block mb-2 text-sm font-medium text-gray-900">Domains</label>
-        <select id="domains"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5">
-            <option value="" disabled selected hidden>Select a Domain</option>
-            <!-- Add domain options if needed -->
-        </select>
-    </div>
-
     <div [ngClass]="{'hidden': !IsChoosenDomain}">
         <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
             <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
@@ -95,16 +86,12 @@
         <h1 *ngIf="mode === 'edit'" class="font-semibold text-2xl leading-9">Edit ZATCA Device</h1>
 
         <div class="mt-4 bg-[#F7F7F7] w-[573px] h-auto rounded-[24px] p-[16px_24px] gap-[20px]">
-            <h6 class="font-medium text-base leading-6">PC Name</h6>
-            <div class="flex justify-start mt-2 gap-2 items-start">
-                <div class="flex flex-col">
-                    <input type="text" class="w-[404px] h-[45px] rounded-lg border border-solid border-gray-300 px-2"
+            <h6 class="font-medium text-base leading-6 mt-4">PC Name</h6>
+                    <input type="text" class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2"
                         [(ngModel)]="zatcaDevice.pcName" placeholder="Enter PC Name"
                         (ngModelChange)="onInputValueChange({ field: 'pcName', value: $event })" />
                     <span *ngIf="validationErrors['pcName']" class="text-red-500 ml-3 font-normal">{{
                         validationErrors['pcName'] }}</span>
-                </div>
-            </div>
 
             <h6 class="font-medium text-base leading-6 mt-4">Serial Number</h6>
             <input type="text" class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2"
@@ -114,14 +101,17 @@
                 validationErrors['serialNumber'] }}</span>
 
             <h6 class="font-medium text-base leading-6 mt-4">School</h6>
-            <select [(ngModel)]="zatcaDevice.school"
-                class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2"
-                (ngModelChange)="onInputValueChange({ field: 'school', value: $event })">
-                <option value="" disabled selected>Select School</option>
-                <option *ngFor="let school of schools" [value]="school.id">{{ school.name }}</option>
-            </select>
-            <span *ngIf="validationErrors['schoolId']" class="text-red-500 ml-3 font-normal">{{
-                validationErrors['schoolId'] }}</span>
+            <!-- Change the school dropdown binding -->
+<select [(ngModel)]="zatcaDevice.schoolId" class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2"
+    (ngModelChange)="onInputValueChange({ field: 'schoolId', value: $event })">
+    <option [ngValue]="0" disabled selected hidden>Select School</option>
+    <option *ngFor="let school of schools" [ngValue]="school.id">
+        {{ school.name }}
+    </option>
+</select>
+            <span *ngIf="validationErrors['schoolId']" class="text-red-500 ml-3 font-normal">
+                {{ validationErrors['schoolId'] }}
+            </span>
 
             <button [disabled]="isLoading"
                 class="secondaryBg text-white font-medium px-4 py-2 rounded-lg mt-4 flex items-center justify-center gap-2"

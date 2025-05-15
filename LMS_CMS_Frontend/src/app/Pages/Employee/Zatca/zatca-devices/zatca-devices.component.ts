@@ -119,14 +119,42 @@ export class ZatcaDevicesComponent implements OnInit {
     this.openModal();
   }
 
-  Edit(id: number) {
-    this.mode = "edit";
-    const deviceToEdit = this.TableData.find((d) => d.id === id);
-    if (deviceToEdit) {
-      this.zatcaDevice = { ...deviceToEdit };
+Edit(id: number) {
+  this.mode = "edit";
+  this.isLoading = true;
+  
+  this.schoolPCsService.GetById(id, this.DomainName).subscribe({
+    next: (device) => {
+      console.log('Device loaded for editing:', device);
+      this.zatcaDevice = new ZatcaDevice(
+        device.id,
+        device.pcName,
+        device.serialNumber,
+        this.getSchoolIdFromName(device.school), // Convert school name to ID
+        device.school,
+        device.certificateDate
+      );
+      this.isLoading = false;
       this.openModal();
+    },
+    error: (error) => {
+      console.error('Error loading device:', error);
+      this.isLoading = false;
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Failed to load device for editing',
+        confirmButtonText: 'Okay'
+      });
     }
-  }
+  });
+}
+
+// Helper method to find school ID by name
+private getSchoolIdFromName(schoolName: string): number {
+  const school = this.schools.find(s => s.name === schoolName);
+  return school ? school.id : 0;
+}
 
   openModal() {
     this.isModalVisible = true;
@@ -152,7 +180,7 @@ export class ZatcaDevicesComponent implements OnInit {
       isValid = false;
     }
 
-    if (!this.zatcaDevice.school) {
+    if (!this.zatcaDevice.schoolId) {
       this.validationErrors['schoolId'] = '*School is required';
       isValid = false;
     }
@@ -179,63 +207,112 @@ export class ZatcaDevicesComponent implements OnInit {
     }
   }
 
-  AddNewDevice() {
-    this.schoolPCsService.Create(this.zatcaDevice, this.DomainName).subscribe({
-      next: () => {
-        this.GetTableData();
-        this.closeModal();
-        this.isLoading = false;
-      },
-      error: (error) => {
-        this.isLoading = false;
-        Swal.fire({
-          icon: 'error',
-          title: 'Oops...',
-          text: 'Try Again Later!',
-          confirmButtonText: 'Okay',
-          customClass: { confirmButton: 'secondaryBg' }
-        });
-      }
-    });
-  }
+AddNewDevice() {
+  // Create a complete ZatcaDevice object
+  const payload = new ZatcaDevice(
+    0, // id will be assigned by server
+    this.zatcaDevice.pcName,
+    this.zatcaDevice.serialNumber,
+    Number(this.zatcaDevice.schoolId),
+    '', // schoolName can be empty
+  );
 
-  Save() {
-    this.schoolPCsService.Edit(this.zatcaDevice.id, this.zatcaDevice, this.DomainName).subscribe({
-      next: () => {
-        this.GetTableData();
-        this.closeModal();
-        this.isLoading = false;
-      },
-      error: (error) => {
-        this.isLoading = false;
-        Swal.fire({
-          icon: 'error',
-          title: 'Oops...',
-          text: 'Try Again Later!',
-          confirmButtonText: 'Okay',
-          customClass: { confirmButton: 'secondaryBg' }
-        });
-      }
-    });
-  }
+  console.log('Sending payload:', payload);
 
-  Delete(id: number) {
-    Swal.fire({
-      title: 'Are you sure you want to delete this device?',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#FF7519',
-      cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        this.schoolPCsService.Delete(id, this.DomainName).subscribe(() => {
+  this.schoolPCsService.Create(payload, this.DomainName).subscribe({
+    next: () => {
+      this.GetTableData();
+      this.closeModal();
+      this.isLoading = false;
+    },
+    error: (error) => {
+      console.error('Error:', error);
+      this.isLoading = false;
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: error.error?.message || 'Failed to create device',
+        confirmButtonText: 'Okay'
+      });
+    }
+  });
+}
+
+Save() {
+  const selectedSchool = this.schools.find(s => s.id === Number(this.zatcaDevice.schoolId));
+  const payload = {
+    id: this.zatcaDevice.id,
+    pcName: this.zatcaDevice.pcName,
+    serialNumber: this.zatcaDevice.serialNumber,
+    schoolId: Number(this.zatcaDevice.schoolId),
+    school: selectedSchool ? selectedSchool.name : '',
+    certificateDate: this.zatcaDevice.certificateDate
+  };
+
+  console.log('Sending update payload:', payload);
+
+  this.schoolPCsService.Edit(this.zatcaDevice.id, payload, this.DomainName).subscribe({
+    next: () => {
+      this.GetTableData();
+      this.closeModal();
+      this.isLoading = false;
+      Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: 'Device updated successfully',
+        confirmButtonText: 'Okay'
+      });
+    },
+    error: (error) => {
+      console.error('Update error:', error);
+      this.isLoading = false;
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: error.error?.message || 'Failed to update device',
+        confirmButtonText: 'Okay'
+      });
+    }
+  });
+}
+
+Delete(id: number) {
+  Swal.fire({
+    title: 'Are you sure you want to delete this device?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#FF7519',
+    cancelButtonColor: '#17253E',
+    confirmButtonText: 'Delete',
+    cancelButtonText: 'Cancel'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      this.isLoading = true;
+      this.schoolPCsService.Delete(id, this.DomainName).subscribe({
+        next: () => {
           this.GetTableData();
-        });
-      }
-    });
-  }
+          this.isLoading = false;
+          Swal.fire({
+            icon: 'success',
+            title: 'Deleted!',
+            text: 'Device has been deleted.',
+            confirmButtonText: 'Okay'
+          });
+        },
+        error: (error) => {
+          this.isLoading = false;
+          console.error('Delete error details:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: error.message || 'Failed to delete device',
+            confirmButtonText: 'Okay'
+          });
+        }
+      });
+    }
+  });
+}
 
   formatDate(date: string | null): string {
     if (!date) return '';
