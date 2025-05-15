@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using LMS_CMS_DAL.Models.Octa;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace LMS_CMS_DAL.Models.Domains.ETA
 {
@@ -6,11 +8,15 @@ namespace LMS_CMS_DAL.Models.Domains.ETA
     {
         [Key]
         public string ID { get; set; }
-        public string Type { get; set; }
+
+        [ForeignKey("TaxCustomer")]
+        public int? TypeID { get; set; }
+        public TaxCustomer? TaxCustomer { get; set; }
+
         public string Name { get; set; }
         public string ActivityCode { get; set; }
         public string BranchID { get; set; }
-        public string Country { get; set; }
+        public long? CountryID { get; set; }
         public string Governate { get; set; }
         public string RegionCity { get; set; }
         public string Street { get; set; }

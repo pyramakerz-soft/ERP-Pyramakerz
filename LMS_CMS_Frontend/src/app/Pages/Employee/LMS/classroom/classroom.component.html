@@ -219,7 +219,7 @@
                 <label class="mb-2" for="Employees">Homeroom Teacher</label>
                 <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Employees"
                     [(ngModel)]="classroom.homeroomTeacherID">
-                    <option [value]=0 disabled selected hidden>Choose Teacher</option>
+                    <option [value]=null disabled selected hidden>Choose Teacher</option>
                     <option *ngFor="let emp of Employees" [value]="emp.id">{{ emp.user_Name }}</option>
                     <option *ngIf="Employees.length === 0" disabled selected>No Data Found</option>
                 </select>

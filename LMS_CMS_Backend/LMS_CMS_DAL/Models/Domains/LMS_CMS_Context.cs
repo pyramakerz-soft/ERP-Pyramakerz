@@ -166,6 +166,7 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<LMS.QuestionBankType> QuestionBankType { get; set; }
         public DbSet<TaxIssuer> TaxIssuers { get; set; }
         public DbSet<TaxReceiver> TaxReceivers { get; set; }
+        public DbSet<TaxCustomer> TaxCustomer { get; set; }
 
 
         public LMS_CMS_Context(DbContextOptions<LMS_CMS_Context> options)
