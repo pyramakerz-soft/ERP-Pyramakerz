@@ -12,7 +12,7 @@ export class TestWithRegistrationForm {
         public academicYearName: string = '',
         public academicYearID: number = 0,
         public registrationTestState: string = '',
-        public registrationTestMark: number = 0,
+        public registrationTestMark: number | null = null,
         public registrationTestID: number = 0,
         public registrationTestVisibleToParent :boolean=false,
         public registrationTestStateId :number = 0,

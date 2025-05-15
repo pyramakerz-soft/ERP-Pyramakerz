@@ -170,7 +170,7 @@ namespace LMS_CMS
 
 
             /// 1) For DB Check
-            app.UseMiddleware<DbConnection_Check_Middleware>(); 
+            //app.UseMiddleware<DbConnection_Check_Middleware>(); 
 
             /// 3)
             app.UseCors(txt); 
