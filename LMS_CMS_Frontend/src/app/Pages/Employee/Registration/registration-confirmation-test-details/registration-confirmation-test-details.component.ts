@@ -115,24 +115,25 @@ export class RegistrationConfirmationTestDetailsComponent {
     if(!this.RegesterForm.mark){
       this.MarkIsEmpty=true
     }
-    else{
-      this.isLoading=true
-      this.registrationserv.Edit(this.RegesterForm, this.DomainName).subscribe(() => {
-        this.GetAllData();
-        this.closeModal();
-        this.isLoading=false
-      },
-      error => {
-        this.isLoading=false
-        Swal.fire({
-          icon: 'error',
-          title: 'Oops...',
-          text: 'Try Again Later!',
-          confirmButtonText: 'Okay',
-          customClass: { confirmButton: 'secondaryBg' },
-        });
-      })
-    }
+    console.log(this.RegesterForm)
+    // else{
+    //   this.isLoading=true
+    //   this.registrationserv.Edit(this.RegesterForm, this.DomainName).subscribe(() => {
+    //     this.GetAllData();
+    //     this.closeModal();
+    //     this.isLoading=false
+    //   },
+    //   error => {
+    //     this.isLoading=false
+    //     Swal.fire({
+    //       icon: 'error',
+    //       title: 'Oops...',
+    //       text: 'Try Again Later!',
+    //       confirmButtonText: 'Okay',
+    //       customClass: { confirmButton: 'secondaryBg' },
+    //     });
+    //   })
+    // }
   }
 
   openModal() {
