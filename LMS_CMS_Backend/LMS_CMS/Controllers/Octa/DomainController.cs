@@ -141,6 +141,7 @@ namespace LMS_CMS_PL.Controllers.Octa
                     ID = page.ID,
                     en_name = page.en_name, 
                     ar_name = page.ar_name,
+                    Order=page.Order,
                     enDisplayName_name = page.enDisplayName_name,
                     arDisplayName_name = page.arDisplayName_name,
                     IsDisplay = page.IsDisplay,

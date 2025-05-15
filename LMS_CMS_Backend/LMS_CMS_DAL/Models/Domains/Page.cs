@@ -22,6 +22,7 @@ namespace LMS_CMS_DAL.Models.Domains
         public string? arDisplayName_name { get; set; }
         public string? enDisplayName_name { get; set; }
         public bool IsDisplay { get; set; }
+        public long Order { get; set; }
 
         [ForeignKey("Parent")]
         public long? Page_ID { get; set; }
