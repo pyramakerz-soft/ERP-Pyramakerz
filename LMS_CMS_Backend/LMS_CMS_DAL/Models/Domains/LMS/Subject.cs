@@ -22,8 +22,8 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public int OrderInCertificate { get; set; }
         public double CreditHours { get; set; }
         public string SubjectCode { get; set; }
-        public int PassByDegree { get; set; }
-        public int TotalMark {  get; set; }
+        public float PassByDegree { get; set; }
+        public float TotalMark {  get; set; }
         public bool HideFromGradeReport { get; set; }
         public string IconLink { get; set; }
         public int NumberOfSessionPerWeek { get; set; }
