@@ -12,6 +12,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TestWithRegistrationForm } from '../../../../Models/Registration/test-with-registration-form';
 import { TestService } from '../../../../Services/Employee/Registration/test.service';
+import { Test } from '../../../../Models/Registration/test';
 
 @Component({
   selector: 'app-registration-confirmation-test-details',
@@ -48,6 +49,7 @@ export class RegistrationConfirmationTestDetailsComponent {
 
   RegisterFormParentID: number = 0;
   Data: TestWithRegistrationForm[] = [];
+  test: Test = new Test()
   RegesterForm: RegisterationFormTest = new RegisterationFormTest();
   isModalVisible: boolean = false;
 
@@ -110,30 +112,36 @@ export class RegistrationConfirmationTestDetailsComponent {
       this.StudentArName=d.studentArName
     })
   }
-
-  Save() {
+ 
+  Save() { 
     if(!this.RegesterForm.mark){
       this.MarkIsEmpty=true
+    }else if(Number(this.RegesterForm.mark) > Number(this.RegesterForm.totalMark)){
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: `Assigned Mark Shouldn't be Greater than Total Mark For Test ${this.test.totalMark}`,
+        confirmButtonText: 'Okay',
+        customClass: { confirmButton: 'secondaryBg' },
+      });
+    }else{
+      this.isLoading=true
+      this.registrationserv.Edit(this.RegesterForm, this.DomainName).subscribe(() => {
+        this.GetAllData();
+        this.closeModal();
+        this.isLoading=false
+      },
+      error => {
+        this.isLoading=false
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'Try Again Later!',
+          confirmButtonText: 'Okay',
+          customClass: { confirmButton: 'secondaryBg' },
+        });
+      })
     }
-    console.log(this.RegesterForm)
-    // else{
-    //   this.isLoading=true
-    //   this.registrationserv.Edit(this.RegesterForm, this.DomainName).subscribe(() => {
-    //     this.GetAllData();
-    //     this.closeModal();
-    //     this.isLoading=false
-    //   },
-    //   error => {
-    //     this.isLoading=false
-    //     Swal.fire({
-    //       icon: 'error',
-    //       title: 'Oops...',
-    //       text: 'Try Again Later!',
-    //       confirmButtonText: 'Okay',
-    //       customClass: { confirmButton: 'secondaryBg' },
-    //     });
-    //   })
-    // }
   }
 
   openModal() {
@@ -148,13 +156,14 @@ export class RegistrationConfirmationTestDetailsComponent {
     this.router.navigateByUrl(`Employee/Registration Confirmation`)
   }
 
-  Edit(row: TestWithRegistrationForm) {
+  Edit(row: TestWithRegistrationForm) { 
     this.mode = 'Edit';
     this.RegesterForm.id = row.registrationTestID ;
     this.RegesterForm.visibleToParent = row.registrationTestVisibleToParent ;
     this.RegesterForm.mark = row.registrationTestMark ;
+    this.RegesterForm.totalMark = row.totalMark ;
     this.RegesterForm.registerationFormParentID = this.RegisterFormParentID ;
-    this.RegesterForm.testID = row.registrationTestID ;
+    this.RegesterForm.testID = row.id ;
     this.RegesterForm.stateID = row.registrationTestStateId ;
 
     this.openModal();
