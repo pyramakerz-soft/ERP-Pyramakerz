@@ -5,7 +5,7 @@ namespace LMS_CMS_PL.Services.ETA
 {
     public static class EtaServices
     {
-        public static bool GenerateInvoiceJSON(InventoryMaster master, string issuerCountry, string receiverCountry, char invoiceType = 'P', char documentType = 'I')
+        public static bool GenerateInvoiceJSON(InventoryMaster master, string issuerCountry, string receiverCountry, char documentType = 'I')
         {
             string version = "1.0";
 
@@ -39,7 +39,7 @@ namespace LMS_CMS_PL.Services.ETA
                                 ["landmark"] = master.TaxIssuer.LandMark,
                                 ["additionalInformation"] = master.TaxIssuer.AdditionalInfo
                             },
-                            ["type"] = invoiceType.ToString(),
+                            ["type"] = master.TaxIssuer.TypeID,
                             ["id"] = master.TaxIssuer.ID,
                             ["name"] = master.TaxIssuer.Name
                         },
@@ -58,7 +58,7 @@ namespace LMS_CMS_PL.Services.ETA
                                 ["landmark"] = master.TaxReceiver.LandMark,
                                 ["additionalInformation"] = master.TaxReceiver.AdditionalInfo
                             },
-                            ["type"] = invoiceType.ToString(),
+                            ["type"] = master.TaxReceiver.TypeID,
                             ["id"] = master.TaxReceiver.ID,
                             ["name"] = master.TaxReceiver.Name
                         },

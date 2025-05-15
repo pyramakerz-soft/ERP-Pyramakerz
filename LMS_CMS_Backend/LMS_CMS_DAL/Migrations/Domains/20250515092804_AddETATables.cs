@@ -10,97 +10,43 @@ namespace LMS_CMS_DAL.Migrations.LMS_CMS_
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "Country",
-                table: "TaxReceivers");
-
-            migrationBuilder.DropColumn(
-                name: "Type",
-                table: "TaxReceivers");
-
-            migrationBuilder.DropColumn(
-                name: "Country",
-                table: "TaxIssuers");
-
-            migrationBuilder.DropColumn(
-                name: "Type",
-                table: "TaxIssuers");
-
-            migrationBuilder.AddColumn<long>(
-                name: "CountryID",
-                table: "TaxReceivers",
-                type: "bigint",
-                nullable: true);
-
-            migrationBuilder.AddColumn<int>(
-                name: "TypeID",
-                table: "TaxReceivers",
-                type: "int",
-                nullable: true);
-
-            migrationBuilder.AddColumn<long>(
-                name: "CountryID",
-                table: "TaxIssuers",
-                type: "bigint",
-                nullable: true);
-
-            migrationBuilder.AddColumn<int>(
-                name: "TypeID",
-                table: "TaxIssuers",
-                type: "int",
-                nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "ItemType",
-                table: "ShopItem",
-                type: "nvarchar(max)",
-                nullable: true);
-
             migrationBuilder.CreateTable(
-                name: "TaxTypes",
+                name: "TaxCustomer",
                 columns: table => new
                 {
                     ID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Type = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    EnDescription = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ArDescription = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TaxTypes", x => x.ID);
+                    table.PrimaryKey("PK_TaxCustomer", x => x.ID);
                 });
 
             migrationBuilder.InsertData(
-                table: "TaxTypes",
-                columns: new[] { "ID", "Type" },
+                table: "TaxCustomer",
+                columns: new[] { "ID", "Type", "EnDescription", "ArDescription" },
                 values: new object[,]
                 {
-                    { 1, "P" },
-                    { 2, "B" },
-                    { 3, "F" }
+                    { 1, "P", "Personal", "شخصي" },
+                    { 2, "B", "Business", "أعمال" },
+                    { 3, "F", "Foreign", "أجنبي" }
                 });
 
-            migrationBuilder.CreateIndex(
-                name: "IX_TaxReceivers_TypeID",
-                table: "TaxReceivers",
-                column: "TypeID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_TaxIssuers_TypeID",
-                table: "TaxIssuers",
-                column: "TypeID");
-
             migrationBuilder.AddForeignKey(
-                name: "FK_TaxIssuers_TaxTypes_TypeID",
+                name: "FK_TaxIssuers_TaxCustomer_TypeID",
                 table: "TaxIssuers",
                 column: "TypeID",
-                principalTable: "TaxTypes",
+                principalTable: "TaxCustomer",
                 principalColumn: "ID");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_TaxReceivers_TaxTypes_TypeID",
+                name: "FK_TaxReceivers_TaxCustomer_TypeID",
                 table: "TaxReceivers",
                 column: "TypeID",
-                principalTable: "TaxTypes",
+                principalTable: "TaxCustomer",
                 principalColumn: "ID");
         }
 
@@ -108,15 +54,15 @@ namespace LMS_CMS_DAL.Migrations.LMS_CMS_
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_TaxIssuers_TaxTypes_TypeID",
+                name: "FK_TaxIssuers_TaxCustomer_TypeID",
                 table: "TaxIssuers");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_TaxReceivers_TaxTypes_TypeID",
+                name: "FK_TaxReceivers_TaxCustomer_TypeID",
                 table: "TaxReceivers");
 
             migrationBuilder.DropTable(
-                name: "TaxTypes");
+                name: "TaxCustomer");
 
             migrationBuilder.DropIndex(
                 name: "IX_TaxReceivers_TypeID",

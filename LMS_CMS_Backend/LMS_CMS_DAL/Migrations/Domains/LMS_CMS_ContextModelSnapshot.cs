@@ -3280,6 +3280,29 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.ToTable("OrderState");
                 });
 
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.ETA.TaxCustomer", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<string>("ArDescription")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EnDescription")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("TaxCustomer");
+                });
+
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.ETA.TaxIssuer", b =>
                 {
                     b.Property<string>("ID")
@@ -3462,29 +3485,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.HasIndex("UpdatedByUserId");
 
                     b.ToTable("TaxReceivers");
-                });
-
-            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.ETA.TaxType", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
-
-                    b.Property<string>("ArDescription")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("EnDescription")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("ID");
-
-                    b.ToTable("TaxTypes");
                 });
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.Employee", b =>
@@ -10751,7 +10751,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .WithMany()
                         .HasForeignKey("InsertedByUserId");
 
-                    b.HasOne("LMS_CMS_DAL.Models.Domains.ETA.TaxType", "TaxReceiverType")
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.ETA.TaxCustomer", "TaxCustomer")
                         .WithMany()
                         .HasForeignKey("TypeID");
 
@@ -10763,7 +10763,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.Navigation("InsertedByEmployee");
 
-                    b.Navigation("TaxReceiverType");
+                    b.Navigation("TaxCustomer");
 
                     b.Navigation("UpdatedByEmployee");
                 });
@@ -10778,7 +10778,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .WithMany()
                         .HasForeignKey("InsertedByUserId");
 
-                    b.HasOne("LMS_CMS_DAL.Models.Domains.ETA.TaxType", "TaxReceiverType")
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.ETA.TaxCustomer", "TaxCustomer")
                         .WithMany()
                         .HasForeignKey("TypeID");
 
@@ -10790,7 +10790,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.Navigation("InsertedByEmployee");
 
-                    b.Navigation("TaxReceiverType");
+                    b.Navigation("TaxCustomer");
 
                     b.Navigation("UpdatedByEmployee");
                 });
