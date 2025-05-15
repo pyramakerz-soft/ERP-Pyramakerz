@@ -14,6 +14,8 @@ import { RegisterationFormTest } from '../../../../Models/Registration/registera
 import { RegisterationFormTestService } from '../../../../Services/Employee/Registration/registeration-form-test.service';
 import { TranslateModule } from '@ngx-translate/core';
 import Swal from 'sweetalert2';
+import { TestService } from '../../../../Services/Employee/Registration/test.service';
+import { Test } from '../../../../Models/Registration/test';
 
 @Component({
   selector: 'app-registration-form-test-answer',
@@ -56,6 +58,7 @@ export class RegistrationFormTestAnswerComponent {
   MarkIsEmpty : boolean=false;
 
   RegesterForm: RegisterationFormTest = new RegisterationFormTest();
+  test: Test = new Test();
   isLoading=false
   
   constructor(
@@ -66,6 +69,7 @@ export class RegistrationFormTestAnswerComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     private router: Router,
     public registerServ: RegisterationFormTestAnswerService,
+    public testService: TestService,
     public registrationserv: RegisterationFormTestService
     
   ) { }
@@ -99,6 +103,7 @@ export class RegistrationFormTestAnswerComponent {
     });
 
     this.GetAllData();
+    this.GetTestByID();
   }
 
   GetAllData() {
@@ -112,6 +117,12 @@ export class RegistrationFormTestAnswerComponent {
     })
   }
 
+  GetTestByID() { 
+    this.testService.GetByID(this.TestId, this.DomainName).subscribe((d: any) => {
+      this.test=d
+    })
+  }
+
   moveToEmployee() {
     this.router.navigateByUrl(`Employee/Registration Confirmation Test/${this.RegisterFormParentID}`)
   }
@@ -122,6 +133,7 @@ export class RegistrationFormTestAnswerComponent {
 
   closeModal() {
     this.isModalVisible = false;
+    this.MarkIsEmpty = false;
   }
 
   AddDegree() {  
@@ -132,8 +144,17 @@ export class RegistrationFormTestAnswerComponent {
     this.RegesterForm.registerationFormParentID=this.RegisterFormParentID;
     this.RegesterForm.testID=this.TestId;
     this.RegesterForm.id=this.RegisterFormID;
+ 
     if(!this.RegesterForm.mark){
       this.MarkIsEmpty=true
+    } else if(Number(this.RegesterForm.mark) > Number(this.test.totalMark)){
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: `Assigned Mark Shouldn't be Greater than Total Mark For Test ${this.test.totalMark}`,
+        confirmButtonText: 'Okay',
+        customClass: { confirmButton: 'secondaryBg' },
+      });
     }
     else{
       this.isLoading=true
