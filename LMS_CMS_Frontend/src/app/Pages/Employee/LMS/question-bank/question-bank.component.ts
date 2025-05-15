@@ -411,7 +411,7 @@ export class QuestionBankComponent {
       console.log(d, this.questionBank);
     });
 
-      console.log( this.questionBank);
+      console.log( this.questionBank); 
     this.openModal();
   }
 
