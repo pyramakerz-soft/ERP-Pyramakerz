@@ -151,6 +151,9 @@ import { StudentLessonLiveComponent } from './Pages/Student/LMS/student-lesson-l
 import { AssignmentDetailsComponent } from './Pages/Employee/LMS/assignment/assignment-details/assignment-details.component';
 import { AssignmentEditComponent } from './Pages/Employee/LMS/assignment/assignment-edit/assignment-edit.component';
 import { ZatcaDevicesComponent } from './Pages/Employee/Zatca/zatca-devices/zatca-devices.component';
+import { SubjectsComponent } from './Pages/Employee/LMS/subjects/subjects.component';
+import { SubjectDetailsComponent } from './Pages/Employee/LMS/SubjectDetails/subject-details.component';
+import { WeekDetailsComponent } from './Pages/Employee/LMS/week-details/week-details.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate:[noNavigateToLoginIfLoginGuard] },
@@ -346,10 +349,14 @@ export const routes: Routes = [
             { path: "Lesson Activity/:id", component: LessonActivityComponent, title: "Lesson Activity", canActivate:[noNavigateWithoutLoginGuard ] },
             { path: "Lesson Resource/:id", component: LessonResourceComponent, title: "Lesson Resource", canActivate:[noNavigateWithoutLoginGuard ] },
             { path: "Lesson Live", component: LessonLiveComponent, title: "Lesson Live", canActivate:[noNavigateWithoutLoginGuard ] },
+            
             { path: "Assignment Details", component: AssignmentDetailsComponent, title: "Assignment Details", canActivate:[noNavigateWithoutLoginGuard ] },
             { path: "Assignment Edit", component: AssignmentEditComponent, title: "Assignment Edit", canActivate:[noNavigateWithoutLoginGuard ] },
             { path: "Zatca Devices", component: ZatcaDevicesComponent, title: "Zatca Devices", canActivate:[noNavigateWithoutLoginGuard ] },
-        ]
+            { path: "Subjects", component: SubjectsComponent, title: "Subjects", canActivate:[noNavigateWithoutLoginGuard ] },
+            { path: "Subject-Details/:subjectId", component: SubjectDetailsComponent, title: "Subject-Details", canActivate:[noNavigateWithoutLoginGuard] },
+            { path: "week-details/:subjectId/:weekId", component: WeekDetailsComponent, title: "Week Details", canActivate:[noNavigateWithoutLoginGuard] }, 
+               ]
 },
     { 
         path: "Parent", 
