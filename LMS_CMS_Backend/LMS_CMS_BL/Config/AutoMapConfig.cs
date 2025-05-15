@@ -906,6 +906,8 @@ namespace LMS_CMS_BL.Config
 
             CreateMap<QuestionBank, QuestionBankGetDTO>()
                  .ForMember(dest => dest.LessonName, opt => opt.MapFrom(src => src.Lesson.EnglishTitle))
+                 .ForMember(dest => dest.SubjectID, opt => opt.MapFrom(src => src.Lesson.SubjectID))
+                 .ForMember(dest => dest.SubjectName, opt => opt.MapFrom(src => src.Lesson.Subject.en_name))
                  .ForMember(dest => dest.BloomLevelName, opt => opt.MapFrom(src => src.BloomLevel.EnglishName))
                  .ForMember(dest => dest.DokLevelName, opt => opt.MapFrom(src => src.DokLevel.EnglishName))
                  .ForMember(dest => dest.QuestionTypeName, opt => opt.MapFrom(src => src.QuestionType.Name));
@@ -913,18 +915,22 @@ namespace LMS_CMS_BL.Config
             CreateMap<DTO.LMS.QuestionBankAddDTO, QuestionBank>();
 
             CreateMap<QuestionBankOptionAddDTO, QuestionBankOption>();
+            CreateMap<QuestionBankOption, QuestionBankOptionAddDTO>();
+            CreateMap<SubBankQuestion, SubBankQuestionAddDTO>();
+            CreateMap<SubBankQuestionAddDTO, SubBankQuestion>();
 
             CreateMap<BloomLevel, BloomLevelGetDTO>();
             CreateMap<DokLevel, DokLevelGetDTO>();
             CreateMap<QuestionBankType, QuestionBankTypeGetDTO>();
 
-            CreateMap<TaxIssuer, TaxIssuerGetDTO>();
+            CreateMap<TaxIssuer, TaxIssuerGetDTO>()
+                .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.TaxCustomer.Type)); ;
             CreateMap<TaxIssuerAddDTO, TaxIssuer>();
             CreateMap<TaxIssuerEditDTO, TaxIssuer>();
 
             CreateMap<TaxReceiver, TaxReceiverGetDTO>()
-                .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.TaxReceiverType.Type))
-                .ForMember(dest => dest.Country, opt => opt.MapFrom(src => src.Country.Iso));
+                .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.TaxCustomer.Type));
+                //.ForMember(dest => dest.Country, opt => opt.MapFrom(src => src.Country.Iso));
             CreateMap<TaxReceiverAddDTO, TaxReceiver>();
             CreateMap<TaxReceiverEditDTO, TaxReceiver>();
 

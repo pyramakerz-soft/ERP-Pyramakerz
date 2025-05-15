@@ -13,6 +13,8 @@ export class QuestionBank {
     public essayAnswer?: string,
     public lessonID: number = 0,
     public lessonName: string = '',
+    public subjectID: number = 0,
+    public subjectName: string = '',
     public bloomLevelID: number = 0,
     public bloomLevelName: string = '',
     public dokLevelID: number = 0,

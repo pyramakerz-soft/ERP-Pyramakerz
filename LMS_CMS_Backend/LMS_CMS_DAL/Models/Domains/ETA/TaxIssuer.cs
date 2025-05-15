@@ -9,18 +9,14 @@ namespace LMS_CMS_DAL.Models.Domains.ETA
         [Key]
         public string ID { get; set; }
 
-        [ForeignKey("TaxReceiverType")]
+        [ForeignKey("TaxCustomer")]
         public int? TypeID { get; set; }
-        public TaxType? TaxReceiverType { get; set; }
+        public TaxCustomer? TaxCustomer { get; set; }
 
         public string Name { get; set; }
         public string ActivityCode { get; set; }
         public string BranchID { get; set; }
-
-        [ForeignKey("Country")]
         public long? CountryID { get; set; }
-        public Country? Country { get; set; }
-
         public string Governate { get; set; }
         public string RegionCity { get; set; }
         public string Street { get; set; }
