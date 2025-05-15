@@ -3,12 +3,14 @@ using LMS_CMS_BL.DTO.LMS;
 using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Migrations.Domains;
 using LMS_CMS_DAL.Models.Domains.LMS;
+using LMS_CMS_DAL.Models.Domains.RegisterationModule;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace LMS_CMS_PL.Controllers.Domains.LMS
 {
@@ -98,7 +100,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            LMS_CMS_DAL.Models.Domains.LMS.QuestionBank Questions;
+            LMS_CMS_DAL.Models.Domains.LMS.QuestionBank Question;
 
             var userClaims = HttpContext.User.Claims;
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
@@ -110,7 +112,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            Questions = await Unit_Of_Work.questionBank_Repository.FindByIncludesAsync(
+            Question = await Unit_Of_Work.questionBank_Repository.FindByIncludesAsync(
                     f => f.IsDeleted != true&&f.ID==id,
                     query => query.Include(emp => emp.BloomLevel),
                     query => query.Include(emp => emp.DokLevel),
@@ -119,13 +121,28 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     query => query.Include(emp => emp.Lesson.Subject),
                     query => query.Include(emp => emp.Lesson)
                     );
+            QuestionBankGetDTO Dto = mapper.Map<QuestionBankGetDTO>(Question);
 
-            if (Questions == null )
+
+            if (Question == null )
             {
                 return NotFound();
             }
 
-            QuestionBankGetDTO Dto = mapper.Map<QuestionBankGetDTO>(Questions);
+            List<QuestionBankTags> questionBankTags = Unit_Of_Work.questionBankTags_Repository.FindBy(s => s.QuestionBankID == id);
+            Dto.QuestionBankTagsDTO = questionBankTags?.Select(s => s.TagID).ToList();
+
+            if (Question.QuestionTypeID==2|| Question.QuestionTypeID == 3 || Question.QuestionTypeID == 5)
+            {
+                List<QuestionBankOption> options = Unit_Of_Work.questionBankOption_Repository.FindBy(s => s.QuestionBankID == id);
+                Dto.QuestionBankOptionsDTO = mapper.Map<List<QuestionBankOptionAddDTO>>(options);
+            }
+
+            if (Question.QuestionTypeID == 4)
+            {
+                List<SubBankQuestion> subBankQuestions = Unit_Of_Work.subBankQuestion_Repository.FindBy(s => s.QuestionBankID == id);
+                Dto.SubBankQuestionsDTO = mapper.Map<List<SubBankQuestionAddDTO>>(subBankQuestions);
+            }
 
             return Ok(Dto);
         }
@@ -229,7 +246,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             if (NewData.QuestionTypeID == 1)
             {
-                if (NewData.CorrectAnswerName != "true" && NewData.CorrectAnswerName != "false")
+                if (NewData.CorrectAnswerName != "True" && NewData.CorrectAnswerName != "False")
                 {
                     return BadRequest("Correct Answer should be true or false");
                 }

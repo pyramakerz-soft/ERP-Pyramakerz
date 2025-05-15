@@ -75,7 +75,6 @@ export class QuestionBankComponent {
   isAddSubQuestion = false;
   questionBank: QuestionBank = new QuestionBank()
   NewOption: string = ""
-  SelectedSubjectId: number = 0
   TagsSelected: Tag[] = [];
   dropdownOpen = false;
   @ViewChild('quillEditor') quillEditor!: ElementRef;
@@ -173,7 +172,7 @@ export class QuestionBankComponent {
   }
 
   GetAllLesson() {
-    this.LessonServ.GetBySubjectID(this.SelectedSubjectId, this.DomainName).subscribe((d) => {
+    this.LessonServ.GetBySubjectID(this.questionBank.subjectID, this.DomainName).subscribe((d) => {
       this.lesson = d
     })
   }
@@ -288,6 +287,7 @@ export class QuestionBankComponent {
   }
 
   CreateOREdit() {
+    this.questionBank.questionBankTagsDTO = this.TagsSelected.map(s => s.id)
     if (this.isFormValid()) {
       this.isLoading = true;
       console.log(this.questionBank)
@@ -302,6 +302,7 @@ export class QuestionBankComponent {
             this.closeModal();
           },
           (error) => {
+            console.log(error)
             this.isLoading = false; // Hide spinner
             Swal.fire({
               icon: 'error',
@@ -387,16 +388,39 @@ export class QuestionBankComponent {
 
   Edit(row: QuestionBank) {
     this.mode = 'Edit';
+    this.TagsSelected = [];
+
     this.QuestionBankServ.GetById(row.id, this.DomainName).subscribe((d) => {
       this.questionBank = d;
+      this.GetAllLesson();
+      if (this.questionBank.questionTypeID == 1) {
+        this.questionBank.questionBankOptionsDTO=[]
+        var opt = new QuestionBankOption()
+        opt.questionBankID = 0
+        opt.option = "True"
+        opt.questionBankID = 0
+        this.questionBank.questionBankOptionsDTO.push(opt);
+        var opt = new QuestionBankOption()
+        opt.questionBankID = 0
+        opt.option = "False"
+        opt.questionBankID = 0
+        this.questionBank.questionBankOptionsDTO.push(opt);
+      }
+
+      this.TagsSelected = this.tag.filter(s => this.questionBank.questionBankTagsDTO.includes(s.id));
+      console.log(d, this.questionBank);
     });
+
+      console.log( this.questionBank);
     this.openModal();
   }
+
 
   Create() {
     this.mode = 'Create';
     this.questionBank = new QuestionBank();
     this.validationErrors = {};
+    this.TagsSelected = []
     this.openModal();
   }
 

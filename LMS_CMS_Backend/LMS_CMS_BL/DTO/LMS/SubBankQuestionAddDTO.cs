@@ -8,6 +8,7 @@ namespace LMS_CMS_BL.DTO.LMS
 {
     public class SubBankQuestionAddDTO
     {
+        public long? ID { get; set; }
         public long QuestionBankID { get; set; }
         public string Description { get; set; }
         public string Answer { get; set; }

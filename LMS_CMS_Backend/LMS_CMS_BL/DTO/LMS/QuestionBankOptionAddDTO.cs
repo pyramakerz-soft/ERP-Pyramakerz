@@ -9,6 +9,7 @@ namespace LMS_CMS_BL.DTO.LMS
 {
     public class QuestionBankOptionAddDTO
     {
+        public long? ID { get; set; }
         public string Option { get; set; }
         public int? Order { get; set; }
         public long? QuestionBankID { get; set; }

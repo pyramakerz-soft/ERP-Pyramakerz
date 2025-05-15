@@ -906,6 +906,8 @@ namespace LMS_CMS_BL.Config
 
             CreateMap<QuestionBank, QuestionBankGetDTO>()
                  .ForMember(dest => dest.LessonName, opt => opt.MapFrom(src => src.Lesson.EnglishTitle))
+                 .ForMember(dest => dest.SubjectID, opt => opt.MapFrom(src => src.Lesson.SubjectID))
+                 .ForMember(dest => dest.SubjectName, opt => opt.MapFrom(src => src.Lesson.Subject.en_name))
                  .ForMember(dest => dest.BloomLevelName, opt => opt.MapFrom(src => src.BloomLevel.EnglishName))
                  .ForMember(dest => dest.DokLevelName, opt => opt.MapFrom(src => src.DokLevel.EnglishName))
                  .ForMember(dest => dest.QuestionTypeName, opt => opt.MapFrom(src => src.QuestionType.Name));
@@ -913,6 +915,9 @@ namespace LMS_CMS_BL.Config
             CreateMap<DTO.LMS.QuestionBankAddDTO, QuestionBank>();
 
             CreateMap<QuestionBankOptionAddDTO, QuestionBankOption>();
+            CreateMap<QuestionBankOption, QuestionBankOptionAddDTO>();
+            CreateMap<SubBankQuestion, SubBankQuestionAddDTO>();
+            CreateMap<SubBankQuestionAddDTO, SubBankQuestion>();
 
             CreateMap<BloomLevel, BloomLevelGetDTO>();
             CreateMap<DokLevel, DokLevelGetDTO>();
