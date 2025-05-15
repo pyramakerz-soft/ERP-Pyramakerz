@@ -69,63 +69,7 @@ export class MainLayoutComponent {
               label: 'Interview Registration', route: 'Interview Registration'
             }
           ], icon: 'Registration'
-        },
-        {
-          label: 'LMS', subItems: [
-            {
-              label: 'Live Sessions', route: 'Live Sessions'
-            },
-            {
-              label: 'Subjects', route: 'Subjects'
-            },
-            {
-              label: 'Reports', route: 'Reports'
-            }
-          ], icon: 'LMS'
-        },
-        {
-          label: 'Virtual Meetings', subItems: [
-            {
-              label: 'Discussion Room', route: 'Discussion Room'
-            }
-          ], icon: 'Virtual Meetings'
-        },
-        {
-          label: 'Communication', subItems: [
-            {
-              label: 'Request', route: 'Request'
-            },
-            {
-              label: 'Chat', route: 'Chat'
-            },
-            {
-              label: 'Notification', route: 'Notification'
-            }
-          ], icon: 'Communication'
-        },
-        {
-          label: 'Clinic', subItems: [
-            {
-              label: 'Medical History', route: 'Medical History'
-            },
-            {
-              label: 'Medical Report', route: 'Medical Report'
-            }
-          ], icon: 'Clinic'
-        },
-        {
-          label: 'E-Commerce', subItems: [
-            {
-              label: 'Shop', route: 'Shop'
-            },
-            {
-              label: 'Cart', route: 'Cart'
-            },
-            {
-              label: 'Orders', route: 'Orders'
-            }
-          ], icon: 'E-Commerce'
-        },
+        }
       ]
     }
     else if (this.User_Data_After_Login.type == "octa") {
@@ -154,7 +98,6 @@ export class MainLayoutComponent {
     this.roleDetailsService.Get_Pages_With_RoleID(this.User_Data_After_Login.role).subscribe(
       (data:any) => {
         this.menuItemsForEmployee = data  
-        console.log( this.menuItemsForEmployee , data  )
         this.menuService.updateMenuItemsForEmployee(this.menuItemsForEmployee);
       } ,(error)=>{
         this.menuItemsForEmployee = [];
