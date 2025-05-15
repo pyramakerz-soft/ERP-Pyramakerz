@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace LMS_CMS_PL.Controllers.Domains
 {
@@ -34,6 +35,7 @@ namespace LMS_CMS_PL.Controllers.Domains
                 .Where(rd => rd.IsDeleted != true && rd.Role_ID== roleId)
                 .Include(rd => rd.Page)  // Include the related Page entity
                 .ThenInclude(p => p.ChildPages) // Include the child pages
+                .OrderBy(rd => rd.Page.Order)
                 .ToListAsync();
 
             if (roleDetailsList == null || !roleDetailsList.Any())
@@ -58,12 +60,14 @@ namespace LMS_CMS_PL.Controllers.Domains
                     enDisplayName_name = group.First().Page.enDisplayName_name,
                     arDisplayName_name = group.First().Page.arDisplayName_name,
                     IsDisplay = group.First().Page.IsDisplay,
+                    order = group.First().Page.Order,
                     Allow_Edit = group.First().Allow_Edit,
                     Allow_Delete = group.First().Allow_Delete,
                     Allow_Edit_For_Others = group.First().Allow_Edit_For_Others,
                     Allow_Delete_For_Others = group.First().Allow_Delete_For_Others,
                     Children = GetChildPagesRecursive(group.First().Page, roleDetails) // Use the optimized recursive method
                 })
+                .OrderBy(p => p.order) // ✅ Order parent pages by order
                 .ToList();
 
             return Ok(parentPages);
@@ -74,6 +78,7 @@ namespace LMS_CMS_PL.Controllers.Domains
             // Recursively fetch children and their nested children
             return parentPage.ChildPages
                 .Where(child => roleDetails.ContainsKey(child.ID)) // Ensure child exists in Role_Details
+                .OrderBy(child => child.Order) // ✅ Order children by Order
                 .Select(child => new Role_Details_GetDTO
                 {
                     ID = child.ID,
@@ -81,6 +86,7 @@ namespace LMS_CMS_PL.Controllers.Domains
                     ar_name = child.ar_name,
                     enDisplayName_name = child.enDisplayName_name,
                     arDisplayName_name = child.arDisplayName_name,
+                    order = child.Order,
                     IsDisplay = child.IsDisplay,
                     Allow_Edit = roleDetails[child.ID].Allow_Edit,
                     Allow_Delete = roleDetails[child.ID].Allow_Delete,
@@ -124,6 +130,7 @@ namespace LMS_CMS_PL.Controllers.Domains
                     enDisplayName_name = group.First().Page.enDisplayName_name,
                     arDisplayName_name = group.First().Page.arDisplayName_name,
                     IsDisplay = group.First().Page.IsDisplay,
+                    order = group.First().Page.Order,
                     Allow_Edit = group.First().Allow_Edit,
                     Allow_Delete = group.First().Allow_Delete,
                     Allow_Edit_For_Others = group.First().Allow_Edit_For_Others,
