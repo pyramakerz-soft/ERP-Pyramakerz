@@ -441,6 +441,7 @@ export class InventoryDetailsComponent {
             this.router.navigateByUrl(`Employee/${this.InventoryFlag.enName}`);
           },
           (error) => {
+            console.log(error)
             this.isLoading = false;
             Swal.fire({
               icon: 'error',
@@ -715,7 +716,7 @@ export class InventoryDetailsComponent {
       if (this.Data.hasOwnProperty(key)) {
         const field = key as keyof InventoryMaster;
         if (!this.Data[field]) {
-          if (field == 'storeID' || field == 'date') {
+          if (field == 'storeID' || field == 'date' ||field == 'schoolId' ) {
             this.validationErrors[field] = `*${this.capitalizeField(
               field
             )} is required`;
