@@ -923,8 +923,8 @@ namespace LMS_CMS_BL.Config
             CreateMap<TaxIssuerEditDTO, TaxIssuer>();
 
             CreateMap<TaxReceiver, TaxReceiverGetDTO>()
-                .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.TaxReceiverType.Type))
-                .ForMember(dest => dest.Country, opt => opt.MapFrom(src => src.Country.Iso));
+                .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.TaxReceiverType.Type));
+                //.ForMember(dest => dest.Country, opt => opt.MapFrom(src => src.Country.Iso));
             CreateMap<TaxReceiverAddDTO, TaxReceiver>();
             CreateMap<TaxReceiverEditDTO, TaxReceiver>();
 

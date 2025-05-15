@@ -16,11 +16,7 @@ namespace LMS_CMS_DAL.Models.Domains.ETA
         public string Name { get; set; }
         public string ActivityCode { get; set; }
         public string BranchID { get; set; }
-
-        [ForeignKey("Country")]
         public long? CountryID { get; set; }
-        public Country? Country { get; set; }
-
         public string Governate { get; set; }
         public string RegionCity { get; set; }
         public string Street { get; set; }
