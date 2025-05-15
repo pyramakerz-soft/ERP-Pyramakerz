@@ -35,5 +35,6 @@ namespace LMS_CMS_BL.DTO.Inventory
         public string[]? ShopItemColors { get; set; }
         public string[]? ShopItemSizes { get; set; }
         public string BarCode { get; set; }
+        public string? ItemType { get; set; }
     }
 }
