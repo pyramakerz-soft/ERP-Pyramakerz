@@ -224,8 +224,8 @@ export class AddEditSubjectComponent {
   }
 
   SaveSubject(){
-    if(this.isFormValid()){
-      if((this.subject.passByDegree?this.subject.passByDegree:0) > (this.subject.totalMark?this.subject.totalMark:0)){
+    if(this.isFormValid()){ 
+      if((Number(this.subject.passByDegree)?Number(this.subject.passByDegree):0) > (Number(this.subject.totalMark)?Number(this.subject.totalMark):0)){
         Swal.fire({
           icon: 'error',
           text: "Pass By Degree Can't Be > Total Marks",

@@ -55,7 +55,7 @@
                 <td *ngIf="row.registrationTestState==null" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     Not Solved Yet
                 </td>
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.registrationTestMark }} <span *ngIf="row.registrationTestState==null">-- </span>/
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.registrationTestMark?row.registrationTestMark:"" }} <span *ngIf="row.registrationTestState==null">-- </span>/
                     {{row.totalMark}}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{
                     row.registrationTestVisibleToParent }}</td>
