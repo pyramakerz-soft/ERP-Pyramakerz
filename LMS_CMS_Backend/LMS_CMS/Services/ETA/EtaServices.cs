@@ -3,9 +3,9 @@ using System.Text.Json.Nodes;
 
 namespace LMS_CMS_PL.Services.ETA
 {
-    public class EtaServices
+    public static class EtaServices
     {
-        public static bool GenerateInvoiceJSON(InventoryMaster master, char documentType = 'I')
+        public static bool GenerateInvoiceJSON(InventoryMaster master, string issuerCountry, string receiverCountry, char invoiceType = 'P', char documentType = 'I')
         {
             string version = "1.0";
 
@@ -28,7 +28,7 @@ namespace LMS_CMS_PL.Services.ETA
                             ["address"] = new JsonObject
                             {
                                 ["branchID"] = master.TaxIssuer.BranchID,
-                                ["country"] = master.TaxIssuer.Country,
+                                ["country"] = issuerCountry,
                                 ["governate"] = master.TaxIssuer.Governate,
                                 ["regionCity"] = master.TaxIssuer.RegionCity,
                                 ["street"] = master.TaxIssuer.Street,
@@ -39,7 +39,7 @@ namespace LMS_CMS_PL.Services.ETA
                                 ["landmark"] = master.TaxIssuer.LandMark,
                                 ["additionalInformation"] = master.TaxIssuer.AdditionalInfo
                             },
-                            ["type"] = master.TaxIssuer.Type,
+                            ["type"] = invoiceType.ToString(),
                             ["id"] = master.TaxIssuer.ID,
                             ["name"] = master.TaxIssuer.Name
                         },
@@ -47,7 +47,7 @@ namespace LMS_CMS_PL.Services.ETA
                         {
                             ["address"] = new JsonObject
                             {
-                                ["country"] = master.TaxReceiver.Country,
+                                ["country"] = receiverCountry,
                                 ["governate"] = master.TaxReceiver.Governate,
                                 ["regionCity"] = master.TaxReceiver.RegionCity,
                                 ["street"] = master.TaxReceiver.Street,
@@ -58,7 +58,7 @@ namespace LMS_CMS_PL.Services.ETA
                                 ["landmark"] = master.TaxReceiver.LandMark,
                                 ["additionalInformation"] = master.TaxReceiver.AdditionalInfo
                             },
-                            ["type"] = master.TaxReceiver.Type,
+                            ["type"] = invoiceType.ToString(),
                             ["id"] = master.TaxReceiver.ID,
                             ["name"] = master.TaxReceiver.Name
                         },
@@ -137,7 +137,7 @@ namespace LMS_CMS_PL.Services.ETA
             return new JsonObject
             {
                 ["description"] = $"{item.ShopItem.EnName} - {item.ShopItem.ArName}",
-                ["itemType"] = "EGS",
+                ["itemType"] = item.ShopItem.ItemType,
                 ["itemCode"] = item.ShopItem.BarCode,
                 ["unitType"] = "EA",
                 ["quantity"] = item.Quantity,

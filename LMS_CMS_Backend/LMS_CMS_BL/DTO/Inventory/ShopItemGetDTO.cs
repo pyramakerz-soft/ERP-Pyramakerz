@@ -37,5 +37,6 @@ namespace LMS_CMS_BL.DTO.Inventory
         public string BarCode { get; set; }
         public long? InsertedByUserId { get; set; }
         public long CurrentStock { get; set; }
+        public string? ItemType { get; set; }
     }
 }

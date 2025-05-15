@@ -4,10 +4,10 @@ namespace LMS_CMS_BL.DTO.ETA
     public class TaxReceiverEditDTO
     {
         public string? ID { get; set; }
-        public string? Type { get; set; }
+        public int? TypeID { get; set; }
         public string? Name { get; set; }
         public string? ActivityCode { get; set; }
-        public string? Country { get; set; }
+        public long? CountryID { get; set; }
         public string? Governate { get; set; }
         public string? RegionCity { get; set; }
         public string? Street { get; set; }
