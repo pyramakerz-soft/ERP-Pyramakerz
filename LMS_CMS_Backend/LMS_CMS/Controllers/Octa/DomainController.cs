@@ -480,7 +480,7 @@ namespace LMS_CMS_PL.Controllers.Octa
                 Unit_Of_Work.SaveChanges();
             }
 
-            // 3) Get The Deleted Ones (By Default it will delete the role details as on delete cascade
+            // 3) Get The Deleted Ones (By Default it will delete the role details as on delete cascade)
             if (existingPages != null && existingPages.Count != 0)
             {
                 for (int i = 0; i < existingPages.Count; i++)
@@ -496,6 +496,21 @@ namespace LMS_CMS_PL.Controllers.Octa
                 }
                 Unit_Of_Work.SaveChanges();
             }
+
+            // Delete pages that are in domain and not in Octa
+            var pagesInDomain = Unit_Of_Work.page_Repository.Select_All();
+            var pagesInOcta = _Unit_Of_Work.page_Octa_Repository.Select_All_Octa();
+            var pagesNotInOcta = pagesInDomain.Where(domainPage => !pagesInOcta.Any(octaPage => octaPage.ID == domainPage.ID)).ToList();
+
+            // Check if there are any pages not in `pagesInOcta`
+            if (pagesNotInOcta.Any())
+            {
+                for (int i = 0; i < pagesNotInOcta.Count; i++)
+                {
+                    Unit_Of_Work.page_Repository.Delete(pagesNotInOcta[i].ID);
+                }
+            } 
+
 
             //var notFoundPages = new List<long>();
             //var notModulePages = new List<long>();

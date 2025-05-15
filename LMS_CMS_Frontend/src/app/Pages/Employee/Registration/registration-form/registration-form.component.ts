@@ -81,6 +81,7 @@ export class RegistrationFormComponent {
   parent:any = null 
   isRtl: boolean = false;
   subscription!: Subscription;
+  isLoading = false
 
   constructor(public account: AccountService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService, public schoolService:SchoolService, public CountryServ:CountryService ,
     public activeRoute: ActivatedRoute, public registrationFormService: RegistrationFormService, public router:Router, public parentService:ParentService, public NationalityServ : NationalityService ,
@@ -464,11 +465,14 @@ export class RegistrationFormComponent {
       if(this.isMotherEmailValid && this.isGuardianEmailValid && this.isGuardianEmailSameAsParent){
         this.CheckAgeForGrade()
         if(this.ageIsCompatibleWithGrade){
+          this.isLoading = true
           this.registrationFormService.Add(this.registrationForm, this.registrationFormForFiles, this.DomainName).subscribe(
             (data) => {
+              this.isLoading = false
               this.DoneSuccessfully()
             },
             (error) => {
+              this.isLoading = false
               if(error.error == "Email Already Exists"){
                 Swal.fire({
                   icon: 'warning',

@@ -181,9 +181,10 @@
         </div>
 
         <div class="flex justify-end">
-            <button *ngIf="currentCategory == RegistrationFormData.categories.length" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg" (click)="Save()">
-                {{ 'Done' | translate }}
-            </button>
+            <button [disabled]="isLoading" *ngIf="currentCategory == RegistrationFormData.categories.length" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg" (click)="Save()">
+                <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+                <span *ngIf="!isLoading">{{ 'Done' | translate }}</span>
+            </button> 
             <button  *ngIf="currentCategory !== RegistrationFormData.categories.length"
                 class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
                 [disabled]="currentCategory === RegistrationFormData.categories.length"
