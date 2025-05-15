@@ -414,7 +414,7 @@ export class InventoryDetailsComponent {
         icon: 'warning',
         title: 'Warning!',
         text: 'You Should Choose Store First',
-        confirmButtonColor: '#FF7519',
+        confirmButtonColor: '#089B41',
       });
     }
   }
@@ -530,7 +530,7 @@ export class InventoryDetailsComponent {
         title: 'Are you sure you want to delete this Sales Item?',
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#FF7519',
+        confirmButtonColor: '#089B41',
         cancelButtonColor: '#17253E',
         confirmButtonText: 'Delete',
         cancelButtonText: 'Cancel',
@@ -556,7 +556,7 @@ export class InventoryDetailsComponent {
         title: 'Are you sure you want to delete this Sales Item?',
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#FF7519',
+        confirmButtonColor: '#089B41',
         cancelButtonColor: '#17253E',
         confirmButtonText: 'Delete',
         cancelButtonText: 'Cancel',
@@ -730,7 +730,7 @@ export class InventoryDetailsComponent {
         icon: 'warning',
         title: 'Warning!',
         text: 'SalesItems Is Required',
-        confirmButtonColor: '#FF7519',
+        confirmButtonColor: '#089B41',
       });
       return false;
     }
@@ -739,7 +739,7 @@ export class InventoryDetailsComponent {
         icon: 'warning',
         title: 'Warning!',
         text: 'SalesItems Is Required',
-        confirmButtonColor: '#FF7519',
+        confirmButtonColor: '#089B41',
       });
       return false;
     }

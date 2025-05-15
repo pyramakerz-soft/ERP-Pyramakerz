@@ -135,7 +135,7 @@ export class AccountingStudentEditComponent {
         icon: 'success',
         title: 'Done',
         text: 'Student Edited Succeessfully',
-        confirmButtonColor: '#FF7519',
+        confirmButtonColor: '#089B41',
       });
       this.router.navigateByUrl(`Employee/Student Accounting`)
       this.isLoading = false

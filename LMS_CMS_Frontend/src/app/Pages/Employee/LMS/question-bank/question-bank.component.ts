@@ -145,7 +145,7 @@ export class QuestionBankComponent {
       title: 'Are you sure you want to delete this Question Bank?',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#FF7519',
+      confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
       confirmButtonText: 'Delete',
       cancelButtonText: 'Cancel',

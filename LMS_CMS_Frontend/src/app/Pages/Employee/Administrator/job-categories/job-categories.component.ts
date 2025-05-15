@@ -111,7 +111,7 @@ export class JobCategoriesComponent {
       title: 'Are you sure you want to delete this Job Category?',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#FF7519',
+      confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
       confirmButtonText: 'Delete',
       cancelButtonText: 'Cancel',
@@ -166,7 +166,7 @@ export class JobCategoriesComponent {
               icon: 'error',
               title: 'Error',
               text: error.error || 'An unexpected error occurred',
-              confirmButtonColor: '#FF7519',
+              confirmButtonColor: '#089B41',
             });
             return false;
           }
@@ -188,7 +188,7 @@ export class JobCategoriesComponent {
               icon: 'error',
               title: 'Error',
               text: error.error || 'An unexpected error occurred',
-              confirmButtonColor: '#FF7519',
+              confirmButtonColor: '#089B41',
             });
             return false;
           }

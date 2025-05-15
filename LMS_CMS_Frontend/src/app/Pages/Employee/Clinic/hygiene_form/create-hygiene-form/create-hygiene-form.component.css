@@ -45,7 +45,7 @@ button:disabled {
 }
 
 input:checked + .slider {
-  background-color: #FF7519;
+  background-color: #089B41;
 }
 
 input:checked + .slider:before {

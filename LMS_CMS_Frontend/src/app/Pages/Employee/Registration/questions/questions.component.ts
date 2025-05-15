@@ -156,7 +156,7 @@ export class QuestionsComponent {
       title: 'Are you sure you want to delete this question?',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#FF7519',
+      confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
       confirmButtonText: 'Delete',
       cancelButtonText: 'Cancel',
@@ -233,13 +233,13 @@ export class QuestionsComponent {
             });
           });
       }
-      if (this.mode == 'Edit') {
+      if (this.mode == 'Edit') { 
         this.QuestionServ.Edit(this.question, this.DomainName).subscribe(() => {
           this.GetAllData();
           this.closeModal();
           this.isLoading = false
         },
-          error => {
+          error => { 
             this.isLoading = false
             Swal.fire({
               icon: 'error',
@@ -271,8 +271,13 @@ export class QuestionsComponent {
 
   AddOption() {
     if(this.NewOption !=""){
-      this.options.push(this.NewOption);
-      this.NewOption = '';
+      if (this.options.includes(this.NewOption)) {
+          this.validationErrors['options'] = "Option already exists";
+          this.NewOption = '';  
+      } else {
+          this.options.push(this.NewOption);
+          this.NewOption = '';  
+      } 
     }
     else{
       this.validationErrors['options']="option is required"
@@ -326,9 +331,11 @@ export class QuestionsComponent {
     }
     return isValid;
   }
+
   capitalizeField(field: keyof QuestionAddEdit): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
+
   onInputValueChange(event: { field: keyof QuestionAddEdit; value: any }) {
     const { field, value } = event;
     (this.question as any)[field] = value;

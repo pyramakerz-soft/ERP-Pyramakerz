@@ -186,7 +186,7 @@ export class BusStudentComponent {
       title: 'Are you sure you want to delete this student?',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#FF7519',
+      confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
       confirmButtonText: 'Delete',
       cancelButtonText: 'Cancel'
@@ -448,14 +448,14 @@ export class BusStudentComponent {
           Swal.fire({
             title: 'Date From can not be after Date To',
             icon: 'warning',
-            confirmButtonColor: '#FF7519',
+            confirmButtonColor: '#089B41',
             confirmButtonText: 'Ok',
           });
         }else if (fromDate < semesterStart || fromDate > semesterEnd || toDate < semesterStart || toDate > semesterEnd) { 
           Swal.fire({
             title: `Exception Date must be within the Semester Year Range from ${semesteer[0].dateFrom} to ${semesteer[0].dateTo}`,
             icon: 'warning',
-            confirmButtonColor: '#FF7519',
+            confirmButtonColor: '#089B41',
             confirmButtonText: 'Ok',
           });
         } else{

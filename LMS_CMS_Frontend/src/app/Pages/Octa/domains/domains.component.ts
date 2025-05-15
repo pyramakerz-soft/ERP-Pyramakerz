@@ -243,7 +243,7 @@ export class DomainsComponent {
                 </div>
               `,
               showCancelButton: false,
-              confirmButtonColor: '#FF7519',
+              confirmButtonColor: '#089B41',
               confirmButtonText: 'Okay',
             }).then((r) => {
               this.closeModal()
@@ -290,7 +290,7 @@ export class DomainsComponent {
       title: 'Are you sure you want to delete this domain?',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#FF7519',
+      confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
       confirmButtonText: 'Delete',
       cancelButtonText: 'Cancel'

@@ -326,7 +326,7 @@ export class PayableDetailsComponent {
             Swal.fire({
               title: 'Saved Successfully',
               icon: 'success',
-              confirmButtonColor: '#FF7519',
+              confirmButtonColor: '#089B41',
             });
           },
           (error) => {
@@ -343,7 +343,7 @@ export class PayableDetailsComponent {
               icon: 'success',
               title: 'Done!',
               text: 'The Payable has been edited successfully.',
-              confirmButtonColor: '#FF7519',
+              confirmButtonColor: '#089B41',
             });
           },
           (error) => {
@@ -448,7 +448,7 @@ export class PayableDetailsComponent {
       title: 'Are you sure you want to delete this Payable Detail?',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#FF7519',
+      confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
       confirmButtonText: 'Delete',
       cancelButtonText: 'Cancel',

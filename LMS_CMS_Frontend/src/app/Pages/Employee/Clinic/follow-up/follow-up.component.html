@@ -112,7 +112,7 @@
                             <option *ngFor="let drug of drugs" [value]="drug.id">{{ drug.name }}</option>
                         </select>
                         <button (click)="openDrugModal()"
-                            class="px-4 py-2 border-l border-gray-300 text-gray-500 hover:text-[#FF7519] text-xl">
+                            class="px-4 py-2 border-l border-gray-300 text-gray-500 hover:text-[#089B41] text-xl">
                             +
                         </button>
                     </div>
@@ -127,7 +127,7 @@
                             <option *ngFor="let dose of doses" [value]="dose.id">{{ dose.doseTimes }}</option>
                         </select>
                         <button (click)="openDoseModal()"
-                            class="px-4 py-2 border-l border-gray-300 text-gray-500 hover:text-[#FF7519] text-xl">
+                            class="px-4 py-2 border-l border-gray-300 text-gray-500 hover:text-[#089B41] text-xl">
                             +
                         </button>
                     </div>
@@ -191,7 +191,7 @@
 
             <div class="flex items-center gap-2">
                 <input type="checkbox" id="sendSms" [(ngModel)]="followUp.sendSMSToParent"
-                    class="w-4 h-4 rounded border-gray-300 text-[#FF7519] focus:ring-[#FF7519]">
+                    class="w-4 h-4 rounded border-gray-300 text-[#089B41] focus:ring-[#089B41]">
                 <label for="sendSms" class="text-sm text-gray-900">Send SMS to Parent</label>
             </div>
         </div>

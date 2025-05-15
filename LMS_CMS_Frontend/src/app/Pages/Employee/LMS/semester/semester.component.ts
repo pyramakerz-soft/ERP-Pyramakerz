@@ -227,7 +227,7 @@ export class SemesterComponent {
       Swal.fire({
         title: 'From Date Must Be Before To Date',
         icon: 'warning',
-        confirmButtonColor: '#FF7519',
+        confirmButtonColor: '#089B41',
         confirmButtonText: 'Ok',
       });
       this.isLoading = false;
@@ -243,7 +243,7 @@ export class SemesterComponent {
       Swal.fire({
         title: 'Semester dates must be within the Academic Year Range',
         icon: 'warning',
-        confirmButtonColor: '#FF7519',
+        confirmButtonColor: '#089B41',
         confirmButtonText: 'Ok',
       });
       this.isLoading = false;
@@ -305,7 +305,7 @@ export class SemesterComponent {
       title: 'Are you sure you want to delete this Semester?',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#FF7519',
+      confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
       confirmButtonText: 'Delete',
       cancelButtonText: 'Cancel'

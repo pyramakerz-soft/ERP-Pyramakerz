@@ -58,8 +58,8 @@
 </div>
 <div *ngIf="AllowEdit && IsAllowEdit()" class="w-full md:w-1/2">
     <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">Password</p>
-    <button *ngIf="!isChange" class="bg-[#FF7519] text-white p-2 rounded-lg text-sm md:text-base" (click)="toggleChangePassword()">Change Password</button>
-    <button *ngIf="isChange" class="bg-[#FF7519] text-white p-2 rounded-lg text-sm md:text-base" (click)="UpdatePassword()">Update</button>
+    <button *ngIf="!isChange" class="bg-[#089B41] text-white p-2 rounded-lg text-sm md:text-base" (click)="toggleChangePassword()">Change Password</button>
+    <button *ngIf="isChange" class="bg-[#089B41] text-white p-2 rounded-lg text-sm md:text-base" (click)="UpdatePassword()">Update</button>
     <button *ngIf="isChange" class="bg-[#17253E] text-white p-2 rounded-lg text-sm md:text-base ml-3" (click)="CancelUpdatePassword()">Cancel</button>
     
     <input *ngIf="isChange" type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl mt-2" placeholder="Enter the password"

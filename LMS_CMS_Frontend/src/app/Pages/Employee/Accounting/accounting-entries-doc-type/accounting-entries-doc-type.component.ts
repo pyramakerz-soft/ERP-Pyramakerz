@@ -109,7 +109,7 @@ User_Data_After_Login: TokenData = new TokenData(
       title: 'Are you sure you want to delete this Doc Type?',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#FF7519',
+      confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
       confirmButtonText: 'Delete',
       cancelButtonText: 'Cancel',

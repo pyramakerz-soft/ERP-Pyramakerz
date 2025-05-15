@@ -209,7 +209,7 @@ export class GradeComponent {
       Swal.fire({
         title: 'From Birthdate Must Be a Date Before To Birthdate',
         icon: 'warning',
-        confirmButtonColor: '#FF7519',
+        confirmButtonColor: '#089B41',
         confirmButtonText: 'Ok',
       });
 
@@ -272,7 +272,7 @@ export class GradeComponent {
       title: 'Are you sure you want to delete this Grade?',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#FF7519',
+      confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
       confirmButtonText: 'Delete',
       cancelButtonText: 'Cancel'

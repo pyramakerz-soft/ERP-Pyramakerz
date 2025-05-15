@@ -246,7 +246,7 @@ export class AccountingEmployeeEditComponent {
           icon: 'success',
           title: 'Done',
           text: 'Employee Edited Succeessfully',
-          confirmButtonColor: '#FF7519',
+          confirmButtonColor: '#089B41',
         });
         this.router.navigateByUrl(`Employee/Employee Accounting`)
         this.isLoading = false
@@ -372,7 +372,7 @@ export class AccountingEmployeeEditComponent {
         icon: 'warning',
         title: 'Warning!',
         text: 'There is no student with this National Id',
-        confirmButtonColor: '#FF7519',
+        confirmButtonColor: '#089B41',
       });
     }
   }

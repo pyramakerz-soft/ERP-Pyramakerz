@@ -33,7 +33,7 @@
             <div class="mb-4">
                 <div class="flex items-center">
                     <input type="checkbox" [checked]="checkForRow(row.id)" (change)="onCheckboxChange($event, row.id, row.page_ID)"
-                        class="h-5 w-5 mr-2 ml-2 border-2 border-[#FF7519] focus:ring-0 checked:border-[#FF7519] checked:bg-[#FF7519] text-[#FF7519]" />
+                        class="h-5 w-5 mr-2 ml-2 border-2 border-[#089B41] focus:ring-0 checked:border-[#089B41] checked:bg-[#089B41] text-[#089B41]" />
                     <i class="fa-solid fa-folder-open"></i>
                     <button (click)="toggleCollapse(row.id)" class="w-full px-2 py-2 text-left">
                         {{ row.en_name }}
@@ -53,7 +53,7 @@
     <div *ngFor="let page of children">
         <div class="flex items-center" [style.marginLeft.px]="level">
             <input type="checkbox" [checked]="checkForPage(page.id, parentId)" (change)="onCheckboxChange($event, page.id, page.page_ID)"
-                class="h-5 w-5 mr-2 ml-2 border-2 border-[#FF7519] focus:ring-0 checked:border-[#FF7519] checked:bg-[#FF7519] text-[#FF7519]" />
+                class="h-5 w-5 mr-2 ml-2 border-2 border-[#089B41] focus:ring-0 checked:border-[#089B41] checked:bg-[#089B41] text-[#089B41]" />
             <button (click)="toggleCollapse(page.id)" class="w-full px-2 py-2 text-left">
                 > {{ page.en_name }}
             </button>
@@ -64,25 +64,25 @@
                 <div class="flex items-center" [style.marginLeft.px]="level + 20">
                     <input type="checkbox" [checked]="getPermissionState(parentId, page.id, 'allow_Edit')"
                         (change)="setPermissionState(parentId, page.id, 'allow_Edit')"
-                        class="h-5 w-5 mr-2 ml-2 border-2 border-[#FF7519] focus:ring-0 checked:border-[#FF7519] checked:bg-[#FF7519] text-[#FF7519]" />
+                        class="h-5 w-5 mr-2 ml-2 border-2 border-[#089B41] focus:ring-0 checked:border-[#089B41] checked:bg-[#089B41] text-[#089B41]" />
                     <label class="text-gray-700">Allow Edit</label>
                 </div>
                 <div class="flex items-center" [style.marginLeft.px]="level + 20">
                     <input type="checkbox" [checked]="getPermissionState(parentId, page.id, 'allow_Delete')"
                         (change)="setPermissionState(parentId, page.id, 'allow_Delete')"
-                        class="h-5 w-5 mr-2 ml-2 border-2 border-[#FF7519] focus:ring-0 checked:border-[#FF7519] checked:bg-[#FF7519] text-[#FF7519]" />
+                        class="h-5 w-5 mr-2 ml-2 border-2 border-[#089B41] focus:ring-0 checked:border-[#089B41] checked:bg-[#089B41] text-[#089B41]" />
                     <label class="text-gray-700">Allow Delete</label>
                 </div>
                 <div class="flex items-center" [style.marginLeft.px]="level + 20">
                     <input type="checkbox" [checked]="getPermissionState(parentId, page.id, 'allow_Edit_For_Others')"
                         (change)="setPermissionState(parentId, page.id, 'allow_Edit_For_Others')"
-                        class="h-5 w-5 mr-2 ml-2 border-2 border-[#FF7519] focus:ring-0 checked:border-[#FF7519] checked:bg-[#FF7519] text-[#FF7519]" />
+                        class="h-5 w-5 mr-2 ml-2 border-2 border-[#089B41] focus:ring-0 checked:border-[#089B41] checked:bg-[#089B41] text-[#089B41]" />
                     <label class="text-gray-700">Allow Edit For Others</label>
                 </div>
                 <div class="flex items-center" [style.marginLeft.px]="level + 20">
                     <input type="checkbox" [checked]="getPermissionState(parentId, page.id, 'allow_Delete_For_Others')"
                         (change)="setPermissionState(parentId, page.id, 'allow_Delete_For_Others')"
-                        class="h-5 w-5 mr-2 ml-2 border-2 border-[#FF7519] focus:ring-0 checked:border-[#FF7519] checked:bg-[#FF7519] text-[#FF7519]" />
+                        class="h-5 w-5 mr-2 ml-2 border-2 border-[#089B41] focus:ring-0 checked:border-[#089B41] checked:bg-[#089B41] text-[#089B41]" />
                     <label class="text-gray-700">Allow Delete For Others</label>
                 </div>
             </ng-container>

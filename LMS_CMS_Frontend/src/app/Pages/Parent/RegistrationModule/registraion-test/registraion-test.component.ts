@@ -201,7 +201,7 @@ export class RegistraionTestComponent {
           icon: 'success',
           title: 'Done',
           text: 'Added Succeessfully',
-          confirmButtonColor: '#FF7519',
+          confirmButtonColor: '#089B41',
         });
         this.router.navigateByUrl(`Parent/Admission Test`);
       });

@@ -197,7 +197,7 @@
     <div class="primaryBg py-8 px-4 rounded-lg !important">
         <div *ngFor="let category of RegistrationFormData.categories; let i = index" class="relative flex flex-col justify-center items-center" (click)="goToCategory(i+1)">
             <div *ngIf="i !== 0" class="w-1 h-5 bg-[#BCBDBD] bottom-[100%]" [ngClass]="{secondaryBg : i <= currentCategory - 1, 'bg-[#BCBDBD]': i > currentCategory - 1}"></div>
-            <div *ngIf="i <= currentCategory - 1" class="p-1 border-4 border-[#FF7519] rounded-full">
+            <div *ngIf="i <= currentCategory - 1" class="p-1 border-4 border-[#089B41] rounded-full">
                 <div class="flex justify-center items-center text-white px-4 py-4 rounded-full w-12 h-12 secondaryBg">
                     {{i+1}}
                 </div>

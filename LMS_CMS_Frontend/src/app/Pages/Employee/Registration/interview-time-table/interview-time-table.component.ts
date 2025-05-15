@@ -389,7 +389,7 @@ export class InterviewTimeTableComponent {
         Swal.fire({
           title: "From Time cant't be After To Time",
           icon: 'warning',
-          confirmButtonColor: '#FF7519',
+          confirmButtonColor: '#089B41',
           confirmButtonText: 'OK',
         })
       }
@@ -399,7 +399,7 @@ export class InterviewTimeTableComponent {
           Swal.fire({
             title: "From Date cant't be After To Date",
             icon: 'warning',
-            confirmButtonColor: '#FF7519',
+            confirmButtonColor: '#089B41',
             confirmButtonText: 'OK',
           })
         }
@@ -419,7 +419,7 @@ export class InterviewTimeTableComponent {
                 Swal.fire({
                   title: 'No Days in This Date',
                   icon: 'warning',
-                  confirmButtonColor: '#FF7519',
+                  confirmButtonColor: '#089B41',
                   confirmButtonText: 'OK',
                 })
               }
@@ -510,7 +510,7 @@ export class InterviewTimeTableComponent {
       title: 'Are you sure you want to delete this Interview Time?',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#FF7519',
+      confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
       confirmButtonText: 'Delete',
       cancelButtonText: 'Cancel'

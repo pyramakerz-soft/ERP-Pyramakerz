@@ -112,7 +112,7 @@ export class EmployeeViewComponent {
           icon: 'success',
           title: 'Done',
           text: 'Updatedd Successfully',
-          confirmButtonColor: '#FF7519',
+          confirmButtonColor: '#089B41',
         });
       },
       (error) => {  
@@ -122,7 +122,7 @@ export class EmployeeViewComponent {
                 icon: 'error',
                 title: 'Error',
                 text: error.error.errors.Password[0] || 'An unexpected error occurred',
-                confirmButtonColor: '#FF7519',
+                confirmButtonColor: '#089B41',
               });
               break; 
             
@@ -131,7 +131,7 @@ export class EmployeeViewComponent {
                 icon: 'error',
                 title: 'Error',
                 text: error.error.errors || 'An unexpected error occurred',
-                confirmButtonColor: '#FF7519',
+                confirmButtonColor: '#089B41',
               });
               break;
           }

@@ -278,7 +278,7 @@ export class AccountingEntriesDetailsComponent {
             Swal.fire({
               title: 'Saved Successfully',
               icon: 'success', 
-              confirmButtonColor: '#FF7519',  
+              confirmButtonColor: '#089B41',  
             });
           },
           (error) => {
@@ -295,7 +295,7 @@ export class AccountingEntriesDetailsComponent {
             Swal.fire({
               title: 'Updated Successfully',
               icon: 'success', 
-              confirmButtonColor: '#FF7519',  
+              confirmButtonColor: '#089B41',  
             });
           },
           (error) => {
@@ -393,7 +393,7 @@ export class AccountingEntriesDetailsComponent {
       title: 'Are you sure you want to delete this Accounting Entries Detail?',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#FF7519',
+      confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
       confirmButtonText: 'Delete',
       cancelButtonText: 'Cancel',

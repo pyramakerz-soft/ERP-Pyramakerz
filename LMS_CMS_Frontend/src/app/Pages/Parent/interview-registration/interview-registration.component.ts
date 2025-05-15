@@ -131,7 +131,7 @@ export class InterviewRegistrationComponent {
           title: 'Are you sure you want to Cancel this Interview Registration?',
           icon: 'warning',
           showCancelButton: true,
-          confirmButtonColor: '#FF7519',
+          confirmButtonColor: '#089B41',
           cancelButtonColor: '#17253E',
           confirmButtonText: 'Yes',
           cancelButtonText: 'No',
@@ -168,7 +168,7 @@ export class InterviewRegistrationComponent {
             title: 'Error',
             text: error.error,
             icon: 'error',
-            confirmButtonColor: '#FF7519',
+            confirmButtonColor: '#089B41',
             confirmButtonText: 'OK',
           });
         }
@@ -185,7 +185,7 @@ export class InterviewRegistrationComponent {
             title: 'Error',
             text: error.error,
             icon: 'error',
-            confirmButtonColor: '#FF7519',
+            confirmButtonColor: '#089B41',
             confirmButtonText: 'OK',
           });
         }

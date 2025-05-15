@@ -478,7 +478,7 @@ export class RegistrationFormComponent {
                   icon: 'warning',
                   title: 'Warning!',
                   text: 'Guardian’s Email Already Exists',
-                  confirmButtonColor: '#FF7519',
+                  confirmButtonColor: '#089B41',
                 });
                 this.goToCategory(2)
               }
@@ -490,7 +490,7 @@ export class RegistrationFormComponent {
             icon: 'warning',
             title: 'Warning!',
             text: 'The selected grade is not compatible with the student\'s age. Please choose an appropriate grade.',
-            confirmButtonColor: '#FF7519',
+            confirmButtonColor: '#089B41',
           });
           this.goToCategory(1)
         }

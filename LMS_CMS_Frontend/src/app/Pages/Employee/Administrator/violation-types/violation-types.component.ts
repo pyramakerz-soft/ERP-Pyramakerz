@@ -140,7 +140,7 @@ export class ViolationTypesComponent {
       title: 'Are you sure you want to delete this Violation?',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#FF7519',
+      confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
       confirmButtonText: 'Delete',
       cancelButtonText: 'Cancel',
@@ -193,7 +193,7 @@ export class ViolationTypesComponent {
               Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                confirmButtonColor: '#FF7519',
+                confirmButtonColor: '#089B41',
                 text: errorMessage,
               });
             },
@@ -214,7 +214,7 @@ export class ViolationTypesComponent {
               Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                confirmButtonColor: '#FF7519',
+                confirmButtonColor: '#089B41',
                 text: errorMessage,
               });
             },

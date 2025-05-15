@@ -303,7 +303,7 @@ export class ReceivableDetailsComponent {
             Swal.fire({
               title: 'Saved Successfully',
               icon: 'success',
-              confirmButtonColor: '#FF7519',
+              confirmButtonColor: '#089B41',
             })
             this.isLoading = false
           },
@@ -328,7 +328,7 @@ export class ReceivableDetailsComponent {
               icon: 'success',
               title: 'Done!',
               text: 'The Receivable has been edited successfully.',
-              confirmButtonColor: '#FF7519',
+              confirmButtonColor: '#089B41',
             });
           },
           err => {
@@ -446,7 +446,7 @@ export class ReceivableDetailsComponent {
       title: 'Are you sure you want to delete this Receivable Detail?',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#FF7519',
+      confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
       confirmButtonText: 'Delete',
       cancelButtonText: 'Cancel',

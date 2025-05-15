@@ -333,7 +333,7 @@ export class AccountingTreeComponent {
               Swal.fire({
                 title: 'Edited Successfully',
                 icon: 'success',
-                confirmButtonColor: '#FF7519'
+                confirmButtonColor: '#089B41'
               })
             }, (error) => {
             }
@@ -356,7 +356,7 @@ export class AccountingTreeComponent {
             Swal.fire({
               title: 'Added Successfully',
               icon: 'success',
-              confirmButtonColor: '#FF7519'
+              confirmButtonColor: '#089B41'
             })
           }, (error) => {
           }

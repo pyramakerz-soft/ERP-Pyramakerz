@@ -213,7 +213,7 @@ export class EmployeeAddEditComponent {
               icon: 'success',
               title: 'Done',
               text: 'Employee Added Succeessfully',
-              confirmButtonColor: '#FF7519',
+              confirmButtonColor: '#089B41',
             });
             this.moveToEmployee();
             this.isLoading = false;
@@ -226,7 +226,7 @@ export class EmployeeAddEditComponent {
                   icon: 'error',
                   title: 'Error',
                   text: error.error || 'An unexpected error occurred',
-                  confirmButtonColor: '#FF7519',
+                  confirmButtonColor: '#089B41',
                 });
                 break;
 
@@ -235,7 +235,7 @@ export class EmployeeAddEditComponent {
                   icon: 'error',
                   title: 'Error',
                   text: error.error.errors.Password[0] || 'An unexpected error occurred',
-                  confirmButtonColor: '#FF7519',
+                  confirmButtonColor: '#089B41',
                 });
                 break;
 
@@ -244,7 +244,7 @@ export class EmployeeAddEditComponent {
                   icon: 'error',
                   title: 'Error',
                   text: error.error || 'An unexpected error occurred',
-                  confirmButtonColor: '#FF7519',
+                  confirmButtonColor: '#089B41',
                 });
                 break;
 
@@ -253,7 +253,7 @@ export class EmployeeAddEditComponent {
                   icon: 'error',
                   title: 'Error',
                   text: error.error.errors || 'An unexpected error occurred',
-                  confirmButtonColor: '#FF7519',
+                  confirmButtonColor: '#089B41',
                 });
                 break;
             }
@@ -274,7 +274,7 @@ export class EmployeeAddEditComponent {
               icon: 'success',
               title: 'Done',
               text: 'Employee Edited Succeessfully',
-              confirmButtonColor: '#FF7519',
+              confirmButtonColor: '#089B41',
             });
             this.moveToEmployee();
             this.isLoading = false;
@@ -288,7 +288,7 @@ export class EmployeeAddEditComponent {
                   icon: 'error',
                   title: 'Error',
                   text: error.error || 'An unexpected error occurred',
-                  confirmButtonColor: '#FF7519',
+                  confirmButtonColor: '#089B41',
                 });
                 break;
 
@@ -297,7 +297,7 @@ export class EmployeeAddEditComponent {
                   icon: 'error',
                   title: 'Error',
                   text: error.error || 'An unexpected error occurred',
-                  confirmButtonColor: '#FF7519',
+                  confirmButtonColor: '#089B41',
                 });
                 break;
 
@@ -306,7 +306,7 @@ export class EmployeeAddEditComponent {
                   icon: 'error',
                   title: 'Error',
                   text: error.error.errors || 'An unexpected error occurred',
-                  confirmButtonColor: '#FF7519',
+                  confirmButtonColor: '#089B41',
                 });
                 break;
             }
