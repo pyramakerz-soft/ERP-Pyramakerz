@@ -51,81 +51,32 @@
       <p class="text-sm text-gray-500">Total Students</p>
       <h2 class="text-2xl font-bold">1,200</h2>
     </div>
-    <!-- Monthly Fee Collected -->
-    <div class="bg-white p-4 rounded-xl shadow">
-      <p class="text-sm text-gray-500">Monthly Fee Collected</p>
-      <h2 class="text-2xl font-bold">EGP 180,000</h2>
-    </div>
     <!-- Active Classes -->
     <div class="bg-white p-4 rounded-xl shadow">
       <p class="text-sm text-gray-500">Active Classes Today</p>
       <h2 class="text-2xl font-bold">85</h2>
+    </div>
+    <!-- Monthly Fee Collected -->
+    <div class="bg-white p-4 rounded-xl shadow">
+      <p class="text-sm text-gray-500">Fee Collected</p>
+      <h2 class="text-2xl font-bold">EGP 180,000</h2>
     </div>
     <!-- Inventory Low Items -->
     <div class="bg-white p-4 rounded-xl shadow">
       <p class="text-sm text-gray-500">Inventory Low items</p>
       <h2 class="text-2xl font-bold">12</h2>
     </div>
+    <!-- Visits In Clinic -->
+    <div class="bg-white p-4 rounded-xl shadow">
+      <p class="text-sm text-gray-500">Visits In Clinic</p>
+      <h2 class="text-2xl font-bold">10</h2>
+    </div>
   </div>
 
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
     <app-chart-pie></app-chart-pie>
     <app-revenue-chart></app-revenue-chart>
-
-    <div class="bg-white rounded-xl shadow border">
-      <div
-        class="header-plan bg-gray-50 p-4 rounded-t-xl border-b border-gray-200">
-        <div class="flex items-center justify-between mb-1">
-          <h2 class="font-semibold text-gray-800">Clinic</h2>
-          <span
-            class="text-xs bg-red-100 text-red-600 font-semibold px-2 py-0.5 rounded-full">Monthly</span >
-        </div>
-        <!-- <p class="text-sm text-gray-500 mb-4">
-          Our most popular plan for small vendors.
-        </p> -->
-      </div>
-      <div class="p-4">
-        <div
-          class="flex justify-between text-sm font-medium text-gray-700 mb-1" >
-          <span>Visit This Month</span>
-          <span>70%</span>
-        </div>
-        <div class="h-2 bg-gray-200 rounded-full mb-4">
-          <div class="h-full bg-red-600 rounded-full" style="width: 80%"></div>
-        </div>
-
-        <div
-          class="flex justify-between text-sm font-medium text-gray-700 mb-1">
-          <span>Active Cases</span>
-          <span>60%</span>
-        </div>
-        <div class="h-2 bg-gray-200 rounded-full mb-4">
-          <div
-            class="h-full bg-red-600 rounded-full"
-            style="width: 78.6%"></div>
-        </div>
-
-        <div class="text-right">
-          <button
-            class="px-4 py-2 text-white text-sm font-semibold rounded"
-            style="background-color: #1175b9">
-            Upgrade Plan
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="inline w-4 h-4 ml-1"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              viewBox="0 0 24 24">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-    </div>
+    <app-revenue-chart-sales></app-revenue-chart-sales>
   </div>
 
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -295,7 +246,8 @@
     </div>
   </div>
 </div> -->
-
+  </div>
+</div>
 <div *ngIf="employee.role_ID != 1">
   <p>Welcome</p>
 </div>
