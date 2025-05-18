@@ -63,6 +63,7 @@ export class EmployeeAddEditComponent {
           this.EmpId = Number(this.activeRoute.snapshot.paramMap.get('id'))
           this.EmpServ.Get_Employee_By_ID(this.EmpId, this.DomainName).subscribe(async (data) => {
             this.Data = data;
+            console.log(this.Data)
             this.Data.editedFiles = []
             console.log(this.Data)
             if (data.files == null) {
@@ -103,7 +104,7 @@ export class EmployeeAddEditComponent {
         const file = input.files[i];
         this.NewFile = new EmployeeAttachment()
         this.NewFile.file = file
-        this.NewFile.name = file.name
+        this.NewFile.name = file.name.replace(/\.[^/.]+$/, '');
         this.NewFile.link = ''
         this.NewFile.id = Date.now() + Math.floor(Math.random() * 10000);
         this.SelectedFiles.push(this.NewFile);
@@ -333,12 +334,13 @@ export class EmployeeAddEditComponent {
     if (this.SelectedFiles.length > 0) {
       selectedFile = this.SelectedFiles[index];
     } else {
-      selectedFile = this.Data.files.find(f => f.id === index); // ✅ use `find`, not `filter`
+      selectedFile = this.Data.files.find(f => f.id === index); 
     }
 
     if (!selectedFile) return;
 
     selectedFile.name = newName;
+    console.log(selectedFile)
 
     const isExistingFile = !(selectedFile.file instanceof File) && selectedFile.link !== '';
     const alreadyTracked = this.Data.editedFiles.some(f => f.id === selectedFile!.id);

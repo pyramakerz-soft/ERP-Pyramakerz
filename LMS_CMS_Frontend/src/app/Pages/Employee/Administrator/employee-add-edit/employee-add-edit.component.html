@@ -21,15 +21,6 @@
             validationErrors["user_Name"]}}</span>
     </div>
 
-    <div *ngIf="mode == 'Create'" class="flex flex-col mb-4 w-[49%]">
-        <label class="mb-2 primaryTxt" for="name">Password</label>
-        <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-            (ngModelChange)="onInputValueChange({ field: 'password', value: $event })" placeholder="Enter Password"
-            [(ngModel)]="Data.password" />
-        <span *ngIf="validationErrors['password']" class="text-red-500 ml-3 font-normal">{{
-            validationErrors["password"]}}</span>
-    </div>
-    
     <div class="flex flex-col mb-4 w-[49%]">
         <label class="mb-2 primaryTxt" for="name">English Name</label>
         <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
@@ -43,6 +34,15 @@
         <label class="mb-2 primaryTxt" for="name">Arabic Name</label>
         <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
             placeholder="Enter Arabic Name" [(ngModel)]="Data.ar_name" />
+    </div>
+
+    <div *ngIf="mode == 'Create'" class="flex flex-col mb-4 w-[49%]">
+        <label class="mb-2 primaryTxt" for="name">Password</label>
+        <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+            (ngModelChange)="onInputValueChange({ field: 'password', value: $event })" placeholder="Enter Password"
+            [(ngModel)]="Data.password" />
+        <span *ngIf="validationErrors['password']" class="text-red-500 ml-3 font-normal">{{
+            validationErrors["password"]}}</span>
     </div>
 
     <div class="flex flex-col mb-4 w-[49%]">
