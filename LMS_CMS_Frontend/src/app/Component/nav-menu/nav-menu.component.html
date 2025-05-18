@@ -60,6 +60,7 @@
                             </button>
                         </li>
                     </ul>
+                    <button (click)="openModal()" class="text-start w-full hover:bg-gray-100 p-2 rounded-md">Change Password</button>
                     <button (click)="gotologin()" class="text-start w-full hover:bg-gray-100 p-2 rounded-md">Add New
                         Account</button>
                     <button (click)="logOut()" class="text-start w-full hover:bg-gray-100 p-2 rounded-md">Log
@@ -70,5 +71,35 @@
                 </div>
             </div>
         </div>
+    </div>
+</div>
+
+
+
+<!-- Modal -->
+<div id="ChangePassModal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
+    <div class="bg-white rounded-2xl p-12 w-1/2">
+        <div class="flex justify-between items-center">
+            <h1 class="font-semibold text-2xl leading-9">Change Passeord</h1> 
+            <button (click)="closeModal()" type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
+        </div>
+
+        <div class="mt-6 mb-4 flex flex-wrap justify-between">
+            <div class="flex flex-col w-[49%] mb-4">
+                <label class="mb-2 primaryTxt" for="Password">Password</label>
+                <input id="Password" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter the password"
+                (input)="onPasswordChange()" [(ngModel)]="password"/>
+                <span *ngIf="PasswordError" class="text-red-500 text-sm font-normal">{{ PasswordError }}</span>
+            </div> 
+        </div> 
+        <!-- <div class="flex justify-end">
+            <button  
+                [disabled]="isLoading" 
+                class="secondaryBg text-white font-medium px-4 py-2 rounded-lg" 
+                (click)="SaveBus()">
+                <span *ngIf="!isLoading">Save</span>
+                <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+              </button>
+        </div> -->
     </div>
 </div>

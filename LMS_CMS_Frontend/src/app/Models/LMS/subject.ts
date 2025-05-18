@@ -4,6 +4,8 @@ export class Subject {
         public insertedByUserId: number = 0,
         public en_name : string = '',
         public ar_name  : string = '',
+        public subjectEnglishNameInCertificate : string = '',
+        public subjectArabicNameInCertificate  : string = '',
         public orderInCertificate : number|null = null,
         public creditHours : number|null = null,
         public subjectCode : number|null = null,
@@ -23,4 +25,4 @@ export class Subject {
         public iconLink : string = "",
         public insertedAt: string = '',
     ) {}
-}
+} 

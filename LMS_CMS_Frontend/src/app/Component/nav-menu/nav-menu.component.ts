@@ -28,6 +28,8 @@ export class NavMenuComponent {
   allTokens: { id: number, key: string; KeyInLocal: string; value: string; UserType: string }[] = [];
   User_Data_After_Login = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   subscription: Subscription | undefined;
+  PasswordError: string = ""; 
+  password:string =""
 
   constructor(private router: Router, public account: AccountService, public languageService: LanguageService,
     private translate: TranslateService, private communicationService: NewTokenService, private logOutService: LogOutService) { }
@@ -175,4 +177,18 @@ export class NavMenuComponent {
     this.getAllTokens();
     this.router.navigateByUrl("");
   }
+
+  openModal(busId?: number) {
+    document.getElementById("ChangePassModal")?.classList.remove("hidden");
+    document.getElementById("ChangePassModal")?.classList.add("flex");
+  }
+
+  closeModal() {
+    document.getElementById("ChangePassModal")?.classList.remove("flex");
+    document.getElementById("ChangePassModal")?.classList.add("hidden");
+  }
+
+  onPasswordChange() {
+    this.PasswordError = "" 
+  } 
 }
