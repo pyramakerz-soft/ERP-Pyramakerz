@@ -40,15 +40,6 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         )]
         public async Task<IActionResult> Get([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            if (pageNumber < 1) pageNumber = 1;
-            if (pageSize < 1) pageSize = 10;
-            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-
-            List<LMS_CMS_DAL.Models.Domains.LMS.QuestionBank> Questions;
-            // Get total record count
-            int totalRecords = await Unit_Of_Work.installmentDeductionMaster_Repository
-                .CountAsync(f => f.IsDeleted != true);
-
             var userClaims = HttpContext.User.Claims;
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
             long.TryParse(userIdClaim, out long userId);
@@ -58,6 +49,17 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             {
                 return Unauthorized("User ID or Type claim not found.");
             }
+
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            // Get total record count
+            int totalRecords = await Unit_Of_Work.questionBank_Repository
+                .CountAsync(f => f.IsDeleted != true);
+
+            List<LMS_CMS_DAL.Models.Domains.LMS.QuestionBank> Questions;
+
 
             Questions =await Unit_Of_Work.questionBank_Repository.Select_All_With_IncludesById_Pagination<LMS_CMS_DAL.Models.Domains.LMS.QuestionBank>(
                     f => f.IsDeleted != true,

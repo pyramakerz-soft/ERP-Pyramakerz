@@ -63,7 +63,7 @@ export class QuestionBankComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'docNumber', 'employeeName', 'studentName'];
+  keysArray: string[] = ['id', 'description', 'lessonName', 'mark' ,'difficultyLevel' ,'questionTypeName'];
 
   CurrentPage: number = 1
   PageSize: number = 10
@@ -151,9 +151,9 @@ export class QuestionBankComponent {
       cancelButtonText: 'Cancel',
     }).then((result) => {
       if (result.isConfirmed) {
-        // this.QuestionBankServ.Delete(id,this.DomainName).subscribe((D)=>{
-        //   this.GetAllData(this.CurrentPage, this.PageSize)
-        // })
+        this.QuestionBankServ.Delete(id,this.DomainName).subscribe((D)=>{
+          this.GetAllData(this.CurrentPage, this.PageSize)
+        })
       }
     });
   }
@@ -351,9 +351,11 @@ export class QuestionBankComponent {
         const field = key as keyof QuestionBank;
         if (!this.questionBank[field]) {
           if (
+            field == 'subjectID' ||
             field == 'lessonID' ||
             field == 'bloomLevelID' ||
             field == 'dokLevelID' ||
+            field == 'description' ||
             field == 'questionTypeID' ||
             field == 'difficultyLevel'
           ) {
@@ -367,15 +369,68 @@ export class QuestionBankComponent {
         }
       }
     }
+    if (this.questionBank.questionTypeID == 1 || this.questionBank.questionTypeID == 2) { // MCQ , TF
+      if (this.questionBank.questionBankOptionsDTO.length == 0) {
+        this.validationErrors['questionBankOptionsDTO'] = 'Options Is Required';
+        isValid = false;
+      }
+      if (this.questionBank.correctAnswerName == "") {
+        this.validationErrors['correctAnswerName'] = 'Choose Corresct Answer';
+        isValid = false;
+      }
+
+    }
+    if (this.questionBank.questionTypeID == 3) { // MCQ , TF
+      if (this.questionBank.questionBankOptionsDTO.length == 0) {
+        this.validationErrors['questionBankOptionsDTO'] = 'Options Is Required';
+        isValid = false;
+      }
+    }
+    if (this.questionBank.questionTypeID == 4) { // Drag & Drop
+      if (this.questionBank.subBankQuestionsDTO.length == 0) {
+        this.validationErrors['subBankQuestionsDTO'] = 'Questions Is Required';
+        isValid = false;
+      }
+      const last = this.questionBank.subBankQuestionsDTO[this.questionBank.subBankQuestionsDTO.length - 1];
+      if (this.questionBank.subBankQuestionsDTO.length > 0) {
+        if (!last || (!last.Description?.trim() || !last.Answer?.trim())) {
+          this.validationErrors['subBankQuestionsDTO'] = 'Please fill in both the question and answer before Save';
+          isValid = false;
+        }
+      }
+    }
+    if (this.questionBank.questionTypeID == 5) { // Order - Sequencing
+      if (this.questionBank.questionBankOptionsDTO.length == 0) {
+        this.validationErrors['questionBankOptionsDTO'] = 'Options Is Required';
+        isValid = false;
+      }
+      const last = this.questionBank.questionBankOptionsDTO[this.questionBank.questionBankOptionsDTO.length - 1];
+      if (this.questionBank.questionBankOptionsDTO.length > 0) {
+        if (!last || !last.option?.trim() || !last.order?.toString().trim()) {
+          this.validationErrors['questionBankOptionsDTO'] = 'Please fill in both the option and order before adding a new one.';
+          isValid = false;
+        }
+      }
+      const options = this.questionBank.questionBankOptionsDTO;
+      const orderValues = options.map(opt => opt.order);
+      const orderSet = new Set(orderValues);
+      if (orderValues.length !== orderSet.size) {
+        this.validationErrors['questionBankOptionsDTO'] = 'Order numbers must be unique for each option.';
+        isValid = false;
+      }
+    }
     return isValid;
   }
 
   onInputValueChange(event: { field: keyof QuestionBank; value: any }) {
     const { field, value } = event;
+    console.log(field, value)
     if (
       field == 'lessonID' ||
+      field == 'subjectID' ||
       field == 'bloomLevelID' ||
       field == 'dokLevelID' ||
+      field == 'description' ||
       field == 'questionTypeID' ||
       field == 'difficultyLevel'
     ) {
@@ -383,6 +438,12 @@ export class QuestionBankComponent {
       if (value) {
         this.validationErrors[field] = '';
       }
+    }
+    if (field == "questionBankOptionsDTO") {
+      this.validationErrors['questionBankOptionsDTO'] = '';
+    }
+    if (field == "subBankQuestionsDTO") {
+      this.validationErrors['subBankQuestionsDTO'] = '';
     }
   }
 
@@ -394,7 +455,7 @@ export class QuestionBankComponent {
       this.questionBank = d;
       this.GetAllLesson();
       if (this.questionBank.questionTypeID == 1) {
-        this.questionBank.questionBankOptionsDTO=[]
+        this.questionBank.questionBankOptionsDTO = []
         var opt = new QuestionBankOption()
         opt.questionBankID = 0
         opt.option = "True"
@@ -411,7 +472,7 @@ export class QuestionBankComponent {
       console.log(d, this.questionBank);
     });
 
-      console.log( this.questionBank); 
+    console.log(this.questionBank);
     this.openModal();
   }
 
@@ -422,6 +483,7 @@ export class QuestionBankComponent {
     this.validationErrors = {};
     this.TagsSelected = []
     this.openModal();
+    console.log(1, this.questionBank)
   }
 
   closeModal() {
@@ -477,13 +539,25 @@ export class QuestionBankComponent {
   }
 
   AddOption() {
-    if (this.NewOption != "") {
-      var opt = new QuestionBankOption()
-      opt.questionBankID = 0
-      opt.option = this.NewOption
-      opt.questionBankID = 0
-      this.questionBank.questionBankOptionsDTO.push(opt);
-      this.NewOption = '';
+    if (!Array.isArray(this.questionBank.questionBankOptionsDTO)) {
+      console.warn("questionBankOptionsDTO was invalid, initializing to []");
+      this.questionBank.questionBankOptionsDTO = [];
+    } else {
+      if (this.NewOption != "") {
+        const exist = this.questionBank.questionBankOptionsDTO.find(s => s.option == this.NewOption)
+        if (exist) {
+          this.validationErrors['questionBankOptionsDTO'] = 'This Option already exist';
+        } else {
+          var opt = new QuestionBankOption()
+          opt.questionBankID = 0
+          opt.option = this.NewOption
+          this.questionBank.questionBankOptionsDTO.push(opt);
+          this.NewOption = '';
+        }
+      }
+      else {
+        this.validationErrors['questionBankOptionsDTO'] = 'This Option is required';
+      }
     }
   }
 
@@ -491,6 +565,7 @@ export class QuestionBankComponent {
     console.log(this.questionBank.questionTypeID)
     this.questionBank.correctAnswerName = ""
     this.questionBank.questionBankOptionsDTO = [];
+    this.questionBank.subBankQuestionsDTO = [];
     if (this.questionBank.questionTypeID == 1) {
       var opt = new QuestionBankOption()
       opt.questionBankID = 0
@@ -506,11 +581,36 @@ export class QuestionBankComponent {
   }
 
   addSubQuestion(): void {
+    const last = this.questionBank.subBankQuestionsDTO[this.questionBank.subBankQuestionsDTO.length - 1];
+
+    if (this.questionBank.subBankQuestionsDTO.length > 0) {
+      if (!last || (!last.Description?.trim() || !last.Answer?.trim())) {
+        // You can show a validation message here if needed
+        this.validationErrors['subBankQuestionsDTO'] = 'Please fill in both the question and answer before adding a new one.';
+        return;
+      }
+    }
+
     this.questionBank.subBankQuestionsDTO.push(new SubBankQuestion());
   }
 
-  addOptionOrder() {
-    this.questionBank.questionBankOptionsDTO.push(new QuestionBankOption());
+  addOptionOrder(): void {
+    const options = this.questionBank.questionBankOptionsDTO;
+    const last = options[options.length - 1];
+
+    if (this.questionBank.questionBankOptionsDTO.length > 0) {
+      if (!last || !last.option?.trim() || !last.order?.toString().trim()) {
+        this.validationErrors['questionBankOptionsDTO'] = 'Please fill in both the option and order before adding a new one.';
+        return;
+      }
+    }
+    const orderValues = options.map(opt => opt.order);
+    const orderSet = new Set(orderValues);
+    if (orderValues.length !== orderSet.size) {
+      this.validationErrors['questionBankOptionsDTO'] = 'Order numbers must be unique for each option.';
+      return;
+    }
+    options.push(new QuestionBankOption());
   }
 
   validateNumber(event: any, field: keyof QuestionBank): void {
