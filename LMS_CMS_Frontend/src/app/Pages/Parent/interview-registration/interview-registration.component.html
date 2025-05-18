@@ -4,7 +4,7 @@
 
 <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD] max-w-full">
     <table class="overflow-auto w-full bg-[#EBEBEB] text-left text-[#6F6F6F]">
-        <thead class="bg-[##EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+        <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
             <tr>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     ID
@@ -46,7 +46,7 @@
         </thead>
         <tbody>
             <!-- No Data Row -->
-            <tr *ngIf="registrationFormParentIncludeRegistrationFormInterview.length === 0">
+            <tr *ngIf="registrationFormParentIncludeRegistrationFormInterview?.length === 0">
                 <td colspan="12"
                     class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
                     No Data Found
@@ -81,7 +81,7 @@
                     <div class="flex justify-start">
                         <div *ngIf="row.registrationFormInterviewStateID == 2"
                             class="border flex space-x-2 items-center justify-between rounded-md shadow px-2 py-1 ">
-                            <span class="w-[6px] h-[6px] p-1 rounded-full"
+                            <span class="w-[6px] h-[6px] rounded-full"
                                 style="background-color: green; padding: 4px;"></span>
                             <p>
                                 {{row.registrationFormInterviewStateName}}
@@ -89,7 +89,7 @@
                         </div>
                         <div *ngIf="row.registrationFormInterviewStateID == 3"
                             class="border flex space-x-2 items-center justify-between rounded-md shadow px-2 py-1 ">
-                            <span class="w-[6px] h-[6px] p-1 rounded-full"
+                            <span class="w-[6px] h-[6px] rounded-full"
                                 style="background-color: red; padding: 4px;"></span>
                             <p>
                                 {{row.registrationFormInterviewStateName}}
@@ -97,7 +97,7 @@
                         </div>
                         <div *ngIf="row.registrationFormInterviewStateID == 1"
                             class="border flex space-x-2 items-center justify-between rounded-md shadow px-2 py-1 ">
-                            <div class="w-[6px] h-[6px] p-1 rounded-full" style="background-color: gray; padding: 4px;">
+                            <div class="w-[6px] h-[6px] rounded-full" style="background-color: gray; padding: 4px;">
                             </div>
                             <p>
                                 {{row.registrationFormInterviewStateName}}
@@ -206,7 +206,7 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr *ngFor="let interview of ToChooseFromInterviewTimeTable">
+                                            <tr *ngFor="let interview of ToChooseFromInterviewTimeTable; trackBy: trackByInterview">
                                                 <td class="px-4 py-2">
                                                     <p *ngIf="interview.capacity != interview.reserved"
                                                         class="py-1 px-2 bg-[#96C68D] rounded-md">
