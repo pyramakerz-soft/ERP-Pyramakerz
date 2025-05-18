@@ -66,7 +66,7 @@ export class QuestionBankService {
       let uploadIndex = 0;
       questionBank.questionBankTagsDTO.forEach((id, index) => {
         formData.append(`QuestionBankTagsDTO[${uploadIndex}]`, id.toString());
-          uploadIndex++;
+        uploadIndex++;
       });
     }
 
@@ -76,7 +76,7 @@ export class QuestionBankService {
       questionBank.questionBankOptionsDTO.forEach((option, index) => {
         formData.append(`QuestionBankOptionsDTO[${uploadIndex}].Option`, option.option);
         formData.append(`QuestionBankOptionsDTO[${uploadIndex}].Order`, option.order.toString());
-          uploadIndex++;
+        uploadIndex++;
       });
     }
 
@@ -102,4 +102,15 @@ export class QuestionBankService {
     });
   }
 
+  Delete(id: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName;
+    }
+    const token = localStorage.getItem('current_token');
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.delete(`${this.baseUrl}/QuestionBank/${id}`, { headers });
+  }
 }
