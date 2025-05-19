@@ -312,7 +312,6 @@
           </div>
         </div>
 
-
         <div *ngIf="questionBank.questionTypeID ==3"> <!-- fill in blank-->
           <div>
             <h6 class="font-medium text-base leading-6 mb-2 mt-3">Answer</h6>
@@ -351,7 +350,6 @@
             </div>
           </div>
         </div>
-
 
         <div *ngIf="questionBank.questionTypeID == 4" class="flex flex-col"> <!-- Drag and Drop -->
           <div *ngFor="let subQuestion of questionBank.subBankQuestionsDTO; let i = index"

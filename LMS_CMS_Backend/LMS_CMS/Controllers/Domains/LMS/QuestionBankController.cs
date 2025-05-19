@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using System.Linq;
 
 namespace LMS_CMS_PL.Controllers.Domains.LMS
 {
@@ -530,20 +531,20 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return BadRequest("this questionBankType doesn`t exist");
             }
 
-            if (NewData.QuestionBankTagsDTO != null && NewData.QuestionBankTagsDTO.Count > 0)
-            {
-                foreach (var tagId in NewData.QuestionBankTagsDTO)
-                {
-                    if (tagId != 0)
-                    {
-                        var tag = Unit_Of_Work.tag_Repository.First_Or_Default(l => l.ID == tagId);
-                        if (tag == null)
-                        {
-                            return BadRequest($"Tag with ID {tagId} does not exist.");
-                        }
-                    }
-                }
-            }
+            //if (NewData.QuestionBankTagsDTO != null && NewData.QuestionBankTagsDTO.Count > 0)
+            //{
+            //    foreach (var tagId in NewData.QuestionBankTagsDTO)
+            //    {
+            //        if (tagId != 0)
+            //        {
+            //            var tag = Unit_Of_Work.tag_Repository.First_Or_Default(l => l.ID == tagId);
+            //            if (tag == null)
+            //            {
+            //                return BadRequest($"Tag with ID {tagId} does not exist.");
+            //            }
+            //        }
+            //    }
+            //}
             ////////// Validation For True False Question 
 
             if (NewData.QuestionTypeID == 1)
@@ -563,10 +564,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     return BadRequest("Correct Answer is required.");
                 }
 
-                if (NewData.QuestionBankOptionsDTO.Count == 0)
-                {
-                    return BadRequest("Question Bank Options Is Requiered");
-                }
+                //if (NewData.QuestionBankOptionsDTO.Count == 0)
+                //{
+                //    return BadRequest("Question Bank Options Is Requiered");
+                //}
             }
 
             ////////// Validation For Fill in blank and Order - Sequencing Question 
@@ -574,21 +575,28 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             if (NewData.QuestionTypeID == 3 || NewData.QuestionTypeID == 5)
             {
 
-                if (NewData.QuestionBankOptionsDTO.Count == 0)
-                {
-                    return BadRequest("Question Bank Options Is Requiered");
-                }
+                //if (NewData.QuestionBankOptionsDTO.Count == 0)
+                //{
+                //    return BadRequest("Question Bank Options Is Requiered");
+                //}
             }
 
             ////////// Validation For Drag & Drop Question 
 
             if (NewData.QuestionTypeID == 4)
             {
-                if (NewData.SubBankQuestionsDTO.Count == 0)
-                {
-                    return BadRequest("SubBankQuestions Is Requiered");
-                }
+                //if (NewData.SubBankQuestionsDTO.Count == 0)
+                //{
+                //    return BadRequest("SubBankQuestions Is Requiered");
+                //}
             }
+
+            var IsTypeChanged = false;
+            if (NewData.QuestionTypeID != questionBank.QuestionTypeID)
+            {
+                 IsTypeChanged = true;
+            }
+
             mapper.Map(NewData, questionBank);
 
             if (NewData.ImageForm != null)
@@ -627,44 +635,93 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             Unit_Of_Work.questionBank_Repository.Update(questionBank);
             Unit_Of_Work.SaveChanges();
 
-            ///////////////////////////// Delete Old Data 
-            Unit_Of_Work.questionBankTags_Repository.RemoveRange(
-                Unit_Of_Work.questionBankTags_Repository.FindBy(t => t.QuestionBankID == NewData.ID));
+            ///////////////////////////// Delete Data 
 
-            Unit_Of_Work.questionBankOption_Repository.RemoveRange(
-                Unit_Of_Work.questionBankOption_Repository.FindBy(o => o.QuestionBankID == NewData.ID));
+            // tags
+            if (NewData.DeletedQuestionBankTagsDTO != null && NewData.DeletedQuestionBankTagsDTO.Count > 0)
+            {
+                // Get all matching QuestionBankTags entries
+                List<QuestionBankTags> questionBankTags = Unit_Of_Work.questionBankTags_Repository
+                    .FindBy(s => NewData.DeletedQuestionBankTagsDTO.Contains(s.TagID))
+                    .ToList();
 
-            // Step 1: Get all sub-question IDs for the given QuestionBank
-            var subQuestionIds = Unit_Of_Work.subBankQuestion_Repository
-                .FindBy(sbq => sbq.QuestionBankID == NewData.ID)
-                .Select(sbq => sbq.ID)
-                .ToList();
+                // Delete them
+                foreach (var tag in questionBankTags)
+                {
+                    Unit_Of_Work.questionBankTags_Repository.Delete(tag.ID);
+                }
 
-            //// Step 2: Delete all DragAndDropAnswers for those sub-question IDs
-            //var dragAnswers = Unit_Of_Work.dragAndDropAnswer_Repository
-            //    .FindBy(ans => subQuestionIds.Contains(ans.SubBankQuestionID))
-            //    .ToList();
+                Unit_Of_Work.SaveChanges();
+            }
 
-            //Unit_Of_Work.dragAndDropAnswer_Repository.RemoveRange(dragAnswers);
+            // Option 
+            if (NewData.DeletedQuestionBankOptionsDTO != null && NewData.DeletedQuestionBankOptionsDTO.Count > 0)
+            {
+                var optionsToDelete = Unit_Of_Work.questionBankOption_Repository
+                    .FindBy(s => NewData.DeletedQuestionBankOptionsDTO.Contains(s.ID))
+                    .ToList();
 
-            // Step 3: Delete the sub-questions themselves
-            var subQuestions = Unit_Of_Work.subBankQuestion_Repository
-                .FindBy(sbq => sbq.QuestionBankID == NewData.ID)
-                .ToList();
+                foreach (var option in optionsToDelete)
+                {
+                    option.IsDeleted = true;
+                    Unit_Of_Work.questionBankOption_Repository.Update(option);
+                }
 
-            Unit_Of_Work.subBankQuestion_Repository.RemoveRange(subQuestions);
+                Unit_Of_Work.SaveChanges();
+            }
 
-            // Save changes (if needed at this step)
-            Unit_Of_Work.SaveChanges();
+            // SubQuestion 
+            if (NewData.DeletedSubBankQuestionsDTO != null && NewData.DeletedSubBankQuestionsDTO.Count > 0)
+            {
+                var optionsToDelete = Unit_Of_Work.subBankQuestion_Repository
+                    .FindBy(s => NewData.DeletedSubBankQuestionsDTO.Contains(s.ID))
+                    .ToList();
+
+                foreach (var option in optionsToDelete)
+                {
+                    option.IsDeleted = true;
+                    Unit_Of_Work.subBankQuestion_Repository.Update(option);
+                }
+
+                Unit_Of_Work.SaveChanges();
+            }
+
+            // if user changed Type
+            if (IsTypeChanged == true)
+            {
+                // Step 1: Mark options as deleted instead of removing them
+                var options = Unit_Of_Work.questionBankOption_Repository
+                    .FindBy(o => o.QuestionBankID == NewData.ID)
+                    .ToList();
+
+                foreach (var option in options)
+                {
+                    option.IsDeleted = true;
+                    Unit_Of_Work.questionBankOption_Repository.Update(option);
+                }
+
+                // Step 2: Mark sub-questions as deleted instead of removing them
+                var subQuestions = Unit_Of_Work.subBankQuestion_Repository
+                    .FindBy(sbq => sbq.QuestionBankID == NewData.ID)
+                    .ToList();
+
+                foreach (var subQuestion in subQuestions)
+                {
+                    subQuestion.IsDeleted = true;
+                    Unit_Of_Work.subBankQuestion_Repository.Update(subQuestion);
+                }
+
+                Unit_Of_Work.SaveChanges();
+            }
 
             /////////////////////////////////////////////////////////////////////////  ReCreate 
 
             //////////  Create For Tags
 
-            if (NewData.QuestionBankTagsDTO != null && NewData.QuestionBankTagsDTO.Count > 0)
+            if (NewData.NewQuestionBankTagsDTO != null && NewData.NewQuestionBankTagsDTO.Count > 0)
             {
                 List<QuestionBankTags> questionBankTags = new List<QuestionBankTags>();
-                foreach (int tagId in NewData.QuestionBankTagsDTO)
+                foreach (int tagId in NewData.NewQuestionBankTagsDTO)
                 {
                     if (tagId != 0)
                     {
@@ -688,11 +745,11 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             //////////  Create For Mcq ,Order - Sequencing ,Fill in blank Question
 
-            if (NewData.QuestionBankOptionsDTO != null && NewData.QuestionBankOptionsDTO.Count != 0 && (NewData.QuestionTypeID == 2 || NewData.QuestionTypeID == 3 || NewData.QuestionTypeID == 5))
+            if (NewData.NewQuestionBankOptionsDTO != null && NewData.NewQuestionBankOptionsDTO.Count != 0 && (NewData.QuestionTypeID == 2 || NewData.QuestionTypeID == 3 || NewData.QuestionTypeID == 5))
             {
                 List<QuestionBankOption> options = new List<QuestionBankOption>();
                 long correctOption = 0;
-                foreach (var item in NewData.QuestionBankOptionsDTO)
+                foreach (var item in NewData.NewQuestionBankOptionsDTO)
                 {
                     QuestionBankOption option = new QuestionBankOption
                     {
@@ -720,11 +777,11 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             //////////  Create For Drag & Drop Question
 
-            if (NewData.SubBankQuestionsDTO.Count != 0 && NewData.QuestionTypeID == 4)
+            if (NewData.NewSubBankQuestionsDTO.Count != 0 && NewData.QuestionTypeID == 4)
             {
                 List<SubBankQuestion> newsubQuestions = new List<SubBankQuestion>();
 
-                foreach (SubBankQuestionAddDTO item in NewData.SubBankQuestionsDTO)
+                foreach (SubBankQuestionAddDTO item in NewData.NewSubBankQuestionsDTO)
                 {
                     SubBankQuestion subQuestion = new SubBankQuestion
                     {
@@ -736,16 +793,6 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                         InsertedByUserId = userTypeClaim == "employee" ? userId : (int?)null
                     };
                     newsubQuestions.Add(subQuestion);
-                    //DragAndDropAnswer answer = new DragAndDropAnswer
-                    //{
-                    //    Answer = item.Answer,
-                    //    SubBankQuestion = subQuestion, // navigation property
-                    //    InsertedAt = subQuestion.InsertedAt,
-                    //    InsertedByOctaId = subQuestion.InsertedByOctaId,
-                    //    InsertedByUserId = subQuestion.InsertedByUserId
-                    //};
-
-                    //newdragAnswers.Add(answer);
                 }
                 Unit_Of_Work.subBankQuestion_Repository.AddRange(newsubQuestions);
                 Unit_Of_Work.SaveChanges();

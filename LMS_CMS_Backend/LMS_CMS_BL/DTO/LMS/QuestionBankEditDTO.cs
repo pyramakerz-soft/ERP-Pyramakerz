@@ -25,8 +25,13 @@ namespace LMS_CMS_BL.DTO.LMS
         public long DokLevelID { get; set; }
         public long QuestionTypeID { get; set; }
         public string? CorrectAnswerName { get; set; }
-        public List<int> QuestionBankTagsDTO { get; set; } = new();
-        public List<QuestionBankOptionAddDTO>? QuestionBankOptionsDTO { get; set; }
-        public List<SubBankQuestionAddDTO> SubBankQuestionsDTO { get; set; } = new();
+        public List<long> NewQuestionBankTagsDTO { get; set; } = new();
+        public List<long> DeletedQuestionBankTagsDTO { get; set; } = new();
+
+        public List<QuestionBankOptionAddDTO>? NewQuestionBankOptionsDTO { get; set; }
+        public List<SubBankQuestionAddDTO> NewSubBankQuestionsDTO { get; set; } = new();
+
+        public List<long>? DeletedQuestionBankOptionsDTO { get; set; }
+        public List<long> DeletedSubBankQuestionsDTO { get; set; } = new();
     }
 }
