@@ -63,7 +63,7 @@ export class QuestionBankComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'description', 'lessonName', 'mark' ,'difficultyLevel' ,'questionTypeName'];
+  keysArray: string[] = ['id', 'description', 'lessonName', 'mark', 'difficultyLevel', 'questionTypeName'];
 
   CurrentPage: number = 1
   PageSize: number = 10
@@ -151,7 +151,7 @@ export class QuestionBankComponent {
       cancelButtonText: 'Cancel',
     }).then((result) => {
       if (result.isConfirmed) {
-        this.QuestionBankServ.Delete(id,this.DomainName).subscribe((D)=>{
+        this.QuestionBankServ.Delete(id, this.DomainName).subscribe((D) => {
           this.GetAllData(this.CurrentPage, this.PageSize)
         })
       }
@@ -288,6 +288,7 @@ export class QuestionBankComponent {
 
   CreateOREdit() {
     this.questionBank.questionBankTagsDTO = this.TagsSelected.map(s => s.id)
+    console.log("dfd")
     if (this.isFormValid()) {
       this.isLoading = true;
       console.log(this.questionBank)
@@ -315,26 +316,36 @@ export class QuestionBankComponent {
         );
       }
       if (this.mode == 'Edit') {
-        // this.QuestionBankServ.Edit(
-        //   this.questionBank,
-        //   this.DomainName
-        // ).subscribe(
-        //   (d) => {
-        //     this.GetAllData(this.CurrentPage, this.PageSize)
-        //     this.isLoading = false;
-        //     this.closeModal();
-        //   },
-        //   (error) => {
-        //     this.isLoading = false; // Hide spinner
-        //     Swal.fire({
-        //       icon: 'error',
-        //       title: 'Oops...',
-        //       text: 'Try Again Later!',
-        //       confirmButtonText: 'Okay',
-        //       customClass: { confirmButton: 'secondaryBg' }
-        //     });
-        //   }
-        // );
+        console.log(this.questionBank)
+        if(this.questionBank.questionTypeID==5){
+          this.questionBank.newQuestionBankOptionsDTO = this.questionBank.questionBankOptionsDTO.filter(s=>s.id==0)
+          console.log("this.questionBank.newQuestionBankOptionsDTO",this.questionBank.newQuestionBankOptionsDTO)
+        }
+        if(this.questionBank.questionTypeID==4){
+          this.questionBank.newSubBankQuestionsDTO = this.questionBank.subBankQuestionsDTO.filter(s=>s.id==0)
+          console.log("this.questionBank.newSubBankQuestionsDTO",this.questionBank.newSubBankQuestionsDTO)
+        }
+        this.QuestionBankServ.Edit(
+          this.questionBank,
+          this.DomainName
+        ).subscribe(
+          (d) => {
+            this.GetAllData(this.CurrentPage, this.PageSize)
+            this.isLoading = false;
+            this.closeModal();
+          },
+          (error) => {
+            console.log(error)
+            this.isLoading = false; // Hide spinner
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'Try Again Later!',
+              confirmButtonText: 'Okay',
+              customClass: { confirmButton: 'secondaryBg' }
+            });
+          }
+        );
       }
     }
     this.GetAllData(this.CurrentPage, this.PageSize)
@@ -353,9 +364,6 @@ export class QuestionBankComponent {
           if (
             field == 'subjectID' ||
             field == 'lessonID' ||
-            field == 'bloomLevelID' ||
-            field == 'dokLevelID' ||
-            field == 'description' ||
             field == 'questionTypeID' ||
             field == 'difficultyLevel'
           ) {
@@ -393,7 +401,7 @@ export class QuestionBankComponent {
       }
       const last = this.questionBank.subBankQuestionsDTO[this.questionBank.subBankQuestionsDTO.length - 1];
       if (this.questionBank.subBankQuestionsDTO.length > 0) {
-        if (!last || (!last.Description?.trim() || !last.Answer?.trim())) {
+        if (!last || (!last.description?.trim() || !last.answer?.trim())) {
           this.validationErrors['subBankQuestionsDTO'] = 'Please fill in both the question and answer before Save';
           isValid = false;
         }
@@ -453,6 +461,7 @@ export class QuestionBankComponent {
 
     this.QuestionBankServ.GetById(row.id, this.DomainName).subscribe((d) => {
       this.questionBank = d;
+      console.log(this.questionBank)
       this.GetAllLesson();
       if (this.questionBank.questionTypeID == 1) {
         this.questionBank.questionBankOptionsDTO = []
@@ -553,12 +562,20 @@ export class QuestionBankComponent {
           opt.option = this.NewOption
           this.questionBank.questionBankOptionsDTO.push(opt);
           this.NewOption = '';
+          if (this.mode == "Edit") {
+            if (!Array.isArray(this.questionBank.newQuestionBankOptionsDTO)) {
+              this.questionBank.newQuestionBankOptionsDTO = [];
+            } 
+             this.questionBank.newQuestionBankOptionsDTO.push(opt);
+            console.log("edit" ,this.questionBank )
+          }
         }
       }
       else {
         this.validationErrors['questionBankOptionsDTO'] = 'This Option is required';
       }
     }
+
   }
 
   checkOnType() {
@@ -584,7 +601,7 @@ export class QuestionBankComponent {
     const last = this.questionBank.subBankQuestionsDTO[this.questionBank.subBankQuestionsDTO.length - 1];
 
     if (this.questionBank.subBankQuestionsDTO.length > 0) {
-      if (!last || (!last.Description?.trim() || !last.Answer?.trim())) {
+      if (!last || (!last.description?.trim() || !last.answer?.trim())) {
         // You can show a validation message here if needed
         this.validationErrors['subBankQuestionsDTO'] = 'Please fill in both the question and answer before adding a new one.';
         return;
@@ -592,6 +609,9 @@ export class QuestionBankComponent {
     }
 
     this.questionBank.subBankQuestionsDTO.push(new SubBankQuestion());
+    if(this.mode=="Edit"){
+      this.questionBank.newSubBankQuestionsDTO.push(new SubBankQuestion());
+    }
   }
 
   addOptionOrder(): void {

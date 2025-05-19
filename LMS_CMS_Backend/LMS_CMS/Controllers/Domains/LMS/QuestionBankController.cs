@@ -132,18 +132,18 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return NotFound();
             }
 
-            List<QuestionBankTags> questionBankTags = Unit_Of_Work.questionBankTags_Repository.FindBy(s => s.QuestionBankID == id);
+            List<QuestionBankTags> questionBankTags = Unit_Of_Work.questionBankTags_Repository.FindBy(s => s.QuestionBankID == id && s.IsDeleted !=true);
             Dto.QuestionBankTagsDTO = questionBankTags?.Select(s => s.TagID).ToList();
 
             if (Question.QuestionTypeID==2|| Question.QuestionTypeID == 3 || Question.QuestionTypeID == 5)
             {
-                List<QuestionBankOption> options = Unit_Of_Work.questionBankOption_Repository.FindBy(s => s.QuestionBankID == id);
+                List<QuestionBankOption> options = Unit_Of_Work.questionBankOption_Repository.FindBy(s => s.QuestionBankID == id && s.IsDeleted != true);
                 Dto.QuestionBankOptionsDTO = mapper.Map<List<QuestionBankOptionAddDTO>>(options);
             }
 
             if (Question.QuestionTypeID == 4)
             {
-                List<SubBankQuestion> subBankQuestions = Unit_Of_Work.subBankQuestion_Repository.FindBy(s => s.QuestionBankID == id);
+                List<SubBankQuestion> subBankQuestions = Unit_Of_Work.subBankQuestion_Repository.FindBy(s => s.QuestionBankID == id&& s.IsDeleted !=true);
                 Dto.SubBankQuestionsDTO = mapper.Map<List<SubBankQuestionAddDTO>>(subBankQuestions);
             }
 
@@ -174,7 +174,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             //////////////////////////////////////////////////// Validation ////////////////////////////////////////////////
             
-            if(NewData.DifficultyLevel>6 || NewData.DifficultyLevel < 1)
+            if(NewData.DifficultyLevel>6 || NewData.DifficultyLevel < 0)
             {
                 return BadRequest("DifficultyLevel Should be from 1 to 6");
             }
@@ -192,7 +192,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return BadRequest("this Lesson doesn`t exist");
             }
 
-            if (NewData.BloomLevelID != null)
+            if (NewData.BloomLevelID != null && NewData.BloomLevelID != 0)
             {
                 BloomLevel bloomLevel = Unit_Of_Work.bloomLevel_Repository.First_Or_Default(l => l.ID == NewData.BloomLevelID);
                 if (bloomLevel == null)
@@ -202,10 +202,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
             else
             {
-                return BadRequest("this bloomLevel doesn`t exist");
+                NewData.BloomLevelID = null;
             }
 
-            if (NewData.DokLevelID != null)
+            if (NewData.DokLevelID != null && NewData.DokLevelID != 0)
             {
                 DokLevel dokLevel = Unit_Of_Work.dokLevel_Repository.First_Or_Default(l => l.ID == NewData.DokLevelID);
                 if (dokLevel == null)
@@ -215,7 +215,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
             else
             {
-                return BadRequest("this dokLevel doesn`t exist");
+                NewData.DokLevelID = null;
             }
 
             if (NewData.QuestionTypeID != null)
@@ -388,16 +388,6 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                         InsertedByUserId = userTypeClaim == "employee" ? userId : (int?)null
                     };
                     subQuestions.Add(subQuestion);
-                    //DragAndDropAnswer answer = new DragAndDropAnswer
-                    //{
-                    //    Answer = item.Answer,
-                    //    SubBankQuestion = subQuestion, // navigation property
-                    //    InsertedAt = subQuestion.InsertedAt,
-                    //    InsertedByOctaId = subQuestion.InsertedByOctaId,
-                    //    InsertedByUserId = subQuestion.InsertedByUserId
-                    //};
-
-                    //dragAnswers.Add(answer);
                 }
                 Unit_Of_Work.subBankQuestion_Repository.AddRange(subQuestions);
                 Unit_Of_Work.SaveChanges();
@@ -474,11 +464,14 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             //}
             //////////////////////////////////////////////////// Validation ////////////////////////////////////////////////
 
-            if (NewData.DifficultyLevel > 6 || NewData.DifficultyLevel < 1)
+            if(NewData.DifficultyLevel != 0)
             {
-                return BadRequest("DifficultyLevel Should be from 1 to 6");
-            }
+                if (NewData.DifficultyLevel > 6 || NewData.DifficultyLevel < 1)
+                {
+                    return BadRequest("DifficultyLevel Should be from 0 to 6");
+                }
 
+            }
             if (NewData.LessonID != null)
             {
                 Lesson lesson = Unit_Of_Work.lesson_Repository.First_Or_Default(l => l.ID == NewData.LessonID);
@@ -492,7 +485,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return BadRequest("this Lesson doesn`t exist");
             }
 
-            if (NewData.BloomLevelID != null)
+            if (NewData.BloomLevelID != null && NewData.BloomLevelID != 0)
             {
                 BloomLevel bloomLevel = Unit_Of_Work.bloomLevel_Repository.First_Or_Default(l => l.ID == NewData.BloomLevelID);
                 if (bloomLevel == null)
@@ -502,10 +495,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
             else
             {
-                return BadRequest("this bloomLevel doesn`t exist");
+                NewData.BloomLevelID = null;
             }
 
-            if (NewData.DokLevelID != null)
+            if (NewData.DokLevelID != null && NewData.DokLevelID != 0)
             {
                 DokLevel dokLevel = Unit_Of_Work.dokLevel_Repository.First_Or_Default(l => l.ID == NewData.DokLevelID);
                 if (dokLevel == null)
@@ -515,7 +508,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
             else
             {
-                return BadRequest("this dokLevel doesn`t exist");
+                NewData.DokLevelID = null;
             }
 
             if (NewData.QuestionTypeID != null)
@@ -531,27 +524,27 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return BadRequest("this questionBankType doesn`t exist");
             }
 
-            //if (NewData.QuestionBankTagsDTO != null && NewData.QuestionBankTagsDTO.Count > 0)
-            //{
-            //    foreach (var tagId in NewData.QuestionBankTagsDTO)
-            //    {
-            //        if (tagId != 0)
-            //        {
-            //            var tag = Unit_Of_Work.tag_Repository.First_Or_Default(l => l.ID == tagId);
-            //            if (tag == null)
-            //            {
-            //                return BadRequest($"Tag with ID {tagId} does not exist.");
-            //            }
-            //        }
-            //    }
-            //}
+            if (NewData.NewQuestionBankTagsDTO != null && NewData.NewQuestionBankTagsDTO.Count > 0)
+            {
+                foreach (var tagId in NewData.NewQuestionBankTagsDTO)
+                {
+                    if (tagId != 0)
+                    {
+                        var tag = Unit_Of_Work.tag_Repository.First_Or_Default(l => l.ID == tagId);
+                        if (tag == null)
+                        {
+                            return BadRequest($"Tag with ID {tagId} does not exist.");
+                        }
+                    }
+                }
+            }
             ////////// Validation For True False Question 
 
             if (NewData.QuestionTypeID == 1)
             {
-                if (NewData.CorrectAnswerName != "true" && NewData.CorrectAnswerName != "false")
+                if (NewData.CorrectAnswerName != "True" && NewData.CorrectAnswerName != "Fales")
                 {
-                    return BadRequest("Correct Answer should be true or false");
+                    return BadRequest("Correct Answer should be True or Fales");
                 }
             }
 

@@ -74,9 +74,9 @@
                 <button (click)="Delete(row.id)">
                   <i class="fa-regular fa-trash-can"></i>
                 </button>
-                <!-- <button (click)="Edit(row)">
+                <button (click)="Edit(row)">
                   <i class="fa-solid fa-pencil"></i>
-                </button> -->
+                </button>
               </div>
             </td>
           </tr>
@@ -199,8 +199,6 @@
             {{ level }}
           </option>
         </select>
-        <span *ngIf="validationErrors['difficultyLevel']"
-          class="text-red-500 ml-3 font-normal">{{validationErrors['difficultyLevel'] }}</span>
       </div>
 
       <div class="flex flex-col mb-4 w-[49%]">
@@ -212,8 +210,6 @@
           <option *ngFor="let c of bloomLevel" [value]="c.id">{{ c.englishName }}</option>
           <option *ngIf="bloomLevel.length === 0" disabled selected>No Data Found</option>
         </select>
-        <span *ngIf="validationErrors['bloomLevelID']"
-          class="text-red-500 ml-3 font-normal">{{validationErrors['bloomLevelID']}}</span>
       </div>
 
       <div class="flex flex-col mb-4 w-[49%]">
@@ -225,8 +221,6 @@
           <option *ngFor="let c of dokLevel" [value]="c.id">{{ c.englishName }}</option>
           <option *ngIf="dokLevel.length === 0" disabled selected>No Data Found</option>
         </select>
-        <span *ngIf="validationErrors['dokLevelID']"
-          class="text-red-500 ml-3 font-normal">{{validationErrors['dokLevelID']}}</span>
       </div>
 
       <div class="flex flex-col mb-4 w-[49%]">
@@ -358,13 +352,13 @@
               <label class="mb-2 primaryTxt">Question {{ i + 1 }}</label>
               <input type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                 (ngModelChange)="onInputValueChange({ field: 'subBankQuestionsDTO', value: $event })"
-                placeholder="Enter Question" [(ngModel)]="subQuestion.Description" />
+                placeholder="Enter Question" [(ngModel)]="subQuestion.description" />
             </div>
             <div class="flex flex-col w-[50%]">
               <label class="mb-2 primaryTxt">Answer</label>
               <input type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                 (ngModelChange)="onInputValueChange({ field: 'subBankQuestionsDTO', value: $event })"
-                placeholder="Enter Answer" [(ngModel)]="subQuestion.Answer" />
+                placeholder="Enter Answer" [(ngModel)]="subQuestion.answer" />
             </div>
           </div>
           <span *ngIf="validationErrors['subBankQuestionsDTO']" class="text-red-500  font-normal text-xs md:text-sm">{{
@@ -374,7 +368,6 @@
             <p class="primaryTxt">Add Question</p>
           </div>
         </div>
-
 
         <div *ngIf="questionBank.questionTypeID == 5" class="flex flex-col"> <!-- Order - Sequencing -->
           <div *ngFor="let option of questionBank.questionBankOptionsDTO; let i = index"

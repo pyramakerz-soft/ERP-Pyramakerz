@@ -17,21 +17,21 @@ namespace LMS_CMS_BL.DTO.LMS
         public string? Description { get; set; }
         public string? Image { get; set; }
         public IFormFile? ImageForm { get; set; }
-        public int DifficultyLevel { get; set; }
+        public int? DifficultyLevel { get; set; }
         public double Mark { get; set; }
         public string? EssayAnswer { get; set; }
         public long LessonID { get; set; }
-        public long BloomLevelID { get; set; }
-        public long DokLevelID { get; set; }
+        public long? BloomLevelID { get; set; }
+        public long? DokLevelID { get; set; }
         public long QuestionTypeID { get; set; }
         public string? CorrectAnswerName { get; set; }
-        public List<long> NewQuestionBankTagsDTO { get; set; } = new();
-        public List<long> DeletedQuestionBankTagsDTO { get; set; } = new();
+        public List<long>? NewQuestionBankTagsDTO { get; set; } = new();
+        public List<long>? DeletedQuestionBankTagsDTO { get; set; } = new();
 
         public List<QuestionBankOptionAddDTO>? NewQuestionBankOptionsDTO { get; set; }
-        public List<SubBankQuestionAddDTO> NewSubBankQuestionsDTO { get; set; } = new();
+        public List<SubBankQuestionAddDTO>? NewSubBankQuestionsDTO { get; set; } = new();
 
         public List<long>? DeletedQuestionBankOptionsDTO { get; set; }
-        public List<long> DeletedSubBankQuestionsDTO { get; set; } = new();
+        public List<long>? DeletedSubBankQuestionsDTO { get; set; } = new();
     }
 }

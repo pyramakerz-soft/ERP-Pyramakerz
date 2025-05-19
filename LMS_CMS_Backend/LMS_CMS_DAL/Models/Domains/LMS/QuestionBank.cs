@@ -15,22 +15,23 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public long ID { get; set; }
         public string? Description { get; set; }
         public string? Image { get; set; }
-        public int DifficultyLevel { get; set; }
+        public int? DifficultyLevel { get; set; }
         public double Mark { get; set; }
         public string? EssayAnswer { get; set; }
+        public string? CorrectAnswerName { get; set; }
 
         [ForeignKey("Lesson")]
         public long LessonID { get; set; }
         public Lesson Lesson { get; set; }
 
         [ForeignKey("BloomLevel")]
-        public long BloomLevelID { get; set; }
-        public BloomLevel BloomLevel { get; set; }
+        public long? BloomLevelID { get; set; }
+        public BloomLevel? BloomLevel { get; set; }
 
 
         [ForeignKey("DokLevel")]
-        public long DokLevelID { get; set; }
-        public DokLevel DokLevel { get; set; }
+        public long? DokLevelID { get; set; }
+        public DokLevel? DokLevel { get; set; }
 
         [ForeignKey("QuestionType")]
         public long QuestionTypeID { get; set; }
