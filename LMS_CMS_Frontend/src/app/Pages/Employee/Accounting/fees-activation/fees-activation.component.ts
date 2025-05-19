@@ -469,7 +469,8 @@ export class FeesActivationComponent {
     }
   }
 
-  CalculateNet() {
+  async CalculateNet() {
+   await this.CalculateDiscountFromPercentage()
     this.Fees.net = this.Fees.amount - this.Fees.discount;
   }
 

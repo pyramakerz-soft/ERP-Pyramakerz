@@ -139,7 +139,9 @@ export class StoresComponent {
     if (!this.CategoriesSelected.some((e) => e.id === category.id)) {
       this.CategoriesSelected.push(category);
     }
-    this.store.categoriesIds.push(category.id);
+     if (! this.store.categoriesIds.some((e) => e=== category.id)) {
+       this.store.categoriesIds.push(category.id);
+    }
     this.dropdownOpen = false;
   }
 
