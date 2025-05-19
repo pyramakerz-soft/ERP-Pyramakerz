@@ -42,7 +42,7 @@
             [(ngModel)]="SelectedStudentId" [disabled]="!SelectedClassId" (change)=" IsView = false">
             <option value=0 disabled selected hidden>Select a student</option>
             <option *ngFor="let ac of students" [value]="ac.id">
-                {{ ac.user_Name }}
+                {{ ac.en_name }}
             </option>
         </select>
     </div>
@@ -57,7 +57,7 @@
 
 <div class="mt-5" *ngIf="IsView">
     <div class="flex justify-between">
-        <h1 class="font-semibold text-2xl leading-9">{{SelectedStudent.user_Name}}</h1>
+        <h1 class="font-semibold text-2xl leading-9">{{SelectedStudent.en_name}}</h1>
         <div class="flex justify-between items-center">
             <button (click)="Create()"
                 class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
@@ -144,6 +144,7 @@
                 'border-4 border-blue-500 rounded-xl': stuMedal.medalID === row.id,
                 'cursor-pointer': true}">
               <img *ngIf="row.imageLink" [src]="row.imageLink" class="w-24 h-24 object-cover rounded-xl" />
+              <p>{{row.englishName}}</p>
             </div>
             <span *ngIf="validationErrors['medalID']" class="text-red-500 ml-3 font-normal">{{
                     validationErrors['medalID']}}</span>

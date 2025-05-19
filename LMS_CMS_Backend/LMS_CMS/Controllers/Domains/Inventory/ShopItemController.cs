@@ -102,7 +102,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
         [HttpGet("GetBySubCategoryID/{SubCategoryID}")]
         [Authorize_Endpoint_(
-           allowedTypes: new[] { "octa", "employee", "student" }
+           allowedTypes: new[] { "octa", "employee" }
         )]
         public async Task<IActionResult> GetBySubCategoryID(long SubCategoryID, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string searchQuery = null)
         { 
@@ -253,9 +253,12 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
             genderID = student.GenderId;
 
-            List<StudentAcademicYear> studentAcademicYears = Unit_Of_Work.studentAcademicYear_Repository.FindBy(
-                d => d.IsDeleted != true && d.StudentID == StudentID
+            StudentAcademicYear studentAcademicYear = Unit_Of_Work.studentAcademicYear_Repository.First_Or_Default(
+                d => d.IsDeleted != true && d.StudentID == StudentID && d.Classroom.AcademicYear.IsActive == true
                 );
+
+            gradeID = studentAcademicYear.GradeID;
+
             shopItemQuery = shopItemQuery.Where(s => s.GenderID == genderID || s.GenderID == null);
             shopItemQuery = shopItemQuery.Where(s => s.GradeID == gradeID || s.GradeID == null); 
 

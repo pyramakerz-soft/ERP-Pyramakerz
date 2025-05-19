@@ -298,7 +298,7 @@ export class DailyPerformanceComponent {
   }
 
   GetStudentName(ID: number): string {
-    return this.students.find(s => s.id === ID)?.user_Name || 'Unknown';
+    return this.students.find(s => s.id === ID)?.en_name || 'Unknown';
   }
 
   toggleStudentSelection(event: Event, id: number): void {

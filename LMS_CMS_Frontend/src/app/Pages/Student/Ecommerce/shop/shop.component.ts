@@ -100,6 +100,7 @@ export class ShopComponent {
   }
 
   getShopPagination(){
+    this.ShopItem = []
     this.shopItemService.GetBySubCategoryID(this.selectedInventorySubCategory, this.CurrentPage, this.PageSize, this.DomainName, this.searchQuery).subscribe(
       data => { 
         this.CurrentPage = data.pagination.currentPage
@@ -112,6 +113,7 @@ export class ShopComponent {
   }
 
   getShopPaginationWithStudentID(){
+    this.ShopItem = []
     this.shopItemService.GetBySubCategoryIDWithGenderAndGradeAndStudentID(this.selectedInventorySubCategory, this.StuID, this.CurrentPage, this.PageSize, this.DomainName, this.searchQuery).subscribe(
       data => { 
         this.CurrentPage = data.pagination.currentPage
@@ -193,6 +195,14 @@ export class ShopComponent {
   searchReports(): void {
     this.ShopItem = []
     this.CurrentPage = 1; 
+    if(this.StuID != 0){
+      this.getShopPaginationWithStudentID()
+    }else{
+      this.getShopPagination()
+    }
+  }
+
+  onStudentChange(){ 
     if(this.StuID != 0){
       this.getShopPaginationWithStudentID()
     }else{
