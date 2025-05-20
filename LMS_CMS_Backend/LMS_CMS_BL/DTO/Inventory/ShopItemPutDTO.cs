@@ -37,5 +37,6 @@ namespace LMS_CMS_BL.DTO.Inventory
         public string BarCode { get; set; }
         public string? ItemType { get; set; }
         public string? ItemCode { get; set; }
+        public string? UnitType { get; set; }
     }
 }
