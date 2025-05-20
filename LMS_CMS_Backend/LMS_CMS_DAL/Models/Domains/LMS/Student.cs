@@ -9,6 +9,7 @@ using LMS_CMS_DAL.Models.Domains.AccountingModule;
 using LMS_CMS_DAL.Models.Domains.BusModule;
 using LMS_CMS_DAL.Models.Domains.ClinicModule;
 using LMS_CMS_DAL.Models.Domains.ECommerce;
+using LMS_CMS_DAL.Models.Domains.ETA;
 using LMS_CMS_DAL.Models.Domains.Inventory;
 using LMS_CMS_DAL.Models.Domains.RegisterationModule;
 
@@ -43,6 +44,19 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public string? NationalID { get; set; }
         public string? NationalIDExpiredDate { get; set; }
         public long? Nationality { get; set; }
+        public string? CountryCode { get; set; }
+        public string? Governate { get; set; }
+        public string? RegionCity { get; set; }
+        public string? Street { get; set; }
+        public string? BuildingNumber { get; set; }
+        public string? PostalCode { get; set; }
+        public string? Floor { get; set; }
+        public string? Room { get; set; }
+        public string? LandMark { get; set; }
+        public string? AdditionalInfo { get; set; }
+
+        [ForeignKey("TaxCustomer")]
+        public int? TypeID { get; set; }
 
         [ForeignKey("Parent")]
         public long? Parent_Id { get; set; } 
@@ -91,6 +105,7 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public string? AdmissionDate { get; set; }
 
         public AccountingTreeChart AccountNumber { get; set; }
+        public TaxCustomer? TaxCustomer { get; set; }
         public ICollection<BusStudent> BusStudents { get; set; } = new HashSet<BusStudent>();
         public ICollection<StudentAcademicYear> StudentAcademicYears { get; set; } = new HashSet<StudentAcademicYear>();
         public ICollection<EmployeeStudent> EmployeeStudents { get; set; } = new HashSet<EmployeeStudent>();

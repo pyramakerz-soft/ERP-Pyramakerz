@@ -7,7 +7,7 @@ using LMS_CMS_PL.Services;
 using LMS_CMS_PL.Services.Zatca;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using System.Text;
 using Zatca.EInvoice.SDK.Contracts;
@@ -23,13 +23,15 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
         private readonly DbContextFactoryService _dbContextFactory;
         private readonly IConfiguration _config;
         private readonly IAmazonSecretsManager _secretsManager;
+        private readonly DomainService _domainService;
 
-        public ZatcaController(ICsrGenerator csrGenerator, DbContextFactoryService dbContextFactory, IConfiguration config, IAmazonSecretsManager secretsManager)
+        public ZatcaController(ICsrGenerator csrGenerator, DbContextFactoryService dbContextFactory, IConfiguration config, IAmazonSecretsManager secretsManager, DomainService domainService)
         {
             _csrGenerator = csrGenerator;
             _dbContextFactory = dbContextFactory;
             _config = config;
             _secretsManager = secretsManager;
+            _domainService = domainService;
         }
 
         #region Generate PCSID
@@ -73,7 +75,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
             );
 
             string pcName = $"PC{schoolPc.ID}{schoolPc.School.ID}";
-            //AmazonS3Client amazonS3Client = new AmazonS3Client();
+
             S3Service s3SecretManager = new S3Service(_secretsManager);
 
             var csrSteps = ZatcaServices.GenerateCSRandPrivateKey(csrGeneration);
@@ -90,7 +92,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
             //await InvoicingServices.GeneratePublicKey(publicKeyPath, privateKeyPath);
 
-            string version = "V2";
+            string version = _config.GetValue<string>("ZatcaVersion");
 
             string csrPayload = Convert.ToBase64String(Encoding.UTF8.GetBytes(csrContent));
             var csrObj = new { csr = csrPayload };
@@ -264,10 +266,14 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                 Unit_Of_Work.inventoryMaster_Repository.Update(master);
                 Unit_Of_Work.SaveChanges();
 
-                var request = HttpContext.Request;
-                var domain = request.Host.Host;
-                var hostParts = request.Host.Value.Split('.');
-                string subDomain = hostParts.Length > 2 ? hostParts[0] : "test";
+                //var request = HttpContext.Request;
+                //var domain = request.Host.Host;
+                //var hostParts = request.Host.Value.Split('.');
+                //string subDomain = hostParts.Length > 2 ? hostParts[0] : "test";
+
+                var domain = _domainService.GetDomain(HttpContext);
+                string subDomainValue = _domainService.GetSubdomain(HttpContext);
+                string subDomain = !subDomainValue.IsNullOrEmpty() ? subDomainValue : "test";
 
                 S3Service s3Client = new S3Service(secretS3Client, _config, "AWS:Bucket", "AWS:Folder");
 
@@ -313,10 +319,14 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
             if (masters is null || masters.Count == 0)
                 return NotFound("No invoices found.");
 
-            var request = HttpContext.Request;
-            var domain = request.Host.Host;
-            var hostParts = request.Host.Value.Split('.');
-            string subDomain = hostParts.Length > 2 ? hostParts[0] : "test";
+            //var request = HttpContext.Request;
+            //var domain = request.Host.Host;
+            //var hostParts = request.Host.Value.Split('.');
+            //string subDomain = hostParts.Length > 2 ? hostParts[0] : "test";
+
+            var domain = _domainService.GetDomain(HttpContext);
+            string subDomainValue = _domainService.GetSubdomain(HttpContext);
+            string subDomain = !subDomainValue.IsNullOrEmpty() ? subDomainValue : "test";
 
             foreach (var master in masters)
             {

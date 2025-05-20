@@ -75,6 +75,17 @@ namespace LMS_CMS_BL.DTO.LMS
         public string IsRegisteredToBus { get; set;}
 
         public string CurrentGradeName { get; set;}
-        public string CurrentAcademicYear { get; set;}
+        public string CurrentAcademicYear { get; set; }
+        public string? CountryCode { get; set; }
+        public string? Governate { get; set; }
+        public string? RegionCity { get; set; }
+        public string? Street { get; set; }
+        public string? BuildingNumber { get; set; }
+        public string? PostalCode { get; set; }
+        public string? Floor { get; set; }
+        public string? Room { get; set; }
+        public string? LandMark { get; set; }
+        public string? AdditionalInfo { get; set; }
+        public int? TypeID { get; set; }
     }
 }
