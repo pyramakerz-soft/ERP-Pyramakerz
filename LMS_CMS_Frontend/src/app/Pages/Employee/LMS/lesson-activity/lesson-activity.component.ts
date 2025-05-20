@@ -329,4 +329,8 @@ export class LessonActivityComponent {
       }
     });
   }
+
+  moveToLesson(){
+    this.router.navigateByUrl('Employee/Lessons')
+  }
 }

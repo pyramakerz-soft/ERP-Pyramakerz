@@ -12,6 +12,8 @@ namespace LMS_CMS_BL.DTO.LMS
         public long ID { get; set; }
         public string en_name { get; set; }
         public string ar_name { get; set; }
+        public string SubjectEnglishNameInCertificate { get; set; }
+        public string SubjectArabicNameInCertificate { get; set; }
         public int OrderInCertificate { get; set; }
         public double CreditHours { get; set; }
         public string SubjectCode { get; set; }

@@ -297,6 +297,19 @@ export class EvaluationComponent {
     return this.studentEvaluationCorectionBooks.find(e => e.studentID === studentID)?.state || 0;
   }
 
+
+  areAllQuestionsAnswered(): boolean {
+    for (let group of this.EvaluationTemplateGroups) {
+      for (let question of group.evaluationTemplateGroupQuestions) {
+        const mark = this.getQuestionMark(question.id);
+        if (!mark || mark < 1 || mark > 5) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
   ////////////////////////////////////////// Submit ///////////////////////////////////////////////
 
   Submit(){ 

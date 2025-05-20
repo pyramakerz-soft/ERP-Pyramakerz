@@ -75,7 +75,7 @@ export class EmployeeService {
 
     if (employee.files && employee.files.length > 0) {
       employee.files.forEach((file, index) => {
-        formData.append(`files[${index}].file`, file.file, file.name); // File (IFormFile)
+        formData.append(`files[${index}].file`, file.file, file.file.name); // File (IFormFile)
         formData.append(`files[${index}].Name`, file.name);            // Name (string)
       });
     }
@@ -114,8 +114,9 @@ export class EmployeeService {
     if (employee.files && employee.files.length > 0) {
       let uploadIndex = 0;
       employee.files.forEach((file) => {
+        console.log(file)
         if (file.file instanceof File) {
-          formData.append(`files[${uploadIndex}].file`, file.file, file.name);
+          formData.append(`files[${uploadIndex}].file`, file.file, file.file.name);
           formData.append(`files[${uploadIndex}].name`, file.name);
           uploadIndex++;
         }

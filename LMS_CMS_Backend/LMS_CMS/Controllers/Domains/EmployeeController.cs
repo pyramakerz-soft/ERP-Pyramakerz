@@ -489,33 +489,27 @@ namespace LMS_CMS_PL.Controllers.Domains
             }
 
             // Handle new files
-            foreach (var file in files)
+            if (files != null && files.Any())
             {
-                if (file.file == null)
+                foreach (var file in files)
                 {
-                    Console.WriteLine($"File object for '{file.Name}' is null.");
-                    continue; // skip it
-                }
-
-                Console.WriteLine($"Saving file: {file.Name}, size: {file.file.Length}");
-
-                if (file.file.Length > 0)
-                {
-                    var filePath = Path.Combine(employeeFolder, file.Name);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    if (file.file.Length > 0)
                     {
-                        await file.file.CopyToAsync(stream);
+                        var filePath = Path.Combine(employeeFolder, file.file.FileName);
+                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await file.file.CopyToAsync(stream);
+                        }
                     }
-
-                    var uploadedFile = new EmployeeAttachment
+                    EmployeeAttachment uploadedFile = new EmployeeAttachment
                     {
                         EmployeeID = oldEmp.ID,
-                        Link = $"{Request.Scheme}://{Request.Host}/Uploads/Attachments/{sanitizedUserName}/{file.Name}",
+                        Link = $"{Request.Scheme}://{Request.Host}/Uploads/Attachments/{oldEmp.User_Name}/{file.file.FileName}",
                         Name = file.Name,
                     };
 
                     Unit_Of_Work.employeeAttachment_Repository.Add(uploadedFile);
-                    await Unit_Of_Work.SaveChangesAsync();
+                    Unit_Of_Work.SaveChanges();
                 }
             }
 

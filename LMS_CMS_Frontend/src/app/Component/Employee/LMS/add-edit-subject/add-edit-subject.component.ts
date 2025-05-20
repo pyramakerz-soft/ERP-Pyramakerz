@@ -156,12 +156,7 @@ export class AddEditSubjectComponent {
           ){
             this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
             isValid = false;
-          } else if(field == "iconFile"){
-            if(!this.editSubject){
-              this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
-              isValid = false;
-            }
-          }
+          } 
         } else {
           if(field == "en_name" || field == "ar_name"){
             if(this.subject.en_name.length > 100 || this.subject.ar_name.length > 100){
@@ -235,14 +230,31 @@ export class AddEditSubjectComponent {
       }else{
         this.isLoading = true;
         if(this.editSubject == false){
-          (this.subjectService.Add(this.subject, this.DomainName)).subscribe(
-            (result: any) => {
-              this.closeDialog()
-            },
-            error => {
-              this.isLoading = false;
-            }
-          );
+          if (!this.subject.iconFile) {
+            fetch('Images/DummySubject.jpg')
+            .then(res => res.blob())
+            .then(blob => {
+              this.subject.iconFile = new File([blob], 'DummySubject.jpg', { type: 'image/jpeg' });
+
+              this.subjectService.Add(this.subject, this.DomainName).subscribe(
+                (result: any) => {
+                  this.closeDialog();
+                },
+                error => {
+                  this.isLoading = false;
+                }
+              );
+            });
+          } else {
+            this.subjectService.Add(this.subject, this.DomainName).subscribe(
+              (result: any) => {
+                this.closeDialog();
+              },
+              error => {
+                this.isLoading = false;
+              }
+            );
+          }       
         } else{
           this.subjectService.Edit(this.subject, this.DomainName).subscribe(
             (result: any) => {

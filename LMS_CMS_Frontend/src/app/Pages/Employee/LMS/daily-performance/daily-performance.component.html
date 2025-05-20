@@ -223,6 +223,7 @@
                 'border-4 border-blue-500 rounded-xl': SelectedMedalId === row.id,
                 'cursor-pointer': true}">
               <img *ngIf="row.imageLink" [src]="row.imageLink" class="w-24 h-24 object-cover rounded-xl" />
+              <p>{{row.englishName}}</p>
             </div>
             <span *ngIf="!IsValid" class="text-red-500 ml-3 font-normal"> Choose Medal </span>
           </div>

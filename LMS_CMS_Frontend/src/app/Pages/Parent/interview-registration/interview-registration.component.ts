@@ -10,7 +10,8 @@ import { InterviewTimeTable } from '../../../Models/Registration/interview-time-
 import { InterviewTimeTableService } from '../../../Services/Employee/Registration/interview-time-table.service';
 import { RegistrationFormInterviewService } from '../../../Services/Employee/Registration/registration-form-interview.service';
 import Swal from 'sweetalert2';
-
+import { DayWithInterviews } from '../../../Models/Registration/day-with-interviews';
+ 
 @Component({
   selector: 'app-interview-registration',
   standalone: true,
@@ -54,6 +55,10 @@ export class InterviewRegistrationComponent {
     this.DomainName = this.ApiServ.GetHeader();
 
     this.getRegistrationFormParentIncludeRegistrationFormInterviewData()
+  }
+  
+  trackByInterview(index: number, interview: InterviewTimeTable): number {
+    return interview.id;
   }
 
   getRegistrationFormParentIncludeRegistrationFormInterviewData(){
@@ -324,7 +329,3 @@ export class InterviewRegistrationComponent {
 }
 
   
-interface DayWithInterviews {
-  day: number;  
-  interviews: InterviewTimeTable[];  
-}

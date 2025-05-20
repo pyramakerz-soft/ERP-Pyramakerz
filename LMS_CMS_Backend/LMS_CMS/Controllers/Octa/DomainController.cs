@@ -261,7 +261,7 @@ namespace LMS_CMS_PL.Controllers.Octa
             string Pass = GenerateSecurePassword(12);
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(Pass);
 
-            Employee emp = new Employee { User_Name = domain.Name, en_name = domain.Name, Password = hashedPassword, Role_ID = 1, EmployeeTypeID = 1 };
+            Employee emp = new Employee { User_Name = "Admin", en_name = "Admin", Password = hashedPassword, Role_ID = 1, EmployeeTypeID = 1 };
             emp.InsertedByOctaId= userId;
             emp.InsertedAt= TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
             Unit_Of_Work.employee_Repository.Add(emp);

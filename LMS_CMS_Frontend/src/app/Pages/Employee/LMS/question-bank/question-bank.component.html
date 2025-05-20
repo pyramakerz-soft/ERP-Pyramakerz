@@ -55,7 +55,7 @@
               {{ row.id }}
             </td>
             <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-              {{ row.description }}
+              <div [innerHTML]="row.description"></div>
             </td>
             <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
               {{ row.lessonName }}
@@ -114,7 +114,6 @@
       min="1" (input)="validatePageSize($event)" (ngModelChange)="changeCurrentPage(CurrentPage)">
     <p>items Per Page</p>
   </div>
-
   <div>
     <p>{{CurrentPage}} of {{TotalPages}} pages ({{TotalRecords}} Item)</p>
   </div>
@@ -134,22 +133,28 @@
     <div class="mt-6 mb-4 rounded-3xl flex justify-between flex-wrap">
       <div class="flex flex-col mb-4 w-[49%]">
         <label class="mb-2 primaryTxt" for="questionBank.subjectID">Subject</label>
-        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="questionBank.subjectID"
-          (change)="GetAllLesson();" [(ngModel)]="questionBank.subjectID">
+        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
+          id="questionBank.subjectID" (change)="GetAllLesson();" [(ngModel)]="questionBank.subjectID"
+          (ngModelChange)="onInputValueChange({ field: 'subjectID', value: $event })">
           <option [value]="0" disabled selected hidden>Choose Subject</option>
           <option *ngFor="let c of subject" [value]="c.id">{{ c.en_name }}</option>
           <option *ngIf="subject.length === 0" disabled selected>No Data Found</option>
         </select>
+        <span *ngIf="validationErrors['subjectID']"
+          class="text-red-500 ml-3 font-normal">{{validationErrors['subjectID'] }}</span>
       </div>
 
       <div class="flex flex-col mb-4 w-[49%]">
         <label class="mb-2 primaryTxt" for="lessonID">Lesson</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="lessonID"
-          [disabled]="!questionBank.subjectID" [(ngModel)]="questionBank.lessonID">
+          [disabled]="!questionBank.subjectID" [(ngModel)]="questionBank.lessonID"
+          (ngModelChange)="onInputValueChange({ field: 'lessonID', value: $event })">
           <option [value]="0" disabled selected hidden>Choose Lesson</option>
           <option *ngFor="let c of lesson" [value]="c.id">{{ c.englishTitle }}</option>
           <option *ngIf="lesson.length === 0" disabled selected>No Data Found</option>
         </select>
+        <span *ngIf="validationErrors['lessonID']" class="text-red-500 ml-3 font-normal">{{validationErrors['lessonID']
+          }}</span>
       </div>
 
       <div class="flex flex-col mb-4 w-[49%]">
@@ -187,44 +192,41 @@
       <div class="flex flex-col mb-4 w-[49%]">
         <label class="mb-2 primaryTxt" for="difficultyLevel">Difficulty Level</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="difficultyLevel"
-          [(ngModel)]="questionBank.difficultyLevel">
+          [(ngModel)]="questionBank.difficultyLevel"
+          (ngModelChange)="onInputValueChange({ field: 'difficultyLevel', value: $event })">
           <option [value]="0" disabled selected hidden>Choose Difficulty Level</option>
           <option *ngFor="let level of [1, 2, 3, 4, 5, 6]" [value]="level">
             {{ level }}
           </option>
         </select>
-        <span *ngIf="validationErrors['difficultyLevel']"
-          class="text-red-500 ml-3 font-normal">{{validationErrors['difficultyLevel'] }}</span>
       </div>
 
       <div class="flex flex-col mb-4 w-[49%]">
         <label class="mb-2 primaryTxt" for="bloomLevelID">Bloom Level</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="bloomLevelID"
-          [(ngModel)]="questionBank.bloomLevelID">
+          [(ngModel)]="questionBank.bloomLevelID"
+          (ngModelChange)="onInputValueChange({ field: 'bloomLevelID', value: $event })">
           <option [value]="0" disabled selected hidden>Choose Bloom Level</option>
           <option *ngFor="let c of bloomLevel" [value]="c.id">{{ c.englishName }}</option>
           <option *ngIf="bloomLevel.length === 0" disabled selected>No Data Found</option>
         </select>
-        <span *ngIf="validationErrors['bloomLevelID']"
-          class="text-red-500 ml-3 font-normal">{{validationErrors['bloomLevelID']}}</span>
       </div>
 
       <div class="flex flex-col mb-4 w-[49%]">
         <label class="mb-2 primaryTxt" for="dokLevelID">Dok Level</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="dokLevelID"
-          [(ngModel)]="questionBank.dokLevelID">
+          [(ngModel)]="questionBank.dokLevelID"
+          (ngModelChange)="onInputValueChange({ field: 'dokLevelID', value: $event })">
           <option [value]="0" disabled selected hidden>Choose Dok Level</option>
           <option *ngFor="let c of dokLevel" [value]="c.id">{{ c.englishName }}</option>
           <option *ngIf="dokLevel.length === 0" disabled selected>No Data Found</option>
         </select>
-        <span *ngIf="validationErrors['dokLevelID']"
-          class="text-red-500 ml-3 font-normal">{{validationErrors['dokLevelID']}}</span>
       </div>
 
       <div class="flex flex-col mb-4 w-[49%]">
         <label class="mb-2 primaryTxt" for="mark">Mark</label>
-        <input id="mark" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" (input)="validateNumber($event,'mark')"
-          placeholder="Enter English Name" [(ngModel)]="questionBank.mark"
+        <input id="mark" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+          (input)="validateNumber($event,'mark')" placeholder="Enter English Name" [(ngModel)]="questionBank.mark"
           (ngModelChange)="onInputValueChange({ field: 'mark', value: $event })" />
         <span *ngIf="validationErrors['mark']" class="text-red-500 ml-3 font-normal">{{validationErrors['mark']}}</span>
       </div>
@@ -232,7 +234,8 @@
       <div class="flex flex-col mb-4 w-full">
         <label class="mb-2 primaryTxt" for="questionTypeID">Question Type</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="questionTypeID"
-          [(ngModel)]="questionBank.questionTypeID" (ngModelChange)="checkOnType()">
+          [(ngModel)]="questionBank.questionTypeID" (ngModelChange)="checkOnType()"
+          (ngModelChange)="onInputValueChange({ field: 'questionTypeID', value: $event })">
           <option [value]="0" disabled selected hidden>Choose Question Type</option>
           <option *ngFor="let c of questionBankType" [value]="c.id">{{ c.name }}</option>
           <option *ngIf="questionBankType.length === 0" disabled selected>No Data Found</option>
@@ -249,6 +252,8 @@
             [(ngModel)]="questionBank.description" [modules]="editorModules" theme="snow" class="quill-editor-wrapper"
             placeholder="Enter description">
           </quill-editor>
+          <span *ngIf="validationErrors['description']"
+            class="text-red-500 ml-3 font-normal">{{validationErrors['description']}}</span>
         </div>
 
 
@@ -259,9 +264,10 @@
               <div class="flex flex-col">
                 <input type="text" [(ngModel)]="NewOption"
                   class="w-[450px] h-[45px] rounded-lg border border-solid border-gray-300 px-2"
+                  (ngModelChange)="onInputValueChange({ field: 'questionBankOptionsDTO', value: $event })"
                   placeholder="Enter Option" />
-                <!-- <span *ngIf="validationErrors['options']" class="text-red-500 ml-3 font-normal">{{
-                validationErrors['options'] }}</span> -->
+                <span *ngIf="validationErrors['questionBankOptionsDTO']" class="text-red-500 ml-3 font-normal">{{
+                  validationErrors['questionBankOptionsDTO'] }}</span>
               </div>
               <button class="secondaryBg text-white font-medium px-5 py-2 rounded-lg" (click)="AddOption()">
                 Add
@@ -293,13 +299,12 @@
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.option }}</td>
                   </tr>
                 </tbody>
-                <!-- <span *ngIf="validationErrors['correctAnswerName']" class="text-red-500 ml-3 font-normal">{{
-                validationErrors['correctAnswerName'] }}</span> -->
+                <span *ngIf="validationErrors['correctAnswerName']" class="text-red-500 ml-3 font-normal">{{
+                  validationErrors['correctAnswerName'] }}</span>
               </table>
             </div>
           </div>
         </div>
-
 
         <div *ngIf="questionBank.questionTypeID ==3"> <!-- fill in blank-->
           <div>
@@ -308,9 +313,10 @@
               <div class="flex flex-col">
                 <input type="text" [(ngModel)]="NewOption"
                   class="w-[450px] h-[45px] rounded-lg border border-solid border-gray-300 px-2"
+                  (ngModelChange)="onInputValueChange({ field: 'questionBankOptionsDTO', value: $event })"
                   placeholder="Enter Option" />
-                <!-- <span *ngIf="validationErrors['options']" class="text-red-500 ml-3 font-normal">{{
-                validationErrors['options'] }}</span> -->
+                <span *ngIf="validationErrors['questionBankOptionsDTO']" class="text-red-500 ml-3 font-normal">{{
+                  validationErrors['questionBankOptionsDTO'] }}</span>
               </div>
               <button class="secondaryBg text-white font-medium px-5 py-2 rounded-lg" (click)="AddOption()">
                 Add
@@ -334,13 +340,10 @@
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.option }}</td>
                   </tr>
                 </tbody>
-                <!-- <span *ngIf="validationErrors['correctAnswerName']" class="text-red-500 ml-3 font-normal">{{
-                validationErrors['correctAnswerName'] }}</span> -->
               </table>
             </div>
           </div>
         </div>
-
 
         <div *ngIf="questionBank.questionTypeID == 4" class="flex flex-col"> <!-- Drag and Drop -->
           <div *ngFor="let subQuestion of questionBank.subBankQuestionsDTO; let i = index"
@@ -348,20 +351,23 @@
             <div class="flex flex-col w-[50%]">
               <label class="mb-2 primaryTxt">Question {{ i + 1 }}</label>
               <input type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                placeholder="Enter Question" [(ngModel)]="subQuestion.Description" />
+                (ngModelChange)="onInputValueChange({ field: 'subBankQuestionsDTO', value: $event })"
+                placeholder="Enter Question" [(ngModel)]="subQuestion.description" />
             </div>
             <div class="flex flex-col w-[50%]">
               <label class="mb-2 primaryTxt">Answer</label>
               <input type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                placeholder="Enter Answer" [(ngModel)]="subQuestion.Answer" />
+                (ngModelChange)="onInputValueChange({ field: 'subBankQuestionsDTO', value: $event })"
+                placeholder="Enter Answer" [(ngModel)]="subQuestion.answer" />
             </div>
           </div>
+          <span *ngIf="validationErrors['subBankQuestionsDTO']" class="text-red-500  font-normal text-xs md:text-sm">{{
+            validationErrors['subBankQuestionsDTO'] }}</span>
           <div class="flex justify-start items-center space-x-2 my-3 cursor-pointer" (click)="addSubQuestion()">
             <i class="fa-regular fa-square-plus"></i>
             <p class="primaryTxt">Add Question</p>
           </div>
         </div>
-
 
         <div *ngIf="questionBank.questionTypeID == 5" class="flex flex-col"> <!-- Order - Sequencing -->
           <div *ngFor="let option of questionBank.questionBankOptionsDTO; let i = index"
@@ -369,13 +375,19 @@
             <div class="flex flex-col w-[50%]">
               <label class="mb-2 primaryTxt">Option {{ i + 1 }}</label>
               <input type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                (ngModelChange)="onInputValueChange({ field: 'questionBankOptionsDTO', value: $event })"
                 placeholder="Enter Option" [(ngModel)]="option.option" />
             </div>
             <div class="flex flex-col w-[50%]">
               <label class="mb-2 primaryTxt">Order</label>
-              <input type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Order" [(ngModel)]="option.order"(input)="validateQuestionBankOptionNumber($event,'order',  option)"/>
+              <input type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                (ngModelChange)="onInputValueChange({ field: 'questionBankOptionsDTO', value: $event })"
+                placeholder="Enter Order" [(ngModel)]="option.order"
+                (input)="validateQuestionBankOptionNumber($event,'order',  option)" />
             </div>
           </div>
+          <span *ngIf="validationErrors['questionBankOptionsDTO']" class="text-red-500 ml-3 font-normal">{{
+            validationErrors['questionBankOptionsDTO'] }}</span>
           <div class="flex justify-start items-center space-x-2 my-3 cursor-pointer" (click)="addOptionOrder()">
             <i class="fa-regular fa-square-plus"></i>
             <p class="primaryTxt">Add Option</p>

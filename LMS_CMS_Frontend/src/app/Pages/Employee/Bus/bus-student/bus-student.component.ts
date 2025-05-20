@@ -316,7 +316,7 @@ export class BusStudentComponent {
     this.Students = [];
     this.busStudent.studentID = 0
     if (this.selectedClass) {
-      this.studentService.GetByClassID(this.selectedClass, this.DomainName).subscribe((data) => {
+      this.studentService.GetByClassIDAndThoseWhoWishesToUseSchoolTransportation(this.selectedClass, this.DomainName).subscribe((data) => {
         this.Students = data
       });
     }

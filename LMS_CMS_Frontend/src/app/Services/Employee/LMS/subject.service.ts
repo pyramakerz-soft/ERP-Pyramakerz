@@ -51,6 +51,8 @@ export class SubjectService {
     const formData = new FormData();
     formData.append('en_name', Subject.en_name ?? '');
     formData.append('ar_name', Subject.ar_name ?? '');
+    formData.append('subjectEnglishNameInCertificate', Subject.subjectEnglishNameInCertificate ?? '');
+    formData.append('subjectArabicNameInCertificate', Subject.subjectArabicNameInCertificate ?? '');
     formData.append('orderInCertificate', Subject.orderInCertificate?.toString() ?? '');
     formData.append('creditHours', Subject.creditHours?.toString() ?? '');
     formData.append('subjectCode', Subject.subjectCode?.toString() ?? '');
@@ -83,6 +85,8 @@ export class SubjectService {
     formData.append('id', Subject.id.toString() ?? '');
     formData.append('en_name', Subject.en_name.toString() ?? '');
     formData.append('ar_name', Subject.ar_name.toString() ?? '');
+    formData.append('subjectEnglishNameInCertificate', Subject.subjectEnglishNameInCertificate ?? '');
+    formData.append('subjectArabicNameInCertificate', Subject.subjectArabicNameInCertificate ?? '');
     formData.append('orderInCertificate', Subject.orderInCertificate?.toString() ?? '');
     formData.append('creditHours', Subject.creditHours?.toString() ?? '');
     formData.append('subjectCode', Subject.subjectCode?.toString() ?? '');

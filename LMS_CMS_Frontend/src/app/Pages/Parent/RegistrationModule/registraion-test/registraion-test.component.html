@@ -63,12 +63,12 @@
           <div class="bg-[#EBEBEB] p-4 rounded-xl mb-2 border">
             <div *ngIf="q.video" class="bg-[#F6F6F6] rounded-md border-dashed border-2 w-[60%] px-6 py-3 lg:py-5 mb-2">
               <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Video</p>
-              <video *ngIf="q.video" [src]="q.video" class="object-cover w-full" controls>
+              <video *ngIf="q.video" [src]="q.video" class="object-cover w-fit" controls>
               </video>
             </div>
             <div *ngIf="q.image " class="bg-[#F6F6F6] rounded-md border-dashed border-2 w-[60%] px-6 py-3 lg:py-5 mb-2">
               <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Image</p>
-              <img *ngIf="q.image" [src]="q.image" class="object-cover w-2/3">
+              <img *ngIf="q.image" [src]="q.image" class="object-cover w-fit">
             </div>
             <div>{{ q.description }}?</div>
             <div *ngFor="let option of q.options; let optionIndex = index" class="mt-5">
@@ -86,6 +86,15 @@
       <div *ngIf="row.questionTypeID === 3" class="">
         <div *ngFor="let q of row.questions; let i = index">
           <div class="bg-[#EBEBEB] p-4 rounded-xl mb-2">
+            <div *ngIf="q.video" class="bg-[#F6F6F6] rounded-md border-dashed border-2 w-[60%] px-6 py-3 lg:py-5 mb-2">
+              <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Video</p>
+              <video *ngIf="q.video" [src]="q.video" class="object-cover w-fit" controls>
+              </video>
+            </div>
+            <div *ngIf="q.image " class="bg-[#F6F6F6] rounded-md border-dashed border-2 w-[60%] px-6 py-3 lg:py-5 mb-2">
+              <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Image</p>
+              <img *ngIf="q.image" [src]="q.image" class="object-cover w-fit">
+            </div>
             <div class="mb-2">{{ q.description }} ?</div>
             <div>
               <textarea class="p-4 text-left resize-none w-full rounded-xl" (input)="EssayAnswer(q.id, $event)"

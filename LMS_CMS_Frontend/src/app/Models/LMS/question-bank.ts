@@ -27,7 +27,11 @@ export class QuestionBank {
     public questionBankTagsDTO: number[] = [],
     public questionBankOptionsDTO: QuestionBankOption[] = [],
     public subBankQuestionsDTO: SubBankQuestion[] = [],
+    public newQuestionBankTagsDTO: number[] = [],
+    public deletedQuestionBankTagsDTO: number[] = [],
+    public deletedQuestionBankOptionsDTO: number[] = [],
+    public deletedSubBankQuestionsDTO: number[] = [],
+    public newQuestionBankOptionsDTO: QuestionBankOption[] = [],
+    public newSubBankQuestionsDTO: SubBankQuestion[] = [],
   ) {}
 }
-
-

@@ -19,6 +19,7 @@ using System.Runtime.InteropServices;
 using LMS_CMS_DAL.Models.Domains.BusModule;
 using System.Linq;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using LMS_CMS_DAL.Models.Domains.RegisterationModule;
 
 namespace LMS_CMS_PL.Controllers.Domains
 {
@@ -189,6 +190,61 @@ namespace LMS_CMS_PL.Controllers.Domains
 
             List<Student> students = studentAcademicYears.Select(sa => sa.Student).ToList();
             List<StudentGetDTO> studentDTOs = mapper.Map<List<StudentGetDTO>>(students);
+
+            return Ok(studentDTOs);
+        }
+
+        /////
+        [HttpGet("GetByClassIDAndThoseWhoWishesToUseSchoolTransportation/{Id}")]
+        public async Task<IActionResult> GetByClassIDAndThoseWhoWishesToUseSchoolTransportation(long Id)
+        {
+            if (Id == 0)
+            {
+                return BadRequest("ID can't e null");
+            }
+
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            Classroom cls = Unit_Of_Work.classroom_Repository.First_Or_Default(d => d.ID == Id && d.IsDeleted != true);
+            if (cls == null)
+            {
+                return NotFound("No Class with this Id");
+            }
+
+            List<StudentAcademicYear> studentAcademicYears = await Unit_Of_Work.studentAcademicYear_Repository.Select_All_With_IncludesById<StudentAcademicYear>(
+                query => query.IsDeleted != true && query.ClassID == Id,
+                query => query.Include(stu => stu.Student)
+            );
+
+            if (studentAcademicYears == null || studentAcademicYears.Count == 0)
+            {
+                return NotFound("No students found.");
+            }
+
+            List<Student> students = studentAcademicYears.Select(sa => sa.Student).ToList();
+
+            List<Student> filteredStudents = new List<Student>();
+            foreach (var student in students)
+            {
+                RegisterationFormSubmittion registerationFormSubmittion = Unit_Of_Work.registerationFormSubmittion_Repository.First_Or_Default
+                    (d => d.CategoryFieldID == 14 && d.RegisterationFormParentID == student.RegistrationFormParentID);
+                if(registerationFormSubmittion != null && registerationFormSubmittion.TextAnswer == "true")
+                {
+                    filteredStudents.Add(student);
+                }
+            }
+             
+            List<StudentGetDTO> studentDTOs = mapper.Map<List<StudentGetDTO>>(filteredStudents);
 
             return Ok(studentDTOs);
         }

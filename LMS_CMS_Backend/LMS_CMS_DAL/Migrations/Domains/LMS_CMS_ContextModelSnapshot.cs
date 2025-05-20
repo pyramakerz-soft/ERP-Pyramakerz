@@ -6309,11 +6309,14 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("ID"));
 
-                    b.Property<long>("BloomLevelID")
+                    b.Property<long?>("BloomLevelID")
                         .HasColumnType("bigint");
 
                     b.Property<long?>("CorrectAnswerID")
                         .HasColumnType("bigint");
+
+                    b.Property<string>("CorrectAnswerName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
@@ -6327,10 +6330,10 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("DifficultyLevel")
+                    b.Property<int?>("DifficultyLevel")
                         .HasColumnType("int");
 
-                    b.Property<long>("DokLevelID")
+                    b.Property<long?>("DokLevelID")
                         .HasColumnType("bigint");
 
                     b.Property<string>("EssayAnswer")
@@ -7376,11 +7379,17 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<float>("PassByDegree")
                         .HasColumnType("real");
 
+                    b.Property<string>("SubjectArabicNameInCertificate")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<long>("SubjectCategoryID")
                         .HasColumnType("bigint");
 
                     b.Property<string>("SubjectCode")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SubjectEnglishNameInCertificate")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<float>("TotalMark")
@@ -12151,8 +12160,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.HasOne("LMS_CMS_DAL.Models.Domains.LMS.BloomLevel", "BloomLevel")
                         .WithMany("QuestionBanks")
                         .HasForeignKey("BloomLevelID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("LMS_CMS_DAL.Models.Domains.LMS.QuestionBankOption", "QuestionBankOption")
                         .WithMany("QuestionBanks")
@@ -12166,8 +12174,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.HasOne("LMS_CMS_DAL.Models.Domains.LMS.DokLevel", "DokLevel")
                         .WithMany("QuestionBanks")
                         .HasForeignKey("DokLevelID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "InsertedByEmployee")
                         .WithMany()
