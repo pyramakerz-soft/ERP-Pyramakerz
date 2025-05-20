@@ -209,7 +209,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             {
                 return BadRequest("the name cannot be null");
             }
-            Section section=Unit_Of_Work.section_Repository.First_Or_Default(s=>s.ID== Newgrade.SectionID&&s.IsDeleted!=true);
+            Section section = await Unit_Of_Work.section_Repository.FindByIncludesAsync(s => s.ID == Newgrade.SectionID && s.IsDeleted != true, query => query.Include(emp => emp.school));
             if (section == null)
             {
                 return BadRequest("this section not found");
@@ -217,7 +217,11 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             if(Newgrade.SAT != null)
             {
-                if(section.school.MaximumPeriodCountTimeTable < Newgrade.SAT)
+                if (section.school.MaximumPeriodCountTimeTable == null)
+                {
+                    return BadRequest("School hasn't set Maximum Period Count Time Table.");
+                }
+                if (section.school.MaximumPeriodCountTimeTable < Newgrade.SAT)
                 {
                     return BadRequest("Period Count In SAT Can't be Bigger than Maximum Period Count Time Table For School");
                 }
@@ -225,7 +229,11 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             
             if(Newgrade.SUN != null)
             {
-                if(section.school.MaximumPeriodCountTimeTable < Newgrade.SUN)
+                if (section.school.MaximumPeriodCountTimeTable == null)
+                {
+                    return BadRequest("School hasn't set Maximum Period Count Time Table.");
+                }
+                if (section.school.MaximumPeriodCountTimeTable < Newgrade.SUN)
                 {
                     return BadRequest("Period Count In SUN Can't be Bigger than Maximum Period Count Time Table For School");
                 }
@@ -233,7 +241,11 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             
             if(Newgrade.MON != null)
             {
-                if(section.school.MaximumPeriodCountTimeTable < Newgrade.MON)
+                if (section.school.MaximumPeriodCountTimeTable == null)
+                {
+                    return BadRequest("School hasn't set Maximum Period Count Time Table.");
+                }
+                if (section.school.MaximumPeriodCountTimeTable < Newgrade.MON)
                 {
                     return BadRequest("Period Count In MON Can't be Bigger than Maximum Period Count Time Table For School");
                 }
@@ -241,7 +253,11 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             
             if(Newgrade.TUS != null)
             {
-                if(section.school.MaximumPeriodCountTimeTable < Newgrade.TUS)
+                if (section.school.MaximumPeriodCountTimeTable == null)
+                {
+                    return BadRequest("School hasn't set Maximum Period Count Time Table.");
+                }
+                if (section.school.MaximumPeriodCountTimeTable < Newgrade.TUS)
                 {
                     return BadRequest("Period Count In TUS Can't be Bigger than Maximum Period Count Time Table For School");
                 }
@@ -249,7 +265,11 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             
             if(Newgrade.WED != null)
             {
-                if(section.school.MaximumPeriodCountTimeTable < Newgrade.WED)
+                if (section.school.MaximumPeriodCountTimeTable == null)
+                {
+                    return BadRequest("School hasn't set Maximum Period Count Time Table.");
+                }
+                if (section.school.MaximumPeriodCountTimeTable < Newgrade.WED)
                 {
                     return BadRequest("Period Count In WED Can't be Bigger than Maximum Period Count Time Table For School");
                 }
@@ -257,7 +277,11 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             
             if(Newgrade.THRU != null)
             {
-                if(section.school.MaximumPeriodCountTimeTable < Newgrade.THRU)
+                if (section.school.MaximumPeriodCountTimeTable == null)
+                {
+                    return BadRequest("School hasn't set Maximum Period Count Time Table.");
+                }
+                if (section.school.MaximumPeriodCountTimeTable < Newgrade.THRU)
                 {
                     return BadRequest("Period Count In THRU Can't be Bigger than Maximum Period Count Time Table For School");
                 }
@@ -265,7 +289,11 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             
             if(Newgrade.FRI != null)
             {
-                if(section.school.MaximumPeriodCountTimeTable < Newgrade.FRI)
+                if (section.school.MaximumPeriodCountTimeTable == null)
+                {
+                    return BadRequest("School hasn't set Maximum Period Count Time Table.");
+                }
+                if (section.school.MaximumPeriodCountTimeTable < Newgrade.FRI)
                 {
                     return BadRequest("Period Count In FRI Can't be Bigger than Maximum Period Count Time Table For School");
                 }
@@ -325,7 +353,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return BadRequest("the name cannot be null");
             }
 
-            Section section = Unit_Of_Work.section_Repository.First_Or_Default(s => s.ID == newGrade.SectionID&&s.IsDeleted!=true);
+            Section section = await Unit_Of_Work.section_Repository.FindByIncludesAsync(s => s.ID == newGrade.SectionID&&s.IsDeleted!=true, query => query.Include(emp => emp.school));
             if (section == null)
             {
                 return BadRequest("this section not found");
@@ -343,6 +371,97 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 if (accessCheck != null)
                 {
                     return accessCheck;
+                }
+            }
+
+            if (newGrade.SAT != null)
+            {
+                if (section.school.MaximumPeriodCountTimeTable == null)
+                {
+                    return BadRequest("School hasn't set Maximum Period Count Time Table.");
+                }
+
+                if (section.school.MaximumPeriodCountTimeTable < newGrade.SAT)
+                {
+                    return BadRequest("Period Count In SAT Can't be Bigger than Maximum Period Count Time Table For School");
+                }
+            }
+
+            if (newGrade.SUN != null)
+            {
+                if (section.school.MaximumPeriodCountTimeTable == null)
+                {
+                    return BadRequest("School hasn't set Maximum Period Count Time Table.");
+                }
+
+                if (section.school.MaximumPeriodCountTimeTable < newGrade.SUN)
+                {
+                    return BadRequest("Period Count In SUN Can't be Bigger than Maximum Period Count Time Table For School");
+                }
+            }
+
+            if (newGrade.MON != null)
+            {
+                if (section.school.MaximumPeriodCountTimeTable == null)
+                {
+                    return BadRequest("School hasn't set Maximum Period Count Time Table.");
+                }
+
+                if (section.school.MaximumPeriodCountTimeTable < newGrade.MON)
+                {
+                    return BadRequest("Period Count In MON Can't be Bigger than Maximum Period Count Time Table For School");
+                }
+            }
+
+            if (newGrade.TUS != null)
+            {
+                if (section.school.MaximumPeriodCountTimeTable == null)
+                {
+                    return BadRequest("School hasn't set Maximum Period Count Time Table.");
+                }
+
+                if (section.school.MaximumPeriodCountTimeTable < newGrade.TUS)
+                {
+                    return BadRequest("Period Count In TUS Can't be Bigger than Maximum Period Count Time Table For School");
+                }
+            }
+
+            if (newGrade.WED != null)
+            {
+                if (section.school.MaximumPeriodCountTimeTable == null)
+                {
+                    return BadRequest("School hasn't set Maximum Period Count Time Table.");
+                }
+
+                if (section.school.MaximumPeriodCountTimeTable < newGrade.WED)
+                {
+                    return BadRequest("Period Count In WED Can't be Bigger than Maximum Period Count Time Table For School");
+                }
+            }
+
+            if (newGrade.THRU != null)
+            {
+                if (section.school.MaximumPeriodCountTimeTable == null)
+                {
+                    return BadRequest("School hasn't set Maximum Period Count Time Table.");
+                }
+
+                if (section.school.MaximumPeriodCountTimeTable < newGrade.THRU)
+                {
+                    return BadRequest("Period Count In THRU Can't be Bigger than Maximum Period Count Time Table For School");
+                }
+            }
+
+            if (newGrade.FRI != null)
+            {
+                if (section.school.MaximumPeriodCountTimeTable == null)
+                {
+                    return BadRequest("School hasn't set Maximum Period Count Time Table.");
+                }
+
+                if (section.school.MaximumPeriodCountTimeTable < newGrade.FRI)
+                {
+                    return BadRequest("Period Count In FRI Can't be Bigger than Maximum Period Count Time Table For School");
                 }
             }
 
