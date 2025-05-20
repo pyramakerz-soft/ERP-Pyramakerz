@@ -362,7 +362,7 @@ namespace LMS_CMS_PL.Controllers.Octa
             return Ok(new
             {
                 message = "Domain and database setup successfully.",
-                userName = domain.Name,
+                userName = "Admin",
                 password = Pass,
                 link = domainLink,
                 notFoundPages = notFoundPages.Any() ? notFoundPages : null,

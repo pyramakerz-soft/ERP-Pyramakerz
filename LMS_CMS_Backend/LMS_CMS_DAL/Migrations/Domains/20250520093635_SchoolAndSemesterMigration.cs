@@ -40,6 +40,18 @@ namespace LMS_CMS_DAL.Migrations.Domains
                 table: "TaxIssuers",
                 newName: "CountryCode");
 
+            //migrationBuilder.AddColumn<string>(
+            //    name: "SubjectArabicNameInCertificate",
+            //    table: "Subject",
+            //    type: "nvarchar(max)",
+            //    nullable: true);
+
+            //migrationBuilder.AddColumn<string>(
+            //    name: "SubjectEnglishNameInCertificate",
+            //    table: "Subject",
+            //    type: "nvarchar(max)",
+            //    nullable: true);
+
             migrationBuilder.AddColumn<string>(
                 name: "AdditionalInfo",
                 table: "Student",
@@ -119,13 +131,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                 nullable: true);
 
             migrationBuilder.AddColumn<long>(
-                name: "DaysID",
-                table: "School",
-                type: "bigint",
-                nullable: false,
-                defaultValue: 0L);
-
-            migrationBuilder.AddColumn<long>(
                 name: "WeekEndDayID",
                 table: "School",
                 type: "bigint",
@@ -136,6 +141,36 @@ namespace LMS_CMS_DAL.Migrations.Domains
                 table: "School",
                 type: "bigint",
                 nullable: true);
+
+            //migrationBuilder.AlterColumn<long>(
+            //    name: "DokLevelID",
+            //    table: "QuestionBank",
+            //    type: "bigint",
+            //    nullable: true,
+            //    oldClrType: typeof(long),
+            //    oldType: "bigint");
+
+            //migrationBuilder.AlterColumn<int>(
+            //    name: "DifficultyLevel",
+            //    table: "QuestionBank",
+            //    type: "int",
+            //    nullable: true,
+            //    oldClrType: typeof(int),
+            //    oldType: "int");
+
+            //migrationBuilder.AlterColumn<long>(
+            //    name: "BloomLevelID",
+            //    table: "QuestionBank",
+            //    type: "bigint",
+            //    nullable: true,
+            //    oldClrType: typeof(long),
+            //    oldType: "bigint");
+
+            //migrationBuilder.AddColumn<string>(
+            //    name: "CorrectAnswerName",
+            //    table: "QuestionBank",
+            //    type: "nvarchar(max)",
+            //    nullable: true);
 
             migrationBuilder.AddColumn<DateTime>(
                 name: "EtaInsertedDate",
@@ -149,11 +184,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                 column: "TypeID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_School_DaysID",
-                table: "School",
-                column: "DaysID");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_School_WeekEndDayID",
                 table: "School",
                 column: "WeekEndDayID");
@@ -162,14 +192,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                 name: "IX_School_WeekStartDayID",
                 table: "School",
                 column: "WeekStartDayID");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_School_Days_DaysID",
-                table: "School",
-                column: "DaysID",
-                principalTable: "Days",
-                principalColumn: "ID",
-                onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_School_Days_WeekEndDayID",
@@ -199,10 +221,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_School_Days_DaysID",
-                table: "School");
-
-            migrationBuilder.DropForeignKey(
                 name: "FK_School_Days_WeekEndDayID",
                 table: "School");
 
@@ -219,16 +237,20 @@ namespace LMS_CMS_DAL.Migrations.Domains
                 table: "Student");
 
             migrationBuilder.DropIndex(
-                name: "IX_School_DaysID",
-                table: "School");
-
-            migrationBuilder.DropIndex(
                 name: "IX_School_WeekEndDayID",
                 table: "School");
 
             migrationBuilder.DropIndex(
                 name: "IX_School_WeekStartDayID",
                 table: "School");
+
+            //migrationBuilder.DropColumn(
+            //    name: "SubjectArabicNameInCertificate",
+            //    table: "Subject");
+
+            //migrationBuilder.DropColumn(
+            //    name: "SubjectEnglishNameInCertificate",
+            //    table: "Subject");
 
             migrationBuilder.DropColumn(
                 name: "AdditionalInfo",
@@ -283,16 +305,16 @@ namespace LMS_CMS_DAL.Migrations.Domains
                 table: "ShopItem");
 
             migrationBuilder.DropColumn(
-                name: "DaysID",
-                table: "School");
-
-            migrationBuilder.DropColumn(
                 name: "WeekEndDayID",
                 table: "School");
 
             migrationBuilder.DropColumn(
                 name: "WeekStartDayID",
                 table: "School");
+
+            //migrationBuilder.DropColumn(
+            //    name: "CorrectAnswerName",
+            //    table: "QuestionBank");
 
             migrationBuilder.DropColumn(
                 name: "EtaInsertedDate",
@@ -314,6 +336,36 @@ namespace LMS_CMS_DAL.Migrations.Domains
                 table: "Semester",
                 type: "bigint",
                 nullable: true);
+
+            //migrationBuilder.AlterColumn<long>(
+            //    name: "DokLevelID",
+            //    table: "QuestionBank",
+            //    type: "bigint",
+            //    nullable: false,
+            //    defaultValue: 0L,
+            //    oldClrType: typeof(long),
+            //    oldType: "bigint",
+            //    oldNullable: true);
+
+            //migrationBuilder.AlterColumn<int>(
+            //    name: "DifficultyLevel",
+            //    table: "QuestionBank",
+            //    type: "int",
+            //    nullable: false,
+            //    defaultValue: 0,
+            //    oldClrType: typeof(int),
+            //    oldType: "int",
+            //    oldNullable: true);
+
+            //migrationBuilder.AlterColumn<long>(
+            //    name: "BloomLevelID",
+            //    table: "QuestionBank",
+            //    type: "bigint",
+            //    nullable: false,
+            //    defaultValue: 0L,
+            //    oldClrType: typeof(long),
+            //    oldType: "bigint",
+            //    oldNullable: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Semester_WeekEndDayID",
