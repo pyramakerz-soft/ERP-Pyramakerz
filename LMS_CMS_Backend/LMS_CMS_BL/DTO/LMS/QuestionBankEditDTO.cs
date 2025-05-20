@@ -28,10 +28,13 @@ namespace LMS_CMS_BL.DTO.LMS
         public List<long>? NewQuestionBankTagsDTO { get; set; } = new();
         public List<long>? DeletedQuestionBankTagsDTO { get; set; } = new();
 
-        public List<QuestionBankOptionAddDTO>? NewQuestionBankOptionsDTO { get; set; }
+        public List<QuestionBankOptionAddDTO>? NewQuestionBankOptionsDTO { get; set; } = new();
         public List<SubBankQuestionAddDTO>? NewSubBankQuestionsDTO { get; set; } = new();
 
-        public List<long>? DeletedQuestionBankOptionsDTO { get; set; }
+        public List<long>? DeletedQuestionBankOptionsDTO { get; set; } = new();
         public List<long>? DeletedSubBankQuestionsDTO { get; set; } = new();
+
+        public List<QuestionBankOptionAddDTO>? EditedQuestionBankOptionsDTO { get; set; } = new();
+        public List<SubBankQuestionAddDTO>? EditedSubBankQuestionsDTO { get; set; } = new();
     }
 }

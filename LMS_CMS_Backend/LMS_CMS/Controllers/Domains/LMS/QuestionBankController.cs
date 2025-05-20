@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoMapper.Internal;
 using LMS_CMS_BL.DTO.LMS;
 using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Migrations.Domains;
@@ -261,12 +262,42 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             {
                 if (string.IsNullOrWhiteSpace(NewData.CorrectAnswerName))
                 {
-                    return BadRequest("Correct Answer is required.");
+                    return BadRequest("Correct answer is required.");
                 }
 
-                if (NewData.QuestionBankOptionsDTO.Count == 0)
+                if (NewData.QuestionBankOptionsDTO == null || NewData.QuestionBankOptionsDTO.Count == 0)
                 {
-                    return BadRequest("Question Bank Options Is Requiered");
+                    return BadRequest("At least one option is required.");
+                }
+
+                // Check for null or empty options first
+                bool anyEmptyOption = NewData.QuestionBankOptionsDTO.Any(o =>
+                    string.IsNullOrWhiteSpace(o.Option));
+
+                if (anyEmptyOption)
+                {
+                    return BadRequest("All options must have non-empty values.");
+                }
+
+                // Normalize all options
+                var normalizedOptions = NewData.QuestionBankOptionsDTO
+                    .Select(o => o.Option?.Trim().ToLower())
+                    .Where(opt => !string.IsNullOrWhiteSpace(opt))
+                    .ToList();
+
+                // Check for duplicate options
+                bool hasDuplicateOptions = normalizedOptions.Count != normalizedOptions.Distinct().Count();
+                if (hasDuplicateOptions)
+                {
+                    return BadRequest("All options must be unique.");
+                }
+
+                // Check if correct answer exists among options
+                string normalizedCorrectAnswer = NewData.CorrectAnswerName.Trim().ToLower();
+                bool correctAnswerExists = normalizedOptions.Contains(normalizedCorrectAnswer);
+                if (!correctAnswerExists)
+                {
+                    return BadRequest("Correct answer must match one of the provided options.");
                 }
             }
 
@@ -274,10 +305,49 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             if (NewData.QuestionTypeID == 3 || NewData.QuestionTypeID == 5)
             {
-
-                if (NewData.QuestionBankOptionsDTO.Count == 0)
+                if (NewData.QuestionBankOptionsDTO == null || NewData.QuestionBankOptionsDTO.Count == 0)
                 {
-                    return BadRequest("Question Bank Options Is Requiered");
+                    return BadRequest("At least one option is required.");
+                }
+
+                // Check for null or empty options first
+                bool anyEmptyOption = NewData.QuestionBankOptionsDTO.Any(o =>
+                    string.IsNullOrWhiteSpace(o.Option));
+
+                if (anyEmptyOption)
+                {
+                    return BadRequest("All options must have non-empty values.");
+                }
+
+                // Normalize options
+                var normalizedOptions = NewData.QuestionBankOptionsDTO
+                    .Select(o => o.Option.Trim().ToLower())
+                    .ToList();
+
+                if (NewData.QuestionTypeID == 5)
+                {
+                    bool hasDuplicateOptions = normalizedOptions.Count != normalizedOptions.Distinct().Count();
+                    if (hasDuplicateOptions)
+                    {
+                        return BadRequest("All options must be unique.");
+                    }
+                    var orders = NewData.QuestionBankOptionsDTO
+                        .Select(o => o.Order)
+                        .ToList();
+
+                    // Check for null order
+                    bool hasNullOrder = orders.Any(o => o == null);
+                    if (hasNullOrder)
+                    {
+                        return BadRequest("All options must have a non-null order value.");
+                    }
+
+                    // Check for duplicate order values
+                    bool hasDuplicateOrders = orders.Count != orders.Distinct().Count();
+                    if (hasDuplicateOrders)
+                    {
+                        return BadRequest("All order values must be unique.");
+                    }
                 }
             }
 
@@ -285,12 +355,31 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             if (NewData.QuestionTypeID == 4)
             {
-                if (NewData.SubBankQuestionsDTO.Count == 0)
+                if (NewData.SubBankQuestionsDTO == null || NewData.SubBankQuestionsDTO.Count == 0)
                 {
-                    return BadRequest("SubBankQuestions Is Requiered");
+                    return BadRequest("Sub-questions are required.");
+                }
+
+                // Check for null or empty description/answer
+                bool anyEmpty = NewData.SubBankQuestionsDTO.Any(s =>
+                    string.IsNullOrWhiteSpace(s.Description) || string.IsNullOrWhiteSpace(s.Answer));
+
+                if (anyEmpty)
+                {
+                    return BadRequest("All sub-questions must have both a description and an answer.");
+                }
+
+                // Check uniqueness based on description
+                var normalizedPairs = NewData.SubBankQuestionsDTO
+                    .Select(s => $"{s.Description.Trim().ToLower()}")
+                    .ToList();
+
+                bool hasDuplicates = normalizedPairs.Count != normalizedPairs.Distinct().Count();
+                if (hasDuplicates)
+                {
+                    return BadRequest("All sub-questions must be unique description.");
                 }
             }
-
             //////////////////////////////////////////////////// Create ////////////////////////////////////////////////
 
             //////////  Create For True False and Essay Question
@@ -557,33 +646,131 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     return BadRequest("Correct Answer is required.");
                 }
 
-                //if (NewData.QuestionBankOptionsDTO.Count == 0)
-                //{
-                //    return BadRequest("Question Bank Options Is Requiered");
-                //}
             }
 
-            ////////// Validation For Fill in blank and Order - Sequencing Question 
+            ////////// Validation That all options is not the same 
 
-            if (NewData.QuestionTypeID == 3 || NewData.QuestionTypeID == 5)
+            if (NewData.QuestionTypeID == 2 || NewData.QuestionTypeID == 3 || NewData.QuestionTypeID == 5)
             {
+                List<QuestionBankOption> existedOptions = Unit_Of_Work.questionBankOption_Repository
+                    .FindBy(s => s.QuestionBankID == NewData.ID && s.IsDeleted != true);
 
-                //if (NewData.QuestionBankOptionsDTO.Count == 0)
-                //{
-                //    return BadRequest("Question Bank Options Is Requiered");
-                //}
+                if (existedOptions != null && NewData.DeletedQuestionBankOptionsDTO != null)
+                {
+                    existedOptions = existedOptions
+                        .Where(s => !NewData.DeletedQuestionBankOptionsDTO.Contains(s.ID))
+                        .ToList();
+                }
+
+                // Apply edits to existing options
+                foreach (var edited in NewData.EditedQuestionBankOptionsDTO ?? new List<QuestionBankOptionAddDTO>())
+                {
+                    var match = existedOptions.FirstOrDefault(o => o.ID == edited.ID);
+                    if (match != null)
+                    {
+                        match.Option = edited.Option;
+                        match.Order = edited.Order;
+                    }
+                }
+
+                // Combine all options (edited + new)
+                var allOptions = existedOptions
+                    .Select(o => o.Option?.Trim().ToLower())
+                    .Concat((NewData.NewQuestionBankOptionsDTO ?? new List<QuestionBankOptionAddDTO>())
+                        .Select(n => n.Option?.Trim().ToLower()))
+                    .ToList();
+
+
+                // Unique order validation for type 5
+                if (NewData.QuestionTypeID == 5)
+                {
+                    bool hasDuplicates = allOptions.Count != allOptions.Distinct().Count();
+                    if (hasDuplicates)
+                    {
+                        return BadRequest("All options must be unique.");
+                    }
+                    var allOrders = existedOptions
+                        .Select(o => o.Order)
+                        .Concat(NewData.NewQuestionBankOptionsDTO.Select(n => n.Order))
+                        .Where(o => o.HasValue)
+                        .Select(o => o.Value)
+                        .ToList();
+
+                    bool hasDuplicateOrders = allOrders.Count != allOrders.Distinct().Count();
+                    if (hasDuplicateOrders)
+                    {
+                        return BadRequest("All order values must be unique.");
+                    }
+                }
+
+                // Correct answer must exist in final option list for type 2
+                if (NewData.QuestionTypeID == 2)
+                {
+                    string? correctAnswerNormalized = NewData.CorrectAnswerName?.Trim().ToLower();
+                    bool correctAnswerExists = allOptions.Any(opt =>
+                        opt == correctAnswerNormalized);
+
+                    if (!correctAnswerExists)
+                    {
+                        return BadRequest("Correct answer must match one of the available options.");
+                    }
+                }
             }
 
-            ////////// Validation For Drag & Drop Question 
+            ////////// Validation That all Sub Questions is not the same 
 
             if (NewData.QuestionTypeID == 4)
             {
-                //if (NewData.SubBankQuestionsDTO.Count == 0)
-                //{
-                //    return BadRequest("SubBankQuestions Is Requiered");
-                //}
+                // 1. Get existing (not deleted) sub-questions
+                List<SubBankQuestion> existedSubBankQuestion = Unit_Of_Work.subBankQuestion_Repository
+                    .FindBy(s => s.QuestionBankID == NewData.ID && s.IsDeleted != true);
+
+                if (existedSubBankQuestion != null && NewData.DeletedSubBankQuestionsDTO != null)
+                {
+                    existedSubBankQuestion = existedSubBankQuestion
+                        .Where(s => !NewData.DeletedSubBankQuestionsDTO.Contains(s.ID))
+                        .ToList();
+                }
+
+                // 2. Apply edits to existing sub-questions
+                foreach (var edited in NewData.EditedSubBankQuestionsDTO ?? new List<SubBankQuestionAddDTO>())
+                {
+                    var match = existedSubBankQuestion.FirstOrDefault(q => q.ID == edited.ID);
+                    if (match != null)
+                    {
+                        match.Description = edited.Description;
+                        match.Answer = edited.Answer;
+                    }
+                }
+
+                // 3. Combine all sub-questions: edited + new
+                var allSubQuestions = existedSubBankQuestion
+                    .Select(q => new { q.Description, q.Answer })
+                    .Concat(NewData.NewSubBankQuestionsDTO.Select(n => new { n.Description, n.Answer }))
+                    .ToList();
+
+                // 4. Check for empty description/answer
+                bool anyEmpty = allSubQuestions.Any(s =>
+                    string.IsNullOrWhiteSpace(s.Description) || string.IsNullOrWhiteSpace(s.Answer));
+
+                if (anyEmpty)
+                {
+                    return BadRequest("All sub-questions must have both a description and an answer.");
+                }
+
+                // 5. Check for duplicates
+                var distinctPairs = allSubQuestions
+                    .Select(s => $"{s.Description.Trim().ToLower()}|{s.Answer.Trim().ToLower()}")
+                    .Distinct()
+                    .ToList();
+
+                if (distinctPairs.Count != allSubQuestions.Count)
+                {
+                    return BadRequest("Sub-questions must be unique (no duplicate description-answer pairs).");
+                }
             }
 
+            ////////////////////////////////////////////////////////////// Edit 
             var IsTypeChanged = false;
             if (NewData.QuestionTypeID != questionBank.QuestionTypeID)
             {
@@ -757,14 +944,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 }
                 Unit_Of_Work.questionBankOption_Repository.AddRange(options);
                 Unit_Of_Work.SaveChanges();
-                var correctOptionEntity = Unit_Of_Work.questionBankOption_Repository
-                    .First_Or_Default(o => o.QuestionBankID == questionBank.ID && o.Option == NewData.CorrectAnswerName);
-                if (correctOptionEntity != null)
-                {
-                    questionBank.CorrectAnswerID = correctOptionEntity.ID;
-                    Unit_Of_Work.questionBank_Repository.Update(questionBank);
-                    Unit_Of_Work.SaveChanges();
-                }
+               
 
             }
 
@@ -788,6 +968,69 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     newsubQuestions.Add(subQuestion);
                 }
                 Unit_Of_Work.subBankQuestion_Repository.AddRange(newsubQuestions);
+                Unit_Of_Work.SaveChanges();
+            }
+
+            /////////////////////////////////////////////////////////////////////////  Edit
+            // Options
+            if (NewData.EditedQuestionBankOptionsDTO != null && NewData.EditedQuestionBankOptionsDTO.Count != 0 && (NewData.QuestionTypeID == 2 || NewData.QuestionTypeID == 3 || NewData.QuestionTypeID == 5))
+            {
+                foreach (var item in NewData.EditedQuestionBankOptionsDTO ?? new List<QuestionBankOptionAddDTO>())
+                {
+                    if (item.ID != null && item.ID != 0)
+                    {
+                        var existingOption = Unit_Of_Work.questionBankOption_Repository.First_Or_Default(o => o.ID == item.ID);
+                        if (existingOption != null)
+                        {
+                            existingOption.Option = item.Option;
+                            existingOption.Order = item.Order;
+                            existingOption.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                            existingOption.InsertedByOctaId = userTypeClaim == "octa" ? userId : (int?)null;
+                            existingOption.InsertedByUserId = userTypeClaim == "employee" ? userId : (int?)null;
+
+                            Unit_Of_Work.questionBankOption_Repository.Update(existingOption);
+                        }
+                    }
+                }
+                Unit_Of_Work.SaveChanges();
+            }
+
+            if (NewData.QuestionTypeID == 2)
+            {
+                var correctOptionEntity = Unit_Of_Work.questionBankOption_Repository
+                       .First_Or_Default(o => o.QuestionBankID == questionBank.ID && o.Option == NewData.CorrectAnswerName && questionBank.IsDeleted != true);
+                if (correctOptionEntity != null)
+                {
+                    questionBank.CorrectAnswerID = correctOptionEntity.ID;
+                    Unit_Of_Work.questionBank_Repository.Update(questionBank);
+                    Unit_Of_Work.SaveChanges();
+                }
+                else
+                {
+                    return BadRequest("Correct Answer is required.");
+                }
+            }
+
+            // SubQuestions
+            if (NewData.EditedSubBankQuestionsDTO != null && NewData.EditedSubBankQuestionsDTO.Count != 0 && (NewData.QuestionTypeID == 4))
+            {
+                foreach (var item in NewData.EditedSubBankQuestionsDTO)
+                {
+                    if (item.ID != null && item.ID != 0)
+                    {
+                        var existing = Unit_Of_Work.subBankQuestion_Repository.First_Or_Default(q => q.ID == item.ID);
+                        if (existing != null)
+                        {
+                            existing.Description = item.Description;
+                            existing.Answer = item.Answer;
+                            existing.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                            existing.InsertedByOctaId = userTypeClaim == "octa" ? userId : (int?)null;
+                            existing.InsertedByUserId = userTypeClaim == "employee" ? userId : (int?)null;
+
+                            Unit_Of_Work.subBankQuestion_Repository.Update(existing);
+                        }
+                    }
+                }
                 Unit_Of_Work.SaveChanges();
             }
 
