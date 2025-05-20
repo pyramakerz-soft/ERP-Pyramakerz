@@ -151,38 +151,7 @@
                         validationErrors['dateTo'] }}</span>
                 </div>
             </div>
-
-
-            <div class="flex flex-wrap justify-between gap-x-4">
-                <div class="flex w-[47%] flex-col mb-4">
-                    <label class="mb-2" for="weekStartDayID">Week Start Day</label>
-                    <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="weekStartDayID"
-                      (ngModelChange)="onInputValueChange({ field: 'weekStartDayID', value: $event })" [(ngModel)]="semester.weekStartDayID">
-                      <option [value]="null" disabled selected hidden>Choose Day</option>
-                      <option *ngFor="let s of WeekDays" [value]="s.id">{{ s.name }}</option>
-                      <option *ngIf="WeekDays.length === 0" disabled selected>
-                        No Data Found
-                      </option>
-                    </select>
-                    <span *ngIf="validationErrors['weekStartDayID']" class="text-red-500 ml-3 font-normal">{{
-                      validationErrors["weekStartDayID"]}}</span>
-                </div>
-
-                <div class="flex w-[47%] flex-col mb-4">
-                    <label class="mb-2" for="weekEndDayID">Week End Day</label>
-                    <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="weekEndDayID"
-                      (ngModelChange)="onInputValueChange({ field: 'weekEndDayID', value: $event })" [(ngModel)]="semester.weekEndDayID">
-                      <option [value]="null" disabled selected hidden>Choose Day</option>
-                      <option *ngFor="let s of WeekDays" [value]="s.id">{{ s.name }}</option>
-                      <option *ngIf="WeekDays.length === 0" disabled selected>
-                        No Data Found
-                      </option>
-                    </select>
-                    <span *ngIf="validationErrors['weekEndDayID']" class="text-red-500 ml-3 font-normal">{{
-                      validationErrors["weekEndDayID"]}}</span>
-                </div>
-            </div>
-
+ 
             <div class="flex flex-wrap justify-between gap-x-4">
                 <div class="flex w-[47%] space-x-5 items-center mb-4">
                     <input type="checkbox" id="active" class="w-5 h-5"

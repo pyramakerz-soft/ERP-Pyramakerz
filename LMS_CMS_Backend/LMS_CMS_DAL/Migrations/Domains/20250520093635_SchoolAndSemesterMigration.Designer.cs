@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LMS_CMS_DAL.Migrations.Domains
 {
     [DbContext(typeof(LMS_CMS_Context))]
-    [Migration("20250520090816_SchoolAndSemesterMigration")]
+    [Migration("20250520093635_SchoolAndSemesterMigration")]
     partial class SchoolAndSemesterMigration
     {
         /// <inheritdoc />
@@ -6568,9 +6568,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<string>("CitySubdivision")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<long>("DaysID")
-                        .HasColumnType("bigint");
-
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
 
@@ -6646,8 +6643,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .HasColumnType("bigint");
 
                     b.HasKey("ID");
-
-                    b.HasIndex("DaysID");
 
                     b.HasIndex("DeletedByUserId");
 
@@ -12337,12 +12332,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.LMS.School", b =>
                 {
-                    b.HasOne("LMS_CMS_DAL.Models.Domains.Days", "Days")
-                        .WithMany()
-                        .HasForeignKey("DaysID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "DeletedByEmployee")
                         .WithMany()
                         .HasForeignKey("DeletedByUserId");
@@ -12370,8 +12359,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .WithMany("StartDaySchool")
                         .HasForeignKey("WeekStartDayID")
                         .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("Days");
 
                     b.Navigation("DeletedByEmployee");
 
