@@ -119,6 +119,7 @@ namespace LMS_CMS
             builder.Services.AddScoped<IEInvoiceSigner, EInvoiceSigner>();
             builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
             builder.Services.AddSingleton<IAmazonS3, AmazonS3Client>();
+            builder.Services.AddScoped<DomainService>();
 
             builder.Services.AddAWSService<IAmazonSecretsManager>(new Amazon.Extensions.NETCore.Setup.AWSOptions
             {

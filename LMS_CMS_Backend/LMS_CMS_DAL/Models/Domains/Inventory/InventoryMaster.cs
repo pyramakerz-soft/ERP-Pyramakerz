@@ -38,6 +38,7 @@ namespace LMS_CMS_DAL.Models.Domains.Inventory
         public byte? IsValid { get; set; }
         public byte[]? QrImage { get; set; }
         public string? Notes { get; set; }
+        public DateTime? EtaInsertedDate { get; set; }
         public List<string>? Attachments { get; set; }
 
         [ForeignKey("TaxIssuer")]
