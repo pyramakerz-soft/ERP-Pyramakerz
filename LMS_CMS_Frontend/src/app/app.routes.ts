@@ -151,9 +151,13 @@ import { StudentLessonLiveComponent } from './Pages/Student/LMS/student-lesson-l
 import { AssignmentDetailsComponent } from './Pages/Employee/LMS/assignment/assignment-details/assignment-details.component';
 import { AssignmentEditComponent } from './Pages/Employee/LMS/assignment/assignment-edit/assignment-edit.component';
 import { ZatcaDevicesComponent } from './Pages/Employee/Zatca/zatca-devices/zatca-devices.component';
-import { SubjectsComponent } from './Pages/Employee/LMS/subjects/subjects.component';
-import { SubjectDetailsComponent } from './Pages/Employee/LMS/SubjectDetails/subject-details.component';
-import { WeekDetailsComponent } from './Pages/Employee/LMS/week-details/week-details.component';
+import { SubjectsComponent } from './Pages/Employee/LMS/UI/subjects/subjects.component';
+import { SubjectDetailsComponent } from './Pages/Employee/LMS/UI/SubjectDetails/subject-details.component';
+import { WeekDetailsComponent } from './Pages/Employee/LMS/UI/week-details/week-details.component';
+import { ElectronicInvoiceComponent } from './Pages/Employee/Inventory/Report/electronic-invoice/electronic-invoice.component';
+import { LessonResourcesComponent } from './Pages/Employee/LMS/UI/lesson-resources/lesson-resources.component';
+import { AssignmentsComponent } from './Pages/Employee/LMS/UI/assignments/assignments.component';
+import { ElectronicInvoiceDetailComponent } from './Pages/Employee/Inventory/Report/electronic-invoice-detail/electronic-invoice-detail.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate:[noNavigateToLoginIfLoginGuard] },
@@ -353,9 +357,13 @@ export const routes: Routes = [
             { path: "Assignment Details", component: AssignmentDetailsComponent, title: "Assignment Details", canActivate:[noNavigateWithoutLoginGuard ] },
             { path: "Assignment Edit", component: AssignmentEditComponent, title: "Assignment Edit", canActivate:[noNavigateWithoutLoginGuard ] },
             { path: "Zatca Devices", component: ZatcaDevicesComponent, title: "Zatca Devices", canActivate:[noNavigateWithoutLoginGuard ] },
+            { path: "menna", component: ElectronicInvoiceComponent, title: "menna", canActivate:[noNavigateWithoutLoginGuard ] },
+            { path: "menna/:id", component: ElectronicInvoiceDetailComponent, title: "menna", canActivate:[noNavigateWithoutLoginGuard ] },
             { path: "Subjects", component: SubjectsComponent, title: "Subjects", canActivate:[noNavigateWithoutLoginGuard ] },
             { path: "Subject-Details/:subjectId", component: SubjectDetailsComponent, title: "Subject-Details", canActivate:[noNavigateWithoutLoginGuard] },
             { path: "week-details/:subjectId/:weekId", component: WeekDetailsComponent, title: "Week Details", canActivate:[noNavigateWithoutLoginGuard] }, 
+            { path: "Lesson-Resources/:subjectId", component: LessonResourcesComponent, title: "Lesson Resources", canActivate:[noNavigateWithoutLoginGuard] }, 
+            { path: "Assignments/:subjectId", component: AssignmentsComponent, title: "Assignments", canActivate:[noNavigateWithoutLoginGuard] }, 
 
             
                ]

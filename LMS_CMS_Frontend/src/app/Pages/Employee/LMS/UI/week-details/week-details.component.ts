@@ -75,6 +75,10 @@ export class WeekDetailsComponent implements OnInit {
   setActiveTab(tab: string) {
     this.activeTab = tab;
   }
+  navigateToLessonRes(subjectName: string) {
+  const subjectId = subjectName.toLowerCase().replace(/\s+/g, '-');
+  this.router.navigate(['/Employee/Lesson-Resources', subjectId]);
+}
 
   goBack() {
     this.router.navigate(['/Employee/Subject-Details', this.subjectName.toLowerCase().replace(/\s+/g, '-')]);

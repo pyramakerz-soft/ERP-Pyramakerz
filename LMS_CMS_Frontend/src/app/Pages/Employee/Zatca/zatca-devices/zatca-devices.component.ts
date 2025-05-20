@@ -7,7 +7,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
-import { ZatcaDevice } from '../../../../Models/zatca/zatca-device.model';
+import { ZatcaDevice } from '../../../../Models/zatca/zatca-device';
 import { School } from '../../../../Models/school';
 import { TokenData } from '../../../../Models/token-data';
 import { AccountService } from '../../../../Services/account.service';
@@ -15,6 +15,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { ApiService } from '../../../../Services/api.service';
+import { ZatcaService } from '../../../../Services/Employee/Zatca/zatca.service';
 
 @Component({
   selector: 'app-zatca-devices',
@@ -59,7 +60,9 @@ export class ZatcaDevicesComponent implements OnInit {
     private schoolService: SchoolService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
-    private datePipe: DatePipe
+    private datePipe: DatePipe,
+    private zatcaService: ZatcaService
+
   ) {}
 
   ngOnInit() {
@@ -306,6 +309,43 @@ Delete(id: number) {
             icon: 'error',
             title: 'Error',
             text: error.message || 'Failed to delete device',
+            confirmButtonText: 'Okay'
+          });
+        }
+      });
+    }
+  });
+}
+generateCertificate(id: number) {
+  Swal.fire({
+    title: 'Generate Certificate',
+    text: 'Are you sure you want to generate a certificate for this device?',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#FF7519',
+    cancelButtonColor: '#17253E',
+    confirmButtonText: 'Generate',
+    cancelButtonText: 'Cancel'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      this.isLoading = true;
+      this.zatcaService.generateCertificate(id, this.DomainName).subscribe({
+        next: () => {
+          this.isLoading = false;
+          Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: 'Certificate generated successfully',
+            confirmButtonText: 'Okay'
+          });
+          this.GetTableData(); // Refresh table data
+        },
+        error: (error) => {
+          this.isLoading = false;
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: error.error?.message || 'Failed to generate certificate',
             confirmButtonText: 'Okay'
           });
         }

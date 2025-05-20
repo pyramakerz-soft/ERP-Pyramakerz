@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ApiService } from '../../api.service';
 import { Observable } from 'rxjs';
-import { ZatcaDevice } from '../../../Models/zatca/zatca-device.model';
+import { ZatcaDevice } from '../../../Models/zatca/zatca-device';
 import { SchoolPCs } from '../../../Models/Inventory/school-pcs';
 
 @Injectable({

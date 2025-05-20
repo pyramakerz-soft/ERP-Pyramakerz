@@ -64,6 +64,9 @@
                             <button *ngIf="AllowEdit " (click)="Edit(row.id)">
                                 <i class="fa-solid fa-pencil"></i>
                             </button>
+                            <button (click)="generateCertificate(row.id)" title="Generate Certificate">
+                                <i class="fa-solid fa-certificate"></i>
+                            </button>
                         </div>
                     </td>
                     </tr>
@@ -108,6 +111,8 @@
     <option *ngFor="let school of schools" [ngValue]="school.id">
         {{ school.name }}
     </option>
+        <option *ngIf="schools.length === 0" disabled selected>No Data Found</option>
+
 </select>
             <span *ngIf="validationErrors['schoolId']" class="text-red-500 ml-3 font-normal">
                 {{ validationErrors['schoolId'] }}

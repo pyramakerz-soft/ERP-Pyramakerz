@@ -62,4 +62,8 @@ weeks: string[] = [
   setActiveTab(tab: string) {
     this.activeTab = tab;
   }
+  navigateToAssignments(subjectName: string) {
+  const subjectId = subjectName.toLowerCase().replace(/\s+/g, '-');
+  this.router.navigate(['/Employee/Assignments', subjectId]);
+}
 }
