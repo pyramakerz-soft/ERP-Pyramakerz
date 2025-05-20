@@ -49,6 +49,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     f => f.IsDeleted != true,
                     query => query.Include(emp => emp.Grade),
                     query => query.Include(emp => emp.AcademicYear),
+                    query => query.Include(emp => emp.HomeroomTeacher),
                     query => query.Include(emp => emp.Floor)
                     );
 
@@ -81,6 +82,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     f => f.IsDeleted != true && f.AcademicYear.SchoolID == schoolID,
                     query => query.Include(emp => emp.Grade),
                     query => query.Include(emp => emp.AcademicYear),
+                    query => query.Include(emp => emp.HomeroomTeacher),
                     query => query.Include(emp => emp.Floor)
                     );
 
@@ -111,6 +113,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             Classroom classroom = await Unit_Of_Work.classroom_Repository.FindByIncludesAsync(
                 t => t.IsDeleted != true && t.ID == id,
                 query => query.Include(e => e.Floor).ThenInclude(d => d.building),
+                query => query.Include(emp => emp.HomeroomTeacher),
                 query => query.Include(emp => emp.AcademicYear).ThenInclude(d => d.School),
                 query => query.Include(emp => emp.Grade).ThenInclude(d => d.Section)
                 );
@@ -154,6 +157,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
            List<Classroom> classroom =await Unit_Of_Work.classroom_Repository.Select_All_With_IncludesById<Classroom>(
                 t => t.IsDeleted != true && t.GradeID == GradeId && t.AcademicYearID==AccademicYearId,
                 query => query.Include(e => e.Floor),
+                query => query.Include(emp => emp.HomeroomTeacher),
                 query => query.Include(emp => emp.AcademicYear),
                 query => query.Include(emp => emp.Grade)
                 );
@@ -182,6 +186,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             List<Classroom> classrooms = await Unit_Of_Work.classroom_Repository.Select_All_With_IncludesById<Classroom>(
                     f => f.IsDeleted != true && f.GradeID==id,
                     query => query.Include(emp => emp.Grade),
+                    query => query.Include(emp => emp.HomeroomTeacher),
                     query => query.Include(emp => emp.AcademicYear),
                     query => query.Include(emp => emp.Floor)
                     );
@@ -208,6 +213,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             List<Classroom> classrooms = await Unit_Of_Work.classroom_Repository.Select_All_With_IncludesById<Classroom>(
                     f => f.IsDeleted != true && f.GradeID== GradeId && f.AcademicYearID == AcYeaId,
                     query => query.Include(emp => emp.Grade),
+                    query => query.Include(emp => emp.HomeroomTeacher),
                     query => query.Include(emp => emp.AcademicYear),
                     query => query.Include(emp => emp.Floor)
                     );
@@ -234,6 +240,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             List<Classroom> classrooms = await Unit_Of_Work.classroom_Repository.Select_All_With_IncludesById<Classroom>(
                     f => f.IsDeleted != true && f.AcademicYearID == AcYeaId,
                     query => query.Include(emp => emp.Grade),
+                    query => query.Include(emp => emp.HomeroomTeacher),
                     query => query.Include(emp => emp.AcademicYear),
                     query => query.Include(emp => emp.Floor)
                     );
@@ -260,6 +267,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             List<Classroom> classrooms = await Unit_Of_Work.classroom_Repository.Select_All_With_IncludesById<Classroom>(
                     f => f.IsDeleted != true && f.AcademicYear.IsActive == true,
                     query => query.Include(emp => emp.Grade),
+                    query => query.Include(emp => emp.HomeroomTeacher),
                     query => query.Include(emp => emp.AcademicYear),
                     query => query.Include(emp => emp.Floor)
                     );

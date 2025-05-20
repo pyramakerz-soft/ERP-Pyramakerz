@@ -288,7 +288,8 @@ namespace LMS_CMS_BL.Config
                 .ForMember(dest => dest.SectionID, opt => opt.MapFrom(src => src.Grade.SectionID))
                 .ForMember(dest => dest.SectionName, opt => opt.MapFrom(src => src.Grade.Section.Name))
                 .ForMember(dest => dest.BuildingID, opt => opt.MapFrom(src => src.Floor.buildingID))
-                .ForMember(dest => dest.BuildingName, opt => opt.MapFrom(src => src.Floor.building.Name))
+                .ForMember(dest => dest.BuildingName, opt => opt.MapFrom(src => src.Floor.building.Name)) 
+                .ForMember(dest => dest.HomeroomTeacherName, opt => opt.MapFrom(src => src.HomeroomTeacher != null ? src.HomeroomTeacher.en_name : null))
                 .ForMember(dest => dest.FloorName, opt => opt.MapFrom(src => src.Floor.Name));
             CreateMap<ClassroomAddDTO, Classroom>();
             CreateMap<Classroom, ClassroomAddDTO>();
