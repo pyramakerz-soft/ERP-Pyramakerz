@@ -31,6 +31,8 @@ namespace LMS_CMS_DAL.Models.Domains.Inventory
         public string? OtherImage { get; set; }
         public string BarCode { get; set; }
         public string? ItemType { get; set; }
+        public string? ItemCode { get; set; }
+        public string? UnitType { get; set; }
 
         [ForeignKey("Gender")]
         public long? GenderID { get; set; }

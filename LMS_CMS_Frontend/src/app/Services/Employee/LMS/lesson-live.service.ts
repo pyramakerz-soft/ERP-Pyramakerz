@@ -52,6 +52,18 @@ export class LessonLiveService {
     return this.http.get<LessonLive[]>(`${this.baseUrl}/LessonLive/ByStudentId/${id}`, { headers })
   }
 
+  GetByClassId(id: number,DomainName:string) {
+    if(DomainName!=null) {
+      this.header=DomainName 
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<LessonLive[]>(`${this.baseUrl}/LessonLive/ByClassId/${id}`, { headers })
+  }
+
   Add(LessonLive: LessonLive,DomainName:string) {
     if(DomainName!=null) {
       this.header=DomainName 

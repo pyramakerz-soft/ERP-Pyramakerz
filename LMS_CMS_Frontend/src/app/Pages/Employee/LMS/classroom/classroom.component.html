@@ -20,7 +20,7 @@
     <div class="w-[49%]">
         <label for="School1" class="block mb-2 text-sm font-medium text-gray-900">School</label>
         <select id="School1" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
-            [(ngModel)]="SelectedSchoolIdForFilteration" (change)="getAllYearsForFilteration()">
+            [(ngModel)]="SelectedSchoolIdForFilteration" (change)="onSchoolFilterrationChange()">
             <option value=0 disabled selected hidden>Select a School</option>
             <option *ngFor="let school of SchoolsForFilteration" [value]="school.id">
                 {{ school.name }}
@@ -35,6 +35,7 @@
             <option *ngFor="let ac of AcademicYearsForFilteration" [value]="ac.id">
                 {{ ac.name }}
             </option>
+            <option *ngIf="AcademicYearsForFilteration.length == 0">No Data Found</option>
         </select>
     </div>
     <div class="rounded-full p-2 border-4" (click)="ResetFilter()">

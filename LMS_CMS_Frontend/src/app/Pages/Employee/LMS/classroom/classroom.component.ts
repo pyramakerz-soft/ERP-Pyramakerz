@@ -265,7 +265,14 @@ export class ClassroomComponent {
     )
   }
 
+  onSchoolFilterrationChange(){
+    this.classroomData=[]
+    this.activeAcademicYearID = 0
+    this.getAllYearsForFilteration()
+  }
+
   getAllYearsForFilteration() {
+    this.AcademicYearsForFilteration = []
     this.acadimicYearService.GetBySchoolId(this.SelectedSchoolIdForFilteration, this.DomainName).subscribe((d) => {
       this.AcademicYearsForFilteration = d
     })

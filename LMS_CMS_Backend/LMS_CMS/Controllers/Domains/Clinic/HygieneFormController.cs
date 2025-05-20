@@ -60,7 +60,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                     StudentHygienes studentHygiene = Unit_Of_Work.studentHygiens_Repository.First_Or_Default(x => x.StudentId == dd.StudentId);
 
                     HygieneType hygieneType = new();
-                    if (studentHygiene is null)
+                    if (studentHygiene is not null)
                     {
                         hygieneType = Unit_Of_Work.hygieneType_Repository.First_Or_Default(h => h.Id == studentHygiene.ID);
 

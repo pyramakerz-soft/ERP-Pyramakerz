@@ -105,13 +105,13 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             {
                 return BadRequest("Enter student ID");
             }
-            Student student = Unit_Of_Work.student_Repository.First_Or_Default(s=>s.ID== id);
+            Student student = Unit_Of_Work.student_Repository.First_Or_Default(s=>s.ID== id && s.IsDeleted != true);
             if (student == null)
             {
-                return BadRequest("Enter student ID");
+                return BadRequest("No Student With This ID");
             }
 
-            StudentAcademicYear studentAcademicYear = Unit_Of_Work.studentAcademicYear_Repository.First_Or_Default(s => s.StudentID == id && s.Classroom.AcademicYear.IsActive==true);
+            StudentAcademicYear studentAcademicYear = Unit_Of_Work.studentAcademicYear_Repository.First_Or_Default(s => s.StudentID == id && s.Classroom.AcademicYear.IsActive==true && s.IsDeleted != true);
             if (studentAcademicYear == null)
             {
                 return BadRequest("this student Has no class");
@@ -120,6 +120,45 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             List<LessonLive> lessonLives = await Unit_Of_Work.lessonLive_Repository.Select_All_With_IncludesById<LessonLive>(
                     b => b.IsDeleted != true && b.ClassroomID== studentAcademicYear.ClassID,
+                    query => query.Include(d => d.Classroom),
+                    query => query.Include(d => d.WeekDay),
+                    query => query.Include(d => d.Subject)
+                    );
+
+            if (lessonLives == null || lessonLives.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<LessonLiveGetDTO> lessonLivesDTO = mapper.Map<List<LessonLiveGetDTO>>(lessonLives);
+
+            return Ok(lessonLivesDTO);
+        }
+        
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpGet("ByClassId/{id}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" }
+            //,
+            //pages: new[] { "Lesson Live" }
+        )]
+        public async Task<IActionResult> GetByClassId(long id)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            if (id == 0)
+            {
+                return BadRequest("Enter Class ID");
+            }
+            Classroom classroom = Unit_Of_Work.classroom_Repository.First_Or_Default(s=>s.ID== id && s.IsDeleted != true);
+            if (classroom == null)
+            {
+                return BadRequest("No Classroom With This ID");
+            }
+             
+            List<LessonLive> lessonLives = await Unit_Of_Work.lessonLive_Repository.Select_All_With_IncludesById<LessonLive>(
+                    b => b.IsDeleted != true && b.ClassroomID== id,
                     query => query.Include(d => d.Classroom),
                     query => query.Include(d => d.WeekDay),
                     query => query.Include(d => d.Subject)
