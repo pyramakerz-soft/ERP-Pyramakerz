@@ -273,6 +273,12 @@ namespace LMS_CMS_PL.Services.ETA
             };
         }
 
+        public static List<Country> GetCountries(UOW unitofWork)
+        {
+            List<Country> countries = unitofWork.country_Repository.Select_All();
+            return countries;
+        }
+
         private static decimal GetDiscountAmount(IEnumerable<InventoryDetails> items)
         {
             decimal total = 0;
