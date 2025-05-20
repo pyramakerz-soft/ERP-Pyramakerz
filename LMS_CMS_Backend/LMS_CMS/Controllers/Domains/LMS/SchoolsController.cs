@@ -201,6 +201,18 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             {
                 return BadRequest("there is no School Type with this id");
             }
+            
+            Days start = Unit_Of_Work.days_Repository.First_Or_Default(s => s.ID == newSchool.WeekStartDayID);
+            if (start == null)
+            {
+                return BadRequest("There is no Start Day with this id");
+            }
+            
+            Days end = Unit_Of_Work.days_Repository.First_Or_Default(s => s.ID == newSchool.WeekEndDayID);
+            if (end == null)
+            {
+                return BadRequest("There is no End Day with this id");
+            }
 
             if (newSchool.ReportImageFile != null)
             {

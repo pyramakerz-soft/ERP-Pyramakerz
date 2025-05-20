@@ -33,9 +33,17 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public string? VatNumber { get; set; }
         public string? CRN { get; set; } //Commercial Registration Number
         public int? MaximumPeriodCountTimeTable { get; set; }
-        public int? MaximumPeriodCountRemedials { get; set; } 
+        public int? MaximumPeriodCountRemedials { get; set; }
+        [ForeignKey("WeekStartDay")]
+        public long? WeekStartDayID { get; set; }
+        public Days? WeekStartDay { get; set; }
+
+        [ForeignKey("WeekEndDay")]
+        public long? WeekEndDayID { get; set; }
+        public Days? WeekEndDay { get; set; }
 
         public SchoolType SchoolType { get; set; }
+        public Days Days { get; set; }
         public ICollection<AcademicYear> AcademicYears { get; set; } = new HashSet<AcademicYear>();
         public ICollection<StudentAcademicYear> StudentAcademicYears { get; set; } = new HashSet<StudentAcademicYear>();
         public ICollection<Section> Sections { get; set; } = new HashSet<Section>();

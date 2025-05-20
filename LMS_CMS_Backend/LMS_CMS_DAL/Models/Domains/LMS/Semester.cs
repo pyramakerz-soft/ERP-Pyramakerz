@@ -20,15 +20,7 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public string DateFrom { get; set; }
         public string DateTo { get; set; }
         public bool? IsCurrent { get; set; }
-        public bool? IsActive { get; set; }
-
-        [ForeignKey("WeekStartDay")]
-        public long? WeekStartDayID { get; set; }
-        public Days? WeekStartDay { get; set; }
-
-        [ForeignKey("WeekEndDay")]
-        public long? WeekEndDayID { get; set; }
-        public Days? WeekEndDay { get; set; }
+        public bool? IsActive { get; set; } 
 
         [ForeignKey("AcademicYear")]
         public long? AcademicYearID { get; set; }

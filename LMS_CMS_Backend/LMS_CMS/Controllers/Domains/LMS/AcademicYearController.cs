@@ -179,6 +179,16 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 academicYear.InsertedByUserId = userId;
             }
 
+            if(academicYear.IsActive == true)
+            {
+                List<AcademicYear> academicYears = Unit_Of_Work.academicYear_Repository.Select_All();
+                foreach (var year in academicYears)
+                {
+                    year.IsActive = false;
+                    Unit_Of_Work.academicYear_Repository.Update(year);
+                }
+            }
+
             Unit_Of_Work.academicYear_Repository.Add(academicYear);
             Unit_Of_Work.SaveChanges();
             return Ok(NewAcademicYear);
@@ -257,6 +267,17 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     AcademicYear.UpdatedByOctaId = null;
                 }
             }
+
+            if (AcademicYear.IsActive == true)
+            {
+                List<AcademicYear> academicYears = Unit_Of_Work.academicYear_Repository.FindBy(d => d.ID != AcademicYear.ID);
+                foreach (var year in academicYears)
+                {
+                    year.IsActive = false;
+                    Unit_Of_Work.academicYear_Repository.Update(year);
+                }
+            }
+
             Unit_Of_Work.academicYear_Repository.Update(AcademicYear);
             Unit_Of_Work.SaveChanges();
             return Ok(newAcademicYear);
