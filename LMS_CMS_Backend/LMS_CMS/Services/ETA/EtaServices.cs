@@ -150,17 +150,17 @@ namespace LMS_CMS_PL.Services.ETA
                         ["totalAmount"] = totalSalesAmount,
                         ["extraDiscountAmount"] = 0,
                         ["totalItemsDiscountAmount"] = 0,
-                        ["signatures"] = new JsonArray
-                        {
-                            new JsonObject
-                            {
-                                ["signatureType"] = "I",
-                                ["value"] = "<Signature Value>"
-                            }
-                        }
                     }
                 }
             };
+            //["signatures"] = new JsonArray
+            //            {
+            //                new JsonObject
+            //                {
+            //                    ["signatureType"] = "I",
+            //                    ["value"] = "<Signature Value>"
+            //                }
+            //            }
 
             //string serialize0 = Serialize((JObject)invoiceJson.ToJsonString());
             //string signWithCMS0 = SignWithCMS(Encoding.UTF8.GetBytes(serialize0));
