@@ -155,13 +155,13 @@
             <div class="flex flex-wrap justify-between gap-x-4">
                 <div class="flex w-[47%] space-x-5 items-center mb-4">
                     <input type="checkbox" id="active" class="w-5 h-5"
-                    [checked]="semester.isActive">
+                    [(ngModel)]="semester.isActive">
                     <label for="active" class="text-sm">Is Active</label>
                 </div>
     
                 <div class="flex w-[47%] space-x-5 items-center mb-4">
                     <input type="checkbox" id="Current" class="w-5 h-5"
-                    [checked]="semester.isCurrent">
+                    [(ngModel)]="semester.isCurrent">
                     <label for="Current" class="text-sm">Is Current</label>
                 </div>
             </div>

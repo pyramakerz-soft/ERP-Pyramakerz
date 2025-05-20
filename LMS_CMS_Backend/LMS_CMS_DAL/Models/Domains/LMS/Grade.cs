@@ -23,6 +23,14 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         [ForeignKey("Section")]
         public long SectionID { get; set; }
         public Section Section { get; set; }
+        public int? SAT { get; set; }
+        public int? SUN { get; set; }
+        public int? MON { get; set; }
+        public int? TUS { get; set; }
+        public int? WED { get; set; }
+        public int? THRU { get; set; }
+        public int? FRI { get; set; }
+
         public ICollection<StudentAcademicYear> StudentAcademicYears { get; set; } = new HashSet<StudentAcademicYear>();
         public ICollection<Subject> Subjects { get; set; } = new HashSet<Subject>();
         public ICollection<Classroom> Classrooms { get; set; } = new HashSet<Classroom>();

@@ -18,6 +18,13 @@ namespace LMS_CMS_BL.DTO.LMS
         public string DateTo { get; set; }
         public long SectionID { get; set; }
         public string? SectionName { get; set; }
+        public int? SAT { get; set; }
+        public int? SUN { get; set; }
+        public int? MON { get; set; }
+        public int? TUS { get; set; }
+        public int? WED { get; set; }
+        public int? THRU { get; set; }
+        public int? FRI { get; set; }
         public long? InsertedByUserId { get; set; }
     }
 }

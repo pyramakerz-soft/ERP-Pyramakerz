@@ -21,5 +21,7 @@ export class School {
         public reportImage : string = "",
         public maximumPeriodCountTimeTable: number = 0,
         public maximumPeriodCountRemedials: number = 0,
+        public weekStartDayID: number | null = null,
+        public weekEndDayID: number | null = null
     ) {}
 }
