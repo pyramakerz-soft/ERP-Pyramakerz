@@ -78,6 +78,8 @@ export class SchoolService {
     formData.append('citySubdivision', school.citySubdivision?.toString() ?? '');
     formData.append('buildingNumber', school.buildingNumber?.toString() ?? '');
     formData.append('streetName', school.streetName?.toString() ?? '');
+    formData.append('weekEndDayID', school.weekEndDayID?.toString() ?? '');
+    formData.append('weekStartDayID', school.weekStartDayID?.toString() ?? '');
     if (school.reportImageFile) {
       formData.append('reportImageFile', school.reportImageFile, school.reportImageFile.name);
     } else if (school.reportImage) {

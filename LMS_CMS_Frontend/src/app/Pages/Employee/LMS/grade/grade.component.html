@@ -114,6 +114,60 @@
                 (ngModelChange)="onInputValueChange({ field: 'dateTo', value: $event })"/>
                 <span *ngIf="validationErrors['dateTo']" class="text-red-500 ml-3 font-normal">{{ validationErrors['dateTo'] }}</span>
             </div>
+            <div class="flex flex-col mb-4">
+                <label class="mb-2 primaryTxt">Periods Count</label>
+                <div class="flex">
+                    <div class="flex flex-col mb-4">
+                        <label class="mb-2 primaryTxt" for="SAT">SAT</label>
+                        <input id="SAT" type="text" (input)="validateNumber($event, 'SAT')" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Number"
+                        [(ngModel)]="grade.SAT" 
+                        (ngModelChange)="onInputValueChange({ field: 'SAT', value: $event })"/>
+                        <span *ngIf="validationErrors['SAT']" class="text-red-500 ml-3 font-normal">{{ validationErrors['SAT'] }}</span>
+                    </div>
+                    <div class="flex flex-col mb-4">
+                        <label class="mb-2 primaryTxt" for="SUN">SUN</label>
+                        <input id="SUN" type="text" (input)="validateNumber($event, 'SUN')" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Number"
+                        [(ngModel)]="grade.SUN" 
+                        (ngModelChange)="onInputValueChange({ field: 'SUN', value: $event })"/>
+                        <span *ngIf="validationErrors['SUN']" class="text-red-500 ml-3 font-normal">{{ validationErrors['SUN'] }}</span>
+                    </div>
+                    <div class="flex flex-col mb-4">
+                        <label class="mb-2 primaryTxt" for="MON">MON</label>
+                        <input id="MON" type="text" (input)="validateNumber($event, 'MON')" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Number"
+                        [(ngModel)]="grade.MON" 
+                        (ngModelChange)="onInputValueChange({ field: 'MON', value: $event })"/>
+                        <span *ngIf="validationErrors['MON']" class="text-red-500 ml-3 font-normal">{{ validationErrors['MON'] }}</span>
+                    </div>
+                    <div class="flex flex-col mb-4">
+                        <label class="mb-2 primaryTxt" for="TUS">TUS</label>
+                        <input id="TUS" type="text" (input)="validateNumber($event, 'TUS')" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Number"
+                        [(ngModel)]="grade.dateTo" 
+                        (ngModelChange)="onInputValueChange({ field: 'TUS', value: $event })"/>
+                        <span *ngIf="validationErrors['TUS']" class="text-red-500 ml-3 font-normal">{{ validationErrors['TUS'] }}</span>
+                    </div>
+                    <div class="flex flex-col mb-4">
+                        <label class="mb-2 primaryTxt" for="WED">WED</label>
+                        <input id="WED" type="text" (input)="validateNumber($event, 'WED')" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Number"
+                        [(ngModel)]="grade.WED" 
+                        (ngModelChange)="onInputValueChange({ field: 'WED', value: $event })"/>
+                        <span *ngIf="validationErrors['WED']" class="text-red-500 ml-3 font-normal">{{ validationErrors['WED'] }}</span>
+                    </div>
+                    <div class="flex flex-col mb-4">
+                        <label class="mb-2 primaryTxt" for="THRU">THRU</label>
+                        <input id="THRU" type="text" (input)="validateNumber($event, 'THRU')" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Number"
+                        [(ngModel)]="grade.THRU" 
+                        (ngModelChange)="onInputValueChange({ field: 'THRU', value: $event })"/>
+                        <span *ngIf="validationErrors['THRU']" class="text-red-500 ml-3 font-normal">{{ validationErrors['THRU'] }}</span>
+                    </div>
+                    <div class="flex flex-col mb-4">
+                        <label class="mb-2 primaryTxt" for="FRI">FRI</label>
+                        <input id="FRI" type="text" (input)="validateNumber($event, 'FRI')" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Number"
+                        [(ngModel)]="grade.FRI" 
+                        (ngModelChange)="onInputValueChange({ field: 'FRI', value: $event })"/>
+                        <span *ngIf="validationErrors['FRI']" class="text-red-500 ml-3 font-normal">{{ validationErrors['FRI'] }}</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="flex justify-end">

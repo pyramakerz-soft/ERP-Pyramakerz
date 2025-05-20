@@ -13,6 +13,8 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
+import { Day } from '../../../../Models/day';
+import { DaysService } from '../../../../Services/Octa/days.service';
 
 @Component({
   selector: 'app-school',
@@ -50,7 +52,8 @@ export class SchoolComponent {
     ''
   );
   isLoading = false;
-
+  WeekDays:Day[]=[]
+  
   constructor(
     public account: AccountService,
     public ApiServ: ApiService,
@@ -58,6 +61,7 @@ export class SchoolComponent {
     private menuService: MenuService,
     public activeRoute: ActivatedRoute,
     public schoolService: SchoolService,
+    public DaysServ: DaysService,
     public router: Router
   ) { }
 
@@ -97,10 +101,17 @@ export class SchoolComponent {
       });
   }
 
+  GetAllDays() {
+    this.DaysServ.Get(this.DomainName).subscribe((d) => {
+      this.WeekDays = d;
+    });
+  }
+
   openModal(schoolId: number) {
     this.GetSchoolById(schoolId);
 
     this.getSchoolData();
+    this.GetAllDays()
 
     document.getElementById('Add_Modal')?.classList.remove('hidden');
     document.getElementById('Add_Modal')?.classList.add('flex');
@@ -231,7 +242,7 @@ export class SchoolComponent {
     }
   }
 
-  SaveSchool() {
+  SaveSchool() { 
     if (this.isFormValid()) {
       this.isLoading = true;
       this.schoolService.Edit(this.school, this.DomainName).subscribe(

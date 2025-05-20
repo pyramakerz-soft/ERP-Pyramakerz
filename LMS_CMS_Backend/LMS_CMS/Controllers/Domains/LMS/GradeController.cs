@@ -214,6 +214,63 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             {
                 return BadRequest("this section not found");
             }
+
+            if(Newgrade.SAT != null)
+            {
+                if(section.school.MaximumPeriodCountTimeTable < Newgrade.SAT)
+                {
+                    return BadRequest("Period Count In SAT Can't be Bigger than Maximum Period Count Time Table For School");
+                }
+            }
+            
+            if(Newgrade.SUN != null)
+            {
+                if(section.school.MaximumPeriodCountTimeTable < Newgrade.SUN)
+                {
+                    return BadRequest("Period Count In SUN Can't be Bigger than Maximum Period Count Time Table For School");
+                }
+            }
+            
+            if(Newgrade.MON != null)
+            {
+                if(section.school.MaximumPeriodCountTimeTable < Newgrade.MON)
+                {
+                    return BadRequest("Period Count In MON Can't be Bigger than Maximum Period Count Time Table For School");
+                }
+            }
+            
+            if(Newgrade.TUS != null)
+            {
+                if(section.school.MaximumPeriodCountTimeTable < Newgrade.TUS)
+                {
+                    return BadRequest("Period Count In TUS Can't be Bigger than Maximum Period Count Time Table For School");
+                }
+            }
+            
+            if(Newgrade.WED != null)
+            {
+                if(section.school.MaximumPeriodCountTimeTable < Newgrade.WED)
+                {
+                    return BadRequest("Period Count In WED Can't be Bigger than Maximum Period Count Time Table For School");
+                }
+            }
+            
+            if(Newgrade.THRU != null)
+            {
+                if(section.school.MaximumPeriodCountTimeTable < Newgrade.THRU)
+                {
+                    return BadRequest("Period Count In THRU Can't be Bigger than Maximum Period Count Time Table For School");
+                }
+            }
+            
+            if(Newgrade.FRI != null)
+            {
+                if(section.school.MaximumPeriodCountTimeTable < Newgrade.FRI)
+                {
+                    return BadRequest("Period Count In FRI Can't be Bigger than Maximum Period Count Time Table For School");
+                }
+            }
+
             Grade grade = mapper.Map<Grade>(Newgrade);
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");

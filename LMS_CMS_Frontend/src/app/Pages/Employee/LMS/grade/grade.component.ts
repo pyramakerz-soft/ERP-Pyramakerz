@@ -219,6 +219,16 @@ export class GradeComponent {
     return valid
   }
 
+  validateNumber(event: any, field: keyof Grade): void {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = ''; 
+      if (typeof this.grade[field] === 'string') {
+        this.grade[field] = '' as never;  
+      }
+    }
+  }
+
   SaveGrade(){
     if(this.isFormValid()){
       this.isLoading = true;
