@@ -171,7 +171,7 @@ export class InstallmentDeductionDetailComponent {
             icon: 'success',
             title: 'Done',
             text: 'Done Succeessfully',
-            confirmButtonColor: '#FF7519',
+            confirmButtonColor: '#089B41',
           });
 
           this.router.navigateByUrl(`Employee/Installment Deduction Details/Edit/${this.MasterId}`)
@@ -254,7 +254,7 @@ export class InstallmentDeductionDetailComponent {
       title: 'Are you sure you want to delete this Installment Deduction Details?',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#FF7519',
+      confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
       confirmButtonText: 'Delete',
       cancelButtonText: 'Cancel',
@@ -266,7 +266,7 @@ export class InstallmentDeductionDetailComponent {
             icon: 'success',
             title: 'Done',
             text: 'Installment Deduction Details Deleted Succeessfully',
-            confirmButtonColor: '#FF7519',
+            confirmButtonColor: '#089B41',
           });
         })
       }

@@ -10,6 +10,10 @@ import { NewTokenService } from '../../Services/shared/new-token.service';
 import { LogOutService } from '../../Services/shared/log-out.service';
 import { Subscription } from 'rxjs';
 import { LanguageService } from '../../Services/shared/language.service';
+import { EditPass } from '../../Models/Employee/edit-pass';
+import Swal from 'sweetalert2';
+import { EmployeeService } from '../../Services/Employee/employee.service';
+import { ApiService } from '../../Services/api.service';
 
 @Component({
   selector: 'app-nav-menu',
@@ -28,9 +32,14 @@ export class NavMenuComponent {
   allTokens: { id: number, key: string; KeyInLocal: string; value: string; UserType: string }[] = [];
   User_Data_After_Login = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   subscription: Subscription | undefined;
+  PasswordError: string = ""; 
+  password:string =""
+  isLoading = false;
+  editpasss:EditPass=new EditPass();
+  DomainName: string = "";
 
-  constructor(private router: Router, public account: AccountService, public languageService: LanguageService,
-    private translate: TranslateService, private communicationService: NewTokenService, private logOutService: LogOutService) { }
+  constructor(private router: Router, public account: AccountService, public languageService: LanguageService, public ApiServ: ApiService,
+    private translate: TranslateService, private communicationService: NewTokenService, private logOutService: LogOutService, public EmpServ: EmployeeService) { }
 
   ngOnInit() {
     this.GetUserInfo();
@@ -40,6 +49,7 @@ export class NavMenuComponent {
     this.subscription = this.communicationService.action$.subscribe((state) => {
       this.GetUserInfo();
     });
+    this.DomainName = this.ApiServ.GetHeader();
   }
 
   getAllTokens(): void {
@@ -174,5 +184,66 @@ export class NavMenuComponent {
     this.GetUserInfo();
     this.getAllTokens();
     this.router.navigateByUrl("");
+  }
+
+  openModal() {
+    document.getElementById("ChangePassModal")?.classList.remove("hidden");
+    document.getElementById("ChangePassModal")?.classList.add("flex");
+  }
+
+  closeModal() {
+    document.getElementById("ChangePassModal")?.classList.remove("flex");
+    document.getElementById("ChangePassModal")?.classList.add("hidden");
+
+    this.PasswordError = ""; 
+    this.password = ""; 
+    this.isLoading = false;
+    this.editpasss = new EditPass();
+  }
+
+  onPasswordChange() {
+    this.PasswordError = "" 
+  } 
+  
+  Save(){
+    if(this.password != ""){
+      this.editpasss.Id=this.User_Data_After_Login.id;
+      this.editpasss.Password=this.password
+      this.isLoading = true
+      this.EmpServ.EditPassword(this.editpasss,this.DomainName).subscribe(()=>{
+          this.closeModal()
+          Swal.fire({
+            icon: 'success',
+            title: 'Done',
+            text: 'Updatedd Successfully',
+            confirmButtonColor: '#089B41',
+          });
+        },
+        (error) => {  
+          this.isLoading = false
+          switch(true) {
+            case error.error.errors?.Password !== undefined:
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.error.errors.Password[0] || 'An unexpected error occurred',
+                confirmButtonColor: '#089B41',
+              });
+              break; 
+            
+            default:
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.error.errors || 'An unexpected error occurred',
+                confirmButtonColor: '#089B41',
+              });
+              break;
+          }
+        } 
+      ) 
+    } else{
+      this.PasswordError = "Passworrd Can't be Empty"
+    }
   }
 }

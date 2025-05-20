@@ -9,6 +9,7 @@ import { EmployeeService } from '../../../Services/Employee/employee.service';
 import { ApiService } from '../../../Services/api.service';
 import { Employee } from '../../../Models/Employee/employee';
 import { CommonModule } from '@angular/common';
+import { RevenueChartSalesComponent } from '../../../Component/Employee/Home/revenue-chart-sales/revenue-chart-sales.component';
 
 @Component({
   selector: 'app-employee-home',
@@ -16,6 +17,7 @@ import { CommonModule } from '@angular/common';
   imports: [
     ChartPieComponent,
     RevenueChartComponent,
+    RevenueChartSalesComponent,
     SalesAnalyticsComponent,
     FilterHeaderComponent,
     CommonModule

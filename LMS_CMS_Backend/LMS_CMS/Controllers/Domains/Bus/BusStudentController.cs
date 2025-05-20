@@ -375,7 +375,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Bus
             if (bus.IsCapacityRestricted == true)
             {
                 List<BusStudent> busStudents = Unit_Of_Work.busStudent_Repository.FindBy(
-                    b => b.SemseterID == busStudentPutDTO.SemseterID && b.IsDeleted != true && b.BusID == busStudentPutDTO.BusID
+                    b => b.SemseterID == busStudentPutDTO.SemseterID && b.IsDeleted != true && b.BusID == busStudentPutDTO.BusID && b.ID != busStudentPutDTO.ID
                     );
 
                 if (busStudents.Count >= bus.Capacity)

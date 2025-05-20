@@ -292,7 +292,7 @@ export class RoleAddEditComponent {
               icon: 'success',
               title: 'Done',
               text: 'Role Added Succeessfully',
-              confirmButtonColor: '#FF7519',
+              confirmButtonColor: '#089B41',
             });
             this.router.navigateByUrl("Employee/Role")
           },
@@ -302,7 +302,7 @@ export class RoleAddEditComponent {
             Swal.fire({
               icon: 'error',
               title: 'Error',
-              confirmButtonColor: '#FF7519',
+              confirmButtonColor: '#089B41',
               text: errorMessage,
             });
           },
@@ -315,7 +315,7 @@ export class RoleAddEditComponent {
               icon: 'success',
               title: 'Done',
               text: 'Role Edited Succeessfully',
-              confirmButtonColor: '#FF7519',
+              confirmButtonColor: '#089B41',
             });
             this.router.navigateByUrl("Employee/Role")
           },
@@ -324,7 +324,7 @@ export class RoleAddEditComponent {
               Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                confirmButtonColor: '#FF7519',
+                confirmButtonColor: '#089B41',
                 text: "You Are Not Allowed To Edit This",
               });
             }else{
@@ -333,7 +333,7 @@ export class RoleAddEditComponent {
               Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                confirmButtonColor: '#FF7519',
+                confirmButtonColor: '#089B41',
                 text: errorMessage,
               });
             }
@@ -371,7 +371,7 @@ export class RoleAddEditComponent {
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        confirmButtonColor: '#FF7519',
+        confirmButtonColor: '#089B41',
         text: "Pages list cannot be null or empty",
       });
       isValid = false;

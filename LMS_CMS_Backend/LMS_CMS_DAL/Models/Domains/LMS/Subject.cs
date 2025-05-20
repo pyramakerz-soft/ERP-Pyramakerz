@@ -19,6 +19,8 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         [Required(ErrorMessage = "الاسم مطلوب")]
         [StringLength(100, ErrorMessage = "لا يمكن أن يكون الاسم أطول من 100 حرف")]
         public string ar_name { get; set; }
+        public string? SubjectEnglishNameInCertificate { get; set; } 
+        public string? SubjectArabicNameInCertificate { get; set; } 
         public int OrderInCertificate { get; set; }
         public double CreditHours { get; set; }
         public string SubjectCode { get; set; }

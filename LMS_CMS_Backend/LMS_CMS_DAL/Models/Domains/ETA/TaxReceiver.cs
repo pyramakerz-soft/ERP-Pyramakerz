@@ -9,9 +9,9 @@ namespace LMS_CMS_DAL.Models.Domains.ETA
         [Key]
         public string? ID { get; set; }
 
-        [ForeignKey("TaxReceiverType")]
+        [ForeignKey("TaxCustomer")]
         public int? TypeID { get; set; }
-        public TaxType? TaxReceiverType { get; set; }
+        public TaxCustomer? TaxCustomer { get; set; }
 
         public string? Name { get; set; }
         public string? ActivityCode { get; set; }

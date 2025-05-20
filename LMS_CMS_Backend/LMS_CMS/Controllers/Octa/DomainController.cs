@@ -141,6 +141,7 @@ namespace LMS_CMS_PL.Controllers.Octa
                     ID = page.ID,
                     en_name = page.en_name, 
                     ar_name = page.ar_name,
+                    Order=page.Order,
                     enDisplayName_name = page.enDisplayName_name,
                     arDisplayName_name = page.arDisplayName_name,
                     IsDisplay = page.IsDisplay,
@@ -260,7 +261,7 @@ namespace LMS_CMS_PL.Controllers.Octa
             string Pass = GenerateSecurePassword(12);
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(Pass);
 
-            Employee emp = new Employee { User_Name = domain.Name, en_name = domain.Name, Password = hashedPassword, Role_ID = 1, EmployeeTypeID = 1 };
+            Employee emp = new Employee { User_Name = "Admin", en_name = "Admin", Password = hashedPassword, Role_ID = 1, EmployeeTypeID = 1 };
             emp.InsertedByOctaId= userId;
             emp.InsertedAt= TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
             Unit_Of_Work.employee_Repository.Add(emp);
@@ -479,7 +480,7 @@ namespace LMS_CMS_PL.Controllers.Octa
                 Unit_Of_Work.SaveChanges();
             }
 
-            // 3) Get The Deleted Ones (By Default it will delete the role details as on delete cascade
+            // 3) Get The Deleted Ones (By Default it will delete the role details as on delete cascade)
             if (existingPages != null && existingPages.Count != 0)
             {
                 for (int i = 0; i < existingPages.Count; i++)
@@ -495,6 +496,21 @@ namespace LMS_CMS_PL.Controllers.Octa
                 }
                 Unit_Of_Work.SaveChanges();
             }
+
+            // Delete pages that are in domain and not in Octa
+            var pagesInDomain = Unit_Of_Work.page_Repository.Select_All();
+            var pagesInOcta = _Unit_Of_Work.page_Octa_Repository.Select_All_Octa();
+            var pagesNotInOcta = pagesInDomain.Where(domainPage => !pagesInOcta.Any(octaPage => octaPage.ID == domainPage.ID)).ToList();
+
+            // Check if there are any pages not in `pagesInOcta`
+            if (pagesNotInOcta.Any())
+            {
+                for (int i = 0; i < pagesNotInOcta.Count; i++)
+                {
+                    Unit_Of_Work.page_Repository.Delete(pagesNotInOcta[i].ID);
+                }
+            } 
+
 
             //var notFoundPages = new List<long>();
             //var notModulePages = new List<long>();

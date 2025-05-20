@@ -21,6 +21,7 @@ namespace LMS_CMS_DAL.Models.Octa
         public string ar_name { get; set; }
         public string? arDisplayName_name { get; set; }
         public string? enDisplayName_name { get; set; }
+        public long Order { get; set; }
         public bool IsDisplay { get; set; }
         [ForeignKey("Parent")]
         public long? Page_ID { get; set; }

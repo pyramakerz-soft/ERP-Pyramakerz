@@ -60,7 +60,7 @@
             <!-- Filter Button -->
             <div class="flex flex-col mb-4 w-[12%] justify-end">
                 <button (click)="filterMHByDoctor()"
-                    class="text-white rounded-lg px-4 py-2.5 flex items-center justify-center gap-2 bg-[#FF7519]">
+                    class="text-white rounded-lg px-4 py-2.5 flex items-center justify-center gap-2 bg-[#089B41]">
                     Search for
                 </button>
             </div>
@@ -119,7 +119,7 @@
         <!-- Filter Button -->
         <div class="flex flex-col mb-4 w-[12%] justify-end">
             <button (click)="filterHygieneForms()"
-                class="text-white rounded-lg px-4 py-2.5 flex items-center justify-center gap-2 bg-[#FF7519]">
+                class="text-white rounded-lg px-4 py-2.5 flex items-center justify-center gap-2 bg-[#089B41]">
                 Search for
             </button>
         </div>
@@ -178,7 +178,7 @@
             <!-- Filter Button -->
             <div class="flex flex-col mb-4 w-[12%] justify-end">
                 <button (click)="filterFollowUps()"
-                    class="text-white rounded-lg px-4 py-2.5 flex items-center justify-center gap-2 bg-[#FF7519]">
+                    class="text-white rounded-lg px-4 py-2.5 flex items-center justify-center gap-2 bg-[#089B41]">
                     Search for
                 </button>
             </div>
@@ -193,7 +193,7 @@
     <!-- Tabs -->
     <div class="flex space-x-4">
         <button *ngFor="let tab of tabs" (click)="selectTab(tab)" [ngClass]="{
-        'bg-[#FF7519] text-white': selectedTab === tab,
+        'bg-[#089B41] text-white': selectedTab === tab,
         'bg-gray-200 text-gray-700': selectedTab !== tab
       }" class="px-4 py-3 text-sm font-medium rounded-sm focus:outline-none transition-colors duration-200">
             {{ tab }}

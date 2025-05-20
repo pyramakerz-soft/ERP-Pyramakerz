@@ -401,7 +401,7 @@ deleteFollowUp(row: any) {
     text: 'You will not be able to recover this follow-up!',
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonColor: '#FF7519',
+    confirmButtonColor: '#089B41',
     cancelButtonColor: '#2E3646',
     confirmButtonText: 'Yes, delete it!',
     cancelButtonText: 'No, keep it'

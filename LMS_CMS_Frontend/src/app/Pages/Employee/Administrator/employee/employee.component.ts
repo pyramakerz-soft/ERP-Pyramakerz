@@ -83,7 +83,7 @@ export class EmployeeComponent {
       title: 'Are you sure you want to delete this Employee?',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#FF7519',
+      confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
       confirmButtonText: 'Delete',
       cancelButtonText: 'Cancel',
@@ -103,7 +103,7 @@ export class EmployeeComponent {
               icon: 'success',
               title: 'Deleted!',
               text: 'The Employee has been deleted successfully.',
-              confirmButtonColor: '#FF7519',
+              confirmButtonColor: '#089B41',
             });
             this.GetEmployee(); 
           },
@@ -113,7 +113,7 @@ export class EmployeeComponent {
               icon: 'error',
               title: 'Error!',
               text: errorMessage,
-              confirmButtonColor: '#FF7519',
+              confirmButtonColor: '#089B41',
             });
           },
         });

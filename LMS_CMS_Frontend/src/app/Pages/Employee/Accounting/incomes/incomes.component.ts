@@ -120,7 +120,7 @@ export class IncomesComponent {
       title: 'Are you sure you want to delete this Income?',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#FF7519',
+      confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
       confirmButtonText: 'Delete',
       cancelButtonText: 'Cancel',

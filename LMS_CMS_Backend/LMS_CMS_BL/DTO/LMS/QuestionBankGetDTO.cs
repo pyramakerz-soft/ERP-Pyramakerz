@@ -21,6 +21,8 @@ namespace LMS_CMS_BL.DTO.LMS
         public string? EssayAnswer { get; set; }
         public long LessonID { get; set; }
         public string LessonName { get; set; }
+        public long SubjectID { get; set; }
+        public string SubjectName { get; set; }
         public long BloomLevelID { get; set; }
         public string BloomLevelName { get; set; }
         public long DokLevelID { get; set; }
@@ -28,6 +30,10 @@ namespace LMS_CMS_BL.DTO.LMS
         public long QuestionTypeID { get; set; }
         public string QuestionTypeName { get; set; }
         public long? CorrectAnswerID { get; set; }
+        public string? CorrectAnswerName { get; set; }
         public string? QuestionBankOptionName { get; set; }
+        public List<long> QuestionBankTagsDTO { get; set; } 
+        public List<QuestionBankOptionAddDTO>? QuestionBankOptionsDTO { get; set; }
+        public List<SubBankQuestionAddDTO> SubBankQuestionsDTO { get; set; } 
     }
 }

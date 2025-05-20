@@ -139,7 +139,9 @@ export class StoresComponent {
     if (!this.CategoriesSelected.some((e) => e.id === category.id)) {
       this.CategoriesSelected.push(category);
     }
-    this.store.categoriesIds.push(category.id);
+     if (! this.store.categoriesIds.some((e) => e=== category.id)) {
+       this.store.categoriesIds.push(category.id);
+    }
     this.dropdownOpen = false;
   }
 
@@ -149,7 +151,7 @@ export class StoresComponent {
       title: 'Are you sure you want to delete this Store?',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#FF7519',
+      confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
       confirmButtonText: 'Delete',
       cancelButtonText: 'Cancel',

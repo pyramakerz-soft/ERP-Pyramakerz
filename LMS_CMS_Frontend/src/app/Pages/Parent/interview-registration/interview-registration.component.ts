@@ -10,7 +10,8 @@ import { InterviewTimeTable } from '../../../Models/Registration/interview-time-
 import { InterviewTimeTableService } from '../../../Services/Employee/Registration/interview-time-table.service';
 import { RegistrationFormInterviewService } from '../../../Services/Employee/Registration/registration-form-interview.service';
 import Swal from 'sweetalert2';
-
+import { DayWithInterviews } from '../../../Models/Registration/day-with-interviews';
+ 
 @Component({
   selector: 'app-interview-registration',
   standalone: true,
@@ -54,6 +55,10 @@ export class InterviewRegistrationComponent {
     this.DomainName = this.ApiServ.GetHeader();
 
     this.getRegistrationFormParentIncludeRegistrationFormInterviewData()
+  }
+  
+  trackByInterview(index: number, interview: InterviewTimeTable): number {
+    return interview.id;
   }
 
   getRegistrationFormParentIncludeRegistrationFormInterviewData(){
@@ -131,7 +136,7 @@ export class InterviewRegistrationComponent {
           title: 'Are you sure you want to Cancel this Interview Registration?',
           icon: 'warning',
           showCancelButton: true,
-          confirmButtonColor: '#FF7519',
+          confirmButtonColor: '#089B41',
           cancelButtonColor: '#17253E',
           confirmButtonText: 'Yes',
           cancelButtonText: 'No',
@@ -168,7 +173,7 @@ export class InterviewRegistrationComponent {
             title: 'Error',
             text: error.error,
             icon: 'error',
-            confirmButtonColor: '#FF7519',
+            confirmButtonColor: '#089B41',
             confirmButtonText: 'OK',
           });
         }
@@ -185,7 +190,7 @@ export class InterviewRegistrationComponent {
             title: 'Error',
             text: error.error,
             icon: 'error',
-            confirmButtonColor: '#FF7519',
+            confirmButtonColor: '#089B41',
             confirmButtonText: 'OK',
           });
         }
@@ -324,7 +329,3 @@ export class InterviewRegistrationComponent {
 }
 
   
-interface DayWithInterviews {
-  day: number;  
-  interviews: InterviewTimeTable[];  
-}

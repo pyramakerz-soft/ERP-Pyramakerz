@@ -186,7 +186,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
             List<questionGetDTO> questionDTO = mapper.Map<List<questionGetDTO>>(questions);
             foreach (var question in questionDTO)
             {
-
+                List<MCQQuestionOption> MCQQuestionOptions = Unit_Of_Work.mCQQuestionOption_Repository.FindBy(d => d.IsDeleted != true && d.Question_ID == question.ID);
+                List<MCQQuestionOptionGetDto> MCQQuestionOptionGetDtos = mapper.Map<List<MCQQuestionOptionGetDto>>(MCQQuestionOptions);
+                question.options = MCQQuestionOptionGetDtos;
                 string serverUrl = $"{Request.Scheme}://{Request.Host}/";
 
                 if (!string.IsNullOrEmpty(question.Image))

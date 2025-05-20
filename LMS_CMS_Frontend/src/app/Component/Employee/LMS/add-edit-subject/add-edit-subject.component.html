@@ -21,6 +21,16 @@
                 (ngModelChange)="onInputValueChange({ field: 'ar_name', value: $event })"/>
                 <span *ngIf="validationErrors['ar_name']" class="text-red-500 ml-3 font-normal">{{ validationErrors['ar_name'] }}</span>
             </div>
+            <div class="flex flex-col mb-4 w-[49%]">
+                <label class="mb-2 primaryTxt" for="nameInCertificate">Subject English Name In Certificate</label>
+                <input id="nameInCertificate" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Name In Certificate"
+                [(ngModel)]="subject.subjectEnglishNameInCertificate" /> 
+            </div>
+            <div class="flex flex-col mb-4 w-[49%]">
+                <label class="mb-2 primaryTxt" for="nameInCertificateArabic">Subject Arabic Name In Certificate</label>
+                <input id="nameInCertificateArabic" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Name In Certificate"
+                [(ngModel)]="subject.subjectArabicNameInCertificate" /> 
+            </div>
             <div class="flex flex-col w-[49%] mb-4">
                 <label class="mb-2" for="school" [ngClass]="{ 'text-gray-400': editSubject, 'primaryTxt': !editSubject}">Choose School</label>
                 <select
@@ -99,6 +109,7 @@
                 <label for="hide" class="text-sm">Hide From Grade Report</label>
             </div>
             <div class="w-full mb-4">
+                <label class="mb-2 primaryTxt" for="totalMark">Subject Icon</label>
                 <div class="bg-[#F6F6F6] flex items-center space-x-4 w-full rounded-md border-dashed border-2">
                     <div class="flex justify-center w-full">
                         <label for="file-upload" class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">

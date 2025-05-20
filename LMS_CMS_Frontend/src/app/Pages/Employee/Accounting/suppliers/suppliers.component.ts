@@ -130,7 +130,7 @@ export class SuppliersComponent {
       title: 'Are you sure you want to delete this Supplier?',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#FF7519',
+      confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
       confirmButtonText: 'Delete',
       cancelButtonText: 'Cancel',
@@ -261,7 +261,7 @@ export class SuppliersComponent {
         icon: 'warning',
         title: 'Warning!',
         text: 'Email is not valid.',
-        confirmButtonColor: '#FF7519',
+        confirmButtonColor: '#089B41',
       });
     }
 
@@ -273,7 +273,7 @@ export class SuppliersComponent {
         icon: 'warning',
         title: 'Warning!',
         text: 'Phone 1 is not valid.',
-        confirmButtonColor: '#FF7519',
+        confirmButtonColor: '#089B41',
       });
     }
 
@@ -284,7 +284,7 @@ export class SuppliersComponent {
           icon: 'warning',
           title: 'Warning!',
           text: 'Phone 2 is not valid.',
-          confirmButtonColor: '#FF7519',
+          confirmButtonColor: '#089B41',
         });
       }
     }
@@ -296,7 +296,7 @@ export class SuppliersComponent {
           icon: 'warning',
           title: 'Warning!',
           text: 'Phone 3 is not valid.',
-          confirmButtonColor: '#FF7519',
+          confirmButtonColor: '#089B41',
         });
       }
     }

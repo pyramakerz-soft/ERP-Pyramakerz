@@ -196,6 +196,9 @@ namespace LMS_CMS_DAL.Migrations.Octa
                     b.Property<bool>("IsDisplay")
                         .HasColumnType("bit");
 
+                    b.Property<long>("Order")
+                        .HasColumnType("bigint");
+
                     b.Property<long?>("Page_ID")
                         .HasColumnType("bigint");
 

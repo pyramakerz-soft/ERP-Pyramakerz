@@ -473,7 +473,7 @@ export class StockingDetailsComponent {
               icon: 'success',
               title: 'Done',
               text: 'Stocking Added Succeessfully',
-              confirmButtonColor: '#FF7519',
+              confirmButtonColor: '#089B41',
             });
             this.router.navigateByUrl(`Employee/Stocking`);
           },
@@ -518,7 +518,7 @@ export class StockingDetailsComponent {
               icon: 'success',
               title: 'Done',
               text: 'Stocking Edited Succeessfully',
-              confirmButtonColor: '#FF7519',
+              confirmButtonColor: '#089B41',
             });
             this.router.navigateByUrl(`Employee/Stocking`);
           },
@@ -547,7 +547,7 @@ export class StockingDetailsComponent {
         title: 'Are you sure you want to delete this Item?',
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#FF7519',
+        confirmButtonColor: '#089B41',
         cancelButtonColor: '#17253E',
         confirmButtonText: 'Delete',
         cancelButtonText: 'Cancel',
@@ -572,7 +572,7 @@ export class StockingDetailsComponent {
         title: 'Are you sure you want to delete this Item?',
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#FF7519',
+        confirmButtonColor: '#089B41',
         cancelButtonColor: '#17253E',
         confirmButtonText: 'Delete',
         cancelButtonText: 'Cancel',
@@ -616,7 +616,7 @@ export class StockingDetailsComponent {
         icon: 'warning',
         title: 'Warning!',
         text: 'Stocking Details Is Required',
-        confirmButtonColor: '#FF7519',
+        confirmButtonColor: '#089B41',
       });
       return false;
     }
@@ -625,7 +625,7 @@ export class StockingDetailsComponent {
         icon: 'warning',
         title: 'Warning!',
         text: 'Stocking Details Is Required',
-        confirmButtonColor: '#FF7519',
+        confirmButtonColor: '#089B41',
       });
       return false;
     }

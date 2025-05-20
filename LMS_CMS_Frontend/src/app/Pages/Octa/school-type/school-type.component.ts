@@ -143,7 +143,7 @@ export class SchoolTypeComponent {
               title: 'School Type Created Successfully',
               icon: 'success',
               showCancelButton: false,
-              confirmButtonColor: '#FF7519',
+              confirmButtonColor: '#089B41',
               confirmButtonText: 'Okay',
             }).then((r) => {
               this.closeModal()
@@ -196,7 +196,7 @@ export class SchoolTypeComponent {
       title: 'Are you sure you want to delete this school type?',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#FF7519',
+      confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
       confirmButtonText: 'Delete',
       cancelButtonText: 'Cancel'

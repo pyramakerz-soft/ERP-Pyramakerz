@@ -100,7 +100,21 @@ export class ShopComponent {
   }
 
   getShopPagination(){
-    this.shopItemService.GetBySubCategoryIDWithGenderAndGrade(this.selectedInventorySubCategory, this.CurrentPage, this.PageSize, this.DomainName, this.searchQuery).subscribe(
+    this.ShopItem = []
+    this.shopItemService.GetBySubCategoryID(this.selectedInventorySubCategory, this.CurrentPage, this.PageSize, this.DomainName, this.searchQuery).subscribe(
+      data => { 
+        this.CurrentPage = data.pagination.currentPage
+        this.PageSize = data.pagination.pageSize
+        this.TotalPages = data.pagination.totalPages
+        this.TotalRecords = data.pagination.totalRecords 
+        this.ShopItem = data.data 
+      }
+    )
+  }
+
+  getShopPaginationWithStudentID(){
+    this.ShopItem = []
+    this.shopItemService.GetBySubCategoryIDWithGenderAndGradeAndStudentID(this.selectedInventorySubCategory, this.StuID, this.CurrentPage, this.PageSize, this.DomainName, this.searchQuery).subscribe(
       data => { 
         this.CurrentPage = data.pagination.currentPage
         this.PageSize = data.pagination.pageSize
@@ -114,7 +128,11 @@ export class ShopComponent {
   getShopItems(id: number) { 
     this.ShopItem = []
     this.selectedInventorySubCategory = id
-    this.getShopPagination()
+    if(this.StuID != 0){
+      this.getShopPaginationWithStudentID()
+    }else{
+      this.getShopPagination()
+    }
   }
   
   addShopItemToCart(id: number) { 
@@ -143,7 +161,11 @@ export class ShopComponent {
 
   changeCurrentPage(currentPage:number){
     this.CurrentPage = currentPage
-    this.getShopPagination() 
+    if(this.StuID != 0){
+      this.getShopPaginationWithStudentID()
+    }else{
+      this.getShopPagination()
+    } 
   }
 
   goToShopItem(id: number) {  
@@ -173,6 +195,18 @@ export class ShopComponent {
   searchReports(): void {
     this.ShopItem = []
     this.CurrentPage = 1; 
-    this.getShopPagination();
+    if(this.StuID != 0){
+      this.getShopPaginationWithStudentID()
+    }else{
+      this.getShopPagination()
+    }
+  }
+
+  onStudentChange(){ 
+    if(this.StuID != 0){
+      this.getShopPaginationWithStudentID()
+    }else{
+      this.getShopPagination()
+    }
   }
 }

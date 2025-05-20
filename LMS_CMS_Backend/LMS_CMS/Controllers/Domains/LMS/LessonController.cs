@@ -154,6 +154,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 }
             }
 
+            lessonsDTO = lessonsDTO.OrderBy(lesson => lesson.Order).ToList();
+
             return Ok(lessonsDTO);
         }
 

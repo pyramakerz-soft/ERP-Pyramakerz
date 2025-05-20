@@ -159,7 +159,7 @@ export class FeesActivationComponent {
       title: 'Are you sure you want to delete this Fees Activation?',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#FF7519',
+      confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
       confirmButtonText: 'Delete',
       cancelButtonText: 'Cancel',
@@ -372,7 +372,7 @@ export class FeesActivationComponent {
           icon: 'warning',
           title: 'Warning!',
           text: 'School Is Required',
-          confirmButtonColor: '#FF7519',
+          confirmButtonColor: '#089B41',
         });
       }
       else if (this.SchoolId == 0) {
@@ -380,7 +380,7 @@ export class FeesActivationComponent {
           icon: 'warning',
           title: 'Warning!',
           text: 'School Is Required',
-          confirmButtonColor: '#FF7519',
+          confirmButtonColor: '#089B41',
         });
       }
       else if (this.SectionId == 0) {
@@ -388,7 +388,7 @@ export class FeesActivationComponent {
           icon: 'warning',
           title: 'Warning!',
           text: 'Section Is Required',
-          confirmButtonColor: '#FF7519',
+          confirmButtonColor: '#089B41',
         });
       }
       else if (this.GradeId == 0) {
@@ -396,7 +396,7 @@ export class FeesActivationComponent {
           icon: 'warning',
           title: 'Warning!',
           text: 'Grade Is Required',
-          confirmButtonColor: '#FF7519',
+          confirmButtonColor: '#089B41',
         });
       }
     }
@@ -446,7 +446,7 @@ export class FeesActivationComponent {
         Swal.fire({
           title: 'Fees Added Successfully',
           icon: 'success',
-          confirmButtonColor: '#FF7519',
+          confirmButtonColor: '#089B41',
         });
       } catch (error) {
         console.error("Error while activating fees:", error);
@@ -469,7 +469,8 @@ export class FeesActivationComponent {
     }
   }
 
-  CalculateNet() {
+  async CalculateNet() {
+   await this.CalculateDiscountFromPercentage()
     this.Fees.net = this.Fees.amount - this.Fees.discount;
   }
 
@@ -500,7 +501,7 @@ export class FeesActivationComponent {
       Swal.fire({
         title: 'Fees Updated Successfully',
         icon: 'success',
-        confirmButtonColor: '#FF7519',
+        confirmButtonColor: '#089B41',
       });
     })
   }

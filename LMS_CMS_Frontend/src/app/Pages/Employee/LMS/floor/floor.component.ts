@@ -16,6 +16,7 @@ import { CommonModule } from '@angular/common';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
+import { Employee } from '../../../../Models/Employee/employee';
 
 @Component({
   selector: 'app-floor',
@@ -29,7 +30,7 @@ export class FloorComponent {
   key: string = 'id';
   value: any = '';
 
-  monitorrData: EmployeeGet[] = [];
+  monitorrData: Employee[] = [];
   floorData: Floor[] = [];
   floor: Floor = new Floor();
   building: Building = new Building();
@@ -118,7 +119,7 @@ export class FloorComponent {
   }
 
   getMonitorData() {
-    this.employeeService.Get_Employees(this.DomainName).subscribe((data) => {
+    this.employeeService.GetWithTypeId(1, this.DomainName).subscribe((data) => {
       this.monitorrData = data;
     });
   }
@@ -296,7 +297,7 @@ export class FloorComponent {
       title: 'Are you sure you want to delete this Floor?',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#FF7519',
+      confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
       confirmButtonText: 'Delete',
       cancelButtonText: 'Cancel',

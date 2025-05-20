@@ -247,7 +247,9 @@
         </button>
     
         <button *ngIf="currentStep < 3"
-                class="secondaryBorder secondaryTxt bg-white px-4 py-3 font-medium text-lg rounded-lg cursor-pointer flex space-x-2 items-center"
+                [disabled]="currentStep === 1 && !areAllQuestionsAnswered()"
+                [ngClass]="{'border text-gray-400': currentStep === 1 && !areAllQuestionsAnswered(), 'cursor-pointer secondaryBorder secondaryTxt': areAllQuestionsAnswered()}"
+                class=" bg-white px-4 py-3 font-medium text-lg rounded-lg flex space-x-2 items-center"
                 (click)="currentStep = currentStep + 1">
             <p>Next</p>
             <i class="fa-solid fa-arrow-right"></i>

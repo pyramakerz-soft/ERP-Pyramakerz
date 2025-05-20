@@ -19,6 +19,8 @@ import { SubjectService } from '../../../../Services/Employee/LMS/subject.servic
 import { Subject } from '../../../../Models/LMS/subject';
 import { Day } from '../../../../Models/day';
 import { Classroom } from '../../../../Models/LMS/classroom';
+import { AcademicYear } from '../../../../Models/LMS/academic-year';
+import { School } from '../../../../Models/school';
 
 @Component({
   selector: 'app-lesson-live',
@@ -61,8 +63,14 @@ export class LessonLiveComponent {
   validationErrors: { [key in keyof LessonLive]?: string } = {};
   isLoading = false;
 
-  constructor(
-    private router: Router,
+  selectedSchool: number = 0
+  selectedYear: number = 0
+  selectedClass: number = 0
+  Schools: School[] = []
+  Years: AcademicYear[] = []
+  ClassesForFilter: Classroom[] = []
+
+  constructor( 
     private menuService: MenuService,
     public activeRoute: ActivatedRoute,
     public account: AccountService,
@@ -97,6 +105,48 @@ export class LessonLiveComponent {
     this.getAllDays();
   }
 
+  onSchoolChange() {
+    // const selectedSchool = this.SchoolGroupByGradeGroupByClass.find((element) => element.id == this.selectedSchool)
+    // if (this.selectedSchool)
+    //   this.sectionService.GetBySchoolId(this.selectedSchool, this.DomainName).subscribe(
+    //     (data) => {
+    //       this.filteredSections = data.filter((section) => this.checkSchool(section))
+    //     }
+    //   )
+      
+    this.selectedYear = 0;
+    this.selectedClass = 0
+    this.Years = []; 
+    this.ClassesForFilter = []; 
+  }
+
+  checkSchool(element: any) {
+    return element.schoolID == this.selectedSchool
+  }
+
+  onYearChange() {
+    // this.gradeService.Get(this.DomainName).subscribe(
+    //   (data) => {
+    //     this.filteredGrades = data.filter((grade) => this.checkSection(grade))
+    //   }
+    // )
+
+    this.selectedClass = 0 
+    this.ClassesForFilter = []; 
+  }
+  
+  onClassChange() {
+    // this.gradeService.Get(this.DomainName).subscribe(
+    //   (data) => {
+    //     this.filteredGrades = data.filter((grade) => this.checkSection(grade))
+    //   }
+    // ) 
+  }
+
+  checkSection(element: any) {
+    return element.sectionID == this.selectedYear
+  }
+
   GetAllData() {
     this.TableData = [];
     this.LessonLiveServ.Get(this.DomainName).subscribe((d) => {
@@ -116,7 +166,7 @@ export class LessonLiveComponent {
       title: 'Are you sure you want to delete this Lesson Activity Type?',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#FF7519',
+      confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
       confirmButtonText: 'Delete',
       cancelButtonText: 'Cancel',
