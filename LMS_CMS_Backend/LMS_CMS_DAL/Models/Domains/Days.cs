@@ -17,8 +17,8 @@ namespace LMS_CMS_DAL.Models.Domains
         public string Name { get; set; }
 
         public ICollection<EmployeeDays> EmployeeDays { get; set; } = new HashSet<EmployeeDays>();
-        public ICollection<Semester> StartDaySemesters { get; set; } = new HashSet<Semester>();
-        public ICollection<Semester> EndDaySemesters { get; set; } = new HashSet<Semester>();
+        public ICollection<School> StartDaySchool { get; set; } = new HashSet<School>();
+        public ICollection<School> EndDaySchool { get; set; } = new HashSet<School>();
         public ICollection<LessonLive> LessonLives { get; set; } = new HashSet<LessonLive>();
     }
 }

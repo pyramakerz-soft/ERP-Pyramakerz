@@ -1292,15 +1292,15 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasForeignKey(p => p.SemesterID)
                 .OnDelete(DeleteBehavior.Restrict);
             
-            modelBuilder.Entity<Semester>()
+            modelBuilder.Entity<School>()
                 .HasOne(p => p.WeekStartDay)
-                .WithMany(p => p.StartDaySemesters)
+                .WithMany(p => p.StartDaySchool)
                 .HasForeignKey(p => p.WeekStartDayID)
                 .OnDelete(DeleteBehavior.Restrict);
             
-            modelBuilder.Entity<Semester>()
+            modelBuilder.Entity<School>()
                 .HasOne(p => p.WeekEndDay)
-                .WithMany(p => p.EndDaySemesters)
+                .WithMany(p => p.EndDaySchool)
                 .HasForeignKey(p => p.WeekEndDayID)
                 .OnDelete(DeleteBehavior.Restrict);
             
