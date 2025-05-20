@@ -33,5 +33,7 @@ export class QuestionBank {
     public deletedSubBankQuestionsDTO: number[] = [],
     public newQuestionBankOptionsDTO: QuestionBankOption[] = [],
     public newSubBankQuestionsDTO: SubBankQuestion[] = [],
+    public editedQuestionBankOptionsDTO: QuestionBankOption[] = [],
+    public editedSubBankQuestionsDTO: SubBankQuestion[] = [],
   ) {}
 }

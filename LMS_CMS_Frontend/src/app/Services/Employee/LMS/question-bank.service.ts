@@ -163,6 +163,28 @@ export class QuestionBankService {
       });
     }
 
+        // Append Edit QuestionBankOptions
+    if (questionBank.editedQuestionBankOptionsDTO?.length > 0) {
+      let uploadIndex = 0;
+      questionBank.editedQuestionBankOptionsDTO.forEach((option, index) => {
+        formData.append(`EditedQuestionBankOptionsDTO[${uploadIndex}].ID`, option.id.toString());
+        formData.append(`EditedQuestionBankOptionsDTO[${uploadIndex}].Option`, option.option);
+        formData.append(`EditedQuestionBankOptionsDTO[${uploadIndex}].Order`, option.order.toString());
+        uploadIndex++;
+      });
+    }
+
+    // Append Edit SubBankQuestions (for Drag & Drop)
+    if (questionBank.editedSubBankQuestionsDTO?.length > 0) {
+      let uploadIndex = 0;
+      questionBank.editedSubBankQuestionsDTO.forEach((item, index) => {
+        formData.append(`EditedSubBankQuestionsDTO[${uploadIndex}].ID`, item.id.toString());
+        formData.append(`EditedSubBankQuestionsDTO[${uploadIndex}].Description`, item.description);
+        formData.append(`EditedSubBankQuestionsDTO[${uploadIndex}].Answer`, item.answer);
+        uploadIndex++;
+      });
+    }
+
      // Append DeletedQuestionBankOptions (IDs)
     if (questionBank.deletedQuestionBankOptionsDTO?.length > 0) {
       let uploadIndex = 0;
@@ -175,7 +197,7 @@ export class QuestionBankService {
      // Append DeletedSubBankQuestions (IDs)
     if (questionBank.deletedSubBankQuestionsDTO?.length > 0) {
       let uploadIndex = 0;
-      questionBank.deletedQuestionBankTagsDTO.forEach((id, index) => {
+      questionBank.deletedSubBankQuestionsDTO.forEach((id, index) => {
         formData.append(`DeletedSubBankQuestionsDTO[${uploadIndex}]`, id.toString());
         uploadIndex++;
       });

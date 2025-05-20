@@ -167,7 +167,6 @@ export class QuestionBankComponent {
   GetAllQuestionBankType() {
     this.QuestionBankTypeServ.Get(this.DomainName).subscribe((d) => {
       this.questionBankType = d
-      console.log(this.questionBankType)
     })
   }
 
@@ -288,10 +287,9 @@ export class QuestionBankComponent {
 
   CreateOREdit() {
     this.questionBank.questionBankTagsDTO = this.TagsSelected.map(s => s.id)
-    console.log("dfd")
+    console.log(this.questionBank)
     if (this.isFormValid()) {
       this.isLoading = true;
-      console.log(this.questionBank)
       if (this.mode == 'Create') {
         this.QuestionBankServ.Add(
           this.questionBank,
@@ -316,14 +314,11 @@ export class QuestionBankComponent {
         );
       }
       if (this.mode == 'Edit') {
-        console.log(this.questionBank)
-        if(this.questionBank.questionTypeID==5){
-          this.questionBank.newQuestionBankOptionsDTO = this.questionBank.questionBankOptionsDTO.filter(s=>s.id==0)
-          console.log("this.questionBank.newQuestionBankOptionsDTO",this.questionBank.newQuestionBankOptionsDTO)
+        if (this.questionBank.questionTypeID == 5) {
+          this.questionBank.newQuestionBankOptionsDTO = this.questionBank.questionBankOptionsDTO.filter(s => s.id == 0)
         }
-        if(this.questionBank.questionTypeID==4){
-          this.questionBank.newSubBankQuestionsDTO = this.questionBank.subBankQuestionsDTO.filter(s=>s.id==0)
-          console.log("this.questionBank.newSubBankQuestionsDTO",this.questionBank.newSubBankQuestionsDTO)
+        if (this.questionBank.questionTypeID == 4) {
+          this.questionBank.newSubBankQuestionsDTO = this.questionBank.subBankQuestionsDTO.filter(s => s.id == 0)
         }
         this.QuestionBankServ.Edit(
           this.questionBank,
@@ -364,8 +359,7 @@ export class QuestionBankComponent {
           if (
             field == 'subjectID' ||
             field == 'lessonID' ||
-            field == 'questionTypeID' ||
-            field == 'difficultyLevel'
+            field == 'questionTypeID'
           ) {
             this.validationErrors[field] = `*${this.capitalizeField(
               field
@@ -377,54 +371,108 @@ export class QuestionBankComponent {
         }
       }
     }
-    if (this.questionBank.questionTypeID == 1 || this.questionBank.questionTypeID == 2) { // MCQ , TF
-      if (this.questionBank.questionBankOptionsDTO.length == 0) {
-        this.validationErrors['questionBankOptionsDTO'] = 'Options Is Required';
-        isValid = false;
-      }
-      if (this.questionBank.correctAnswerName == "") {
-        this.validationErrors['correctAnswerName'] = 'Choose Corresct Answer';
-        isValid = false;
-      }
+    if (this.questionBank.questionTypeID == 1 || this.questionBank.questionTypeID == 2 || this.questionBank.questionTypeID == 3) { // MCQ , TF
+      const options = this.questionBank.questionBankOptionsDTO || [];
 
+      if (options.length === 0) {
+        this.validationErrors['questionBankOptionsDTO'] = 'Options are required';
+        isValid = false;
+        return isValid;
+      } else {
+        // Check for empty option values
+        const anyEmpty = options.some(o => !o.option || o.option.trim() === '');
+        if (anyEmpty) {
+          this.validationErrors['questionBankOptionsDTO'] = 'All options must have non-empty values.';
+          isValid = false;
+        }
+
+        // Check for duplicate options
+        const normalizedOptions = options
+          .map(o => o.option?.trim().toLowerCase())
+          .filter(o => !!o); // filter out undefined/null
+
+        const hasDuplicates = normalizedOptions.length !== new Set(normalizedOptions).size;
+        if (hasDuplicates) {
+          this.validationErrors['questionBankOptionsDTO'] = 'All options must be unique.';
+          isValid = false;
+        }
+      }
+      // Correct answer check
+      if (this.questionBank.questionTypeID == 1 || this.questionBank.questionTypeID == 2) {
+        if (!this.questionBank.correctAnswerName || this.questionBank.correctAnswerName.trim() === '') {
+          this.validationErrors['correctAnswerName'] = 'Choose correct answer';
+          isValid = false;
+        } else {
+          const normalizedCorrect = this.questionBank.correctAnswerName.trim().toLowerCase();
+          const normalizedOptions = options.map(o => o.option?.trim().toLowerCase());
+          const exists = normalizedOptions.includes(normalizedCorrect);
+
+          if (!exists) {
+            this.validationErrors['correctAnswerName'] = 'Correct answer must match one of the options.';
+            isValid = false;
+          }
+        }
+      }
     }
     if (this.questionBank.questionTypeID == 3) { // MCQ , TF
       if (this.questionBank.questionBankOptionsDTO.length == 0) {
         this.validationErrors['questionBankOptionsDTO'] = 'Options Is Required';
         isValid = false;
+        return isValid;
       }
     }
     if (this.questionBank.questionTypeID == 4) { // Drag & Drop
-      if (this.questionBank.subBankQuestionsDTO.length == 0) {
-        this.validationErrors['subBankQuestionsDTO'] = 'Questions Is Required';
+      const subQuestions = this.questionBank.subBankQuestionsDTO;
+
+      if (!subQuestions || subQuestions.length === 0) {
+        this.validationErrors['subBankQuestionsDTO'] = 'Questions are required';
         isValid = false;
-      }
-      const last = this.questionBank.subBankQuestionsDTO[this.questionBank.subBankQuestionsDTO.length - 1];
-      if (this.questionBank.subBankQuestionsDTO.length > 0) {
-        if (!last || (!last.description?.trim() || !last.answer?.trim())) {
-          this.validationErrors['subBankQuestionsDTO'] = 'Please fill in both the question and answer before Save';
+      } else {
+        // 1. Check if any question or answer is empty
+        const anyEmpty = subQuestions.some(q =>
+          !q.description?.trim() || !q.answer?.trim()
+        );
+
+        if (anyEmpty) {
+          this.validationErrors['subBankQuestionsDTO'] = 'Please fill in both the question and answer for all rows';
+          isValid = false;
+        }
+
+        // 2. Check for duplicate descriptions (case-insensitive)
+        const normalizedDescriptions = subQuestions.map(q => q.description?.trim().toLowerCase());
+        const hasDuplicateDescriptions = normalizedDescriptions.length !== new Set(normalizedDescriptions).size;
+
+        if (hasDuplicateDescriptions) {
+          this.validationErrors['subBankQuestionsDTO'] = 'Each question must have a unique description';
           isValid = false;
         }
       }
     }
     if (this.questionBank.questionTypeID == 5) { // Order - Sequencing
-      if (this.questionBank.questionBankOptionsDTO.length == 0) {
-        this.validationErrors['questionBankOptionsDTO'] = 'Options Is Required';
+      const options = this.questionBank.questionBankOptionsDTO;
+
+      if (!options || options.length === 0) {
+        this.validationErrors['questionBankOptionsDTO'] = 'Options are required.';
         isValid = false;
-      }
-      const last = this.questionBank.questionBankOptionsDTO[this.questionBank.questionBankOptionsDTO.length - 1];
-      if (this.questionBank.questionBankOptionsDTO.length > 0) {
-        if (!last || !last.option?.trim() || !last.order?.toString().trim()) {
-          this.validationErrors['questionBankOptionsDTO'] = 'Please fill in both the option and order before adding a new one.';
+      } else {
+        // Check all options have non-empty 'option' and 'order'
+        const anyInvalid = options.some(opt =>
+          !opt.option?.trim() || opt.order == null || opt.order.toString().trim() === ''
+        );
+
+        if (anyInvalid) {
+          this.validationErrors['questionBankOptionsDTO'] = 'Each option must have both an option text and an order.';
           isValid = false;
         }
-      }
-      const options = this.questionBank.questionBankOptionsDTO;
-      const orderValues = options.map(opt => opt.order);
-      const orderSet = new Set(orderValues);
-      if (orderValues.length !== orderSet.size) {
-        this.validationErrors['questionBankOptionsDTO'] = 'Order numbers must be unique for each option.';
-        isValid = false;
+
+        // Check all order values are unique
+        const orderValues = options.map(opt => opt.order?.toString().trim()).filter(order => order !== '');
+        const uniqueOrders = new Set(orderValues);
+
+        if (orderValues.length !== uniqueOrders.size) {
+          this.validationErrors['questionBankOptionsDTO'] = 'Order numbers must be unique for each option.';
+          isValid = false;
+        }
       }
     }
     return isValid;
@@ -436,8 +484,6 @@ export class QuestionBankComponent {
     if (
       field == 'lessonID' ||
       field == 'subjectID' ||
-      field == 'bloomLevelID' ||
-      field == 'dokLevelID' ||
       field == 'description' ||
       field == 'questionTypeID' ||
       field == 'difficultyLevel'
@@ -461,7 +507,6 @@ export class QuestionBankComponent {
 
     this.QuestionBankServ.GetById(row.id, this.DomainName).subscribe((d) => {
       this.questionBank = d;
-      console.log(this.questionBank)
       this.GetAllLesson();
       if (this.questionBank.questionTypeID == 1) {
         this.questionBank.questionBankOptionsDTO = []
@@ -478,10 +523,8 @@ export class QuestionBankComponent {
       }
 
       this.TagsSelected = this.tag.filter(s => this.questionBank.questionBankTagsDTO.includes(s.id));
-      console.log(d, this.questionBank);
     });
 
-    console.log(this.questionBank);
     this.openModal();
   }
 
@@ -492,7 +535,6 @@ export class QuestionBankComponent {
     this.validationErrors = {};
     this.TagsSelected = []
     this.openModal();
-    console.log(1, this.questionBank)
   }
 
   closeModal() {
@@ -535,11 +577,23 @@ export class QuestionBankComponent {
     if (!this.TagsSelected.some((e) => e.id === Type.id)) {
       this.TagsSelected.push(Type);
     }
+    if (this.mode == "Edit") {
+      if (!Array.isArray(this.questionBank.newQuestionBankTagsDTO)) {
+        this.questionBank.newQuestionBankTagsDTO = [];
+      }
+      this.questionBank.newQuestionBankTagsDTO.push(Type.id);
+    }
     this.dropdownOpen = false;
   }
 
   removeSelected(id: number): void {
-    this.TagsSelected = this.TagsSelected.filter((e) => e.id !== id);
+    const index = this.TagsSelected.findIndex(tag => tag.id === id);
+    if (index === -1) return; // Tag not found
+    const removed = this.TagsSelected.splice(index, 1)[0];
+    if (this.mode === 'Edit' && removed?.id !== 0) {
+      this.questionBank.deletedQuestionBankTagsDTO = this.questionBank.deletedQuestionBankTagsDTO || [];
+      this.questionBank.deletedQuestionBankTagsDTO.push(removed.id);
+    }
   }
 
   CorrectAnswer(option: string) {
@@ -565,21 +619,71 @@ export class QuestionBankComponent {
           if (this.mode == "Edit") {
             if (!Array.isArray(this.questionBank.newQuestionBankOptionsDTO)) {
               this.questionBank.newQuestionBankOptionsDTO = [];
-            } 
-             this.questionBank.newQuestionBankOptionsDTO.push(opt);
-            console.log("edit" ,this.questionBank )
+            }
+            this.questionBank.newQuestionBankOptionsDTO.push(opt);
           }
         }
       }
-      else {
-        this.validationErrors['questionBankOptionsDTO'] = 'This Option is required';
-      }
+      // else {
+      //   this.validationErrors['questionBankOptionsDTO'] = 'This Option is required';
+      // }
     }
 
   }
 
+  onOptionEdit(editedOption: any): void {
+    if (!this.questionBank.editedQuestionBankOptionsDTO) {
+      this.questionBank.editedQuestionBankOptionsDTO = [];
+    }
+
+    if (this.mode == "Edit" && editedOption.id != 0) {
+      const exists = this.questionBank.editedQuestionBankOptionsDTO.find(
+        (opt: any) => opt.id === editedOption.id
+      );
+
+      if (exists) {
+        // Update existing entry
+        exists.option = editedOption.option;
+        exists.order = editedOption.order; // if you also have `order`
+      } else {
+        // Add new edited entry
+        this.questionBank.editedQuestionBankOptionsDTO.push({
+          id: editedOption.id,
+          option: editedOption.option,
+          order: editedOption.order,
+          questionBankID: editedOption.questionBankID,
+        });
+      }
+    }
+  }
+
+  onsubQuestionEdit(editedsubQuestion: any): void {
+    if (!this.questionBank.editedSubBankQuestionsDTO) {
+      this.questionBank.editedSubBankQuestionsDTO = [];
+    }
+
+    if (this.mode == "Edit" && editedsubQuestion.id != 0) {
+      const exists = this.questionBank.editedSubBankQuestionsDTO.find(
+        (opt: any) => opt.id === editedsubQuestion.id
+      );
+
+      if (exists) {
+        // Update existing entry
+        exists.answer = editedsubQuestion.answer;
+        exists.description = editedsubQuestion.description; // if you also have `order`
+      } else {
+        // Add new edited entry
+        this.questionBank.editedSubBankQuestionsDTO.push({
+          id: editedsubQuestion.id,
+          description: editedsubQuestion.description,
+          answer: editedsubQuestion.answer,
+          questionBankID: editedsubQuestion.questionBankID,
+        });
+      }
+    }
+  }
+
   checkOnType() {
-    console.log(this.questionBank.questionTypeID)
     this.questionBank.correctAnswerName = ""
     this.questionBank.questionBankOptionsDTO = [];
     this.questionBank.subBankQuestionsDTO = [];
@@ -609,7 +713,7 @@ export class QuestionBankComponent {
     }
 
     this.questionBank.subBankQuestionsDTO.push(new SubBankQuestion());
-    if(this.mode=="Edit"){
+    if (this.mode == "Edit") {
       this.questionBank.newSubBankQuestionsDTO.push(new SubBankQuestion());
     }
   }
@@ -655,4 +759,24 @@ export class QuestionBankComponent {
       }
   }
 
+  deleteOption(index: number): void {
+    const removed = this.questionBank.questionBankOptionsDTO.splice(index, 1)[0];
+    if (!Array.isArray(this.questionBank.deletedQuestionBankOptionsDTO)) {
+      this.questionBank.deletedQuestionBankOptionsDTO = [];
+    }
+    if (this.mode === 'Edit' && removed?.id != 0) {
+      // Mark as deleted for API if it was already saved
+      this.questionBank.deletedQuestionBankOptionsDTO.push(removed.id);
+    }
+  }
+
+  deleteSubQuestion(index: number): void {
+    const removed = this.questionBank.subBankQuestionsDTO.splice(index, 1)[0];
+    if (!Array.isArray(this.questionBank.deletedSubBankQuestionsDTO)) {
+      this.questionBank.deletedSubBankQuestionsDTO = [];
+    }
+    if (this.mode === 'Edit' && removed?.id != 0) {
+      this.questionBank.deletedSubBankQuestionsDTO.push(removed.id);
+    }
+  }
 }
