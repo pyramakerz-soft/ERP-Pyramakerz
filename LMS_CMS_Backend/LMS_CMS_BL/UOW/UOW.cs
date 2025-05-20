@@ -176,7 +176,6 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<SubBankQuestion> SubBankQuestion_Repository;
         GenericRepo<QuestionBankType> QuestionBankType_Repository;
         GenericRepo<TaxIssuer> TaxIssuer_Repository;
-        GenericRepo<TaxReceiver> TaxReceiver_Repository;
         GenericRepo<TaxUnitType> TaxUnitType_Repository;
 
 
@@ -1959,18 +1958,6 @@ namespace LMS_CMS_BL.UOW
                     TaxIssuer_Repository = new GenericRepo<TaxIssuer>(db);
                 }
                 return TaxIssuer_Repository;
-            }
-        }
-
-        public GenericRepo<TaxReceiver> taxReceiver_Repository
-        {
-            get
-            {
-                if (TaxReceiver_Repository == null)
-                {
-                    TaxReceiver_Repository = new GenericRepo<TaxReceiver>(db);
-                }
-                return TaxReceiver_Repository;
             }
         }
 
