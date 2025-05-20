@@ -14,7 +14,7 @@
         <div class="flex flex-col w-[30%] mb-4">
             <label class="mb-2 primaryTxt" for="school">Choose School</label>
             <select
-            class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto bg-[#EBEBEB]" id="school" [(ngModel)]="selectedSchool" (change)="onSchoolChange()">
+            class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="school" [(ngModel)]="selectedSchool" (change)="onSchoolChange()">
                 <option [value]="0" disabled selected hidden>Choose School</option>
                 <option *ngFor="let school of Schools" [value]="school.id">{{ school.name }}</option>
                 <option *ngIf="Schools.length === 0" disabled selected>No Data Found</option>
@@ -38,7 +38,7 @@
         </div>
     </div>
 
-    <div>
+    <div *ngIf="selectedClass">
         <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
             <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
                 <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
@@ -141,9 +141,9 @@
 
         <div class="mt-6 mb-4 rounded-3xl flex justify-between flex-wrap">
             <div class="flex flex-col mb-4 w-[49%]">
-                <label for="Class" class="block mb-2 text-sm font-medium text-gray-900">Classroom</label>
+                <label for="Class" class="block mb-2 text-sm font-medium primaryTxt">Classroom</label>
                 <select id="Class"  (ngModelChange)="onInputValueChange({ field: 'classroomID', value: $event })"
-                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+                    class="bg-gray-50 border border-gray-300 primaryTxt text-sm rounded-lg p-2.5 w-full"
                     [(ngModel)]="live.classroomID"(change)="selectClass()">
                     <option value=0 disabled selected hidden>Select a class</option>
                     <option *ngFor="let ac of classrooms" [value]="ac.id">
@@ -153,9 +153,9 @@
                 <span *ngIf="validationErrors['classroomID']" class="text-red-500 ml-3 font-normal">{{ validationErrors['classroomID']}}</span>
             </div>
             <div class="flex flex-col mb-4 w-[49%]">
-                <label for="subject" class="block mb-2 text-sm font-medium text-gray-900">Subjects</label>
+                <label for="subject" class="block mb-2 text-sm font-medium" [ngClass]="{ 'text-gray-400': !selectedSchool, 'primaryTxt': selectedSchool }">Subjects</label>
                 <select id="subject"  (ngModelChange)="onInputValueChange({ field: 'subjectID', value: $event })"
-                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+                    class="bg-gray-50 border border-gray-300 primaryTxt text-sm rounded-lg p-2.5 w-full"
                     [(ngModel)]="live.subjectID" [disabled]="!live.classroomID" >
                     <option value=0 disabled selected hidden>Select a subject</option>
                     <option *ngFor="let ac of subject" [value]="ac.id">
@@ -165,9 +165,9 @@
                 <span *ngIf="validationErrors['subjectID']" class="text-red-500 ml-3 font-normal">{{ validationErrors['subjectID']}}</span>
             </div>
             <div class="flex flex-col mb-4 w-[49%]">
-                <label for="day" class="block mb-2 text-sm font-medium text-gray-900">Week Days</label>
+                <label for="day" class="block mb-2 text-sm font-medium primaryTxt">Week Days</label>
                 <select id="day"  (ngModelChange)="onInputValueChange({ field: 'weekDayID', value: $event })"
-                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+                    class="bg-gray-50 border border-gray-300 primaryTxt text-sm rounded-lg p-2.5 w-full"
                     [(ngModel)]="live.weekDayID">
                     <option value=0 disabled selected hidden>Select Day</option>
                     <option *ngFor="let ac of days" [value]="ac.id">
