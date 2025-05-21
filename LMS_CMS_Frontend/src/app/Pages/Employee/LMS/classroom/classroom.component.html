@@ -99,6 +99,9 @@
                         <button *ngIf="AllowEdit && IsAllowEdit(row.insertedByUserId)" (click)="openModal(row.id)">
                             <i class="fa-solid fa-pencil"></i>
                         </button>
+                        <button (click)="ViewClass(row.id)" >
+                            <i class="fa-solid fa-eye"></i> 
+                        </button>
                     </div>
                 </td>
             </tr>

@@ -8,7 +8,7 @@ import { ApiService } from '../../../../Services/api.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { BuildingService } from '../../../../Services/Employee/LMS/building.service';
 import { SchoolService } from '../../../../Services/Employee/school.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { TokenData } from '../../../../Models/token-data';
 import { ClassroomService } from '../../../../Services/Employee/LMS/classroom.service';
@@ -80,7 +80,7 @@ export class ClassroomComponent {
 
   constructor(public account: AccountService, public buildingService: BuildingService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService, 
       private menuService: MenuService, public activeRoute: ActivatedRoute, public schoolService: SchoolService, public classroomService: ClassroomService, public employeeServ : EmployeeService ,
-      public sectionService:SectionService, public gradeService:GradeService, public acadimicYearService:AcadimicYearService, public floorService: FloorService){}
+      public sectionService:SectionService, public gradeService:GradeService, public acadimicYearService:AcadimicYearService, public floorService: FloorService, public router:Router){}
       
   ngOnInit(){
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -332,6 +332,10 @@ export class ClassroomComponent {
         this.classroom[field] = '' as never;  
       }
     }
+  }
+
+  ViewClass(classID:number){
+    this.router.navigateByUrl("Employee/Classroom/"+classID)
   }
 
   SaveClassroom(){

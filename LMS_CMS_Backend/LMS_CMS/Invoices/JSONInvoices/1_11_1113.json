@@ -1,0 +1,146 @@
+{
+  "documents": [
+    {
+      "issuer": {
+        "address": {
+          "branchID": "0",
+          "country": "1",
+          "governate": "Alex",
+          "regionCity": "Alex",
+          "street": " ",
+          "buildingNumber": "1",
+          "postalCode": "0",
+          "floor": "1",
+          "room": "1",
+          "landmark": " ",
+          "additionalInformation": " "
+        },
+        "type": 1,
+        "id": "1",
+        "name": "Pyramakerz"
+      },
+      "receiver": {
+        "address": {
+          "country": null,
+          "governate": null,
+          "regionCity": null,
+          "street": null,
+          "buildingNumber": null,
+          "postalCode": null,
+          "floor": null,
+          "room": null,
+          "landmark": null,
+          "additionalInformation": null
+        },
+        "type": null,
+        "id": 1,
+        "name": "Omar"
+      },
+      "documentType": "I",
+      "documentTypeVersion": "1.0",
+      "dateTimeIssued": "2025-05-20T13:31:24Z",
+      "taxpayerActivityCode": "0123",
+      "internalID": "1_11_1113",
+      "purchaseOrderReference": "",
+      "purchaseOrderDescription": "",
+      "salesOrderReference": "",
+      "salesOrderDescription": "",
+      "proformaInvoiceNumber": "",
+      "payment": {
+        "bankName": "",
+        "bankAddress": "",
+        "bankAccountNo": "",
+        "bankAccountIBAN": "",
+        "swiftCode": "",
+        "terms": ""
+      },
+      "delivery": {
+        "approach": "",
+        "packaging": "",
+        "dateValidity": "",
+        "exportPort": "",
+        "grossWeight": 0,
+        "netWeight": 0,
+        "terms": ""
+      },
+      "invoiceLines": [
+        {
+          "description": "Item 01 - Item 01",
+          "itemType": "EGS",
+          "itemCode": "EG-113317713-123456",
+          "unitType": "EA",
+          "quantity": 1,
+          "internalCode": 16,
+          "salesTotal": 20,
+          "total": 20,
+          "valueDifference": 0,
+          "totalTaxableFees": 0,
+          "netTotal": 20,
+          "itemsDiscount": 0,
+          "unitValue": {
+            "currencySold": "EGP",
+            "amountEGP": 20
+          },
+          "discount": {
+            "rate": 0,
+            "amount": 0
+          },
+          "taxableItems": []
+        },
+        {
+          "description": "Item 01 - Item 01",
+          "itemType": "EGS",
+          "itemCode": "EG-113317713-123456",
+          "unitType": "EA",
+          "quantity": 1,
+          "internalCode": 17,
+          "salesTotal": 20,
+          "total": 20,
+          "valueDifference": 0,
+          "totalTaxableFees": 0,
+          "netTotal": 20,
+          "itemsDiscount": 0,
+          "unitValue": {
+            "currencySold": "EGP",
+            "amountEGP": 20
+          },
+          "discount": {
+            "rate": 0,
+            "amount": 0
+          },
+          "taxableItems": []
+        },
+        {
+          "description": "Item 01 - Item 01",
+          "itemType": "EGS",
+          "itemCode": "EG-113317713-123456",
+          "unitType": "EA",
+          "quantity": 1,
+          "internalCode": 18,
+          "salesTotal": 20,
+          "total": 20,
+          "valueDifference": 0,
+          "totalTaxableFees": 0,
+          "netTotal": 20,
+          "itemsDiscount": 0,
+          "unitValue": {
+            "currencySold": "EGP",
+            "amountEGP": 20
+          },
+          "discount": {
+            "rate": 0,
+            "amount": 0
+          },
+          "taxableItems": []
+        }
+      ],
+      "totalDiscountAmount": 0,
+      "totalSalesAmount": 60,
+      "netAmount": 60,
+      "taxTotals": "",
+      "totalAmount": 60,
+      "extraDiscountAmount": 0,
+      "totalItemsDiscountAmount": 0
+    }
+  ]
+}

@@ -149,6 +149,7 @@ import { LessonActivityComponent } from './Pages/Employee/LMS/lesson-activity/le
 import { LessonLiveComponent } from './Pages/Employee/LMS/lesson-live/lesson-live.component';
 import { StudentLessonLiveComponent } from './Pages/Student/LMS/student-lesson-live/student-lesson-live.component';
 import { QuestionBankComponent } from './Pages/Employee/LMS/question-bank/question-bank.component';
+import { ClassroomViewComponent } from './Pages/Employee/LMS/classroom-view/classroom-view.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate:[noNavigateToLoginIfLoginGuard] },
@@ -196,6 +197,7 @@ export const routes: Routes = [
             { path: "Building", component: BuildingComponent, title: "Building", canActivate:[noNavigateWithoutLoginGuard , navigateIfHaveSettingPageGuard]}, 
             { path: "Floor/:domainName/:Id", component: FloorComponent, title: "Floor", canActivate:[noNavigateWithoutLoginGuard , navigateIfHaveSettingPageGuard]}, 
             { path: "Classroom", component: ClassroomComponent, title: "Classroom", canActivate:[noNavigateWithoutLoginGuard , navigateIfHaveSettingPageGuard]}, 
+            { path: "Classroom/:id", component: ClassroomViewComponent, title: "Classroom", canActivate:[noNavigateWithoutLoginGuard , navigateIfHaveSettingPageGuard]}, 
             { path: "Violation Types", component: ViolationTypesComponent, title: "Violation Types", canActivate:[noNavigateWithoutLoginGuard ,navigateIfHaveSettingPageGuard]}, 
             { path: "Section", component: SectionComponent, title: "Section", canActivate:[noNavigateWithoutLoginGuard ,navigateIfHaveSettingPageGuard]}, 
             { path: "Grade/:domainName/:Id", component: GradeComponent, title: "Grade", canActivate:[noNavigateWithoutLoginGuard ,navigateIfHaveSettingPageGuard]}, 

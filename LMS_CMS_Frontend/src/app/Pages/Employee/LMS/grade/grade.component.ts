@@ -86,7 +86,7 @@ export class GradeComponent {
   getGradeData(){
     this.gradeData=[]
     this.gradeService.GetBySectionId(this.sectionId, this.DomainName).subscribe(
-      (data) => {
+      (data) => { 
         this.gradeData = data;
       }
     )
@@ -219,12 +219,23 @@ export class GradeComponent {
     return valid
   }
 
+  validateNumber(event: any, field: keyof Grade): void {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = ''; 
+      if (typeof this.grade[field] === 'string') {
+        this.grade[field] = null as never;  
+      }
+    }
+  }
+
   SaveGrade(){
     if(this.isFormValid()){
       this.isLoading = true;
       this.grade.sectionID = this.sectionId
       this.checkFromToDate()
       if(this.checkFromToDate()){
+        console.log(this.grade)
         if(this.editGrade == false){
           this.gradeService.Add(this.grade, this.DomainName).subscribe(
             (result: any) => {
@@ -235,9 +246,8 @@ export class GradeComponent {
             error => {
               this.isLoading = false;
               Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'Try Again Later!',
+                icon: 'error', 
+                text: error.error,
                 confirmButtonText: 'Okay',
                 customClass: { confirmButton: 'secondaryBg' },
               });
@@ -255,8 +265,7 @@ export class GradeComponent {
               this.isLoading = false;
               Swal.fire({
                 icon: 'error',
-                title: 'Oops...',
-                text: 'Try Again Later!',
+                text: error.error,
                 confirmButtonText: 'Okay',
                 customClass: { confirmButton: 'secondaryBg' },
               });

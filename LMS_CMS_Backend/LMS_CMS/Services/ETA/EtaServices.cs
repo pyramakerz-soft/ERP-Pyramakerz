@@ -14,6 +14,7 @@ using System.Net;
 using LMS_CMS_DAL.Models.Domains.ETA;
 using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Octa;
+using System.Text.Json;
 
 namespace LMS_CMS_PL.Services.ETA
 {
@@ -53,8 +54,21 @@ namespace LMS_CMS_PL.Services.ETA
 
 
         //Login befor sending
-        public static bool SendInvoiceToETA(InventoryMaster master, UOW unitOfWork, IConfiguration config)
+        public static bool GenerateJsonInvoice(InventoryMaster master, UOW unitOfWork, IConfiguration config)
         {
+            string invoices = string.Empty;
+
+            if (master.FlagId == 11)
+                invoices = Path.Combine(Directory.GetCurrentDirectory(), "Invoices/JSONInvoices");
+
+            if (master.FlagId == 12)
+                invoices = Path.Combine(Directory.GetCurrentDirectory(), "Invoices/JSONCredits");
+
+            if (!Directory.Exists(invoices))
+            {
+                Directory.CreateDirectory(invoices);
+            }
+
             char invoiceType = 'I';
 
             if (master.FlagId == 12)
@@ -116,7 +130,7 @@ namespace LMS_CMS_PL.Services.ETA
                         ["documentType"] = invoiceType.ToString(),
                         ["documentTypeVersion"] = version,
                         ["dateTimeIssued"] = dateTime,
-                        ["taxpayerActivityCode"] = master.TaxIssuer.ActivityCode,
+                        ["taxpayerActivityCode"] = taxIssuer.ActivityCode,
                         ["internalID"] = master.StoreID + "_" + master.FlagId + "_" + master.InvoiceNumber,
                         ["purchaseOrderReference"] = "",
                         ["purchaseOrderDescription"] = "",
@@ -162,25 +176,25 @@ namespace LMS_CMS_PL.Services.ETA
             //                }
             //            }
 
-            //string serialize0 = Serialize((JObject)invoiceJson.ToJsonString());
-            //string signWithCMS0 = SignWithCMS(Encoding.UTF8.GetBytes(serialize0));
+            string serialize0 = Serialize((JObject)invoiceJson.ToJsonString());
+            string signWithCMS0 = SignWithCMS(Encoding.UTF8.GetBytes(serialize0));
 
-            //if (string.IsNullOrEmpty(signWithCMS0))
-            //{
-            //    return false;
-            //}
+            if (string.IsNullOrEmpty(signWithCMS0))
+            {
+                return false;
+            }
 
-            //string json = invoiceJson.ToJsonString();
+            string json = invoiceJson.ToJsonString();
 
-            //string signedJson = $@"{{""documents"": [{json.Substring(0, json.Length - 1)},""signatures"": [{{""signatureType"": ""I"",""value"": ""{signWithCMS0}""}}]]}}";
+            string signedJson = $@"{{""documents"": [{json.Substring(0, json.Length - 1)},""signatures"": [{{""signatureType"": ""I"",""value"": ""{signWithCMS0}""}}]]}}";
 
             //byte[] jsonDataBytes = Encoding.UTF8.GetBytes(signedJson);
 
             //string result = PostRequest(new Uri(apiBaseUrl + "/api/v1/documentsubmissions"), jsonDataBytes, "application/json", "POST");
 
-            //        if (string.IsNullOrEmpty(result))
-            //        {
-            //            bm.ExecuteNonQuery($@"
+            //if (string.IsNullOrEmpty(result))
+            //{
+            //    bm.ExecuteNonQuery($@"
             //    DELETE {MyTable} 
             //    WHERE StoreId = {SalesMasterDT.Rows[0]["StoreId"]} 
             //    AND Flag = {SalesMasterDT.Rows[0]["Flag"]} 
@@ -189,17 +203,17 @@ namespace LMS_CMS_PL.Services.ETA
             //    INSERT INTO {MyTable} (StoreId, Flag, InvoiceNo, Notes) 
             //    SELECT {SalesMasterDT.Rows[0]["StoreId"]}, {SalesMasterDT.Rows[0]["Flag"]}, {SalesMasterDT.Rows[0]["InvoiceNo"]}, ' Failed';
             //");
-            //            return;
-            //        }
+            //    return;
+            //}
 
-            //        dynamic result0 = JsonConvert.DeserializeObject(result);
+            //dynamic result0 = JsonConvert.DeserializeObject(result);
 
-            //        if (result0.acceptedDocuments.Count > 0)
-            //        {
-            //            string uuid = result0.acceptedDocuments[0].uuid;
-            //            string longId = result0.acceptedDocuments[0].longId;
+            //if (result0.acceptedDocuments.Count > 0)
+            //{
+            //    string uuid = result0.acceptedDocuments[0].uuid;
+            //    string longId = result0.acceptedDocuments[0].longId;
 
-            //            bm.ExecuteNonQuery($@"
+            //    bm.ExecuteNonQuery($@"
             //    DELETE {MyTable} 
             //    WHERE StoreId = {SalesMasterDT.Rows[0]["StoreId"]} 
             //    AND Flag = {SalesMasterDT.Rows[0]["Flag"]} 
@@ -208,17 +222,17 @@ namespace LMS_CMS_PL.Services.ETA
             //    INSERT INTO {MyTable} (StoreId, Flag, InvoiceNo, uuid, longId) 
             //    SELECT {SalesMasterDT.Rows[0]["StoreId"]}, {SalesMasterDT.Rows[0]["Flag"]}, {SalesMasterDT.Rows[0]["InvoiceNo"]}, '{uuid}', '{longId}';
             //");
-            //        }
+            //}
 
-            //        if (result0.rejectedDocuments.Count > 0)
-            //        {
-            //            string msg = "";
-            //            foreach (var detail in result0.rejectedDocuments[0].error.details)
-            //            {
-            //                msg += $"{detail.propertyPath} - {detail.message}\r\n";
-            //            }
+            //if (result0.rejectedDocuments.Count > 0)
+            //{
+            //    string msg = "";
+            //    foreach (var detail in result0.rejectedDocuments[0].error.details)
+            //    {
+            //        msg += $"{detail.propertyPath} - {detail.message}\r\n";
+            //    }
 
-            //            bm.ExecuteNonQuery($@"
+            //    bm.ExecuteNonQuery($@"
             //    DELETE {MyTable} 
             //    WHERE StoreId = {SalesMasterDT.Rows[0]["StoreId"]} 
             //    AND Flag = {SalesMasterDT.Rows[0]["Flag"]} 
@@ -227,7 +241,13 @@ namespace LMS_CMS_PL.Services.ETA
             //    INSERT INTO {MyTable} (StoreId, Flag, InvoiceNo, Notes) 
             //    SELECT {SalesMasterDT.Rows[0]["StoreId"]}, {SalesMasterDT.Rows[0]["Flag"]}, {SalesMasterDT.Rows[0]["InvoiceNo"]}, '{msg.Replace("'", "''")}';
             //");
-            //        }
+            //}
+
+            File.WriteAllText(Path.Combine(invoices, $"{master.StoreID}_{master.FlagId}_{master.InvoiceNumber}.json"), ((JsonObject)signedJson).ToJsonString(new JsonSerializerOptions
+            {
+                WriteIndented = true
+            }));
+
             return true;
         }
 
@@ -480,8 +500,8 @@ namespace LMS_CMS_PL.Services.ETA
         }
 
 
-        //public static string SignWithCMS(byte[] data)
-        //{
+        public static string SignWithCMS(byte[] data)
+        {
         //    try
         //    {
         //        var factories = new Pkcs11InteropFactories();
@@ -561,9 +581,9 @@ namespace LMS_CMS_PL.Services.ETA
         //    catch (Exception ex)
         //    {
         //        bm.ShowMSG(ex.Message);
-        //        return "";
-        //    }
-        //}
+                return "";
+            //}
+        }
 
         public static byte[] HashBytes(byte[] input)
         {

@@ -8,6 +8,7 @@ using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_DAL.Models.Domains.Zatca;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
+using LMS_CMS_PL.Services.ETA;
 using LMS_CMS_PL.Services.Zatca;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -291,24 +292,24 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            SchoolPCs pc = Unit_Of_Work.schoolPCs_Repository.First_Or_Default(
-                d => d.ID == newData.SchoolPCId && d.IsDeleted != true
-            );
+            //SchoolPCs pc = Unit_Of_Work.schoolPCs_Repository.First_Or_Default(
+            //    d => d.ID == newData.SchoolPCId && d.IsDeleted != true
+            //);
 
-            if (pc == null)
-            {
-                return NotFound("PC not found.");
-            }
+            //if (pc == null)
+            //{
+            //    return NotFound("PC not found.");
+            //}
 
-            if (pc.CertificateDate == null)
-            {
-                return BadRequest("Please Create the Certificate.");
-            }
+            //if (pc.CertificateDate == null)
+            //{
+            //    return BadRequest("Please Create the Certificate.");
+            //}
 
-            if (pc.CertificateDate.Value <= DateOnly.FromDateTime(DateTime.Now.AddDays(1)))
-            {
-                return BadRequest("Please Update the Certificate.");
-            }
+            //if (pc.CertificateDate.Value <= DateOnly.FromDateTime(DateTime.Now.AddDays(1)))
+            //{
+            //    return BadRequest("Please Update the Certificate.");
+            //}
 
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
             long.TryParse(userIdClaim, out long userId);
@@ -549,43 +550,43 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
             Unit_Of_Work.inventoryMaster_Repository.Update(Master);
             await Unit_Of_Work.SaveChangesAsync();
-
+            //Master.FlagId = 11;
             if (Master.FlagId == 11 || Master.FlagId == 12)
             {
                 Master.School = school;
 
                 List<InventoryMaster> masters = Unit_Of_Work.inventoryMaster_Repository.SelectQuery<InventoryMaster>(i => i.IsDeleted != true).ToList();
+                var json = EtaServices.GenerateJsonInvoice(Master, Unit_Of_Work, _config);
+                //string lastInvoiceHash = "";
 
-                string lastInvoiceHash = "";
+                //if (masters.Count > 1 || masters is not null)
+                //{
+                //    if (Master.FlagId == 11)
+                //        lastInvoiceHash = masters[masters.Count - 2].InvoiceHash;
+                //}
 
-                if (masters.Count > 1 || masters is not null)
-                {
-                    if (Master.FlagId == 11)
-                        lastInvoiceHash = masters[masters.Count - 2].InvoiceHash;
-                }
+                //S3Service s3 = new S3Service(_config, "AWS:Region");
+                //bool result = await ZatcaServices.GenerateInvoiceXML(Master, lastInvoiceHash, s3);
 
-                S3Service s3 = new S3Service(_config, "AWS:Region");
-                bool result = await ZatcaServices.GenerateInvoiceXML(Master, lastInvoiceHash, s3);
+                //if (!result)
+                //    return BadRequest("Failed to generate XML file.");
 
-                if (!result)
-                    return BadRequest("Failed to generate XML file.");
+                //DateTime invDate = DateTime.Parse(newData.Date);
+                //string date = invDate.ToString("yyyy-MM-dd");
+                //string time = invDate.ToString("HH:mm:ss").Replace(":", "");
 
-                DateTime invDate = DateTime.Parse(newData.Date);
-                string date = invDate.ToString("yyyy-MM-dd");
-                string time = invDate.ToString("HH:mm:ss").Replace(":", "");
+                //string xml = string.Empty;
+                //if (Master.FlagId == 11)
+                //    xml = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/XMLInvoices/{Master.School.CRN}_{date.Replace("-", "")}T{time}_{date}-{Master.StoreID}_{Master.FlagId}_{Master.ID}.xml");
 
-                string xml = string.Empty;
-                if (Master.FlagId == 11)
-                    xml = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/XMLInvoices/{Master.School.CRN}_{date.Replace("-", "")}T{time}_{date}-{Master.StoreID}_{Master.FlagId}_{Master.ID}.xml");
+                //if (Master.FlagId == 12)
+                //    xml = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/XMLCredits/{Master.School.CRN}_{date.Replace("-", "")}T{time}_{date}-{Master.StoreID}_{Master.FlagId}_{Master.ID}.xml");
 
-                if (Master.FlagId == 12)
-                    xml = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/XMLCredits/{Master.School.CRN}_{date.Replace("-", "")}T{time}_{date}-{Master.StoreID}_{Master.FlagId}_{Master.ID}.xml");
-
-                Master.InvoiceHash = ZatcaServices.GetInvoiceHash(xml);
-                Master.QRCode = ZatcaServices.GetQRCode(xml);
-                Master.uuid = ZatcaServices.GetUUID(xml);
-                //Master.XmlInvoiceFile = xml;
-                Master.QrImage = ZatcaServices.GenerateQrImage(Master.QRCode);
+                //Master.InvoiceHash = ZatcaServices.GetInvoiceHash(xml);
+                //Master.QRCode = ZatcaServices.GetQRCode(xml);
+                //Master.uuid = ZatcaServices.GetUUID(xml);
+                ////Master.XmlInvoiceFile = xml;
+                //Master.QrImage = ZatcaServices.GenerateQrImage(Master.QRCode);
 
                 Unit_Of_Work.inventoryMaster_Repository.Update(Master);
                 await Unit_Of_Work.SaveChangesAsync();
