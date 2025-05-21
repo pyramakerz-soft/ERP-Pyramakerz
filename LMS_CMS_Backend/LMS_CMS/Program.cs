@@ -19,6 +19,7 @@ using Zatca.EInvoice.SDK;
 using Amazon.S3;
 using Amazon.SecretsManager;
 using Amazon;
+using System;
 
 namespace LMS_CMS
 {
@@ -119,6 +120,7 @@ namespace LMS_CMS
             builder.Services.AddScoped<IEInvoiceSigner, EInvoiceSigner>();
             builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
             builder.Services.AddSingleton<IAmazonS3, AmazonS3Client>();
+            builder.Services.AddScoped<DomainService>();
 
             builder.Services.AddAWSService<IAmazonSecretsManager>(new Amazon.Extensions.NETCore.Setup.AWSOptions
             {
@@ -167,7 +169,6 @@ namespace LMS_CMS
 
 
             var app = builder.Build();
-
 
             /// 1) For DB Check
             //app.UseMiddleware<DbConnection_Check_Middleware>(); 

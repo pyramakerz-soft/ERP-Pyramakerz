@@ -38,13 +38,11 @@ namespace LMS_CMS_DAL.Models.Domains.Inventory
         public byte? IsValid { get; set; }
         public byte[]? QrImage { get; set; }
         public string? Notes { get; set; }
+        public DateTime? EtaInsertedDate { get; set; }
         public List<string>? Attachments { get; set; }
 
         [ForeignKey("TaxIssuer")]
         public string? IssuerId { get; set; }
-
-        [ForeignKey("TaxReceiver")]
-        public string? TaxReceiverId { get; set; }
 
         [ForeignKey("Store")]
         public long StoreID { get; set; }
@@ -82,7 +80,6 @@ namespace LMS_CMS_DAL.Models.Domains.Inventory
         public School? School { get; set; }
         public SchoolPCs? SchoolPCs { get; set; }
         public TaxIssuer? TaxIssuer { get; set; }
-        public TaxReceiver? TaxReceiver { get; set; }
         public ICollection<InventoryDetails> InventoryDetails { get; set; } = new HashSet<InventoryDetails>();
     }
 }

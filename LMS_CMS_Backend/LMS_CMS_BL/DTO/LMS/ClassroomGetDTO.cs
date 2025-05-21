@@ -25,5 +25,6 @@ namespace LMS_CMS_BL.DTO.LMS
         public string BuildingName { get; set; }
         public long? InsertedByUserId { get; set; }
         public long HomeroomTeacherID { get; set; }
+        public string HomeroomTeacherName { get; set; }
     }
 }

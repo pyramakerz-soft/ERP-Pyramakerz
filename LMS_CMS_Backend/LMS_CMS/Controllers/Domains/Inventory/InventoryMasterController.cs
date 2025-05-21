@@ -8,6 +8,7 @@ using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_DAL.Models.Domains.Zatca;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
+using LMS_CMS_PL.Services.ETA;
 using LMS_CMS_PL.Services.Zatca;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -541,55 +542,55 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 }
             }
 
-            //Master.uuid = Guid.NewGuid().ToString();
-            //Master.VatPercent = vat;
-            //Master.VatAmount = Master.Total * Master.VatPercent;
-            //Master.TotalWithVat = Master.Total + Master.VatAmount;
-            //Master.SchoolPCId = newData.SchoolPCId;
+            Master.uuid = Guid.NewGuid().ToString();
+            Master.VatPercent = vat;
+            Master.VatAmount = Master.Total * Master.VatPercent;
+            Master.TotalWithVat = Master.Total + Master.VatAmount;
+            Master.SchoolPCId = newData.SchoolPCId;
 
-            //Unit_Of_Work.inventoryMaster_Repository.Update(Master);
-            //await Unit_Of_Work.SaveChangesAsync();
+            Unit_Of_Work.inventoryMaster_Repository.Update(Master);
+            await Unit_Of_Work.SaveChangesAsync();
+            //Master.FlagId = 11;
+            if (Master.FlagId == 11 || Master.FlagId == 12)
+            {
+                Master.School = school;
 
-            //if (Master.FlagId == 11 || Master.FlagId == 12)
-            //{
-            //    Master.School = school;
+                List<InventoryMaster> masters = Unit_Of_Work.inventoryMaster_Repository.SelectQuery<InventoryMaster>(i => i.IsDeleted != true).ToList();
+                var json = EtaServices.GenerateJsonInvoice(Master, Unit_Of_Work, _config);
+                //string lastInvoiceHash = "";
 
-            //    List<InventoryMaster> masters = Unit_Of_Work.inventoryMaster_Repository.SelectQuery<InventoryMaster>(i => i.IsDeleted != true).ToList();
+                //if (masters.Count > 1 || masters is not null)
+                //{
+                //    if (Master.FlagId == 11)
+                //        lastInvoiceHash = masters[masters.Count - 2].InvoiceHash;
+                //}
 
-            //    string lastInvoiceHash = "";
+                //S3Service s3 = new S3Service(_config, "AWS:Region");
+                //bool result = await ZatcaServices.GenerateInvoiceXML(Master, lastInvoiceHash, s3);
 
-            //    if (masters.Count > 1 || masters is not null)
-            //    {
-            //        if (Master.FlagId == 11)
-            //            lastInvoiceHash = masters[masters.Count - 2].InvoiceHash;
-            //    }
+                //if (!result)
+                //    return BadRequest("Failed to generate XML file.");
 
-            //    S3Service s3 = new S3Service(_config, "AWS:Region");
-            //    bool result = await ZatcaServices.GenerateInvoiceXML(Master, lastInvoiceHash, s3);
+                //DateTime invDate = DateTime.Parse(newData.Date);
+                //string date = invDate.ToString("yyyy-MM-dd");
+                //string time = invDate.ToString("HH:mm:ss").Replace(":", "");
 
-            //    if (!result)
-            //        return BadRequest("Failed to generate XML file.");
+                //string xml = string.Empty;
+                //if (Master.FlagId == 11)
+                //    xml = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/XMLInvoices/{Master.School.CRN}_{date.Replace("-", "")}T{time}_{date}-{Master.StoreID}_{Master.FlagId}_{Master.ID}.xml");
 
-            //    DateTime invDate = DateTime.Parse(newData.Date);
-            //    string date = invDate.ToString("yyyy-MM-dd");
-            //    string time = invDate.ToString("HH:mm:ss").Replace(":", "");
+                //if (Master.FlagId == 12)
+                //    xml = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/XMLCredits/{Master.School.CRN}_{date.Replace("-", "")}T{time}_{date}-{Master.StoreID}_{Master.FlagId}_{Master.ID}.xml");
 
-            //    string xml = string.Empty;
-            //    if (Master.FlagId == 11)
-            //        xml = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/XMLInvoices/{Master.School.CRN}_{date.Replace("-", "")}T{time}_{date}-{Master.StoreID}_{Master.FlagId}_{Master.ID}.xml");
+                //Master.InvoiceHash = ZatcaServices.GetInvoiceHash(xml);
+                //Master.QRCode = ZatcaServices.GetQRCode(xml);
+                //Master.uuid = ZatcaServices.GetUUID(xml);
+                ////Master.XmlInvoiceFile = xml;
+                //Master.QrImage = ZatcaServices.GenerateQrImage(Master.QRCode);
 
-            //    if (Master.FlagId == 12)
-            //        xml = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/XMLCredits/{Master.School.CRN}_{date.Replace("-", "")}T{time}_{date}-{Master.StoreID}_{Master.FlagId}_{Master.ID}.xml");
-
-            //    Master.InvoiceHash = ZatcaServices.GetInvoiceHash(xml);
-            //    Master.QRCode = ZatcaServices.GetQRCode(xml);
-            //    Master.uuid = ZatcaServices.GetUUID(xml);
-            //    //Master.XmlInvoiceFile = xml;
-            //    Master.QrImage = ZatcaServices.GenerateQrImage(Master.QRCode);
-
-            //    Unit_Of_Work.inventoryMaster_Repository.Update(Master);
-            //    await Unit_Of_Work.SaveChangesAsync();
-            //}
+                Unit_Of_Work.inventoryMaster_Repository.Update(Master);
+                await Unit_Of_Work.SaveChangesAsync();
+            }
 
             return Ok(Master.ID);
         }

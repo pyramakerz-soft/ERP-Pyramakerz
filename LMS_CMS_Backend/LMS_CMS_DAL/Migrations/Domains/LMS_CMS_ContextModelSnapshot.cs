@@ -3280,6 +3280,27 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.ToTable("OrderState");
                 });
 
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.ETA.EtaTokenType", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<string>("DllPath")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("EtaTokenType");
+                });
+
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.ETA.TaxCustomer", b =>
                 {
                     b.Property<int>("ID")
@@ -3309,22 +3330,19 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ActivityCode")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("AdditionalInfo")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("BranchID")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("BuildingNumber")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<long?>("CountryID")
-                        .HasColumnType("bigint");
+                    b.Property<string>("CountryCode")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
@@ -3339,7 +3357,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Governate")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("InsertedAt")
@@ -3358,21 +3375,18 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PostalCode")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("RegionCity")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Room")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Street")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("TypeID")
@@ -3400,91 +3414,27 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.ToTable("TaxIssuers");
                 });
 
-            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.ETA.TaxReceiver", b =>
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.ETA.TaxUnitType", b =>
                 {
-                    b.Property<string>("ID")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("ActivityCode")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("AdditionalInfo")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("BuildingNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<long?>("CountryID")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<long?>("DeletedByOctaId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("DeletedByUserId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("Floor")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Governate")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("InsertedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<long?>("InsertedByOctaId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("InsertedByUserId")
-                        .HasColumnType("bigint");
-
-                    b.Property<bool?>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("LandMark")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PostalCode")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("RegionCity")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Room")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Street")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("TypeID")
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
-                    b.Property<long?>("UpdatedByOctaId")
-                        .HasColumnType("bigint");
+                    b.Property<string>("code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<long?>("UpdatedByUserId")
-                        .HasColumnType("bigint");
+                    b.Property<string>("desc_ar")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("desc_en")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ID");
 
-                    b.HasIndex("DeletedByUserId");
-
-                    b.HasIndex("InsertedByUserId");
-
-                    b.HasIndex("TypeID");
-
-                    b.HasIndex("UpdatedByUserId");
-
-                    b.ToTable("TaxReceivers");
+                    b.ToTable("TaxUnitType");
                 });
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.Employee", b =>
@@ -4018,6 +3968,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<long?>("DeletedByUserId")
                         .HasColumnType("bigint");
 
+                    b.Property<DateTime?>("EtaInsertedDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<long>("FlagId")
                         .HasColumnType("bigint");
 
@@ -4087,9 +4040,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<long?>("SupplierId")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("TaxReceiverId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<decimal>("Total")
                         .HasColumnType("decimal(18,2)");
 
@@ -4142,8 +4092,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.HasIndex("StudentID");
 
                     b.HasIndex("SupplierId");
-
-                    b.HasIndex("TaxReceiverId");
 
                     b.HasIndex("UpdatedByUserId");
 
@@ -4330,6 +4278,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<string>("ItemCode")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ItemType")
                         .HasColumnType("nvarchar(max)");
 
@@ -4350,6 +4301,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.Property<long>("SchoolID")
                         .HasColumnType("bigint");
+
+                    b.Property<string>("UnitType")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -5608,6 +5562,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<long?>("DeletedByUserId")
                         .HasColumnType("bigint");
 
+                    b.Property<int?>("FRI")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("InsertedAt")
                         .HasColumnType("datetime2");
 
@@ -5620,13 +5577,28 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<int?>("MON")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<int?>("SAT")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SUN")
+                        .HasColumnType("int");
+
                     b.Property<long>("SectionID")
                         .HasColumnType("bigint");
+
+                    b.Property<int?>("THRU")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("TUS")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -5636,6 +5608,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.Property<long?>("UpdatedByUserId")
                         .HasColumnType("bigint");
+
+                    b.Property<int?>("WED")
+                        .HasColumnType("int");
 
                     b.HasKey("ID");
 
@@ -6631,6 +6606,12 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<string>("VatNumber")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<long?>("WeekEndDayID")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("WeekStartDayID")
+                        .HasColumnType("bigint");
+
                     b.HasKey("ID");
 
                     b.HasIndex("DeletedByUserId");
@@ -6640,6 +6621,10 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.HasIndex("SchoolTypeID");
 
                     b.HasIndex("UpdatedByUserId");
+
+                    b.HasIndex("WeekEndDayID");
+
+                    b.HasIndex("WeekStartDayID");
 
                     b.ToTable("School");
                 });
@@ -6778,12 +6763,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<long?>("UpdatedByUserId")
                         .HasColumnType("bigint");
 
-                    b.Property<long?>("WeekEndDayID")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("WeekStartDayID")
-                        .HasColumnType("bigint");
-
                     b.HasKey("ID");
 
                     b.HasIndex("AcademicYearID");
@@ -6793,10 +6772,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.HasIndex("InsertedByUserId");
 
                     b.HasIndex("UpdatedByUserId");
-
-                    b.HasIndex("WeekEndDayID");
-
-                    b.HasIndex("WeekStartDayID");
 
                     b.ToTable("Semester");
                 });
@@ -6882,10 +6857,19 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<long?>("AccountNumberID")
                         .HasColumnType("bigint");
 
+                    b.Property<string>("AdditionalInfo")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Address")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("AdmissionDate")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("BuildingNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CountryCode")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("DateOfBirth")
@@ -6912,8 +6896,14 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<string>("EmergencyContactRelation")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Floor")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<long>("GenderId")
                         .HasColumnType("bigint");
+
+                    b.Property<string>("Governate")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("GuardianRelation")
                         .HasColumnType("nvarchar(max)");
@@ -6932,6 +6922,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.Property<bool?>("IsRegisteredInNoor")
                         .HasColumnType("bit");
+
+                    b.Property<string>("LandMark")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Mobile")
                         .HasColumnType("nvarchar(max)");
@@ -7010,7 +7003,13 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<string>("PlaceOfBirth")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("PostalCode")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("PreviousSchool")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RegionCity")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<long?>("RegistrationFormParentID")
@@ -7019,8 +7018,17 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<string>("Religion")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Room")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<long?>("StartAcademicYearID")
                         .HasColumnType("bigint");
+
+                    b.Property<string>("Street")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("TypeID")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -7064,6 +7072,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.HasIndex("RegistrationFormParentID");
 
                     b.HasIndex("StartAcademicYearID");
+
+                    b.HasIndex("TypeID");
 
                     b.HasIndex("UpdatedByUserId");
 
@@ -10780,33 +10790,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Navigation("UpdatedByEmployee");
                 });
 
-            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.ETA.TaxReceiver", b =>
-                {
-                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "DeletedByEmployee")
-                        .WithMany()
-                        .HasForeignKey("DeletedByUserId");
-
-                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "InsertedByEmployee")
-                        .WithMany()
-                        .HasForeignKey("InsertedByUserId");
-
-                    b.HasOne("LMS_CMS_DAL.Models.Domains.ETA.TaxCustomer", "TaxCustomer")
-                        .WithMany()
-                        .HasForeignKey("TypeID");
-
-                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "UpdatedByEmployee")
-                        .WithMany()
-                        .HasForeignKey("UpdatedByUserId");
-
-                    b.Navigation("DeletedByEmployee");
-
-                    b.Navigation("InsertedByEmployee");
-
-                    b.Navigation("TaxCustomer");
-
-                    b.Navigation("UpdatedByEmployee");
-                });
-
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.Employee", b =>
                 {
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Administration.AcademicDegree", "AcademicDegree")
@@ -11070,10 +11053,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .HasForeignKey("SupplierId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("LMS_CMS_DAL.Models.Domains.ETA.TaxReceiver", "TaxReceiver")
-                        .WithMany()
-                        .HasForeignKey("TaxReceiverId");
-
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "UpdatedByEmployee")
                         .WithMany()
                         .HasForeignKey("UpdatedByUserId");
@@ -11101,8 +11080,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Navigation("Supplier");
 
                     b.Navigation("TaxIssuer");
-
-                    b.Navigation("TaxReceiver");
 
                     b.Navigation("UpdatedByEmployee");
                 });
@@ -12310,6 +12287,16 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .WithMany()
                         .HasForeignKey("UpdatedByUserId");
 
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Days", "WeekEndDay")
+                        .WithMany("EndDaySchool")
+                        .HasForeignKey("WeekEndDayID")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Days", "WeekStartDay")
+                        .WithMany("StartDaySchool")
+                        .HasForeignKey("WeekStartDayID")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("DeletedByEmployee");
 
                     b.Navigation("InsertedByEmployee");
@@ -12317,6 +12304,10 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Navigation("SchoolType");
 
                     b.Navigation("UpdatedByEmployee");
+
+                    b.Navigation("WeekEndDay");
+
+                    b.Navigation("WeekStartDay");
                 });
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.LMS.Section", b =>
@@ -12367,16 +12358,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .WithMany()
                         .HasForeignKey("UpdatedByUserId");
 
-                    b.HasOne("LMS_CMS_DAL.Models.Domains.Days", "WeekEndDay")
-                        .WithMany("EndDaySemesters")
-                        .HasForeignKey("WeekEndDayID")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("LMS_CMS_DAL.Models.Domains.Days", "WeekStartDay")
-                        .WithMany("StartDaySemesters")
-                        .HasForeignKey("WeekStartDayID")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.Navigation("AcademicYear");
 
                     b.Navigation("DeletedByEmployee");
@@ -12384,10 +12365,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Navigation("InsertedByEmployee");
 
                     b.Navigation("UpdatedByEmployee");
-
-                    b.Navigation("WeekEndDay");
-
-                    b.Navigation("WeekStartDay");
                 });
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.LMS.SemesterWorkingWeek", b =>
@@ -12454,6 +12431,10 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .WithMany()
                         .HasForeignKey("StartAcademicYearID");
 
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.ETA.TaxCustomer", "TaxCustomer")
+                        .WithMany()
+                        .HasForeignKey("TypeID");
+
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "UpdatedByEmployee")
                         .WithMany()
                         .HasForeignKey("UpdatedByUserId");
@@ -12471,6 +12452,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Navigation("RegistrationFormParent");
 
                     b.Navigation("StartAcademicYear");
+
+                    b.Navigation("TaxCustomer");
 
                     b.Navigation("UpdatedByEmployee");
                 });
@@ -13654,11 +13637,11 @@ namespace LMS_CMS_DAL.Migrations.Domains
                 {
                     b.Navigation("EmployeeDays");
 
-                    b.Navigation("EndDaySemesters");
+                    b.Navigation("EndDaySchool");
 
                     b.Navigation("LessonLives");
 
-                    b.Navigation("StartDaySemesters");
+                    b.Navigation("StartDaySchool");
                 });
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.ECommerce.Cart", b =>

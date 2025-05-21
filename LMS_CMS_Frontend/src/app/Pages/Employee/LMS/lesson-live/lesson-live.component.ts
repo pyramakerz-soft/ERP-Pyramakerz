@@ -21,6 +21,8 @@ import { Day } from '../../../../Models/day';
 import { Classroom } from '../../../../Models/LMS/classroom';
 import { AcademicYear } from '../../../../Models/LMS/academic-year';
 import { School } from '../../../../Models/school';
+import { AcadimicYearService } from '../../../../Services/Employee/LMS/academic-year.service';
+import { SchoolService } from '../../../../Services/Employee/school.service';
 
 @Component({
   selector: 'app-lesson-live',
@@ -80,8 +82,11 @@ export class LessonLiveComponent {
     public LessonLiveServ: LessonLiveService ,
     public ClassroomServ :ClassroomService ,
     public weekdaysServ : DaysService ,
+    public acadimicYearService : AcadimicYearService ,
+    public schoolService : SchoolService ,
     public SubjectServ : SubjectService 
   ) { }
+
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
@@ -100,70 +105,64 @@ export class LessonLiveComponent {
       }
     });
 
-    this.GetAllData();
-    this.getAllClass();
-    this.getAllDays();
+    this.GetAllSchools(); 
   }
 
   onSchoolChange() {
-    // const selectedSchool = this.SchoolGroupByGradeGroupByClass.find((element) => element.id == this.selectedSchool)
-    // if (this.selectedSchool)
-    //   this.sectionService.GetBySchoolId(this.selectedSchool, this.DomainName).subscribe(
-    //     (data) => {
-    //       this.filteredSections = data.filter((section) => this.checkSchool(section))
-    //     }
-    //   )
-      
     this.selectedYear = 0;
     this.selectedClass = 0
     this.Years = []; 
-    this.ClassesForFilter = []; 
-  }
+    this.ClassesForFilter = []
 
-  checkSchool(element: any) {
-    return element.schoolID == this.selectedSchool
-  }
+    if (this.selectedSchool){
+      this.acadimicYearService.GetBySchoolId(this.selectedSchool, this.DomainName).subscribe(
+        (data) => {
+          this.Years = data
+        }
+      ) 
+    }
+  } 
 
-  onYearChange() {
-    // this.gradeService.Get(this.DomainName).subscribe(
-    //   (data) => {
-    //     this.filteredGrades = data.filter((grade) => this.checkSection(grade))
-    //   }
-    // )
-
+  onYearChange() { 
     this.selectedClass = 0 
-    this.ClassesForFilter = []; 
-  }
+    this.ClassesForFilter = []
+
+    if (this.selectedYear){
+      this.ClassroomServ.GetByAcYearId(this.selectedSchool, this.DomainName).subscribe(
+        (data) => {
+          this.ClassesForFilter = data
+        }
+      ) 
+    }
+  }  
   
   onClassChange() {
-    // this.gradeService.Get(this.DomainName).subscribe(
-    //   (data) => {
-    //     this.filteredGrades = data.filter((grade) => this.checkSection(grade))
-    //   }
-    // ) 
-  }
+    this.GetLessonsByClassID()
+  } 
 
-  checkSection(element: any) {
-    return element.sectionID == this.selectedYear
-  }
-
-  GetAllData() {
+  GetLessonsByClassID() {
     this.TableData = [];
-    this.LessonLiveServ.Get(this.DomainName).subscribe((d) => {
+    this.LessonLiveServ.GetByClassId(this.selectedClass, this.DomainName).subscribe((d) => {
       this.TableData = d;
+    });
+  }
+
+  GetAllSchools() {
+    this.Schools = [];
+    this.schoolService.Get(this.DomainName).subscribe((d) => {
+      this.Schools = d;
     });
   }
 
   Create() {
     this.mode = 'Create';
-    this.live = new LessonLive();
     this.validationErrors = {};
     this.openModal();
   }
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Lesson Activity Type?',
+      title: 'Are you sure you want to delete this Lesson Live?',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
@@ -173,7 +172,7 @@ export class LessonLiveComponent {
     }).then((result) => {
       if (result.isConfirmed) {
         this.LessonLiveServ.Delete(id, this.DomainName).subscribe((d) => {
-          this.GetAllData();
+          this.GetLessonsByClassID();
         });
       }
     });
@@ -215,7 +214,7 @@ export class LessonLiveComponent {
           this.DomainName
         ).subscribe(
           (d) => {
-            this.GetAllData();
+            this.GetLessonsByClassID();
             this.isLoading = false;
             this.closeModal();
           },
@@ -237,7 +236,7 @@ export class LessonLiveComponent {
           this.DomainName
         ).subscribe(
           (d) => {
-            this.GetAllData();
+            this.GetLessonsByClassID();
             this.isLoading = false;
             this.closeModal();
           },
@@ -253,8 +252,7 @@ export class LessonLiveComponent {
           }
         );
       }
-    }
-    this.GetAllData();
+    } 
   }
 
   getAllSubject() {
@@ -295,10 +293,13 @@ export class LessonLiveComponent {
 
   closeModal() {
     this.isModalVisible = false;
+    this.validationErrors = {};
+    this.live = new LessonLive();
   }
 
   openModal() {
-    this.validationErrors = {};
+    this.getAllClass();
+    this.getAllDays();
     this.isModalVisible = true;
   }
 

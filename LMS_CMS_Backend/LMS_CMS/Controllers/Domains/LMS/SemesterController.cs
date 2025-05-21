@@ -175,6 +175,16 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 semester.InsertedByUserId = userId;
             }
 
+            if (semester.IsCurrent == true)
+            {
+                List<Semester> Semesters = Unit_Of_Work.semester_Repository.Select_All();
+                foreach (var sssemester in Semesters)
+                {
+                    sssemester.IsCurrent = false;
+                    Unit_Of_Work.semester_Repository.Update(sssemester);
+                }
+            }
+
             Unit_Of_Work.semester_Repository.Add(semester);
             Unit_Of_Work.SaveChanges();
             return Ok(NewSemester);
@@ -253,6 +263,17 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     semester.UpdatedByOctaId = null;
                 }
             }
+
+            if (semester.IsCurrent == true)
+            {
+                List<Semester> Semesters = Unit_Of_Work.semester_Repository.FindBy(d=> d.ID != semester.ID);
+                foreach (var sssemester in Semesters)
+                {
+                    sssemester.IsCurrent = false;
+                    Unit_Of_Work.semester_Repository.Update(sssemester);
+                }
+            }
+
             Unit_Of_Work.semester_Repository.Update(semester);
             Unit_Of_Work.SaveChanges();
             return Ok(newSemester);

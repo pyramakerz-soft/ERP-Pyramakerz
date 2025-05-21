@@ -114,6 +114,46 @@
                 (ngModelChange)="onInputValueChange({ field: 'dateTo', value: $event })"/>
                 <span *ngIf="validationErrors['dateTo']" class="text-red-500 ml-3 font-normal">{{ validationErrors['dateTo'] }}</span>
             </div>
+            <div class="flex flex-col mb-4">
+                <label class="mb-2 primaryTxt">Periods Count</label>
+                <div class="flex flex-wrap justify-around">
+                    <div class="flex flex-col mb-4">
+                        <label class="mb-2 primaryTxt" for="SAT">SAT</label>
+                        <input id="SAT" type="text" (input)="validateNumber($event, 'sat')" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Number"
+                        [(ngModel)]="grade.sat"/> 
+                    </div>
+                    <div class="flex flex-col mb-4">
+                        <label class="mb-2 primaryTxt" for="SUN">SUN</label>
+                        <input id="SUN" type="text" (input)="validateNumber($event, 'sun')" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Number"
+                        [(ngModel)]="grade.sun" /> 
+                    </div>
+                    <div class="flex flex-col mb-4">
+                        <label class="mb-2 primaryTxt" for="MON">MON</label>
+                        <input id="MON" type="text" (input)="validateNumber($event, 'mon')" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Number"
+                        [(ngModel)]="grade.mon" /> 
+                    </div>
+                    <div class="flex flex-col mb-4">
+                        <label class="mb-2 primaryTxt" for="TUS">TUS</label>
+                        <input id="TUS" type="text" (input)="validateNumber($event, 'tus')" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Number"
+                        [(ngModel)]="grade.tus"/> 
+                    </div>
+                    <div class="flex flex-col mb-4">
+                        <label class="mb-2 primaryTxt" for="WED">WED</label>
+                        <input id="WED" type="text" (input)="validateNumber($event, 'wed')" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Number"
+                        [(ngModel)]="grade.wed"/> 
+                    </div>
+                    <div class="flex flex-col mb-4">
+                        <label class="mb-2 primaryTxt" for="THRU">THRU</label>
+                        <input id="THRU" type="text" (input)="validateNumber($event, 'thru')" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Number"
+                        [(ngModel)]="grade.thru"/> 
+                    </div>
+                    <div class="flex flex-col mb-4">
+                        <label class="mb-2 primaryTxt" for="FRI">FRI</label>
+                        <input id="FRI" type="text" (input)="validateNumber($event, 'fri')" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Number"
+                        [(ngModel)]="grade.fri"/> 
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="flex justify-end">
