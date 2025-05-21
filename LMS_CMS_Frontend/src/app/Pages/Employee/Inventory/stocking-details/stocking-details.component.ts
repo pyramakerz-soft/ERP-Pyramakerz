@@ -732,19 +732,24 @@ export class StockingDetailsComponent {
     }
   }
 
-  private async prepareAdjustment(
-    flagId: number,
-    filterCondition: (item: any) => boolean
-  ) {
-    this.adiustmentDisbursement.date = this.Data.date;
-    this.adiustmentDisbursement.storeID = this.Data.storeID;
-    this.adiustmentDisbursement.flagId = flagId;
-    this.adiustmentDisbursement.inventoryDetails = this.TableData.filter(
-      filterCondition
-    ).map((item) => {
+ private async prepareAdjustment(
+  flagId: number,
+  filterCondition: (item: any) => boolean
+) {
+  this.adiustmentDisbursement.date = this.Data.date;
+  this.adiustmentDisbursement.storeID = this.Data.storeID;
+  this.adiustmentDisbursement.flagId = flagId;
+
+  this.adiustmentDisbursement.inventoryDetails = this.TableData
+    .filter(filterCondition)
+    .map((item) => {
       const foundItem = this.AllShopItems.find((s) => s.id == item.shopItemID);
       const price = foundItem?.purchasePrice ?? 0;
       const quantity = item.theDifference ?? 0;
+
+      const adjustedQuantity = flagId === 4 ? -1 * quantity : quantity;
+      const adjustedTotalPrice = flagId === 4 ? -1 * price * quantity : price * quantity;
+
       return {
         id: Date.now() + Math.floor(Math.random() * 1000),
         insertedAt: '',
@@ -755,25 +760,28 @@ export class StockingDetailsComponent {
         notes: '',
         insertedByUserId: 0,
         shopItemID: item.shopItemID,
-        quantity: -1 * quantity,
+        quantity: adjustedQuantity,
+        totalPrice: adjustedTotalPrice,
         price: price,
-        totalPrice: -1 * price * quantity,
         inventoryMasterId: this.MasterId,
       };
     });
-    this.adiustmentDisbursement.total =
-      this.adiustmentDisbursement.inventoryDetails.reduce(
-        (sum, item) => sum + (item.totalPrice ?? 0),
-        0
-      );
-    if (this.adiustmentDisbursement.inventoryDetails.length > 0) {
-      const response = await this.InventoryMastrServ.Add(
-        this.adiustmentDisbursement,
-        this.DomainName
-      ).toPromise();
-      return response;
-    } else return;
+
+  this.adiustmentDisbursement.total = this.adiustmentDisbursement.inventoryDetails.reduce(
+    (sum, item) => sum + (item.totalPrice ?? 0),
+    0
+  );
+
+  if (this.adiustmentDisbursement.inventoryDetails.length > 0) {
+    const response = await this.InventoryMastrServ.Add(
+      this.adiustmentDisbursement,
+      this.DomainName
+    ).toPromise();
+    return response;
+  } else {
+    return;
   }
+}
 
   //////// print
 
