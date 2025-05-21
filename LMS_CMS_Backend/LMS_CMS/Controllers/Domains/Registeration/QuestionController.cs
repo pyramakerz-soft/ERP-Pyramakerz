@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using LMS_CMS_BL.DTO.Registration;
 using LMS_CMS_BL.UOW;
+using LMS_CMS_DAL.Migrations.Domains;
 using LMS_CMS_DAL.Models.Domains;
 using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_DAL.Models.Domains.RegisterationModule;
@@ -49,27 +50,22 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                     query => query.Include(emp => emp.MCQQuestionOptions)
                     );
 
+            foreach (var question in questions)
+            {
+                if (question.MCQQuestionOptions != null)
+                {
+                    question.MCQQuestionOptions = question.MCQQuestionOptions
+                        .Where(opt => opt.IsDeleted != true)
+                        .ToList();
+                }
+            }
+
             if (questions == null || questions.Count == 0)
             {
                 return NotFound();
             }
 
             List<questionGetDTO> questionDTO = mapper.Map<List<questionGetDTO>>(questions);
-
-            foreach (var question in questionDTO) 
-            { 
-            
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-
-            if (!string.IsNullOrEmpty(question.Image))
-            {
-                    question.Image = $"{serverUrl}{question.Image.Replace("\\", "/")}";
-            }
-            if (!string.IsNullOrEmpty(question.Video))
-            {
-                question.Video = $"{serverUrl}{question.Video.Replace("\\", "/")}";
-            }
-            }
 
             return Ok(questionDTO);
         }
@@ -94,23 +90,20 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                     query => query.Include(emp => emp.MCQQuestionOptions)
                     );
 
+            // Manually filter sub-collections
+            if (questions.MCQQuestionOptions != null)
+            {
+                questions.MCQQuestionOptions = questions.MCQQuestionOptions
+                    .Where(opt => opt.IsDeleted != true)
+                    .ToList();
+            }
+
             if (questions == null)
             {
                 return NotFound();
             }
 
             questionGetDTO questionDTO = mapper.Map<questionGetDTO>(questions);
-
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-
-            if (!string.IsNullOrEmpty(questionDTO.Image))
-            {
-                questionDTO.Image = $"{serverUrl}{questionDTO.Image.Replace("\\", "/")}";
-            }
-            if (!string.IsNullOrEmpty(questionDTO.Video))
-            {
-                questionDTO.Video = $"{serverUrl}{questionDTO.Video.Replace("\\", "/")}";
-            }
 
             return Ok(questionDTO);
         }
@@ -140,20 +133,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
             }
 
             List<questionGetDTO> questionDTO = mapper.Map<List<questionGetDTO>>(questions);
-            foreach (var question in questionDTO)
-            {
-
-                string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-
-                if (!string.IsNullOrEmpty(question.Image))
-                {
-                    question.Image = $"{serverUrl}{question.Image.Replace("\\", "/")}";
-                }
-                if (!string.IsNullOrEmpty(question.Video))
-                {
-                    question.Video = $"{serverUrl}{question.Video.Replace("\\", "/")}";
-                }
-            }
 
             return Ok(questionDTO);
         }
@@ -189,16 +168,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                 List<MCQQuestionOption> MCQQuestionOptions = Unit_Of_Work.mCQQuestionOption_Repository.FindBy(d => d.IsDeleted != true && d.Question_ID == question.ID);
                 List<MCQQuestionOptionGetDto> MCQQuestionOptionGetDtos = mapper.Map<List<MCQQuestionOptionGetDto>>(MCQQuestionOptions);
                 question.options = MCQQuestionOptionGetDtos;
-                string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-
-                if (!string.IsNullOrEmpty(question.Image))
-                {
-                    question.Image = $"{serverUrl}{question.Image.Replace("\\", "/")}";
-                }
-                if (!string.IsNullOrEmpty(question.Video))
-                {
-                    question.Video = $"{serverUrl}{question.Video.Replace("\\", "/")}";
-                }
             }
             // Group by QuestionType
             var groupedByQuestionType = questionDTO
@@ -337,8 +306,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                     {
                         newQuestion.ImageFile.CopyTo(stream);
                     }
-                    question.Image = Path.Combine("Uploads", "Questions", question.ID.ToString(), newQuestion.ImageFile.FileName); 
-
+                    //question.Image = Path.Combine("Uploads", "Questions", question.ID.ToString(), newQuestion.ImageFile.FileName);
+                    question.Image = $"{Request.Scheme}://{Request.Host}/Uploads/Questions/{question.ID.ToString()}/{newQuestion.ImageFile.FileName}";
                 }
 
                 if (newQuestion.VideoFile != null)
@@ -349,7 +318,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                     {
                         await newQuestion.VideoFile.CopyToAsync(stream);
                     }
-                    question.Video = Path.Combine("Uploads", "Questions", question.ID.ToString(), newQuestion.VideoFile.FileName);
+                    //question.Video = Path.Combine("Uploads", "Questions", question.ID.ToString(), newQuestion.VideoFile.FileName);
+                    question.Video = $"{Request.Scheme}://{Request.Host}/Uploads/Questions/{question.ID.ToString()}/{newQuestion.VideoFile.FileName}";
                 }
             }
 
@@ -464,7 +434,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
 
                 foreach (var i in Oldoptions)
                 {
-                    await Unit_Of_Work.mCQQuestionOption_Repository.DeleteAsync(i.ID);
+                    i.IsDeleted = true;
+                    Unit_Of_Work.mCQQuestionOption_Repository.Update(i);
                     await Unit_Of_Work.SaveChangesAsync();
                 }
                 foreach (var item in newQuestion.options)
@@ -537,7 +508,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                     {
                         newQuestion.ImageFile.CopyTo(stream);
                     }
-                    question.Image = Path.Combine("Uploads", "Questions", question.ID.ToString(), newQuestion.ImageFile.FileName);
+                    question.Image = $"{Request.Scheme}://{Request.Host}/Uploads/Questions/{question.ID.ToString()}/{newQuestion.ImageFile.FileName}";
                 }
 
                 // Save VideoFile if provided
@@ -549,7 +520,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                     {
                         newQuestion.VideoFile.CopyTo(stream);
                     }
-                    question.Video = Path.Combine("Uploads", "Questions", question.ID.ToString(), newQuestion.VideoFile.FileName);
+                    question.Video = $"{Request.Scheme}://{Request.Host}/Uploads/Questions/{question.ID.ToString()}/{newQuestion.VideoFile.FileName}";
                 }
             }
 

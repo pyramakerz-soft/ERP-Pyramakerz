@@ -200,20 +200,6 @@ export class QuestionsComponent {
     if(this.question.questionTypeID == 3){
       this.question.correctAnswerName = '' 
     }
-
-    if (this.question.video != null) {
-      const index = this.question.video.indexOf('Uploads');
-      if (index !== -1) {
-        this.question.video = this.question.video.substring(index);
-      }
-    }
-
-    if (this.question.image != null) {
-      const index = this.question.image.indexOf('Uploads');
-      if (index !== -1) {
-        this.question.image = this.question.image.substring(index);
-      }
-    }
     if (this.isFormValid()) { 
       this.isLoading = true
       if (this.mode == 'Create') {
