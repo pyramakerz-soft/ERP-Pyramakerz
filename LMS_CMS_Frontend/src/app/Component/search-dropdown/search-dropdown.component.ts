@@ -1,16 +1,16 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, EventEmitter, HostListener, Input, Output } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, Output, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-search-dropdown',
   standalone: true,
-  imports: [CommonModule,FormsModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './search-dropdown.component.html',
   styleUrl: './search-dropdown.component.css'
 })
 export class SearchDropdownComponent {
-  constructor(private _eref: ElementRef) {}
+  constructor(private _eref: ElementRef) { }
 
   @Input() selectedValue: any;
   @Output() selectedValueChange = new EventEmitter<any>();
@@ -22,6 +22,7 @@ export class SearchDropdownComponent {
   @Input() validationKey: string = '';
   @Input() validationErrors: any = {};
   @Output() blur = new EventEmitter<void>();
+  @Input() selectedName: string | null = '';
 
   searchTerm: string = '';
   showDropdown: boolean = false;
@@ -30,6 +31,30 @@ export class SearchDropdownComponent {
   totalPages: number = 1;
   searchTriggered = false;
 
+  ngOnInit() {
+    // If a display name is passed, show it in the input
+    if (this.selectedName && !this.searchTerm) {
+      this.searchTerm = this.selectedName;
+    }
+
+    // Optional: log to confirm it works
+    console.log("SearchDropdown initialized with:", {
+      selectedId: this.selectedValue,
+      selectedName: this.selectedName,
+      searchTerm: this.searchTerm
+    });
+  }
+
+   ngOnChanges(changes: SimpleChanges): void {
+    if (
+      changes['selectedName'] &&
+      changes['selectedName'].currentValue &&
+      !this.searchTerm
+    ) {
+      this.searchTerm = changes['selectedName'].currentValue;
+    }
+  }
+  
   // Detect clicks outside this component
   @HostListener('document:click', ['$event'])
   onClickOutside(event: Event): void {
@@ -64,4 +89,4 @@ export class SearchDropdownComponent {
     this.searchTriggered = false;
     this.blur.emit();
   }
-  }
+}

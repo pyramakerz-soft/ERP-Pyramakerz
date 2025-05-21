@@ -19,6 +19,7 @@ export class InventoryMaster {
             public saveID :number =0,
             public bankID :number =0,
             public supplierId :number =0,
+            public supplierName :string = '',
             public storeToTransformId :number =0,
             public storeName :string = '',
             public studentName :string = '',

@@ -16,30 +16,26 @@ namespace LMS_CMS_PL.Services
         //}
         public async Task<string> GetNextInvoiceNumber(LMS_CMS_Context db, long storeId, long flagId)
         {
-            string prefix = storeId.ToString() + flagId.ToString();
-
             var invoiceNumbers = await db.InventoryMaster
-                .Where(x => x.StoreID == storeId && x.FlagId == flagId && x.InvoiceNumber.StartsWith(prefix))
+                .Where(x => x.StoreID == storeId && x.FlagId == flagId && !string.IsNullOrEmpty(x.InvoiceNumber))
                 .Select(x => x.InvoiceNumber)
                 .ToListAsync();
 
             long maxNumber = 0;
 
-            if (invoiceNumbers.Any())
+            foreach (var inv in invoiceNumbers)
             {
-                maxNumber = invoiceNumbers
-                    .Select(inv =>
+                if (long.TryParse(inv, out long parsedNumber))
+                {
+                    if (parsedNumber > maxNumber)
                     {
-                        var suffix = inv.Length > prefix.Length ? inv.Substring(prefix.Length) : "0";
-                        return long.TryParse(suffix, out var num) ? num : 0;
-                    })
-                    .Max();
+                        maxNumber = parsedNumber;
+                    }
+                }
             }
 
             long nextNumber = maxNumber + 1;
-
-            return $"{prefix}{nextNumber}";
+            return $"{nextNumber}";
         }
-
     }
 }

@@ -138,6 +138,7 @@ export class InventoryDetailsComponent {
   tableDataForPrint: any[] = [];
   schools: School[] = []
   schoolPCs: SchoolPCs[] = []
+  SelectedSupplier: any = null;
 
   constructor(
     private router: Router,
@@ -321,6 +322,7 @@ export class InventoryDetailsComponent {
   GetMasterInfo() {
     this.salesServ.GetById(this.MasterId, this.DomainName).subscribe((d) => {
       this.Data = d;
+      console.log(this.Data, d)
       this.GetCategories();
     });
   }
@@ -579,6 +581,10 @@ export class InventoryDetailsComponent {
     }
   }
 
+  get supplierId() {
+    return this.SelectedSupplier?.id ?? null;
+  }
+
   DeleteWhenCreate(img: File) {
     this.Data.attachment = this.Data.attachment.filter((i) => i != img);
   }
@@ -632,9 +638,22 @@ export class InventoryDetailsComponent {
   ConvertToPurcase() {
     this.Data.flagId = 9;
     this.Data.isEditInvoiceNumber = true;
-    this.Data.date = new Date().toISOString().split('T')[0];
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    var date = `${year}-${month}-${day}T${hours}:${minutes}`;
+    this.Data.date = date;
     this.salesServ.Edit(this.Data, this.DomainName).subscribe((d) => {
-      this.router.navigateByUrl(`Employee/Purchase`);
+      Swal.fire({
+        icon: 'success',
+        title: 'Done',
+        text: 'Convert Succeessfully',
+        confirmButtonColor: '#089B41',
+      });
+      this.router.navigateByUrl(`Employee/Purchases`);
     });
   }
 
