@@ -163,7 +163,7 @@ export class SemesterComponent {
   }
 
   MoveToSemesterView(id:number){
-    this.router.navigateByUrl('Employee/WorkingWeeks/' + this.DomainName + '/' + id)
+    this.router.navigateByUrl('Employee/Working Weeks/' + this.DomainName + '/' + id)
   }
 
   capitalizeField(field: keyof Semester): string {
