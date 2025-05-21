@@ -42,7 +42,7 @@ export class StockingComponent {
    path: string = '';
    key: string = 'id';
    value: any = '';
-   keysArray: string[] = ['id', 'storeName' ,'invoiceNumber' ,'date' ,'amount'];
+   keysArray: string[] = ['id', 'date'];
  
    CurrentPage:number = 1
    PageSize:number = 10

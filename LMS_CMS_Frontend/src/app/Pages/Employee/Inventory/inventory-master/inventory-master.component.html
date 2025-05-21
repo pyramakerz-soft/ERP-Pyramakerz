@@ -15,6 +15,9 @@
         <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
           <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
             <tr>
+               <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                ID
+              </th>
               <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                 Store
               </th>
@@ -48,6 +51,9 @@
             <tr *ngFor="let row of TableData; let i = index"
               [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
               class="border-t border-gray-300 text-xs md:text-sm">
+              <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                {{ row.id }}
+              </td>
               <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                 {{ row.storeName }}
               </td>

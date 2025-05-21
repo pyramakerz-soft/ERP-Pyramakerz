@@ -250,7 +250,7 @@ export class SubCategoryComponent {
     this.value = event.value;
     try {
       const data: SubCategory[] = await firstValueFrom(
-        this.InventorySubCategoryServ.Get(this.DomainName)
+         this.InventorySubCategoryServ.GetByCategoryId(this.CategoryId, this.DomainName)
       );
       this.TableData = data || [];
 

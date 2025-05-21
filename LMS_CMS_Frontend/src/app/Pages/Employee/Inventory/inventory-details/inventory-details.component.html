@@ -2,10 +2,10 @@
   <div class="flex justify-between items-center space-x-5">
     <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToMaster()"></i>
     <h1 *ngIf="mode == 'Create'" class="font-semibold text-2xl leading-9">
-      Create {{InventoryFlag.title}}
+      Create {{InventoryFlag.enName}}
     </h1>
     <h1 *ngIf="mode == 'Edit'" class="font-semibold text-2xl leading-9">
-      Edit
+      Edit {{InventoryFlag.enName}}
     </h1>
     <!-- <h1 *ngIf="mode == 'View'" class="font-semibold text-2xl leading-9">
       View
@@ -13,8 +13,7 @@
   </div>
 
   <div class="flex space-x-2">
-    <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg mt-2"
-      (click)="Save()">
+    <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg" (click)="Save()">
       <span *ngIf="!isLoading">Save</span>
       <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
     </button>
@@ -69,7 +68,8 @@
   <div class="flex flex-col w-[24%] mb-4">
     <label class="mb-2" for="store">School</label>
     <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="school"
-      (ngModelChange)="onInputValueChange({ field: 'schoolId', value: $event })" [(ngModel)]="Data.schoolId" (change)="GetAllSchoolPCs()">
+      (ngModelChange)="onInputValueChange({ field: 'schoolId', value: $event })" [(ngModel)]="Data.schoolId"
+      (change)="GetAllSchoolPCs()">
       <option [value]="0" disabled selected hidden>Choose School</option>
       <option *ngFor="let s of schools" [value]="s.id">{{ s.name }}</option>
       <option *ngIf="schools.length === 0" disabled selected>
@@ -82,8 +82,9 @@
 
   <div class="flex flex-col w-[24%] mb-4">
     <label class="mb-2" for="schoolPCs">SchoolPCs</label>
-    <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="schoolPCs" [disabled]="!Data.schoolId"
-      (ngModelChange)="onInputValueChange({ field: 'schoolPCId', value: $event })" [(ngModel)]="Data.schoolPCId">
+    <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="schoolPCs"
+      [disabled]="!Data.schoolId" (ngModelChange)="onInputValueChange({ field: 'schoolPCId', value: $event })"
+      [(ngModel)]="Data.schoolPCId">
       <option [value]="0" disabled selected hidden>Choose schoolPCs</option>
       <option *ngFor="let s of schoolPCs" [value]="s.id">{{ s.pcName }}</option>
       <option *ngIf="schoolPCs.length === 0" disabled selected>
@@ -112,19 +113,18 @@
   </div>
 
   <div *ngIf="FlagId == 11 || FlagId == 12" class="flex flex-col w-[24%] mb-4 relative">
-    <app-search-dropdown [(selectedValue)]="Data.studentID" [placeholder]="'Search Student'"
+    <app-search-dropdown [(selectedValue)]="Data.studentID" [placeholder]="'Search Student'" [selectedName]="Data.studentName"
       [displayProperty]="'user_Name'" [validationKey]="'studentID'" [validationErrors]="validationErrors"
       [serviceFunction]="SearchStudents">
     </app-search-dropdown>
   </div>
 
   <div *ngIf="FlagId == 9 || FlagId == 10 || FlagId == 13" class="flex flex-col w-[24%] mb-4 relative">
-    <app-search-dropdown [(selectedValue)]="Data.supplierId" [placeholder]="'Search Supplier'"
-      [displayProperty]="'name'" [validationKey]="'supplierId'" [validationErrors]="validationErrors"
-      [serviceFunction]="SearchSuppliers">
+    <app-search-dropdown [(selectedValue)]="Data.supplierId" [selectedName]="Data.supplierName"
+      [placeholder]="'Search Supplier'" [displayProperty]="'name'" [validationKey]="'supplierId'"
+      [validationErrors]="validationErrors" [serviceFunction]="SearchSuppliers">
     </app-search-dropdown>
   </div>
-
 
   <div *ngIf="IsRemainingCashVisa" class="flex justify-start w-full mb-4 space-x-5">
     <div class="flex w-[8%] space-x-5 items-center mb-4">
