@@ -10,23 +10,23 @@ import { TestWithQuestion } from '../../../Models/Registration/test-with-questio
 })
 export class QuestionService {
 
- baseUrl = ""
-   header = ""
- 
-   constructor(public http: HttpClient, public ApiServ: ApiService) {
-     this.baseUrl = ApiServ.BaseUrl
-   }
- 
-   Add(question: QuestionAddEdit, DomainName: string) {
+  baseUrl = ""
+  header = ""
+
+  constructor(public http: HttpClient, public ApiServ: ApiService) {
+    this.baseUrl = ApiServ.BaseUrl
+  }
+
+  Add(question: QuestionAddEdit, DomainName: string) {
     if (DomainName) {
       this.header = DomainName;
     }
-  
+
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`);
-  
+
     const formData = new FormData();
     formData.append('description', question.description || '');
     formData.append('image', question.image || '');
@@ -37,33 +37,34 @@ export class QuestionService {
     if (question.imageFile) {
       formData.append('imageFile', question.imageFile);
     }
-  
+
     if (question.videoFile) {
       formData.append('videoFile', question.videoFile);
     }
     if (question.options && question.options.length > 0) {
-      question.options.forEach(element => {
-        formData.append('options',element);
+      let uploadIndex = 0;
+      question.options.forEach((option, index) => {
+        formData.append(`Options[${uploadIndex}].Name`, option.name);
+        formData.append(`Options[${uploadIndex}].ID`, option.id.toString());
+        uploadIndex++;
       });
     }
-    formData.forEach(element => {
-    });
     return this.http.post(`${this.baseUrl}/Question`, formData, {
       headers: headers,
       responseType: 'text' as 'json',
     });
   }
- 
-   Edit(question: QuestionAddEdit,DomainName:string) {
+
+  Edit(question: QuestionAddEdit, DomainName: string) {
     if (DomainName) {
       this.header = DomainName;
     }
-  
+
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`);
-  
+
     const formData = new FormData();
     formData.append('id', question.id.toString());
     formData.append('description', question.description || '');
@@ -75,13 +76,31 @@ export class QuestionService {
     if (question.imageFile) {
       formData.append('imageFile', question.imageFile);
     }
-  
+
     if (question.videoFile) {
       formData.append('videoFile', question.videoFile);
     }
-    if (question.options && question.options.length > 0) {
-      question.options.forEach(element => {
-        formData.append('options',element);
+    // if (question.options && question.options.length > 0) {
+    //   question.options.forEach(element => {
+    //     formData.append('options', element);
+    //   });
+    // }
+    if (question.newOptions && question.newOptions.length > 0) {
+      question.newOptions.forEach(element => {
+        formData.append('NewOptions', element);
+      });
+    }
+    if (question.deletedOptions && question.deletedOptions.length > 0) {
+      question.deletedOptions.forEach(element => {
+        formData.append('DeletedOptions', element.toString());
+      });
+    }
+    if (question.editedOptions?.length > 0) {
+      let uploadIndex = 0;
+      question.editedOptions.forEach((option, index) => {
+        formData.append(`EditedOptions[${uploadIndex}].Name`, option.name);
+        formData.append(`EditedOptions[${uploadIndex}].ID`, option.id.toString());
+        uploadIndex++;
       });
     }
     return this.http.put(`${this.baseUrl}/Question`, formData, {
@@ -89,58 +108,58 @@ export class QuestionService {
       responseType: 'text' as 'json',
     });
   }
- 
-   Delete(id: number,DomainName:string) {
-     if(DomainName!=null) {
-       this.header=DomainName 
-     }
-     const token = localStorage.getItem("current_token");
-     const headers = new HttpHeaders()
-       .set('domain-name', this.header)
-       .set('Authorization', `Bearer ${token}`)
-       .set('Content-Type', 'application/json');
-     return this.http.delete(`${this.baseUrl}/Question/${id}`, { headers })
-   }
- 
-   Get(DomainName:string) {
-     if(DomainName!=null) {
-       this.header=DomainName 
-     }
-     const token = localStorage.getItem("current_token");
-     const headers = new HttpHeaders()
-       .set('domain-name', this.header)
-       .set('Authorization', `Bearer ${token}`)
-       .set('Content-Type', 'application/json');
-     return this.http.get<Question[]>(`${this.baseUrl}/Question`, { headers })
-   }
 
-   GetByTestID(id:number,DomainName:string) {
-     if(DomainName!=null) {
-       this.header=DomainName 
-     }
-     const token = localStorage.getItem("current_token");
-     const headers = new HttpHeaders()
-       .set('domain-name', this.header)
-       .set('Authorization', `Bearer ${token}`)
-       .set('Content-Type', 'application/json');
-     return this.http.get<Question[]>(`${this.baseUrl}/Question/ByTest/${id}`, { headers })
-   }
-   
-   GetByID(id:number,DomainName:string) {
-     if(DomainName!=null) {
-       this.header=DomainName 
-     }
-     const token = localStorage.getItem("current_token");
-     const headers = new HttpHeaders()
-       .set('domain-name', this.header)
-       .set('Authorization', `Bearer ${token}`)
-       .set('Content-Type', 'application/json');
-     return this.http.get<Question>(`${this.baseUrl}/Question/GetByID/${id}`, { headers })
-   }
+  Delete(id: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.delete(`${this.baseUrl}/Question/${id}`, { headers })
+  }
 
-   GetByTestIDGroupBy(id:number,DomainName:string) {
-    if(DomainName!=null) {
-      this.header=DomainName 
+  Get(DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<Question[]>(`${this.baseUrl}/Question`, { headers })
+  }
+
+  GetByTestID(id: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<Question[]>(`${this.baseUrl}/Question/ByTest/${id}`, { headers })
+  }
+
+  GetByID(id: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<Question>(`${this.baseUrl}/Question/GetByID/${id}`, { headers })
+  }
+
+  GetByTestIDGroupBy(id: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
@@ -150,4 +169,4 @@ export class QuestionService {
     return this.http.get<TestWithQuestion[]>(`${this.baseUrl}/Question/ByTestGroupBy/${id}`, { headers })
   }
 
-  }
+}

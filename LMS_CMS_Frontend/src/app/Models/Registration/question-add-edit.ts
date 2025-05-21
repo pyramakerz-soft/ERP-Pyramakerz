@@ -1,3 +1,5 @@
+import { QuestionOption } from "./question-option";
+
 export class QuestionAddEdit {
     constructor(
         public id: number = 0,
@@ -9,6 +11,10 @@ export class QuestionAddEdit {
         public testID: number = 0,
         public imageFile: File |any = null,
         public videoFile: File |any = null,
-        public options :string[] =[], 
+        public options :QuestionOption[] =[], 
+        public newOptions :string[] =[],
+        public deletedOptions :number[] =[],
+        public editedOptions :QuestionOption[] =[],
+        
     ) {}
 }

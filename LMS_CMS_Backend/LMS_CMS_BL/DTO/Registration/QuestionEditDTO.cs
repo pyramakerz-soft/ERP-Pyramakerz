@@ -20,7 +20,10 @@ namespace LMS_CMS_BL.DTO.Registration
         public string? correctAnswerName{ get; set; }
         public long QuestionTypeID { get; set; }
         public long TestID { get; set; }
-        public List<string>? options { get; set; }
+        public List<string>? options { get; set; } = new();
+        public List<string>? NewOptions { get; set; } = new();
+        public List<long>? DeletedOptions { get; set; } = new();
+        public List<MCQQuestionOptionGetDto>? EditedOptions { get; set; } = new();
 
     }
 }
