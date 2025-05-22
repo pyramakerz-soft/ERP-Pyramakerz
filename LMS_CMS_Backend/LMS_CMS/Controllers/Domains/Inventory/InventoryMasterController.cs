@@ -554,10 +554,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             //Master.FlagId = 11;
             if (Master.FlagId == 11 || Master.FlagId == 12)
             {
-                Master.School = school;
+                //Master.School = school;
 
-                List<InventoryMaster> masters = Unit_Of_Work.inventoryMaster_Repository.SelectQuery<InventoryMaster>(i => i.IsDeleted != true).ToList();
-                var json = EtaServices.GenerateJsonInvoice(Master, Unit_Of_Work, _config);
+                //List<InventoryMaster> masters = Unit_Of_Work.inventoryMaster_Repository.SelectQuery<InventoryMaster>(i => i.IsDeleted != true).ToList();
+                //var json = EtaServices.GenerateJsonInvoice(Master, Unit_Of_Work, _config);
                 //string lastInvoiceHash = "";
 
                 //if (masters.Count > 1 || masters is not null)

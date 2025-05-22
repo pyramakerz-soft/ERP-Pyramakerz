@@ -352,7 +352,7 @@
   </div>
 </div>
 
-<div class="print-area">
+<div class="print-area" *ngIf="FlagId != 12">
   <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
     <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
       <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
@@ -447,6 +447,174 @@
   </div>
 </div>
 
+<div class="print-area" *ngIf="FlagId == 12"> <!-- in sales return only  -->
+  <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
+    <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
+      <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+        <tr>
+           <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+           Sales Number
+          </th>
+          <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+            Bar Code
+          </th>
+          <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+            Item ID
+          </th>
+          <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+            Item Name
+          </th>
+          <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+            Quantity
+          </th>
+          <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+            Price
+          </th>
+          <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+            Total Price
+          </th>
+          <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+            Notes
+          </th>
+          <th *ngIf="mode == 'Edit'"
+            class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+            Actions
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- No Data Row -->
+        <tr
+          *ngIf=" Data.inventoryDetails?.length === 0 && !IsOpenToAdd && mode === 'Create' && SelectedSopItem == null && FlagId != 12">
+          <td colspan="11" class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+            No Data Found
+          </td>
+        </tr>
+
+        <tr *ngIf="TableData?.length === 0 && !IsOpenToAdd && mode === 'Edit' && FlagId != 12">
+          <td colspan="11" class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+            No Data Found
+          </td>
+        </tr>
+
+         <tr
+          *ngIf=" Data.inventoryDetails?.length === 0 && !IsOpenToAdd && mode === 'Create' && SelectedSopItem == null && FlagId == 12">
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+            <input 
+              type="number"
+               (dblclick)="openModal()"
+              class="w-full border border-gray-300 px-2 py-1 rounded-md" 
+            />
+          </td>
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+           _
+          </td>
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+            _
+          </td>
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+            _
+          </td>
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+            _
+          </td>
+          <td  class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+            _
+          </td>
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+            _
+          </td>
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+           _
+          </td>
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+            _
+          </td>
+        </tr>
+
+        <tr *ngIf="TableData?.length === 0 && !IsOpenToAdd && mode === 'Edit' && FlagId == 12">
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+            <input type="number"
+              class="w-full border border-gray-300 px-2 py-1 rounded-md" />
+          </td>
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+           _
+          </td>
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+            _
+          </td>
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+            _
+          </td>
+          <td  class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+            _
+          </td>
+          <td  class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+            _
+          </td>
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+           _
+          </td>
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+            _
+          </td>
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+            _
+          </td>
+        </tr>
+        <!-- Data Rows -->
+        <tr *ngFor="
+            let row of (mode === 'Create'
+              ? Data.inventoryDetails
+              : TableData) || [];
+            let i = index
+          " [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
+          class="border-t border-gray-300 text-xs md:text-sm">
+           <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+            <input [(ngModel)]="row.quantity" (ngModelChange)="CalculateTotalPrice(row)" type="number"
+              class="w-full border border-gray-300 px-2 py-1 rounded-md" />
+          </td>
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+            {{ row.barCode }}
+          </td>
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+            {{ row.shopItemID }}
+          </td>
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+            {{ row.shopItemName }}
+          </td>
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+            <input [(ngModel)]="row.quantity" (ngModelChange)="CalculateTotalPrice(row)" type="number"
+              class="w-full border border-gray-300 px-2 py-1 rounded-md" />
+          </td>
+          <td *ngIf="!IsPriceEditable && mode === 'Create'"
+            class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+            {{ row.price }}
+          </td>
+          <td *ngIf="IsPriceEditable || mode === 'Edit'"
+            class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+            <input [(ngModel)]="row.price" (ngModelChange)="EditPrice(row)" type="number"
+              class="w-full border border-gray-300 px-2 py-1 rounded-md" />
+          </td>
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+            {{ row.totalPrice }}
+          </td>
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+            <input [(ngModel)]="row.notes" type="notes" class="w-full border border-gray-300 px-2 py-1 rounded-md" />
+          </td>
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+            <div class="flex space-x-4">
+              <button (click)="Delete(row)">
+                <i class="fa-regular fa-trash-can"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
 <div class="absolute -top-[9999px] -left-[9999px]">
   <div id="Data" class="hidden">
     <app-pdf-print *ngIf="showPDF" [fileName]="'Inventory'" [infoRows]="[
@@ -464,5 +632,94 @@
       }
     ]" [tableHeaders]="['BarCode', 'Item_Id', 'Item_Name', 'Quantity', 'Price' , 'Total_Price' , 'Notes']"
       [tableData]="tableDataForPrint" #pdfComponentRef></app-pdf-print>
+  </div>
+</div>
+
+<!-- Modal -->
+<div id="default-modal" tabindex="-1" aria-hidden="true" [ngClass]="{ hidden: !isModalVisible }"
+  class="fixed top-0 left-0 right-0 z-50 flex justify-center items-center w-full h-full bg-black/50">
+  <div class="relative bg-white w-[669px] h-auto rounded-2xl p-12 gap-4 shadow-md">
+    <!-- Close Icon -->
+    <button (click)="closeModal()"
+      class="absolute top-4 right-4 text-gray-400 hover:text-gray-900 transition duration-200">
+      <i class="fa-solid fa-xmark text-2xl"></i>
+    </button>
+<!-- 
+    <h1 class="font-semibold text-2xl leading-9">
+      Search For Item
+    </h1> -->
+    <div class="mt-1 bg-[#F7F7F7] w-[573px] h-auto rounded-[24px] p-[16px_24px] gap-[20px]">
+       <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
+        <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
+          <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+            <tr>
+              <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+              Sales Number
+              </th>
+              <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                Bar Code
+              </th>
+              <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                Item ID
+              </th>
+              <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                Item Name
+              </th>
+              <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                Quantity
+              </th>
+              <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                Price
+              </th>
+              <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                Total Price
+              </th>
+              <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                Notes
+              </th>
+              <th *ngIf="mode == 'Edit'"
+                class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- No Data Row -->
+            <tr
+              *ngIf=" Data.inventoryDetails?.length === 0 && !IsOpenToAdd && mode === 'Create' && SelectedSopItem == null && FlagId != 12">
+              <td colspan="11" class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                No Data Found
+              </td>
+            </tr>
+            <!-- Data Rows -->
+            <tr *ngFor=" let row of  SalesItem; let i = index" [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
+              class="border-t border-gray-300 text-xs md:text-sm">
+              <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                {{ row.barCode }}
+              </td>
+              <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                {{ row.barCode }}
+              </td>
+              <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                {{ row.shopItemID }}
+              </td>
+              <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                {{ row.shopItemName }}
+              </td>
+              <td *ngIf="!IsPriceEditable && mode === 'Create'"
+                class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                {{ row.price }}
+              </td>
+              <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                {{ row.price }}
+              </td>
+              <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                {{ row.totalPrice }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+     </div>
+    </div>
   </div>
 </div>

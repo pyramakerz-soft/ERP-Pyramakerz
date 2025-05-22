@@ -140,6 +140,8 @@ export class InventoryDetailsComponent {
   schoolPCs: SchoolPCs[] = []
   SelectedSupplier: any = null;
 
+  SalesItem :InventoryDetails[] = []; // for sales return 
+
   constructor(
     private router: Router,
     private menuService: MenuService,
@@ -1014,5 +1016,15 @@ export class InventoryDetailsComponent {
   getStoreNameById(id: number | string): string {
     const store = this.Stores.find((s) => s.id === +id);
     return store ? store.name : '—';
+  }
+
+  closeModal() {
+    this.validationErrors = {}
+    this.isModalVisible = false;
+  }
+
+  openModal() {
+    console.log("fd")
+    this.isModalVisible = true;
   }
 }
