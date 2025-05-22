@@ -4,16 +4,25 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
-  selector: 'app-assignments',
+  selector: 'app-lesson-resources',
   standalone: true,
   imports: [CommonModule , FormsModule],
-  templateUrl: './assignments.component.html',
-  styleUrl: './assignments.component.css'
+  templateUrl: './lesson-resources.component.html',
+  styleUrl: './lesson-resources.component.css'
 })
-export class AssignmentsComponent {
+export class LessonResourcesComponent {
   subjectName: string = '';
   activeTab: string = 'resources'; // Default active tab
-
+Sheets: string[] = [
+  'Sheets book 1.pdf',
+  'Sheets book 2.pdf',
+  'Sheets book 3.pdf',
+  'Sheets book 4.pdf',
+  'Sheets book 5.pdf',
+  'Sheets book 6.pdf',
+  'Sheets book 7.pdf',
+  'Sheets book 8.pdf',
+];
 
   selectedWeek: string | null = null;
 
@@ -46,7 +55,7 @@ export class AssignmentsComponent {
   // }
 
   goBack() {
-    this.router.navigate(['/Employee/Subject-Details', this.subjectName.toLowerCase().replace(/\s+/g, '-')]);
+    this.router.navigate(['/Student/Subject-Details-UI', this.subjectName.toLowerCase().replace(/\s+/g, '-')]);
   }
 
   setActiveTab(tab: string) {

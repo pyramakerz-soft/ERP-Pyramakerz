@@ -151,16 +151,16 @@ import { StudentLessonLiveComponent } from './Pages/Student/LMS/student-lesson-l
 import { AssignmentDetailsComponent } from './Pages/Employee/LMS/assignment/assignment-details/assignment-details.component';
 import { AssignmentEditComponent } from './Pages/Employee/LMS/assignment/assignment-edit/assignment-edit.component';
 import { ZatcaDevicesComponent } from './Pages/Employee/Zatca/zatca-devices/zatca-devices.component';
-import { SubjectsComponent } from './Pages/Employee/LMS/UI/subjects/subjects.component';
-import { SubjectDetailsComponent } from './Pages/Employee/LMS/UI/SubjectDetails/subject-details.component';
-import { WeekDetailsComponent } from './Pages/Employee/LMS/UI/week-details/week-details.component';
+import { SubjectsComponent } from './Pages/Student/LMS/UI/subject/subjects.component';
+import { SubjectDetailsComponent } from './Pages/Student/LMS/UI/subject-details/subject-details.component';
+import { WeekDetailsComponent } from './Pages/Student/LMS/UI/week-details/week-details.component';
 import { ElectronicInvoiceComponent } from './Pages/Employee/Inventory/Report/electronic-invoice/electronic-invoice.component';
-import { LessonResourcesComponent } from './Pages/Employee/LMS/UI/lesson-resources/lesson-resources.component';
-import { AssignmentsComponent } from './Pages/Employee/LMS/UI/assignments/assignments.component';
+import { LessonResourcesComponent } from './Pages/Student/LMS/UI/lesson-resources/lesson-resources.component';
+import { AssignmentsComponent } from './Pages/Student/LMS/UI/assignments/assignments.component';
 import { ElectronicInvoiceDetailComponent } from './Pages/Employee/Inventory/Report/electronic-invoice-detail/electronic-invoice-detail.component';
 import { ClassroomViewComponent } from './Pages/Employee/LMS/classroom-view/classroom-view.component';
 import { QuestionBankComponent } from './Pages/Employee/LMS/question-bank/question-bank.component';
-import { LessonLiveUIComponent } from './Pages/Employee/LMS/UI/lesson-live/lesson-live.component';
+import { LessonLiveUIComponent } from './Pages/Student/LMS/UI/lesson-live/lesson-live.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate:[noNavigateToLoginIfLoginGuard] },
@@ -361,16 +361,7 @@ export const routes: Routes = [
             { path: "Zatca Devices", component: ZatcaDevicesComponent, title: "Zatca Devices", canActivate:[noNavigateWithoutLoginGuard ] },
             { path: "Electronic-Invoice", component: ElectronicInvoiceComponent, title: "ElectronicInvoice", canActivate:[noNavigateWithoutLoginGuard ] },
             { path: "Electronic-Invoice/:id", component: ElectronicInvoiceDetailComponent, title: "menna", canActivate:[noNavigateWithoutLoginGuard ] },
-            { path: "Assignment Details", component: AssignmentDetailsComponent, title: "Assignment Details", canActivate:[noNavigateWithoutLoginGuard ] },
-            { path: "Assignment Edit", component: AssignmentEditComponent, title: "Assignment Edit", canActivate:[noNavigateWithoutLoginGuard ] },
-            { path: "Subjects", component: SubjectsComponent, title: "Subjects", canActivate:[noNavigateWithoutLoginGuard ] },
-            { path: "Subject-Details/:subjectId", component: SubjectDetailsComponent, title: "Subject-Details", canActivate:[noNavigateWithoutLoginGuard] },
-            { path: "week-details/:subjectId/:weekId", component: WeekDetailsComponent, title: "Week Details", canActivate:[noNavigateWithoutLoginGuard] }, 
-            { path: "Lesson-Resources/:subjectId", component: LessonResourcesComponent, title: "Lesson Resources", canActivate:[noNavigateWithoutLoginGuard] }, 
-            { path: "Assignments/:subjectId", component: AssignmentsComponent, title: "Assignments", canActivate:[noNavigateWithoutLoginGuard] }, 
-            { path: "LessonLiveUI/:subjectId", component: LessonLiveUIComponent, title: "Lesson Live", canActivate:[noNavigateWithoutLoginGuard] }, 
 
-            
                ]
 },
     { 
@@ -398,8 +389,18 @@ export const routes: Routes = [
             { path: "Ecommerce/Cart", component: CartComponent, title: "Cart" },
             { path: "Ecommerce/Order", component: OrderComponent, title: "Order" },
             { path: "Ecommerce/Order/:id", component: OrderItemsComponent, title: "Order Items" },
-            { path: "Lesson Live", component: StudentLessonLiveComponent, title: "Lesson Live" }
+            { path: "Lesson Live", component: StudentLessonLiveComponent, title: "Lesson Live" },
 
+            { path: "Assignment-Details-UI", component: AssignmentDetailsComponent, title: "Assignment Details", canActivate:[noNavigateWithoutLoginGuard ] },
+            { path: "Assignment-Edit-UI", component: AssignmentEditComponent, title: "Assignment Edit", canActivate:[noNavigateWithoutLoginGuard ] },
+            { path: "Subject-UI", component: SubjectsComponent, title: "Subjects", canActivate:[noNavigateWithoutLoginGuard ] },
+            { path: "Subject-Details-UI/:subjectId", component: SubjectDetailsComponent, title: "Subject-Details", canActivate:[noNavigateWithoutLoginGuard] },
+            { path: "week-details-UI/:subjectId/:weekId", component: WeekDetailsComponent, title: "Week Details", canActivate:[noNavigateWithoutLoginGuard] }, 
+            { path: "Lesson-Resources-UI/:subjectId", component: LessonResourcesComponent, title: "Lesson Resources", canActivate:[noNavigateWithoutLoginGuard] }, 
+            { path: "Assignments-UI/:subjectId", component: AssignmentsComponent, title: "Assignments", canActivate:[noNavigateWithoutLoginGuard] }, 
+            { path: "Lesson-Live-UI/:subjectId", component: LessonLiveUIComponent, title: "Lesson Live", canActivate:[noNavigateWithoutLoginGuard] }, 
+
+            
         ]
     },
     { 

@@ -29,10 +29,10 @@ console.log('garab yad ybn el')}
 
 navigateToSubject(subjectName: string) {
   const subjectId = subjectName.toLowerCase().replace(/\s+/g, '-');
-  this.router.navigate(['/Employee/Subject-Details', subjectId]);
+  this.router.navigate(['/Student/Subject-Details-UI', subjectId]);
 }
   navigateToLessonRes(subjectName: string) {
   const subjectId = subjectName.toLowerCase().replace(/\s+/g, '-');
-  this.router.navigate(['/Employee/Lesson-Resources', subjectId]);
+  this.router.navigate(['/Student/Lesson-Resources-UI', subjectId]);
 }
 }

@@ -50,14 +50,14 @@ weeks: string[] = [
 
   selectWeek(week: string) {
     this.selectedWeek = week;
-    this.router.navigate(['/Employee/week-details', 
+    this.router.navigate(['/Student/week-details', 
       this.subjectName.toLowerCase().replace(/\s+/g, '-'), 
       week.toLowerCase().replace(/\s+/g, '-')
     ]);
   }
 
   goBack() {
-    this.router.navigate(['/Subjects']);
+    this.router.navigate(['/Student/Subject-UI']);
   }
 
   setActiveTab(tab: string) {
@@ -65,11 +65,11 @@ weeks: string[] = [
   }
   navigateToAssignments(subjectName: string) {
   const subjectId = subjectName.toLowerCase().replace(/\s+/g, '-');
-  this.router.navigate(['/Employee/Assignments', subjectId]);
+  this.router.navigate(['/Student/Assignments-UI', subjectId]);
 }
 navigateToLessonLive(subjectName: string) {
   const subjectId = subjectName.toLowerCase().replace(/\s+/g, '-');
-  this.router.navigate(['/Employee/LessonLiveUI', subjectId]);
+  this.router.navigate(['/Student/Lesson-Resources-UI', subjectId]);
 }
 
 }

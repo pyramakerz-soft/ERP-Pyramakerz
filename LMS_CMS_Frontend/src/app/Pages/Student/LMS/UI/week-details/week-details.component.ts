@@ -77,10 +77,10 @@ export class WeekDetailsComponent implements OnInit {
   }
   navigateToLessonRes(subjectName: string) {
   const subjectId = subjectName.toLowerCase().replace(/\s+/g, '-');
-  this.router.navigate(['/Employee/Lesson-Resources', subjectId]);
+  this.router.navigate(['/Student/Lesson-Resources-UI', subjectId]);
 }
 
   goBack() {
-    this.router.navigate(['/Employee/Subject-Details', this.subjectName.toLowerCase().replace(/\s+/g, '-')]);
+    this.router.navigate(['/Student/Subject-Details-UI', this.subjectName.toLowerCase().replace(/\s+/g, '-')]);
   }
 }

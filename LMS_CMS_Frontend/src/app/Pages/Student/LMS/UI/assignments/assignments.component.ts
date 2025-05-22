@@ -4,13 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
-  selector: 'app-lesson-live',
+  selector: 'app-assignments',
   standalone: true,
   imports: [CommonModule , FormsModule],
-  templateUrl: './lesson-live.component.html',
-  styleUrl: './lesson-live.component.css'
+  templateUrl: './assignments.component.html',
+  styleUrl: './assignments.component.css'
 })
-export class LessonLiveUIComponent {
+export class AssignmentsComponent {
   subjectName: string = '';
   activeTab: string = 'resources'; // Default active tab
 
@@ -46,7 +46,7 @@ export class LessonLiveUIComponent {
   // }
 
   goBack() {
-    this.router.navigate(['/Employee/Subject-Details', this.subjectName.toLowerCase().replace(/\s+/g, '-')]);
+    this.router.navigate(['/Student/Subject-Details-UI', this.subjectName.toLowerCase().replace(/\s+/g, '-')]);
   }
 
   setActiveTab(tab: string) {
