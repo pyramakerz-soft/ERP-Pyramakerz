@@ -32,6 +32,9 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public string? ReportImage { get; set; }
         public string? VatNumber { get; set; }
         public string? CRN { get; set; } //Commercial Registration Number
+        public string? ClientID { get; set; } 
+        public string? SecretNumber1 { get; set; } 
+        public string? SecretNumber2 { get; set; } 
         public int? MaximumPeriodCountTimeTable { get; set; }
         public int? MaximumPeriodCountRemedials { get; set; }
         [ForeignKey("WeekStartDay")]

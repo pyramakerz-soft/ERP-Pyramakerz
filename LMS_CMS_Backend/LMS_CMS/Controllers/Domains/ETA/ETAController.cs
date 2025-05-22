@@ -1,13 +1,15 @@
 ﻿using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains.Inventory;
 using LMS_CMS_PL.Services;
+using LMS_CMS_PL.Services.ETA;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using Newtonsoft.Json;
+using System.Text;
 
 namespace LMS_CMS_PL.Controllers.Domains.ETA
 {
-    [Route("api/[controller]")]
+    [Route("api/with-domain/[controller]")]
     [ApiController]
     public class ETAController : ControllerBase
     {
@@ -18,7 +20,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
             _dbContextFactory = dbContextFactory;
         }
 
-        [HttpGet]
+        [HttpPost("SendToETA")]
         //#region Report Invoice
         //[HttpPost("ReportInvoice")]
         //[Authorize_Endpoint_(
@@ -27,6 +29,9 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
         //)]
         public async Task<IActionResult> SendToETA(long masterId)
         {
+            string apiBaseUrl = "https://api.invoicing.eta.gov.eg";
+            string idSrvBaseUrl = "https://id.eta.gov.eg";
+
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             InventoryMaster master = await Unit_Of_Work.inventoryMaster_Repository.FindByIncludesAsync(
@@ -40,15 +45,59 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
             if (master is null)
                 return NotFound("Invoice not found.");
 
+            string token = EtaServices.Login(Unit_Of_Work, master.School.ID);
+
             //string dateTime = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ");
 
-            string lsonPath = string.Empty;
+            string jsonPath = string.Empty;
             if (master.FlagId == 11)
-                lsonPath = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/JSONInvoices/{master.StoreID}_{master.FlagId}_{master.InvoiceNumber}.json");
+                jsonPath = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/JSONInvoices/{master.StoreID}_{master.FlagId}_{master.InvoiceNumber}.json");
             if (master.FlagId == 12)
-                lsonPath = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/JSONInvoices/{master.StoreID}_{master.FlagId}_{master.InvoiceNumber}.json");
+                jsonPath = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/JSONInvoices/{master.StoreID}_{master.FlagId}_{master.InvoiceNumber}.json");
 
+            if (master.IsValid == 0 || master.IsValid == null)
+            {
+                string signedJson = System.IO.File.ReadAllText(jsonPath);
+                byte[] jsonDataBytes = Encoding.UTF8.GetBytes(signedJson);
 
+                string result = string.Empty;
+
+                if (string.IsNullOrEmpty(token))
+                {
+                    result = EtaServices.PostRequest(new Uri(apiBaseUrl + "/api/v1/documentsubmissions"), jsonDataBytes, "application/json", "POST", token);
+                }
+
+                if (!string.IsNullOrEmpty(result))
+                {
+                    dynamic result0 = JsonConvert.DeserializeObject(result);
+
+                    if (result0.acceptedDocuments.Count > 0)
+                    {
+                        string uuid = result0.acceptedDocuments[0].uuid;
+                        string longId = result0.acceptedDocuments[0].longId;
+
+                        master.uuid = uuid;
+                        master.ShareLongId = longId;
+
+                        Unit_Of_Work.inventoryMaster_Repository.Update(master);
+                        await Unit_Of_Work.SaveChangesAsync();
+
+                        return Ok(new { uuid, longId });
+                    }
+
+                    if (result0.rejectedDocuments.Count > 0)
+                    {
+                        string msg = "";
+
+                        foreach (var detail in result0.rejectedDocuments[0].error.details)
+                        {
+                            msg += $"{detail.propertyPath} - {detail.message}\r\n";
+                        }
+
+                        return BadRequest(new { msg });
+                    }
+                }
+            }
 
             return Ok();
         }
