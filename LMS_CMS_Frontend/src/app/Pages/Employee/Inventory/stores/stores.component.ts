@@ -60,7 +60,7 @@ export class StoresComponent {
   AllowEditForOthers: boolean = false;
   AllowDeleteForOthers: boolean = false;
 
-  keysArray: string[] = ['id', 'name'];
+  keysArray: string[] = ['id', 'name' ];
   key: string = "id";
   value: any = "";
 

@@ -13,7 +13,13 @@ import { ClassroomService } from '../../../../Services/Employee/LMS/classroom.se
   templateUrl: './classroom-view.component.html',
   styleUrl: './classroom-view.component.css'
 })
-export class ClassroomViewComponent { 
+export class ClassroomViewComponent {
+GoToStudent() {
+throw new Error('Method not implemented.');
+}
+GoToSubject() {
+throw new Error('Method not implemented.');
+} 
   classroom: Classroom = new Classroom();  
 
   DomainName: string = '';
