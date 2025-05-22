@@ -37,7 +37,7 @@ namespace LMS_CMS_BL.DTO.Inventory
         public string? InvoiceHash { get; set; }
         public string? QRCode { get; set; }
         public string? uuid { get; set; }
-        //public string? XmlInvoiceFile { get; set; }
+        public string? ShareLongId { get; set; }
         public string? Status { get; set; }
         public byte? IsValid { get; set; }
         public string? QrImage { get; set; }

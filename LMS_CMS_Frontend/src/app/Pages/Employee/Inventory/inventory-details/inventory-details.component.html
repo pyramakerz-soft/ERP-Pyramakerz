@@ -497,7 +497,7 @@
           </td>
         </tr>
 
-         <tr
+        <tr
           *ngIf=" Data.inventoryDetails?.length === 0 && !IsOpenToAdd && mode === 'Create' && SelectedSopItem == null && FlagId == 12">
           <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
             <input 
@@ -534,8 +534,11 @@
 
         <tr *ngIf="TableData?.length === 0 && !IsOpenToAdd && mode === 'Edit' && FlagId == 12">
           <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-            <input type="number"
-              class="w-full border border-gray-300 px-2 py-1 rounded-md" />
+           <input 
+              type="number"
+               (dblclick)="openModal()"
+              class="w-full border border-gray-300 px-2 py-1 rounded-md" 
+            />
           </td>
           <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
            _
@@ -608,6 +611,39 @@
                 <i class="fa-regular fa-trash-can"></i>
               </button>
             </div>
+          </td>
+        </tr>
+        <tr *ngIf="TableData?.length != 0 && Data.inventoryDetails?.length != 0 &&FlagId == 12">
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+            <input 
+              type="number"
+               (dblclick)="openModal()"
+              class="w-full border border-gray-300 px-2 py-1 rounded-md" 
+            />
+          </td>
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+           _
+          </td>
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+            _
+          </td>
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+            _
+          </td>
+          <td  class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+            _
+          </td>
+          <td  class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+            _
+          </td>
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+           _
+          </td>
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+            _
+          </td>
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+            _
           </td>
         </tr>
       </tbody>

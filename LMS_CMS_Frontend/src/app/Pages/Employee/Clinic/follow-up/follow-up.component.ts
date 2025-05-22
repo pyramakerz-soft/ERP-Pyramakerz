@@ -94,41 +94,62 @@ keysArray: string[] = ['id', 'schoolName', 'gradeName', 'className', 'studentNam
         }
     }
 
-  onSchoolChange(event: Event) {
-    const selectedSchoolId = (event.target as HTMLSelectElement).value;
-    this.followUp.gradeId = 0;
-    this.followUp.classroomId = 0;
-    this.followUp.studentId = 0;
-    this.grades = [];
-    this.classes = [];
-    this.students = [];
+onSchoolChange(event: Event) {
+  const selectedSchoolId = (event.target as HTMLSelectElement).value;
+  this.followUp.gradeId = 0;
+  this.followUp.classroomId = 0;
+  this.followUp.studentId = 0;
+  this.grades = [];
+  this.classes = [];
+  this.students = [];
+  
+  // Clear school validation error when school changes
+  delete this.validationErrors['schoolId'];
 
-    if (selectedSchoolId) {
-      this.loadGrades(Number(selectedSchoolId));
-    }
+  if (selectedSchoolId) {
+    this.loadGrades(Number(selectedSchoolId));
   }
+}
 
-  onGradeChange(event: Event) {
-    const selectedGradeId = (event.target as HTMLSelectElement).value;
-    this.followUp.classroomId = 0;
-    this.followUp.studentId = 0;
-    this.classes = [];
-    this.students = [];
+onGradeChange(event: Event) {
+  const selectedGradeId = (event.target as HTMLSelectElement).value;
+  this.followUp.classroomId = 0;
+  this.followUp.studentId = 0;
+  this.classes = [];
+  this.students = [];
+  
+  // Clear grade validation error when grade changes
+  delete this.validationErrors['gradeId'];
 
-    if (selectedGradeId) {
-      this.loadClasses(Number(selectedGradeId));
-    }
+  if (selectedGradeId) {
+    this.loadClasses(Number(selectedGradeId));
   }
+}
 
-  onClassChange(event: Event) {
-    const selectedClassId = (event.target as HTMLSelectElement).value;
-    this.followUp.studentId = 0;
-    this.students = [];
+onClassChange(event: Event) {
+  const selectedClassId = (event.target as HTMLSelectElement).value;
+  this.followUp.studentId = 0;
+  this.students = [];
+  
+  // Clear class validation error when class changes
+  delete this.validationErrors['classroomId'];
 
-    if (selectedClassId) {
-      this.loadStudents(Number(selectedClassId));
-    }
+  if (selectedClassId) {
+    this.loadStudents(Number(selectedClassId));
   }
+}
+
+// Add this method to handle student selection changes
+onStudentChange() {
+  // Clear student validation error when student changes
+  delete this.validationErrors['studentId'];
+}
+
+// Add this method to handle diagnosis selection changes
+onDiagnosisChange() {
+  // Clear diagnosis validation error when diagnosis changes
+  delete this.validationErrors['diagnosisId'];
+}
 
   async loadGrades(schoolId: number) {
     try {

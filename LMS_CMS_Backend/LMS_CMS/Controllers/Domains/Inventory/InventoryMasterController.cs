@@ -282,6 +282,42 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             }
             return Ok(DTO);
         }
+
+        /////////////////////////////////////////////////////////////////////////////
+
+        [HttpGet("SalesByStudentId/{id}")]
+        [Authorize_Endpoint_(
+        allowedTypes: new[] { "octa", "employee" },
+          pages: new[] { "Inventory" }
+         )]
+        public async Task<IActionResult> GetByStudentId(long id)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            if (id == 0)
+            {
+                return BadRequest("Enter student ID");
+            }
+
+            List<InventoryMaster> Data = await Unit_Of_Work.inventoryMaster_Repository.Select_All_With_IncludesById<InventoryMaster>(
+                    s => s.IsDeleted != true && s.FlagId == 11  && s.StudentID == id ,
+                    query => query.Include(store => store.Store),
+                    query => query.Include(store => store.Student),
+                    query => query.Include(store => store.InventoryDetails),
+                    query => query.Include(store => store.Save),
+                    query => query.Include(store => store.InventoryFlags),
+                    query => query.Include(store => store.Bank)
+                    );
+
+            if (Data == null)
+            {
+                return NotFound();
+            }
+
+            List<InventoryMasterGetDTO> DTO = mapper.Map<List<InventoryMasterGetDTO>>(Data);
+           
+            return Ok(DTO);
+        }
         /////////////////////////////////////////////////////////////////////////////
 
         [HttpPost]

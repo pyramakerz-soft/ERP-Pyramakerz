@@ -6538,6 +6538,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<string>("CitySubdivision")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("ClientID")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
 
@@ -6590,6 +6593,12 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.Property<long>("SchoolTypeID")
                         .HasColumnType("bigint");
+
+                    b.Property<string>("SecretNumber1")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SecretNumber2")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("StreetName")
                         .HasColumnType("nvarchar(max)");

@@ -12,6 +12,8 @@ export class InventoryMaster {
             public visaAmount :number =0,
             public remaining :number =0,
             public total :number =0,
+            public totalWithVat :number =0,
+            public vatAmount :number =0,
             public notes :string = '',
             public flagId :number =0,
             public storeID :number =0,
