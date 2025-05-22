@@ -15,6 +15,8 @@ using LMS_CMS_DAL.Models.Domains.ETA;
 using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Octa;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
+using LMS_CMS_DAL.Models.Domains.LMS;
 
 namespace LMS_CMS_PL.Services.ETA
 {
@@ -27,29 +29,31 @@ namespace LMS_CMS_PL.Services.ETA
         private static string access_token = "";
 
 
-        //public EtaServices(string myTokenPinId)
-        //{
-        //    TokenPin = myTokenPinId;
-        //   // DataTable dt = bm.ExecuteAdapter("select clientId,ClientSecret,ClientSecret2,TokenType from Statics");
+        public static async void GetToken(int myTokenPinId, long schoolId, UOW unitOfWork)
+        {
+            EtaToken etaToken = await unitOfWork.etaToken_Repository.FindByIncludesAsync(x => x.ID == myTokenPinId, query => query.Include(x => x.EtaTokenType));
+            TokenPin = etaToken.PIN;
+            
+            // DataTable dt = bm.ExecuteAdapter("select clientId,ClientSecret,ClientSecret2,TokenType from Statics");
 
-        //    if (dt.Rows.Count > 0)
-        //    {
-        //        clientId = dt.Rows[0]["clientId"].ToString();
-        //        ClientSecret = dt.Rows[0]["ClientSecret"].ToString();
-        //        ClientSecret2 = dt.Rows[0]["ClientSecret2"].ToString();
+            //if (dt.Rows.Count > 0)
+            //{
+            //    clientId = dt.Rows[0]["clientId"].ToString();
+            //    ClientSecret = dt.Rows[0]["ClientSecret"].ToString();
+            //    ClientSecret2 = dt.Rows[0]["ClientSecret2"].ToString();
 
-        //        //TokenPin
-        //        switch (Convert.ToInt32(dt.Rows[0]["TokenType"]))
-        //        {
-        //            case 0:
-        //                DllLibPath = "eps2003csp11.dll";
-        //                break;
-        //            case 1:
-        //                DllLibPath = "SignatureP11.dll";
-        //                break;
-        //        }
-        //    }
-        //}
+                //TokenPin
+                switch (etaToken.EtaTokenTypeID)
+                {
+                    case 1:
+                        DllLibPath = "eps2003csp11.dll";
+                        break;
+                    case 2:
+                        DllLibPath = "SignatureP11.dll";
+                        break;
+                }
+            //}
+        }
 
 
 
@@ -176,7 +180,7 @@ namespace LMS_CMS_PL.Services.ETA
             //                }
             //            }
 
-            string serialize0 = Serialize((JObject)invoiceJson.ToJsonString());
+            string serialize0 = Serialize(JObject.Parse(invoiceJson.ToJsonString()));
             string signWithCMS0 = SignWithCMS(Encoding.UTF8.GetBytes(serialize0));
 
             if (string.IsNullOrEmpty(signWithCMS0))
@@ -399,32 +403,47 @@ namespace LMS_CMS_PL.Services.ETA
             return dd.ToString("yyyy-MM-dd HH:mm:ss");
         }
 
-        //public static void Login()
-        //{
-        //    try
-        //    {
-        //        var outgoingQueryString = System.Web.HttpUtility.ParseQueryString(string.Empty);
-        //        outgoingQueryString.Add("grant_type", "client_credentials");
-        //        outgoingQueryString.Add("client_id", clientId);
-        //        outgoingQueryString.Add("client_secret", ClientSecret);
-        //        outgoingQueryString.Add("scope", "InvoicingAPI");
-
-        //        byte[] jsonDataBytes = System.Text.Encoding.ASCII.GetBytes(outgoingQueryString.ToString());
-
-        //        string result = PostRequest(new Uri(idSrvBaseUrl + "/connect/token"), jsonDataBytes, "application/x-www-form-urlencoded", "POST");
-
-        //        var json = JsonConvert.DeserializeObject<dynamic>(result);
-        //        access_token = json.access_token;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // bm.ShowMSG(ex.Message);
-        //    }
-        //}
-
-
-        private static string PostRequest(Uri uri, byte[] jsonDataBytes, string contentType, string method)
+        public static string Login(UOW unitOfWork, long schoolId)
         {
+            School school = unitOfWork.school_Repository.Select_By_Id(schoolId);
+            string clientId = school.ClientID;
+            string clientSecret = school.SecretNumber1;
+            string clientSecret2 = school.SecretNumber2;
+            try
+            {
+                var outgoingQueryString = System.Web.HttpUtility.ParseQueryString(string.Empty);
+                outgoingQueryString.Add("grant_type", "client_credentials");
+                outgoingQueryString.Add("client_id", clientId);
+                outgoingQueryString.Add("client_secret", clientSecret);
+                outgoingQueryString.Add("scope", "InvoicingAPI");
+
+                byte[] jsonDataBytes = System.Text.Encoding.ASCII.GetBytes(outgoingQueryString.ToString());
+
+                string result = PostRequest(new Uri(idSrvBaseUrl + "/connect/token"), jsonDataBytes, "application/x-www-form-urlencoded", "POST");
+
+                var json = JsonConvert.DeserializeObject<dynamic>(result);
+                access_token = json.access_token;
+
+                return access_token;
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+        }
+
+        public static string PostRequest(Uri uri, byte[] jsonDataBytes, string contentType, string method, string? accessToken = "")
+        {
+            //HttpClient client = new HttpClient();
+            //var request = new HttpRequestMessage
+            //{
+            //    RequestUri = new Uri(uri, ""),
+            //    Method = new HttpMethod(method), // e.g., "POST" or "GET"
+            //    Content = new StringContent(jsonDataBytes, Encoding.UTF8, contentType) // e.g., "application/json"
+            //};
+            //request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", access_token);
+            //HttpResponseMessage responseMessage = await client.SendAsync(request);
+            //string response = await responseMessage.Content.ReadAsStringAsync();
             try
             {
                 ServicePointManager.Expect100Continue = true;
@@ -435,7 +454,7 @@ namespace LMS_CMS_PL.Services.ETA
                 request.ContentLength = jsonDataBytes.Length;
                 request.ContentType = contentType;
                 request.Method = method;
-                request.Headers.Add(HttpRequestHeader.Authorization, "Bearer " + access_token);
+                request.Headers.Add(HttpRequestHeader.Authorization, "Bearer " + accessToken);
 
                 using (Stream requestStream = request.GetRequestStream())
                 {
@@ -452,12 +471,11 @@ namespace LMS_CMS_PL.Services.ETA
             }
             catch (Exception ex)
             {
-                //bm.ShowMSG(ex.Message);
-                return "";
+                return "ex.Message";
             }
         }
 
-        private static string PostRequest(Uri uri, string jsonData, string contentType, string method)
+        public static string PostRequest(Uri uri, string jsonData, string contentType, string method, string? accessToken = "")
         {
             try
             {
@@ -466,7 +484,7 @@ namespace LMS_CMS_PL.Services.ETA
                 request.ContentLength = System.Text.Encoding.UTF8.GetByteCount(jsonData);
                 request.ContentType = contentType;
                 request.Method = method;
-                request.Headers.Add(HttpRequestHeader.Authorization, "Bearer " + access_token);
+                request.Headers.Add(HttpRequestHeader.Authorization, "Bearer " + accessToken);
 
                 using (StreamWriter requestStream = new StreamWriter(request.GetRequestStream()))
                 {
@@ -488,101 +506,95 @@ namespace LMS_CMS_PL.Services.ETA
             }
         }
 
-
-        public static string Dec2(string value)
+        private static string Dec2(string value)
         {
             return string.Format("{0:0.00}", Convert.ToDecimal(value));
         }
 
-        public static string Dec5(string value)
+        private static string Dec5(string value)
         {
             return string.Format("{0:0.00000}", Convert.ToDecimal(value));
         }
 
-
-        public static string SignWithCMS(byte[] data)
+        private static string SignWithCMS(byte[] data)
         {
-        //    try
-        //    {
-        //        var factories = new Pkcs11InteropFactories();
-        //        var pkcs11Library = factories.Pkcs11LibraryFactory.LoadPkcs11Library(factories, DllLibPath, AppType.MultiThreaded);
+            try
+            {
+                var factories = new Pkcs11InteropFactories();
+                var pkcs11Library = factories.Pkcs11LibraryFactory.LoadPkcs11Library(factories, DllLibPath, Net.Pkcs11Interop.Common.AppType.MultiThreaded);
 
-        //        var slot = pkcs11Library.GetSlotList(SlotsType.WithTokenPresent).FirstOrDefault();
-        //        if (slot == null)
-        //        {
-        //            bm.ShowMSG("No slots found");
-        //            return "";
-        //        }
+                var slot = pkcs11Library.GetSlotList(Net.Pkcs11Interop.Common.SlotsType.WithTokenPresent).FirstOrDefault();
+                if (slot == null)
+                {
+                    return "No slots found";
+                }
 
-        //        var session = slot.OpenSession(SessionType.ReadWrite);
-        //        try
-        //        {
-        //            session.Login(CKU.CKU_USER, Encoding.UTF8.GetBytes(TokenPin));
-        //        }
-        //        catch { }
+                var session = slot.OpenSession(Net.Pkcs11Interop.Common.SessionType.ReadWrite);
+                try
+                {
+                    session.Login(Net.Pkcs11Interop.Common.CKU.CKU_USER, Encoding.UTF8.GetBytes(TokenPin));
+                }
+                catch { }
 
-        //        var certAttributes = new List<IObjectAttribute>
-        //{
-        //    session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, CKO.CKO_CERTIFICATE),
-        //    session.Factories.ObjectAttributeFactory.Create(CKA.CKA_TOKEN, true),
-        //    session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CERTIFICATE_TYPE, CKC.CKC_X_509)
-        //};
+                var certAttributes = new List<IObjectAttribute>
+                {
+                    session.Factories.ObjectAttributeFactory.Create(Net.Pkcs11Interop.Common.CKA.CKA_CLASS, Net.Pkcs11Interop.Common.CKO.CKO_CERTIFICATE),
+                    session.Factories.ObjectAttributeFactory.Create(Net.Pkcs11Interop.Common.CKA.CKA_TOKEN, true),
+                    session.Factories.ObjectAttributeFactory.Create(Net.Pkcs11Interop.Common.CKA.CKA_CERTIFICATE_TYPE, Net.Pkcs11Interop.Common.CKC.CKC_X_509)
+                };
 
-        //        var certificate = session.FindAllObjects(certAttributes).FirstOrDefault();
-        //        if (certificate == null)
-        //        {
-        //            bm.ShowMSG("Certificate not found");
-        //            return "";
-        //        }
+                var certificate = session.FindAllObjects(certAttributes).FirstOrDefault();
+                if (certificate == null)
+                {
+                    return "Certificate not found";
+                }
 
-        //        var store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
-        //        store.Open(OpenFlags.MaxAllowed);
+                var store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
+                store.Open(OpenFlags.MaxAllowed);
 
-        //        var foundCerts = new X509Certificate2Collection();
-        //        var certsIssuerNames = bm.ExecuteAdapter("select * from CertificatesIssuerName");
-        //        foreach (DataRow row in certsIssuerNames.Rows)
-        //        {
-        //            foundCerts = store.Certificates.Find(X509FindType.FindByIssuerName, row["Name"].ToString(), true);
-        //            if (foundCerts.Count > 0) break;
-        //        }
+                var foundCerts = new X509Certificate2Collection();
+                var certsIssuerNames = bm.ExecuteAdapter("select * from CertificatesIssuerName");
+                foreach (DataRow row in certsIssuerNames.Rows)
+                {
+                    foundCerts = store.Certificates.Find(X509FindType.FindByIssuerName, row["Name"].ToString(), true);
+                    if (foundCerts.Count > 0) break;
+                }
 
-        //        if (foundCerts.Count == 0)
-        //        {
-        //            bm.ShowMSG("No Device Detected");
-        //            return "";
-        //        }
+                if (foundCerts.Count == 0)
+                {
+                    return "No Device Detected";
+                }
 
-        //        var certForSigning = foundCerts[0];
-        //        store.Close();
+                var certForSigning = foundCerts[0];
+                store.Close();
 
-        //        var content = new ContentInfo(new Oid("1.2.840.113549.1.7.5"), data);
-        //        var cms = new SignedCms(content, true);
+                var content = new ContentInfo(new Oid("1.2.840.113549.1.7.5"), data);
+                var cms = new SignedCms(content, true);
 
-        //        var bouncyCertificate = new EssCertIDv2(
-        //            new Org.BouncyCastle.Asn1.X509.AlgorithmIdentifier(new DerObjectIdentifier("1.2.840.113549.1.9.16.2.47")),
-        //            HashBytes(certForSigning.RawData)
-        //        );
-        //        var signerCertV2 = new SigningCertificateV2(new[] { bouncyCertificate });
+                var bouncyCertificate = new EssCertIDv2(
+                    new Org.BouncyCastle.Asn1.X509.AlgorithmIdentifier(new DerObjectIdentifier("1.2.840.113549.1.9.16.2.47")),
+                    HashBytes(certForSigning.RawData)
+                );
+                var signerCertV2 = new SigningCertificateV2(new[] { bouncyCertificate });
 
-        //        var signer = new CmsSigner(certForSigning)
-        //        {
-        //            DigestAlgorithm = new Oid("2.16.840.1.101.3.4.2.1")
-        //        };
-        //        signer.SignedAttributes.Add(new Pkcs9SigningTime(DateTime.UtcNow));
-        //        signer.SignedAttributes.Add(new AsnEncodedData(
-        //            new Oid("1.2.840.113549.1.9.16.2.47"),
-        //            signerCertV2.GetEncoded()
-        //        ));
+                var signer = new CmsSigner(certForSigning)
+                {
+                    DigestAlgorithm = new Oid("2.16.840.1.101.3.4.2.1")
+                };
+                signer.SignedAttributes.Add(new Pkcs9SigningTime(DateTime.UtcNow));
+                signer.SignedAttributes.Add(new AsnEncodedData(
+                    new Oid("1.2.840.113549.1.9.16.2.47"),
+                    signerCertV2.GetEncoded()
+                ));
 
-        //        cms.ComputeSignature(signer);
-        //        var output = cms.Encode();
-        //        return Convert.ToBase64String(output);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        bm.ShowMSG(ex.Message);
-                return "";
-            //}
+                cms.ComputeSignature(signer);
+                var output = cms.Encode();
+                return Convert.ToBase64String(output);
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
         }
 
         public static byte[] HashBytes(byte[] input)
@@ -592,8 +604,6 @@ namespace LMS_CMS_PL.Services.ETA
                 return sha.ComputeHash(input);
             }
         }
-
-
     }
 
 }

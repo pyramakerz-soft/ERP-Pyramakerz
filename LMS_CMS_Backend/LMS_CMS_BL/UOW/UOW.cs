@@ -178,6 +178,7 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<TaxIssuer> TaxIssuer_Repository;
         GenericRepo<TaxUnitType> TaxUnitType_Repository;
         GenericRepo<EtaTokenType> EtaTokenType_Repository;
+        GenericRepo<EtaToken> EtaToken_Repository;
 
 
 
@@ -1983,6 +1984,18 @@ namespace LMS_CMS_BL.UOW
                     EtaTokenType_Repository = new GenericRepo<EtaTokenType>(db);
                 }
                 return EtaTokenType_Repository;
+            }
+        }
+
+        public GenericRepo<EtaToken> etaToken_Repository
+        {
+            get
+            {
+                if (EtaToken_Repository == null)
+                {
+                    EtaToken_Repository = new GenericRepo<EtaToken>(db);
+                }
+                return EtaToken_Repository;
             }
         }
 
