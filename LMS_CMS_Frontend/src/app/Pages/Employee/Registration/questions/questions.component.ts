@@ -18,6 +18,7 @@ import Swal from 'sweetalert2';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { firstValueFrom } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
+import { QuestionOption } from '../../../../Models/Registration/question-option';
 
 @Component({
   selector: 'app-questions',
@@ -59,7 +60,7 @@ export class QuestionsComponent {
   testId: number = 0;
   QuestionTypes: QuestionType[] = [];
 
-  options: string[] = [];
+  options: QuestionOption[] = [];
   NewOption: string = '';
 
   validationErrors: { [key in keyof QuestionAddEdit]?: string } = {};
@@ -123,11 +124,11 @@ export class QuestionsComponent {
     );
   }
 
-  GetByID(id:number) {
-    this.question = new QuestionAddEdit(); 
+  GetByID(id: number) {
+    this.question = new QuestionAddEdit();
     this.QuestionServ.GetByID(id, this.DomainName).subscribe(
       (d: any) => {
-        this.question = d; 
+        this.question = d;
       }
     );
   }
@@ -145,7 +146,7 @@ export class QuestionsComponent {
   }
 
   Create() {
-    this.mode = 'Create'; 
+    this.mode = 'Create';
     this.question = new QuestionAddEdit();
     this.options = [];
     this.openModal();
@@ -172,8 +173,8 @@ export class QuestionsComponent {
   Edit(row: Question) {
     this.mode = 'Edit';
     this.openModal();
-    this.GetByID(row.id) 
-    this.options = row.options.map((option) => option.name);
+    this.GetByID(row.id)
+    this.options = row.options
   }
 
   IsAllowDelete(InsertedByID: number) {
@@ -195,26 +196,13 @@ export class QuestionsComponent {
   }
 
   CreateOREdit() {
-    this.question.options = this.options; 
-    this.question.testID = this.testId;  
-    if(this.question.questionTypeID == 3){
-      this.question.correctAnswerName = '' 
+    this.question.options = this.options;
+    this.question.testID = this.testId;
+    console.log(this.question)
+    if (this.question.questionTypeID == 3) {
+      this.question.correctAnswerName = ''
     }
-
-    if (this.question.video != null) {
-      const index = this.question.video.indexOf('Uploads');
-      if (index !== -1) {
-        this.question.video = this.question.video.substring(index);
-      }
-    }
-
-    if (this.question.image != null) {
-      const index = this.question.image.indexOf('Uploads');
-      if (index !== -1) {
-        this.question.image = this.question.image.substring(index);
-      }
-    }
-    if (this.isFormValid()) { 
+    if (this.isFormValid()) {
       this.isLoading = true
       if (this.mode == 'Create') {
         this.QuestionServ.Add(this.question, this.DomainName).subscribe(() => {
@@ -233,13 +221,14 @@ export class QuestionsComponent {
             });
           });
       }
-      if (this.mode == 'Edit') { 
+      if (this.mode == 'Edit') {
         this.QuestionServ.Edit(this.question, this.DomainName).subscribe(() => {
           this.GetAllData();
           this.closeModal();
           this.isLoading = false
         },
-          error => { 
+          error => {
+            console.log(error)
             this.isLoading = false
             Swal.fire({
               icon: 'error',
@@ -257,7 +246,7 @@ export class QuestionsComponent {
     this.isModalVisible = false;
     this.validationErrors = {}
     this.question = new QuestionAddEdit();
-     this.options = []
+    this.options = []
   }
 
   CorrectAnswer(option: string) {
@@ -270,26 +259,42 @@ export class QuestionsComponent {
   }
 
   AddOption() {
-    if(this.NewOption !=""){
-      if (this.options.includes(this.NewOption)) {
-          this.validationErrors['options'] = "Option already exists";
-          this.NewOption = '';  
+    if (this.NewOption != "") {
+      var existOption = this.options.find(s => s.name == this.NewOption)
+      if (existOption) {
+        this.validationErrors['options'] = "Option already exists";
+        this.NewOption = '';
       } else {
-          this.options.push(this.NewOption);
-          this.NewOption = '';  
-      } 
+        var option = new QuestionOption()
+        option.id = 0;
+        option.name = this.NewOption
+        this.options.push(option);
+        if (this.mode == "Edit") {
+          if (!Array.isArray(this.question.newOptions)) {
+            this.question.newOptions = [];
+          }
+          this.question.newOptions.push(this.NewOption);
+        }
+        this.NewOption = '';
+      }
     }
-    else{
-      this.validationErrors['options']="option is required"
+    else {
+      this.validationErrors['options'] = "option is required"
     }
   }
 
   checkOnType() {
-    this.question.correctAnswerName=""
+    this.question.correctAnswerName = ""
     this.options = [];
     if (this.question.questionTypeID == 1) {
-      this.options.push('True');
-      this.options.push('False');
+      var option = new QuestionOption()
+      option.id = 0;
+      option.name = 'True'
+      this.options.push(option);
+      var option = new QuestionOption()
+      option.id = 0;
+      option.name = 'False'
+      this.options.push(option);
     }
   }
 
@@ -316,17 +321,42 @@ export class QuestionsComponent {
       this.question.questionTypeID == 1 ||
       this.question.questionTypeID == 2
     ) {
-      if (this.question.options.length == 0) {
-        this.validationErrors['options'] = `*${this.capitalizeField(
-          'options'
-        )} is required`;
+      if (!this.question.options || this.question.options.length === 0) {
+        this.validationErrors['options'] = `*${this.capitalizeField('options')} is required`;
         isValid = false;
+      } else {
+        const trimmedOptions = this.question.options.map(opt => opt.name?.trim()).filter(opt => opt !== undefined);
+        const hasEmpty = trimmedOptions.some(opt => opt === '');
+        if (hasEmpty) {
+          this.validationErrors['options'] = `*${this.capitalizeField('options')} cannot contain empty values`;
+          isValid = false;
+        }
+        const lowerCaseOptions = trimmedOptions.map(opt => opt.toLowerCase());
+        const hasDuplicates = new Set(lowerCaseOptions).size !== lowerCaseOptions.length;
+        if (hasDuplicates) {
+          this.validationErrors['options'] = `*Duplicate ${this.capitalizeField('options')} are not allowed`;
+          isValid = false;
+        }
       }
       if (this.question.correctAnswerName == '' || this.question.correctAnswerName == null) {
         this.validationErrors['correctAnswerName'] = `*${this.capitalizeField(
           'correctAnswerName'
         )} is required`;
         isValid = false;
+      }
+      const options = this.question.options || [];
+      if (!this.question.correctAnswerName || this.question.correctAnswerName.trim() === '') {
+        this.validationErrors['correctAnswerName'] = 'Choose correct answer';
+        isValid = false;
+      } else {
+        const normalizedCorrect = this.question.correctAnswerName.trim().toLowerCase();
+        const normalizedOptions = options.map(o => o.name?.trim().toLowerCase());
+        const exists = normalizedOptions.includes(normalizedCorrect);
+
+        if (!exists) {
+          this.validationErrors['correctAnswerName'] = 'Correct answer must match one of the options.';
+          isValid = false;
+        }
       }
     }
     return isValid;
@@ -352,7 +382,7 @@ export class QuestionsComponent {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
       const file = input.files[0];
-      const fileType = file.type; 
+      const fileType = file.type;
 
       const reader = new FileReader();
       reader.readAsDataURL(file);
@@ -400,6 +430,40 @@ export class QuestionsComponent {
       }
     } catch (error) {
       this.Data = [];
+    }
+  }
+
+  onOptionEdit(editedOption: any): void {
+    if (!this.question.editedOptions) {
+      this.question.editedOptions = [];
+    }
+
+    if (this.mode == "Edit" && editedOption.id != 0) {
+      const exists = this.question.editedOptions.find(
+        (opt: any) => opt.id === editedOption.id
+      );
+
+      if (exists) {
+        exists.name = editedOption.name;
+        exists.id = editedOption.id; // if you also have `order`
+      } else {
+        // Add new edited entry
+        this.question.editedOptions.push({
+          id: editedOption.id,
+          name: editedOption.name
+        });
+      }
+    }
+  }
+
+  deleteOption(index: number): void {
+    const removed = this.options.splice(index, 1)[0];
+    if (!Array.isArray(this.question.deletedOptions)) {
+      this.question.deletedOptions = [];
+    }
+    if (this.mode === 'Edit' && removed?.id != 0) {
+      // Mark as deleted for API if it was already saved
+      this.question.deletedOptions.push(removed.id);
     }
   }
 }

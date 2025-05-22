@@ -84,7 +84,7 @@ export class StockingDetailsComponent {
   IsSearchOpen: boolean = false;
   BarCode: string = '';
   HasBallance: boolean = false;
-  AllItems: boolean = true;
+  AllItems: boolean = false;
   ShopItems: ShopItem[] = [];
   // MultiDetails: StockingDetails[] = [];
   FilteredDetails: StockingDetails[] = [];
@@ -736,43 +736,59 @@ export class StockingDetailsComponent {
     flagId: number,
     filterCondition: (item: any) => boolean
   ) {
-    this.adiustmentDisbursement.date = this.Data.date;
-    this.adiustmentDisbursement.storeID = this.Data.storeID;
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+
+    var date = `${year}-${month}-${day}T${hours}:${minutes}`;
+    this.adiustmentDisbursement.date =date
+      this.adiustmentDisbursement.storeID = this.Data.storeID;
     this.adiustmentDisbursement.flagId = flagId;
-    this.adiustmentDisbursement.inventoryDetails = this.TableData.filter(
-      filterCondition
-    ).map((item) => {
-      const foundItem = this.AllShopItems.find((s) => s.id == item.shopItemID);
-      const price = foundItem?.purchasePrice ?? 0;
-      const quantity = item.theDifference ?? 0;
-      return {
-        id: Date.now() + Math.floor(Math.random() * 1000),
-        insertedAt: '',
-        barCode: '',
-        name: '',
-        shopItemName: '',
-        salesName: '',
-        notes: '',
-        insertedByUserId: 0,
-        shopItemID: item.shopItemID,
-        quantity: -1 * quantity,
-        price: price,
-        totalPrice: -1 * price * quantity,
-        inventoryMasterId: this.MasterId,
-      };
-    });
-    this.adiustmentDisbursement.total =
-      this.adiustmentDisbursement.inventoryDetails.reduce(
-        (sum, item) => sum + (item.totalPrice ?? 0),
-        0
-      );
+
+    this.adiustmentDisbursement.inventoryDetails = this.TableData
+      .filter(filterCondition)
+      .map((item) => {
+        const foundItem = this.AllShopItems.find((s) => s.id == item.shopItemID);
+        const price = foundItem?.purchasePrice ?? 0;
+        const quantity = item.theDifference ?? 0;
+
+        const adjustedQuantity = flagId === 4 ? -1 * quantity : quantity;
+        const adjustedTotalPrice = flagId === 4 ? -1 * price * quantity : price * quantity;
+
+        return {
+          id: Date.now() + Math.floor(Math.random() * 1000),
+          insertedAt: '',
+          barCode: '',
+          name: '',
+          shopItemName: '',
+          salesName: '',
+          notes: '',
+          insertedByUserId: 0,
+          shopItemID: item.shopItemID,
+          quantity: adjustedQuantity,
+          totalPrice: adjustedTotalPrice,
+          price: price,
+          inventoryMasterId: this.MasterId,
+        };
+      });
+
+    this.adiustmentDisbursement.total = this.adiustmentDisbursement.inventoryDetails.reduce(
+      (sum, item) => sum + (item.totalPrice ?? 0),
+      0
+    );
+
     if (this.adiustmentDisbursement.inventoryDetails.length > 0) {
       const response = await this.InventoryMastrServ.Add(
         this.adiustmentDisbursement,
         this.DomainName
       ).toPromise();
       return response;
-    } else return;
+    } else {
+      return;
+    }
   }
 
   //////// print
@@ -798,9 +814,9 @@ export class StockingDetailsComponent {
         await this.Receipt();
         break;
     }
-    this.StoreAndDateSpanWhenPrint = false; 
+    this.StoreAndDateSpanWhenPrint = false;
   }
-  
+
   async Blank() {
     const backupTableData = JSON.parse(JSON.stringify(this.TableData)); // 🛡 Deep copy
     this.TableData.forEach((row) => {
@@ -874,14 +890,14 @@ export class StockingDetailsComponent {
 
       document.body.appendChild(printContainer);
       window.print();
-      
+
       setTimeout(() => {
         document.body.removeChild(printContainer);
         this.showPDF = false;
       }, 100);
     }, 500);
   }
-  
+
   async DownloadAsPDF() {
     this.showPDF = true;
     await this.formateData()
@@ -904,7 +920,7 @@ export class StockingDetailsComponent {
       };
     });
   }
-  
+
   async DownloadAsExcel() {
     const tableHeaders = [
       'Bar Code',
@@ -955,14 +971,14 @@ export class StockingDetailsComponent {
   async Receipt() {
     await this.formateData();
     this.showPDF = true;
-  
+
     setTimeout(() => {
       const printContents = document.getElementById("Data")?.innerHTML;
       if (!printContents) {
         console.error("Element not found!");
         return;
       }
-  
+
       const printStyle = `
         <style>
         @page { 
@@ -991,14 +1007,14 @@ export class StockingDetailsComponent {
         }
         </style>
       `;
-  
+
       const printContainer = document.createElement('div');
       printContainer.id = 'print-container';
       printContainer.innerHTML = printStyle + printContents;
-  
+
       document.body.appendChild(printContainer);
       window.print();
-  
+
       setTimeout(() => {
         document.body.removeChild(printContainer);
         this.showPDF = false;
@@ -1009,4 +1025,3 @@ export class StockingDetailsComponent {
 }
 
 
-  

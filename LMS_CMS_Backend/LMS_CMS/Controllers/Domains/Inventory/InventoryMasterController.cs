@@ -260,6 +260,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                     s => s.IsDeleted != true && s.ID == id,
                     query => query.Include(store => store.Store),
                     query => query.Include(store => store.Student),
+                    query => query.Include(store => store.Supplier),
                     query => query.Include(store => store.Save),
                     query => query.Include(store => store.InventoryFlags),
                     query => query.Include(store => store.Bank)

@@ -135,9 +135,10 @@ export class InventoryDetailsComponent {
   currentPage = 1;
   totalPages = 1;
 
-  tableDataForPrint: any[]=[];
-  schools:School[]=[]
-  schoolPCs:SchoolPCs[]=[]
+  tableDataForPrint: any[] = [];
+  schools: School[] = []
+  schoolPCs: SchoolPCs[] = []
+  SelectedSupplier: any = null;
 
   constructor(
     private router: Router,
@@ -160,9 +161,9 @@ export class InventoryDetailsComponent {
     public shopitemServ: ShopItemService,
     public SupplierServ: SupplierService,
     public InventoryFlagServ: InventoryFlagService,
-    public reportsService: ReportsService ,
-    public SchoolServ : SchoolService ,
-    public schoolpcsServ :SchoolPCsService 
+    public reportsService: ReportsService,
+    public SchoolServ: SchoolService,
+    public schoolpcsServ: SchoolPCsService
   ) { }
   async ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -177,8 +178,16 @@ export class InventoryDetailsComponent {
     this.Data.flagId = Number(this.activeRoute.snapshot.paramMap.get('FlagId'));
     if (!this.MasterId) {
       this.mode = 'Create';
-      this.Data.date = new Date().toISOString().split('T')[0];
-    } else {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+
+      this.Data.date = `${year}-${month}-${day}T${hours}:${minutes}`;
+    }
+    else {
       this.mode = 'Edit';
       this.GetTableDataByID();
       this.GetMasterInfo();
@@ -250,21 +259,21 @@ export class InventoryDetailsComponent {
     });
   }
 
-  GetAllSchools(){
-    this.SchoolServ.Get(this.DomainName).subscribe((d)=>{
-      this.schools=d
-      if(this.schools.length==1){
-        this.Data.schoolId=this.schools[0].id
+  GetAllSchools() {
+    this.SchoolServ.Get(this.DomainName).subscribe((d) => {
+      this.schools = d
+      if (this.schools.length == 1) {
+        this.Data.schoolId = this.schools[0].id
         this.GetAllSchoolPCs()
       }
     })
   }
 
-  GetAllSchoolPCs(){
-    this.schoolpcsServ.GetBySchoolId(this.Data.schoolId ,this.DomainName).subscribe((d)=>{
-      this.schoolPCs=d
-      if(this.schoolPCs.length==1){
-        this.Data.schoolPCId=this.schoolPCs[0].id
+  GetAllSchoolPCs() {
+    this.schoolpcsServ.GetBySchoolId(this.Data.schoolId, this.DomainName).subscribe((d) => {
+      this.schoolPCs = d
+      if (this.schoolPCs.length == 1) {
+        this.Data.schoolPCId = this.schoolPCs[0].id
       }
     })
   }
@@ -313,6 +322,7 @@ export class InventoryDetailsComponent {
   GetMasterInfo() {
     this.salesServ.GetById(this.MasterId, this.DomainName).subscribe((d) => {
       this.Data = d;
+      console.log(this.Data, d)
       this.GetCategories();
     });
   }
@@ -571,6 +581,10 @@ export class InventoryDetailsComponent {
     }
   }
 
+  get supplierId() {
+    return this.SelectedSupplier?.id ?? null;
+  }
+
   DeleteWhenCreate(img: File) {
     this.Data.attachment = this.Data.attachment.filter((i) => i != img);
   }
@@ -624,9 +638,22 @@ export class InventoryDetailsComponent {
   ConvertToPurcase() {
     this.Data.flagId = 9;
     this.Data.isEditInvoiceNumber = true;
-    this.Data.date = new Date().toISOString().split('T')[0];
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    var date = `${year}-${month}-${day}T${hours}:${minutes}`;
+    this.Data.date = date;
     this.salesServ.Edit(this.Data, this.DomainName).subscribe((d) => {
-      this.router.navigateByUrl(`Employee/Purchase`);
+      Swal.fire({
+        icon: 'success',
+        title: 'Done',
+        text: 'Convert Succeessfully',
+        confirmButtonColor: '#089B41',
+      });
+      this.router.navigateByUrl(`Employee/Purchases`);
     });
   }
 
@@ -716,7 +743,7 @@ export class InventoryDetailsComponent {
       if (this.Data.hasOwnProperty(key)) {
         const field = key as keyof InventoryMaster;
         if (!this.Data[field]) {
-          if (field == 'storeID' || field == 'date' ||field == 'schoolId' ) {
+          if (field == 'storeID' || field == 'date' || field == 'schoolId') {
             this.validationErrors[field] = `*${this.capitalizeField(
               field
             )} is required`;
@@ -885,7 +912,7 @@ export class InventoryDetailsComponent {
     const dataRows = sourceData.map(row =>
       headerKeyMap.map(({ key }) => (row as any)?.[key] ?? '')
     );
-  
+
     await this.reportsService.generateExcelReport({
       infoRows: [
         { key: 'Store', value: this.Data?.storeName ?? '' },
@@ -904,7 +931,7 @@ export class InventoryDetailsComponent {
     });
   }
 
-  formateData(){
+  formateData() {
     const sourceData = this.mode === "Create" ? this.Data?.inventoryDetails ?? [] : this.TableData ?? [];
     this.tableDataForPrint = sourceData.map((row) => {
       return {
