@@ -12,12 +12,14 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
     {
         [Key]
         public long ID { get; set; }
-        [ForeignKey("Student")]
+        [ForeignKey("WeightType")]
         public long WeightTypeID { get; set; }
         public WeightType WeightType { get; set; }
 
         [ForeignKey("Subject")]
         public long SubjectID { get; set; }
         public Subject Subject { get; set; }
+
+        public float Value { get; set; } 
     }
 }

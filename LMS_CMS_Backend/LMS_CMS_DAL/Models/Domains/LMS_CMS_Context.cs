@@ -168,6 +168,7 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<TaxCustomer> TaxCustomer { get; set; }
         public DbSet<TaxUnitType> TaxUnitType { get; set; }
         public DbSet<EtaTokenType> EtaTokenType { get; set; }
+        public DbSet<SubjectResource> SubjectResource { get; set; }
 
 
         public LMS_CMS_Context(DbContextOptions<LMS_CMS_Context> options)
@@ -1326,6 +1327,12 @@ namespace LMS_CMS_DAL.Models.Domains
             modelBuilder.Entity<SubjectWeightType>()
                 .HasOne(p => p.Subject)
                 .WithMany(p => p.SubjectWeightTypes)
+                .HasForeignKey(p => p.SubjectID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<SubjectResource>()
+                .HasOne(p => p.Subject)
+                .WithMany(p => p.SubjectResources)
                 .HasForeignKey(p => p.SubjectID)
                 .OnDelete(DeleteBehavior.Restrict);
             
