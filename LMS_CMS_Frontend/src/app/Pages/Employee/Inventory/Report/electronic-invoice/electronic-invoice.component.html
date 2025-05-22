@@ -42,15 +42,15 @@
             <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
         </button>
 
-        <button class="p-4 font-medium text-xl rounded-lg flex items-center gap-2" (click)="printAll()"
+        <button class="p-2 font-medium text-xl rounded-lg flex items-center gap-2" (click)="printAll()"
             [disabled]="transactions.length === 0">
-            <i class="fas fa-print" style="color: #267C15;"></i>
+                <i><img src="Images/PrintOutline.png" alt=""></i>
             <!-- <span>Print All</span> -->
         </button>
         
-        <button class="p-4 font-medium text-xl rounded-lg flex items-center gap-2" (click)="sendAll()"
+        <button class="p-2 font-medium text-xl rounded-lg flex items-center gap-2" (click)="sendAll()"
             [disabled]="transactions.length === 0">
-            <i class="fas fa-paper-plane" style="color: #267C15;"></i>
+                <i class=""><img src="Images/SendPaperPlane.png" alt=""></i>
             <!-- <span>Send All</span> -->
         </button>
 
@@ -120,12 +120,13 @@
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         <div class="flex gap-2">
-                            <button (click)="sendInvoice(transaction)" class="p-2 rounded hover:bg-gray-100">
-                                <i class="fas fa-paper-plane"></i>
-                            </button>
                             <button (click)="printInvoice(transaction)" class="p-2 rounded hover:bg-gray-100">
-                                <i class="fas fa-print"></i>
+                <i><img src="Images/PrintOutline.png" alt=""></i>
                             </button>
+                            <button (click)="sendInvoice(transaction)" class="p-2 rounded hover:bg-gray-100">
+                <i><img src="Images/SendPaperPlane.png" alt=""></i>
+                            </button>
+
                         </div>
                     </td>
                 </tr>

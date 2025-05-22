@@ -31,4 +31,8 @@ navigateToSubject(subjectName: string) {
   const subjectId = subjectName.toLowerCase().replace(/\s+/g, '-');
   this.router.navigate(['/Employee/Subject-Details', subjectId]);
 }
+  navigateToLessonRes(subjectName: string) {
+  const subjectId = subjectName.toLowerCase().replace(/\s+/g, '-');
+  this.router.navigate(['/Employee/Lesson-Resources', subjectId]);
+}
 }

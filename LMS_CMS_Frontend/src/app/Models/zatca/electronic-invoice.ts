@@ -31,7 +31,7 @@ export interface ElectronicInvoice {
   storeName?: string;
   schoolName?: string;
   flagEnName?: string;
-  studentName?: string;
+  student?: string;
   studentAddress?: string;
   inventoryDetails?: {
     id: number;

@@ -160,6 +160,7 @@ import { AssignmentsComponent } from './Pages/Employee/LMS/UI/assignments/assign
 import { ElectronicInvoiceDetailComponent } from './Pages/Employee/Inventory/Report/electronic-invoice-detail/electronic-invoice-detail.component';
 import { ClassroomViewComponent } from './Pages/Employee/LMS/classroom-view/classroom-view.component';
 import { QuestionBankComponent } from './Pages/Employee/LMS/question-bank/question-bank.component';
+import { LessonLiveUIComponent } from './Pages/Employee/LMS/UI/lesson-live/lesson-live.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate:[noNavigateToLoginIfLoginGuard] },
@@ -357,16 +358,17 @@ export const routes: Routes = [
             { path: "Lesson Resource/:id", component: LessonResourceComponent, title: "Lesson Resource", canActivate:[noNavigateWithoutLoginGuard ] },
             { path: "Lesson Live", component: LessonLiveComponent, title: "Lesson Live", canActivate:[noNavigateWithoutLoginGuard ] },
             
+            { path: "Zatca Devices", component: ZatcaDevicesComponent, title: "Zatca Devices", canActivate:[noNavigateWithoutLoginGuard ] },
+            { path: "Electronic-Invoice", component: ElectronicInvoiceComponent, title: "ElectronicInvoice", canActivate:[noNavigateWithoutLoginGuard ] },
+            { path: "Electronic-Invoice/:id", component: ElectronicInvoiceDetailComponent, title: "menna", canActivate:[noNavigateWithoutLoginGuard ] },
             { path: "Assignment Details", component: AssignmentDetailsComponent, title: "Assignment Details", canActivate:[noNavigateWithoutLoginGuard ] },
             { path: "Assignment Edit", component: AssignmentEditComponent, title: "Assignment Edit", canActivate:[noNavigateWithoutLoginGuard ] },
-            { path: "Zatca Devices", component: ZatcaDevicesComponent, title: "Zatca Devices", canActivate:[noNavigateWithoutLoginGuard ] },
-            { path: "menna", component: ElectronicInvoiceComponent, title: "menna", canActivate:[noNavigateWithoutLoginGuard ] },
-            { path: "menna/:id", component: ElectronicInvoiceDetailComponent, title: "menna", canActivate:[noNavigateWithoutLoginGuard ] },
             { path: "Subjects", component: SubjectsComponent, title: "Subjects", canActivate:[noNavigateWithoutLoginGuard ] },
             { path: "Subject-Details/:subjectId", component: SubjectDetailsComponent, title: "Subject-Details", canActivate:[noNavigateWithoutLoginGuard] },
             { path: "week-details/:subjectId/:weekId", component: WeekDetailsComponent, title: "Week Details", canActivate:[noNavigateWithoutLoginGuard] }, 
             { path: "Lesson-Resources/:subjectId", component: LessonResourcesComponent, title: "Lesson Resources", canActivate:[noNavigateWithoutLoginGuard] }, 
             { path: "Assignments/:subjectId", component: AssignmentsComponent, title: "Assignments", canActivate:[noNavigateWithoutLoginGuard] }, 
+            { path: "LessonLiveUI/:subjectId", component: LessonLiveUIComponent, title: "Lesson Live", canActivate:[noNavigateWithoutLoginGuard] }, 
 
             
                ]

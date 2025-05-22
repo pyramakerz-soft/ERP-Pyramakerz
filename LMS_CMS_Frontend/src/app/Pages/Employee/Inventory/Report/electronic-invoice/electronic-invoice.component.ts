@@ -115,7 +115,7 @@ export class ElectronicInvoiceComponent implements OnInit {
   navigateToDetail(id: number) {
     console.log('enter');
     console.log(id);
-    this.router.navigate(['/Employee/menna', id]);
+    this.router.navigate(['/Employee/Electronic-Invoice', id]);
   }
 
   sendInvoice(invoice: ElectronicInvoice) {

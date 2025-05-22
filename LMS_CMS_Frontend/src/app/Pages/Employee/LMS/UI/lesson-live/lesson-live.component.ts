@@ -4,13 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
-  selector: 'app-assignments',
+  selector: 'app-lesson-live',
   standalone: true,
   imports: [CommonModule , FormsModule],
-  templateUrl: './assignments.component.html',
-  styleUrl: './assignments.component.css'
+  templateUrl: './lesson-live.component.html',
+  styleUrl: './lesson-live.component.css'
 })
-export class AssignmentsComponent {
+export class LessonLiveUIComponent {
   subjectName: string = '';
   activeTab: string = 'resources'; // Default active tab
 

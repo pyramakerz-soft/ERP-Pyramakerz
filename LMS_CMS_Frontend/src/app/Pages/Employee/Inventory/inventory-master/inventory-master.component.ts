@@ -169,6 +169,7 @@ export class InventoryMasterComponent {
          this.TotalRecords = data.pagination.totalRecords 
          this.TableData = data.data
          this.inventoryFlag = data.inventoryFlag
+         console.log(data)
        }, 
        (error) => { 
          if(error.status == 404){

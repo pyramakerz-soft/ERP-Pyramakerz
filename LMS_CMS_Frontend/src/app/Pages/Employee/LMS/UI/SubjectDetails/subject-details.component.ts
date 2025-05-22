@@ -11,6 +11,7 @@ standalone:true,
   styleUrls: ['./subject-details.component.css']
 })
 export class SubjectDetailsComponent implements OnInit {
+
   subjectName: string = '';
   activeTab: string = 'resources'; // Default active tab
 weeks: string[] = [
@@ -66,4 +67,9 @@ weeks: string[] = [
   const subjectId = subjectName.toLowerCase().replace(/\s+/g, '-');
   this.router.navigate(['/Employee/Assignments', subjectId]);
 }
+navigateToLessonLive(subjectName: string) {
+  const subjectId = subjectName.toLowerCase().replace(/\s+/g, '-');
+  this.router.navigate(['/Employee/LessonLiveUI', subjectId]);
+}
+
 }
