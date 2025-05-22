@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 
 namespace LMS_CMS_PL.Controllers.Domains.LMS
 {
@@ -28,10 +29,13 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             _checkPageAccessService = checkPageAccessService;
         }
 
+        ////////////////////////////////////////////////////
+
         [HttpGet("GetBySemesterID/{id}")]
         [Authorize_Endpoint_(
-           allowedTypes: new[] { "octa", "employee" }
-       )]
+           allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Working Weeks" }
+         )]
         public async Task<IActionResult> GetAsync(long id)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -56,11 +60,39 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
              
             return Ok(semesterWorkingWeeksDTO);
         }
+        
+        ////////////////////////////////////////////////////
+
+        [HttpGet("GetByID/{id}")]
+        [Authorize_Endpoint_(
+           allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Working Weeks" }
+         )]
+        public async Task<IActionResult> GetByIdAsync(long id)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+              
+            SemesterWorkingWeek semesterWorkingWeek = await Unit_Of_Work.semesterWorkingWeek_Repository.FindByIncludesAsync(
+                    f => f.IsDeleted != true && f.ID == id,
+                    query => query.Include(emp => emp.Semester)
+                    );
+
+            if (semesterWorkingWeek == null)
+            {
+                return NotFound();
+            }
+
+            SemesterWorkingWeekGetDTO semesterWorkingWeekDTO = mapper.Map<SemesterWorkingWeekGetDTO>(semesterWorkingWeek);
+             
+            return Ok(semesterWorkingWeekDTO);
+        }
+
+        ////////////////////////////////////////////////////
 
         [HttpPost("GenerateWeeks/{semesterId}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Semester" }
+            pages: new[] { "Working Weeks" }
         )]
         public async Task<IActionResult> GenerateAsync(long semesterId)
         {
@@ -220,7 +252,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             return Ok();
         }
 
-        // Helper method to calculate the end date of the first week based on school start and end days
+        ////////////////////////////////////////////////////
+
         private DateOnly GetFirstWeekEndDate(DateOnly semesterStartDate, long schoolStartDay, long schoolEndDay)
         {
             // Calculate how many days until the school end day (for the first week)
@@ -230,6 +263,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             return firstWeekEnd;
         }
 
+        ////////////////////////////////////////////////////
+
         private DateOnly GetSchoolDayDate(DateOnly semesterStartDate, long schoolDay)
         {
             // Calculate how many days until the school day (e.g., Sunday, Monday, etc.)
@@ -237,6 +272,230 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             DateOnly schoolDayDate = semesterStartDate.AddDays(daysUntilSchoolDay);
 
             return schoolDayDate;
+        }
+
+        ////////////////////////////////////////////////////
+        
+        [HttpPost]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Working Weeks" }
+        )]
+        public async Task<IActionResult> Add(SemesterWorkingWeekAddDTO NewWorkingWeek)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+            if (NewWorkingWeek == null)
+            {
+                return BadRequest("Working Week can not be null");
+            }
+
+            if (NewWorkingWeek.DateFrom > NewWorkingWeek.DateTo)
+            {
+                return BadRequest("Date From must be earlier than Date To.");
+            }
+
+            Semester Semester = Unit_Of_Work.semester_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == NewWorkingWeek.SemesterID);
+            if (Semester == null)
+            {
+                return NotFound("No Semester With this ID");
+            }
+
+            if (!DateOnly.TryParse(Semester.DateFrom, out DateOnly semesterDateFrom) ||
+                !DateOnly.TryParse(Semester.DateTo, out DateOnly semesterDateTo))
+            {
+                return BadRequest("Semester DateFrom or DateTo is not in a valid format. Expected format: yyyy-MM-dd.");
+            }
+             
+            if (NewWorkingWeek.DateFrom < semesterDateFrom || NewWorkingWeek.DateTo > semesterDateTo)
+            {
+                return BadRequest($"DateFrom and DateTo must be within the semester range ({semesterDateFrom} to {semesterDateTo}).");
+            }
+
+            SemesterWorkingWeek semesterWorkingWeek = mapper.Map<SemesterWorkingWeek>(NewWorkingWeek);
+
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            semesterWorkingWeek.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            if (userTypeClaim == "octa")
+            {
+                semesterWorkingWeek.InsertedByOctaId = userId;
+            }
+            else if (userTypeClaim == "employee")
+            {
+                semesterWorkingWeek.InsertedByUserId = userId;
+            } 
+
+            Unit_Of_Work.semesterWorkingWeek_Repository.Add(semesterWorkingWeek);
+            Unit_Of_Work.SaveChanges();
+            return Ok(NewWorkingWeek);
+        }
+        ////////////////////////////////////////////////////
+        
+        [HttpPut]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            allowEdit: 1,
+            pages: new[] { "Working Weeks" }
+        )]
+        public async Task<IActionResult> Edit(SemesterWorkingWeekPutDTO EditWorkingWeek)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+            if (EditWorkingWeek == null)
+            {
+                return BadRequest("Working Week can not be null");
+            }
+
+            if (EditWorkingWeek.DateFrom > EditWorkingWeek.DateTo)
+            {
+                return BadRequest("Date From must be earlier than Date To.");
+            }
+
+            SemesterWorkingWeek semesterWorkingWeek = Unit_Of_Work.semesterWorkingWeek_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == EditWorkingWeek.ID);
+            if(semesterWorkingWeek == null)
+            {
+                return NotFound("No Working Week With this ID");
+            }
+
+            Semester Semester = Unit_Of_Work.semester_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == EditWorkingWeek.SemesterID);
+            if (Semester == null)
+            {
+                return NotFound("No Semester With this ID");
+            }
+
+            if (!DateOnly.TryParse(Semester.DateFrom, out DateOnly semesterDateFrom) ||
+                !DateOnly.TryParse(Semester.DateTo, out DateOnly semesterDateTo))
+            {
+                return BadRequest("Semester DateFrom or DateTo is not in a valid format. Expected format: yyyy-MM-dd.");
+            }
+             
+            if (EditWorkingWeek.DateFrom < semesterDateFrom || EditWorkingWeek.DateTo > semesterDateTo)
+            {
+                return BadRequest($"DateFrom and DateTo must be within the semester range ({semesterDateFrom} to {semesterDateTo}).");
+            }
+
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Working Weeks", roleId, userId, EditWorkingWeek);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
+            }
+
+
+            mapper.Map(EditWorkingWeek, semesterWorkingWeek);
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            semesterWorkingWeek.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            if (userTypeClaim == "octa")
+            {
+                semesterWorkingWeek.UpdatedByOctaId = userId;
+                if (semesterWorkingWeek.UpdatedByUserId != null)
+                {
+                    semesterWorkingWeek.UpdatedByUserId = null;
+                }
+            }
+            else if (userTypeClaim == "employee")
+            {
+                semesterWorkingWeek.UpdatedByUserId = userId;
+                if (semesterWorkingWeek.UpdatedByOctaId != null)
+                {
+                    semesterWorkingWeek.UpdatedByOctaId = null;
+                }
+            }
+            Unit_Of_Work.semesterWorkingWeek_Repository.Update(semesterWorkingWeek);
+            Unit_Of_Work.SaveChanges(); 
+            return Ok(EditWorkingWeek);
+        }
+
+        ////////////////////////////////////////////////////
+
+        [HttpDelete("{id}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            allowDelete: 1,
+            pages: new[] { "Working Weeks" }
+        )]
+        public IActionResult Delete(long id)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            if (id == null)
+            {
+                return BadRequest("id cannot be null");
+            }
+
+            SemesterWorkingWeek workingWeek = Unit_Of_Work.semesterWorkingWeek_Repository.First_Or_Default(d=>d.IsDeleted != true && d.ID == id);
+
+            if (workingWeek == null)
+            {
+                return NotFound("No Working week with this ID");
+            }
+
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Working Weeks", roleId, userId, workingWeek);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
+            }
+
+            workingWeek.IsDeleted = true;
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            workingWeek.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            if (userTypeClaim == "octa")
+            {
+                workingWeek.DeletedByOctaId = userId;
+                if (workingWeek.DeletedByUserId != null)
+                {
+                    workingWeek.DeletedByUserId = null;
+                }
+            }
+            else if (userTypeClaim == "employee")
+            {
+                workingWeek.DeletedByUserId = userId;
+                if (workingWeek.DeletedByOctaId != null)
+                {
+                    workingWeek.DeletedByOctaId = null;
+                }
+            }
+
+            Unit_Of_Work.semesterWorkingWeek_Repository.Update(workingWeek);
+            Unit_Of_Work.SaveChanges();
+            return Ok();
         }
     }
 }

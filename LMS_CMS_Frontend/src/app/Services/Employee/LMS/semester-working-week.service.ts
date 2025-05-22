@@ -25,6 +25,18 @@ export class SemesterWorkingWeekService {
       .set('Content-Type', 'application/json');
     return this.http.get<SemesterWorkingWeek[]>(`${this.baseUrl}/SemesterWorkingWeek/GetBySemesterID/${id}`, { headers })
   }
+
+  GetByID(id: number,DomainName:string) {
+    if(DomainName!=null) {
+      this.header=DomainName 
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<SemesterWorkingWeek>(`${this.baseUrl}/SemesterWorkingWeek/GetByID/${id}`, { headers })
+  }
  
   GenerateWeeks(id: number,DomainName:string) {
     if(DomainName!=null) {
@@ -40,5 +52,46 @@ export class SemesterWorkingWeekService {
       headers: headers,
       responseType: 'text' as 'json'
     });
+  }
+
+  Add(SemesterWorkingWeek: SemesterWorkingWeek,DomainName:string) {
+    if(DomainName!=null) {
+      this.header=DomainName 
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+
+    return this.http.post(`${this.baseUrl}/SemesterWorkingWeek`, SemesterWorkingWeek, {
+      headers: headers,
+      responseType: 'text' as 'json'
+    });
+  }
+
+  Edit(SemesterWorkingWeek: SemesterWorkingWeek,DomainName:string) {
+    if(DomainName!=null) {
+      this.header=DomainName 
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.put(`${this.baseUrl}/SemesterWorkingWeek`, SemesterWorkingWeek, { headers });
+  }
+
+
+  Delete(id: number,DomainName:string) {
+    if(DomainName!=null) {
+      this.header=DomainName 
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.delete(`${this.baseUrl}/SemesterWorkingWeek/${id}`, { headers })
   }
 }

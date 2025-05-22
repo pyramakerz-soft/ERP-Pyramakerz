@@ -22,8 +22,7 @@ import { Subject } from '../../../../Models/LMS/subject';
 import { Semester } from '../../../../Models/LMS/semester';
 import { AcademicYear } from '../../../../Models/LMS/academic-year';
 import { School } from '../../../../Models/school';
-import { Grade } from '../../../../Models/LMS/grade';
-import { SemesterWorkingDays } from '../../../../Models/LMS/semester-working-days';
+import { Grade } from '../../../../Models/LMS/grade'; 
 import { SemesterWorkingWeekService } from '../../../../Services/Employee/LMS/semester-working-week.service';  
 import { QuillModule } from 'ngx-quill';
 import { Tag } from '../../../../Models/LMS/tag';
@@ -80,7 +79,7 @@ export class LessonComponent {
   SubjectsModal: Subject[] = [] 
   Semesters: Semester[] = []
   SemestersModal: Semester[] = []
-  WeeksModal: SemesterWorkingDays[] = []
+  WeeksModal: SemesterWorkingWeek[] = []
 
   @ViewChild('quillEditor') quillEditor!: ElementRef;
   editorModules = {
