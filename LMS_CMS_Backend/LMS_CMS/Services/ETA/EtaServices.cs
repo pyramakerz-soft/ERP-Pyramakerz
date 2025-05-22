@@ -553,12 +553,12 @@ namespace LMS_CMS_PL.Services.ETA
                 store.Open(OpenFlags.MaxAllowed);
 
                 var foundCerts = new X509Certificate2Collection();
-                var certsIssuerNames = bm.ExecuteAdapter("select * from CertificatesIssuerName");
-                foreach (DataRow row in certsIssuerNames.Rows)
-                {
-                    foundCerts = store.Certificates.Find(X509FindType.FindByIssuerName, row["Name"].ToString(), true);
-                    if (foundCerts.Count > 0) break;
-                }
+                //var certsIssuerNames = bm.ExecuteAdapter("select * from CertificatesIssuerName");
+                //foreach (DataRow row in certsIssuerNames.Rows)
+                //{
+                //    foundCerts = store.Certificates.Find(X509FindType.FindByIssuerName, row["Name"].ToString(), true);
+                //    if (foundCerts.Count > 0) break;
+                //}
 
                 if (foundCerts.Count == 0)
                 {
