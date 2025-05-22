@@ -148,8 +148,19 @@ import { LessonResourceComponent } from './Pages/Employee/LMS/lesson-resource/le
 import { LessonActivityComponent } from './Pages/Employee/LMS/lesson-activity/lesson-activity.component';
 import { LessonLiveComponent } from './Pages/Employee/LMS/lesson-live/lesson-live.component';
 import { StudentLessonLiveComponent } from './Pages/Student/LMS/student-lesson-live/student-lesson-live.component';
-import { QuestionBankComponent } from './Pages/Employee/LMS/question-bank/question-bank.component';
+import { AssignmentDetailsComponent } from './Pages/Employee/LMS/assignment/assignment-details/assignment-details.component';
+import { AssignmentEditComponent } from './Pages/Employee/LMS/assignment/assignment-edit/assignment-edit.component';
+import { ZatcaDevicesComponent } from './Pages/Employee/Zatca/zatca-devices/zatca-devices.component';
+import { SubjectsComponent } from './Pages/Student/LMS/UI/subject/subjects.component';
+import { SubjectDetailsComponent } from './Pages/Student/LMS/UI/subject-details/subject-details.component';
+import { WeekDetailsComponent } from './Pages/Student/LMS/UI/week-details/week-details.component';
+import { ElectronicInvoiceComponent } from './Pages/Employee/Inventory/Report/electronic-invoice/electronic-invoice.component';
+import { LessonResourcesComponent } from './Pages/Student/LMS/UI/lesson-resources/lesson-resources.component';
+import { AssignmentsComponent } from './Pages/Student/LMS/UI/assignments/assignments.component';
+import { ElectronicInvoiceDetailComponent } from './Pages/Employee/Inventory/Report/electronic-invoice-detail/electronic-invoice-detail.component';
 import { ClassroomViewComponent } from './Pages/Employee/LMS/classroom-view/classroom-view.component';
+import { QuestionBankComponent } from './Pages/Employee/LMS/question-bank/question-bank.component';
+import { LessonLiveUIComponent } from './Pages/Student/LMS/UI/lesson-live/lesson-live.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate:[noNavigateToLoginIfLoginGuard] },
@@ -171,11 +182,12 @@ export const routes: Routes = [
             { path: "Create Hygiene Form", component: CreateHygieneFormComponent, title: "Create Hygiene Form" },
             { path: 'view hygiene form/:id', component: ViewHygieneFormComponent },
             { path: 'mh by parent/:id', component: MedicalHistoryByParentComponent },
-            { path:  'mh by doctor/:id',  component: MedicalHistoryByDoctorComponent},
+            {path:  'mh by doctor/:id',  component: MedicalHistoryByDoctorComponent},
             { path: "Follow Up", component: FollowUpComponent, title: "Follow Up" },
             { path: "Medical History", component: MedicalHistoryComponent, title: "Medical History" },
             { path: "Medical Report", component: MedicalReportComponent, title: "Medical Report" },
-            { path: "Doses", component: DosesComponent, title: "Doses" }, 
+            { path: "Doses", component: DosesComponent, title: "Doses" },
+            { path: "", component: EmployeeHomeComponent, title: "EmployeeHome" }, 
             { path: "Bus Details",component: BusDetailsComponent,title: "Bus"  , canActivate:[noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard]},     
             { path: "Bus Students/:domainName/:busId", component: BusStudentComponent, title: "Bus Students", canActivate:[noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard]}, 
             { path: "Bus Types", component: BusTypesComponent, title: "Bus Type"  , canActivate:[noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard]},     
@@ -345,8 +357,12 @@ export const routes: Routes = [
             { path: "Lesson Activity/:id", component: LessonActivityComponent, title: "Lesson Activity", canActivate:[noNavigateWithoutLoginGuard ] },
             { path: "Lesson Resource/:id", component: LessonResourceComponent, title: "Lesson Resource", canActivate:[noNavigateWithoutLoginGuard ] },
             { path: "Lesson Live", component: LessonLiveComponent, title: "Lesson Live", canActivate:[noNavigateWithoutLoginGuard ] },
-            { path: "Question Bank", component: QuestionBankComponent, title: "Question Bank", canActivate:[noNavigateWithoutLoginGuard ] },
-        ]
+            
+            { path: "Zatca Devices", component: ZatcaDevicesComponent, title: "Zatca Devices", canActivate:[noNavigateWithoutLoginGuard ] },
+            { path: "Electronic-Invoice", component: ElectronicInvoiceComponent, title: "ElectronicInvoice", canActivate:[noNavigateWithoutLoginGuard ] },
+            { path: "Electronic-Invoice/:id", component: ElectronicInvoiceDetailComponent, title: "menna", canActivate:[noNavigateWithoutLoginGuard ] },
+
+               ]
 },
     { 
         path: "Parent", 
@@ -373,8 +389,18 @@ export const routes: Routes = [
             { path: "Ecommerce/Cart", component: CartComponent, title: "Cart" },
             { path: "Ecommerce/Order", component: OrderComponent, title: "Order" },
             { path: "Ecommerce/Order/:id", component: OrderItemsComponent, title: "Order Items" },
-            { path: "Lesson Live", component: StudentLessonLiveComponent, title: "Lesson Live" }
+            { path: "Lesson Live", component: StudentLessonLiveComponent, title: "Lesson Live" },
 
+            { path: "Assignment-Details-UI", component: AssignmentDetailsComponent, title: "Assignment Details", canActivate:[noNavigateWithoutLoginGuard ] },
+            { path: "Assignment-Edit-UI", component: AssignmentEditComponent, title: "Assignment Edit", canActivate:[noNavigateWithoutLoginGuard ] },
+            { path: "Subject-UI", component: SubjectsComponent, title: "Subjects", canActivate:[noNavigateWithoutLoginGuard ] },
+            { path: "Subject-Details-UI/:subjectId", component: SubjectDetailsComponent, title: "Subject-Details", canActivate:[noNavigateWithoutLoginGuard] },
+            { path: "week-details-UI/:subjectId/:weekId", component: WeekDetailsComponent, title: "Week Details", canActivate:[noNavigateWithoutLoginGuard] }, 
+            { path: "Lesson-Resources-UI/:subjectId", component: LessonResourcesComponent, title: "Lesson Resources", canActivate:[noNavigateWithoutLoginGuard] }, 
+            { path: "Assignments-UI/:subjectId", component: AssignmentsComponent, title: "Assignments", canActivate:[noNavigateWithoutLoginGuard] }, 
+            { path: "Lesson-Live-UI/:subjectId", component: LessonLiveUIComponent, title: "Lesson Live", canActivate:[noNavigateWithoutLoginGuard] }, 
+
+            
         ]
     },
     { 

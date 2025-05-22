@@ -1,0 +1,36 @@
+<div class="p-6">
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="primaryTxt font-semibold text-2xl leading-9">Subjects</h1>
+    </div>
+
+    <!-- Subjects Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <!-- Subject Card -->
+<div *ngFor="let subject of subjects"
+    class="bg-[#F7F7F7] rounded-2xl p-6 cursor-pointer hover:shadow-lg transition-all flex flex-col items-center text-center gap-4"
+    (click)="navigateToSubject(subject.name)">
+
+    <h3 class="text-xl font-bold text-[#004279]">{{ subject.name }}</h3>
+
+    <img [src]="subject.icon" [alt]="subject.name" class="h-32 w-32 object-cover  shadow-sm">
+    
+    <div class="flex justify-between text-xs text-[#6F6F6F] gap-2">
+        <div class="flex items-center gap-2" (click)="Test()">
+            <i class="fas fa-book text-sm w-4"></i>
+            <span>Assignments</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <i class="fas fa-file-alt text-sm w-4"></i>
+            <span>Resources</span>
+        </div>
+    </div>
+    
+    <!-- Second Row: Lesson Live -->
+    <div class="flex items-center gap-2 text-xs text-[#6F6F6F]">
+        <i class="fas fa-chalkboard-teacher text-sm w-4"></i>
+        <span>Lesson Live</span>
+    </div>
+    </div>
+
+    </div>
+</div>

@@ -245,6 +245,14 @@ async loadMHByParentData() {
       description: item.details || 'No details',
       insertDate: new Date(item.insertedAt).toLocaleDateString(),
       lastModified: item.updatedAt ? new Date(item.updatedAt).toLocaleDateString() : 'Not modified',
+      schoolId: item.schoolId,
+      schoolName: item.school || '',
+      gradeId: item.gradeId,
+      gradeName: item.grade || '',
+      classRoomID: item.classRoomID,
+      className: item.classRoom || '',
+      studentId: item.studentId,
+      studentName: item.student || '',
       actions: { delete: true, edit: true, view: true }
     }));
 
@@ -350,6 +358,34 @@ async loadFollowUps() {
     } catch (error) {
         console.error('Error fetching follow-ups:', error);
     }
+}
+
+filterMHByParent() {
+  let filteredData = [...this.mhByParentData];
+
+  // Apply filters based on selected values
+  if (this.selectedSchool) {
+    filteredData = filteredData.filter(item => item.schoolId == this.selectedSchool);
+  }
+  if (this.selectedGrade) {
+    filteredData = filteredData.filter(item => item.gradeId == this.selectedGrade);
+  }
+  if (this.selectedClass) {
+    filteredData = filteredData.filter(item => item.classRoomID == this.selectedClass);
+  }
+  if (this.selectedStudent) {
+    filteredData = filteredData.filter(item => item.studentId == this.selectedStudent);
+  }
+
+  // Apply search filter if searchValue exists
+  if (this.searchValue) {
+    filteredData = filteredData.filter(item => {
+      const fieldValue = item[this.searchKey as keyof typeof item]?.toString().toLowerCase() || '';
+      return fieldValue.includes(this.searchValue.toString().toLowerCase());
+    });
+  }
+
+  this.mhByParentData = filteredData;
 }
 
 filterMHByDoctor() {
@@ -540,7 +576,6 @@ prepareStudentsData() {
   }
 
 async selectTab(tab: string) {
-  
   this.selectedTab = tab;
   this.selectedSchool = null;
   this.selectedGrade = null;
@@ -555,7 +590,7 @@ async selectTab(tab: string) {
   
   switch(tab) {
     case 'MH By Parent':
-      this.searchKeysArray = ['id'];
+      this.searchKeysArray = ['id', 'schoolName', 'gradeName', 'className', 'studentName']; // Updated search keys
       await this.loadMHByParentData();
       break;
     case 'MH By Doctor':

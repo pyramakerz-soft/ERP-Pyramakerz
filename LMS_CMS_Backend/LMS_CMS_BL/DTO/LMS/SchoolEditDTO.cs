@@ -28,6 +28,9 @@ namespace LMS_CMS_BL.DTO.LMS
         public int? MaximumPeriodCountTimeTable { get; set; }
         public int? MaximumPeriodCountRemedials { get; set; }
         public string? CRN { get; set; } //Commercial Registration Number
+        public string? ClientID { get; set; }
+        public string? SecretNumber1 { get; set; }
+        public string? SecretNumber2 { get; set; }
         public long? WeekStartDayID { get; set; }
         public long? WeekEndDayID { get; set; }
     }
