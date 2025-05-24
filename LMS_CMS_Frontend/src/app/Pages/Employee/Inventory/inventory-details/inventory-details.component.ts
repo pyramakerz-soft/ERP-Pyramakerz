@@ -141,6 +141,8 @@ export class InventoryDetailsComponent {
   SelectedSupplier: any = null;
 
   SalesItem :InventoryDetails[] = []; // for sales return 
+  SaleId : number =0
+
 
   constructor(
     private router: Router,
@@ -1026,5 +1028,49 @@ export class InventoryDetailsComponent {
   openModal() {
     console.log("fd")
     this.isModalVisible = true;
+  }
+
+  getSalesItemByStudentId(){
+    if(this.Data.studentID!= 0){
+      this.salesServ.GetByStudentId(this.Data.studentID,this.DomainName).subscribe((d)=>{
+         this.SalesItem=d
+         this.openModal();
+      })
+    }
+    else{
+      this.validationErrors['studentID']='Choose Student Id First' ;
+    }
+  }
+
+  getBySalesItemBySaleId(){
+    console.log(this.SaleId)
+    if(this.SaleId!= 0){
+       this.salesItemServ.GetBySalesId(this.SaleId, this.DomainName).subscribe((d)=>{
+         this.SalesItem=d
+         this.openModal();
+      })
+    }
+    else{
+      if(this.Data.studentID!= 0){
+        this.salesServ.GetByStudentId(this.Data.studentID,this.DomainName).subscribe((d)=>{
+         this.SalesItem=d
+         this.openModal();
+        })
+      }
+      else{
+        this.validationErrors['studentID']='Choose Student Id First' ;
+      }
+    }
+  }
+
+  async SelectItemFromSaleInvoive(row:InventoryDetails){
+    this.Item.id = Date.now();
+    this.Item.price = row.price
+    this.Item.shopItemID = row.id;
+    this.Item.shopItemName = row.shopItemName;
+    this.Item.barCode = row.barCode;
+    this.Item.quantity = row.quantity;
+    this.Item.totalPrice = this.Item.price;
+    await this.SaveRow();
   }
 }

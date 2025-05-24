@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { InventoryFlag } from '../../../Models/Inventory/inventory-flag';
 import { InventoryMaster } from '../../../Models/Inventory/InventoryMaster';
 import { ApiService } from '../../api.service';
+import { InventoryDetails } from '../../../Models/Inventory/InventoryDetails';
 
 @Injectable({
   providedIn: 'root'
@@ -39,6 +40,18 @@ export class InventoryMasterService {
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
     return this.http.get<InventoryMaster>(`${this.baseUrl}/InventoryMaster/${id}`, { headers })
+  }
+
+  GetByStudentId(id: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<InventoryDetails[]>(`${this.baseUrl}/InventoryMaster/SalesByStudentId/${id}`, { headers })
   }
 
   Add(master: InventoryMaster, DomainName: string): Observable<any> {

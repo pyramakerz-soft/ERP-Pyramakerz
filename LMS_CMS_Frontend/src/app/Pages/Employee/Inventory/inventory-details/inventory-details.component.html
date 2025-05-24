@@ -484,87 +484,40 @@
       </thead>
       <tbody>
         <!-- No Data Row -->
-        <tr
-          *ngIf=" Data.inventoryDetails?.length === 0 && !IsOpenToAdd && mode === 'Create' && SelectedSopItem == null && FlagId != 12">
+        <tr *ngIf="(!IsOpenToAdd && FlagId != 12 && SelectedSopItem == null) &&
+                  ((mode === 'Create' && Data.inventoryDetails?.length === 0) ||
+                    (mode === 'Edit' && TableData?.length === 0))">
           <td colspan="11" class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
             No Data Found
           </td>
         </tr>
 
-        <tr *ngIf="TableData?.length === 0 && !IsOpenToAdd && mode === 'Edit' && FlagId != 12">
-          <td colspan="11" class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-            No Data Found
-          </td>
-        </tr>
-
-        <tr
-          *ngIf=" Data.inventoryDetails?.length === 0 && !IsOpenToAdd && mode === 'Create' && SelectedSopItem == null && FlagId == 12">
+        <tr *ngIf="!IsOpenToAdd && FlagId == 12 && 
+          ((mode === 'Create' && Data.inventoryDetails?.length === 0 && SelectedSopItem == null) || 
+           (mode === 'Edit' && TableData?.length === 0))">
           <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
             <input 
-              type="number"
-               (dblclick)="openModal()"
+              type="number" [(ngModel)]="SaleId"
+              (dblclick)="getSalesItemByStudentId()"
               class="w-full border border-gray-300 px-2 py-1 rounded-md" 
             />
           </td>
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">_</td>
           <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-           _
+            <input 
+              type="number" 
+              (dblclick)="getBySalesItemBySaleId()"
+              class="w-full border border-gray-300 px-2 py-1 rounded-md" 
+            />
           </td>
-          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-            _
-          </td>
-          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-            _
-          </td>
-          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-            _
-          </td>
-          <td  class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-            _
-          </td>
-          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-            _
-          </td>
-          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-           _
-          </td>
-          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-            _
-          </td>
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">_</td>
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">_</td>
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">_</td>
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">_</td>
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">_</td>
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">_</td>
         </tr>
 
-        <tr *ngIf="TableData?.length === 0 && !IsOpenToAdd && mode === 'Edit' && FlagId == 12">
-          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-           <input 
-              type="number"
-               (dblclick)="openModal()"
-              class="w-full border border-gray-300 px-2 py-1 rounded-md" 
-            />
-          </td>
-          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-           _
-          </td>
-          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-            _
-          </td>
-          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-            _
-          </td>
-          <td  class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-            _
-          </td>
-          <td  class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-            _
-          </td>
-          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-           _
-          </td>
-          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-            _
-          </td>
-          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-            _
-          </td>
-        </tr>
         <!-- Data Rows -->
         <tr *ngFor="
             let row of (mode === 'Create'
@@ -616,8 +569,8 @@
         <tr *ngIf="TableData?.length != 0 && Data.inventoryDetails?.length != 0 &&FlagId == 12">
           <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
             <input 
-              type="number"
-               (dblclick)="openModal()"
+              type="number" [(ngModel)]="SaleId"
+               (dblclick)="getSalesItemByStudentId()"
               class="w-full border border-gray-300 px-2 py-1 rounded-md" 
             />
           </td>
@@ -625,7 +578,10 @@
            _
           </td>
           <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-            _
+            <input 
+              type="number" 
+               (dblclick)="getBySalesItemBySaleId()"
+              class="w-full border border-gray-300 px-2 py-1 rounded-md" />
           </td>
           <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
             _
@@ -690,7 +646,7 @@
           <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
             <tr>
               <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-              Sales Number
+              Sales id
               </th>
               <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                 Bar Code
@@ -707,16 +663,6 @@
               <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                 Price
               </th>
-              <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                Total Price
-              </th>
-              <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                Notes
-              </th>
-              <th *ngIf="mode == 'Edit'"
-                class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                Actions
-              </th>
             </tr>
           </thead>
           <tbody>
@@ -729,9 +675,10 @@
             </tr>
             <!-- Data Rows -->
             <tr *ngFor=" let row of  SalesItem; let i = index" [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
-              class="border-t border-gray-300 text-xs md:text-sm">
+              class="border-t border-gray-300 text-xs md:text-sm"
+               (dblclick)="SelectItemFromSaleInvoive(row)">
               <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                {{ row.barCode }}
+                {{ row.inventoryMasterId }}
               </td>
               <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                 {{ row.barCode }}
@@ -742,15 +689,12 @@
               <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                 {{ row.shopItemName }}
               </td>
-              <td *ngIf="!IsPriceEditable && mode === 'Create'"
+              <td
                 class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                 {{ row.price }}
               </td>
               <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                 {{ row.price }}
-              </td>
-              <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                {{ row.totalPrice }}
               </td>
             </tr>
           </tbody>

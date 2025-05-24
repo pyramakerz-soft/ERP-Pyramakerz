@@ -287,35 +287,39 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
         [HttpGet("SalesByStudentId/{id}")]
         [Authorize_Endpoint_(
-        allowedTypes: new[] { "octa", "employee" },
-          pages: new[] { "Inventory" }
-         )]
+     allowedTypes: new[] { "octa", "employee" },
+     pages: new[] { "Inventory" }
+ )]
         public async Task<IActionResult> GetByStudentId(long id)
         {
-            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-
             if (id == 0)
             {
                 return BadRequest("Enter student ID");
             }
 
-            List<InventoryMaster> Data = await Unit_Of_Work.inventoryMaster_Repository.Select_All_With_IncludesById<InventoryMaster>(
-                    s => s.IsDeleted != true && s.FlagId == 11  && s.StudentID == id ,
-                    query => query.Include(store => store.Store),
-                    query => query.Include(store => store.Student),
-                    query => query.Include(store => store.InventoryDetails),
-                    query => query.Include(store => store.Save),
-                    query => query.Include(store => store.InventoryFlags),
-                    query => query.Include(store => store.Bank)
-                    );
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            if (Data == null)
+            List<InventoryMaster> Data = await Unit_Of_Work.inventoryMaster_Repository.Select_All_With_IncludesById<InventoryMaster>(
+                s => s.IsDeleted != true && s.FlagId == 11 && s.StudentID == id 
+
+            );
+
+            if (Data == null || !Data.Any())
             {
-                return NotFound();
+                return NotFound("No inventory master records found.");
             }
 
-            List<InventoryMasterGetDTO> DTO = mapper.Map<List<InventoryMasterGetDTO>>(Data);
-           
+            var masterIds = Data.Select(d => d.ID).ToList();
+
+            List<InventoryDetails> DetailsData = await Unit_Of_Work.inventoryDetails_Repository.Select_All_With_IncludesById<InventoryDetails>(
+                s => s.IsDeleted != true && masterIds.Contains(s.InventoryMasterId),
+                    query => query.Include(store => store.InventoryMaster) ,
+                    query => query.Include(store => store.ShopItem)
+
+            );
+
+            List<InventoryDetailsGetDTO> DTO = mapper.Map<List<InventoryDetailsGetDTO>>(DetailsData);
+
             return Ok(DTO);
         }
         /////////////////////////////////////////////////////////////////////////////
