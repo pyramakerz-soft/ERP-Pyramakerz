@@ -41,6 +41,7 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public ICollection<Test> Tests { get; set; } = new HashSet<Test>();
         public ICollection<StudentPerformance> StudentPerformances { get; set; } = new HashSet<StudentPerformance>();
         public ICollection<SubjectWeightType> SubjectWeightTypes { get; set; } = new HashSet<SubjectWeightType>();
+        public ICollection<SubjectResource> SubjectResources { get; set; } = new HashSet<SubjectResource>();
         public ICollection<Lesson> Lessons { get; set; } = new HashSet<Lesson>();
         public ICollection<LessonLive> LessonLives { get; set; } = new HashSet<LessonLive>();
         public ICollection<DailyPerformance> DailyPerformance { get; set; } = new HashSet<DailyPerformance>();

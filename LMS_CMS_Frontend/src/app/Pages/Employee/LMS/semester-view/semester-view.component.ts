@@ -4,8 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Semester } from '../../../../Models/LMS/semester';
 import { SemesterService } from '../../../../Services/Employee/LMS/semester.service';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { SemesterWorkingDays } from '../../../../Models/LMS/semester-working-days';
+import { FormsModule } from '@angular/forms'; 
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { AccountService } from '../../../../Services/account.service';
@@ -13,6 +12,8 @@ import { TokenData } from '../../../../Models/token-data';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { SemesterWorkingWeekService } from '../../../../Services/Employee/LMS/semester-working-week.service';
 import Swal from 'sweetalert2';
+import { firstValueFrom } from 'rxjs';
+import { SemesterWorkingWeek } from '../../../../Models/LMS/semester-working-week';
 
 @Component({
   selector: 'app-semester-view',
@@ -21,12 +22,13 @@ import Swal from 'sweetalert2';
   templateUrl: './semester-view.component.html',
   styleUrl: './semester-view.component.css'
 })
-export class SemesterViewComponent { 
+export class SemesterViewComponent {
   DomainName: string = "";
   semesterId: number = 0
 
   semester:Semester = new Semester()
-  WorkingWeeks:SemesterWorkingDays[]=[]
+  semesterWorkingWeek:SemesterWorkingWeek = new SemesterWorkingWeek()
+  WorkingWeeks:SemesterWorkingWeek[]=[]
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -34,6 +36,14 @@ export class SemesterViewComponent {
   AllowDeleteForOthers: boolean = false;
   path: string = ""
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
+  
+  keysArray: string[] = ['id', 'englishName' ,"arabicName"];
+  key: string = 'id';
+  value: any = '';
+
+  editWorkingWeek: boolean = false;
+  validationErrors: { [key in keyof SemesterWorkingWeek]?: string } = {};
+  isLoading = false; 
 
   constructor(public account: AccountService, public EditDeleteServ: DeleteEditPermissionService, public ApiServ: ApiService, public activeRoute: ActivatedRoute, 
     public router:Router, private menuService: MenuService, public semesterService:SemesterService, public semesterWorkingWeekService:SemesterWorkingWeekService){}
@@ -46,6 +56,10 @@ export class SemesterViewComponent {
     this.GetSemesterById(this.semesterId)
     this.GetWorkingWeeksBySemesterById(this.semesterId)
 
+    this.activeRoute.url.subscribe(url => {
+      this.path = url[0].path
+    });
+
     this.menuService.menuItemsForEmployee$.subscribe((items) => {
       const settingsPage = this.menuService.findByPageName(this.path, items);
       if (settingsPage) {
@@ -57,7 +71,7 @@ export class SemesterViewComponent {
     });
   }
 
-  IsAllowDelete(InsertedByID: number) {
+  IsAllowDelete(InsertedByID: number) { 
     const IsAllow = this.EditDeleteServ.IsAllowDelete(InsertedByID, this.User_Data_After_Login.id, this.AllowDeleteForOthers);
     return IsAllow;
   }
@@ -117,16 +131,210 @@ export class SemesterViewComponent {
     });
   }
 
+  GetSemesterWeekDayById(Id: number) {
+    this.semesterWorkingWeekService.GetByID(Id, this.DomainName).subscribe((data) => {
+      this.semesterWorkingWeek = data;
+    });
+  } 
+
   GetWorkingWeeksBySemesterById(Id: number) {
-      this.WorkingWeeks = []
+    this.WorkingWeeks = []
     this.semesterWorkingWeekService.GetBySemesterID(Id, this.DomainName).subscribe((data) => {
       this.WorkingWeeks = data;
     });
   }
 
-  Delete(id:number){
+  openModal(Id?: number) {
+    if (Id) {
+      this.editWorkingWeek = true;
+      this.GetSemesterWeekDayById(Id); 
+    } 
+    document.getElementById("Add_Modal")?.classList.remove("hidden");
+    document.getElementById("Add_Modal")?.classList.add("flex");
   }
 
-  Edit(id: number) {
+  closeModal() {
+    document.getElementById("Add_Modal")?.classList.remove("flex");
+    document.getElementById("Add_Modal")?.classList.add("hidden");
+
+    this.semesterWorkingWeek= new SemesterWorkingWeek()
+
+    if(this.editWorkingWeek){
+      this.editWorkingWeek = false
+    }
+    this.validationErrors = {}; 
+  } 
+
+  capitalizeField(field: keyof SemesterWorkingWeek): string {
+    return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
+  }
+
+  isFormValid(): boolean {
+    let isValid = true;
+    for (const key in this.semesterWorkingWeek) {
+      if (this.semesterWorkingWeek.hasOwnProperty(key)) {
+        const field = key as keyof SemesterWorkingWeek;
+        if (!this.semesterWorkingWeek[field]) {
+          if(field == "englishName" || field == "arabicName" || field == "dateFrom" || field == "dateTo"){
+            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
+            isValid = false;
+          }
+        } else {
+          if(field == "englishName" || field == "arabicName"){
+            if(this.semesterWorkingWeek.englishName.length > 100){
+              this.validationErrors[field] = `*${this.capitalizeField(field)} cannot be longer than 100 characters`
+              isValid = false;
+            }
+            if(this.semesterWorkingWeek.arabicName.length > 100){
+              this.validationErrors[field] = `*${this.capitalizeField(field)} cannot be longer than 100 characters`
+              isValid = false;
+            }
+          } else{
+            this.validationErrors[field] = '';
+          }
+        }
+      }
+    }
+    return isValid;
+  }
+
+  Delete(id:number){
+    Swal.fire({
+      title: 'Are you sure you want to Delete this Working Week?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#089B41',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'Cancel',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.semesterWorkingWeekService.Delete(id,this.DomainName).subscribe((D)=>{ 
+          this.GetWorkingWeeksBySemesterById(this.semesterId)
+        })
+      }
+    });
+  }
+
+  onInputValueChange(event: { field: keyof SemesterWorkingWeek, value: any }) {
+    const { field, value } = event;
+    (this.semesterWorkingWeek as any)[field] = value;
+    if (value) {
+      this.validationErrors[field] = '';
+    }
+  }
+  
+  checkFromToDate() {
+    let valid = true;
+  
+    const semesterFrom: Date = new Date(this.semester.dateFrom);
+    const semesterTo: Date = new Date(this.semester.dateTo);
+    const workingWeekFrom: Date = new Date(this.semesterWorkingWeek.dateFrom);
+    const workingWeekTo: Date = new Date(this.semesterWorkingWeek.dateTo);
+   
+    if (workingWeekTo.getTime() < workingWeekFrom.getTime()) {
+      valid = false;
+      Swal.fire({
+        title: 'From Date Must Be Before To Date',
+        icon: 'warning',
+        confirmButtonColor: '#089B41',
+        confirmButtonText: 'Ok',
+      });
+      this.isLoading = false;
+      return false;
+    }
+   
+    if (
+      workingWeekFrom.getTime() < semesterFrom.getTime() ||
+      workingWeekTo.getTime() > semesterTo.getTime()
+    ) {
+      valid = false;
+      Swal.fire({
+        title: 'Working Week dates must be within the Semester Range',
+        icon: 'warning',
+        confirmButtonColor: '#089B41',
+        confirmButtonText: 'Ok',
+      });
+      this.isLoading = false;
+      return false;
+    }
+  
+    return valid;
+  }
+   
+  Save(){
+    if(this.isFormValid()){
+      this.isLoading = true;
+      this.semesterWorkingWeek.semesterID = this.semesterId
+      if(this.checkFromToDate()){
+        if(this.editWorkingWeek == false){
+          this.semesterWorkingWeekService.Add(this.semesterWorkingWeek, this.DomainName).subscribe(
+            data =>{
+                this.GetWorkingWeeksBySemesterById(this.semesterId)
+                this.closeModal()
+                this.isLoading = false;
+            },
+            error => {
+              this.isLoading = false;
+              Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: error.error,
+                confirmButtonText: 'Okay',
+                customClass: { confirmButton: 'secondaryBg' },
+              });
+            }
+          ) 
+        } else{
+          this.semesterWorkingWeekService.Edit(this.semesterWorkingWeek, this.DomainName).subscribe(
+            data =>{
+                this.GetWorkingWeeksBySemesterById(this.semesterId)
+                this.closeModal()
+                this.isLoading = false;
+            },
+            error => {
+              this.isLoading = false;
+              Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: error.error,
+                confirmButtonText: 'Okay',
+                customClass: { confirmButton: 'secondaryBg' },
+              });
+            }
+          ) 
+        }  
+      }
+    }
+  } 
+
+  async onSearchEvent(event: { key: string; value: any }) {
+    this.key = event.key;
+    this.value = event.value;
+    try {
+      const data: SemesterWorkingWeek[] = await firstValueFrom(
+        this.semesterWorkingWeekService.GetBySemesterID(this.semesterId, this.DomainName)
+      );
+      this.WorkingWeeks = data || [];
+
+      if (this.value !== '') {
+        const numericValue = isNaN(Number(this.value))
+          ? this.value
+          : parseInt(this.value, 10);
+
+        this.WorkingWeeks = this.WorkingWeeks.filter((t) => {
+          const fieldValue = t[this.key as keyof typeof t];
+          if (typeof fieldValue === 'string') {
+            return fieldValue.toLowerCase().includes(this.value.toLowerCase());
+          }
+          if (typeof fieldValue === 'number') {
+            return fieldValue.toString().includes(numericValue.toString())
+          }
+          return fieldValue == this.value;
+        });
+      }
+    } catch (error) {
+      this.WorkingWeeks = [];
+    }
   }
 }

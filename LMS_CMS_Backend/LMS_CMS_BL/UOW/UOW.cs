@@ -179,8 +179,8 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<TaxUnitType> TaxUnitType_Repository;
         GenericRepo<EtaTokenType> EtaTokenType_Repository;
         GenericRepo<EtaToken> EtaToken_Repository;
-
-
+        GenericRepo<SubjectResource> SubjectResource_Repository;
+         
 
 
         public UOW(Octa_DbContext octa_Db)
@@ -1996,6 +1996,18 @@ namespace LMS_CMS_BL.UOW
                     EtaToken_Repository = new GenericRepo<EtaToken>(db);
                 }
                 return EtaToken_Repository;
+            }
+        }
+        
+        public GenericRepo<SubjectResource> subjectResource_Repository
+        {
+            get
+            {
+                if (SubjectResource_Repository == null)
+                {
+                    SubjectResource_Repository = new GenericRepo<SubjectResource>(db);
+                }
+                return SubjectResource_Repository;
             }
         }
 

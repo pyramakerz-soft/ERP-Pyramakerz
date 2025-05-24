@@ -904,6 +904,8 @@ namespace LMS_CMS_BL.Config
 
             CreateMap<SemesterWorkingWeek, SemesterWorkingWeekGetDTO>()
                .ForMember(dest => dest.SemesterName, opt => opt.MapFrom(src => src.Semester.Name));
+            CreateMap<SemesterWorkingWeekAddDTO, SemesterWorkingWeek>();
+            CreateMap<SemesterWorkingWeekPutDTO, SemesterWorkingWeek>();
 
             CreateMap<DailyPerformanceAddDTO, DailyPerformance>();
 
@@ -927,10 +929,28 @@ namespace LMS_CMS_BL.Config
             CreateMap<QuestionBankType, QuestionBankTypeGetDTO>();
 
             CreateMap<TaxIssuer, TaxIssuerGetDTO>()
-                .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.TaxCustomer.Type)); ;
+                .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.TaxCustomer.Type));
             CreateMap<TaxIssuerAddDTO, TaxIssuer>();
             CreateMap<TaxIssuerEditDTO, TaxIssuer>();
 
+            CreateMap<WeightType, WeightTypeGetDTO>(); 
+            CreateMap<WeightTypeAddDTO, WeightType>(); 
+            CreateMap<WeightTypePutDTO, WeightType>(); 
+
+            CreateMap<SubjectWeightType, SubjectWeightTypeGetDTO>()
+                .ForMember(dest => dest.WeightTypeEnglishName, opt => opt.MapFrom(src => src.WeightType.EnglishName))
+                .ForMember(dest => dest.WeightTypeArabicName, opt => opt.MapFrom(src => src.WeightType.ArabicName))
+                .ForMember(dest => dest.SubjectEnglishName, opt => opt.MapFrom(src => src.Subject.en_name))
+                .ForMember(dest => dest.SubjectArabicName, opt => opt.MapFrom(src => src.Subject.ar_name));
+
+            CreateMap<SubjectWeightTypeAddDTO, SubjectWeightType>(); 
+            CreateMap<SubjectWeightTypePutDTO, SubjectWeightType>(); 
+
+            CreateMap<SubjectResource, SubjectResourceGetDTO>() 
+                .ForMember(dest => dest.SubjectEnglishName, opt => opt.MapFrom(src => src.Subject.en_name))
+                .ForMember(dest => dest.SubjectArabicName, opt => opt.MapFrom(src => src.Subject.ar_name));
+
+            CreateMap<SubjectResourceAddDTO, SubjectResource>();  
         }
     } 
 }
