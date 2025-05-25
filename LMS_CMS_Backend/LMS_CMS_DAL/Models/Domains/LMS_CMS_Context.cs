@@ -169,6 +169,7 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<TaxUnitType> TaxUnitType { get; set; }
         public DbSet<EtaTokenType> EtaTokenType { get; set; }
         public DbSet<SubjectResource> SubjectResource { get; set; }
+        public DbSet<CertificatesIssuerName> CertificatesIssuerNames { get; set; }
 
 
         public LMS_CMS_Context(DbContextOptions<LMS_CMS_Context> options)
