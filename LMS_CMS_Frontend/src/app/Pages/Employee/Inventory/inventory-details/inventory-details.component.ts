@@ -140,8 +140,8 @@ export class InventoryDetailsComponent {
   schoolPCs: SchoolPCs[] = []
   SelectedSupplier: any = null;
 
-  SalesItem :InventoryDetails[] = []; // for sales return 
-  SaleId : number =0
+  SalesItem: InventoryDetails[] = []; // for sales return 
+  SaleId: number = 0
 
 
   constructor(
@@ -403,6 +403,7 @@ export class InventoryDetailsComponent {
       this.salesItemServ.GetBySalesId(this.MasterId, this.DomainName).subscribe(
         (d) => {
           this.TableData = d;
+          console.log( this.TableData)
           this.Data.inventoryDetails = d;
           resolve();
         },
@@ -434,6 +435,7 @@ export class InventoryDetailsComponent {
   }
   async Save() {
     if (this.isFormValid()) {
+      console.log(this.Data)
       this.isLoading = true;
       // await this.SaveRow();
       if (this.mode == 'Create') {
@@ -472,6 +474,7 @@ export class InventoryDetailsComponent {
         this.salesItemServ
           .Edit(this.Data.inventoryDetails, this.DomainName)
           .subscribe((d) => { });
+        console.log("new",this.NewDetailsWhenEdit)
         this.salesItemServ
           .Add(this.NewDetailsWhenEdit, this.DomainName)
           .subscribe(
@@ -987,6 +990,7 @@ export class InventoryDetailsComponent {
           shopItemName: d.arName,
           barCode: d.barCode,
           quantity: 1,
+          salesId:0,
           price: price,
           totalPrice: price,
           name: '',
@@ -1030,47 +1034,121 @@ export class InventoryDetailsComponent {
     this.isModalVisible = true;
   }
 
-  getSalesItemByStudentId(){
-    if(this.Data.studentID!= 0){
-      this.salesServ.GetByStudentId(this.Data.studentID,this.DomainName).subscribe((d)=>{
-         this.SalesItem=d
-         this.openModal();
-      })
-    }
-    else{
-      this.validationErrors['studentID']='Choose Student Id First' ;
-    }
-  }
-
-  getBySalesItemBySaleId(){
-    console.log(this.SaleId)
-    if(this.SaleId!= 0){
-       this.salesItemServ.GetBySalesId(this.SaleId, this.DomainName).subscribe((d)=>{
-         this.SalesItem=d
-         this.openModal();
-      })
-    }
-    else{
-      if(this.Data.studentID!= 0){
-        this.salesServ.GetByStudentId(this.Data.studentID,this.DomainName).subscribe((d)=>{
-         this.SalesItem=d
-         this.openModal();
+  getSalesItems() {
+    if (this.SaleId != 0) {
+      this.salesItemServ.GetBySalesId(this.SaleId, this.DomainName).subscribe((d) => {
+        this.SalesItem = d
+        this.openModal();
+      },
+        (error) => {
+          console.log(error)
+          this.isLoading = false;
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'There is No Sales Invoice With this id',
+            confirmButtonText: 'Okay',
+            customClass: { confirmButton: 'secondaryBg' },
+          });
         })
-      }
-      else{
-        this.validationErrors['studentID']='Choose Student Id First' ;
-      }
+    }
+    else {
+    if (this.Data.studentID != 0) {
+      this.salesServ.GetByStudentId(this.Data.studentID, this.DomainName).subscribe((d) => {
+        this.SalesItem = d
+        this.openModal();
+      },
+        (error) => {
+          console.log(error)
+          this.isLoading = false;
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'There is No Sales Invoices For this student',
+            confirmButtonText: 'Okay',
+            customClass: { confirmButton: 'secondaryBg' },
+          });
+        })
+    }
+    else {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Warning!',
+        text: 'Choose Student First',
+        confirmButtonColor: '#089B41',
+      });
     }
   }
+  }
 
-  async SelectItemFromSaleInvoive(row:InventoryDetails){
+  // getBySalesItemBySaleId() {
+  //   console.log(this.SaleId)
+  //   if (this.SaleId != 0) {
+  //     this.salesItemServ.GetBySalesId(this.SaleId, this.DomainName).subscribe((d) => {
+  //       this.SalesItem = d
+  //       this.openModal();
+  //     },
+  //       (error) => {
+  //         console.log(error)
+  //         this.isLoading = false;
+  //         Swal.fire({
+  //           icon: 'error',
+  //           title: 'Oops...',
+  //           text: 'There is No Sales Invoice With this id',
+  //           confirmButtonText: 'Okay',
+  //           customClass: { confirmButton: 'secondaryBg' },
+  //         });
+  //       })
+  //   }
+  //   else {
+  //     if (this.Data.studentID != 0) {
+  //       this.salesServ.GetByStudentId(this.Data.studentID, this.DomainName).subscribe((d) => {
+  //         this.SalesItem = d
+  //         this.openModal();
+  //       },
+  //       (error) => {
+  //         console.log(error)
+  //         this.isLoading = false;
+  //         Swal.fire({
+  //           icon: 'error',
+  //           title: 'Oops...',
+  //           text: 'There is No Sales Invoices For this student',
+  //           confirmButtonText: 'Okay',
+  //           customClass: { confirmButton: 'secondaryBg' },
+  //         });
+  //       })
+  //     }
+  //     else {
+  //       Swal.fire({
+  //         icon: 'warning',
+  //         title: 'Warning!',
+  //         text: 'Choose Student First',
+  //         confirmButtonColor: '#089B41',
+  //       });
+  //     }
+  //   }
+  // }
+
+  async SelectItemFromSaleInvoive(row: InventoryDetails) {
     this.Item.id = Date.now();
     this.Item.price = row.price
-    this.Item.shopItemID = row.id;
+    this.Item.shopItemID = row.shopItemID;
     this.Item.shopItemName = row.shopItemName;
     this.Item.barCode = row.barCode;
+    this.Item.salesId = row.inventoryMasterId;
     this.Item.quantity = row.quantity;
     this.Item.totalPrice = this.Item.price;
     await this.SaveRow();
+    this.SaleId = 0
+  }
+
+  validateNumber(event: any, field: keyof InventoryDetails): void {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = ''; 
+      if (typeof this.Item[field] === 'string') {
+        this.Item[field] = '' as never;  
+      }
+    }
   }
 }

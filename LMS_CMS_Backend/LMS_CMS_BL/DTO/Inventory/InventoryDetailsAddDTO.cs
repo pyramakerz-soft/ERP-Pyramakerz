@@ -15,5 +15,6 @@ namespace LMS_CMS_BL.DTO.Inventory
         public string? Notes { get; set; }
         public long ShopItemID { get; set; }
         public long InventoryMasterId { get; set; }
+        public long? SalesId { get; set; }
     }
 }

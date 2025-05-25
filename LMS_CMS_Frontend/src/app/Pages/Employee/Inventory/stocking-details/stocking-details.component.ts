@@ -766,6 +766,7 @@ export class StockingDetailsComponent {
           shopItemName: '',
           salesName: '',
           notes: '',
+          salesId :0 ,
           insertedByUserId: 0,
           shopItemID: item.shopItemID,
           quantity: adjustedQuantity,

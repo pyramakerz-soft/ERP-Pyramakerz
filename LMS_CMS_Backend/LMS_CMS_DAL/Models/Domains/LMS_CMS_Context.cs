@@ -1396,6 +1396,12 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasForeignKey(p => p.QuestionTypeID)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<InventoryDetails>()
+                .HasOne(p => p.Sales)
+                .WithMany(p => p.SaleReturns)
+                .HasForeignKey(p => p.SalesId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<QuestionBank>()
                 .HasOne(p => p.QuestionBankOption)
                 .WithMany(p => p.QuestionBanks)

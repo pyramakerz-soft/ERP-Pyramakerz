@@ -97,6 +97,7 @@ export class InventoryMasterService {
         formData.append(`inventoryDetails[${index}][quantity]`, item.quantity.toString());
         formData.append(`inventoryDetails[${index}][notes]`, item.notes.toString());
         formData.append(`inventoryDetails[${index}][shopItemID]`, item.shopItemID.toString());
+        formData.append(`inventoryDetails[${index}][salesId]`, item.salesId.toString());
         formData.append(`inventoryDetails[${index}][inventoryMasterId]`, item.inventoryMasterId.toString());
 
       });

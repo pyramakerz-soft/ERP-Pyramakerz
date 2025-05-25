@@ -12,6 +12,7 @@ export class ModalComponent {
   @Input() title: string = '';
   @Input() isEditMode: boolean = false;
   @Input() buttonText: string = 'Create';
+  @Input() isLoading: boolean = false; // Add this input
   @Output() save = new EventEmitter<void>();
   @Output() close = new EventEmitter<void>();
 
@@ -20,6 +21,8 @@ export class ModalComponent {
   }
 
   onSave() {
-    this.save.emit();
+    if (!this.isLoading) { // Prevent save when already loading
+      this.save.emit();
+    }
   }
 }

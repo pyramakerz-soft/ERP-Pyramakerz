@@ -93,35 +93,33 @@ openModal(id?: number) {
   this.isModalVisible = true;
 }
 
-
+isSaving: boolean = false;
 saveDiagnosis() {
   if (this.validateForm()) {
-    if (this.editDiagnosis) {
-      this.diagnosisService.Edit(this.diagnosis, this.DomainName).subscribe({
-        next: () => {
-          this.getDiagnoses(); 
-          this.closeModal();
-          Swal.fire('Success', 'Diagnosis saved successfully', 'success');
-        },
-        error: (err) => {
-          console.error('Error updating diagnosis:', err);
-          Swal.fire('Error', 'Failed to save diagnosis', 'error');
-        }
-      });
-    } else {
-      this.diagnosis.insertedAt = new Date().toISOString();
-      this.diagnosisService.Add(this.diagnosis, this.DomainName).subscribe({
-        next: () => {
-          this.getDiagnoses(); 
-          this.closeModal();
-          Swal.fire('Success', 'Diagnosis created successfully', 'success');
-        },
-        error: (err) => {
-          console.error('Error creating diagnosis:', err);
-          Swal.fire('Error', 'Failed to create diagnosis', 'error');
-        }
-      });
-    }
+    const isEditing = this.editDiagnosis;
+    const domainName = this.DomainName;
+    const diagnosis = { ...this.diagnosis };
+    
+    // Disable the save button during submission
+    this.isSaving = true;
+
+    const operation = isEditing 
+      ? this.diagnosisService.Edit(diagnosis, domainName)
+      : this.diagnosisService.Add(diagnosis, domainName);
+
+    operation.subscribe({
+      next: () => {
+        this.getDiagnoses();
+        this.closeModal();
+        Swal.fire('Success', `Diagnosis ${isEditing ? 'updated' : 'created'} successfully`, 'success');
+        this.isSaving = false;
+      },
+      error: (err) => {
+        console.error(`Error ${isEditing ? 'updating' : 'creating'} diagnosis:`, err);
+        Swal.fire('Error', `Failed to ${isEditing ? 'update' : 'create'} diagnosis`, 'error');
+        this.isSaving = false;
+      }
+    });
   }
 }
 

@@ -95,36 +95,36 @@ openModal(id?: number) {
     this.validationErrors = {};
   }
 
-  
+  isSaving: boolean = false;
 saveHygieneType() {
   if (this.validateForm()) {
-    if (this.editHygieneType) {
-      this.hygieneTypesService.Edit(this.hygieneType, this.DomainName).subscribe({
-        next: () => {
-          
-          this.getHygieneTypes();
-          this.closeModal();
-        },
-        error: (err) => {
-          console.error('Error updating hygiene type:', err);
-          
-        }
-      });
-    } else {
-      this.hygieneTypesService.Add(this.hygieneType, this.DomainName).subscribe({
-        next: () => {
-          
-          this.getHygieneTypes();
-          this.closeModal();
-        },
-        error: (err) => {
-          console.error('Error adding hygiene type:', err);
-          
-        }
-      });
-    }
+    const isEditing = this.editHygieneType;
+    const domainName = this.DomainName;
+    const hygieneType = { ...this.hygieneType };
+    
+    // Disable the save button during submission
+    this.isSaving = true;
+
+    const operation = isEditing 
+      ? this.hygieneTypesService.Edit(hygieneType, domainName)
+      : this.hygieneTypesService.Add(hygieneType, domainName);
+
+    operation.subscribe({
+      next: () => {
+        this.getHygieneTypes();
+        this.closeModal();
+        Swal.fire('Success', `Hygiene type ${isEditing ? 'updated' : 'created'} successfully`, 'success');
+        this.isSaving = false;
+      },
+      error: (err) => {
+        console.error(`Error ${isEditing ? 'updating' : 'creating'} hygiene type:`, err);
+        Swal.fire('Error', `Failed to ${isEditing ? 'update' : 'create'} hygiene type`, 'error');
+        this.isSaving = false;
+      }
+    });
   }
 }
+
 private formatDate(date: Date | string): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
   const options: Intl.DateTimeFormatOptions = {

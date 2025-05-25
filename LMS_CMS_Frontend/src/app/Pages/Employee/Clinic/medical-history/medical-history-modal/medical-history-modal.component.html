@@ -125,8 +125,9 @@
 
         <div class="flex justify-end w-full pt-6">
             <button (click)="saveMedicalHistory()"
+              [disabled]="isSaving"
                 class="bg-[#089B41] text-white font-medium px-5 py-3 rounded-lg transition duration-200 w-full">
-                Submit
+                {{ isSaving ? 'Saving...' : 'Submit' }}
             </button>
         </div>
     </div>

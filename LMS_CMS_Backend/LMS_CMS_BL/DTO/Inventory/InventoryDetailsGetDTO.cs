@@ -23,6 +23,7 @@ namespace LMS_CMS_BL.DTO.Inventory
         public long? CategoryId { get; set; }
         public long? SubCategoryId { get; set; }
         public string? SalesName { get; set; }
+        public long? SalesId { get; set; }
         public long? InsertedByUserId { get; set; }
     }
 }

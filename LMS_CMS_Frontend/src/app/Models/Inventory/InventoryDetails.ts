@@ -10,6 +10,7 @@ export class InventoryDetails {
         public inventoryMasterId :number =0,
         public shopItemName :string = '',
         public salesName :string = '',
+        public salesId :number =0,
         public notes :string = '',
         public insertedAt :string ="",
         public insertedByUserId :number =0,
