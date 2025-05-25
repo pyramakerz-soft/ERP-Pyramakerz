@@ -79,25 +79,35 @@ export class DosesComponent implements OnInit {
     }
     this.isModalVisible = true;
   }
+  
+isSaving: boolean = false;
+saveDose() {
+  if (this.validateForm()) {
+    const isEditing = this.editDose;
+    const domainName = this.DomainName;
+    const dose = { ...this.dose };
+    
+    // Disable the save button during submission
+    this.isSaving = true;
 
-  saveDose() {
-    if (this.validateForm()) {
-      const operation = this.editDose 
-        ? this.doseService.Edit(this.dose, this.DomainName)
-        : this.doseService.Add(this.dose, this.DomainName);
+    const operation = isEditing 
+      ? this.doseService.Edit(dose, domainName)
+      : this.doseService.Add(dose, domainName);
 
-      operation.subscribe({
-        next: () => {
-          this.getDoses();
-          this.closeModal();
-          Swal.fire('Success', `Dose ${this.editDose ? 'updated' : 'created'} successfully`, 'success');
-        },
-        error: (error) => {
-          this.handleError(`Error ${this.editDose ? 'updating' : 'creating'} dose:`, error);
-        }
-      });
-    }
+    operation.subscribe({
+      next: () => {
+        this.getDoses();
+        this.closeModal();
+        Swal.fire('Success', `Dose ${isEditing ? 'updated' : 'created'} successfully`, 'success');
+        this.isSaving = false;
+      },
+      error: (error) => {
+        this.handleError(`Error ${isEditing ? 'updating' : 'creating'} dose:`, error);
+        this.isSaving = false;
+      }
+    });
   }
+}
 
   deleteDose(row: Dose) {
     Swal.fire({

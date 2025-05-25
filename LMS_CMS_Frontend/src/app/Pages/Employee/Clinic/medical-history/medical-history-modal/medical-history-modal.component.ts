@@ -194,31 +194,37 @@ export class MedicalHistoryModalComponent implements OnInit, OnChanges {
     return isValid;
   }
 
-  async saveMedicalHistory() {
-    if (this.isFormValid()) {
-      try {
-        const domainName = this.apiService.GetHeader();
-        
-        if (this.editMode) {
-          await firstValueFrom(
-            this.medicalHistoryService.UpdateByDoctorAsync(this.medicalHistory, domainName)
-          );
-          Swal.fire('Success', 'Medical history updated successfully!', 'success');
-        } else {
-          await firstValueFrom(
-            this.medicalHistoryService.AddByDoctor(this.medicalHistory, domainName)
-          );
-          Swal.fire('Success', 'Medical history created successfully!', 'success');
-        }
-
-        this.onSave.emit();
-        this.closeModal();
-      } catch (error) {
-        console.error('Error saving medical history:', error);
-        Swal.fire('Error', 'Failed to save medical history. Please try again later.', 'error');
+  isSaving: boolean = false;
+async saveMedicalHistory() {
+  if (this.isFormValid()) {
+    try {
+      // Disable the save button during submission
+      this.isSaving = true;
+      
+      const domainName = this.apiService.GetHeader();
+      
+      if (this.editMode) {
+        await firstValueFrom(
+          this.medicalHistoryService.UpdateByDoctorAsync(this.medicalHistory, domainName)
+        );
+        Swal.fire('Success', 'Medical history updated successfully!', 'success');
+      } else {
+        await firstValueFrom(
+          this.medicalHistoryService.AddByDoctor(this.medicalHistory, domainName)
+        );
+        Swal.fire('Success', 'Medical history created successfully!', 'success');
       }
+
+      this.onSave.emit();
+      this.closeModal();
+    } catch (error) {
+      console.error('Error saving medical history:', error);
+      Swal.fire('Error', 'Failed to save medical history. Please try again later.', 'error');
+    } finally {
+      this.isSaving = false;
     }
   }
+}
 
   closeModal() {
     this.isVisible = false;
