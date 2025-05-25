@@ -295,9 +295,12 @@ export class QuestionsComponent {
       option.id = 0;
       option.name = 'False'
       this.options.push(option);
-      if(this.mode=="Edit"){
-      this.question.newOptions.push('True');
-      this.question.newOptions.push('False');
+      if (this.mode == "Edit") {
+        if (!Array.isArray(this.question.newOptions)) {
+          this.question.newOptions = [];
+        }
+        this.question.newOptions.push('True');
+        this.question.newOptions.push('False');
       }
     }
   }
