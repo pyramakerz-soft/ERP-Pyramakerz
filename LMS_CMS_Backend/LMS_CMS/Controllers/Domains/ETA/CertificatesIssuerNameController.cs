@@ -1,34 +1,32 @@
 ﻿using AutoMapper;
-using LMS_CMS_BL.DTO.Zatca;
+using LMS_CMS_BL.DTO.ETA;
 using LMS_CMS_BL.UOW;
-using LMS_CMS_DAL.Models.Domains.Zatca;
-using LMS_CMS_PL.Attribute;
+using LMS_CMS_DAL.Models.Domains.ETA;
 using LMS_CMS_PL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
-namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
+namespace LMS_CMS_PL.Controllers.Domains.ETA
 {
     [Route("api/with-domain/[controller]")]
     [ApiController]
     [Authorize]
-    public class SchoolPCsController : ControllerBase
+    public class CertificatesIssuerNameController : ControllerBase
     {
         private readonly DbContextFactoryService _dbContextFactory;
         private readonly IMapper _mapper;
 
-        public SchoolPCsController(DbContextFactoryService dbContextFactory, IMapper mapper)
+        public CertificatesIssuerNameController(DbContextFactoryService dbContextFactory, IMapper mapper)
         {
             _dbContextFactory = dbContextFactory;
             _mapper = mapper;
         }
 
-        #region Get
-        [HttpGet]
+        #region Get All
+        [HttpGet("get")]
         //[Authorize_Endpoint_(
         //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "SchoolPCs" }
+        //    pages: new[] { "" }
         //)]
         public async Task<IActionResult> Get()
         {
@@ -36,8 +34,8 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
             var userClaims = HttpContext.User.Claims;
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-
             long.TryParse(userIdClaim, out long userId);
+
             var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
 
             if (userIdClaim == null || userTypeClaim == null)
@@ -45,34 +43,26 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            List<SchoolPCs> pcs = await Unit_Of_Work.schoolPCs_Repository.Select_All_With_IncludesById<SchoolPCs>(
-                d => d.IsDeleted != true,
-                query => query.Include(s => s.School)
-            );
+            List<CertificatesIssuerName> certificatesIssuerNames =  Unit_Of_Work.certificatesIssuerName_Repository.Select_All();
 
-            if (pcs == null || pcs.Count == 0)
+            if (certificatesIssuerNames == null || !certificatesIssuerNames.Any())
             {
-                return NotFound();
+                return NotFound("No certificates issuer names found.");
             }
 
-            if (pcs == null || pcs.Count == 0)
-            {
-                return NotFound();
-            }
+            List<CertificatesIssuerNameGetDTO> certNameDTO = _mapper.Map<List<CertificatesIssuerNameGetDTO>>(certificatesIssuerNames);
 
-            List<SchoolPCsGetDTO> schoolPCsDto = _mapper.Map<List<SchoolPCsGetDTO>>(pcs);
-
-            return Ok(schoolPCsDto);
+            return Ok(certificatesIssuerNames);
         }
         #endregion
 
-        #region GetByID
+        #region Get By ID
         [HttpGet("id")]
         //[Authorize_Endpoint_(
         //    allowedTypes: new[] { "octa", "employee" },
         //    pages: new[] { "SchoolPCs" }
         //)]
-        public async Task<IActionResult> GetByID(long id)
+        public async Task<IActionResult> GetByID(int id)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -86,67 +76,27 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
             {
                 return Unauthorized("User ID or Type claim not found.");
             }
-            SchoolPCs pc = await Unit_Of_Work.schoolPCs_Repository.FindByIncludesAsync(
-                d => d.ID == id && d.IsDeleted != true,
-                query => query.Include(s => s.School)
-            );
 
-            if (pc == null)
+            CertificatesIssuerName certificatesIssuerName = Unit_Of_Work.certificatesIssuerName_Repository.First_Or_Default(x => x.ID == id && x.IsDeleted != true);
+
+            if (certificatesIssuerName == null)
             {
-                return NotFound();
+                return NotFound($"CertificatesIssuerName with ID {id} not found.");
             }
 
-            SchoolPCsGetDTO drugDto = _mapper.Map<SchoolPCsGetDTO>(pc);
+            CertificatesIssuerNameGetDTO certNameDTO = _mapper.Map<CertificatesIssuerNameGetDTO>(certificatesIssuerName);
 
-            return Ok(drugDto);
+            return Ok(certNameDTO);
         }
         #endregion
 
-        #region Get By School Id
-        [HttpGet("GetBySchoolId")]
+        #region Create
+        [HttpPost("Add")]
         //[Authorize_Endpoint_(
         //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "SchoolPCs" , "Inventory" }
+        //    pages: new[] { "SchoolPCs" }
         //)]
-        public async Task<IActionResult> GetBySchoolId(long schoolId)
-        {
-            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-
-            var userClaims = HttpContext.User.Claims;
-            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-
-            long.TryParse(userIdClaim, out long userId);
-
-            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
-
-            if (userIdClaim == null || userTypeClaim == null)
-            {
-                return Unauthorized("User ID or Type claim not found.");
-            }
-
-            List<SchoolPCs> pcs = await Unit_Of_Work.schoolPCs_Repository.Select_All_With_IncludesById<SchoolPCs>(
-                d => d.IsDeleted != true && d.SchoolId == schoolId,
-                query => query.Include(s => s.School)
-            );
-
-            if (pcs == null || pcs.Count == 0)
-            {
-                return NotFound();
-            }
-
-            List<SchoolPCsGetDTO> schoolPCsDto = _mapper.Map<List<SchoolPCsGetDTO>>(pcs);
-
-            return Ok(schoolPCsDto);
-        }
-        #endregion
-
-        #region Add PC
-        [HttpPost]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "SchoolPCs" , "Inventory" }
-        //)]
-        public IActionResult Add(SchoolPCsAddDTO schoolPCsDto)
+        public IActionResult Add(CertificatesIssuerNameAddDTO certIssuerAdd)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -166,34 +116,34 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                 return BadRequest();
             }
 
-            SchoolPCs pc = _mapper.Map<SchoolPCs>(schoolPCsDto);
+            CertificatesIssuerName certificatesIssuerName = _mapper.Map<CertificatesIssuerName>(certIssuerAdd);
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-            pc.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            certificatesIssuerName.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
 
             if (userTypeClaim == "octa")
             {
-                pc.InsertedByOctaId = userId;
+                certificatesIssuerName.InsertedByOctaId = userId;
             }
             else if (userTypeClaim == "employee")
             {
-                pc.InsertedByUserId = userId;
+                certificatesIssuerName.InsertedByUserId = userId;
             }
 
-            Unit_Of_Work.schoolPCs_Repository.Add(pc);
+            Unit_Of_Work.certificatesIssuerName_Repository.Add(certificatesIssuerName);
             Unit_Of_Work.SaveChanges();
 
-            return Ok(schoolPCsDto);
+            return Ok(certificatesIssuerName);
         }
         #endregion
 
-        #region Update PC
+        #region Update
         [HttpPut("Edit")]
         //[Authorize_Endpoint_(
         //    allowedTypes: new[] { "octa", "employee" },
         //    pages: new[] { "SchoolPCs" }
         //)]
-        public IActionResult Update(SchoolPCsPutDTO SchoolPCsDto)
+        public IActionResult Edit(CertificatesIssuerNameEditDTO certIssuerDTO)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -213,50 +163,50 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                 return BadRequest();
             }
 
-            SchoolPCs pc = Unit_Of_Work.schoolPCs_Repository.First_Or_Default(d => d.ID == SchoolPCsDto.ID && d.IsDeleted != true);
+            CertificatesIssuerName certificatesIssuerName = Unit_Of_Work.certificatesIssuerName_Repository.First_Or_Default(x => x.ID == certIssuerDTO.ID && x.IsDeleted != true);
 
-            if (pc == null)
+            if (certificatesIssuerName == null)
             {
-                return NotFound();
+                return NotFound($"CertificatesIssuerName with ID {certIssuerDTO.ID} not found.");
             }
 
-            _mapper.Map(SchoolPCsDto, pc);
+            _mapper.Map(certIssuerDTO, certificatesIssuerName);
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
 
-            pc.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            certificatesIssuerName.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
 
             if (userTypeClaim == "octa")
             {
-                pc.UpdatedByOctaId = userId;
-                if (pc.UpdatedByUserId != null)
+                certificatesIssuerName.UpdatedByOctaId = userId;
+                if (certificatesIssuerName.UpdatedByUserId != null)
                 {
-                    pc.UpdatedByUserId = null;
+                    certificatesIssuerName.UpdatedByUserId = null;
                 }
             }
             else if (userTypeClaim == "employee")
             {
-                pc.UpdatedByUserId = userId;
-                if (pc.UpdatedByOctaId != null)
+                certificatesIssuerName.UpdatedByUserId = userId;
+                if (certificatesIssuerName.UpdatedByOctaId != null)
                 {
-                    pc.UpdatedByOctaId = null;
+                    certificatesIssuerName.UpdatedByOctaId = null;
                 }
             }
 
-            Unit_Of_Work.schoolPCs_Repository.Update(pc);
+            Unit_Of_Work.certificatesIssuerName_Repository.Update(certificatesIssuerName);
             Unit_Of_Work.SaveChanges();
 
-            return Ok(SchoolPCsDto);
+            return Ok(certificatesIssuerName);
         }
         #endregion
 
-        #region Delete PC
+        #region Delete
         [HttpDelete]
         //[Authorize_Endpoint_(
         //    allowedTypes: new[] { "octa", "employee" },
         //    pages: new[] { "SchoolPCs" }
         //)]
-        public IActionResult Delete(long id)
+        public IActionResult Delete(int id)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -271,40 +221,38 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            SchoolPCs pc = Unit_Of_Work.schoolPCs_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == id);
-
-            if (pc == null)
+               CertificatesIssuerName certificatesIssuerName = Unit_Of_Work.certificatesIssuerName_Repository.First_Or_Default(x => x.ID == id && x.IsDeleted != true);
+    
+            if (certificatesIssuerName == null)
             {
-                return NotFound();
+                return NotFound($"CertificatesIssuerName with ID {id} not found.");
             }
-
-            pc.IsDeleted = true;
-
+    
+            certificatesIssuerName.IsDeleted = true;
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-            pc.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            certificatesIssuerName.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
 
             if (userTypeClaim == "octa")
-            {
-                pc.DeletedByOctaId = userId;
-
-                if (pc.DeletedByUserId != null)
                 {
-                    pc.DeletedByUserId = null;
+                    certificatesIssuerName.DeletedByOctaId = userId;
+                    if (certificatesIssuerName.DeletedByUserId != null)
+                    {
+                        certificatesIssuerName.DeletedByUserId = null;
+                    }
                 }
-            }
-            else if (userTypeClaim == "employee")
-            {
-                pc.DeletedByUserId = userId;
-                if (pc.DeletedByOctaId != null)
+                else if (userTypeClaim == "employee")
                 {
-                    pc.DeletedByOctaId = null;
+                    certificatesIssuerName.DeletedByUserId = userId;
+                    if (certificatesIssuerName.DeletedByOctaId != null)
+                    {
+                        certificatesIssuerName.DeletedByOctaId = null;
+                    }
                 }
-            }
-
-            Unit_Of_Work.schoolPCs_Repository.Update(pc);
-            Unit_Of_Work.SaveChanges();
-
-            return Ok("PC deleted successfully");
+    
+                Unit_Of_Work.certificatesIssuerName_Repository.Update(certificatesIssuerName);
+                Unit_Of_Work.SaveChanges();
+    
+                return Ok("Certificate deleted successfully");
         }
         #endregion
     }

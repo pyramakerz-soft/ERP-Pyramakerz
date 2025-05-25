@@ -1,34 +1,32 @@
 ﻿using AutoMapper;
-using LMS_CMS_BL.DTO.Zatca;
+using LMS_CMS_BL.DTO.ETA;
 using LMS_CMS_BL.UOW;
-using LMS_CMS_DAL.Models.Domains.Zatca;
-using LMS_CMS_PL.Attribute;
+using LMS_CMS_DAL.Models.Domains.ETA;
 using LMS_CMS_PL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
-namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
+namespace LMS_CMS_PL.Controllers.Domains.ETA
 {
     [Route("api/with-domain/[controller]")]
     [ApiController]
     [Authorize]
-    public class SchoolPCsController : ControllerBase
+    public class TaxIssuerController : ControllerBase
     {
         private readonly DbContextFactoryService _dbContextFactory;
         private readonly IMapper _mapper;
 
-        public SchoolPCsController(DbContextFactoryService dbContextFactory, IMapper mapper)
+        public TaxIssuerController(DbContextFactoryService dbContextFactory, IMapper mapper)
         {
             _dbContextFactory = dbContextFactory;
             _mapper = mapper;
         }
 
-        #region Get
-        [HttpGet]
+        #region Get All
+        [HttpGet("get")]
         //[Authorize_Endpoint_(
         //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "SchoolPCs" }
+        //    pages: new[] { "" }
         //)]
         public async Task<IActionResult> Get()
         {
@@ -36,8 +34,8 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
             var userClaims = HttpContext.User.Claims;
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-
             long.TryParse(userIdClaim, out long userId);
+
             var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
 
             if (userIdClaim == null || userTypeClaim == null)
@@ -45,34 +43,26 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            List<SchoolPCs> pcs = await Unit_Of_Work.schoolPCs_Repository.Select_All_With_IncludesById<SchoolPCs>(
-                d => d.IsDeleted != true,
-                query => query.Include(s => s.School)
-            );
+            List<TaxIssuer> taxIssuers = Unit_Of_Work.taxIssuer_Repository.Select_All();
 
-            if (pcs == null || pcs.Count == 0)
+            if (taxIssuers == null || !taxIssuers.Any())
             {
-                return NotFound();
+                return NotFound("No tax issuers found.");
             }
 
-            if (pcs == null || pcs.Count == 0)
-            {
-                return NotFound();
-            }
+            var taxIssuerDtos = _mapper.Map<List<TaxIssuerGetDTO>>(taxIssuers);
 
-            List<SchoolPCsGetDTO> schoolPCsDto = _mapper.Map<List<SchoolPCsGetDTO>>(pcs);
-
-            return Ok(schoolPCsDto);
+            return Ok(taxIssuerDtos);
         }
         #endregion
 
-        #region GetByID
+        #region Get By ID
         [HttpGet("id")]
         //[Authorize_Endpoint_(
         //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "SchoolPCs" }
+        //    pages: new[] { "" }
         //)]
-        public async Task<IActionResult> GetByID(long id)
+        public async Task<IActionResult> GetByID(string id)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -86,67 +76,27 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
             {
                 return Unauthorized("User ID or Type claim not found.");
             }
-            SchoolPCs pc = await Unit_Of_Work.schoolPCs_Repository.FindByIncludesAsync(
-                d => d.ID == id && d.IsDeleted != true,
-                query => query.Include(s => s.School)
-            );
 
-            if (pc == null)
+            TaxIssuer? taxIssuer = Unit_Of_Work.taxIssuer_Repository.First_Or_Default(x => x.ID == id && x.IsDeleted != true);
+
+            if (taxIssuer == null)
             {
-                return NotFound();
+                return NotFound($"Tax issuer with ID {id} not found.");
             }
 
-            SchoolPCsGetDTO drugDto = _mapper.Map<SchoolPCsGetDTO>(pc);
+            var taxIssuerDto = _mapper.Map<TaxIssuerGetDTO>(taxIssuer);
 
-            return Ok(drugDto);
+            return Ok(taxIssuerDto);
         }
         #endregion
 
-        #region Get By School Id
-        [HttpGet("GetBySchoolId")]
+        #region Create
+        [HttpPost("Add")]
         //[Authorize_Endpoint_(
         //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "SchoolPCs" , "Inventory" }
+        //    pages: new[] { "" }
         //)]
-        public async Task<IActionResult> GetBySchoolId(long schoolId)
-        {
-            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-
-            var userClaims = HttpContext.User.Claims;
-            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-
-            long.TryParse(userIdClaim, out long userId);
-
-            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
-
-            if (userIdClaim == null || userTypeClaim == null)
-            {
-                return Unauthorized("User ID or Type claim not found.");
-            }
-
-            List<SchoolPCs> pcs = await Unit_Of_Work.schoolPCs_Repository.Select_All_With_IncludesById<SchoolPCs>(
-                d => d.IsDeleted != true && d.SchoolId == schoolId,
-                query => query.Include(s => s.School)
-            );
-
-            if (pcs == null || pcs.Count == 0)
-            {
-                return NotFound();
-            }
-
-            List<SchoolPCsGetDTO> schoolPCsDto = _mapper.Map<List<SchoolPCsGetDTO>>(pcs);
-
-            return Ok(schoolPCsDto);
-        }
-        #endregion
-
-        #region Add PC
-        [HttpPost]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "SchoolPCs" , "Inventory" }
-        //)]
-        public IActionResult Add(SchoolPCsAddDTO schoolPCsDto)
+        public IActionResult Add(TaxIssuerAddDTO taxIssuerAdd)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -166,34 +116,34 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                 return BadRequest();
             }
 
-            SchoolPCs pc = _mapper.Map<SchoolPCs>(schoolPCsDto);
+            TaxIssuer taxIssuer = _mapper.Map<TaxIssuer>(taxIssuerAdd);
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-            pc.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            taxIssuer.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
 
             if (userTypeClaim == "octa")
             {
-                pc.InsertedByOctaId = userId;
+                taxIssuer.InsertedByOctaId = userId;
             }
             else if (userTypeClaim == "employee")
             {
-                pc.InsertedByUserId = userId;
+                taxIssuer.InsertedByUserId = userId;
             }
 
-            Unit_Of_Work.schoolPCs_Repository.Add(pc);
+            Unit_Of_Work.taxIssuer_Repository.Add(taxIssuer);
             Unit_Of_Work.SaveChanges();
 
-            return Ok(schoolPCsDto);
+            return Ok(taxIssuer);
         }
         #endregion
 
-        #region Update PC
+        #region Edit
         [HttpPut("Edit")]
         //[Authorize_Endpoint_(
         //    allowedTypes: new[] { "octa", "employee" },
         //    pages: new[] { "SchoolPCs" }
         //)]
-        public IActionResult Update(SchoolPCsPutDTO SchoolPCsDto)
+        public IActionResult Edit(TaxIssuerEditDTO taxIssuerDTO)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -213,50 +163,50 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                 return BadRequest();
             }
 
-            SchoolPCs pc = Unit_Of_Work.schoolPCs_Repository.First_Or_Default(d => d.ID == SchoolPCsDto.ID && d.IsDeleted != true);
+            TaxIssuer taxIssuer = Unit_Of_Work.taxIssuer_Repository.First_Or_Default(x => x.ID == taxIssuerDTO.ID && x.IsDeleted != true);
 
-            if (pc == null)
+            if (taxIssuer == null)
             {
-                return NotFound();
+                return NotFound($"Tax Issuer with ID {taxIssuerDTO.ID} not found.");
             }
 
-            _mapper.Map(SchoolPCsDto, pc);
+            _mapper.Map(taxIssuerDTO, taxIssuer);
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
 
-            pc.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            taxIssuer.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
 
             if (userTypeClaim == "octa")
             {
-                pc.UpdatedByOctaId = userId;
-                if (pc.UpdatedByUserId != null)
+                taxIssuer.UpdatedByOctaId = userId;
+                if (taxIssuer.UpdatedByUserId != null)
                 {
-                    pc.UpdatedByUserId = null;
+                    taxIssuer.UpdatedByUserId = null;
                 }
             }
             else if (userTypeClaim == "employee")
             {
-                pc.UpdatedByUserId = userId;
-                if (pc.UpdatedByOctaId != null)
+                taxIssuer.UpdatedByUserId = userId;
+                if (taxIssuer.UpdatedByOctaId != null)
                 {
-                    pc.UpdatedByOctaId = null;
+                    taxIssuer.UpdatedByOctaId = null;
                 }
             }
 
-            Unit_Of_Work.schoolPCs_Repository.Update(pc);
+            Unit_Of_Work.taxIssuer_Repository.Update(taxIssuer);
             Unit_Of_Work.SaveChanges();
 
-            return Ok(SchoolPCsDto);
+            return Ok(taxIssuer);
         }
         #endregion
 
-        #region Delete PC
+        #region Delete
         [HttpDelete]
         //[Authorize_Endpoint_(
         //    allowedTypes: new[] { "octa", "employee" },
         //    pages: new[] { "SchoolPCs" }
         //)]
-        public IActionResult Delete(long id)
+        public IActionResult Delete(string id)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -271,40 +221,38 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            SchoolPCs pc = Unit_Of_Work.schoolPCs_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == id);
+            TaxIssuer taxIssuer = Unit_Of_Work.taxIssuer_Repository.First_Or_Default(x => x.ID == id && x.IsDeleted != true);
 
-            if (pc == null)
+            if (taxIssuer == null)
             {
-                return NotFound();
+                return NotFound($"Tax Issuer with ID {id} not found.");
             }
 
-            pc.IsDeleted = true;
-
+            taxIssuer.IsDeleted = true;
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-            pc.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            taxIssuer.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
 
             if (userTypeClaim == "octa")
             {
-                pc.DeletedByOctaId = userId;
-
-                if (pc.DeletedByUserId != null)
+                taxIssuer.DeletedByOctaId = userId;
+                if (taxIssuer.DeletedByUserId != null)
                 {
-                    pc.DeletedByUserId = null;
+                    taxIssuer.DeletedByUserId = null;
                 }
             }
             else if (userTypeClaim == "employee")
             {
-                pc.DeletedByUserId = userId;
-                if (pc.DeletedByOctaId != null)
+                taxIssuer.DeletedByUserId = userId;
+                if (taxIssuer.DeletedByOctaId != null)
                 {
-                    pc.DeletedByOctaId = null;
+                    taxIssuer.DeletedByOctaId = null;
                 }
             }
 
-            Unit_Of_Work.schoolPCs_Repository.Update(pc);
+            Unit_Of_Work.taxIssuer_Repository.Update(taxIssuer);
             Unit_Of_Work.SaveChanges();
 
-            return Ok("PC deleted successfully");
+            return Ok("Tax Issuer deleted successfully");
         }
         #endregion
     }

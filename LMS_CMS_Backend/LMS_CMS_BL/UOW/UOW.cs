@@ -180,6 +180,7 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<EtaTokenType> EtaTokenType_Repository;
         GenericRepo<EtaToken> EtaToken_Repository;
         GenericRepo<SubjectResource> SubjectResource_Repository;
+        GenericRepo<CertificatesIssuerName> CertificatesIssuerName_Repository;
          
 
 
@@ -2008,6 +2009,18 @@ namespace LMS_CMS_BL.UOW
                     SubjectResource_Repository = new GenericRepo<SubjectResource>(db);
                 }
                 return SubjectResource_Repository;
+            }
+        }
+        
+        public GenericRepo<CertificatesIssuerName> certificatesIssuerName_Repository
+        {
+            get
+            {
+                if (CertificatesIssuerName_Repository == null)
+                {
+                    CertificatesIssuerName_Repository = new GenericRepo<CertificatesIssuerName>(db);
+                }
+                return CertificatesIssuerName_Repository;
             }
         }
 
