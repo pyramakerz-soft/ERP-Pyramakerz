@@ -15,7 +15,7 @@
     </app-table>
 
     <app-modal [title]="editDose ? 'Dose' : 'Create Dose'" [isEditMode]="editDose"
-        [buttonText]="editDose ? 'Save' : 'Create'" (save)="saveDose()" (close)="closeModal()"
+        [buttonText]="editDose ? 'Save' : 'Create'" [isLoading]="isSaving" (save)="saveDose()" (close)="closeModal()"
         [ngClass]="{ hidden: !isModalVisible }">
         <div class="flex flex-col w-full mb-4">
             <label class="mb-2 primaryTxt" for="name">Dose Name</label>

@@ -346,6 +346,7 @@ openModal(id?: number) {
     this.students = [];
   }
 
+  isSaving: boolean = false;
 async saveFollowUp() {
   this.validationErrors = {};
   let isValid = true;
@@ -376,6 +377,9 @@ async saveFollowUp() {
   }
 
   try {
+    // Disable the save button during submission
+    this.isSaving = true;
+    
     const domainName = this.apiService.GetHeader();
     if (this.followUp.id) {
       await firstValueFrom(this.followUpService.Edit(this.followUp, domainName));
@@ -389,6 +393,8 @@ async saveFollowUp() {
   } catch (error) {
     console.error('Error saving follow-up:', error);
     Swal.fire('Error', 'Failed to save follow-up. Please try again later.', 'error');
+  } finally {
+    this.isSaving = false;
   }
 }
 

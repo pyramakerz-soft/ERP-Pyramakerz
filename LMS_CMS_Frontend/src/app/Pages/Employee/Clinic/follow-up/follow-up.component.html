@@ -197,8 +197,8 @@
         </div>
 
         <div class="flex justify-end mt-6">
-            <button class="secondaryBg text-white font-medium w-full py-2 rounded-lg" (click)="saveFollowUp()">
-                Submit
+            <button class="secondaryBg text-white font-medium w-full py-2 rounded-lg"   [disabled]="isSaving"  (click)="saveFollowUp()">
+                {{ isSaving ? 'Saving...' : 'Submit' }}
             </button>
         </div>
     </div>
