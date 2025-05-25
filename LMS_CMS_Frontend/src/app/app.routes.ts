@@ -366,6 +366,7 @@ export const routes: Routes = [
             { path: "Weight Types", component: WeightTypeComponent, title: "Weight Types", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Classroom Students/:id", component: ClassroomStudentsComponent, title: "Classroom Students", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Classroom Subject/:id", component: ClassroomSubjectsComponent, title: "Classroom Subject", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Question Bank", component: QuestionBankComponent, title: "Question Bank", canActivate: [noNavigateWithoutLoginGuard] },
         ]
     },
     {

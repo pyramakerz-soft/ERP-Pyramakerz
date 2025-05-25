@@ -13,7 +13,7 @@
     <app-table
         [headers]="['ID', 'School', 'Grade', 'Class', 'Student', 'Complaints', 'Diagnosis', 'Recommendation', 'Actions']"
         [data]="followUps" [showViewAction]="true"
-        [keys]="['id', 'schoolName', 'gradeName', 'className', 'studentName', 'complaints', 'diagnosisName', 'recommendation']"
+        [keys]="['id', 'schoolName', 'gradeName', 'className', 'studentName', 'complains', 'diagnosisName', 'recommendation']"
         (delete)="deleteFollowUp($event)" (edit)="openModal($event.id)">
     </app-table>
 </div>
@@ -197,8 +197,8 @@
         </div>
 
         <div class="flex justify-end mt-6">
-            <button class="secondaryBg text-white font-medium w-full py-2 rounded-lg" (click)="saveFollowUp()">
-                Submit
+            <button class="secondaryBg text-white font-medium w-full py-2 rounded-lg"   [disabled]="isSaving"  (click)="saveFollowUp()">
+                {{ isSaving ? 'Saving...' : 'Submit' }}
             </button>
         </div>
     </div>

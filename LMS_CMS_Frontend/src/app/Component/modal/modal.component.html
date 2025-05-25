@@ -19,9 +19,10 @@
         <!-- Modal Body -->
         <div class="bg-gray-100 px-5 py-3 rounded-3xl flex items-center gap-4 w-full">
             <ng-content></ng-content>
-            <button class="text-white font-medium px-5 py-3 rounded-xl text-lg transition-colors hover:bg-[#FF8C42]"
-                style="background-color: #089B41;" (click)="onSave()">
-                {{ buttonText }}
+            <button
+                class="text-white font-medium px-5 py-3 rounded-xl text-lg transition-colors hover:bg-[#FF8C42] disabled:opacity-50 disabled:cursor-not-allowed"
+                style="background-color: #089B41;" (click)="onSave()" [disabled]="isLoading">
+                {{ isLoading ? 'Saving...' : buttonText }}
             </button>
         </div>
     </div>

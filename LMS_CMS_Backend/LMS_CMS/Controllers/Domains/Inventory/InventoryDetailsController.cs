@@ -145,6 +145,14 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 return NotFound();
             }
 
+            foreach (var item in newItems)
+            {
+                if (item.SalesId == 0)
+                {
+                    item.SalesId = null;
+                }
+            }
+
             InventoryDetails salesItem = mapper.Map<InventoryDetails>(newItem);
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");

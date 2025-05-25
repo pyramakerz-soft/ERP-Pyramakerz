@@ -169,6 +169,9 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<TaxUnitType> TaxUnitType { get; set; }
         public DbSet<EtaTokenType> EtaTokenType { get; set; }
         public DbSet<SubjectResource> SubjectResource { get; set; }
+        public DbSet<CertificatesIssuerName> CertificatesIssuerNames { get; set; }
+        public DbSet<ClassroomSubject> ClassroomSubject { get; set; }
+        public DbSet<ClassroomSubjectCoTeacher> ClassroomSubjectCoTeacher { get; set; }
 
 
         public LMS_CMS_Context(DbContextOptions<LMS_CMS_Context> options)
@@ -511,6 +514,36 @@ namespace LMS_CMS_DAL.Models.Domains
                  .HasOne(p => p.SubjectCategory)
                  .WithMany(p => p.Subjects)
                  .HasForeignKey(p => p.SubjectCategoryID)
+                 .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<ClassroomSubject>()
+                 .HasOne(p => p.Teacher)
+                 .WithMany(p => p.ClassroomSubjects)
+                 .HasForeignKey(p => p.TeacherID)
+                 .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<ClassroomSubject>()
+                 .HasOne(p => p.Subject)
+                 .WithMany(p => p.ClassroomSubjects)
+                 .HasForeignKey(p => p.SubjectID)
+                 .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<ClassroomSubject>()
+                 .HasOne(p => p.Classroom)
+                 .WithMany(p => p.ClassroomSubjects)
+                 .HasForeignKey(p => p.ClassroomID)
+                 .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<ClassroomSubjectCoTeacher>()
+                 .HasOne(p => p.CoTeacher)
+                 .WithMany(p => p.ClassroomSubjectCoTeachers)
+                 .HasForeignKey(p => p.CoTeacherID)
+                 .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<ClassroomSubjectCoTeacher>()
+                 .HasOne(p => p.ClassroomSubject)
+                 .WithMany(p => p.ClassroomSubjectCoTeachers)
+                 .HasForeignKey(p => p.ClassroomSubjectID)
                  .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Floor>()
@@ -1396,6 +1429,12 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasForeignKey(p => p.QuestionTypeID)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<InventoryDetails>()
+                .HasOne(p => p.Sales)
+                .WithMany(p => p.SaleReturns)
+                .HasForeignKey(p => p.SalesId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<QuestionBank>()
                 .HasOne(p => p.QuestionBankOption)
                 .WithMany(p => p.QuestionBanks)
@@ -1470,6 +1509,18 @@ namespace LMS_CMS_DAL.Models.Domains
                 .OnDelete(DeleteBehavior.Restrict); // Optional
             
             modelBuilder.Entity<EvaluationEmployee>()
+               .HasOne(f => f.DeletedByEmployee)
+               .WithMany()  
+               .HasForeignKey(f => f.DeletedByUserId)
+               .OnDelete(DeleteBehavior.Restrict); 
+            
+            modelBuilder.Entity<ClassroomSubject>()
+               .HasOne(f => f.DeletedByEmployee)
+               .WithMany()  
+               .HasForeignKey(f => f.DeletedByUserId)
+               .OnDelete(DeleteBehavior.Restrict); 
+            
+            modelBuilder.Entity<ClassroomSubjectCoTeacher>()
                .HasOne(f => f.DeletedByEmployee)
                .WithMany()  
                .HasForeignKey(f => f.DeletedByUserId)

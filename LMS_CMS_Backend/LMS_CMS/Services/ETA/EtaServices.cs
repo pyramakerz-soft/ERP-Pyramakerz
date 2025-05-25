@@ -3,7 +3,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Org.BouncyCastle.Asn1.Ess;
 using Org.BouncyCastle.Asn1;
-using System.Data;
 using System.Security.Cryptography.Pkcs;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Cryptography;
@@ -181,7 +180,7 @@ namespace LMS_CMS_PL.Services.ETA
             //            }
 
             string serialize0 = Serialize(JObject.Parse(invoiceJson.ToJsonString()));
-            string signWithCMS0 = SignWithCMS(Encoding.UTF8.GetBytes(serialize0));
+            string signWithCMS0 = SignWithCMS(Encoding.UTF8.GetBytes(serialize0), unitOfWork);
 
             if (string.IsNullOrEmpty(signWithCMS0))
             {
@@ -516,7 +515,7 @@ namespace LMS_CMS_PL.Services.ETA
             return string.Format("{0:0.00000}", Convert.ToDecimal(value));
         }
 
-        private static string SignWithCMS(byte[] data)
+        private static string SignWithCMS(byte[] data, UOW unitOfWork)
         {
             try
             {
@@ -553,6 +552,13 @@ namespace LMS_CMS_PL.Services.ETA
                 store.Open(OpenFlags.MaxAllowed);
 
                 var foundCerts = new X509Certificate2Collection();
+                var certsIssuerNames = unitOfWork.certificatesIssuerName_Repository.FindBy(x => x.IsDeleted != true);
+
+                foreach (var cert in certsIssuerNames)
+                {
+                    foundCerts = store.Certificates.Find(X509FindType.FindByIssuerName, cert.Name, true);
+                    if (foundCerts.Count > 0) break;
+                }
                 //var certsIssuerNames = bm.ExecuteAdapter("select * from CertificatesIssuerName");
                 //foreach (DataRow row in certsIssuerNames.Rows)
                 //{

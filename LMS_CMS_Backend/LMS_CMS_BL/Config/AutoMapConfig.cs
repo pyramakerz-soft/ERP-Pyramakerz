@@ -950,7 +950,11 @@ namespace LMS_CMS_BL.Config
                 .ForMember(dest => dest.SubjectEnglishName, opt => opt.MapFrom(src => src.Subject.en_name))
                 .ForMember(dest => dest.SubjectArabicName, opt => opt.MapFrom(src => src.Subject.ar_name));
 
-            CreateMap<SubjectResourceAddDTO, SubjectResource>();  
+            CreateMap<SubjectResourceAddDTO, SubjectResource>();
+
+            CreateMap<CertificatesIssuerName, CertificatesIssuerNameGetDTO>();
+            CreateMap<CertificatesIssuerNameAddDTO, CertificatesIssuerName>();
+            CreateMap<CertificatesIssuerNameEditDTO, CertificatesIssuerName>();
         }
     } 
 }

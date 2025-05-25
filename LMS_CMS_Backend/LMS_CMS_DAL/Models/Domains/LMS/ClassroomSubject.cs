@@ -8,11 +8,12 @@ using System.Threading.Tasks;
 
 namespace LMS_CMS_DAL.Models.Domains.LMS
 {
-    public class ClassroomSubject
+    public class ClassroomSubject : AuditableEntity
     {
         [Key]
         public long ID { get; set; }
         public bool Hide { get; set; }
+
         [ForeignKey("Teacher")]
         public long? TeacherID { get; set; }
         public Employee? Teacher { get; set; }
@@ -24,5 +25,7 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         [ForeignKey("Subject")]
         public long SubjectID { get; set; }
         public Subject Subject { get; set; }
+
+        public ICollection<ClassroomSubjectCoTeacher> ClassroomSubjectCoTeachers { get; set; } = new HashSet<ClassroomSubjectCoTeacher>();
     }
 }
