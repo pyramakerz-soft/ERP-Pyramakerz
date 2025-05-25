@@ -69,19 +69,26 @@
     <img *ngIf="subject.iconLink" [src]="subject.iconLink" class="object-cover w-1/2">
 </div>
 
-<!-- 
-<div class="flex justify-between items-center">
-    <h1 class="primaryTxt font-semibold text-2xl leading-9">Working Types</h1>
-    <div class="flex justify-between items-center ">
 
-        <button (click)="AddWeight()"
-            class="secondaryBorder secondaryTxt rounded-lg px-4 py-3 flex items-center justify-center gap-2">
+<div class="flex justify-between items-center mt-8">
+    <div class="flex justify-between space-x-10">
+        <h1 [ngClass]="{'primaryTxt font-semibold': isWeightPart, 'text-gray-400 font-medium': !isWeightPart}" class="text-2xl leading-9 cursor-pointer" (click)="isWeightPart = !isWeightPart">Weights</h1>
+        <h1 [ngClass]="{'primaryTxt font-semibold': !isWeightPart, 'text-gray-400 font-medium': isWeightPart}" class="text-2xl leading-9 cursor-pointer" (click)="isWeightPart = !isWeightPart">Resources</h1>
+    </div>
+    <div class="flex justify-between items-center "> 
+        <button (click)="subjectWeight()" *ngIf="isWeightPart"
+            class="secondaryBg text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2">
             Add Weight
+        </button>
+
+        <button (click)="subjectResource()" *ngIf="!isWeightPart"
+            class="secondaryBg text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2">
+            Add Resource
         </button>
     </div>
 </div>
 
-<div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD] max-w-full">
+<div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD] max-w-full" *ngIf="isWeightPart">
     <table class="overflow-auto w-full bg-[#EBEBEB] text-left text-[#6F6F6F]">
         <thead class="bg-[##EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
             <tr>
@@ -89,7 +96,13 @@
                     ID
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
-                    Title
+                    Weight Type English Name
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
+                    Weight Type Arabic Name
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
+                    Value
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     Actions
@@ -97,28 +110,176 @@
             </tr>
         </thead>
         <tbody>
-            <tr *ngIf="WeightTypes.length === 0">
-                <td colspan="6"
+            <tr *ngIf="SubjectWeights.length === 0">
+                <td colspan="4"
                     class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
                     No Data Found
                 </td>
             </tr>
 
-            <tr *ngFor="let row of WeightTypes; let i = index"
+            <tr *ngFor="let row of SubjectWeights; let i = index"
                 [ngClass]="{'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1}"
                 class="border-t border-gray-300 text-xs md:text-sm">
 
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{ row.id }}</td>
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{ row.englishName }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{ row.weightTypeEnglishName }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{ row.weightTypeArabicName }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{ row.value }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     <div class="flex space-x-4">
                         <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)"
-                            (click)="delete(row.id)">
+                            (click)="DeleteSubjectWeight(row.id)">
                             <i class="fa-regular fa-trash-can"></i>
+                        </button>
+                        <button *ngIf="AllowEdit && IsAllowEdit(row.insertedByUserId)" (click)="subjectWeight(row.id)">
+                            <i class="fa-solid fa-pencil"></i>
                         </button>
                     </div>
                 </td>
             </tr>
         </tbody>
     </table>
-</div> -->
+</div>
+
+
+<div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD] max-w-full" *ngIf="!isWeightPart">
+    <table class="overflow-auto w-full bg-[#EBEBEB] text-left text-[#6F6F6F]">
+        <thead class="bg-[##EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+            <tr>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    ID
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
+                    English Name
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
+                    Arabic Name
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
+                    Link
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    Actions
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngIf="SubjectResources.length === 0">
+                <td colspan="5"
+                    class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                    No Data Found
+                </td>
+            </tr>
+
+            <tr *ngFor="let row of SubjectResources; let i = index"
+                [ngClass]="{'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1}"
+                class="border-t border-gray-300 text-xs md:text-sm">
+
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{ row.id }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{ row.englishName }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{ row.arabicName }}</td> 
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">
+                    <button (click)="downloadFile(row.fileLink)" class="font-semibold">Click to Download</button>
+                </td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    <div class="flex space-x-4">
+                        <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)"
+                            (click)="DeleteSubjecResource(row.id)">
+                            <i class="fa-regular fa-trash-can"></i>
+                        </button> 
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+
+<div id="Weight_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
+    <div class="bg-white rounded-2xl p-12 w-[669px]">
+        <div class="flex justify-between items-center">
+            <h1 *ngIf="!editSubjectWeight" class="font-semibold text-2xl leading-9">Add Subject Weight</h1>
+            <h1 *ngIf="editSubjectWeight" class="font-semibold text-2xl leading-9">Edit Subject Weight</h1>
+            <button (click)="closeSubjectWeight()" type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
+        </div>
+
+        <div class="flex flex-col mt-6 mb-4 bg-[#F7F7F7] rounded-3xl p-4">   
+            <div class="flex flex-col mb-4">
+                <label class="mb-2 primaryTxt" for="WeightType">Weight Type</label>
+                <select (ngModelChange)="onInputValueChangeForSubjectWeight({ field: 'weightTypeID', value: $event })"
+                    class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="WeightType" [(ngModel)]="subjectWeightElement.weightTypeID">
+                    <option [value]="0" disabled selected hidden>Choose Weight Type</option>
+                    <option *ngFor="let WeightType of WeightTypes" [value]="WeightType.id">{{ WeightType.englishName }}</option>
+                    <option *ngIf="WeightTypes.length === 0" disabled selected>No Data Found</option>
+                </select>
+                <span *ngIf="validationErrorsForWeights['weightTypeID']" class="text-red-500 ml-3 font-normal">{{ validationErrorsForWeights['weightTypeID'] }}</span>
+            </div>
+            <div class="flex w-full flex-col mb-4">
+                <label class="mb-2 primaryTxt" for="Value">Value</label>
+                <input id="Value" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                    (input)="validateNumber($event, 'value')"
+                    placeholder="Enter Value" [(ngModel)]="subjectWeightElement.value"
+                    (ngModelChange)="onInputValueChangeForSubjectWeight({ field: 'value', value: $event })" />
+                <span *ngIf="validationErrorsForWeights['value']" class="text-red-500 ml-3 font-normal">{{ validationErrorsForWeights['value'] }}</span>
+            </div>   
+        </div>
+
+        <div class="flex justify-end">
+            <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
+                (click)="SaveSubjectWeight()">
+                <span *ngIf="!isLoading">Save</span>
+                <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+
+<div id="Resource_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
+    <div class="bg-white rounded-2xl p-12 w-[669px]">
+        <div class="flex justify-between items-center">
+            <h1 class="font-semibold text-2xl leading-9">Add Subject Resource</h1> 
+            <button (click)="closeSubjectResource()" type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
+        </div>
+
+        <div class="flex flex-col mt-6 mb-4 bg-[#F7F7F7] rounded-3xl p-4">  
+            <div class="flex w-full flex-col mb-4">
+                <label class="mb-2 primaryTxt" for="EnglishName">English Name</label>
+                <input id="EnglishName" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                    placeholder="Enter English Name" [(ngModel)]="SubjectResourceElement.englishName"
+                    (ngModelChange)="onInputValueChangeForSubjectResource({ field: 'englishName', value: $event })" />
+                <span *ngIf="validationErrorsForResources['englishName']" class="text-red-500 ml-3 font-normal">{{ validationErrorsForResources['englishName'] }}</span>
+            </div>     
+            <div class="flex w-full flex-col mb-4">
+                <label class="mb-2 primaryTxt" for="ArabicName">Arabic Name</label>
+                <input id="ArabicName" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                    placeholder="Enter Arabic Name" [(ngModel)]="SubjectResourceElement.arabicName"
+                    (ngModelChange)="onInputValueChangeForSubjectResource({ field: 'arabicName', value: $event })" />
+                <span *ngIf="validationErrorsForResources['arabicName']" class="text-red-500 ml-3 font-normal">{{ validationErrorsForResources['arabicName'] }}</span>
+            </div>  
+            <div class="w-full mb-4">
+                <label class="mb-2 primaryTxt" for="totalMark">File</label>
+                <div class="bg-white flex items-center space-x-4 w-full rounded-md border-dashed border-2">
+                    <div class="flex justify-center w-full">
+                        <label for="file-upload" class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
+                            <img *ngIf="!SubjectResourceElement.file" src="Images/Icon frame.png" class="w-1/4">
+                            <img *ngIf="SubjectResourceElement.file" src="Images/FileAttached.png" class="w-1/4"> 
+                            <p class="font-normal text-xs md:text-sm text-[#8E8E93] mt-3"><span class="secondaryTxt">Click to Upload </span></p>
+                            <p class="font-normal text-xs md:text-sm text-[#8E8E93]"> (Max. File size: 25 MB)</p>
+                        </label>
+                        <input id="file-upload" type="file" class="hidden" (change)="onFileSelected($event)"/>
+                    </div>
+                </div>
+                <span *ngIf="validationErrorsForResources['file']" class="text-red-500  font-normal text-xs md:text-sm">{{ validationErrorsForResources['file'] }}</span>
+            </div>    
+        </div>
+
+        <div class="flex justify-end">
+            <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
+                (click)="SaveSubjectResource()">
+                <span *ngIf="!isLoading">Save</span>
+                <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+            </button>
+        </div>
+    </div>
+</div> 

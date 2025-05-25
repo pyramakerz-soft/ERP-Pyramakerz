@@ -13,13 +13,7 @@ import { ClassroomService } from '../../../../Services/Employee/LMS/classroom.se
   templateUrl: './classroom-view.component.html',
   styleUrl: './classroom-view.component.css'
 })
-export class ClassroomViewComponent {
-GoToStudent() {
-throw new Error('Method not implemented.');
-}
-GoToSubject() {
-throw new Error('Method not implemented.');
-} 
+export class ClassroomViewComponent { 
   classroom: Classroom = new Classroom();  
 
   DomainName: string = '';
@@ -58,4 +52,12 @@ throw new Error('Method not implemented.');
   moveToClass() {
     this.router.navigateByUrl('Employee/Classroom');
   }
+
+  GoToStudent() {
+    this.router.navigateByUrl('Employee/Classroom Students/'+ this.classId);
+  }
+
+  GoToSubject() {
+    this.router.navigateByUrl('Employee/Classroom Subject/'+ this.classId);
+  } 
 }
