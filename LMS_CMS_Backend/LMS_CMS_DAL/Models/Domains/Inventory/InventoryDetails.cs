@@ -23,9 +23,11 @@ namespace LMS_CMS_DAL.Models.Domains.Inventory
         
         [ForeignKey("InventoryMaster")]
         public long InventoryMasterId { get; set; }
-
+        [ForeignKey("Sales")]
+        public long? SalesId { get; set; }
         public ShopItem ShopItem { get; set; }
         public InventoryMaster InventoryMaster { get; set; }
+        public InventoryMaster? Sales { get; set; }
 
         public ICollection<SalesItemAttachment> SalesItemAttachment { get; set; } = new HashSet<SalesItemAttachment>();
 
