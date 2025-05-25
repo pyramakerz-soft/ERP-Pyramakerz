@@ -13,7 +13,7 @@
     <app-table
         [headers]="['ID', 'School', 'Grade', 'Class', 'Student', 'Complaints', 'Diagnosis', 'Recommendation', 'Actions']"
         [data]="followUps" [showViewAction]="true"
-        [keys]="['id', 'schoolName', 'gradeName', 'className', 'studentName', 'complaints', 'diagnosisName', 'recommendation']"
+        [keys]="['id', 'schoolName', 'gradeName', 'className', 'studentName', 'complains', 'diagnosisName', 'recommendation']"
         (delete)="deleteFollowUp($event)" (edit)="openModal($event.id)">
     </app-table>
 </div>

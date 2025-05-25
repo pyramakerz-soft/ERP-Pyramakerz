@@ -182,46 +182,56 @@ onDiagnosisChange() {
     }
   }
 
-  async loadFollowUps() {
-    try {
-      const domainName = this.apiService.GetHeader();
-      const data = await firstValueFrom(this.followUpService.Get(domainName));
-      
-      this.followUps = data.map((item) => {
-        return {
-          id: item.id,
-          schoolName: item.school || 'N/A',
-          gradeName: item.grade || 'N/A',
-          className: item.classroom || 'N/A',
-          studentName: item.student || 'N/A',
-          complaints: item.complains || "No Complaints",
-          diagnosisName: this.diagnoses.find(d => d.id === item.diagnosisId)?.name || 'N/A',
-          recommendation: item.recommendation || "No Recommendation",
-          actions: { edit: true, delete: true }
-        };
-      });
-    } catch (error) {
-      console.error('Error fetching follow-ups:', error);
-      
-    }
-  }
-
-  async loadDropdownOptions() {
-    try {
-      const domainName = this.apiService.GetHeader();
-      this.schools = await firstValueFrom(this.schoolService.Get(domainName));
-      this.grades = await firstValueFrom(this.gradeService.Get(domainName));
+async loadFollowUps() {
+  try {
+    const domainName = this.apiService.GetHeader();
+    const data = await firstValueFrom(this.followUpService.Get(domainName));
+    
+    // Load diagnoses first if not already loaded
+    if (this.diagnoses.length === 0) {
       this.diagnoses = await firstValueFrom(this.diagnosisService.Get(domainName));
-      this.drugs = await firstValueFrom(this.drugService.Get(domainName));
-      this.doses = await firstValueFrom(this.doseService.Get(domainName));
-      this.classes = await firstValueFrom(this.classroomService.Get(domainName));
-      const studentsData = await firstValueFrom(this.studentService.GetAll(domainName));
-      this.students = studentsData.map(student => ({ id: student.id, name: student.en_name }));
-    } catch (error) {
-      console.error('Error loading dropdown options:', error);
-      
     }
+    
+    this.followUps = data.map((item) => {
+      return {
+        id: item.id,
+        schoolId: item.schoolId,
+        schoolName: item.school || 'N/A',
+        gradeId: item.gradeId,
+        gradeName: item.grade || 'N/A',
+        classroomId: item.classroomId,
+        className: item.classroom || 'N/A',
+        studentId: item.studentId,
+        studentName: item.student || 'N/A',
+        complains: item.complains || "No Complaints",
+        diagnosisId: item.diagnosisId,
+        diagnosisName: this.diagnoses.find(d => d.id === item.diagnosisId)?.name || 'N/A',
+        recommendation: item.recommendation || "No Recommendation",
+        sendSMSToParent: item.sendSMSToParent || false,
+        followUpDrugs: item.followUpDrugs || [],
+        actions: { edit: true, delete: true }
+      };
+    });
+  } catch (error) {
+    console.error('Error fetching follow-ups:', error);
   }
+}
+
+async loadDropdownOptions() {
+  try {
+    const domainName = this.apiService.GetHeader();
+    this.schools = await firstValueFrom(this.schoolService.Get(domainName));
+    this.grades = await firstValueFrom(this.gradeService.Get(domainName));
+    this.diagnoses = await firstValueFrom(this.diagnosisService.Get(domainName));
+    this.drugs = await firstValueFrom(this.drugService.Get(domainName));
+    this.doses = await firstValueFrom(this.doseService.Get(domainName));
+    this.classes = await firstValueFrom(this.classroomService.Get(domainName));
+    const studentsData = await firstValueFrom(this.studentService.GetAll(domainName));
+    this.students = studentsData.map(student => ({ id: student.id, name: student.en_name }));
+  } catch (error) {
+    console.error('Error loading dropdown options:', error);
+  }
+}
 
   openDrugModal() {
     this.isDrugModalVisible = true;
@@ -283,44 +293,49 @@ onDiagnosisChange() {
     }
   }
 
-  openModal(id?: number) {
-    this.isModalVisible = true;
-    if (id) {
-      const existingFollowUp = this.followUps.find(f => f.id === id);
-      if (existingFollowUp) {
-        this.followUp = { ...existingFollowUp };
-
-        if (this.followUp.schoolId) {
-          this.loadGrades(this.followUp.schoolId);
-        }
-        if (this.followUp.gradeId) {
-          this.loadClasses(this.followUp.gradeId);
-        }
-        if (this.followUp.classroomId) {
-          this.loadStudents(this.followUp.classroomId);
-        }
-
-        this.drugDoseList = this.followUp.followUpDrugs.map(fd => {
-          const drug = this.drugs.find(d => d.id === fd.drugId);
-          const dose = this.doses.find(d => d.id === fd.doseId);
-          return {
-            drugName: drug ? drug.name : 'N/A',
-            doseTimes: dose ? dose.doseTimes : 'N/A'
-          };
+openModal(id?: number) {
+  this.isModalVisible = true;
+  if (id) {
+    const existingFollowUp = this.followUps.find(f => f.id === id);
+    if (existingFollowUp) {
+      // Clone the existing follow-up to avoid reference issues
+      this.followUp = JSON.parse(JSON.stringify(existingFollowUp));
+      
+      // Load the related data for the existing follow-up
+      if (this.followUp.schoolId) {
+        this.loadGrades(this.followUp.schoolId).then(() => {
+          if (this.followUp.gradeId) {
+            this.loadClasses(this.followUp.gradeId).then(() => {
+              if (this.followUp.classroomId) {
+                this.loadStudents(this.followUp.classroomId);
+              }
+            });
+          }
         });
       }
-    } else {
-      this.followUp = new FollowUp();
-      this.followUp.schoolId = 0;
-      this.followUp.gradeId = 0;
-      this.followUp.classroomId = 0;
-      this.followUp.studentId = 0;
-      this.grades = [];
-      this.classes = [];
-      this.students = [];
-      this.drugDoseList = [];
+
+      // Load drug-dose combinations
+      this.drugDoseList = this.followUp.followUpDrugs?.map(fd => {
+        const drug = this.drugs.find(d => d.id === fd.drugId);
+        const dose = this.doses.find(d => d.id === fd.doseId);
+        return {
+          drugName: drug ? drug.name : 'N/A',
+          doseTimes: dose ? dose.doseTimes : 'N/A'
+        };
+      }) || [];
     }
+  } else {
+    this.followUp = new FollowUp();
+    this.followUp.schoolId = 0;
+    this.followUp.gradeId = 0;
+    this.followUp.classroomId = 0;
+    this.followUp.studentId = 0;
+    this.grades = [];
+    this.classes = [];
+    this.students = [];
+    this.drugDoseList = [];
   }
+}
 
   closeModal() {
     this.isModalVisible = false;
@@ -331,49 +346,51 @@ onDiagnosisChange() {
     this.students = [];
   }
 
-  async saveFollowUp() {
-    this.validationErrors = {};
-    let isValid = true;
-    
-    if (!this.followUp.schoolId || this.followUp.schoolId === 0) {
-      this.validationErrors['schoolId'] = '*School is required';
-      isValid = false;
-    }
-    if (!this.followUp.gradeId || this.followUp.gradeId === 0) {
-      this.validationErrors['gradeId'] = '*Grade is required';
-      isValid = false;
-    }
-    if (!this.followUp.classroomId || this.followUp.classroomId === 0) {
-      this.validationErrors['classroomId'] = '*Class is required';
-      isValid = false;
-    }
-    if (!this.followUp.studentId || this.followUp.studentId === 0) {
-      this.validationErrors['studentId'] = '*Student is required';
-      isValid = false;
-    }
-    if (!this.followUp.diagnosisId || this.followUp.diagnosisId === 0) {
-      this.validationErrors['diagnosisId'] = '*Diagnosis is required';
-      isValid = false;
-    }
-    
-    if (!isValid) {
-      return;
-    }
-
-    try {
-      const domainName = this.apiService.GetHeader();
-      if (this.followUp.id) {
-        await firstValueFrom(this.followUpService.Edit(this.followUp, domainName));
-      } else {
-        await firstValueFrom(this.followUpService.Add(this.followUp, domainName));
-      }
-      this.loadFollowUps();
-      this.closeModal();
-    } catch (error) {
-      console.error('Error saving follow-up:', error);
-      Swal.fire('Error', 'Failed to save follow-up. Please try again later.', 'error');
-    }
+async saveFollowUp() {
+  this.validationErrors = {};
+  let isValid = true;
+  
+  if (!this.followUp.schoolId || this.followUp.schoolId === 0) {
+    this.validationErrors['schoolId'] = '*School is required';
+    isValid = false;
   }
+  if (!this.followUp.gradeId || this.followUp.gradeId === 0) {
+    this.validationErrors['gradeId'] = '*Grade is required';
+    isValid = false;
+  }
+  if (!this.followUp.classroomId || this.followUp.classroomId === 0) {
+    this.validationErrors['classroomId'] = '*Class is required';
+    isValid = false;
+  }
+  if (!this.followUp.studentId || this.followUp.studentId === 0) {
+    this.validationErrors['studentId'] = '*Student is required';
+    isValid = false;
+  }
+  if (!this.followUp.diagnosisId || this.followUp.diagnosisId === 0) {
+    this.validationErrors['diagnosisId'] = '*Diagnosis is required';
+    isValid = false;
+  }
+  
+  if (!isValid) {
+    return;
+  }
+
+  try {
+    const domainName = this.apiService.GetHeader();
+    if (this.followUp.id) {
+      await firstValueFrom(this.followUpService.Edit(this.followUp, domainName));
+      Swal.fire('Success', 'Follow-up updated successfully!', 'success');
+    } else {
+      await firstValueFrom(this.followUpService.Add(this.followUp, domainName));
+      Swal.fire('Success', 'Follow-up created successfully!', 'success');
+    }
+    this.loadFollowUps();
+    this.closeModal();
+  } catch (error) {
+    console.error('Error saving follow-up:', error);
+    Swal.fire('Error', 'Failed to save follow-up. Please try again later.', 'error');
+  }
+}
 
   addDrugAndDose() {
     if (this.selectedDrugId && this.selectedDoseId) {
