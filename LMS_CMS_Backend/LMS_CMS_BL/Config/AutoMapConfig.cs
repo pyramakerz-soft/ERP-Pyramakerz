@@ -955,6 +955,18 @@ namespace LMS_CMS_BL.Config
             CreateMap<CertificatesIssuerName, CertificatesIssuerNameGetDTO>();
             CreateMap<CertificatesIssuerNameAddDTO, CertificatesIssuerName>();
             CreateMap<CertificatesIssuerNameEditDTO, CertificatesIssuerName>();
+
+            CreateMap<ClassroomSubject, ClassroomSubjectGetDTO>()
+                .ForMember(dest => dest.SubjectEnglishName, opt => opt.MapFrom(src => src.Subject.en_name))
+                .ForMember(dest => dest.SubjectArabicName, opt => opt.MapFrom(src => src.Subject.ar_name))
+                .ForMember(dest => dest.TeacherEnglishName, opt => opt.MapFrom(src => src.Teacher.en_name))
+                .ForMember(dest => dest.TeacherArabicName, opt => opt.MapFrom(src => src.Teacher.ar_name));
+            CreateMap<ClassroomSubjectPutDTO, ClassroomSubject>();
+            CreateMap<ClassroomSubjectHidePutDTO, ClassroomSubject>();
+
+            CreateMap<ClassroomSubjectCoTeacher, ClassroomSubjectCoTeacherGetDTO>() 
+                .ForMember(dest => dest.CoTeacherEnglishName, opt => opt.MapFrom(src => src.CoTeacher.en_name))
+                .ForMember(dest => dest.CoTeacherArabicName, opt => opt.MapFrom(src => src.CoTeacher.ar_name));
         }
     } 
 }
