@@ -30,9 +30,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" }
-            //,
-            //pages: new[] { "Lesson Live" }
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Lesson Live" }
         )]
         public async Task<IActionResult> GetAsync()
         {
@@ -59,9 +58,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" }
-            //,
-            //pages: new[] { "Lesson Live" }
+            allowedTypes: new[] { "octa", "employee" } ,
+            pages: new[] { "Lesson Live" }
         )]
         public async Task<IActionResult> GetById(long id)
         {
@@ -93,9 +91,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("ByStudentId/{id}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" ,"student" }
-            //,
-            //pages: new[] { "Lesson Live" }
+            allowedTypes: new[] { "octa", "employee" ,"student" },
+            pages: new[] { "Lesson Live" }
         )]
         public async Task<IActionResult> GetByStudentId(long id)
         {
@@ -139,9 +136,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("ByClassId/{id}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" }
-            //,
-            //pages: new[] { "Lesson Live" }
+            allowedTypes: new[] { "octa", "employee" }, 
+            pages: new[] { "Lesson Live" }
         )]
         public async Task<IActionResult> GetByClassId(long id)
         {
@@ -178,9 +174,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpPost]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" }
-            //,
-            //pages: new[] { "Lesson Live" }
+            allowedTypes: new[] { "octa", "employee" } ,
+            pages: new[] { "Lesson Live" }
         )]
         public IActionResult Add(LessonLiveAddDTO NewLessonLive)
         {
@@ -241,9 +236,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpPut]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            allowEdit: 1
-            //,
-            //pages: new[] { "Lesson Live" }
+            allowEdit: 1,
+            pages: new[] { "Lesson Live" }
         )]
         public IActionResult Edit(LessonLivePutDTO EditedLessonLive)
         {
@@ -289,14 +283,14 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return NotFound("No Lesson Live with this ID");
             }
 
-            //if (userTypeClaim == "employee")
-            //{
-            //    IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Lesson Live", roleId, userId, LessonLiveExists);
-            //    if (accessCheck != null)
-            //    {
-            //        return accessCheck;
-            //    }
-            //}
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Lesson Live", roleId, userId, LessonLiveExists);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
+            }
 
             mapper.Map(EditedLessonLive, LessonLiveExists);
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
@@ -328,9 +322,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpDelete("{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            allowDelete: 1
-            //,
-            //pages: new[] { "Lesson Live" }
+            allowDelete: 1,
+            pages: new[] { "Lesson Live" }
         )]
         public IActionResult Delete(long id)
         {
@@ -361,14 +354,14 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return NotFound();
             }
 
-            //if (userTypeClaim == "employee")
-            //{
-            //    IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Lesson Live", roleId, userId, lessonLive);
-            //    if (accessCheck != null)
-            //    {
-            //        return accessCheck;
-            //    }
-            //}
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Lesson Live", roleId, userId, lessonLive);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
+            }
 
             lessonLive.IsDeleted = true;
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");

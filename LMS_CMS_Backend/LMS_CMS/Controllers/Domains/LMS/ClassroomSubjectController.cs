@@ -104,7 +104,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     query => query.Include(emp => emp.Subject),
                     query => query.Include(emp => emp.Classroom),
                     query => query.Include(emp => emp.Teacher),
-                    query => query.Include(emp => emp.ClassroomSubjectCoTeachers).ThenInclude(c => c.CoTeacher)
+                    query => query.Include(emp => emp.ClassroomSubjectCoTeachers.Where(c => c.IsDeleted != true)).ThenInclude(c => c.CoTeacher)
                     );
 
             if (classroomSubjects == null || classroomSubjects.Count == 0)
@@ -133,7 +133,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     query => query.Include(emp => emp.Subject),
                     query => query.Include(emp => emp.Classroom),
                     query => query.Include(emp => emp.Teacher),
-                    query => query.Include(emp => emp.ClassroomSubjectCoTeachers).ThenInclude(c => c.CoTeacher)
+                    query => query.Include(emp => emp.ClassroomSubjectCoTeachers.Where(c => c.IsDeleted != true)).ThenInclude(c => c.CoTeacher)
                     );
 
             if (classroomSubject == null)
@@ -181,13 +181,17 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return NotFound("No Classroom Subject with this ID");
             }
              
-            if (EditedClassroomSubject.TeacherID != 0 || EditedClassroomSubject.TeacherID != null)
+            if (EditedClassroomSubject.TeacherID != 0 && EditedClassroomSubject.TeacherID != null)
             {
                 Employee employee = Unit_Of_Work.employee_Repository.First_Or_Default(g => g.ID == EditedClassroomSubject.TeacherID && g.IsDeleted != true);
                 if (employee == null)
                 {
                     return BadRequest("No Teacher with this ID");
                 }
+            }
+            else
+            {
+                EditedClassroomSubject.TeacherID = null;
             }
 
             if (userTypeClaim == "employee")
@@ -257,7 +261,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             foreach (long id in idsToRemove)
             {
-                ClassroomSubjectCoTeacher itemToRemove = Unit_Of_Work.classroomSubjectCoTeacher_Repository.First_Or_Default(x => x.CoTeacherID == id);
+                ClassroomSubjectCoTeacher itemToRemove = Unit_Of_Work.classroomSubjectCoTeacher_Repository.First_Or_Default(x => x.CoTeacherID == id && x.IsDeleted != true && x.ClassroomSubjectID == EditedClassroomSubject.ID);
                 
                 if (itemToRemove != null)
                 {
@@ -281,8 +285,9 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     }
                     Unit_Of_Work.classroomSubjectCoTeacher_Repository.Update(itemToRemove);
                 }
-            } 
-            
+            }
+            Unit_Of_Work.SaveChanges();
+
             mapper.Map(EditedClassroomSubject, ClassroomSubjectExists); 
 
             ClassroomSubjectExists.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
