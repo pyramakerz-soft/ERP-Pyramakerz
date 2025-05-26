@@ -9,19 +9,10 @@ using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_DAL.Models.Domains.Zatca;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
-using LMS_CMS_PL.Services.ETA;
 using LMS_CMS_PL.Services.Zatca;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Diagnostics.Metrics;
-using System.Xml;
-using System.Xml.Linq;
-using Zatca.EInvoice.SDK.Contracts.Models;
-using static Org.BouncyCastle.Math.EC.ECCurve;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace LMS_CMS_PL.Controllers.Domains.Inventory
 {
