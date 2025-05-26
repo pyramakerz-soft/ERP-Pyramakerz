@@ -12,6 +12,9 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { ClassroomSubject } from '../../../../Models/LMS/classroom-subject';
 import { ClassroomSubjectService } from '../../../../Services/Employee/LMS/classroom-subject.service';
 import { FormsModule } from '@angular/forms';
+import Swal from 'sweetalert2';
+import { Employee } from '../../../../Models/Employee/employee';
+import { EmployeeService } from '../../../../Services/Employee/employee.service';
 
 @Component({
   selector: 'app-classroom-subjects',
@@ -33,9 +36,14 @@ export class ClassroomSubjectsComponent {
 
   AllowEdit: boolean = false;
   AllowEditForOthers: boolean = false; 
-
+  
   ClassSubjects:ClassroomSubject[] = []
-
+  ClassSubject:ClassroomSubject = new ClassroomSubject()
+  Employees:Employee[] = []
+  ChoosedCoTeacherIds:number[] = []
+  isLoading: boolean = false; 
+  
+  isDropdownOpen = false;
   constructor(
     public account: AccountService, 
     public ApiServ: ApiService, 
@@ -44,6 +52,7 @@ export class ClassroomSubjectsComponent {
     public activeRoute: ActivatedRoute,
     private menuService: MenuService,
     private classroomSubjectService: ClassroomSubjectService,
+    private employeeService: EmployeeService,
     public router: Router
   ) {}
 
@@ -60,7 +69,7 @@ export class ClassroomSubjectsComponent {
       const settingsPage = this.menuService.findByPageName(this.path, items);
       if (settingsPage) {
         this.AllowEdit = settingsPage.allow_Edit; 
-        this.AllowEditForOthers = settingsPage.allow_Edit_For_Others;
+        this.AllowEditForOthers = settingsPage.allow_Edit_For_Others; 
       }
     });
 
@@ -84,6 +93,29 @@ export class ClassroomSubjectsComponent {
     this.classroomSubjectService.GetByClassId(this.classId, this.DomainName).subscribe(
       data =>{
         this.ClassSubjects = data
+      }
+    )
+  }
+
+  getEmployees(){
+    this.Employees = []
+    this.employeeService.Get_Employees(this.DomainName).subscribe(
+      data =>{
+        this.Employees = data
+      }
+    )
+  }
+
+  GetClassSubjectById(id:number){
+    this.ClassSubject = new ClassroomSubject()
+    this.classroomSubjectService.GetByID(id, this.DomainName).subscribe(
+      data =>{
+        this.ClassSubject = data
+        if(this.ClassSubject.classroomSubjectCoTeachers && this.ClassSubject.classroomSubjectCoTeachers.length > 0){
+          this.ClassSubject.classroomSubjectCoTeachers.forEach(element => {
+            this.ChoosedCoTeacherIds.push(element.coTeacherID)
+          });
+        }
       }
     )
   }
@@ -119,10 +151,117 @@ export class ClassroomSubjectsComponent {
   }
 
   Generate(){
-
+    this.isLoading = true
+    this.classroomSubjectService.Generate(this.classId, this.DomainName).subscribe(
+      data =>{
+        this.getSubjectsByClassID()
+        this.isLoading = false
+      },
+      error =>{
+        this.isLoading = false
+        Swal.fire({
+          title: error.error,
+          icon: 'warning', 
+          confirmButtonColor: '#089B41', 
+          confirmButtonText: 'OK', 
+        })
+      }
+    )
   }
 
-  onToggle(value: boolean): void {
-    console.log('Toggle value:', value);
+  Save(){
+    this.isLoading = true
+    this.ClassSubject.coTeacherIDs = this.ChoosedCoTeacherIds 
+    this.classroomSubjectService.Edit(this.ClassSubject, this.DomainName).subscribe(
+      data =>{
+        this.getSubjectsByClassID()
+        this.closeModal()
+        this.isLoading = false
+      },
+      error =>{
+        this.isLoading = false
+        Swal.fire({
+          title: error.error,
+          icon: 'warning', 
+          confirmButtonColor: '#089B41', 
+          confirmButtonText: 'OK', 
+        })
+      }
+    )
+  }
+
+  onToggle(classSubject:ClassroomSubject) {  
+    this.classroomSubjectService.IsSubjectHide(classSubject, this.DomainName).subscribe(
+      data =>{ 
+      },
+      error =>{
+        Swal.fire({
+          title: error.error,
+          icon: 'warning', 
+          confirmButtonColor: '#089B41', 
+          confirmButtonText: 'OK', 
+        })
+      }
+    )
+  }
+
+  onToggleNotAllowed() {
+    Swal.fire({
+      title: 'You Are Not Allowed To Edit This',
+      icon: 'warning', 
+      confirmButtonColor: '#089B41', 
+      confirmButtonText: 'OK', 
+    })
+  }
+
+  OpenModal(id: number) { 
+    this.GetClassSubjectById(id); 
+    this.getEmployees(); 
+    document.getElementById("Add_Modal")?.classList.remove("hidden");
+    document.getElementById("Add_Modal")?.classList.add("flex");
+  }
+
+  closeModal() {
+    document.getElementById("Add_Modal")?.classList.remove("flex");
+    document.getElementById("Add_Modal")?.classList.add("hidden"); 
+
+    this.isDropdownOpen = false;
+    this.ClassSubject = new ClassroomSubject();
+    this.ChoosedCoTeacherIds = [];
+  } 
+
+   toggleDropdown(event: MouseEvent) {
+    event.stopPropagation(); // Prevent the click event from bubbling up
+    this.isDropdownOpen = !this.isDropdownOpen;
+  }
+
+  removeFromCoTeachers(ChoosedCoTeacherId:number, event: MouseEvent){
+    event.stopPropagation();
+    this.ChoosedCoTeacherIds = this.ChoosedCoTeacherIds.filter(_choosedCoTeacherId => _choosedCoTeacherId !== ChoosedCoTeacherId);
+  }
+
+  onCoTeacherChange(coTeacherID: number, event: Event) {
+    const isChecked = (event.target as HTMLInputElement).checked;
+
+    if (isChecked) {
+      if (!this.ChoosedCoTeacherIds.includes(coTeacherID)) {
+        this.ChoosedCoTeacherIds.push(coTeacherID);
+      }
+    } else {
+      const index = this.ChoosedCoTeacherIds.indexOf(coTeacherID);
+      if (index > -1) {
+        this.ChoosedCoTeacherIds.splice(index, 1);
+      }
+    }
+  }
+
+  toggleSelectAll(event: Event) {
+    const isChecked = (event.target as HTMLInputElement).checked;
+
+    if (isChecked) {
+      this.ChoosedCoTeacherIds = this.Employees.map(m => m.id);  
+    } else {
+      this.ChoosedCoTeacherIds = [];  
+    } 
   }
 }
