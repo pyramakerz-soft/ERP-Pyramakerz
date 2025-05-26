@@ -179,7 +179,45 @@
             </div>
             </div>
         </div>
-     </div>
+    </div>
+
+    <div class="flex align-middle space-x-2 mb-4 w-full items-center justify-between">
+        <div class="flex align-middle w-[49%] space-x-2">
+            <input type="checkbox" id="isFloorMonitor" class="w-5 h-5" [(ngModel)]="isFloorMonitor">
+            <label class="mb-2" for="isFloorMonitor">Floor Monitor</label>
+        </div>
+        <div class="flex flex-col mb-4 w-[49%]">
+            <label class="block mb-2 text-sm font-medium text-gray-900" for="ac">Floors</label>
+            <div class="relative">
+            <div class="border border-gray-300 rounded-lg px-4 py-3 cursor-pointer min-h-[48px]"
+                (click)="toggleDropdown()" tabindex="0">
+                <ng-container *ngIf="floorsSelected.length > 0; else placeholder">
+                <div class="flex flex-wrap">
+                    <span class="mr-2 mb-1 bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center"
+                    *ngFor="let selected of floorsSelected">
+                    {{ selected.name }}
+                    <span class="ml-2 cursor-pointer text-red-500" (click)="removeSelected(selected.id)">
+                        &times;
+                    </span>
+                    </span>
+                </div>
+                </ng-container>
+                <ng-template #placeholder>
+                <span class="text-gray-400">Choose Tag</span>
+                </ng-template>
+            </div>
+            <div class="absolute bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10"
+                *ngIf="dropdownOpen">
+                <ul>
+                <li *ngFor="let Type of floors" class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                    (click)="selectType(Type)">
+                    {{ Type.name }}
+                </li>
+                </ul>
+            </div>
+            </div>
+        </div>
+    </div>
 
     <div class="bg-[#F6F6F6] flex items-center space-x-4 w-full rounded-md border-dashed mb-4 border-2">
         <div class="flex justify-center w-full">
