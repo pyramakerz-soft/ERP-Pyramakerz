@@ -79,6 +79,12 @@ export class EmployeeService {
         formData.append(`files[${index}].Name`, file.name);            // Name (string)
       });
     }
+
+    if (employee.floorsSelected && employee.floorsSelected.length > 0) {
+    employee.floorsSelected.forEach((floor, index) => {
+      formData.append(`floorsSelected[${index}]`, floor.toString());
+    });
+    }
     return this.http.post<EmployeeGet>(`${this.baseUrl}/Employee`, formData, { headers });
   }
 
@@ -121,6 +127,18 @@ export class EmployeeService {
           uploadIndex++;
         }
       });
+    }
+
+    if (employee.deletedFloorsSelected && employee.deletedFloorsSelected.length > 0) {
+    employee.deletedFloorsSelected.forEach((floor, index) => {
+      formData.append(`deletedFloorsSelected[${index}]`, floor.toString());
+    });
+    }
+
+    if (employee.newFloorsSelected && employee.newFloorsSelected.length > 0) {
+    employee.newFloorsSelected.forEach((floor, index) => {
+      formData.append(`newFloorsSelected[${index}]`, floor.toString());
+    });
     }
 
     if (employee.editedFiles && employee.editedFiles.length > 0) {

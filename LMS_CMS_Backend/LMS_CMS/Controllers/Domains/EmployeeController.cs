@@ -82,7 +82,25 @@ namespace LMS_CMS_PL.Controllers.Domains
                 else
                 employeeDTO.Files = new List<EmployeeAttachmentDTO>();
 
+                //////////////
+                //List<Floor> floors = Unit_Of_Work.floor_Repository.FindBy(s => s.FloorMonitorID == employeeDTO.ID && s.IsDeleted!=true);
+                //List<FloorGetDTO> FloorGetDTO = mapper.Map<List<FloorGetDTO>>(floors);
+                //if (FloorGetDTO != null)
+                //    employeeDTO.FloorsSelected = FloorGetDTO;
+                //else
+                //    employeeDTO.FloorsSelected = new List<FloorGetDTO>();
+
+
+                List<Floor> floors = Unit_Of_Work.floor_Repository.FindBy(s => s.FloorMonitorID == employeeDTO.ID && s.IsDeleted != true);
+
+                if (floors != null && floors.Any())
+                    employeeDTO.FloorsSelected = floors.Select(v => v.ID).ToList();
+                else
+                    employeeDTO.FloorsSelected = new List<long>();
+
+
             }
+
 
             return Ok(EmployeesDTO);
         }
@@ -168,6 +186,15 @@ namespace LMS_CMS_PL.Controllers.Domains
                     file.Size = Math.Round(fileInfo.Length / (1024.0 * 1024.0), 2);
                 }
             }
+
+            ////////
+
+            List<Floor> floors = Unit_Of_Work.floor_Repository.FindBy(s => s.FloorMonitorID == employeeDTO.ID && s.IsDeleted != true);
+
+            if (floors != null && floors.Any())
+                employeeDTO.FloorsSelected = floors.Select(v => v.ID).ToList();
+            else
+                employeeDTO.FloorsSelected = new List<long>();
 
             return Ok(employeeDTO); 
         }
@@ -289,6 +316,21 @@ namespace LMS_CMS_PL.Controllers.Domains
 
             Unit_Of_Work.employee_Repository.Add(employee);
             Unit_Of_Work.SaveChanges();
+
+            //// Create floorMonitor
+            if(NewEmployee.FloorsSelected!=null && NewEmployee.FloorsSelected.Count > 0)
+            {
+                foreach (var item in NewEmployee.FloorsSelected)
+                {
+                    Floor floor = Unit_Of_Work.floor_Repository.First_Or_Default(s => s.ID == item && s.IsDeleted != true);
+                    if (floor!=null)
+                    {
+                        floor.FloorMonitorID = employee.ID;
+                        Unit_Of_Work.floor_Repository.Update(floor);
+                    }
+                }
+                Unit_Of_Work.SaveChanges();
+            }
 
             ////create attachment folder
             var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Attachments");
@@ -523,6 +565,36 @@ namespace LMS_CMS_PL.Controllers.Domains
                     existingAttachment.Name = filee.Name;
                     Unit_Of_Work.employeeAttachment_Repository.Update(existingAttachment);
                 }
+            }
+
+            //// Create floorMonitor
+            if (newEmployee.NewFloorsSelected != null && newEmployee.NewFloorsSelected.Count > 0)
+            {
+                foreach (var item in newEmployee.NewFloorsSelected)
+                {
+                    Floor floor = Unit_Of_Work.floor_Repository.First_Or_Default(s => s.ID == item && s.IsDeleted != true);
+                    if (floor != null)
+                    {
+                        floor.FloorMonitorID = oldEmp.ID;
+                        Unit_Of_Work.floor_Repository.Update(floor);
+                    }
+                }
+                Unit_Of_Work.SaveChanges();
+            }
+
+            //// Delete floorMonitor
+            if (newEmployee.DeletedFloorsSelected != null && newEmployee.DeletedFloorsSelected.Count > 0)
+            {
+                foreach (var item in newEmployee.DeletedFloorsSelected)
+                {
+                    Floor floor = Unit_Of_Work.floor_Repository.First_Or_Default(s => s.ID == item && s.IsDeleted != true);
+                    if (floor != null)
+                    {
+                        floor.FloorMonitorID = null;
+                        Unit_Of_Work.floor_Repository.Update(floor);
+                    }
+                }
+                Unit_Of_Work.SaveChanges();
             }
             await Unit_Of_Work.SaveChangesAsync();
             return Ok(newEmployee);

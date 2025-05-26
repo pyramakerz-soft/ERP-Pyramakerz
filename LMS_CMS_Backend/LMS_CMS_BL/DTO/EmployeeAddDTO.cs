@@ -34,7 +34,6 @@ namespace LMS_CMS_BL.DTO
         public long EmployeeTypeID { get; set; }
         public bool? CanReceiveRequest { get; set; }
         public bool? CanReceiveMessage { get; set; }
-
-
+        public List<int>? FloorsSelected { get; set; } = new();
     }
 }

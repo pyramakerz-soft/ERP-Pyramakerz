@@ -17,63 +17,108 @@ import { EmployeeTypeService } from '../../../../Services/Employee/employee-type
 import { EmployeeTypeGet } from '../../../../Models/Administrator/employee-type-get';
 import Swal from 'sweetalert2';
 import { EmployeeAttachment } from '../../../../Models/Employee/employee-attachment';
+import { Floor } from '../../../../Models/LMS/floor';
+import { FloorService } from '../../../../Services/Employee/LMS/floor.service';
 
 @Component({
   selector: 'app-employee-add-edit',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './employee-add-edit.component.html',
-  styleUrl: './employee-add-edit.component.css'
+  styleUrl: './employee-add-edit.component.css',
 })
 export class EmployeeAddEditComponent {
-  User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
-  DomainName: string = "";
+  User_Data_After_Login: TokenData = new TokenData(
+    '',
+    0,
+    0,
+    0,
+    0,
+    '',
+    '',
+    '',
+    '',
+    ''
+  );
+  DomainName: string = '';
   UserID: number = 0;
-  path: string = "";
-  Data: EmployeeGet = new EmployeeGet()
-  BusCompany: BusType[] = []
-  Roles: Role[] = []
-  empTypes: EmployeeTypeGet[] = []
-  mode: string = ""
+  path: string = '';
+  Data: EmployeeGet = new EmployeeGet();
+  BusCompany: BusType[] = [];
+  Roles: Role[] = [];
+  empTypes: EmployeeTypeGet[] = [];
+  mode: string = '';
   BusCompanyId: number = 0;
   RoleId: number = 0;
   EmpType: number = 0;
   EmpId: number = 0;
   validationErrors: { [key in keyof EmployeeGet]?: string } = {};
   emailPattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
-  DeletedFiles: number[] = []
-  SelectedFiles: EmployeeAttachment[] = []
-  NewFile: EmployeeAttachment = new EmployeeAttachment()
+  DeletedFiles: number[] = [];
+  SelectedFiles: EmployeeAttachment[] = [];
+  NewFile: EmployeeAttachment = new EmployeeAttachment();
   isLoading = false;
+  floors: Floor[] = [];
+  floorsSelected: Floor[] = [];
+  isFloorMonitor = false;
+  isGradeSupervisor = false;
+  isSubjectSupervisor = false;
 
-  constructor(public RoleServ: RoleService, public empTypeServ: EmployeeTypeService, public BusCompanyServ: BusCompanyService, public activeRoute: ActivatedRoute, public account: AccountService, public ApiServ: ApiService, private menuService: MenuService, public EditDeleteServ: DeleteEditPermissionService, private router: Router, public EmpServ: EmployeeService) { }
+  dropdownOpen = false;
+
+  constructor(
+    public RoleServ: RoleService,
+    public empTypeServ: EmployeeTypeService,
+    public BusCompanyServ: BusCompanyService,
+    public activeRoute: ActivatedRoute,
+    public account: AccountService,
+    public ApiServ: ApiService,
+    private menuService: MenuService,
+    public EditDeleteServ: DeleteEditPermissionService,
+    private router: Router,
+    public EmpServ: EmployeeService,
+    public FloorServ: FloorService
+  ) {}
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
-    if (this.User_Data_After_Login.type === "employee") {
+    if (this.User_Data_After_Login.type === 'employee') {
       this.DomainName = this.ApiServ.GetHeader();
-      this.activeRoute.url.subscribe(url => {
-        this.path = url[0].path
+      this.activeRoute.url.subscribe((url) => {
+        this.path = url[0].path;
 
-        if (this.path == "Employee Create") {
-          this.mode = "Create";
-        } else if (this.path == "Employee Edit") {
-          this.mode = "Edit";
-          this.EmpId = Number(this.activeRoute.snapshot.paramMap.get('id'))
-          this.EmpServ.Get_Employee_By_ID(this.EmpId, this.DomainName).subscribe(async (data) => {
+        if (this.path == 'Employee Create') {
+          this.mode = 'Create';
+        } else if (this.path == 'Employee Edit') {
+          this.mode = 'Edit';
+          this.EmpId = Number(this.activeRoute.snapshot.paramMap.get('id'));
+          this.EmpServ.Get_Employee_By_ID(
+            this.EmpId,
+            this.DomainName
+          ).subscribe(async (data) => {
             this.Data = data;
-            console.log(this.Data)
-            this.Data.editedFiles = []
-            console.log(this.Data)
+            console.log(this.Data);
+            this.Data.editedFiles = [];
+            console.log(this.Data);
             if (data.files == null) {
-              this.Data.files = []
+              this.Data.files = [];
             }
             this.Data.id = this.EmpId;
-          })
+            this.FloorServ.Get(this.DomainName).subscribe((data) => {
+              this.floors = data;
+              if(this.Data.floorsSelected){
+                this.isFloorMonitor=true
+                this.floorsSelected = this.floors.filter((s) =>
+                  this.Data.floorsSelected.includes(s.id)
+                );
+              }
+            });
+          });
         }
         this.GetBusCompany();
         this.GetRole();
+        this.GetFloors();
         this.GetEmployeeType();
       });
     }
@@ -82,6 +127,13 @@ export class EmployeeAddEditComponent {
   GetBusCompany() {
     this.BusCompanyServ.Get(this.DomainName).subscribe((data) => {
       this.BusCompany = data;
+    });
+  }
+
+  GetFloors() {
+    this.floors = [];
+    this.FloorServ.Get(this.DomainName).subscribe((data) => {
+      this.floors = data;
     });
   }
 
@@ -102,10 +154,10 @@ export class EmployeeAddEditComponent {
     if (input.files) {
       for (let i = 0; i < input.files.length; i++) {
         const file = input.files[i];
-        this.NewFile = new EmployeeAttachment()
-        this.NewFile.file = file
+        this.NewFile = new EmployeeAttachment();
+        this.NewFile.file = file;
         this.NewFile.name = file.name.replace(/\.[^/.]+$/, '');
-        this.NewFile.link = ''
+        this.NewFile.link = '';
         this.NewFile.id = Date.now() + Math.floor(Math.random() * 10000);
         this.SelectedFiles.push(this.NewFile);
       }
@@ -120,22 +172,21 @@ export class EmployeeAddEditComponent {
   }
 
   deleteFileFromSelectedFile(file: File): void {
-    const index = this.SelectedFiles.findIndex(item => item.file === file);
+    const index = this.SelectedFiles.findIndex((item) => item.file === file);
     if (index !== -1) {
       this.SelectedFiles.splice(index, 1);
     }
   }
 
   downloadFile(file: any): void {
-    if (this.mode == "Create") {
+    if (this.mode == 'Create') {
       const fileURL = URL.createObjectURL(file);
       const a = document.createElement('a');
       a.href = fileURL;
       a.download = file.name;
       a.click();
       // URL.revokeObjectURL(fileURL);
-    }
-    else if (this.mode == "Edit") {
+    } else if (this.mode == 'Edit') {
       const fileURL = file.link;
       const a = document.createElement('a');
       a.href = fileURL;
@@ -151,8 +202,17 @@ export class EmployeeAddEditComponent {
       if (this.Data.hasOwnProperty(key)) {
         const field = key as keyof EmployeeGet;
         if (!this.Data[field]) {
-          if (field == 'user_Name' || field == 'en_name' || field == 'password' || field == 'role_ID' || field == 'employeeTypeID' || field == 'email') {
-            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`;
+          if (
+            field == 'user_Name' ||
+            field == 'en_name' ||
+            field == 'password' ||
+            field == 'role_ID' ||
+            field == 'employeeTypeID' ||
+            field == 'email'
+          ) {
+            this.validationErrors[field] = `*${this.capitalizeField(
+              field
+            )} is required`;
             isValid = false;
           }
         }
@@ -160,18 +220,18 @@ export class EmployeeAddEditComponent {
     }
 
     if (this.Data.employeeTypeID == 2) {
-      if (this.Data.licenseNumber == "") {
-        this.validationErrors["licenseNumber"] = `*License Number is required`;
+      if (this.Data.licenseNumber == '') {
+        this.validationErrors['licenseNumber'] = `*License Number is required`;
         isValid = false;
       }
-      if (this.Data.expireDate == "") {
-        this.validationErrors["expireDate"] = `*Expire Data is required`;
+      if (this.Data.expireDate == '') {
+        this.validationErrors['expireDate'] = `*Expire Data is required`;
         isValid = false;
       }
     }
 
     if (this.Data.email && !this.emailPattern.test(this.Data.email)) {
-      this.validationErrors["email"] = `*Email is not valid`;
+      this.validationErrors['email'] = `*Email is not valid`;
       isValid = false;
     }
 
@@ -201,119 +261,126 @@ export class EmployeeAddEditComponent {
   }
 
   async Save() {
+    this.Data.floorsSelected = this.floorsSelected.map((s) => s.id);
     if (this.isFormValid()) {
       this.isLoading = true;
       for (let i = 0; i < this.SelectedFiles.length; i++) {
         this.Data.files.push(this.SelectedFiles[i]);
       }
-      if (this.mode == "Create") {
-        console.log(this.Data)
-        return this.EmpServ.Add(this.Data, this.DomainName).toPromise().then(
-          (data) => {
-            Swal.fire({
-              icon: 'success',
-              title: 'Done',
-              text: 'Employee Added Succeessfully',
-              confirmButtonColor: '#089B41',
-            });
-            this.moveToEmployee();
-            this.isLoading = false;
-            return true;
-          },
-          (error) => {
-            switch (true) {
-              case error.error == 'This User Name Already Exist':
-                Swal.fire({
-                  icon: 'error',
-                  title: 'Error',
-                  text: error.error || 'An unexpected error occurred',
-                  confirmButtonColor: '#089B41',
-                });
-                break;
+      if (this.mode == 'Create') {
+        console.log(this.Data);
+        return this.EmpServ.Add(this.Data, this.DomainName)
+          .toPromise()
+          .then(
+            (data) => {
+              Swal.fire({
+                icon: 'success',
+                title: 'Done',
+                text: 'Employee Added Succeessfully',
+                confirmButtonColor: '#089B41',
+              });
+              this.moveToEmployee();
+              this.isLoading = false;
+              return true;
+            },
+            (error) => {
+              switch (true) {
+                case error.error == 'This User Name Already Exist':
+                  Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.error || 'An unexpected error occurred',
+                    confirmButtonColor: '#089B41',
+                  });
+                  break;
 
-              case error.error.errors?.Password !== undefined:
-                Swal.fire({
-                  icon: 'error',
-                  title: 'Error',
-                  text: error.error.errors.Password[0] || 'An unexpected error occurred',
-                  confirmButtonColor: '#089B41',
-                });
-                break;
+                case error.error.errors?.Password !== undefined:
+                  Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text:
+                      error.error.errors.Password[0] ||
+                      'An unexpected error occurred',
+                    confirmButtonColor: '#089B41',
+                  });
+                  break;
 
-              case error.error === "This Email Already Exist":
-                Swal.fire({
-                  icon: 'error',
-                  title: 'Error',
-                  text: error.error || 'An unexpected error occurred',
-                  confirmButtonColor: '#089B41',
-                });
-                break;
+                case error.error === 'This Email Already Exist':
+                  Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.error || 'An unexpected error occurred',
+                    confirmButtonColor: '#089B41',
+                  });
+                  break;
 
-              default:
-                Swal.fire({
-                  icon: 'error',
-                  title: 'Error',
-                  text: error.error.errors || 'An unexpected error occurred',
-                  confirmButtonColor: '#089B41',
-                });
-                break;
+                default:
+                  Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.error.errors || 'An unexpected error occurred',
+                    confirmButtonColor: '#089B41',
+                  });
+                  break;
+              }
+              this.isLoading = false;
+              return false;
             }
-            this.isLoading = false;
-            return false;
-          }
-        );
-      } else if (this.mode == "Edit") {
+          );
+      } else if (this.mode == 'Edit') {
         if (this.DeletedFiles.length > 0) {
           for (const id of this.DeletedFiles) {
             await this.EmpServ.DeleteFile(id, this.DomainName).toPromise();
           }
         }
-        console.log(this.Data)
-        return this.EmpServ.Edit(this.Data, this.DomainName).toPromise().then(
-          (data) => {
-            Swal.fire({
-              icon: 'success',
-              title: 'Done',
-              text: 'Employee Edited Succeessfully',
-              confirmButtonColor: '#089B41',
-            });
-            this.moveToEmployee();
-            this.isLoading = false;
-            return true;
-          },
-          (error) => {
-            this.isLoading = false;
-            switch (true) {
-              case error.error == 'This User Name Already Exist':
-                Swal.fire({
-                  icon: 'error',
-                  title: 'Error',
-                  text: error.error || 'An unexpected error occurred',
-                  confirmButtonColor: '#089B41',
-                });
-                break;
+        console.log(this.Data);
+        return this.EmpServ.Edit(this.Data, this.DomainName)
+          .toPromise()
+          .then(
+            (data) => {
+              Swal.fire({
+                icon: 'success',
+                title: 'Done',
+                text: 'Employee Edited Succeessfully',
+                confirmButtonColor: '#089B41',
+              });
+              this.moveToEmployee();
+              this.isLoading = false;
+              return true;
+            },
+            (error) => {
+              this.isLoading = false;
+              switch (true) {
+                case error.error == 'This User Name Already Exist':
+                  Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.error || 'An unexpected error occurred',
+                    confirmButtonColor: '#089B41',
+                  });
+                  break;
 
-              case error.error === "This Email Already Exist":
-                Swal.fire({
-                  icon: 'error',
-                  title: 'Error',
-                  text: error.error || 'An unexpected error occurred',
-                  confirmButtonColor: '#089B41',
-                });
-                break;
+                case error.error === 'This Email Already Exist':
+                  Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.error || 'An unexpected error occurred',
+                    confirmButtonColor: '#089B41',
+                  });
+                  break;
 
-              default:
-                Swal.fire({
-                  icon: 'error',
-                  title: 'Error',
-                  text: error.error.errors || 'An unexpected error occurred',
-                  confirmButtonColor: '#089B41',
-                });
-                break;
+                default:
+                  Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.error.errors || 'An unexpected error occurred',
+                    confirmButtonColor: '#089B41',
+                  });
+                  break;
+              }
+              return false;
             }
-            return false;
-          }
-        );
+          );
       }
     }
 
@@ -321,7 +388,7 @@ export class EmployeeAddEditComponent {
   }
 
   moveToEmployee() {
-    this.router.navigateByUrl("Employee/Employee")
+    this.router.navigateByUrl('Employee/Employee');
   }
 
   changeFileName(index: number, event: Event): void {
@@ -334,16 +401,19 @@ export class EmployeeAddEditComponent {
     if (this.SelectedFiles.length > 0) {
       selectedFile = this.SelectedFiles[index];
     } else {
-      selectedFile = this.Data.files.find(f => f.id === index); 
+      selectedFile = this.Data.files.find((f) => f.id === index);
     }
 
     if (!selectedFile) return;
 
     selectedFile.name = newName;
-    console.log(selectedFile)
+    console.log(selectedFile);
 
-    const isExistingFile = !(selectedFile.file instanceof File) && selectedFile.link !== '';
-    const alreadyTracked = this.Data.editedFiles.some(f => f.id === selectedFile!.id);
+    const isExistingFile =
+      !(selectedFile.file instanceof File) && selectedFile.link !== '';
+    const alreadyTracked = this.Data.editedFiles.some(
+      (f) => f.id === selectedFile!.id
+    );
 
     if (isExistingFile && !alreadyTracked) {
       this.Data.editedFiles.push(selectedFile);
@@ -352,4 +422,32 @@ export class EmployeeAddEditComponent {
     console.log('editedFiles:', this.Data.editedFiles);
   }
 
+  ////////////////////////////////////////////////////
+
+  toggleDropdown(): void {
+    this.dropdownOpen = !this.dropdownOpen;
+  }
+
+  selectType(Type: Floor): void {
+    if (!this.floorsSelected.some((e) => e.id === Type.id)) {
+      this.floorsSelected.push(Type);
+    }
+    if (this.mode == 'Edit') {
+      if (!Array.isArray(this.Data.newFloorsSelected)) {
+        this.Data.newFloorsSelected = [];
+      }
+      this.Data.newFloorsSelected.push(Type.id);
+    }
+    this.dropdownOpen = false;
+  }
+
+  removeSelected(id: number): void {
+    const index = this.floorsSelected.findIndex((tag) => tag.id === id);
+    if (index === -1) return; // Tag not found
+    const removed = this.floorsSelected.splice(index, 1)[0];
+    if (this.mode === 'Edit' && removed?.id !== 0) {
+      this.Data.deletedFloorsSelected = this.Data.deletedFloorsSelected || [];
+      this.Data.deletedFloorsSelected.push(removed.id);
+    }
+  }
 }
