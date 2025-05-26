@@ -9,11 +9,14 @@ import { firstValueFrom } from 'rxjs';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { CommonModule } from '@angular/common';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
+import { ClassroomSubject } from '../../../../Models/LMS/classroom-subject';
+import { ClassroomSubjectService } from '../../../../Services/Employee/LMS/classroom-subject.service';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-classroom-subjects',
   standalone: true,
-  imports: [SearchComponent, CommonModule],
+  imports: [SearchComponent, CommonModule, FormsModule],
   templateUrl: './classroom-subjects.component.html',
   styleUrl: './classroom-subjects.component.css'
 })
@@ -26,10 +29,12 @@ export class ClassroomSubjectsComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id'];
+  keysArray: string[] = ['id', 'subjectEnglishName', 'subjectArabicName', 'teacherEnglishName', 'teacherArabicName'];
 
   AllowEdit: boolean = false;
   AllowEditForOthers: boolean = false; 
+
+  ClassSubjects:ClassroomSubject[] = []
 
   constructor(
     public account: AccountService, 
@@ -38,6 +43,7 @@ export class ClassroomSubjectsComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public activeRoute: ActivatedRoute,
     private menuService: MenuService,
+    private classroomSubjectService: ClassroomSubjectService,
     public router: Router
   ) {}
 
@@ -60,6 +66,8 @@ export class ClassroomSubjectsComponent {
 
     this.classId = Number(this.activeRoute.snapshot.paramMap.get('id'));
     this.DomainName = this.ApiServ.GetHeader(); 
+
+    this.getSubjectsByClassID()
   }
 
   GoToClass() {
@@ -71,37 +79,50 @@ export class ClassroomSubjectsComponent {
     return IsAllow;
   }
 
-  // async onSearchEvent(event: { key: string; value: any }) {
-  //   this.key = event.key;
-  //   this.value = event.value;
-  //   try {
-  //     const data: WeightType[] = await firstValueFrom(
-  //       this.weightTypeService.Get(this.DomainName)
-  //     );
-  //     this.TableData = data || [];
+  getSubjectsByClassID(){
+    this.ClassSubjects = []
+    this.classroomSubjectService.GetByClassId(this.classId, this.DomainName).subscribe(
+      data =>{
+        this.ClassSubjects = data
+      }
+    )
+  }
 
-  //     if (this.value !== '') {
-  //       const numericValue = isNaN(Number(this.value))
-  //         ? this.value
-  //         : parseInt(this.value, 10);
+  async onSearchEvent(event: { key: string; value: any }) {
+    this.key = event.key;
+    this.value = event.value;
+    try {
+      const data: ClassroomSubject[] = await firstValueFrom(
+        this.classroomSubjectService.GetByClassId(this.classId, this.DomainName)
+      );
+      this.ClassSubjects = data || [];
 
-  //       this.TableData = this.TableData.filter((t) => {
-  //         const fieldValue = t[this.key as keyof typeof t];
-  //         if (typeof fieldValue === 'string') {
-  //           return fieldValue.toLowerCase().includes(this.value.toLowerCase());
-  //         }
-  //         if (typeof fieldValue === 'number') {
-  //           return fieldValue.toString().includes(numericValue.toString())
-  //         }
-  //         return fieldValue == this.value;
-  //       });
-  //     }
-  //   } catch (error) {
-  //     this.TableData = [];
-  //   }
-  // }
+      if (this.value !== '') {
+        const numericValue = isNaN(Number(this.value))
+          ? this.value
+          : parseInt(this.value, 10);
+
+        this.ClassSubjects = this.ClassSubjects.filter((t) => {
+          const fieldValue = t[this.key as keyof typeof t];
+          if (typeof fieldValue === 'string') {
+            return fieldValue.toLowerCase().includes(this.value.toLowerCase());
+          }
+          if (typeof fieldValue === 'number') {
+            return fieldValue.toString().includes(numericValue.toString())
+          }
+          return fieldValue == this.value;
+        });
+      }
+    } catch (error) {
+      this.ClassSubjects = [];
+    }
+  }
 
   Generate(){
 
+  }
+
+  onToggle(value: boolean): void {
+    console.log('Toggle value:', value);
   }
 }

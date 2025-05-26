@@ -4,7 +4,7 @@
         <h1 class="primaryTxt font-semibold text-2xl leading-9">Subjects</h1>
     </div>
     <div class="flex justify-between items-center space-x-5">
-        <!-- <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search> -->
+        <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
         <button (click)="Generate()"
         class="secondaryBg text-white rounded-lg px-4 py-3">
             Generate
@@ -12,7 +12,7 @@
     </div>
 </div>
 
-<!-- <div>
+<div>
     <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
         <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
             <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
@@ -27,12 +27,15 @@
                         Subject Arabic Name
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Teacher
+                        Teacher English Name
                     </th>
-                    <th lass="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Co-Teacher
+                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        Teacher Arabic Name
+                    </th>
+                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        CoTeacher
                     </th> 
-                    <th lass="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         Hide
                     </th> 
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
@@ -40,37 +43,81 @@
                     </th>
                 </tr>
             </thead>
-            <tbody> -->
+            <tbody>
                 <!-- No Data Row -->
-                <!-- <tr *ngIf="TableData.length === 0">
-                    <td colspan="7"
+                <tr *ngIf="ClassSubjects.length === 0">
+                    <td colspan="8"
                         class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
                         No Data Found
                     </td>
-                </tr> -->
+                </tr>
 
                 <!-- Data Rows -->
-                <!-- <tr *ngFor="let row of TableData; let i = index"
+                <tr *ngFor="let row of ClassSubjects; let i = index"
                     [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
                     class="border-t border-gray-300 text-xs md:text-sm">
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ row.id }}
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ row.englishName }}
+                        {{ row.subjectEnglishName }}
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ row.arabicName }}
+                        {{ row.subjectArabicName }}
+                    </td> 
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        <div *ngIf="row.teacherID != 0">
+                            {{ row.teacherEnglishName }}
+                        </div>
+                        <div *ngIf="row.teacherID == 0">
+                            <div class="w-full p-2 bg-gray-200 rounded-md">
+                                <hr class="border-gray-300">
+                            </div>
+                        </div> 
+                    </td> 
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        <div *ngIf="row.teacherID != 0">
+                            {{row.teacherArabicName}}
+                        </div>
+                        <div *ngIf="row.teacherID == 0">
+                            <div class="w-full p-2 bg-gray-200 rounded-md">
+                                <hr class="border-gray-300">
+                            </div>
+                        </div> 
+                    </td> 
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        <div *ngIf="row.classroomSubjectCoTeachers.length != 0">
+                            <div *ngFor="let co of row.classroomSubjectCoTeachers; let i = index" class="w-fit rounded-lg my-1 p-2 bg-gray-200">
+                                {{co.coTeacherEnglishName}}
+                            </div>
+                        </div>
+                        <div *ngIf="row.classroomSubjectCoTeachers.length == 0">
+                            <div class="w-full p-2 bg-gray-200 rounded-md">
+                                <hr class="border-gray-300">
+                            </div>
+                        </div>
+                    </td> 
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="checkbox"
+                                [(ngModel)]="row.hide"
+                                (change)="onToggle(row.hide)"
+                                class="sr-only peer" />
+                            
+                            <div class="w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-300 peer-checked:bg-green-500 relative transition-colors duration-300">
+                                <span class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-300 transform peer-checked:translate-x-5"></span>
+                            </div>
+                        </label>
                     </td> 
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         <div class="flex space-x-4"> 
-                            <button *ngIf="AllowEdit && IsAllowEdit(row.insertedByUserId)" (click)="OpenModal(row.id)">
+                            <!-- <button *ngIf="AllowEdit && IsAllowEdit(row.insertedByUserId)" (click)="OpenModal(row.id)">
                                 <i class="fa-solid fa-pencil"></i>
-                            </button>
+                            </button> -->
                         </div>
                     </td>
                 </tr>
             </tbody>
         </table>
     </div>
-</div> -->
+</div>
