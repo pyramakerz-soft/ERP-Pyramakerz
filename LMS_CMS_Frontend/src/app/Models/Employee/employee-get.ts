@@ -27,6 +27,12 @@ export class EmployeeGet {
         public floorsSelected :number []=[],
         public newFloorsSelected :number []=[],
         public deletedFloorsSelected :number []=[],
+        public gradeSelected :number []=[],
+        public newgradeSelected :number []=[],
+        public deletedgradeSelected :number []=[],
+        public subjectSelected :number []=[],
+        public newsubjectSelected :number []=[],
+        public deletedsubjectSelected :number []=[],
     ) {}
 }
 

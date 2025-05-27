@@ -148,73 +148,111 @@
             <input type="checkbox" id="isFloorMonitor" class="w-5 h-5" [(ngModel)]="isFloorMonitor">
             <label class="mb-2" for="isFloorMonitor">Floor Monitor</label>
         </div>
-        <div class="flex flex-col mb-4 w-[49%]">
+        <div class="flex flex-col mb-4 w-[49%]" *ngIf="isFloorMonitor" >
             <label class="block mb-2 text-sm font-medium text-gray-900" for="ac">Floors</label>
             <div class="relative">
-            <div class="border border-gray-300 rounded-lg px-4 py-3 cursor-pointer min-h-[48px]"
-                (click)="toggleDropdown()" tabindex="0">
-                <ng-container *ngIf="floorsSelected.length > 0; else placeholder">
-                <div class="flex flex-wrap">
-                    <span class="mr-2 mb-1 bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center"
-                    *ngFor="let selected of floorsSelected">
-                    {{ selected.name }}
-                    <span class="ml-2 cursor-pointer text-red-500" (click)="removeSelected(selected.id)">
-                        &times;
-                    </span>
-                    </span>
+                <div class="border border-gray-300 rounded-lg px-4 py-3 cursor-pointer min-h-[48px]"
+                    (click)="toggleDropdown()" tabindex="0">
+                    <ng-container *ngIf="floorsSelected.length > 0; else placeholder">
+                        <div class="flex flex-wrap">
+                            <span class="mr-2 mb-1 bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center"
+                                *ngFor="let selected of floorsSelected">
+                                {{ selected.name }}
+                                <span class="ml-2 cursor-pointer text-red-500" (click)="removeSelected(selected.id)">
+                                    &times;
+                                </span>
+                            </span>
+                        </div>
+                    </ng-container>
+                    <ng-template #placeholder>
+                        <span class="text-gray-400">Choose Tag</span>
+                    </ng-template>
                 </div>
-                </ng-container>
-                <ng-template #placeholder>
-                <span class="text-gray-400">Choose Tag</span>
-                </ng-template>
-            </div>
-            <div class="absolute bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10"
-                *ngIf="dropdownOpen">
-                <ul>
-                <li *ngFor="let Type of floors" class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                    (click)="selectType(Type)">
-                    {{ Type.name }}
-                </li>
-                </ul>
-            </div>
+                <div class="absolute bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10"
+                    *ngIf="dropdownOpen">
+                    <ul>
+                        <li *ngFor="let Type of floors" class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                            (click)="selectType(Type)">
+                            {{ Type.name }}
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
 
     <div class="flex align-middle space-x-2 mb-4 w-full items-center justify-between">
         <div class="flex align-middle w-[49%] space-x-2">
-            <input type="checkbox" id="isFloorMonitor" class="w-5 h-5" [(ngModel)]="isFloorMonitor">
-            <label class="mb-2" for="isFloorMonitor">Floor Monitor</label>
+            <input type="checkbox" id="isGradeSupervisor" class="w-5 h-5" [(ngModel)]="isGradeSupervisor">
+            <label class="mb-2" for="isGradeSupervisor">Grade Supervisor</label>
         </div>
-        <div class="flex flex-col mb-4 w-[49%]">
-            <label class="block mb-2 text-sm font-medium text-gray-900" for="ac">Floors</label>
+        <div class="flex flex-col mb-4 w-[49%]" *ngIf="isGradeSupervisor">
+            <label class="block mb-2 text-sm font-medium text-gray-900" for="ac">Grades</label>
             <div class="relative">
-            <div class="border border-gray-300 rounded-lg px-4 py-3 cursor-pointer min-h-[48px]"
-                (click)="toggleDropdown()" tabindex="0">
-                <ng-container *ngIf="floorsSelected.length > 0; else placeholder">
-                <div class="flex flex-wrap">
-                    <span class="mr-2 mb-1 bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center"
-                    *ngFor="let selected of floorsSelected">
-                    {{ selected.name }}
-                    <span class="ml-2 cursor-pointer text-red-500" (click)="removeSelected(selected.id)">
-                        &times;
-                    </span>
-                    </span>
+                <div class="border border-gray-300 rounded-lg px-4 py-3 cursor-pointer min-h-[48px]"
+                    (click)="GradetoggleDropdown()" tabindex="0">
+                    <ng-container *ngIf="gradeSelected.length > 0; else placeholder">
+                        <div class="flex flex-wrap">
+                            <span class="mr-2 mb-1 bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center"
+                                *ngFor="let selected of gradeSelected">
+                                {{ selected.name }}
+                                <span class="ml-2 cursor-pointer text-red-500" (click)="GraderemoveSelected(selected.id)">
+                                    &times;
+                                </span>
+                            </span>
+                        </div>
+                    </ng-container>
+                    <ng-template #placeholder>
+                        <span class="text-gray-400">Choose Tag</span>
+                    </ng-template>
                 </div>
-                </ng-container>
-                <ng-template #placeholder>
-                <span class="text-gray-400">Choose Tag</span>
-                </ng-template>
+                <div class="absolute bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10"
+                    *ngIf="GradedropdownOpen">
+                    <ul>
+                        <li *ngFor="let Type of grades" class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                            (click)="GradeselectType(Type)">
+                            {{ Type.name }}
+                        </li>
+                    </ul>
+                </div>
             </div>
-            <div class="absolute bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10"
-                *ngIf="dropdownOpen">
-                <ul>
-                <li *ngFor="let Type of floors" class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                    (click)="selectType(Type)">
-                    {{ Type.name }}
-                </li>
-                </ul>
-            </div>
+        </div>
+    </div>
+
+    <div class="flex align-middle space-x-2 mb-4 w-full items-center justify-between">
+        <div class="flex align-middle w-[49%] space-x-2">
+            <input type="checkbox" id="isSubjectSupervisor" class="w-5 h-5" [(ngModel)]="isSubjectSupervisor">
+            <label class="mb-2" for="isSubjectSupervisor">Subject Supervisor</label>
+        </div>
+        <div class="flex flex-col mb-4 w-[49%]" *ngIf="isSubjectSupervisor">
+            <label class="block mb-2 text-sm font-medium text-gray-900" for="ac">Subjects</label>
+            <div class="relative">
+                <div class="border border-gray-300 rounded-lg px-4 py-3 cursor-pointer min-h-[48px]"
+                    (click)="SubjecttoggleDropdown()" tabindex="0">
+                    <ng-container *ngIf="subjectSelected.length > 0; else placeholder">
+                        <div class="flex flex-wrap">
+                            <span class="mr-2 mb-1 bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center"
+                                *ngFor="let selected of subjectSelected">
+                                {{ selected.en_name }}
+                                <span class="ml-2 cursor-pointer text-red-500" (click)="SubjectremoveSelected(selected.id)">
+                                    &times;
+                                </span>
+                            </span>
+                        </div>
+                    </ng-container>
+                    <ng-template #placeholder>
+                        <span class="text-gray-400">Choose Tag</span>
+                    </ng-template>
+                </div>
+                <div class="absolute bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10"
+                    *ngIf="SubjectdropdownOpen">
+                    <ul>
+                        <li *ngFor="let Type of subject" class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                            (click)="SubjectselectType(Type)">
+                            {{ Type.en_name }}
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
@@ -244,14 +282,14 @@
                     <div class="flex justify-between items-center">
                         <div class="flex items-center space-x-2">
                             <i class="fa-solid fa-file"></i>
-      
+
                         </div>
                         <button (click)="deleteFile(i)">
                             <i class="fa-regular fa-trash-can"></i>
                         </button>
                     </div>
                     <p class="text-sm font-medium text-gray-700 mb-4">
-                        {{  file.size * 1024 }} bytes
+                        {{ file.size * 1024 }} bytes
                     </p>
                     <p class="secondaryTxt cursor-pointer hover:underline mt-2" (click)="downloadFile(file)">
                         Click to View
