@@ -319,6 +319,10 @@ namespace LMS_CMS_PL.Services.ETA
         public static string Login(UOW unitOfWork, long schoolId)
         {
             School school = unitOfWork.school_Repository.Select_By_Id(schoolId);
+
+            if (school == null)
+                return "School not found";
+
             string clientId = school.ClientID;
             string clientSecret = school.SecretNumber1;
             string clientSecret2 = school.SecretNumber2;
@@ -330,7 +334,7 @@ namespace LMS_CMS_PL.Services.ETA
                 outgoingQueryString.Add("client_secret", clientSecret);
                 outgoingQueryString.Add("scope", "InvoicingAPI");
 
-                byte[] jsonDataBytes = System.Text.Encoding.ASCII.GetBytes(outgoingQueryString.ToString());
+                byte[] jsonDataBytes = Encoding.ASCII.GetBytes(outgoingQueryString.ToString());
 
                 string result = PostRequest(new Uri(idSrvBaseUrl + "/connect/token"), jsonDataBytes, "application/x-www-form-urlencoded", "POST");
 

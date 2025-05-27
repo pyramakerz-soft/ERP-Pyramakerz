@@ -867,6 +867,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 }
             }
 
+            sale.VatAmount = sale.Total * sale.VatPercent;
+            sale.TotalWithVat = sale.Total + sale.VatAmount;
+
             Unit_Of_Work.inventoryMaster_Repository.Update(sale);
             Unit_Of_Work.SaveChanges();
 
