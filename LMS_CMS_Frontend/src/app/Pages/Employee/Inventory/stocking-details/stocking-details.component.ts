@@ -210,7 +210,6 @@ export class StockingDetailsComponent {
   selectCategory(categoryId: number) {
     this.GetSubCategories(categoryId);
     this.SelectedCategoryId = categoryId;
-    console.log(-2, this.TableData)
     if (this.AllItems) {
       this.GetAllShopItems(categoryId);
     }
@@ -230,7 +229,7 @@ export class StockingDetailsComponent {
         insertedByUserId: 0,
         currentStock: item.currentStock,
         actualStock: 0,
-        theDifference: 0,
+        theDifference: -1 * item.currentStock,
         shopItemID: item.id,
         stockingId: this.MasterId,
         shopItemName: item.enName,
@@ -285,14 +284,13 @@ export class StockingDetailsComponent {
       ).subscribe((d) => {
         this.ShopItems = d;
         if (this.AllItems) {
-          console.log(-1, this.TableData)
           this.FilteredDetails = this.ShopItems.map((item) => ({
             id: Date.now() + Math.floor(Math.random() * 1000),
             insertedAt: '',
             insertedByUserId: 0,
             currentStock: item.currentStock,
             actualStock: 0,
-            theDifference: 0,
+            theDifference: -1 * item.currentStock,
             shopItemID: item.id,
             stockingId: this.MasterId,
             shopItemName: item.enName,
@@ -322,7 +320,6 @@ export class StockingDetailsComponent {
           }
         }
       });
-    console.log(-12, this.TableData)
   }
 
   selectSubCategory(subCategoryId: number) {
@@ -340,7 +337,7 @@ export class StockingDetailsComponent {
       insertedByUserId: 0,
       currentStock: item.currentStock,
       actualStock: 0,
-      theDifference: 0,
+      theDifference: -1 * item.currentStock,
       shopItemID: item.id,
       stockingId: this.MasterId,
       shopItemName: item.enName,
@@ -349,18 +346,14 @@ export class StockingDetailsComponent {
     };
 
     this.OriginDetails.push(newItem);
-      console.log(this.TableData)
     if (this.mode === 'Create') {
-      console.log(this.mode)
       if (this.HasBallance) {
         this.Data.stockingDetails = this.OriginDetails.filter(d => d.currentStock != 0);
       } else {
         this.Data.stockingDetails.push(newItem);
       }
     } else if (this.mode === 'Edit') {
-      console.log(this.TableData)
       this.NewDetailsWhenEdit.push(newItem);
-
       if (this.HasBallance) {
         this.TableData = this.OriginDetails.filter(d => d.currentStock != 0);
       } else {
@@ -394,7 +387,7 @@ export class StockingDetailsComponent {
           insertedByUserId: 0,
           currentStock: d.currentStock,
           actualStock: 0,
-          theDifference: 0,
+          theDifference: -1 * d.currentStock,
           shopItemID: d.id,
           stockingId: this.MasterId,
           shopItemName: d.arName,
