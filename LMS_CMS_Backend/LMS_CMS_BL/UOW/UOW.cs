@@ -183,7 +183,9 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<CertificatesIssuerName> CertificatesIssuerName_Repository;
         GenericRepo<ClassroomSubject> ClassroomSubject_Repository;
         GenericRepo<ClassroomSubjectCoTeacher> ClassroomSubjectCoTeacher_Repository;
-         
+        GenericRepo<GradeSupervisor> GradeSupervisor_Repository;
+        GenericRepo<SubjectSupervisor> SubjectSupervisor_Repository;
+
 
 
         public UOW(Octa_DbContext octa_Db)
@@ -2047,6 +2049,30 @@ namespace LMS_CMS_BL.UOW
                     ClassroomSubjectCoTeacher_Repository = new GenericRepo<ClassroomSubjectCoTeacher>(db);
                 }
                 return ClassroomSubjectCoTeacher_Repository;
+            }
+        }
+
+        public GenericRepo<GradeSupervisor> gradeSupervisor_Repository
+        {
+            get
+            {
+                if (GradeSupervisor_Repository == null)
+                {
+                    GradeSupervisor_Repository = new GenericRepo<GradeSupervisor>(db);
+                }
+                return GradeSupervisor_Repository;
+            }
+        }
+
+        public GenericRepo<SubjectSupervisor> subjectSupervisor_Repository
+        {
+            get
+            {
+                if (SubjectSupervisor_Repository == null)
+                {
+                    SubjectSupervisor_Repository = new GenericRepo<SubjectSupervisor>(db);
+                }
+                return SubjectSupervisor_Repository;
             }
         }
 
