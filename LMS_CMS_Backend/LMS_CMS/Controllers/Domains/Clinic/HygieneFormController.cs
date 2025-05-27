@@ -4,6 +4,7 @@ using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains.ClinicModule;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,6 +12,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
 {
     [Route("api/with-domain/[controller]")]
     [ApiController]
+    [Authorize]
     public class HygieneFormController : ControllerBase
     {
         private readonly IMapper _mapper;
