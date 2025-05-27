@@ -1,5 +1,5 @@
 <!-- electronic-invoice-detail.component.html -->
-    <!-- Header Section -->
+<!-- Header Section -->
 <div class="flex justify-between items-center">
     <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
         <i class="fa-solid fa-chevron-left cursor-pointer rtl:rotate-180 cursor-pointer" (click)="goBack()"></i>
@@ -7,43 +7,43 @@
     </div>
 
 
-        <div class="flex gap-4">   
-            <button (click)="printInvoice()" class="flex items-center gap-2 text-[#267C15] hover:text-[#1e6310]">
-                <i ><img src="Images/PrintOutline.png" alt="Print"></i>
-                <!-- <span>Print</span> -->
-            </button>
-            <button (click)="sendInvoice()" class="flex items-center gap-2 text-[#267C15] hover:text-[#1e6310]">
-                <i><img src="Images/SendPaperPlane.png" alt="Send"></i>
-                <!-- <span>Send</span> -->
-            </button>
+    <div class="flex gap-4">
+        <button (click)="printInvoice()" class="flex items-center gap-2 text-[#267C15] hover:text-[#1e6310]">
+            <i><img src="Images/PrintOutline.png" alt="Print"></i>
+            <!-- <span>Print</span> -->
+        </button>
+        <button (click)="sendInvoice()" class="flex items-center gap-2 text-[#267C15] hover:text-[#1e6310]">
+            <i><img src="Images/SendPaperPlane.png" alt="Send"></i>
+            <!-- <span>Send</span> -->
+        </button>
 
+    </div>
+</div>
+
+<!-- Invoice Header -->
+<div class="text-center mb-8">
+    <div class=" mt-4 text-sm">
+        <div class="flex justify-start gap-4 mb-4">
+            <p><strong>Name:</strong> {{invoice.student}}</p>
+            <p><strong>Address:</strong> {{invoice.studentAddress || 'N/A'}}</p>
+        </div>
+        <div class="flex justify-start gap-4">
+            <p><strong>Date:</strong> {{formatDate(invoice.date) || 'N/A'}}</p>
+            <p><strong>Number:</strong> {{invoice.invoiceNumber || 'N/A'}}</p>
         </div>
     </div>
+</div>
 
-    <!-- Invoice Header -->
-    <div class="text-center mb-8">
-        <div class=" mt-4 text-sm" >
-            <div class="flex justify-start gap-4 mb-4">
-                <p><strong>Name:</strong> {{invoice.student}}</p>
-                <p><strong>Address:</strong> {{invoice.studentAddress || 'N/A'}}</p>
-            </div>
-            <div class="flex justify-start gap-4">
-                <p><strong>Date:</strong> {{formatDate(invoice.date) || 'N/A'}}</p>
-                <p><strong>Number:</strong> {{invoice.invoiceNumber || 'N/A'}}</p>
-            </div>
-        </div>
-    </div>
+<!-- Loading State -->
+<div *ngIf="isLoading" class="text-center py-10">
+    <i class="fas fa-spinner fa-spin text-2xl"></i>
+    <p>Loading invoice details...</p>
+</div>
 
-    <!-- Loading State -->
-    <div *ngIf="isLoading" class="text-center py-10">
-        <i class="fas fa-spinner fa-spin text-2xl"></i>
-        <p>Loading invoice details...</p>
-    </div>
-
-    <!-- Invoice Content -->
-    <div *ngIf="invoice && !isLoading" class="">
-        <!-- Products Table -->
-    <div  class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
+<!-- Invoice Content -->
+<div *ngIf="invoice && !isLoading" class="">
+    <!-- Products Table -->
+    <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
         <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
             <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
                 <tr>
@@ -57,53 +57,53 @@
                         Tax </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         Total </th>
-            
+
                 </tr>
-                </thead>
-                <tbody>
+            </thead>
+            <tbody>
                 <tr *ngFor="let item of invoice.inventoryDetails; let i = index"
                     [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
-                    class="border-t border-gray-300 text-xs md:text-sm">     
+                    class="border-t border-gray-300 text-xs md:text-sm">
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{item.itemName}}    
-                </td>
+                        {{item.itemName}}
+                    </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-{{item.quantity}}    
-                </td>
+                        {{item.quantity}}
+                    </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-{{item.price}}    
-                </td>
+                        {{item.price}}
+                    </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-{{invoice.vatAmount}}    
-                </td>
+                        {{invoice.vatAmount}}
+                    </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-{{item.totalPrice}}    
-                </td>
+                        {{item.totalPrice}}
+                    </td>
 
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        
+                </tr>
+            </tbody>
+        </table>
     </div>
-            <!-- Invoice Summary -->
-            <div class="flex justify-start">
-                <div class="w-full md:w-1/2 lg:w-1/3 border-t-2 border-gray-200 pt-4">
-                    <h3 class="text-lg font-semibold mb-4">Invoice Summary</h3>
-                    <div class="flex justify-between mb-2">
-                        <span class="font-medium">Sub total:</span>
-                        <span>{{invoice.total | currency}}</span>
-                    </div>
-                    <div class="flex justify-between mb-2">
-                        <span class="font-medium">Taxes & Fees:</span>
-                        <span>{{invoice.vatAmount | currency}}</span>
-                    </div>
-                    <div class="flex justify-between font-bold text-lg mt-4 pt-2 border-t">
-                        <span>Total:</span>
-                        <span class="text-[#089B41]">{{invoice.totalWithVat | currency}}</span>
-                    </div>
-                </div>
-            </div>
+
+</div>
+<!-- Invoice Summary -->
+<div class="flex justify-start">
+    <div class="w-full md:w-1/2 lg:w-1/3 border-t-2 border-gray-200 pt-4">
+        <h3 class="text-lg font-semibold mb-4">Invoice Summary</h3>
+        <div class="flex justify-between mb-2">
+            <span class="font-medium">Sub total:</span>
+            <span>{{invoice.total | currency}}</span>
+        </div>
+        <div class="flex justify-between mb-2">
+            <span class="font-medium">Taxes & Fees:</span>
+            <span>{{invoice.vatAmount | currency}}</span>
+        </div>
+        <div class="flex justify-between font-bold text-lg mt-4 pt-2 border-t">
+            <span>Total:</span>
+            <span class="text-[#089B41]">{{invoice.totalWithVat | currency}}</span>
+        </div>
+    </div>
+</div>
 
 <div class="absolute -top-[9999px] -left-[9999px]">
     <div id="invoiceData" class="hidden">

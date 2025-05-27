@@ -44,13 +44,13 @@
 
         <button class="p-2 font-medium text-xl rounded-lg flex items-center gap-2" (click)="printAll()"
             [disabled]="transactions.length === 0">
-                <i><img src="Images/PrintOutline.png" alt=""></i>
+            <i><img src="Images/PrintOutline.png" alt=""></i>
             <!-- <span>Print All</span> -->
         </button>
-        
+
         <button class="p-2 font-medium text-xl rounded-lg flex items-center gap-2" (click)="sendAll()"
             [disabled]="transactions.length === 0">
-                <i class=""><img src="Images/SendPaperPlane.png" alt=""></i>
+            <i class=""><img src="Images/SendPaperPlane.png" alt=""></i>
             <!-- <span>Send All</span> -->
         </button>
 
@@ -120,11 +120,13 @@
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         <div class="flex gap-2">
-                            <button (click)="printInvoice(transaction)" class="filter brightness-0 p-2 rounded hover:bg-gray-100">
-                <i><img src="Images/PrintOutline.png" alt=""></i>
+                            <button (click)="printInvoice(transaction)"
+                                class="filter brightness-0 p-2 rounded hover:bg-gray-50">
+                                <i><img src="Images/PrintOutline.png" alt=""></i>
                             </button>
-                            <button (click)="sendInvoice(transaction)" class="filter brightness-0 p-2 rounded hover:bg-gray-100">
-                <i><img src="Images/SendPaperPlane.png" alt=""></i>
+                            <button (click)="sendInvoice(transaction)"
+                                class="filter brightness-0 p-2 rounded hover:bg-gray-50">
+                                <i><img src="Images/SendPaperPlane.png" alt=""></i>
                             </button>
 
                         </div>
