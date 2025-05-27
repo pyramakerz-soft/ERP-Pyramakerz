@@ -153,27 +153,27 @@ export class EmployeeService {
       });
     }
 
-     if (employee.deletedgradeSelected && employee.deletedgradeSelected.length > 0) {
-      employee.deletedgradeSelected.forEach((floor, index) => {
-        formData.append(`deletedgradeSelected[${index}]`, floor.toString());
+     if (employee.deletedGradesSelected && employee.deletedGradesSelected.length > 0) {
+      employee.deletedGradesSelected.forEach((floor, index) => {
+        formData.append(`deletedGradesSelected[${index}]`, floor.toString());
       });
     }
 
-    if (employee.newgradeSelected && employee.newgradeSelected.length > 0) {
-      employee.newgradeSelected.forEach((floor, index) => {
-        formData.append(`newgradeSelected[${index}]`, floor.toString());
+    if (employee.newGradesSelected && employee.newGradesSelected.length > 0) {
+      employee.newGradesSelected.forEach((floor, index) => {
+        formData.append(`newGradesSelected[${index}]`, floor.toString());
       });
     }
 
-     if (employee.deletedsubjectSelected && employee.deletedsubjectSelected.length > 0) {
-      employee.deletedsubjectSelected.forEach((floor, index) => {
-        formData.append(`deletedsubjectSelected[${index}]`, floor.toString());
+     if (employee.deletedSubjectsSelected && employee.deletedSubjectsSelected.length > 0) {
+      employee.deletedSubjectsSelected.forEach((floor, index) => {
+        formData.append(`deletedSubjectsSelected[${index}]`, floor.toString());
       });
     }
 
-    if (employee.newsubjectSelected && employee.newsubjectSelected.length > 0) {
-      employee.newsubjectSelected.forEach((floor, index) => {
-        formData.append(`newsubjectSelected[${index}]`, floor.toString());
+    if (employee.newSubjectsSelected && employee.newSubjectsSelected.length > 0) {
+      employee.newSubjectsSelected.forEach((floor, index) => {
+        formData.append(`newSubjectsSelected[${index}]`, floor.toString());
       });
     }
 
