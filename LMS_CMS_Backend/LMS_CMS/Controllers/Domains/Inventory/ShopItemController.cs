@@ -253,11 +253,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
             genderID = student.GenderId;
 
-            StudentAcademicYear studentAcademicYear = Unit_Of_Work.studentAcademicYear_Repository.First_Or_Default(
-                d => d.IsDeleted != true && d.StudentID == StudentID && d.Classroom.AcademicYear.IsActive == true
-                );
+            //StudentAcademicYear studentAcademicYear = Unit_Of_Work.studentAcademicYear_Repository.First_Or_Default(
+            //    d => d.IsDeleted != true && d.StudentID == StudentID && d.Classroom.AcademicYear.IsActive == true
+            //    );
 
-            gradeID = studentAcademicYear.GradeID;
+            //gradeID = studentAcademicYear.GradeID;
 
             shopItemQuery = shopItemQuery.Where(s => s.GenderID == genderID || s.GenderID == null);
             shopItemQuery = shopItemQuery.Where(s => s.GradeID == gradeID || s.GradeID == null); 

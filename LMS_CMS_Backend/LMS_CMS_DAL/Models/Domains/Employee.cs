@@ -110,6 +110,7 @@ namespace LMS_CMS_DAL.Models.Domains
         public ICollection<EvaluationEmployee> EvaluatedEmployees { get; set; } = new HashSet<EvaluationEmployee>();
         public ICollection<ClassroomSubject> ClassroomSubjects { get; set; } = new HashSet<ClassroomSubject>();
         public ICollection<ClassroomSubjectCoTeacher> ClassroomSubjectCoTeachers { get; set; } = new HashSet<ClassroomSubjectCoTeacher>();
-
+        public ICollection<SubjectSupervisor> SubjectSupervisors { get; set; } = new HashSet<SubjectSupervisor>();
+        public ICollection<GradeSupervisor> GradeSupervisors { get; set; } = new HashSet<GradeSupervisor>();
     }
 }

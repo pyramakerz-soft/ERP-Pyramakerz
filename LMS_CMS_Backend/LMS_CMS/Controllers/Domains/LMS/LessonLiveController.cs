@@ -89,48 +89,48 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        [HttpGet("ByStudentId/{id}")]
-        [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" ,"student" },
-            pages: new[] { "Lesson Live" }
-        )]
-        public async Task<IActionResult> GetByStudentId(long id)
-        {
-            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+        //[HttpGet("ByStudentId/{id}")]
+        //[Authorize_Endpoint_(
+        //    allowedTypes: new[] { "octa", "employee" ,"student" },
+        //    pages: new[] { "Lesson Live" }
+        //)]
+        //public async Task<IActionResult> GetByStudentId(long id)
+        //{
+        //    UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            if (id == 0)
-            {
-                return BadRequest("Enter student ID");
-            }
-            Student student = Unit_Of_Work.student_Repository.First_Or_Default(s=>s.ID== id && s.IsDeleted != true);
-            if (student == null)
-            {
-                return BadRequest("No Student With This ID");
-            }
+        //    if (id == 0)
+        //    {
+        //        return BadRequest("Enter student ID");
+        //    }
+        //    Student student = Unit_Of_Work.student_Repository.First_Or_Default(s=>s.ID== id && s.IsDeleted != true);
+        //    if (student == null)
+        //    {
+        //        return BadRequest("No Student With This ID");
+        //    }
 
-            StudentAcademicYear studentAcademicYear = Unit_Of_Work.studentAcademicYear_Repository.First_Or_Default(s => s.StudentID == id && s.Classroom.AcademicYear.IsActive==true && s.IsDeleted != true);
-            if (studentAcademicYear == null)
-            {
-                return BadRequest("this student Has no class");
-            }
+        //    StudentAcademicYear studentAcademicYear = Unit_Of_Work.studentAcademicYear_Repository.First_Or_Default(s => s.StudentID == id && s.Classroom.AcademicYear.IsActive==true && s.IsDeleted != true);
+        //    if (studentAcademicYear == null)
+        //    {
+        //        return BadRequest("this student Has no class");
+        //    }
 
 
-            List<LessonLive> lessonLives = await Unit_Of_Work.lessonLive_Repository.Select_All_With_IncludesById<LessonLive>(
-                    b => b.IsDeleted != true && b.ClassroomID== studentAcademicYear.ClassID,
-                    query => query.Include(d => d.Classroom),
-                    query => query.Include(d => d.WeekDay),
-                    query => query.Include(d => d.Subject)
-                    );
+        //    List<LessonLive> lessonLives = await Unit_Of_Work.lessonLive_Repository.Select_All_With_IncludesById<LessonLive>(
+        //            b => b.IsDeleted != true && b.ClassroomID== studentAcademicYear.ClassID,
+        //            query => query.Include(d => d.Classroom),
+        //            query => query.Include(d => d.WeekDay),
+        //            query => query.Include(d => d.Subject)
+        //            );
 
-            if (lessonLives == null || lessonLives.Count == 0)
-            {
-                return NotFound();
-            }
+        //    if (lessonLives == null || lessonLives.Count == 0)
+        //    {
+        //        return NotFound();
+        //    }
 
-            List<LessonLiveGetDTO> lessonLivesDTO = mapper.Map<List<LessonLiveGetDTO>>(lessonLives);
+        //    List<LessonLiveGetDTO> lessonLivesDTO = mapper.Map<List<LessonLiveGetDTO>>(lessonLives);
 
-            return Ok(lessonLivesDTO);
-        }
+        //    return Ok(lessonLivesDTO);
+        //}
         
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 

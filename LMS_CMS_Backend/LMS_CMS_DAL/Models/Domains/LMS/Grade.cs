@@ -31,11 +31,13 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public int? THRU { get; set; }
         public int? FRI { get; set; }
 
-        public ICollection<StudentAcademicYear> StudentAcademicYears { get; set; } = new HashSet<StudentAcademicYear>();
+        //public ICollection<StudentAcademicYear> StudentAcademicYears { get; set; } = new HashSet<StudentAcademicYear>();
+        public ICollection<StudentGrade> StudentGrades { get; set; } = new HashSet<StudentGrade>();
         public ICollection<Subject> Subjects { get; set; } = new HashSet<Subject>();
         public ICollection<Classroom> Classrooms { get; set; } = new HashSet<Classroom>();
         public ICollection<Test> Tests { get; set; } = new HashSet<Test>();
         public ICollection<ShopItem> ShopItem { get; set; } = new HashSet<ShopItem>();
+        public ICollection<GradeSupervisor> GradeSupervisors { get; set; } = new HashSet<GradeSupervisor>();
 
     }
 }

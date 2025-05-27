@@ -38,7 +38,7 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<BusCompany> BusCompany { get; set; }
         public DbSet<Bus> Bus { get; set; }
         public DbSet<BusStudent> BusStudent { get; set; }
-        public DbSet<StudentAcademicYear> StudentAcademicYear { get; set; }
+        //public DbSet<StudentAcademicYear> StudentAcademicYear { get; set; }
         public DbSet<Grade> Grade { get; set; }
         public DbSet<EmployeeAttachment> EmployeeAttachment { get; set; }
         public DbSet<Violation> Violation { get; set; }
@@ -172,6 +172,8 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<CertificatesIssuerName> CertificatesIssuerNames { get; set; }
         public DbSet<ClassroomSubject> ClassroomSubject { get; set; }
         public DbSet<ClassroomSubjectCoTeacher> ClassroomSubjectCoTeacher { get; set; }
+        public DbSet<SubjectSupervisor> SubjectSupervisor { get; set; }
+        public DbSet<GradeSupervisor> GradeSupervisor { get; set; }
 
 
         public LMS_CMS_Context(DbContextOptions<LMS_CMS_Context> options)
@@ -480,29 +482,29 @@ namespace LMS_CMS_DAL.Models.Domains
                  .HasForeignKey(p => p.SemseterID)
                  .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<StudentAcademicYear>()
-                 .HasOne(p => p.Student)
-                 .WithMany(p => p.StudentAcademicYears)
-                 .HasForeignKey(p => p.StudentID)
-                 .OnDelete(DeleteBehavior.Restrict);
+            //modelBuilder.Entity<StudentAcademicYear>()
+            //     .HasOne(p => p.Student)
+            //     .WithMany(p => p.StudentAcademicYears)
+            //     .HasForeignKey(p => p.StudentID)
+            //     .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<StudentAcademicYear>()
-                 .HasOne(p => p.School)
-                 .WithMany(p => p.StudentAcademicYears)
-                 .HasForeignKey(p => p.SchoolID)
-                 .OnDelete(DeleteBehavior.Restrict);
+            //modelBuilder.Entity<StudentAcademicYear>()
+            //     .HasOne(p => p.School)
+            //     .WithMany(p => p.StudentAcademicYears)
+            //     .HasForeignKey(p => p.SchoolID)
+            //     .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<StudentAcademicYear>()
-                 .HasOne(p => p.Classroom)
-                 .WithMany(p => p.StudentAcademicYears)
-                 .HasForeignKey(p => p.ClassID)
-                 .OnDelete(DeleteBehavior.Restrict);
+            //modelBuilder.Entity<StudentAcademicYear>()
+            //     .HasOne(p => p.Classroom)
+            //     .WithMany(p => p.StudentAcademicYears)
+            //     .HasForeignKey(p => p.ClassID)
+            //     .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<StudentAcademicYear>()
-                 .HasOne(p => p.Grade)
-                 .WithMany(p => p.StudentAcademicYears)
-                 .HasForeignKey(p => p.GradeID)
-                 .OnDelete(DeleteBehavior.Restrict);
+            //modelBuilder.Entity<StudentAcademicYear>()
+            //     .HasOne(p => p.Grade)
+            //     .WithMany(p => p.StudentAcademicYears)
+            //     .HasForeignKey(p => p.GradeID)
+            //     .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Subject>()
                  .HasOne(p => p.Grade)
@@ -1465,6 +1467,30 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasForeignKey(p => p.QuestionBankID)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<SubjectSupervisor>()
+              .HasOne(p => p.Employee)
+              .WithMany(p => p.SubjectSupervisors)
+              .HasForeignKey(p => p.EmployeeID)
+              .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<SubjectSupervisor>()
+              .HasOne(p => p.Subject)
+              .WithMany(p => p.SubjectSupervisors)
+              .HasForeignKey(p => p.SubjectID)
+              .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<GradeSupervisor>()
+              .HasOne(p => p.Grade)
+              .WithMany(p => p.GradeSupervisors)
+              .HasForeignKey(p => p.GradeID)
+              .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<GradeSupervisor>()
+              .HasOne(p => p.Employee)
+              .WithMany(p => p.GradeSupervisors)
+              .HasForeignKey(p => p.EmployeeID)
+              .OnDelete(DeleteBehavior.Restrict);
+
             ///////////////////////// Exception: /////////////////////////
             modelBuilder.Entity<Bus>()
                 .HasOne(b => b.DeletedByEmployee)
@@ -1524,7 +1550,7 @@ namespace LMS_CMS_DAL.Models.Domains
                .HasOne(f => f.DeletedByEmployee)
                .WithMany()  
                .HasForeignKey(f => f.DeletedByUserId)
-               .OnDelete(DeleteBehavior.Restrict); 
+               .OnDelete(DeleteBehavior.Restrict);
 
             ///////////////////////// Optional ID According to other field: /////////////////////////  
             modelBuilder.Entity<ReceivableMaster>()

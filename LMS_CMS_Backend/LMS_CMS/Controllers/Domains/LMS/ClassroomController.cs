@@ -592,79 +592,79 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             return Ok();
         }
 
-        [HttpPost("AddStudentToClassroom/{registrationFormParentID}/{classroomid}")]
-        [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" }
-        )]
-        public async Task<IActionResult> AddStudent(long registrationFormParentID, long classroomid)
-        {
-            try
-            {
-                UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+        //[HttpPost("AddStudentToClassroom/{registrationFormParentID}/{classroomid}")]
+        //[Authorize_Endpoint_(
+        //    allowedTypes: new[] { "octa", "employee" }
+        //)]
+        //public async Task<IActionResult> AddStudent(long registrationFormParentID, long classroomid)
+        //{
+        //    try
+        //    {
+        //        UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-                if (Unit_Of_Work == null)
-                {
-                    return StatusCode(500, "Unit of Work could not be created.");
-                }
+        //        if (Unit_Of_Work == null)
+        //        {
+        //            return StatusCode(500, "Unit of Work could not be created.");
+        //        }
 
-                var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-                long.TryParse(userIdClaim, out long userId);
-                var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+        //        var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+        //        long.TryParse(userIdClaim, out long userId);
+        //        var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
 
-                TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+        //        TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
 
-                var registerationFormParent = Unit_Of_Work.registerationFormParent_Repository
-                    .First_Or_Default(r => r.ID == registrationFormParentID && r.IsDeleted != true);
-                if (registerationFormParent == null)
-                {
-                    return NotFound("Registration form parent not found.");
-                }
+        //        var registerationFormParent = Unit_Of_Work.registerationFormParent_Repository
+        //            .First_Or_Default(r => r.ID == registrationFormParentID && r.IsDeleted != true);
+        //        if (registerationFormParent == null)
+        //        {
+        //            return NotFound("Registration form parent not found.");
+        //        }
 
 
-                if (registerationFormParent.AcademicYearID == null ||
-                    registerationFormParent.GradeID == null)
-                {
-                    return StatusCode(400, "Missing required fields in registration form parent.");
-                }
+        //        if (registerationFormParent.AcademicYearID == null ||
+        //            registerationFormParent.GradeID == null)
+        //        {
+        //            return StatusCode(400, "Missing required fields in registration form parent.");
+        //        }
 
-                long AccademicYearId = Convert.ToInt64(registerationFormParent.AcademicYearID);
-                long GradeId = Convert.ToInt64(registerationFormParent.GradeID);
+        //        long AccademicYearId = Convert.ToInt64(registerationFormParent.AcademicYearID);
+        //        long GradeId = Convert.ToInt64(registerationFormParent.GradeID);
                 
-                AcademicYear academicYear = Unit_Of_Work.academicYear_Repository
-                    .First_Or_Default(a => a.ID == AccademicYearId && a.IsDeleted != true);
-                if (academicYear == null)
-                {
-                    return NotFound("Academic year not found.");
-                }
+        //        AcademicYear academicYear = Unit_Of_Work.academicYear_Repository
+        //            .First_Or_Default(a => a.ID == AccademicYearId && a.IsDeleted != true);
+        //        if (academicYear == null)
+        //        {
+        //            return NotFound("Academic year not found.");
+        //        }
 
-                StudentGetDTO studentDto = await _createStudentService.CreateStudentDtoObj(Unit_Of_Work, registrationFormParentID);
-                Student student = await _createStudentService.CreateNewStudent(Unit_Of_Work, studentDto, userTypeClaim, userId, AccademicYearId);
+        //        StudentGetDTO studentDto = await _createStudentService.CreateStudentDtoObj(Unit_Of_Work, registrationFormParentID);
+        //        Student student = await _createStudentService.CreateNewStudent(Unit_Of_Work, studentDto, userTypeClaim, userId, AccademicYearId);
                  
-                StudentAcademicYear studentAcademicYear = new StudentAcademicYear
-                {
-                    StudentID = student.ID,
-                    SchoolID = academicYear.SchoolID,
-                    ClassID = classroomid,
-                    GradeID = GradeId,
-                    InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone),
-                    InsertedByOctaId = userTypeClaim == "octa" ? userId : null,
-                    InsertedByUserId = userTypeClaim == "employee" ? userId : null
-                };
+        //        StudentAcademicYear studentAcademicYear = new StudentAcademicYear
+        //        {
+        //            StudentID = student.ID,
+        //            SchoolID = academicYear.SchoolID,
+        //            ClassID = classroomid,
+        //            GradeID = GradeId,
+        //            InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone),
+        //            InsertedByOctaId = userTypeClaim == "octa" ? userId : null,
+        //            InsertedByUserId = userTypeClaim == "employee" ? userId : null
+        //        };
 
-                Unit_Of_Work.studentAcademicYear_Repository.Add(studentAcademicYear);
-                await Unit_Of_Work.SaveChangesAsync();
+        //        Unit_Of_Work.studentAcademicYear_Repository.Add(studentAcademicYear);
+        //        await Unit_Of_Work.SaveChangesAsync();
 
 
-                //////////////////////////////////// remove all registration form parent ////////////////////////////////////////
-                _removeAllRegistrationFormParentService.RemoveAllRegistrationFormParent(Unit_Of_Work, registrationFormParentID, userTypeClaim, userId); 
+        //        //////////////////////////////////// remove all registration form parent ////////////////////////////////////////
+        //        _removeAllRegistrationFormParentService.RemoveAllRegistrationFormParent(Unit_Of_Work, registrationFormParentID, userTypeClaim, userId); 
 
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error: {ex.Message}\n{ex.StackTrace}");
-                return StatusCode(500, $"An error occurred: {ex.Message}");
-            }
-        }  
+        //        return Ok();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine($"Error: {ex.Message}\n{ex.StackTrace}");
+        //        return StatusCode(500, $"An error occurred: {ex.Message}");
+        //    }
+        //}  
     }
 }

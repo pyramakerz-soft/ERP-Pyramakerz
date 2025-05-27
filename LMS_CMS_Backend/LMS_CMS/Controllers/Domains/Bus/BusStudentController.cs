@@ -35,260 +35,260 @@ namespace LMS_CMS_PL.Controllers.Domains.Bus
             _checkPageAccessService = checkPageAccessService;
         }
 
-        [HttpGet("GetByBusId/{busId}")]
-        [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Buses" }
-        )]
-        public async Task<IActionResult> GetByBusID(long busId)
-        {
-            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+        //[HttpGet("GetByBusId/{busId}")]
+        //[Authorize_Endpoint_(
+        //    allowedTypes: new[] { "octa", "employee" },
+        //    pages: new[] { "Buses" }
+        //)]
+        //public async Task<IActionResult> GetByBusID(long busId)
+        //{
+        //    UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            List<BusStudent> busStudents;
+        //    List<BusStudent> busStudents;
 
-            var userClaims = HttpContext.User.Claims;
-            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-            long.TryParse(userIdClaim, out long userId);
-            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+        //    var userClaims = HttpContext.User.Claims;
+        //    var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+        //    long.TryParse(userIdClaim, out long userId);
+        //    var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
 
-            if (userIdClaim == null || userTypeClaim == null)
-            {
-                return Unauthorized("User ID or Type claim not found.");
-            }
+        //    if (userIdClaim == null || userTypeClaim == null)
+        //    {
+        //        return Unauthorized("User ID or Type claim not found.");
+        //    }
 
-            BusModel bus = Unit_Of_Work.bus_Repository.Select_By_Id(busId);
-            if (bus == null)
-            {
-                return NotFound("No Bus with this Id");
-            }
+        //    BusModel bus = Unit_Of_Work.bus_Repository.Select_By_Id(busId);
+        //    if (bus == null)
+        //    {
+        //        return NotFound("No Bus with this Id");
+        //    }
 
-            busStudents = await Unit_Of_Work.busStudent_Repository.Select_All_With_IncludesById<BusStudent>(
-                bus => bus.BusID == busId && bus.IsDeleted != true,
-                query => query.Include(bus => bus.Bus),
-                query => query.Include(stu => stu.Student).ThenInclude(stu => stu.StudentAcademicYears),
-                query => query.Include(busCat => busCat.BusCategory),
-                query => query.Include(sem => sem.Semester).ThenInclude(st => st.AcademicYear).ThenInclude(st => st.School) 
-            );
+        //    busStudents = await Unit_Of_Work.busStudent_Repository.Select_All_With_IncludesById<BusStudent>(
+        //        bus => bus.BusID == busId && bus.IsDeleted != true,
+        //        query => query.Include(bus => bus.Bus),
+        //        query => query.Include(stu => stu.Student).ThenInclude(stu => stu.StudentAcademicYears),
+        //        query => query.Include(busCat => busCat.BusCategory),
+        //        query => query.Include(sem => sem.Semester).ThenInclude(st => st.AcademicYear).ThenInclude(st => st.School) 
+        //    );
 
-            if (busStudents == null || busStudents.Count == 0)
-            {
-                return NotFound();
-            }
+        //    if (busStudents == null || busStudents.Count == 0)
+        //    {
+        //        return NotFound();
+        //    }
 
-            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-            DateTime currentDateTime = TimeZoneInfo.ConvertTime(DateTime.UtcNow, cairoZone);
-            string todayString = currentDateTime.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+        //    TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+        //    DateTime currentDateTime = TimeZoneInfo.ConvertTime(DateTime.UtcNow, cairoZone);
+        //    string todayString = currentDateTime.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 
-            foreach (var busStudent in busStudents)
-            {
-                if(busStudent.IsException == true)
-                {
-                    if (!string.IsNullOrEmpty(busStudent.ExceptionFromDate) && !string.IsNullOrEmpty(busStudent.ExceptionToDate))
-                    {
-                        if (string.Compare(busStudent.ExceptionToDate, todayString) < 0)
-                        {
-                            busStudent.IsDeleted = true;
-                            busStudent.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
-                            Unit_Of_Work.busStudent_Repository.Update(busStudent);
-                        }
-                    }
-                }
-            }
-            Unit_Of_Work.SaveChanges();
+        //    foreach (var busStudent in busStudents)
+        //    {
+        //        if(busStudent.IsException == true)
+        //        {
+        //            if (!string.IsNullOrEmpty(busStudent.ExceptionFromDate) && !string.IsNullOrEmpty(busStudent.ExceptionToDate))
+        //            {
+        //                if (string.Compare(busStudent.ExceptionToDate, todayString) < 0)
+        //                {
+        //                    busStudent.IsDeleted = true;
+        //                    busStudent.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+        //                    Unit_Of_Work.busStudent_Repository.Update(busStudent);
+        //                }
+        //            }
+        //        }
+        //    }
+        //    Unit_Of_Work.SaveChanges();
 
-            busStudents = busStudents.Where(bs => bs.IsDeleted != true).ToList();
+        //    busStudents = busStudents.Where(bs => bs.IsDeleted != true).ToList();
 
-            List<BusStudentGetDTO> busStudentDTOs = mapper.Map<List<BusStudentGetDTO>>(busStudents);
+        //    List<BusStudentGetDTO> busStudentDTOs = mapper.Map<List<BusStudentGetDTO>>(busStudents);
 
-            foreach (var dto in busStudentDTOs)
-            {
-                var busStudent = Unit_Of_Work.busStudent_Repository.Select_By_Id(dto.ID);
-                if (busStudent != null)
-                {
-                    Semester semester = Unit_Of_Work.semester_Repository.First_Or_Default(s => s.ID == dto.SemseterID);
+        //    foreach (var dto in busStudentDTOs)
+        //    {
+        //        var busStudent = Unit_Of_Work.busStudent_Repository.Select_By_Id(dto.ID);
+        //        if (busStudent != null)
+        //        {
+        //            Semester semester = Unit_Of_Work.semester_Repository.First_Or_Default(s => s.ID == dto.SemseterID);
 
-                    var studentAcademicYear = Unit_Of_Work.studentAcademicYear_Repository
-                        .Last_Or_Default(s => s.StudentID == busStudent.StudentID && s.SchoolID == dto.SchoolID && s.IsDeleted != true &&
-                        s.Classroom.AcademicYearID == semester.AcademicYearID,
-                        s => s.ID);
+        //            var studentAcademicYear = Unit_Of_Work.studentAcademicYear_Repository
+        //                .Last_Or_Default(s => s.StudentID == busStudent.StudentID && s.SchoolID == dto.SchoolID && s.IsDeleted != true &&
+        //                s.Classroom.AcademicYearID == semester.AcademicYearID,
+        //                s => s.ID);
 
-                    if (studentAcademicYear != null)
-                    {
-                        dto.GradeID = studentAcademicYear.GradeID;
-                        var grade = Unit_Of_Work.grade_Repository.Select_By_Id(dto.GradeID);
-                        dto.GradeName = grade.Name;
+        //            if (studentAcademicYear != null)
+        //            {
+        //                dto.GradeID = studentAcademicYear.GradeID;
+        //                var grade = Unit_Of_Work.grade_Repository.Select_By_Id(dto.GradeID);
+        //                dto.GradeName = grade.Name;
 
-                        dto.SectionID = grade.SectionID;
-                        var section = Unit_Of_Work.section_Repository.Select_By_Id(dto.SectionID);
-                        dto.SectionName = section.Name;
+        //                dto.SectionID = grade.SectionID;
+        //                var section = Unit_Of_Work.section_Repository.Select_By_Id(dto.SectionID);
+        //                dto.SectionName = section.Name;
 
-                        dto.ClassID = studentAcademicYear.ClassID;
-                        var classs = Unit_Of_Work.classroom_Repository.Select_By_Id(dto.ClassID);
-                        dto.ClassName = classs.Name;
-                    }
-                }
-            }
+        //                dto.ClassID = studentAcademicYear.ClassID;
+        //                var classs = Unit_Of_Work.classroom_Repository.Select_By_Id(dto.ClassID);
+        //                dto.ClassName = classs.Name;
+        //            }
+        //        }
+        //    }
 
-            return Ok(busStudentDTOs);
-        }
+        //    return Ok(busStudentDTOs);
+        //}
 
 
-        [HttpGet("{Id}")]
-        [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Buses" }
-        )]
-        public async Task<IActionResult> GetByID(long Id)
-        {
-            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+        //[HttpGet("{Id}")]
+        //[Authorize_Endpoint_(
+        //    allowedTypes: new[] { "octa", "employee" },
+        //    pages: new[] { "Buses" }
+        //)]
+        //public async Task<IActionResult> GetByID(long Id)
+        //{
+        //    UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            if (Id == 0)
-            {
-                return BadRequest("Enter Bus Student ID");
-            }
+        //    if (Id == 0)
+        //    {
+        //        return BadRequest("Enter Bus Student ID");
+        //    }
 
-            var userClaims = HttpContext.User.Claims;
-            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-            long.TryParse(userIdClaim, out long userId);
-            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+        //    var userClaims = HttpContext.User.Claims;
+        //    var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+        //    long.TryParse(userIdClaim, out long userId);
+        //    var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
 
-            if (userIdClaim == null || userTypeClaim == null)
-            {
-                return Unauthorized("User ID or Type claim not found.");
-            }
+        //    if (userIdClaim == null || userTypeClaim == null)
+        //    {
+        //        return Unauthorized("User ID or Type claim not found.");
+        //    }
 
-            var busStudent = await Unit_Of_Work.busStudent_Repository.FindByIncludesAsync(
-                busStu => busStu.ID == Id && busStu.IsDeleted != true,
-                query => query.Include(bus => bus.Bus),
-                query => query.Include(stu => stu.Student).ThenInclude(stu => stu.StudentAcademicYears),
-                query => query.Include(busCat => busCat.BusCategory),
-                query => query.Include(sem => sem.Semester).ThenInclude(st => st.AcademicYear).ThenInclude(st => st.School)
-            );
+        //    var busStudent = await Unit_Of_Work.busStudent_Repository.FindByIncludesAsync(
+        //        busStu => busStu.ID == Id && busStu.IsDeleted != true,
+        //        query => query.Include(bus => bus.Bus),
+        //        query => query.Include(stu => stu.Student).ThenInclude(stu => stu.StudentAcademicYears),
+        //        query => query.Include(busCat => busCat.BusCategory),
+        //        query => query.Include(sem => sem.Semester).ThenInclude(st => st.AcademicYear).ThenInclude(st => st.School)
+        //    );
 
-            if (busStudent == null || busStudent.IsDeleted == true)
-            {
-                return NotFound("No bus Student with this ID");
-            }
+        //    if (busStudent == null || busStudent.IsDeleted == true)
+        //    {
+        //        return NotFound("No bus Student with this ID");
+        //    }
 
-            BusStudentGetDTO busStudentDTO = mapper.Map<BusStudentGetDTO>(busStudent);
-            Semester semester = Unit_Of_Work.semester_Repository.First_Or_Default(s => s.ID == busStudentDTO.SemseterID);
+        //    BusStudentGetDTO busStudentDTO = mapper.Map<BusStudentGetDTO>(busStudent);
+        //    Semester semester = Unit_Of_Work.semester_Repository.First_Or_Default(s => s.ID == busStudentDTO.SemseterID);
 
-            var studentAcademicYear = Unit_Of_Work.studentAcademicYear_Repository
-                    .Last_Or_Default(s => s.StudentID == busStudent.StudentID && s.SchoolID == busStudentDTO.SchoolID && s.IsDeleted != true &&
-                    s.Classroom.AcademicYearID == semester.AcademicYearID,
-                    s => s.ID);
+        //    var studentAcademicYear = Unit_Of_Work.studentAcademicYear_Repository
+        //            .Last_Or_Default(s => s.StudentID == busStudent.StudentID && s.SchoolID == busStudentDTO.SchoolID && s.IsDeleted != true &&
+        //            s.Classroom.AcademicYearID == semester.AcademicYearID,
+        //            s => s.ID);
 
-            if (studentAcademicYear != null)
-            {
-                busStudentDTO.GradeID = studentAcademicYear.GradeID;
-                var grade = Unit_Of_Work.grade_Repository.Select_By_Id(busStudentDTO.GradeID);
-                busStudentDTO.GradeName = grade.Name;
+        //    if (studentAcademicYear != null)
+        //    {
+        //        busStudentDTO.GradeID = studentAcademicYear.GradeID;
+        //        var grade = Unit_Of_Work.grade_Repository.Select_By_Id(busStudentDTO.GradeID);
+        //        busStudentDTO.GradeName = grade.Name;
                 
-                busStudentDTO.SectionID = grade.SectionID;
-                var section = Unit_Of_Work.section_Repository.Select_By_Id(busStudentDTO.SectionID);
-                busStudentDTO.SectionName = section.Name;
+        //        busStudentDTO.SectionID = grade.SectionID;
+        //        var section = Unit_Of_Work.section_Repository.Select_By_Id(busStudentDTO.SectionID);
+        //        busStudentDTO.SectionName = section.Name;
 
-                busStudentDTO.ClassID = studentAcademicYear.ClassID;
-                var classs = Unit_Of_Work.classroom_Repository.Select_By_Id(busStudentDTO.ClassID);
-                busStudentDTO.ClassName = classs.Name;
-            }
+        //        busStudentDTO.ClassID = studentAcademicYear.ClassID;
+        //        var classs = Unit_Of_Work.classroom_Repository.Select_By_Id(busStudentDTO.ClassID);
+        //        busStudentDTO.ClassName = classs.Name;
+        //    }
 
-            return Ok(busStudentDTO);
-        }
+        //    return Ok(busStudentDTO);
+        //}
 
-        [HttpPost]
-        [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Buses" }
-        )]
-        public ActionResult Add(BusStudent_AddDTO busStudentAddDTO)
-        {
-            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+        //[HttpPost]
+        //[Authorize_Endpoint_(
+        //    allowedTypes: new[] { "octa", "employee" },
+        //    pages: new[] { "Buses" }
+        //)]
+        //public ActionResult Add(BusStudent_AddDTO busStudentAddDTO)
+        //{
+        //    UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            var userClaims = HttpContext.User.Claims;
-            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-            long.TryParse(userIdClaim, out long userId);
-            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+        //    var userClaims = HttpContext.User.Claims;
+        //    var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+        //    long.TryParse(userIdClaim, out long userId);
+        //    var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
 
-            if (userIdClaim == null || userTypeClaim == null)
-            {
-                return Unauthorized("User ID or Type claim not found.");
-            }
+        //    if (userIdClaim == null || userTypeClaim == null)
+        //    {
+        //        return Unauthorized("User ID or Type claim not found.");
+        //    }
 
-            if (busStudentAddDTO == null)
-            {
-                return BadRequest("Bus Student cannot be null.");
-            }
+        //    if (busStudentAddDTO == null)
+        //    {
+        //        return BadRequest("Bus Student cannot be null.");
+        //    }
 
-            BusModel bus = Unit_Of_Work.bus_Repository.Select_By_Id(busStudentAddDTO.BusID);
-            if (bus == null || bus.IsDeleted == true)
-            {
-                return NotFound("No Bus with this ID");
-            }
+        //    BusModel bus = Unit_Of_Work.bus_Repository.Select_By_Id(busStudentAddDTO.BusID);
+        //    if (bus == null || bus.IsDeleted == true)
+        //    {
+        //        return NotFound("No Bus with this ID");
+        //    }
 
-            Student student = Unit_Of_Work.student_Repository.Select_By_Id(busStudentAddDTO.StudentID);
-            if (student == null || student.IsDeleted == true)
-            {
-                return NotFound("No Student with this ID");
-            }
+        //    Student student = Unit_Of_Work.student_Repository.Select_By_Id(busStudentAddDTO.StudentID);
+        //    if (student == null || student.IsDeleted == true)
+        //    {
+        //        return NotFound("No Student with this ID");
+        //    }
 
-            if (busStudentAddDTO.SemseterID != null)
-            {
-                Semester semester = Unit_Of_Work.semester_Repository.Select_By_Id(busStudentAddDTO.SemseterID);
-                if (semester == null || semester.IsDeleted == true)
-                {
-                    return NotFound("No Semester with this ID");
-                }
-            }
+        //    if (busStudentAddDTO.SemseterID != null)
+        //    {
+        //        Semester semester = Unit_Of_Work.semester_Repository.Select_By_Id(busStudentAddDTO.SemseterID);
+        //        if (semester == null || semester.IsDeleted == true)
+        //        {
+        //            return NotFound("No Semester with this ID");
+        //        }
+        //    }
 
-            if (busStudentAddDTO.BusCategoryID != null)
-            {
-                BusCategory busCategory = Unit_Of_Work.busCategory_Repository.Select_By_Id(busStudentAddDTO.BusCategoryID);
-                if (busCategory == null || busCategory.IsDeleted == true)
-                {
-                    return NotFound("No Bus Category with this ID");
-                }
-            }
+        //    if (busStudentAddDTO.BusCategoryID != null)
+        //    {
+        //        BusCategory busCategory = Unit_Of_Work.busCategory_Repository.Select_By_Id(busStudentAddDTO.BusCategoryID);
+        //        if (busCategory == null || busCategory.IsDeleted == true)
+        //        {
+        //            return NotFound("No Bus Category with this ID");
+        //        }
+        //    }
 
-            BusStudent busStudedntExists = Unit_Of_Work.busStudent_Repository.First_Or_Default( 
-                d => d.IsDeleted != true && d.StudentID == busStudentAddDTO.StudentID && d.BusID == busStudentAddDTO.BusID && d.SemseterID == busStudentAddDTO.SemseterID
-                );
+        //    BusStudent busStudedntExists = Unit_Of_Work.busStudent_Repository.First_Or_Default( 
+        //        d => d.IsDeleted != true && d.StudentID == busStudentAddDTO.StudentID && d.BusID == busStudentAddDTO.BusID && d.SemseterID == busStudentAddDTO.SemseterID
+        //        );
 
-            if (busStudedntExists != null)
-            {
-                return BadRequest("Student Already Exists In This Bus For This Semester");
-            }
+        //    if (busStudedntExists != null)
+        //    {
+        //        return BadRequest("Student Already Exists In This Bus For This Semester");
+        //    }
 
-            // Check Capacity Per Semester
-            if(bus.IsCapacityRestricted == true)
-            {
-                List<BusStudent> busStudents = Unit_Of_Work.busStudent_Repository.FindBy(
-                    b => b.SemseterID == busStudentAddDTO.SemseterID && b.IsDeleted != true && b.BusID == busStudentAddDTO.BusID
-                    );
+        //    // Check Capacity Per Semester
+        //    if(bus.IsCapacityRestricted == true)
+        //    {
+        //        List<BusStudent> busStudents = Unit_Of_Work.busStudent_Repository.FindBy(
+        //            b => b.SemseterID == busStudentAddDTO.SemseterID && b.IsDeleted != true && b.BusID == busStudentAddDTO.BusID
+        //            );
 
-                if(busStudents.Count >= bus.Capacity)
-                {
-                    return BadRequest("You Exceeded bus Capacity for this Semester");
-                }
-            }
+        //        if(busStudents.Count >= bus.Capacity)
+        //        {
+        //            return BadRequest("You Exceeded bus Capacity for this Semester");
+        //        }
+        //    }
 
-            BusStudent busStudent = mapper.Map<BusStudent>(busStudentAddDTO);
-            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-            busStudent.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
-            if (userTypeClaim == "octa")
-            {
-                busStudent.InsertedByOctaId = userId;
-            }
-            else if (userTypeClaim == "employee")
-            {
-                busStudent.InsertedByUserId = userId;
-            }
+        //    BusStudent busStudent = mapper.Map<BusStudent>(busStudentAddDTO);
+        //    TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+        //    busStudent.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+        //    if (userTypeClaim == "octa")
+        //    {
+        //        busStudent.InsertedByOctaId = userId;
+        //    }
+        //    else if (userTypeClaim == "employee")
+        //    {
+        //        busStudent.InsertedByUserId = userId;
+        //    }
 
-            Unit_Of_Work.busStudent_Repository.Add(busStudent);
-            Unit_Of_Work.SaveChanges();
+        //    Unit_Of_Work.busStudent_Repository.Add(busStudent);
+        //    Unit_Of_Work.SaveChanges();
 
-            return CreatedAtAction(nameof(GetByID), new { Id = bus.ID }, busStudentAddDTO);
-        }
+        //    return CreatedAtAction(nameof(GetByID), new { Id = bus.ID }, busStudentAddDTO);
+        //}
 
         [HttpPut]
         [Authorize_Endpoint_(

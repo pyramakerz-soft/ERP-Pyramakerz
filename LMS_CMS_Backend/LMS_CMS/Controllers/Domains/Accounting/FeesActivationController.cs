@@ -32,70 +32,70 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
         ////
 
-        [HttpGet]
-        [Authorize_Endpoint_(
-       allowedTypes: new[] { "octa", "employee" },
-       pages: new[] { "Fees Activation" }
-   )]
-        public async Task<IActionResult> GetAsync()
-        {
-            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+        //[HttpGet]
+        //[Authorize_Endpoint_(
+        //    allowedTypes: new[] { "octa", "employee" },
+        //    pages: new[] { "Fees Activation" }
+        //)]
+        //public async Task<IActionResult> GetAsync()
+        //{
+        //    UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            List<StudentAcademicYear> studentsAcademicYear = await Unit_Of_Work.studentAcademicYear_Repository
-                .Select_All_With_IncludesById<StudentAcademicYear>(
-                    sem => sem.IsDeleted != true,
-                    query => query.Include(emp => emp.Student),
-                    query => query.Include(emp => emp.Grade).ThenInclude(g => g.Section),
-                    query => query.Include(emp => emp.Classroom),
-                    query => query.Include(emp => emp.School)
-                );
+        //    List<StudentAcademicYear> studentsAcademicYear = await Unit_Of_Work.studentAcademicYear_Repository
+        //        .Select_All_With_IncludesById<StudentAcademicYear>(
+        //            sem => sem.IsDeleted != true,
+        //            query => query.Include(emp => emp.Student),
+        //            query => query.Include(emp => emp.Grade).ThenInclude(g => g.Section),
+        //            query => query.Include(emp => emp.Classroom),
+        //            query => query.Include(emp => emp.School)
+        //        );
 
-            List<FeesActivation> feesActivations = await Unit_Of_Work.feesActivation_Repository
-                .Select_All_With_IncludesById<FeesActivation>(
-                    f => f.IsDeleted != true,
-                    query => query.Include(Income => Income.Student),
-                    query => query.Include(Income => Income.TuitionDiscountType),
-                    query => query.Include(Income => Income.AcademicYear),
-                    query => query.Include(Income => Income.TuitionFeesType)
-                );
+        //    List<FeesActivation> feesActivations = await Unit_Of_Work.feesActivation_Repository
+        //        .Select_All_With_IncludesById<FeesActivation>(
+        //            f => f.IsDeleted != true,
+        //            query => query.Include(Income => Income.Student),
+        //            query => query.Include(Income => Income.TuitionDiscountType),
+        //            query => query.Include(Income => Income.AcademicYear),
+        //            query => query.Include(Income => Income.TuitionFeesType)
+        //        );
 
-            var result = studentsAcademicYear
-                .SelectMany(student =>
-                    feesActivations
-                        .Where(fee => fee.StudentID == student.StudentID) 
-                        .DefaultIfEmpty(), 
-                    (student, fee) => new FeesActivationGetDTO
-                    {
-                        StudentAcademicYearID = student.ID,
-                        StudentID = student.StudentID,
-                        StudentName = student.Student.User_Name,
-                        SchoolID = student.SchoolID,
-                        SchoolName = student.School?.Name ?? "",
-                        ClassID = student.ClassID,
-                        ClassName = student.Classroom?.Name ?? "",
-                        GradeID = student.GradeID,
-                        GradeName = student.Grade?.Name ?? "",
-                        SectionId = student.Grade?.Section?.ID ?? 0,
-                        SectionName = student.Grade?.Section?.Name ?? "",
+        //    var result = studentsAcademicYear
+        //        .SelectMany(student =>
+        //            feesActivations
+        //                .Where(fee => fee.StudentID == student.StudentID) 
+        //                .DefaultIfEmpty(), 
+        //            (student, fee) => new FeesActivationGetDTO
+        //            {
+        //                StudentAcademicYearID = student.ID,
+        //                StudentID = student.StudentID,
+        //                StudentName = student.Student.User_Name,
+        //                SchoolID = student.SchoolID,
+        //                SchoolName = student.School?.Name ?? "",
+        //                ClassID = student.ClassID,
+        //                ClassName = student.Classroom?.Name ?? "",
+        //                GradeID = student.GradeID,
+        //                GradeName = student.Grade?.Name ?? "",
+        //                SectionId = student.Grade?.Section?.ID ?? 0,
+        //                SectionName = student.Grade?.Section?.Name ?? "",
 
-                        FeeActivationID = fee?.ID ?? 0,
-                        Amount = fee?.Amount ?? 0,
-                        Discount = fee?.Discount ?? 0,
-                        Net = fee?.Net ?? 0,
-                        AcademicYearId =fee?.AcademicYearId ?? 0,
-                        AcademicYearName = fee?.AcademicYear?.Name?? "",
-                        Date = fee?.Date ?? "",
-                        FeeTypeID = fee?.FeeTypeID ?? 0,
-                        FeeTypeName = fee?.TuitionFeesType?.Name ?? null,
-                        FeeDiscountTypeID = fee?.FeeDiscountTypeID?? 0,
-                        FeeDiscountTypeName = fee?.TuitionDiscountType?.Name ?? null,
-                        InsertedByUserId = fee?.InsertedByUserId ?? 0,
-                    }
-                )
-                .ToList();
+        //                FeeActivationID = fee?.ID ?? 0,
+        //                Amount = fee?.Amount ?? 0,
+        //                Discount = fee?.Discount ?? 0,
+        //                Net = fee?.Net ?? 0,
+        //                AcademicYearId =fee?.AcademicYearId ?? 0,
+        //                AcademicYearName = fee?.AcademicYear?.Name?? "",
+        //                Date = fee?.Date ?? "",
+        //                FeeTypeID = fee?.FeeTypeID ?? 0,
+        //                FeeTypeName = fee?.TuitionFeesType?.Name ?? null,
+        //                FeeDiscountTypeID = fee?.FeeDiscountTypeID?? 0,
+        //                FeeDiscountTypeName = fee?.TuitionDiscountType?.Name ?? null,
+        //                InsertedByUserId = fee?.InsertedByUserId ?? 0,
+        //            }
+        //        )
+        //        .ToList();
 
-            return Ok(result);
-        }
+        //    return Ok(result);
+        //}
         /////
 
         [HttpPost]

@@ -47,7 +47,7 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<Semester> Semester_Repository;
         GenericRepo<EmployeeType> EmployeeType_Repository;
         GenericRepo<Grade> Grade_Repository;
-        GenericRepo<StudentAcademicYear> StudentAcademicYear_Repository;
+        //GenericRepo<StudentAcademicYear> StudentAcademicYear_Repository;
         GenericRepo<Violation> Violations_Repository;
         GenericRepo<EmployeeAttachment> EmployeeAttachment_Repository;
         GenericRepo<EmployeeTypeViolation> EmployeeTypeViolation_Repository;
@@ -183,7 +183,11 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<CertificatesIssuerName> CertificatesIssuerName_Repository;
         GenericRepo<ClassroomSubject> ClassroomSubject_Repository;
         GenericRepo<ClassroomSubjectCoTeacher> ClassroomSubjectCoTeacher_Repository;
-         
+        GenericRepo<GradeSupervisor> GradeSupervisor_Repository;
+        GenericRepo<SubjectSupervisor> SubjectSupervisor_Repository;
+        GenericRepo<StudentClassroom> StudentClassroom_Repository;
+        GenericRepo<StudentGrade> StudentGrade_Repository;
+
 
 
         public UOW(Octa_DbContext octa_Db)
@@ -466,17 +470,17 @@ namespace LMS_CMS_BL.UOW
             }
         }
 
-        public GenericRepo<StudentAcademicYear> studentAcademicYear_Repository
-        {
-            get
-            {
-                if (StudentAcademicYear_Repository == null)
-                {
-                    StudentAcademicYear_Repository = new GenericRepo<StudentAcademicYear>(db);
-                }
-                return StudentAcademicYear_Repository;
-            }
-        }
+        //public GenericRepo<StudentAcademicYear> studentAcademicYear_Repository
+        //{
+        //    get
+        //    {
+        //        if (StudentAcademicYear_Repository == null)
+        //        {
+        //            StudentAcademicYear_Repository = new GenericRepo<StudentAcademicYear>(db);
+        //        }
+        //        return StudentAcademicYear_Repository;
+        //    }
+        //}
 
         public GenericRepo<Violation> violations_Repository
         {
@@ -2047,6 +2051,54 @@ namespace LMS_CMS_BL.UOW
                     ClassroomSubjectCoTeacher_Repository = new GenericRepo<ClassroomSubjectCoTeacher>(db);
                 }
                 return ClassroomSubjectCoTeacher_Repository;
+            }
+        }
+
+        public GenericRepo<GradeSupervisor> gradeSupervisor_Repository
+        {
+            get
+            {
+                if (GradeSupervisor_Repository == null)
+                {
+                    GradeSupervisor_Repository = new GenericRepo<GradeSupervisor>(db);
+                }
+                return GradeSupervisor_Repository;
+            }
+        }
+
+        public GenericRepo<SubjectSupervisor> subjectSupervisor_Repository
+        {
+            get
+            {
+                if (SubjectSupervisor_Repository == null)
+                {
+                    SubjectSupervisor_Repository = new GenericRepo<SubjectSupervisor>(db);
+                }
+                return SubjectSupervisor_Repository;
+            }
+        } 
+        
+        public GenericRepo<StudentGrade> studentGrade_Repository
+        {
+            get
+            {
+                if (StudentGrade_Repository == null)
+                {
+                    StudentGrade_Repository = new GenericRepo<StudentGrade>(db);
+                }
+                return StudentGrade_Repository;
+            }
+        }
+        
+        public GenericRepo<StudentClassroom> studentClassroom_Repository
+        {
+            get
+            {
+                if (StudentClassroom_Repository == null)
+                {
+                    StudentClassroom_Repository = new GenericRepo<StudentClassroom>(db);
+                }
+                return StudentClassroom_Repository;
             }
         }
 
