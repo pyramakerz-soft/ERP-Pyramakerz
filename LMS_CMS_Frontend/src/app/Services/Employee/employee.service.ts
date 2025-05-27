@@ -81,9 +81,21 @@ export class EmployeeService {
     }
 
     if (employee.floorsSelected && employee.floorsSelected.length > 0) {
-    employee.floorsSelected.forEach((floor, index) => {
-      formData.append(`floorsSelected[${index}]`, floor.toString());
-    });
+      employee.floorsSelected.forEach((floor, index) => {
+        formData.append(`floorsSelected[${index}]`, floor.toString());
+      });
+    }
+
+    if (employee.gradeSelected && employee.gradeSelected.length > 0) {
+      employee.gradeSelected.forEach((floor, index) => {
+        formData.append(`gradeSelected[${index}]`, floor.toString());
+      });
+    }
+
+    if (employee.subjectSelected && employee.subjectSelected.length > 0) {
+      employee.subjectSelected.forEach((floor, index) => {
+        formData.append(`subjectSelected[${index}]`, floor.toString());
+      });
     }
     return this.http.post<EmployeeGet>(`${this.baseUrl}/Employee`, formData, { headers });
   }
@@ -130,28 +142,52 @@ export class EmployeeService {
     }
 
     if (employee.deletedFloorsSelected && employee.deletedFloorsSelected.length > 0) {
-    employee.deletedFloorsSelected.forEach((floor, index) => {
-      formData.append(`deletedFloorsSelected[${index}]`, floor.toString());
-    });
+      employee.deletedFloorsSelected.forEach((floor, index) => {
+        formData.append(`deletedFloorsSelected[${index}]`, floor.toString());
+      });
     }
 
     if (employee.newFloorsSelected && employee.newFloorsSelected.length > 0) {
-    employee.newFloorsSelected.forEach((floor, index) => {
-      formData.append(`newFloorsSelected[${index}]`, floor.toString());
-    });
+      employee.newFloorsSelected.forEach((floor, index) => {
+        formData.append(`newFloorsSelected[${index}]`, floor.toString());
+      });
+    }
+
+     if (employee.deletedgradeSelected && employee.deletedgradeSelected.length > 0) {
+      employee.deletedgradeSelected.forEach((floor, index) => {
+        formData.append(`deletedgradeSelected[${index}]`, floor.toString());
+      });
+    }
+
+    if (employee.newgradeSelected && employee.newgradeSelected.length > 0) {
+      employee.newgradeSelected.forEach((floor, index) => {
+        formData.append(`newgradeSelected[${index}]`, floor.toString());
+      });
+    }
+
+     if (employee.deletedsubjectSelected && employee.deletedsubjectSelected.length > 0) {
+      employee.deletedsubjectSelected.forEach((floor, index) => {
+        formData.append(`deletedsubjectSelected[${index}]`, floor.toString());
+      });
+    }
+
+    if (employee.newsubjectSelected && employee.newsubjectSelected.length > 0) {
+      employee.newsubjectSelected.forEach((floor, index) => {
+        formData.append(`newsubjectSelected[${index}]`, floor.toString());
+      });
     }
 
     if (employee.editedFiles && employee.editedFiles.length > 0) {
       let uploadIndex = 0;
       employee.files.forEach((file) => {
-          formData.append(`editedFiles[${uploadIndex}].id`, file.id.toString());
-          formData.append(`editedFiles[${uploadIndex}].name`, file.name);
-          formData.append(`editedFiles[${uploadIndex}].link`, file.link);
-          formData.append(`editedFiles[${uploadIndex}].lastModified`, file.lastModified.toString());
-          formData.append(`editedFiles[${uploadIndex}].size`, file.size.toString());
-          formData.append(`editedFiles[${uploadIndex}].type`, file.type);
-          formData.append(`editedFiles[${uploadIndex}].employeeID`, file.employeeID.toString());
-          uploadIndex++;
+        formData.append(`editedFiles[${uploadIndex}].id`, file.id.toString());
+        formData.append(`editedFiles[${uploadIndex}].name`, file.name);
+        formData.append(`editedFiles[${uploadIndex}].link`, file.link);
+        formData.append(`editedFiles[${uploadIndex}].lastModified`, file.lastModified.toString());
+        formData.append(`editedFiles[${uploadIndex}].size`, file.size.toString());
+        formData.append(`editedFiles[${uploadIndex}].type`, file.type);
+        formData.append(`editedFiles[${uploadIndex}].employeeID`, file.employeeID.toString());
+        uploadIndex++;
       });
     }
     return this.http.put<EmployeeGet>(`${this.baseUrl}/Employee`, formData, { headers });
