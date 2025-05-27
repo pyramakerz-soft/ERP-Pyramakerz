@@ -3,7 +3,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Org.BouncyCastle.Asn1.Ess;
 using Org.BouncyCastle.Asn1;
-using System.Data;
 using System.Security.Cryptography.Pkcs;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Cryptography;
@@ -33,14 +32,6 @@ namespace LMS_CMS_PL.Services.ETA
         {
             EtaToken etaToken = await unitOfWork.etaToken_Repository.FindByIncludesAsync(x => x.ID == myTokenPinId, query => query.Include(x => x.EtaTokenType));
             TokenPin = etaToken.PIN;
-            
-            // DataTable dt = bm.ExecuteAdapter("select clientId,ClientSecret,ClientSecret2,TokenType from Statics");
-
-            //if (dt.Rows.Count > 0)
-            //{
-            //    clientId = dt.Rows[0]["clientId"].ToString();
-            //    ClientSecret = dt.Rows[0]["ClientSecret"].ToString();
-            //    ClientSecret2 = dt.Rows[0]["ClientSecret2"].ToString();
 
                 //TokenPin
                 switch (etaToken.EtaTokenTypeID)
@@ -55,10 +46,7 @@ namespace LMS_CMS_PL.Services.ETA
             //}
         }
 
-
-
-        //Login befor sending
-        public static bool GenerateJsonInvoice(InventoryMaster master, UOW unitOfWork, IConfiguration config)
+        public static bool GenerateJsonInvoice(InventoryMaster master, UOW unitOfWork, IConfiguration config, string dateTime)
         {
             string invoices = string.Empty;
 
@@ -81,8 +69,6 @@ namespace LMS_CMS_PL.Services.ETA
             TaxIssuer taxIssuer = unitOfWork.taxIssuer_Repository.Select_All().FirstOrDefault();
 
             string version = config.GetValue<string>("ETAVersion");
-
-            string dateTime = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ");
 
             decimal totalSalesAmount = GetTotalSalesAmount(master.InventoryDetails);
 
@@ -171,17 +157,9 @@ namespace LMS_CMS_PL.Services.ETA
                     }
                 }
             };
-            //["signatures"] = new JsonArray
-            //            {
-            //                new JsonObject
-            //                {
-            //                    ["signatureType"] = "I",
-            //                    ["value"] = "<Signature Value>"
-            //                }
-            //            }
 
             string serialize0 = Serialize(JObject.Parse(invoiceJson.ToJsonString()));
-            string signWithCMS0 = SignWithCMS(Encoding.UTF8.GetBytes(serialize0));
+            string signWithCMS0 = SignWithCMS(Encoding.UTF8.GetBytes(serialize0), unitOfWork);
 
             if (string.IsNullOrEmpty(signWithCMS0))
             {
@@ -190,67 +168,12 @@ namespace LMS_CMS_PL.Services.ETA
 
             string json = invoiceJson.ToJsonString();
 
-            string signedJson = $@"{{""documents"": [{json.Substring(0, json.Length - 1)},""signatures"": [{{""signatureType"": ""I"",""value"": ""{signWithCMS0}""}}]]}}";
+            string signedJson = "{\"documents\": [" + json.Substring(0, json.Length - 1) + ",\"signatures\": [{\"signatureType\": \"I\",\"value\": \"" + signWithCMS0 + "\"}]}]}";
 
-            //byte[] jsonDataBytes = Encoding.UTF8.GetBytes(signedJson);
-
-            //string result = PostRequest(new Uri(apiBaseUrl + "/api/v1/documentsubmissions"), jsonDataBytes, "application/json", "POST");
-
-            //if (string.IsNullOrEmpty(result))
-            //{
-            //    bm.ExecuteNonQuery($@"
-            //    DELETE {MyTable} 
-            //    WHERE StoreId = {SalesMasterDT.Rows[0]["StoreId"]} 
-            //    AND Flag = {SalesMasterDT.Rows[0]["Flag"]} 
-            //    AND InvoiceNo = {SalesMasterDT.Rows[0]["InvoiceNo"]};
-
-            //    INSERT INTO {MyTable} (StoreId, Flag, InvoiceNo, Notes) 
-            //    SELECT {SalesMasterDT.Rows[0]["StoreId"]}, {SalesMasterDT.Rows[0]["Flag"]}, {SalesMasterDT.Rows[0]["InvoiceNo"]}, ' Failed';
-            //");
-            //    return;
-            //}
-
-            //dynamic result0 = JsonConvert.DeserializeObject(result);
-
-            //if (result0.acceptedDocuments.Count > 0)
-            //{
-            //    string uuid = result0.acceptedDocuments[0].uuid;
-            //    string longId = result0.acceptedDocuments[0].longId;
-
-            //    bm.ExecuteNonQuery($@"
-            //    DELETE {MyTable} 
-            //    WHERE StoreId = {SalesMasterDT.Rows[0]["StoreId"]} 
-            //    AND Flag = {SalesMasterDT.Rows[0]["Flag"]} 
-            //    AND InvoiceNo = {SalesMasterDT.Rows[0]["InvoiceNo"]};
-
-            //    INSERT INTO {MyTable} (StoreId, Flag, InvoiceNo, uuid, longId) 
-            //    SELECT {SalesMasterDT.Rows[0]["StoreId"]}, {SalesMasterDT.Rows[0]["Flag"]}, {SalesMasterDT.Rows[0]["InvoiceNo"]}, '{uuid}', '{longId}';
-            //");
-            //}
-
-            //if (result0.rejectedDocuments.Count > 0)
-            //{
-            //    string msg = "";
-            //    foreach (var detail in result0.rejectedDocuments[0].error.details)
-            //    {
-            //        msg += $"{detail.propertyPath} - {detail.message}\r\n";
-            //    }
-
-            //    bm.ExecuteNonQuery($@"
-            //    DELETE {MyTable} 
-            //    WHERE StoreId = {SalesMasterDT.Rows[0]["StoreId"]} 
-            //    AND Flag = {SalesMasterDT.Rows[0]["Flag"]} 
-            //    AND InvoiceNo = {SalesMasterDT.Rows[0]["InvoiceNo"]};
-
-            //    INSERT INTO {MyTable} (StoreId, Flag, InvoiceNo, Notes) 
-            //    SELECT {SalesMasterDT.Rows[0]["StoreId"]}, {SalesMasterDT.Rows[0]["Flag"]}, {SalesMasterDT.Rows[0]["InvoiceNo"]}, '{msg.Replace("'", "''")}';
-            //");
-            //}
-
-            File.WriteAllText(Path.Combine(invoices, $"{master.StoreID}_{master.FlagId}_{master.InvoiceNumber}.json"), ((JsonObject)signedJson).ToJsonString(new JsonSerializerOptions
+            File.WriteAllText(Path.Combine(invoices, $"{master.StoreID}_{master.FlagId}_{master.InvoiceNumber}.json"), JsonObject.Parse(signedJson)?.ToJsonString((new JsonSerializerOptions
             {
                 WriteIndented = true
-            }));
+            })));
 
             return true;
         }
@@ -301,16 +224,6 @@ namespace LMS_CMS_PL.Services.ETA
         {
             List<Country> countries = unitofWork.country_Repository.Select_All();
             return countries;
-        }
-
-        private static decimal GetDiscountAmount(IEnumerable<InventoryDetails> items)
-        {
-            decimal total = 0;
-            //foreach (var item in items)
-            //{
-            //    total += 
-            //}
-            return total;
         }
 
         private static decimal GetTotalSalesAmount(IEnumerable<InventoryDetails> items)
@@ -434,16 +347,6 @@ namespace LMS_CMS_PL.Services.ETA
 
         public static string PostRequest(Uri uri, byte[] jsonDataBytes, string contentType, string method, string? accessToken = "")
         {
-            //HttpClient client = new HttpClient();
-            //var request = new HttpRequestMessage
-            //{
-            //    RequestUri = new Uri(uri, ""),
-            //    Method = new HttpMethod(method), // e.g., "POST" or "GET"
-            //    Content = new StringContent(jsonDataBytes, Encoding.UTF8, contentType) // e.g., "application/json"
-            //};
-            //request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", access_token);
-            //HttpResponseMessage responseMessage = await client.SendAsync(request);
-            //string response = await responseMessage.Content.ReadAsStringAsync();
             try
             {
                 ServicePointManager.Expect100Continue = true;
@@ -516,7 +419,7 @@ namespace LMS_CMS_PL.Services.ETA
             return string.Format("{0:0.00000}", Convert.ToDecimal(value));
         }
 
-        private static string SignWithCMS(byte[] data)
+        private static string SignWithCMS(byte[] data, UOW unitOfWork)
         {
             try
             {
@@ -553,12 +456,13 @@ namespace LMS_CMS_PL.Services.ETA
                 store.Open(OpenFlags.MaxAllowed);
 
                 var foundCerts = new X509Certificate2Collection();
-                //var certsIssuerNames = bm.ExecuteAdapter("select * from CertificatesIssuerName");
-                //foreach (DataRow row in certsIssuerNames.Rows)
-                //{
-                //    foundCerts = store.Certificates.Find(X509FindType.FindByIssuerName, row["Name"].ToString(), true);
-                //    if (foundCerts.Count > 0) break;
-                //}
+                var certsIssuerNames = unitOfWork.certificatesIssuerName_Repository.FindBy(x => x.IsDeleted != true);
+
+                foreach (var cert in certsIssuerNames)
+                {
+                    foundCerts = store.Certificates.Find(X509FindType.FindByIssuerName, cert.Name, true);
+                    if (foundCerts.Count > 0) break;
+                }
 
                 if (foundCerts.Count == 0)
                 {

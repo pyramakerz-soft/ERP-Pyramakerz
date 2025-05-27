@@ -39,5 +39,9 @@ namespace LMS_CMS_BL.DTO
         public long? BusCompanyID { get; set; }
         [Required]
         public long EmployeeTypeID { get; set; }
+
+        public List<int>? NewFloorsSelected { get; set; } = new();
+        public List<int>? DeletedFloorsSelected { get; set; } = new();
+
     }
 }

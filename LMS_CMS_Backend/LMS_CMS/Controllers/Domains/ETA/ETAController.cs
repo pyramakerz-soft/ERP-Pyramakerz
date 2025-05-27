@@ -2,6 +2,7 @@
 using LMS_CMS_DAL.Models.Domains.Inventory;
 using LMS_CMS_PL.Services;
 using LMS_CMS_PL.Services.ETA;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -11,13 +12,16 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
 {
     [Route("api/with-domain/[controller]")]
     [ApiController]
+    //[Authorize]
     public class ETAController : ControllerBase
     {
         private readonly DbContextFactoryService _dbContextFactory;
+        private readonly IConfiguration _config;
 
-        public ETAController(DbContextFactoryService dbContextFactory)
+        public ETAController(DbContextFactoryService dbContextFactory, IConfiguration config)
         {
             _dbContextFactory = dbContextFactory;
+            _config = config;
         }
 
         [HttpPost("SendToETA")]
@@ -36,10 +40,13 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
 
             InventoryMaster master = await Unit_Of_Work.inventoryMaster_Repository.FindByIncludesAsync(
                 d => d.ID == masterId &&
-                d.IsDeleted != true &&
                 (d.FlagId == 11 || d.FlagId == 12) &&
                 d.IsDeleted != true,
-                query => query.Include(s => s.TaxIssuer)
+                query => query.Include(s => s.TaxIssuer),
+                query => query.Include(s => s.School),
+                query => query.Include(s => s.Student),
+                query => query.Include(s => s.InventoryDetails)
+                    .ThenInclude(detail => detail.ShopItem)
             );
 
             if (master is null)
@@ -47,13 +54,17 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
 
             string token = EtaServices.Login(Unit_Of_Work, master.School.ID);
 
-            //string dateTime = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ");
+            string dateTime = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ");
+
+            bool jsonResult = EtaServices.GenerateJsonInvoice(master, Unit_Of_Work, _config, dateTime);
+
+            string inv = $"{master.StoreID}_{master.FlagId}_{master.InvoiceNumber}.json";
 
             string jsonPath = string.Empty;
             if (master.FlagId == 11)
-                jsonPath = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/JSONInvoices/{master.StoreID}_{master.FlagId}_{master.InvoiceNumber}.json");
+                jsonPath = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/JSONInvoices/{inv}");
             if (master.FlagId == 12)
-                jsonPath = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/JSONInvoices/{master.StoreID}_{master.FlagId}_{master.InvoiceNumber}.json");
+                jsonPath = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/JSONCredits/{inv}");
 
             if (master.IsValid == 0 || master.IsValid == null)
             {
@@ -98,6 +109,9 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
                     }
                 }
             }
+
+            if (System.IO.File.Exists(jsonPath))
+                System.IO.File.Delete(jsonPath);
 
             return Ok();
         }

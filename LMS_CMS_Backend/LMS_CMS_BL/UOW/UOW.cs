@@ -180,7 +180,12 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<EtaTokenType> EtaTokenType_Repository;
         GenericRepo<EtaToken> EtaToken_Repository;
         GenericRepo<SubjectResource> SubjectResource_Repository;
-         
+        GenericRepo<CertificatesIssuerName> CertificatesIssuerName_Repository;
+        GenericRepo<ClassroomSubject> ClassroomSubject_Repository;
+        GenericRepo<ClassroomSubjectCoTeacher> ClassroomSubjectCoTeacher_Repository;
+        GenericRepo<GradeSupervisor> GradeSupervisor_Repository;
+        GenericRepo<SubjectSupervisor> SubjectSupervisor_Repository;
+
 
 
         public UOW(Octa_DbContext octa_Db)
@@ -2008,6 +2013,66 @@ namespace LMS_CMS_BL.UOW
                     SubjectResource_Repository = new GenericRepo<SubjectResource>(db);
                 }
                 return SubjectResource_Repository;
+            }
+        }
+        
+        public GenericRepo<CertificatesIssuerName> certificatesIssuerName_Repository
+        {
+            get
+            {
+                if (CertificatesIssuerName_Repository == null)
+                {
+                    CertificatesIssuerName_Repository = new GenericRepo<CertificatesIssuerName>(db);
+                }
+                return CertificatesIssuerName_Repository;
+            }
+        }
+        
+        public GenericRepo<ClassroomSubject> classroomSubject_Repository
+        {
+            get
+            {
+                if (ClassroomSubject_Repository == null)
+                {
+                    ClassroomSubject_Repository = new GenericRepo<ClassroomSubject>(db);
+                }
+                return ClassroomSubject_Repository;
+            }
+        }
+        
+        public GenericRepo<ClassroomSubjectCoTeacher> classroomSubjectCoTeacher_Repository
+        {
+            get
+            {
+                if (ClassroomSubjectCoTeacher_Repository == null)
+                {
+                    ClassroomSubjectCoTeacher_Repository = new GenericRepo<ClassroomSubjectCoTeacher>(db);
+                }
+                return ClassroomSubjectCoTeacher_Repository;
+            }
+        }
+
+        public GenericRepo<GradeSupervisor> gradeSupervisor_Repository
+        {
+            get
+            {
+                if (GradeSupervisor_Repository == null)
+                {
+                    GradeSupervisor_Repository = new GenericRepo<GradeSupervisor>(db);
+                }
+                return GradeSupervisor_Repository;
+            }
+        }
+
+        public GenericRepo<SubjectSupervisor> subjectSupervisor_Repository
+        {
+            get
+            {
+                if (SubjectSupervisor_Repository == null)
+                {
+                    SubjectSupervisor_Repository = new GenericRepo<SubjectSupervisor>(db);
+                }
+                return SubjectSupervisor_Repository;
             }
         }
 

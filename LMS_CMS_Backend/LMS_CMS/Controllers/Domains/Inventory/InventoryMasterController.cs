@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using LMS_CMS_BL.DTO.Inventory;
 using LMS_CMS_BL.UOW;
+using LMS_CMS_DAL.Migrations.Domains;
 using LMS_CMS_DAL.Models.Domains;
 using LMS_CMS_DAL.Models.Domains.AccountingModule;
 using LMS_CMS_DAL.Models.Domains.Inventory;
@@ -8,19 +9,10 @@ using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_DAL.Models.Domains.Zatca;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
-using LMS_CMS_PL.Services.ETA;
 using LMS_CMS_PL.Services.Zatca;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Diagnostics.Metrics;
-using System.Xml;
-using System.Xml.Linq;
-using Zatca.EInvoice.SDK.Contracts.Models;
-using static Org.BouncyCastle.Math.EC.ECCurve;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace LMS_CMS_PL.Controllers.Domains.Inventory
 {
@@ -526,6 +518,14 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 return shopItem == null;
             });
 
+            foreach (var item in newData.InventoryDetails)
+            {
+                if (item.SalesId == 0)
+                {
+                    item.SalesId = null;
+                }
+            }
+
             /// Create
             InventoryMaster Master = mapper.Map<InventoryMaster>(newData);
             LMS_CMS_Context db = Unit_Of_Work.inventoryMaster_Repository.Database();
@@ -546,6 +546,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             {
                 Master.InsertedByUserId = userId;
             }
+
+           
 
             Unit_Of_Work.inventoryMaster_Repository.Add(Master);
             await Unit_Of_Work.SaveChangesAsync();

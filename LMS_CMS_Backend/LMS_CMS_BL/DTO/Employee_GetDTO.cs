@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using LMS_CMS_BL.DTO.LMS;
 
 namespace LMS_CMS_BL.DTO
 {
@@ -40,6 +41,8 @@ namespace LMS_CMS_BL.DTO
         public bool? CanReceiveRequest { get; set; }
         public bool? CanReceiveMessage { get; set; }
         public List<EmployeeAttachmentDTO>? Files { get; set; }
+        public List<long>? FloorsSelected { get; set; }
+
 
 
     }

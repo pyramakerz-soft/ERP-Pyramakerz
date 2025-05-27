@@ -82,5 +82,7 @@ namespace LMS_CMS_DAL.Models.Domains.Inventory
         public SchoolPCs? SchoolPCs { get; set; }
         public TaxIssuer? TaxIssuer { get; set; }
         public ICollection<InventoryDetails> InventoryDetails { get; set; } = new HashSet<InventoryDetails>();
+        public ICollection<InventoryDetails>? SaleReturns { get; set; } = new HashSet<InventoryDetails>();
+
     }
 }

@@ -147,7 +147,7 @@ export class DomainsComponent {
     }
 
     this.validationErrors['pages'] = '';
-}
+  }
 
   async onSearchEvent(event: { key: string, value: any }) {
     this.key = event.key;

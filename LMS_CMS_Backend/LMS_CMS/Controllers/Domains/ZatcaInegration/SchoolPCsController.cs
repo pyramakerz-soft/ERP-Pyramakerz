@@ -188,7 +188,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
         #endregion
 
         #region Update PC
-        [HttpPut]
+        [HttpPut("Edit")]
         //[Authorize_Endpoint_(
         //    allowedTypes: new[] { "octa", "employee" },
         //    pages: new[] { "SchoolPCs" }
