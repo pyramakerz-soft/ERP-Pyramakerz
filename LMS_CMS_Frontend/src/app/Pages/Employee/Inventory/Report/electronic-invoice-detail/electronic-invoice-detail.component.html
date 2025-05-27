@@ -109,14 +109,15 @@
     <div id="invoiceData" class="hidden">
         <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'invoice_' + invoice.invoiceNumber"
             [Title]="'Simplified Tax Invoice'" [infoRows]="[
-        { keyEn: 'Invoice Number:', valueEn: invoice.invoiceNumber},
-        { keyEn: 'Customer Name:', valueEn: invoice.student || 'N/A' },
-        { keyEn: 'Date:', valueEn: formatDate(invoice.date) || 'N/A' },
-        { keyEn: 'VAT Registration Number:', valueEn: '123456789900003' }
+                { keyEn: 'Invoice Number: ' + invoice.invoiceNumber },
+        { keyEn: 'Customer Name:'+  invoice.student || 'N/A' },
+        { keyEn: 'Date:' + formatDate(invoice.date) || 'N/A' },
+        { keyEn: 'VAT Registration Number:'+ '123456789900003' }
       ]" [tableHeaders]="['Product', 'Quantity', 'Price', 'Tax', 'Total']" [tableData]="getInvoiceTableData()"
             [PsNotes]="[
-        { EnNote: 'VAT Amount (15%): ' + (invoice.vatAmount | currency), ArNote: 'ضريبة القيمة المضافة (15%)' },
-        { EnNote: 'Total with VAT (15%): ' + (invoice.totalWithVat | currency), ArNote: 'المجموع مع الضريبة (15%)' }
+        { EnNote: 'Amount w/o Taxes: ' + (invoice.total | currency) },
+        { EnNote: 'VAT Amount: ' + (invoice.vatAmount | currency) },
+        { EnNote: 'Total with VAT: ' + (invoice.totalWithVat | currency) }
       ]" #pdfPrint></app-pdf-print>
     </div>
 </div>
