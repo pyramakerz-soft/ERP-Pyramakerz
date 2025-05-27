@@ -5,10 +5,11 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 
 namespace LMS_CMS_DAL.Models.Domains.LMS
 {
-    public class SubjectSupervisor
+    public class SubjectSupervisor : AuditableEntity
     {
         [Key]
         public long ID { get; set; }

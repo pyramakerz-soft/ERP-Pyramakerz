@@ -19,6 +19,10 @@ import Swal from 'sweetalert2';
 import { EmployeeAttachment } from '../../../../Models/Employee/employee-attachment';
 import { Floor } from '../../../../Models/LMS/floor';
 import { FloorService } from '../../../../Services/Employee/LMS/floor.service';
+import { Grade } from '../../../../Models/LMS/grade';
+import { Subject } from '../../../../Models/LMS/subject';
+import { GradeService } from '../../../../Services/Employee/LMS/grade.service';
+import { SubjectService } from '../../../../Services/Employee/LMS/subject.service';
 
 @Component({
   selector: 'app-employee-add-edit',
@@ -60,11 +64,18 @@ export class EmployeeAddEditComponent {
   isLoading = false;
   floors: Floor[] = [];
   floorsSelected: Floor[] = [];
+  grades: Grade[] = [];
+  gradeSelected: Grade[] = [];
+  subject: Subject[] = [];
+  subjectSelected: Subject[] = [];
   isFloorMonitor = false;
   isGradeSupervisor = false;
   isSubjectSupervisor = false;
 
   dropdownOpen = false;
+  GradedropdownOpen = false;
+  SubjectdropdownOpen = false;
+
 
   constructor(
     public RoleServ: RoleService,
@@ -77,7 +88,10 @@ export class EmployeeAddEditComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     private router: Router,
     public EmpServ: EmployeeService,
-    public FloorServ: FloorService
+    public FloorServ: FloorService ,
+    public GradeServ: GradeService ,
+    public SubjectServ: SubjectService ,
+
   ) {}
 
   ngOnInit() {
@@ -119,6 +133,8 @@ export class EmployeeAddEditComponent {
         this.GetBusCompany();
         this.GetRole();
         this.GetFloors();
+        this.GetGrade();
+        this.GetSubject();
         this.GetEmployeeType();
       });
     }
@@ -136,6 +152,20 @@ export class EmployeeAddEditComponent {
       this.floors = data;
     });
   }
+
+  GetGrade() {
+    this.grades = [];
+    this.GradeServ.Get(this.DomainName).subscribe((data) => {
+      this.grades = data;
+    });
+  }
+
+  GetSubject() {
+    this.subject = [];
+    this.SubjectServ.Get(this.DomainName).subscribe((data) => {
+      this.subject = data;
+    });
+  } 
 
   GetRole() {
     this.RoleServ.Get_Roles(this.DomainName).subscribe((data) => {
@@ -422,7 +452,7 @@ export class EmployeeAddEditComponent {
     console.log('editedFiles:', this.Data.editedFiles);
   }
 
-  ////////////////////////////////////////////////////
+  //////////////////////////////////////////////////// floor
 
   toggleDropdown(): void {
     this.dropdownOpen = !this.dropdownOpen;
@@ -448,6 +478,64 @@ export class EmployeeAddEditComponent {
     if (this.mode === 'Edit' && removed?.id !== 0) {
       this.Data.deletedFloorsSelected = this.Data.deletedFloorsSelected || [];
       this.Data.deletedFloorsSelected.push(removed.id);
+    }
+  }
+
+    //////////////////////////////////////////////////// Grade
+
+  GradetoggleDropdown(): void {
+    this.GradedropdownOpen = !this.GradedropdownOpen;
+  }
+
+  GradeselectType(Type: Grade): void {
+    if (!this.gradeSelected.some((e) => e.id === Type.id)) {
+      this.gradeSelected.push(Type);
+    }
+    if (this.mode == 'Edit') {
+      if (!Array.isArray(this.Data.newgradeSelected)) {
+        this.Data.newgradeSelected = [];
+      }
+      this.Data.newgradeSelected.push(Type.id);
+    }
+    this.GradedropdownOpen = false;
+  }
+
+  GraderemoveSelected(id: number): void {
+    const index = this.gradeSelected.findIndex((tag) => tag.id === id);
+    if (index === -1) return; // Tag not found
+    const removed = this.gradeSelected.splice(index, 1)[0];
+    if (this.mode === 'Edit' && removed?.id !== 0) {
+      this.Data.deletedgradeSelected = this.Data.deletedgradeSelected || [];
+      this.Data.deletedgradeSelected.push(removed.id);
+    }
+  }
+
+   //////////////////////////////////////////////////// Subject
+
+  SubjecttoggleDropdown(): void {
+    this.SubjectdropdownOpen = !this.SubjectdropdownOpen;
+  }
+
+  SubjectselectType(Type: Subject): void {
+    if (!this.subjectSelected.some((e) => e.id === Type.id)) {
+      this.subjectSelected.push(Type);
+    }
+    if (this.mode == 'Edit') {
+      if (!Array.isArray(this.Data.newsubjectSelected)) {
+        this.Data.newsubjectSelected = [];
+      }
+      this.Data.newsubjectSelected.push(Type.id);
+    }
+    this.SubjectdropdownOpen = false;
+  }
+
+  SubjectremoveSelected(id: number): void {
+    const index = this.subjectSelected.findIndex((tag) => tag.id === id);
+    if (index === -1) return; // Tag not found
+    const removed = this.subjectSelected.splice(index, 1)[0];
+    if (this.mode === 'Edit' && removed?.id !== 0) {
+      this.Data.deletedsubjectSelected = this.Data.deletedsubjectSelected || [];
+      this.Data.deletedsubjectSelected.push(removed.id);
     }
   }
 }

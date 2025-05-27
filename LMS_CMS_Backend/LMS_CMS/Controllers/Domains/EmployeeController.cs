@@ -332,6 +332,40 @@ namespace LMS_CMS_PL.Controllers.Domains
                 Unit_Of_Work.SaveChanges();
             }
 
+            //// Create GradeSupervisor
+            if (NewEmployee.GradeSelected != null && NewEmployee.GradeSelected.Count > 0)
+            {
+                foreach (var item in NewEmployee.GradeSelected)
+                {
+                    Grade grade = Unit_Of_Work.grade_Repository.First_Or_Default(s => s.ID == item && s.IsDeleted != true);
+                    if (grade != null)
+                    {
+                       GradeSupervisor gradeSupervisor = new GradeSupervisor();
+                        gradeSupervisor.GradeID = item;
+                        gradeSupervisor.EmployeeID = employee.ID;
+                        Unit_Of_Work.gradeSupervisor_Repository.Add(gradeSupervisor);
+                    }
+                }
+                Unit_Of_Work.SaveChanges();
+            }
+
+            //// Create SubjectSupervisor
+            if (NewEmployee.SubjectSelected != null && NewEmployee.SubjectSelected.Count > 0)
+            {
+                foreach (var item in NewEmployee.SubjectSelected)
+                {
+                    Subject subject = Unit_Of_Work.subject_Repository.First_Or_Default(s => s.ID == item && s.IsDeleted != true);
+                    if (subject != null)
+                    {
+                        SubjectSupervisor subjectSupervisor = new SubjectSupervisor();
+                        subjectSupervisor.SubjectID = item;
+                        subjectSupervisor.EmployeeID = employee.ID;
+                        Unit_Of_Work.subjectSupervisor_Repository.Add(subjectSupervisor);
+                    }
+                }
+                Unit_Of_Work.SaveChanges();
+            }
+
             ////create attachment folder
             var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Attachments");
             var employeeFolder = Path.Combine(baseFolder, employee.User_Name);
@@ -596,6 +630,8 @@ namespace LMS_CMS_PL.Controllers.Domains
                 }
                 Unit_Of_Work.SaveChanges();
             }
+
+
             await Unit_Of_Work.SaveChangesAsync();
             return Ok(newEmployee);
         }

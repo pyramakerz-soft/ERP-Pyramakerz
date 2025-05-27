@@ -1552,6 +1552,19 @@ namespace LMS_CMS_DAL.Models.Domains
                .HasForeignKey(f => f.DeletedByUserId)
                .OnDelete(DeleteBehavior.Restrict);
 
+
+            modelBuilder.Entity<SubjectSupervisor>()
+               .HasOne(f => f.DeletedByEmployee)
+               .WithMany()
+               .HasForeignKey(f => f.DeletedByUserId)
+               .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<GradeSupervisor>()
+                .HasOne(f => f.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(f => f.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             ///////////////////////// Optional ID According to other field: /////////////////////////  
             modelBuilder.Entity<ReceivableMaster>()
                 .Ignore(r => r.Bank)
