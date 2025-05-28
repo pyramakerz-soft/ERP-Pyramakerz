@@ -273,7 +273,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
           allowedTypes: new[] { "octa", "employee" },
           allowEdit: 1,
           pages: new[] { "Fees Activation" }
-      )]
+        )]
         public IActionResult Edit(FeesActivationGetDTO newActivation)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
