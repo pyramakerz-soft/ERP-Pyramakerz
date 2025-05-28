@@ -14,6 +14,7 @@ import { ClassroomSubjectService } from '../../../../Services/Employee/LMS/class
 import { ClassroomService } from '../../../../Services/Employee/LMS/classroom.service';
 import { SubjectService } from '../../../../Services/Employee/LMS/subject.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
+import { ClassroomSubjectCoTeacher } from '../../../../Models/LMS/classroom-subject-co-teacher';
 
 @Component({
   selector: 'app-subject-co-teacher',
@@ -47,12 +48,16 @@ export class SubjectCoTeacherComponent {
   SupjectTeacherData: any[] = [];
   path: string = '';
   areAllClassroomsOpen: boolean = true;
-  SupjectTeacher: ClassroomSubject = new ClassroomSubject()
+  SupjectCoTeacher: ClassroomSubjectCoTeacher = new ClassroomSubjectCoTeacher()
   Classrooms: Classroom[] = []
   subject: ClassroomSubject[] = []
-  validationErrors: { [key in keyof ClassroomSubject]?: string } = {};
+  validationErrors: { [key in keyof ClassroomSubjectCoTeacher]?: string } = {};
   isLoading = false;
   employee: EmployeeGet = new EmployeeGet()
+  SelectedClassId : number =0
+  ClassValidation : string =""
+  SubjectValidation : string =""
+
 
   constructor(
     private router: Router,
@@ -73,8 +78,8 @@ export class SubjectCoTeacherComponent {
     this.activeRoute.url.subscribe((url) => {
       this.path = url[0].path;
     });
-    this.SupjectTeacher.teacherID = Number(this.activeRoute.snapshot.paramMap.get('id'));
-     this.EmpServ.Get_Employee_By_ID(this.SupjectTeacher.teacherID, this.DomainName).subscribe(async (data) => {
+    this.SupjectCoTeacher.coTeacherID = Number(this.activeRoute.snapshot.paramMap.get('id'));
+     this.EmpServ.Get_Employee_By_ID(this.SupjectCoTeacher.coTeacherID, this.DomainName).subscribe(async (data) => {
           this.employee = data; 
         })
     this.menuService.menuItemsForEmployee$.subscribe((items) => {
@@ -95,7 +100,7 @@ export class SubjectCoTeacherComponent {
   }
 
   GetData() {
-    this.ClassroomSubjectServ.GetByEmpId(this.SupjectTeacher.teacherID, this.DomainName).subscribe((d) => {
+    this.ClassroomSubjectServ.GetByEmpCoTeacherId(this.SupjectCoTeacher.coTeacherID, this.DomainName).subscribe((d) => {
       this.SupjectTeacherData = d
       console.log(this.SupjectTeacherData)
     })
@@ -110,8 +115,8 @@ export class SubjectCoTeacherComponent {
 
   GetSubjectByClassroom() {
     this.subject = [];
-    this.SupjectTeacher.id = 0
-    this.ClassroomSubjectServ.GetByClassId(this.SupjectTeacher.classroomID, this.DomainName).subscribe(d => {
+    this.SupjectCoTeacher.id = 0
+    this.ClassroomSubjectServ.GetByClassId(this.SelectedClassId, this.DomainName).subscribe(d => {
       this.subject = d;
     });
   }
@@ -129,15 +134,15 @@ export class SubjectCoTeacherComponent {
   }
 
   AddSupjectTeacher() {
-    if (this.isFormValid()) {
       this.isLoading = true;
-      this.ClassroomSubjectServ.Edit(this.SupjectTeacher, this.DomainName).subscribe({
+      this.ClassroomSubjectServ.AddCoTeacher(this.SupjectCoTeacher, this.DomainName).subscribe({
         next: () => {
           this.GetData();
           this.isLoading = false;
           this.closeModal();
         },
         error: (err) => {
+          console.log(err)
           Swal.fire({
             icon: 'error',
             title: 'Error',
@@ -148,7 +153,6 @@ export class SubjectCoTeacherComponent {
           this.closeModal();
         }
       });
-    }
   }
 
   openModal() {
@@ -160,43 +164,43 @@ export class SubjectCoTeacherComponent {
     document.getElementById("Add_Modal")?.classList.remove("flex");
     document.getElementById("Add_Modal")?.classList.add("hidden");
 
-    this.SupjectTeacher = new ClassroomSubject()
+    this.SupjectCoTeacher = new ClassroomSubjectCoTeacher()
   }
 
   capitalizeField(field: keyof ClassroomSubject): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
 
-  isFormValid(): boolean {
-    let isValid = true;
-    for (const key in this.SupjectTeacher) {
-      if (this.SupjectTeacher.hasOwnProperty(key)) {
-        const field = key as keyof ClassroomSubject;
-        if (!this.SupjectTeacher[field]) {
-          if (
-            field == 'classroomID'
-          ) {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
-            isValid = false;
-          }
-        }
-        if (this.SupjectTeacher.id == 0) {
-          this.validationErrors['subjectID'] = "Subject is required"
-          isValid = false;
-        }
-      }
-    }
-    return isValid;
-  }
+  // isFormValid(): boolean {
+  //   let isValid = true;
+  //   for (const key in this.SupjectCoTeacher) {
+  //     if (this.SupjectCoTeacher.hasOwnProperty(key)) {
+  //       const field = key as keyof ClassroomSubjectCoTeacher;
+  //       if (!this.SupjectCoTeacher[field]) {
+  //         if (
+  //           field == 'classroomID'
+  //         ) {
+  //           this.validationErrors[field] = `*${this.capitalizeField(
+  //             field
+  //           )} is required`;
+  //           isValid = false;
+  //         }
+  //       }
+  //       if (this.SupjectCoTeacher.id == 0) {
+  //         this.validationErrors['subjectID'] = "Subject is required"
+  //         isValid = false;
+  //       }
+  //     }
+  //   }
+  //   return isValid;
+  // }
 
-  onInputValueChange(event: { field: keyof ClassroomSubject; value: any }) {
-    const { field, value } = event;
+  // onInputValueChange(event: { field: keyof string; value: any }) {
+  //   const { field, value } = event;
 
-    (this.SupjectTeacher as any)[field] = value;
-    if (value) {
-      this.validationErrors[field] = '';
-    }
-  }
+  //   (this.SupjectCoTeacher as any)[field] = value;
+  //   if (value) {
+  //     [field] = '';
+  //   }
+  // }
 }
