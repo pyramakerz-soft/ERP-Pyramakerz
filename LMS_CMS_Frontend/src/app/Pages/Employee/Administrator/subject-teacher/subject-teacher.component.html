@@ -1,0 +1,109 @@
+<div class="flex justify-between items-between mb-5">
+    <div class="flex justify-between items-center space-x-5">
+        <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToEmployee()"></i>
+        <h1 class="primaryTxt font-semibold text-2xl leading-9">{{employee.user_Name}} / SupjectTeacher</h1>
+    </div>
+    <button (click)="Add()" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg">
+        Add
+    </button>
+</div>
+
+<!-- Parent toggle -->
+<div class="flex items-center justify-between">
+    <div class="flex items-center justify-between px-4 py-2 bg-[#f1f1f1] rounded cursor-pointer font-bold"
+        (click)="toggleAllClassrooms()">
+        <div class="flex items-center space-x-3">
+            <div class="px-3 py-[6px] rounded bg-white secondaryTxt border border-[#394B6E]">
+                <i class="fa-solid" [ngClass]="{
+                    'fa-chevron-down': !areAllClassroomsOpen,
+                    'fa-chevron-up': areAllClassroomsOpen
+                }"></i>
+            </div>
+            <span class="primaryTxt font-semibold text-2xl leading-9">
+                Classrooms
+            </span>
+        </div>
+    </div>
+</div>
+
+<!-- All Classrooms -->
+<div *ngIf="areAllClassroomsOpen">
+    <div *ngFor="let item of SupjectTeacherData" class="my-4  mx-14 w-[40%]">
+        <!-- Classroom Header -->
+        <div class="flex items-center space-x-2 p-2 rounded cursor-pointer primaryBg text-white"
+            (click)="toggleChildren(item)">
+            <div class="px-3 py-[6px] rounded bg-white secondaryTxt">
+                <i class="fa-solid" [ngClass]="{
+            'fa-chevron-down': !item.isOpen,
+            'fa-chevron-up': item.isOpen
+          }"></i>
+            </div>
+
+            <div class="flex items-center space-x-2">
+                <p>{{ item.classroomName }}</p>
+            </div>
+        </div>
+
+        <!-- Subject Children -->
+        <div *ngIf="item.isOpen && item.subjects?.length > 0" class="ml-11 mt-2 space-y-2">
+            <div *ngFor="let subject of item.subjects" class="flex items-center space-x-3 p-2 rounded text-[#333333]">
+                <div class="flex flex-col">
+                    <p class="font-semibold">{{ subject.subjectEnglishName }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Add-Edit School Type Modal -->
+<div id="Add_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
+    <div class="bg-white rounded-2xl p-12 w-1/2">
+        <div class="flex justify-between items-center">
+            <h1 class="font-semibold text-2xl leading-9">Add Classroom & Subject</h1>
+            <button (click)="closeModal()" type="button"
+                class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
+        </div>
+
+        <div class="mt-6 mb-4 flex flex-wrap justify-between">
+            <div class="flex flex-col w-full mb-4">
+                <label for="Class" class="block mb-2 text-sm font-medium text-gray-900">Classroom</label>
+                <select id="Class"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+                    [(ngModel)]="SupjectTeacher.classroomID" (change)="GetSubjectByClassroom()"
+                    (ngModelChange)="onInputValueChange({ field: 'classroomID', value: $event })">
+                    <option value="0" disabled selected hidden>Select a class</option>
+                    <option *ngFor="let ac of Classrooms" [value]="ac.id">
+                        {{ ac.name }}
+                    </option>
+                </select>
+                <span *ngIf="validationErrors['classroomID']" class="text-red-500 ml-3 font-normal">{{
+                    validationErrors['classroomID'] }}</span>
+            </div>
+
+            <div class="flex flex-col w-full mb-4">
+                <label for="Class" class="block mb-2 text-sm font-medium text-gray-900">Subject</label>
+                <select id="Class"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+                    [(ngModel)]="SupjectTeacher.id" [disabled]="!SupjectTeacher.classroomID"
+                    (ngModelChange)="onInputValueChange({ field: 'subjectID', value: $event })">
+                    <option value=0 disabled selected hidden>Select a class</option>
+                    <option *ngFor="let ac of subject" [value]="ac.id">
+                        {{ ac.subjectEnglishName }}
+                    </option>
+                </select>
+                <span *ngIf="validationErrors['subjectID']" class="text-red-500 ml-3 font-normal">{{
+                    validationErrors['subjectID'] }}</span>
+            </div>
+
+        </div>
+
+        <div class="flex justify-end">
+            <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
+                (click)="AddSupjectTeacher()">
+                <span *ngIf="!isLoading">Save</span>
+                <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+            </button>
+        </div>
+    </div>
+</div>

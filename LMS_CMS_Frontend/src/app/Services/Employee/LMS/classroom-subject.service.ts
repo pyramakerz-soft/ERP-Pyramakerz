@@ -2,6 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ApiService } from '../../api.service';
 import { ClassroomSubject } from '../../../Models/LMS/classroom-subject';
+import { ClassroomSubjectGroupBy } from '../../../Models/LMS/classroom-subject-group-by';
 
 @Injectable({
   providedIn: 'root'
@@ -24,6 +25,18 @@ export class ClassroomSubjectService {
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
     return this.http.get<ClassroomSubject[]>(`${this.baseUrl}/ClassroomSubject/GetByClassroom/${classID}`, { headers });
+  }
+
+  GetByEmpId(EmpId:number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<ClassroomSubjectGroupBy[]>(`${this.baseUrl}/ClassroomSubject/GetByEmployee/${EmpId}`, { headers });
   }
 
   GetByID(id:number, DomainName: string) {

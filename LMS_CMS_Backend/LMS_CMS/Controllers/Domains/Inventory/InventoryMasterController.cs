@@ -318,9 +318,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
         [HttpPost]
         [Authorize_Endpoint_(
-      allowedTypes: new[] { "octa", "employee" },
-      pages: new[] { "Inventory" }
-  )]
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Inventory" }
+        )]
         public async Task<IActionResult> Add([FromForm] InventoryMasterAddDTO newData)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -866,6 +866,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                     sale.UpdatedByOctaId = null;
                 }
             }
+
+            sale.VatAmount = sale.Total * sale.VatPercent;
+            sale.TotalWithVat = sale.Total + sale.VatAmount;
 
             Unit_Of_Work.inventoryMaster_Repository.Update(sale);
             Unit_Of_Work.SaveChanges();

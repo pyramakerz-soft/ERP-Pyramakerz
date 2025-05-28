@@ -5,6 +5,7 @@ using LMS_CMS_DAL.Models.Domains.Inventory;
 using LMS_CMS_DAL.Models.Domains.Zatca;
 using LMS_CMS_PL.Services;
 using LMS_CMS_PL.Services.Zatca;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -17,6 +18,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 {
     [Route("api/with-domain/[controller]")]
     [ApiController]
+    //[Authorize]
     public class ZatcaController : ControllerBase
     {
         private readonly ICsrGenerator _csrGenerator;
@@ -416,16 +418,11 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
             DateTime start = DateTime.Parse(startDate).Date;
             DateTime end = DateTime.Parse(endDate).Date;
 
-            //List<InventoryMaster> masters = await Unit_Of_Work.inventoryMaster_Repository.Select_All_With_IncludesById_Pagination<InventoryMaster>(
-            //    d => d.SchoolId == schoolId && DateTime.Parse(d.Date).Date == start && DateTime.Parse(d.Date) <= end && d.IsDeleted != true,
-            //    query => query.Include(s => s.School)
-            //)
-            //    .Skip((pageNumber - 1) * pageSize)
-            //    .Take(pageSize)
-            //    .ToListAsync();
-
             List<InventoryMaster> mastersBySchool = await Unit_Of_Work.inventoryMaster_Repository.Select_All_With_IncludesById_Pagination<InventoryMaster>(
-                d => d.SchoolId == schoolId && d.IsDeleted != true).ToListAsync();
+                d => d.SchoolId == schoolId && 
+                d.IsDeleted != true &&
+                d.FlagId == 11 || d.FlagId == 12)
+                .ToListAsync();
 
             if (mastersBySchool is null || mastersBySchool.Count == 0)
                 return NotFound("No invoices found.");

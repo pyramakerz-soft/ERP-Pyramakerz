@@ -40,8 +40,14 @@ namespace LMS_CMS_BL.DTO
         [Required]
         public long EmployeeTypeID { get; set; }
 
-        public List<int>? NewFloorsSelected { get; set; } = new();
-        public List<int>? DeletedFloorsSelected { get; set; } = new();
+        public List<long>? NewFloorsSelected { get; set; } = new();
+        public List<long>? DeletedFloorsSelected { get; set; } = new();
+
+        public List<long>? NewGradesSelected { get; set; } = new();
+        public List<long>? DeletedGradesSelected { get; set; } = new();
+
+        public List<long>? NewSubjectsSelected { get; set; } = new();
+        public List<long>? DeletedSubjectsSelected { get; set; } = new();
 
     }
 }

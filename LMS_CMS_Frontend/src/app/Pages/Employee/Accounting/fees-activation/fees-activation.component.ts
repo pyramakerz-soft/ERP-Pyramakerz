@@ -124,13 +124,13 @@ export class FeesActivationComponent {
  
     this.GetAllSchools(); 
     this.GetAllTuitionFeesType();
-    this.GetAllDiscountType()
+    this.GetAllDiscountType() 
   } 
 
   GetAllFeesData() {
     this.TableData = []
     this.feesActivationServ.Get(this.GradeId, this.ClassRoomId, this.StudentId, this.DomainName).subscribe((d) => {
-      this.TableData = d; 
+      this.TableData = d;  
     })
   }
 

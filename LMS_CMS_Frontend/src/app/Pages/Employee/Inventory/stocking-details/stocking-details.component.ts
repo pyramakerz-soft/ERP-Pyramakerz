@@ -229,7 +229,7 @@ export class StockingDetailsComponent {
         insertedByUserId: 0,
         currentStock: item.currentStock,
         actualStock: 0,
-        theDifference: 0,
+        theDifference: -1 * item.currentStock,
         shopItemID: item.id,
         stockingId: this.MasterId,
         shopItemName: item.enName,
@@ -283,14 +283,14 @@ export class StockingDetailsComponent {
         this.DomainName
       ).subscribe((d) => {
         this.ShopItems = d;
-        if ((this, this.AllItems)) {
+        if (this.AllItems) {
           this.FilteredDetails = this.ShopItems.map((item) => ({
             id: Date.now() + Math.floor(Math.random() * 1000),
             insertedAt: '',
             insertedByUserId: 0,
             currentStock: item.currentStock,
             actualStock: 0,
-            theDifference: 0,
+            theDifference: -1 * item.currentStock,
             shopItemID: item.id,
             stockingId: this.MasterId,
             shopItemName: item.enName,
@@ -329,32 +329,35 @@ export class StockingDetailsComponent {
   }
 
   selectShopItem(item: ShopItem) {
+    this.SelectedSopItem = item;
+
     const newItem = {
       id: Date.now() + Math.floor(Math.random() * 1000),
       insertedAt: '',
       insertedByUserId: 0,
       currentStock: item.currentStock,
       actualStock: 0,
-      theDifference: 0,
+      theDifference: -1 * item.currentStock,
       shopItemID: item.id,
       stockingId: this.MasterId,
       shopItemName: item.enName,
       barCode: item.barCode,
       ItemPrice: item.purchasePrice ?? 0,
     };
+
     this.OriginDetails.push(newItem);
     if (this.mode === 'Create') {
-      this.Data.stockingDetails.push(newItem);
       if (this.HasBallance) {
-        this.Data.stockingDetails = this.OriginDetails.filter(
-          (d) => d.currentStock != 0
-        );
+        this.Data.stockingDetails = this.OriginDetails.filter(d => d.currentStock != 0);
+      } else {
+        this.Data.stockingDetails.push(newItem);
       }
     } else if (this.mode === 'Edit') {
-      this.TableData.push(newItem);
       this.NewDetailsWhenEdit.push(newItem);
       if (this.HasBallance) {
-        this.TableData = this.OriginDetails.filter((d) => d.currentStock != 0);
+        this.TableData = this.OriginDetails.filter(d => d.currentStock != 0);
+      } else {
+        this.TableData.push(newItem);
       }
     }
   }
@@ -384,7 +387,7 @@ export class StockingDetailsComponent {
           insertedByUserId: 0,
           currentStock: d.currentStock,
           actualStock: 0,
-          theDifference: 0,
+          theDifference: -1 * d.currentStock,
           shopItemID: d.id,
           stockingId: this.MasterId,
           shopItemName: d.arName,
@@ -429,11 +432,7 @@ export class StockingDetailsComponent {
       ).subscribe(
         (d) => {
           this.TableData = d;
-          this.TableData = this.TableData.map((row) => ({
-            ...row,
-            stockingId: this.MasterId,
-          }));
-          this.OriginDetails = this.TableData;
+          this.OriginDetails = JSON.parse(JSON.stringify(d)); // ✅ Deep copy
           resolve();
         },
         (error) => {
@@ -744,8 +743,8 @@ export class StockingDetailsComponent {
     const minutes = String(now.getMinutes()).padStart(2, '0');
 
     var date = `${year}-${month}-${day}T${hours}:${minutes}`;
-    this.adiustmentDisbursement.date =date
-      this.adiustmentDisbursement.storeID = this.Data.storeID;
+    this.adiustmentDisbursement.date = date
+    this.adiustmentDisbursement.storeID = this.Data.storeID;
     this.adiustmentDisbursement.flagId = flagId;
 
     this.adiustmentDisbursement.inventoryDetails = this.TableData
@@ -766,7 +765,7 @@ export class StockingDetailsComponent {
           shopItemName: '',
           salesName: '',
           notes: '',
-          salesId :0 ,
+          salesId: 0,
           insertedByUserId: 0,
           shopItemID: item.shopItemID,
           quantity: adjustedQuantity,
@@ -818,36 +817,59 @@ export class StockingDetailsComponent {
     this.StoreAndDateSpanWhenPrint = false;
   }
 
-  async Blank() {
-    const backupTableData = JSON.parse(JSON.stringify(this.TableData)); // 🛡 Deep copy
-    this.TableData.forEach((row) => {
+  async Blank(): Promise<void> {
+    const isEditMode = this.mode === 'Edit';
+    const originalData = isEditMode
+      ? JSON.parse(JSON.stringify(this.TableData))
+      : JSON.parse(JSON.stringify(this.Data.stockingDetails));
+    const targetData = isEditMode ? this.TableData : this.Data.stockingDetails;
+    targetData.forEach(row => {
       row.actualStock = "";
       row.theDifference = "";
     });
     this.cdr.detectChanges();
-    return new Promise<void>((resolve) => {
+    await new Promise<void>(resolve =>
       setTimeout(async () => {
         await this.Print();
-        this.TableData = backupTableData; // ✅ Safe, not modified
+        if (isEditMode) {
+          this.TableData = originalData;
+        } else {
+          this.Data.stockingDetails = originalData;
+        }
         this.cdr.detectChanges();
         resolve();
-      }, 300);
-    });
+      }, 300)
+    );
   }
 
-  async Differences() {
-    const backupTableData = JSON.parse(JSON.stringify(this.TableData)); // 🛡 Deep copy
-    this.TableData = this.TableData.filter((f) => f.theDifference != 0);
+
+  async Differences(): Promise<void> {
+    const isEditMode = this.mode === 'Edit';
+    const originalData = isEditMode
+      ? [...this.TableData]
+      : [...this.Data.stockingDetails];
+    const filteredData = originalData.filter(f => f.theDifference !== 0);
+    if (isEditMode) {
+      this.TableData = filteredData;
+    } else {
+      this.Data.stockingDetails = filteredData;
+    }
     this.cdr.detectChanges();
-    return new Promise<void>((resolve) => {
+    await new Promise<void>(resolve =>
       setTimeout(async () => {
         await this.Print();
-        this.TableData = backupTableData;
+
+        if (isEditMode) {
+          this.TableData = originalData;
+        } else {
+          this.Data.stockingDetails = originalData;
+        }
         this.cdr.detectChanges();
         resolve();
-      }, 300);
-    });
+      }, 300)
+    );
   }
+
 
   async Print() {
     await this.formateData()
@@ -865,7 +887,6 @@ export class StockingDetailsComponent {
       body { 
             margin: 0; 
           }
-  
           @media print {
             body > *:not(#print-container) {
               display: none !important;

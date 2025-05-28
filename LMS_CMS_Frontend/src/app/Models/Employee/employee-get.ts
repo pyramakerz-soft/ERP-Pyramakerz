@@ -28,11 +28,11 @@ export class EmployeeGet {
         public newFloorsSelected :number []=[],
         public deletedFloorsSelected :number []=[],
         public gradeSelected :number []=[],
-        public newgradeSelected :number []=[],
-        public deletedgradeSelected :number []=[],
+        public newGradesSelected :number []=[],
+        public deletedGradesSelected :number []=[],
         public subjectSelected :number []=[],
-        public newsubjectSelected :number []=[],
-        public deletedsubjectSelected :number []=[],
+        public newSubjectsSelected :number []=[],
+        public deletedSubjectsSelected :number []=[],
     ) {}
 }
 

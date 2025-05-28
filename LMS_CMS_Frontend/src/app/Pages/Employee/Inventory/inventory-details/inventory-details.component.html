@@ -26,7 +26,7 @@
   <div class="flex flex-col w-[24%] mb-4">
     <label class="mb-2" for="store">Store</label>
     <select *ngIf="!IsPrint" class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Store"
-      (change)="GetCategories()" (ngModelChange)="onInputValueChange({ field: 'storeID', value: $event })"
+      (change)="StoreChanged()" (ngModelChange)="onInputValueChange({ field: 'storeID', value: $event })"
       [(ngModel)]="Data.storeID">
       <option [value]="0" disabled selected hidden>Choose Store</option>
       <option *ngFor="let s of Stores" [value]="s.id">{{ s.name }}</option>
@@ -92,11 +92,11 @@
       validationErrors["schoolPCId"]}}</span>
   </div>
 
-  <div *ngIf="FlagId == 8" class="flex flex-col w-[24%] mb-4">
+  <div *ngIf="FlagId == 8 " class="flex flex-col w-[24%] mb-4">
     <label class="mb-2" for="storeToTransform">Store</label>
     <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="storeToTransform"
       (ngModelChange)="
-        onInputValueChange({ field: 'storeToTransformId', value: $event })" [(ngModel)]="Data.storeToTransformId">
+        onInputValueChange({ field: 'storeToTransformId', value: $event })" [(ngModel)]="Data.storeToTransformId" [disabled]="Data.storeID == 0">
       <option [value]="0" disabled selected hidden>Choose Store</option>
       <option *ngFor="let stu of StoresForTitle" [value]="stu.id">
         {{ stu.name }}

@@ -4,6 +4,7 @@ using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains.ClinicModule;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,6 +12,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
 {
     [Route("api/with-domain/[controller]")]
     [ApiController]
+    [Authorize]
     public class HygieneFormController : ControllerBase
     {
         private readonly IMapper _mapper;
@@ -48,7 +50,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                     query => query.Include(h => h.Classroom),
                     query => query.Include(h => h.School),
                     query => query.Include(h => h.Grade),
-                    query => query.Include(h => h.StudentHygieneTypes)
+                    query => query.Include(h => h.StudentHygieneTypes)?.ThenInclude(x => x.HygieneTypes)
             );
 
             foreach (var ff in hygieneForms)
@@ -62,9 +64,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                     HygieneType hygieneType = new();
                     if (studentHygiene is not null)
                     {
-                        hygieneType = Unit_Of_Work.hygieneType_Repository.First_Or_Default(h => h.Id == studentHygiene.ID);
-
-                        dd.HygieneTypes.Add(hygieneType);
+                        hygieneType = Unit_Of_Work.hygieneType_Repository.First_Or_Default(h => h.Id == dd.Id);
+                        dd.HygieneTypes?.Add(hygieneType);
                     }
                 }
             }
@@ -106,7 +107,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                     query => query.Include(x => x.Classroom),
                     query => query.Include(x => x.School),
                     query => query.Include(x => x.Grade),
-                    query => query.Include(x => x.StudentHygieneTypes)
+                    query => query.Include(x => x.StudentHygieneTypes)?.ThenInclude(x => x.HygieneTypes)
                 );
 
             if (hygieneForm == null)

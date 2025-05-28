@@ -119,6 +119,49 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         /////////////////////////////////////////////////////////////////////////////////////////////
 
+        [HttpGet("GetByEmployee/{EmpId}")]
+        [Authorize_Endpoint_(
+             allowedTypes: new[] { "octa", "employee" },
+             pages: new[] { "Classroom Subject" }
+         )]
+        public async Task<IActionResult> GetByEmployeeAsync(long EmpId)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var classroomSubjects = await Unit_Of_Work.classroomSubject_Repository
+                .Select_All_With_IncludesById<ClassroomSubject>(
+                    f => f.IsDeleted != true && f.TeacherID == EmpId,
+                    q => q.Include(cs => cs.Subject),
+                    q => q.Include(cs => cs.Classroom),
+                    q => q.Include(cs => cs.Teacher),
+                    q => q.Include(cs => cs.ClassroomSubjectCoTeachers.Where(c => c.IsDeleted != true)).ThenInclude(c => c.CoTeacher)
+                );
+
+            if (classroomSubjects == null || classroomSubjects.Count == 0)
+            {
+                return NotFound();
+            }
+
+            var classroomSubjectsDTO = mapper.Map<List<ClassroomSubjectGetDTO>>(classroomSubjects);
+
+            // Group by ClassroomID and build result
+            var grouped = classroomSubjectsDTO
+                .GroupBy(x => x.ClassroomID)
+                .Select(g => new ClassroomWithSubjectsDTO
+                {
+                    ClassroomID = g.Key,
+                    ClassroomName = classroomSubjects
+                        .FirstOrDefault(cs => cs.ClassroomID == g.Key)?.Classroom?.Name ?? "",
+                    Subjects = g.ToList()
+                })
+                .ToList();
+
+            return Ok(grouped);
+        }
+
+        /////////////////////////////////////////////////////////////////////////////////////////////
+
+
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },

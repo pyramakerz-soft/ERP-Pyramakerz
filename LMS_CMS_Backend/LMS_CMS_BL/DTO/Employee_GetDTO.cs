@@ -42,6 +42,9 @@ namespace LMS_CMS_BL.DTO
         public bool? CanReceiveMessage { get; set; }
         public List<EmployeeAttachmentDTO>? Files { get; set; }
         public List<long>? FloorsSelected { get; set; }
+        public List<long>? GradeSelected { get; set; }
+        public List<long>? SubjectSelected { get; set; }
+
 
 
 

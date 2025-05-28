@@ -112,7 +112,7 @@ export class EmployeeAddEditComponent {
             this.DomainName
           ).subscribe(async (data) => {
             this.Data = data;
-            console.log(this.Data);
+            console.log(55,data);
             this.Data.editedFiles = [];
             console.log(this.Data);
             if (data.files == null) {
@@ -121,10 +121,28 @@ export class EmployeeAddEditComponent {
             this.Data.id = this.EmpId;
             this.FloorServ.Get(this.DomainName).subscribe((data) => {
               this.floors = data;
-              if(this.Data.floorsSelected){
+              if(this.Data.floorsSelected.length>0){
                 this.isFloorMonitor=true
                 this.floorsSelected = this.floors.filter((s) =>
                   this.Data.floorsSelected.includes(s.id)
+                );
+              }
+            });
+            this.GradeServ.Get(this.DomainName).subscribe((data) => {
+              this.grades = data;
+              if(this.Data.gradeSelected.length>0){
+                this.isGradeSupervisor=true
+                this.gradeSelected = this.grades.filter((s) =>
+                  this.Data.gradeSelected.includes(s.id)
+                );
+              }
+            });
+            this.SubjectServ.Get(this.DomainName).subscribe((data) => {
+              this.subject = data;
+              if(this.Data.subjectSelected.length>0){
+                this.isSubjectSupervisor=true
+                this.subjectSelected = this.subject.filter((s) =>
+                  this.Data.subjectSelected.includes(s.id)
                 );
               }
             });
@@ -292,6 +310,8 @@ export class EmployeeAddEditComponent {
 
   async Save() {
     this.Data.floorsSelected = this.floorsSelected.map((s) => s.id);
+    this.Data.gradeSelected = this.gradeSelected.map((s) => s.id);
+    this.Data.subjectSelected = this.subjectSelected.map((s) => s.id);
     if (this.isFormValid()) {
       this.isLoading = true;
       for (let i = 0; i < this.SelectedFiles.length; i++) {
@@ -492,10 +512,10 @@ export class EmployeeAddEditComponent {
       this.gradeSelected.push(Type);
     }
     if (this.mode == 'Edit') {
-      if (!Array.isArray(this.Data.newgradeSelected)) {
-        this.Data.newgradeSelected = [];
+      if (!Array.isArray(this.Data.newGradesSelected)) {
+        this.Data.newGradesSelected = [];
       }
-      this.Data.newgradeSelected.push(Type.id);
+      this.Data.newGradesSelected.push(Type.id);
     }
     this.GradedropdownOpen = false;
   }
@@ -505,8 +525,8 @@ export class EmployeeAddEditComponent {
     if (index === -1) return; // Tag not found
     const removed = this.gradeSelected.splice(index, 1)[0];
     if (this.mode === 'Edit' && removed?.id !== 0) {
-      this.Data.deletedgradeSelected = this.Data.deletedgradeSelected || [];
-      this.Data.deletedgradeSelected.push(removed.id);
+      this.Data.deletedGradesSelected = this.Data.deletedGradesSelected || [];
+      this.Data.deletedGradesSelected.push(removed.id);
     }
   }
 
@@ -521,10 +541,10 @@ export class EmployeeAddEditComponent {
       this.subjectSelected.push(Type);
     }
     if (this.mode == 'Edit') {
-      if (!Array.isArray(this.Data.newsubjectSelected)) {
-        this.Data.newsubjectSelected = [];
+      if (!Array.isArray(this.Data.newSubjectsSelected)) {
+        this.Data.newSubjectsSelected = [];
       }
-      this.Data.newsubjectSelected.push(Type.id);
+      this.Data.newSubjectsSelected.push(Type.id);
     }
     this.SubjectdropdownOpen = false;
   }
@@ -534,8 +554,8 @@ export class EmployeeAddEditComponent {
     if (index === -1) return; // Tag not found
     const removed = this.subjectSelected.splice(index, 1)[0];
     if (this.mode === 'Edit' && removed?.id !== 0) {
-      this.Data.deletedsubjectSelected = this.Data.deletedsubjectSelected || [];
-      this.Data.deletedsubjectSelected.push(removed.id);
+      this.Data.deletedSubjectsSelected = this.Data.deletedSubjectsSelected || [];
+      this.Data.deletedSubjectsSelected.push(removed.id);
     }
   }
 }

@@ -3,11 +3,18 @@
         <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToEmployee()"></i>
         <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ Data.user_Name }}</h1>
     </div>
-    <button 
-    (click)="edit()"
-    class="bg-[#6F6F6F] text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2">
-        Edit
-    </button>
+    <div class="flex justify-between items-center space-x-5">
+        <button class="underline text-[#1E1E1E] cursor-pointer" (click)="SubjectTeacher()">
+            Subject Teacher
+        </button>
+        <button class="underline text-[#1E1E1E] cursor-pointer" (click)="SubjectCoTeacher()">
+            Subject Co-Teacher
+        </button>
+        <button (click)="edit()"
+            class="bg-[#6F6F6F] text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2">
+            Edit
+        </button>
+    </div>
 </div>
 
 <div class="flex flex-wrap justify-between mt-5">
@@ -58,12 +65,15 @@
 </div>
 <div *ngIf="AllowEdit && IsAllowEdit()" class="w-full md:w-1/2">
     <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">Password</p>
-    <button *ngIf="!isChange" class="bg-[#089B41] text-white p-2 rounded-lg text-sm md:text-base" (click)="toggleChangePassword()">Change Password</button>
-    <button *ngIf="isChange" class="bg-[#089B41] text-white p-2 rounded-lg text-sm md:text-base" (click)="UpdatePassword()">Update</button>
-    <button *ngIf="isChange" class="bg-[#17253E] text-white p-2 rounded-lg text-sm md:text-base ml-3" (click)="CancelUpdatePassword()">Cancel</button>
-    
-    <input *ngIf="isChange" type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl mt-2" placeholder="Enter the password"
-    (input)="onPasswordChange()" [(ngModel)]="password">
+    <button *ngIf="!isChange" class="bg-[#089B41] text-white p-2 rounded-lg text-sm md:text-base"
+        (click)="toggleChangePassword()">Change Password</button>
+    <button *ngIf="isChange" class="bg-[#089B41] text-white p-2 rounded-lg text-sm md:text-base"
+        (click)="UpdatePassword()">Update</button>
+    <button *ngIf="isChange" class="bg-[#17253E] text-white p-2 rounded-lg text-sm md:text-base ml-3"
+        (click)="CancelUpdatePassword()">Cancel</button>
+
+    <input *ngIf="isChange" type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl mt-2"
+        placeholder="Enter the password" (input)="onPasswordChange()" [(ngModel)]="password">
     <span *ngIf="PasswordError" class="text-red-500 text-sm font-normal">{{ PasswordError }}</span>
 </div>
 

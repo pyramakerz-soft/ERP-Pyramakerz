@@ -257,48 +257,7 @@ export class SuppliersComponent {
     const emailPattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
     if (this.Supplier.email && !emailPattern.test(this.Supplier.email)) {
       isValid = false;
-      Swal.fire({
-        icon: 'warning',
-        title: 'Warning!',
-        text: 'Email is not valid.',
-        confirmButtonColor: '#089B41',
-      });
-    }
-
-    const phoenPattern = /^0(10|11|12|15)\d{8}$/;
-
-    if (this.Supplier.email && !phoenPattern.test(this.Supplier.phone1)) {
-      isValid = false;
-      Swal.fire({
-        icon: 'warning',
-        title: 'Warning!',
-        text: 'Phone 1 is not valid.',
-        confirmButtonColor: '#089B41',
-      });
-    }
-
-    if (this.Supplier.phone2) {
-      if (this.Supplier.email && !phoenPattern.test(this.Supplier.phone2)) {
-        isValid = false;
-        Swal.fire({
-          icon: 'warning',
-          title: 'Warning!',
-          text: 'Phone 2 is not valid.',
-          confirmButtonColor: '#089B41',
-        });
-      }
-    }
-
-    if (this.Supplier.phone3) {
-      if (this.Supplier.email && !phoenPattern.test(this.Supplier.phone3)) {
-        isValid = false;
-        Swal.fire({
-          icon: 'warning',
-          title: 'Warning!',
-          text: 'Phone 3 is not valid.',
-          confirmButtonColor: '#089B41',
-        });
-      }
+      this.validationErrors['email']='Email is not valid.'
     }
 
     return isValid;
