@@ -128,7 +128,7 @@ export class LessonLiveComponent {
     this.ClassesForFilter = []
 
     if (this.selectedYear){
-      this.ClassroomServ.GetByAcYearId(this.selectedSchool, this.DomainName).subscribe(
+      this.ClassroomServ.GetByAcYearId(this.selectedYear, this.DomainName).subscribe(
         (data) => {
           this.ClassesForFilter = data
         }

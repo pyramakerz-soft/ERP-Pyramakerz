@@ -389,7 +389,7 @@ export const routes: Routes = [
         canActivate: [noNavigateWithoutLoginGuard, navigateIfStudentGuard],
         children: [
             { path: "", component: StudentHomeComponent, title: "StudentHome" },
-            { path: "Ecommerce/Shop", component: ShopComponent, title: "Shop" },
+            { path: "Ecommerce/The Shop", component: ShopComponent, title: "Shop" },
             { path: "Ecommerce/ShopItem/:id", component: ShopItemComponent, title: "Shop Item" },
             { path: "Ecommerce/Cart", component: CartComponent, title: "Cart" },
             { path: "Ecommerce/Order", component: OrderComponent, title: "Order" },

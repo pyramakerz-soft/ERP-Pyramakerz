@@ -506,6 +506,36 @@ namespace LMS_CMS_DAL.Models.Domains
             //     .HasForeignKey(p => p.GradeID)
             //     .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<StudentClassroom>()
+                 .HasOne(p => p.Classroom)
+                 .WithMany(p => p.StudentClassrooms)
+                 .HasForeignKey(p => p.ClassID)
+                 .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<StudentClassroom>()
+                 .HasOne(p => p.Student)
+                 .WithMany(p => p.StudentClassrooms)
+                 .HasForeignKey(p => p.StudentID)
+                 .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<StudentGrade>()
+                 .HasOne(p => p.Student)
+                 .WithMany(p => p.StudentGrades)
+                 .HasForeignKey(p => p.StudentID)
+                 .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<StudentGrade>()
+                 .HasOne(p => p.Grade)
+                 .WithMany(p => p.StudentGrades)
+                 .HasForeignKey(p => p.GradeID)
+                 .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<StudentGrade>()
+                 .HasOne(p => p.AcademicYear)
+                 .WithMany(p => p.StudentGrades)
+                 .HasForeignKey(p => p.AcademicYearID)
+                 .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<Subject>()
                  .HasOne(p => p.Grade)
                  .WithMany(p => p.Subjects)

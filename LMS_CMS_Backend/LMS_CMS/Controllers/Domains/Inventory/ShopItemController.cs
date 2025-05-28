@@ -210,8 +210,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         )]
         public async Task<IActionResult> GetBySubCategoryIDWithGenderAndGradeAndStudentID(long SubCategoryID, long StudentID, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string searchQuery = null)
         {
-            long gradeID = 1;
-            long genderID = 1;
+            long gradeID = 0;
+            long genderID = 0;
 
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
             long.TryParse(userIdClaim, out long userId);
@@ -257,7 +257,19 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             //    d => d.IsDeleted != true && d.StudentID == StudentID && d.Classroom.AcademicYear.IsActive == true
             //    );
 
-            //gradeID = studentAcademicYear.GradeID;
+            StudentGrade studentGrade = Unit_Of_Work.studentGrade_Repository.First_Or_Default(
+                d => d.IsDeleted != true && d.StudentID == StudentID && d.AcademicYear.IsActive == true
+                );
+
+            if(studentGrade != null)
+            {
+                gradeID = studentGrade.GradeID;
+            }
+
+            if(gradeID == 0 || genderID == 0)
+            {
+                return NotFound("Student Isn't Assigned to Grade or Doesn't have Gender");
+            }
 
             shopItemQuery = shopItemQuery.Where(s => s.GenderID == genderID || s.GenderID == null);
             shopItemQuery = shopItemQuery.Where(s => s.GradeID == gradeID || s.GradeID == null); 
