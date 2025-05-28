@@ -143,6 +143,7 @@ export class FeesActivationComponent {
   GetAllStudentData() {
     this.StudentAcademicYearServ.Get(this.DomainName).subscribe((d) => {
       this.Students = d
+      console.log(this.Students)
       this.StudentsOriginal = d
     })
   }
@@ -150,6 +151,7 @@ export class FeesActivationComponent {
   GetAllFeesData() {
     this.feesActivationServ.Get(this.DomainName).subscribe((d) => {
       this.TableDataStudentOriginal = d;
+      console.log(d)
       // this.TableData = d
     })
   }

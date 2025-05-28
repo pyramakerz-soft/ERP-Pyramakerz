@@ -285,7 +285,6 @@ export class InventoryDetailsComponent {
   GetAllStores() {
     this.storeServ.Get(this.DomainName).subscribe((d) => {
       this.Stores = d;
-      this.StoresForTitle = d;
     });
   }
 
@@ -329,6 +328,15 @@ export class InventoryDetailsComponent {
       console.log(this.Data, d)
       this.GetCategories();
     });
+  }
+
+  StoreChanged(){
+    this.GetCategories()
+    if(this.FlagId == 8){
+      this.Data.storeToTransformId=0
+      this.StoresForTitle =[]
+      this.StoresForTitle = this.Stores.filter(s=>s.id!=this.Data.storeID);
+    }
   }
 
   GetCategories() {
@@ -441,6 +449,7 @@ export class InventoryDetailsComponent {
       if (this.mode == 'Create') {
         this.salesServ.Add(this.Data, this.DomainName).subscribe(
           (d) => {
+            console.log(d)
             this.MasterId = d;
             if (this.EditedShopItems.length > 0) {
               this.EditedShopItems.forEach((element) => {

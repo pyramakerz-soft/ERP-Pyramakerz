@@ -887,7 +887,6 @@ export class StockingDetailsComponent {
       body { 
             margin: 0; 
           }
-  
           @media print {
             body > *:not(#print-container) {
               display: none !important;

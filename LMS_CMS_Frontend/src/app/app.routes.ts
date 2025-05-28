@@ -164,6 +164,8 @@ import { LessonLiveUIComponent } from './Pages/Student/LMS/UI/lesson-live/lesson
 import { WeightTypeComponent } from './Pages/Employee/LMS/weight-type/weight-type.component';
 import { ClassroomStudentsComponent } from './Pages/Employee/LMS/classroom-students/classroom-students.component';
 import { ClassroomSubjectsComponent } from './Pages/Employee/LMS/classroom-subjects/classroom-subjects.component';
+import { SubjectTeacherComponent } from './Pages/Employee/Administrator/subject-teacher/subject-teacher.component';
+import { SubjectCoTeacherComponent } from './Pages/Employee/Administrator/subject-co-teacher/subject-co-teacher.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -367,6 +369,9 @@ export const routes: Routes = [
             { path: "Classroom Students/:id", component: ClassroomStudentsComponent, title: "Classroom Students", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Classroom Subject/:id", component: ClassroomSubjectsComponent, title: "Classroom Subject", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Question Bank", component: QuestionBankComponent, title: "Question Bank", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Subject Teacher/:id", component: SubjectTeacherComponent, title: "Subject Teacher", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Subject Co-Teacher/:id", component: SubjectCoTeacherComponent, title: "Subject Co-Teacher", canActivate: [noNavigateWithoutLoginGuard] },
+
         ]
     },
     {
