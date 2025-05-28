@@ -161,6 +161,52 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         /////////////////////////////////////////////////////////////////////////////////////////////
 
+        [HttpGet("GetByEmployeeCoTeacher/{EmpId}")]
+        [Authorize_Endpoint_(
+             allowedTypes: new[] { "octa", "employee" },
+             pages: new[] { "Classroom Subject" }
+         )]
+        public async Task<IActionResult> GetByEmployeeCoTeacherAsync(long EmpId)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            List<ClassroomSubjectCoTeacher> classroomSubjectCoTeacher = Unit_Of_Work.classroomSubjectCoTeacher_Repository.FindBy(s => s.CoTeacherID == EmpId && s.IsDeleted != true);
+            List<long> subjectIds = classroomSubjectCoTeacher
+                .Select(v => v.ClassroomSubjectID)
+                .Distinct()
+                .ToList();
+
+           var classroomSubjects = await Unit_Of_Work.classroomSubject_Repository
+                .Select_All_With_IncludesById<ClassroomSubject>(
+                    f => f.IsDeleted != true && subjectIds.Contains( f.ID) ,
+                    q => q.Include(cs => cs.Subject),
+                    q => q.Include(cs => cs.Classroom)
+                );
+
+            if (classroomSubjects == null || classroomSubjects.Count == 0)
+            {
+                return NotFound();
+            }
+
+            var classroomSubjectsDTO = mapper.Map<List<ClassroomSubjectGetDTO>>(classroomSubjects);
+
+            // Group by ClassroomID and build result
+            var grouped = classroomSubjectsDTO
+                .GroupBy(x => x.ClassroomID)
+                .Select(g => new ClassroomWithSubjectsDTO
+                {
+                    ClassroomID = g.Key,
+                    ClassroomName = classroomSubjects
+                        .FirstOrDefault(cs => cs.ClassroomID == g.Key)?.Classroom?.Name ?? "",
+                    Subjects = g.ToList()
+                })
+                .ToList();
+
+            return Ok(grouped);
+        }
+
+        /////////////////////////////////////////////////////////////////////////////////////////////
+
 
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
@@ -356,8 +402,76 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             return Ok();
         }
+
         /////////////////////////////////////////////////////////////////////////////////////////////
-        
+
+        [HttpPost]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            allowEdit: 1,
+            pages: new[] { "Classroom Subject" }
+        )]
+        public IActionResult AddCoTeacher(ClassroomSubjectCoTeacherGetDTO NewCoTeacher)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID, Type claim not found.");
+            }
+
+            if (NewCoTeacher == null)
+            {
+                return BadRequest("CoTeacher cannot be null");
+            }
+
+            ClassroomSubject classroomSubject = Unit_Of_Work.classroomSubject_Repository.First_Or_Default(s=>s.ID== NewCoTeacher.ClassroomSubjectID && s.IsDeleted!= true);
+            if(classroomSubject == null)
+            {
+                return BadRequest("ClassroomSubject not found");
+            }
+
+            Employee employee = Unit_Of_Work.employee_Repository.First_Or_Default(s => s.ID == NewCoTeacher.CoTeacherID && s.IsDeleted != true);
+            if (employee == null)
+            {
+                return BadRequest("employee not found");
+            }
+
+            ClassroomSubjectCoTeacher classroomSubjectCoTeacher = Unit_Of_Work.classroomSubjectCoTeacher_Repository.First_Or_Default(s=>s.ClassroomSubjectID== NewCoTeacher.ClassroomSubjectID && s.CoTeacherID==NewCoTeacher.CoTeacherID);
+            if(classroomSubjectCoTeacher != null)
+            {
+                if(classroomSubjectCoTeacher.IsDeleted == true)
+                {
+                    classroomSubjectCoTeacher.IsDeleted=null;
+                    Unit_Of_Work.classroomSubjectCoTeacher_Repository.Update(classroomSubjectCoTeacher);
+                    Unit_Of_Work.SaveChanges();
+                }
+                else
+                {
+                    return Ok();
+                }
+
+            }
+            else
+            {
+                classroomSubjectCoTeacher = new ClassroomSubjectCoTeacher();
+                classroomSubjectCoTeacher.ClassroomSubjectID = NewCoTeacher.ClassroomSubjectID;
+                classroomSubjectCoTeacher.CoTeacherID=NewCoTeacher.CoTeacherID;
+                Unit_Of_Work.classroomSubjectCoTeacher_Repository.Add(classroomSubjectCoTeacher);
+                Unit_Of_Work.SaveChanges();
+            }
+
+            return Ok();
+        }
+        /////////////////////////////////////////////////////////////////////////////////////////////
+
         [HttpPut("IsSubjectHide")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
