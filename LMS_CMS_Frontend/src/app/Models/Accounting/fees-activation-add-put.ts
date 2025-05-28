@@ -1,12 +1,9 @@
-export class FeesActivationAddPut {
-    push(fee: FeesActivationAddPut) {
-      throw new Error('Method not implemented.');
-    }
+export class FeesActivationAddPut { 
     constructor(
         public feeActivationID: number = 0,
-        public amount: number = 0,
-        public discount: number = 0,
-        public net: number = 0,
+        public amount: number|null = null,
+        public discount: number|null = null,
+        public net: number|null = null,
         public date: string ="",
         public feeTypeID: number = 0,
         public feeDiscountTypeID: number = 0,

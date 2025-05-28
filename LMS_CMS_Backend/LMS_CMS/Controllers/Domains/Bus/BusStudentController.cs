@@ -65,9 +65,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Bus
             busStudents = await Unit_Of_Work.busStudent_Repository.Select_All_With_IncludesById<BusStudent>(
                 bus => bus.BusID == busId && bus.IsDeleted != true,
                 query => query.Include(bus => bus.Bus),
-                query => query.Include(stu => stu.Student).ThenInclude(stu => stu.StudentAcademicYears),
+                query => query.Include(stu => stu.Student),
                 query => query.Include(busCat => busCat.BusCategory),
-                query => query.Include(sem => sem.Semester).ThenInclude(st => st.AcademicYear).ThenInclude(st => st.School) 
+                query => query.Include(sem => sem.Semester).ThenInclude(st => st.AcademicYear).ThenInclude(st => st.School)
             );
 
             if (busStudents == null || busStudents.Count == 0)
@@ -81,7 +81,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Bus
 
             foreach (var busStudent in busStudents)
             {
-                if(busStudent.IsException == true)
+                if (busStudent.IsException == true)
                 {
                     if (!string.IsNullOrEmpty(busStudent.ExceptionFromDate) && !string.IsNullOrEmpty(busStudent.ExceptionToDate))
                     {
@@ -107,24 +107,52 @@ namespace LMS_CMS_PL.Controllers.Domains.Bus
                 {
                     Semester semester = Unit_Of_Work.semester_Repository.First_Or_Default(s => s.ID == dto.SemseterID);
 
-                    var studentAcademicYear = Unit_Of_Work.studentAcademicYear_Repository
-                        .Last_Or_Default(s => s.StudentID == busStudent.StudentID && s.SchoolID == dto.SchoolID && s.IsDeleted != true &&
+                    //var studentAcademicYear = Unit_Of_Work.studentAcademicYear_Repository
+                    //    .Last_Or_Default(s => s.StudentID == busStudent.StudentID && s.SchoolID == dto.SchoolID && s.IsDeleted != true &&
+                    //    s.Classroom.AcademicYearID == semester.AcademicYearID,
+                    //    s => s.ID);
+
+                    //if (studentAcademicYear != null)
+                    //{
+                    //    dto.GradeID = studentAcademicYear.GradeID;
+                    //    var grade = Unit_Of_Work.grade_Repository.Select_By_Id(dto.GradeID);
+                    //    dto.GradeName = grade.Name;
+
+                    //    dto.SectionID = grade.SectionID;
+                    //    var section = Unit_Of_Work.section_Repository.Select_By_Id(dto.SectionID);
+                    //    dto.SectionName = section.Name;
+
+                    //    dto.ClassID = studentAcademicYear.ClassID;
+                    //    var classs = Unit_Of_Work.classroom_Repository.Select_By_Id(dto.ClassID);
+                    //    dto.ClassName = classs.Name;
+                    //}
+
+                    var studentGrade = Unit_Of_Work.studentGrade_Repository
+                        .Last_Or_Default(s => s.StudentID == busStudent.StudentID && s.IsDeleted != true &&
+                        s.AcademicYearID == semester.AcademicYearID,
+                        s => s.ID);
+
+                    var studentClass = Unit_Of_Work.studentClassroom_Repository
+                        .Last_Or_Default(s => s.StudentID == busStudent.StudentID && s.IsDeleted != true &&
                         s.Classroom.AcademicYearID == semester.AcademicYearID,
                         s => s.ID);
 
-                    if (studentAcademicYear != null)
+                    if (studentGrade != null)
                     {
-                        dto.GradeID = studentAcademicYear.GradeID;
+                        dto.GradeID = studentGrade.GradeID;
                         var grade = Unit_Of_Work.grade_Repository.Select_By_Id(dto.GradeID);
                         dto.GradeName = grade.Name;
 
                         dto.SectionID = grade.SectionID;
                         var section = Unit_Of_Work.section_Repository.Select_By_Id(dto.SectionID);
                         dto.SectionName = section.Name;
+                    }
 
-                        dto.ClassID = studentAcademicYear.ClassID;
-                        var classs = Unit_Of_Work.classroom_Repository.Select_By_Id(dto.ClassID);
-                        dto.ClassName = classs.Name;
+                    if (studentClass != null)
+                    { 
+                        dto.ClassID = studentClass.ClassID;
+                        var classroom = Unit_Of_Work.classroom_Repository.Select_By_Id(dto.SectionID);
+                        dto.ClassName = classroom.Name;
                     }
                 }
             }
@@ -160,7 +188,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Bus
             var busStudent = await Unit_Of_Work.busStudent_Repository.FindByIncludesAsync(
                 busStu => busStu.ID == Id && busStu.IsDeleted != true,
                 query => query.Include(bus => bus.Bus),
-                query => query.Include(stu => stu.Student).ThenInclude(stu => stu.StudentAcademicYears),
+                query => query.Include(stu => stu.Student),
                 query => query.Include(busCat => busCat.BusCategory),
                 query => query.Include(sem => sem.Semester).ThenInclude(st => st.AcademicYear).ThenInclude(st => st.School)
             );
@@ -173,24 +201,53 @@ namespace LMS_CMS_PL.Controllers.Domains.Bus
             BusStudentGetDTO busStudentDTO = mapper.Map<BusStudentGetDTO>(busStudent);
             Semester semester = Unit_Of_Work.semester_Repository.First_Or_Default(s => s.ID == busStudentDTO.SemseterID);
 
-            var studentAcademicYear = Unit_Of_Work.studentAcademicYear_Repository
-                    .Last_Or_Default(s => s.StudentID == busStudent.StudentID && s.SchoolID == busStudentDTO.SchoolID && s.IsDeleted != true &&
-                    s.Classroom.AcademicYearID == semester.AcademicYearID,
-                    s => s.ID);
+            //var studentAcademicYear = Unit_Of_Work.studentAcademicYear_Repository
+            //        .Last_Or_Default(s => s.StudentID == busStudent.StudentID && s.SchoolID == busStudentDTO.SchoolID && s.IsDeleted != true &&
+            //        s.Classroom.AcademicYearID == semester.AcademicYearID,
+            //        s => s.ID);
 
-            if (studentAcademicYear != null)
+            //if (studentAcademicYear != null)
+            //{
+            //    busStudentDTO.GradeID = studentAcademicYear.GradeID;
+            //    var grade = Unit_Of_Work.grade_Repository.Select_By_Id(busStudentDTO.GradeID);
+            //    busStudentDTO.GradeName = grade.Name;
+
+            //    busStudentDTO.SectionID = grade.SectionID;
+            //    var section = Unit_Of_Work.section_Repository.Select_By_Id(busStudentDTO.SectionID);
+            //    busStudentDTO.SectionName = section.Name;
+
+            //    busStudentDTO.ClassID = studentAcademicYear.ClassID;
+            //    var classs = Unit_Of_Work.classroom_Repository.Select_By_Id(busStudentDTO.ClassID);
+            //    busStudentDTO.ClassName = classs.Name;
+            //}
+
+
+            var studentGrade = Unit_Of_Work.studentGrade_Repository
+                .Last_Or_Default(s => s.StudentID == busStudent.StudentID && s.IsDeleted != true &&
+                s.AcademicYearID == semester.AcademicYearID,
+                s => s.ID);
+
+            var studentClass = Unit_Of_Work.studentClassroom_Repository
+                .Last_Or_Default(s => s.StudentID == busStudent.StudentID && s.IsDeleted != true &&
+                s.Classroom.AcademicYearID == semester.AcademicYearID,
+                s => s.ID);
+
+            if (studentGrade != null)
             {
-                busStudentDTO.GradeID = studentAcademicYear.GradeID;
+                busStudentDTO.GradeID = studentGrade.GradeID;
                 var grade = Unit_Of_Work.grade_Repository.Select_By_Id(busStudentDTO.GradeID);
                 busStudentDTO.GradeName = grade.Name;
-                
+
                 busStudentDTO.SectionID = grade.SectionID;
                 var section = Unit_Of_Work.section_Repository.Select_By_Id(busStudentDTO.SectionID);
                 busStudentDTO.SectionName = section.Name;
+            }
 
-                busStudentDTO.ClassID = studentAcademicYear.ClassID;
-                var classs = Unit_Of_Work.classroom_Repository.Select_By_Id(busStudentDTO.ClassID);
-                busStudentDTO.ClassName = classs.Name;
+            if (studentClass != null)
+            {
+                busStudentDTO.ClassID = studentClass.ClassID;
+                var classroom = Unit_Of_Work.classroom_Repository.Select_By_Id(busStudentDTO.SectionID);
+                busStudentDTO.ClassName = classroom.Name;
             }
 
             return Ok(busStudentDTO);

@@ -38,7 +38,7 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<BusCompany> BusCompany { get; set; }
         public DbSet<Bus> Bus { get; set; }
         public DbSet<BusStudent> BusStudent { get; set; }
-        public DbSet<StudentAcademicYear> StudentAcademicYear { get; set; }
+        //public DbSet<StudentAcademicYear> StudentAcademicYear { get; set; }
         public DbSet<Grade> Grade { get; set; }
         public DbSet<EmployeeAttachment> EmployeeAttachment { get; set; }
         public DbSet<Violation> Violation { get; set; }
@@ -482,28 +482,58 @@ namespace LMS_CMS_DAL.Models.Domains
                  .HasForeignKey(p => p.SemseterID)
                  .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<StudentAcademicYear>()
-                 .HasOne(p => p.Student)
-                 .WithMany(p => p.StudentAcademicYears)
-                 .HasForeignKey(p => p.StudentID)
-                 .OnDelete(DeleteBehavior.Restrict);
+            //modelBuilder.Entity<StudentAcademicYear>()
+            //     .HasOne(p => p.Student)
+            //     .WithMany(p => p.StudentAcademicYears)
+            //     .HasForeignKey(p => p.StudentID)
+            //     .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<StudentAcademicYear>()
-                 .HasOne(p => p.School)
-                 .WithMany(p => p.StudentAcademicYears)
-                 .HasForeignKey(p => p.SchoolID)
-                 .OnDelete(DeleteBehavior.Restrict);
+            //modelBuilder.Entity<StudentAcademicYear>()
+            //     .HasOne(p => p.School)
+            //     .WithMany(p => p.StudentAcademicYears)
+            //     .HasForeignKey(p => p.SchoolID)
+            //     .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<StudentAcademicYear>()
+            //modelBuilder.Entity<StudentAcademicYear>()
+            //     .HasOne(p => p.Classroom)
+            //     .WithMany(p => p.StudentAcademicYears)
+            //     .HasForeignKey(p => p.ClassID)
+            //     .OnDelete(DeleteBehavior.Restrict);
+
+            //modelBuilder.Entity<StudentAcademicYear>()
+            //     .HasOne(p => p.Grade)
+            //     .WithMany(p => p.StudentAcademicYears)
+            //     .HasForeignKey(p => p.GradeID)
+            //     .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<StudentClassroom>()
                  .HasOne(p => p.Classroom)
-                 .WithMany(p => p.StudentAcademicYears)
+                 .WithMany(p => p.StudentClassrooms)
                  .HasForeignKey(p => p.ClassID)
                  .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<StudentAcademicYear>()
+            
+            modelBuilder.Entity<StudentClassroom>()
+                 .HasOne(p => p.Student)
+                 .WithMany(p => p.StudentClassrooms)
+                 .HasForeignKey(p => p.StudentID)
+                 .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<StudentGrade>()
+                 .HasOne(p => p.Student)
+                 .WithMany(p => p.StudentGrades)
+                 .HasForeignKey(p => p.StudentID)
+                 .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<StudentGrade>()
                  .HasOne(p => p.Grade)
-                 .WithMany(p => p.StudentAcademicYears)
+                 .WithMany(p => p.StudentGrades)
                  .HasForeignKey(p => p.GradeID)
+                 .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<StudentGrade>()
+                 .HasOne(p => p.AcademicYear)
+                 .WithMany(p => p.StudentGrades)
+                 .HasForeignKey(p => p.AcademicYearID)
                  .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Subject>()

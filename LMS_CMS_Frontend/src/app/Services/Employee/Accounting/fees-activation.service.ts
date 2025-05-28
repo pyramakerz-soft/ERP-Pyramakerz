@@ -17,7 +17,7 @@ export class FeesActivationService {
     this.baseUrl = ApiServ.BaseUrl
   }
 
-  Get(DomainName:string){
+  Get(gradeID:number, classID:number, studentID:number, DomainName:string){
      if(DomainName!=null) {
       this.header=DomainName 
     }
@@ -26,7 +26,7 @@ export class FeesActivationService {
     .set('domain-name', this.header)
     .set('Authorization', `Bearer ${token}`)
     .set('Content-Type', 'application/json');
-    return this.http.get<FeesActivation[]>(`${this.baseUrl}/FeesActivation`, { headers })
+    return this.http.get<FeesActivation[]>(`${this.baseUrl}/FeesActivation?gradeID=${gradeID}&classID=${classID}&studentID=${studentID}`, { headers })
   }
 
    Add(fees: FeesActivationAddPut[], DomainName: string): Observable<any> {

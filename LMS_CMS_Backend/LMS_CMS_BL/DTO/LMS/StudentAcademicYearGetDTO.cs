@@ -7,20 +7,20 @@ using System.Threading.Tasks;
 
 namespace LMS_CMS_BL.DTO.LMS
 {
-    public class StudentAcademicYearGetDTO
-    {
-        public long ID { get; set; }
-        public long StudentID { get; set; }
-        public string StudentName { get; set; }
-        public long SchoolID { get; set; }
-        public string SchoolName { get; set; }
-        public long ClassID { get; set; }
-        public string ClassName { get; set; }
-        public long GradeID { get; set; }
-        public string GradeName { get; set; }
-        public long SectionId { get; set; }
-        public string SectionName { get; set; }
-        public long? InsertedByUserId { get; set; }
+    //public class StudentAcademicYearGetDTO
+    //{
+    //    public long ID { get; set; }
+    //    public long StudentID { get; set; }
+    //    public string StudentName { get; set; }
+    //    public long SchoolID { get; set; }
+    //    public string SchoolName { get; set; }
+    //    public long ClassID { get; set; }
+    //    public string ClassName { get; set; }
+    //    public long GradeID { get; set; }
+    //    public string GradeName { get; set; }
+    //    public long SectionId { get; set; }
+    //    public string SectionName { get; set; }
+    //    public long? InsertedByUserId { get; set; }
 
-    }
+    //}
 }

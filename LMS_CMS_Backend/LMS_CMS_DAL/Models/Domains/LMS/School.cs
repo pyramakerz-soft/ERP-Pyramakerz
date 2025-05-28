@@ -47,7 +47,7 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
 
         public SchoolType SchoolType { get; set; }
         public ICollection<AcademicYear> AcademicYears { get; set; } = new HashSet<AcademicYear>();
-        public ICollection<StudentAcademicYear> StudentAcademicYears { get; set; } = new HashSet<StudentAcademicYear>();
+        //public ICollection<StudentAcademicYear> StudentAcademicYears { get; set; } = new HashSet<StudentAcademicYear>();
         public ICollection<Section> Sections { get; set; } = new HashSet<Section>();
         public ICollection<Building> Buildings { get; set; } = new HashSet<Building>();
         public ICollection<ShopItem> ShopItem { get; set; } = new HashSet<ShopItem>();

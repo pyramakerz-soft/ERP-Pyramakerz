@@ -91,7 +91,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("ByStudentId/{id}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" ,"student" },
+            allowedTypes: new[] { "octa", "employee", "student" },
             pages: new[] { "Lesson Live" }
         )]
         public async Task<IActionResult> GetByStudentId(long id)
@@ -102,21 +102,21 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             {
                 return BadRequest("Enter student ID");
             }
-            Student student = Unit_Of_Work.student_Repository.First_Or_Default(s=>s.ID== id && s.IsDeleted != true);
+            Student student = Unit_Of_Work.student_Repository.First_Or_Default(s => s.ID == id && s.IsDeleted != true);
             if (student == null)
             {
                 return BadRequest("No Student With This ID");
             }
 
-            StudentAcademicYear studentAcademicYear = Unit_Of_Work.studentAcademicYear_Repository.First_Or_Default(s => s.StudentID == id && s.Classroom.AcademicYear.IsActive==true && s.IsDeleted != true);
-            if (studentAcademicYear == null)
+            StudentClassroom studentClassroom = Unit_Of_Work.studentClassroom_Repository.First_Or_Default(s => s.StudentID == id && s.Classroom.AcademicYear.IsActive == true && s.IsDeleted != true);
+            if (studentClassroom == null)
             {
                 return BadRequest("this student Has no class");
             }
 
 
             List<LessonLive> lessonLives = await Unit_Of_Work.lessonLive_Repository.Select_All_With_IncludesById<LessonLive>(
-                    b => b.IsDeleted != true && b.ClassroomID== studentAcademicYear.ClassID,
+                    b => b.IsDeleted != true && b.ClassroomID == studentClassroom.ClassID,
                     query => query.Include(d => d.Classroom),
                     query => query.Include(d => d.WeekDay),
                     query => query.Include(d => d.Subject)
@@ -131,7 +131,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             return Ok(lessonLivesDTO);
         }
-        
+
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         [HttpGet("ByClassId/{id}")]
