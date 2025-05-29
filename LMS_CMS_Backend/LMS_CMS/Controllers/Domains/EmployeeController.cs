@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Diagnostics;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
@@ -82,14 +83,6 @@ namespace LMS_CMS_PL.Controllers.Domains
                 else
                 employeeDTO.Files = new List<EmployeeAttachmentDTO>();
 
-                //////////////
-                //List<Floor> floors = Unit_Of_Work.floor_Repository.FindBy(s => s.FloorMonitorID == employeeDTO.ID && s.IsDeleted!=true);
-                //List<FloorGetDTO> FloorGetDTO = mapper.Map<List<FloorGetDTO>>(floors);
-                //if (FloorGetDTO != null)
-                //    employeeDTO.FloorsSelected = FloorGetDTO;
-                //else
-                //    employeeDTO.FloorsSelected = new List<FloorGetDTO>();
-
 
                 List<Floor> floors = Unit_Of_Work.floor_Repository.FindBy(s => s.FloorMonitorID == employeeDTO.ID && s.IsDeleted != true);
 
@@ -99,8 +92,35 @@ namespace LMS_CMS_PL.Controllers.Domains
                     employeeDTO.FloorsSelected = new List<long>();
 
 
-            }
+                List<SubjectSupervisor> subjectSupervisors = Unit_Of_Work.subjectSupervisor_Repository
+                   .FindBy(s => s.EmployeeID == employeeDTO.ID && s.IsDeleted != true);
 
+                var subjectIds = subjectSupervisors.Select(ss => ss.SubjectID).ToList();
+
+                List<Subject> subjects = Unit_Of_Work.subject_Repository
+                    .FindBy(s => subjectIds.Contains(s.ID) && s.IsDeleted != true);
+
+
+                if (subjects != null && subjects.Any())
+                    employeeDTO.SubjectSelected = subjects.Select(v => v.ID).ToList();
+                else
+                    employeeDTO.SubjectSelected = new List<long>();
+
+
+                List<GradeSupervisor> gradeSupervisors = Unit_Of_Work.gradeSupervisor_Repository
+                  .FindBy(s => s.EmployeeID == employeeDTO.ID && s.IsDeleted != true);
+
+                var gradeIds = gradeSupervisors.Select(ss => ss.GradeID).ToList();
+
+                List<Grade> grades = Unit_Of_Work.grade_Repository
+                    .FindBy(s => gradeIds.Contains(s.ID) && s.IsDeleted != true);
+
+                if (grades != null && grades.Any())
+                    employeeDTO.GradeSelected = grades.Select(v => v.ID).ToList();
+                else
+                    employeeDTO.GradeSelected = new List<long>();
+
+            }
 
             return Ok(EmployeesDTO);
         }
@@ -195,6 +215,35 @@ namespace LMS_CMS_PL.Controllers.Domains
                 employeeDTO.FloorsSelected = floors.Select(v => v.ID).ToList();
             else
                 employeeDTO.FloorsSelected = new List<long>();
+
+            List<SubjectSupervisor> subjectSupervisors = Unit_Of_Work.subjectSupervisor_Repository
+                   .FindBy(s => s.EmployeeID == employeeDTO.ID && s.IsDeleted != true);
+
+            var subjectIds = subjectSupervisors.Select(ss => ss.SubjectID).ToList();
+
+            List<Subject> subjects = Unit_Of_Work.subject_Repository
+                .FindBy(s => subjectIds.Contains(s.ID) && s.IsDeleted != true);
+
+
+            if (subjects != null && subjects.Any())
+                employeeDTO.SubjectSelected = subjects.Select(v => v.ID).ToList();
+            else
+                employeeDTO.SubjectSelected = new List<long>();
+
+
+            List<GradeSupervisor> gradeSupervisors = Unit_Of_Work.gradeSupervisor_Repository
+              .FindBy(s => s.EmployeeID == employeeDTO.ID && s.IsDeleted != true);
+
+            var gradeIds = gradeSupervisors.Select(ss => ss.GradeID).ToList();
+
+            List<Grade> grades = Unit_Of_Work.grade_Repository
+                .FindBy(s => gradeIds.Contains(s.ID) && s.IsDeleted != true);
+
+            if (grades != null && grades.Any())
+                employeeDTO.GradeSelected = grades.Select(v => v.ID).ToList();
+            else
+                employeeDTO.GradeSelected = new List<long>();
+
 
             return Ok(employeeDTO); 
         }
@@ -631,7 +680,87 @@ namespace LMS_CMS_PL.Controllers.Domains
                 Unit_Of_Work.SaveChanges();
             }
 
+            //// Create GradeSupervisor
+            if (newEmployee.NewGradesSelected != null && newEmployee.NewGradesSelected.Count > 0)
+            {
+                foreach (var item in newEmployee.NewGradesSelected)
+                {
+                    Grade grade = Unit_Of_Work.grade_Repository.First_Or_Default(s => s.ID == item && s.IsDeleted != true);
+                    if (grade != null)
+                    {
+                        GradeSupervisor gradeSupervisor = Unit_Of_Work.gradeSupervisor_Repository.First_Or_Default(s => s.GradeID == grade.ID && s.EmployeeID == oldEmp.ID && s.IsDeleted==true);
+                        if (gradeSupervisor!=null)
+                        {
+                            gradeSupervisor.IsDeleted = null;
+                            Unit_Of_Work.gradeSupervisor_Repository.Update(gradeSupervisor);
+                        }
+                        else
+                        {
+                            gradeSupervisor = new GradeSupervisor();
+                            gradeSupervisor.GradeID = item;
+                            gradeSupervisor.EmployeeID = oldEmp.ID;
+                            Unit_Of_Work.gradeSupervisor_Repository.Add(gradeSupervisor);
+                        }
+                    }
+                }
+                Unit_Of_Work.SaveChanges();
+            }
 
+            //// Delete GradeSupervisor
+            if (newEmployee.DeletedGradesSelected != null && newEmployee.DeletedGradesSelected.Count > 0)
+            {
+                foreach (var item in newEmployee.DeletedGradesSelected)
+                {
+                    GradeSupervisor gradeSupervisor = Unit_Of_Work.gradeSupervisor_Repository.First_Or_Default(s => s.GradeID == item &&s.EmployeeID==oldEmp.ID && s.IsDeleted != true);
+                    if (gradeSupervisor != null)
+                    {
+                        gradeSupervisor.IsDeleted = true;
+                        Unit_Of_Work.gradeSupervisor_Repository.Update(gradeSupervisor);
+                    }
+                }
+                Unit_Of_Work.SaveChanges();
+            }
+
+            //// Create SubjectSupervisor
+            if (newEmployee.NewSubjectsSelected != null && newEmployee.NewSubjectsSelected.Count > 0)
+            {
+                foreach (var item in newEmployee.NewSubjectsSelected)
+                {
+                    Subject subject = Unit_Of_Work.subject_Repository.First_Or_Default(s => s.ID == item && s.IsDeleted != true);
+                    if (subject != null)
+                    {
+                        SubjectSupervisor subjectSupervisor = Unit_Of_Work.subjectSupervisor_Repository.First_Or_Default(s => s.SubjectID == subject.ID && s.EmployeeID == oldEmp.ID && s.IsDeleted == true);
+                        if (subjectSupervisor != null)
+                        {
+                            subjectSupervisor.IsDeleted = null;
+                            Unit_Of_Work.subjectSupervisor_Repository.Update(subjectSupervisor);
+                        }
+                        else
+                        {
+                            subjectSupervisor = new SubjectSupervisor();
+                            subjectSupervisor.SubjectID = item;
+                            subjectSupervisor.EmployeeID = oldEmp.ID;
+                            Unit_Of_Work.subjectSupervisor_Repository.Add(subjectSupervisor);
+                        }
+                    }
+                }
+                Unit_Of_Work.SaveChanges();
+            }
+
+            //// Delete SubjectSupervisor
+            if (newEmployee.DeletedSubjectsSelected != null && newEmployee.DeletedSubjectsSelected.Count > 0)
+            {
+                foreach (var item in newEmployee.DeletedSubjectsSelected)
+                {
+                    SubjectSupervisor subjectSupervisor = Unit_Of_Work.subjectSupervisor_Repository.First_Or_Default(s => s.SubjectID == item && s.IsDeleted != true && s.EmployeeID== oldEmp.ID);
+                    if (subjectSupervisor != null)
+                    {
+                        subjectSupervisor.IsDeleted = true;
+                        Unit_Of_Work.subjectSupervisor_Repository.Update(subjectSupervisor);
+                    }
+                }
+                Unit_Of_Work.SaveChanges();
+            }
             await Unit_Of_Work.SaveChangesAsync();
             return Ok(newEmployee);
         }

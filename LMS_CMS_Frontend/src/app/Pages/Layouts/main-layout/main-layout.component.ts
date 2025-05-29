@@ -47,7 +47,7 @@ export class MainLayoutComponent {
         {
           label: 'ECommerce', subItems: [
             {
-              label: 'Shop', route: 'Ecommerce/Shop'
+              label: 'The Shop', route: 'Ecommerce/The Shop'
             }
           ], icon: 'E-Commerce'
         }
@@ -116,13 +116,13 @@ export class MainLayoutComponent {
         {
           label: 'E-Commerce', subItems: [
             {
-              label: 'Shop', route: 'Shop'
+              label: 'The Shop', route: 'Ecommerce/The Shop'
             },
             {
-              label: 'Cart', route: 'Cart'
+              label: 'Cart', route: 'Ecommerce/Cart'
             },
             {
-              label: 'Orders', route: 'Orders'
+              label: 'Order', route: 'Ecommerce/Order'
             }
           ], icon: 'E-Commerce'
         },

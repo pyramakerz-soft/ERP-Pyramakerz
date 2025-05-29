@@ -150,4 +150,12 @@ export class EmployeeViewComponent {
     const IsAllow = this.EditDeleteServ.IsAllowEdit(this.Data.insertedByUserId, this.UserID, this.AllowEditForOthers);
     return IsAllow;
   }
+
+  SubjectCoTeacher(){
+    this.router.navigateByUrl("Employee/Subject Co-Teacher/"+this.EmpId)
+  }
+
+  SubjectTeacher(){
+    this.router.navigateByUrl("Employee/Subject Teacher/"+this.EmpId)
+  }
 }

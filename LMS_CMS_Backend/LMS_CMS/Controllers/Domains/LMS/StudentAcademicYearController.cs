@@ -27,41 +27,41 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         }
         //////////////////////////////////////////////////////////////////////////////////////////
 
-        [HttpGet]
-        [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee", "parent" },
-            pages: new[] { "Academic Years" }
-        )]
-        public async Task<IActionResult> GetAsync()
-        {
-            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+        //[HttpGet]
+        //[Authorize_Endpoint_(
+        //    allowedTypes: new[] { "octa", "employee", "parent" },
+        //    pages: new[] { "Academic Years" }
+        //)]
+        //public async Task<IActionResult> GetAsync()
+        //{
+        //    UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            var userClaims = HttpContext.User.Claims;
-            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-            long.TryParse(userIdClaim, out long userId);
-            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+        //    var userClaims = HttpContext.User.Claims;
+        //    var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+        //    long.TryParse(userIdClaim, out long userId);
+        //    var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
 
-            if (userIdClaim == null || userTypeClaim == null)
-            {
-                return Unauthorized("User ID or Type claim not found.");
-            }
+        //    if (userIdClaim == null || userTypeClaim == null)
+        //    {
+        //        return Unauthorized("User ID or Type claim not found.");
+        //    }
 
-            List<StudentAcademicYear> academicYear = await Unit_Of_Work.studentAcademicYear_Repository.Select_All_With_IncludesById<StudentAcademicYear>(
-                    sem => sem.IsDeleted != true,
-                     query => query.Include(emp => emp.Student),
-                     query => query.Include(emp => emp.Grade).ThenInclude(g=>g.Section),
-                      query => query.Include(emp => emp.Classroom),
-                    query => query.Include(emp => emp.School));
+        //    List<StudentAcademicYear> academicYear = await Unit_Of_Work.studentAcademicYear_Repository.Select_All_With_IncludesById<StudentAcademicYear>(
+        //            sem => sem.IsDeleted != true,
+        //             query => query.Include(emp => emp.Student),
+        //             query => query.Include(emp => emp.Grade).ThenInclude(g=>g.Section),
+        //              query => query.Include(emp => emp.Classroom),
+        //            query => query.Include(emp => emp.School));
 
-            if (academicYear == null || academicYear.Count == 0)
-            {
-                return NotFound();
-            }
+        //    if (academicYear == null || academicYear.Count == 0)
+        //    {
+        //        return NotFound();
+        //    }
 
-            List<StudentAcademicYearGetDTO> AcademicYearDTOs = mapper.Map<List<StudentAcademicYearGetDTO>>(academicYear);
+        //    List<StudentAcademicYearGetDTO> AcademicYearDTOs = mapper.Map<List<StudentAcademicYearGetDTO>>(academicYear);
 
-            return Ok(AcademicYearDTOs);
-        }
+        //    return Ok(AcademicYearDTOs);
+        //}
 
 
     }

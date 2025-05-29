@@ -107,7 +107,9 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public AccountingTreeChart AccountNumber { get; set; }
         public TaxCustomer? TaxCustomer { get; set; }
         public ICollection<BusStudent> BusStudents { get; set; } = new HashSet<BusStudent>();
-        public ICollection<StudentAcademicYear> StudentAcademicYears { get; set; } = new HashSet<StudentAcademicYear>();
+        //public ICollection<StudentAcademicYear> StudentAcademicYears { get; set; } = new HashSet<StudentAcademicYear>();
+        public ICollection<StudentClassroom> StudentClassrooms { get; set; } = new HashSet<StudentClassroom>();
+        public ICollection<StudentGrade> StudentGrades { get; set; } = new HashSet<StudentGrade>();
         public ICollection<EmployeeStudent> EmployeeStudents { get; set; } = new HashSet<EmployeeStudent>();
         public ICollection<InstallmentDeductionMaster> InstallmentDeductionMasters { get; set; } = new HashSet<InstallmentDeductionMaster>();
         public ICollection<FeesActivation> FeesActivations { get; set; } = new HashSet<FeesActivation>();

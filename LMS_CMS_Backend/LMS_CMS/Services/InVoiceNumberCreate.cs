@@ -14,28 +14,58 @@ namespace LMS_CMS_PL.Services
         //{
         //    this.db = db;
         //}
+        //public async Task<string> GetNextInvoiceNumber(LMS_CMS_Context db, long storeId, long flagId)
+        //{
+        //    var invoiceNumbers = await db.InventoryMaster
+        //        .Where(x => x.StoreID == storeId && x.FlagId == flagId && !string.IsNullOrEmpty(x.InvoiceNumber))
+        //        .Select(x => x.InvoiceNumber)
+        //        .ToListAsync();
+
+        //    long maxNumber = 0;
+
+        //    foreach (var inv in invoiceNumbers)
+        //    {
+        //        if (long.TryParse(inv, out long parsedNumber))
+        //        {
+        //            if (parsedNumber > maxNumber)
+        //            {
+        //                maxNumber = parsedNumber;
+        //            }
+        //        }
+        //    }
+
+        //    long nextNumber = maxNumber + 1;
+        //    return $"{nextNumber}";
+        //}
+
         public async Task<string> GetNextInvoiceNumber(LMS_CMS_Context db, long storeId, long flagId)
         {
-            var invoiceNumbers = await db.InventoryMaster
-                .Where(x => x.StoreID == storeId && x.FlagId == flagId && !string.IsNullOrEmpty(x.InvoiceNumber))
-                .Select(x => x.InvoiceNumber)
-                .ToListAsync();
+            using var transaction = await db.Database.BeginTransactionAsync();
 
-            long maxNumber = 0;
+            // Use raw SQL locking to prevent concurrency issues
+            var maxInvoiceNumber = await db.InventoryMaster
+                .FromSqlRaw(@"
+            SELECT * FROM InventoryMaster 
+            WITH (UPDLOCK, HOLDLOCK)
+            WHERE StoreID = {0} AND FlagId = {1} AND ISNULL(InvoiceNumber, '') != ''
+            ", storeId, flagId)
+                    .Select(x => x.InvoiceNumber)
+                    .ToListAsync();
 
-            foreach (var inv in invoiceNumbers)
+            long max = 0;
+
+            foreach (var inv in maxInvoiceNumber)
             {
-                if (long.TryParse(inv, out long parsedNumber))
-                {
-                    if (parsedNumber > maxNumber)
-                    {
-                        maxNumber = parsedNumber;
-                    }
-                }
+                if (long.TryParse(inv, out var parsed) && parsed > max)
+                    max = parsed;
             }
 
-            long nextNumber = maxNumber + 1;
-            return $"{nextNumber}";
+            var next = max + 1;
+
+            await transaction.CommitAsync();
+
+            return next.ToString();
         }
+
     }
 }

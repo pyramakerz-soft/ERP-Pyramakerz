@@ -65,8 +65,8 @@ namespace LMS_CMS_PL.Controllers.Domains
                 Nationality nationality = _Unit_Of_Work_Octa.nationality_Repository.Select_By_Id_Octa(item.Nationality);
                 if (nationality != null)
                 {
-                        item.NationalityEnName = nationality.Name;
-                        item.NationalityArName = nationality.ArName;
+                    item.NationalityEnName = nationality.Name;
+                    item.NationalityArName = nationality.ArName;
                 }
             }
             return Ok(StudentDTO);
@@ -79,7 +79,7 @@ namespace LMS_CMS_PL.Controllers.Domains
 
             // Build query with optional filter
             var query = Unit_Of_Work.student_Repository
-                .SelectQuery<Student>(s => s.IsDeleted!= true && s.User_Name.Contains(keyword))
+                .SelectQuery<Student>(s => s.IsDeleted != true && s.User_Name.Contains(keyword))
                 .Include(s => s.AccountNumber)
                 .Include(s => s.Gender)
                 .OrderBy(s => s.en_name); // You can change to ar_name or Id if needed
@@ -178,17 +178,22 @@ namespace LMS_CMS_PL.Controllers.Domains
                 return NotFound("No Class with this Id");
             }
 
-            List<StudentAcademicYear> studentAcademicYears = await Unit_Of_Work.studentAcademicYear_Repository.Select_All_With_IncludesById<StudentAcademicYear>(
+            //List<StudentAcademicYear> studentAcademicYears = await Unit_Of_Work.studentAcademicYear_Repository.Select_All_With_IncludesById<StudentAcademicYear>(
+            //    query => query.IsDeleted != true && query.ClassID == Id,
+            //    query => query.Include(stu => stu.Student)
+            //);
+
+            List<StudentClassroom> studentClassrooms = await Unit_Of_Work.studentClassroom_Repository.Select_All_With_IncludesById<StudentClassroom>(
                 query => query.IsDeleted != true && query.ClassID == Id,
                 query => query.Include(stu => stu.Student)
             );
 
-            if (studentAcademicYears == null || studentAcademicYears.Count == 0)
+            if (studentClassrooms == null || studentClassrooms.Count == 0)
             {
                 return NotFound("No students found.");
             }
 
-            List<Student> students = studentAcademicYears.Select(sa => sa.Student).ToList();
+            List<Student> students = studentClassrooms.Select(sa => sa.Student).ToList();
             List<StudentGetDTO> studentDTOs = mapper.Map<List<StudentGetDTO>>(students);
 
             return Ok(studentDTOs);
@@ -221,36 +226,41 @@ namespace LMS_CMS_PL.Controllers.Domains
                 return NotFound("No Class with this Id");
             }
 
-            List<StudentAcademicYear> studentAcademicYears = await Unit_Of_Work.studentAcademicYear_Repository.Select_All_With_IncludesById<StudentAcademicYear>(
+            //List<StudentAcademicYear> studentAcademicYears = await Unit_Of_Work.studentAcademicYear_Repository.Select_All_With_IncludesById<StudentAcademicYear>(
+            //    query => query.IsDeleted != true && query.ClassID == Id,
+            //    query => query.Include(stu => stu.Student)
+            //);
+
+            List<StudentClassroom> studentClassrooms = await Unit_Of_Work.studentClassroom_Repository.Select_All_With_IncludesById<StudentClassroom>(
                 query => query.IsDeleted != true && query.ClassID == Id,
                 query => query.Include(stu => stu.Student)
             );
 
-            if (studentAcademicYears == null || studentAcademicYears.Count == 0)
+            if (studentClassrooms == null || studentClassrooms.Count == 0)
             {
                 return NotFound("No students found.");
             }
 
-            List<Student> students = studentAcademicYears.Select(sa => sa.Student).ToList();
+            List<Student> students = studentClassrooms.Select(sa => sa.Student).ToList();
 
             List<Student> filteredStudents = new List<Student>();
             foreach (var student in students)
             {
                 RegisterationFormSubmittion registerationFormSubmittion = Unit_Of_Work.registerationFormSubmittion_Repository.First_Or_Default
                     (d => d.CategoryFieldID == 14 && d.RegisterationFormParentID == student.RegistrationFormParentID);
-                if(registerationFormSubmittion != null && registerationFormSubmittion.TextAnswer == "true")
+                if (registerationFormSubmittion != null && registerationFormSubmittion.TextAnswer == "true")
                 {
                     filteredStudents.Add(student);
                 }
             }
-             
+
             List<StudentGetDTO> studentDTOs = mapper.Map<List<StudentGetDTO>>(filteredStudents);
 
             return Ok(studentDTOs);
         }
 
         /////
-         
+
         [HttpGet("Get_By_SchoolID/{Id}")]
         public async Task<IActionResult> GetBySchoolID(long Id)
         {
@@ -277,17 +287,22 @@ namespace LMS_CMS_PL.Controllers.Domains
                 return NotFound("No School with this Id");
             }
 
-            List<StudentAcademicYear> studentAcademicYears = await Unit_Of_Work.studentAcademicYear_Repository.Select_All_With_IncludesById<StudentAcademicYear>(
-                query => query.IsDeleted != true && query.SchoolID == Id,
+            //List<StudentAcademicYear> studentAcademicYears = await Unit_Of_Work.studentAcademicYear_Repository.Select_All_With_IncludesById<StudentAcademicYear>(
+            //    query => query.IsDeleted != true && query.SchoolID == Id,
+            //    query => query.Include(stu => stu.Student)
+            //);
+
+            List<StudentClassroom> studentClassrooms = await Unit_Of_Work.studentClassroom_Repository.Select_All_With_IncludesById<StudentClassroom>(
+                query => query.IsDeleted != true && query.Classroom.AcademicYear.SchoolID == Id,
                 query => query.Include(stu => stu.Student)
             );
 
-            if (studentAcademicYears == null || studentAcademicYears.Count == 0)
+            if (studentClassrooms == null || studentClassrooms.Count == 0)
             {
                 return NotFound("No students found.");
             }
 
-            List<Student> students = studentAcademicYears.Select(sa => sa.Student).ToList();
+            List<Student> students = studentClassrooms.Select(sa => sa.Student).ToList();
             List<StudentGetDTO> studentDTOs = mapper.Map<List<StudentGetDTO>>(students);
 
             return Ok(studentDTOs);
@@ -320,7 +335,7 @@ namespace LMS_CMS_PL.Controllers.Domains
             {
                 return NotFound("No Academic Year with this Id");
             }
-            
+
             List<Classroom> classes = Unit_Of_Work.classroom_Repository.FindBy(d => d.IsDeleted != true && d.AcademicYearID == Id);
             if (classes == null)
             {
@@ -331,35 +346,40 @@ namespace LMS_CMS_PL.Controllers.Domains
 
             for (int i = 0; i < classes.Count; i++)
             {
-                List<StudentAcademicYear> studentAcademicYears = await Unit_Of_Work.studentAcademicYear_Repository.Select_All_With_IncludesById<StudentAcademicYear>(
+                //List<StudentAcademicYear> studentAcademicYears = await Unit_Of_Work.studentAcademicYear_Repository.Select_All_With_IncludesById<StudentAcademicYear>(
+                //    query => query.IsDeleted != true && query.ClassID == classes[i].ID,
+                //    query => query.Include(stu => stu.Student)
+                //);
+
+                List<StudentClassroom> studentClassrooms = await Unit_Of_Work.studentClassroom_Repository.Select_All_With_IncludesById<StudentClassroom>(
                     query => query.IsDeleted != true && query.ClassID == classes[i].ID,
                     query => query.Include(stu => stu.Student)
-                ); 
+                );
 
-                for (int j = 0; j < studentAcademicYears.Count; j++)
+                for (int j = 0; j < studentClassrooms.Count; j++)
                 {
-                    if (!students.Contains(studentAcademicYears[j].Student))
+                    if (!students.Contains(studentClassrooms[j].Student))
                     {
-                        students.Add(studentAcademicYears[j].Student);
+                        students.Add(studentClassrooms[j].Student);
                     }
                 }
-            } 
+            }
 
             if (students == null || students.Count == 0)
             {
                 return NotFound("No students found.");
             }
-             
+
             List<StudentGetDTO> studentDTOs = mapper.Map<List<StudentGetDTO>>(students);
 
             return Ok(studentDTOs);
         }
 
-        /////
+        //  /////
 
         [HttpGet("GetBySchoolGradeClassID")]
         public async Task<IActionResult> GetBySchoolGradeClassID([FromQuery] long schoolId, [FromQuery] long gradeId, [FromQuery] long classId)
-        { 
+        {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             var userClaims = HttpContext.User.Claims;
@@ -376,7 +396,7 @@ namespace LMS_CMS_PL.Controllers.Domains
             {
                 return BadRequest("School Id can't be null");
             }
-            
+
             if (gradeId == null || gradeId == 0)
             {
                 return BadRequest("Grade Id can't be null");
@@ -385,15 +405,15 @@ namespace LMS_CMS_PL.Controllers.Domains
             if (classId == null || classId == 0)
             {
                 return BadRequest("Class Id can't be null");
-            } 
-            
+            }
+
             Grade grade = Unit_Of_Work.grade_Repository.First_Or_Default(
                 d => d.IsDeleted != true && d.ID == gradeId
                 );
             if (grade == null)
             {
                 return NotFound("No Grade with this Id");
-            } 
+            }
 
             Classroom cls = Unit_Of_Work.classroom_Repository.First_Or_Default(
                 d => d.IsDeleted != true && d.ID == classId
@@ -403,24 +423,53 @@ namespace LMS_CMS_PL.Controllers.Domains
                 return NotFound("No Class with this Id");
             }
 
-             
-            List<StudentAcademicYear> studentAcademicYears = await Unit_Of_Work.studentAcademicYear_Repository
-                .Select_All_With_IncludesById<StudentAcademicYear>(
-                    s => s.IsDeleted != true && s.ClassID == classId && s.GradeID == gradeId && s.SchoolID == schoolId,
+
+            //List<StudentAcademicYear> studentAcademicYears = await Unit_Of_Work.studentAcademicYear_Repository
+            //    .Select_All_With_IncludesById<StudentAcademicYear>(
+            //        s => s.IsDeleted != true && s.ClassID == classId && s.GradeID == gradeId && s.SchoolID == schoolId,
+            //        query => query.Include(stu => stu.Student)
+            //          .ThenInclude(stu => stu.Gender)
+            //    );
+
+            //List<Student> students = studentAcademicYears.Select(sa => sa.Student).ToList();
+            
+            List<StudentClassroom> studentClassrooms = await Unit_Of_Work.studentClassroom_Repository
+                .Select_All_With_IncludesById<StudentClassroom>(
+                    s => s.IsDeleted != true && s.ClassID == classId && s.Classroom.AcademicYear.SchoolID == schoolId,
                     query => query.Include(stu => stu.Student)
                       .ThenInclude(stu => stu.Gender)
                 );
 
-
-            if (studentAcademicYears == null || studentAcademicYears.Count == 0)
+            if (studentClassrooms == null || studentClassrooms.Count == 0)
             {
-                return NotFound("No students found.");
+                return NotFound("No students in the class found.");
             }
 
-            List<Student> students = studentAcademicYears.Select(sa => sa.Student).ToList();
+            List<StudentGrade> studentGrades = await Unit_Of_Work.studentGrade_Repository
+                .Select_All_With_IncludesById<StudentGrade>(
+                    s => s.IsDeleted != true && s.GradeID == gradeId && s.AcademicYear.SchoolID == schoolId,
+                    query => query.Include(stu => stu.Student)
+                      .ThenInclude(stu => stu.Gender)
+                );
+
+            if (studentGrades == null || studentGrades.Count == 0)
+            {
+                return NotFound("No students in the grade found.");
+            } 
+
+            var classroomStudentIds = studentClassrooms.Select(sc => sc.StudentID).ToHashSet();
+            var gradeStudentIds = studentGrades.Select(sg => sg.StudentID).ToHashSet(); 
+            var commonStudentIds = classroomStudentIds.Intersect(gradeStudentIds).ToHashSet(); 
+
+            var totalStudents = studentClassrooms
+                .Where(sc => commonStudentIds.Contains(sc.StudentID))
+                .ToList();
+             
+            List<Student> students = totalStudents.Select(sc => sc.Student).ToList();
+
             List<StudentGetDTO> studentDTOs = mapper.Map<List<StudentGetDTO>>(students);
 
-            for(int i = 0; i < studentDTOs.Count; i++)
+            for (int i = 0; i < studentDTOs.Count; i++)
             {
                 Nationality nationality = _Unit_Of_Work_Octa.nationality_Repository.Select_By_Id_Octa(studentDTOs[i].Nationality);
                 if (nationality != null)
@@ -429,7 +478,7 @@ namespace LMS_CMS_PL.Controllers.Domains
                     studentDTOs[i].NationalityArName = nationality.ArName;
                 }
             }
-              
+
             ClassroomGetDTO classsDTO = mapper.Map<ClassroomGetDTO>(cls);
 
             string timeZoneId = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
@@ -451,10 +500,10 @@ namespace LMS_CMS_PL.Controllers.Domains
         }
 
         /////
-       
+
         [HttpGet("GetStudentByYearID")]
         public async Task<IActionResult> GetStudentByYearID([FromQuery] long yearId, [FromQuery] long stuId, [FromQuery] long schoolId)
-        { 
+        {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             var userClaims = HttpContext.User.Claims;
@@ -471,7 +520,7 @@ namespace LMS_CMS_PL.Controllers.Domains
             {
                 return BadRequest("Year Id can't be null");
             }
-            
+
             if (stuId == null || stuId == 0)
             {
                 return BadRequest("Student Id can't be null");
@@ -490,17 +539,17 @@ namespace LMS_CMS_PL.Controllers.Domains
             if (student == null)
             {
                 return NotFound("No Student with this Id");
-            }   
-             
+            }
+
             AcademicYear academicYear = Unit_Of_Work.academicYear_Repository.First_Or_Default(
                 d => d.IsDeleted != true && d.ID == yearId
                 );
             if (academicYear == null)
             {
                 return NotFound("No Academic Year with this Id");
-            } 
-             
-            List<Classroom> classrooms = Unit_Of_Work.classroom_Repository.FindBy(d => d.IsDeleted != true &&  d.AcademicYearID == yearId);
+            }
+
+            List<Classroom> classrooms = Unit_Of_Work.classroom_Repository.FindBy(d => d.IsDeleted != true && d.AcademicYearID == yearId);
 
             if (classrooms == null || classrooms.Count == 0)
             {
@@ -510,15 +559,17 @@ namespace LMS_CMS_PL.Controllers.Domains
             long clsID = 0;
             for (int i = 0; i < classrooms.Count; i++)
             {
-                StudentAcademicYear stuAY = Unit_Of_Work.studentAcademicYear_Repository.First_Or_Default(d => d.IsDeleted != true && d.ClassID == classrooms[i].ID && d.StudentID == stuId);
-                if( stuAY != null)
+                //StudentAcademicYear stuAY = Unit_Of_Work.studentAcademicYear_Repository.First_Or_Default(d => d.IsDeleted != true && d.ClassID == classrooms[i].ID && d.StudentID == stuId);
+                StudentClassroom stuAY = Unit_Of_Work.studentClassroom_Repository.First_Or_Default(d => d.IsDeleted != true && d.ClassID == classrooms[i].ID && d.StudentID == stuId);
+                
+                if (stuAY != null)
                 {
                     clsID = stuAY.ClassID;
                 }
             }
 
             Classroom cls = Unit_Of_Work.classroom_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == clsID);
-             
+
             ClassroomGetDTO classDTO = mapper.Map<ClassroomGetDTO>(cls);
 
             StudentGetDTO studentDTO = mapper.Map<StudentGetDTO>(student);
@@ -528,7 +579,7 @@ namespace LMS_CMS_PL.Controllers.Domains
             {
                 studentDTO.NationalityEnName = nationality.Name;
                 studentDTO.NationalityArName = nationality.ArName;
-            }  
+            }
 
             string timeZoneId = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
                 ? "Egypt Standard Time"
@@ -540,18 +591,18 @@ namespace LMS_CMS_PL.Controllers.Domains
 
             return Ok(new
             {
-                Student = studentDTO, 
+                Student = studentDTO,
                 School = schoolDTO,
                 Class = classDTO,
                 Date = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone)
             });
         }
-        
+
         /////
-      
+
         [HttpGet("GetStudentProofRegistrationAndSuccessForm")]
         public async Task<IActionResult> GetStudentProofRegistrationAndSuccessForm([FromQuery] long yearId, [FromQuery] long stuId, [FromQuery] long schoolId)
-        { 
+        {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             var userClaims = HttpContext.User.Claims;
@@ -568,7 +619,7 @@ namespace LMS_CMS_PL.Controllers.Domains
             {
                 return BadRequest("Year Id can't be null");
             }
-            
+
             if (stuId == null || stuId == 0)
             {
                 return BadRequest("Student Id can't be null");
@@ -585,8 +636,8 @@ namespace LMS_CMS_PL.Controllers.Domains
             if (student == null)
             {
                 return NotFound("No Student with this Id");
-            }   
-             
+            }
+
             AcademicYear academicYear = Unit_Of_Work.academicYear_Repository.First_Or_Default(
                 d => d.IsDeleted != true && d.ID == yearId
                 );
@@ -594,7 +645,7 @@ namespace LMS_CMS_PL.Controllers.Domains
             {
                 return NotFound("No Academic Year with this Id");
             }
-             
+
             List<Classroom> classroomsTo = await Unit_Of_Work.classroom_Repository.Select_All_With_IncludesById<Classroom>(
                 query => query.IsDeleted != true && query.AcademicYearID == yearId,
                 query => query.Include(d => d.AcademicYear),
@@ -608,7 +659,9 @@ namespace LMS_CMS_PL.Controllers.Domains
             long clsToID = 0;
             for (int i = 0; i < classroomsTo.Count; i++)
             {
-                StudentAcademicYear stuAY = Unit_Of_Work.studentAcademicYear_Repository.First_Or_Default(d => d.IsDeleted != true && d.ClassID == classroomsTo[i].ID && d.StudentID == stuId);
+                //StudentAcademicYear stuAY = Unit_Of_Work.studentAcademicYear_Repository.First_Or_Default(d => d.IsDeleted != true && d.ClassID == classroomsTo[i].ID && d.StudentID == stuId);
+                StudentClassroom stuAY = Unit_Of_Work.studentClassroom_Repository.First_Or_Default(d => d.IsDeleted != true && d.ClassID == classroomsTo[i].ID && d.StudentID == stuId);
+
                 if (stuAY != null)
                 {
                     clsToID = stuAY.ClassID;
@@ -634,13 +687,15 @@ namespace LMS_CMS_PL.Controllers.Domains
             List<Classroom> classroomsFilteredFrom = new List<Classroom>();
             for (int i = 0; i < classroomsFrom.Count; i++)
             {
-                StudentAcademicYear stuAY = Unit_Of_Work.studentAcademicYear_Repository.First_Or_Default(d => d.IsDeleted != true && d.ClassID == classroomsFrom[i].ID && d.StudentID == stuId);
+                //StudentAcademicYear stuAY = Unit_Of_Work.studentAcademicYear_Repository.First_Or_Default(d => d.IsDeleted != true && d.ClassID == classroomsFrom[i].ID && d.StudentID == stuId);
+                StudentClassroom stuAY = Unit_Of_Work.studentClassroom_Repository.First_Or_Default(d => d.IsDeleted != true && d.ClassID == classroomsFrom[i].ID && d.StudentID == stuId);
+
                 if (stuAY != null)
                 {
                     classroomsFilteredFrom.Add(classroomsFrom[i]);
                 }
             }
-             
+
             List<ClassroomGetDTO> classFromDTOs = mapper.Map<List<ClassroomGetDTO>>(classroomsFilteredFrom);
 
             StudentGetDTO studentDTO = mapper.Map<StudentGetDTO>(student);
@@ -650,7 +705,7 @@ namespace LMS_CMS_PL.Controllers.Domains
             {
                 studentDTO.NationalityEnName = nationality.Name;
                 studentDTO.NationalityArName = nationality.ArName;
-            }  
+            }
 
             string timeZoneId = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
                 ? "Egypt Standard Time"
@@ -662,19 +717,19 @@ namespace LMS_CMS_PL.Controllers.Domains
 
             return Ok(new
             {
-                Student = studentDTO, 
+                Student = studentDTO,
                 School = schoolDTO,
                 ClassFrom = classFromDTOs[0],
                 ClassTo = classToDTO,
                 Date = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone)
             });
         }
-         
+
         /////
-      
+
         [HttpGet("GetStudentProofRegistration")]
         public async Task<IActionResult> GetStudentProofRegistration([FromQuery] long yearId, [FromQuery] long stuId, [FromQuery] long schoolId)
-        { 
+        {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             var userClaims = HttpContext.User.Claims;
@@ -691,7 +746,7 @@ namespace LMS_CMS_PL.Controllers.Domains
             {
                 return BadRequest("Year Id can't be null");
             }
-            
+
             if (stuId == null || stuId == 0)
             {
                 return BadRequest("Student Id can't be null");
@@ -708,16 +763,16 @@ namespace LMS_CMS_PL.Controllers.Domains
             if (student == null)
             {
                 return NotFound("No Student with this Id");
-            }   
-             
+            }
+
             AcademicYear academicYear = Unit_Of_Work.academicYear_Repository.First_Or_Default(
                 d => d.IsDeleted != true && d.ID == yearId
                 );
             if (academicYear == null)
             {
                 return NotFound("No Academic Year with this Id");
-            } 
-             
+            }
+
             List<Classroom> classrooms = await Unit_Of_Work.classroom_Repository.Select_All_With_IncludesById<Classroom>(
                 query => query.IsDeleted != true && query.AcademicYearID == yearId,
                 query => query.Include(d => d.AcademicYear),
@@ -731,7 +786,9 @@ namespace LMS_CMS_PL.Controllers.Domains
             long clsID = 0;
             for (int i = 0; i < classrooms.Count; i++)
             {
-                StudentAcademicYear stuAY = Unit_Of_Work.studentAcademicYear_Repository.First_Or_Default(d => d.IsDeleted != true && d.ClassID == classrooms[i].ID && d.StudentID == stuId);
+                //StudentAcademicYear stuAY = Unit_Of_Work.studentAcademicYear_Repository.First_Or_Default(d => d.IsDeleted != true && d.ClassID == classrooms[i].ID && d.StudentID == stuId);
+                StudentClassroom stuAY = Unit_Of_Work.studentClassroom_Repository.First_Or_Default(d => d.IsDeleted != true && d.ClassID == classrooms[i].ID && d.StudentID == stuId);
+
                 if (stuAY != null)
                 {
                     clsID = stuAY.ClassID;
@@ -741,7 +798,7 @@ namespace LMS_CMS_PL.Controllers.Domains
             Classroom cls = Unit_Of_Work.classroom_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == clsID);
 
             ClassroomGetDTO classDTO = mapper.Map<ClassroomGetDTO>(cls);
-             
+
             StudentGetDTO studentDTO = mapper.Map<StudentGetDTO>(student);
             Nationality nationality = _Unit_Of_Work_Octa.nationality_Repository.Select_By_Id_Octa(studentDTO.Nationality);
 
@@ -749,7 +806,7 @@ namespace LMS_CMS_PL.Controllers.Domains
             {
                 studentDTO.NationalityEnName = nationality.Name;
                 studentDTO.NationalityArName = nationality.ArName;
-            }   
+            }
 
             string timeZoneId = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
                 ? "Egypt Standard Time"
@@ -761,8 +818,8 @@ namespace LMS_CMS_PL.Controllers.Domains
 
             return Ok(new
             {
-                Student = studentDTO, 
-                School = schoolDTO, 
+                Student = studentDTO,
+                School = schoolDTO,
                 Class = classDTO,
                 Date = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone)
             });
@@ -788,13 +845,13 @@ namespace LMS_CMS_PL.Controllers.Domains
             if (schoolId == null || schoolId == 0)
             {
                 return BadRequest("School Id can't be null");
-            } 
+            }
 
             if (classId == null || classId == 0)
             {
                 return BadRequest("Class Id can't be null");
             }
-             
+
             Classroom cls = Unit_Of_Work.classroom_Repository.First_Or_Default(
                 d => d.IsDeleted != true && d.ID == classId
                 );
@@ -804,20 +861,27 @@ namespace LMS_CMS_PL.Controllers.Domains
             }
 
 
-            List<StudentAcademicYear> studentAcademicYears = await Unit_Of_Work.studentAcademicYear_Repository
-                .Select_All_With_IncludesById<StudentAcademicYear>(
-                    s => s.IsDeleted != true && s.ClassID == classId && s.SchoolID == schoolId,
+            //List<StudentAcademicYear> studentAcademicYears = await Unit_Of_Work.studentAcademicYear_Repository
+            //    .Select_All_With_IncludesById<StudentAcademicYear>(
+            //        s => s.IsDeleted != true && s.ClassID == classId && s.SchoolID == schoolId,
+            //        query => query.Include(stu => stu.Student)
+            //          .ThenInclude(stu => stu.Gender)
+            //    );
+
+            List<StudentClassroom> studentClassrooms = await Unit_Of_Work.studentClassroom_Repository
+                .Select_All_With_IncludesById<StudentClassroom>(
+                    s => s.IsDeleted != true && s.ClassID == classId && s.Classroom.AcademicYear.SchoolID == schoolId,
                     query => query.Include(stu => stu.Student)
                       .ThenInclude(stu => stu.Gender)
                 );
 
 
-            if (studentAcademicYears == null || studentAcademicYears.Count == 0)
+            if (studentClassrooms == null || studentClassrooms.Count == 0)
             {
                 return NotFound("No students found.");
             }
 
-            List<Student> students = studentAcademicYears.Select(sa => sa.Student).ToList();
+            List<Student> students = studentClassrooms.Select(sa => sa.Student).ToList();
             List<StudentGetDTO> studentDTOs = mapper.Map<List<StudentGetDTO>>(students);
 
             for (int i = 0; i < studentDTOs.Count; i++)
@@ -841,10 +905,10 @@ namespace LMS_CMS_PL.Controllers.Domains
                 else
                 {
                     busStudents = busStudents.OrderBy(c => c.Semester.DateFrom).ToList();
-                    studentDTOs[i].IsRegisteredToBus = $"Yes / {busStudents[busStudents.Count-1].BusCategory.Name}";
+                    studentDTOs[i].IsRegisteredToBus = $"Yes / {busStudents[busStudents.Count - 1].BusCategory.Name}";
                 }
             }
-             
+
 
             string timeZoneId = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
                 ? "Egypt Standard Time"
@@ -856,8 +920,8 @@ namespace LMS_CMS_PL.Controllers.Domains
 
             return Ok(new
             {
-                Students = studentDTOs, 
-                School = schoolDTO, 
+                Students = studentDTOs,
+                School = schoolDTO,
                 Date = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone)
             });
         }
@@ -899,37 +963,42 @@ namespace LMS_CMS_PL.Controllers.Domains
                 return NotFound("No Student with this Id");
             }
 
-            List<StudentAcademicYear> StudentAcademicYear = await Unit_Of_Work.studentAcademicYear_Repository.Select_All_With_IncludesById<StudentAcademicYear>(
-                 query => query.IsDeleted != true && query.StudentID == stuId && query.SchoolID == schoolId,
+            //List<StudentAcademicYear> StudentAcademicYear = await Unit_Of_Work.studentAcademicYear_Repository.Select_All_With_IncludesById<StudentAcademicYear>(
+            //     query => query.IsDeleted != true && query.StudentID == stuId && query.SchoolID == schoolId,
+            //     query => query.Include(stu => stu.Grade),
+            //     query => query.Include(stu => stu.Classroom).ThenInclude(d => d.AcademicYear));
+            
+            List<StudentGrade> StudentGrade = await Unit_Of_Work.studentGrade_Repository.Select_All_With_IncludesById<StudentGrade>(
+                 query => query.IsDeleted != true && query.StudentID == stuId && query.AcademicYear.SchoolID == schoolId,
                  query => query.Include(stu => stu.Grade),
-                 query => query.Include(stu => stu.Classroom).ThenInclude(d => d.AcademicYear));
+                 query => query.Include(stu => stu.AcademicYear));
 
-            if(StudentAcademicYear == null)
+            if (StudentGrade == null)
             {
-                return NotFound("No Student Academic Year With This Student ID");
+                return NotFound("No Student Grade With This Student ID");
             }
 
             List<GradeWithAcademicYearGetDTO> gradeWithAcYears = new List<GradeWithAcademicYearGetDTO>();
-            
+
             string currentGradeName = "";
-            
-            for(int i = 0; i < StudentAcademicYear.Count; i++)
+
+            for (int i = 0; i < StudentGrade.Count; i++)
             {
                 GradeWithAcademicYearGetDTO data = new GradeWithAcademicYearGetDTO();
-                data.GradeID = StudentAcademicYear[i].GradeID;
-                data.GradeName = StudentAcademicYear[i].Grade.Name;
-                data.AcademicYearID = StudentAcademicYear[i].Classroom.AcademicYearID;
-                data.AcademicYearName = StudentAcademicYear[i].Classroom.AcademicYear.Name;
+                data.GradeID = StudentGrade[i].GradeID;
+                data.GradeName = StudentGrade[i].Grade.Name;
+                data.AcademicYearID = StudentGrade[i].AcademicYearID;
+                data.AcademicYearName = StudentGrade[i].AcademicYear.Name;
                 gradeWithAcYears.Add(data);
 
-                if (StudentAcademicYear[i].Classroom.AcademicYear.IsActive == true)
+                if (StudentGrade[i].AcademicYear.IsActive == true)
                 {
-                    currentGradeName = StudentAcademicYear[i].Grade.Name;
+                    currentGradeName = StudentGrade[i].Grade.Name;
                 }
             }
 
             StudentGetDTO studentDTO = mapper.Map<StudentGetDTO>(student);
-            studentDTO.CurrentGradeName = currentGradeName;             
+            studentDTO.CurrentGradeName = currentGradeName;
 
             Nationality nationality = _Unit_Of_Work_Octa.nationality_Repository.Select_By_Id_Octa(studentDTO.Nationality);
 
@@ -993,25 +1062,31 @@ namespace LMS_CMS_PL.Controllers.Domains
                 return NotFound("No Student with this Id");
             }
 
-            List<StudentAcademicYear> StudentAcademicYear = await Unit_Of_Work.studentAcademicYear_Repository.Select_All_With_IncludesById<StudentAcademicYear>(
-                 query => query.IsDeleted != true && query.StudentID == stuId && query.SchoolID == schoolId,
-                 query => query.Include(stu => stu.Grade),
-                 query => query.Include(stu => stu.Classroom).ThenInclude(d => d.AcademicYear));
+            //List<StudentAcademicYear> StudentAcademicYear = await Unit_Of_Work.studentAcademicYear_Repository.Select_All_With_IncludesById<StudentAcademicYear>(
+            //     query => query.IsDeleted != true && query.StudentID == stuId && query.SchoolID == schoolId,
+            //     query => query.Include(stu => stu.Grade),
+            //     query => query.Include(stu => stu.Classroom).ThenInclude(d => d.AcademicYear));
 
-            if (StudentAcademicYear == null)
+            List<StudentGrade> StudentGrade = await Unit_Of_Work.studentGrade_Repository.Select_All_With_IncludesById<StudentGrade>(
+                 query => query.IsDeleted != true && query.StudentID == stuId && query.AcademicYear.SchoolID == schoolId,
+                 query => query.Include(stu => stu.Grade),
+                 query => query.Include(stu => stu.AcademicYear));
+
+
+            if (StudentGrade == null)
             {
-                return NotFound("No Student Academic Year With This Student ID");
-            } 
+                return NotFound("No Student Grade With This Student ID");
+            }
 
             string currentGradeName = "";
             string CurrentAcademicYear = "";
 
-            for (int i = 0; i < StudentAcademicYear.Count; i++)
-            { 
-                if (StudentAcademicYear[i].Classroom.AcademicYear.IsActive == true)
+            for (int i = 0; i < StudentGrade.Count; i++)
+            {
+                if (StudentGrade[i].AcademicYear.IsActive == true)
                 {
-                    currentGradeName = StudentAcademicYear[i].Grade.Name;
-                    CurrentAcademicYear = StudentAcademicYear[i].Classroom.AcademicYear.Name;
+                    currentGradeName = StudentGrade[i].Grade.Name;
+                    CurrentAcademicYear = StudentGrade[i].AcademicYear.Name;
                 }
             }
 
@@ -1038,7 +1113,7 @@ namespace LMS_CMS_PL.Controllers.Domains
             return Ok(new
             {
                 Student = studentDTO,
-                School = schoolDTO, 
+                School = schoolDTO,
                 Date = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone)
             });
         }
@@ -1047,10 +1122,10 @@ namespace LMS_CMS_PL.Controllers.Domains
 
         [HttpPut("StudentAccounting")]
         [Authorize_Endpoint_(
-          allowedTypes: new[] { "octa", "employee" },
-          allowEdit: 1,
-          pages: new[] { "Student Edit Accounting" }
-      )]
+            allowedTypes: new[] { "octa", "employee" },
+            allowEdit: 1,
+            pages: new[] { "Student Edit Accounting" }
+        )]
         public async Task<IActionResult> EditStudentAccountingAsync(AccountingStudentPutDTO newStudent)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -1072,7 +1147,7 @@ namespace LMS_CMS_PL.Controllers.Domains
                 return NotFound("No student with this ID");
             }
 
-            if(newStudent.AccountNumberID != null)
+            if (newStudent.AccountNumberID != null)
             {
                 AccountingTreeChart account = Unit_Of_Work.accountingTreeChart_Repository.First_Or_Default(t => t.IsDeleted != true && t.ID == newStudent.AccountNumberID);
 
@@ -1094,7 +1169,7 @@ namespace LMS_CMS_PL.Controllers.Domains
                 }
             }
 
-            
+
             if (newStudent.Nationality != 0 && newStudent.Nationality != null)
             {
                 Nationality nationality = _Unit_Of_Work_Octa.nationality_Repository.Select_By_Id_Octa(newStudent.Nationality);
@@ -1104,7 +1179,7 @@ namespace LMS_CMS_PL.Controllers.Domains
                 }
 
             }
-             
+
             if (userTypeClaim == "employee")
             {
                 IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Student Edit Accounting", roleId, userId, student);

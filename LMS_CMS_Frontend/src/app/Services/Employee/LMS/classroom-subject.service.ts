@@ -2,6 +2,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ApiService } from '../../api.service';
 import { ClassroomSubject } from '../../../Models/LMS/classroom-subject';
+import { ClassroomSubjectGroupBy } from '../../../Models/LMS/classroom-subject-group-by';
+import { ClassroomSubjectCoTeacher } from '../../../Models/LMS/classroom-subject-co-teacher';
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +16,7 @@ export class ClassroomSubjectService {
     this.baseUrl = ApiServ.BaseUrl
   }
 
-  GetByClassId(classID:number, DomainName: string) {
+  GetByClassId(classID: number, DomainName: string) {
     if (DomainName != null) {
       this.header = DomainName
     }
@@ -26,7 +28,31 @@ export class ClassroomSubjectService {
     return this.http.get<ClassroomSubject[]>(`${this.baseUrl}/ClassroomSubject/GetByClassroom/${classID}`, { headers });
   }
 
-  GetByID(id:number, DomainName: string) {
+  GetByEmpId(EmpId: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<ClassroomSubjectGroupBy[]>(`${this.baseUrl}/ClassroomSubject/GetByEmployee/${EmpId}`, { headers });
+  }
+
+  GetByEmpCoTeacherId(EmpId: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<ClassroomSubjectGroupBy[]>(`${this.baseUrl}/ClassroomSubject/GetByEmployeeCoTeacher/${EmpId}`, { headers });
+  }
+
+  GetByID(id: number, DomainName: string) {
     if (DomainName != null) {
       this.header = DomainName
     }
@@ -38,9 +64,9 @@ export class ClassroomSubjectService {
     return this.http.get<ClassroomSubject>(`${this.baseUrl}/ClassroomSubject/${id}`, { headers });
   }
 
-  Generate(classID: number, DomainName:string) {
-    if(DomainName!=null) {
-      this.header=DomainName 
+  Generate(classID: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
@@ -54,9 +80,9 @@ export class ClassroomSubjectService {
     });
   }
 
-  Edit(classroomSubject: ClassroomSubject, DomainName:string) {
-    if(DomainName!=null) {
-      this.header=DomainName 
+  Edit(classroomSubject: ClassroomSubject, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
@@ -66,9 +92,21 @@ export class ClassroomSubjectService {
     return this.http.put(`${this.baseUrl}/ClassroomSubject`, classroomSubject, { headers });
   }
 
-  IsSubjectHide(classroomSubject: ClassroomSubject, DomainName:string) {
-    if(DomainName!=null) {
-      this.header=DomainName 
+   AddCoTeacher(ClassroomSubjectCoTeacher: ClassroomSubjectCoTeacher, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.post(`${this.baseUrl}/ClassroomSubject`, ClassroomSubjectCoTeacher, { headers });
+  }
+
+  IsSubjectHide(classroomSubject: ClassroomSubject, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()

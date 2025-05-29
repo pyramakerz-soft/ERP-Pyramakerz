@@ -400,26 +400,31 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
                     for (int i = 0; i < classes.Count; i++)
                     {
-                        List<StudentAcademicYear> studentAcademicYears = await Unit_Of_Work.studentAcademicYear_Repository.Select_All_With_IncludesById<StudentAcademicYear>(
-                            d => d.IsDeleted != true && d.ClassID == classes[i].ID && d.SchoolID == schoolId && d.GradeID == grade.ID,
+                        //List<StudentAcademicYear> studentAcademicYears = await Unit_Of_Work.studentAcademicYear_Repository.Select_All_With_IncludesById<StudentAcademicYear>(
+                        //    d => d.IsDeleted != true && d.ClassID == classes[i].ID && d.SchoolID == schoolId && d.GradeID == grade.ID,
+                        //    query => query.Include(d => d.Student)
+                        //    );
+
+                        List<StudentClassroom> studentClassrooms = await Unit_Of_Work.studentClassroom_Repository.Select_All_With_IncludesById<StudentClassroom>(
+                            d => d.IsDeleted != true && d.ClassID == classes[i].ID && d.Classroom.AcademicYear.SchoolID == schoolId && d.Classroom.GradeID == grade.ID,
                             query => query.Include(d => d.Student)
                             );
 
-                        var studentCountPerClass = studentAcademicYears
-                            .Select(d => d.StudentID) 
+                        var studentCountPerClass = studentClassrooms
+                            .Select(d => d.StudentID)
                             .Distinct()
                             .Count();
 
-                        var studentSaudiCountPerClass = studentAcademicYears
-                            .Where(d => d.Student.Nationality == 148)  
-                            .Select(d => d.StudentID)                 
-                            .Distinct()                               
+                        var studentSaudiCountPerClass = studentClassrooms
+                            .Where(d => d.Student.Nationality == 148)
+                            .Select(d => d.StudentID)
+                            .Distinct()
                             .Count();
-                        
-                        var studentNoonCountPerClass = studentAcademicYears
-                            .Where(d => d.Student.IsRegisteredInNoor == true)  
-                            .Select(d => d.StudentID)                 
-                            .Distinct()                               
+
+                        var studentNoonCountPerClass = studentClassrooms
+                            .Where(d => d.Student.IsRegisteredInNoor == true)
+                            .Select(d => d.StudentID)
+                            .Distinct()
                             .Count();
 
                         StudentCountPerGrade = StudentCountPerGrade + studentCountPerClass;
@@ -441,7 +446,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     gradeWithStudentClassCountDTO.StudentsAssignedToNoorCount = StudentNoonCountPerGrade;
                     TotalCounts.StudentsAssignedToNoorCount = TotalCounts.StudentsAssignedToNoorCount + gradeWithStudentClassCountDTO.StudentsAssignedToNoorCount;
 
-                    section.GradeWithStudentClassCount.Add(gradeWithStudentClassCountDTO); 
+                    section.GradeWithStudentClassCount.Add(gradeWithStudentClassCountDTO);
                 }
 
                 section.TotalCounts = TotalCounts;

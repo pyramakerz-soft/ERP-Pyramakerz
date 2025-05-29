@@ -586,13 +586,13 @@ namespace LMS_CMS_BL.Config
                 .ForMember(dest => dest.AccountingTreeChartName, opt => opt.MapFrom(src => src.AccountingTreeChart.Name));
             CreateMap<AccountingEntriesDetailsAddDTO, AccountingEntriesDetails>();
             CreateMap<AccountingEntriesDetailsPutDTO, AccountingEntriesDetails>();
-            CreateMap<StudentAcademicYear, StudentAcademicYearGetDTO>()
-               .ForMember(dest => dest.GradeName, opt => opt.MapFrom(src => src.Grade.Name))
-               .ForMember(dest => dest.SchoolName, opt => opt.MapFrom(src => src.School.Name))
-               .ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => src.Student.User_Name))
-               .ForMember(dest => dest.ClassName, opt => opt.MapFrom(src => src.Classroom.Name))
-               .ForMember(dest => dest.SectionId, opt => opt.MapFrom(src => src.Grade.Section.ID))
-               .ForMember(dest => dest.SectionName, opt => opt.MapFrom(src => src.Grade.Section.Name));
+            //CreateMap<StudentAcademicYear, StudentAcademicYearGetDTO>()
+            //   .ForMember(dest => dest.GradeName, opt => opt.MapFrom(src => src.Grade.Name))
+            //   .ForMember(dest => dest.SchoolName, opt => opt.MapFrom(src => src.School.Name))
+            //   .ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => src.Student.User_Name))
+            //   .ForMember(dest => dest.ClassName, opt => opt.MapFrom(src => src.Classroom.Name))
+            //   .ForMember(dest => dest.SectionId, opt => opt.MapFrom(src => src.Grade.Section.ID))
+            //   .ForMember(dest => dest.SectionName, opt => opt.MapFrom(src => src.Grade.Section.Name));
 
             CreateMap<Store, InventoryStoreGetDTO>();
             CreateMap<InventoryStoreAddDTO, Store>();
@@ -967,6 +967,11 @@ namespace LMS_CMS_BL.Config
             CreateMap<ClassroomSubjectCoTeacher, ClassroomSubjectCoTeacherGetDTO>() 
                 .ForMember(dest => dest.CoTeacherEnglishName, opt => opt.MapFrom(src => src.CoTeacher.en_name))
                 .ForMember(dest => dest.CoTeacherArabicName, opt => opt.MapFrom(src => src.CoTeacher.ar_name));
+
+            CreateMap<StudentClassroom, StudentClassroomGetDTO>()
+                .ForMember(dest => dest.StudentEnglishName, opt => opt.MapFrom(src => src.Student.en_name))
+                .ForMember(dest => dest.StudentArabicName, opt => opt.MapFrom(src => src.Student.ar_name)) 
+                .ForMember(dest => dest.ClassName, opt => opt.MapFrom(src => src.Classroom.Name));
         }
     } 
 }

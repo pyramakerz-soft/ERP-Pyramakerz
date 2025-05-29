@@ -7347,7 +7347,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.ToTable("Student");
                 });
 
-            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.LMS.StudentAcademicYear", b =>
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.LMS.StudentClassroom", b =>
                 {
                     b.Property<long>("ID")
                         .ValueGeneratedOnAdd()
@@ -7356,6 +7356,65 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("ID"));
 
                     b.Property<long>("ClassID")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("DeletedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("DeletedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("InsertedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("InsertedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("InsertedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool?>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<long>("StudentID")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("UpdatedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("UpdatedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("ClassID");
+
+                    b.HasIndex("DeletedByUserId");
+
+                    b.HasIndex("InsertedByUserId");
+
+                    b.HasIndex("StudentID");
+
+                    b.HasIndex("UpdatedByUserId");
+
+                    b.ToTable("StudentClassroom");
+                });
+
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.LMS.StudentGrade", b =>
+                {
+                    b.Property<long>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("ID"));
+
+                    b.Property<long>("AcademicYearID")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime?>("DeletedAt")
@@ -7382,9 +7441,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<long>("SchoolID")
-                        .HasColumnType("bigint");
-
                     b.Property<long>("StudentID")
                         .HasColumnType("bigint");
 
@@ -7399,7 +7455,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.HasKey("ID");
 
-                    b.HasIndex("ClassID");
+                    b.HasIndex("AcademicYearID");
 
                     b.HasIndex("DeletedByUserId");
 
@@ -7407,13 +7463,11 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.HasIndex("InsertedByUserId");
 
-                    b.HasIndex("SchoolID");
-
                     b.HasIndex("StudentID");
 
                     b.HasIndex("UpdatedByUserId");
 
-                    b.ToTable("StudentAcademicYear");
+                    b.ToTable("StudentGrade");
                 });
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.LMS.StudentMedal", b =>
@@ -13000,10 +13054,10 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Navigation("UpdatedByEmployee");
                 });
 
-            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.LMS.StudentAcademicYear", b =>
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.LMS.StudentClassroom", b =>
                 {
                     b.HasOne("LMS_CMS_DAL.Models.Domains.LMS.Classroom", "Classroom")
-                        .WithMany("StudentAcademicYears")
+                        .WithMany("StudentClassrooms")
                         .HasForeignKey("ClassID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -13012,24 +13066,12 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .WithMany()
                         .HasForeignKey("DeletedByUserId");
 
-                    b.HasOne("LMS_CMS_DAL.Models.Domains.LMS.Grade", "Grade")
-                        .WithMany("StudentAcademicYears")
-                        .HasForeignKey("GradeID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "InsertedByEmployee")
                         .WithMany()
                         .HasForeignKey("InsertedByUserId");
 
-                    b.HasOne("LMS_CMS_DAL.Models.Domains.LMS.School", "School")
-                        .WithMany("StudentAcademicYears")
-                        .HasForeignKey("SchoolID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("LMS_CMS_DAL.Models.Domains.LMS.Student", "Student")
-                        .WithMany("StudentAcademicYears")
+                        .WithMany("StudentClassrooms")
                         .HasForeignKey("StudentID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -13042,11 +13084,52 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.Navigation("DeletedByEmployee");
 
+                    b.Navigation("InsertedByEmployee");
+
+                    b.Navigation("Student");
+
+                    b.Navigation("UpdatedByEmployee");
+                });
+
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.LMS.StudentGrade", b =>
+                {
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.LMS.AcademicYear", "AcademicYear")
+                        .WithMany("StudentGrades")
+                        .HasForeignKey("AcademicYearID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "DeletedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("DeletedByUserId");
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.LMS.Grade", "Grade")
+                        .WithMany("StudentGrades")
+                        .HasForeignKey("GradeID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "InsertedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("InsertedByUserId");
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.LMS.Student", "Student")
+                        .WithMany("StudentGrades")
+                        .HasForeignKey("StudentID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "UpdatedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("UpdatedByUserId");
+
+                    b.Navigation("AcademicYear");
+
+                    b.Navigation("DeletedByEmployee");
+
                     b.Navigation("Grade");
 
                     b.Navigation("InsertedByEmployee");
-
-                    b.Navigation("School");
 
                     b.Navigation("Student");
 
@@ -14388,6 +14471,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.Navigation("Semesters");
 
+                    b.Navigation("StudentGrades");
+
                     b.Navigation("Tests");
                 });
 
@@ -14411,7 +14496,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.Navigation("LessonResourceClassrooms");
 
-                    b.Navigation("StudentAcademicYears");
+                    b.Navigation("StudentClassrooms");
                 });
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.LMS.ClassroomSubject", b =>
@@ -14471,7 +14556,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.Navigation("ShopItem");
 
-                    b.Navigation("StudentAcademicYears");
+                    b.Navigation("StudentGrades");
 
                     b.Navigation("Subjects");
 
@@ -14544,8 +14629,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Navigation("Sections");
 
                     b.Navigation("ShopItem");
-
-                    b.Navigation("StudentAcademicYears");
                 });
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.LMS.SchoolType", b =>
@@ -14590,7 +14673,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.Navigation("Orders");
 
-                    b.Navigation("StudentAcademicYears");
+                    b.Navigation("StudentClassrooms");
+
+                    b.Navigation("StudentGrades");
 
                     b.Navigation("StudentHygieneTypes");
 

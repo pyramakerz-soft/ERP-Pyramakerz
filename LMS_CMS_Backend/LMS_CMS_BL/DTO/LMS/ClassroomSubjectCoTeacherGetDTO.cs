@@ -10,7 +10,7 @@ namespace LMS_CMS_BL.DTO.LMS
 {
     public class ClassroomSubjectCoTeacherGetDTO
     {
-        public long ID { get; set; }
+        public long? ID { get; set; }
         public long CoTeacherID { get; set; }
         public string CoTeacherEnglishName { get; set; }
         public string CoTeacherArabicName { get; set; }

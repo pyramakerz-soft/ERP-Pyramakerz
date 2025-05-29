@@ -318,9 +318,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
         [HttpPost]
         [Authorize_Endpoint_(
-      allowedTypes: new[] { "octa", "employee" },
-      pages: new[] { "Inventory" }
-  )]
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Inventory" }
+        )]
         public async Task<IActionResult> Add([FromForm] InventoryMasterAddDTO newData)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);

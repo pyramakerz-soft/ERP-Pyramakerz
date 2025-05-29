@@ -629,7 +629,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
                 long AccademicYearId = Convert.ToInt64(registerationFormParent.AcademicYearID);
                 long GradeId = Convert.ToInt64(registerationFormParent.GradeID);
-                
+
                 AcademicYear academicYear = Unit_Of_Work.academicYear_Repository
                     .First_Or_Default(a => a.ID == AccademicYearId && a.IsDeleted != true);
                 if (academicYear == null)
@@ -639,24 +639,45 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
                 StudentGetDTO studentDto = await _createStudentService.CreateStudentDtoObj(Unit_Of_Work, registrationFormParentID);
                 Student student = await _createStudentService.CreateNewStudent(Unit_Of_Work, studentDto, userTypeClaim, userId, AccademicYearId);
-                 
-                StudentAcademicYear studentAcademicYear = new StudentAcademicYear
+
+                //StudentAcademicYear studentAcademicYear = new StudentAcademicYear
+                //{
+                //    StudentID = student.ID,
+                //    SchoolID = academicYear.SchoolID,
+                //    ClassID = classroomid,
+                //    GradeID = GradeId,
+                //    InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone),
+                //    InsertedByOctaId = userTypeClaim == "octa" ? userId : null,
+                //    InsertedByUserId = userTypeClaim == "employee" ? userId : null
+                //};
+
+                //Unit_Of_Work.studentAcademicYear_Repository.Add(studentAcademicYear);
+
+                StudentClassroom studentClassroom = new StudentClassroom
                 {
-                    StudentID = student.ID,
-                    SchoolID = academicYear.SchoolID,
-                    ClassID = classroomid,
-                    GradeID = GradeId,
+                    StudentID = student.ID, 
+                    ClassID = classroomid, 
                     InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone),
                     InsertedByOctaId = userTypeClaim == "octa" ? userId : null,
                     InsertedByUserId = userTypeClaim == "employee" ? userId : null
                 };
+                Unit_Of_Work.studentClassroom_Repository.Add(studentClassroom);
 
-                Unit_Of_Work.studentAcademicYear_Repository.Add(studentAcademicYear);
+                StudentGrade studentGrade = new StudentGrade
+                {
+                    StudentID = student.ID,
+                    GradeID = GradeId, 
+                    AcademicYearID = AccademicYearId, 
+                    InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone),
+                    InsertedByOctaId = userTypeClaim == "octa" ? userId : null,
+                    InsertedByUserId = userTypeClaim == "employee" ? userId : null
+                };
+                Unit_Of_Work.studentGrade_Repository.Add(studentGrade);
+
                 await Unit_Of_Work.SaveChangesAsync();
 
-
                 //////////////////////////////////// remove all registration form parent ////////////////////////////////////////
-                _removeAllRegistrationFormParentService.RemoveAllRegistrationFormParent(Unit_Of_Work, registrationFormParentID, userTypeClaim, userId); 
+                _removeAllRegistrationFormParentService.RemoveAllRegistrationFormParent(Unit_Of_Work, registrationFormParentID, userTypeClaim, userId);
 
                 return Ok();
             }
@@ -665,6 +686,6 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 Console.WriteLine($"Error: {ex.Message}\n{ex.StackTrace}");
                 return StatusCode(500, $"An error occurred: {ex.Message}");
             }
-        }  
+        }
     }
 }
