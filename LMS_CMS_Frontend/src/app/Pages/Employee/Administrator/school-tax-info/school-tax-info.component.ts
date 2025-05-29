@@ -11,6 +11,8 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
+import Swal from 'sweetalert2';
+import { TaxIssuerService } from '../../../../Services/Employee/Administration/tax-issuer.service';
 
 @Component({
   selector: 'app-school-tax-info',
@@ -22,7 +24,8 @@ import { firstValueFrom } from 'rxjs';
 export class SchoolTaxInfoComponent {
   schoolData: School[] = [];
   school: School = new School();
-  validationErrors: { [key in keyof School]?: string } = {};
+  taxIssuer: any = {};
+  validationErrors: any = {};
   selectedTaxType: string = 'ETA';
   isLoading = false;
 
@@ -41,6 +44,7 @@ export class SchoolTaxInfoComponent {
     private menuService: MenuService,
     public activeRoute: ActivatedRoute,
     public schoolService: SchoolService,
+    public taxIssuerService: TaxIssuerService,
     public router: Router
   ) { }
 
@@ -69,7 +73,7 @@ export class SchoolTaxInfoComponent {
   getTaxTypeDisplay(school: School): string {
     if (school.streetName || school.buildingNumber || school.city || school.crn || school.postalZone) {
       return 'ZATCA';
-    } else if (school.vatNumber) {
+    } else if (school.vatNumber) {//recheck
       return 'ETA';
     }
     return 'Not Set';
@@ -79,7 +83,40 @@ export class SchoolTaxInfoComponent {
     this.schoolService.GetBySchoolId(schoolId, this.DomainName).subscribe((data) => {
       this.school = data;
       this.selectedTaxType = this.getTaxTypeDisplay(data);
+      
+      // Load tax issuer data if ETA is selected
+      if (this.selectedTaxType === 'ETA' && data.vatNumber) {
+        this.getTaxIssuerById(data.vatNumber);
+      }
     });
+  }
+
+  getTaxIssuerById(id: string) {
+    this.taxIssuerService.getById(id, this.DomainName).subscribe(
+      (data) => {
+        this.taxIssuer = data;
+      },
+      (error) => {
+        // If tax issuer not found, initialize empty object
+        this.taxIssuer = {
+          id: id,
+          type: '',
+          name: '',
+          activityCode: '',
+          branchID: '',
+          country: '',
+          governate: '',
+          regionCity: '',
+          street: '',
+          buildingNumber: '',
+          postalCode: '',
+          floor: '',
+          room: '',
+          landMark: '',
+          additionalInfo: ''
+        };
+      }
+    );
   }
 
   openModal(schoolId: number) {
@@ -92,6 +129,7 @@ export class SchoolTaxInfoComponent {
     document.getElementById('Tax_Modal')?.classList.remove('flex');
     document.getElementById('Tax_Modal')?.classList.add('hidden');
     this.school = new School();
+    this.taxIssuer = {};
     this.validationErrors = {};
   }
 
@@ -107,12 +145,17 @@ export class SchoolTaxInfoComponent {
     } else {
       // Clear ETA fields when switching to ZATCA
       this.school.vatNumber = '';
+      this.taxIssuer = {};
     }
   }
 
-  onInputValueChange(event: { field: keyof School; value: any }) {
+  onInputValueChange(event: { field: string; value: any }, model: 'school' | 'taxIssuer' = 'school') {
     const { field, value } = event;
-    (this.school as any)[field] = value;
+    if (model === 'school') {
+      (this.school as any)[field] = value;
+    } else {
+      this.taxIssuer[field] = value;
+    }
     if (value) {
       this.validationErrors[field] = '';
     }
@@ -128,16 +171,96 @@ export class SchoolTaxInfoComponent {
 
   SaveSchool() {
     this.isLoading = true;
+    
+    if (this.selectedTaxType === 'ETA') {
+      this.saveTaxIssuer();
+    } else {
+      this.saveZatcaInfo();
+    }
+  }
+
+  saveTaxIssuer() {
+    // Ensure VAT number is set in school
+    if (this.taxIssuer.id) {
+      this.school.vatNumber = this.taxIssuer.id;
+    }
+
+    this.taxIssuerService.edit(this.taxIssuer, this.DomainName).subscribe(
+      (result: any) => {
+        // After saving tax issuer, save school info
+        this.saveZatcaInfo();
+      },
+      (error) => {
+        this.isLoading = false;
+        Swal.fire({
+          icon: 'error',
+          title: 'Error saving tax issuer',
+          text: error.message || 'Please try again',
+          confirmButtonText: 'Okay',
+          customClass: { confirmButton: 'secondaryBg' },
+        });
+      }
+    );
+  }
+
+  saveZatcaInfo() {
     this.schoolService.Edit(this.school, this.DomainName).subscribe(
       (result: any) => {
         this.closeModal();
         this.isLoading = false;
         this.getSchoolData();
+        Swal.fire({
+          icon: 'success',
+          title: 'Saved successfully',
+          showConfirmButton: false,
+          timer: 1500
+        });
       },
       (error) => {
         this.isLoading = false;
-        // Handle error
+        Swal.fire({
+          icon: 'error',
+          title: 'Error saving school',
+          text: error.message || 'Please try again',
+          confirmButtonText: 'Okay',
+          customClass: { confirmButton: 'secondaryBg' },
+        });
       }
     );
+  }
+
+  deleteSchool(schoolId: number) {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.isLoading = true;
+        this.schoolService.Delete(schoolId, this.DomainName).subscribe(
+          () => {
+            this.isLoading = false;
+            Swal.fire(
+              'Deleted!',
+              'The school has been deleted.',
+              'success'
+            );
+            this.getSchoolData();
+          },
+          (error) => {
+            this.isLoading = false;
+            Swal.fire(
+              'Error!',
+              'There was an error deleting the school.',
+              'error'
+            );
+          }
+        );
+      }
+    });
   }
 }

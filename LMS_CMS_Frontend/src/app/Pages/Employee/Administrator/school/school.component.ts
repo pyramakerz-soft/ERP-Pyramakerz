@@ -24,11 +24,6 @@ import { DaysService } from '../../../../Services/Octa/days.service';
   styleUrl: './school.component.css',
 })
 export class SchoolComponent {
-
-  navigateToTaxInfo(schoolId: number) {
-    this.router.navigate(['/Employee/School Tax Info', schoolId]);
-  }
-
   keysArray: string[] = ['id', 'name', 'address', 'schoolTypeName'];
   key: string = 'id';
   value: any = '';
