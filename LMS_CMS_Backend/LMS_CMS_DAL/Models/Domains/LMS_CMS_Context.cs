@@ -174,6 +174,7 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<ClassroomSubjectCoTeacher> ClassroomSubjectCoTeacher { get; set; }
         public DbSet<SubjectSupervisor> SubjectSupervisor { get; set; }
         public DbSet<GradeSupervisor> GradeSupervisor { get; set; }
+        public DbSet<StudentClassroomSubject> StudentClassroomSubject { get; set; }
 
 
         public LMS_CMS_Context(DbContextOptions<LMS_CMS_Context> options)
@@ -1519,6 +1520,18 @@ namespace LMS_CMS_DAL.Models.Domains
               .HasOne(p => p.Employee)
               .WithMany(p => p.GradeSupervisors)
               .HasForeignKey(p => p.EmployeeID)
+              .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<StudentClassroomSubject>()
+              .HasOne(p => p.StudentClassroom)
+              .WithMany(p => p.StudentClassroomSubjects)
+              .HasForeignKey(p => p.StudentClassroomID)
+              .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<StudentClassroomSubject>()
+              .HasOne(p => p.Subject)
+              .WithMany(p => p.StudentClassroomSubjects)
+              .HasForeignKey(p => p.SubjectID)
               .OnDelete(DeleteBehavior.Restrict);
 
             ///////////////////////// Exception: /////////////////////////

@@ -187,6 +187,7 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<SubjectSupervisor> SubjectSupervisor_Repository;
         GenericRepo<StudentClassroom> StudentClassroom_Repository;
         GenericRepo<StudentGrade> StudentGrade_Repository;
+        GenericRepo<StudentClassroomSubject> StudentClassroomSubject_Repository;
 
 
 
@@ -2099,6 +2100,18 @@ namespace LMS_CMS_BL.UOW
                     StudentClassroom_Repository = new GenericRepo<StudentClassroom>(db);
                 }
                 return StudentClassroom_Repository;
+            }
+        }
+        
+        public GenericRepo<StudentClassroomSubject> studentClassroomSubject_Repository
+        {
+            get
+            {
+                if (StudentClassroomSubject_Repository == null)
+                {
+                    StudentClassroomSubject_Repository = new GenericRepo<StudentClassroomSubject>(db);
+                }
+                return StudentClassroomSubject_Repository;
             }
         }
 
