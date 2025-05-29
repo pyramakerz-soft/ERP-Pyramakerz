@@ -505,6 +505,68 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return NotFound("No Classroom Subject with this ID");
             } 
 
+            // If Not Hide, Add the subject to students in class
+            if(ClassroomSubjectExists.Hide == true && EditedClassroomSubjectHide.Hide == false)
+            {
+                List<StudentClassroom> studentClassrooms = Unit_Of_Work.studentClassroom_Repository.FindBy(d => d.ClassID == ClassroomSubjectExists.ClassroomID && d.IsDeleted != true);
+                foreach (var studentClassroom in studentClassrooms)
+                {
+                   StudentClassroomSubject studentClassroomSubject = new StudentClassroomSubject
+                   {
+                       StudentClassroomID = studentClassroom.ID,
+                       SubjectID = ClassroomSubjectExists.SubjectID
+                   };
+
+                    studentClassroomSubject.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                    if (userTypeClaim == "octa")
+                    {
+                        studentClassroomSubject.InsertedByOctaId = userId;
+                    }
+                    else if (userTypeClaim == "employee")
+                    {
+                        studentClassroomSubject.InsertedByUserId = userId;
+                    }
+
+                    Unit_Of_Work.studentClassroomSubject_Repository.Add(studentClassroomSubject);
+                }
+            }
+
+            // If Hide, Remove subject from students
+            if (ClassroomSubjectExists.Hide == false && EditedClassroomSubjectHide.Hide == true)
+            {
+                List<StudentClassroom> studentClassrooms = Unit_Of_Work.studentClassroom_Repository.FindBy(d => d.ClassID == ClassroomSubjectExists.ClassroomID && d.IsDeleted != true);
+                foreach (var studentClassroom in studentClassrooms)
+                {
+                    StudentClassroomSubject studentClassroomSubject = Unit_Of_Work.studentClassroomSubject_Repository.First_Or_Default(
+                        d => d.StudentClassroomID == studentClassroom.ID && d.IsDeleted != true && d.SubjectID == ClassroomSubjectExists.SubjectID
+                        );
+                     
+                    if(studentClassroomSubject != null)
+                    {
+                        studentClassroomSubject.IsDeleted = true;
+                        studentClassroomSubject.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                        if (userTypeClaim == "octa")
+                        {
+                            studentClassroomSubject.DeletedByOctaId = userId;
+                            if (studentClassroomSubject.DeletedByUserId != null)
+                            {
+                                studentClassroomSubject.DeletedByUserId = null;
+                            }
+                        }
+                        else if (userTypeClaim == "employee")
+                        {
+                            studentClassroomSubject.DeletedByUserId = userId;
+                            if (studentClassroomSubject.DeletedByOctaId != null)
+                            {
+                                studentClassroomSubject.DeletedByOctaId = null;
+                            }
+                        }
+
+                        Unit_Of_Work.studentClassroomSubject_Repository.Update(studentClassroomSubject);
+                    } 
+                }
+            }
+
             if (userTypeClaim == "employee")
             {
                 IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Classroom Subject", roleId, userId, ClassroomSubjectExists);

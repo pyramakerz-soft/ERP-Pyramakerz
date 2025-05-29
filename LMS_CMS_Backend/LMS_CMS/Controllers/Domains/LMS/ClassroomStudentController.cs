@@ -68,7 +68,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
              allowedTypes: new[] { "octa", "employee" },
              pages: new[] { "Classroom Students" }
         )]
-        public IActionResult Add(StudentClassroomAddDTO newStudentClassroom)
+        public async Task<IActionResult> AddAsync(StudentClassroomAddDTO newStudentClassroom)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -86,7 +86,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return BadRequest("Student Classroom cannot be null");
             }
 
-            Classroom classroom = Unit_Of_Work.classroom_Repository.First_Or_Default(s => s.ID == newStudentClassroom.ClassID && s.IsDeleted != true);
+            Classroom classroom = await Unit_Of_Work.classroom_Repository.FindByIncludesAsync(
+                s => s.ID == newStudentClassroom.ClassID && s.IsDeleted != true, 
+                query => query.Include(d => d.ClassroomSubjects)
+                );
             if (classroom == null)
             {
                 return BadRequest("this Classroom is not exist");
@@ -113,6 +116,33 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             Unit_Of_Work.studentClassroom_Repository.Add(studentClassroom);
             Unit_Of_Work.SaveChanges();
+
+            if (classroom.ClassroomSubjects != null && classroom.ClassroomSubjects.Count != 0)
+            {
+                foreach (var classroomSubject in classroom.ClassroomSubjects)
+                {
+                    if(classroomSubject.Hide != true)
+                    {
+                        StudentClassroomSubject studentClassroomSubject = new StudentClassroomSubject();
+                        studentClassroomSubject.StudentClassroomID = studentClassroom.ID;
+                        studentClassroomSubject.SubjectID = classroomSubject.SubjectID;
+                        studentClassroomSubject.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                        if (userTypeClaim == "octa")
+                        {
+                            studentClassroomSubject.InsertedByOctaId = userId;
+                        }
+                        else if (userTypeClaim == "employee")
+                        {
+                            studentClassroomSubject.InsertedByUserId = userId;
+                        }
+
+                        Unit_Of_Work.studentClassroomSubject_Repository.Add(studentClassroomSubject);
+
+                    }
+                }
+            }
+
+            Unit_Of_Work.SaveChanges();
             return Ok(newStudentClassroom);
         }
 
@@ -124,9 +154,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
           allowEdit: 1,
           pages: new[] { "Classroom Students" }
         )]
-        public IActionResult Edit(StudentClassroomPutDTO editStudentClassroom)
+        public async Task<IActionResult> EditAsync(StudentClassroomPutDTO editStudentClassroom)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
 
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
             long.TryParse(userIdClaim, out long userId);
@@ -144,8 +175,11 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return BadRequest("Student Classroom be null");
             }
 
-            Classroom classroom = Unit_Of_Work.classroom_Repository.First_Or_Default(s => s.ID == editStudentClassroom.ClassID && s.IsDeleted != true);
-            if (classroom == null)
+            Classroom classroomEdited = await Unit_Of_Work.classroom_Repository.FindByIncludesAsync(
+                s => s.ID == editStudentClassroom.ClassID && s.IsDeleted != true,
+                query => query.Include(d => d.ClassroomSubjects)
+                );
+            if (classroomEdited == null)
             {
                 return BadRequest("this Classroom is not exist");
             }
@@ -171,13 +205,70 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 }
             }
 
-            if(studentClassroom.Classroom.GradeID != classroom.GradeID)
+            if(studentClassroom.Classroom.GradeID != classroomEdited.GradeID)
             {
                 return BadRequest("Classrooms Are not at the Same Grade");
             }
+             
+            if (editStudentClassroom.ClassID != studentClassroom.ClassID)
+            { 
+                List<StudentClassroomSubject> studentClassroomSubjects = Unit_Of_Work.studentClassroomSubject_Repository.FindBy(
+                    d => d.StudentClassroomID == studentClassroom.ID && d.IsDeleted != true
+                    );
+
+                if(studentClassroomSubjects != null && studentClassroomSubjects.Count() > 0)
+                {
+                    foreach (var studentClassroomSubject in studentClassroomSubjects)
+                    {
+                        studentClassroomSubject.IsDeleted = true;
+                        studentClassroomSubject.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                        if (userTypeClaim == "octa")
+                        {
+                            studentClassroomSubject.DeletedByOctaId = userId;
+                            if (studentClassroomSubject.DeletedByUserId != null)
+                            {
+                                studentClassroomSubject.DeletedByUserId = null;
+                            }
+                        }
+                        else if (userTypeClaim == "employee")
+                        {
+                            studentClassroomSubject.DeletedByUserId = userId;
+                            if (studentClassroomSubject.DeletedByOctaId != null)
+                            {
+                                studentClassroomSubject.DeletedByOctaId = null;
+                            }
+                        }
+
+                        Unit_Of_Work.studentClassroomSubject_Repository.Update(studentClassroomSubject);
+                    } 
+                }
+
+                if (classroomEdited.ClassroomSubjects != null && classroomEdited.ClassroomSubjects.Count != 0)
+                {
+                    foreach (var classroomSubject in classroomEdited.ClassroomSubjects)
+                    {
+                        if (classroomSubject.Hide != true)
+                        {
+                            StudentClassroomSubject studentClassroomSubject = new StudentClassroomSubject();
+                            studentClassroomSubject.StudentClassroomID = studentClassroom.ID;
+                            studentClassroomSubject.SubjectID = classroomSubject.SubjectID;
+                            studentClassroomSubject.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                            if (userTypeClaim == "octa")
+                            {
+                                studentClassroomSubject.InsertedByOctaId = userId;
+                            }
+                            else if (userTypeClaim == "employee")
+                            {
+                                studentClassroomSubject.InsertedByUserId = userId;
+                            }
+
+                            Unit_Of_Work.studentClassroomSubject_Repository.Add(studentClassroomSubject);
+                        }
+                    }
+                } 
+            }
 
             mapper.Map(editStudentClassroom, studentClassroom);
-            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             studentClassroom.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
             if (userTypeClaim == "octa")
             {

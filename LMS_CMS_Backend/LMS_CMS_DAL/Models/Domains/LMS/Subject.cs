@@ -47,8 +47,7 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public ICollection<DailyPerformance> DailyPerformance { get; set; } = new HashSet<DailyPerformance>();
         public ICollection<ClassroomSubject> ClassroomSubjects { get; set; } = new HashSet<ClassroomSubject>();
         public ICollection<SubjectSupervisor> SubjectSupervisors { get; set; } = new HashSet<SubjectSupervisor>();
-
-
+        public ICollection<StudentClassroomSubject> StudentClassroomSubjects { get; set; } = new HashSet<StudentClassroomSubject>();
     }
 }
 

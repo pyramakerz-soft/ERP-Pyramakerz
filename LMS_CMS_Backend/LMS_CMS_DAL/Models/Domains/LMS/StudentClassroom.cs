@@ -17,6 +17,7 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public Student Student { get; set; } 
         [ForeignKey("Classroom")]
         public long ClassID { get; set; } 
-        public Classroom Classroom { get; set; } 
+        public Classroom Classroom { get; set; }
+        public ICollection<StudentClassroomSubject> StudentClassroomSubjects { get; set; } = new HashSet<StudentClassroomSubject>();
     }
 }
