@@ -94,7 +94,7 @@ export class SubjectTeacherComponent {
   }
 
   moveToEmployee() {
-    this.router.navigateByUrl("Employee/Employee")
+    this.router.navigateByUrl(`Employee/Employee Details/${this.SupjectTeacher.teacherID}`)
   }
 
   GetData() {
@@ -116,6 +116,19 @@ export class SubjectTeacherComponent {
     this.SupjectTeacher.id = 0
     this.ClassroomSubjectServ.GetByClassId(this.SupjectTeacher.classroomID, this.DomainName).subscribe(d => {
       this.subject = d;
+      const assignedSubjects = this.SupjectTeacherData
+        .flatMap(item => item.subjects)  // Extract subjects from each class object
+        .map(sub => ({
+          subjectID: sub.subjectID,
+          classroomID: sub.classroomID
+        }));
+      this.subject = d.filter(sub =>
+        !assignedSubjects.some(assigned =>
+          assigned.subjectID === sub.subjectID &&
+          assigned.classroomID === sub.classroomID
+        )
+      );
+      console.log('Filtered subjects:', this.subject); // ✅ Only subjects NOT assigned to this teacher
     });
   }
 

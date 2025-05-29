@@ -55,9 +55,7 @@ export class SubjectCoTeacherComponent {
   isLoading = false;
   employee: EmployeeGet = new EmployeeGet()
   SelectedClassId : number =0
-  ClassValidation : string =""
-  SubjectValidation : string =""
-
+  IsSelectedClassId : string =""
 
   constructor(
     private router: Router,
@@ -96,7 +94,7 @@ export class SubjectCoTeacherComponent {
   }
 
   moveToEmployee() {
-    this.router.navigateByUrl("Employee/Employee")
+    this.router.navigateByUrl(`Employee/Employee Details/${this.SupjectCoTeacher.coTeacherID}`)
   }
 
   GetData() {
@@ -115,9 +113,27 @@ export class SubjectCoTeacherComponent {
 
   GetSubjectByClassroom() {
     this.subject = [];
-    this.SupjectCoTeacher.id = 0
+    this.IsSelectedClassId =""
+    this.SupjectCoTeacher.classroomSubjectID = 0
     this.ClassroomSubjectServ.GetByClassId(this.SelectedClassId, this.DomainName).subscribe(d => {
       this.subject = d;
+
+      const assignedSubjects = this.SupjectTeacherData
+      .flatMap(item => item.subjects)  // Extract subjects from each class object
+      .map(sub => ({
+        subjectID: sub.subjectID,
+        classroomID: sub.classroomID
+      }));
+
+      // Filter out subjects already assigned to this teacher in this class
+      this.subject = d.filter(sub =>
+        !assignedSubjects.some(assigned =>
+          assigned.subjectID === sub.subjectID &&
+          assigned.classroomID === sub.classroomID
+        )
+      );
+
+      console.log('Filtered subjects:', this.subject); // ✅ Only subjects NOT assigned to this teacher
     });
   }
 
@@ -134,6 +150,7 @@ export class SubjectCoTeacherComponent {
   }
 
   AddSupjectTeacher() {
+    if(this.isFormValid()){
       this.isLoading = true;
       this.ClassroomSubjectServ.AddCoTeacher(this.SupjectCoTeacher, this.DomainName).subscribe({
         next: () => {
@@ -153,9 +170,13 @@ export class SubjectCoTeacherComponent {
           this.closeModal();
         }
       });
+    }
   }
 
   openModal() {
+    this.SupjectCoTeacher.classroomSubjectID=0
+    this.SelectedClassId=0
+
     document.getElementById("Add_Modal")?.classList.remove("hidden");
     document.getElementById("Add_Modal")?.classList.add("flex");
   }
@@ -164,43 +185,36 @@ export class SubjectCoTeacherComponent {
     document.getElementById("Add_Modal")?.classList.remove("flex");
     document.getElementById("Add_Modal")?.classList.add("hidden");
 
-    this.SupjectCoTeacher = new ClassroomSubjectCoTeacher()
   }
 
   capitalizeField(field: keyof ClassroomSubject): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
 
-  // isFormValid(): boolean {
-  //   let isValid = true;
-  //   for (const key in this.SupjectCoTeacher) {
-  //     if (this.SupjectCoTeacher.hasOwnProperty(key)) {
-  //       const field = key as keyof ClassroomSubjectCoTeacher;
-  //       if (!this.SupjectCoTeacher[field]) {
-  //         if (
-  //           field == 'classroomID'
-  //         ) {
-  //           this.validationErrors[field] = `*${this.capitalizeField(
-  //             field
-  //           )} is required`;
-  //           isValid = false;
-  //         }
-  //       }
-  //       if (this.SupjectCoTeacher.id == 0) {
-  //         this.validationErrors['subjectID'] = "Subject is required"
-  //         isValid = false;
-  //       }
-  //     }
-  //   }
-  //   return isValid;
-  // }
+  isFormValid(): boolean {
+    let isValid = true;
+    for (const key in this.SupjectCoTeacher) {
+      if (this.SupjectCoTeacher.hasOwnProperty(key)) {
+        const field = key as keyof ClassroomSubjectCoTeacher;
+        if (this.SupjectCoTeacher.classroomSubjectID == 0) {
+          this.validationErrors['classroomSubjectID'] = "Subject is required"
+          isValid = false;
+        }
+         if (this.SelectedClassId == 0) {
+          this.IsSelectedClassId = "Class is required"
+          isValid = false;
+        }
+      }
+    }
+    return isValid;
+  }
 
-  // onInputValueChange(event: { field: keyof string; value: any }) {
-  //   const { field, value } = event;
+  onInputValueChange(event: { field: keyof ClassroomSubjectCoTeacher; value: any }) {
+    const { field, value } = event;
 
-  //   (this.SupjectCoTeacher as any)[field] = value;
-  //   if (value) {
-  //     [field] = '';
-  //   }
-  // }
+    (this.SupjectCoTeacher as any)[field] = value;
+    if (value) {
+      this.validationErrors[field] = '';
+    }
+  }
 }
