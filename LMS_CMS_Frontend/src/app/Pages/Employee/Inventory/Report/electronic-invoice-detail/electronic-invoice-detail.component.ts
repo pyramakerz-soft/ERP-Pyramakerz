@@ -75,6 +75,7 @@ export class ElectronicInvoiceDetailComponent implements OnInit {
     // First get the master invoice data
     this.inventoryMasterService.GetById(this.invoiceId, this.DomainName).subscribe({
       next: (masterData) => {
+        console.log('masterData')
         console.log(masterData)
         // Map the master data to our invoice object
         this.invoice = {
@@ -94,6 +95,7 @@ export class ElectronicInvoiceDetailComponent implements OnInit {
         // Then get the inventory details
         this.inventoryDetailsService.GetBySalesId(this.invoiceId, this.DomainName).subscribe({
           next: (details) => {
+            console.log('details')
             console.log(details)
             this.invoice.inventoryDetails = details.map(item => ({
               ...item,

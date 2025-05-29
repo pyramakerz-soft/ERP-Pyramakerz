@@ -1,6 +1,8 @@
+// tax-issuer.service.ts
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { TaxIssuer } from '../../../Models/Administrator/tax-issuer.model';
 import { ApiService } from '../../api.service';
 
 @Injectable({
@@ -14,7 +16,8 @@ export class TaxIssuerService {
     this.baseUrl = ApiServ.BaseUrl;
   }
 
-  getById(id: string, DomainName: string): Observable<any> {
+  // Get all tax issuers
+  getAll(DomainName: string){
     if (DomainName != null) {
       this.header = DomainName;
     }
@@ -23,10 +26,11 @@ export class TaxIssuerService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.get(`${this.baseUrl}/TaxIssuer/id?id=${id}`, { headers });
+    return this.http.get<TaxIssuer[]>(`${this.baseUrl}/TaxIssuer`, { headers });
   }
 
-  edit(taxIssuer: any, DomainName: string): Observable<any> {
+  // Get single tax issuer by ID
+  getById(id: string, DomainName: string): Observable<TaxIssuer> {
     if (DomainName != null) {
       this.header = DomainName;
     }
@@ -35,6 +39,19 @@ export class TaxIssuerService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.put(`${this.baseUrl}/TaxIssuer/Edit`, taxIssuer, { headers });
+    return this.http.get<TaxIssuer>(`${this.baseUrl}/TaxIssuer/id?id=${id}`, { headers });
+  }
+
+  edit(taxIssuer: TaxIssuer, DomainName: string): Observable<TaxIssuer> {
+    if (DomainName != null) {
+      this.header = DomainName;
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+
+    return this.http.put<TaxIssuer>(`${this.baseUrl}/TaxIssuer/Edit`, taxIssuer, { headers });
   }
 }

@@ -10,6 +10,7 @@ import { ZatcaService } from '../../../../../Services/Employee/Zatca/zatca.servi
 import { ApiService } from '../../../../../Services/api.service';
 import { firstValueFrom } from 'rxjs';
 import { ElectronicInvoice } from '../../../../../Models/zatca/electronic-invoice';
+import { StateService } from '../../../../../Services/Employee/Inventory/state.service';
 
 @Component({
   selector: 'app-electronic-invoice',
@@ -36,6 +37,7 @@ export class ElectronicInvoiceComponent implements OnInit {
 
   constructor(
     private schoolService: SchoolService,
+        private stateService: StateService,
     private zatcaService: ZatcaService,
     private datePipe: DatePipe,
     private apiService: ApiService,
@@ -46,6 +48,37 @@ export class ElectronicInvoiceComponent implements OnInit {
 
   ngOnInit() {
     this.loadSchools();
+    this.restoreState();
+
+  }
+
+    private restoreState() {
+    const savedState = this.stateService.getInvoiceState();
+    if (savedState) {
+      this.selectedSchoolId = savedState.selectedSchoolId;
+      this.dateFrom = savedState.dateFrom;
+      this.dateTo = savedState.dateTo;
+      this.transactions = savedState.transactions;
+      this.currentPage = savedState.currentPage;
+      this.totalPages = savedState.totalPages;
+      this.pageSize = savedState.pageSize;
+      this.totalRecords = savedState.totalRecords;
+      this.showTable = true;
+      this.stateService.clearInvoiceState();
+    }
+  }
+
+  private saveState() {
+    this.stateService.setInvoiceState({
+      selectedSchoolId: this.selectedSchoolId,
+      dateFrom: this.dateFrom,
+      dateTo: this.dateTo,
+      transactions: this.transactions,
+      currentPage: this.currentPage,
+      totalPages: this.totalPages,
+      pageSize: this.pageSize,
+      totalRecords: this.totalRecords
+    });
   }
 
   async loadSchools() {
@@ -113,8 +146,7 @@ export class ElectronicInvoiceComponent implements OnInit {
   }
 
   navigateToDetail(id: number) {
-    console.log('enter');
-    console.log(id);
+    this.saveState(); // Save state before navigating
     this.router.navigate(['/Employee/Electronic-Invoice', id]);
   }
 

@@ -70,6 +70,16 @@
                 class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                 Inventory Sub Categories
               </th>
+
+
+              <th
+                class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+code for now          </th>
+              <th
+                class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+unit for now              </th>
+
+
               <th
                 class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                 Actions
@@ -130,6 +140,16 @@
               <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                 {{ row.inventorySubCategoriesName }}
               </td> 
+
+
+              <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                {{ row.itemCode || 'na' }}
+              </td> 
+              <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                {{ row.unitType || 'na' }}
+              </td> 
+
+
               <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                 <div class="flex space-x-4">
                   <button

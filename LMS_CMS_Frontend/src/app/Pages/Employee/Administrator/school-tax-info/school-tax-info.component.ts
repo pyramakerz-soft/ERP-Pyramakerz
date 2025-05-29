@@ -13,6 +13,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
 import { TaxIssuerService } from '../../../../Services/Employee/Administration/tax-issuer.service';
+import { TaxIssuer } from '../../../../Models/Administrator/tax-issuer.model';
 
 @Component({
   selector: 'app-school-tax-info',
@@ -22,7 +23,9 @@ import { TaxIssuerService } from '../../../../Services/Employee/Administration/t
   styleUrl: './school-tax-info.component.css',
 })
 export class SchoolTaxInfoComponent {
-  schoolData: School[] = [];
+  // schoolData: School[] = [];
+    taxIssuers: TaxIssuer[] = []; // Changed from schoolData to taxIssuers
+
   school: School = new School();
   taxIssuer: any = {};
   validationErrors: any = {};
@@ -53,8 +56,8 @@ export class SchoolTaxInfoComponent {
     this.UserID = this.User_Data_After_Login.id;
     this.DomainName = this.ApiServ.GetHeader();
 
-    this.getSchoolData();
-
+    // this.getSchoolData();
+this.getTaxIssuers(); 
     this.menuService.menuItemsForEmployee$.subscribe((items) => {
       const settingsPage = this.menuService.findByPageName(this.path, items);
       if (settingsPage) {
@@ -64,9 +67,21 @@ export class SchoolTaxInfoComponent {
     });
   }
 
-  getSchoolData() {
-    this.schoolService.Get(this.DomainName).subscribe((data) => {
-      this.schoolData = data;
+  // getSchoolData() {
+  //   this.schoolService.Get(this.DomainName).subscribe((data) => {
+  //     this.schoolData = data;
+  //   });
+  // }
+
+    getTaxIssuers() {
+    this.taxIssuerService.getAll(this.DomainName).subscribe({
+      next: (data) => {
+        console.log(data)
+        this.taxIssuers = data;
+      },
+      error: (error) => {
+        console.error('Error loading tax issuers:', error);
+      }
     });
   }
 
@@ -179,36 +194,45 @@ export class SchoolTaxInfoComponent {
     }
   }
 
-  saveTaxIssuer() {
-    // Ensure VAT number is set in school
-    if (this.taxIssuer.id) {
-      this.school.vatNumber = this.taxIssuer.id;
-    }
+saveTaxIssuer() {
+  // Ensure all required fields are set
+  this.taxIssuer = {
+    ...this.taxIssuer,
+    type: this.taxIssuer.type || 'Zatca', // Default type if not set
+    country: this.taxIssuer.country || '' // Default country if not set
+  };
 
-    this.taxIssuerService.edit(this.taxIssuer, this.DomainName).subscribe(
-      (result: any) => {
-        // After saving tax issuer, save school info
-        this.saveZatcaInfo();
-      },
-      (error) => {
-        this.isLoading = false;
-        Swal.fire({
-          icon: 'error',
-          title: 'Error saving tax issuer',
-          text: error.message || 'Please try again',
-          confirmButtonText: 'Okay',
-          customClass: { confirmButton: 'secondaryBg' },
-        });
-      }
-    );
+  // Ensure VAT number is set in school
+  if (this.taxIssuer.id) {
+    this.school.vatNumber = this.taxIssuer.id;
   }
+
+  this.taxIssuerService.edit(this.taxIssuer, this.DomainName).subscribe(
+    (result: any) => {
+      // After saving tax issuer, save school info
+      this.saveZatcaInfo();
+    },
+    (error) => {
+      this.isLoading = false;
+      Swal.fire({
+        icon: 'error',
+        title: 'Error saving tax issuer',
+        text: error.message || 'Please try again',
+        confirmButtonText: 'Okay',
+        customClass: { confirmButton: 'secondaryBg' },
+      });
+      console.error('Error details:', error); // Log detailed error
+    }
+  );
+}
 
   saveZatcaInfo() {
     this.schoolService.Edit(this.school, this.DomainName).subscribe(
       (result: any) => {
         this.closeModal();
         this.isLoading = false;
-        this.getSchoolData();
+        // this.getSchoolData();
+        this.getTaxIssuers();
         Swal.fire({
           icon: 'success',
           title: 'Saved successfully',
@@ -249,7 +273,7 @@ export class SchoolTaxInfoComponent {
               'The school has been deleted.',
               'success'
             );
-            this.getSchoolData();
+            this.getTaxIssuers();
           },
           (error) => {
             this.isLoading = false;

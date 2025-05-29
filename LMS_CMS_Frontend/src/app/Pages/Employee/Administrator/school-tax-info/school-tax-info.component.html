@@ -1,5 +1,5 @@
 <div class="flex justify-between items-center">
-    <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ 'School Tax Information' | translate }}</h1>
+    <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ 'Tax Issuers' | translate }}</h1>
 </div>
 
 <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD] max-w-full">
@@ -9,11 +9,20 @@
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'ID' | translate }}
                 </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ 'School Name' | translate }}
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Name' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ 'Tax Type' | translate }}
+                    {{ 'Type' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Activity Code' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Branch ID' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Country' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Actions' | translate }}
@@ -22,24 +31,28 @@
         </thead>
         <tbody>
             <!-- No Data Row -->
-            <tr *ngIf="schoolData.length === 0">
-                <td colspan="4"
+            <tr *ngIf="taxIssuers.length === 0">
+                <td colspan="7"
                     class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
                     No Data Found
                 </td>
             </tr>
 
             <!-- Data Rows -->
-            <tr *ngFor="let row of schoolData; let i = index"
+            <tr *ngFor="let issuer of taxIssuers; let i = index"
                 [ngClass]="{'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1}"
                 class="border-t border-gray-300 text-xs md:text-sm">
 
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{ row.id }}</td>
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.name }}</td>
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ getTaxTypeDisplay(row) }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{ issuer.id }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ issuer.name }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ issuer.type }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ issuer.activityCode }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ issuer.branchID }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ issuer.country }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     <div class="flex space-x-4">
-                        <button (click)="openModal(row.id)">
+                        <button *ngIf="AllowEdit && IsAllowEdit(issuer.insertedByUserId)"
+                            (click)="openModal(issuer.id)" class="text-blue-500 hover:text-blue-700">
                             <i class="fa-solid fa-pencil"></i>
                         </button>
                     </div>
@@ -48,195 +61,98 @@
         </tbody>
     </table>
 </div>
-<!-- Edit Tax Info Modal -->
-<div id="Tax_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
+
+<!-- Edit Tax Issuer Modal -->
+<div id="EditTaxIssuerModal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
     <div class="bg-white rounded-2xl p-12 w-1/2 max-h-[95%] overflow-y-auto m-auto">
         <div class="flex justify-between items-center">
-            <h1 class="font-semibold text-2xl leading-9">{{ 'Edit Tax Information' | translate }}</h1>
+            <h1 class="font-semibold text-2xl leading-9">{{ 'Edit Tax Issuer' | translate }}</h1>
             <button (click)="closeModal()" type="button"
                 class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
         </div>
 
         <div class="p-[16px_24px] mt-6 mb-4 flex flex-wrap justify-between">
-            <div class="flex flex-col mb-4 w-[49%]">
-                <label class="mb-2 primaryTxt" for="name">{{ 'School Name' | translate }}</label>
-                <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                    placeholder="{{ 'Enter' | translate }} {{ 'School Name' | translate }}" [(ngModel)]="school.name"
-                    (ngModelChange)="onInputValueChange({ field: 'name', value: $event })" />
-                <span *ngIf="validationErrors['name']" class="text-red-500 ml-3 font-normal">{{ validationErrors['name']
-                    }}</span>
-            </div>
-            <div class="flex flex-col mb-4 w-[49%]">
-                <label class="mb-2 primaryTxt" for="address">{{ 'Address' | translate }}</label>
-                <input id="address" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                    placeholder="{{ 'Enter' | translate }} {{ 'Address' | translate }}" [(ngModel)]="school.address"
-                    (ngModelChange)="onInputValueChange({ field: 'address', value: $event })" />
-            </div>
-            <div class="flex flex-col mb-4 w-full">
-                <label class="mb-2 primaryTxt" for="taxType">{{ 'Tax Type' | translate }}</label>
-                <select id="taxType" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                    [(ngModel)]="selectedTaxType" (change)="onTaxTypeChange()">
-                    <option value="ETA">ETA</option>
-                    <option value="ZATCA">ZATCA</option>
-                </select>
-            </div>
-
-            <!-- ETA Fields -->
-            <div *ngIf="selectedTaxType === 'ETA'" class="w-full">
-                <!-- <div class="flex flex-col mb-4 w-full">
-                    <label class="mb-2 primaryTxt" for="taxIssuerId">{{ 'VAT Number' | translate }}</label>
+            <!-- Column 1 -->
+            <div class="w-[49%]">
+                <div class="flex flex-col mb-4">
+                    <label class="mb-2 primaryTxt" for="taxIssuerId">{{ 'ID' | translate }}</label>
                     <input id="taxIssuerId" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                        [(ngModel)]="taxIssuer.id"
-                        (ngModelChange)="onInputValueChange({ field: 'id', value: $event }, 'taxIssuer')" />
-                </div> -->
-
-                <div class="flex flex-col mb-4 w-[49%]">
-                    <label class="mb-2 primaryTxt" for="taxIssuerName">{{ 'Name' | translate }}</label>
-                    <input id="taxIssuerName" type="text"
-                        class="rounded-lg border border-solid border-gray-300 px-4 py-3" [(ngModel)]="taxIssuer.name"
-                        (ngModelChange)="onInputValueChange({ field: 'name', value: $event }, 'taxIssuer')" />
+                        [(ngModel)]="taxIssuer.id" readonly />
                 </div>
 
-                <div class="flex flex-col mb-4 w-[49%]">
+                <div class="flex flex-col mb-4">
+                    <label class="mb-2 primaryTxt" for="taxIssuerName">{{ 'Name' | translate }}</label>
+                    <input id="taxIssuerName" type="text"
+                        class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                        [(ngModel)]="taxIssuer.name" />
+                </div>
+
+                <div class="flex flex-col mb-4">
+                    <label class="mb-2 primaryTxt" for="taxIssuerType">{{ 'Type' | translate }}</label>
+                    <select id="taxIssuerType" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                        [(ngModel)]="taxIssuer.type">
+                        <option value="ETA">ETA</option>
+                        <option value="ZATCA">ZATCA</option>
+                    </select>
+                </div>
+
+                <div class="flex flex-col mb-4">
                     <label class="mb-2 primaryTxt" for="taxIssuerActivityCode">{{ 'Activity Code' | translate }}</label>
                     <input id="taxIssuerActivityCode" type="text"
                         class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                        [(ngModel)]="taxIssuer.activityCode"
-                        (ngModelChange)="onInputValueChange({ field: 'activityCode', value: $event }, 'taxIssuer')" />
+                        [(ngModel)]="taxIssuer.activityCode" />
                 </div>
 
-                <div class="flex flex-col mb-4 w-[49%]">
+                <div class="flex flex-col mb-4">
                     <label class="mb-2 primaryTxt" for="taxIssuerBranchID">{{ 'Branch ID' | translate }}</label>
                     <input id="taxIssuerBranchID" type="text"
                         class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                        [(ngModel)]="taxIssuer.branchID"
-                        (ngModelChange)="onInputValueChange({ field: 'branchID', value: $event }, 'taxIssuer')" />
+                        [(ngModel)]="taxIssuer.branchID" />
                 </div>
+            </div>
 
-                <div class="flex flex-col mb-4 w-[49%]">
+            <!-- Column 2 -->
+            <div class="w-[49%]">
+                <div class="flex flex-col mb-4">
                     <label class="mb-2 primaryTxt" for="taxIssuerCountry">{{ 'Country' | translate }}</label>
                     <input id="taxIssuerCountry" type="text"
-                        class="rounded-lg border border-solid border-gray-300 px-4 py-3" [(ngModel)]="taxIssuer.Country"
-                        (ngModelChange)="onInputValueChange({ field: 'country', value: $event }, 'taxIssuer')" />
+                        class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                        [(ngModel)]="taxIssuer.country" />
                 </div>
 
-                <div class="flex flex-col mb-4 w-[49%]">
+                <div class="flex flex-col mb-4">
                     <label class="mb-2 primaryTxt" for="taxIssuerGovernate">{{ 'Governate' | translate }}</label>
                     <input id="taxIssuerGovernate" type="text"
                         class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                        [(ngModel)]="taxIssuer.governate"
-                        (ngModelChange)="onInputValueChange({ field: 'governate', value: $event }, 'taxIssuer')" />
+                        [(ngModel)]="taxIssuer.governate" />
                 </div>
 
-                <div class="flex flex-col mb-4 w-[49%]">
+                <div class="flex flex-col mb-4">
                     <label class="mb-2 primaryTxt" for="taxIssuerRegionCity">{{ 'Region City' | translate }}</label>
                     <input id="taxIssuerRegionCity" type="text"
                         class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                        [(ngModel)]="taxIssuer.regionCity"
-                        (ngModelChange)="onInputValueChange({ field: 'regionCity', value: $event }, 'taxIssuer')" />
+                        [(ngModel)]="taxIssuer.regionCity" />
                 </div>
 
-                <div class="flex flex-col mb-4 w-[49%]">
-                    <label class="mb-2 primaryTxt" for="taxIssuerStreet">{{ 'Street' | translate }}</label>
-                    <input id="taxIssuerStreet" type="text"
-                        class="rounded-lg border border-solid border-gray-300 px-4 py-3" [(ngModel)]="taxIssuer.street"
-                        (ngModelChange)="onInputValueChange({ field: 'street', value: $event }, 'taxIssuer')" />
-                </div>
-
-                <div class="flex flex-col mb-4 w-[49%]">
-                    <label class="mb-2 primaryTxt" for="taxIssuerBuildingNumber">{{ 'Building Number' | translate
-                        }}</label>
-                    <input id="taxIssuerBuildingNumber" type="text"
-                        class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                        [(ngModel)]="taxIssuer.buildingNumber"
-                        (ngModelChange)="onInputValueChange({ field: 'buildingNumber', value: $event }, 'taxIssuer')" />
-                </div>
-
-                <div class="flex flex-col mb-4 w-[49%]">
+                <div class="flex flex-col mb-4">
                     <label class="mb-2 primaryTxt" for="taxIssuerPostalCode">{{ 'Postal Code' | translate }}</label>
                     <input id="taxIssuerPostalCode" type="text"
                         class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                        [(ngModel)]="taxIssuer.postalCode"
-                        (ngModelChange)="onInputValueChange({ field: 'postalCode', value: $event }, 'taxIssuer')" />
+                        [(ngModel)]="taxIssuer.postalCode" />
                 </div>
 
-                <div class="flex flex-col mb-4 w-[49%]">
-                    <label class="mb-2 primaryTxt" for="taxIssuerFloor">{{ 'Floor' | translate }}</label>
-                    <input id="taxIssuerFloor" type="text"
-                        class="rounded-lg border border-solid border-gray-300 px-4 py-3" [(ngModel)]="taxIssuer.floor"
-                        (ngModelChange)="onInputValueChange({ field: 'floor', value: $event }, 'taxIssuer')" />
-                </div>
-
-                <div class="flex flex-col mb-4 w-[49%]">
-                    <label class="mb-2 primaryTxt" for="taxIssuerRoom">{{ 'Room' | translate }}</label>
-                    <input id="taxIssuerRoom" type="text"
-                        class="rounded-lg border border-solid border-gray-300 px-4 py-3" [(ngModel)]="taxIssuer.room"
-                        (ngModelChange)="onInputValueChange({ field: 'room', value: $event }, 'taxIssuer')" />
-                </div>
-
-                <div class="flex flex-col mb-4 w-[49%]">
-                    <label class="mb-2 primaryTxt" for="taxIssuerLandMark">{{ 'Land Mark' | translate }}</label>
-                    <input id="taxIssuerLandMark" type="text"
-                        class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                        [(ngModel)]="taxIssuer.landMark"
-                        (ngModelChange)="onInputValueChange({ field: 'landMark', value: $event }, 'taxIssuer')" />
-                </div>
-
-                <div class="flex flex-col mb-4 w-[49%]">
+                <div class="flex flex-col mb-4">
                     <label class="mb-2 primaryTxt" for="taxIssuerAdditionalInfo">{{ 'Additional Info' | translate
                         }}</label>
                     <input id="taxIssuerAdditionalInfo" type="text"
                         class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                        [(ngModel)]="taxIssuer.additionalInfo"
-                        (ngModelChange)="onInputValueChange({ field: 'additionalInfo', value: $event }, 'taxIssuer')" />
-                </div>
-            </div>
-
-            <!-- ZATCA Fields -->
-            <div *ngIf="selectedTaxType === 'ZATCA'" class="w-full">
-                <div class="flex flex-col mb-4 w-[49%]">
-                    <label class="mb-2 primaryTxt" for="streetName">{{ 'Street Name' | translate }}</label>
-                    <input id="streetName" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                        [(ngModel)]="school.streetName"
-                        (ngModelChange)="onInputValueChange({ field: 'streetName', value: $event })" />
-                </div>
-                <div class="flex flex-col mb-4 w-[49%]">
-                    <label class="mb-2 primaryTxt" for="buildingNumber">{{ 'Building Number' | translate }}</label>
-                    <input id="buildingNumber" type="text"
-                        class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                        [(ngModel)]="school.buildingNumber"
-                        (ngModelChange)="onInputValueChange({ field: 'buildingNumber', value: $event })" />
-                </div>
-                <div class="flex flex-col mb-4 w-[49%]">
-                    <label class="mb-2 primaryTxt" for="citySubdivision">{{ 'City Subdivision' | translate }}</label>
-                    <input id="citySubdivision" type="text"
-                        class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                        [(ngModel)]="school.citySubdivision"
-                        (ngModelChange)="onInputValueChange({ field: 'citySubdivision', value: $event })" />
-                </div>
-                <div class="flex flex-col mb-4 w-[49%]">
-                    <label class="mb-2 primaryTxt" for="city">{{ 'City' | translate }}</label>
-                    <input id="city" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                        [(ngModel)]="school.city"
-                        (ngModelChange)="onInputValueChange({ field: 'city', value: $event })" />
-                </div>
-                <div class="flex flex-col mb-4 w-[49%]">
-                    <label class="mb-2 primaryTxt" for="crn">{{ 'CRN' | translate }}</label>
-                    <input id="crn" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                        [(ngModel)]="school.crn"
-                        (ngModelChange)="onInputValueChange({ field: 'crn', value: $event })" />
-                </div>
-                <div class="flex flex-col mb-4 w-[49%]">
-                    <label class="mb-2 primaryTxt" for="PostalZone">{{ 'Postal Zone' | translate }}</label>
-                    <input id="PostalZone" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                        [(ngModel)]="school.postalZone"
-                        (ngModelChange)="onInputValueChange({ field: 'postalZone', value: $event })" />
+                        [(ngModel)]="taxIssuer.additionalInfo" />
                 </div>
             </div>
         </div>
         <div class="flex justify-end">
             <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
-                (click)="SaveSchool()">
+                (click)="saveTaxIssuer()">
                 <span *ngIf="!isLoading">{{ 'Save' | translate }} </span>
                 <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
             </button>
