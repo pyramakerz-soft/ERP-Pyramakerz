@@ -101,6 +101,15 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return BadRequest("this Student is not exist");
             }
 
+            StudentClassroom studentClassroomExists = Unit_Of_Work.studentClassroom_Repository.First_Or_Default(
+                d => d.IsDeleted != true && d.StudentID ==  newStudentClassroom.StudentID && d.Classroom.GradeID == classroom.GradeID
+                );
+
+            if(studentClassroomExists != null)
+            {
+                return BadRequest("Student Already In a Class at this Grade, Do You Want to Transfer this Student?");
+            }
+
             StudentClassroom studentClassroom = mapper.Map<StudentClassroom>(newStudentClassroom);
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
@@ -190,7 +199,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return BadRequest("this Student is not exist");
             }
             
-            StudentClassroom studentClassroom= Unit_Of_Work.studentClassroom_Repository.First_Or_Default(s => s.ID == editStudentClassroom.ID && s.IsDeleted != true);
+            StudentClassroom studentClassroom= await Unit_Of_Work.studentClassroom_Repository.FindByIncludesAsync(
+                s => s.ID == editStudentClassroom.ID && s.IsDeleted != true,
+                query => query.Include(d => d.Classroom)
+                );
             if (student == null)
             {
                 return BadRequest("this Student Classroom is not exist");
