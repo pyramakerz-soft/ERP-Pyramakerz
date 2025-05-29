@@ -14,10 +14,10 @@ import { TableComponent } from "../../../../Component/reuse-table/reuse-table.co
 import { DrugService } from '../../../../Services/Employee/Clinic/drug.service';
 import { DoseService } from '../../../../Services/Employee/Clinic/dose.service';
 import { ClassroomService } from '../../../../Services/Employee/LMS/classroom.service';
-import { FollowUp } from '../../../../Models/Clinic/FollowUp';
-import { Drug } from '../../../../Models/Clinic/drug';
+import { FollowUp } from '../../../../Models/Clinic/FollowUp'; 
 import { Dose } from '../../../../Models/Clinic/dose';
 import { ModalComponent } from '../../../../Component/modal/modal.component';
+import { Drug } from '../../../../Models/Clinic/drug';
 
 @Component({
   selector: 'app-follow-up',
