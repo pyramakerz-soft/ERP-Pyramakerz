@@ -12,6 +12,8 @@ export class Student {
         public address: string = '',
         public note: string = '',
         public nationalityName: string = '',
+        public currentAcademicYear: string = '',
+        public currentGradeName: string = '',
         public accountNumberName: string = '',
         public accountNumberID :number =0,
         public nationality :number =0,
