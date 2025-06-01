@@ -167,6 +167,8 @@ import { ClassroomSubjectsComponent } from './Pages/Employee/LMS/classroom-subje
 import { SchoolTaxInfoComponent } from './Pages/Employee/Administrator/school-tax-info/school-tax-info.component';
 import { SubjectTeacherComponent } from './Pages/Employee/Administrator/subject-teacher/subject-teacher.component';
 import { SubjectCoTeacherComponent } from './Pages/Employee/Administrator/subject-co-teacher/subject-co-teacher.component';
+import { StudentsComponent } from './Pages/Employee/Administrator/students/students.component';
+
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -373,6 +375,7 @@ export const routes: Routes = [
             { path: "Question Bank", component: QuestionBankComponent, title: "Question Bank", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Subject Teacher/:id", component: SubjectTeacherComponent, title: "Subject Teacher", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Subject Co-Teacher/:id", component: SubjectCoTeacherComponent, title: "Subject Co-Teacher", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Students", component: StudentsComponent, title: "Student", canActivate: [noNavigateWithoutLoginGuard] },
 
         ]
     },

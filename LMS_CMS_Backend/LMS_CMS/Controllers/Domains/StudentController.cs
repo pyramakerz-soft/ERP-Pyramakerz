@@ -52,6 +52,8 @@ namespace LMS_CMS_PL.Controllers.Domains
             List<Student> students = await Unit_Of_Work.student_Repository.Select_All_With_IncludesById<Student>(
                 query => query.IsDeleted != true,
                 query => query.Include(stu => stu.AccountNumber),
+                query => query.Include(stu => stu.AccountNumber),
+
                 query => query.Include(stu => stu.Gender));
 
             if (students == null || students.Count == 0)
@@ -68,6 +70,22 @@ namespace LMS_CMS_PL.Controllers.Domains
                     item.NationalityEnName = nationality.Name;
                     item.NationalityArName = nationality.ArName;
                 }
+
+                StudentGrade studentGrade =await Unit_Of_Work.studentGrade_Repository.FindByIncludesAsync(
+                    s => s.StudentID == item.ID && s.IsDeleted != true && s.AcademicYear != null && s.AcademicYear.IsActive == true ,
+                    s => s.Include(stu => stu.Grade) ,
+                    s => s.Include(stu => stu.AcademicYear)
+                    );
+
+                if (studentGrade != null)
+                {
+                    if (studentGrade.Grade != null)
+                        item.CurrentGradeName = studentGrade.Grade.Name;
+
+                    if (studentGrade.AcademicYear != null)
+                        item.CurrentAcademicYear = studentGrade.AcademicYear.Name;
+                }
+
             }
             return Ok(StudentDTO);
         }
