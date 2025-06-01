@@ -62,6 +62,32 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////////
+        
+        [HttpGet("GetByID/{Id}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Classroom Students" }
+        )]
+        public async Task<IActionResult> GetByIDAsync(long Id)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            StudentClassroom studentClassroom = await Unit_Of_Work.studentClassroom_Repository.FindByIncludesAsync(
+                    d => d.IsDeleted != true && d.ID == Id,
+                    query => query.Include(emp => emp.Student),
+                    query => query.Include(emp => emp.StudentClassroomSubjects.Where(d => d.IsDeleted != true)).ThenInclude(d => d.Subject),
+                    query => query.Include(emp => emp.Classroom));
+            if(studentClassroom == null)
+            {
+                return NotFound("No Student Classroom with this ID");
+            }
+
+            StudentClassroomGetDTO studentClassroomDTO = mapper.Map<StudentClassroomGetDTO>(studentClassroom);
+
+            return Ok(studentClassroomDTO);
+        }
+
+        /////////////////////////////////////////////////////////////////////////////////////////////
 
         [HttpPost]
         [Authorize_Endpoint_(

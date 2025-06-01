@@ -20,6 +20,7 @@ using LMS_CMS_DAL.Models.Domains.BusModule;
 using System.Linq;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using LMS_CMS_DAL.Models.Domains.RegisterationModule;
+using LMS_CMS_BL.DTO;
 
 namespace LMS_CMS_PL.Controllers.Domains
 {
@@ -1261,5 +1262,59 @@ namespace LMS_CMS_PL.Controllers.Domains
             return Ok(StudentDTO);
         }
 
+        ////
+
+        //[HttpGet("SearchByMultiParameters")]
+        //public async Task<IActionResult> SearchByMultiParameters(MultiParametersForStudentDTO parameters, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        //{
+        //    if (pageNumber < 1) pageNumber = 1;
+        //    if (pageSize < 1) pageSize = 10;
+
+        //    UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+        //    int totalRecords = await Unit_Of_Work.student_Repository
+        //        .CountAsync(f => f.IsDeleted != true);
+
+        //    Student student = await Unit_Of_Work.student_Repository.FindByIncludesAsync(
+        //        query => query.IsDeleted != true && query.NationalID == parameters.NationalID,
+        //        query => query.Include(stu => stu.Gender),
+        //        query => query.Include(stu => stu.AccountNumber));
+
+        //    if (student == null || student.IsDeleted == true)
+        //    {
+        //        return NotFound("No Student found");
+        //    }
+
+        //    StudentGetDTO StudentDTO = mapper.Map<StudentGetDTO>(student); 
+        //    return Ok(StudentDTO);
+
+             
+        //    // Apply pagination
+        //    List<Student> students = await Unit_Of_Work.student_Repository
+        //        .Select_All_With_IncludesById_Pagination<Student>(
+        //            f => f.IsDeleted != true,
+        //            query => query.Include(Income => Income.Gender))
+        //        .Skip((pageNumber - 1) * pageSize)
+        //        .Take(pageSize)
+        //        .ToListAsync();
+
+        //    if (students == null || students.Count == 0)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    List<StudentGetDTO> StudentDTOs = mapper.Map<List<StudentGetDTO>>(students);
+
+        //    // Pagination metadata
+        //    var paginationMetadata = new
+        //    {
+        //        TotalRecords = totalRecords,
+        //        PageSize = pageSize,
+        //        CurrentPage = pageNumber,
+        //        TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+        //    };
+
+        //    return Ok(new { Data = StudentDTOs, Pagination = paginationMetadata });
+        //}
     }
 }

@@ -37,7 +37,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Fees Activation" }
         )]
-        public async Task<IActionResult> GetAsync(int gradeID,  int? classID = null, int? studentID = null)
+        public async Task<IActionResult> GetAsync(int gradeID, int yearID,  int? classID = null, int? studentID = null)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -55,15 +55,21 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             {
                 return BadRequest("No Grade with this ID");
             } 
+            
+            AcademicYear academicYear = Unit_Of_Work.academicYear_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == yearID);
+            if(academicYear == null)
+            {
+                return BadRequest("No Academic Year with this ID");
+            } 
 
             List<StudentGrade> studentGrades = await Unit_Of_Work.studentGrade_Repository.Select_All_With_IncludesById<StudentGrade>(
-                s => s.IsDeleted != true && s.GradeID == gradeID,
+                s => s.IsDeleted != true && s.GradeID == gradeID && s.AcademicYearID == yearID,
                 query => query.Include(s => s.Student)
                 );
 
             if(studentGrades == null || studentGrades.Count == 0)
             {
-                return NotFound("No Students In this Grade");
+                return NotFound("No Students In this Grade At this Academic Year");
             }
 
             List <Student> gradeStudents = studentGrades
@@ -85,7 +91,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                     query => query.Include(s => s.Student)
                 );
                 
-                if (studentGrades == null || studentGrades.Count == 0)
+                if (studentClassrooms == null || studentClassrooms.Count == 0)
                 {
                     return NotFound("No Students In this Classroom");
                 }

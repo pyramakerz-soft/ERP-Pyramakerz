@@ -1,0 +1,26 @@
+<div class="fixed inset-0 z-50 justify-center items-center content-center w-full h-full bg-black/50">
+    <div class="bg-white rounded-2xl p-12 w-1/2 max-h-[90%] overflow-auto m-auto">
+        <div class="flex justify-between items-center">
+            <h1 class="font-semibold text-2xl leading-9">Search For Students</h1> 
+        </div>
+
+        <div class="flex flex-col mt-6 mb-4 bg-[#F7F7F7] rounded-3xl p-4">  
+            <div>
+                
+            </div>
+
+            <div class="flex justify-end space-x-4"> 
+                <button class="secondaryBorder secondaryTxt bg-white rounded-lg px-4 py-3"
+                    (click)="close()">
+                    Cancel
+                </button>
+                <button [disabled]="!IsStudentsSelected" class="secondaryBg text-white rounded-lg px-4 py-3"
+                    [ngClass]="{'secondaryBg text-white': IsStudentsSelected, 'bg-gray-300 text-gray-200': !IsStudentsSelected}"
+                    (click)="closeWithData()">
+                    Done
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>

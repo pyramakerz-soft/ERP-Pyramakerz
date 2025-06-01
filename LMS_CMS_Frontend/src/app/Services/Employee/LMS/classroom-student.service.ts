@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { ClassroomStudent } from '../../../Models/LMS/classroom-student';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ApiService } from '../../api.service';
+import { StudentClassroomSubject } from '../../../Models/LMS/student-classroom-subject';
 
 @Injectable({
   providedIn: 'root'
@@ -24,6 +25,18 @@ export class ClassroomStudentService {
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
     return this.http.get<ClassroomStudent[]>(`${this.baseUrl}/ClassroomStudent/GetByClassroom/${classID}`, { headers });
+  }
+
+  GetById(ID:number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<ClassroomStudent>(`${this.baseUrl}/ClassroomStudent/GetByID/${ID}`, { headers });
   }
 
   Add(ClassroomStudent: ClassroomStudent,DomainName:string) {
@@ -52,6 +65,18 @@ export class ClassroomStudentService {
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
     return this.http.put(`${this.baseUrl}/ClassroomStudent/TransferFromClassToClass`, ClassroomStudent, { headers });
+  }
+
+  IsSubjectHide(StudentClassroomSubject: StudentClassroomSubject,DomainName:string) {
+    if(DomainName!=null) {
+      this.header=DomainName 
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.put(`${this.baseUrl}/ClassroomStudentSubject/IsSubjectHide`, StudentClassroomSubject, { headers });
   }
 
   Delete(id: number,DomainName:string) {

@@ -976,6 +976,9 @@ namespace LMS_CMS_BL.Config
             CreateMap<StudentClassroomPutDTO, StudentClassroom>();
 
             CreateMap<StudentClassroomSubjectHidePutDTO, StudentClassroomSubject>();
+            CreateMap<StudentClassroomSubject, StudentClassroomSubjectGetDTO>()
+                .ForMember(dest => dest.SubjectEnglishName, opt => opt.MapFrom(src => src.Subject.en_name))
+                .ForMember(dest => dest.SubjectArabicName, opt => opt.MapFrom(src => src.Subject.ar_name));
         }
     } 
 }
