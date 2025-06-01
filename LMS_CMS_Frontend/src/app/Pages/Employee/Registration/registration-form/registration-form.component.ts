@@ -33,11 +33,12 @@ import { Nationality } from '../../../../Models/nationality';
 import { NationalityService } from '../../../../Services/Octa/nationality.service';
 import { CountryService } from '../../../../Services/Octa/country.service';
 import { Country } from '../../../../Models/Accounting/country';
+import { RegistrationFormSubmissionService } from '../../../../Services/Employee/Registration/registration-form-submission.service';
 
 @Component({
   selector: 'app-registration-form',
   standalone: true,
-  imports: [FormsModule,CommonModule, TranslateModule],
+  imports: [FormsModule, CommonModule, TranslateModule],
   templateUrl: './registration-form.component.html',
   styleUrl: './registration-form.component.css'
 })
@@ -46,9 +47,9 @@ export class RegistrationFormComponent {
   UserID: number = 0;
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
 
-  RegistrationFormData:RegistrationForm = new RegistrationForm()
-  registrationForm:RegistrationFormForFormSubmission = new RegistrationFormForFormSubmission()
-  registrationFormForFiles:RegistrationFormForFormSubmissionForFiles [] = []
+  RegistrationFormData: RegistrationForm = new RegistrationForm()
+  registrationForm: RegistrationFormForFormSubmission = new RegistrationFormForFormSubmission()
+  registrationFormForFiles: RegistrationFormForFormSubmissionForFiles[] = []
   isFormSubmitted: boolean = false
   isGuardianEmailValid: boolean = true
   isGuardianEmailSameAsParent: boolean = true
@@ -58,16 +59,16 @@ export class RegistrationFormComponent {
   //   name: country.name
   // }));
 
-  schools:School[] = []
+  schools: School[] = []
   selectedSchool: number | null = null;
-  Grades:Grade[] = []
+  Grades: Grade[] = []
   selectedGrade: number | null = null;
-  AcademicYears:AcademicYear[] = []
+  AcademicYears: AcademicYear[] = []
   selectedAcademicYear: number | null = null;
-  Sections:Section[] = []
-  Gender:Gender[]=[]
-  nationalities : Nationality[]=[]
-  countries :Country[]=[]
+  Sections: Section[] = []
+  Gender: Gender[] = []
+  nationalities: Nationality[] = []
+  countries: Country[] = []
 
   selectedOptions: any[] = [];
 
@@ -76,25 +77,34 @@ export class RegistrationFormComponent {
   emailPattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
   ageIsCompatibleWithGrade = false
 
-  isSuccess:boolean = false
+  isSuccess: boolean = false
 
-  parent:any = null 
+  parent: any = null
   isRtl: boolean = false;
   subscription!: Subscription;
   isLoading = false
+  path: string = '';
+  RegistrationParentID: number = 0
 
-  constructor(public account: AccountService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService, public schoolService:SchoolService, public CountryServ:CountryService ,
-    public activeRoute: ActivatedRoute, public registrationFormService: RegistrationFormService, public router:Router, public parentService:ParentService, public NationalityServ : NationalityService ,
-    public http: HttpClient, public academicYearServce:AcadimicYearService, public gradeServce:GradeService, public sectionServce:SectionService, private languageService: LanguageService , public GenderServ:GenderService){}
-  
-  ngOnInit(){
+  constructor(public account: AccountService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService, public schoolService: SchoolService, public CountryServ: CountryService,
+    public activeRoute: ActivatedRoute, public registrationFormService: RegistrationFormService, public router: Router, public parentService: ParentService, public NationalityServ: NationalityService, public RegisterationFormSubmittionServ: RegistrationFormSubmissionService,
+    public http: HttpClient, public academicYearServce: AcadimicYearService, public gradeServce: GradeService, public sectionServce: SectionService, private languageService: LanguageService, public GenderServ: GenderService) { }
+
+  ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
 
     this.DomainName = this.ApiServ.GetHeader();
-    
-    if(this.User_Data_After_Login.type == "parent"){
-      this.getParentByID()   
+    this.activeRoute.url.subscribe((url) => {
+      this.path = url[0].path;
+      console.log(this.path)
+      this.RegistrationParentID = Number(this.activeRoute.snapshot.paramMap.get('id'));
+      if (this.path == "Edit Student") {
+        this.getRegisterationFormSubmittion()
+      }
+    });
+    if (this.User_Data_After_Login.type == "parent") {
+      this.getParentByID()
     }
 
     this.getRegistrationFormData()
@@ -113,17 +123,44 @@ export class RegistrationFormComponent {
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
-  } 
-  
-  getParentByID(){
+  }
+
+  getParentByID() {
     this.parentService.GetByID(this.UserID, this.DomainName).subscribe(
       (data) => {
-        this.parent = data 
+        this.parent = data
       }
     )
   }
 
-  getRegistrationFormData(){
+  getRegisterationFormSubmittion() {
+    this.RegisterationFormSubmittionServ.GetByRegistrationParentID(this.RegistrationParentID, this.DomainName).subscribe(
+      (data) => {
+        this.registrationForm.registerationFormSubmittions = data
+        this.selectedSchool = this.registrationForm.registerationFormSubmittions.find(s => s.categoryFieldID == 7)?.selectedFieldOptionID ?? 0
+        if (this.selectedSchool) {
+          this.getAcademicYear();
+          this.getSections();
+        }
+        this.selectedAcademicYear = this.registrationForm.registerationFormSubmittions.find(s => s.categoryFieldID == 8)?.selectedFieldOptionID ?? 0
+        this.selectedGrade = this.registrationForm.registerationFormSubmittions.find(s => s.categoryFieldID == 9)?.selectedFieldOptionID ?? 0
+
+        console.log(this.registrationForm.registerationFormSubmittions)
+      }
+    )
+  }
+
+  getTextAnswer(fieldId: number): string | null {
+    const entry = this.registrationForm.registerationFormSubmittions.find(e => e.categoryFieldID === fieldId);
+    return entry?.textAnswer ?? null;
+  }
+
+  getSelectedOption(fieldId: number): number | null {
+    const entry = this.registrationForm.registerationFormSubmittions.find(e => e.categoryFieldID === fieldId);
+    return entry?.selectedFieldOptionID ?? null;
+  }
+
+  getRegistrationFormData() {
     this.registrationFormService.GetById(1, this.DomainName).subscribe(
       (data) => {
         this.RegistrationFormData = data
@@ -135,7 +172,7 @@ export class RegistrationFormComponent {
     )
   }
 
-  getSchools(){
+  getSchools() {
     this.schoolService.Get(this.DomainName).subscribe(
       (data) => {
         this.schools = data
@@ -143,7 +180,7 @@ export class RegistrationFormComponent {
     )
   }
 
-  getGenders(){
+  getGenders() {
     this.GenderServ.Get(this.DomainName).subscribe(
       (data) => {
         this.Gender = data
@@ -151,7 +188,7 @@ export class RegistrationFormComponent {
     )
   }
 
-  getNationalities(){
+  getNationalities() {
     this.NationalityServ.Get().subscribe(
       (data) => {
         this.nationalities = data
@@ -159,7 +196,7 @@ export class RegistrationFormComponent {
     )
   }
 
-  getCountry(){
+  getCountry() {
     this.CountryServ.Get().subscribe(
       (data) => {
         this.countries = data
@@ -176,20 +213,20 @@ export class RegistrationFormComponent {
     const selectedValue = (event.target as HTMLSelectElement).value;
     this.selectedSchool = Number(selectedValue)
     if (this.selectedSchool) {
-      this.getAcademicYear(); 
-      this.getSections(); 
+      this.getAcademicYear();
+      this.getSections();
     }
   }
- 
-  getAcademicYear(){
+
+  getAcademicYear() {
     this.academicYearServce.Get(this.DomainName).subscribe(
       (data) => {
         this.AcademicYears = data.filter((ac) => this.checkSchool(ac))
       }
     )
   }
- 
-  getSections(){
+
+  getSections() {
     this.sectionServce.Get(this.DomainName).subscribe(
       (data) => {
         this.Sections = data.filter((ac) => this.checkSchool(ac))
@@ -199,33 +236,33 @@ export class RegistrationFormComponent {
       }
     )
   }
- 
-  getGrades(sectionId: number){
+
+  getGrades(sectionId: number) {
     this.gradeServce.GetBySectionId(sectionId, this.DomainName).subscribe(
-      (data) => { 
+      (data) => {
         data.forEach(element => {
           this.Grades.push(element)
-        }); 
+        });
       }
     )
   }
 
-  checkSchool(el:any) {
+  checkSchool(el: any) {
     return el.schoolID == this.selectedSchool
   }
 
-  handleFileUpload(event:any, fieldId:number){
+  handleFileUpload(event: any, fieldId: number) {
     const file: File = event.target.files[0];
 
     const existingElement = this.registrationFormForFiles.find(
       (element) => element.categoryFieldID === fieldId
     );
 
-    this.registrationFormForFiles = this.registrationFormForFiles.filter(option => 
+    this.registrationFormForFiles = this.registrationFormForFiles.filter(option =>
       !(option.categoryFieldID === fieldId)
     );
-  
-    if(file != undefined){
+
+    if (file != undefined) {
       if (existingElement) {
         existingElement.selectedFile = file;
       } else {
@@ -233,36 +270,36 @@ export class RegistrationFormComponent {
           categoryFieldID: fieldId,
           selectedFile: file
         })
-      } 
+      }
     }
   }
 
-  FillData(event:Event, fieldId:number , fieldTypeId:number){ 
+  FillData(event: Event, fieldId: number, fieldTypeId: number) {
     const selectedValue = (event.target as HTMLSelectElement).value;
 
     let answer: string | null = null;
     let option: number | null = null;
 
-    if(fieldTypeId == 1 || fieldTypeId == 2 || fieldTypeId == 3 || 
-      (fieldTypeId == 7 && (fieldId == 3 || fieldId == 5 || fieldId == 6 || fieldId == 7 || fieldId == 8 || fieldId == 9 || fieldId == 14))){
+    if (fieldTypeId == 1 || fieldTypeId == 2 || fieldTypeId == 3 ||
+      (fieldTypeId == 7 && (fieldId == 3 || fieldId == 5 || fieldId == 6 || fieldId == 7 || fieldId == 8 || fieldId == 9 || fieldId == 14))) {
       answer = selectedValue
       option = null;
-    } else if(fieldTypeId == 5 || fieldTypeId == 7){
-      option = parseInt(selectedValue) 
+    } else if (fieldTypeId == 5 || fieldTypeId == 7) {
+      option = parseInt(selectedValue)
       answer = null;
-    } 
-    
+    }
+
     const existingElement = this.registrationForm.registerationFormSubmittions.find(
       (element) => element.categoryFieldID === fieldId
     );
-  
+
     if (existingElement) {
       if (answer !== null) {
         existingElement.textAnswer = answer;
-        existingElement.selectedFieldOptionID = null;  
+        existingElement.selectedFieldOptionID = null;
       } else if (option !== null) {
         existingElement.selectedFieldOptionID = option;
-        existingElement.textAnswer = null;  
+        existingElement.textAnswer = null;
       }
     } else {
       this.registrationForm.registerationFormSubmittions.push({
@@ -271,11 +308,11 @@ export class RegistrationFormComponent {
         textAnswer: answer,
       });
     }
-    
+
   }
 
-  MultiOptionDataPush(fieldId:number , fieldTypeId:number, optionAnswer:number){
-    if(fieldTypeId == 4){
+  MultiOptionDataPush(fieldId: number, fieldTypeId: number, optionAnswer: number) {
+    if (fieldTypeId == 4) {
       this.registrationForm.registerationFormSubmittions.push({
         categoryFieldID: fieldId,
         selectedFieldOptionID: optionAnswer,
@@ -284,16 +321,16 @@ export class RegistrationFormComponent {
     }
   }
 
-  FillOptionData(){
+  FillOptionData() {
     this.selectedOptions.forEach(element => {
       this.MultiOptionDataPush(element.fieldId, element.fieldTypeId, element.optionId)
     });
     this.selectedOptions = []
   }
 
-  multiCheckBoxesHandling(event:Event, fieldId:number , fieldTypeId:number, optionId: number){
+  multiCheckBoxesHandling(event: Event, fieldId: number, fieldTypeId: number, optionId: number) {
     const checkbox = event.target as HTMLInputElement;
-    
+
     if (checkbox.checked) {
       this.addOptionToArray(fieldId, fieldTypeId, optionId);
     } else {
@@ -307,7 +344,7 @@ export class RegistrationFormComponent {
   }
 
   private removeOptionFromArray(fieldId: number, fieldTypeId: number, optionId: number): void {
-    this.selectedOptions = this.selectedOptions.filter(option => 
+    this.selectedOptions = this.selectedOptions.filter(option =>
       !(option.fieldId === fieldId && option.fieldTypeId === fieldTypeId && option.optionId === optionId)
     );
   }
@@ -315,13 +352,13 @@ export class RegistrationFormComponent {
   validateNumber(event: any, field: any): void {
     const value = event.target.value;
     if (isNaN(value) || value === '') {
-        event.target.value = '';
-        field = ''
+      event.target.value = '';
+      field = ''
     }
-  } 
+  }
 
   isFieldInvalid(field: any) {
-    if(this.isFormSubmitted){
+    if (this.isFormSubmitted) {
       const fieldSubmission = this.registrationForm.registerationFormSubmittions.find(
         (submission) => submission.categoryFieldID === field.id
       );
@@ -331,7 +368,7 @@ export class RegistrationFormComponent {
       );
 
       let fieldData
-      
+
       if (field.isMandatory) {
         if (field.fieldTypeID !== 6) {
           fieldData = fieldSubmission;
@@ -341,7 +378,7 @@ export class RegistrationFormComponent {
           fieldData = fieldSubmissionFile;
         }
 
-        
+
         if (fieldData) {
           return false;
         }
@@ -351,8 +388,8 @@ export class RegistrationFormComponent {
         }
 
         if (field.fieldTypeID === 6) {
-          return !fieldSubmissionFile || !fieldSubmissionFile.selectedFile || 
-                !this.selectedOptions.some(option => option.fieldId === field.id);
+          return !fieldSubmissionFile || !fieldSubmissionFile.selectedFile ||
+            !this.selectedOptions.some(option => option.fieldId === field.id);
         }
 
         return !fieldSubmission || !fieldSubmission.textAnswer || !fieldSubmission.selectedFieldOptionID;
@@ -361,35 +398,35 @@ export class RegistrationFormComponent {
     }
     return false
   }
-  
-  IsEmailValid(){
+
+  IsEmailValid() {
     this.registrationForm.registerationFormSubmittions.forEach(element => {
-      if(element.categoryFieldID == 21){
-        if(element.textAnswer){
-          if( !this.emailPattern.test(element.textAnswer)){
+      if (element.categoryFieldID == 21) {
+        if (element.textAnswer) {
+          if (!this.emailPattern.test(element.textAnswer)) {
             this.isGuardianEmailValid = false
             return false
-          } else if(this.User_Data_After_Login.type == "parent"){
-            if(element.textAnswer != this.parent.email){
+          } else if (this.User_Data_After_Login.type == "parent") {
+            if (element.textAnswer != this.parent.email) {
               this.isGuardianEmailSameAsParent = false
               return false
-            } else{
+            } else {
               this.isGuardianEmailSameAsParent = true
               return true
             }
-          } else{
+          } else {
             this.isGuardianEmailValid = true
             return true
           }
         }
         return true
       }
-      else if(element.categoryFieldID == 28){
-        if(element.textAnswer){
-          if( !this.emailPattern.test(element.textAnswer)){
+      else if (element.categoryFieldID == 28) {
+        if (element.textAnswer) {
+          if (!this.emailPattern.test(element.textAnswer)) {
             this.isMotherEmailValid = false
             return false
-          } else{
+          } else {
             this.isMotherEmailValid = true
             return true
           }
@@ -401,39 +438,39 @@ export class RegistrationFormComponent {
     return true
   }
 
-  CheckAgeForGrade(){ 
+  CheckAgeForGrade() {
     this.ageIsCompatibleWithGrade = false
-    
+
     let choosedGradeID: string | number = 0
     let ageDate = ""
     let grade = new Grade()
-    
+
     this.registrationForm.registerationFormSubmittions.forEach(element => {
-      if(element.categoryFieldID == 4){
+      if (element.categoryFieldID == 4) {
         ageDate = element.textAnswer ? element.textAnswer : ""
-      }        
-      if(element.categoryFieldID == 9){
+      }
+      if (element.categoryFieldID == 9) {
         choosedGradeID = element.textAnswer ? element.textAnswer : 0
-      }        
+      }
     });
 
     this.Grades.forEach(element => {
-      if(choosedGradeID == element.id){
+      if (choosedGradeID == element.id) {
         grade = element
       }
-    }); 
+    });
 
     const dateToCheckObj = new Date(ageDate);
     const fromDate = new Date(grade.dateFrom);
-    const toDate = new Date(grade.dateTo); 
+    const toDate = new Date(grade.dateTo);
 
-    if(dateToCheckObj >= fromDate && dateToCheckObj <= toDate){
+    if (dateToCheckObj >= fromDate && dateToCheckObj <= toDate) {
       this.ageIsCompatibleWithGrade = true
-    } 
+    }
   }
 
-  Save(){
-    if(this.User_Data_After_Login.type == "parent"){
+  Save() {
+    if (this.User_Data_After_Login.type == "parent") {
       this.registrationForm.registerationFormSubmittions.push({
         categoryFieldID: 21,
         selectedFieldOptionID: null,
@@ -446,7 +483,7 @@ export class RegistrationFormComponent {
     this.isGuardianEmailSameAsParent = true;
 
     this.FillOptionData()
-    
+
     let valid = true;
     let EmptyFieldCat = []
 
@@ -459,21 +496,25 @@ export class RegistrationFormComponent {
         }
       }
     }
-     
+
     if (valid) {
       this.IsEmailValid()
-      if(this.isMotherEmailValid && this.isGuardianEmailValid && this.isGuardianEmailSameAsParent){
+      if (this.isMotherEmailValid && this.isGuardianEmailValid && this.isGuardianEmailSameAsParent) {
         this.CheckAgeForGrade()
-        if(this.ageIsCompatibleWithGrade){
+        if (this.ageIsCompatibleWithGrade) {
           this.isLoading = true
+          if (this.path == "Create Student") {
+            this.registrationForm.isStudent = true
+          }
           this.registrationFormService.Add(this.registrationForm, this.registrationFormForFiles, this.DomainName).subscribe(
             (data) => {
               this.isLoading = false
               this.DoneSuccessfully()
             },
             (error) => {
+              console.log(error)
               this.isLoading = false
-              if(error.error == "Email Already Exists"){
+              if (error.error == "Email Already Exists") {
                 Swal.fire({
                   icon: 'warning',
                   title: 'Warning!',
@@ -485,7 +526,7 @@ export class RegistrationFormComponent {
             }
           )
         }
-        else{
+        else {
           Swal.fire({
             icon: 'warning',
             title: 'Warning!',
@@ -494,17 +535,17 @@ export class RegistrationFormComponent {
           });
           this.goToCategory(1)
         }
-      } else if(!this.isGuardianEmailValid || !this.isGuardianEmailSameAsParent){
+      } else if (!this.isGuardianEmailValid || !this.isGuardianEmailSameAsParent) {
         this.goToCategory(2)
-      } else if(!this.isMotherEmailValid){
+      } else if (!this.isMotherEmailValid) {
         this.goToCategory(3)
       }
-    } else{
+    } else {
       this.goToCategory(EmptyFieldCat[0] ? EmptyFieldCat[0] : 0)
     }
   }
 
- 
+
   navigateToNext() {
     if (this.currentCategory < this.RegistrationFormData.categories.length) {
       this.currentCategory++;
@@ -515,7 +556,10 @@ export class RegistrationFormComponent {
     this.currentCategory = categoryIndex;
   }
 
-  DoneSuccessfully(){
+  DoneSuccessfully() {
+    if (this.path == "Create Student") {
+      this.router.navigateByUrl(`Employee/Students`);
+    }
     this.RegistrationFormData = new RegistrationForm()
     this.registrationForm = new RegistrationFormForFormSubmission()
     this.registrationFormForFiles = []
@@ -531,7 +575,7 @@ export class RegistrationFormComponent {
     this.AcademicYears = []
     this.selectedAcademicYear = null;
     this.Sections = []
-  
+
     this.selectedOptions = [];
 
     //////

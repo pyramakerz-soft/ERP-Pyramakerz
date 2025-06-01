@@ -78,19 +78,18 @@
 
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{ row.id }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.user_Name }}</td>
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.nationalityName }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.nationalityEnName }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.currentGradeName }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.currentAcademicYear }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     <div class="flex space-x-4">
-                        <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)"
-                            >
+                        <button  (click)="Delete(row.id)">
                             <i class="fa-regular fa-trash-can"></i>
                         </button>
-                        <button *ngIf="AllowEdit && IsAllowEdit(row.insertedByUserId)" >
+                        <button   (click)="Edit(row.registrationFormParentID)">
                             <i class="fa-solid fa-pencil"></i>
                         </button>
-                        <button >
+                        <button  (click)="View(row.registrationFormParentID)">
                             <i class="fa-solid fa-eye"></i> 
                         </button>
                     </div>

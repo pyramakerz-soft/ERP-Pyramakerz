@@ -276,7 +276,7 @@ export class StudentsNamesInClassComponent {
         {
           title: "Students List",
           headers: ['id', 'en_name', 'mobile', 'nationalityName', 'genderName'],
-          data: this.StudentData.map((row) => [row.id, row.en_name, row.mobile, row.nationalityName, row.genderName])
+          data: this.StudentData.map((row) => [row.id, row.en_name, row.mobile, row.nationalityEnName, row.genderName])
         }
       ]
     });
