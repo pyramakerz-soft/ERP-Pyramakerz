@@ -9,6 +9,7 @@ namespace LMS_CMS_BL.DTO.Registration
     public class RegisterationFormParentAddDTO
     {
         public long RegistrationFormID { get; set; }
+        public bool IsStudent { get; set; }
         public List<RegisterationFormSubmittionGetForRegisterationFormParentAddDTO> RegisterationFormSubmittions { get; set; }
     }
 }

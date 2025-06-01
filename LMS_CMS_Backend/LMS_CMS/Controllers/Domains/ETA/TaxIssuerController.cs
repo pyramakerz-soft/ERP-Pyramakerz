@@ -2,6 +2,7 @@
 using LMS_CMS_BL.DTO.ETA;
 using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains.ETA;
+using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -24,10 +25,10 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
 
         #region Get All
         [HttpGet("get")]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "" }
-        //)]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Tax Issuer" }
+        )]
         public async Task<IActionResult> Get()
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -58,10 +59,10 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
 
         #region Get By ID
         [HttpGet("id")]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "" }
-        //)]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Tax Issuer" }
+        )]
         public async Task<IActionResult> GetByID(string id)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -92,10 +93,10 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
 
         #region Create
         [HttpPost("Add")]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "" }
-        //)]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Tax Issuer" }
+        )]
         public IActionResult Add(TaxIssuerAddDTO taxIssuerAdd)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -139,10 +140,10 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
 
         #region Edit
         [HttpPut("Edit")]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "SchoolPCs" }
-        //)]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Tax Issuer" }
+        )]
         public IActionResult Edit(TaxIssuerEditDTO taxIssuerDTO)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -202,10 +203,10 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
 
         #region Delete
         [HttpDelete]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "SchoolPCs" }
-        //)]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Tax Issuer" }
+        )]
         public IActionResult Delete(string id)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);

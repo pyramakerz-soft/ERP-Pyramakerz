@@ -1263,7 +1263,7 @@ namespace LMS_CMS_PL.Controllers.Domains
         }
 
         ////
-
+         
         //[HttpGet("SearchByMultiParameters")]
         //public async Task<IActionResult> SearchByMultiParameters(MultiParametersForStudentDTO parameters, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         //{
@@ -1316,5 +1316,65 @@ namespace LMS_CMS_PL.Controllers.Domains
 
         //    return Ok(new { Data = StudentDTOs, Pagination = paginationMetadata });
         //}
+ 
+        [HttpDelete("{ID}")]
+        public async Task<IActionResult> Delete(long ID)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+            Student student = await Unit_Of_Work.student_Repository.FindByIncludesAsync(
+                query => query.IsDeleted != true && query.ID == ID,
+                query => query.Include(stu => stu.AccountNumber));
+
+            if (student == null || student.IsDeleted == true)
+            {
+                return NotFound("No Student found");
+            }
+
+            //if (userTypeClaim == "employee")
+            //{
+            //    IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Student", roleId, userId, student);
+            //    if (accessCheck != null)
+            //    {
+            //        return accessCheck;
+            //    }
+            //}
+
+            student.IsDeleted = true;
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            student.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            if (userTypeClaim == "octa")
+            {
+                student.DeletedByOctaId = userId;
+                if (student.DeletedByUserId != null)
+                {
+                    student.DeletedByUserId = null;
+                }
+            }
+            else if (userTypeClaim == "employee")
+            {
+                student.DeletedByUserId = userId;
+                if (student.DeletedByOctaId != null)
+                {
+                    student.DeletedByOctaId = null;
+                }
+            }
+
+            Unit_Of_Work.student_Repository.Update(student);
+            Unit_Of_Work.SaveChanges();
+
+            return Ok();
+        } 
     }
 }

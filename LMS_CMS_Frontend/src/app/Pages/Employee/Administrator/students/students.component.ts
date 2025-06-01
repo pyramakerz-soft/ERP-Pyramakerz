@@ -17,22 +17,23 @@ import { SchoolService } from '../../../../Services/Employee/school.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { StudentService } from '../../../../Services/student.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-students',
   standalone: true,
-  imports: [FormsModule,CommonModule,SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent],
   templateUrl: './students.component.html',
   styleUrl: './students.component.css'
 })
 export class StudentsComponent {
-  
- keysArray: string[] = ['id', 'name','academicYearName','floorName','gradeName','number'];
-  key: string= "id";
+
+  keysArray: string[] = ['id', 'name', 'academicYearName', 'floorName', 'gradeName', 'number'];
+  key: string = "id";
   value: any = "";
 
-  OriginStudentData:Student[] = []
-  StudentsData:Student[] = []
+  OriginStudentData: Student[] = []
+  StudentsData: Student[] = []
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
   AllowEditForOthers: boolean = false;
@@ -42,13 +43,13 @@ export class StudentsComponent {
   DomainName: string = "";
   UserID: number = 0;
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
-  isLoading=false
+  isLoading = false
 
-  constructor(public account: AccountService, public buildingService: BuildingService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService, 
-      private menuService: MenuService, public activeRoute: ActivatedRoute, public schoolService: SchoolService, public StudentService: StudentService, public employeeServ : EmployeeService ,
-      public sectionService:SectionService, public gradeService:GradeService, public acadimicYearService:AcadimicYearService, public floorService: FloorService, public router:Router){}
-      
-  ngOnInit(){
+  constructor(public account: AccountService, public buildingService: BuildingService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService,
+    private menuService: MenuService, public activeRoute: ActivatedRoute, public schoolService: SchoolService, public StudentService: StudentService, public employeeServ: EmployeeService,
+    public sectionService: SectionService, public gradeService: GradeService, public acadimicYearService: AcadimicYearService, public floorService: FloorService, public router: Router) { }
+
+  ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
 
@@ -58,7 +59,7 @@ export class StudentsComponent {
       this.path = url[0].path
     });
 
-    this.getStudentData() 
+    this.getStudentData()
     this.menuService.menuItemsForEmployee$.subscribe((items) => {
       const settingsPage = this.menuService.findByPageName(this.path, items);
       if (settingsPage) {
@@ -68,7 +69,7 @@ export class StudentsComponent {
         this.AllowEditForOthers = settingsPage.allow_Edit_For_Others
       }
     });
-  } 
+  }
 
   IsAllowDelete(InsertedByID: number) {
     const IsAllow = this.EditDeleteServ.IsAllowDelete(InsertedByID, this.UserID, this.AllowDeleteForOthers);
@@ -80,22 +81,48 @@ export class StudentsComponent {
     return IsAllow;
   }
 
-  getStudentData(){
-    this.OriginStudentData=[]
-    this.StudentsData=[]
+  getStudentData() {
+    this.OriginStudentData = []
+    this.StudentsData = []
     this.StudentService.GetAll(this.DomainName).subscribe(
-      (data: Student[]) => { 
+      (data: Student[]) => {
         console.log(data)
-        this.OriginStudentData = data; 
-        this.StudentsData = data; 
+        this.OriginStudentData = data;
+        this.StudentsData = data;
 
       }
     )
   }
 
-  Create(){
-    console.log(45)
-    this.router.navigateByUrl(`Employee/Registration Form`);
+  Create() {
+    this.router.navigateByUrl(`Employee/Create Student`);
   }
-  
+
+  Edit(id : number) {
+    this.router.navigateByUrl(`Employee/Edit Student/` + id);
+  }
+
+
+  View(id: number) {
+    this.router.navigateByUrl(`Employee/Student View/` + id);
+  }
+
+  Delete(id: number) {
+    Swal.fire({
+      title: 'Are you sure you want to delete this Student?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#089B41',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'Cancel',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.StudentService.Delete(id, this.DomainName).subscribe((d) => {
+          this.getStudentData();
+        });
+      }
+    });
+  }
+
 }

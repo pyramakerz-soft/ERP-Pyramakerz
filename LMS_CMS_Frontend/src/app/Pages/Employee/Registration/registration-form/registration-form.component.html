@@ -3,177 +3,191 @@
         <div class="flex justify-between items-center">
             <p class="primaryTxt text-2xl font-semibold">{{ isRtl ? "استمارة التسجيل" : RegistrationFormData.name }}</p>
             <div class="w-[500px] flec flex-col space-y-2">
-                <p>{{currentCategory}} {{ 'of' | translate }} {{ RegistrationFormData.categories.length }} {{ 'Completed' | translate }}</p>
+                <p>{{currentCategory}} {{ 'of' | translate }} {{ RegistrationFormData.categories.length }} {{
+                    'Completed' | translate }}</p>
                 <div class="border h-[15px] rounded-2xl flex items-center w-full overflow-hidden">
-                    <div *ngFor="let category of RegistrationFormData.categories; let i = index" class="h-[15px] flex-1" 
-                    [ngClass]="{secondaryBg: i <= currentCategory - 1, 'rounded-e-2xl': i == currentCategory - 1}"></div>
+                    <div *ngFor="let category of RegistrationFormData.categories; let i = index" class="h-[15px] flex-1"
+                        [ngClass]="{secondaryBg: i <= currentCategory - 1, 'rounded-e-2xl': i == currentCategory - 1}">
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div *ngFor="let cat of RegistrationFormData.categories let i = index"  [hidden]="currentCategory !== i + 1">
+        <div *ngFor="let cat of RegistrationFormData.categories let i = index" [hidden]="currentCategory !== i + 1">
             <div>
                 <div class="primaryBg p-4 rounded-xl text-white mb-4">
                     {{ isRtl ? cat.arName : cat.enName }}
                 </div>
-    
+
                 <div class="flex flex-wrap justify-between">
                     <div *ngFor="let field of cat.fields" class="w-[49%] flex flex-col mb-4">
-                        <label class="mb-2 primaryTxt" for={{field.enName}}>{{ isRtl ? field.arName : field.enName}}<span class="text-red-500 text-sm" *ngIf="field.isMandatory == true">*</span></label>
-    
+                        <label class="mb-2 primaryTxt" for={{field.enName}}>{{ isRtl ? field.arName :
+                            field.enName}}<span class="text-red-500 text-sm"
+                                *ngIf="field.isMandatory == true">*</span></label>
+
                         <ng-container [ngSwitch]="field.fieldTypeID">
-                            <input *ngIf="field.fieldTypeID == 1 && (field.id == 11 || field.id == 17 || field.id == 20 || field.id == 24 || field.id == 27)" 
-                                id="{{cat.enName}}_{{field.enName}}" 
-                                type="text" 
-                                class="rounded-lg border border-solid border-gray-300 px-4 py-3" 
+                            <input
+                                *ngIf="field.fieldTypeID == 1 && (field.id == 11 || field.id == 17 || field.id == 20 || field.id == 24 || field.id == 27)"
+                                id="{{cat.enName}}_{{field.enName}}" type="text"
+                                class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                                [value]="getTextAnswer(field.id)"
                                 placeholder="{{ 'Enter' | translate }} {{ isRtl ? field.arName : field.enName }}"
-                                (change)="FillData($event, field.id, field.fieldTypeID)" 
-                                (input)="validateNumber($event, field)" 
-                                [class.error-border]="isFieldInvalid(field)" 
-                                />
-    
+                                (change)="FillData($event, field.id, field.fieldTypeID)"
+                                (input)="validateNumber($event, field)" [class.error-border]="isFieldInvalid(field)" />
+
                             @if(field.fieldTypeID == 1 && field.id == 21 && User_Data_After_Login.type == 'parent'){
-                                <input  
-                                id="{{cat.enName}}_{{field.enName}}" 
-                                type="text" 
-                                class="rounded-lg border border-solid border-gray-300 px-4 py-3" 
-                                disabled
-                                [value]="parent.email"
-                                placeholder="{{ 'Enter' | translate }} {{ isRtl ? field.arName : field.enName }}" 
-                                [class.error-border]="isFieldInvalid(field)"
-                                />
+                            <input id="{{cat.enName}}_{{field.enName}}" type="text"
+                                class="rounded-lg border border-solid border-gray-300 px-4 py-3" disabled
+                                [value]="parent.email" [value]="getTextAnswer(field.id)"
+                                placeholder="{{ 'Enter' | translate }} {{ isRtl ? field.arName : field.enName }}"
+                                [class.error-border]="isFieldInvalid(field)" />
                             } @else{
-                                <input 
-                                    *ngIf="field.fieldTypeID == 1 && field.id != 11 && field.id != 17 && field.id != 20 && field.id != 24 && field.id != 27" 
-                                    id="{{cat.enName}}_{{field.enName}}" 
-                                    type="text" 
-                                    class="rounded-lg border border-solid border-gray-300 px-4 py-3" 
-                                    placeholder="{{ 'Enter' | translate }} {{ isRtl ? field.arName : field.enName }}"
-                                    (change)="FillData($event, field.id, field.fieldTypeID)" 
-                                    [class.error-border]="isFieldInvalid(field)"
-                                    />
+                            <input
+                                *ngIf="field.fieldTypeID == 1 && field.id != 11 && field.id != 17 && field.id != 20 && field.id != 24 && field.id != 27"
+                                id="{{cat.enName}}_{{field.enName}}" type="text"
+                                class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                                [value]="getTextAnswer(field.id)"
+                                placeholder="{{ 'Enter' | translate }} {{ isRtl ? field.arName : field.enName }}"
+                                (change)="FillData($event, field.id, field.fieldTypeID)"
+                                [class.error-border]="isFieldInvalid(field)" />
                             }
-        
+
                             <textarea *ngSwitchCase="2" id="{{cat.enName}}_{{field.enName}}"
-                                      class="rounded-lg border border-solid border-gray-300 px-4 py-3" 
-                                      placeholder="{{ 'Enter' | translate }} {{ isRtl ? field.arName : field.enName }}" 
-                                      (change)="FillData($event, field.id, field.fieldTypeID)"
-                                      [class.error-border]="isFieldInvalid(field)" [value]="null" >
+                                class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                                [value]="getTextAnswer(field.id)"
+                                placeholder="{{ 'Enter' | translate }} {{ isRtl ? field.arName : field.enName }}"
+                                (change)="FillData($event, field.id, field.fieldTypeID)"
+                                [class.error-border]="isFieldInvalid(field)" [value]="null">
                             </textarea>
-        
-                            <input *ngSwitchCase="3" id="{{cat.enName}}_{{field.enName}}" type="date" 
-                            class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                            (change)="FillData($event, field.id, field.fieldTypeID)"
-                            [class.error-border]="isFieldInvalid(field)" />
-    
+
+                            <input *ngSwitchCase="3" id="{{cat.enName}}_{{field.enName}}" type="date"
+                                class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                                [value]="getTextAnswer(field.id)"
+                                (change)="FillData($event, field.id, field.fieldTypeID)"
+                                [class.error-border]="isFieldInvalid(field)" />
+
                             @if(field.id != 7 && field.id != 8 && field.id != 9){
-                                <select *ngSwitchCase="7" id="{{cat.enName}}_{{field.enName}}"
-                                        class="rounded-lg border border-solid border-gray-300 px-4 py-3" 
-                                        (change)="FillData($event, field.id, field.fieldTypeID)"
-                                        [class.error-border]="isFieldInvalid(field)" >
-                                    <option value="null" style="color: gray;" disabled selected hidden>{{ 'Choose' | translate }} {{ isRtl ? field.arName : field.enName }}</option>
-                                     
-                                    <ng-container *ngIf="field.id == 3">
-                                        <option *ngFor="let gender of Gender" [value]="gender.id">
-                                            {{ gender.name }}
-                                          </option>
-                                    </ng-container>
-        
-                                    <ng-container *ngIf="field.id == 5">
-                                        <option *ngFor="let nationality of nationalities" [value]="nationality.id">
-                                          {{ nationality.name }}
-                                        </option>
-                                    </ng-container>
-        
-                                    <ng-container *ngIf="field.id == 6">
-                                        <option value="islam">{{ 'Islam' | translate }}</option>
-                                        <option value="christianity">{{ 'Christianity' | translate }}</option>
-                                        <option value="other">{{ 'Other' | translate }}</option>
-                                    </ng-container>
-        
-                                    <ng-container *ngIf="field.id == 14">
-                                        <option value="true">{{ 'True' | translate }}</option>
-                                        <option value="false">{{ 'False' | translate }}</option>
-                                    </ng-container>
-        
-                                    <!-- If no condition matches, use default options -->
-                                    <option *ngFor="let option of field.options" [value]="option.id">
-                                        {{ option.name }}
+                            <select *ngSwitchCase="7" id="{{cat.enName}}_{{field.enName}}"
+                                class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                                [value]="getSelectedOption(field.id)"
+                                (change)="FillData($event, field.id, field.fieldTypeID)"
+                                [class.error-border]="isFieldInvalid(field)">
+                                <option value="null" style="color: gray;" disabled selected hidden>{{ 'Choose' |
+                                    translate }} {{ isRtl ? field.arName : field.enName }}</option>
+
+                                <!-- <ng-container *ngIf="field.id == 3"> -->
+                                    <!-- <option *ngFor="let gender of Gender" [value]="gender.id">
+                                        {{ gender.name }}
                                     </option>
-                                </select>
+                                </ng-container> -->
+                                <ng-container *ngIf="field.id == 3">
+                                    <option *ngFor="let gender of Gender" [ngValue]="gender.id">{{ gender.name }}
+                                    </option>
+                                </ng-container>
+
+
+                                <ng-container *ngIf="field.id == 5">
+                                    <option *ngFor="let nationality of nationalities" [value]="nationality.id">
+                                        {{ nationality.name }}
+                                    </option>
+                                </ng-container>
+
+                                <ng-container *ngIf="field.id == 6">
+                                    <option value="islam">{{ 'Islam' | translate }}</option>
+                                    <option value="christianity">{{ 'Christianity' | translate }}</option>
+                                    <option value="other">{{ 'Other' | translate }}</option>
+                                </ng-container>
+
+                                <ng-container *ngIf="field.id == 14">
+                                    <option value="true">{{ 'True' | translate }}</option>
+                                    <option value="false">{{ 'False' | translate }}</option>
+                                </ng-container>
+
+                                <!-- If no condition matches, use default options -->
+                                <option *ngFor="let option of field.options" [value]="option.id">
+                                    {{ option.name }}
+                                </option>
+                            </select>
                             } @else {
-                                <select *ngIf="field.id == 7" (change)="onSchoolChange($event); FillData($event, field.id, field.fieldTypeID)"
-                                        [(ngModel)]="selectedSchool" class="rounded-lg border border-solid border-gray-300 px-4 py-3">
-                                    <option value="null" style="color: gray;" disabled selected hidden>{{ 'Choose' | translate }} {{ 'School' | translate }}</option>
-                                    <option *ngFor="let school of schools" [value]="school.id">
-                                        {{ school.name }}
-                                    </option>
-                                </select>
-                                
-                                <select *ngIf="field.id == 8" [disabled]="!selectedSchool"
-                                        [ngClass]="{ 'bg-[#EBEBEB]': !selectedSchool }"
-                                        [(ngModel)]="selectedAcademicYear" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                                        (change)="FillData($event, field.id, field.fieldTypeID)">
-                                    <option value="null" style="color: gray;" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Academic Year' | translate }}</option>
-                                    <option *ngFor="let ac of AcademicYears" [value]="ac.id">
-                                        {{ ac.name }}
-                                    </option>
-                                </select>
-                                
-                                <select *ngIf="field.id == 9" [disabled]="!selectedSchool"
-                                        [ngClass]="{ 'bg-[#EBEBEB]': !selectedSchool }"
-                                        [(ngModel)]="selectedGrade" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                                        (change)="FillData($event, field.id, field.fieldTypeID)">
-                                    <option value="null" style="color: gray;" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Grade' | translate }}</option>
-                                    <option *ngFor="let g of Grades" [value]="g.id">
-                                        {{ g.name }}
-                                    </option>
-                                </select>
+                            <select *ngIf="field.id == 7"
+                                (change)="onSchoolChange($event); FillData($event, field.id, field.fieldTypeID)"
+                                [(ngModel)]="selectedSchool"
+                                class="rounded-lg border border-solid border-gray-300 px-4 py-3">
+                                <option value="null" style="color: gray;" disabled selected hidden>{{ 'Choose' |
+                                    translate }} {{ 'School' | translate }}</option>
+                                <option *ngFor="let school of schools" [value]="school.id">
+                                    {{ school.name }}
+                                </option>
+                            </select>
+
+                            <select *ngIf="field.id == 8" [disabled]="!selectedSchool"
+                                [ngClass]="{ 'bg-[#EBEBEB]': !selectedSchool }" [(ngModel)]="selectedAcademicYear"
+                                class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                                (change)="FillData($event, field.id, field.fieldTypeID)">
+                                <option value="null" style="color: gray;" disabled selected hidden>{{ 'Choose' |
+                                    translate }} {{ 'Academic Year' | translate }}</option>
+                                <option *ngFor="let ac of AcademicYears" [value]="ac.id">
+                                    {{ ac.name }}
+                                </option>
+                            </select>
+
+                            <select *ngIf="field.id == 9" [disabled]="!selectedSchool"
+                                [ngClass]="{ 'bg-[#EBEBEB]': !selectedSchool }" [(ngModel)]="selectedGrade"
+                                class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                                (change)="FillData($event, field.id, field.fieldTypeID)">
+                                <option value="null" style="color: gray;" disabled selected hidden>{{ 'Choose' |
+                                    translate }} {{ 'Grade' | translate }}</option>
+                                <option *ngFor="let g of Grades" [value]="g.id">
+                                    {{ g.name }}
+                                </option>
+                            </select>
                             }
-    
+
                             <div *ngSwitchCase="4" class="border rounded-lg p-3">
                                 <div *ngFor="let option of field.options" class="flex items-center">
-                                    <input type="checkbox" 
-                                    id="{{cat.enName}}_{{field.enName}}_{{option.name}}" 
-                                    class="square-check"
-                                    name="{{cat.enName}}_{{field.enName}}"
-                                    [value]="option.id"
-                                    (change)="multiCheckBoxesHandling($event, field.id, field.fieldTypeID, option.id)"
-                                    [class.error-border]="isFieldInvalid(field)" />
-                                    <label for="{{cat.enName}}_{{field.enName}}_{{option.name}}" class="ml-2">{{ option.name }}</label>
+                                    <input type="checkbox" id="{{cat.enName}}_{{field.enName}}_{{option.name}}"
+                                        class="square-check" name="{{cat.enName}}_{{field.enName}}" [value]="option.id"
+                                        [value]="getSelectedOption(field.id)"
+                                        (change)="multiCheckBoxesHandling($event, field.id, field.fieldTypeID, option.id)"
+                                        [class.error-border]="isFieldInvalid(field)" />
+                                    <label for="{{cat.enName}}_{{field.enName}}_{{option.name}}" class="ml-2">{{
+                                        option.name }}</label>
                                 </div>
                             </div>
-    
+
                             <div *ngSwitchCase="5" class="border rounded-lg p-3">
                                 <div *ngFor="let option of field.options" class="flex items-center">
-                                    <input type="radio" 
-                                    id="{{cat.enName}}_{{field.enName}}_{{option.name}}" 
-                                    class="square-radio"
-                                    name="{{cat.enName}}_{{field.enName}}"
-                                    [value]="option.id"
-                                    (change)="FillData($event, field.id, field.fieldTypeID)"
-                                    [class.error-border]="isFieldInvalid(field)" />
-                                    <label for="{{cat.enName}}_{{field.enName}}_{{option.name}}" class="ml-2">{{ option.name }}</label>
+                                    <input type="radio" id="{{cat.enName}}_{{field.enName}}_{{option.name}}"
+                                        class="square-radio" name="{{cat.enName}}_{{field.enName}}" [value]="option.id"
+                                        (change)="FillData($event, field.id, field.fieldTypeID)"
+                                        [class.error-border]="isFieldInvalid(field)" />
+                                    <label for="{{cat.enName}}_{{field.enName}}_{{option.name}}" class="ml-2">{{
+                                        option.name }}</label>
                                 </div>
                             </div>
-                            
-                            <input *ngSwitchCase="6" id="{{cat.enName}}_{{field.enName}}" type="file" 
-                            class="rounded-lg border border-solid border-gray-300 px-4 py-3" 
-                            (change)="handleFileUpload($event, field.id)" [class.error-border]="isFieldInvalid(field)" />
+
+                            <input *ngSwitchCase="6" id="{{cat.enName}}_{{field.enName}}" type="file"
+                                class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                                (change)="handleFileUpload($event, field.id)"
+                                [class.error-border]="isFieldInvalid(field)" />
                         </ng-container>
-    
-                        <span *ngIf="(field.id == 21) && isFormSubmitted && !isGuardianEmailValid" class="text-red-500 text-sm mt-1">
-                            {{ 'Guardian’s Email Not Valid.' | translate }} 
+
+                        <span *ngIf="(field.id == 21) && isFormSubmitted && !isGuardianEmailValid"
+                            class="text-red-500 text-sm mt-1">
+                            {{ 'Guardian’s Email Not Valid.' | translate }}
                         </span>
-                        <span *ngIf="(field.id == 21) && isFormSubmitted && !isGuardianEmailSameAsParent && User_Data_After_Login.type == 'parent'" class="text-red-500 text-sm mt-1">
-                            {{ 'Email Must Be The Same As Yours.' | translate }} 
+                        <span
+                            *ngIf="(field.id == 21) && isFormSubmitted && !isGuardianEmailSameAsParent && User_Data_After_Login.type == 'parent'"
+                            class="text-red-500 text-sm mt-1">
+                            {{ 'Email Must Be The Same As Yours.' | translate }}
                         </span>
-                        <span *ngIf="(field.id == 28) && isFormSubmitted && !isMotherEmailValid" class="text-red-500 text-sm mt-1">
-                            {{ 'Mother’s Email Not Valid.' | translate }} 
+                        <span *ngIf="(field.id == 28) && isFormSubmitted && !isMotherEmailValid"
+                            class="text-red-500 text-sm mt-1">
+                            {{ 'Mother’s Email Not Valid.' | translate }}
                         </span>
-                        
+
                         <span *ngIf="isFieldInvalid(field) && isFormSubmitted" class="text-red-500 text-sm mt-1">
-                            {{ 'This field is required.' | translate }} 
+                            {{ 'This field is required.' | translate }}
                         </span>
                     </div>
                 </div>
@@ -181,31 +195,35 @@
         </div>
 
         <div class="flex justify-end">
-            <button [disabled]="isLoading" *ngIf="currentCategory == RegistrationFormData.categories.length" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg" (click)="Save()">
+            <button [disabled]="isLoading" *ngIf="currentCategory == RegistrationFormData.categories.length"
+                class="secondaryBg text-white font-medium px-4 py-2 rounded-lg" (click)="Save()">
                 <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
                 <span *ngIf="!isLoading">{{ 'Done' | translate }}</span>
-            </button> 
-            <button  *ngIf="currentCategory !== RegistrationFormData.categories.length"
+            </button>
+            <button *ngIf="currentCategory !== RegistrationFormData.categories.length"
                 class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
-                [disabled]="currentCategory === RegistrationFormData.categories.length"
-                (click)="navigateToNext()" >
+                [disabled]="currentCategory === RegistrationFormData.categories.length" (click)="navigateToNext()">
                 {{ 'Next' | translate }}
             </button>
         </div>
     </div>
 
     <div class="primaryBg py-8 px-4 rounded-lg !important">
-        <div *ngFor="let category of RegistrationFormData.categories; let i = index" class="relative flex flex-col justify-center items-center" (click)="goToCategory(i+1)">
-            <div *ngIf="i !== 0" class="w-1 h-5 bg-[#BCBDBD] bottom-[100%]" [ngClass]="{secondaryBg : i <= currentCategory - 1, 'bg-[#BCBDBD]': i > currentCategory - 1}"></div>
+        <div *ngFor="let category of RegistrationFormData.categories; let i = index"
+            class="relative flex flex-col justify-center items-center" (click)="goToCategory(i+1)">
+            <div *ngIf="i !== 0" class="w-1 h-5 bg-[#BCBDBD] bottom-[100%]"
+                [ngClass]="{secondaryBg : i <= currentCategory - 1, 'bg-[#BCBDBD]': i > currentCategory - 1}"></div>
             <div *ngIf="i <= currentCategory - 1" class="p-1 border-4 border-[#089B41] rounded-full">
                 <div class="flex justify-center items-center text-white px-4 py-4 rounded-full w-12 h-12 secondaryBg">
                     {{i+1}}
                 </div>
             </div>
-            <div *ngIf="i > currentCategory - 1" class="flex justify-center items-center text-white px-4 py-4 rounded-full w-12 h-12 bg-[#BCBDBD]">
+            <div *ngIf="i > currentCategory - 1"
+                class="flex justify-center items-center text-white px-4 py-4 rounded-full w-12 h-12 bg-[#BCBDBD]">
                 {{i+1}}
             </div>
-            <div *ngIf="i !== RegistrationFormData.categories.length - 1" class="w-1 h-5 top-[100%]" [ngClass]="{secondaryBg : i <= currentCategory - 1, 'bg-[#BCBDBD]': i > currentCategory - 1}"></div>
+            <div *ngIf="i !== RegistrationFormData.categories.length - 1" class="w-1 h-5 top-[100%]"
+                [ngClass]="{secondaryBg : i <= currentCategory - 1, 'bg-[#BCBDBD]': i > currentCategory - 1}"></div>
         </div>
     </div>
 </div>

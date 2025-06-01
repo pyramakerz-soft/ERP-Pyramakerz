@@ -97,6 +97,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                         if (school != null)
                         {
                             item.TextAnswer = school.Name;
+                            item.SelectedFieldOptionID = school.ID;
+
                         }
                         break;
 
@@ -105,6 +107,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                         if (year != null)
                         {
                             item.TextAnswer = year.Name;
+                            item.SelectedFieldOptionID = year.ID;
                         }
                         break;
 
@@ -113,6 +116,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                         if (grade != null)
                         {
                             item.TextAnswer = grade.Name;
+                            item.SelectedFieldOptionID = grade.ID;
                         }
                         break;
 
