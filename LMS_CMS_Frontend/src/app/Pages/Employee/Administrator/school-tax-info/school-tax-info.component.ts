@@ -22,7 +22,7 @@ import { TaxIssuer } from '../../../../Models/Administrator/tax-issuer.model';
   templateUrl: './school-tax-info.component.html',
   styleUrl: './school-tax-info.component.css',
 })
-export class SchoolTaxInfoComponent {
+export class TaxIssuerComponent {
   // schoolData: School[] = [];
     taxIssuers: TaxIssuer[] = []; // Changed from schoolData to taxIssuers
 

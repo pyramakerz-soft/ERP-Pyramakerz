@@ -24,7 +24,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
         }
 
         #region Get All
-        [HttpGet("get")]
+        [HttpGet]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Tax Issuer" }
@@ -61,7 +61,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
         [HttpGet("id")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Tax Issuer" }
+            pages: new[] { "TaxIssuer" }
         )]
         public async Task<IActionResult> GetByID(string id)
         {
@@ -95,7 +95,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
         [HttpPost("Add")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Tax Issuer" }
+            pages: new[] { "TaxIssuer" }
         )]
         public IActionResult Add(TaxIssuerAddDTO taxIssuerAdd)
         {
@@ -142,7 +142,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
         [HttpPut("Edit")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Tax Issuer" }
+            pages: new[] { "TaxIssuer" }
         )]
         public IActionResult Edit(TaxIssuerEditDTO taxIssuerDTO)
         {
@@ -205,7 +205,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
         [HttpDelete]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Tax Issuer" }
+            pages: new[] { "TaxIssuer" }
         )]
         public IActionResult Delete(string id)
         {
