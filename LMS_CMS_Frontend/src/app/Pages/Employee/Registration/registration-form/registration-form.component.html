@@ -55,9 +55,9 @@
                             <textarea *ngSwitchCase="2" id="{{cat.enName}}_{{field.enName}}"
                                 class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                                 [value]="getTextAnswer(field.id)"
-                                placeholder="{{ 'Enter' | translate }} {{ isRtl ? field.arName : field.enName }}"
+                                placeholder="{{ 'ffff' | translate }} {{ isRtl ? field.arName : field.enName }}"
                                 (change)="FillData($event, field.id, field.fieldTypeID)"
-                                [class.error-border]="isFieldInvalid(field)" [value]="null">
+                                [class.error-border]="isFieldInvalid(field)">
                             </textarea>
 
                             <input *ngSwitchCase="3" id="{{cat.enName}}_{{field.enName}}" type="date"
@@ -75,13 +75,8 @@
                                 <option value="null" style="color: gray;" disabled selected hidden>{{ 'Choose' |
                                     translate }} {{ isRtl ? field.arName : field.enName }}</option>
 
-                                <!-- <ng-container *ngIf="field.id == 3"> -->
-                                    <!-- <option *ngFor="let gender of Gender" [value]="gender.id">
-                                        {{ gender.name }}
-                                    </option>
-                                </ng-container> -->
                                 <ng-container *ngIf="field.id == 3">
-                                    <option *ngFor="let gender of Gender" [ngValue]="gender.id">{{ gender.name }}
+                                    <option *ngFor="let gender of Gender" [value]="gender.id">{{ gender.name }}
                                     </option>
                                 </ng-container>
 

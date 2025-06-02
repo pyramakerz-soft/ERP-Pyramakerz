@@ -354,6 +354,7 @@ namespace LMS_CMS_BL.Config
                .ForMember(dest => dest.ParentName, opt => opt.MapFrom(src => src.Parent.en_name))
                .ForMember(dest => dest.RegistrationFormName, opt => opt.MapFrom(src => src.RegistrationForm.Name));
 
+            CreateMap<RegisterationFormSubmittionGetDTO ,RegisterationFormSubmittion>();
             CreateMap<RegisterationFormSubmittion, RegisterationFormSubmittionGetDTO>()
               .ForMember(dest => dest.RegistrationFormParentName, opt => opt.MapFrom(src => src.RegisterationFormParent.StudentName))
               .ForMember(dest => dest.CategoryFieldName, opt => opt.MapFrom(src => src.CategoryField.EnName))

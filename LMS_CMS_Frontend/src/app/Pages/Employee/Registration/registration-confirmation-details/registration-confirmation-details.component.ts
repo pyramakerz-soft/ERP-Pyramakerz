@@ -64,8 +64,8 @@ export class RegistrationConfirmationDetailsComponent {
       this.path = url[0].path
     });
 
-    this.getRegistrationFormSubmissionConfirmationData()
     this.getRegistrationFormData()
+    this.getRegistrationFormSubmissionConfirmationData()
     this.getState()
     this.getRegistrationFormParentById()
 
@@ -125,6 +125,7 @@ export class RegistrationConfirmationDetailsComponent {
     this.registrationFormParentService.GetById(this.registrationParentID, this.DomainName).subscribe(
       (data) => {
         this.RegisterationFormParentData = data;
+        console.log(1,this.RegisterationFormParentData)
         this.selectedState = this.RegisterationFormParentData.registerationFormStateID
       }
     )

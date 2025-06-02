@@ -81,6 +81,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                         if (gender != null)
                         {
                             item.TextAnswer = gender.Name;
+                            item.SelectedFieldOptionID = gender.ID;
+
                         }
                         break;
 
@@ -89,6 +91,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                         if (nationality != null)
                         {
                             item.TextAnswer = nationality.Name;
+                            item.SelectedFieldOptionID = nationality.ID;
+
                         }
                         break;
 
@@ -127,6 +131,134 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
 
 
             return Ok(registerationFormSubmittionDTO);
+        }
+
+        //////////////////////////////////////////////////////////
+
+        [HttpPost]
+        [Authorize_Endpoint_(
+          allowedTypes: new[] { "octa", "employee" },
+          allowEdit: 1,
+          pages: new[] { "Registration Confirmation"}
+         )]
+        public IActionResult Add(List<RegisterationFormSubmittionGetDTO> newData)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID, Type claim not found.");
+            }
+            //if (userTypeClaim == "employee")
+            //{
+            //    IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Registration Confirmation", roleId, userId, registerationFormTest);
+            //    if (accessCheck != null)
+            //    {
+            //        return accessCheck;
+            //    }
+            //}
+            foreach (var item in newData)
+            {
+                RegisterationFormSubmittion registerationFormSubmittion = new RegisterationFormSubmittion();
+
+                if (item.SelectedFieldOptionID == 0) 
+                {
+                    item.SelectedFieldOptionID = null;
+                }
+                mapper.Map(item, registerationFormSubmittion);
+
+                TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+                registerationFormSubmittion.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                if (userTypeClaim == "octa")
+                {
+                    registerationFormSubmittion.InsertedByOctaId = userId;
+                }
+                else if (userTypeClaim == "employee")
+                {
+                    registerationFormSubmittion.InsertedByUserId = userId;
+                }
+
+                Unit_Of_Work.registerationFormSubmittion_Repository.Add(registerationFormSubmittion);
+                
+            }
+
+            Unit_Of_Work.SaveChanges();
+            return Ok();
+        }
+
+        //////////////////////////////////////////////////////////
+
+        [HttpPut]
+        [Authorize_Endpoint_(
+          allowedTypes: new[] { "octa", "employee" },
+          allowEdit: 1,
+          pages: new[] { "Registration Confirmation" }
+         )]
+        public IActionResult Edit(List<RegisterationFormSubmittionGetDTO> newData)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID, Type claim not found.");
+            }
+            //if (userTypeClaim == "employee")
+            //{
+            //    IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Registration Confirmation", roleId, userId, registerationFormTest);
+            //    if (accessCheck != null)
+            //    {
+            //        return accessCheck;
+            //    }
+            //}
+            foreach (var item in newData)
+            {
+                RegisterationFormSubmittion registerationFormSubmittion = Unit_Of_Work.registerationFormSubmittion_Repository.First_Or_Default(r => r.ID == item.ID && r.IsDeleted != true);
+                if (registerationFormSubmittion == null)
+                {
+                    return NotFound("Registeration Form Submittion Test not found");
+                }
+                if (item.SelectedFieldOptionID == 0)
+                {
+                    item.SelectedFieldOptionID = null;
+                }
+                mapper.Map(item, registerationFormSubmittion);
+
+                TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+                registerationFormSubmittion.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                if (userTypeClaim == "octa")
+                {
+                    registerationFormSubmittion.UpdatedByOctaId = userId;
+                    if (registerationFormSubmittion.UpdatedByUserId != null)
+                    {
+                        registerationFormSubmittion.UpdatedByUserId = null;
+                    }
+                }
+                else if (userTypeClaim == "employee")
+                {
+                    registerationFormSubmittion.UpdatedByUserId = userId;
+                    if (registerationFormSubmittion.UpdatedByOctaId != null)
+                    {
+                        registerationFormSubmittion.UpdatedByOctaId = null;
+                    }
+                }
+                Unit_Of_Work.registerationFormSubmittion_Repository.Update(registerationFormSubmittion);
+
+            }
+
+            Unit_Of_Work.SaveChanges();
+            return Ok();
         }
     }
 }
