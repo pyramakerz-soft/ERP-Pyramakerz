@@ -10,6 +10,7 @@ export class Student {
         public mobile: string = '',
         public phone: string = '',
         public address: string = '',
+        public nationalID: string = '',
         public note: string = '',
         public nationalityEnName: string = '',
         public currentAcademicYear: string = '',
@@ -22,5 +23,8 @@ export class Student {
         public insertedByUserId :number =0,
         public genderName: string = '',
         public genderId :number =0,
+        public academicYearName: string = '',
+        public gradeName: string = '',
+        public className: string = '',
     ) {}
-}
+} 

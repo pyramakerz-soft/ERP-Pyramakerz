@@ -175,4 +175,14 @@
     </div>
 </div>
 
-<app-search-student *ngIf="isModalOpen" (closeModal)="closeModal()" (studentSelected)="handleStudentSelected($event)"></app-search-student>
+<!-- <app-search-student *ngIf="isModalOpen" (closeModal)="closeModal()" (studentSelected)="handleStudentSelected($event)"></app-search-student> -->
+
+<app-search-student
+  *ngIf="isModalOpen"
+  [selectedYear]="preSelectedYear"
+  [selectedGrade]="preSelectedGrade"
+  [selectedClassroom]="preSelectedClassroom"
+  [hiddenInputs]="hiddenInputs"
+  (closeModal)="closeModal()"
+  (studentSelected)="handleStudentSelected($event)"
+></app-search-student>

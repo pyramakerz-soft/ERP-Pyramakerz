@@ -1263,60 +1263,157 @@ namespace LMS_CMS_PL.Controllers.Domains
         }
 
         ////
-         
-        //[HttpGet("SearchByMultiParameters")]
-        //public async Task<IActionResult> SearchByMultiParameters(MultiParametersForStudentDTO parameters, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
-        //{
-        //    if (pageNumber < 1) pageNumber = 1;
-        //    if (pageSize < 1) pageSize = 10;
 
-        //    UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+        [HttpGet("SearchByMultiParameters")]
+        public async Task<IActionResult> SearchByMultiParameters([FromQuery] MultiParametersForStudentDTO parameters, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
 
-        //    int totalRecords = await Unit_Of_Work.student_Repository
-        //        .CountAsync(f => f.IsDeleted != true);
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+            
+            List<Student> students = await Unit_Of_Work.student_Repository.Select_All_With_IncludesById<Student>(
+                s => s.IsDeleted != true,
+                query => query.Include(Income => Income.Gender),
+                query => query.Include(Income => Income.StudentGrades).ThenInclude(g => g.Grade),
+                query => query.Include(Income => Income.StudentGrades).ThenInclude(g => g.AcademicYear),
+                query => query.Include(Income => Income.StudentClassrooms).ThenInclude(c => c.Classroom)
+                );
 
-        //    Student student = await Unit_Of_Work.student_Repository.FindByIncludesAsync(
-        //        query => query.IsDeleted != true && query.NationalID == parameters.NationalID,
-        //        query => query.Include(stu => stu.Gender),
-        //        query => query.Include(stu => stu.AccountNumber));
+            if (parameters.ID.HasValue)
+                students = students.Where(s => s.ID == parameters.ID.Value).ToList();
 
-        //    if (student == null || student.IsDeleted == true)
-        //    {
-        //        return NotFound("No Student found");
-        //    }
+            if (!string.IsNullOrWhiteSpace(parameters.Name))
+            {
+                var name = parameters.Name.ToLower();
+                students = students.Where(s =>
+                    (s.en_name != null && s.en_name.ToLower().Contains(name)) ||
+                    (s.ar_name != null && s.ar_name.ToLower().Contains(name))
+                ).ToList();
+            }
 
-        //    StudentGetDTO StudentDTO = mapper.Map<StudentGetDTO>(student); 
-        //    return Ok(StudentDTO);
-
+            if (!string.IsNullOrWhiteSpace(parameters.NationalID))
+                students = students.Where(s => s.NationalID == parameters.NationalID && s.IsDeleted != true).ToList();
              
-        //    // Apply pagination
-        //    List<Student> students = await Unit_Of_Work.student_Repository
-        //        .Select_All_With_IncludesById_Pagination<Student>(
-        //            f => f.IsDeleted != true,
-        //            query => query.Include(Income => Income.Gender))
-        //        .Skip((pageNumber - 1) * pageSize)
-        //        .Take(pageSize)
-        //        .ToListAsync();
+            if (parameters.AcademicYearID.HasValue)
+                students = students.Where(s => s.StudentGrades.Any(g => g.AcademicYearID == parameters.AcademicYearID.Value && g.IsDeleted != true)).ToList();
 
-        //    if (students == null || students.Count == 0)
-        //    {
-        //        return NotFound();
-        //    }
+            if (parameters.GradeID.HasValue)
+                students = students.Where(s => s.StudentGrades.Any(g => g.GradeID == parameters.GradeID.Value && g.IsDeleted != true)).ToList();
 
-        //    List<StudentGetDTO> StudentDTOs = mapper.Map<List<StudentGetDTO>>(students);
+            if (parameters.ClassroomID.HasValue)
+                students = students.Where(s => s.StudentClassrooms.Any(c => c.ClassID == parameters.ClassroomID.Value && c.IsDeleted != true)).ToList();
 
-        //    // Pagination metadata
-        //    var paginationMetadata = new
-        //    {
-        //        TotalRecords = totalRecords,
-        //        PageSize = pageSize,
-        //        CurrentPage = pageNumber,
-        //        TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
-        //    };
+            int totalRecords = students.Count;
+             
+            var finalStudents = students
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
 
-        //    return Ok(new { Data = StudentDTOs, Pagination = paginationMetadata });
-        //}
- 
+            if (finalStudents == null || finalStudents.Count == 0)
+            {
+                return NotFound("No students found");
+            }
+
+            //List<StudentGetDTO> studentDTOs = mapper.Map<List<StudentGetDTO>>(finalStudents);
+            var studentDTOs = finalStudents
+                .Select(student =>
+                { 
+                    var dto = mapper.Map<StudentGetDTO>(student);
+
+                    // Manually assign conditional fields
+                    if (parameters.AcademicYearID.HasValue)
+                    {
+                        dto.AcademicYearName = student.StudentGrades
+                            .FirstOrDefault(g => g.AcademicYearID == parameters.AcademicYearID.Value && g.IsDeleted != true)?.AcademicYear?.Name;
+                    }
+                    else
+                    {
+                        dto.AcademicYearName = student.StudentGrades
+                            .Where(g => g.AcademicYear != null && g.AcademicYear.IsActive && g.AcademicYear.IsDeleted != true)
+                            .OrderByDescending(g => g.AcademicYearID)
+                            .Select(g => g.AcademicYear.Name)
+                            .FirstOrDefault();
+                    }
+
+                    if (parameters.GradeID.HasValue)
+                    {
+                        dto.GradeName = student.StudentGrades
+                            .FirstOrDefault(g => g.GradeID == parameters.GradeID.Value && g.IsDeleted != true)?.Grade?.Name;
+                    }
+                    else
+                    {
+                        if (parameters.AcademicYearID.HasValue)
+                        {
+                            dto.GradeName = student.StudentGrades
+                            .FirstOrDefault(g => g.AcademicYearID == parameters.AcademicYearID.Value && g.IsDeleted != true)?.Grade?.Name;
+                        }
+                        else
+                        {
+                            dto.GradeName = student.StudentGrades
+                                .Where(g => g.AcademicYear != null && g.AcademicYear.IsActive && g.AcademicYear.IsDeleted != true)
+                                .OrderByDescending(g => g.GradeID)
+                                .Select(g => g.Grade.Name)
+                                .FirstOrDefault();
+                        }
+                    }
+
+                    if (parameters.ClassroomID.HasValue)
+                    {
+                        dto.ClassName = student.StudentClassrooms
+                            .FirstOrDefault(c => c.ClassID == parameters.ClassroomID.Value && c.IsDeleted != true)?.Classroom?.Name;
+                    }
+                    else
+                    {
+                        if (parameters.AcademicYearID.HasValue)
+                        {
+                            if (parameters.GradeID.HasValue)
+                            {
+                                dto.ClassName = student.StudentClassrooms
+                                    .FirstOrDefault(c =>
+                                        c.Classroom.AcademicYearID == parameters.AcademicYearID.Value &&
+                                        c.Classroom.GradeID == parameters.GradeID.Value &&
+                                        c.IsDeleted != true
+                                    )?.Classroom?.Name;
+                            }
+                            else
+                            {
+                                dto.ClassName = student.StudentClassrooms
+                                    .FirstOrDefault(c =>
+                                        c.Classroom.AcademicYearID == parameters.AcademicYearID.Value &&
+                                        c.IsDeleted != true
+                                    )?.Classroom?.Name;
+                            }
+                        }
+                        else
+                        {
+                            dto.ClassName = student.StudentClassrooms
+                                .Where(c => c.Classroom?.AcademicYear != null &&
+                                            c.Classroom.AcademicYear.IsActive && c.Classroom.AcademicYear.IsDeleted != true)
+                                .OrderByDescending(c => c.ClassID)
+                                .Select(c => c.Classroom.Name)
+                                .FirstOrDefault();
+                        }
+                    }
+
+                    return dto;
+                })
+                .ToList();
+
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = studentDTOs, Pagination = paginationMetadata }); 
+        }
+
+        ////
+
         [HttpDelete("{ID}")]
         public async Task<IActionResult> Delete(long ID)
         {

@@ -133,6 +133,30 @@ export class StudentService {
 
     return this.http.get<Student>(`${this.baseUrl}/Student/SearchByNationalID/${NationalID}`, { headers })
   }
+    
+  SearchByMultiParameters(parameters: any, DomainName: string, pageNumber:number, pageSize:number) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+
+    let queryParams = new HttpParams()
+      .set('pageNumber', pageNumber.toString())
+      .set('pageSize', pageSize.toString());
+
+    for (const key in parameters) {
+      if (parameters[key] !== null && parameters[key] !== undefined) {
+        queryParams = queryParams.set(key, parameters[key]);
+      }
+    }
+      
+    return this.http.get<{ data: Student[], pagination: any }>(`${this.baseUrl}/Student/SearchByMultiParameters`,
+    { headers, params: queryParams });
+  }
   
   GetBySchoolGradeClassID(schoolId: number, gradeId: number, classId: number, DomainName: string){
     if(DomainName!=null) {
