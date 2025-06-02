@@ -1,28 +1,260 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Student } from '../../../Models/student';
+import { FormsModule } from '@angular/forms';
+import { AcademicYear } from '../../../Models/LMS/academic-year';
+import { Grade } from '../../../Models/LMS/grade';
+import { Classroom } from '../../../Models/LMS/classroom';
+import { AcadimicYearService } from '../../../Services/Employee/LMS/academic-year.service';
+import { GradeService } from '../../../Services/Employee/LMS/grade.service';
+import { ClassroomService } from '../../../Services/Employee/LMS/classroom.service';
+import { ApiService } from '../../../Services/api.service';
+import { StudentService } from '../../../Services/student.service';
 
 @Component({
   selector: 'app-search-student',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './search-student.component.html',
   styleUrl: './search-student.component.css'
 })
 export class SearchStudentComponent {
+  @Input() selectedYear: number | null = null;
+  @Input() selectedGrade: number | null = null;
+  @Input() selectedClassroom: number | null = null;
+  @Input() hiddenInputs: string[] = [];
+  
   @Output() closeModal = new EventEmitter<void>();
-  @Output() studentSelected = new EventEmitter<Student[]>();
- 
+  @Output() studentSelected = new EventEmitter<number[]>();
+  
   IsStudentsSelected = false
+  IsTableShown = false
+  id: number | null = null;
+  name: string | null = null;
+  nationalID: number | null = null; 
 
   students:Student[] = []
+  selectedStudents:number[] = []
+  AcademicYears:AcademicYear[] = []
+  Grades:Grade[] = []
+  Classrooms:Classroom[] = []
   
+  DomainName: string = "";
+
+  CurrentPage:number = 1
+  PageSize:number = 10
+  TotalPages:number = 1
+  TotalRecords:number = 0
+
+
+  constructor(public acadimicYearService:AcadimicYearService, public gradeservice:GradeService, public classroomService:ClassroomService, public studentService:StudentService, public ApiServ: ApiService){}
+
+  ngOnInit(){ 
+    this.DomainName = this.ApiServ.GetHeader(); 
+    this.getAcademicYears()  
+    this.getGrades(); 
+
+    if (this.selectedYear || this.selectedGrade) {
+      this.getClassrooms();
+    } 
+  } 
+
+  isInputHidden(input: string): boolean {
+    return this.hiddenInputs.includes(input);
+  }
+ 
+  isYearDisabled(): boolean {
+    return this.selectedYear !== null;
+  }
+
+  isGradeDisabled(): boolean {
+    return this.selectedGrade !== null;
+  }
+
+  isClassroomDisabled(): boolean {
+    return this.selectedClassroom !== null;
+  }
+
   close() {
     this.closeModal.emit();
   }
   
   closeWithData(){ 
     this.closeModal.emit();
-    this.studentSelected.emit(this.students)
+    this.studentSelected.emit(this.selectedStudents)
+  }
+
+  HideTable(){
+    this.IsTableShown = false  
+  }
+
+  validateNumberForSearch(event: any, field: 'id' | 'nationalID'): void {
+    const value = event.target.value; 
+    if (isNaN(value) || value.trim() === '') {
+      event.target.value = '';
+      this[field] = null;
+      return;
+    } 
+    this[field] = Number(value);
+  }
+
+  onYearChange() {  
+    this.Classrooms = []   
+    this.selectedClassroom = null 
+ 
+    if (this.selectedYear) {
+      this.getClassrooms();  
+    }
+  }
+
+  onGradeChange() {  
+    this.Classrooms = []   
+    this.selectedClassroom = null 
+ 
+    if (this.selectedYear) {
+      this.getClassrooms();  
+    }
+  }
+
+  getAcademicYears(){
+    this.AcademicYears = []
+    this.acadimicYearService.Get(this.DomainName).subscribe(
+      (data) => {
+        this.AcademicYears = data
+      }
+    )
+  }
+
+  getGrades(){
+    this.Grades = []
+    this.gradeservice.Get(this.DomainName).subscribe(
+      (data) => {
+        this.Grades = data
+      }
+    ) 
+  }
+
+  getClassrooms(){
+    this.Classrooms = []
+    if(this.selectedYear && this.selectedGrade){
+      this.classroomService.GetByGradeAndAcYearId(this.selectedGrade, this.selectedYear, this.DomainName).subscribe(
+        (data) => {
+          this.Classrooms = data
+        }
+      )
+    } else if(this.selectedYear){
+      this.classroomService.GetByAcYearId(this.selectedYear, this.DomainName).subscribe(
+        (data) => {
+          this.Classrooms = data
+        }
+      )
+    } else if(this.selectedGrade){
+      this.classroomService.GetByGradeId(this.selectedGrade, this.DomainName).subscribe(
+        (data) => {
+          this.Classrooms = data
+        }
+      )
+    }
+  }
+
+  Search(){
+    this.IsTableShown = true
+    this.IsStudentsSelected = true
+    this.selectedStudents = []
+    this.CurrentPage= 1
+    this.PageSize= 10
+    this.TotalPages= 1
+    this.TotalRecords= 0
+    this.GetAllData(this.CurrentPage, this.PageSize) 
+  } 
+
+  GetAllData(pageNumber:number, pageSize:number){
+    const filters = { 
+      ID: this.id,
+      Name: this.name,
+      NationalID: this.nationalID,
+      GradeID: this.selectedGrade,
+      AcademicYearID: this.selectedYear,
+      ClassroomID: this.selectedClassroom
+    };
+
+    this.students = []  
+
+    this.studentService.SearchByMultiParameters(filters, this.DomainName, pageNumber, pageSize).subscribe(
+      (data) => {
+        this.CurrentPage = data.pagination.currentPage
+        this.PageSize = data.pagination.pageSize
+        this.TotalPages = data.pagination.totalPages
+        this.TotalRecords = data.pagination.totalRecords 
+        this.students = data.data
+      }, 
+      (error) => { 
+        if(error.status == 404){
+          if(this.TotalRecords != 0){
+            let lastPage = this.TotalRecords / this.PageSize 
+            if(lastPage >= 1){ 
+              this.CurrentPage = Math.ceil(lastPage) 
+              this.GetAllData(this.CurrentPage, this.PageSize)
+            }
+          } 
+        }
+      }
+    )
+  }
+
+  changeCurrentPage(currentPage:number){
+    this.CurrentPage = currentPage
+    this.GetAllData(this.CurrentPage, this.PageSize)
+
+    this.IsStudentsSelected= false
+    this.selectedStudents= []
+  }
+
+  validateNumber(event: any): void {
+    const value = event.target.value;
+    this.PageSize = 0
+  }
+
+  validatePageSize(event: any) { 
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+        event.target.value = '';
+    }
+  }
+
+  toggleSelection(studentId: number, isChecked?: boolean) {
+    if (isChecked) {
+      if (!this.selectedStudents.includes(studentId)) {
+        this.selectedStudents.push(studentId);
+      }
+    } else {
+      this.selectedStudents = this.selectedStudents.filter(id => id !== studentId);
+    }
+
+    this.IsStudentsSelected = this.selectedStudents.length > 0;
+  }
+
+  onCheckboxChange(event: Event, studentId: number) {
+    const isChecked = (event.target as HTMLInputElement).checked;
+    this.toggleSelection(studentId, isChecked);
+  }
+
+  isSelected(studentId: number): boolean {
+    return this.selectedStudents.includes(studentId);
+  }
+
+  selectAll(): boolean {
+    return this.students.length > 0 && this.selectedStudents.length === this.students.length;
+  }
+
+  toggleSelectAll(event: Event): void {
+    const isChecked = (event.target as HTMLInputElement).checked;
+    if (isChecked) {
+      this.selectedStudents = this.students.map(s => s.id);
+    } else {
+      this.selectedStudents = []; 
+    }
+
+    this.IsStudentsSelected = this.selectedStudents.length > 0;
   }
 }

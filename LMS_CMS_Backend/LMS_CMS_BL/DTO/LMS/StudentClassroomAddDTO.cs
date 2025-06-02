@@ -10,7 +10,7 @@ namespace LMS_CMS_BL.DTO.LMS
 {
     public class StudentClassroomAddDTO
     { 
-        public long StudentID { get; set; } 
+        public List<long> StudentIDs { get; set; } 
         public long ClassID { get; set; }
     }
 }

@@ -48,7 +48,12 @@ export class ClassroomStudentsComponent {
   
   isDropdownOpen = false;
 
+
   isModalOpen = false;
+  preSelectedYear: number | null = null;  
+  preSelectedGrade: number | null = null;  
+  preSelectedClassroom: number | null = null;  
+  hiddenInputs: string[] = ['classroom'];
 
   constructor(
     public account: AccountService, 
@@ -123,6 +128,8 @@ export class ClassroomStudentsComponent {
     this.classroomService.GetByID(this.classId, this.DomainName).subscribe(
       data => {
         this.classroom = data
+        this.preSelectedGrade = this.classroom.gradeID
+        this.preSelectedYear = this.classroom.academicYearID 
       }
     )
   }
@@ -140,17 +147,51 @@ export class ClassroomStudentsComponent {
     this.isModalOpen = true;
   } 
 
-  handleStudentSelected(students: Student[]) {
-    // students.forEach(student => {
-    //   var classroomStudentNew = new ClassroomStudent()
-    //   classroomStudentNew.studentID = student.id
-    //   classroomStudentNew.classID = this.classId
-    //   this.classroomStudentService.Add(classroomStudentNew, this.DomainName).subscribe(
-    //     data => {
+  handleStudentSelected(students: number[]) {
+    var classroomStudentNew = new ClassroomStudent()
+    classroomStudentNew.classID = this.classId
 
-    //     }
-    //   )
-    // }); 
+    students.forEach(student => {
+      classroomStudentNew.studentIDs.push(student)
+    }); 
+     
+    this.classroomStudentService.Add(classroomStudentNew, this.DomainName).subscribe(
+      data => { 
+        let studentsAlreadyInClass: any[] = []; 
+        if (typeof data === 'string') {
+          try {
+            studentsAlreadyInClass = JSON.parse(data);
+          } catch (e) {
+            console.error('Invalid JSON response', e);
+            return;
+          }
+        } else if (Array.isArray(data)) {
+          studentsAlreadyInClass = data;
+        }
+
+        if (studentsAlreadyInClass.length > 0) {
+          const namesList = studentsAlreadyInClass.map(s => s.user_Name || s.name || 'Unnamed Student');
+          const formattedNames = namesList.join('<br/>');
+
+          Swal.fire({
+            icon: 'warning',
+            title: 'Some students are already in a class',
+            html: `<strong>The following students are already assigned:</strong><br/><br/>${formattedNames}`,
+            confirmButtonText: 'OK'
+          });
+        }
+
+        this.getStudentsByClassID()
+      },
+      error => {
+        console.error('Error:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'An error occurred',
+          text: 'Could not add students. Please try again later.',
+        });
+      }
+    )
   }
   
   OpenTransferModal(id:number){

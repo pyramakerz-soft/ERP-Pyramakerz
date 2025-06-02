@@ -177,6 +177,11 @@ namespace LMS_CMS_BL.Repository
             return query; // Return IQueryable to support Skip & Take
         }
 
+        public IQueryable<TEntity> GetAll<TEntity>() where TEntity : class
+        {
+            return db.Set<TEntity>().AsQueryable();
+        }
+
         public async Task<List<T>> FindByAsync<T>(Expression<Func<T, bool>> predicate) where T : class
         {
             return await db.Set<T>().Where(predicate).ToListAsync();

@@ -87,5 +87,11 @@ namespace LMS_CMS_BL.DTO.LMS
         public string? LandMark { get; set; }
         public string? AdditionalInfo { get; set; }
         public int? TypeID { get; set; }
+
+
+
+        public string AcademicYearName { get; set; }
+        public string GradeName { get; set; }
+        public string ClassName { get; set; }
     }
 }
