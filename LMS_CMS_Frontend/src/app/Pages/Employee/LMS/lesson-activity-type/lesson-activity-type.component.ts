@@ -76,7 +76,7 @@ export class LessonActivityTypeComponent {
     });
 
     this.GetAllData();
-  }
+  } 
 
   GetAllData() {
     this.TableData = [];

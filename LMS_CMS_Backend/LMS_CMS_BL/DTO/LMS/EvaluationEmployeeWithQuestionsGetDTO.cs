@@ -27,6 +27,7 @@ namespace LMS_CMS_BL.DTO.LMS
 
         public List<EvaluationEmployeeQuestionGroupGetDTO> EvaluationEmployeeQuestionGroups { get; set; }
         public List<EvaluationEmployeeStudentBookCorrectionsGetDTO> EvaluationEmployeeStudentBookCorrections { get; set; }
+        public long? InsertedByUserId { get; set; }
 
     }
 }

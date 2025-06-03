@@ -28,9 +28,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         ///////////////////////////////////////////////////////////////////////////////////
         [HttpGet]
         [Authorize_Endpoint_(
-          allowedTypes: new[] { "octa", "employee" }
-          //,
-          //pages: new[] { "Book Correction" }
+          allowedTypes: new[] { "octa", "employee" } 
         )]
         public IActionResult Get()
         {

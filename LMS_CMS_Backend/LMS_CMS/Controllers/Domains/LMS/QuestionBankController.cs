@@ -36,9 +36,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" }
-            //,
-            //pages: new[] { "Template" }
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Question Bank" }
         )]
         public async Task<IActionResult> Get([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
@@ -96,10 +95,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         [HttpGet("{id}")]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "Lesson Resource" }
-        //)]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Question Bank" }
+        )]
         public async Task<IActionResult> GetById(long id)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -154,10 +153,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         [HttpPost]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "Lesson Resource" }
-        //)]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Question Bank" }
+        )]
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> Add([FromForm] LMS_CMS_BL.DTO.LMS.QuestionBankAddDTO NewData)
 
@@ -514,11 +513,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpPut]
         [Authorize_Endpoint_(
-        allowedTypes: new[] { "octa", "employee" },
-        allowEdit: 1
-    //   ,
-    //pages: new[] { "" }
-    )]
+            allowedTypes: new[] { "octa", "employee" },
+            allowEdit: 1,
+            pages: new[] { "Question Bank" }
+        )]
         public async Task<IActionResult> Edit([FromForm] QuestionBankEditDTO NewData)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -543,17 +541,17 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             if (questionBank == null)
                 return NotFound("Question bank not found.");
 
-            //if (userTypeClaim == "employee")
-            //{
-            //    IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Subject", roleId, userId, medal);
-            //    if (accessCheck != null)
-            //    {
-            //        return accessCheck;
-            //    }
-            //}
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Question Bank", roleId, userId, questionBank);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
+            }
             //////////////////////////////////////////////////// Validation ////////////////////////////////////////////////
 
-            if(NewData.DifficultyLevel != 0)
+            if (NewData.DifficultyLevel != 0)
             {
                 if (NewData.DifficultyLevel > 6 || NewData.DifficultyLevel < 1)
                 {
@@ -1040,11 +1038,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpDelete("{id}")]
         [Authorize_Endpoint_(
-          allowedTypes: new[] { "octa", "employee" }
-          //,
-          //allowDelete: 1,
-          //pages: new[] { "Section" }
-      )]
+          allowedTypes: new[] { "octa", "employee" },
+          allowDelete: 1,
+          pages: new[] { "Question Bank" }
+        )]
         public IActionResult Delete(long id)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -1072,14 +1069,14 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return NotFound("No Question Bank with this ID");
             }
 
-            //if (userTypeClaim == "employee")
-            //{
-            //    IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Section", roleId, userId, section);
-            //    if (accessCheck != null)
-            //    {
-            //        return accessCheck;
-            //    }
-            //}
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Question Bank", roleId, userId, questionBank);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
+            }
 
             questionBank.IsDeleted = true;
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");

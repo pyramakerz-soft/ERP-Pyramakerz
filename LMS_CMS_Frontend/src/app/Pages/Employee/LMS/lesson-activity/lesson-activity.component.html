@@ -119,13 +119,13 @@
                         <button  (click)="openModal(row.id)">
                             <i class="fa-solid fa-pencil"></i>
                         </button> 
-                        <!-- <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)"
+                        <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)"
                             (click)="Delete(row.id)">
                             <i class="fa-regular fa-trash-can"></i>
                         </button>
                         <button *ngIf="AllowEdit && IsAllowEdit(row.insertedByUserId)" (click)="openModal(row.id)">
                             <i class="fa-solid fa-pencil"></i>
-                        </button> -->
+                        </button>
                     </div>
                 </td>
             </tr>

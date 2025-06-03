@@ -891,6 +891,7 @@ namespace LMS_CMS_BL.Config
             CreateMap<StudentMedal, StudentMedalGetDTO>()
                  .ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => src.Student.en_name))
                  .ForMember(dest => dest.MedalName, opt => opt.MapFrom(src => src.Medal.EnglishName))
+                 .ForMember(dest => dest.InsertedByUserName, opt => opt.MapFrom(src => src.InsertedByEmployee.en_name))
                  .ForMember(dest => dest.ImageLink, opt => opt.MapFrom(src => src.Medal.ImageLink));
 
             CreateMap<StudentMedalAddDTO, StudentMedal>();
