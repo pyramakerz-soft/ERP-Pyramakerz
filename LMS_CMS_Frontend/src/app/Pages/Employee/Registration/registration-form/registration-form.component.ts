@@ -651,7 +651,7 @@ export class RegistrationFormComponent {
                   text: 'Student updated successfully',
                   confirmButtonText: 'Okay'
                 });
-                this.router.navigateByUrl(`Employee/Students`);
+                this.router.navigateByUrl(`Employee/Student`);
               })
             })
           }
@@ -690,7 +690,7 @@ export class RegistrationFormComponent {
 
   DoneSuccessfully() {
     if (this.path == 'Create Student') {
-      this.router.navigateByUrl(`Employee/Students`);
+      this.router.navigateByUrl(`Employee/Student`);
     }
     this.RegistrationFormData = new RegistrationForm();
     this.registrationForm = new RegistrationFormForFormSubmission();
