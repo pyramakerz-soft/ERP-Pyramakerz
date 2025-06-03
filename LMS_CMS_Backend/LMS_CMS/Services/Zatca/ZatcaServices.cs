@@ -182,19 +182,12 @@ namespace LMS_CMS_PL.Services.Zatca
 
         public static async Task<bool> GenerateInvoiceXML(string xmalPath, InventoryMaster master, string lastInvoiceHash, S3Service s3, string dateTime)
         {
-            string invoices = string.Empty;
-
-            if (master.FlagId == 11)
-                invoices = Path.Combine(Directory.GetCurrentDirectory(), "Invoices/XMLInvoices");
-
-            if (master.FlagId == 12)
-                invoices = Path.Combine(Directory.GetCurrentDirectory(), "Invoices/XMLCredits");
 
             string examplePath = Path.Combine(Directory.GetCurrentDirectory(), "Services/Zatca/Invoice");
 
-            if (!Directory.Exists(invoices))
+            if (!Directory.Exists(xmalPath))
             {
-                Directory.CreateDirectory(invoices);
+                Directory.CreateDirectory(xmalPath);
             }
 
             DateTime invDate = DateTime.Parse(dateTime);
@@ -204,7 +197,7 @@ namespace LMS_CMS_PL.Services.Zatca
 
             string pcName = $"PC{master.SchoolPCId}{master.SchoolId}";
 
-            string newXmlPath = Path.Combine(invoices, $"{master.School.CRN}_{date.Replace("-", "")}T{time.Replace(":", "")}_{date}-{master.StoreID}_{master.FlagId}_{master.ID}.xml");
+            string newXmlPath = Path.Combine(xmalPath, $"{master.School.CRN}_{date.Replace("-", "")}T{time.Replace(":", "")}_{date}-{master.StoreID}_{master.FlagId}_{master.ID}.xml");
 
             string tempXmlPath = string.Empty;
             if (master.FlagId == 11)
