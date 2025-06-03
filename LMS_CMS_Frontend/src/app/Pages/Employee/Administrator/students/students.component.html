@@ -3,40 +3,14 @@
 <div class="flex justify-between items-center">
     <h1 class="primaryTxt font-semibold text-2xl leading-9">Students</h1>
     <div class="flex justify-between items-center space-x-4">
-        <app-search [keysArray]="keysArray"></app-search>
+        <i class="fas fa-search ltr:mr-3 rtl:ml-3 text-gray-500 cursor-pointer" style="width: 22.51px; height: 22.51px; font-size: 22.51px;"
+         (click)="OpenModal()"></i>
         <button (click)="Create()"
             class="secondaryBorder secondaryTxt rounded-lg px-4 py-3 flex items-center justify-center gap-2">
             Create Student
         </button>
     </div>
 </div>
-
-<!-- <div class="flex justify-start items-center space-x-4 mt-5">
-    <div class="w-[49%]">
-        <label for="School1" class="block mb-2 text-sm font-medium text-gray-900">School</label>
-        <select id="School1" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
-            [(ngModel)]="SelectedSchoolIdForFilteration" (change)="onSchoolFilterrationChange()">
-            <option value=0 disabled selected hidden>Select a School</option>
-            <option *ngFor="let school of SchoolsForFilteration" [value]="school.id">
-                {{ school.name }}
-            </option>
-        </select>
-    </div>
-    <div class="w-[49%]">
-        <label for="Year" class="block mb-2 text-sm font-medium" [ngClass]="{'text-gray-500': !SelectedSchoolIdForFilteration, 'text-gray-900' : SelectedSchoolIdForFilteration}" >Year</label>
-        <select id="Year" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
-            [(ngModel)]="activeAcademicYearID" (change)="getStudentsDataByYearID()" [disabled]="!SelectedSchoolIdForFilteration">
-            <option value=0 disabled selected hidden>Select a Year</option>
-            <option *ngFor="let ac of AcademicYearsForFilteration" [value]="ac.id">
-                {{ ac.name }}
-            </option>
-            <option *ngIf="AcademicYearsForFilteration.length == 0">No Data Found</option>
-        </select>
-    </div>
-    <div class="rounded-full p-2 border-4" (click)="ResetFilter()">
-        <i class="fa-solid fa-rotate-left secondaryTxt text-2xl w-8 h-8 text-center hover:cursor-pointer rounded-full"></i>
-    </div>
-</div> -->
 
 <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD] max-w-full">
     <table class="overflow-auto w-full bg-[#EBEBEB] text-left text-[#6F6F6F]">
@@ -65,7 +39,7 @@
         <tbody>
             <!-- No Data Row -->
             <tr *ngIf="StudentsData.length === 0">
-                <td colspan="7"
+                <td colspan="6"
                     class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
                     No Data Found
                 </td>
@@ -83,10 +57,10 @@
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.currentAcademicYear }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     <div class="flex space-x-4">
-                        <button  (click)="Delete(row.id)">
+                        <button  (click)="Delete(row.id)" *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)">
                             <i class="fa-regular fa-trash-can"></i>
-                        </button>
-                        <button   (click)="Edit(row.registrationFormParentID)">
+                        </button> 
+                        <button   (click)="Edit(row.id ,row.registrationFormParentID)" *ngIf="AllowEdit && IsAllowEdit(row.insertedByUserId)"> 
                             <i class="fa-solid fa-pencil"></i>
                         </button>
                         <button  (click)="View(row.registrationFormParentID)">
@@ -99,3 +73,12 @@
     </table>
 </div>
 
+<app-search-student
+  *ngIf="isModalOpen"
+  [selectedYear]="preSelectedYear"
+  [selectedGrade]="preSelectedGrade"
+  [IsDoneHidden]='true'
+  [selectedClassroom]="preSelectedClassroom"
+  (closeModal)="closeModal()"
+  (studentSelected)="handleStudentSelected($event)"
+></app-search-student>

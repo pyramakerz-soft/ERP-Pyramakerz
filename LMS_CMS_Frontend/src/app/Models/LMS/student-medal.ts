@@ -7,5 +7,7 @@ export class StudentMedal {
             public medalName: number = 0,
             public imageLink: string = '',
             public insertedByUserId: number = 0,
+            public insertedByUserName: number = 0,
+            public insertedAt: string = ""
         ) {}
-}
+} 

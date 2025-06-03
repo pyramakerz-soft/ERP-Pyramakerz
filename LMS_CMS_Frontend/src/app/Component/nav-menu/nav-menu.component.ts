@@ -179,11 +179,15 @@ export class NavMenuComponent {
     // }
 
     // localStorage.setItem("count", this.allTokens.length.toString());
+    if(this.User_Type=="octa"){
+      this.router.navigateByUrl("Octa/login");
+    }else{
+      this.router.navigateByUrl("");
+    }
     this.isPopupOpen = false
     await this.logOutService.logOut();
     this.GetUserInfo();
     this.getAllTokens();
-    this.router.navigateByUrl("");
   }
 
   openModal() {

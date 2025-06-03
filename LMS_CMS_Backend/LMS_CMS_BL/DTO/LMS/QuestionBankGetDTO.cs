@@ -35,5 +35,6 @@ namespace LMS_CMS_BL.DTO.LMS
         public List<long> QuestionBankTagsDTO { get; set; } 
         public List<QuestionBankOptionAddDTO>? QuestionBankOptionsDTO { get; set; }
         public List<SubBankQuestionAddDTO> SubBankQuestionsDTO { get; set; } 
+        public long? InsertedByUserId { get; set; }
     }
 }

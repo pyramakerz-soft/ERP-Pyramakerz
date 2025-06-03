@@ -358,8 +358,7 @@ export const routes: Routes = [
             { path: "Lesson Resources Types", component: LessonResourcesTypeComponent, title: "Lesson Resource Type", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Student Medal", component: StudentMedalComponent, title: "Student Medal", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Lessons", component: LessonComponent, title: "Lesson", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "Enter Daily Performance", component: DailyPerformanceComponent, title: "Daily Performance", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "Student Medal", component: StudentMedalComponent, title: "Student Medal", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Enter Daily Performance", component: DailyPerformanceComponent, title: "Daily Performance", canActivate: [noNavigateWithoutLoginGuard] }, 
             { path: "Performance Type", component: PerformanceTypeComponent, title: "Performance Type", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Lesson Activity/:id", component: LessonActivityComponent, title: "Lesson Activity", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Lesson Resource/:id", component: LessonResourceComponent, title: "Lesson Resource", canActivate: [noNavigateWithoutLoginGuard] },
@@ -375,7 +374,7 @@ export const routes: Routes = [
             { path: "Subject Co-Teacher/:id", component: SubjectCoTeacherComponent, title: "Subject Co-Teacher", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Students", component: StudentsComponent, title: "Student", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Create Student", component: RegistrationFormComponent, title: "Create Student", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "Edit Student/:id", component: RegistrationFormComponent, title: "Create Student", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Edit Student/:RegisterationFormParentId/:StudentId", component: RegistrationFormComponent, title: "Edit Student", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Student View/:Id", component: RegistrationConfirmationDetailsComponent, title: "Student View", canActivate: [noNavigateWithoutLoginGuard] },
 
         ]

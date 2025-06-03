@@ -32,9 +32,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet]
         [Authorize_Endpoint_(
-          allowedTypes: new[] { "octa", "employee" }
-          //,
-          //pages: new[] { "" }
+          allowedTypes: new[] { "octa", "employee" },
+          pages: new[] { "Medal", "Student Medal" }
       )]
         public IActionResult GetAsync()
         {
@@ -57,10 +56,9 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
-        allowedTypes: new[] { "octa", "employee" }
-    //,
-    //pages: new[] { "" }
-    )]
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Medal" }
+        )]
         public IActionResult GetById(long id)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -82,10 +80,9 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpPost]
         [Authorize_Endpoint_(
-         allowedTypes: new[] { "octa", "employee" }
-         //,
-         //pages: new[] { "" }
-     )]
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Medal" }
+        )]
         public async Task<IActionResult> Add([FromForm] MedalAddDto newMedal)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -168,11 +165,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpPut]
         [Authorize_Endpoint_(
-         allowedTypes: new[] { "octa", "employee" },
-         allowEdit: 1
-         //   ,
-         //pages: new[] { "" }
-     )]
+             allowedTypes: new[] { "octa", "employee" },
+             allowEdit: 1,
+            pages: new[] { "Medal" }
+        )]
         public async Task<IActionResult> Edit([FromForm] MedalEditDTO newModal)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -211,14 +207,14 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return NotFound("No Medal with this ID");
             }
 
-            //if (userTypeClaim == "employee")
-            //{
-            //    IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Subject", roleId, userId, medal);
-            //    if (accessCheck != null)
-            //    {
-            //        return accessCheck;
-            //    }
-            //}
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Medal", roleId, userId, medal);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
+            }
             mapper.Map(newModal, medal);
 
             if (newModal.ImageForm != null)
@@ -282,11 +278,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpDelete("{id}")]
         [Authorize_Endpoint_(
-          allowedTypes: new[] { "octa", "employee" },
-          allowDelete: 1
-          //  ,
-          //pages: new[] { "" }
-      )]
+            allowedTypes: new[] { "octa", "employee" },
+            allowDelete: 1,
+            pages: new[] { "Medal" }
+        )]
         public IActionResult Delete(long id)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -316,14 +311,14 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return NotFound();
             }
 
-            //if (userTypeClaim == "employee")
-            //{
-            //    IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Subject", roleId, userId, subject);
-            //    if (accessCheck != null)
-            //    {
-            //        return accessCheck;
-            //    }
-            //}
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Medal", roleId, userId, medal);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
+            }
 
             medal.IsDeleted = true;
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");

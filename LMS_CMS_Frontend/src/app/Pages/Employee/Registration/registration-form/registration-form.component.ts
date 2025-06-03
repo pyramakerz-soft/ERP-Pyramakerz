@@ -101,7 +101,8 @@ export class RegistrationFormComponent {
   isLoading = false;
   path: string = '';
   RegistrationParentID: number = 0;
-  mode : string ='Create'
+  StudentId: number = 0;
+  mode: string = 'Create'
 
   constructor(
     public account: AccountService,
@@ -121,7 +122,7 @@ export class RegistrationFormComponent {
     public sectionServce: SectionService,
     private languageService: LanguageService,
     public GenderServ: GenderService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -131,11 +132,14 @@ export class RegistrationFormComponent {
     this.activeRoute.url.subscribe((url) => {
       this.path = url[0].path;
       this.RegistrationParentID = Number(
-        this.activeRoute.snapshot.paramMap.get('id')
+        this.activeRoute.snapshot.paramMap.get('RegisterationFormParentId')
+      );
+      this.StudentId = Number(
+        this.activeRoute.snapshot.paramMap.get('StudentId')
       );
       if (this.path == 'Edit Student') {
         this.getRegisterationFormSubmittion();
-        this.mode='Edit'
+        this.mode = 'Edit'
       }
     });
     if (this.User_Data_After_Login.type == 'parent') {
@@ -207,8 +211,8 @@ export class RegistrationFormComponent {
     const entry = this.registrationForm.registerationFormSubmittions.find(
       (e) => e.categoryFieldID === fieldId
     );
-    if(fieldId==6 || fieldId==14){
-     return entry?.textAnswer ?? null;
+    if (fieldId == 6 || fieldId == 14) {
+      return entry?.textAnswer ?? null;
     }
     return entry?.selectedFieldOptionID ?? null;
   }
@@ -221,7 +225,7 @@ export class RegistrationFormComponent {
         this.RegistrationFormData.categories.sort(
           (a, b) =>
             (a.orderInForm ? a.orderInForm : 0) -
-          (b.orderInForm ? b.orderInForm : 0)
+            (b.orderInForm ? b.orderInForm : 0)
         );
         this.RegistrationFormData.categories.forEach((element) => {
           element.fields.sort((a, b) => a.orderInForm - b.orderInForm);
@@ -360,29 +364,29 @@ export class RegistrationFormComponent {
       }
       if (this.path == 'Edit Student') {
         this.registrationFormSubmissionEdited.push({
-          id:  existingElement.id,
-          registerationFormParentID : this.RegistrationParentID ,
-          categoryFieldID:  existingElement.categoryFieldID,
-          selectedFieldOptionID:  existingElement.selectedFieldOptionID ,
-          textAnswer: existingElement.textAnswer ,
+          id: existingElement.id,
+          registerationFormParentID: this.RegistrationParentID,
+          categoryFieldID: existingElement.categoryFieldID,
+          selectedFieldOptionID: existingElement.selectedFieldOptionID,
+          textAnswer: existingElement.textAnswer,
         });
       }
     } else {
       this.registrationForm.registerationFormSubmittions.push({
         id: 0,
         categoryFieldID: fieldId,
-        registerationFormParentID : this.RegistrationParentID ,
+        registerationFormParentID: this.RegistrationParentID,
         selectedFieldOptionID: option,
         textAnswer: answer,
       });
-      if(this.mode=='Edit'){
+      if (this.mode == 'Edit') {
         this.registrationFormSubmissionNew.push({
-        id: 0,
-        categoryFieldID: fieldId,
-        registerationFormParentID : this.RegistrationParentID ,
-        selectedFieldOptionID: option,
-        textAnswer: answer,
-      });
+          id: 0,
+          categoryFieldID: fieldId,
+          registerationFormParentID: this.RegistrationParentID,
+          selectedFieldOptionID: option,
+          textAnswer: answer,
+        });
       }
     }
   }
@@ -395,7 +399,7 @@ export class RegistrationFormComponent {
     if (fieldTypeId == 4) {
       this.registrationForm.registerationFormSubmittions.push({
         id: 0,
-        registerationFormParentID : this.RegistrationParentID ,
+        registerationFormParentID: this.RegistrationParentID,
         categoryFieldID: fieldId,
         selectedFieldOptionID: optionAnswer,
         textAnswer: null,
@@ -562,30 +566,31 @@ export class RegistrationFormComponent {
         ageDate = element.textAnswer ? element.textAnswer : '';
       }
       if (element.categoryFieldID == 9) {
-        choosedGradeID = element.textAnswer ? element.textAnswer : 0;
+        choosedGradeID = element.selectedFieldOptionID ? element.selectedFieldOptionID : 0;
       }
     });
-
     this.Grades.forEach((element) => {
       if (choosedGradeID == element.id) {
         grade = element;
       }
     });
+    console.log(this.registrationForm.registerationFormSubmittions , ageDate , choosedGradeID)
 
     const dateToCheckObj = new Date(ageDate);
     const fromDate = new Date(grade.dateFrom);
     const toDate = new Date(grade.dateTo);
+    console.log(dateToCheckObj , fromDate , toDate)
 
     if (dateToCheckObj >= fromDate && dateToCheckObj <= toDate) {
       this.ageIsCompatibleWithGrade = true;
     }
   }
 
-  Save() {
+  async Save() {
     if (this.User_Data_After_Login.type == 'parent') {
       this.registrationForm.registerationFormSubmittions.push({
         id: 0,
-        registerationFormParentID : this.RegistrationParentID ,
+        registerationFormParentID: this.RegistrationParentID,
         categoryFieldID: 21,
         selectedFieldOptionID: null,
         textAnswer: this.parent.email,
@@ -595,7 +600,6 @@ export class RegistrationFormComponent {
     this.isGuardianEmailValid = true;
     this.isMotherEmailValid = true;
     this.isGuardianEmailSameAsParent = true;
-
     this.FillOptionData();
 
     let valid = true;
@@ -613,55 +617,54 @@ export class RegistrationFormComponent {
 
     if (valid) {
       this.IsEmailValid();
-      if (this.isMotherEmailValid &&this.isGuardianEmailValid &&this.isGuardianEmailSameAsParent ) {
-         this.CheckAgeForGrade();
+      if (this.isMotherEmailValid && this.isGuardianEmailValid && this.isGuardianEmailSameAsParent) {
+        await this.CheckAgeForGrade();
         if (this.ageIsCompatibleWithGrade) {
           this.isLoading = true;
           if (this.path == 'Create Student') {
             this.registrationForm.isStudent = true;
           }
-          if(this.mode=='Create'){
-            this.registrationFormService.Add(this.registrationForm, this.registrationFormForFiles,this.DomainName).subscribe((data) => {
-                  this.isLoading = false;
-                  this.DoneSuccessfully();
-                },
-                (error) => {
-                  this.isLoading = false;
-                  if (error.error == 'Email Already Exists') {
-                    Swal.fire({
-                      icon: 'warning',
-                      title: 'Warning!',
-                      text: 'Guardian’s Email Already Exists',
-                      confirmButtonColor: '#089B41',
-                    });
-                    this.goToCategory(2);
-                  }
+          if (this.mode == 'Create') {
+            this.registrationFormService.Add(this.registrationForm, this.registrationFormForFiles, this.DomainName).subscribe((data) => {
+              this.isLoading = false;
+              this.DoneSuccessfully();
+            },
+              (error) => {
+                this.isLoading = false;
+                if (error.error == 'Email Already Exists') {
+                  Swal.fire({
+                    icon: 'warning',
+                    title: 'Warning!',
+                    text: 'Guardian’s Email Already Exists',
+                    confirmButtonColor: '#089B41',
+                  });
+                  this.goToCategory(2);
                 }
-              );
-            } else {
-              Swal.fire({
-                icon: 'warning',
-                title: 'Warning!',
-                text: "The selected grade is not compatible with the student's age. Please choose an appropriate grade.",
-                confirmButtonColor: '#089B41',
-              });
-              this.goToCategory(1);
-            }
-          }
-          else if(this.mode== 'Edit'){
-          console.log(11,this.isLoading)
-            this.RegisterationFormSubmittionServ.Edit(this.registrationFormSubmissionEdited,this.DomainName).subscribe((s)=>{
-              this.RegisterationFormSubmittionServ.Add(this.registrationFormSubmissionNew,this.DomainName).subscribe((s)=>{
+              }
+            );
+          } else if (this.mode == 'Edit') {
+            this.RegisterationFormSubmittionServ.Edit(this.StudentId, this.registrationFormSubmissionEdited, this.DomainName).subscribe((s) => {
+              this.RegisterationFormSubmittionServ.Add(this.registrationFormSubmissionNew, this.DomainName).subscribe((s) => {
                 Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: 'Student updated successfully',
-                    confirmButtonText: 'Okay'
-                });          
-               this.router.navigateByUrl(`Employee/Students`);
-             })
+                  icon: 'success',
+                  title: 'Success',
+                  text: 'Student updated successfully',
+                  confirmButtonText: 'Okay'
+                });
+                this.router.navigateByUrl(`Employee/Students`);
+              })
             })
           }
+        }
+        else {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Warning!',
+            text: "The selected grade is not compatible with the student's age. Please choose an appropriate grade.",
+            confirmButtonColor: '#089B41',
+          });
+          this.goToCategory(1);
+        }
       } else if (
         !this.isGuardianEmailValid ||
         !this.isGuardianEmailSameAsParent

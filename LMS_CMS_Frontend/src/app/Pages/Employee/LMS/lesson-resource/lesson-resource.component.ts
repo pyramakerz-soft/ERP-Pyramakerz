@@ -101,6 +101,24 @@ export class LessonResourceComponent {
     }); 
   }
 
+  IsAllowDelete(InsertedByID: number) {
+    const IsAllow = this.EditDeleteServ.IsAllowDelete(
+      InsertedByID,
+      this.UserID,
+      this.AllowDeleteForOthers
+    );
+    return IsAllow;
+  }
+
+  IsAllowEdit(InsertedByID: number) {
+    const IsAllow = this.EditDeleteServ.IsAllowEdit(
+      InsertedByID,
+      this.UserID,
+      this.AllowEditForOthers
+    );
+    return IsAllow;
+  }
+
   GetLessonResourceByLessonId(){
     this.LessonResourceData = [];
     this.lessonResourceService.GetByLessonId(this.lessonId, this.DomainName).subscribe((data) => {

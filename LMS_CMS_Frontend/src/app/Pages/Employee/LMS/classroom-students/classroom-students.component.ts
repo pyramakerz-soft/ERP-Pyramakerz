@@ -53,7 +53,8 @@ export class ClassroomStudentsComponent {
   preSelectedYear: number | null = null;  
   preSelectedGrade: number | null = null;  
   preSelectedClassroom: number | null = null;  
-  hiddenInputs: string[] = ['classroom'];
+  hiddenInputs: string[] = ['classroom' ];
+  hiddenColumns: string[] = ['Actions' ];
 
   constructor(
     public account: AccountService, 
