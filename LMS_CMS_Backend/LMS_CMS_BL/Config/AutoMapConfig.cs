@@ -699,36 +699,8 @@ namespace LMS_CMS_BL.Config
                 .ForMember(dest => dest.StudentHygieneTypes, opt => opt.Ignore());
 
             CreateMap<StudentHygieneTypes, StudentHygieneTypesGetDTO>()
-                .ForMember(dest => dest.Student, opt => opt.MapFrom(src => src.Student.en_name))
-                .AfterMap(async (src, dest) =>
-                {
-                    if (src.HygieneTypes != null && _context != null)
-                    {
-                        foreach (var ht in src.HygieneTypes)
-                        {
-                            //var hygieneType = await _context.HygieneTypes.FirstOrDefaultAsync(h => h.Id == ht.Id);
-                            //if (hygieneType != null)
-                            //{
-                                dest.HygieneTypes.Add(ht);
-                            //}
-                        }
-                    }
-                });
-            CreateMap<StudentHygieneTypesAddDTO, StudentHygieneTypes>()
-                .AfterMap(async (src, dest) =>
-                {
-                    if (src.HygieneTypesIds != null && _context != null)
-                    {
-                        foreach (var ht in src.HygieneTypesIds)
-                        {
-                            var hygieneType = await _context.HygieneTypes.FirstOrDefaultAsync(h => h.Id == ht);
-                            if (hygieneType != null)
-                            {
-                                dest.HygieneTypes.Add(hygieneType);
-                            }
-                        }
-                    }
-                }); 
+                .ForMember(dest => dest.Student, opt => opt.MapFrom(src => src.Student.en_name));
+            CreateMap<StudentHygieneTypesAddDTO, StudentHygieneTypes>(); 
 
             CreateMap<FollowUpAddDTO, FollowUp>();
             CreateMap<FollowUp, FollowUpGetDTO>()
