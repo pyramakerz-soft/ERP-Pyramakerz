@@ -1,4 +1,6 @@
-﻿using LMS_CMS_BL.UOW;
+﻿using AutoMapper;
+using LMS_CMS_BL.DTO.Inventory;
+using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains.Inventory;
 using LMS_CMS_PL.Services;
 using LMS_CMS_PL.Services.ETA;
@@ -7,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.Text;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace LMS_CMS_PL.Controllers.Domains.ETA
 {
@@ -17,11 +20,13 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
     {
         private readonly DbContextFactoryService _dbContextFactory;
         private readonly IConfiguration _config;
+        private readonly IMapper _mapper;
 
-        public ETAController(DbContextFactoryService dbContextFactory, IConfiguration config)
+        public ETAController(DbContextFactoryService dbContextFactory, IConfiguration config, IMapper mapper)
         {
             _dbContextFactory = dbContextFactory;
             _config = config;
+            _mapper = mapper;
         }
 
         #region Send Invoice
@@ -89,6 +94,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
                         master.uuid = uuid;
                         master.ShareLongId = longId;
                         master.IsValid = 1;
+                        master.EtaInsertedDate = DateTime.Parse(dateTime);
 
                         Unit_Of_Work.inventoryMaster_Repository.Update(master);
                         await Unit_Of_Work.SaveChangesAsync();
@@ -184,6 +190,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
                             master.uuid = uuid;
                             master.ShareLongId = longId;
                             master.IsValid = 1;
+                            master.EtaInsertedDate = DateTime.Parse(dateTime);
 
                             Unit_Of_Work.inventoryMaster_Repository.Update(master);
                             await Unit_Of_Work.SaveChangesAsync();
@@ -229,7 +236,8 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
             List<InventoryMaster> mastersBySchool = await Unit_Of_Work.inventoryMaster_Repository.Select_All_With_IncludesById_Pagination<InventoryMaster>(
                 d => d.SchoolId == schoolId && 
                 d.IsDeleted != true &&
-                d.FlagId == 11 || d.FlagId == 12)
+                (d.FlagId == 11 || d.FlagId == 12),
+                query => query.Include(x => x.InventoryDetails).ThenInclude(x => x.ShopItem))
                 .ToListAsync();
 
             if (mastersBySchool is null || mastersBySchool.Count == 0)
@@ -237,11 +245,13 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
 
             List<InventoryMaster> mastersByDate = mastersBySchool
                 .Where(d => DateTime.Parse(d.Date).Date >= start && DateTime.Parse(d.Date).Date <= end)
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
 
-            return Ok(mastersByDate);
+            List<InventoryMasterGetDTO> DTO = _mapper.Map<List<InventoryMasterGetDTO>>(mastersByDate);
+
+            return Ok(DTO);
         }
         #endregion
     }
