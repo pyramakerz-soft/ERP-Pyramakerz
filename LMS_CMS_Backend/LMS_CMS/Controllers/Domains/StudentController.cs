@@ -441,28 +441,23 @@ namespace LMS_CMS_PL.Controllers.Domains
             {
                 return NotFound("No Class with this Id");
             }
-
-
-            //List<StudentAcademicYear> studentAcademicYears = await Unit_Of_Work.studentAcademicYear_Repository
-            //    .Select_All_With_IncludesById<StudentAcademicYear>(
-            //        s => s.IsDeleted != true && s.ClassID == classId && s.GradeID == gradeId && s.SchoolID == schoolId,
-            //        query => query.Include(stu => stu.Student)
-            //          .ThenInclude(stu => stu.Gender)
-            //    );
-
-            //List<Student> students = studentAcademicYears.Select(sa => sa.Student).ToList();
             
             List<StudentClassroom> studentClassrooms = await Unit_Of_Work.studentClassroom_Repository
                 .Select_All_With_IncludesById<StudentClassroom>(
                     s => s.IsDeleted != true && s.ClassID == classId && s.Classroom.AcademicYear.SchoolID == schoolId,
                     query => query.Include(stu => stu.Student)
                       .ThenInclude(stu => stu.Gender)
+                      .Include(sc => sc.Classroom)
                 );
 
             if (studentClassrooms == null || studentClassrooms.Count == 0)
             {
                 return NotFound("No students in the class found.");
             }
+
+            studentClassrooms = studentClassrooms
+                .Where(s => s.Student != null && s.Student.IsDeleted != true && s.Classroom != null && s.Classroom.IsDeleted!= true)
+                .ToList();
 
             List<StudentGrade> studentGrades = await Unit_Of_Work.studentGrade_Repository
                 .Select_All_With_IncludesById<StudentGrade>(
@@ -474,7 +469,11 @@ namespace LMS_CMS_PL.Controllers.Domains
             if (studentGrades == null || studentGrades.Count == 0)
             {
                 return NotFound("No students in the grade found.");
-            } 
+            }
+
+            studentGrades = studentGrades
+               .Where(s => s.Student != null && s.Student.IsDeleted != true && s.Grade != null && s.Grade.IsDeleted != true)
+               .ToList();
 
             var classroomStudentIds = studentClassrooms.Select(sc => sc.StudentID).ToHashSet();
             var gradeStudentIds = studentGrades.Select(sg => sg.StudentID).ToHashSet(); 
