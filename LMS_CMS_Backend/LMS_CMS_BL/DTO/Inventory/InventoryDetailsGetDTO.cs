@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using LMS_CMS_DAL.Models.Domains.Inventory;
 
 namespace LMS_CMS_BL.DTO.Inventory
 {
@@ -25,5 +26,6 @@ namespace LMS_CMS_BL.DTO.Inventory
         public string? SalesName { get; set; }
         public long? SalesId { get; set; }
         public long? InsertedByUserId { get; set; }
+        public ShopItemGetDTO? shopItem { get; set; }
     }
 }
