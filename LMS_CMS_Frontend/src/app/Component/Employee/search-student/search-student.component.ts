@@ -34,6 +34,9 @@ export class SearchStudentComponent {
   
   IsStudentsSelected = false
   IsTableShown = false
+  IsYearSelectedFromTheBegining = false
+  IsGradeSelectedFromTheBegining = false
+  IsClassSelectedFromTheBegining = false
   id: number | null = null;
   name: string | null = null;
   nationalID: number | null = null; 
@@ -59,6 +62,9 @@ export class SearchStudentComponent {
     this.getAcademicYears()  
     this.getGrades(); 
 
+    if(this.selectedYear){this.IsYearSelectedFromTheBegining = true}
+    if(this.selectedGrade){this.IsGradeSelectedFromTheBegining = true}
+    if(this.selectedClassroom){this.IsClassSelectedFromTheBegining = true}
     if (this.selectedYear || this.selectedGrade) {
       this.getClassrooms();
     } 
@@ -69,19 +75,27 @@ export class SearchStudentComponent {
   }
 
    isColumnHidden(input: string): boolean {
+    var dataCell = document.getElementById('data-cell');
+    if (this.hiddenColumns.includes(input)) {
+      if(dataCell)
+        dataCell.setAttribute('colspan', '6');
+    } else {
+      if(dataCell)
+        dataCell.setAttribute('colspan', '7');
+    }
     return this.hiddenColumns.includes(input);
   }
  
   isYearDisabled(): boolean {
-    return this.selectedYear !== null;
+    return this.IsYearSelectedFromTheBegining;
   }
 
   isGradeDisabled(): boolean {
-    return this.selectedGrade !== null;
+    return this.IsGradeSelectedFromTheBegining
   }
 
   isClassroomDisabled(): boolean {
-    return this.selectedClassroom !== null;
+    return this.IsClassSelectedFromTheBegining
   }
 
   close() {
