@@ -46,7 +46,7 @@ export class RegistrationFormSubmissionService {
     );
   }
 
-  Edit(submission: RegistrationFormSubmission[], DomainName: string) {
+  Edit(id:number,submission: RegistrationFormSubmission[], DomainName: string) {
     if (DomainName != null) {
       this.header = DomainName;
     }
@@ -56,7 +56,7 @@ export class RegistrationFormSubmissionService {
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
     return this.http.put(
-      `${this.baseUrl}/RegisterationFormSubmittion`,
+      `${this.baseUrl}/RegisterationFormSubmittion/ForSpacificStudent/${id}`,
       submission,
       { headers }
     );

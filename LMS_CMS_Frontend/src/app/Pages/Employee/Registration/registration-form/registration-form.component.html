@@ -81,7 +81,7 @@
                                 </ng-container>
 
 
-                                <ng-container *ngIf="field.id == 5">
+                                <ng-container *ngIf="field.id == 5 ">
                                     <option *ngFor="let nationality of nationalities" [value]="nationality.id">
                                         {{ nationality.name }}
                                     </option>
@@ -104,7 +104,7 @@
                                 </option>
                             </select>
                             } @else {
-                            <select *ngIf="field.id == 7"
+                            <select *ngIf="field.id == 7 && mode!='Edit'"
                                 (change)="onSchoolChange($event); FillData($event, field.id, field.fieldTypeID)"
                                 [(ngModel)]="selectedSchool"
                                 class="rounded-lg border border-solid border-gray-300 px-4 py-3">
@@ -115,23 +115,45 @@
                                 </option>
                             </select>
 
-                            <select *ngIf="field.id == 8" [disabled]="!selectedSchool"
-                                [ngClass]="{ 'bg-[#EBEBEB]': !selectedSchool }" [(ngModel)]="selectedAcademicYear"
-                                class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                                (change)="FillData($event, field.id, field.fieldTypeID)">
-                                <option value="null" style="color: gray;" disabled selected hidden>{{ 'Choose' |
-                                    translate }} {{ 'Academic Year' | translate }}</option>
+                            <select *ngIf="field.id == 7 && mode=='Edit'"
+                                    (change)="onSchoolChange($event); FillData($event, field.id, field.fieldTypeID)"
+                                    [(ngModel)]="selectedSchool"
+                                    class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                                    disabled>
+                                <option value="null" style="color: gray;" disabled selected hidden>
+                                    {{ 'Choose' | translate }} {{ 'School' | translate }}
+                                </option>
+                                <option *ngFor="let school of schools" [value]="school.id">
+                                    {{ school.name }}
+                                </option>
+                            </select>
+
+
+                            <!-- Academic Year Dropdown -->
+                            <select *ngIf="field.id == 8"
+                                    [disabled]="mode === 'Edit' || !selectedSchool"
+                                    [ngClass]="{ 'bg-[#EBEBEB]': mode === 'Edit' || !selectedSchool }"
+                                    [(ngModel)]="selectedAcademicYear"
+                                    class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                                    (change)="FillData($event, field.id, field.fieldTypeID)">
+                                <option value="null" style="color: gray;" disabled selected hidden>
+                                    {{ 'Choose' | translate }} {{ 'Academic Year' | translate }}
+                                </option>
                                 <option *ngFor="let ac of AcademicYears" [value]="ac.id">
                                     {{ ac.name }}
                                 </option>
                             </select>
 
-                            <select *ngIf="field.id == 9" [disabled]="!selectedSchool"
-                                [ngClass]="{ 'bg-[#EBEBEB]': !selectedSchool }" [(ngModel)]="selectedGrade"
-                                class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                                (change)="FillData($event, field.id, field.fieldTypeID)">
-                                <option value="null" style="color: gray;" disabled selected hidden>{{ 'Choose' |
-                                    translate }} {{ 'Grade' | translate }}</option>
+                            <!-- Grade Dropdown -->
+                            <select *ngIf="field.id == 9"
+                                    [disabled]="mode === 'Edit' || !selectedSchool"
+                                    [ngClass]="{ 'bg-[#EBEBEB]': mode === 'Edit' || !selectedSchool }"
+                                    [(ngModel)]="selectedGrade"
+                                    class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                                    (change)="FillData($event, field.id, field.fieldTypeID)">
+                                <option value="null" style="color: gray;" disabled selected hidden>
+                                    {{ 'Choose' | translate }} {{ 'Grade' | translate }}
+                                </option>
                                 <option *ngFor="let g of Grades" [value]="g.id">
                                     {{ g.name }}
                                 </option>

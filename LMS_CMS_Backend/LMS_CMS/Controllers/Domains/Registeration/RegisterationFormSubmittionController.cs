@@ -194,13 +194,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
 
         //////////////////////////////////////////////////////////
 
-        [HttpPut]
+        [HttpPut("ForSpacificStudent/{StudentId}")]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
           allowEdit: 1,
           pages: new[] { "Registration Confirmation" }
          )]
-        public IActionResult Edit(List<RegisterationFormSubmittionGetDTO> newData)
+        public IActionResult Edit(long StudentId ,List<RegisterationFormSubmittionGetDTO> newData)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -222,6 +222,17 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
             //        return accessCheck;
             //    }
             //}
+
+            Student student = Unit_Of_Work.student_Repository.First_Or_Default(s=>s.ID== StudentId && s.IsDeleted!= true);
+            if (student == null)
+            {
+                return BadRequest("No Student with this ID");
+            }
+            RegisterationFormParent registerationFormParent = Unit_Of_Work.registerationFormParent_Repository.First_Or_Default(r => r.ID == student.RegistrationFormParentID);
+            if (registerationFormParent == null)
+            {
+                return BadRequest("No RegisterationFormParent with this ID");
+            }
             foreach (var item in newData)
             {
                 RegisterationFormSubmittion registerationFormSubmittion = Unit_Of_Work.registerationFormSubmittion_Repository.First_Or_Default(r => r.ID == item.ID && r.IsDeleted != true);
@@ -255,8 +266,77 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                 }
                 Unit_Of_Work.registerationFormSubmittion_Repository.Update(registerationFormSubmittion);
 
+                if (item.CategoryFieldID ==  1) 
+                {
+                    student.en_name = item.TextAnswer;
+                    registerationFormParent.StudentEnName = item.TextAnswer;
+                }
+                if (item.CategoryFieldID == 2)
+                {
+                    student.ar_name = item.TextAnswer;
+                    registerationFormParent.StudentArName = item.TextAnswer;
+                }
+                if (item.CategoryFieldID == 3)
+                {
+                    student.GenderId = Convert.ToInt64(item?.TextAnswer);
+                }
+                if (item.CategoryFieldID == 4)
+                {
+                    student.DateOfBirth = item.TextAnswer;
+                }
+                if (item.CategoryFieldID == 5)
+                {
+                    student.Nationality = Convert.ToInt64(item?.TextAnswer);
+                }
+                if (item.CategoryFieldID == 6)
+                {
+                    student.Religion = item.TextAnswer;
+                }
+                if (item.CategoryFieldID == 11)
+                {
+                    student.NationalID = item.TextAnswer;
+                }
+                if (item.CategoryFieldID == 13)
+                {
+                    student.PreviousSchool = item.TextAnswer;
+                }
+                if (item.CategoryFieldID == 12)
+                {
+                    student.PassportNo = item.TextAnswer;
+                }
+                if (item.CategoryFieldID == 22)
+                {
+                    student.MotherName = item.TextAnswer;
+                }
+                if (item.CategoryFieldID == 23)
+                {
+                    student.MotherPassportNo = item.TextAnswer;
+                }
+                if (item.CategoryFieldID == 24)
+                {
+                    student.MotherNationalID = item.TextAnswer;
+                }
+                if (item.CategoryFieldID == 25)
+                {
+                    student.MotherQualification = item.TextAnswer;
+                }
+                if (item.CategoryFieldID == 26)
+                {
+                    student.MotherWorkPlace = item.TextAnswer;
+                }
+                if (item.CategoryFieldID == 27)
+                {
+                    student.MotherMobile = item.TextAnswer;
+                }
+                if (item.CategoryFieldID == 28)
+                {
+                    student.MotherEmail = item.TextAnswer;
+                }
+
             }
 
+            Unit_Of_Work.student_Repository.Update(student);
+            Unit_Of_Work.registerationFormParent_Repository.Update(registerationFormParent);
             Unit_Of_Work.SaveChanges();
             return Ok();
         }
