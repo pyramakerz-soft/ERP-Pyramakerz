@@ -22,12 +22,15 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
         private readonly DbContextFactoryService _dbContextFactory;
         IMapper mapper;
         private readonly UOW _Unit_Of_Work_Octa;
+        private readonly CheckPageAccessService _checkPageAccessService;
 
-        public RegisterationFormSubmittionController(DbContextFactoryService dbContextFactory, IMapper mapper, UOW unit_Of_Work_Octa)
+
+        public RegisterationFormSubmittionController(DbContextFactoryService dbContextFactory, IMapper mapper, UOW unit_Of_Work_Octa, CheckPageAccessService checkPageAccessService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _Unit_Of_Work_Octa = unit_Of_Work_Octa;
+            _checkPageAccessService = checkPageAccessService;   
         }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -139,7 +142,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
           allowEdit: 1,
-          pages: new[] { "Registration Confirmation"}
+          pages: new[] { "Registration Confirmation" , "Student"}
          )]
         public IActionResult Add(List<RegisterationFormSubmittionGetDTO> newData)
         {
@@ -155,14 +158,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
             {
                 return Unauthorized("User ID, Type claim not found.");
             }
-            //if (userTypeClaim == "employee")
-            //{
-            //    IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Registration Confirmation", roleId, userId, registerationFormTest);
-            //    if (accessCheck != null)
-            //    {
-            //        return accessCheck;
-            //    }
-            //}
             foreach (var item in newData)
             {
                 RegisterationFormSubmittion registerationFormSubmittion = new RegisterationFormSubmittion();
@@ -198,7 +193,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
           allowEdit: 1,
-          pages: new[] { "Registration Confirmation" }
+          pages: new[] { "Registration Confirmation" , "Student" }
          )]
         public IActionResult Edit(long StudentId ,List<RegisterationFormSubmittionGetDTO> newData)
         {
@@ -214,14 +209,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
             {
                 return Unauthorized("User ID, Type claim not found.");
             }
-            //if (userTypeClaim == "employee")
-            //{
-            //    IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Registration Confirmation", roleId, userId, registerationFormTest);
-            //    if (accessCheck != null)
-            //    {
-            //        return accessCheck;
-            //    }
-            //}
 
             Student student = Unit_Of_Work.student_Repository.First_Or_Default(s=>s.ID== StudentId && s.IsDeleted!= true);
             if (student == null)
@@ -239,6 +226,15 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                 if (registerationFormSubmittion == null)
                 {
                     return NotFound("Registeration Form Submittion Test not found");
+                }
+                if (userTypeClaim == "employee")
+                {
+                    IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Registration Confirmation", roleId, userId, registerationFormSubmittion);
+                    IActionResult? accessCheckStudents = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Student", roleId, userId, registerationFormSubmittion);
+                    if (accessCheck != null && accessCheckStudents != null)
+                    {
+                        return accessCheck;
+                    }
                 }
                 if (item.SelectedFieldOptionID == 0)
                 {

@@ -11,6 +11,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EditPass } from '../../../../Models/Employee/edit-pass';
 import Swal from 'sweetalert2';
+import { GradeService } from '../../../../Services/Employee/LMS/grade.service';
+import { FloorService } from '../../../../Services/Employee/LMS/floor.service';
+import { SubjectService } from '../../../../Services/Employee/LMS/subject.service';
+import { Floor } from '../../../../Models/LMS/floor';
+import { Grade } from '../../../../Models/LMS/grade';
+import { Subject } from '../../../../Models/LMS/subject';
 
 @Component({
   selector: 'app-employee-view',
@@ -30,17 +36,30 @@ export class EmployeeViewComponent {
   Data: EmployeeGet = new EmployeeGet()
   EmpId: number = 0;
 
-  PasswordError: string = ""; 
+  PasswordError: string = "";
   isChange = false;
-  password:string =""
+  password: string = ""
 
-  editpasss:EditPass=new EditPass();
+  editpasss: EditPass = new EditPass();
 
   AllowEdit: boolean = false;
   AllowEditForOthers: boolean = false;
+  isFloorMonitor = false;
+  isGradeSupervisor = false;
+  isSubjectSupervisor = false;
+  floors: Floor[] = [];
+  floorsSelected: Floor[] = [];
+  grades: Grade[] = [];
+  gradeSelected: Grade[] = [];
+  subject: Subject[] = [];
+  subjectSelected: Subject[] = [];
 
 
-  constructor(public activeRoute: ActivatedRoute, public account: AccountService, public ApiServ: ApiService, private menuService: MenuService, public EditDeleteServ: DeleteEditPermissionService, private router: Router, public EmpServ: EmployeeService) { }
+
+  constructor(public activeRoute: ActivatedRoute, public account: AccountService, public ApiServ: ApiService, private menuService: MenuService, public EditDeleteServ: DeleteEditPermissionService, private router: Router, public EmpServ: EmployeeService, public FloorServ: FloorService,
+    public GradeServ: GradeService,
+    public SubjectServ: SubjectService,
+  ) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -51,11 +70,48 @@ export class EmployeeViewComponent {
         this.path = url[0].path
         this.EmpId = Number(this.activeRoute.snapshot.paramMap.get('id'))
         this.EmpServ.Get_Employee_By_ID(this.EmpId, this.DomainName).subscribe(async (data) => {
-          this.Data = data; 
+          this.Data = data;
+          console.log(this.Data)
           if (data.files == null) {
             this.Data.files = []
           }
           this.Data.id = this.EmpId;
+          if (this.Data.floorsSelected.length > 0) {
+            this.isFloorMonitor = true
+          }
+          if (this.Data.gradeSelected.length > 0) {
+            this.isGradeSupervisor = true
+          }
+          if (this.Data.subjectSelected.length > 0) {
+            this.isSubjectSupervisor = true
+          }
+          this.FloorServ.Get(this.DomainName).subscribe((data) => {
+            this.floors = data;
+            if (this.Data.floorsSelected.length > 0) {
+              this.isFloorMonitor = true
+              this.floorsSelected = this.floors.filter((s) =>
+                this.Data.floorsSelected.includes(s.id)
+              );
+            }
+          });
+          this.GradeServ.Get(this.DomainName).subscribe((data) => {
+            this.grades = data;
+            if (this.Data.gradeSelected.length > 0) {
+              this.isGradeSupervisor = true
+              this.gradeSelected = this.grades.filter((s) =>
+                this.Data.gradeSelected.includes(s.id)
+              );
+            }
+          });
+          this.SubjectServ.Get(this.DomainName).subscribe((data) => {
+            this.subject = data;
+            if (this.Data.subjectSelected.length > 0) {
+              this.isSubjectSupervisor = true
+              this.subjectSelected = this.subject.filter((s) =>
+                this.Data.subjectSelected.includes(s.id)
+              );
+            }
+          });
         })
       });
     }
@@ -74,7 +130,7 @@ export class EmployeeViewComponent {
   edit() {
     this.router.navigateByUrl(`Employee/Employee Edit/${this.EmpId}`)
   }
-  
+
   downloadFile(file: any): void {
     fetch(file.link)
       .then(response => {
@@ -97,65 +153,65 @@ export class EmployeeViewComponent {
         console.error('Download failed:', error);
       });
   }
-  
+
   toggleChangePassword() {
     this.isChange = !this.isChange;
   }
 
-  UpdatePassword(){
-    this.editpasss.Id=this.EmpId;
-    this.editpasss.Password=this.password
-    this.EmpServ.EditPassword(this.editpasss,this.DomainName).subscribe(()=>{
-        this.isChange = false
-        this.password = '';
-        Swal.fire({
-          icon: 'success',
-          title: 'Done',
-          text: 'Updatedd Successfully',
-          confirmButtonColor: '#089B41',
-        });
-      },
-      (error) => {  
-          switch(true) {
-            case error.error.errors?.Password !== undefined:
-              Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: error.error.errors.Password[0] || 'An unexpected error occurred',
-                confirmButtonColor: '#089B41',
-              });
-              break; 
-            
-            default:
-              Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: error.error.errors || 'An unexpected error occurred',
-                confirmButtonColor: '#089B41',
-              });
-              break;
-          }
-      } 
+  UpdatePassword() {
+    this.editpasss.Id = this.EmpId;
+    this.editpasss.Password = this.password
+    this.EmpServ.EditPassword(this.editpasss, this.DomainName).subscribe(() => {
+      this.isChange = false
+      this.password = '';
+      Swal.fire({
+        icon: 'success',
+        title: 'Done',
+        text: 'Updatedd Successfully',
+        confirmButtonColor: '#089B41',
+      });
+    },
+      (error) => {
+        switch (true) {
+          case error.error.errors?.Password !== undefined:
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: error.error.errors.Password[0] || 'An unexpected error occurred',
+              confirmButtonColor: '#089B41',
+            });
+            break;
+
+          default:
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: error.error.errors || 'An unexpected error occurred',
+              confirmButtonColor: '#089B41',
+            });
+            break;
+        }
+      }
     )
   }
 
-  CancelUpdatePassword(){
+  CancelUpdatePassword() {
     this.isChange = false
     this.password = '';
   }
   onPasswordChange() {
-    this.PasswordError = "" 
+    this.PasswordError = ""
   }
   IsAllowEdit() {
     const IsAllow = this.EditDeleteServ.IsAllowEdit(this.Data.insertedByUserId, this.UserID, this.AllowEditForOthers);
     return IsAllow;
   }
 
-  SubjectCoTeacher(){
-    this.router.navigateByUrl("Employee/Subject Co-Teacher/"+this.EmpId)
+  SubjectCoTeacher() {
+    this.router.navigateByUrl("Employee/Subject Co-Teacher/" + this.EmpId)
   }
 
-  SubjectTeacher(){
-    this.router.navigateByUrl("Employee/Subject Teacher/"+this.EmpId)
+  SubjectTeacher() {
+    this.router.navigateByUrl("Employee/Subject Teacher/" + this.EmpId)
   }
 }
