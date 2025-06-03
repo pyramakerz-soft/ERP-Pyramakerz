@@ -10,6 +10,8 @@ import { GradeService } from '../../../Services/Employee/LMS/grade.service';
 import { ClassroomService } from '../../../Services/Employee/LMS/classroom.service';
 import { ApiService } from '../../../Services/api.service';
 import { StudentService } from '../../../Services/student.service';
+import { Router } from '@angular/router';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-search-student',
@@ -23,6 +25,9 @@ export class SearchStudentComponent {
   @Input() selectedGrade: number | null = null;
   @Input() selectedClassroom: number | null = null;
   @Input() hiddenInputs: string[] = [];
+  @Input() hiddenColumns: string[] = [];
+  @Input() IsDoneHidden: boolean | null = false;
+
   
   @Output() closeModal = new EventEmitter<void>();
   @Output() studentSelected = new EventEmitter<number[]>();
@@ -47,7 +52,7 @@ export class SearchStudentComponent {
   TotalRecords:number = 0
 
 
-  constructor(public acadimicYearService:AcadimicYearService, public gradeservice:GradeService, public classroomService:ClassroomService, public studentService:StudentService, public ApiServ: ApiService){}
+  constructor(public acadimicYearService:AcadimicYearService, public gradeservice:GradeService, public StudentService: StudentService , public classroomService:ClassroomService, public studentService:StudentService, public ApiServ: ApiService , public router: Router){}
 
   ngOnInit(){ 
     this.DomainName = this.ApiServ.GetHeader(); 
@@ -61,6 +66,10 @@ export class SearchStudentComponent {
 
   isInputHidden(input: string): boolean {
     return this.hiddenInputs.includes(input);
+  }
+
+   isColumnHidden(input: string): boolean {
+    return this.hiddenColumns.includes(input);
   }
  
   isYearDisabled(): boolean {
@@ -257,4 +266,31 @@ export class SearchStudentComponent {
 
     this.IsStudentsSelected = this.selectedStudents.length > 0;
   }
+
+   Edit(StuId: number, Rid: number) {
+      this.router.navigateByUrl(`Employee/Edit Student/${Rid}/${StuId}`);
+    }
+  
+  
+    View(id: number) {
+      this.router.navigateByUrl(`Employee/Student View/` + id);
+    }
+  
+    Delete(id: number) {
+      Swal.fire({
+        title: 'Are you sure you want to delete this Student?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#089B41',
+        cancelButtonColor: '#17253E',
+        confirmButtonText: 'Delete',
+        cancelButtonText: 'Cancel',
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.StudentService.Delete(id, this.DomainName).subscribe((d) => {
+            this.Search();
+          });
+        }
+      });
+    }
 }

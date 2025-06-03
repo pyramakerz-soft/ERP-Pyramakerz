@@ -18,11 +18,12 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { StudentService } from '../../../../Services/student.service';
 import Swal from 'sweetalert2';
+import { SearchStudentComponent } from '../../../../Component/Employee/search-student/search-student.component';
 
 @Component({
   selector: 'app-students',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchStudentComponent],
   templateUrl: './students.component.html',
   styleUrl: './students.component.css'
 })
@@ -38,12 +39,16 @@ export class StudentsComponent {
   AllowDelete: boolean = false;
   AllowEditForOthers: boolean = false;
   AllowDeleteForOthers: boolean = false;
+  isModalOpen: boolean = false;
   path: string = ""
 
   DomainName: string = "";
   UserID: number = 0;
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   isLoading = false
+  preSelectedYear: number | null = null;  
+  preSelectedGrade: number | null = null;  
+  preSelectedClassroom: number | null = null;  
 
   constructor(public account: AccountService, public buildingService: BuildingService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService,
     private menuService: MenuService, public activeRoute: ActivatedRoute, public schoolService: SchoolService, public StudentService: StudentService, public employeeServ: EmployeeService,
@@ -94,12 +99,16 @@ export class StudentsComponent {
     )
   }
 
+  OpenModal() {
+    this.isModalOpen = true;
+  }
+
   Create() {
     this.router.navigateByUrl(`Employee/Create Student`);
   }
 
-  Edit(id : number) {
-    this.router.navigateByUrl(`Employee/Edit Student/` + id);
+  Edit(StuId: number, Rid: number) {
+    this.router.navigateByUrl(`Employee/Edit Student/${Rid}/${StuId}`);
   }
 
 
@@ -125,4 +134,17 @@ export class StudentsComponent {
     });
   }
 
+  handleStudentSelected(students: number[]) {
+    
+  }
+
+  closeModal() {
+    document.getElementById("Transfer_Modal")?.classList.remove("flex");
+    document.getElementById("Transfer_Modal")?.classList.add("hidden");
+
+    document.getElementById("Hide_Modal")?.classList.remove("flex");
+    document.getElementById("Hide_Modal")?.classList.add("hidden");
+
+    this.isModalOpen = false;
+  }
 }

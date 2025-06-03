@@ -180,7 +180,7 @@ namespace LMS_CMS_PL.Services.Zatca
             return response;
         }
 
-        public static async Task<bool> GenerateInvoiceXML(InventoryMaster master, string lastInvoiceHash, S3Service s3)
+        public static async Task<bool> GenerateInvoiceXML(string xmalPath, InventoryMaster master, string lastInvoiceHash, S3Service s3, string dateTime)
         {
             string invoices = string.Empty;
 
@@ -197,7 +197,7 @@ namespace LMS_CMS_PL.Services.Zatca
                 Directory.CreateDirectory(invoices);
             }
 
-            DateTime invDate = DateTime.Parse(master.Date);
+            DateTime invDate = DateTime.Parse(dateTime);
 
             string date = invDate.ToString("yyyy-MM-dd");
             string time = invDate.ToString("HH:mm:ss");
