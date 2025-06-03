@@ -11,6 +11,7 @@
             <option *ngFor="let stu of schools" [value]="stu.id">
                 {{ stu.name }}
             </option>
+            <option *ngIf="schools.length === 0" disabled selected>No Data Found</option>
         </select>
     </div>
 
@@ -23,6 +24,7 @@
             <option *ngFor="let ac of Grades" [value]="ac.id">
                 {{ ac.name }}
             </option>
+            <option *ngIf="Grades.length === 0" disabled selected>No Data Found</option>
         </select>
     </div>
 
@@ -34,6 +36,7 @@
             <option *ngFor="let ac of class" [value]="ac.id">
                 {{ ac.name }}
             </option>
+            <option *ngIf="class.length === 0" disabled selected>No Data Found</option>
         </select>
     </div>
 
@@ -45,6 +48,7 @@
             <option *ngFor="let ac of subjects" [value]="ac.id">
                 {{ ac.en_name }}
             </option>
+            <option *ngIf="subjects.length === 0" disabled selected>No Data Found</option>
         </select>
     </div>
 
@@ -91,12 +95,13 @@
                 </div>
                 <div class="absolute bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10"
                     *ngIf="dropdownOpen">
-                    <ul>
+                    <ul *ngIf="PerformanceTypes.length > 0">
                         <li *ngFor="let Type of PerformanceTypes" class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                             (click)="selectType(Type)">
                             {{ Type.englishName }}
                         </li>
                     </ul>
+                    <div *ngIf="PerformanceTypes.length === 0" disabled selected>No Data Found</div>
                 </div>
             <span *ngIf="!IsStudentPerformance" class="text-red-500 ml-3 font-normal"> Performance Type is Requiered</span>
             </div>

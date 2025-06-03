@@ -38,17 +38,11 @@ export class SubjectTeacherComponent {
     '',
     '',
     ''
-  );
-
-  AllowEdit: boolean = false;
-  AllowDelete: boolean = false;
-  AllowEditForOthers: boolean = false;
-  AllowDeleteForOthers: boolean = false;
+  ); 
 
   DomainName: string = '';
   UserID: number = 0;
-  SupjectTeacherData: any[] = [];
-  path: string = '';
+  SupjectTeacherData: any[] = []; 
   areAllClassroomsOpen: boolean = true;
   SupjectTeacher: ClassroomSubject = new ClassroomSubject()
   Classrooms: Classroom[] = []
@@ -58,8 +52,7 @@ export class SubjectTeacherComponent {
   employee: EmployeeGet = new EmployeeGet()
 
   constructor(
-    private router: Router,
-    private menuService: MenuService,
+    private router: Router, 
     public activeRoute: ActivatedRoute,
     public account: AccountService,
     public ApiServ: ApiService,
@@ -73,22 +66,11 @@ export class SubjectTeacherComponent {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
     this.DomainName = this.ApiServ.GetHeader();
-    this.activeRoute.url.subscribe((url) => {
-      this.path = url[0].path;
-    });
+     
     this.SupjectTeacher.teacherID = Number(this.activeRoute.snapshot.paramMap.get('id'));
      this.EmpServ.Get_Employee_By_ID(this.SupjectTeacher.teacherID, this.DomainName).subscribe(async (data) => {
           this.employee = data; 
-        })
-    this.menuService.menuItemsForEmployee$.subscribe((items) => {
-      const settingsPage = this.menuService.findByPageName(this.path, items);
-      if (settingsPage) {
-        this.AllowEdit = settingsPage.allow_Edit;
-        this.AllowDelete = settingsPage.allow_Delete;
-        this.AllowDeleteForOthers = settingsPage.allow_Delete_For_Others;
-        this.AllowEditForOthers = settingsPage.allow_Edit_For_Others;
-      }
-    });
+        }) 
     this.GetData();
     this.GetAllClassrooms();
   }

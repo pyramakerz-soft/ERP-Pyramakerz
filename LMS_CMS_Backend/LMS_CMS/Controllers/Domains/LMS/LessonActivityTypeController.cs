@@ -30,10 +30,9 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet]
         [Authorize_Endpoint_(
-        allowedTypes: new[] { "octa", "employee" }
-        //,
-        //pages: new[] { "" }
-    )]
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Lesson Activity Types" }
+        )]
         public IActionResult Get()
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -66,10 +65,9 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
-           allowedTypes: new[] { "octa", "employee" }
-           //,
-           //pages: new[] { "EvaluationTemplateGroupQuestion" }
-       )]
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Lesson Activity Types" }
+        )]
         public async Task<IActionResult> GetById(long id)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -103,10 +101,9 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpPost]
         [Authorize_Endpoint_(
-          allowedTypes: new[] { "octa", "employee" }
-      // ,
-      // pages: new[] { "" }
-      )]
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Lesson Activity Types" }
+        )]
         public async Task<IActionResult> Add(LessonActivityTypeAddDTO newType)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -147,9 +144,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpPut]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            allowEdit: 1
-        //    ,
-        //pages: new[] { "EvaluationTemplateGroupQuestion" }
+            allowEdit: 1,
+            pages: new[] { "Lesson Activity Types" }
         )]
         public async Task<IActionResult> EditAsync(LessonActivityTypeEditDto newData)
         {
@@ -182,14 +178,14 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return BadRequest("Type not exist");
             }
 
-            //if (userTypeClaim == "employee")
-            //{
-            //    IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "EvaluationTemplateGroupQuestion", roleId, userId, question);
-            //    if (accessCheck != null)
-            //    {
-            //        return accessCheck;
-            //    }
-            //}
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Lesson Activity Types", roleId, userId, type);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
+            }
 
             mapper.Map(newData, type);
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
@@ -219,11 +215,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpDelete("{id}")]
         [Authorize_Endpoint_(
-          allowedTypes: new[] { "octa", "employee" },
-          allowDelete: 1
-      //      ,
-      //pages: new[] { "" }
-      )]
+            allowedTypes: new[] { "octa", "employee" },
+            allowDelete: 1,
+            pages: new[] { "Lesson Activity Types" }
+        )]
         public IActionResult Delete(long id)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -249,15 +244,15 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             {
                 return BadRequest("Type not exist");
             }
-            //if (userTypeClaim == "employee")
-            //{
-            //    IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "EvaluationTemplateGroupQuestion", roleId, userId, question);
-            //    if (accessCheck != null)
-            //    {
-            //        return accessCheck;
-            //    }
-            //}
 
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Lesson Activity Types", roleId, userId, type);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
+            }
 
             type.IsDeleted = true;
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");

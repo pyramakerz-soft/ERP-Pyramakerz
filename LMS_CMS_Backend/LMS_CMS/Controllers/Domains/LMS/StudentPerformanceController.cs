@@ -32,9 +32,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet]
         [Authorize_Endpoint_(
-     allowedTypes: new[] { "octa", "employee" }
-         //,
-         //pages: new[] { "" }
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "" }
          )]
         public async Task<IActionResult> Get()
         {

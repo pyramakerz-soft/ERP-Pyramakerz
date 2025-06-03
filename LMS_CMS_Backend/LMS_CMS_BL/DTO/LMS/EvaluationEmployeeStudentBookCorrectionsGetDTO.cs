@@ -17,5 +17,7 @@ namespace LMS_CMS_BL.DTO.LMS
         public long EvaluationBookCorrectionID { get; set; }
         public string EvaluationBookCorrectionEnglishName { get; set; }
         public string EvaluationBookCorrectionArabicName { get; set; }
+        public long? InsertedByUserId { get; set; }
+
     }
 }

@@ -111,31 +111,34 @@
     </div>
 </div>
 
-<div class="mt-5 ">
-    <div>
-        <div class="primaryBg p-4 rounded-xl text-white mb-4">
-            Feedback
-        </div>
-        <div class="mt-5 flex flex-col">
-            <label class="mb-2 primaryTxt font-medium" for="notes">Feedback</label>
-            <textarea *ngIf="data.feedback=='' && mode=='Evaluated'" id="notes" [(ngModel)]="Feedback"
-                class="w-full rounded-lg border border-solid border-gray-300 py-3" placeholder="Add Your Feedback">
-            </textarea>
-            <div *ngIf="data.feedback=='' && mode=='Evaluator' " class="bg-[#EBEBEB] p-4 rounded-xl mb-2 border">
-                <div>No Feed back till now</div>
-            </div>
+<div>
 
-            <div *ngIf="data.feedback!='' " class="bg-[#EBEBEB] p-4 rounded-xl mb-2 border">
-                <div>{{data.feedback}}</div>
+    <div class="mt-5 ">
+        <div>
+            <div class="primaryBg p-4 rounded-xl text-white mb-4">
+                Feedback
+            </div>
+            <div class="mt-5 flex flex-col">
+                <label class="mb-2 primaryTxt font-medium" for="notes">Feedback</label>
+                <textarea *ngIf="data.feedback=='' && mode=='Evaluated'" id="notes" [(ngModel)]="Feedback"
+                    class="w-full rounded-lg border border-solid border-gray-300 py-3" placeholder="Add Your Feedback">
+                </textarea>
+                <div *ngIf="data.feedback=='' && mode=='Evaluator' " class="bg-[#EBEBEB] p-4 rounded-xl mb-2 border">
+                    <div>No Feed back till now</div>
+                </div>
+    
+                <div *ngIf="data.feedback!='' " class="bg-[#EBEBEB] p-4 rounded-xl mb-2 border">
+                    <div>{{data.feedback}}</div>
+                </div>
             </div>
         </div>
     </div>
-</div>
-
-<div class="flex justify-end" *ngIf="data.feedback=='' && mode=='Evaluated'">
-    <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
-        (click)="SaveFeedback()">
-        <span *ngIf="!isLoading">Save</span>
-        <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
-    </button>
+    
+    <div class="flex justify-end" *ngIf="data.feedback=='' && mode=='Evaluated'">
+        <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
+            (click)="SaveFeedback()">
+            <span *ngIf="!isLoading">Save</span>
+            <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+        </button>
+    </div>
 </div>

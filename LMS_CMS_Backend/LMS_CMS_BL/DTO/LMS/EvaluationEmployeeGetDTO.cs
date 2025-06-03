@@ -27,5 +27,7 @@ namespace LMS_CMS_BL.DTO.LMS
         public String EvaluationTemplateEnglishTitle { get; set; }
         public long ClassroomID { get; set; }
         public String ClassroomName { get; set; }
+        public long? InsertedByUserId { get; set; }
+
     }
 }

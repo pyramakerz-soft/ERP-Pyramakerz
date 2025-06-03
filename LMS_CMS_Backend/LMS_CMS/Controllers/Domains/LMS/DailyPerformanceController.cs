@@ -30,10 +30,9 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpPost]
         [Authorize_Endpoint_(
-      allowedTypes: new[] { "octa", "employee" }
-      // ,
-      // pages: new[] { "" }
-      )]
+          allowedTypes: new[] { "octa", "employee" },
+           pages: new[] { "Enter Daily Performance", "Daily Performance" }
+        )]
         public async Task<IActionResult> Add(List<DailyPerformanceAddDTO> Newtypes)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
