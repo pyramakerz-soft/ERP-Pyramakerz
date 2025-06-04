@@ -11,7 +11,7 @@ export class ApiService {
   BaseUrlOcta="http://localhost:5094/api"
 
   // BaseUrl="http://44.210.155.226:5000/api/with-domain"
-  // BaseUrlOcta="http://44.210.155.226:5000/api"
+  // BaseUrlOcta="http://44.210.155.226:5000/api"w
 
 
   constructor() {}
@@ -20,7 +20,8 @@ export class ApiService {
     // const hostname = window.location.hostname;
     // var Header = hostname.split('.')[0]
 
-    var Header = 'Domain_One'; 
+    var Header = 'Domain_One';
+
 
     return Header;
   }

@@ -882,6 +882,11 @@ namespace LMS_CMS_BL.Config
             CreateMap<SemesterWorkingWeekPutDTO, SemesterWorkingWeek>();
 
             CreateMap<DailyPerformanceAddDTO, DailyPerformance>();
+            CreateMap<DailyPerformance, DailyPerformanceGetDTO>()
+               .ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => src.Student.en_name))
+               .ForMember(dest => dest.SubjectName, opt => opt.MapFrom(src => src.Subject.en_name))
+               .ForMember(dest => dest.GradeName, opt => opt.MapFrom(src => src.Subject.Grade.Name));
+
 
             CreateMap<QuestionBank, QuestionBankGetDTO>()
                  .ForMember(dest => dest.LessonName, opt => opt.MapFrom(src => src.Lesson.EnglishTitle))

@@ -15,7 +15,7 @@ export class AssignmentDetailsComponent {
 
   constructor(private router: Router) {}
   editAssignment(assignmentId: number) {
-    this.router.navigateByUrl(`Employee/Assignment Edit`);
+    this.router.navigateByUrl(`Employee/Assignment-Edit-UI`);
   }
 
   assignmentData: any[] = [
