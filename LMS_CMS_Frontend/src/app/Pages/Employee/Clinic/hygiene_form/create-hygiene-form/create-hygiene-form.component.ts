@@ -132,50 +132,61 @@ export class CreateHygieneFormComponent implements OnInit {
     }
   }
 
-  onSchoolChange() {
-    this.selectedGrade = null;
-    this.selectedClass = null;
-    this.grades = [];
-    this.classes = [];
-    this.students = [];
-    this.loadGrades();
+onSchoolChange() {
+  this.selectedGrade = null;
+  this.selectedClass = null;
+  this.grades = [];
+  this.classes = [];
+  this.students = [];
+  // Clear school validation error
+  delete this.validationErrors['school'];
+  this.loadGrades();
+}
+
+onGradeChange() {
+  this.selectedClass = null;
+  this.classes = [];
+  this.students = [];
+  // Clear grade validation error
+  delete this.validationErrors['grade'];
+  this.loadClasses();
+}
+
+onClassChange() {
+  this.students = [];
+  // Clear class validation error
+  delete this.validationErrors['class'];
+  this.loadStudents();
+}
+onDateChange() {
+  // Clear date validation error
+  delete this.validationErrors['date'];
+}
+
+validateForm(): boolean {
+  // Clear all errors before re-validating
+  this.validationErrors = {};
+  let isValid = true;
+
+  if (!this.selectedSchool) {
+    this.validationErrors['school'] = '*School is required';
+    isValid = false;
+  }
+  if (!this.selectedGrade) {
+    this.validationErrors['grade'] = '*Grade is required';
+    isValid = false;
+  }
+  if (!this.selectedClass) {
+    this.validationErrors['class'] = '*Class is required';
+    isValid = false;
+  }
+  if (!this.selectedDate) {
+    this.validationErrors['date'] = '*Date is required';
+    isValid = false;
   }
 
-  onGradeChange() {
-    this.selectedClass = null;
-    this.classes = [];
-    this.students = [];
-    this.loadClasses();
-  }
-
-  onClassChange() {
-    this.students = [];
-    this.loadStudents();
-  }
-
-  validateForm(): boolean {
-    let isValid = true;
-    this.validationErrors = {};
-
-    if (!this.selectedSchool) {
-      this.validationErrors['school'] = '*School is required';
-      isValid = false;
-    }
-    if (!this.selectedGrade) {
-      this.validationErrors['grade'] = '*Grade is required';
-      isValid = false;
-    }
-    if (!this.selectedClass) {
-      this.validationErrors['class'] = '*Class is required';
-      isValid = false;
-    }
-    if (!this.selectedDate) {
-      this.validationErrors['date'] = '*Date is required';
-      isValid = false;
-    }
-
-    return isValid;
-  }
+  return isValid;
+}
 
 saveHygieneForm() {
   if (this.validateForm()) {
