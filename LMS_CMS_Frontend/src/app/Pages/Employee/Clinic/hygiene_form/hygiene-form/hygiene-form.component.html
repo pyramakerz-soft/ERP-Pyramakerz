@@ -10,8 +10,8 @@
 </div>
 
 <!-- Reusable Table Component -->
-    <app-table [headers]="['ID', 'Grade', 'Classes', 'Date', 'Actions']" [data]="hygieneForms"
-        [keys]="['id', 'grade', 'classRoom', 'date']"
+    <app-table [headers]="['ID' , 'School' , 'Grade', 'Classes', 'Date', 'Actions']" [data]="hygieneForms"
+        [keys]="['id','school', 'grade', 'classRoom', 'date']"
             [showViewAction]="true" [showEditAction]="false"
  (delete)="deleteHygieneForm($event)" (edit)="openModal($event.id)" (view)="onView($event)">
     </app-table>

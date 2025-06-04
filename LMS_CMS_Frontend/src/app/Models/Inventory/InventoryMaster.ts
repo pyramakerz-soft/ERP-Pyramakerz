@@ -3,6 +3,7 @@ import { InventoryDetails } from "./InventoryDetails";
 export class InventoryMaster {
      constructor(
             public id: number = 0,
+            public etaInsertedDate: number | null = null,
             public name: string = '',
             public invoiceNumber :number =0,
             public date: string = '',

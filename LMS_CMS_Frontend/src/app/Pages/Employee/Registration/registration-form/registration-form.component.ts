@@ -565,8 +565,11 @@ export class RegistrationFormComponent {
       if (element.categoryFieldID == 4) {
         ageDate = element.textAnswer ? element.textAnswer : '';
       }
-      if (element.categoryFieldID == 9) {
+      if (element.categoryFieldID == 9 && this.mode=='Edit') {
         choosedGradeID = element.selectedFieldOptionID ? element.selectedFieldOptionID : 0;
+      }
+       if (element.categoryFieldID == 9 && this.mode=='Create') {
+        choosedGradeID = element.textAnswer ? element.textAnswer : 0;
       }
     });
     this.Grades.forEach((element) => {
