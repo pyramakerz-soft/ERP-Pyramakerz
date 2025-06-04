@@ -1,5 +1,5 @@
 // electronic-invoice-detail.component.ts
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule, DatePipe } from '@angular/common';
 import { InventoryDetailsService } from '../../../../../Services/Employee/Inventory/inventory-details.service';
@@ -7,16 +7,19 @@ import { ApiService } from '../../../../../Services/api.service';
 import { FormsModule } from '@angular/forms';
 import { ElectronicInvoice } from '../../../../../Models/zatca/electronic-invoice';
 import { InventoryMasterService } from '../../../../../Services/Employee/Inventory/inventory-master.service';
+import { PdfPrintComponent } from "../../../../../Component/pdf-print/pdf-print.component";
 
 @Component({
   selector: 'app-electronic-invoice-detail',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PdfPrintComponent],
   standalone: true,
   templateUrl: './electronic-invoice-detail.component.html',
   styleUrls: ['./electronic-invoice-detail.component.css'],
   providers: [DatePipe]
 })
 export class ElectronicInvoiceDetailComponent implements OnInit {
+  @ViewChild('pdfPrint') pdfPrint!: PdfPrintComponent;
+
   invoiceId!: number;
   invoice: ElectronicInvoice = {
     id: 0,
@@ -72,6 +75,7 @@ export class ElectronicInvoiceDetailComponent implements OnInit {
     // First get the master invoice data
     this.inventoryMasterService.GetById(this.invoiceId, this.DomainName).subscribe({
       next: (masterData) => {
+        console.log('masterData')
         console.log(masterData)
         // Map the master data to our invoice object
         this.invoice = {
@@ -91,6 +95,7 @@ export class ElectronicInvoiceDetailComponent implements OnInit {
         // Then get the inventory details
         this.inventoryDetailsService.GetBySalesId(this.invoiceId, this.DomainName).subscribe({
           next: (details) => {
+            console.log('details')
             console.log(details)
             this.invoice.inventoryDetails = details.map(item => ({
               ...item,
@@ -122,19 +127,79 @@ export class ElectronicInvoiceDetailComponent implements OnInit {
     alert(`Invoice ${this.invoice.invoiceNumber} sent successfully`);
   }
 
+    showPDF = false;
+  school = {
+    reportHeaderOneEn: 'Invoice Report',
+    reportHeaderTwoEn: 'Simplified Tax Invoice',
+    reportHeaderOneAr: 'تقرير الفاتورة',
+    reportHeaderTwoAr: 'فاتورة ضريبة مبسطة',
+    reportImage: 'assets/images/logo.png'
+  };
+
+  
   printInvoice() {
-    window.print();
+    this.showPDF = true;
+    setTimeout(() => {
+      const printContents = document.getElementById("invoiceData")?.innerHTML;
+      if (!printContents) {
+        console.error("Element not found!");
+        return;
+      }
+
+      const printStyle = `
+        <style>
+          @page { size: auto; margin: 0mm; }
+          body { margin: 0; }
+          @media print {
+            body > *:not(#print-container) { display: none !important; }
+            #print-container {
+              display: block !important;
+              position: static !important;
+              width: 100% !important;
+              height: auto !important;
+              background: white !important;
+              margin: 0 !important;
+            }
+          }
+        </style>
+      `;
+
+      const printContainer = document.createElement('div');
+      printContainer.id = 'print-container';
+      printContainer.innerHTML = printStyle + printContents;
+
+      document.body.appendChild(printContainer);
+      window.print();
+
+      setTimeout(() => {
+        document.body.removeChild(printContainer);
+        this.showPDF = false;
+      }, 100);
+    }, 500);
   }
 
   formatDate(date: string): string {
     return this.datePipe.transform(date, 'dd MMMM yyyy') || '';
   }
 
-  calculateSubtotal(): number {
-    return this.invoice.inventoryDetails?.reduce((sum, item) => sum + (item.price * item.quantity), 0) || 0;
+  // calculateSubtotal(): number {
+  //   return this.invoice.inventoryDetails?.reduce((sum, item) => sum + (item.price * item.quantity), 0) || 0;
+  // }
+
+  // calculateTax(): number {
+  //   return this.invoice.inventoryDetails?.reduce((sum, item) => sum + (item.tax || 0), 0) || 0;
+  // }
+
+  getInvoiceTableData(): any[] {
+    if (!this.invoice.inventoryDetails) return [];
+    
+    return this.invoice.inventoryDetails.map(item => ({
+      'Product': item.itemName,
+      'Quantity': item.quantity,
+      'Price': item.price,
+      'Tax': this.invoice.vatAmount,
+      'Total': item.totalPrice
+    }));
   }
 
-  calculateTax(): number {
-    return this.invoice.inventoryDetails?.reduce((sum, item) => sum + (item.tax || 0), 0) || 0;
-  }
 }

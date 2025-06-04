@@ -24,6 +24,19 @@
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'VatNumber' | translate }}
                 </th>
+
+
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'clientID' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Secret Number 1' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Secret Number 2' | translate }}
+                </th>
+
+                
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Actions' | translate }}
                 </th>
@@ -47,6 +60,13 @@
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.address }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.schoolTypeName }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.vatNumber }}</td>
+
+
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.clientID || 'na' }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.secretNumber1 || 'na' }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.secretNumber2 || 'na' }}</td>
+
+
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     <div class="flex space-x-4"> 
                         <button *ngIf="AllowEdit && IsAllowEdit(row.insertedByUserId)" (click)="openModal(row.id)">
@@ -106,15 +126,35 @@
                 [(ngModel)]="school.reportHeaderTwoAr" 
                 (ngModelChange)="onInputValueChange({ field: 'reportHeaderTwoAr', value: $event })"></textarea>
             </div>
-            <div class="flex flex-col mb-4 w-[49%]">
+            <!-- <div class="flex flex-col mb-4 w-[49%]">
                 <label class="mb-2 primaryTxt" for="VatNumber">{{ 'VatNumber' | translate }}</label>
                 <input id="VatNumber" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'VatNumber' | translate }}"
                 [(ngModel)]="school.vatNumber" 
                 (ngModelChange)="onInputValueChange({ field: 'vatNumber', value: $event })"/>
-            </div>
+            </div> -->
 
 
             <div class="flex flex-col mb-4 w-[49%]">
+                <label class="mb-2 primaryTxt" for="clientID">{{ 'clientID' | translate }}</label>
+                <input id="clientID" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'clientID' | translate }}"
+                [(ngModel)]="school.clientID" 
+                (ngModelChange)="onInputValueChange({ field: 'clientID', value: $event })"/>
+            </div>
+            <div class="flex flex-col mb-4 w-[49%]">
+                <label class="mb-2 primaryTxt" for="secretNumber1">{{ 'secretNumber1' | translate }}</label>
+                <input id="secretNumber1" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'secretNumber1' | translate }}"
+                [(ngModel)]="school.secretNumber1" 
+                (ngModelChange)="onInputValueChange({ field: 'secretNumber1', value: $event })"/>
+            </div>
+            <div class="flex flex-col mb-4 w-[49%]">
+                <label class="mb-2 primaryTxt" for="secretNumber2">{{ 'secretNumber2' | translate }}</label>
+                <input id="secretNumber2" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'secretNumber2' | translate }}"
+                [(ngModel)]="school.secretNumber2" 
+                (ngModelChange)="onInputValueChange({ field: 'secretNumber2', value: $event })"/>
+            </div>
+
+
+            <!-- <div class="flex flex-col mb-4 w-[49%]">
                 <label class="mb-2 primaryTxt" for="streetName">{{ 'Street Name' | translate }}</label>
                 <input id="streetName" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'StreetName' | translate }}"
                 [(ngModel)]="school.streetName" 
@@ -149,7 +189,7 @@
                 <input id="PostalZone" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'Postal Zone' | translate }}"
                 [(ngModel)]="school.postalZone" 
                 (ngModelChange)="onInputValueChange({ field: 'postalZone', value: $event })"/>
-            </div>
+            </div> -->
 
 
             <div class="w-full mb-4">
