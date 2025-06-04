@@ -50,7 +50,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         //    Data = await Unit_Of_Work.dailyPerformance_Repository.Select_All_With_IncludesById<DailyPerformance>(
         //            f => f.IsDeleted != true,
-        //            query => query.Include(emp => emp.Subject).ThenInclude(s=>s.Grade),
+        //            query => query.Include(emp => emp.Subject).ThenInclude(s => s.Grade),
         //            query => query.Include(emp => emp.Student)
         //            );
 
