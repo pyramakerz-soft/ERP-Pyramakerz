@@ -135,23 +135,16 @@
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.semesterWorkingWeekEnglishName }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.semesterWorkingWeekArabicName }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    <div class="flex items-center  justify-between">
-                        <button 
-                            (click)="Delete(row.id)">
-                            <i class="fa-regular fa-trash-can"></i>
-                        </button>
-                        <button  (click)="openModal(row.id)">
-                            <i class="fa-solid fa-pencil"></i>
-                        </button>
-                        <img src="Icons/LessonActivity.png" (click)="MoveToLessonActivity(row.id)">
-                        <img src="Icons/LessonResource.png" (click)="MoveToLessonResource(row.id)"> 
-                        <!-- <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)"
+                    <div class="flex items-center  justify-between"> 
+                        <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)"
                             (click)="Delete(row.id)">
                             <i class="fa-regular fa-trash-can"></i>
                         </button>
                         <button *ngIf="AllowEdit && IsAllowEdit(row.insertedByUserId)" (click)="openModal(row.id)">
                             <i class="fa-solid fa-pencil"></i>
-                        </button> -->
+                        </button>
+                        <img src="Icons/LessonActivity.png" (click)="MoveToLessonActivity(row.id)">
+                        <img src="Icons/LessonResource.png" (click)="MoveToLessonResource(row.id)"> 
                     </div>
                 </td>
             </tr>

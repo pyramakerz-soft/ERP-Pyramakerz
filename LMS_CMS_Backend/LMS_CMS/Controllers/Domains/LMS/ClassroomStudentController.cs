@@ -62,6 +62,32 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////////
+        
+        [HttpGet("GetByID/{Id}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Classroom Students" }
+        )]
+        public async Task<IActionResult> GetByIDAsync(long Id)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            StudentClassroom studentClassroom = await Unit_Of_Work.studentClassroom_Repository.FindByIncludesAsync(
+                    d => d.IsDeleted != true && d.ID == Id,
+                    query => query.Include(emp => emp.Student),
+                    query => query.Include(emp => emp.StudentClassroomSubjects.Where(d => d.IsDeleted != true)).ThenInclude(d => d.Subject),
+                    query => query.Include(emp => emp.Classroom));
+            if(studentClassroom == null)
+            {
+                return NotFound("No Student Classroom with this ID");
+            }
+
+            StudentClassroomGetDTO studentClassroomDTO = mapper.Map<StudentClassroomGetDTO>(studentClassroom);
+
+            return Ok(studentClassroomDTO);
+        }
+
+        /////////////////////////////////////////////////////////////////////////////////////////////
 
         [HttpPost]
         [Authorize_Endpoint_(
@@ -71,6 +97,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         public async Task<IActionResult> AddAsync(StudentClassroomAddDTO newStudentClassroom)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
 
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
             long.TryParse(userIdClaim, out long userId);
@@ -94,65 +121,75 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             {
                 return BadRequest("this Classroom is not exist");
             }
-            
-            Student student = Unit_Of_Work.student_Repository.First_Or_Default(s => s.ID == newStudentClassroom.StudentID && s.IsDeleted != true);
-            if (student == null)
+
+            List<Student> studentsAlreadyAssignedToClass = new List<Student>();
+
+            foreach (var studentID in newStudentClassroom.StudentIDs)
             {
-                return BadRequest("this Student is not exist");
-            }
-
-            StudentClassroom studentClassroomExists = Unit_Of_Work.studentClassroom_Repository.First_Or_Default(
-                d => d.IsDeleted != true && d.StudentID ==  newStudentClassroom.StudentID && d.Classroom.GradeID == classroom.GradeID
-                );
-
-            if(studentClassroomExists != null)
-            {
-                return BadRequest("Student Already In a Class at this Grade, Do You Want to Transfer this Student?");
-            }
-
-            StudentClassroom studentClassroom = mapper.Map<StudentClassroom>(newStudentClassroom);
-
-            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-            studentClassroom.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
-            if (userTypeClaim == "octa")
-            {
-                studentClassroom.InsertedByOctaId = userId;
-            }
-            else if (userTypeClaim == "employee")
-            {
-                studentClassroom.InsertedByUserId = userId;
-            }
-
-            Unit_Of_Work.studentClassroom_Repository.Add(studentClassroom);
-            Unit_Of_Work.SaveChanges();
-
-            if (classroom.ClassroomSubjects != null && classroom.ClassroomSubjects.Count != 0)
-            {
-                foreach (var classroomSubject in classroom.ClassroomSubjects)
+                Student student = Unit_Of_Work.student_Repository.First_Or_Default(s => s.ID == studentID && s.IsDeleted != true);
+                if (student == null)
                 {
-                    if(classroomSubject.Hide != true)
-                    {
-                        StudentClassroomSubject studentClassroomSubject = new StudentClassroomSubject();
-                        studentClassroomSubject.StudentClassroomID = studentClassroom.ID;
-                        studentClassroomSubject.SubjectID = classroomSubject.SubjectID;
-                        studentClassroomSubject.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
-                        if (userTypeClaim == "octa")
-                        {
-                            studentClassroomSubject.InsertedByOctaId = userId;
-                        }
-                        else if (userTypeClaim == "employee")
-                        {
-                            studentClassroomSubject.InsertedByUserId = userId;
-                        }
-
-                        Unit_Of_Work.studentClassroomSubject_Repository.Add(studentClassroomSubject);
-
-                    }
+                    return BadRequest("this Student is not exist");
                 }
+
+                StudentClassroom studentClassroomExists = Unit_Of_Work.studentClassroom_Repository.First_Or_Default(
+                    d => d.IsDeleted != true && d.StudentID == studentID && d.Classroom.GradeID == classroom.GradeID
+                    );
+
+                if(studentClassroomExists != null)
+                {
+                    studentsAlreadyAssignedToClass.Add(student);
+                }
+                else
+                {
+                    StudentClassroom studentClassroom = new StudentClassroom();
+                    studentClassroom.StudentID = studentID;
+                    studentClassroom.ClassID = newStudentClassroom.ClassID;
+                    studentClassroom.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                    if (userTypeClaim == "octa")
+                    {
+                        studentClassroom.InsertedByOctaId = userId;
+                    }
+                    else if (userTypeClaim == "employee")
+                    {
+                        studentClassroom.InsertedByUserId = userId;
+                    }
+
+                    Unit_Of_Work.studentClassroom_Repository.Add(studentClassroom);
+                    Unit_Of_Work.SaveChanges();
+
+                    if (classroom.ClassroomSubjects != null && classroom.ClassroomSubjects.Count != 0)
+                    {
+                        foreach (var classroomSubject in classroom.ClassroomSubjects)
+                        {
+                            if(classroomSubject.Hide != true)
+                            {
+                                StudentClassroomSubject studentClassroomSubject = new StudentClassroomSubject();
+                                studentClassroomSubject.StudentClassroomID = studentClassroom.ID;
+                                studentClassroomSubject.SubjectID = classroomSubject.SubjectID;
+                                studentClassroomSubject.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                                if (userTypeClaim == "octa")
+                                {
+                                    studentClassroomSubject.InsertedByOctaId = userId;
+                                }
+                                else if (userTypeClaim == "employee")
+                                {
+                                    studentClassroomSubject.InsertedByUserId = userId;
+                                }
+
+                                Unit_Of_Work.studentClassroomSubject_Repository.Add(studentClassroomSubject);
+
+                            }
+                        }
+                    }
+
+                    Unit_Of_Work.SaveChanges();
+                } 
             }
 
-            Unit_Of_Work.SaveChanges();
-            return Ok(newStudentClassroom);
+            List<StudentGetDTO> studentDTOs = mapper.Map<List<StudentGetDTO>>(studentsAlreadyAssignedToClass);
+
+            return Ok(studentDTOs);
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////////

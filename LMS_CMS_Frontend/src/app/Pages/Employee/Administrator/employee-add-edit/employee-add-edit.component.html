@@ -145,7 +145,7 @@
 
     <div class="flex align-middle space-x-2 mb-4 w-full items-center justify-between">
         <div class="flex align-middle w-[49%] space-x-2">
-            <input type="checkbox" id="isFloorMonitor" class="w-5 h-5" [(ngModel)]="isFloorMonitor">
+            <input type="checkbox" id="isFloorMonitor" class="w-5 h-5" [(ngModel)]="isFloorMonitor" (change)="onFloorsSupervisorChange()">
             <label class="mb-2" for="isFloorMonitor">Floor Monitor</label>
         </div>
         <div class="flex flex-col mb-4 w-[49%]" *ngIf="isFloorMonitor" >
@@ -183,7 +183,7 @@
 
     <div class="flex align-middle space-x-2 mb-4 w-full items-center justify-between">
         <div class="flex align-middle w-[49%] space-x-2">
-            <input type="checkbox" id="isGradeSupervisor" class="w-5 h-5" [(ngModel)]="isGradeSupervisor">
+            <input type="checkbox" id="isGradeSupervisor" class="w-5 h-5" [(ngModel)]="isGradeSupervisor" (change)="onGradeSupervisorChange()">
             <label class="mb-2" for="isGradeSupervisor">Grade Supervisor</label>
         </div>
         <div class="flex flex-col mb-4 w-[49%]" *ngIf="isGradeSupervisor">
@@ -221,7 +221,7 @@
 
     <div class="flex align-middle space-x-2 mb-4 w-full items-center justify-between">
         <div class="flex align-middle w-[49%] space-x-2">
-            <input type="checkbox" id="isSubjectSupervisor" class="w-5 h-5" [(ngModel)]="isSubjectSupervisor">
+            <input type="checkbox" id="isSubjectSupervisor" class="w-5 h-5" [(ngModel)]="isSubjectSupervisor" (change)="onSubjectSupervisorChange()">
             <label class="mb-2" for="isSubjectSupervisor">Subject Supervisor</label>
         </div>
         <div class="flex flex-col mb-4 w-[49%]" *ngIf="isSubjectSupervisor">

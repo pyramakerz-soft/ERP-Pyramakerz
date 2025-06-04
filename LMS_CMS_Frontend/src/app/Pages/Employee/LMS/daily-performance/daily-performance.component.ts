@@ -143,6 +143,7 @@ export class DailyPerformanceComponent {
       this.DomainName
     ).subscribe((d: any) => {
       this.students = d.students;
+      console.log(d)
       this.RatedStudent = [];
 
       for (let student of this.students) {
@@ -151,6 +152,12 @@ export class DailyPerformanceComponent {
           studentID: student.id,
           subjectID: this.SelectedSubjectId,
           comment: "",
+          subjectName: "",
+          className: "",
+          gradeName: "",
+          studentName: "",
+          gradeID: 0,
+          classID: 0,
           insertedByUserId: 0,
           studentPerformance: this.PerformanceTypesSelected.map(type => ({
             id: 0,
@@ -272,6 +279,7 @@ export class DailyPerformanceComponent {
        this.IsStudentPerformance=false
       } 
       else{
+        this.isLoading= true
         this.StudentPerformanceServ.Add(this.RatedStudent, this.DomainName).subscribe((d) => {
           if (this.SelectedMedalId && this.selectedStudentIds.length) {
             this.selectedStudentIds.forEach(element => {
@@ -281,6 +289,7 @@ export class DailyPerformanceComponent {
               this.studentMedalServ.Add(this.studentMedal, this.DomainName).subscribe((d) => { })
             });
           }
+          this.isLoading= false
           Swal.fire({
             icon: 'success',
             title: 'Done',

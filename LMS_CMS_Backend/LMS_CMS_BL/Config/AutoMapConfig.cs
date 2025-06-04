@@ -354,6 +354,7 @@ namespace LMS_CMS_BL.Config
                .ForMember(dest => dest.ParentName, opt => opt.MapFrom(src => src.Parent.en_name))
                .ForMember(dest => dest.RegistrationFormName, opt => opt.MapFrom(src => src.RegistrationForm.Name));
 
+            CreateMap<RegisterationFormSubmittionGetDTO ,RegisterationFormSubmittion>();
             CreateMap<RegisterationFormSubmittion, RegisterationFormSubmittionGetDTO>()
               .ForMember(dest => dest.RegistrationFormParentName, opt => opt.MapFrom(src => src.RegisterationFormParent.StudentName))
               .ForMember(dest => dest.CategoryFieldName, opt => opt.MapFrom(src => src.CategoryField.EnName))
@@ -698,36 +699,8 @@ namespace LMS_CMS_BL.Config
                 .ForMember(dest => dest.StudentHygieneTypes, opt => opt.Ignore());
 
             CreateMap<StudentHygieneTypes, StudentHygieneTypesGetDTO>()
-                .ForMember(dest => dest.Student, opt => opt.MapFrom(src => src.Student.en_name))
-                .AfterMap(async (src, dest) =>
-                {
-                    if (src.HygieneTypes != null && _context != null)
-                    {
-                        foreach (var ht in src.HygieneTypes)
-                        {
-                            //var hygieneType = await _context.HygieneTypes.FirstOrDefaultAsync(h => h.Id == ht.Id);
-                            //if (hygieneType != null)
-                            //{
-                                dest.HygieneTypes.Add(ht);
-                            //}
-                        }
-                    }
-                });
-            CreateMap<StudentHygieneTypesAddDTO, StudentHygieneTypes>()
-                .AfterMap(async (src, dest) =>
-                {
-                    if (src.HygieneTypesIds != null && _context != null)
-                    {
-                        foreach (var ht in src.HygieneTypesIds)
-                        {
-                            var hygieneType = await _context.HygieneTypes.FirstOrDefaultAsync(h => h.Id == ht);
-                            if (hygieneType != null)
-                            {
-                                dest.HygieneTypes.Add(hygieneType);
-                            }
-                        }
-                    }
-                }); 
+                .ForMember(dest => dest.Student, opt => opt.MapFrom(src => src.Student.en_name));
+            CreateMap<StudentHygieneTypesAddDTO, StudentHygieneTypes>(); 
 
             CreateMap<FollowUpAddDTO, FollowUp>();
             CreateMap<FollowUp, FollowUpGetDTO>()
@@ -890,6 +863,7 @@ namespace LMS_CMS_BL.Config
             CreateMap<StudentMedal, StudentMedalGetDTO>()
                  .ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => src.Student.en_name))
                  .ForMember(dest => dest.MedalName, opt => opt.MapFrom(src => src.Medal.EnglishName))
+                 .ForMember(dest => dest.InsertedByUserName, opt => opt.MapFrom(src => src.InsertedByEmployee.en_name))
                  .ForMember(dest => dest.ImageLink, opt => opt.MapFrom(src => src.Medal.ImageLink));
 
             CreateMap<StudentMedalAddDTO, StudentMedal>();
@@ -976,6 +950,9 @@ namespace LMS_CMS_BL.Config
             CreateMap<StudentClassroomPutDTO, StudentClassroom>();
 
             CreateMap<StudentClassroomSubjectHidePutDTO, StudentClassroomSubject>();
+            CreateMap<StudentClassroomSubject, StudentClassroomSubjectGetDTO>()
+                .ForMember(dest => dest.SubjectEnglishName, opt => opt.MapFrom(src => src.Subject.en_name))
+                .ForMember(dest => dest.SubjectArabicName, opt => opt.MapFrom(src => src.Subject.ar_name));
         }
     } 
 }

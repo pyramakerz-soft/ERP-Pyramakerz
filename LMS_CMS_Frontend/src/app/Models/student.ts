@@ -10,16 +10,21 @@ export class Student {
         public mobile: string = '',
         public phone: string = '',
         public address: string = '',
+        public nationalID: string = '',
         public note: string = '',
-        public nationalityName: string = '',
+        public nationalityEnName: string = '',
         public currentAcademicYear: string = '',
         public currentGradeName: string = '',
         public accountNumberName: string = '',
         public accountNumberID :number =0,
         public nationality :number =0,
+        public registrationFormParentID :number =0,
         public email: string = '',
         public insertedByUserId :number =0,
         public genderName: string = '',
         public genderId :number =0,
+        public academicYearName: string = '',
+        public gradeName: string = '',
+        public className: string = '',
     ) {}
-}
+} 

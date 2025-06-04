@@ -31,7 +31,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpPost]
         [Authorize_Endpoint_(
-           allowedTypes: new[] { "octa", "employee" }
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Evaluation" }
         )]
         public IActionResult Add(EvaluationEmployeeAddDTO newEval)
         {
@@ -165,7 +166,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         
         [HttpPut("AddFeedback")]
         [Authorize_Endpoint_(
-           allowedTypes: new[] { "octa", "employee" }
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Received Evaluations" }
         )]
         public IActionResult AddFeedback(EvaluationEmployeeFeedbackAddDTO feedback)
         {
@@ -204,7 +206,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         
         [HttpGet("GetEvaluatorEvaluations/{evaluatorID}")]
         [Authorize_Endpoint_(
-           allowedTypes: new[] { "octa", "employee" }
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Created Evaluations" }
         )]
         public async Task<IActionResult> GetEvaluatorEvaluationsAsync(long evaluatorID)
         {
@@ -248,7 +251,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         
         [HttpGet("GetEvaluatedEvaluations/{evaluatedID}")]
         [Authorize_Endpoint_(
-           allowedTypes: new[] { "octa", "employee" }
+           allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Received Evaluations" }
         )]
         public async Task<IActionResult> GetEvaluatedEvaluationsAsync(long evaluatedID)
         {
@@ -292,7 +296,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         
         [HttpGet("GetEvaluation/{evaluationID}")]
         [Authorize_Endpoint_(
-           allowedTypes: new[] { "octa", "employee" }
+           allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Evaluation" }
         )]
         public async Task<IActionResult> GetEvaluationById(long evaluationID)
         {

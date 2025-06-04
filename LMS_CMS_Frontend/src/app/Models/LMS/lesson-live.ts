@@ -11,5 +11,6 @@ export class LessonLive {
         public subjectEnglishName: string = '',
         public subjectID: number = 0,
         public subjectArabicName: string = '',
+        public insertedByUserId: number = 0,
     ) {}
 }

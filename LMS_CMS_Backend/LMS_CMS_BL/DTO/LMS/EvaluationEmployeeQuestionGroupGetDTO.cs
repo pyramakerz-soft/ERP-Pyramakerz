@@ -13,5 +13,7 @@ namespace LMS_CMS_BL.DTO.LMS
         public string EnglishTitle { get; set; }
         public string ArabicTitle { get; set; }
         public List<EvaluationEmployeeQuestionGetDTO> EvaluationEmployeeQuestions { get; set; }
+        public long? InsertedByUserId { get; set; }
+
     }
 }

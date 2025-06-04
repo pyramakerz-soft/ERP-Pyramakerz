@@ -13,17 +13,19 @@ import { FormsModule } from '@angular/forms';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
+import { Classroom } from '../../../../Models/LMS/classroom';
+import { SearchStudentComponent } from '../../../../Component/Employee/search-student/search-student.component';
+import { Student } from '../../../../Models/student';
 
 @Component({
   selector: 'app-classroom-students',
   standalone: true,
-  imports: [CommonModule, FormsModule, SearchComponent],
+  imports: [CommonModule, FormsModule, SearchComponent, SearchStudentComponent],
   templateUrl: './classroom-students.component.html',
   styleUrl: './classroom-students.component.css'
 })
 export class ClassroomStudentsComponent {
-
-classId:number = 0
+  classId:number = 0
   DomainName: string = '';
   UserID: number = 0; 
   User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
@@ -39,10 +41,21 @@ classId:number = 0
   AllowDeleteForOthers: boolean = false;
   
   ClassStudents:ClassroomStudent[] = []
-  ClasssStudent:ClassroomStudent = new ClassroomStudent() 
+  Classes:Classroom[] = []
+  ClasssStudent:ClassroomStudent = new ClassroomStudent()  
+  classroom:Classroom = new Classroom() 
   isLoading: boolean = false; 
   
   isDropdownOpen = false;
+
+
+  isModalOpen = false;
+  preSelectedYear: number | null = null;  
+  preSelectedGrade: number | null = null;  
+  preSelectedClassroom: number | null = null;  
+  hiddenInputs: string[] = ['classroom' ];
+  hiddenColumns: string[] = ['Actions' ];
+
   constructor(
     public account: AccountService, 
     public ApiServ: ApiService, 
@@ -77,6 +90,7 @@ classId:number = 0
     this.DomainName = this.ApiServ.GetHeader(); 
 
     this.getStudentsByClassID()
+    this.getClassByID()
   }
 
   GoToClass() {
@@ -102,8 +116,132 @@ classId:number = 0
     )
   }
 
-  OpenModal(id?:number){
+  getStudentClassByID(id:number){
+    this.ClasssStudent = new ClassroomStudent()
+    this.classroomStudentService.GetById(id, this.DomainName).subscribe(
+      data =>{ 
+        this.ClasssStudent = data  
+      }
+    )
+  }
 
+  getClassByID(){
+    this.classroomService.GetByID(this.classId, this.DomainName).subscribe(
+      data => {
+        this.classroom = data
+        this.preSelectedGrade = this.classroom.gradeID
+        this.preSelectedYear = this.classroom.academicYearID 
+      }
+    )
+  }
+
+  getClassesByGradeID(){
+    this.Classes = []
+    this.classroomService.GetByGradeId(this.classroom.gradeID, this.DomainName).subscribe(
+      data =>{
+        this.Classes = data
+      }
+    )
+  }
+
+  OpenModal() {
+    this.isModalOpen = true;
+  } 
+
+  handleStudentSelected(students: number[]) {
+    var classroomStudentNew = new ClassroomStudent()
+    classroomStudentNew.classID = this.classId
+
+    students.forEach(student => {
+      classroomStudentNew.studentIDs.push(student)
+    }); 
+     
+    this.classroomStudentService.Add(classroomStudentNew, this.DomainName).subscribe(
+      data => { 
+        let studentsAlreadyInClass: any[] = []; 
+        if (typeof data === 'string') {
+          try {
+            studentsAlreadyInClass = JSON.parse(data);
+          } catch (e) {
+            console.error('Invalid JSON response', e);
+            return;
+          }
+        } else if (Array.isArray(data)) {
+          studentsAlreadyInClass = data;
+        }
+
+        if (studentsAlreadyInClass.length > 0) {
+          const namesList = studentsAlreadyInClass.map(s => s.user_Name || s.name || 'Unnamed Student');
+          const formattedNames = namesList.join('<br/>');
+
+          Swal.fire({
+            icon: 'warning',
+            title: 'Some students are already in a class',
+            html: `<strong>The following students are already assigned:</strong><br/><br/>${formattedNames}`,
+            confirmButtonText: 'OK'
+          });
+        }
+
+        this.getStudentsByClassID()
+      },
+      error => {
+        console.error('Error:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'An error occurred',
+          text: 'Could not add students. Please try again later.',
+        });
+      }
+    )
+  }
+  
+  OpenTransferModal(id:number){
+    document.getElementById("Transfer_Modal")?.classList.remove("hidden");
+    document.getElementById("Transfer_Modal")?.classList.add("flex");
+
+    this.getStudentClassByID(id)
+    this.getClassesByGradeID()
+  }
+  
+  OpenHideModal(id:number){
+    document.getElementById("Hide_Modal")?.classList.remove("hidden");
+    document.getElementById("Hide_Modal")?.classList.add("flex");
+
+    this.getStudentClassByID(id) 
+  }
+
+  closeModal(){
+    document.getElementById("Transfer_Modal")?.classList.remove("flex");
+    document.getElementById("Transfer_Modal")?.classList.add("hidden");
+
+    document.getElementById("Hide_Modal")?.classList.remove("flex");
+    document.getElementById("Hide_Modal")?.classList.add("hidden");
+    
+    this.isModalOpen = false;
+  }
+
+  SaveTransfer(){
+    this.isLoading = true
+    this.classroomStudentService.TransferFromClassToClass(this.ClasssStudent, this.DomainName).subscribe(
+      data => {
+        this.isLoading = false
+        this.closeModal()
+        this.getStudentsByClassID()
+      }
+    )
+  }  
+
+  SaveHideSubject(){
+    this.isLoading = true 
+    this.ClasssStudent.studentClassroomSubjects.forEach(studentClassroomSubject => {
+      this.classroomStudentService.IsSubjectHide(studentClassroomSubject, this.DomainName).subscribe(
+        data => {
+          this.isLoading = false
+          this.closeModal()
+          this.getStudentsByClassID()
+        }
+      )
+    });
   }
 
   deleteStudent(id:number){

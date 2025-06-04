@@ -5,6 +5,7 @@ using LMS_CMS_DAL.Models.Domains.ClinicModule;
 using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,6 +13,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
 {
     [Route("api/with-domain/[controller]")]
     [ApiController]
+    [Authorize]
     public class FollowUpController : ControllerBase
     {
         private readonly DbContextFactoryService _dbContextFactory;

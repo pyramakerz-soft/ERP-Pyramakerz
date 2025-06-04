@@ -17,6 +17,8 @@ namespace LMS_CMS_BL.DTO.LMS
         public long MedalID { get; set; }
         public string MedalName { get; set; }
         public string ImageLink { get; set; }
-
+        public DateTime? InsertedAt { get; set; }
+        public long? InsertedByUserId { get; set; }
+        public string InsertedByUserName { get; set; }
     }
 }

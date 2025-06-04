@@ -17,5 +17,6 @@ namespace LMS_CMS_BL.DTO.LMS
         public long ClassID { get; set; }
         public string ClassName { get; set; }
         public long InsertedByUserId { get; set; }
+        public ICollection<StudentClassroomSubjectGetDTO> StudentClassroomSubjects { get; set; } = new HashSet<StudentClassroomSubjectGetDTO>();
     }
 }

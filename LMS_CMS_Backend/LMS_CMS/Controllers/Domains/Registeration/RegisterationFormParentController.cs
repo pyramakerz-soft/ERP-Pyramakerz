@@ -247,7 +247,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                 return Unauthorized("User ID or Type claim not found.");
             }
             RegisterationFormParent registerationFormParent = await Unit_Of_Work.registerationFormParent_Repository.FindByIncludesAsync(
-                    r => r.IsDeleted != true && r.ID == id,
+                    r => r.ID == id,
                     query => query.Include(emp => emp.RegisterationFormState),
                     query => query.Include(emp => emp.RegistrationForm),
                     query => query.Include(emp => emp.Parent));

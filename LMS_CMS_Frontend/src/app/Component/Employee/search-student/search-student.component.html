@@ -1,0 +1,217 @@
+<div class="fixed inset-0 z-50 justify-center items-center content-center w-full h-full bg-black/50">
+    <div class="bg-white rounded-2xl p-12 w-[90%] max-h-[90%] overflow-auto m-auto">
+        <div class="flex justify-between items-center">
+            <h1 class="font-semibold text-2xl leading-9">Search For Students</h1>
+        </div>
+
+        <div class="flex flex-col mt-6 mb-4 bg-[#F7F7F7] rounded-3xl p-4">
+            <div class="flex items-center flex-wrap justify-between">
+                <div class="flex flex-col mb-4" *ngIf="!isInputHidden('id')">
+                    <label class="mb-2 primaryTxt" for="id">ID</label>
+                    <input id="id" type="text"
+                        class="rounded-lg border border-solid border-gray-300 px-4 py-3 min-w-[220px]"
+                        placeholder="Enter ID Number" [(ngModel)]="id"
+                        (input)="validateNumberForSearch($event, 'id'); HideTable()" />
+                </div>
+                <div class="flex flex-col mb-4" *ngIf="!isInputHidden('name')">
+                    <label class="mb-2 primaryTxt" for="name">Name</label>
+                    <input id="name" type="text"
+                        class="rounded-lg border border-solid border-gray-300 px-4 py-3 min-w-[220px]"
+                        placeholder="Enter Name" [(ngModel)]="name" (input)="HideTable()" />
+                </div>
+                <div class="flex flex-col mb-4" *ngIf="!isInputHidden('nationalID')">
+                    <label class="mb-2 primaryTxt" for="national">National ID</label>
+                    <input id="national" type="text"
+                        class="rounded-lg border border-solid border-gray-300 px-4 py-3 min-w-[220px]"
+                        placeholder="Enter National Number" [(ngModel)]="nationalID"
+                        (input)="validateNumberForSearch($event, 'nationalID'); HideTable()" />
+                </div>
+                <div class="flex flex-col mb-4" *ngIf="!isInputHidden('academicYear')">
+                    <label class="mb-2 primaryTxt" for="Year">Academic Year</label>
+                    <select
+                        class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto min-w-[220px]"
+                        id="Year" [disabled]="isYearDisabled()" [(ngModel)]="selectedYear"
+                        (change)="onYearChange(); HideTable()">
+                        <option [value]="null" disabled selected hidden>Choose Year</option>
+                        <option *ngFor="let year of AcademicYears" [value]="year.id">{{ year.name }}</option>
+                        <option *ngIf="AcademicYears.length === 0" disabled selected>No Data Found</option>
+                    </select>
+                </div>
+                <div class="flex flex-col mb-4" *ngIf="!isInputHidden('grade')">
+                    <label class="mb-2 primaryTxt" for="grade">Grade</label>
+                    <select
+                        class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto min-w-[220px]"
+                        id="grade" [disabled]="isGradeDisabled()" [(ngModel)]="selectedGrade"
+                        (change)="onGradeChange(); HideTable()">
+                        <option [value]="null" disabled selected hidden>Choose Grade</option>
+                        <option *ngFor="let grade of Grades" [value]="grade.id">{{ grade.name }}
+                        </option>
+                        <option *ngIf="Grades.length === 0" disabled selected>No Data Found</option>
+                    </select>
+                </div>
+                <div class="flex flex-col mb-4" *ngIf="!isInputHidden('classroom')">
+                    <label class="mb-2" for="classroom"
+                        [ngClass]="{ 'text-gray-400': !selectedYear && !selectedGrade, 'primaryTxt': selectedYear || selectedGrade }">Classroom</label>
+                    <select
+                        class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto min-w-[220px]"
+                        id="classroom" [(ngModel)]="selectedClassroom"
+                        [disabled]="(!selectedYear && !selectedGrade) || isClassroomDisabled()"
+                        [ngClass]="{ 'bg-[#EBEBEB]': !selectedYear && !selectedGrade }" (change)="HideTable()">
+                        <option [value]="null" disabled selected hidden>Choose Classroom</option>
+                        <option *ngFor="let classroom of Classrooms" [value]="classroom.id">{{ classroom.name }}
+                        </option>
+                        <option *ngIf="Classrooms.length === 0" disabled selected>No Data Found</option>
+                    </select>
+                </div>
+
+                <div>
+                    <button class="secondaryBg rounded-lg px-4 py-3 text-white mt-5" (click)="Search()">
+                        Search
+                    </button>
+                </div>
+            </div>
+
+            <div *ngIf="IsTableShown" class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
+                <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
+                    <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+                        <tr>
+                            <th
+                                class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                <div class="flex items-center space-x-2">
+                                    <input type="checkbox" [checked]="selectAll()" (change)="toggleSelectAll($event)" />
+                                    <p>
+                                        ID
+                                    </p>
+                                </div>
+                            </th>
+                            <th
+                                class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                Name
+                            </th>
+                            <th
+                                class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                National ID
+                            </th>
+                            <th
+                                class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                Academic Year
+                            </th>
+                            <th
+                                class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                Grade
+                            </th>
+                            <th
+                                class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                Classroom
+                            </th>
+                            <th *ngIf="!isColumnHidden('Actions')"
+                                class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- No Data Row -->
+                        <tr *ngIf="students.length === 0">
+                            <td id="data-cell" 
+                                class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                                No Data Found
+                            </td>
+                        </tr>
+
+                        <!-- Data Rows -->
+                        <tr *ngFor="let row of students; let i = index"
+                            [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
+                            class="border-t border-gray-300 text-xs md:text-sm">
+                            <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                <div class="flex items-center space-x-2">
+                                    <input type="checkbox" [checked]="isSelected(row.id)"
+                                        (change)="onCheckboxChange($event, row.id)" />
+                                    <p>
+                                        {{ row.id }}
+                                    </p>
+                                </div>
+                            </td>
+                            <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ row.en_name }}
+                            </td>
+                            <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ row.nationalID }}
+                            </td>
+                            <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ row.academicYearName }}
+                            </td>
+                            <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ row.gradeName }}
+                            </td>
+                            <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ row.className }}
+                            </td>
+                            <td *ngIf="!isColumnHidden('Actions')" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                 <div class="flex space-x-4">
+                                    <button  (click)="Delete(row.id)">
+                                        <i class="fa-regular fa-trash-can"></i>
+                                    </button>
+                                    <button   (click)="Edit(row.id ,row.registrationFormParentID)">
+                                        <i class="fa-solid fa-pencil"></i>
+                                    </button>
+                                    <button  (click)="View(row.registrationFormParentID)">
+                                        <i class="fa-solid fa-eye"></i> 
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-5 flex justify-end space-x-4">
+                <button class="secondaryBorder secondaryTxt bg-white rounded-lg px-4 py-3" (click)="close()">
+                    Cancel
+                </button>
+                <button *ngIf="!IsDoneHidden" [disabled]="!IsStudentsSelected" class="secondaryBg text-white rounded-lg px-4 py-3"
+                    [ngClass]="{'secondaryBg text-white': IsStudentsSelected, 'bg-gray-300 text-gray-200': !IsStudentsSelected}"
+                    (click)="closeWithData()">
+                    Done
+                </button>
+            </div>
+        </div>
+
+        <div *ngIf="IsTableShown" class="mt-8 flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <button class="flex items-center space-x-2 rounded-lg border py-3 px-4"
+                    (click)="changeCurrentPage(CurrentPage-1)" [disabled]="CurrentPage === 1 || students.length == 0"
+                    [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === 1 || students.length == 0}">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <p>Previous</p>
+                </button>
+                <div class="flex">
+                    <div *ngFor="let page of [].constructor(TotalPages); let i = index"
+                        class="rounded-lg py-[10px] w-[40px]"
+                        [ngClass]="{'border': i+1 == CurrentPage || students.length == 0}"
+                        (click)="changeCurrentPage(i+1)">
+                        <p class="text-center">{{ i + 1 }}</p>
+                    </div>
+                </div>
+                <button class="flex items-center space-x-2 rounded-lg border py-3 px-4"
+                    (click)="changeCurrentPage(CurrentPage+1)"
+                    [disabled]="CurrentPage === TotalPages || students.length == 0"
+                    [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === TotalPages || students.length == 0}">
+                    <p>Next</p>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+
+            <div class="flex items-center space-x-2">
+                <input (input)="validateNumber($event)" class="rounded-lg border py-3 px-4 w-[73px]"
+                    [(ngModel)]="PageSize" min="1" (input)="validatePageSize($event)"
+                    (ngModelChange)="changeCurrentPage(CurrentPage)">
+                <p>items Per Page</p>
+            </div>
+
+            <div>
+                <p>{{CurrentPage}} of {{TotalPages}} pages ({{TotalRecords}} Item)</p>
+            </div>
+        </div>
+    </div>
+</div>

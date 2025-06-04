@@ -5,7 +5,7 @@
 <div class="flex justify-start mt-5 flex-wrap p-3">
     <div class="w-[31%] mr-5 mb-3">
         <label for="Schools" class=" mb-2 text-sm font-medium text-gray-900">School <span class="text-red-500 text-sm">*</span></label>
-        <select [(ngModel)]="SchoolId" (change)="SchoolIsChanged($event)"
+        <select id="Schools" [(ngModel)]="SchoolId" (change)="SchoolIsChanged($event)"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5">
             <option [value]="0" disabled hidden>Select a School</option>
             <option *ngFor="let S of Schools" [value]="S.id">{{ S.name }}</option>
@@ -13,8 +13,18 @@
     </div>
 
     <div class="w-[31%] mr-5 mb-3">
+        <label for="AcYear" class=" mb-2 text-sm font-medium" [ngClass]="{ 'text-gray-400': SchoolId == 0, 'text-gray-900': SchoolId }">Academic Year <span class="text-red-500 text-sm">*</span></label>
+        <select id="AcYear" [(ngModel)]="YearId" [disabled]="SchoolId == 0" (change)="YearIsChanged($event)"
+        [ngClass]="{ 'bg-[#EBEBEB]': SchoolId == 0 }"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5">
+            <option [value]="0" disabled hidden>Select a Year</option>
+            <option *ngFor="let S of AcademicYears" [value]="S.id">{{ S.name }}</option>
+        </select>
+    </div>
+
+    <div class="w-[31%] mr-5 mb-3">
         <label for="Sections" class=" mb-2 text-sm font-medium" [ngClass]="{ 'text-gray-400': SchoolId == 0, 'text-gray-900': SchoolId }">Section <span class="text-red-500 text-sm">*</span></label>
-        <select [(ngModel)]="SectionId" [disabled]="SchoolId == 0" (change)="SectionIsChanged($event)"
+        <select id="Sections" [(ngModel)]="SectionId" [disabled]="SchoolId == 0" (change)="SectionIsChanged($event)"
         [ngClass]="{ 'bg-[#EBEBEB]': SchoolId == 0 }"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5">
             <option [value]="0" disabled hidden>Select a Section</option>
@@ -24,7 +34,7 @@
 
     <div class="w-[31%] mr-5 mb-3">
         <label for="Grades" class=" mb-2 text-sm font-medium" [ngClass]="{ 'text-gray-400': SectionId == 0, 'text-gray-900': SectionId }">Grade <span class="text-red-500 text-sm">*</span></label>
-        <select [(ngModel)]="GradeId" [disabled]="SectionId == 0" (change)="GradeIsChanged($event)"
+        <select id="Grades" [(ngModel)]="GradeId" [disabled]="SectionId == 0" (change)="GradeIsChanged($event)"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5">
             <option [value]="0" disabled hidden>Select a Grade</option>
             <option *ngFor="let S of Grades" [value]="S.id">{{ S.name }}</option>
@@ -32,8 +42,8 @@
     </div>
 
     <div class="w-[42%] mr-5 mb-3">
-        <label for="ClassRooms" class=" mb-2 text-sm font-medium " [ngClass]="{ 'text-gray-400': !IsOpenStudentandClassroom || GradeId == 0, 'text-gray-900': IsOpenStudentandClassroom }">Classroom</label>
-        <select [(ngModel)]="ClassRoomId" (change)="ClassRoomIsChanged($event)" [disabled]="!IsOpenStudentandClassroom"
+        <label for="ClassRooms" class=" mb-2 text-sm font-medium " [ngClass]="{ 'text-gray-400': GradeId == 0 || YearId == 0, 'text-gray-900': YearId != 0 && GradeId != 0 }">Classroom</label>
+        <select id="ClassRooms" [(ngModel)]="ClassRoomId" (change)="ClassRoomIsChanged($event)" [disabled]="GradeId == 0 || YearId == 0"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5">
             <option [value]="0" disabled hidden>Select a Classroom</option>
             <option *ngFor="let S of ClassRooms" [value]="S.id">{{ S.name }}</option>
@@ -42,7 +52,7 @@
 
     <div class="w-[42%] mr-5 mb-3">
         <label for="Students" class=" mb-2 text-sm font-medium" [ngClass]="{ 'text-gray-400': ClassRoomId == 0, 'text-gray-900': ClassRoomId }">Students</label>
-        <select [(ngModel)]="StudentId" (change)="StudentChanged($event)" [disabled]="ClassRoomId == 0"
+        <select id="Students" [(ngModel)]="StudentId" (change)="StudentChanged($event)" [disabled]="ClassRoomId == 0"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5">
             <option [value]="0" disabled hidden>Select a Student</option>
             <option *ngFor="let S of Students" [value]="S.id">{{ S.en_name }}</option>
@@ -52,8 +62,8 @@
     <div class="w-[10%] mr-5 mb-3 flex items-center">
         <button  (click)="Search()" 
         class="font-medium text-white px-5 py-3 rounded-lg mt-4" 
-        [ngClass]="{'bg-gray-300': (SchoolId == 0 || SectionId == 0 || GradeId == 0), 'secondaryBg':(SchoolId != 0 && SectionId != 0 && GradeId != 0)}"
-        [disabled]="SchoolId == 0 || SectionId == 0 || GradeId == 0">
+        [ngClass]="{'bg-gray-300': (SchoolId == 0 || SectionId == 0 || GradeId == 0 || YearId == 0), 'secondaryBg':(SchoolId != 0 && SectionId != 0 && GradeId != 0 && YearId != 0)}"
+        [disabled]="SchoolId == 0 || SectionId == 0 || GradeId == 0 || YearId == 0">
             Search
         </button>
     </div>
@@ -86,17 +96,7 @@
         <input type="date" [(ngModel)]="Fees.date" (ngModelChange)="onInputValueChange({ field: 'date', value: $event })"
             class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2" placeholder="Enter date">
         <span *ngIf="validationErrors['date']" class="text-red-500 ml-3 font-normal">{{ validationErrors["date"]}}</span>
-    </div>
-
-    <div class="w-[22%] mr-5 mb-3">
-        <label for="academicYear" class=" mb-2 text-sm font-medium text-gray-900">Academic Year</label>
-        <select [(ngModel)]="Fees.academicYearId"  (ngModelChange)="onInputValueChange({ field: 'academicYearId', value: $event })"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5">
-            <option [value]="0" disabled hidden>Select a Year</option>
-            <option *ngFor="let S of academicYear" [value]="S.id">{{ S.name }}</option>
-        </select>
-        <span *ngIf="validationErrors['academicYearId']" class="text-red-500 ml-3 font-normal">{{ validationErrors["academicYearId"]}}</span>
-    </div>
+    </div> 
 
     <div class="w-[20%] mr-5 mb-3">
         <label class="mb-2 text-sm font-medium text-gray-900">Amount</label>
@@ -160,10 +160,7 @@
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         Date
-                    </th>
-                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Academic Year
-                    </th>
+                    </th> 
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         Actions
                     </th>
@@ -172,7 +169,7 @@
             <tbody>
                 <!-- No Data Row -->
                 <tr *ngIf="TableData.length === 0">
-                    <td colspan="10"
+                    <td colspan="9"
                         class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
                         No Data Found
                     </td>
@@ -227,17 +224,7 @@
                             <input type="date" [(ngModel)]="row.date" class="w-full border border-gray-300 px-2 py-1 rounded-md">
                         </ng-container>
                         <ng-template #textModeDate>{{ row.date }}</ng-template>
-                    </td>
-                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        <ng-container *ngIf="editingRowId === row.feeActivationID; else textModeAcademicYear">
-                            <select [(ngModel)]="row.academicYearId" class="w-full border border-gray-300 px-2 py-1 rounded-md">
-                                <option *ngFor="let S of academicYear" [value]="S.id" >
-                                    {{ S.name }}
-                                </option>
-                            </select>
-                        </ng-container>
-                        <ng-template #textModeAcademicYear>{{ row.academicYearName }}</ng-template>
-                    </td>
+                    </td> 
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0" *ngIf="row.feeActivationID != 0 && row.feeActivationID != null">
                         <div class="flex space-x-4">
                             <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)" (click)="Delete(row.feeActivationID)">

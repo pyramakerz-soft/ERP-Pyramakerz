@@ -84,8 +84,8 @@
 
 
 <!-- Add-Edit Grade Modal -->
-<div id="Add_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
-    <div class="bg-white rounded-2xl p-12 w-[669px]">
+<div id="Add_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 flex">
+  <div class="bg-white rounded-2xl p-12 w-[669px] max-h-[90vh] overflow-y-auto">
         <div class="flex justify-between items-center">
             <h1 *ngIf="!editGrade" class="font-semibold text-2xl leading-9">Create Grade</h1>
             <h1 *ngIf="editGrade" class="font-semibold text-2xl leading-9">Edit Grade</h1>

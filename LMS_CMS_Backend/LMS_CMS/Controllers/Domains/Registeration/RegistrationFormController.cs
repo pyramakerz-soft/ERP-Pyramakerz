@@ -22,11 +22,14 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
     {
         private readonly DbContextFactoryService _dbContextFactory;
         IMapper mapper;
+        private readonly CreateStudentService _createStudentService;
 
-        public RegistrationFormController(DbContextFactoryService dbContextFactory, IMapper mapper)
+        public RegistrationFormController(DbContextFactoryService dbContextFactory, IMapper mapper, CreateStudentService createStudentService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
+            _createStudentService = createStudentService;
+
         }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -351,7 +354,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                 registerationFormParent.InsertedByOctaId = userId;
             }
 
-            Unit_Of_Work.registerationFormParent_Repository.Add(registerationFormParent);
+            Unit_Of_Work.registerationFormParent_Repository.Add(registerationFormParent); ////////////////////////////////////////////////////////////////////////////////////
             Unit_Of_Work.SaveChanges();
 
             registerationFormParent.StudentName = $"{registerationFormParent.StudentName.Replace(" ", "_")}_{registerationFormParent.ID}";
@@ -365,6 +368,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
             var fileFolder = "";
 
             /// If File
+            RegisterationFormSubmittion registerationFormSubmittion = new RegisterationFormSubmittion();
             if (filesFieldCat != null)
             {
                 for (int j = 0; j < filesFieldCat.Count; j++)
@@ -388,7 +392,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                             await filesFieldCat[j].SelectedFile.CopyToAsync(stream);
                         }
 
-                        RegisterationFormSubmittion registerationFormSubmittion = new RegisterationFormSubmittion
+                        registerationFormSubmittion = new RegisterationFormSubmittion
                         {
                             RegisterationFormParentID = newRegisterationFormParentID,
                             CategoryFieldID = filesFieldCat[j].CategoryFieldID,
@@ -412,7 +416,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                 }
                 for (int i = 0; i < registerationFormParentAddDTO.RegisterationFormSubmittions.Count; i++)
                 {
-                    RegisterationFormSubmittion registerationFormSubmittion = new RegisterationFormSubmittion
+                    registerationFormSubmittion = new RegisterationFormSubmittion////////////////////////////////////////////////////////////////////////
                     {
                         RegisterationFormParentID = newRegisterationFormParentID,
                         CategoryFieldID = registerationFormParentAddDTO.RegisterationFormSubmittions[i].CategoryFieldID,
@@ -435,7 +439,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
             {
                 for (int i = 0; i < registerationFormParentAddDTO.RegisterationFormSubmittions.Count; i++)
                 {
-                    RegisterationFormSubmittion registerationFormSubmittion = new RegisterationFormSubmittion
+                    registerationFormSubmittion = new RegisterationFormSubmittion
                     {
                         RegisterationFormParentID = newRegisterationFormParentID,
                         CategoryFieldID = registerationFormParentAddDTO.RegisterationFormSubmittions[i].CategoryFieldID,
@@ -456,6 +460,68 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
             }
 
             Unit_Of_Work.SaveChanges();
+
+            ///////////////////////////////////////////////// if it used for create student 
+            
+            if(registerationFormParentAddDTO.IsStudent == true)
+            {
+
+                /// 1) create Student 
+                if (registerationFormParent.AcademicYearID == null ||
+                    registerationFormParent.GradeID == null)
+                {
+                    return StatusCode(400, "Missing required fields in registration form parent.");
+                }
+
+                long AccademicYearId = Convert.ToInt64(registerationFormParent.AcademicYearID);
+                long GradeId = Convert.ToInt64(registerationFormParent.GradeID);
+
+                AcademicYear academicYear2 = Unit_Of_Work.academicYear_Repository
+                    .First_Or_Default(a => a.ID == AccademicYearId && a.IsDeleted != true);
+                if (academicYear2 == null)
+                {
+                    return NotFound("Academic year not found.");
+                }
+
+                StudentGetDTO studentDto = await _createStudentService.CreateStudentDtoObj(Unit_Of_Work, registerationFormParent.ID);
+                Student student = await _createStudentService.CreateNewStudent(Unit_Of_Work, studentDto, userTypeClaim, userId, academicYear2.ID);
+
+                /// 2) create StudentClassroom
+                Classroom classroomid = Unit_Of_Work.classroom_Repository.First_Or_Default(s => s.GradeID == GradeId && s.IsDeleted != true && s.AcademicYearID == AccademicYearId);
+                StudentClassroom studentClassroom = new StudentClassroom
+                {
+                    StudentID = student.ID,
+                    ClassID = classroomid.ID,
+                    InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone),
+                    InsertedByOctaId = userTypeClaim == "octa" ? userId : null,
+                    InsertedByUserId = userTypeClaim == "employee" ? userId : null
+                };
+                Unit_Of_Work.studentClassroom_Repository.Add(studentClassroom);
+
+                /// 3) create StudentClassroom
+                StudentGrade studentGrade = new StudentGrade
+                {
+                    StudentID = student.ID,
+                    GradeID = GradeId,
+                    AcademicYearID = AccademicYearId,
+                    InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone),
+                    InsertedByOctaId = userTypeClaim == "octa" ? userId : null,
+                    InsertedByUserId = userTypeClaim == "employee" ? userId : null
+                };
+                Unit_Of_Work.studentGrade_Repository.Add(studentGrade);
+                await Unit_Of_Work.SaveChangesAsync();
+
+                /// 4) Delete Registeration Form Parent
+                registerationFormParent.IsDeleted = true;
+                Unit_Of_Work.registerationFormParent_Repository.Update(registerationFormParent);
+                Unit_Of_Work.SaveChanges();
+
+                /// 5) Delete Registeration Form Submittion
+                registerationFormSubmittion.IsDeleted = true;
+                Unit_Of_Work.registerationFormSubmittion_Repository.Update(registerationFormSubmittion);
+                Unit_Of_Work.SaveChanges();
+
+            }
 
             return Ok(registerationFormParentAddDTO);
         }

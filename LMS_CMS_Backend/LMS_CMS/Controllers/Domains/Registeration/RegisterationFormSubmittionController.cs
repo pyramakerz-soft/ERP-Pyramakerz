@@ -22,12 +22,15 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
         private readonly DbContextFactoryService _dbContextFactory;
         IMapper mapper;
         private readonly UOW _Unit_Of_Work_Octa;
+        private readonly CheckPageAccessService _checkPageAccessService;
 
-        public RegisterationFormSubmittionController(DbContextFactoryService dbContextFactory, IMapper mapper, UOW unit_Of_Work_Octa)
+
+        public RegisterationFormSubmittionController(DbContextFactoryService dbContextFactory, IMapper mapper, UOW unit_Of_Work_Octa, CheckPageAccessService checkPageAccessService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _Unit_Of_Work_Octa = unit_Of_Work_Octa;
+            _checkPageAccessService = checkPageAccessService;   
         }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -81,6 +84,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                         if (gender != null)
                         {
                             item.TextAnswer = gender.Name;
+                            item.SelectedFieldOptionID = gender.ID;
+
                         }
                         break;
 
@@ -89,6 +94,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                         if (nationality != null)
                         {
                             item.TextAnswer = nationality.Name;
+                            item.SelectedFieldOptionID = nationality.ID;
+
                         }
                         break;
 
@@ -97,6 +104,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                         if (school != null)
                         {
                             item.TextAnswer = school.Name;
+                            item.SelectedFieldOptionID = school.ID;
+
                         }
                         break;
 
@@ -105,6 +114,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                         if (year != null)
                         {
                             item.TextAnswer = year.Name;
+                            item.SelectedFieldOptionID = year.ID;
                         }
                         break;
 
@@ -113,6 +123,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                         if (grade != null)
                         {
                             item.TextAnswer = grade.Name;
+                            item.SelectedFieldOptionID = grade.ID;
                         }
                         break;
 
@@ -123,6 +134,207 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
 
 
             return Ok(registerationFormSubmittionDTO);
+        }
+
+        //////////////////////////////////////////////////////////
+
+        [HttpPost]
+        [Authorize_Endpoint_(
+          allowedTypes: new[] { "octa", "employee" },
+          allowEdit: 1,
+          pages: new[] { "Registration Confirmation" , "Student"}
+         )]
+        public IActionResult Add(List<RegisterationFormSubmittionGetDTO> newData)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID, Type claim not found.");
+            }
+            foreach (var item in newData)
+            {
+                RegisterationFormSubmittion registerationFormSubmittion = new RegisterationFormSubmittion();
+
+                if (item.SelectedFieldOptionID == 0) 
+                {
+                    item.SelectedFieldOptionID = null;
+                }
+                mapper.Map(item, registerationFormSubmittion);
+
+                TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+                registerationFormSubmittion.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                if (userTypeClaim == "octa")
+                {
+                    registerationFormSubmittion.InsertedByOctaId = userId;
+                }
+                else if (userTypeClaim == "employee")
+                {
+                    registerationFormSubmittion.InsertedByUserId = userId;
+                }
+
+                Unit_Of_Work.registerationFormSubmittion_Repository.Add(registerationFormSubmittion);
+                
+            }
+
+            Unit_Of_Work.SaveChanges();
+            return Ok();
+        }
+
+        //////////////////////////////////////////////////////////
+
+        [HttpPut("ForSpacificStudent/{StudentId}")]
+        [Authorize_Endpoint_(
+          allowedTypes: new[] { "octa", "employee" },
+          allowEdit: 1,
+          pages: new[] { "Registration Confirmation" , "Student" }
+         )]
+        public IActionResult Edit(long StudentId ,List<RegisterationFormSubmittionGetDTO> newData)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID, Type claim not found.");
+            }
+
+            Student student = Unit_Of_Work.student_Repository.First_Or_Default(s=>s.ID== StudentId && s.IsDeleted!= true);
+            if (student == null)
+            {
+                return BadRequest("No Student with this ID");
+            }
+            RegisterationFormParent registerationFormParent = Unit_Of_Work.registerationFormParent_Repository.First_Or_Default(r => r.ID == student.RegistrationFormParentID);
+            if (registerationFormParent == null)
+            {
+                return BadRequest("No RegisterationFormParent with this ID");
+            }
+            foreach (var item in newData)
+            {
+                RegisterationFormSubmittion registerationFormSubmittion = Unit_Of_Work.registerationFormSubmittion_Repository.First_Or_Default(r => r.ID == item.ID && r.IsDeleted != true);
+                if (registerationFormSubmittion == null)
+                {
+                    return NotFound("Registeration Form Submittion Test not found");
+                }
+                if (userTypeClaim == "employee")
+                {
+                    IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Registration Confirmation", roleId, userId, registerationFormSubmittion);
+                    IActionResult? accessCheckStudents = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Student", roleId, userId, registerationFormSubmittion);
+                    if (accessCheck != null && accessCheckStudents != null)
+                    {
+                        return accessCheck;
+                    }
+                }
+                if (item.SelectedFieldOptionID == 0)
+                {
+                    item.SelectedFieldOptionID = null;
+                }
+                mapper.Map(item, registerationFormSubmittion);
+
+                TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+                registerationFormSubmittion.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                if (userTypeClaim == "octa")
+                {
+                    registerationFormSubmittion.UpdatedByOctaId = userId;
+                    if (registerationFormSubmittion.UpdatedByUserId != null)
+                    {
+                        registerationFormSubmittion.UpdatedByUserId = null;
+                    }
+                }
+                else if (userTypeClaim == "employee")
+                {
+                    registerationFormSubmittion.UpdatedByUserId = userId;
+                    if (registerationFormSubmittion.UpdatedByOctaId != null)
+                    {
+                        registerationFormSubmittion.UpdatedByOctaId = null;
+                    }
+                }
+                Unit_Of_Work.registerationFormSubmittion_Repository.Update(registerationFormSubmittion);
+
+                if (item.CategoryFieldID ==  1) 
+                {
+                    student.en_name = item.TextAnswer;
+                    registerationFormParent.StudentEnName = item.TextAnswer;
+                }
+                if (item.CategoryFieldID == 2)
+                {
+                    student.ar_name = item.TextAnswer;
+                    registerationFormParent.StudentArName = item.TextAnswer;
+                }
+                if (item.CategoryFieldID == 3)
+                {
+                    student.GenderId = Convert.ToInt64(item?.TextAnswer);
+                }
+                if (item.CategoryFieldID == 4)
+                {
+                    student.DateOfBirth = item.TextAnswer;
+                }
+                if (item.CategoryFieldID == 5)
+                {
+                    student.Nationality = Convert.ToInt64(item?.TextAnswer);
+                }
+                if (item.CategoryFieldID == 6)
+                {
+                    student.Religion = item.TextAnswer;
+                }
+                if (item.CategoryFieldID == 11)
+                {
+                    student.NationalID = item.TextAnswer;
+                }
+                if (item.CategoryFieldID == 13)
+                {
+                    student.PreviousSchool = item.TextAnswer;
+                }
+                if (item.CategoryFieldID == 12)
+                {
+                    student.PassportNo = item.TextAnswer;
+                }
+                if (item.CategoryFieldID == 22)
+                {
+                    student.MotherName = item.TextAnswer;
+                }
+                if (item.CategoryFieldID == 23)
+                {
+                    student.MotherPassportNo = item.TextAnswer;
+                }
+                if (item.CategoryFieldID == 24)
+                {
+                    student.MotherNationalID = item.TextAnswer;
+                }
+                if (item.CategoryFieldID == 25)
+                {
+                    student.MotherQualification = item.TextAnswer;
+                }
+                if (item.CategoryFieldID == 26)
+                {
+                    student.MotherWorkPlace = item.TextAnswer;
+                }
+                if (item.CategoryFieldID == 27)
+                {
+                    student.MotherMobile = item.TextAnswer;
+                }
+                if (item.CategoryFieldID == 28)
+                {
+                    student.MotherEmail = item.TextAnswer;
+                }
+
+            }
+
+            Unit_Of_Work.student_Repository.Update(student);
+            Unit_Of_Work.registerationFormParent_Repository.Update(registerationFormParent);
+            Unit_Of_Work.SaveChanges();
+            return Ok();
         }
     }
 }

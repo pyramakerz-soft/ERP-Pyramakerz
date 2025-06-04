@@ -32,10 +32,9 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
-        allowedTypes: new[] { "octa", "employee" }
-        //,
-        //pages: new[] { "" }
-    )]
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Student Medal" }
+        )]
         public async Task<IActionResult> GetByStudentId(long id)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -55,6 +54,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             types =await Unit_Of_Work.studentMedal_Repository.Select_All_With_IncludesById<StudentMedal>(
                     sem => sem.IsDeleted != true && sem.StudentID==id,
                      query => query.Include(emp => emp.Student),
+                     query => query.Include(emp => emp.InsertedByEmployee),
                     query => query.Include(emp => emp.Medal));
 
             if (types == null || types.Count == 0)
@@ -72,9 +72,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpPost]
         [Authorize_Endpoint_(
-         allowedTypes: new[] { "octa", "employee" }
-         // ,
-         // pages: new[] { "" }
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Student Medal" }
          )]
         public async Task<IActionResult> Add(StudentMedalAddDTO type)
         {

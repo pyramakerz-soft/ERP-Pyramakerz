@@ -22,5 +22,7 @@ namespace LMS_CMS_BL.DTO.LMS
         public long SubjectID { get; set; }
         public string SubjectEnglishName { get; set; }
         public string SubjectArabicName { get; set; }
+        public long? InsertedByUserId { get; set; }
+
     }
 }

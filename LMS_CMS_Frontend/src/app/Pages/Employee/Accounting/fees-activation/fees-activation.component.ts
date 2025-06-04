@@ -62,25 +62,24 @@ export class FeesActivationComponent {
 
   SchoolId: number = 0;
   SectionId: number = 0;
+  YearId: number = 0;
   GradeId: number = 0;
   ClassRoomId: number = 0;
   StudentId: number = 0;
 
   Schools: School[] = []
   Sections: Section[] = [];
+  AcademicYears: AcademicYear[] = [];
   Grades: Grade[] = [];
   ClassRooms: Classroom[] = [];
  
   Students: Student[] = []; 
 
   FeesTypes: TuitionFeesType[] = []
-  FeesDiscountType: TuitionDiscountTypes[] = []
-  academicYear: AcademicYear[] = []
+  FeesDiscountType: TuitionDiscountTypes[] = [] 
   DiscountPercentage: number|null = null
 
-  IsSearch: boolean = false
-
-  IsOpenStudentandClassroom: boolean = false
+  IsSearch: boolean = false 
 
   IsEdit = false;
   editingRowId: any = null; 
@@ -96,6 +95,7 @@ export class FeesActivationComponent {
     public feesActivationServ: FeesActivationService,
     public SchoolServ: SchoolService,
     public SectionServ: SectionService,
+    public acadimicYearService: AcadimicYearService,
     public GradeServ: GradeService,
     public ClassRoomServ: ClassroomService,
     public studentService: StudentService,
@@ -129,7 +129,7 @@ export class FeesActivationComponent {
 
   GetAllFeesData() {
     this.TableData = []
-    this.feesActivationServ.Get(this.GradeId, this.ClassRoomId, this.StudentId, this.DomainName).subscribe((d) => {
+    this.feesActivationServ.Get(this.GradeId, this.YearId, this.ClassRoomId, this.StudentId, this.DomainName).subscribe((d) => {
       this.TableData = d;  
     })
   }
@@ -202,6 +202,13 @@ export class FeesActivationComponent {
     })
   }
 
+  GetAllYearsBySchoolID() {
+    this.AcademicYears = []
+    this.acadimicYearService.GetBySchoolId(this.SchoolId, this.DomainName).subscribe((d) => {
+      this.AcademicYears = d
+    })
+  }
+
   GetAllGradeBySectionId() {
     this.Grades = []
     this.GradeServ.GetBySectionId(this.SectionId, this.DomainName).subscribe((d) => {
@@ -209,9 +216,9 @@ export class FeesActivationComponent {
     })
   }
 
-  GetAllClassRoomByGradeID() {
+  GetAllClassRoomByGradeAndAcademicYearID() {
     this.ClassRooms = []
-    this.ClassRoomServ.GetByGradeId(this.GradeId, this.DomainName).subscribe((d) => {
+    this.ClassRoomServ.GetByGradeAndAcYearId(this.GradeId, this.YearId, this.DomainName).subscribe((d) => {
       this.ClassRooms = d
     })
   }
@@ -221,14 +228,16 @@ export class FeesActivationComponent {
     this.SchoolId = Number((event.target as HTMLSelectElement).value);
     this.SectionId = 0;
     this.GradeId = 0;
+    this.YearId = 0;
     this.ClassRoomId = 0;
     this.StudentId = 0;
     this.Sections = [];
     this.Grades = [];
+    this.AcademicYears = [];
     this.ClassRooms = [];
     this.Students = [];
     this.GetAllSectionsBySchoolID(); 
-    this.IsOpenStudentandClassroom = false; 
+    this.GetAllYearsBySchoolID();  
   }
 
   SectionIsChanged(event: Event) {
@@ -240,8 +249,17 @@ export class FeesActivationComponent {
     this.ClassRooms = [];
     this.Students = [];
     this.GetAllGradeBySectionId(); 
-    this.IsSearch = false
-    this.IsOpenStudentandClassroom = false; 
+    this.IsSearch = false 
+  }
+
+  YearIsChanged(event: Event) {
+    this.YearId = Number((event.target as HTMLSelectElement).value);
+    this.ClassRoomId = 0;
+    this.StudentId = 0;
+    this.ClassRooms = [];
+    this.Students = []; 
+    this.GetAllClassRoomByGradeAndAcademicYearID();
+    this.IsSearch = false 
   }
 
   GradeIsChanged(event: Event) {
@@ -250,9 +268,8 @@ export class FeesActivationComponent {
     this.StudentId = 0;
     this.ClassRooms = [];
     this.Students = [];
-    this.GetAllClassRoomByGradeID();
-    this.IsSearch = false
-    this.IsOpenStudentandClassroom = true 
+    this.GetAllClassRoomByGradeAndAcademicYearID();
+    this.IsSearch = false 
   }
 
   ClassRoomIsChanged(event: Event) {
@@ -277,8 +294,7 @@ export class FeesActivationComponent {
   } 
 
   Search() { 
-    this.IsSearch = true
-    this.GetAllAcademicYear()
+    this.IsSearch = true 
     this.GetAllFeesData()
   }
 
@@ -292,21 +308,14 @@ export class FeesActivationComponent {
     this.FeesDiscountTypeServ.Get(this.DomainName).subscribe((d) => {
       this.FeesDiscountType = d
     })
-  }
-
-  GetAllAcademicYear() {
-    this.academicYear = []
-    this.AcademicYearServ.GetBySchoolId(this.SchoolId, this.DomainName).subscribe((d) => {
-      this.academicYear = d
-    })
-  }
+  } 
 
   async Activate() {
     if(this.isFormValid()){
       this.FeesForAdd = [];
       this.TableData.forEach(stu => {
         var fee: FeesActivationAddPut = new FeesActivationAddPut();
-        fee.academicYearId = this.Fees.academicYearId;
+        fee.academicYearId = this.YearId;
         fee.amount = this.Fees.amount;
         fee.date = this.Fees.date;
         fee.discount = this.Fees.discount;
@@ -347,7 +356,8 @@ export class FeesActivationComponent {
   }
 
   async CalculateNet() {
-   await this.CalculateDiscountFromPercentage()
+    this.Fees.net = this.Fees.amount
+    await this.CalculateDiscountFromPercentage()
     this.Fees.net = (this.Fees.amount?this.Fees.amount:0) - (this.Fees.discount?this.Fees.discount:0);
   }
 
@@ -391,8 +401,7 @@ export class FeesActivationComponent {
           if (
             field == 'feeTypeID' ||
             field == 'date' ||
-            field == 'amount' ||
-            field == 'academicYearId'
+            field == 'amount'
           ) {
             this.validationErrors[field] = `*${this.capitalizeField(
               field

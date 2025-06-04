@@ -196,7 +196,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             allowEdit: 1 ,
-        pages: new[] { "EvaluationTemplateGroup" }
+            pages: new[] { "EvaluationTemplateGroup" }
         )]
         public async Task<IActionResult> EditAsync(EvaluationTemplateGroupEditDTO newData)
         {

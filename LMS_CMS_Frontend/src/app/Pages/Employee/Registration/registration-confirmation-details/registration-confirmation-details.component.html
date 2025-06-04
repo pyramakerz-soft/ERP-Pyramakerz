@@ -1,7 +1,11 @@
 <div class="flex justify-between items-center">
     <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
-        <i class="fa-solid fa-chevron-left cursor-pointer rtl:rotate-180" (click)="moveToRegistrationConfirmation()"></i>
-        <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ 'Registration Confirmation' | translate }}</h1>
+        <i class="fa-solid fa-chevron-left cursor-pointer rtl:rotate-180"
+            (click)="moveToRegistrationConfirmation()"></i>
+        <h1 *ngIf="path=='Registration Confirmation'" class="primaryTxt font-semibold text-2xl leading-9">{{
+            'Registration Confirmation' | translate }}</h1>
+        <h1 *ngIf="path=='Student View'" class="primaryTxt font-semibold text-2xl leading-9">{{ 'Student View' |
+            translate }}</h1>
     </div>
 </div>
 
@@ -16,9 +20,12 @@
                 <div class="bg-[#EBEBEB] p-2 rounded-lg">
                     <p class="text-[#6F6F6F] font-semibold text-sm mb-3">{{ isRtl ? field.arName : field.enName }}</p>
                     <div *ngFor="let answer of registrationFormSubmissionConfirmationData">
-                        <p *ngIf="answer.categoryFieldID == field.id && answer.selectedFieldOptionID == 0 && field.fieldTypeID != 6" class="font-normal text-sm">{{answer.textAnswer}}</p>
-                        <p *ngIf="answer.categoryFieldID == field.id && answer.selectedFieldOptionID != 0 && field.fieldTypeID != 6" class="font-normal text-sm">{{answer.selectedFieldOptionName}}</p>
-                        <span *ngIf="answer.categoryFieldID == field.id && field.fieldTypeID == 6" class="font-normal text-sm">
+                        <p *ngIf="answer.categoryFieldID == field.id && answer.selectedFieldOptionID == 0 && field.fieldTypeID != 6"
+                            class="font-normal text-sm">{{answer.textAnswer}}</p>
+                        <p *ngIf="answer.categoryFieldID == field.id && answer.selectedFieldOptionID != 0 && field.fieldTypeID != 6"
+                            class="font-normal text-sm">{{answer.textAnswer}}</p>
+                        <span *ngIf="answer.categoryFieldID == field.id && field.fieldTypeID == 6"
+                            class="font-normal text-sm">
                             <a href={{answer.textAnswer}} class="secondaryTxt" target="_blank">
                                 {{ 'Click To See' | translate }}
                             </a>
@@ -30,10 +37,8 @@
     </div>
 </div>
 
-<hr>
-
-
-<div class="mt-5" *ngIf="AllowEdit && IsAllowEdit(RegisterationFormParentData.insertedByUserId)">
+<div class="mt-5"
+    *ngIf="path=='Registration Confirmation' &&AllowEdit && IsAllowEdit(RegisterationFormParentData.insertedByUserId)">
     <p class="text-base font-medium mb-2">{{ 'Registration Form Action' | translate }}</p>
     <div class="flex justify-between space-x-5 rtl:space-x-reverse">
         <select id="state" [(ngModel)]="selectedState"

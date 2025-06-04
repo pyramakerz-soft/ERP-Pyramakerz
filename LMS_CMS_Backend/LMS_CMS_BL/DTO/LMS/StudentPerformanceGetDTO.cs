@@ -18,5 +18,6 @@ namespace LMS_CMS_BL.DTO.LMS
         public string PerformanceTypeName { get; set; }
         public long SubjectID { get; set; }
         public string SubjectName { get; set; }
+        public long? InsertedByUserId { get; set; }
     }
 }

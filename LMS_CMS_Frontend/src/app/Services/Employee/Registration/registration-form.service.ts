@@ -39,6 +39,7 @@ export class RegistrationFormService {
 
     const formData = new FormData();
     formData.append("registerationFormParentAddDTO.RegistrationFormID", registrationForm.registrationFormID.toString());
+    formData.append("registerationFormParentAddDTO.IsStudent", registrationForm.isStudent.toString());
 
     registrationForm.registerationFormSubmittions.forEach((field: any, index) => {
       if(field.textAnswer != null){

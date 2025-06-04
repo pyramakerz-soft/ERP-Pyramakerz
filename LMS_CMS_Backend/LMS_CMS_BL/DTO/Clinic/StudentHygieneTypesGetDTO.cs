@@ -11,7 +11,7 @@ namespace LMS_CMS_BL.DTO.Clinic
         public string Student { get; set; }
         //public long HygieneTypeId { get; set; }
         //public string HygieneType { get; set; }n
-        public ICollection<HygieneType>? HygieneTypes { get; set; }
+        public ICollection<HygieneTypeGetDTO>? HygieneTypes { get; set; }
         public bool Attendance { get; set; }
         public bool SelectAll { get; set; }
         public string? Comment { get; set; }

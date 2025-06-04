@@ -12,5 +12,6 @@ namespace LMS_CMS_BL.DTO.LMS
         public long ID { get; set; }
         public string EnglishName { get; set; }
         public string ArabicName { get; set; }
+        public long? InsertedByUserId { get; set; }
     }
 }

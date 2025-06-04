@@ -1,5 +1,7 @@
 ﻿using Amazon.S3;
 using Amazon.SecretsManager;
+using AutoMapper;
+using LMS_CMS_BL.DTO.Inventory;
 using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains.Inventory;
 using LMS_CMS_DAL.Models.Domains.Zatca;
@@ -26,14 +28,16 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
         private readonly IConfiguration _config;
         private readonly IAmazonSecretsManager _secretsManager;
         private readonly DomainService _domainService;
+        private readonly IMapper _mapper;
 
-        public ZatcaController(ICsrGenerator csrGenerator, DbContextFactoryService dbContextFactory, IConfiguration config, IAmazonSecretsManager secretsManager, DomainService domainService)
+        public ZatcaController(ICsrGenerator csrGenerator, DbContextFactoryService dbContextFactory, IConfiguration config, IAmazonSecretsManager secretsManager, DomainService domainService, IMapper mapper)
         {
             _csrGenerator = csrGenerator;
             _dbContextFactory = dbContextFactory;
             _config = config;
             _secretsManager = secretsManager;
             _domainService = domainService;
+            _mapper = mapper;
         }
 
         #region Generate PCSID
@@ -204,7 +208,6 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
         #region Report Invoice
         [HttpPost("ReportInvoice")]
-        //#region Report Invoice
         //[HttpPost("ReportInvoice")]
         //[Authorize_Endpoint_(
         //    allowedTypes: new[] { "octa", "employee" },
@@ -217,31 +220,63 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
             InventoryMaster master = await Unit_Of_Work.inventoryMaster_Repository.FindByIncludesAsync(
                 d => d.ID == masterId &&
                 d.IsDeleted != true &&
-                (d.FlagId == 11 || d.FlagId == 12) && 
-                d.IsDeleted != true,
+                (d.FlagId == 11 || d.FlagId == 12),
                 query => query.Include(s => s.School)
             );
 
             if (master is null)
                 return NotFound("Invoice not found.");
 
-            DateTime invDate = DateTime.Parse(master.Date);
-            string date = invDate.ToString("yyyy-MM-dd");
-            string time = invDate.ToString("HH:mm:ss").Replace(":", "");
+            SchoolPCs pc = Unit_Of_Work.schoolPCs_Repository.First_Or_Default(
+                d => d.ID == master.SchoolPCId && d.IsDeleted != true
+            );
+
+            if (pc == null)
+            {
+                return NotFound("PC not found.");
+            }
+
+            if (pc.CertificateDate == null)
+            {
+                return BadRequest("Please Create the Certificate.");
+            }
+
+            if (pc.CertificateDate.Value <= DateOnly.FromDateTime(DateTime.Now.AddDays(1)))
+            {
+                return BadRequest("Please Update the Certificate.");
+            }
+
+            string dateTime = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ");
+            string date = DateTime.Parse(dateTime).ToString("yyyy-MM-dd");
+            string time = DateTime.Parse(dateTime).ToString("HH:mm:ss").Replace(":", "");
 
             string xmlPath = string.Empty;
             if (master.FlagId == 11)
-                xmlPath = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/XMLInvoices/{master.School.CRN}_{date.Replace("-", "")}T{time}_{date}-{master.StoreID}_{master.FlagId}_{master.ID}.xml");
+                xmlPath = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/XMLInvoices");
 
             if (master.FlagId == 12)
-                xmlPath = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/XMLCredits/{master.School.CRN}_{date.Replace("-", "")}T{time}_{date}-{master.StoreID}_{master.FlagId}_{master.ID}.xml");
+                xmlPath = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/XMLCredits");
 
             if (master.IsValid == 0 || master.IsValid == null)
             {
-                string pcName = $"PC{master.SchoolPCId}{master.School.ID}";
+                string pcName = $"PC{master.SchoolPCId}{master.School?.ID}";
 
                 AmazonS3Client secretS3Client = new AmazonS3Client();
                 S3Service s3 = new S3Service(_config, "AWS:Region");
+
+                InventoryMaster lastMaster = Unit_Of_Work.inventoryMaster_Repository
+                    .SelectQuery<InventoryMaster>(i => i.IsDeleted != true && (i.FlagId == 11 || i.FlagId == 12))
+                    .OrderByDescending(i => i.ID)
+                    .FirstOrDefault();
+
+                string lastInvoiceHash = "";
+                if (master.FlagId == 11 || master.FlagId == 12)
+                    lastInvoiceHash = lastMaster?.InvoiceHash;
+
+                bool result = await ZatcaServices.GenerateInvoiceXML(xmlPath, master, lastInvoiceHash, s3, dateTime);
+
+                if (!result)
+                    return BadRequest("Failed to generate XML file.");
 
                 string certContent = await s3.GetSecret($"{pcName}PCSID");
 
@@ -290,6 +325,8 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                 if (!uploaded)
                     return BadRequest("Uploading Invoice failed!");
 
+                xmlPath = Path.Combine(xmlPath, $"{master.School.CRN}_{date.Replace("-", "")}T{time.Replace(":", "")}_{date}-{master.StoreID}_{master.FlagId}_{master.ID}.xml");
+
                 if (System.IO.File.Exists(xmlPath))
                 {
                     System.IO.File.Delete(xmlPath);
@@ -313,8 +350,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
             List<InventoryMaster> masters = await Unit_Of_Work.inventoryMaster_Repository.Select_All_With_IncludesById<List<InventoryMaster>>(
                 d => d.SchoolId == schoolId && 
                 d.IsDeleted != true &&
-                (d.FlagId == 11 || d.FlagId == 12) && 
-                d.IsDeleted != true,
+                (d.FlagId == 11 || d.FlagId == 12),
                 query => query.Include(s => s.School)
             );
 
@@ -332,65 +368,105 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
             foreach (var master in masters)
             {
+                SchoolPCs pc = Unit_Of_Work.schoolPCs_Repository.First_Or_Default(
+                d => d.ID == master.SchoolPCId && d.IsDeleted != true
+                );
+
+                if (pc == null)
+                {
+                    return NotFound("PC not found.");
+                }
+
+                if (pc.CertificateDate == null)
+                {
+                    return BadRequest("Please Create the Certificate.");
+                }
+
+                if (pc.CertificateDate.Value <= DateOnly.FromDateTime(DateTime.Now.AddDays(1)))
+                {
+                    return BadRequest("Please Update the Certificate.");
+                }
+
                 if (master.IsValid == 0 || master.IsValid == null)
                 {
                     try
                     {
-                        DateTime invDate = DateTime.Parse(master.Date);
-                        string date = invDate.ToString("yyyy-MM-dd");
-                        string time = invDate.ToString("HH:mm:ss").Replace(":", "");
+                        string dateTime = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ");
+                        string date = DateTime.Parse(dateTime).ToString("yyyy-MM-dd");
+                        string time = DateTime.Parse(dateTime).ToString("HH:mm:ss").Replace(":", "");
 
                         string xmlPath = string.Empty;
                         if (master.FlagId == 11)
-                            xmlPath = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/XMLInvoices/{master.School.CRN}_{date.Replace("-", "")}T{time}_{date}-{master.StoreID}_{master.FlagId}_{master.ID}.xml");
+                            xmlPath = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/XMLInvoices");
 
                         if (master.FlagId == 12)
-                            xmlPath = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/XMLCredits/{master.School.CRN}_{date.Replace("-", "")}T{time}_{date}-{master.StoreID}_{master.FlagId}_{master.ID}.xml");
+                            xmlPath = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/XMLCredits");
 
-                        string pcName = $"PC{master.SchoolPCId}{master.School.ID}";
-
-                        AmazonS3Client secretS3Client = new AmazonS3Client();
-                        S3Service s3Secret = new S3Service(_config, "AWS:Region");
-
-                        string certContent = await s3Secret.GetSecret($"{pcName}PCSID");
-
-                        dynamic certObject = JsonConvert.DeserializeObject(certContent);
-                        string token = certObject.binarySecurityToken;
-                        string secret = certObject.secret;
-
-                        HttpResponseMessage response = await ZatcaServices.InvoiceReporting(xmlPath, token, secret, _config);
-
-                        string responseContent = await response.Content.ReadAsStringAsync();
-                        dynamic responseJson = JsonConvert.DeserializeObject(responseContent);
-                        master.Status = responseJson.reportingStatus;
-
-                        if (response.IsSuccessStatusCode)
+                        if (master.IsValid == 0 || master.IsValid == null)
                         {
-                            master.IsValid = 1;
-                        }
-                        else
-                        {
-                            master.IsValid = 0;
-                        }
-                        Unit_Of_Work.inventoryMaster_Repository.Update(master);
+                            string pcName = $"PC{master.SchoolPCId}{master.School?.ID}";
 
-                        AmazonS3Client amazonS3Client = new AmazonS3Client();
-                        S3Service s3 = new S3Service(amazonS3Client, _config, "AWS:Bucket", "AWS:Folder");
+                            AmazonS3Client secretS3Client = new AmazonS3Client();
+                            S3Service s3 = new S3Service(_config, "AWS:Region");
 
-                        string subDirectory = string.Empty;
-                        if (master.FlagId == 11)
-                            subDirectory = "Invoices/";
-                        else if (master.FlagId == 12)
-                            subDirectory = "Credits/";
+                            InventoryMaster lastMaster = Unit_Of_Work.inventoryMaster_Repository
+                                .SelectQuery<InventoryMaster>(i => i.IsDeleted != true && (i.FlagId == 11 || i.FlagId == 12))
+                                .OrderByDescending(i => i.ID)
+                                .FirstOrDefault();
 
-                        bool uploaded = await s3.UploadAsync(xmlPath, subDirectory, $"{domain}/{subDomain}");
+                            string lastInvoiceHash = "";
+                            if (master.FlagId == 11 || master.FlagId == 12)
+                                lastInvoiceHash = lastMaster?.InvoiceHash;
 
-                        if (!uploaded)
-                            return BadRequest("Uploading Invoice failed!");
+                            bool result = await ZatcaServices.GenerateInvoiceXML(xmlPath, master, lastInvoiceHash, s3, dateTime);
 
-                        if (System.IO.File.Exists(xmlPath))
-                        {
-                            System.IO.File.Delete(xmlPath);
+                            if (!result)
+                                return BadRequest("Failed to generate XML file.");
+
+                            string certContent = await s3.GetSecret($"{pcName}PCSID");
+
+                            dynamic certObject = JsonConvert.DeserializeObject(certContent);
+                            string token = certObject.binarySecurityToken;
+                            string secret = certObject.secret;
+
+                            HttpResponseMessage response = await ZatcaServices.InvoiceReporting(xmlPath, token, secret, _config);
+                            response.EnsureSuccessStatusCode();
+
+                            string responseContent = await response.Content.ReadAsStringAsync();
+                            dynamic responseJson = JsonConvert.DeserializeObject(responseContent);
+                            master.Status = responseJson.reportingStatus;
+
+                            if (response.IsSuccessStatusCode)
+                            {
+                                master.IsValid = 1;
+                            }
+                            else
+                            {
+                                master.IsValid = 0;
+                            }
+
+                            Unit_Of_Work.inventoryMaster_Repository.Update(master);
+                            Unit_Of_Work.SaveChanges();
+
+                            S3Service s3Client = new S3Service(secretS3Client, _config, "AWS:Bucket", "AWS:Folder");
+
+                            string subDirectory = string.Empty;
+                            if (master.FlagId == 11)
+                                subDirectory = "Invoices/";
+                            else if (master.FlagId == 12)
+                                subDirectory = "Credits/";
+
+                            bool uploaded = await s3Client.UploadAsync(xmlPath, subDirectory, $"{domain}/{subDomain}");
+
+                            if (!uploaded)
+                                return BadRequest("Uploading Invoice failed!");
+
+                            xmlPath = Path.Combine(xmlPath, $"{master.School.CRN}_{date.Replace("-", "")}T{time.Replace(":", "")}_{date}-{master.StoreID}_{master.FlagId}_{master.ID}.xml");
+
+                            if (System.IO.File.Exists(xmlPath))
+                            {
+                                System.IO.File.Delete(xmlPath);
+                            }
                         }
                     }
                     catch (Exception ex)
@@ -406,7 +482,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
         #endregion
 
         #region Filter by School and Date
-        [HttpGet("FilterBySchoolAndDate")]
+        [HttpPost("FilterBySchoolAndDate")]
         //[Authorize_Endpoint_(
         //    allowedTypes: new[] { "octa", "employee" },
         //    pages: new[] { "" }
@@ -421,7 +497,8 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
             List<InventoryMaster> mastersBySchool = await Unit_Of_Work.inventoryMaster_Repository.Select_All_With_IncludesById_Pagination<InventoryMaster>(
                 d => d.SchoolId == schoolId && 
                 d.IsDeleted != true &&
-                d.FlagId == 11 || d.FlagId == 12)
+                d.FlagId == 11 || d.FlagId == 12,
+                query => query.Include(x => x.InventoryDetails).ThenInclude(x => x.ShopItem))
                 .ToListAsync();
 
             if (mastersBySchool is null || mastersBySchool.Count == 0)
@@ -433,7 +510,9 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                 .Take(pageSize)
                 .ToList();
 
-            return Ok(mastersByDate);
+            List<InventoryMasterGetDTO> DTO = _mapper.Map<List<InventoryMasterGetDTO>>(mastersByDate);
+
+            return Ok(DTO);
         }
         #endregion
     }
