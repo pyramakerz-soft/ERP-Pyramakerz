@@ -48,6 +48,7 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public ICollection<ClassroomSubject> ClassroomSubjects { get; set; } = new HashSet<ClassroomSubject>();
         public ICollection<SubjectSupervisor> SubjectSupervisors { get; set; } = new HashSet<SubjectSupervisor>();
         public ICollection<StudentClassroomSubject> StudentClassroomSubjects { get; set; } = new HashSet<StudentClassroomSubject>();
+        public ICollection<Assignment> Assignments { get; set; } = new HashSet<Assignment>();
     }
 }
 

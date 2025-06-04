@@ -19,5 +19,8 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public long ClassID { get; set; } 
         public Classroom Classroom { get; set; }
         public ICollection<StudentClassroomSubject> StudentClassroomSubjects { get; set; } = new HashSet<StudentClassroomSubject>();
+        public ICollection<AssignmentClassroomStudent> AssignmentClassroomStudents { get; set; } = new HashSet<AssignmentClassroomStudent>();
+        public ICollection<DirectMarkClassroomStudent> DirectMarkClassroomStudents { get; set; } = new HashSet<DirectMarkClassroomStudent>();
+        public ICollection<AssignmentStudent> AssignmentStudents { get; set; } = new HashSet<AssignmentStudent>();
     }
 }

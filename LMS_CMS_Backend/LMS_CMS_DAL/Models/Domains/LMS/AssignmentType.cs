@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace LMS_CMS_DAL.Models.Domains.LMS
 {
-    public class WeightType : AuditableEntity
+    public class AssignmentType
     {
         [Key]
         public long ID { get; set; }
@@ -18,7 +18,6 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         [StringLength(100, ErrorMessage = "Arabic Name cannot be longer than 100 characters.")]
         public string ArabicName { get; set; }
 
-        public ICollection<SubjectWeightType> SubjectWeightTypes { get; set; } = new HashSet<SubjectWeightType>();
-        public ICollection<DirectMarkClassroomStudent> DirectMarkClassroomStudents { get; set; } = new HashSet<DirectMarkClassroomStudent>();
+        public ICollection<Assignment> Assignments { get; set; } = new HashSet<Assignment>();
     }
 }
