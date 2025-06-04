@@ -111,7 +111,7 @@ export class DailyPerformanceMasterComponent {
   Done() {
     this.IsView = true;
     this.students = [];
-
+      
   }
 
   getAllSubject() {
