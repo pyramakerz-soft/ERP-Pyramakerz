@@ -138,33 +138,49 @@ onSchoolChange() {
   this.grades = [];
   this.classes = [];
   this.students = [];
-  // Clear school validation error
   delete this.validationErrors['school'];
   this.loadGrades();
+  if (this.checkFormValidity()) {
+    this.errorMessage = null;
+  }
 }
 
 onGradeChange() {
   this.selectedClass = null;
   this.classes = [];
   this.students = [];
-  // Clear grade validation error
   delete this.validationErrors['grade'];
   this.loadClasses();
+  if (this.checkFormValidity()) {
+    this.errorMessage = null;
+  }
 }
 
 onClassChange() {
   this.students = [];
-  // Clear class validation error
   delete this.validationErrors['class'];
   this.loadStudents();
+  if (this.checkFormValidity()) {
+    this.errorMessage = null;
+  }
 }
 onDateChange() {
-  // Clear date validation error
   delete this.validationErrors['date'];
+  if (this.checkFormValidity()) {
+    this.errorMessage = null;
+  }
 }
 
+// Add this method to check form validity
+checkFormValidity(): boolean {
+  return !!this.selectedSchool && 
+         !!this.selectedGrade && 
+         !!this.selectedClass && 
+         !!this.selectedDate;
+}
+
+// Update the validateForm method
 validateForm(): boolean {
-  // Clear all errors before re-validating
   this.validationErrors = {};
   let isValid = true;
 
@@ -183,6 +199,11 @@ validateForm(): boolean {
   if (!this.selectedDate) {
     this.validationErrors['date'] = '*Date is required';
     isValid = false;
+  }
+
+  // Clear the general error message if form is valid
+  if (isValid) {
+    this.errorMessage = null;
   }
 
   return isValid;
@@ -231,8 +252,6 @@ saveHygieneForm() {
         this.errorMessage = 'Failed to save hygiene form.';
       },
     });
-  } else {
-    this.errorMessage = 'Please fill out all required fields.';
   }
 }
 
