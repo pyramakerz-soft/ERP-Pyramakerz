@@ -88,11 +88,11 @@ export class EmployeeAddEditComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     private router: Router,
     public EmpServ: EmployeeService,
-    public FloorServ: FloorService ,
-    public GradeServ: GradeService ,
-    public SubjectServ: SubjectService ,
+    public FloorServ: FloorService,
+    public GradeServ: GradeService,
+    public SubjectServ: SubjectService,
 
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -112,7 +112,7 @@ export class EmployeeAddEditComponent {
             this.DomainName
           ).subscribe(async (data) => {
             this.Data = data;
-            console.log(55,data);
+            console.log(55, data);
             this.Data.editedFiles = [];
             console.log(this.Data);
             if (data.files == null) {
@@ -121,8 +121,8 @@ export class EmployeeAddEditComponent {
             this.Data.id = this.EmpId;
             this.FloorServ.Get(this.DomainName).subscribe((data) => {
               this.floors = data;
-              if(this.Data.floorsSelected.length>0){
-                this.isFloorMonitor=true
+              if (this.Data.floorsSelected.length > 0) {
+                this.isFloorMonitor = true
                 this.floorsSelected = this.floors.filter((s) =>
                   this.Data.floorsSelected.includes(s.id)
                 );
@@ -130,8 +130,8 @@ export class EmployeeAddEditComponent {
             });
             this.GradeServ.Get(this.DomainName).subscribe((data) => {
               this.grades = data;
-              if(this.Data.gradeSelected.length>0){
-                this.isGradeSupervisor=true
+              if (this.Data.gradeSelected.length > 0) {
+                this.isGradeSupervisor = true
                 this.gradeSelected = this.grades.filter((s) =>
                   this.Data.gradeSelected.includes(s.id)
                 );
@@ -139,8 +139,8 @@ export class EmployeeAddEditComponent {
             });
             this.SubjectServ.Get(this.DomainName).subscribe((data) => {
               this.subject = data;
-              if(this.Data.subjectSelected.length>0){
-                this.isSubjectSupervisor=true
+              if (this.Data.subjectSelected.length > 0) {
+                this.isSubjectSupervisor = true
                 this.subjectSelected = this.subject.filter((s) =>
                   this.Data.subjectSelected.includes(s.id)
                 );
@@ -183,7 +183,7 @@ export class EmployeeAddEditComponent {
     this.SubjectServ.Get(this.DomainName).subscribe((data) => {
       this.subject = data;
     });
-  } 
+  }
 
   GetRole() {
     this.RoleServ.Get_Roles(this.DomainName).subscribe((data) => {
@@ -495,13 +495,29 @@ export class EmployeeAddEditComponent {
     const index = this.floorsSelected.findIndex((tag) => tag.id === id);
     if (index === -1) return; // Tag not found
     const removed = this.floorsSelected.splice(index, 1)[0];
+    if (this.floorsSelected.length == 0) {
+      this.isFloorMonitor = false
+    }
     if (this.mode === 'Edit' && removed?.id !== 0) {
       this.Data.deletedFloorsSelected = this.Data.deletedFloorsSelected || [];
       this.Data.deletedFloorsSelected.push(removed.id);
     }
+    this.dropdownOpen = false;
   }
 
-    //////////////////////////////////////////////////// Grade
+  onFloorsSupervisorChange(){
+     if (!this.isFloorMonitor) {
+      if (this.mode === 'Edit') {
+        this.Data.deletedFloorsSelected = this.Data.deletedFloorsSelected || [];
+        const selectedIds = (this.floorsSelected || []).map(s => s.id);
+        this.Data.deletedFloorsSelected.push(...selectedIds);
+      }
+      this.floorsSelected = [];
+    }
+    this.dropdownOpen = false;
+  }
+
+  //////////////////////////////////////////////////// Grade
 
   GradetoggleDropdown(): void {
     this.GradedropdownOpen = !this.GradedropdownOpen;
@@ -524,13 +540,28 @@ export class EmployeeAddEditComponent {
     const index = this.gradeSelected.findIndex((tag) => tag.id === id);
     if (index === -1) return; // Tag not found
     const removed = this.gradeSelected.splice(index, 1)[0];
+    if (this.gradeSelected.length == 0) {
+      this.isGradeSupervisor = false
+    }
     if (this.mode === 'Edit' && removed?.id !== 0) {
       this.Data.deletedGradesSelected = this.Data.deletedGradesSelected || [];
       this.Data.deletedGradesSelected.push(removed.id);
     }
+    this.GradedropdownOpen = false;
   }
 
-   //////////////////////////////////////////////////// Subject
+  onGradeSupervisorChange() {
+    if (!this.isGradeSupervisor) {
+      if (this.mode === 'Edit') {
+        this.Data.deletedGradesSelected = this.Data.deletedGradesSelected || [];
+        const selectedIds = (this.gradeSelected || []).map(s => s.id);
+        this.Data.deletedGradesSelected.push(...selectedIds);
+      }
+      this.gradeSelected = [];
+    }
+    this.GradedropdownOpen = false;
+  }
+  //////////////////////////////////////////////////// Subject
 
   SubjecttoggleDropdown(): void {
     this.SubjectdropdownOpen = !this.SubjectdropdownOpen;
@@ -553,9 +584,26 @@ export class EmployeeAddEditComponent {
     const index = this.subjectSelected.findIndex((tag) => tag.id === id);
     if (index === -1) return; // Tag not found
     const removed = this.subjectSelected.splice(index, 1)[0];
+    if (this.subjectSelected.length == 0) {
+      this.isSubjectSupervisor = false
+    }
     if (this.mode === 'Edit' && removed?.id !== 0) {
       this.Data.deletedSubjectsSelected = this.Data.deletedSubjectsSelected || [];
       this.Data.deletedSubjectsSelected.push(removed.id);
     }
+    this.SubjectdropdownOpen = false;
   }
+
+  onSubjectSupervisorChange(): void {
+    if (!this.isSubjectSupervisor) {
+      if (this.mode === 'Edit') {
+        this.Data.deletedSubjectsSelected = this.Data.deletedSubjectsSelected || [];
+        const selectedIds = (this.subjectSelected || []).map(s => s.id);
+        this.Data.deletedSubjectsSelected.push(...selectedIds);
+      }
+      this.subjectSelected = [];
+    }
+    this.SubjectdropdownOpen = false;
+  }
+
 }
