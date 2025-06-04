@@ -152,6 +152,12 @@ export class DailyPerformanceComponent {
           studentID: student.id,
           subjectID: this.SelectedSubjectId,
           comment: "",
+          subjectName: "",
+          className: "",
+          gradeName: "",
+          studentName: "",
+          gradeID: 0,
+          classID: 0,
           insertedByUserId: 0,
           studentPerformance: this.PerformanceTypesSelected.map(type => ({
             id: 0,
