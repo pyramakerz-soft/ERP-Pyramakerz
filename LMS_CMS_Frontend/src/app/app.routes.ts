@@ -380,6 +380,11 @@ export const routes: Routes = [
             { path: "Edit Student/:RegisterationFormParentId/:StudentId", component: RegistrationFormComponent, title: "Edit Student", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Student View/:Id", component: RegistrationConfirmationDetailsComponent, title: "Student View", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Daily Performance", component: DailyPerformanceMasterComponent, title: "Daily Performance", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
+
+            //ui for assignment lms
+            { path: "Assignment-Details-UI", component: AssignmentDetailsComponent, title: "Assignment Details", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Assignment-Edit-UI", component: AssignmentEditComponent, title: "Assignment Edit", canActivate: [noNavigateWithoutLoginGuard] },
+
         ]
     },
     {
@@ -409,8 +414,6 @@ export const routes: Routes = [
             { path: "Ecommerce/Order/:id", component: OrderItemsComponent, title: "Order Items" },
             { path: "Lesson Live", component: StudentLessonLiveComponent, title: "Lesson Live" },
 
-            { path: "Assignment-Details-UI", component: AssignmentDetailsComponent, title: "Assignment Details", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "Assignment-Edit-UI", component: AssignmentEditComponent, title: "Assignment Edit", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Subject-UI", component: SubjectsComponent, title: "Subjects", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Subject-Details-UI/:subjectId", component: SubjectDetailsComponent, title: "Subject-Details", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "week-details-UI/:subjectId/:weekId", component: WeekDetailsComponent, title: "Week Details", canActivate: [noNavigateWithoutLoginGuard] },
