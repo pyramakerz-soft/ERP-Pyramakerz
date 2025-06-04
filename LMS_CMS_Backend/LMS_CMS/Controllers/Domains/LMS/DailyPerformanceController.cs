@@ -7,6 +7,7 @@ using LMS_CMS_PL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace LMS_CMS_PL.Controllers.Domains.LMS
 {
@@ -25,7 +26,43 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             this.mapper = mapper;
             _checkPageAccessService = checkPageAccessService;
         }
+        /////////////////////////////////////////////
 
+        //[HttpGet]
+        //[Authorize_Endpoint_(
+        //    allowedTypes: new[] { "octa", "employee" }
+        //  )]
+        //public async Task<IActionResult> GetAsync()
+        //{
+        //    UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+        //    List<DailyPerformance> Data;
+
+        //    var userClaims = HttpContext.User.Claims;
+        //    var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+        //    long.TryParse(userIdClaim, out long userId);
+        //    var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+        //    if (userIdClaim == null || userTypeClaim == null)
+        //    {
+        //        return Unauthorized("User ID or Type claim not found.");
+        //    }
+
+        //    Data = await Unit_Of_Work.dailyPerformance_Repository.Select_All_With_IncludesById<DailyPerformance>(
+        //            f => f.IsDeleted != true,
+        //            query => query.Include(emp => emp.Subject).ThenInclude(s=>s.Grade),
+        //            query => query.Include(emp => emp.Student)
+        //            );
+
+        //    if (Data == null || Data.Count == 0)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    List<daily> Dto = mapper.Map<List<DokLevelGetDTO>>(Data);
+
+        //    return Ok(Dto);
+        //}
         /////////////////////////////////////////////
 
         [HttpPost]
