@@ -226,18 +226,19 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
         //    allowedTypes: new[] { "octa", "employee" },
         //    pages: new[] { "" }
         //)]
-        public async Task<IActionResult> FilterBySchoolAndDate(long schoolId, string startDate, string endDate, int pageNumber, int pageSize)
+        public async Task<IActionResult> FilterBySchoolAndDate(long schoolId, string startDate, string endDate, int pageNumber = 1, int pageSize = 10)
         {
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             DateTime start = DateTime.Parse(startDate).Date;
             DateTime end = DateTime.Parse(endDate).Date;
 
-            List<InventoryMaster> mastersBySchool = await Unit_Of_Work.inventoryMaster_Repository.Select_All_With_IncludesById_Pagination<InventoryMaster>(
+            List<InventoryMaster> mastersBySchool = await Unit_Of_Work.inventoryMaster_Repository.SelectQuery<InventoryMaster>(
                 d => d.SchoolId == schoolId && 
                 d.IsDeleted != true &&
-                (d.FlagId == 11 || d.FlagId == 12),
-                query => query.Include(x => x.InventoryDetails).ThenInclude(x => x.ShopItem))
+                (d.FlagId == 11 || d.FlagId == 12))
                 .ToListAsync();
 
             if (mastersBySchool is null || mastersBySchool.Count == 0)
