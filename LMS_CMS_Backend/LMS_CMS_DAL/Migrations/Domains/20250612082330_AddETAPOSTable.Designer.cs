@@ -4,16 +4,19 @@ using LMS_CMS_DAL.Models.Domains;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace LMS_CMS_DAL.Migrations.Domains
+namespace LMS_CMS_DAL.Migrations.LMS_CMS_
 {
     [DbContext(typeof(LMS_CMS_Context))]
-    partial class LMS_CMS_ContextModelSnapshot : ModelSnapshot
+    [Migration("20250612082330_AddETAPOSTable")]
+    partial class AddETAPOSTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -4100,12 +4103,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<long?>("DeletedByUserId")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("ETAErrorMsg")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("ETAPOSID")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("EtaInsertedDate")
                         .HasColumnType("datetime2");
 
@@ -4213,8 +4210,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.HasIndex("BankID");
 
                     b.HasIndex("DeletedByUserId");
-
-                    b.HasIndex("ETAPOSID");
 
                     b.HasIndex("FlagId");
 
@@ -12045,10 +12040,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .WithMany()
                         .HasForeignKey("DeletedByUserId");
 
-                    b.HasOne("LMS_CMS_DAL.Models.Domains.ETA.ETAPOS", "ETAPOS")
-                        .WithMany()
-                        .HasForeignKey("ETAPOSID");
-
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Inventory.InventoryFlags", "InventoryFlags")
                         .WithMany("InventoryMaster")
                         .HasForeignKey("FlagId")
@@ -12104,8 +12095,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Navigation("Bank");
 
                     b.Navigation("DeletedByEmployee");
-
-                    b.Navigation("ETAPOS");
 
                     b.Navigation("InsertedByEmployee");
 

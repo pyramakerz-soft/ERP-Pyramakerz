@@ -195,6 +195,7 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<AssignmentQuestion> AssignmentQuestion_Repository;
         GenericRepo<DirectMarkClassroomStudent> DirectMarkClassroomStudent_Repository;
         GenericRepo<AssignmentStudentQuestion> AssignmentStudentQuestion_Repository;
+        GenericRepo<ETAPOS> POS_Repository;
 
 
 
@@ -2203,6 +2204,18 @@ namespace LMS_CMS_BL.UOW
                     AssignmentStudentQuestion_Repository = new GenericRepo<AssignmentStudentQuestion>(db);
                 }
                 return AssignmentStudentQuestion_Repository;
+            }
+        }
+        
+        public GenericRepo<ETAPOS> pos_Repository
+        {
+            get
+            {
+                if (POS_Repository == null)
+                {
+                    POS_Repository = new GenericRepo<ETAPOS>(db);
+                }
+                return POS_Repository;
             }
         }
 

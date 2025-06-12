@@ -1,21 +1,25 @@
-﻿using LMS_CMS_DAL.Models.Domains.Inventory;
+﻿using LMS_CMS_BL.UOW;
+using LMS_CMS_DAL.Models.Domains.ETA;
+using LMS_CMS_DAL.Models.Domains.Inventory;
+using LMS_CMS_DAL.Models.Domains.LMS;
+using LMS_CMS_DAL.Models.Octa;
+using Microsoft.EntityFrameworkCore;
+using Net.Pkcs11Interop.HighLevelAPI;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Org.BouncyCastle.Asn1.Ess;
 using Org.BouncyCastle.Asn1;
+using Org.BouncyCastle.Asn1.Ess;
+using System.Collections.Specialized;
+using System.Data;
+using System.Net;
+using System.Net.Http.Headers;
+using System.Security.Cryptography;
 using System.Security.Cryptography.Pkcs;
 using System.Security.Cryptography.X509Certificates;
-using System.Security.Cryptography;
 using System.Text;
-using System.Text.Json.Nodes;
-using Net.Pkcs11Interop.HighLevelAPI;
-using System.Net;
-using LMS_CMS_DAL.Models.Domains.ETA;
-using LMS_CMS_BL.UOW;
-using LMS_CMS_DAL.Models.Octa;
 using System.Text.Json;
-using Microsoft.EntityFrameworkCore;
-using LMS_CMS_DAL.Models.Domains.LMS;
+using System.Text.Json.Nodes;
+using System.Web;
 
 namespace LMS_CMS_PL.Services.ETA
 {
@@ -25,8 +29,15 @@ namespace LMS_CMS_PL.Services.ETA
         private static string TokenPin = "";
         private static string apiBaseUrl = "https://api.invoicing.eta.gov.eg";
         private static string idSrvBaseUrl = "https://id.eta.gov.eg";
-        private static string access_token = "";
 
+        private static string clientId = "";
+        private static string ClientSecret = "";
+        private static string ClientSecret2 = "";
+        private static string deviceSerialNumber = "";
+
+        private static string UUID = "";
+
+        private static string access_token = "";
 
         public static async void GetToken(int myTokenPinId, long schoolId, UOW unitOfWork)
         {
@@ -378,7 +389,7 @@ namespace LMS_CMS_PL.Services.ETA
             }
             catch (Exception ex)
             {
-                return "ex.Message";
+                return ex.Message;
             }
         }
 
@@ -408,10 +419,291 @@ namespace LMS_CMS_PL.Services.ETA
             }
             catch (Exception ex)
             {
-                //bm.ShowMSG(ex.Message);
-                return "";
+                return ex.Message;
             }
         }
+
+        private static string PutRequest(string uri, string postData)
+        {
+            var client = new HttpClient();
+            HttpResponseMessage response;
+
+            try
+            {
+                client.BaseAddress = new Uri(apiBaseUrl);
+                var byteArray = Encoding.UTF8.GetBytes(postData);
+
+                using (HttpContent httpContent = new StringContent(postData))
+                {
+                    httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", access_token);
+
+                    response = client.PutAsync(uri, httpContent).Result;
+                    return response.Content.ReadAsStringAsync().Result;
+                }
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+        }
+
+        private static string GetRequest(string requestUrl)
+        {
+            try
+            {
+                var request = WebRequest.Create(requestUrl) as HttpWebRequest;
+                request.Method = "GET";
+                request.Headers.Add(HttpRequestHeader.Authorization, "Bearer " + access_token);
+                request.ContentLength = 0;
+
+                string responseContent = "";
+                using (var response = request.GetResponse() as HttpWebResponse)
+                using (var reader = new StreamReader(response.GetResponseStream()))
+                {
+                    responseContent = reader.ReadToEnd();
+                }
+
+                return responseContent;
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+        }
+
+        public static string AuthenticatePOS(UOW unitOfWork, int _POSID)
+        {
+            try
+            {
+                ETAPOS pos = unitOfWork.pos_Repository.Select_By_Id(_POSID);
+
+                if (pos == null)
+                {
+                    return "POS is not found";
+                }
+
+                deviceSerialNumber = pos.deviceSerialNumber;
+                clientId = pos.ClientID.ToString();
+                ClientSecret = pos.ClientSecret.ToString();
+                ClientSecret2 = pos.ClientSecret2.ToString();
+
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(new Uri(idSrvBaseUrl + "/connect/token"));
+                request.Method = "POST";
+                request.ContentType = "application/x-www-form-urlencoded";
+
+                // Add headers
+                request.Headers.Add("posserial", deviceSerialNumber);
+                request.Headers.Add("pososversion", "Windows");
+
+                NameValueCollection outgoingQueryString = HttpUtility.ParseQueryString(string.Empty);
+                outgoingQueryString.Add("grant_type", "client_credentials");
+                outgoingQueryString.Add("client_id", clientId);
+                outgoingQueryString.Add("client_secret", ClientSecret);
+
+                byte[] jsonDataBytes = new ASCIIEncoding().GetBytes(outgoingQueryString.ToString());
+
+                using (Stream stream = request.GetRequestStream())
+                {
+                    stream.Write(jsonDataBytes, 0, jsonDataBytes.Length);
+                }
+
+                WebResponse response = request.GetResponse();
+
+                using (Stream dataStream = response.GetResponseStream())
+                using (StreamReader reader = new StreamReader(dataStream))
+                {
+                    string responseFromServer = reader.ReadToEnd();
+                    access_token = JsonConvert.DeserializeObject<dynamic>(responseFromServer)["access_token"];
+                }
+
+                response.Close();
+                return access_token;
+            }
+            catch (Exception ex)
+            {
+                return(ex.Message);
+            }
+        }
+
+        public static string receiptsubmissions(UOW unitOfWork, InventoryMaster master, bool getUUID = false)
+        {
+            string uuid = "";
+            try
+            {
+                string totalSales = GetTotalSalesAmount(master.InventoryDetails).ToString();
+                string itemData = "";
+
+                string MyInvoiceNo = master?.InvoiceNumber;
+
+                string CurrencySign = "EGP";
+
+                decimal totalTaxAmount = 0;
+
+                string documentType = "S";
+                string ReturnString = "";
+
+                if (master.FlagId == 12)
+                {
+                    documentType = "R";
+                    uuid = unitOfWork.inventoryMaster_Repository.Last_Or_Default(x => x.StoreID == master.StoreID && x.FlagId == 11 && x.InvoiceNumber == MyInvoiceNo, x => x.InvoiceNumber.OrderDescending())?.uuid;
+                }
+
+                decimal Weight = 0;
+                decimal MyTotal = 0;
+
+                foreach (var item in master.InventoryDetails)
+                {
+                    MyTotal += Convert.ToDecimal(Dec5(item.TotalPrice.ToString()));
+
+                    itemData += $@"{{
+                    ""internalCode"": ""{item.ID}"",
+                    ""description"": ""{item.ShopItem.EnName.ToString().Replace("*", "X")}"",
+                    ""itemType"": ""{(item.ShopItem.ItemCode.ToString().StartsWith("EG") ? "EGS" : "GS1")}"",
+                    ""itemCode"": ""{item.ShopItem.ItemCode}"",
+                    ""unitType"": ""{item.ShopItem.UnitType}"",
+                    ""quantity"": {item.Quantity},
+                    ""unitPrice"": {Dec5(item.Price.ToString())},
+                    ""netSale"": {Dec5(item.TotalPrice.ToString())},
+                    ""totalSale"": {Dec5(item.Price.ToString())},
+                    ""total"": {Dec5(item.TotalPrice.ToString())},
+                    ""taxableItems"": [";
+
+                    itemData = itemData.TrimEnd(',') + "]},";
+                }
+
+                itemData = itemData.TrimEnd(',');
+
+                string dateTimeIssued = DateTime.Now.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ");
+
+                string json = $@"
+                {{
+                    ""header"": {{
+                        ""dateTimeIssued"": ""{dateTimeIssued}"",
+                        ""receiptNumber"": ""{master.StoreID}_{master.FlagId}_{MyInvoiceNo}"",
+                        ""uuid"": ""{uuid}"",
+                        ""previousUUID"": """",
+                        ""referenceOldUUID"": """",
+                        ""currency"": ""{CurrencySign}"",
+                        ""exchangeRate"": 0
+                    }},
+                    ""documentType"": {{
+                        ""receiptType"": ""{documentType}"",
+                        ""typeVersion"": ""1.2""
+                    }},
+                    ""seller"": {{
+                        ""branchAddress"": {{
+                            ""country"": ""{master.TaxIssuer?.CountryCode}"",
+                            ""governate"": ""{master.TaxIssuer?.Governate}"",
+                            ""regionCity"": ""{master.TaxIssuer?.RegionCity}"",
+                            ""street"": ""{master.TaxIssuer?.Street}"",
+                            ""buildingNumber"": ""{master.TaxIssuer?.BuildingNumber}"",
+                            ""postalCode"": ""{master.TaxIssuer?.PostalCode}"",
+                            ""floor"": ""{master.TaxIssuer?.Floor}"",
+                            ""room"": ""{master.TaxIssuer?.Room}"",
+                            ""landmark"": ""{master.TaxIssuer?.LandMark}"",
+                            ""additionalInformation"": ""{master.TaxIssuer?.AdditionalInfo}""
+                        }},
+                        ""rin"": ""{master.TaxIssuer?.ID}"",
+                        ""companyTradeName"": ""{master.TaxIssuer?.Name}"",
+                        ""branchCode"": ""{master.TaxIssuer?.BranchID}"",
+                        ""activityCode"": ""{master.TaxIssuer?.ActivityCode}"",
+                        ""deviceSerialNumber"": ""{deviceSerialNumber}""
+                    }},
+                    ""buyer"": {{
+                        ""type"": ""{master.Student.TypeID}"",
+                        ""id"": ""{master.Student.ID}"",
+                        ""name"": ""{master.Student.ar_name}"",
+                        ""mobileNumber"": ""{master.Student.Phone}"",
+                        ""paymentNumber"": ""{master.Student.NationalID}""
+                    }},
+                    ""itemData"": [{itemData}],
+                    ""totalSales"": {Dec5(totalSales)},
+                    ""totalCommercialDiscount"": {Dec5("0")},
+                    ""totalItemsDiscount"": {Dec5("0")},
+                    ""netAmount"": {Dec5(totalSales)},
+                    ""totalAmount"": {Dec5(totalSales)},
+                    ""taxTotals"": """",
+                    ""paymentMethod"": ""C""
+                }}";
+
+                string serialize0 = Serialize(JObject.Parse(JsonNode.Parse(json).ToJsonString()));
+
+                using (SHA256 sha256 = SHA256.Create())
+                {
+                    byte[] hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(serialize0));
+                    uuid = string.Concat(hashBytes.Select(b => b.ToString("x2")));
+                }
+
+                //bm.ExecuteNonQuery($"update InventoryMaster set uuid='{uuid}', POSID='{master.ETAPOSID}' where StoreId={master.StoreID} and Flag={master.FlagId} and InvoiceNo={master.InvoiceNumber}");
+
+                master.uuid = uuid;
+
+                unitOfWork.inventoryMaster_Repository.Update(master);
+                unitOfWork.SaveChanges();
+
+                if (getUUID)
+                {
+                    return $"http://invoicing.eta.gov.eg/receipts/search/{uuid}/share/{dateTimeIssued}#Total:{Dec2(Convert.ToDecimal(master.Total).ToString() + totalTaxAmount)},IssuerRIN:{master.TaxIssuer?.ID}";
+                }
+
+                json = json.Replace(@"""uuid"": """"", $@"""uuid"": ""{uuid}""");
+                byte[] jsonDataBytes = Encoding.UTF8.GetBytes($@"{{""receipts"": [{json.TrimEnd('}')}]}}");
+
+                string result = PostRequest(new Uri(apiBaseUrl + "/api/v1/receiptsubmissions"), jsonDataBytes, "application/json", "POST");
+
+                if (string.IsNullOrEmpty(result))
+                {
+                    master.IsValid = 0;
+                    master.Status = "Failed";
+
+                    unitOfWork.inventoryMaster_Repository.Update(master);
+                    unitOfWork.SaveChanges();
+
+                    return "Failed to submit receipt.";
+                }
+
+                dynamic result0 = JsonConvert.DeserializeObject(result);
+
+                if (result0.acceptedDocuments != null && result0.acceptedDocuments.Count > 0)
+                {
+                //    bm.ExecuteNonQuery($@"delete InventoryMaster where StoreId={master.StoreID} and Flag={master.FlagId} and InvoiceNo={master.InvoiceNumber}
+                //insert into InventoryMaster (StoreId,Flag,InvoiceNo,uuid,longId) values ({master.StoreID},{master.FlagId},{master.InvoiceNumber},'{result0.acceptedDocuments[0].uuid}','{result0.acceptedDocuments[0].longId}')");
+
+                    master.IsValid = 1;
+                    master.Status = "Valid";
+                    master.ShareLongId = result0.acceptedDocuments[0].longId;
+                    master.EtaInsertedDate = DateTime.Parse(dateTimeIssued);
+
+                    unitOfWork.inventoryMaster_Repository.Update(master);
+                    unitOfWork.SaveChanges();
+                }
+
+                if (result0.rejectedDocuments != null && result0.rejectedDocuments.Count > 0)
+                {
+                    StringBuilder msg = new();
+                    foreach (var detail in result0.rejectedDocuments[0].error.details)
+                    {
+                        msg.Append($"{detail.propertyPath} - {detail.message}\r\n");
+                    }
+
+                    //    bm.ExecuteNonQuery($@"delete InventoryMaster where StoreId={master.StoreID} and Flag={master.FlagId} and InvoiceNo={master.InvoiceNumber}
+                    //insert into InventoryMaster (StoreId,Flag,InvoiceNo,Notes) values ({master.StoreID},{master.FlagId},{master.InvoiceNumber},'{msg}')");
+
+                    master.ETAErrorMsg = msg.ToString();
+
+                    unitOfWork.inventoryMaster_Repository.Update(master);
+                    unitOfWork.SaveChanges();
+                }
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+
+            return "";
+        }
+
 
         private static string Dec2(string value)
         {
