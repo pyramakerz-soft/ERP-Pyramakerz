@@ -22,7 +22,7 @@ namespace LMS_CMS_BL.DTO.LMS
         public string? LinkFile { get; set; } 
         public long SubjectID { get; set; }  
         public string SubjectName { get; set; }  
-        public long AssignmentTypeID { get; set; } 
-        //public ICollection<AssignmentClassroomStudentGetDTO> AssignmentClassroomStudents { get; set; } = new HashSet<AssignmentClassroomStudentGetDTO>();
+        public long AssignmentTypeID { get; set; }
+        public List<AssignmentClassroomStudentGetDTO> AssignmentClassroomStudents { get; set; } = new List<AssignmentClassroomStudentGetDTO>();
     }
 }

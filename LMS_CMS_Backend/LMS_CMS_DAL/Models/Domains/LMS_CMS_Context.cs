@@ -331,6 +331,10 @@ namespace LMS_CMS_DAL.Models.Domains
             modelBuilder.Entity<DokLevel>()
                 .Property(p => p.ID)
                 .ValueGeneratedNever();
+            
+            modelBuilder.Entity<AssignmentType>()
+                .Property(p => p.ID)
+                .ValueGeneratedNever();
 
 
             ///////////////////////// OnDelete: /////////////////////////
