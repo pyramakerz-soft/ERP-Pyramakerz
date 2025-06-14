@@ -182,6 +182,7 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<AssignmentQuestion> AssignmentQuestion { get; set; }
         public DbSet<DirectMarkClassroomStudent> DirectMarkClassroomStudent { get; set; }
         public DbSet<AssignmentStudentQuestion> AssignmentStudentQuestion { get; set; }
+        public DbSet<ETAPOS> ETAPOS { get; set; }
 
 
         public LMS_CMS_Context(DbContextOptions<LMS_CMS_Context> options)
