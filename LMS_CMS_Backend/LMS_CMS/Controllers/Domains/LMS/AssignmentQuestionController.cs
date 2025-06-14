@@ -32,7 +32,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             //,
             //pages: new[] { "" }
         )]
-        public async Task<IActionResult> Add([FromForm] AssignmentQuestionAddDTO newData)
+        public async Task<IActionResult> Add(AssignmentQuestionAddDTO newData)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -59,6 +59,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             if (assignment.AssignmentTypeID == 1) // Text Book Assignment
             {
+                if(newData.File == null)
+                {
+                    return BadRequest("File Is Required");
+                }
                 var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/AssignmentQuestion");
                 var medalFolder = Path.Combine(baseFolder, assignment.ID.ToString());
                 if (!Directory.Exists(medalFolder))
@@ -88,7 +92,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     if (questionBank != null)
                     { 
                         AssignmentQuestion assignmentQuestion = new AssignmentQuestion();
-                        assignmentQuestion.ID = item;
+                        assignmentQuestion.QuestionBankID = item;
                         assignmentQuestion.AssignmentID = assignment.ID;
                         TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
                         assignmentQuestion.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
@@ -128,7 +132,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 foreach (var item in  selectedQuestions)
                 {
                     AssignmentQuestion assignmentQuestion = new AssignmentQuestion();
-                    assignmentQuestion.ID = item.ID;
+                    assignmentQuestion.QuestionBankID = item.ID;
                     assignmentQuestion.AssignmentID = assignment.ID;
                     TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
                     assignmentQuestion.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
