@@ -971,6 +971,8 @@ namespace LMS_CMS_BL.Config
                .ForMember(dest => dest.StudentEnglishName, opt => opt.MapFrom(src => src.StudentClassroom.Student.en_name))
                .ForMember(dest => dest.StudentArabicName, opt => opt.MapFrom(src => src.StudentClassroom.Student.ar_name))
                .ForMember(dest => dest.StudentID, opt => opt.MapFrom(src => src.StudentClassroom.StudentID));
+
+            CreateMap<AssignmentQuestion, AssignmentQuestionGetDTO>();
         }
     } 
 }

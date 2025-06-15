@@ -1,50 +1,171 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Assignment } from '../../../../../Models/LMS/assignment';
+import { AssignmentQuestionService } from '../../../../../Services/Employee/LMS/assignment-question.service';
+import { SearchComponent } from '../../../../../Component/search/search.component';
+import { TokenData } from '../../../../../Models/token-data';
+import { AccountService } from '../../../../../Services/account.service';
+import { ApiService } from '../../../../../Services/api.service';
+import { DeleteEditPermissionService } from '../../../../../Services/shared/delete-edit-permission.service';
+import { MenuService } from '../../../../../Services/shared/menu.service';
+import { AssignmentQuestion } from '../../../../../Models/LMS/assignment-question';
+import { AssignmentQuestionAdd } from '../../../../../Models/LMS/assignment-question-add';
+import { LessonService } from '../../../../../Services/Employee/LMS/lesson.service';
+import { Lesson } from '../../../../../Models/LMS/lesson';
+import { TagsService } from '../../../../../Services/Employee/LMS/tags.service';
+import { Tag } from '../../../../../Models/LMS/tag';
 
 @Component({
   selector: 'app-assignment-edit',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule, CommonModule, SearchComponent],
   templateUrl: './assignment-edit.component.html',
   styleUrls: ['./assignment-edit.component.css']
 })
 export class AssignmentEditComponent {
-  assignment: any = {
-    name: 'Primary',
-    type: 'textbook',
-    openDate: '2024-05-22',
-    dueDate: '2024-05-22',
-    cutOffDate: '2024-05-22',
-    classes: [
-      { name: 'Class1', count: 5 }
-    ],
-    description: '',
-    file: 'HannahBuzing_Resume.pdf'
-  };
+  assignment: Assignment = new Assignment()
+  assignmentQuestion: AssignmentQuestionAdd = new AssignmentQuestionAdd()
+  DomainName: string = '';
+  UserID: number = 0;
+  path: string = '';
+  User_Data_After_Login: TokenData = new TokenData(
+    '',
+    0,
+    0,
+    0,
+    0,
+    '',
+    '',
+    '',
+    '',
+    ''
+  );
 
-  constructor(private router: Router) {}
+  AssignmentId: number = 0
+  keysArray: string[] = ['id', 'name', 'dateFrom', 'dateTo', 'academicYearName'];
+  key: string = "id";
+  value: any = "";
+  SelectedLessonID: number = 0
+  SElectedTagsIDs: number[] = []
+  Lessons: Lesson[] = []
+  tags: Tag[] = []
+  selectedTypeIds: number[] = []; // Array to store selected type IDs
+  dropdownOpen = false;
+  tagsSelected: Tag[] = [];
+
+
+  constructor(
+    public account: AccountService,
+    public ApiServ: ApiService,
+    public EditDeleteServ: DeleteEditPermissionService,
+    private menuService: MenuService,
+    public activeRoute: ActivatedRoute,
+    public router: Router,
+    public AssigmentQuestionServ: AssignmentQuestionService,
+    public LessonServ: LessonService,
+    public tagServ: TagsService,
+
+  ) { }
+
+  ngOnInit() {
+    this.User_Data_After_Login = this.account.Get_Data_Form_Token();
+    this.UserID = this.User_Data_After_Login.id;
+
+    this.DomainName = this.ApiServ.GetHeader();
+
+    this.activeRoute.url.subscribe((url) => {
+      this.path = url[0].path;
+    });
+    this.AssignmentId = Number(this.activeRoute.snapshot.paramMap.get('id'));
+    this.getAssignmentData()
+  }
+
+  getAssignmentData() {
+    this.AssigmentQuestionServ.GetById(this.AssignmentId, this.DomainName).subscribe((d) => {
+      this.assignment = d
+      console.log(d, this.assignment)
+
+    })
+  }
+
+  getLessons() {
+    this.LessonServ.Get(this.DomainName).subscribe((d) => [
+      this.Lessons = d
+    ])
+  }
+
+  getTags() {
+    this.tagServ.GetByLessonId(this.SelectedLessonID, this.DomainName).subscribe((d) => [
+      this.tags = d
+    ])
+  }
+
+  toggleDropdown(): void {
+    this.dropdownOpen = !this.dropdownOpen;
+  }
+
+  selectType(Type: Tag): void {
+    if (!this.tagsSelected.some((e) => e.id === Type.id)) {
+      this.tagsSelected.push(Type);
+    }
+    this.dropdownOpen = false;
+  }
+
+  removeSelected(id: number): void {
+    this.tagsSelected = this.tagsSelected.filter((e) => e.id !== id);
+  }
 
   goBack() {
     this.router.navigateByUrl(`Employee/Assignment Details`);
-  }  
-
-  getFileName(url: string): string {
-    if (!url) return 'Document';
-    const parts = url.split('/');
-    return parts[parts.length - 1] || 'Document';
   }
 
-  removeFile() {
-    this.assignment.file = null;
+  openModal() {
+    if (this.assignment.assignmentTypeID == 1) {
+      document.getElementById("Add_Modal1")?.classList.remove("hidden");
+      document.getElementById("Add_Modal1")?.classList.add("flex");
+    }
   }
 
-  handleFileUpload(event: any) {
-    const file = event.target.files[0];
+  closeModal() {
+    if (this.assignment.assignmentTypeID == 1) {
+      document.getElementById("Add_Modal1")?.classList.remove("flex");
+      document.getElementById("Add_Modal1")?.classList.add("hidden");
+    }
+  }
+
+  async onSearchEvent(event: { key: string, value: any }) {
+    // this.key = event.key;
+    // this.value = event.value;
+    // try {
+    //   const data: Semester[] = await firstValueFrom(this.semesterService.GetByAcademicYearId(this.academicYearId, this.DomainName));
+    //   this.semesterData = data || [];
+
+    //   if (this.value !== "") {
+    //     const numericValue = isNaN(Number(this.value)) ? this.value : parseInt(this.value, 10);
+
+    //     this.semesterData = this.semesterData.filter(t => {
+    //       const fieldValue = t[this.key as keyof typeof t];
+    //       if (typeof fieldValue === 'string') {
+    //         return fieldValue.toLowerCase().includes(this.value.toLowerCase());
+    //       }
+    //       if (typeof fieldValue === 'number') {
+    //         return fieldValue.toString().includes(numericValue.toString())
+    //       }
+    //       return fieldValue == this.value;
+    //     });
+    //   }
+    // } catch (error) {
+    //   this.semesterData = [];
+    // }
+  }
+
+  onImageFileSelected(event: any) {
+    const file: File = event.target.files[0];
+
     if (file) {
-      // In a real app, you would upload the file and get a URL
-      this.assignment.file = file.name;
+      this.assignmentQuestion.file = file;
     }
   }
 }

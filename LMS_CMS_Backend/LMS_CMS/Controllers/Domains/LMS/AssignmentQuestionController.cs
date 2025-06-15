@@ -6,6 +6,7 @@ using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace LMS_CMS_PL.Controllers.Domains.LMS
 {
@@ -24,6 +25,61 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             this.mapper = mapper;
             _checkPageAccessService = checkPageAccessService;
         }
+
+        /////////////////////////////////////////////
+
+        [HttpGet("GetByID/{id}")]
+        [Authorize_Endpoint_(
+              allowedTypes: new[] { "octa", "employee" }
+              //,
+              //pages: new[] { "Assignment" }
+          )]
+        public async Task<IActionResult> GetByID(long id)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            Assignment assignment = Unit_Of_Work.assignment_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == id);
+            if (assignment == null)
+            {
+                return BadRequest("No assignment with this id");
+            }
+
+            Assignment Assignment = await Unit_Of_Work.assignment_Repository.FindByIncludesAsync(
+                    sem => sem.IsDeleted != true && sem.ID == id,
+                    query => query.Include(d => d.AssignmentType),
+                    query => query.Include(d => d.Subject),
+                    query => query.Include(d => d.AssignmentQuestions)
+                                   .ThenInclude(aq => aq.QuestionBank)
+                                     .ThenInclude(qb => qb.SubBankQuestions)
+                   );
+
+            if (Assignment == null)
+            {
+                return NotFound();
+            }
+
+            AssignmentGetDTO AssignmentGetDTO = mapper.Map<AssignmentGetDTO>(Assignment);
+
+            //string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+
+            //if (!string.IsNullOrEmpty(AssignmentGetDTO.LinkFile))
+            //{
+            //    AssignmentGetDTO.LinkFile = $"{serverUrl}{AssignmentGetDTO.LinkFile.Replace("\\", "/")}";
+            //}
+
+            return Ok(AssignmentGetDTO);
+        }
+
         /////////////////////////////////////////////
 
         [HttpPost]

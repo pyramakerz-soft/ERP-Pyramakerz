@@ -190,12 +190,12 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             AssignmentGetDTO AssignmentGetDTO = mapper.Map<AssignmentGetDTO>(Assignment);
 
-            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+            //string serverUrl = $"{Request.Scheme}://{Request.Host}/";
 
-            if (!string.IsNullOrEmpty(AssignmentGetDTO.LinkFile))
-            {
-                AssignmentGetDTO.LinkFile = $"{serverUrl}{AssignmentGetDTO.LinkFile.Replace("\\", "/")}";
-            }
+            //if (!string.IsNullOrEmpty(AssignmentGetDTO.LinkFile))
+            //{
+            //    AssignmentGetDTO.LinkFile = $"{serverUrl}{AssignmentGetDTO.LinkFile.Replace("\\", "/")}";
+            //}
 
             return Ok(AssignmentGetDTO);
         }
