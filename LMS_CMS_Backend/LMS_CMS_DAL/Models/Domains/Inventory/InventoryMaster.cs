@@ -40,6 +40,7 @@ namespace LMS_CMS_DAL.Models.Domains.Inventory
         public string? Notes { get; set; }
         public DateTime? EtaInsertedDate { get; set; }
         public string? ShareLongId { get; set; }
+        public string? ETAErrorMsg { get; set; }
         public List<string>? Attachments { get; set; }
 
         [ForeignKey("TaxIssuer")]
@@ -71,6 +72,9 @@ namespace LMS_CMS_DAL.Models.Domains.Inventory
 
         [ForeignKey("SchoolPCs")]
         public long? SchoolPCId { get; set; }
+
+        [ForeignKey("ETAPOS")]
+        public int? ETAPOSID { get; set; }
         public InventoryFlags InventoryFlags { get; set; }
         public Store Store { get; set; }
         public Student? Student { get; set; }
@@ -81,6 +85,7 @@ namespace LMS_CMS_DAL.Models.Domains.Inventory
         public School? School { get; set; }
         public SchoolPCs? SchoolPCs { get; set; }
         public TaxIssuer? TaxIssuer { get; set; }
+        public ETAPOS? ETAPOS { get; set; }
         public ICollection<InventoryDetails> InventoryDetails { get; set; } = new HashSet<InventoryDetails>();
         public ICollection<InventoryDetails>? SaleReturns { get; set; } = new HashSet<InventoryDetails>();
 

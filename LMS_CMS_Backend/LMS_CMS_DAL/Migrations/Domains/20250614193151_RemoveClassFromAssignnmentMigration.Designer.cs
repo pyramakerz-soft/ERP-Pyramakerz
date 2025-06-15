@@ -4,6 +4,7 @@ using LMS_CMS_DAL.Models.Domains;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LMS_CMS_DAL.Migrations.Domains
 {
     [DbContext(typeof(LMS_CMS_Context))]
-    partial class LMS_CMS_ContextModelSnapshot : ModelSnapshot
+    [Migration("20250614193151_RemoveClassFromAssignnmentMigration")]
+    partial class RemoveClassFromAssignnmentMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -5072,7 +5075,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<long>("AssignmentID")
                         .HasColumnType("bigint");
 
-                    b.Property<float?>("Degree")
+                    b.Property<float>("Degree")
                         .HasColumnType("real");
 
                     b.Property<DateTime?>("DeletedAt")
@@ -8152,9 +8155,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .HasColumnType("bigint");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("ID"));
-
-                    b.Property<float>("AssignmentCutOffDatePercentage")
-                        .HasColumnType("real");
 
                     b.Property<double>("CreditHours")
                         .HasColumnType("float");

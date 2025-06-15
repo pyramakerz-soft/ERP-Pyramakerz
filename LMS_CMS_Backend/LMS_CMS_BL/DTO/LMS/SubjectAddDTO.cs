@@ -28,5 +28,6 @@ namespace LMS_CMS_BL.DTO.LMS
         public int NumberOfSessionPerWeek { get; set; }
         public long GradeID { get; set; }
         public long SubjectCategoryID { get; set; }
+        public float AssignmentCutOffDatePercentage { get; set; }
     }
 }

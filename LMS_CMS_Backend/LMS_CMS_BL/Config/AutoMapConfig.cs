@@ -958,6 +958,19 @@ namespace LMS_CMS_BL.Config
             CreateMap<StudentClassroomSubject, StudentClassroomSubjectGetDTO>()
                 .ForMember(dest => dest.SubjectEnglishName, opt => opt.MapFrom(src => src.Subject.en_name))
                 .ForMember(dest => dest.SubjectArabicName, opt => opt.MapFrom(src => src.Subject.ar_name));
+
+            CreateMap<Assignment, AssignmentGetDTO>()
+               .ForMember(dest => dest.SubjectEnglishName, opt => opt.MapFrom(src => src.Subject.en_name))
+               .ForMember(dest => dest.SubjectArabicName, opt => opt.MapFrom(src => src.Subject.ar_name));
+            CreateMap<AssignmentAddDTO, Assignment>();
+            CreateMap<AssignmentPutDTO, Assignment>(); 
+
+            CreateMap<AssignmentStudent, AssignmentStudentGetDTO>()
+               .ForMember(dest => dest.ClassroomID, opt => opt.MapFrom(src => src.StudentClassroom.ClassID))
+               .ForMember(dest => dest.ClassroomName, opt => opt.MapFrom(src => src.StudentClassroom.Classroom.Name))
+               .ForMember(dest => dest.StudentEnglishName, opt => opt.MapFrom(src => src.StudentClassroom.Student.en_name))
+               .ForMember(dest => dest.StudentArabicName, opt => opt.MapFrom(src => src.StudentClassroom.Student.ar_name))
+               .ForMember(dest => dest.StudentID, opt => opt.MapFrom(src => src.StudentClassroom.StudentID));
         }
     } 
 }
