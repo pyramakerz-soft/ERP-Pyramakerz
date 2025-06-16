@@ -35,7 +35,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
         //    allowedTypes: new[] { "octa", "employee" },
         //    pages: new[] { "" }
         //)]
-        public async Task<IActionResult> SubmitInvoice(long masterId, int etaPosID = 0)
+        public async Task<IActionResult> SubmitInvoice(long masterId, int etaPosID = 0, long salesInvoiceId = 0)
         {
             string apiBaseUrl = "https://api.invoicing.eta.gov.eg";
             string idSrvBaseUrl = "https://id.eta.gov.eg";
@@ -56,16 +56,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
             if (master is null)
                 return NotFound("Invoice not found.");
 
-            ETAPOS etaPos = Unit_Of_Work.pos_Repository.First_Or_Default(x => x.ID == etaPosID && x.IsDeleted != true);
-
-            if (etaPos is null)
-                return NotFound("ETAPOS not found.");
-
-            string token = EtaServices.Login(Unit_Of_Work, master.School.ID);
-
             string dateTime = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ");
-
-            bool jsonResult = EtaServices.GenerateJsonInvoice(master, Unit_Of_Work, _config, dateTime);
 
             string inv = $"{master.StoreID}_{master.FlagId}_{master.InvoiceNumber}.json";
 
@@ -74,49 +65,68 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
                 jsonPath = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/JSONInvoices/{inv}");
             if (master.FlagId == 12)
                 jsonPath = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/JSONCredits/{inv}");
+            
 
-            if (master.IsValid == 0 || master.IsValid == null)
+            if (master.InvoiceType == 'C')
             {
-                string signedJson = System.IO.File.ReadAllText(jsonPath);
-                byte[] jsonDataBytes = Encoding.UTF8.GetBytes(signedJson);
+                string token = EtaServices.AuthenticatePOS(Unit_Of_Work, etaPosID);
 
                 string result = string.Empty;
 
                 if (!string.IsNullOrEmpty(token))
                 {
-                    result = EtaServices.PostRequest(new Uri(apiBaseUrl + "/api/v1/documentsubmissions"), jsonDataBytes, "application/json", "POST", token);
+                    result = EtaServices.receiptsubmissions(Unit_Of_Work, master, salesInvoiceId);
                 }
+            }
 
-                if (!string.IsNullOrEmpty(result))
+            if (master.InvoiceType == 'B')
+            {
+                string token = EtaServices.Login(Unit_Of_Work, master.School.ClientID, master.School.SecretNumber1, master.School.SecretNumber2);
+                bool jsonResult = EtaServices.GenerateJsonInvoice(master, Unit_Of_Work, _config, dateTime);
+
+                if (master.IsValid == 0 || master.IsValid == null)
                 {
-                    dynamic result0 = JsonConvert.DeserializeObject(result);
+                    string signedJson = System.IO.File.ReadAllText(jsonPath);
+                    byte[] jsonDataBytes = Encoding.UTF8.GetBytes(signedJson);
 
-                    if (result0.acceptedDocuments.Count > 0)
+                    string result = string.Empty;
+
+                    if (!string.IsNullOrEmpty(token))
                     {
-                        string uuid = result0.acceptedDocuments[0].uuid;
-                        string longId = result0.acceptedDocuments[0].longId;
-
-                        master.uuid = uuid;
-                        master.ShareLongId = longId;
-                        master.IsValid = 1;
-                        master.EtaInsertedDate = DateTime.Parse(dateTime);
-
-                        Unit_Of_Work.inventoryMaster_Repository.Update(master);
-                        await Unit_Of_Work.SaveChangesAsync();
-
-                        return Ok(new { uuid, longId });
+                        result = EtaServices.PostRequest(new Uri(apiBaseUrl + "/api/v1/documentsubmissions"), jsonDataBytes, "application/json", "POST", token);
                     }
 
-                    if (result0.rejectedDocuments.Count > 0)
+                    if (!string.IsNullOrEmpty(result))
                     {
-                        string msg = "";
+                        dynamic result0 = JsonConvert.DeserializeObject(result);
 
-                        foreach (var detail in result0.rejectedDocuments[0].error.details)
+                        if (result0.acceptedDocuments.Count > 0)
                         {
-                            msg += $"{detail.propertyPath} - {detail.message}\r\n";
+                            string uuid = result0.acceptedDocuments[0].uuid;
+                            string longId = result0.acceptedDocuments[0].longId;
+
+                            master.uuid = uuid;
+                            master.ShareLongId = longId;
+                            master.IsValid = 1;
+                            master.EtaInsertedDate = DateTime.Parse(dateTime);
+
+                            Unit_Of_Work.inventoryMaster_Repository.Update(master);
+                            await Unit_Of_Work.SaveChangesAsync();
+
+                            return Ok(new { uuid, longId });
                         }
 
-                        return BadRequest(new { msg });
+                        if (result0.rejectedDocuments.Count > 0)
+                        {
+                            string msg = "";
+
+                            foreach (var detail in result0.rejectedDocuments[0].error.details)
+                            {
+                                msg += $"{detail.propertyPath} - {detail.message}\r\n";
+                            }
+
+                            return BadRequest(new { msg });
+                        }
                     }
                 }
             }
@@ -267,7 +277,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
         //    allowedTypes: new[] { "octa", "employee" },
         //    pages: new[] { "" }
         //)]
-        public async Task<IActionResult> SubmitReceipt(long masterId, int etaPosID)
+        public async Task<IActionResult> SubmitReceipt(long masterId, int etaPosID = 0)
         {
             string apiBaseUrl = "https://api.invoicing.eta.gov.eg";
             string idSrvBaseUrl = "https://id.eta.gov.eg";
@@ -288,17 +298,6 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
             if (master is null)
                 return NotFound("Invoice not found.");
 
-            ETAPOS etaPos = Unit_Of_Work.pos_Repository.First_Or_Default(x => x.ID == etaPosID && x.IsDeleted != true);
-
-            if (etaPos is null)
-                return NotFound("ETAPOS not found.");
-
-            string token = EtaServices.Login(Unit_Of_Work, master.School.ID);
-
-            string dateTime = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ");
-
-            bool jsonResult = EtaServices.GenerateJsonInvoice(master, Unit_Of_Work, _config, dateTime);
-
             string inv = $"{master.StoreID}_{master.FlagId}_{master.InvoiceNumber}.json";
 
             string jsonPath = string.Empty;
@@ -306,6 +305,14 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
                 jsonPath = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/JSONInvoices/{inv}");
             if (master.FlagId == 12)
                 jsonPath = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/JSONCredits/{inv}");
+
+            
+
+            string token = EtaServices.Login(Unit_Of_Work, master.School.ID);
+
+            string dateTime = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ");
+
+            bool jsonResult = EtaServices.GenerateJsonInvoice(master, Unit_Of_Work, _config, dateTime);
 
             if (master.IsValid == 0 || master.IsValid == null)
             {
