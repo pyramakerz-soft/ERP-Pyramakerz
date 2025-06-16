@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using LMS_CMS_BL.DTO.LMS;
 using LMS_CMS_BL.UOW;
+using LMS_CMS_DAL.Models.Domains.AccountingModule;
 using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Drawing.Printing;
 
 namespace LMS_CMS_PL.Controllers.Domains.LMS
 {
@@ -36,8 +38,11 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             allowedTypes: new[] { "octa", "employee"},
             pages: new[] { "Assignment" }
         )]
-        public async Task<IActionResult> GetAsync()
+        public async Task<IActionResult> GetAsync([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             var userClaims = HttpContext.User.Claims;
@@ -50,10 +55,15 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            List<Assignment> Assignment = await Unit_Of_Work.assignment_Repository.Select_All_With_IncludesById<Assignment>(
-                    sem => sem.IsDeleted != true,
+            int totalRecords = await Unit_Of_Work.assignment_Repository
+               .CountAsync(f => f.IsDeleted != true); 
+
+            List<Assignment> Assignment = await Unit_Of_Work.assignment_Repository
+                .Select_All_With_IncludesById_Pagination<Assignment>(
+                    f => f.IsDeleted != true,
                     query => query.Include(d => d.AssignmentType),
                     query => query.Include(d => d.Subject),
+                    query => query.Include(d => d.SubjectWeightType.WeightType),
                     query => query.Include(d => d.AssignmentStudents
                         .Where(e => e.IsDeleted != true && e.StudentClassroom.Student.IsDeleted != true && e.StudentClassroom.Classroom.IsDeleted != true))
                         .ThenInclude(d => d.StudentClassroom)
@@ -61,7 +71,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     query => query.Include(d => d.AssignmentStudents
                         .Where(e => e.IsDeleted != true && e.StudentClassroom.Student.IsDeleted != true && e.StudentClassroom.Classroom.IsDeleted != true))
                         .ThenInclude(d => d.StudentClassroom)
-                        .ThenInclude(d => d.Student));
+                        .ThenInclude(d => d.Student))
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
 
             if (Assignment == null || Assignment.Count == 0)
             {
@@ -80,7 +93,15 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 }
             }
 
-            return Ok(AssignmentGetDTOs);
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = AssignmentGetDTOs, Pagination = paginationMetadata }); 
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////
@@ -90,8 +111,11 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             allowedTypes: new[] { "octa", "employee"},
             pages: new[] { "Assignment" }
         )]
-        public async Task<IActionResult> GetBySubjectID(long subID)
+        public async Task<IActionResult> GetBySubjectID(long subID, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             var userClaims = HttpContext.User.Claims;
@@ -110,10 +134,15 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return BadRequest("No subject with this id");
             }
 
-            List<Assignment> Assignment = await Unit_Of_Work.assignment_Repository.Select_All_With_IncludesById<Assignment>(
-                    sem => sem.IsDeleted != true && sem.SubjectID == subID,
+            int totalRecords = await Unit_Of_Work.assignment_Repository
+               .CountAsync(f => f.IsDeleted != true);
+
+            List<Assignment> Assignment = await Unit_Of_Work.assignment_Repository
+                .Select_All_With_IncludesById_Pagination<Assignment>(
+                    f => f.IsDeleted != true && f.SubjectID == subID,
                     query => query.Include(d => d.AssignmentType),
                     query => query.Include(d => d.Subject),
+                    query => query.Include(d => d.SubjectWeightType.WeightType),
                     query => query.Include(d => d.AssignmentStudents
                         .Where(e => e.IsDeleted != true && e.StudentClassroom.Student.IsDeleted != true && e.StudentClassroom.Classroom.IsDeleted != true))
                         .ThenInclude(d => d.StudentClassroom)
@@ -121,8 +150,11 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     query => query.Include(d => d.AssignmentStudents
                         .Where(e => e.IsDeleted != true && e.StudentClassroom.Student.IsDeleted != true && e.StudentClassroom.Classroom.IsDeleted != true))
                         .ThenInclude(d => d.StudentClassroom)
-                        .ThenInclude(d => d.Student));
-
+                    .ThenInclude(d => d.Student))
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+             
             if (Assignment == null || Assignment.Count == 0)
             {
                 return NotFound();
@@ -140,7 +172,15 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 }
             }
 
-            return Ok(AssignmentGetDTOs);
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = AssignmentGetDTOs, Pagination = paginationMetadata });
         }
         
         //////////////////////////////////////////////////////////////////////////////////////////
@@ -174,6 +214,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     sem => sem.IsDeleted != true && sem.ID == id,
                     query => query.Include(d => d.AssignmentType),
                     query => query.Include(d => d.Subject),
+                    query => query.Include(d => d.SubjectWeightType.WeightType),
                     query => query.Include(d => d.AssignmentStudents
                         .Where(e => e.IsDeleted != true && e.StudentClassroom.Student.IsDeleted != true && e.StudentClassroom.Classroom.IsDeleted != true))
                         .ThenInclude(d => d.StudentClassroom)

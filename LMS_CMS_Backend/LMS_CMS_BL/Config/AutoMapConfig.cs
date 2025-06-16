@@ -986,6 +986,7 @@ namespace LMS_CMS_BL.Config
                .ForMember(dest => dest.StudentID, opt => opt.MapFrom(src => src.StudentClassroom.StudentID));
 
             CreateMap<AssignmentQuestion, AssignmentQuestionGetDTO>();
+            CreateMap<AssignmentType, AssignmentTypeGetDTO>();
         }
     } 
 }
