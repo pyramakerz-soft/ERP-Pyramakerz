@@ -33,6 +33,10 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public long AssignmentTypeID { get; set; }
         public AssignmentType AssignmentType { get; set; }
      
+        [ForeignKey("SubjectWeightType")]
+        public long SubjectWeightTypeID { get; set; }
+        public SubjectWeightType SubjectWeightType { get; set; }
+     
         public ICollection<AssignmentQuestion> AssignmentQuestions { get; set; } = new HashSet<AssignmentQuestion>();
         public ICollection<AssignmentStudent> AssignmentStudents { get; set; } = new HashSet<AssignmentStudent>();
     }
