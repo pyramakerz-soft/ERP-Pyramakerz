@@ -134,7 +134,7 @@
 
                 <!-- Data Rows -->
                 <tr *ngFor="let row of assignment.assignmentQuestions; let i = index"
-                    [ngClass]="{'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1}"
+                    [ngClass]="{'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1}" 
                     class="border-t border-gray-300 text-xs md:text-sm">
 
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{
@@ -194,31 +194,32 @@
 
 <!-- Add-Edit Semester Modal -->
 <div id="Add_Modal2" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
-    <div class="bg-white rounded-2xl p-12 w-[669px]">
-        <div class="flex justify-between items-center">
+    <div class="bg-white rounded-2xl p-12 w-[60%] max-h-[90%] overflow-y-auto">
+        <div class="flex justify-between items-center mb-4">
             <h1 class="font-semibold text-2xl leading-9">Add Question</h1>
             <button (click)="closeModal()" type="button"
                 class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
         </div>
-        <div class="flex flex-wrap justify-between gap-x-4 gap-y-3">
-            <div class="w-[49%]">
+
+        <div class="flex flex-wrap gap-x-4 gap-y-4 w-full">
+            <!-- Lesson -->
+            <div class="w-[48%]">
                 <label for="Lesson" class="block mb-2 text-sm font-medium text-gray-900">Lesson</label>
                 <select id="Lesson"
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
                     [(ngModel)]="SelectedLessonID" (change)="getTags();">
                     <option value=0 disabled selected hidden>Select a Lesson</option>
-                    <option *ngFor="let ac of Lessons" [value]="ac.id">
-                        {{ ac.englishTitle }}
-                    </option>
+                    <option *ngFor="let ac of Lessons" [value]="ac.id">{{ ac.englishTitle }}</option>
                     <option *ngIf="Lessons.length === 0" disabled selected>No Data Found</option>
                 </select>
             </div>
 
-            <div class="w-[49%]">
+            <!-- Tags -->
+            <div class="w-[48%]">
                 <label class="block mb-2 text-sm font-medium text-gray-900" for="ac">Tags</label>
                 <div class="relative">
-                    <div class="border border-gray-300 rounded-lg px-4 py-3 cursor-pointer min-h-[48px]"
-                        (click)="toggleDropdown()" tabindex="0">
+                    <div class="border border-gray-300 rounded-lg px-4 py-3 cursor-pointer min-h-[48px] w-full"
+                        (click)="toggleDropdown()"  tabindex="0">
                         <ng-container *ngIf="tagsSelected.length > 0; else placeholder">
                             <div class="flex flex-wrap">
                                 <span class="mr-2 mb-1 bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center"
@@ -243,35 +244,135 @@
                                 {{ Type.name }}
                             </li>
                         </ul>
-                        <div *ngIf="tags.length === 0" disabled selected>No Data Found</div>
+                        <div *ngIf="tags.length === 0" class="px-4 py-2 text-gray-400">No Data Found</div>
                     </div>
                 </div>
             </div>
 
-            <div class="flex w-full flex-col mb-4">
-                    <label class="mb-2 primaryTxt" for="dateFrom">Number Of Questions({{12}})</label>
-                    <input id="dateFrom" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                        placeholder="Enter From" />
+            <!-- Number of Questions -->
+            <div class="w-[100%]">
+                <label class="block mb-2 text-sm font-medium text-gray-900">Number Of Questions ({{12}})</label>
+                <input type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3 w-full"
+                    [(ngModel)]="SelectedLessonID" disabled placeholder="Enter From" />
             </div>
-             <div class="w-full">
-                <label for="Lesson" class="block mb-2 text-sm font-medium text-gray-900">Question Type</label>
-                <select id="Lesson"
-                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
-                    [(ngModel)]="SelectedLessonID" (change)="getTags();">
+
+            <!-- Question Type -->
+            <div class="w-full">
+                <label class="block mb-2 text-sm font-medium text-gray-900">Question Type</label>
+                <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" (change)="GetQuestionBank(this.CurrentPage, this.PageSize)"
+                    [(ngModel)]="SelectedTypeID">
                     <option value=0 disabled selected hidden>Select a Lesson</option>
-                    <option *ngFor="let ac of Lessons" [value]="ac.id">
-                        {{ ac.englishTitle }}
-                    </option>
-                    <option *ngIf="Lessons.length === 0" disabled selected>No Data Found</option>
+                    <option *ngFor="let ac of QuestionBankType" [value]="ac.id">{{ ac.name }}</option>
+                    <option *ngIf="QuestionBankType .length === 0" disabled selected>No Data Found</option>
                 </select>
             </div>
 
         </div>
 
-        <div class="flex justify-end">
-            <button class="secondaryBg text-white font-medium px-4 py-2 rounded-lg">
+        <div *ngIf="IsTableShown" class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
+            <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
+                <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+                    <tr>
+                        <th
+                            class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            <div class="flex items-center space-x-2">
+                                <input type="checkbox" [checked]="selectAll()" (change)="toggleSelectAll($event)" />
+                                <p>
+                                    ID
+                                </p>
+                            </div>
+                        </th>
+                        <th
+                            class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            Description
+                        </th>
+                        <th
+                            class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            Mark
+                        </th>
+                        <th
+                            class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            Difficulty Level
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- No Data Row -->
+                    <tr *ngIf="Questions.length === 0">
+                        <td id="data-cell" colspan="6"
+                            class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                            No Data Found
+                        </td>
+                    </tr>
+
+                    <!-- Data Rows -->
+                    <tr *ngFor="let row of Questions; let i = index"
+                        [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
+                        class="border-t border-gray-300 text-xs md:text-sm">
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            <div class="flex items-center space-x-2">
+                                <input type="checkbox" [checked]="isSelected(row.id)"
+                                    (change)="onCheckboxChange($event, row.id)" />
+                                <p>
+                                    {{ row.id }}
+                                </p>
+                            </div>
+                        </td>
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ row.description }}
+                        </td>
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ row.mark }}
+                        </td>
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ row.difficultyLevel }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div *ngIf="IsTableShown" class="mt-8 flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <button class="flex items-center space-x-2 rounded-lg border py-3 px-4"
+                    (click)="changeCurrentPage(CurrentPage-1)" [disabled]="CurrentPage === 1 || Questions.length == 0"
+                    [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === 1 || Questions.length == 0}">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <p>Previous</p>
+                </button>
+                <div class="flex">
+                    <div *ngFor="let page of [].constructor(TotalPages); let i = index"
+                        class="rounded-lg py-[10px] w-[40px]"
+                        [ngClass]="{'border': i+1 == CurrentPage || Questions.length == 0}"
+                        (click)="changeCurrentPage(i+1)">
+                        <p class="text-center">{{ i + 1 }}</p>
+                    </div>
+                </div>
+                <button class="flex items-center space-x-2 rounded-lg border py-3 px-4"
+                    (click)="changeCurrentPage(CurrentPage+1)"
+                    [disabled]="CurrentPage === TotalPages || Questions.length == 0"
+                    [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === TotalPages || Questions.length == 0}">
+                    <p>Next</p>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+
+            <div class="flex items-center space-x-2">
+                <input (input)="validateNumber($event)" class="rounded-lg border py-3 px-4 w-[73px]"
+                    [(ngModel)]="PageSize" min="1" (input)="validatePageSize($event)"
+                    (ngModelChange)="changeCurrentPage(CurrentPage)">
+                <p>items Per Page</p>
+            </div>
+
+            <div>
+                <p>{{CurrentPage}} of {{TotalPages}} pages ({{TotalRecords}} Item)</p>
+            </div>
+        </div>
+
+        <div class="flex justify-end mt-6">
+            <button class="secondaryBg text-white font-medium px-4 py-2 rounded-lg" (click)="Save()">
                 <span>Save</span>
             </button>
         </div>
     </div>
-</div>  
+</div>

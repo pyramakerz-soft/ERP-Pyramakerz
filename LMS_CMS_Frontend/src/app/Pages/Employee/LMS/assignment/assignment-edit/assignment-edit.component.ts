@@ -16,6 +16,11 @@ import { LessonService } from '../../../../../Services/Employee/LMS/lesson.servi
 import { Lesson } from '../../../../../Models/LMS/lesson';
 import { TagsService } from '../../../../../Services/Employee/LMS/tags.service';
 import { Tag } from '../../../../../Models/LMS/tag';
+import { QuestionAssignmentTypeCount } from '../../../../../Models/LMS/question-assignment-type-count';
+import { QuestionBankService } from '../../../../../Services/Employee/LMS/question-bank.service';
+import { QuestionBankTypeService } from '../../../../../Services/Employee/LMS/question-bank-type.service';
+import { QuestionBankType } from '../../../../../Models/LMS/question-bank-type';
+import { QuestionBank } from '../../../../../Models/LMS/question-bank';
 
 @Component({
   selector: 'app-assignment-edit',
@@ -48,13 +53,23 @@ export class AssignmentEditComponent {
   key: string = "id";
   value: any = "";
   SelectedLessonID: number = 0
-  SElectedTagsIDs: number[] = []
+  SelectedTypeID: number = 0
+  SelectedTagsIDs: number[] = []
   Lessons: Lesson[] = []
   tags: Tag[] = []
-  selectedTypeIds: number[] = []; // Array to store selected type IDs
+  selectedTagsIds: number[] = []; // Array to store selected type IDs
   dropdownOpen = false;
   tagsSelected: Tag[] = [];
-
+  NumberOfQuestions: QuestionAssignmentTypeCount[] = []
+  QuestionBankType: QuestionBankType[] = []
+  IsTableShown: boolean = true;
+  IsQuestionsSelected: boolean = false;
+  selectedQuestions: number[] = [];
+  CurrentPage: number = 1
+  PageSize: number = 10
+  TotalPages: number = 1
+  TotalRecords: number = 0
+  Questions: QuestionBank[] = [];
 
   constructor(
     public account: AccountService,
@@ -66,27 +81,27 @@ export class AssignmentEditComponent {
     public AssigmentQuestionServ: AssignmentQuestionService,
     public LessonServ: LessonService,
     public tagServ: TagsService,
-
+    public QuestionBankServ: QuestionBankService,
+    public QuestionBankTypeServ: QuestionBankTypeService
   ) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
-
     this.DomainName = this.ApiServ.GetHeader();
-
     this.activeRoute.url.subscribe((url) => {
       this.path = url[0].path;
     });
     this.AssignmentId = Number(this.activeRoute.snapshot.paramMap.get('id'));
     this.getAssignmentData()
+    this.getLessons()
+    this.getTypes()
   }
 
   getAssignmentData() {
     this.AssigmentQuestionServ.GetById(this.AssignmentId, this.DomainName).subscribe((d) => {
       this.assignment = d
       console.log(d, this.assignment)
-
     })
   }
 
@@ -97,9 +112,98 @@ export class AssignmentEditComponent {
   }
 
   getTags() {
+    this.tags = []
+    this.tagsSelected = []
+    this.SelectedTagsIDs = []
+    this.Questions = []
     this.tagServ.GetByLessonId(this.SelectedLessonID, this.DomainName).subscribe((d) => [
       this.tags = d
     ])
+  }
+
+  getTypes() {
+    this.QuestionBankTypeServ.Get(this.DomainName).subscribe((d) => {
+      this.QuestionBankType = d
+    })
+  }
+
+  GetQuestionBank(pageNumber: number, pageSize: number): void {
+    this.selectedTagsIds = this.tagsSelected.map(s => s.id);
+    if (this.SelectedLessonID && this.SelectedTypeID) {
+      console.log(21)
+      this.Questions = []
+      this.QuestionBankServ.GetByTags(this.SelectedLessonID, this.SelectedTypeID, this.selectedTagsIds, this.DomainName, pageNumber, pageSize).subscribe({
+        next: (data) => {
+          console.log('✅ Full response from backend:', data);
+          this.PageSize = data.pagination.pageSize
+          this.TotalPages = data.pagination.totalPages
+          this.TotalRecords = data.pagination.totalRecords
+          this.Questions = data.data
+          console.log("d",data,this.Questions)
+        },
+        error: (err) => {
+          console.error('❌ Error loading questions:', err);
+        }
+      });
+    } else {
+      console.warn('⚠️ SelectedLessonID and SelectedTypeID must be set before calling GetQuestionBank.');
+    }
+  }
+
+  changeCurrentPage(currentPage: number) {
+    this.CurrentPage = currentPage
+    this.GetQuestionBank(this.CurrentPage, this.PageSize)
+
+    this.IsQuestionsSelected = false
+    this.selectedQuestions = []
+  }
+
+  validateNumber(event: any): void {
+    const value = event.target.value;
+    this.PageSize = 0
+  }
+
+  validatePageSize(event: any) {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+    }
+  }
+
+  toggleSelection(QuestionId: number, isChecked?: boolean) {
+    if (isChecked) {
+      if (!this.selectedQuestions.includes(QuestionId)) {
+        this.selectedQuestions.push(QuestionId);
+      }
+    } else {
+      this.selectedQuestions = this.selectedQuestions.filter(id => id !== QuestionId);
+    }
+
+    this.IsQuestionsSelected = this.selectedQuestions.length > 0;
+  }
+
+  onCheckboxChange(event: Event, QuestionId: number) {
+    const isChecked = (event.target as HTMLInputElement).checked;
+    this.toggleSelection(QuestionId, isChecked);
+  }
+
+  isSelected(QuestionId: number): boolean {
+    return this.selectedQuestions.includes(QuestionId);
+  }
+
+  selectAll(): boolean {
+    return this.Questions.length > 0 && this.selectedQuestions.length === this.Questions.length;
+  }
+
+  toggleSelectAll(event: Event): void {
+    const isChecked = (event.target as HTMLInputElement).checked;
+    if (isChecked) {
+      this.selectedQuestions = this.Questions.map(s => s.id);
+    } else {
+      this.selectedQuestions = [];
+    }
+
+    this.IsQuestionsSelected = this.selectedQuestions.length > 0;
   }
 
   toggleDropdown(): void {
@@ -110,11 +214,18 @@ export class AssignmentEditComponent {
     if (!this.tagsSelected.some((e) => e.id === Type.id)) {
       this.tagsSelected.push(Type);
     }
+    if (!this.SelectedTagsIDs.some((e) => e === Type.id)) {
+      this.SelectedTagsIDs.push(Type.id);
+    }
     this.dropdownOpen = false;
+    this.GetQuestionBank(this.CurrentPage, this.PageSize)
   }
+
 
   removeSelected(id: number): void {
     this.tagsSelected = this.tagsSelected.filter((e) => e.id !== id);
+    this.SelectedTagsIDs =this.SelectedTagsIDs.filter((e) => e!== id);
+    this.GetQuestionBank(this.CurrentPage, this.PageSize)
   }
 
   goBack() {
@@ -122,16 +233,20 @@ export class AssignmentEditComponent {
   }
 
   openModal() {
-    if (this.assignment.assignmentTypeID == 1) {
-      document.getElementById("Add_Modal1")?.classList.remove("hidden");
-      document.getElementById("Add_Modal1")?.classList.add("flex");
+    const modalId = `Add_Modal${this.assignment.assignmentTypeID}`;
+    const modal = document.getElementById(modalId);
+    if (modal) {
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
     }
   }
 
   closeModal() {
-    if (this.assignment.assignmentTypeID == 1) {
-      document.getElementById("Add_Modal1")?.classList.remove("flex");
-      document.getElementById("Add_Modal1")?.classList.add("hidden");
+    const modalId = `Add_Modal${this.assignment.assignmentTypeID}`;
+    const modal = document.getElementById(modalId);
+    if (modal) {
+      modal.classList.remove("flex");
+      modal.classList.add("hidden");
     }
   }
 
@@ -167,5 +282,15 @@ export class AssignmentEditComponent {
     if (file) {
       this.assignmentQuestion.file = file;
     }
+  }
+
+  Save(){
+    this.assignmentQuestion.assignmentID=this.AssignmentId
+    this.assignmentQuestion.questionIds=this.selectedQuestions
+    console.log(this.AssignmentId ,this.assignmentQuestion.assignmentID)
+    this.AssigmentQuestionServ.Add(this.assignmentQuestion, this.DomainName).subscribe((d)=>{
+      console.log(d)
+    })
+
   }
 }
