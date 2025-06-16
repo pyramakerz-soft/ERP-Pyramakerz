@@ -690,10 +690,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 }
             }
 
-            //if (Master.ETAP == null || Master.ETAPOS == 0)
-            //{
-            //    Master.ETAPOS = new List<ETAPOS>();
-            //}
+            if (Master.ETAPOSID == null || Master.ETAPOSID == 0)
+            {
+                Master.InvoiceType = 'B';
+            }
 
             Master.uuid = Guid.NewGuid().ToString();
             Master.VatPercent = vat;
