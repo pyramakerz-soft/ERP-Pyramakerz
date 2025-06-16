@@ -704,7 +704,6 @@ namespace LMS_CMS_PL.Services.ETA
             return "";
         }
 
-
         private static string Dec2(string value)
         {
             return string.Format("{0:0.00}", Convert.ToDecimal(value));
@@ -806,4 +805,9 @@ namespace LMS_CMS_PL.Services.ETA
         }
     }
 
+    //Public uuidUrl As String = "https://invoicing.eta.gov.eg/receipts/details/"
+    //Public printUrl As String = "https://invoicing.eta.gov.eg/receipts/details/print/"
+    //Public apiBaseUrl As String = "https://api.invoicing.eta.gov.eg"
+    //Public idSrvBaseUrl As String = "https://id.eta.gov.eg"
+    //Public receiptsSearch As String = "http://invoicing.eta.gov.eg/receipts/search/"
 }

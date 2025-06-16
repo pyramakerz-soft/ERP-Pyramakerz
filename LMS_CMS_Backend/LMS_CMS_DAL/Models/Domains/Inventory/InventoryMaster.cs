@@ -38,16 +38,17 @@ namespace LMS_CMS_DAL.Models.Domains.Inventory
         public byte? IsValid { get; set; }
         public byte[]? QrImage { get; set; }
         public string? Notes { get; set; }
-        public DateTime? EtaInsertedDate { get; set; }
+        public DateTime? EtaInsertedDate { get; set; }  //
         public string? ShareLongId { get; set; }
         public string? ETAErrorMsg { get; set; }
+        public char? InvoiceType { get; set; } = 'C';
         public List<string>? Attachments { get; set; }
 
         [ForeignKey("TaxIssuer")]
         public string? IssuerId { get; set; }
 
         [ForeignKey("Store")]
-        public long StoreID { get; set; }
+        public long StoreID { get; set; }  //
         
         [ForeignKey("Student")]
         public long? StudentID { get; set; }
@@ -62,7 +63,7 @@ namespace LMS_CMS_DAL.Models.Domains.Inventory
         public long FlagId { get; set; }
 
         [ForeignKey("Supplier")]
-        public long? SupplierId { get; set; }
+        public long? SupplierId { get; set; }  //
 
         [ForeignKey("StoreToTransform")]
         public long? StoreToTransformId { get; set; }
@@ -72,15 +73,21 @@ namespace LMS_CMS_DAL.Models.Domains.Inventory
 
         [ForeignKey("SchoolPCs")]
         public long? SchoolPCId { get; set; }
+<<<<<<< HEAD
+        public InventoryFlags InventoryFlags { get; set; } // 
+        public Store Store { get; set; }  //
+        public Student? Student { get; set; }  //
+=======
 
         [ForeignKey("ETAPOS")]
         public int? ETAPOSID { get; set; }
         public InventoryFlags InventoryFlags { get; set; }
         public Store Store { get; set; }
         public Student? Student { get; set; }
+>>>>>>> f75d6467d41f31154f1a6c2169dbcb8c88dd0620
         public Save? Save { get; set; }
         public Bank? Bank { get; set; }
-        public Supplier? Supplier { get; set; }
+        public Supplier? Supplier { get; set; }  //
         public Store? StoreToTransform { get; set; }
         public School? School { get; set; }
         public SchoolPCs? SchoolPCs { get; set; }

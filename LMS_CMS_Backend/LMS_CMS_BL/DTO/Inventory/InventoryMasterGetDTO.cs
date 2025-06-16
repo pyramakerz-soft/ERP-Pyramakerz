@@ -56,6 +56,7 @@ namespace LMS_CMS_BL.DTO.Inventory
         public int? ETAPOSID { get; set; }
         public DateTime? EtaInsertedDate { get; set; }
         public string? ETAErrorMsg { get; set; }
+        public char? InvoiceType { get; set; } 
         public List<InventoryDetailsGetDTO> InventoryDetails { get; set; }
     }
 }

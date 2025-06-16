@@ -19,13 +19,13 @@ namespace LMS_CMS_DAL.Models.Domains.Inventory
         public string? Notes { get; set; }
 
         [ForeignKey("ShopItem")]
-        public long ShopItemID { get; set; }
+        public long ShopItemID { get; set; } //
         
         [ForeignKey("InventoryMaster")]
         public long InventoryMasterId { get; set; }
         [ForeignKey("Sales")]
         public long? SalesId { get; set; }
-        public ShopItem ShopItem { get; set; }
+        public ShopItem ShopItem { get; set; }  //
         public InventoryMaster InventoryMaster { get; set; }
         public InventoryMaster? Sales { get; set; }
 

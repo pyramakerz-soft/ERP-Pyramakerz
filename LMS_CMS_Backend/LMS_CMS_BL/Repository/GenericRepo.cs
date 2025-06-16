@@ -176,6 +176,7 @@ namespace LMS_CMS_BL.Repository
 
             return query; // Return IQueryable to support Skip & Take
         }
+      
 
         public IQueryable<TEntity> GetAll<TEntity>() where TEntity : class
         {
