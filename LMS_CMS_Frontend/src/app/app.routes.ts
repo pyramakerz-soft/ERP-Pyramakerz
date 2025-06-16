@@ -383,7 +383,7 @@ export const routes: Routes = [
 
             //ui for assignment lms
             { path: "Assignment-Details-UI", component: AssignmentDetailsComponent, title: "Assignment Details", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "Assignment-Edit-UI", component: AssignmentEditComponent, title: "Assignment Edit", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "AssignmentEdit/:id", component: AssignmentEditComponent, title: "Assignment Edit", canActivate: [noNavigateWithoutLoginGuard] },
 
         ]
     },

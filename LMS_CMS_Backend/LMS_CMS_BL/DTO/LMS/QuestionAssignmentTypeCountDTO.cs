@@ -1,0 +1,15 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace LMS_CMS_BL.DTO.LMS
+{
+    public class QuestionAssignmentTypeCountDTO
+    {
+        public long QuestionTypeId { get; set; }
+        public long NumberOfQuestion { get; set; }
+
+    }
+}

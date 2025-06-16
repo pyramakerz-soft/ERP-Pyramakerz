@@ -33,7 +33,6 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public long AssignmentTypeID { get; set; }
         public AssignmentType AssignmentType { get; set; }
      
-        public ICollection<AssignmentClassroomStudent> AssignmentClassroomStudents { get; set; } = new HashSet<AssignmentClassroomStudent>();
         public ICollection<AssignmentQuestion> AssignmentQuestions { get; set; } = new HashSet<AssignmentQuestion>();
         public ICollection<AssignmentStudent> AssignmentStudents { get; set; } = new HashSet<AssignmentStudent>();
     }
