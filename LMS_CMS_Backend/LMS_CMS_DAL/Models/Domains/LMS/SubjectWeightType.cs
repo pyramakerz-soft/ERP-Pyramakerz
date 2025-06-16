@@ -20,6 +20,8 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public long SubjectID { get; set; }
         public Subject Subject { get; set; }
 
-        public float Value { get; set; } 
+        public float Value { get; set; }
+
+        public ICollection<Assignment> Assignments { get; set; } = new HashSet<Assignment>();
     }
 }

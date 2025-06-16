@@ -25,9 +25,13 @@ namespace LMS_CMS_BL.DTO.LMS
         public string SubjectArabicName { get; set; }  
         public long AssignmentTypeID { get; set; }
         public string AssignmentTypeEnglishName { get; set; }  
-        public string AssignmentTypeArabicName { get; set; }  
+        public string AssignmentTypeArabicName { get; set; }
+        public long SubjectWeightTypeID { get; set; }
+        public string SubjectWeightTypeEnglishName { get; set; }
+        public string SubjectWeightTypeArabicName { get; set; }
         public List<AssignmentStudentGetDTO> AssignmentStudents { get; set; } = new List<AssignmentStudentGetDTO>();
         public List<AssignmentQuestionGetDTO> AssignmentQuestions { get; set; } = new List<AssignmentQuestionGetDTO>();
+        public long? InsertedByUserId { get; set; }
 
     }
 }

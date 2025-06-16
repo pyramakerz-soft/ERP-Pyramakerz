@@ -14,10 +14,10 @@
 
     <!-- Subject Filter with improved styling -->
     <div class="mt-6">
-        <label for="subjectFilter" class="block mb-2 text-sm font-medium text-gray-700">Subject</label>
+        <label for="subjectFilter" class="primaryTxt mb-2 text-sm font-medium">Subject</label>
         <div class="relative">
             <div (click)="toggleSubjectDropdown()"
-                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 cursor-pointer flex justify-between items-center">
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5 cursor-pointer flex justify-between items-center">
                 <span>{{ selectedSubjectName || 'Choose' }}</span>
                 <i class="fas fa-chevron-down text-gray-400"></i>
             </div>
@@ -99,19 +99,7 @@
                 </tr>
             </tbody>
         </table>
-    </div>
-
-    <!-- Pagination -->
-    <div class="flex justify-center mt-4">
-        <div class="flex space-x-2">
-            <button class="px-3 py-1 border rounded">Previous</button>
-            <button *ngFor="let page of [1,2,3,4,5,6,7,8,9,10]" class="px-3 py-1 border rounded"
-                [ngClass]="{'secondaryBg text-white': currentPage === page}">
-                {{ page }}
-            </button>
-            <button class="px-3 py-1 border rounded">Next</button>
-        </div>
-    </div>
+    </div> 
 
 <!-- Modal -->
 <div id="Add_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">

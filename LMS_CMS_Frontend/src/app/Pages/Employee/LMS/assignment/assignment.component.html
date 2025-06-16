@@ -1,0 +1,236 @@
+<div class="flex justify-between items-center">
+    <h1 class="primaryTxt font-semibold text-2xl leading-9">Assignments</h1>
+    <div class="flex justify-between items-center space-x-4">
+        <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
+
+        <button (click)="openModal()"
+            class="secondaryBorder secondaryTxt rounded-lg px-4 py-3 flex items-center justify-center gap-2">
+            Create Assignment
+        </button>
+    </div>
+</div>
+
+<div class="my-5 flex flex-wrap justify-between items-center">
+    <div class="flex flex-col w-full">
+        <label class="primaryTxt mb-2 font-medium" for="subjects">Subject</label>
+        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="subjects"
+            [(ngModel)]="subjectID" (change)="onSubjectChange()">
+            <option [value]="0" disabled selected hidden>Choose Subject</option>
+            <option *ngFor="let c of subjects" [value]="c.id">{{ c.en_name }}</option>
+            <option *ngIf="subjects.length === 0" disabled selected>No Data Found</option>
+        </select>
+    </div>
+</div>
+
+<div>
+    <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
+        <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
+            <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+                <tr>
+                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        ID</th>
+                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        English Name</th>
+                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        Arabic Name</th>
+                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        Mark</th>
+                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        Open Date</th>
+                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        Due Date</th>
+                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        Cut Of Date</th>
+                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        Subject English Name</th>
+                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        Subject Arabic Name</th>
+                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        Assignment Type English Name</th>
+                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        Assignment Type Arabic Name</th>
+                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- No Data Row -->
+                <tr *ngIf="assignmentData.length === 0">
+                    <td colspan="12"
+                        class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                        No Data Found
+                    </td>
+                </tr>
+
+                <!-- Data Rows -->
+                <tr *ngFor="let row of assignmentData; let i = index"
+                    [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
+                    class="border-t border-gray-300 text-xs md:text-sm">
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ row.id }}
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ row.englishName }}
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ row.arabicName }}
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ row.mark }}
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ row.openDate }}
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ row.dueDate }}
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ row.cutOfDate }}
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ row.subjectEnglishName }}
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ row.subjectArabicName }}
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ row.assignmentTypeEnglishName }}
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ row.assignmentTypeArabicName }}
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        <div class="flex space-x-4">
+                            <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)" (click)="Delete(row.id)">
+                                <i class="fa-regular fa-trash-can"></i>
+                            </button>
+                            <button *ngIf="AllowEdit && IsAllowEdit(row.insertedByUserId)" (click)="openModal(row.id)">
+                                <i class="fa-solid fa-pencil"></i>
+                            </button>
+                            <button (click)="View(row.id)">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<div class="mt-8 flex justify-between items-center">
+    <div class="flex items-center space-x-4">
+        <button class="flex items-center space-x-2 rounded-lg border py-3 px-4"
+            (click)="changeCurrentPage(CurrentPage-1)" [disabled]="CurrentPage === 1 || assignmentData.length == 0"
+            [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === 1 || assignmentData.length == 0}">
+            <i class="fa-solid fa-arrow-left"></i>
+            <p>Previous</p>
+        </button>
+        <div class="flex">
+            <div *ngFor="let page of [].constructor(TotalPages); let i = index" class="rounded-lg py-[10px] w-[40px]"
+                [ngClass]="{'border': i+1 == CurrentPage || assignmentData.length == 0}" (click)="changeCurrentPage(i+1)">
+                <p class="text-center">{{ i + 1 }}</p>
+            </div>
+        </div>
+        <button class="flex items-center space-x-2 rounded-lg border py-3 px-4"
+            (click)="changeCurrentPage(CurrentPage+1)" [disabled]="CurrentPage === TotalPages || assignmentData.length == 0"
+            [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === TotalPages || assignmentData.length == 0}">
+            <p>Next</p>
+            <i class="fa-solid fa-arrow-right"></i>
+        </button>
+    </div>
+
+    <div class="flex items-center space-x-2">
+        <input (input)="validateNumberForPagination($event)" class="rounded-lg border py-3 px-4 w-[73px]" [(ngModel)]="PageSize"
+            min="1" (input)="validatePageSize($event)" (ngModelChange)="changeCurrentPage(CurrentPage)">
+        <p>items Per Page</p>
+    </div>
+
+    <div>
+        <p>{{CurrentPage}} of {{TotalPages}} pages ({{TotalRecords}} Item)</p>
+    </div>
+</div>
+
+
+
+<div id="Add_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
+    <div class="bg-white rounded-2xl p-12 w-[669px] max-h-[90%] overflow-y-auto">
+        <div class="flex justify-between items-center">
+            <h1 *ngIf="assignment.id == 0" class="font-semibold text-2xl leading-9">Create Lesson</h1>
+            <h1 *ngIf="assignment.id != 0" class="font-semibold text-2xl leading-9">Edit Lesson</h1>
+            <button (click)="closeModal()" type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
+        </div>
+        
+        <div class="mt-6 mb-4 flex justify-between flex-wrap">
+            <div class="flex flex-col mb-4 w-full">
+                <label class="mb-2 primaryTxt" for="Subject">Subject</label>
+                <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Subject"
+                    [(ngModel)]="assignment.subjectID" (ngModelChange)="onInputValueChange({ field: 'subjectID', value: $event })">
+                    <option [value]="0" disabled selected hidden>Choose Subject</option>
+                    <option *ngFor="let c of subjects" [value]="c.id">{{ c.en_name }}</option>
+                    <option *ngIf="subjects.length === 0" disabled selected>No Data Found</option>
+                </select> 
+            </div>  
+            <div class="flex flex-col mb-4 w-full">
+                <label class="mb-2 primaryTxt" for="englishName">English Name</label>
+                <input id="englishName" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter English Name"
+                [(ngModel)]="assignment.englishName" 
+                (ngModelChange)="onInputValueChange({ field: 'englishName', value: $event })"/>
+                <span *ngIf="validationErrors['englishName']" class="text-red-500 ml-3 font-normal">{{ validationErrors['englishName'] }}</span>
+            </div>
+            <div class="flex flex-col mb-4 w-full">
+                <label class="mb-2 primaryTxt" for="arabicName">Arabic Name</label>
+                <input id="arabicName" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Arabic Name"
+                [(ngModel)]="assignment.arabicName" 
+                (ngModelChange)="onInputValueChange({ field: 'arabicName', value: $event })"/>
+                <span *ngIf="validationErrors['arabicName']" class="text-red-500 ml-3 font-normal">{{ validationErrors['arabicName'] }}</span>
+            </div> 
+            <div class="flex flex-col mb-4 w-[49%]">
+                <label class="mb-2 primaryTxt" for="AssignmentType">Assignment Type</label>
+                <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="AssignmentType"
+                    [(ngModel)]="assignment.assignmentTypeID" (ngModelChange)="onInputValueChange({ field: 'assignmentTypeID', value: $event })">
+                    <option [value]="0" disabled selected hidden>Choose Assignment Type</option>
+                    <option *ngFor="let c of assignmentTypes" [value]="c.id">{{ c.englishName }}</option>
+                    <option *ngIf="assignmentTypes.length === 0" disabled selected>No Data Found</option>
+                </select> 
+            </div>  
+            <div class="flex flex-col mb-4 w-[49%]">
+                <label class="mb-2 primaryTxt" for="mark">Mark</label>
+                <input id="order" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Mark"
+                    [(ngModel)]="assignment.mark" (input)="validateNumber($event, 'mark')"
+                    (ngModelChange)="onInputValueChange({ field: 'mark', value: $event })"/>
+                <span *ngIf="validationErrors['mark']" class="text-red-500 ml-3 font-normal">{{ validationErrors['mark'] }}</span>
+            </div>  
+            <div class="flex flex-col mb-4 w-[30%]">
+                <label class="mb-2 primaryTxt" for="openDate">Open Date</label>
+                <input id="openDate" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                [(ngModel)]="assignment.openDate" 
+                (ngModelChange)="onInputValueChange({ field: 'openDate', value: $event })"/>
+                <span *ngIf="validationErrors['openDate']" class="text-red-500 ml-3 font-normal">{{ validationErrors['openDate'] }}</span>
+            </div>
+            <div class="flex flex-col mb-4 w-[30%]">
+                <label class="mb-2 primaryTxt" for="dueDate">Due Date</label>
+                <input id="dueDate" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                [(ngModel)]="assignment.dueDate"/> 
+            </div>
+            <div class="flex flex-col mb-4 w-[30%]">
+                <label class="mb-2 primaryTxt" for="cutOfDate">Cut Of Date</label>
+                <input id="cutOfDate" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                [(ngModel)]="assignment.cutOfDate" 
+                (ngModelChange)="onInputValueChange({ field: 'cutOfDate', value: $event })"/>
+                <span *ngIf="validationErrors['cutOfDate']" class="text-red-500 ml-3 font-normal">{{ validationErrors['cutOfDate'] }}</span>
+            </div>
+        </div> 
+
+        <div class="flex justify-end">
+            <button
+            [disabled]="isLoading"
+            class="secondaryBg text-white font-medium px-4 py-2 rounded-lg cursor-pointer"
+            (click)="Save()">
+            <span *ngIf="!isLoading">Save</span>
+            <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+          </button>
+        </div>
+    </div>
+</div>

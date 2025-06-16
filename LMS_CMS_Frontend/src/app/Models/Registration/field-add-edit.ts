@@ -4,7 +4,7 @@ export class FieldAddEdit {
             public arName: string = '',
             public enName: string = '',
             public orderInForm: number|null = null,
-            public isMandatory: boolean = true,
+            public isMandatory: boolean = false,
             public fieldTypeID: number = 0,
             public registrationCategoryID: number = 0,
             public options :string[] =[],

@@ -54,6 +54,100 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         }
 
         ////
+        /////////////
+        [HttpGet("inventory-total")]
+        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Inventory" })]
+        public async Task<IActionResult> GetInventoryTotalAsync(
+            long storeId,
+            long shopItemId,
+            DateTime endDate)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var excludedFlagNames = new List<string> { "offer price", "purchase order" };
+
+            var inventoryDetails = await Unit_Of_Work.inventoryDetails_Repository
+             .Select_All_With_IncludesById<InventoryDetails>(
+                 x =>
+                     x.ShopItemID == shopItemId &&
+                     x.InventoryMaster.EtaInsertedDate <= endDate &&
+                     x.InventoryMaster.IsDeleted == null &&
+                     (
+                         (x.InventoryMaster.StoreID == storeId &&
+                          !excludedFlagNames.Contains(x.InventoryMaster.InventoryFlags.arName)) ||
+                         (x.InventoryMaster.FlagId == 8 &&
+                          x.InventoryMaster.StoreToTransformId == storeId)
+                     ),
+                 q => q.Include(x => x.InventoryMaster)
+                       .ThenInclude(im => im.InventoryFlags),
+                 q => q.Include(x => x.InventoryMaster)
+                       .ThenInclude(im => im.Store),
+                 q => q.Include(x => x.ShopItem)
+             );
+
+            int total = inventoryDetails.Sum(x =>
+                x.Quantity * (x.InventoryMaster.InventoryFlags.ItemInOut == 1 ? 1 : -1));
+
+            var first = inventoryDetails.FirstOrDefault();
+
+            var dto = new InventoryTotalDTO
+            {
+                ShopItemId = shopItemId,
+                StoreId = storeId,
+                EndDate = endDate,
+                TotalQuantity = total,
+                ItemName = first?.ShopItem?.EnName ?? "N/A",
+                StoreName = first?.InventoryMaster?.Store?.Name ?? "N/A",
+                FlagName = first?.InventoryMaster?.InventoryFlags?.arName ?? "N/A"
+            };
+
+            return Ok(dto);
+        }
+        /// // /// // /// 
+        //[HttpGet("report-inventory-master")]
+        //[Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Inventory" })]
+        //public async Task<IActionResult> GetInventoryMasterReportAsync(
+        //     long? storeId,
+        //     long? supplierId,
+        //     DateTime fromDate,
+        //     DateTime toDate)
+        //{
+        //    UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+        //    var inventoryMasters = await Unit_Of_Work.inventoryDetails_Repository
+        //    .Select_All_With_Includes(
+        //          x => x.InventoryFlags,
+        //            x => x.Student,
+        //            x => x.Supplier,
+        //            x => x.Store);
+
+        //    //  .ConfigureAwait(false);
+
+        //    // Apply filters after fetch, or refactor includes method to take predicate if needed
+        //    inventoryMasters = inventoryMasters
+        //        .Where(x =>
+        //            x.EtaInsertedDate >= fromDate &&
+        //            x.EtaInsertedDate <= toDate &&
+        //            x.IsDeleted == null &&
+        //            (storeId == null || x.StoreID == storeId) &&
+        //            (supplierId == null || x.SupplierId == supplierId))
+        //        .ToList();
+
+        //    var result = inventoryMasters.Select(x => new InventoryMasterReportDTO
+        //    {
+        //        FlagName = x.InventoryFlags?.arName ?? "N/A",
+        //        InvoiceNumber = x.InvoiceNumber,
+        //        DayDate = x.EtaInsertedDate,
+        //        Notes = x.Notes,
+        //        StoreName = x.Store?.Name ?? "N/A",
+        //        StudentName = x.Student?.Name ?? "N/A",
+        //        SupplierName = x.Supplier?.Name ?? "N/A"
+        //    }).ToList();
+
+        //    return Ok(result);
+        //}
+
+        /// 
 
         [HttpGet("BySaleId/{id}")]
         [Authorize_Endpoint_(

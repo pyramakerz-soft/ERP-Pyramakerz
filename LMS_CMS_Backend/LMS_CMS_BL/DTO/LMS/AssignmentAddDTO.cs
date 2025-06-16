@@ -24,6 +24,7 @@ namespace LMS_CMS_BL.DTO.LMS
         public bool IsSpecificStudents { get; set; }
         public long SubjectID { get; set; } 
         public long AssignmentTypeID { get; set; }
+        public long SubjectWeightTypeID { get; set; }
         public List<long>? StudentClassroomIDs { get; set; }
     }
 }

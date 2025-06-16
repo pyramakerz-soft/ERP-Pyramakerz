@@ -1,14 +1,16 @@
 import { AssignmentQuestion } from "./assignment-question";
+import { AssignmentStudent } from "./assignment-student";
 
 export class Assignment {
      constructor(
         public id: number = 0,
         public englishName: string = '',
         public arabicName: string = '',
-        public mark: number = 0,
-        public openDate: Date = new Date(),
-        public dueDate: Date = new Date(),
-        public cutOfDate: Date = new Date(),
+        public mark: number|null = null,
+        public openDate: string = '',
+        public dueDate: string = '',
+        public cutOfDate: string = '', 
+        public isSpecificStudents: boolean = false,
         public linkFile: string = '',
         public subjectEnglishName: string = '',
         public subjectArabicName: string = '',
@@ -16,8 +18,11 @@ export class Assignment {
         public assignmentTypeID: number = 0,
         public assignmentTypeEnglishName: string = '',
         public assignmentTypeArabicName: string = '',
-        public asSpecificStudents: boolean = false,
+        public subjectWeightTypeID: number = 0,
+        public subjectWeightTypeEnglishName: string = '',
+        public subjectWeightTypeArabicName: string = '',
         public assignmentQuestions : AssignmentQuestion[]=[] ,
-        public insertedByUserId: number = 0,
+        public assignmentStudents : AssignmentStudent[]=[] ,
+        public insertedByUserId: number = 0
     ) {}
 }

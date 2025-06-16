@@ -327,16 +327,8 @@ namespace LMS_CMS_PL.Services.ETA
             return dd.ToString("yyyy-MM-dd HH:mm:ss");
         }
 
-        public static string Login(UOW unitOfWork, long schoolId)
+        public static string Login(UOW unitOfWork, string clientId, string clientSecret, string clientSecret2 = "")
         {
-            School school = unitOfWork.school_Repository.Select_By_Id(schoolId);
-
-            if (school == null)
-                return "School not found";
-
-            string clientId = school.ClientID;
-            string clientSecret = school.SecretNumber1;
-            string clientSecret2 = school.SecretNumber2;
             try
             {
                 var outgoingQueryString = System.Web.HttpUtility.ParseQueryString(string.Empty);
@@ -526,15 +518,13 @@ namespace LMS_CMS_PL.Services.ETA
             }
         }
 
-        public static string receiptsubmissions(UOW unitOfWork, InventoryMaster master, bool getUUID = false)
+        public static string receiptsubmissions(UOW unitOfWork, InventoryMaster master, long salesInvoiceId, bool getUUID = false)
         {
             string uuid = "";
             try
             {
                 string totalSales = GetTotalSalesAmount(master.InventoryDetails).ToString();
                 string itemData = "";
-
-                string MyInvoiceNo = master?.InvoiceNumber;
 
                 string CurrencySign = "EGP";
 
@@ -546,7 +536,12 @@ namespace LMS_CMS_PL.Services.ETA
                 if (master.FlagId == 12)
                 {
                     documentType = "R";
-                    uuid = unitOfWork.inventoryMaster_Repository.Last_Or_Default(x => x.StoreID == master.StoreID && x.FlagId == 11 && x.InvoiceNumber == MyInvoiceNo, x => x.InvoiceNumber.OrderDescending())?.uuid;
+                    if (salesInvoiceId != 0)
+                        uuid = unitOfWork.inventoryMaster_Repository.First_Or_Default(x => x.ID == salesInvoiceId)?.uuid;
+                    else
+                        return "Please enter the slaes invoice ID";
+
+                        ReturnString = """referenceUUID"":""" + uuid + @""",";
                 }
 
                 decimal Weight = 0;
@@ -580,8 +575,9 @@ namespace LMS_CMS_PL.Services.ETA
                 {{
                     ""header"": {{
                         ""dateTimeIssued"": ""{dateTimeIssued}"",
-                        ""receiptNumber"": ""{master.StoreID}_{master.FlagId}_{MyInvoiceNo}"",
+                        ""receiptNumber"": ""{master.StoreID}_{master.FlagId}_{master?.InvoiceNumber}"",
                         ""uuid"": ""{uuid}"",
+                        {ReturnString}
                         ""previousUUID"": """",
                         ""referenceOldUUID"": """",
                         ""currency"": ""{CurrencySign}"",
@@ -635,8 +631,6 @@ namespace LMS_CMS_PL.Services.ETA
                     uuid = string.Concat(hashBytes.Select(b => b.ToString("x2")));
                 }
 
-                //bm.ExecuteNonQuery($"update InventoryMaster set uuid='{uuid}', POSID='{master.ETAPOSID}' where StoreId={master.StoreID} and Flag={master.FlagId} and InvoiceNo={master.InvoiceNumber}");
-
                 master.uuid = uuid;
 
                 unitOfWork.inventoryMaster_Repository.Update(master);
@@ -665,30 +659,25 @@ namespace LMS_CMS_PL.Services.ETA
 
                 dynamic result0 = JsonConvert.DeserializeObject(result);
 
-                if (result0.acceptedDocuments != null && result0.acceptedDocuments.Count > 0)
+                if (result0?.acceptedDocuments != null && result0?.acceptedDocuments.Count > 0)
                 {
-                //    bm.ExecuteNonQuery($@"delete InventoryMaster where StoreId={master.StoreID} and Flag={master.FlagId} and InvoiceNo={master.InvoiceNumber}
-                //insert into InventoryMaster (StoreId,Flag,InvoiceNo,uuid,longId) values ({master.StoreID},{master.FlagId},{master.InvoiceNumber},'{result0.acceptedDocuments[0].uuid}','{result0.acceptedDocuments[0].longId}')");
 
                     master.IsValid = 1;
                     master.Status = "Valid";
-                    master.ShareLongId = result0.acceptedDocuments[0].longId;
+                    master.ShareLongId = result0?.acceptedDocuments[0].longId;
                     master.EtaInsertedDate = DateTime.Parse(dateTimeIssued);
 
                     unitOfWork.inventoryMaster_Repository.Update(master);
                     unitOfWork.SaveChanges();
                 }
 
-                if (result0.rejectedDocuments != null && result0.rejectedDocuments.Count > 0)
+                if (result0?.rejectedDocuments != null && result0?.rejectedDocuments.Count > 0)
                 {
                     StringBuilder msg = new();
-                    foreach (var detail in result0.rejectedDocuments[0].error.details)
+                    foreach (var detail in result0?.rejectedDocuments[0]?.error?.details)
                     {
                         msg.Append($"{detail.propertyPath} - {detail.message}\r\n");
                     }
-
-                    //    bm.ExecuteNonQuery($@"delete InventoryMaster where StoreId={master.StoreID} and Flag={master.FlagId} and InvoiceNo={master.InvoiceNumber}
-                    //insert into InventoryMaster (StoreId,Flag,InvoiceNo,Notes) values ({master.StoreID},{master.FlagId},{master.InvoiceNumber},'{msg}')");
 
                     master.ETAErrorMsg = msg.ToString();
 
@@ -703,7 +692,6 @@ namespace LMS_CMS_PL.Services.ETA
 
             return "";
         }
-
 
         private static string Dec2(string value)
         {
@@ -806,4 +794,9 @@ namespace LMS_CMS_PL.Services.ETA
         }
     }
 
+    //Public uuidUrl As String = "https://invoicing.eta.gov.eg/receipts/details/"
+    //Public printUrl As String = "https://invoicing.eta.gov.eg/receipts/details/print/"
+    //Public apiBaseUrl As String = "https://api.invoicing.eta.gov.eg"
+    //Public idSrvBaseUrl As String = "https://id.eta.gov.eg"
+    //Public receiptsSearch As String = "http://invoicing.eta.gov.eg/receipts/search/"
 }

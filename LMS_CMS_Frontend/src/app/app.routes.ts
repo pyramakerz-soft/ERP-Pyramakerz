@@ -169,6 +169,7 @@ import { SubjectTeacherComponent } from './Pages/Employee/Administrator/subject-
 import { SubjectCoTeacherComponent } from './Pages/Employee/Administrator/subject-co-teacher/subject-co-teacher.component';
 import { StudentsComponent } from './Pages/Employee/Administrator/students/students.component';
 import { DailyPerformanceMasterComponent } from './Pages/Employee/LMS/daily-performance-master/daily-performance-master.component';
+import { AssignmentComponent } from './Pages/Employee/LMS/assignment/assignment.component';
 
 
 export const routes: Routes = [
@@ -380,10 +381,8 @@ export const routes: Routes = [
             { path: "Edit Student/:RegisterationFormParentId/:StudentId", component: RegistrationFormComponent, title: "Edit Student", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Student View/:Id", component: RegistrationConfirmationDetailsComponent, title: "Student View", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Daily Performance", component: DailyPerformanceMasterComponent, title: "Daily Performance", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-
-            //ui for assignment lms
-            { path: "Assignment-Details-UI", component: AssignmentDetailsComponent, title: "Assignment Details", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "AssignmentEdit/:id", component: AssignmentEditComponent, title: "Assignment Edit", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Assignment", component: AssignmentComponent, title: "Assignment", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Assignment/:id", component: AssignmentEditComponent, title: "Assignment Edit", canActivate: [noNavigateWithoutLoginGuard] },
 
         ]
     },
