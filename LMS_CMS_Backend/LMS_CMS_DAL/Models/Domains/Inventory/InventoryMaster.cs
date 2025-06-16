@@ -72,19 +72,13 @@ namespace LMS_CMS_DAL.Models.Domains.Inventory
         public long? SchoolId { get; set; }
 
         [ForeignKey("SchoolPCs")]
-        public long? SchoolPCId { get; set; }
-<<<<<<< HEAD
-        public InventoryFlags InventoryFlags { get; set; } // 
-        public Store Store { get; set; }  //
-        public Student? Student { get; set; }  //
-=======
+        public long? SchoolPCId { get; set; } 
 
         [ForeignKey("ETAPOS")]
         public int? ETAPOSID { get; set; }
         public InventoryFlags InventoryFlags { get; set; }
         public Store Store { get; set; }
         public Student? Student { get; set; }
->>>>>>> f75d6467d41f31154f1a6c2169dbcb8c88dd0620
         public Save? Save { get; set; }
         public Bank? Bank { get; set; }
         public Supplier? Supplier { get; set; }  //

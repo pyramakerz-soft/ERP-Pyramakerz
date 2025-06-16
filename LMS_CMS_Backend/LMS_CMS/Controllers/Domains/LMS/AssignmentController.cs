@@ -190,12 +190,12 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             AssignmentGetDTO AssignmentGetDTO = mapper.Map<AssignmentGetDTO>(Assignment);
 
-            //string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
 
-            //if (!string.IsNullOrEmpty(AssignmentGetDTO.LinkFile))
-            //{
-            //    AssignmentGetDTO.LinkFile = $"{serverUrl}{AssignmentGetDTO.LinkFile.Replace("\\", "/")}";
-            //}
+            if (!string.IsNullOrEmpty(AssignmentGetDTO.LinkFile))
+            {
+                AssignmentGetDTO.LinkFile = $"{serverUrl}{AssignmentGetDTO.LinkFile.Replace("\\", "/")}";
+            }
 
             return Ok(AssignmentGetDTO);
         }
@@ -229,7 +229,18 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             if (subject == null)
             {
                 return BadRequest("No subject with this ID");
+            }
+            
+            SubjectWeightType subjectWeightType = Unit_Of_Work.subjectWeightType_Repository.First_Or_Default(g => g.ID == NewAssignment.SubjectWeightTypeID && g.IsDeleted != true);
+            if (subjectWeightType == null)
+            {
+                return BadRequest("No subject Weight Type with this ID");
             } 
+
+            if(subjectWeightType.SubjectID != NewAssignment.SubjectID)
+            {
+                return BadRequest("This Subject isn't assigned to this Subject Weight Type");
+            }
               
             AssignmentType assignmentType = Unit_Of_Work.assignmentType_Repository.First_Or_Default(g => g.ID == NewAssignment.AssignmentTypeID);
             if (assignmentType == null)
@@ -486,6 +497,17 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             if (subject == null)
             {
                 return BadRequest("No subject with this ID");
+            }
+
+            SubjectWeightType subjectWeightType = Unit_Of_Work.subjectWeightType_Repository.First_Or_Default(g => g.ID == EditAssignment.SubjectWeightTypeID && g.IsDeleted != true);
+            if (subjectWeightType == null)
+            {
+                return BadRequest("No subject Weight Type with this ID");
+            }
+
+            if (subjectWeightType.SubjectID != EditAssignment.SubjectID)
+            {
+                return BadRequest("This Subject isn't assigned to this Subject Weight Type");
             }
 
             AssignmentType assignmentType = Unit_Of_Work.assignmentType_Repository.First_Or_Default(g => g.ID == EditAssignment.AssignmentTypeID);
