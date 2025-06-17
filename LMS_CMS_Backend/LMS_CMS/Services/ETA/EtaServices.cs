@@ -327,14 +327,14 @@ namespace LMS_CMS_PL.Services.ETA
             return dd.ToString("yyyy-MM-dd HH:mm:ss");
         }
 
-        public static string Login(UOW unitOfWork, string clientId, string clientSecret, string clientSecret2 = "")
+        public static string Login(School school)
         {
             try
             {
                 var outgoingQueryString = System.Web.HttpUtility.ParseQueryString(string.Empty);
                 outgoingQueryString.Add("grant_type", "client_credentials");
-                outgoingQueryString.Add("client_id", clientId);
-                outgoingQueryString.Add("client_secret", clientSecret);
+                outgoingQueryString.Add("client_id", school.ClientID);
+                outgoingQueryString.Add("client_secret", school.SecretNumber1);
                 outgoingQueryString.Add("scope", "InvoicingAPI");
 
                 byte[] jsonDataBytes = Encoding.ASCII.GetBytes(outgoingQueryString.ToString());

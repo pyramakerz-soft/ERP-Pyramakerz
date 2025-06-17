@@ -3,6 +3,7 @@ using LMS_CMS_BL.DTO.Inventory;
 using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains.ETA;
 using LMS_CMS_DAL.Models.Domains.Inventory;
+using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_PL.Services;
 using LMS_CMS_PL.Services.ETA;
 using Microsoft.AspNetCore.Authorization;
@@ -81,7 +82,10 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
 
             if (master.InvoiceType == 'B')
             {
-                string token = EtaServices.Login(Unit_Of_Work, master.School.ClientID, master.School.SecretNumber1, master.School.SecretNumber2);
+                if (master.School == null)
+                    return NotFound("School not found");
+
+                string token = EtaServices.Login(master.School);
                 bool jsonResult = EtaServices.GenerateJsonInvoice(master, Unit_Of_Work, _config, dateTime);
 
                 if (master.IsValid == 0 || master.IsValid == null)
@@ -138,13 +142,13 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
         }
         #endregion
 
-        #region Submit Invoice
-        [HttpPost("SendInvoices")]
+        #region Submit Invoices
+        [HttpPost("SubmitInvoices")]
         //[Authorize_Endpoint_(
         //    allowedTypes: new[] { "octa", "employee" },
         //    pages: new[] { "" }
         //)]
-        public async Task<IActionResult> SendInvoices(long schoolId)
+        public async Task<IActionResult> SubmitInvoices(long schoolId)
         {
             string apiBaseUrl = "https://api.invoicing.eta.gov.eg";
             string idSrvBaseUrl = "https://id.eta.gov.eg";
@@ -165,7 +169,12 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
             if (masters is null || masters.Count == 0)
                 return NotFound("Invoice not found.");
 
-            string token = EtaServices.Login(Unit_Of_Work, schoolId);
+            School school = Unit_Of_Work.school_Repository.First_Or_Default(x => x.ID == schoolId && x.IsDeleted != true);
+
+            if (school is null)
+                return NotFound("School not found.");
+
+            string token = EtaServices.Login(school);
 
             foreach (var master in masters)
             {
@@ -268,102 +277,6 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
             List<InventoryMasterGetDTO> DTO = _mapper.Map<List<InventoryMasterGetDTO>>(mastersByDate);
 
             return Ok(DTO);
-        }
-        #endregion
-
-        #region Submit Receipt
-        [HttpPost("SubmitReceipt")]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "" }
-        //)]
-        public async Task<IActionResult> SubmitReceipt(long masterId, int etaPosID = 0)
-        {
-            string apiBaseUrl = "https://api.invoicing.eta.gov.eg";
-            string idSrvBaseUrl = "https://id.eta.gov.eg";
-
-            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-
-            InventoryMaster master = await Unit_Of_Work.inventoryMaster_Repository.FindByIncludesAsync(
-                d => d.ID == masterId &&
-                (d.FlagId == 11 || d.FlagId == 12) &&
-                d.IsDeleted != true,
-                query => query.Include(s => s.TaxIssuer),
-                query => query.Include(s => s.School),
-                query => query.Include(s => s.Student),
-                query => query.Include(s => s.InventoryDetails)
-                    .ThenInclude(detail => detail.ShopItem)
-            );
-
-            if (master is null)
-                return NotFound("Invoice not found.");
-
-            string inv = $"{master.StoreID}_{master.FlagId}_{master.InvoiceNumber}.json";
-
-            string jsonPath = string.Empty;
-            if (master.FlagId == 11)
-                jsonPath = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/JSONInvoices/{inv}");
-            if (master.FlagId == 12)
-                jsonPath = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/JSONCredits/{inv}");
-
-            
-
-            string token = EtaServices.Login(Unit_Of_Work, master.School.ID);
-
-            string dateTime = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ");
-
-            bool jsonResult = EtaServices.GenerateJsonInvoice(master, Unit_Of_Work, _config, dateTime);
-
-            if (master.IsValid == 0 || master.IsValid == null)
-            {
-                string signedJson = System.IO.File.ReadAllText(jsonPath);
-                byte[] jsonDataBytes = Encoding.UTF8.GetBytes(signedJson);
-
-                string result = string.Empty;
-
-                if (!string.IsNullOrEmpty(token))
-                {
-                    //result = EtaServices.receiptsubmissions(new Uri(apiBaseUrl + "/api/v1/documentsubmissions"), jsonDataBytes, "application/json", "POST", token);
-                }
-
-                if (!string.IsNullOrEmpty(result))
-                {
-                    dynamic result0 = JsonConvert.DeserializeObject(result);
-
-                    if (result0.acceptedDocuments.Count > 0)
-                    {
-                        string uuid = result0.acceptedDocuments[0].uuid;
-                        string longId = result0.acceptedDocuments[0].longId;
-
-                        master.uuid = uuid;
-                        master.ShareLongId = longId;
-                        master.IsValid = 1;
-                        master.EtaInsertedDate = DateTime.Parse(dateTime);
-
-                        Unit_Of_Work.inventoryMaster_Repository.Update(master);
-                        await Unit_Of_Work.SaveChangesAsync();
-
-                        return Ok(new { uuid, longId });
-                    }
-
-                    if (result0.rejectedDocuments.Count > 0)
-                    {
-                        string msg = "";
-
-                        foreach (var detail in result0.rejectedDocuments[0].error.details)
-                        {
-                            msg += $"{detail.propertyPath} - {detail.message}\r\n";
-                        }
-
-                        return BadRequest(new { msg });
-                    }
-                }
-            }
-
-            if (System.IO.File.Exists(jsonPath))
-                System.IO.File.Delete(jsonPath);
-
-            return Ok();
         }
         #endregion
     }
