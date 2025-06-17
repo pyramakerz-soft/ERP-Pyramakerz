@@ -55,7 +55,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
             );
 
             if (master is null)
-                return NotFound("Invoice not found.");
+                return NotFound("No Invoice found.");
 
             string dateTime = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ");
 
