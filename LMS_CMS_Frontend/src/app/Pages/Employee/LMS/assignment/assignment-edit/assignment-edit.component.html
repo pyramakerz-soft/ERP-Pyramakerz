@@ -94,7 +94,7 @@
     <div class="flex justify-between items-center">
         <h1 class="primaryTxt font-semibold text-2xl leading-9">Questions</h1>
         <div class="flex justify-between items-center ">
-            <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
+            <!-- <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search> -->
 
             <button (click)="openModal()"
                 class="secondaryBorder secondaryTxt rounded-lg px-4 py-3 flex items-center justify-center gap-2">
@@ -133,21 +133,18 @@
 
                 <!-- Data Rows -->
                 <tr *ngFor="let row of assignment.assignmentQuestions; let i = index"
-                    [ngClass]="{'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1}" 
+                    [ngClass]="{'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1}"
                     class="border-t border-gray-300 text-xs md:text-sm">
 
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{
-                        row.questionBankID }}</td>
+                        row.id }}</td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.questionBank.description
                         }}</td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.questionBank.mark }}</td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         <div class="flex space-x-4">
-                            <button>
-                                <i class="fa-regular fa-trash-can"></i>
-                            </button>
-                            <button>
-                                <i class="fa-solid fa-pencil"></i>
+                             <button (click)="Delete(row.id)">
+                                 <i class="fa-regular fa-trash-can"></i>
                             </button>
                         </div>
                     </td>
@@ -177,11 +174,11 @@
                                 to Upload </span></p>
                         <p class="font-normal text-xs md:text-sm text-[#8E8E93]"> (Max. File size: 25 MB)</p>
                     </label>
-                    <input id="file-upload" type="file" class="hidden" (change)="onImageFileSelected($event)"/>
-                 </div>
+                    <input id="file-upload" type="file" class="hidden" (change)="onImageFileSelected($event)" />
                 </div>
             </div>
-            <span *ngIf="validationErrors['file']" class="text-red-500 ml-3">{{ validationErrors['file'] }}</span>
+        </div>
+        <span *ngIf="validationErrors['file']" class="text-red-500 ml-3">{{ validationErrors['file'] }}</span>
 
         <div class="flex justify-end mt-6">
             <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
@@ -202,7 +199,7 @@
                 class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
         </div>
 
-        <div class="flex flex-wrap gap-x-4 gap-y-4 w-full">
+        <div class="flex flex-wrap gap-x-4 gap-y-4 w-full ">
             <!-- Lesson -->
             <div class="w-[48%]">
                 <label for="Lesson" class="block mb-2 text-sm font-medium text-gray-900">Lesson</label>
@@ -213,15 +210,15 @@
                     <option *ngFor="let ac of Lessons" [value]="ac.id">{{ ac.englishTitle }}</option>
                     <option *ngIf="Lessons.length === 0" disabled selected>No Data Found</option>
                 </select>
-                <span *ngIf="validationErrors['Lesson']" class="text-red-500 ml-3">{{ validationErrors['Lesson'] }}</span>
+                <span *ngIf="validationErrors['Lesson']" class="text-red-500 ml-3">{{ validationErrors['Lesson']
+                    }}</span>
             </div>
-
             <!-- Tags -->
             <div class="w-[48%]">
-                <label class="block mb-2 text-sm font-medium text-gray-900" for="ac">Tags</label>
+                <label class="block mb-2 text-sm font-medium text-gray-900">Tags</label>
                 <div class="relative">
-                    <div class="border border-gray-300 rounded-lg px-4 py-3 cursor-pointer min-h-[48px] w-full"
-                        (click)="toggleDropdown()"  tabindex="0">
+                    <div class="border border-gray-300 rounded-lg px-3 h-[42px] flex items-center w-full cursor-pointer"
+                        (click)="toggleDropdown()" tabindex="0">
                         <ng-container *ngIf="tagsSelected.length > 0; else placeholder">
                             <div class="flex flex-wrap">
                                 <span class="mr-2 mb-1 bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center"
@@ -242,33 +239,30 @@
                         *ngIf="dropdownOpen">
                         <ul *ngIf="tags.length > 0">
                             <li *ngFor="let Type of tags" class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                            (click)="selectType(Type)">
-                            {{ Type.name }}
-                        </li>
-                    </ul>
-                    <div *ngIf="tags.length === 0" class="px-4 py-2 text-gray-400">No Data Found</div>
+                                (click)="selectType(Type)">
+                                {{ Type.name }}
+                            </li>
+                        </ul>
+                        <div *ngIf="tags.length === 0" class="px-4 py-2 text-gray-400">No Data Found</div>
+                    </div>
                 </div>
+                <span *ngIf="validationErrors['tag']" class="text-red-500 ml-3">{{ validationErrors['tag'] }}</span>
             </div>
-            <span *ngIf="validationErrors['tag']" class="text-red-500 ml-3">{{ validationErrors['tag'] }}</span>
-        </div>
 
             <!-- Number of Questions -->
             <div class="w-[100%]">
                 <label class="block mb-2 text-sm font-medium text-gray-900">
                     Number Of Total Questions ({{ selectedQuestions.length }})
                 </label>
-                <input type="text"
-                        class="rounded-lg border border-solid border-gray-300 px-4 py-3 w-full"
-                        [value]="getFormattedQuestionTypes()"
-                        disabled
-                        placeholder="Enter From" />
+                <input type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3 w-full"
+                    [value]="getFormattedQuestionTypes()" disabled placeholder="Enter From" />
             </div>
 
             <!-- Question Type -->
             <div class="w-full">
                 <label class="block mb-2 text-sm font-medium text-gray-900">Question Type</label>
-                <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" (change)="GetQuestionBank(this.CurrentPage, this.PageSize)"
-                    [(ngModel)]="SelectedTypeID">
+                <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+                    (change)="GetQuestionBank(this.CurrentPage, this.PageSize)" [(ngModel)]="SelectedTypeID">
                     <option value=0 disabled selected hidden>Select a Lesson</option>
                     <option *ngFor="let ac of QuestionBankType" [value]="ac.id">{{ ac.name }}</option>
                     <option *ngIf="QuestionBankType .length === 0" disabled selected>No Data Found</option>
@@ -339,7 +333,8 @@
                 </tbody>
             </table>
         </div>
-            <span *ngIf="validationErrors['questionIds']" class="text-red-500 ml-3">{{ validationErrors['questionIds'] }}</span>
+        <span *ngIf="validationErrors['questionIds']" class="text-red-500 ml-3">{{ validationErrors['questionIds']
+            }}</span>
         <div class="mt-8 flex justify-between items-center">
             <div class="flex items-center space-x-4">
                 <button class="flex items-center space-x-2 rounded-lg border py-3 px-4"
@@ -396,7 +391,7 @@
                 class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
         </div>
 
-        <div class="flex flex-wrap gap-x-4 gap-y-4 w-full">
+        <div class="flex flex-wrap gap-x-4 gap-y-4 w-full mb-2">
             <!-- Lesson -->
             <div class="w-[48%]">
                 <label for="Lesson" class="block mb-2 text-sm font-medium text-gray-900">Lesson</label>
@@ -407,15 +402,16 @@
                     <option *ngFor="let ac of Lessons" [value]="ac.id">{{ ac.englishTitle }}</option>
                     <option *ngIf="Lessons.length === 0" disabled selected>No Data Found</option>
                 </select>
-               <span *ngIf="validationErrors['Lesson']" class="text-red-500 ml-3">{{ validationErrors['Lesson'] }}</span>
+                <span *ngIf="validationErrors['Lesson']" class="text-red-500 ml-3">{{ validationErrors['Lesson']
+                    }}</span>
             </div>
 
             <!-- Tags -->
             <div class="w-[48%]">
-                <label class="block mb-2 text-sm font-medium text-gray-900" for="ac">Tags</label>
+                <label class="block mb-2 text-sm font-medium text-gray-900">Tags</label>
                 <div class="relative">
-                    <div class="border border-gray-300 rounded-lg px-4 py-3 cursor-pointer min-h-[48px] w-full"
-                        (click)="toggleDropdown()"  tabindex="0">
+                    <div class="border border-gray-300 rounded-lg px-3 h-[42px] flex items-center w-full cursor-pointer"
+                        (click)="toggleDropdown()" tabindex="0">
                         <ng-container *ngIf="tagsSelected.length > 0; else placeholder">
                             <div class="flex flex-wrap">
                                 <span class="mr-2 mb-1 bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center"
@@ -429,7 +425,7 @@
                             </div>
                         </ng-container>
                         <ng-template #placeholder>
-                            <span class="text-gray-400">Choose Type</span>
+                            <span class="text-gray-400">Choose Tag</span>
                         </ng-template>
                     </div>
                     <div class="absolute bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10"
@@ -443,38 +439,39 @@
                         <div *ngIf="tags.length === 0" class="px-4 py-2 text-gray-400">No Data Found</div>
                     </div>
                 </div>
-              <span *ngIf="validationErrors['tag']" class="text-red-500 ml-3">{{ validationErrors['tag'] }}</span>
+                <span *ngIf="validationErrors['tag']" class="text-red-500 ml-3">{{ validationErrors['tag'] }}</span>
             </div>
         </div>
 
-       <div class="flex flex-col">
+        <div class="flex flex-col gap-x-4 gap-y-4 w-full">
             <div *ngFor="let option of assignmentQuestion.questionAssignmentTypeCountDTO; let i = index"
                 class="flex justify-center gap-6 mb-4 items-start">
                 <!-- Question Type Dropdown -->
-                <div class="flex flex-col w-[45%]">
+                <div class="w-[48%]">
                     <label class="block mb-2 text-sm font-medium text-gray-900">Question Type</label>
-                    <select
-                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+                    <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+                        (focus)="validationErrors['type-' + i] = ''"
                         [(ngModel)]="option.questionTypeId">
                         <option value="0" disabled>Select a Type</option>
                         <option *ngFor="let ac of QuestionBankType" [value]="ac.id">{{ ac.name }}</option>
                     </select>
                     <span *ngIf="validationErrors['type-' + i]" class="text-red-500 mt-1 text-sm">
-                    {{ validationErrors['type-' + i] }}
+                        {{ validationErrors['type-' + i] }}
                     </span>
                 </div>
 
                 <!-- Number Input -->
-                <div class="flex flex-col w-[45%]">
+                <div class="w-[48%]">
                     <label class="block mb-2 text-sm font-medium text-gray-900">Number Of Questions</label>
-                   <input type="number" class="rounded-lg border border-solid px-4 py-3"
+                    <input type="number" class="rounded-lg border border-solid px-4 py-3 w-full"
                         [ngClass]="{ 'input-error': !option.numberOfQuestion || option.numberOfQuestion <= 0 }"
                         [(ngModel)]="option.numberOfQuestion"
+                        (focus)="validationErrors['count-' + i] = ''"
                         (input)="validateNumberQuestionAssignmentTypeCount($event, i, 'numberOfQuestion')"
-                        placeholder="Enter Number"/>
-                        <span *ngIf="validationErrors['count-' + i]" class="text-red-500 mt-1 text-sm">
+                        placeholder="Enter Number" />
+                    <span *ngIf="validationErrors['count-' + i]" class="text-red-500 mt-1 text-sm">
                         {{ validationErrors['count-' + i] }}
-                        </span>
+                    </span>
                 </div>
 
                 <!-- Delete Button -->
@@ -489,7 +486,8 @@
                 <i class="fa-regular fa-square-plus"></i>
                 <p class="primaryTxt">Add Type</p>
             </div>
-            <span *ngIf="validationErrors['questionAssignmentTypeCountDTO']" class="text-red-500 ml-3">{{ validationErrors['questionAssignmentTypeCountDTO'] }}</span>
+            <span *ngIf="validationErrors['questionAssignmentTypeCountDTO']" class="text-red-500 ml-3">{{
+                validationErrors['questionAssignmentTypeCountDTO'] }}</span>
         </div>
 
         <div class="flex justify-end mt-6">

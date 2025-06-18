@@ -19,6 +19,8 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public long QuestionBankID { get; set; }
         public QuestionBank QuestionBank { get; set; }
         public ICollection<QuestionBank>? QuestionBanks { get; set; } = new HashSet<QuestionBank>();
+        public ICollection<AssignmentStudentQuestion>? AssignmentStudentQuestion { get; set; } = new HashSet<AssignmentStudentQuestion>();
+        public ICollection<AssignmentStudentQuestionAnswerOption>? AssignmentStudentQuestionAnswerOption { get; set; } = new HashSet<AssignmentStudentQuestionAnswerOption>();
 
     }
 }

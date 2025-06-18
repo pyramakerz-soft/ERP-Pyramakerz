@@ -8,7 +8,7 @@ import { AssignmentQuestionAdd } from '../../../Models/LMS/assignment-question-a
   providedIn: 'root'
 })
 export class AssignmentQuestionService {
- baseUrl = ""
+  baseUrl = ""
   header = ""
 
   constructor(public http: HttpClient, public ApiServ: ApiService) {
@@ -16,9 +16,9 @@ export class AssignmentQuestionService {
   }
 
 
-  GetById(id : number ,DomainName:string) {
-    if(DomainName!=null) {
-      this.header=DomainName 
+  GetById(id: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
@@ -29,40 +29,59 @@ export class AssignmentQuestionService {
   }
 
   Add(assignmentQuestion: AssignmentQuestionAdd, DomainName: string) {
-  if (DomainName != null) {
-    this.header = DomainName;
+    if (DomainName != null) {
+      this.header = DomainName;
+    }
+
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`);
+
+    const formData = new FormData();
+
+    // Correct way to convert number to string
+    formData.append('assignmentID', assignmentQuestion.assignmentID.toString());
+    formData.append('lessonId', assignmentQuestion.lessonId.toString());
+
+
+    // Append the file if available
+    if (assignmentQuestion.file) {
+      formData.append('file', assignmentQuestion.file, assignmentQuestion.file.name);
+    }
+
+    // Append each question ID
+    assignmentQuestion.questionIds.forEach((id, index) => {
+      formData.append(`questionIds[${index}]`, id.toString());
+    });
+
+    // Append each Tag ID
+    assignmentQuestion.selectedTagsIds.forEach((id, index) => {
+      formData.append(`selectedTagsIds[${index}]`, id.toString());
+    });
+
+    // Append questionAssignmentTypeCountDTO (array of objects)
+    assignmentQuestion.questionAssignmentTypeCountDTO.forEach((item, index) => {
+      formData.append(`questionAssignmentTypeCountDTO[${index}][numberOfQuestion]`, item.numberOfQuestion.toString());
+      formData.append(`questionAssignmentTypeCountDTO[${index}][questionTypeId]`, item.questionTypeId.toString());
+    });
+
+    return this.http.post(`${this.baseUrl}/AssignmentQuestion`, formData, {
+      headers: headers, // DO NOT set Content-Type here! Let the browser set it with boundary
+      responseType: 'text' as 'json'
+    });
   }
 
-  const token = localStorage.getItem("current_token");
-  const headers = new HttpHeaders()
-    .set('domain-name', this.header)
-    .set('Authorization', `Bearer ${token}`);
-
-  const formData = new FormData();
-
-  // Correct way to convert number to string
-  formData.append('assignmentID', assignmentQuestion.assignmentID.toString());
-
-  // Append the file if available
-  if (assignmentQuestion.file) {
-    formData.append('file', assignmentQuestion.file, assignmentQuestion.file.name);
+  Delete(id: number,DomainName:string) {
+    if(DomainName!=null) {
+      this.header=DomainName 
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.delete(`${this.baseUrl}/AssignmentQuestion/${id}`, { headers })
   }
-
-  // Append each question ID
-  assignmentQuestion.questionIds.forEach((id, index) => {
-    formData.append(`questionIds[${index}]`, id.toString());
-  });
-
-  // Append questionAssignmentTypeCountDTO (array of objects)
-  assignmentQuestion.questionAssignmentTypeCountDTO.forEach((item, index) => {
-    formData.append(`questionAssignmentTypeCountDTO[${index}][numberOfQuestion]`, item.numberOfQuestion.toString());
-    formData.append(`questionAssignmentTypeCountDTO[${index}][questionTypeId]`, item.questionTypeId.toString());
-  });
-
-  return this.http.post(`${this.baseUrl}/AssignmentQuestion`, formData, {
-    headers: headers, // DO NOT set Content-Type here! Let the browser set it with boundary
-    responseType: 'text' as 'json'
-  });
-}
 
 }

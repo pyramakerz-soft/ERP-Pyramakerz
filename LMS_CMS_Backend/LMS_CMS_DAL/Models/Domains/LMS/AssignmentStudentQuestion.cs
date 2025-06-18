@@ -13,10 +13,20 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         [Key]
         public long ID { get; set; }
         public float Mark { get; set; }
+        public string Answer { get; set; }
 
         [ForeignKey("AssignmentStudent")]
         public long AssignmentStudentID { get; set; }
         public AssignmentStudent AssignmentStudent { get; set; }
+
+        [ForeignKey("QuestionBank")]
+        public long QuestionBankID { get; set; }
+        public QuestionBank QuestionBank { get; set; }
+
+        [ForeignKey("QuestionBankOption")]
+        public long? AnswerOptionID { get; set; }
+        public QuestionBankOption? QuestionBankOption { get; set; }
+        public ICollection<AssignmentStudentQuestionAnswerOption>? AssignmentStudentQuestionAnswerOption { get; set; } = new HashSet<AssignmentStudentQuestionAnswerOption>();
 
     }
 }
