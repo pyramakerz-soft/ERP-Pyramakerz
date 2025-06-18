@@ -662,6 +662,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 List<StudentClassroomSubject> studentClassrooms = Unit_Of_Work.studentClassroomSubject_Repository.FindBy(
                     d => d.IsDeleted != true && d.SubjectID == EditAssignment.SubjectID && d.Hide != true
                     && d.Subject.IsDeleted != true
+                    && d.StudentClassroom.IsDeleted != true
                     && d.StudentClassroom.Classroom.IsDeleted != true
                     && d.StudentClassroom.Student.IsDeleted != true
                     );
@@ -736,7 +737,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
                         StudentClassroomSubject studentClassroomSubject = Unit_Of_Work.studentClassroomSubject_Repository.First_Or_Default(
                             d => d.IsDeleted != true && d.StudentClassroomID == studentClassroomId && d.SubjectID == EditAssignment.SubjectID && d.Hide != true
-                            && d.Subject.IsDeleted != true && d.StudentClassroom.Classroom.IsDeleted != true && d.StudentClassroom.Student.IsDeleted != true
+                            && d.Subject.IsDeleted != true
+                            && d.StudentClassroom.IsDeleted != true
+                            && d.StudentClassroom.Classroom.IsDeleted != true 
+                            && d.StudentClassroom.Student.IsDeleted != true
                             );
                         if (studentClassroom != null && studentClassroomSubject!=null)
                         {
