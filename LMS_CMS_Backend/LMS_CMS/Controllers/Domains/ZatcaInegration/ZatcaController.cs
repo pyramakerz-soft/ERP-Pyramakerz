@@ -49,6 +49,11 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
         //)]
         public async Task<IActionResult> GeneratePCSID(long otp, long schoolPcId)
         {
+            string certificates = Path.Combine(Directory.GetCurrentDirectory(), "Invoices/Certificates");
+
+            if (!Directory.Exists(certificates)) 
+                Directory.CreateDirectory(certificates);
+
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             SchoolPCs schoolPc = await Unit_Of_Work.schoolPCs_Repository.FindByIncludesAsync(
@@ -86,8 +91,14 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
             //S3Service s3SecretManager = new S3Service(_secretsManager);
 
             var csrSteps = ZatcaServices.GenerateCSRandPrivateKey(csrGeneration);
+
             string csrContent = csrSteps[1].ResultedValue;
+            //string csrPath = Path.Combine(certificates, $"{pcName}_CSR.csr");
+            //System.IO.File.WriteAllText(csrPath, csrContent);
+
             string privateKeyContent = csrSteps[2].ResultedValue;
+            //string privateKeyPath = Path.Combine(certificates, $"{pcName}_PrivateKey.pem");
+            //System.IO.File.WriteAllText(privateKeyPath, privateKeyContent);
 
             //bool addCSR = await s3SecretManager.CreateOrUpdateSecretAsync($"{pcName}CSR", csrContent);
             //if (!addCSR)
