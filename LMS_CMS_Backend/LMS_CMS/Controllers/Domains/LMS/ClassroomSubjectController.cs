@@ -58,7 +58,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             List<Subject> subjects = Unit_Of_Work.subject_Repository.FindBy(d => d.IsDeleted != true && d.GradeID == classroom.GradeID);
 
-            if (classroomSubjects != null && classroomSubjects.Count == subjects.Count)
+            var classroomSubjectIds = new HashSet<long>(classroomSubjects.Select(cs => cs.SubjectID));
+            var subjectIds = new HashSet<long>(subjects.Select(s => s.ID));
+
+            if (classroomSubjectIds.SetEquals(subjectIds))
             {
                 return BadRequest("You Have Already Generated it");
             }
@@ -86,7 +89,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                         Unit_Of_Work.classroomSubject_Repository.Add(classroomSubject);
                     }
                 }
-            } else if (classroomSubjects.Count != subjects.Count)
+            } else
             {
                 if (subjects != null && subjects.Count > 0)
                 {
@@ -187,6 +190,36 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                                 }
 
                                 Unit_Of_Work.studentClassroomSubject_Repository.Update(studentClassroomSubject);
+
+                                List<AssignmentStudent> assignmentStudents = Unit_Of_Work.assignmentStudent_Repository.FindBy(
+                                    d => d.IsDeleted != true && d.StudentClassroomID == studentClassroom.ID && d.Assignment.SubjectID == studentClassroomSubject.SubjectID
+                                    );
+                                if(assignmentStudents != null)
+                                {
+                                    foreach (var item in assignmentStudents)
+                                    {
+                                        item.IsDeleted = true;
+                                        item.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                                        if (userTypeClaim == "octa")
+                                        {
+                                            item.DeletedByOctaId = userId;
+                                            if (item.DeletedByUserId != null)
+                                            {
+                                                item.DeletedByUserId = null;
+                                            }
+                                        }
+                                        else if (userTypeClaim == "employee")
+                                        {
+                                            item.DeletedByUserId = userId;
+                                            if (item.DeletedByOctaId != null)
+                                            {
+                                                item.DeletedByOctaId = null;
+                                            }
+                                        }
+
+                                        Unit_Of_Work.assignmentStudent_Repository.Update(item);
+                                    }
+                                }
                             }
                         }
                     }
@@ -218,6 +251,26 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                                     }
 
                                     Unit_Of_Work.studentClassroomSubject_Repository.Add(studentClassroomSubject);
+
+                                    List<Assignment> assignments = Unit_Of_Work.assignment_Repository.FindBy(d => d.IsDeleted != true && d.IsSpecificStudents != true && d.SubjectID == classroomSubjectAfter.SubjectID);
+
+                                    foreach (Assignment assignment in assignments)
+                                    {
+                                        AssignmentStudent newAssignmentStudent = new AssignmentStudent();
+                                        newAssignmentStudent.AssignmentID = assignment.ID;
+                                        newAssignmentStudent.StudentClassroomID = studentClassroom.ID;
+                                        newAssignmentStudent.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                                        if (userTypeClaim == "octa")
+                                        {
+                                            newAssignmentStudent.InsertedByOctaId = userId;
+                                        }
+                                        else if (userTypeClaim == "employee")
+                                        {
+                                            newAssignmentStudent.InsertedByUserId = userId;
+                                        }
+
+                                        Unit_Of_Work.assignmentStudent_Repository.Add(newAssignmentStudent); 
+                                    }
                                 }
                             }
                         }
@@ -647,9 +700,11 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return NotFound("No Classroom Subject with this ID");
             } 
 
-            // If Not Hide, Add the subject to students in class
-            if(ClassroomSubjectExists.Hide == true && EditedClassroomSubjectHide.Hide == false)
+            // If Not Hide, Add the subject to students in class and add the assignment
+            if (ClassroomSubjectExists.Hide == true && EditedClassroomSubjectHide.Hide == false)
             {
+                List<Assignment> assignments = Unit_Of_Work.assignment_Repository.FindBy(d => d.IsDeleted != true && d.IsSpecificStudents != true);
+                
                 List<StudentClassroom> studentClassrooms = Unit_Of_Work.studentClassroom_Repository.FindBy(d => d.ClassID == ClassroomSubjectExists.ClassroomID && d.IsDeleted != true);
                 foreach (var studentClassroom in studentClassrooms)
                 {
@@ -670,10 +725,32 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     }
 
                     Unit_Of_Work.studentClassroomSubject_Repository.Add(studentClassroomSubject);
+                    
+                    
+                    if(assignments != null)
+                    {
+                        foreach (var assignment in assignments)
+                        {
+                            AssignmentStudent newAssignmentStudent = new AssignmentStudent();
+                            newAssignmentStudent.AssignmentID = assignment.ID;
+                            newAssignmentStudent.StudentClassroomID = studentClassroom.ID;
+                            newAssignmentStudent.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                            if (userTypeClaim == "octa")
+                            {
+                                newAssignmentStudent.InsertedByOctaId = userId;
+                            }
+                            else if (userTypeClaim == "employee")
+                            {
+                                newAssignmentStudent.InsertedByUserId = userId;
+                            }
+
+                            Unit_Of_Work.assignmentStudent_Repository.Add(newAssignmentStudent);
+                        }
+                    }
                 }
             }
 
-            // If Hide, Remove subject from students
+            // If Hide, Remove subject from students and remove assignments
             if (ClassroomSubjectExists.Hide == false && EditedClassroomSubjectHide.Hide == true)
             {
                 List<StudentClassroom> studentClassrooms = Unit_Of_Work.studentClassroom_Repository.FindBy(d => d.ClassID == ClassroomSubjectExists.ClassroomID && d.IsDeleted != true);
@@ -705,7 +782,34 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                         }
 
                         Unit_Of_Work.studentClassroomSubject_Repository.Update(studentClassroomSubject);
-                    } 
+
+                        List<AssignmentStudent> assignmentStudents = Unit_Of_Work.assignmentStudent_Repository.FindBy(d => d.IsDeleted != true && d.StudentClassroomID == studentClassroom.ID);
+                        if(assignmentStudents != null)
+                        {
+                            foreach (AssignmentStudent assignmentStudent in assignmentStudents)
+                            {
+                                assignmentStudent.IsDeleted = true;
+                                assignmentStudent.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                                if (userTypeClaim == "octa")
+                                {
+                                    assignmentStudent.DeletedByOctaId = userId;
+                                    if (assignmentStudent.DeletedByUserId != null)
+                                    {
+                                        assignmentStudent.DeletedByUserId = null;
+                                    }
+                                }
+                                else if (userTypeClaim == "employee")
+                                {
+                                    assignmentStudent.DeletedByUserId = userId;
+                                    if (assignmentStudent.DeletedByOctaId != null)
+                                    {
+                                        assignmentStudent.DeletedByOctaId = null;
+                                    }
+                                }
+                                Unit_Of_Work.assignmentStudent_Repository.Update(assignmentStudent);
+                            }
+                        }
+                    }
                 }
             }
 
