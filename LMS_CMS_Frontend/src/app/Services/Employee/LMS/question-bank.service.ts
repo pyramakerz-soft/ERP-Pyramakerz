@@ -27,6 +27,23 @@ export class QuestionBankService {
     return this.http.get<{ data: QuestionBank[], pagination: any }>(`${this.baseUrl}/QuestionBank?pageNumber=${pageNumber}&pageSize=${pageSize}`, { headers });
   }
 
+  GetByTags(LessonId: number, TypeId: number, tags: number[], DomainName: string, pageNumber: number, pageSize: number) {
+    if (DomainName != null) {
+      this.header = DomainName;
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+
+    return this.http.post<{ data: QuestionBank[], pagination: any }>(
+      `${this.baseUrl}/QuestionBank/GetByLessonTagType/${LessonId}/${TypeId}?pageNumber=${pageNumber}&pageSize=${pageSize}`,
+      tags,
+      { headers }
+    );
+  }
+
   GetById(id: number, DomainName: string) {
     if (DomainName != null) {
       this.header = DomainName
@@ -163,7 +180,7 @@ export class QuestionBankService {
       });
     }
 
-        // Append Edit QuestionBankOptions
+    // Append Edit QuestionBankOptions
     if (questionBank.editedQuestionBankOptionsDTO?.length > 0) {
       let uploadIndex = 0;
       questionBank.editedQuestionBankOptionsDTO.forEach((option, index) => {
@@ -185,7 +202,7 @@ export class QuestionBankService {
       });
     }
 
-     // Append DeletedQuestionBankOptions (IDs)
+    // Append DeletedQuestionBankOptions (IDs)
     if (questionBank.deletedQuestionBankOptionsDTO?.length > 0) {
       let uploadIndex = 0;
       questionBank.deletedQuestionBankOptionsDTO.forEach((id, index) => {
@@ -194,7 +211,7 @@ export class QuestionBankService {
       });
     }
 
-     // Append DeletedSubBankQuestions (IDs)
+    // Append DeletedSubBankQuestions (IDs)
     if (questionBank.deletedSubBankQuestionsDTO?.length > 0) {
       let uploadIndex = 0;
       questionBank.deletedSubBankQuestionsDTO.forEach((id, index) => {

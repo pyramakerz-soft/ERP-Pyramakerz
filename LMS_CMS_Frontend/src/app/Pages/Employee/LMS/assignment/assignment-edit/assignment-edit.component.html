@@ -4,8 +4,8 @@
         <h1 class="primaryTxt font-semibold text-2xl leading-9">Edit Assignment</h1>
     </div>
     <button class="text-white px-4 py-2 rounded-lg font-medium">
-            <img src="Images/classroom.png" class="w-5" alt="Upload Icon" />
-            </button>
+        <img src="Images/classroom.png" class="w-7" alt="Upload Icon" />
+    </button>
 </div>
 
 <div class="bg-white rounded-lg shadow-sm p-6">
@@ -14,7 +14,7 @@
         <div class="bg-[#EBEBEB] p-4  w-[32%]">
             <p class="font-semibold text-sm text-[#6F6F6F] mb-2">Assignment Name</p>
             <p class="font-medium text-base text-[#1E1E1E]">
-                Primary
+                {{assignment.englishName}}
             </p>
         </div>
 
@@ -22,116 +22,480 @@
         <div class="bg-[#EBEBEB] p-4  w-[32%]">
             <p class="font-semibold text-sm text-[#6F6F6F] mb-2">Assignment Type</p>
             <p class="font-medium text-base text-[#1E1E1E]">
-                {{'N/A' }}
+                {{assignment.assignmentTypeEnglishName}}
             </p>
         </div>
 
         <div class="bg-[#EBEBEB] p-4  w-[32%]">
             <p class="font-semibold text-sm text-[#6F6F6F] mb-2">Open Date</p>
             <p class="font-medium text-base text-[#1E1E1E]">
-                22 ,May 2024
+                {{assignment.openDate}}
             </p>
         </div>
     </div>
 
     <!-- Dates Section -->
-    <div class="flex flex-wrap justify-between gap-4 mb-6">
+    <div class="flex flex-wrap justify-between gap-4 mb-4">
         <div class="bg-[#EBEBEB] p-4  w-[32%]">
             <p class="font-semibold text-sm text-[#6F6F6F] mb-2">Due Date</p>
             <p class="font-medium text-base text-[#1E1E1E]">
-                Primary
+                {{assignment.dueDate}}
             </p>
         </div>
-    
+
         <!-- Assignment Type -->
         <div class="bg-[#EBEBEB] p-4  w-[32%]">
             <p class="font-semibold text-sm text-[#6F6F6F] mb-2">Cut Off Date</p>
             <p class="font-medium text-base text-[#1E1E1E]">
-                22 ,May 2024
+                {{assignment.cutOfDate}}
             </p>
         </div>
-    
+
         <div class="bg-[#EBEBEB] p-4  w-[32%]">
-            <p class="font-semibold text-sm text-[#6F6F6F] mb-2">Class</p>
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-2">Subject</p>
             <p class="font-medium text-base text-[#1E1E1E]">
-                Class1 (5)
+                {{assignment.subjectEnglishName}}
             </p>
+        </div>
+    </div>
+</div>
+
+<div *ngIf="assignment.assignmentTypeID==1">
+    <div class="flex justify-start">
+        <button class="secondaryBg text-white font-medium px-4 py-2 rounded-lg" (click)="openModal()">
+            <span>Upload File</span>
+        </button>
     </div>
 
-    <!-- Classes Section -->
-    <!-- <div class="mb-6">
-        <label class="block font-semibold text-sm text-[#6F6F6F] mb-2">Classes</label>
-        <div class="flex flex-wrap gap-2">
-            <div *ngFor="let class of assignment.classes"
-                class="bg-gray-200 rounded-lg px-3 py-1 text-sm flex items-center gap-2">
-                {{ class.name }} ({{ class.count }})
-                <i class="fa-solid fa-xmark text-gray-500 cursor-pointer hover:text-gray-700"></i>
+    <div *ngIf="assignment.linkFile" class="bg-white p-4 rounded-lg">
+        <div class="flex flex-wrap gap-4">
+            <div class="flex flex-col w-[34%]">
+                <h1 class="text-sm font-semibold mb-2">Name</h1>
+                <p class="text-sm font-medium text-gray-700 mb-4">{{ assignment.linkFile.split('/').pop() }}</p>
+                <div class="border border-cacaca rounded-lg p-6">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center space-x-2">
+                            <i class="fa-solid fa-file"></i>
+                            <p class="text-sm font-medium text-gray-700 truncate max-w-[150px]">{{
+                                assignment.linkFile.split('/').pop() }}</p>
+                        </div>
+                    </div>
+                    <a [href]="assignment.linkFile" target="_blank" rel="noopener"
+                        class="secondaryTxt cursor-pointer hover:underline mt-2">
+                        Click to View
+                    </a>
+                </div>
             </div>
         </div>
-        <button class="mt-2 text-[#A020F0] font-medium text-sm hover:underline flex items-center gap-1">
-            <i class="fa-solid fa-plus"></i> Add Class
-        </button>
-    </div> -->
+    </div>
+</div>
 
-    <!-- Description Section -->
-    <!-- <div class="mb-6">
-        <label class="block font-semibold text-sm text-[#6F6F6F] mb-2">Description</label>
-        <textarea class="w-full p-3 border rounded-lg min-h-[100px]" [(ngModel)]="assignment.description"
-            placeholder="Enter assignment description"></textarea>
-    </div> -->
+<div *ngIf="assignment.assignmentTypeID==2||assignment.assignmentTypeID==3">
+    <div class="flex justify-between items-center">
+        <h1 class="primaryTxt font-semibold text-2xl leading-9">Questions</h1>
+        <div class="flex justify-between items-center ">
+            <!-- <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search> -->
 
-    <!-- Attached Files Section -->
-    <div class="mb-6">
-        <h2 class="font-semibold text-lg text-[#1E1E1E] mb-4">Attached Files</h2>
+            <button (click)="openModal()"
+                class="secondaryBorder secondaryTxt rounded-lg px-4 py-3 flex items-center justify-center gap-2">
+                Add Question
+            </button>
+        </div>
+    </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <!-- File Box -->
-            <div *ngIf="assignment.file" class="bg-[#EBEBEB] p-4 rounded-lg shadow-sm relative">
-                <div class="absolute top-2 right-2">
-                    <i class="fa-solid fa-trash text-red-500 cursor-pointer hover:text-red-700"
-                        (click)="removeFile()"></i>
-                </div>
-                <div class="flex items-start space-x-3">
-                    <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-                        <i class="fa-regular fa-file text-[#6F6F6F]"></i>
-                    </div>
-                    <div>
-                        <p class="font-medium text-base text-[#1E1E1E] mb-2">
-                            {{ getFileName(assignment.file) }}
-                        </p>
-                        <p class="font-medium text-sm text-[#6F6F6F] mb-1">File Name</p>
-                        <a [href]="assignment.file" target="_blank"
-                            class="text-[#A020F0] font-medium text-sm hover:underline">
-                            Click to view
-                        </a>
-                    </div>
+    <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD] max-w-full">
+        <table class="overflow-auto w-full bg-[#EBEBEB] text-left text-[#6F6F6F]">
+            <thead class="bg-[##EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+                <tr>
+                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        ID
+                    </th>
+                    <th
+                        class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
+                        Question
+                    </th>
+                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        Mark
+                    </th>
+                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        Actions
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- No Data Row -->
+                <tr *ngIf="assignment.assignmentQuestions.length === 0">
+                    <td colspan="6"
+                        class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                        No Data Found
+                    </td>
+                </tr>
+
+                <!-- Data Rows -->
+                <tr *ngFor="let row of assignment.assignmentQuestions; let i = index"
+                    [ngClass]="{'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1}"
+                    class="border-t border-gray-300 text-xs md:text-sm">
+
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{
+                        row.id }}</td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.questionBank.description
+                        }}</td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.questionBank.mark }}</td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        <div class="flex space-x-4">
+                             <button (click)="Delete(row.id)">
+                                 <i class="fa-regular fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Add-Edit Semester Modal -->
+<div id="Add_Modal1" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
+    <div class="bg-white rounded-2xl p-12 w-[669px]">
+        <div class="flex justify-between items-center">
+            <h1 class="font-semibold text-2xl leading-9">Upload</h1>
+            <button (click)="closeModal()" type="button"
+                class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
+        </div>
+
+        <div class="w-full mb-4">
+            <div class="bg-[#F6F6F6] flex items-center space-x-4 w-full rounded-md border-dashed border-2">
+                <div class="flex justify-center w-full">
+                    <label for="file-upload"
+                        class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
+                        <img *ngIf="!assignmentQuestion.file" src="Images/Icon frame.png" class="w-1/4">
+                        <img *ngIf="assignmentQuestion.file" src="Images/FileAttached.png" class="w-1/4">
+                        <p class="font-normal text-xs md:text-sm text-[#8E8E93] mt-3"><span class="secondaryTxt">Click
+                                to Upload </span></p>
+                        <p class="font-normal text-xs md:text-sm text-[#8E8E93]"> (Max. File size: 25 MB)</p>
+                    </label>
+                    <input id="file-upload" type="file" class="hidden" (change)="onImageFileSelected($event)" />
                 </div>
             </div>
+        </div>
+        <span *ngIf="validationErrors['file']" class="text-red-500 ml-3">{{ validationErrors['file'] }}</span>
 
-            <!-- Upload Button -->
-            <div
-                class="bg-[#EBEBEB] p-4 rounded-lg shadow-sm flex items-center justify-center cursor-pointer hover:bg-gray-200">
-                <label class="flex flex-col items-center justify-center cursor-pointer">
-                    <i class="fa-solid fa-cloud-arrow-up text-2xl text-[#6F6F6F] mb-2"></i>
-                    <span class="text-[#6F6F6F] font-medium">Upload File</span>
-                    <input type="file" class="hidden" (change)="handleFileUpload($event)">
+        <div class="flex justify-end mt-6">
+            <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
+                (click)="Save()">
+                <span *ngIf="!isLoading">Save</span>
+                <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Add-Edit Semester Modal -->
+<div id="Add_Modal2" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
+    <div class="bg-white rounded-2xl p-12 w-[60%] max-h-[90%] overflow-y-auto">
+        <div class="flex justify-between items-center mb-4">
+            <h1 class="font-semibold text-2xl leading-9">Add Question</h1>
+            <button (click)="closeModal()" type="button"
+                class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
+        </div>
+
+        <div class="flex flex-wrap gap-x-4 gap-y-4 w-full ">
+            <!-- Lesson -->
+            <div class="w-[48%]">
+                <label for="Lesson" class="block mb-2 text-sm font-medium text-gray-900">Lesson</label>
+                <select id="Lesson"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+                    [(ngModel)]="SelectedLessonID" (change)="getTags();">
+                    <option value=0 disabled selected hidden>Select a Lesson</option>
+                    <option *ngFor="let ac of Lessons" [value]="ac.id">{{ ac.englishTitle }}</option>
+                    <option *ngIf="Lessons.length === 0" disabled selected>No Data Found</option>
+                </select>
+                <span *ngIf="validationErrors['Lesson']" class="text-red-500 ml-3">{{ validationErrors['Lesson']
+                    }}</span>
+            </div>
+            <!-- Tags -->
+            <div class="w-[48%]">
+                <label class="block mb-2 text-sm font-medium text-gray-900">Tags</label>
+                <div class="relative">
+                    <div class="border border-gray-300 rounded-lg px-3 h-[42px] flex items-center w-full cursor-pointer"
+                        (click)="toggleDropdown()" tabindex="0">
+                        <ng-container *ngIf="tagsSelected.length > 0; else placeholder">
+                            <div class="flex flex-wrap">
+                                <span class="mr-2 mb-1 bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center"
+                                    *ngFor="let selected of tagsSelected">
+                                    {{ selected.name }}
+                                    <span class="ml-2 cursor-pointer text-red-500"
+                                        (click)="removeSelected(selected.id)">
+                                        &times;
+                                    </span>
+                                </span>
+                            </div>
+                        </ng-container>
+                        <ng-template #placeholder>
+                            <span class="text-gray-400">Choose Tag</span>
+                        </ng-template>
+                    </div>
+                    <div class="absolute bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10"
+                        *ngIf="dropdownOpen">
+                        <ul *ngIf="tags.length > 0">
+                            <li *ngFor="let Type of tags" class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                                (click)="selectType(Type)">
+                                {{ Type.name }}
+                            </li>
+                        </ul>
+                        <div *ngIf="tags.length === 0" class="px-4 py-2 text-gray-400">No Data Found</div>
+                    </div>
+                </div>
+                <span *ngIf="validationErrors['tag']" class="text-red-500 ml-3">{{ validationErrors['tag'] }}</span>
+            </div>
+
+            <!-- Number of Questions -->
+            <div class="w-[100%]">
+                <label class="block mb-2 text-sm font-medium text-gray-900">
+                    Number Of Total Questions ({{ selectedQuestions.length }})
                 </label>
+                <input type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3 w-full"
+                    [value]="getFormattedQuestionTypes()" disabled placeholder="Enter From" />
             </div>
 
-            <!-- No Files Message -->
-            <div *ngIf="!assignment.file" class="col-span-2 text-center py-4">
-                <p class="text-[#6F6F6F] font-medium">No attached files</p>
+            <!-- Question Type -->
+            <div class="w-full">
+                <label class="block mb-2 text-sm font-medium text-gray-900">Question Type</label>
+                <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+                    (change)="GetQuestionBank(this.CurrentPage, this.PageSize)" [(ngModel)]="SelectedTypeID">
+                    <option value=0 disabled selected hidden>Select a Lesson</option>
+                    <option *ngFor="let ac of QuestionBankType" [value]="ac.id">{{ ac.name }}</option>
+                    <option *ngIf="QuestionBankType .length === 0" disabled selected>No Data Found</option>
+                </select>
+            </div>
+
+        </div>
+
+        <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
+            <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
+                <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+                    <tr>
+                        <th
+                            class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            <div class="flex items-center space-x-2">
+                                <input type="checkbox" [checked]="selectAll()" (change)="toggleSelectAll($event)" />
+                                <p>
+                                    ID
+                                </p>
+                            </div>
+                        </th>
+                        <th
+                            class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            Description
+                        </th>
+                        <th
+                            class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            Mark
+                        </th>
+                        <th
+                            class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            Difficulty Level
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- No Data Row -->
+                    <tr *ngIf="Questions.length === 0">
+                        <td id="data-cell" colspan="6"
+                            class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                            No Data Found
+                        </td>
+                    </tr>
+
+                    <!-- Data Rows -->
+                    <tr *ngFor="let row of Questions; let i = index"
+                        [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
+                        class="border-t border-gray-300 text-xs md:text-sm">
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            <div class="flex items-center space-x-2">
+                                <input type="checkbox" [checked]="isSelected(row.id)"
+                                    (change)="onCheckboxChange($event, row.id)" />
+                                <p>
+                                    {{ row.id }}
+                                </p>
+                            </div>
+                        </td>
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ row.description }}
+                        </td>
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ row.mark }}
+                        </td>
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ row.difficultyLevel }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <span *ngIf="validationErrors['questionIds']" class="text-red-500 ml-3">{{ validationErrors['questionIds']
+            }}</span>
+        <div class="mt-8 flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <button class="flex items-center space-x-2 rounded-lg border py-3 px-4"
+                    (click)="changeCurrentPage(CurrentPage-1)" [disabled]="CurrentPage === 1 || Questions.length == 0"
+                    [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === 1 || Questions.length == 0}">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <p>Previous</p>
+                </button>
+                <div class="flex">
+                    <div *ngFor="let page of [].constructor(TotalPages); let i = index"
+                        class="rounded-lg py-[10px] w-[40px]"
+                        [ngClass]="{'border': i+1 == CurrentPage || Questions.length == 0}"
+                        (click)="changeCurrentPage(i+1)">
+                        <p class="text-center">{{ i + 1 }}</p>
+                    </div>
+                </div>
+                <button class="flex items-center space-x-2 rounded-lg border py-3 px-4"
+                    (click)="changeCurrentPage(CurrentPage+1)"
+                    [disabled]="CurrentPage === TotalPages || Questions.length == 0"
+                    [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === TotalPages || Questions.length == 0}">
+                    <p>Next</p>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+
+            <div class="flex items-center space-x-2">
+                <input (input)="validateNumber($event)" class="rounded-lg border py-3 px-4 w-[73px]"
+                    [(ngModel)]="PageSize" min="1" (input)="validatePageSize($event)"
+                    (ngModelChange)="changeCurrentPage(CurrentPage)">
+                <p>items Per Page</p>
+            </div>
+
+            <div>
+                <p>{{CurrentPage}} of {{TotalPages}} pages ({{TotalRecords}} Item)</p>
             </div>
         </div>
-    </div>
 
-    <!-- Action Buttons -->
-    <!-- <div class="flex justify-end gap-4">
-        <button class="px-6 py-2 border border-gray-300 rounded-lg font-medium text-[#6F6F6F] hover:bg-gray-100">
-            Cancel
-        </button>
-        <button class="px-6 py-2 bg-[#A020F0] text-white rounded-lg font-medium hover:bg-[#8c1ad1]">
-            Save Changes
-        </button>
-    </div> -->
+        <div class="flex justify-end mt-6">
+            <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
+                (click)="Save()">
+                <span *ngIf="!isLoading">Save</span>
+                <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+
+<div id="Add_Modal3" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
+    <div class="bg-white rounded-2xl p-12 w-[60%] max-h-[90%] overflow-y-auto">
+        <div class="flex justify-between items-center mb-4">
+            <h1 class="font-semibold text-2xl leading-9">Add Question</h1>
+            <button (click)="closeModal()" type="button"
+                class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
+        </div>
+
+        <div class="flex flex-wrap gap-x-4 gap-y-4 w-full mb-2">
+            <!-- Lesson -->
+            <div class="w-[48%]">
+                <label for="Lesson" class="block mb-2 text-sm font-medium text-gray-900">Lesson</label>
+                <select id="Lesson"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+                    [(ngModel)]="SelectedLessonID" (change)="getTags();">
+                    <option value=0 disabled selected hidden>Select a Lesson</option>
+                    <option *ngFor="let ac of Lessons" [value]="ac.id">{{ ac.englishTitle }}</option>
+                    <option *ngIf="Lessons.length === 0" disabled selected>No Data Found</option>
+                </select>
+                <span *ngIf="validationErrors['Lesson']" class="text-red-500 ml-3">{{ validationErrors['Lesson']
+                    }}</span>
+            </div>
+
+            <!-- Tags -->
+            <div class="w-[48%]">
+                <label class="block mb-2 text-sm font-medium text-gray-900">Tags</label>
+                <div class="relative">
+                    <div class="border border-gray-300 rounded-lg px-3 h-[42px] flex items-center w-full cursor-pointer"
+                        (click)="toggleDropdown()" tabindex="0">
+                        <ng-container *ngIf="tagsSelected.length > 0; else placeholder">
+                            <div class="flex flex-wrap">
+                                <span class="mr-2 mb-1 bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center"
+                                    *ngFor="let selected of tagsSelected">
+                                    {{ selected.name }}
+                                    <span class="ml-2 cursor-pointer text-red-500"
+                                        (click)="removeSelected(selected.id)">
+                                        &times;
+                                    </span>
+                                </span>
+                            </div>
+                        </ng-container>
+                        <ng-template #placeholder>
+                            <span class="text-gray-400">Choose Tag</span>
+                        </ng-template>
+                    </div>
+                    <div class="absolute bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10"
+                        *ngIf="dropdownOpen">
+                        <ul *ngIf="tags.length > 0">
+                            <li *ngFor="let Type of tags" class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                                (click)="selectType(Type)">
+                                {{ Type.name }}
+                            </li>
+                        </ul>
+                        <div *ngIf="tags.length === 0" class="px-4 py-2 text-gray-400">No Data Found</div>
+                    </div>
+                </div>
+                <span *ngIf="validationErrors['tag']" class="text-red-500 ml-3">{{ validationErrors['tag'] }}</span>
+            </div>
+        </div>
+
+        <div class="flex flex-col gap-x-4 gap-y-4 w-full">
+            <div *ngFor="let option of assignmentQuestion.questionAssignmentTypeCountDTO; let i = index"
+                class="flex justify-center gap-6 mb-4 items-start">
+                <!-- Question Type Dropdown -->
+                <div class="w-[48%]">
+                    <label class="block mb-2 text-sm font-medium text-gray-900">Question Type</label>
+                    <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+                        (focus)="validationErrors['type-' + i] = ''"
+                        [(ngModel)]="option.questionTypeId">
+                        <option value="0" disabled>Select a Type</option>
+                        <option *ngFor="let ac of QuestionBankType" [value]="ac.id">{{ ac.name }}</option>
+                    </select>
+                    <span *ngIf="validationErrors['type-' + i]" class="text-red-500 mt-1 text-sm">
+                        {{ validationErrors['type-' + i] }}
+                    </span>
+                </div>
+
+                <!-- Number Input -->
+                <div class="w-[48%]">
+                    <label class="block mb-2 text-sm font-medium text-gray-900">Number Of Questions</label>
+                    <input type="number" class="rounded-lg border border-solid px-4 py-3 w-full"
+                        [ngClass]="{ 'input-error': !option.numberOfQuestion || option.numberOfQuestion <= 0 }"
+                        [(ngModel)]="option.numberOfQuestion"
+                        (focus)="validationErrors['count-' + i] = ''"
+                        (input)="validateNumberQuestionAssignmentTypeCount($event, i, 'numberOfQuestion')"
+                        placeholder="Enter Number" />
+                    <span *ngIf="validationErrors['count-' + i]" class="text-red-500 mt-1 text-sm">
+                        {{ validationErrors['count-' + i] }}
+                    </span>
+                </div>
+
+                <!-- Delete Button -->
+                <div class="flex flex-col justify-center pt-7">
+                    <button class="text-red-500 hover:text-red-700" (click)="removeTypeBlock(i)">
+                        <i class="fa-regular fa-trash-can text-lg"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- Add New Type Block -->
+            <div class="flex justify-start items-center space-x-2 my-3 cursor-pointer" (click)="addTypeBlock()">
+                <i class="fa-regular fa-square-plus"></i>
+                <p class="primaryTxt">Add Type</p>
+            </div>
+            <span *ngIf="validationErrors['questionAssignmentTypeCountDTO']" class="text-red-500 ml-3">{{
+                validationErrors['questionAssignmentTypeCountDTO'] }}</span>
+        </div>
+
+        <div class="flex justify-end mt-6">
+            <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
+                (click)="Save()">
+                <span *ngIf="!isLoading">Save</span>
+                <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+            </button>
+        </div>
+    </div>
 </div>

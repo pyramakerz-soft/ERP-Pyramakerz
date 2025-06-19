@@ -190,12 +190,12 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<StudentClassroomSubject> StudentClassroomSubject_Repository;
         GenericRepo<Assignment> Assignment_Repository;
         GenericRepo<AssignmentType> AssignmentType_Repository;
-        GenericRepo<AssignmentClassroomStudent> AssignmentClassroomStudent_Repository;
         GenericRepo<AssignmentStudent> AssignmentStudent_Repository;
         GenericRepo<AssignmentQuestion> AssignmentQuestion_Repository;
         GenericRepo<DirectMarkClassroomStudent> DirectMarkClassroomStudent_Repository;
         GenericRepo<AssignmentStudentQuestion> AssignmentStudentQuestion_Repository;
-
+        GenericRepo<ETAPOS> POS_Repository;
+        GenericRepo<AssignmentStudentQuestionAnswerOption> AssignmentStudentQuestionAnswerOption_Repository;
 
 
         public UOW(Octa_DbContext octa_Db)
@@ -2145,19 +2145,7 @@ namespace LMS_CMS_BL.UOW
                 return Assignment_Repository;
             }
         }
-        
-        public GenericRepo<AssignmentClassroomStudent> assignmentClassroomStudent_Repository
-        {
-            get
-            {
-                if (AssignmentClassroomStudent_Repository == null)
-                {
-                    AssignmentClassroomStudent_Repository = new GenericRepo<AssignmentClassroomStudent>(db);
-                }
-                return AssignmentClassroomStudent_Repository;
-            }
-        }
-        
+         
         public GenericRepo<AssignmentStudent> assignmentStudent_Repository
         {
             get
@@ -2203,6 +2191,30 @@ namespace LMS_CMS_BL.UOW
                     AssignmentStudentQuestion_Repository = new GenericRepo<AssignmentStudentQuestion>(db);
                 }
                 return AssignmentStudentQuestion_Repository;
+            }
+        }
+
+        public GenericRepo<AssignmentStudentQuestionAnswerOption> assignmentStudentQuestionAnswerOption_Repository
+        {
+            get
+            {
+                if (AssignmentStudentQuestionAnswerOption_Repository == null)
+                {
+                    AssignmentStudentQuestionAnswerOption_Repository = new GenericRepo<AssignmentStudentQuestionAnswerOption>(db);
+                }
+                return AssignmentStudentQuestionAnswerOption_Repository;
+            }
+        }
+
+        public GenericRepo<ETAPOS> pos_Repository
+        {
+            get
+            {
+                if (POS_Repository == null)
+                {
+                    POS_Repository = new GenericRepo<ETAPOS>(db);
+                }
+                return POS_Repository;
             }
         }
 

@@ -29,7 +29,7 @@ export class AcademicYearComponent {
     'dateFrom',
     'dateTo',
     'schoolName',
-    'isActive',
+    'isActive'
   ];
   key: string = 'id';
   value: any = '';

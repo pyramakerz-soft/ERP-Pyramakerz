@@ -13,7 +13,6 @@ export class ApiService {
   // BaseUrl="http://44.210.155.226:5000/api/with-domain"
   // BaseUrlOcta="http://44.210.155.226:5000/api"w
 
-
   constructor() {}
 
   GetHeader() {

@@ -110,6 +110,7 @@ export class StockingDetailsService {
     if (DomainName != null) {  
       this.header = DomainName
     }
+    console.log(StoreId,SubCategoryId,date)
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
       .set('domain-name', this.header)

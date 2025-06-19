@@ -177,11 +177,13 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<StudentClassroomSubject> StudentClassroomSubject { get; set; }
         public DbSet<AssignmentType> AssignmentType { get; set; }
         public DbSet<Assignment> Assignment { get; set; }
-        public DbSet<AssignmentClassroomStudent> AssignmentClassroomStudent { get; set; }
         public DbSet<AssignmentStudent> AssignmentStudent { get; set; }
         public DbSet<AssignmentQuestion> AssignmentQuestion { get; set; }
         public DbSet<DirectMarkClassroomStudent> DirectMarkClassroomStudent { get; set; }
         public DbSet<AssignmentStudentQuestion> AssignmentStudentQuestion { get; set; }
+        public DbSet<ETAPOS> ETAPOS { get; set; }
+        public DbSet<AssignmentStudentQuestionAnswerOption> AssignmentStudentQuestionAnswerOption { get; set; }
+
 
 
         public LMS_CMS_Context(DbContextOptions<LMS_CMS_Context> options)
@@ -329,6 +331,10 @@ namespace LMS_CMS_DAL.Models.Domains
                 .ValueGeneratedNever();
             
             modelBuilder.Entity<DokLevel>()
+                .Property(p => p.ID)
+                .ValueGeneratedNever();
+            
+            modelBuilder.Entity<AssignmentType>()
                 .Property(p => p.ID)
                 .ValueGeneratedNever();
 
@@ -1551,19 +1557,7 @@ namespace LMS_CMS_DAL.Models.Domains
               .HasOne(p => p.AssignmentType)
               .WithMany(p => p.Assignments)
               .HasForeignKey(p => p.AssignmentTypeID)
-              .OnDelete(DeleteBehavior.Restrict);
-            
-            modelBuilder.Entity<AssignmentClassroomStudent>()
-              .HasOne(p => p.Assignment)
-              .WithMany(p => p.AssignmentClassroomStudents)
-              .HasForeignKey(p => p.AssignmentID)
-              .OnDelete(DeleteBehavior.Restrict);
-            
-            modelBuilder.Entity<AssignmentClassroomStudent>()
-              .HasOne(p => p.StudentClassroom)
-              .WithMany(p => p.AssignmentClassroomStudents)
-              .HasForeignKey(p => p.StudentClassroomID)
-              .OnDelete(DeleteBehavior.Restrict);
+              .OnDelete(DeleteBehavior.Restrict); 
             
             modelBuilder.Entity<AssignmentStudent>()
               .HasOne(p => p.StudentClassroom)
@@ -1606,7 +1600,24 @@ namespace LMS_CMS_DAL.Models.Domains
               .WithMany(p => p.AssignmentStudentQuestions)
               .HasForeignKey(p => p.AssignmentStudentID)
               .OnDelete(DeleteBehavior.Restrict);
-             
+
+            modelBuilder.Entity<AssignmentStudentQuestionAnswerOption>()
+              .HasOne(p => p.AssignmentStudentQuestion)
+              .WithMany(p => p.AssignmentStudentQuestionAnswerOption)
+              .HasForeignKey(p => p.AssignmentStudentQuestionID)
+              .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AssignmentStudentQuestionAnswerOption>()
+              .HasOne(p => p.SubBankQuestion)
+              .WithMany(p => p.AssignmentStudentQuestionAnswerOption)
+              .HasForeignKey(p => p.SubBankQuestionID)
+              .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AssignmentStudentQuestionAnswerOption>()
+              .HasOne(p => p.QuestionBankOption)
+              .WithMany(p => p.AssignmentStudentQuestionAnswerOption)
+              .HasForeignKey(p => p.SelectedOpionID)
+              .OnDelete(DeleteBehavior.Restrict);
 
             ///////////////////////// Exception: /////////////////////////
             modelBuilder.Entity<Bus>()

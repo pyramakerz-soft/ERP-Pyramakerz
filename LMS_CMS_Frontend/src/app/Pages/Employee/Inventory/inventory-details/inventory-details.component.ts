@@ -996,7 +996,7 @@ export class InventoryDetailsComponent {
           insertedAt: '',
           insertedByUserId: 0,
           shopItemID: d.id,
-          shopItemName: d.arName,
+          shopItemName: d.enName,
           barCode: d.barCode,
           quantity: 1,
           salesId:0,

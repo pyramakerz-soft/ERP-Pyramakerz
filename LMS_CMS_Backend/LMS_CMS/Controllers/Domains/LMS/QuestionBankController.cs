@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Linq;
+using System.Linq.Expressions;
 
 namespace LMS_CMS_PL.Controllers.Domains.LMS
 {
@@ -92,7 +93,101 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         }
 
+        ///////////////////////////////////////////////////////////////////////////////////
+
+        [HttpPost("GetByLessonTagType/{LessonId}/{TypeID}")]
+        [Authorize_Endpoint_(
+             allowedTypes: new[] { "octa", "employee" },
+             pages: new[] { "Question Bank" }
+         )]
+        public async Task<IActionResult> GetByTypes([FromBody] List<long>? TagsId,long? LessonId, long TypeID, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            // 1. Validate User Claims
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+            if (userIdClaim == null || userTypeClaim == null)
+                return Unauthorized("User ID or Type claim not found.");
+
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+
+            var unitOfWork = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            List<long> questionBankIds;
+            if (TagsId.Count > 0)
+            {
+                var questionBankTags = unitOfWork.questionBankTags_Repository.FindBy(
+                    s => TagsId.Contains(s.TagID)
+                        && s.Tag.IsDeleted != true
+                        && s.QuestionBank.IsDeleted != true
+                        && s.IsDeleted != true
+                );
+
+                questionBankIds = questionBankTags
+                    .Select(s => s.QuestionBankID)
+                    .Distinct()
+                    .ToList();
+            }
+            else
+            {
+                var questionBanks = unitOfWork.questionBank_Repository.FindBy(
+                    s => s.IsDeleted != true
+                        && s.LessonID == LessonId
+                        && s.Lesson.IsDeleted != true
+                );
+
+                questionBankIds = questionBanks
+                    .Select(s => s.ID)
+                    .Distinct()
+                    .ToList();
+            }
+
+            // Early return if no matching question banks
+            if (questionBankIds.Count == 0)
+                return Ok(new { Data = new List<QuestionBankGetDTO>(), Pagination = new { TotalRecords = 0, PageSize = pageSize, CurrentPage = pageNumber, TotalPages = 0 } });
+
+            // 3. Reusable filter
+            Expression<Func<LMS_CMS_DAL.Models.Domains.LMS.QuestionBank, bool>> filter = f =>
+                f.IsDeleted != true &&
+                f.QuestionTypeID == TypeID &&
+                f.LessonID == LessonId &&
+                questionBankIds.Contains(f.ID);
+
+            // 4. Count total records
+            int totalRecords = await unitOfWork.questionBank_Repository.CountAsync(filter);
+
+            // 5. Get paginated and included data
+            var questions = await unitOfWork.questionBank_Repository
+                .Select_All_With_IncludesById_Pagination<LMS_CMS_DAL.Models.Domains.LMS.QuestionBank>(
+                    filter,
+                    q => q.Include(e => e.BloomLevel)
+                          .Include(e => e.DokLevel)
+                          .Include(e => e.QuestionType)
+                          .Include(e => e.QuestionBankOption)
+                          .Include(e => e.Lesson.Subject)
+                          .Include(e => e.Lesson))
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            if (questions == null || !questions.Any())
+                return Ok(new { Data = new List<QuestionBankGetDTO>(), Pagination = new { TotalRecords = 0, PageSize = pageSize, CurrentPage = pageNumber, TotalPages = 0 } });
+
+            var dto = mapper.Map<List<QuestionBankGetDTO>>(questions);
+
+            var pagination = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = dto, Pagination = pagination });
+        }
+
         ////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
         [HttpGet("{id}")]
         [Authorize_Endpoint_(

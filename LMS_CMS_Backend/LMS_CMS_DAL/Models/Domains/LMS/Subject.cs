@@ -6,6 +6,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace LMS_CMS_DAL.Models.Domains.LMS
 {
@@ -29,6 +30,7 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public bool HideFromGradeReport { get; set; }
         public string IconLink { get; set; }
         public int NumberOfSessionPerWeek { get; set; }
+        public float AssignmentCutOffDatePercentage { get; set; }
 
         [ForeignKey("Grade")]
         public long GradeID { get; set; }

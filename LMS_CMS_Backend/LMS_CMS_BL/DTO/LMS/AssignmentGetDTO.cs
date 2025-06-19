@@ -21,8 +21,17 @@ namespace LMS_CMS_BL.DTO.LMS
         public bool IsSpecificStudents { get; set; }
         public string? LinkFile { get; set; } 
         public long SubjectID { get; set; }  
-        public string SubjectName { get; set; }  
-        public long AssignmentTypeID { get; set; } 
-        //public ICollection<AssignmentClassroomStudentGetDTO> AssignmentClassroomStudents { get; set; } = new HashSet<AssignmentClassroomStudentGetDTO>();
+        public string SubjectEnglishName { get; set; }  
+        public string SubjectArabicName { get; set; }  
+        public long AssignmentTypeID { get; set; }
+        public string AssignmentTypeEnglishName { get; set; }  
+        public string AssignmentTypeArabicName { get; set; }
+        public long SubjectWeightTypeID { get; set; }
+        public string SubjectWeightTypeEnglishName { get; set; }
+        public string SubjectWeightTypeArabicName { get; set; }
+        public List<AssignmentStudentGetDTO> AssignmentStudents { get; set; } = new List<AssignmentStudentGetDTO>();
+        public List<AssignmentQuestionGetDTO> AssignmentQuestions { get; set; } = new List<AssignmentQuestionGetDTO>();
+        public long? InsertedByUserId { get; set; }
+
     }
 }

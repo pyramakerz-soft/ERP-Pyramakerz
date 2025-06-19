@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using LMS_CMS_BL.DTO.Inventory;
 using LMS_CMS_BL.UOW;
+using LMS_CMS_DAL.Models.Domains.ETA;
 using LMS_CMS_DAL.Models.Domains.Inventory;
+using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_PL.Services;
 using LMS_CMS_PL.Services.ETA;
 using Microsoft.AspNetCore.Authorization;
@@ -9,7 +11,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.Text;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace LMS_CMS_PL.Controllers.Domains.ETA
 {
@@ -29,13 +30,13 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
             _mapper = mapper;
         }
 
-        #region Send Invoice
-        [HttpPost("SendInvoice")]
+        #region Submit Invoice
+        [HttpPost("SubmitInvoice")]
         //[Authorize_Endpoint_(
         //    allowedTypes: new[] { "octa", "employee" },
         //    pages: new[] { "" }
         //)]
-        public async Task<IActionResult> SendInvoice(long masterId)
+        public async Task<IActionResult> SubmitInvoice(long masterId, int etaPosID = 0, long salesInvoiceId = 0)
         {
             string apiBaseUrl = "https://api.invoicing.eta.gov.eg";
             string idSrvBaseUrl = "https://id.eta.gov.eg";
@@ -54,13 +55,9 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
             );
 
             if (master is null)
-                return NotFound("Invoice not found.");
-
-            string token = EtaServices.Login(Unit_Of_Work, master.School.ID);
+                return NotFound("No Invoice found.");
 
             string dateTime = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ");
-
-            bool jsonResult = EtaServices.GenerateJsonInvoice(master, Unit_Of_Work, _config, dateTime);
 
             string inv = $"{master.StoreID}_{master.FlagId}_{master.InvoiceNumber}.json";
 
@@ -69,49 +66,71 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
                 jsonPath = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/JSONInvoices/{inv}");
             if (master.FlagId == 12)
                 jsonPath = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/JSONCredits/{inv}");
+            
 
-            if (master.IsValid == 0 || master.IsValid == null)
+            if (master.InvoiceType == 'C')
             {
-                string signedJson = System.IO.File.ReadAllText(jsonPath);
-                byte[] jsonDataBytes = Encoding.UTF8.GetBytes(signedJson);
+                string token = EtaServices.AuthenticatePOS(Unit_Of_Work, etaPosID);
 
                 string result = string.Empty;
 
                 if (!string.IsNullOrEmpty(token))
                 {
-                    result = EtaServices.PostRequest(new Uri(apiBaseUrl + "/api/v1/documentsubmissions"), jsonDataBytes, "application/json", "POST", token);
+                    result = EtaServices.receiptsubmissions(Unit_Of_Work, master, salesInvoiceId);
                 }
+            }
 
-                if (!string.IsNullOrEmpty(result))
+            if (master.InvoiceType == 'B')
+            {
+                if (master.School == null)
+                    return NotFound("School not found");
+
+                string token = EtaServices.Login(master.School);
+                bool jsonResult = EtaServices.GenerateJsonInvoice(master, Unit_Of_Work, _config, dateTime);
+
+                if (master.IsValid == 0 || master.IsValid == null)
                 {
-                    dynamic result0 = JsonConvert.DeserializeObject(result);
+                    string signedJson = System.IO.File.ReadAllText(jsonPath);
+                    byte[] jsonDataBytes = Encoding.UTF8.GetBytes(signedJson);
 
-                    if (result0.acceptedDocuments.Count > 0)
+                    string result = string.Empty;
+
+                    if (!string.IsNullOrEmpty(token))
                     {
-                        string uuid = result0.acceptedDocuments[0].uuid;
-                        string longId = result0.acceptedDocuments[0].longId;
-
-                        master.uuid = uuid;
-                        master.ShareLongId = longId;
-                        master.IsValid = 1;
-                        master.EtaInsertedDate = DateTime.Parse(dateTime);
-
-                        Unit_Of_Work.inventoryMaster_Repository.Update(master);
-                        await Unit_Of_Work.SaveChangesAsync();
-
-                        return Ok(new { uuid, longId });
+                        result = EtaServices.PostRequest(new Uri(apiBaseUrl + "/api/v1/documentsubmissions"), jsonDataBytes, "application/json", "POST", token);
                     }
 
-                    if (result0.rejectedDocuments.Count > 0)
+                    if (!string.IsNullOrEmpty(result))
                     {
-                        string msg = "";
+                        dynamic result0 = JsonConvert.DeserializeObject(result);
 
-                        foreach (var detail in result0.rejectedDocuments[0].error.details)
+                        if (result0.acceptedDocuments.Count > 0)
                         {
-                            msg += $"{detail.propertyPath} - {detail.message}\r\n";
+                            string uuid = result0.acceptedDocuments[0].uuid;
+                            string longId = result0.acceptedDocuments[0].longId;
+
+                            master.uuid = uuid;
+                            master.ShareLongId = longId;
+                            master.IsValid = 1;
+                            master.EtaInsertedDate = DateTime.Parse(dateTime);
+
+                            Unit_Of_Work.inventoryMaster_Repository.Update(master);
+                            await Unit_Of_Work.SaveChangesAsync();
+
+                            return Ok(new { uuid, longId });
                         }
 
-                        return BadRequest(new { msg });
+                        if (result0.rejectedDocuments.Count > 0)
+                        {
+                            string msg = "";
+
+                            foreach (var detail in result0.rejectedDocuments[0].error.details)
+                            {
+                                msg += $"{detail.propertyPath} - {detail.message}\r\n";
+                            }
+
+                            return BadRequest(new { msg });
+                        }
                     }
                 }
             }
@@ -123,13 +142,13 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
         }
         #endregion
 
-        #region Send Invoices
-        [HttpPost("SendInvoices")]
+        #region Submit Invoices
+        [HttpPost("SubmitInvoices")]
         //[Authorize_Endpoint_(
         //    allowedTypes: new[] { "octa", "employee" },
         //    pages: new[] { "" }
         //)]
-        public async Task<IActionResult> SendInvoices(long schoolId)
+        public async Task<IActionResult> SubmitInvoices(long schoolId)
         {
             string apiBaseUrl = "https://api.invoicing.eta.gov.eg";
             string idSrvBaseUrl = "https://id.eta.gov.eg";
@@ -150,7 +169,12 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
             if (masters is null || masters.Count == 0)
                 return NotFound("Invoice not found.");
 
-            string token = EtaServices.Login(Unit_Of_Work, schoolId);
+            School school = Unit_Of_Work.school_Repository.First_Or_Default(x => x.ID == schoolId && x.IsDeleted != true);
+
+            if (school is null)
+                return NotFound("School not found.");
+
+            string token = EtaServices.Login(school);
 
             foreach (var master in masters)
             {

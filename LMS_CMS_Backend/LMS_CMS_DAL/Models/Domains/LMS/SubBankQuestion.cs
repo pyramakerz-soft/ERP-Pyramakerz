@@ -18,6 +18,7 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public long QuestionBankID { get; set; }
         public string Answer { get; set; }
         public QuestionBank QuestionBank { get; set; }
-        //public ICollection<DragAndDropAnswer> DragAndDropAnswers { get; set; } = new HashSet<DragAndDropAnswer>();
+        public ICollection<AssignmentStudentQuestionAnswerOption>? AssignmentStudentQuestionAnswerOption { get; set; } = new HashSet<AssignmentStudentQuestionAnswerOption>();
+
     }
 }

@@ -58,5 +58,38 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             return Ok(Dto);
         }
 
+        ///////////////////////////////////////////////////////////////////////////////////
+        
+        [HttpGet("byLessonId/{id}")]
+        [Authorize_Endpoint_(
+             allowedTypes: new[] { "octa", "employee" }
+          )]
+        public IActionResult GetByLessonId(long id)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+                return Unauthorized("User ID or Type claim not found.");
+
+            List<LessonTag> lessonTags = Unit_Of_Work.lessonTag_Repository.FindBy(s => s.LessonID == id && s.IsDeleted != true);
+
+            List<long> tagIds = lessonTags.Select(s => s.TagID).Distinct().ToList();
+
+            if (tagIds.Count == 0)
+                return NotFound("No tags found for this lesson.");
+
+            List<Tag> tags = Unit_Of_Work.tag_Repository.FindBy(t => t.IsDeleted != true && tagIds.Contains(t.ID));
+
+            if (tags == null || tags.Count == 0)
+                return NotFound("Tags not found in database.");
+
+            List<TagGetDTO> dto = mapper.Map<List<TagGetDTO>>(tags);
+
+            return Ok(dto);
+        }
+
     }
 }

@@ -58,7 +58,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
         #endregion
 
         #region Get By ID
-        [HttpGet("id")]
+        [HttpGet("{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "TaxIssuer" }

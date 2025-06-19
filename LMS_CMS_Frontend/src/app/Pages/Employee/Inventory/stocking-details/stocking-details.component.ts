@@ -223,6 +223,7 @@ export class StockingDetailsComponent {
       this.DomainName
     ).subscribe((d) => {
       this.ShopItems = d;
+      console.log(this.ShopItems)
       this.FilteredDetails = this.ShopItems.map((item) => ({
         id: Date.now() + Math.floor(Math.random() * 1000),
         insertedAt: '',
@@ -275,6 +276,7 @@ export class StockingDetailsComponent {
   }
 
   GetItems() {
+    
     if (this.SelectedSubCategoryId)
       this.StockingDetailsServ.GetCurrentStockForAllItemsBySub(
         this.Data.storeID,
@@ -282,7 +284,9 @@ export class StockingDetailsComponent {
         this.Data.date,
         this.DomainName
       ).subscribe((d) => {
+        
         this.ShopItems = d;
+        console.log( this.ShopItems)
         if (this.AllItems) {
           this.FilteredDetails = this.ShopItems.map((item) => ({
             id: Date.now() + Math.floor(Math.random() * 1000),
@@ -684,11 +688,11 @@ export class StockingDetailsComponent {
         ).toPromise();
         if (result) this.Data = result;
         this.Data.additionId = await this.prepareAdjustment(
-          2,
+          3,
           (s) => s.theDifference > 0
         );
         this.Data.disbursementId = await this.prepareAdjustment(
-          4,
+          5,
           (s) => s.theDifference < 0
         );
       }
@@ -714,11 +718,11 @@ export class StockingDetailsComponent {
           }
         }
         this.Data.additionId = await this.prepareAdjustment(
-          2,
+          3,
           (s) => s.theDifference > 0
         );
         this.Data.disbursementId = await this.prepareAdjustment(
-          4,
+          5,
           (s) => s.theDifference < 0
         );
       }
