@@ -195,7 +195,7 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<DirectMarkClassroomStudent> DirectMarkClassroomStudent_Repository;
         GenericRepo<AssignmentStudentQuestion> AssignmentStudentQuestion_Repository;
         GenericRepo<ETAPOS> POS_Repository;
-
+        GenericRepo<AssignmentStudentQuestionAnswerOption> AssignmentStudentQuestionAnswerOption_Repository;
 
 
         public UOW(Octa_DbContext octa_Db)
@@ -2193,7 +2193,19 @@ namespace LMS_CMS_BL.UOW
                 return AssignmentStudentQuestion_Repository;
             }
         }
-        
+
+        public GenericRepo<AssignmentStudentQuestionAnswerOption> assignmentStudentQuestionAnswerOption_Repository
+        {
+            get
+            {
+                if (AssignmentStudentQuestionAnswerOption_Repository == null)
+                {
+                    AssignmentStudentQuestionAnswerOption_Repository = new GenericRepo<AssignmentStudentQuestionAnswerOption>(db);
+                }
+                return AssignmentStudentQuestionAnswerOption_Repository;
+            }
+        }
+
         public GenericRepo<ETAPOS> pos_Repository
         {
             get

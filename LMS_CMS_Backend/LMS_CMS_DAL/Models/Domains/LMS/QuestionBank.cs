@@ -44,5 +44,6 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public ICollection<QuestionBankOption>? QuestionBankOptions { get; set; } = new HashSet<QuestionBankOption>();
         public ICollection<SubBankQuestion>? SubBankQuestions { get; set; } = new HashSet<SubBankQuestion>();
         public ICollection<AssignmentQuestion> AssignmentQuestions { get; set; } = new HashSet<AssignmentQuestion>();
+        public ICollection<AssignmentStudentQuestion> AssignmentStudentQuestions { get; set; } = new HashSet<AssignmentStudentQuestion>();
     }
 }

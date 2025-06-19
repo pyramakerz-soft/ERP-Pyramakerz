@@ -31,6 +31,7 @@ import Swal from 'sweetalert2';
   styleUrls: ['./assignment-edit.component.css'],
 })
 export class AssignmentEditComponent {
+
   assignment: Assignment = new Assignment();
   assignmentQuestion: AssignmentQuestionAdd = new AssignmentQuestionAdd();
   DomainName: string = '';
@@ -92,7 +93,7 @@ export class AssignmentEditComponent {
     public tagServ: TagsService,
     public QuestionBankServ: QuestionBankService,
     public QuestionBankTypeServ: QuestionBankTypeService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -231,27 +232,33 @@ export class AssignmentEditComponent {
   }
 
   selectAll(): boolean {
-    return (
-      this.Questions.length > 0 &&
-      this.selectedQuestions.length === this.Questions.length
-    );
+    if (this.Questions.length === 0) return false;
+    const currentTypeQuestionIds = this.Questions.map(q => q.id);
+    return currentTypeQuestionIds.every(id => this.selectedQuestions.includes(id));
   }
 
   toggleSelectAll(event: Event): void {
     this.validationErrors['questionIds'] = ``;
     const isChecked = (event.target as HTMLInputElement).checked;
-    if (isChecked) {
-      this.selectedQuestions = this.Questions.map((q) => q.id);
+    const typeName = this.QuestionBankType.find(t => t.id == this.SelectedTypeID)?.name;
+    console.log(typeName, this.QuestionBankType, this.SelectedTypeID)
+    if (!typeName) return;
 
-      // Count types
-      this.questionTypeCounts = {};
-      for (const q of this.Questions) {
-        this.questionTypeCounts[q.questionTypeName] =
-          (this.questionTypeCounts[q.questionTypeName] || 0) + 1;
+    const questionsOfCurrentType = this.Questions.map(q => q.id);
+
+    if (isChecked) {
+      for (const id of questionsOfCurrentType) {
+        if (!this.selectedQuestions.includes(id)) {
+          this.selectedQuestions.push(id);
+        }
       }
+
+      this.questionTypeCounts[typeName] =
+        (this.questionTypeCounts[typeName] || 0) + questionsOfCurrentType.length;
+
     } else {
-      this.selectedQuestions = [];
-      this.questionTypeCounts = {};
+      this.selectedQuestions = this.selectedQuestions.filter(id => !questionsOfCurrentType.includes(id));
+      delete this.questionTypeCounts[typeName];
     }
 
     this.IsQuestionsSelected = this.selectedQuestions.length > 0;
@@ -284,6 +291,14 @@ export class AssignmentEditComponent {
   }
 
   openModal() {
+    this.assignmentQuestion = new AssignmentQuestionAdd()
+    this.SelectedLessonID = 0
+    this.SelectedTypeID = 0
+    this.selectedTagsIds = []
+    this.tagsSelected = []
+    this.Questions = []
+    this.selectedQuestions = []
+    this.questionTypeCounts = {};
     const modalId = `Add_Modal${this.assignment.assignmentTypeID}`;
     const modal = document.getElementById(modalId);
     if (modal) {
@@ -341,7 +356,7 @@ export class AssignmentEditComponent {
   }
 
   addTypeBlock() {
-      this.validationErrors['questionAssignmentTypeCountDTO'] = ``;
+    this.validationErrors['questionAssignmentTypeCountDTO'] = ``;
     this.assignmentQuestion.questionAssignmentTypeCountDTO.push({
       questionTypeId: 0,
       numberOfQuestion: 0,
@@ -426,10 +441,6 @@ export class AssignmentEditComponent {
         this.validationErrors['Lesson'] = `Lesson Is Required`;
         isValid = false;
       }
-      if (this.tagsSelected.length == 0) {
-        this.validationErrors['tag'] = `Tag Is Required`;
-        isValid = false;
-      }
     }
     if (this.assignment.assignmentTypeID == 2) {
       if (this.assignmentQuestion.questionIds.length == 0) {
@@ -465,5 +476,40 @@ export class AssignmentEditComponent {
     const { field, value } = event;
     console.log(field);
     this.validationErrors[field] = '';
+  }
+
+  Delete(id: number) {
+    Swal.fire({
+      title: 'Are you sure you want to delete this Question?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#FF7519',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'Cancel'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.AssigmentQuestionServ.Delete(id, this.DomainName).subscribe({
+          next: () => {
+            this.getAssignmentData();
+            Swal.fire({
+              icon: 'success',
+              title: 'Deleted!',
+              text: 'Device has been deleted.',
+              confirmButtonText: 'Okay'
+            });
+          },
+          error: (error) => {
+            console.error('Delete error details:', error);
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'Failed to delete Question',
+              confirmButtonText: 'Okay'
+            });
+          }
+        });
+      }
+    });
   }
 }

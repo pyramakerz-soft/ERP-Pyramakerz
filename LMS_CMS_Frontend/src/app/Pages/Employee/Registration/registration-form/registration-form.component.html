@@ -40,8 +40,8 @@
                             @if(field.fieldTypeID == 1 && field.id == 21 && User_Data_After_Login.type == 'parent'){
                             <input id="{{cat.enName}}_{{field.enName}}" type="text"
                                 class="rounded-lg border border-solid border-gray-300 px-4 py-3" disabled
-                                [value]="parent.email" [value]="getTextAnswer(field.id)"
-                                placeholder="{{ 'Enter' | translate }} {{ isRtl ? field.arName : field.enName }}"
+                                [value]="getTextAnswer(field.id)"
+                                placeholder="{{ 'Enterrrrr' | translate }} {{ isRtl ? field.arName : field.enName }}"
                                 [class.error-border]="isFieldInvalid(field)" />
                             } @else{
                             <input
@@ -57,7 +57,7 @@
                             <textarea *ngSwitchCase="2" id="{{cat.enName}}_{{field.enName}}"
                                 class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                                 [value]="getTextAnswer(field.id)"
-                                placeholder="{{ 'ffff' | translate }} {{ isRtl ? field.arName : field.enName }}"
+                                placeholder="{{ 'Enter' | translate }} {{ isRtl ? field.arName : field.enName }}"
                                 (change)="FillData($event, field.id, field.fieldTypeID)"
                                 [class.error-border]="isFieldInvalid(field)">
                             </textarea>

@@ -204,7 +204,12 @@ export class RegistrationFormComponent {
     const entry = this.registrationForm.registerationFormSubmittions.find(
       (e) => e.categoryFieldID === fieldId
     );
-    return entry?.textAnswer ?? "";
+
+    if(this.User_Data_After_Login.type == "parent" && fieldId == 21){
+      return entry?.textAnswer ?? this.parent.email;
+    }else{
+      return entry?.textAnswer ?? "";
+    }
   }
 
   getSelectedOption(fieldId: number): any | null {

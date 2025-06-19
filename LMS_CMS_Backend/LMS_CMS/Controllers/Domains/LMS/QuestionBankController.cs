@@ -100,7 +100,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
              allowedTypes: new[] { "octa", "employee" },
              pages: new[] { "Question Bank" }
          )]
-        public async Task<IActionResult> GetByTypes([FromBody] List<long> TagsId,long LessonId, long TypeID, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetByTypes([FromBody] List<long>? TagsId,long? LessonId, long TypeID, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             // 1. Validate User Claims
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
@@ -113,13 +113,34 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             var unitOfWork = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            // 2. Get related QuestionBank IDs from Tag IDs
-            var questionTags = unitOfWork.questionBankTags_Repository.FindBy(
-                s => TagsId.Contains(s.TagID) &&
-                     s.QuestionBank.IsDeleted != true &&
-                     s.Tag.IsDeleted != true);
+            List<long> questionBankIds;
+            if (TagsId.Count > 0)
+            {
+                var questionBankTags = unitOfWork.questionBankTags_Repository.FindBy(
+                    s => TagsId.Contains(s.TagID)
+                        && s.Tag.IsDeleted != true
+                        && s.QuestionBank.IsDeleted != true
+                        && s.IsDeleted != true
+                );
 
-            var questionBankIds = questionTags.Select(s => s.QuestionBankID).Distinct().ToList();
+                questionBankIds = questionBankTags
+                    .Select(s => s.QuestionBankID)
+                    .Distinct()
+                    .ToList();
+            }
+            else
+            {
+                var questionBanks = unitOfWork.questionBank_Repository.FindBy(
+                    s => s.IsDeleted != true
+                        && s.LessonID == LessonId
+                        && s.Lesson.IsDeleted != true
+                );
+
+                questionBankIds = questionBanks
+                    .Select(s => s.ID)
+                    .Distinct()
+                    .ToList();
+            }
 
             // Early return if no matching question banks
             if (questionBankIds.Count == 0)

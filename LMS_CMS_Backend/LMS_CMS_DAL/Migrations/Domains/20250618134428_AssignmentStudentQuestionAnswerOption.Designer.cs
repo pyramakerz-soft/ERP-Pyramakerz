@@ -4,6 +4,7 @@ using LMS_CMS_DAL.Models.Domains;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LMS_CMS_DAL.Migrations.Domains
 {
     [DbContext(typeof(LMS_CMS_Context))]
-    partial class LMS_CMS_ContextModelSnapshot : ModelSnapshot
+    [Migration("20250618134428_AssignmentStudentQuestionAnswerOption")]
+    partial class AssignmentStudentQuestionAnswerOption
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -12651,7 +12654,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.HasOne("LMS_CMS_DAL.Models.Domains.LMS.AssignmentStudentQuestion", "AssignmentStudentQuestion")
                         .WithMany("AssignmentStudentQuestionAnswerOption")
                         .HasForeignKey("AssignmentStudentQuestionID")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "DeletedByEmployee")
@@ -12664,13 +12667,11 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.HasOne("LMS_CMS_DAL.Models.Domains.LMS.QuestionBankOption", "QuestionBankOption")
                         .WithMany("AssignmentStudentQuestionAnswerOption")
-                        .HasForeignKey("SelectedOpionID")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("SelectedOpionID");
 
                     b.HasOne("LMS_CMS_DAL.Models.Domains.LMS.SubBankQuestion", "SubBankQuestion")
                         .WithMany("AssignmentStudentQuestionAnswerOption")
-                        .HasForeignKey("SubBankQuestionID")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("SubBankQuestionID");
 
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "UpdatedByEmployee")
                         .WithMany()

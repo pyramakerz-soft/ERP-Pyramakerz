@@ -182,6 +182,8 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<DirectMarkClassroomStudent> DirectMarkClassroomStudent { get; set; }
         public DbSet<AssignmentStudentQuestion> AssignmentStudentQuestion { get; set; }
         public DbSet<ETAPOS> ETAPOS { get; set; }
+        public DbSet<AssignmentStudentQuestionAnswerOption> AssignmentStudentQuestionAnswerOption { get; set; }
+
 
 
         public LMS_CMS_Context(DbContextOptions<LMS_CMS_Context> options)
@@ -1598,7 +1600,24 @@ namespace LMS_CMS_DAL.Models.Domains
               .WithMany(p => p.AssignmentStudentQuestions)
               .HasForeignKey(p => p.AssignmentStudentID)
               .OnDelete(DeleteBehavior.Restrict);
-             
+
+            modelBuilder.Entity<AssignmentStudentQuestionAnswerOption>()
+              .HasOne(p => p.AssignmentStudentQuestion)
+              .WithMany(p => p.AssignmentStudentQuestionAnswerOption)
+              .HasForeignKey(p => p.AssignmentStudentQuestionID)
+              .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AssignmentStudentQuestionAnswerOption>()
+              .HasOne(p => p.SubBankQuestion)
+              .WithMany(p => p.AssignmentStudentQuestionAnswerOption)
+              .HasForeignKey(p => p.SubBankQuestionID)
+              .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AssignmentStudentQuestionAnswerOption>()
+              .HasOne(p => p.QuestionBankOption)
+              .WithMany(p => p.AssignmentStudentQuestionAnswerOption)
+              .HasForeignKey(p => p.SelectedOpionID)
+              .OnDelete(DeleteBehavior.Restrict);
 
             ///////////////////////// Exception: /////////////////////////
             modelBuilder.Entity<Bus>()
