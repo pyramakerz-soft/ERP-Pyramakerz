@@ -85,6 +85,7 @@ export class ElectronicInvoiceComponent implements OnInit {
       this.schools = await firstValueFrom(
         this.schoolService.Get(this.DomainName)
       );
+      console.log(this.schools);
     } catch (error) {
       this.handleError('Failed to load schools');
     }
@@ -101,7 +102,15 @@ export class ElectronicInvoiceComponent implements OnInit {
 
     const formattedStartDate = this.formatDateForApi(this.dateFrom);
     const formattedEndDate = this.formatDateForApi(this.dateTo);
-
+    console.log(
+      'start',
+      this.selectedSchoolId,
+      formattedStartDate,
+      formattedEndDate,
+      this.currentPage,
+      this.pageSize,
+      this.DomainName
+    );
     this.zatcaService
       .filterBySchoolAndDate(
         this.selectedSchoolId,
@@ -139,7 +148,10 @@ export class ElectronicInvoiceComponent implements OnInit {
 
   private formatDateForApi(dateString: string): string {
     const date = new Date(dateString);
-    return date.toISOString().split('T')[0]; // YYYY-MM-DD format
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
   }
 
   changePage(page: number) {

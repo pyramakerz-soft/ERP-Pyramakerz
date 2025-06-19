@@ -132,50 +132,82 @@ export class CreateHygieneFormComponent implements OnInit {
     }
   }
 
-  onSchoolChange() {
-    this.selectedGrade = null;
-    this.selectedClass = null;
-    this.grades = [];
-    this.classes = [];
-    this.students = [];
-    this.loadGrades();
+onSchoolChange() {
+  this.selectedGrade = null;
+  this.selectedClass = null;
+  this.grades = [];
+  this.classes = [];
+  this.students = [];
+  delete this.validationErrors['school'];
+  this.loadGrades();
+  if (this.checkFormValidity()) {
+    this.errorMessage = null;
+  }
+}
+
+onGradeChange() {
+  this.selectedClass = null;
+  this.classes = [];
+  this.students = [];
+  delete this.validationErrors['grade'];
+  this.loadClasses();
+  if (this.checkFormValidity()) {
+    this.errorMessage = null;
+  }
+}
+
+onClassChange() {
+  this.students = [];
+  delete this.validationErrors['class'];
+  this.loadStudents();
+  if (this.checkFormValidity()) {
+    this.errorMessage = null;
+  }
+}
+onDateChange() {
+  delete this.validationErrors['date'];
+  if (this.checkFormValidity()) {
+    this.errorMessage = null;
+  }
+}
+
+// Add this method to check form validity
+checkFormValidity(): boolean {
+  return !!this.selectedSchool && 
+         !!this.selectedGrade && 
+         !!this.selectedClass && 
+         !!this.selectedDate;
+}
+
+// Update the validateForm method
+validateForm(): boolean {
+  this.validationErrors = {};
+  let isValid = true;
+
+  if (!this.selectedSchool) {
+    this.validationErrors['school'] = '*School is required';
+    isValid = false;
+  }
+  if (!this.selectedGrade) {
+    this.validationErrors['grade'] = '*Grade is required';
+    isValid = false;
+  }
+  if (!this.selectedClass) {
+    this.validationErrors['class'] = '*Class is required';
+    isValid = false;
+  }
+  if (!this.selectedDate) {
+    this.validationErrors['date'] = '*Date is required';
+    isValid = false;
   }
 
-  onGradeChange() {
-    this.selectedClass = null;
-    this.classes = [];
-    this.students = [];
-    this.loadClasses();
+  // Clear the general error message if form is valid
+  if (isValid) {
+    this.errorMessage = null;
   }
 
-  onClassChange() {
-    this.students = [];
-    this.loadStudents();
-  }
-
-  validateForm(): boolean {
-    let isValid = true;
-    this.validationErrors = {};
-
-    if (!this.selectedSchool) {
-      this.validationErrors['school'] = '*School is required';
-      isValid = false;
-    }
-    if (!this.selectedGrade) {
-      this.validationErrors['grade'] = '*Grade is required';
-      isValid = false;
-    }
-    if (!this.selectedClass) {
-      this.validationErrors['class'] = '*Class is required';
-      isValid = false;
-    }
-    if (!this.selectedDate) {
-      this.validationErrors['date'] = '*Date is required';
-      isValid = false;
-    }
-
-    return isValid;
-  }
+  return isValid;
+}
 
 saveHygieneForm() {
   if (this.validateForm()) {
@@ -220,8 +252,6 @@ saveHygieneForm() {
         this.errorMessage = 'Failed to save hygiene form.';
       },
     });
-  } else {
-    this.errorMessage = 'Please fill out all required fields.';
   }
 }
 
