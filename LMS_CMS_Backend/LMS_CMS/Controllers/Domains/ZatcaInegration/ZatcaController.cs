@@ -43,10 +43,10 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
         #region Generate PCSID
         [HttpPost("GeneratePCSID")]
-        [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Electronic Invoice" }
-        )]
+        //[Authorize_Endpoint_(
+        //    allowedTypes: new[] { "octa", "employee" },
+        //    pages: new[] { "Electronic Invoice" }
+        //)]
         public async Task<IActionResult> GeneratePCSID(long otp, long schoolPcId)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -209,10 +209,10 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
         #region Report Invoice
         [HttpPost("ReportInvoice")]
-        [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Electronic Invoice" }
-        )]
+        //[Authorize_Endpoint_(
+        //    allowedTypes: new[] { "octa", "employee" },
+        //    pages: new[] { "Electronic Invoice" }
+        //)]
         public async Task<IActionResult> ReportInvoice(long masterId)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -339,10 +339,10 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
         #region Report Invoices
         [HttpPost("ReportInvoices")]
-        [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Electronic Invoice" }
-        )]
+        //[Authorize_Endpoint_(
+        //    allowedTypes: new[] { "octa", "employee" },
+        //    pages: new[] { "Electronic Invoice" }
+        //)]
         public async Task<IActionResult> ReportInvoices(long schoolId)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
