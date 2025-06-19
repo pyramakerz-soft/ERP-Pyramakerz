@@ -504,13 +504,24 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
             if (pageSize < 1) pageSize = 10;
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            DateTime start = DateTime.Parse(startDate).Date;
-            DateTime end = DateTime.Parse(endDate).Date;
+            string[] sdParts = startDate.Split("/");
+            Array.Reverse(sdParts);
+            startDate = string.Join("-", sdParts);
+
+            string[] edParts = endDate.Split("/");
+            Array.Reverse(edParts);
+            endDate = string.Join("-", edParts);
+
+            DateTime.TryParse(startDate, out DateTime start);
+            DateTime.TryParse(endDate, out DateTime end);
+
+            start = start.Date;
+            end = end.Date;
 
             List<InventoryMaster> mastersBySchool = await Unit_Of_Work.inventoryMaster_Repository.SelectQuery<InventoryMaster>(
                 d => d.SchoolId == schoolId && 
                 d.IsDeleted != true &&
-                d.FlagId == 11 || d.FlagId == 12)
+                (d.FlagId == 11 || d.FlagId == 12))
                 .ToListAsync();
 
             if (mastersBySchool is null || mastersBySchool.Count == 0)
