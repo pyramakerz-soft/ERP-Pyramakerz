@@ -5,6 +5,7 @@ using LMS_CMS_BL.DTO.Inventory;
 using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains.Inventory;
 using LMS_CMS_DAL.Models.Domains.Zatca;
+using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
 using LMS_CMS_PL.Services.Zatca;
 using Microsoft.AspNetCore.Authorization;
@@ -42,10 +43,10 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
         #region Generate PCSID
         [HttpPost("GeneratePCSID")]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "" }
-        //)]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Electronic Invoice" }
+        )]
         public async Task<IActionResult> GeneratePCSID(long otp, long schoolPcId)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -80,21 +81,21 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                 industryBusinessCategory
             );
 
-            string pcName = $"PC{schoolPc.ID}{schoolPc.School.ID}";
+            string pcName = $"PC{schoolPc.ID}_{schoolPc.School.ID}";
 
-            S3Service s3SecretManager = new S3Service(_secretsManager);
+            //S3Service s3SecretManager = new S3Service(_secretsManager);
 
             var csrSteps = ZatcaServices.GenerateCSRandPrivateKey(csrGeneration);
             string csrContent = csrSteps[1].ResultedValue;
             string privateKeyContent = csrSteps[2].ResultedValue;
 
-            bool addCSR = await s3SecretManager.CreateOrUpdateSecretAsync($"{pcName}CSR", csrContent);
-            if (!addCSR)
-                return BadRequest("Adding CSR failed!");
+            //bool addCSR = await s3SecretManager.CreateOrUpdateSecretAsync($"{pcName}CSR", csrContent);
+            //if (!addCSR)
+            //    return BadRequest("Adding CSR failed!");
 
-            bool addPrivateKey = await s3SecretManager.CreateOrUpdateSecretAsync($"{pcName}PrivateKey", privateKeyContent);
-            if (!addPrivateKey)
-                return BadRequest("Adding Private Key failed!");
+            //bool addPrivateKey = await s3SecretManager.CreateOrUpdateSecretAsync($"{pcName}PrivateKey", privateKeyContent);
+            //if (!addPrivateKey)
+            //    return BadRequest("Adding Private Key failed!");
 
             //await InvoicingServices.GeneratePublicKey(publicKeyPath, privateKeyPath);
 
@@ -106,10 +107,10 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
             string csid = await ZatcaServices.GenerateCSID(csrJson, otp, version, _config);
 
-            bool addCSID = await s3SecretManager.CreateOrUpdateSecretAsync($"{pcName}CSID", csid);
+            //bool addCSID = await s3SecretManager.CreateOrUpdateSecretAsync($"{pcName}CSID", csid);
 
-            if (!addCSID)
-                return BadRequest("Adding CSID failed!");
+            //if (!addCSID)
+            //    return BadRequest("Adding CSID failed!");
 
             dynamic csidJson = JsonConvert.DeserializeObject(csid);
 
@@ -124,10 +125,10 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
             string pcsid = await ZatcaServices.GeneratePCSID(tokenBase64, version, requestId, _config);
 
-            bool addPCSID = await s3SecretManager.CreateOrUpdateSecretAsync($"{pcName}PCSID", pcsid);
+            //bool addPCSID = await s3SecretManager.CreateOrUpdateSecretAsync($"{pcName}PCSID", pcsid);
 
-            if (!addPCSID)
-                return BadRequest("Adding PCSID failed!");
+            //if (!addPCSID)
+            //    return BadRequest("Adding PCSID failed!");
 
             string certificateDate = ZatcaServices.GetCertificateDate(pcsid);
 
@@ -208,11 +209,10 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
         #region Report Invoice
         [HttpPost("ReportInvoice")]
-        //[HttpPost("ReportInvoice")]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "" }
-        //)]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Electronic Invoice" }
+        )]
         public async Task<IActionResult> ReportInvoice(long masterId)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -339,10 +339,10 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
         #region Report Invoices
         [HttpPost("ReportInvoices")]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "" }
-        //)]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Electronic Invoice" }
+        )]
         public async Task<IActionResult> ReportInvoices(long schoolId)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -482,10 +482,10 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
         #endregion
 
         #region Filter by School and Date
-        [HttpPost("FilterBySchoolAndDate")]
+        [HttpGet("FilterBySchoolAndDate")]
         //[Authorize_Endpoint_(
         //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "" }
+        //    pages: new[] { "Electronic Invoice" }
         //)]
         public async Task<IActionResult> FilterBySchoolAndDate(long schoolId, string startDate, string endDate, int pageNumber = 1, int pageSize = 10)
         {

@@ -6,11 +6,11 @@ import { Observable } from 'rxjs';
 import { ElectronicInvoice } from '../../../Models/zatca/electronic-invoice';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ZatcaService {
-  baseUrl = "";
-  header = "";
+  baseUrl = '';
+  header = '';
 
   constructor(public http: HttpClient, public ApiServ: ApiService) {
     this.baseUrl = ApiServ.BaseUrl;
@@ -20,7 +20,7 @@ export class ZatcaService {
     if (DomainName != null) {
       this.header = DomainName;
     }
-    const token = localStorage.getItem("current_token");
+    const token = localStorage.getItem('current_token');
     const headers = new HttpHeaders()
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
@@ -34,47 +34,52 @@ export class ZatcaService {
     );
   }
 
-filterBySchoolAndDate(
-  schoolId: number,
-  startDate: string,
-  endDate: string,
-  pageNumber: number,
-  pageSize: number,
-DomainName: string
+  filterBySchoolAndDate(
+    schoolId: number,
+    startDate: string,
+    endDate: string,
+    pageNumber: number,
+    pageSize: number,
+    DomainName: string
   ): Observable<any> {
-        if (DomainName != null) {
+    if (DomainName != null) {
       this.header = DomainName;
     }
-  const token = localStorage.getItem("current_token");
-  const headers = new HttpHeaders()
-    .set('domain-name', this.header)
-    .set('Authorization', `Bearer ${token}`)
-    .set('accept', '*/*');
+    const token = localStorage.getItem('current_token');
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('accept', '*/*');
 
-  const params = {
-    schoolId: schoolId.toString(),
-    startDate,
-    endDate,
-    pageNumber: pageNumber.toString(),
-    pageSize: pageSize.toString()
-  };
+    const params = {
+      schoolId: schoolId.toString(),
+      startDate,
+      endDate,
+      pageNumber: pageNumber.toString(),
+      pageSize: pageSize.toString(),
+    };
 
-  return this.http.get(`${this.baseUrl}/Zatca/FilterBySchoolAndDate`, { 
-    headers,
-    params 
-  });
-}
-// zatca.service.ts
-getInvoiceById(id: number, DomainName: string): Observable<ElectronicInvoice> {
-  if (DomainName != null) {
-    this.header = DomainName;
+    return this.http.post(`${this.baseUrl}/Zatca/FilterBySchoolAndDate`, {
+      headers,
+      params,
+    });
   }
-  const token = localStorage.getItem("current_token");
-  const headers = new HttpHeaders()
-    .set('domain-name', this.header)
-    .set('Authorization', `Bearer ${token}`)
-    .set('Content-Type', 'application/json');
-    
-  return this.http.get<ElectronicInvoice>(`${this.baseUrl}/Zatca/${id}`, { headers });
-}
+  // zatca.service.ts
+  getInvoiceById(
+    id: number,
+    DomainName: string
+  ): Observable<ElectronicInvoice> {
+    if (DomainName != null) {
+      this.header = DomainName;
+    }
+    const token = localStorage.getItem('current_token');
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+
+    return this.http.get<ElectronicInvoice>(`${this.baseUrl}/Zatca/${id}`, {
+      headers,
+    });
+  }
 }

@@ -13,14 +13,13 @@ export class ApiService {
   // BaseUrl="http://44.210.155.226:5000/api/with-domain"
   // BaseUrlOcta="http://44.210.155.226:5000/api"w
 
-
   constructor() {}
 
   GetHeader() {
     // const hostname = window.location.hostname;
     // var Header = hostname.split('.')[0]
 
-    var Header = 'as'; 
+    var Header = 'aa';
 
     return Header;
   }

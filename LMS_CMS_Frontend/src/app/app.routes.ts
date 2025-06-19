@@ -171,278 +171,1921 @@ import { StudentsComponent } from './Pages/Employee/Administrator/students/stude
 import { DailyPerformanceMasterComponent } from './Pages/Employee/LMS/daily-performance-master/daily-performance-master.component';
 import { AssignmentComponent } from './Pages/Employee/LMS/assignment/assignment.component';
 
-
 export const routes: Routes = [
-    { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
-    { path: "Octa/login", component: OctaLoginComponent, title: "login", canActivate: [noNavigateToLoginIfLoginGuard] },
-    { path: "SignUp", component: SignUpComponent, title: "SignUp", canActivate: [noNavigateToLoginIfLoginGuard] },
+  {
+    path: '',
+    component: LoginComponent,
+    title: 'Login',
+    canActivate: [noNavigateToLoginIfLoginGuard],
+  },
+  {
+    path: 'Octa/login',
+    component: OctaLoginComponent,
+    title: 'login',
+    canActivate: [noNavigateToLoginIfLoginGuard],
+  },
+  {
+    path: 'SignUp',
+    component: SignUpComponent,
+    title: 'SignUp',
+    canActivate: [noNavigateToLoginIfLoginGuard],
+  },
 
+  {
+    path: 'Employee',
+    component: MainLayoutComponent,
+    title: 'Employee Home',
+    canActivate: [navigateIfEmployeeGuard, noNavigateWithoutLoginGuard],
+    children: [
+      { path: '', component: EmployeeHomeComponent, title: 'EmployeeHome' },
+      {
+        path: 'Hygiene Types',
+        component: HygieneTypesComponent,
+        title: 'Hygiene Types',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      { path: 'Diagnosis', component: DiagnosisComponent, title: 'Diagnosis' },
+      { path: 'Drugs', component: DrugsComponent, title: 'Drugs' },
+      {
+        path: 'Hygiene Form Medical Report',
+        component: HygieneFormComponent,
+        title: 'Hygiene Form',
+      },
+      {
+        path: 'Create Hygiene Form',
+        component: CreateHygieneFormComponent,
+        title: 'Create Hygiene Form',
+      },
+      { path: 'view hygiene form/:id', component: ViewHygieneFormComponent },
+      { path: 'mh by parent/:id', component: MedicalHistoryByParentComponent },
+      { path: 'mh by doctor/:id', component: MedicalHistoryByDoctorComponent },
+      { path: 'Follow Up', component: FollowUpComponent, title: 'Follow Up' },
+      {
+        path: 'Medical History',
+        component: MedicalHistoryComponent,
+        title: 'Medical History',
+      },
+      {
+        path: 'Medical Report',
+        component: MedicalReportComponent,
+        title: 'Medical Report',
+      },
+      { path: 'Doses', component: DosesComponent, title: 'Doses' },
+      { path: '', component: EmployeeHomeComponent, title: 'EmployeeHome' },
+      {
+        path: 'Bus Details',
+        component: BusDetailsComponent,
+        title: 'Bus',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Bus Students/:domainName/:busId',
+        component: BusStudentComponent,
+        title: 'Bus Students',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Bus Types',
+        component: BusTypesComponent,
+        title: 'Bus Type',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Bus Status',
+        component: BusStatusComponent,
+        title: 'Bus Status',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Bus Districts',
+        component: BusDistrictsComponent,
+        title: 'Bus Districts',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Bus Categories',
+        component: BusCategoriesComponent,
+        title: 'Bus Category',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Bus Companies',
+        component: BusCompaniesComponent,
+        title: 'Bus Company',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Print Name Tag',
+        component: BusPrintNameTagComponent,
+        title: 'Print Name Tag',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Role',
+        component: RoleComponent,
+        title: 'Role',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Role Create',
+        component: RoleAddEditComponent,
+        title: 'Role Create',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      }, //
+      {
+        path: 'Role Edit/:id',
+        component: RoleAddEditComponent,
+        title: 'Role Edit',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      }, //
+      {
+        path: 'Subject Categories',
+        component: SubjectCategoryComponent,
+        title: 'Subject Categories',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Subject',
+        component: SubjectComponent,
+        title: 'Subjects',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Subject/:domainName/:SubId',
+        component: SubjectViewComponent,
+        title: 'Subject',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Employee',
+        component: EmployeeComponent,
+        title: 'Employee',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Employee Create',
+        component: EmployeeAddEditComponent,
+        title: 'Employee Create',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      }, //
+      {
+        path: 'Employee Edit/:id',
+        component: EmployeeAddEditComponent,
+        title: 'Employee Edit',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      }, //
+      {
+        path: 'Employee Details/:id',
+        component: EmployeeViewComponent,
+        title: 'Employee Details',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      }, //
+      {
+        path: 'Building',
+        component: BuildingComponent,
+        title: 'Building',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Floor/:domainName/:Id',
+        component: FloorComponent,
+        title: 'Floor',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Classroom',
+        component: ClassroomComponent,
+        title: 'Classroom',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Classroom/:id',
+        component: ClassroomViewComponent,
+        title: 'Classroom',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Violation Types',
+        component: ViolationTypesComponent,
+        title: 'Violation Types',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Section',
+        component: SectionComponent,
+        title: 'Section',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Grade/:domainName/:Id',
+        component: GradeComponent,
+        title: 'Grade',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Academic Years',
+        component: AcademicYearComponent,
+        title: 'Academic Year',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Semester/:domainName/:Id',
+        component: SemesterComponent,
+        title: 'Semester',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Working Weeks/:domainName/:Id',
+        component: SemesterViewComponent,
+        title: 'Semester',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      }, //
+      {
+        path: 'School',
+        component: SchoolComponentEmployee,
+        title: 'Schools',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'TaxIssuer',
+        component: TaxIssuerComponent,
+        title: 'TaxIssuer',
+        canActivate: [noNavigateWithoutLoginGuard],
+      },
+      {
+        path: 'Registration Form',
+        component: RegistrationFormComponent,
+        title: 'Registration Form',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Registration Form Field',
+        component: RegistrationFormFieldComponent,
+        title: 'RegistrationFormField',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Registration Form Field/:id',
+        component: FieldsComponent,
+        title: 'CategoryFields',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Admission Test',
+        component: AdmissionTestComponent,
+        title: 'Admission Test',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Question/:id',
+        component: QuestionsComponent,
+        title: 'question',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Registration Confirmation',
+        component: RegistrationConfirmationComponent,
+        title: 'Registration Confirmation',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Registration Confirmation/:Id',
+        component: RegistrationConfirmationDetailsComponent,
+        title: 'Registration Confirmation',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Registration Confirmation Test/:id',
+        component: RegistrationConfirmationTestDetailsComponent,
+        title: 'Registration Confirmation Test',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Registration Confirmation Test/:Rid/:Pid/:Tid',
+        component: RegistrationFormTestAnswerComponent,
+        title: 'Registration Confirmation Test',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Interview Time Table',
+        component: InterviewTimeTableComponent,
+        title: 'Interview Time Table',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Interview Registration/:Id',
+        component: InterviewRegistrationComponentEmployee,
+        title: 'Interview Registration',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Classroom Accommodation',
+        component: ClassroomsAccommodationComponent,
+        title: 'Classroom Accommodation',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Supplier',
+        component: SuppliersComponent,
+        title: 'Suppliers',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Debit',
+        component: DebitsComponent,
+        title: 'Debits',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Credit',
+        component: CreditsComponent,
+        title: 'Credits',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Asset',
+        component: AssetsComponent,
+        title: 'Assets',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Tuition Fees Type',
+        component: TuitionFeesTypesComponent,
+        title: 'Tuition Fees Types',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Tuition Discount Type',
+        component: TuitionDiscountTypesComponent,
+        title: 'TuitionDiscountTypes',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Accounting Entries Doc Type',
+        component: AccountingEntriesDocTypeComponent,
+        title: 'AccountingEntriesDocTypes',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Job/:id',
+        component: JobComponent,
+        title: 'Job',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Job Category',
+        component: JobCategoriesComponent,
+        title: 'Job Categories',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Academic Degree',
+        component: AcademicDegreeComponent,
+        title: 'Academic Degree',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Reasons For Leaving Work',
+        component: ReasonsforleavingworkComponent,
+        title: 'Reasons for leaving work',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Department',
+        component: DepartmentComponent,
+        title: 'Department',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Outcome',
+        component: OutcomesComponent,
+        title: 'Outcome',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Income',
+        component: IncomesComponent,
+        title: 'Income',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Safe',
+        component: SavesComponent,
+        title: 'Save',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Accounting Tree',
+        component: AccountingTreeComponent,
+        title: 'Accounting Tree',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Bank',
+        component: BankComponent,
+        title: 'Bank',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Employee Accounting',
+        component: AccountingEmployeeComponent,
+        title: 'Employee Accounting',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Employee Edit Accounting/:id',
+        component: AccountingEmployeeEditComponent,
+        title: 'Employee Edit Accounting',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Student Accounting',
+        component: AccountingStudentComponent,
+        title: 'Student Accounting',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Student Edit Accounting/:id',
+        component: AccountingStudentEditComponent,
+        title: 'Student Edit Accounting',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Add Children',
+        component: AddChildComponent,
+        title: 'Add Children',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Fees Activation',
+        component: FeesActivationComponent,
+        title: 'Fees Activation',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Receivable',
+        component: ReceivableComponent,
+        title: 'Receivable',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Receivable Details',
+        component: ReceivableDetailsComponent,
+        title: 'Receivable Details',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Receivable Details/:id',
+        component: ReceivableDetailsComponent,
+        title: 'Edit Receivable Details',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Receivable Details/View/:id',
+        component: ReceivableDetailsComponent,
+        title: 'View Receivable Details',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Payable',
+        component: PayableComponent,
+        title: 'Payable',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Payable Details',
+        component: PayableDetailsComponent,
+        title: 'Payable Details',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Payable Details/:id',
+        component: PayableDetailsComponent,
+        title: 'Edit Payable Details',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Payable Details/View/:id',
+        component: PayableDetailsComponent,
+        title: 'View Payable Details',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Accounting Entries',
+        component: AccountingEntriesComponent,
+        title: 'AccountingEntries',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Accounting Entries Details',
+        component: AccountingEntriesDetailsComponent,
+        title: 'AccountingEntries Details',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Accounting Entries Details/:id',
+        component: AccountingEntriesDetailsComponent,
+        title: 'Edit AccountingEntries Details',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Accounting Entries Details/View/:id',
+        component: AccountingEntriesDetailsComponent,
+        title: 'View AccountingEntries Details',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Installment Deduction',
+        component: InstallmentDeductionMasterComponent,
+        title: 'Installment Deduction',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Installment Deduction Details/View/:id',
+        component: InstallmentDeductionDetailComponent,
+        title: 'View Installment Deduction Details',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Installment Deduction Details/Edit/:id',
+        component: InstallmentDeductionDetailComponent,
+        title: 'View Installment Deduction Details',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Installment Deduction Details',
+        component: InstallmentDeductionDetailComponent,
+        title: 'View Installment Deduction Details',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Payable Doc Type',
+        component: PayableDocTypeComponent,
+        title: 'Payable Doc Type',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Receivable Doc Type',
+        component: ReceivableDocTypeComponent,
+        title: 'Receivable Doc Type',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Inventory Categories',
+        component: CategoriesComponent,
+        title: 'Inventory categories',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Inventory Sub Categories/:id',
+        component: SubCategoryComponent,
+        title: 'Sub_categories',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Items',
+        component: ShopItemsComponent,
+        title: 'Shop Items',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Shop Item/Create',
+        component: ShopItemsAddEditComponent,
+        title: 'Create Shop Items',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Shop Item/:id',
+        component: ShopItemsAddEditComponent,
+        title: 'Edit Shop Items',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Stores',
+        component: StoresComponent,
+        title: 'Store',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Sales',
+        component: InventoryMasterComponent,
+        title: 'Sales',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+        data: { id: 11 },
+      },
+      {
+        path: 'Sales Item/:FlagId',
+        component: InventoryDetailsComponent,
+        title: 'Sales Item',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Sales Item/Edit/:FlagId/:id',
+        component: InventoryDetailsComponent,
+        title: 'Sales Item',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Sales Returns',
+        component: InventoryMasterComponent,
+        title: 'Sales Returns',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+        data: { id: 12 },
+      },
+      {
+        path: 'Sales Returns Item/:FlagId',
+        component: InventoryDetailsComponent,
+        title: 'Sales Returns Item',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Sales Returns Item/Edit/:FlagId/:id',
+        component: InventoryDetailsComponent,
+        title: 'Sales Returns Item',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Purchase Returns',
+        component: InventoryMasterComponent,
+        title: 'Sales',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+        data: { id: 10 },
+      },
+      {
+        path: 'Purchase Returns Item/:FlagId',
+        component: InventoryDetailsComponent,
+        title: 'Purchases Item',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Purchase Returns Item/Edit/:FlagId/:id',
+        component: InventoryDetailsComponent,
+        title: 'Purchases Item',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Purchases',
+        component: InventoryMasterComponent,
+        title: 'Sales',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+        data: { id: 9 },
+      },
+      {
+        path: 'Purchases Item/:FlagId',
+        component: InventoryDetailsComponent,
+        title: 'Purchases Item',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Purchases Item/Edit/:FlagId/:id',
+        component: InventoryDetailsComponent,
+        title: 'Purchases Item',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Opening Balances',
+        component: InventoryMasterComponent,
+        title: 'Sales',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+        data: { id: 1 },
+      },
+      {
+        path: 'Opening Balances Item/:FlagId',
+        component: InventoryDetailsComponent,
+        title: 'Opening Balances Item',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Opening Balances Item/Edit/:FlagId/:id',
+        component: InventoryDetailsComponent,
+        title: 'Opening Balances Item',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Addition',
+        component: InventoryMasterComponent,
+        title: 'Sales',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+        data: { id: 2 },
+      },
+      {
+        path: 'Addition Item/:FlagId',
+        component: InventoryDetailsComponent,
+        title: 'Addition Item',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Addition Item/Edit/:FlagId/:id',
+        component: InventoryDetailsComponent,
+        title: 'Addition Item',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Addition Adjustment',
+        component: InventoryMasterComponent,
+        title: 'Sales',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+        data: { id: 3 },
+      },
+      {
+        path: 'Addition Adjustment Item/:FlagId',
+        component: InventoryDetailsComponent,
+        title: 'Addition Adjustment Item',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Addition Adjustment Item/Edit/:FlagId/:id',
+        component: InventoryDetailsComponent,
+        title: 'Addition Adjustment Item',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Disbursement',
+        component: InventoryMasterComponent,
+        title: 'Sales',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+        data: { id: 4 },
+      },
+      {
+        path: 'Disbursement Item/:FlagId',
+        component: InventoryDetailsComponent,
+        title: 'Disbursement Item',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Disbursement Item/Edit/:FlagId/:id',
+        component: InventoryDetailsComponent,
+        title: 'Disbursement Item',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Disbursement Adjustment',
+        component: InventoryMasterComponent,
+        title: 'Sales',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+        data: { id: 5 },
+      },
+      {
+        path: 'Disbursement Adjustment Item/:FlagId',
+        component: InventoryDetailsComponent,
+        title: 'Disbursement Adjustment Item',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Disbursement Adjustment Item/Edit/:FlagId/:id',
+        component: InventoryDetailsComponent,
+        title: 'Disbursement Adjustment Item',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Gifts',
+        component: InventoryMasterComponent,
+        title: 'Sales',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+        data: { id: 6 },
+      },
+      {
+        path: 'Gifts Item/:FlagId',
+        component: InventoryDetailsComponent,
+        title: 'Gifts Item',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Gifts Item/Edit/:FlagId/:id',
+        component: InventoryDetailsComponent,
+        title: 'Gifts Item',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Purchase Order',
+        component: InventoryMasterComponent,
+        title: 'Purchase Order',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+        data: { id: 13 },
+      },
+      {
+        path: 'Purchase Order Item/:FlagId',
+        component: InventoryDetailsComponent,
+        title: 'Purchase Order Item',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Purchase Order Item/Edit/:FlagId/:id',
+        component: InventoryDetailsComponent,
+        title: 'Purchase Order Item',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Transfer to Store',
+        component: InventoryMasterComponent,
+        title: 'Sales',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+        data: { id: 8 },
+      },
+      {
+        path: 'Transfer to Store Item/:FlagId',
+        component: InventoryDetailsComponent,
+        title: 'Transfer to Store Item',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Transfer to Store Item/Edit/:FlagId/:id',
+        component: InventoryDetailsComponent,
+        title: 'Transfer to Store Item',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Damaged',
+        component: InventoryMasterComponent,
+        title: 'Sales',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+        data: { id: 7 },
+      },
+      {
+        path: 'Damaged Item/:FlagId',
+        component: InventoryDetailsComponent,
+        title: 'Damaged Item',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Damaged Item/Edit/:FlagId/:id',
+        component: InventoryDetailsComponent,
+        title: 'Damaged Item',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'The Shop',
+        component: ShopComponent,
+        title: 'Shop',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'ShopItem/:id',
+        component: ShopItemComponent,
+        title: 'Shop Item',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Cart',
+        component: CartComponent,
+        title: 'Cart',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Order',
+        component: OrderComponent,
+        title: 'Order',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Order History',
+        component: OrderHistoryComponent,
+        title: 'Order History',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Order/:id',
+        component: OrderItemsComponent,
+        title: 'Order Items',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Stocking',
+        component: StockingComponent,
+        title: 'Stocking',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Stocking Item',
+        component: StockingDetailsComponent,
+        title: 'Stocking Item',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Stocking Item/Edit/:id',
+        component: StockingDetailsComponent,
+        title: 'Stocking Item',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'StudentsNamesInClass',
+        component: StudentsNamesInClassComponent,
+        title: "Students' Names In Class",
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'StudentInformation',
+        component: StudentInformationComponent,
+        title: 'StudentInformation',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'ProofRegistrationAndSuccessForm',
+        component: ProofRegistrationAndSuccessFormReportComponent,
+        title: 'ProofRegistrationAndSuccessForm',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'ProofRegistration',
+        component: ProofRegistrationReportComponent,
+        title: 'ProofRegistration',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'StudentsInformationFormReport',
+        component: StudentsInformationFormReportComponent,
+        title: 'StudentsInformationFormReport',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'AcademicSequentialReport',
+        component: AcademicSequentialReportComponent,
+        title: 'AcademicSequentialReport',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'TransferedFromKindergartenReport',
+        component: TransferedFromKindergartenReportComponent,
+        title: 'TransferedFromKindergartenReport',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Template',
+        component: TemplateComponent,
+        title: 'Template',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Inventory-Transaction-Report',
+        component: InventoryTransactionReportComponent,
+        title: 'Inventory Transaction Report',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+        data: { reportType: 'inventory' },
+      },
+      {
+        path: 'Sales-Transaction-Report',
+        component: InventoryTransactionReportComponent,
+        title: 'Sales Transaction Report',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+        data: { reportType: 'sales' },
+      },
+      {
+        path: 'Purchase-Transaction-Report',
+        component: InventoryTransactionReportComponent,
+        title: 'Purchase Transaction Report',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+        data: { reportType: 'purchase' },
+      },
+      {
+        path: 'Inventory-Transaction-Report-Detailed',
+        component: InvoiceReportMasterDetailedComponent,
+        title: 'Inventory Transaction Report Detailed',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+        data: { reportType: 'inventory' },
+      },
+      {
+        path: 'Sales-Transaction-Detailed',
+        component: InvoiceReportMasterDetailedComponent,
+        title: 'Sales Transaction Report Detailed',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+        data: { reportType: 'sales' },
+      },
+      {
+        path: 'Purchase-Transaction-Report-Detailed',
+        component: InvoiceReportMasterDetailedComponent,
+        title: 'Purchase Transaction Report Detailed',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+        data: { reportType: 'purchase' },
+      },
+      {
+        path: 'Book Correction',
+        component: BookCorrectionComponent,
+        title: 'BookCorrectionComponent',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Evaluation',
+        component: EvaluationComponent,
+        title: 'Evaluation',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'EvaluationTemplateGroup/:id',
+        component: EvaluationTemplateGroupComponent,
+        title: 'EvaluationTemplateGroup',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'EvaluationTemplateGroupQuestion/:id',
+        component: EvaluationTemplateGroupQuestionComponent,
+        title: 'EvaluationTemplateGroup',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Received Evaluations',
+        component: EvaluationFeedbackComponent,
+        title: 'Received Evaluations',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Created Evaluations',
+        component: EvaluationFeedbackComponent,
+        title: 'Created Evaluations',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Received Evaluations/:id',
+        component: EvaluationEmployeeAnswerComponent,
+        title: 'Received Evaluations',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Created Evaluations/:id',
+        component: EvaluationEmployeeAnswerComponent,
+        title: 'Created Evaluations',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Medal',
+        component: MedalComponent,
+        title: 'Medal',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Lesson Activity Types',
+        component: LessonActivityTypeComponent,
+        title: 'Lesson Activity Type',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Lesson Resources Types',
+        component: LessonResourcesTypeComponent,
+        title: 'Lesson Resource Type',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Student Medal',
+        component: StudentMedalComponent,
+        title: 'Student Medal',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Lessons',
+        component: LessonComponent,
+        title: 'Lesson',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Enter Daily Performance',
+        component: DailyPerformanceComponent,
+        title: 'Daily Performance',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Performance Type',
+        component: PerformanceTypeComponent,
+        title: 'Performance Type',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Lesson Activity/:id',
+        component: LessonActivityComponent,
+        title: 'Lesson Activity',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Lesson Resource/:id',
+        component: LessonResourceComponent,
+        title: 'Lesson Resource',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Lesson Live',
+        component: LessonLiveComponent,
+        title: 'Lesson Live',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Zatca Devices',
+        component: ZatcaDevicesComponent,
+        title: 'Zatca Devices',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Electronic-Invoice',
+        component: ElectronicInvoiceComponent,
+        title: 'ElectronicInvoice',
+        canActivate: [noNavigateWithoutLoginGuard],
+      },
+      {
+        path: 'Electronic-Invoice/:id',
+        component: ElectronicInvoiceDetailComponent,
+        title: 'Electronic-Invoice',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Weight Types',
+        component: WeightTypeComponent,
+        title: 'Weight Types',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Classroom Students/:id',
+        component: ClassroomStudentsComponent,
+        title: 'Classroom Students',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Classroom Subject/:id',
+        component: ClassroomSubjectsComponent,
+        title: 'Classroom Subject',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Question Bank',
+        component: QuestionBankComponent,
+        title: 'Question Bank',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Subject Teacher/:id',
+        component: SubjectTeacherComponent,
+        title: 'Subject Teacher',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Subject Co-Teacher/:id',
+        component: SubjectCoTeacherComponent,
+        title: 'Subject Co-Teacher',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Student',
+        component: StudentsComponent,
+        title: 'Student',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Create Student',
+        component: RegistrationFormComponent,
+        title: 'Create Student',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Edit Student/:RegisterationFormParentId/:StudentId',
+        component: RegistrationFormComponent,
+        title: 'Edit Student',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Student View/:Id',
+        component: RegistrationConfirmationDetailsComponent,
+        title: 'Student View',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Daily Performance',
+        component: DailyPerformanceMasterComponent,
+        title: 'Daily Performance',
+        canActivate: [
+          noNavigateWithoutLoginGuard,
+          navigateIfHaveSettingPageGuard,
+        ],
+      },
+      {
+        path: 'Assignment',
+        component: AssignmentComponent,
+        title: 'Assignment',
+        canActivate: [noNavigateWithoutLoginGuard],
+      },
+      {
+        path: 'Assignment/:id',
+        component: AssignmentEditComponent,
+        title: 'Assignment Edit',
+        canActivate: [noNavigateWithoutLoginGuard],
+      },
+    ],
+  },
+  {
+    path: 'Parent',
+    component: MainLayoutComponent,
+    title: 'Parent Home',
+    canActivate: [noNavigateWithoutLoginGuard, navigateIfParentGuard],
+    children: [
+      { path: '', component: HomeParentComponent, title: 'ParentHome' },
+      {
+        path: 'Admission Test',
+        component: AdmissionTestParentComponent,
+        title: 'Admission Test',
+      },
+      {
+        path: 'Test/:registerationFormParentID/:TestId',
+        component: RegistraionTestComponent,
+        title: 'Test',
+      },
+      {
+        path: 'Registration Form',
+        component: RegistrationFormComponent,
+        title: 'Registration Form',
+      },
+      {
+        path: 'Interview Registration',
+        component: InterviewRegistrationComponentParent,
+        title: 'Interview Registration',
+      },
+    ],
+  },
+  {
+    path: 'Student',
+    component: MainLayoutComponent,
+    title: 'Student Home',
+    canActivate: [noNavigateWithoutLoginGuard, navigateIfStudentGuard],
+    children: [
+      { path: '', component: StudentHomeComponent, title: 'StudentHome' },
+      { path: 'Ecommerce/The Shop', component: ShopComponent, title: 'Shop' },
+      {
+        path: 'Ecommerce/ShopItem/:id',
+        component: ShopItemComponent,
+        title: 'Shop Item',
+      },
+      { path: 'Ecommerce/Cart', component: CartComponent, title: 'Cart' },
+      { path: 'Ecommerce/Order', component: OrderComponent, title: 'Order' },
+      {
+        path: 'Ecommerce/Order/:id',
+        component: OrderItemsComponent,
+        title: 'Order Items',
+      },
+      {
+        path: 'Lesson Live',
+        component: StudentLessonLiveComponent,
+        title: 'Lesson Live',
+      },
 
-    {
-        path: "Employee",
-        component: MainLayoutComponent,
-        title: "Employee Home",
-        canActivate: [navigateIfEmployeeGuard, noNavigateWithoutLoginGuard],
-        children: [
-            { path: "", component: EmployeeHomeComponent, title: "EmployeeHome" },
-            { path: "Hygiene Types", component: HygieneTypesComponent, title: "Hygiene Types", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Diagnosis", component: DiagnosisComponent, title: "Diagnosis" },
-            { path: "Drugs", component: DrugsComponent, title: "Drugs" },
-            { path: "Hygiene Form Medical Report", component: HygieneFormComponent, title: "Hygiene Form" },
-            { path: "Create Hygiene Form", component: CreateHygieneFormComponent, title: "Create Hygiene Form" },
-            { path: 'view hygiene form/:id', component: ViewHygieneFormComponent },
-            { path: 'mh by parent/:id', component: MedicalHistoryByParentComponent },
-            { path: 'mh by doctor/:id', component: MedicalHistoryByDoctorComponent },
-            { path: "Follow Up", component: FollowUpComponent, title: "Follow Up" },
-            { path: "Medical History", component: MedicalHistoryComponent, title: "Medical History" },
-            { path: "Medical Report", component: MedicalReportComponent, title: "Medical Report" },
-            { path: "Doses", component: DosesComponent, title: "Doses" },
-            { path: "", component: EmployeeHomeComponent, title: "EmployeeHome" },
-            { path: "Bus Details", component: BusDetailsComponent, title: "Bus", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Bus Students/:domainName/:busId", component: BusStudentComponent, title: "Bus Students", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Bus Types", component: BusTypesComponent, title: "Bus Type", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Bus Status", component: BusStatusComponent, title: "Bus Status", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Bus Districts", component: BusDistrictsComponent, title: "Bus Districts", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Bus Categories", component: BusCategoriesComponent, title: "Bus Category", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Bus Companies", component: BusCompaniesComponent, title: "Bus Company", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Print Name Tag", component: BusPrintNameTagComponent, title: "Print Name Tag", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Role", component: RoleComponent, title: "Role", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Role Create", component: RoleAddEditComponent, title: "Role Create", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },  //
-            { path: "Role Edit/:id", component: RoleAddEditComponent, title: "Role Edit", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },  //
-            { path: "Subject Categories", component: SubjectCategoryComponent, title: "Subject Categories", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Subject", component: SubjectComponent, title: "Subjects", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Subject/:domainName/:SubId", component: SubjectViewComponent, title: "Subject", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Employee", component: EmployeeComponent, title: "Employee", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Employee Create", component: EmployeeAddEditComponent, title: "Employee Create", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] }, //
-            { path: "Employee Edit/:id", component: EmployeeAddEditComponent, title: "Employee Edit", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] }, //
-            { path: "Employee Details/:id", component: EmployeeViewComponent, title: "Employee Details", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] }, //
-            { path: "Building", component: BuildingComponent, title: "Building", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Floor/:domainName/:Id", component: FloorComponent, title: "Floor", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Classroom", component: ClassroomComponent, title: "Classroom", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Classroom/:id", component: ClassroomViewComponent, title: "Classroom", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Violation Types", component: ViolationTypesComponent, title: "Violation Types", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Section", component: SectionComponent, title: "Section", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Grade/:domainName/:Id", component: GradeComponent, title: "Grade", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Academic Years", component: AcademicYearComponent, title: "Academic Year", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Semester/:domainName/:Id", component: SemesterComponent, title: "Semester", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Working Weeks/:domainName/:Id", component: SemesterViewComponent, title: "Semester", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] }, //
-            { path: "School", component: SchoolComponentEmployee, title: "Schools", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "TaxIssuer", component: TaxIssuerComponent, title: "TaxIssuer", canActivate: [noNavigateWithoutLoginGuard]},
-            { path: "Registration Form", component: RegistrationFormComponent, title: "Registration Form", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Registration Form Field", component: RegistrationFormFieldComponent, title: "RegistrationFormField", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Registration Form Field/:id", component: FieldsComponent, title: "CategoryFields", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Admission Test", component: AdmissionTestComponent, title: "Admission Test", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Question/:id", component: QuestionsComponent, title: "question", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Registration Confirmation", component: RegistrationConfirmationComponent, title: "Registration Confirmation", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Registration Confirmation/:Id", component: RegistrationConfirmationDetailsComponent, title: "Registration Confirmation", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Registration Confirmation Test/:id", component: RegistrationConfirmationTestDetailsComponent, title: "Registration Confirmation Test", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Registration Confirmation Test/:Rid/:Pid/:Tid", component: RegistrationFormTestAnswerComponent, title: "Registration Confirmation Test", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Interview Time Table", component: InterviewTimeTableComponent, title: "Interview Time Table", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Interview Registration/:Id", component: InterviewRegistrationComponentEmployee, title: "Interview Registration", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Classroom Accommodation", component: ClassroomsAccommodationComponent, title: "Classroom Accommodation", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Supplier", component: SuppliersComponent, title: "Suppliers", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Debit", component: DebitsComponent, title: "Debits", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Credit", component: CreditsComponent, title: "Credits", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Asset", component: AssetsComponent, title: "Assets", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Tuition Fees Type", component: TuitionFeesTypesComponent, title: "Tuition Fees Types", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Tuition Discount Type", component: TuitionDiscountTypesComponent, title: "TuitionDiscountTypes", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Accounting Entries Doc Type", component: AccountingEntriesDocTypeComponent, title: "AccountingEntriesDocTypes", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Job/:id", component: JobComponent, title: "Job", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Job Category", component: JobCategoriesComponent, title: "Job Categories", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Academic Degree", component: AcademicDegreeComponent, title: "Academic Degree", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Reasons For Leaving Work", component: ReasonsforleavingworkComponent, title: "Reasons for leaving work", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Department", component: DepartmentComponent, title: "Department", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Outcome", component: OutcomesComponent, title: "Outcome", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Income", component: IncomesComponent, title: "Income", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Safe", component: SavesComponent, title: "Save", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Accounting Tree", component: AccountingTreeComponent, title: "Accounting Tree", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Bank", component: BankComponent, title: "Bank", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Employee Accounting", component: AccountingEmployeeComponent, title: "Employee Accounting", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Employee Edit Accounting/:id", component: AccountingEmployeeEditComponent, title: "Employee Edit Accounting", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Student Accounting", component: AccountingStudentComponent, title: "Student Accounting", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Student Edit Accounting/:id", component: AccountingStudentEditComponent, title: "Student Edit Accounting", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Add Children", component: AddChildComponent, title: "Add Children", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Fees Activation", component: FeesActivationComponent, title: "Fees Activation", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Receivable", component: ReceivableComponent, title: "Receivable", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Receivable Details", component: ReceivableDetailsComponent, title: "Receivable Details", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Receivable Details/:id", component: ReceivableDetailsComponent, title: "Edit Receivable Details", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Receivable Details/View/:id", component: ReceivableDetailsComponent, title: "View Receivable Details", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Payable", component: PayableComponent, title: "Payable", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Payable Details", component: PayableDetailsComponent, title: "Payable Details", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Payable Details/:id", component: PayableDetailsComponent, title: "Edit Payable Details", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Payable Details/View/:id", component: PayableDetailsComponent, title: "View Payable Details", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Accounting Entries", component: AccountingEntriesComponent, title: "AccountingEntries", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Accounting Entries Details", component: AccountingEntriesDetailsComponent, title: "AccountingEntries Details", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Accounting Entries Details/:id", component: AccountingEntriesDetailsComponent, title: "Edit AccountingEntries Details", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Accounting Entries Details/View/:id", component: AccountingEntriesDetailsComponent, title: "View AccountingEntries Details", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Installment Deduction", component: InstallmentDeductionMasterComponent, title: "Installment Deduction", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Installment Deduction Details/View/:id", component: InstallmentDeductionDetailComponent, title: "View Installment Deduction Details", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Installment Deduction Details/Edit/:id", component: InstallmentDeductionDetailComponent, title: "View Installment Deduction Details", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Installment Deduction Details", component: InstallmentDeductionDetailComponent, title: "View Installment Deduction Details", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Payable Doc Type", component: PayableDocTypeComponent, title: "Payable Doc Type", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Receivable Doc Type", component: ReceivableDocTypeComponent, title: "Receivable Doc Type", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Inventory Categories", component: CategoriesComponent, title: "Inventory categories", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Inventory Sub Categories/:id", component: SubCategoryComponent, title: "Sub_categories", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Items", component: ShopItemsComponent, title: "Shop Items", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Shop Item/Create", component: ShopItemsAddEditComponent, title: "Create Shop Items", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Shop Item/:id", component: ShopItemsAddEditComponent, title: "Edit Shop Items", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Stores", component: StoresComponent, title: "Store", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Sales", component: InventoryMasterComponent, title: "Sales", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], data: { id: 11 } },
-            { path: "Sales Item/:FlagId", component: InventoryDetailsComponent, title: "Sales Item", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Sales Item/Edit/:FlagId/:id", component: InventoryDetailsComponent, title: "Sales Item", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Sales Returns", component: InventoryMasterComponent, title: "Sales Returns", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], data: { id: 12 } },
-            { path: "Sales Returns Item/:FlagId", component: InventoryDetailsComponent, title: "Sales Returns Item", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Sales Returns Item/Edit/:FlagId/:id", component: InventoryDetailsComponent, title: "Sales Returns Item", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Purchase Returns", component: InventoryMasterComponent, title: "Sales", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], data: { id: 10 } },
-            { path: "Purchase Returns Item/:FlagId", component: InventoryDetailsComponent, title: "Purchases Item", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Purchase Returns Item/Edit/:FlagId/:id", component: InventoryDetailsComponent, title: "Purchases Item", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Purchases", component: InventoryMasterComponent, title: "Sales", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], data: { id: 9 } },
-            { path: "Purchases Item/:FlagId", component: InventoryDetailsComponent, title: "Purchases Item", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Purchases Item/Edit/:FlagId/:id", component: InventoryDetailsComponent, title: "Purchases Item", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Opening Balances", component: InventoryMasterComponent, title: "Sales", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], data: { id: 1 } },
-            { path: "Opening Balances Item/:FlagId", component: InventoryDetailsComponent, title: "Opening Balances Item", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Opening Balances Item/Edit/:FlagId/:id", component: InventoryDetailsComponent, title: "Opening Balances Item", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Addition", component: InventoryMasterComponent, title: "Sales", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], data: { id: 2 } },
-            { path: "Addition Item/:FlagId", component: InventoryDetailsComponent, title: "Addition Item", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Addition Item/Edit/:FlagId/:id", component: InventoryDetailsComponent, title: "Addition Item", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Addition Adjustment", component: InventoryMasterComponent, title: "Sales", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], data: { id: 3 } },
-            { path: "Addition Adjustment Item/:FlagId", component: InventoryDetailsComponent, title: "Addition Adjustment Item", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Addition Adjustment Item/Edit/:FlagId/:id", component: InventoryDetailsComponent, title: "Addition Adjustment Item", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Disbursement", component: InventoryMasterComponent, title: "Sales", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], data: { id: 4 } },
-            { path: "Disbursement Item/:FlagId", component: InventoryDetailsComponent, title: "Disbursement Item", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Disbursement Item/Edit/:FlagId/:id", component: InventoryDetailsComponent, title: "Disbursement Item", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Disbursement Adjustment", component: InventoryMasterComponent, title: "Sales", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], data: { id: 5 } },
-            { path: "Disbursement Adjustment Item/:FlagId", component: InventoryDetailsComponent, title: "Disbursement Adjustment Item", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Disbursement Adjustment Item/Edit/:FlagId/:id", component: InventoryDetailsComponent, title: "Disbursement Adjustment Item", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Gifts", component: InventoryMasterComponent, title: "Sales", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], data: { id: 6 } },
-            { path: "Gifts Item/:FlagId", component: InventoryDetailsComponent, title: "Gifts Item", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Gifts Item/Edit/:FlagId/:id", component: InventoryDetailsComponent, title: "Gifts Item", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Purchase Order", component: InventoryMasterComponent, title: "Purchase Order", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], data: { id: 13 } },
-            { path: "Purchase Order Item/:FlagId", component: InventoryDetailsComponent, title: "Purchase Order Item", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Purchase Order Item/Edit/:FlagId/:id", component: InventoryDetailsComponent, title: "Purchase Order Item", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Transfer to Store", component: InventoryMasterComponent, title: "Sales", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], data: { id: 8 } },
-            { path: "Transfer to Store Item/:FlagId", component: InventoryDetailsComponent, title: "Transfer to Store Item", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Transfer to Store Item/Edit/:FlagId/:id", component: InventoryDetailsComponent, title: "Transfer to Store Item", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Damaged", component: InventoryMasterComponent, title: "Sales", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], data: { id: 7 } },
-            { path: "Damaged Item/:FlagId", component: InventoryDetailsComponent, title: "Damaged Item", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Damaged Item/Edit/:FlagId/:id", component: InventoryDetailsComponent, title: "Damaged Item", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "The Shop", component: ShopComponent, title: "Shop", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "ShopItem/:id", component: ShopItemComponent, title: "Shop Item", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Cart", component: CartComponent, title: "Cart", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Order", component: OrderComponent, title: "Order", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Order History", component: OrderHistoryComponent, title: "Order History", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Order/:id", component: OrderItemsComponent, title: "Order Items", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Stocking", component: StockingComponent, title: "Stocking", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Stocking Item", component: StockingDetailsComponent, title: "Stocking Item", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Stocking Item/Edit/:id", component: StockingDetailsComponent, title: "Stocking Item", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "StudentsNamesInClass", component: StudentsNamesInClassComponent, title: "Students' Names In Class", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "StudentInformation", component: StudentInformationComponent, title: "StudentInformation", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "ProofRegistrationAndSuccessForm", component: ProofRegistrationAndSuccessFormReportComponent, title: "ProofRegistrationAndSuccessForm", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "ProofRegistration", component: ProofRegistrationReportComponent, title: "ProofRegistration", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "StudentsInformationFormReport", component: StudentsInformationFormReportComponent, title: "StudentsInformationFormReport", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "AcademicSequentialReport", component: AcademicSequentialReportComponent, title: "AcademicSequentialReport", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "TransferedFromKindergartenReport", component: TransferedFromKindergartenReportComponent, title: "TransferedFromKindergartenReport", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Template", component: TemplateComponent, title: "Template", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: 'Inventory-Transaction-Report', component: InventoryTransactionReportComponent, title: 'Inventory Transaction Report', canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], data: { reportType: 'inventory' } },
-            { path: 'Sales-Transaction-Report', component: InventoryTransactionReportComponent, title: 'Sales Transaction Report', canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], data: { reportType: 'sales' } },
-            { path: 'Purchase-Transaction-Report', component: InventoryTransactionReportComponent, title: 'Purchase Transaction Report', canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], data: { reportType: 'purchase' } },
-            { path: 'Inventory-Transaction-Report-Detailed', component: InvoiceReportMasterDetailedComponent, title: 'Inventory Transaction Report Detailed', canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], data: { reportType: 'inventory' } },
-            { path: 'Sales-Transaction-Detailed', component: InvoiceReportMasterDetailedComponent, title: 'Sales Transaction Report Detailed', canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], data: { reportType: 'sales' } },
-            { path: 'Purchase-Transaction-Report-Detailed', component: InvoiceReportMasterDetailedComponent, title: 'Purchase Transaction Report Detailed', canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], data: { reportType: 'purchase' } },
-            { path: "Book Correction", component: BookCorrectionComponent, title: "BookCorrectionComponent", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Evaluation", component: EvaluationComponent, title: "Evaluation", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "EvaluationTemplateGroup/:id", component: EvaluationTemplateGroupComponent, title: "EvaluationTemplateGroup", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "EvaluationTemplateGroupQuestion/:id", component: EvaluationTemplateGroupQuestionComponent, title: "EvaluationTemplateGroup", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Received Evaluations", component: EvaluationFeedbackComponent, title: "Received Evaluations", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Created Evaluations", component: EvaluationFeedbackComponent, title: "Created Evaluations", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Received Evaluations/:id", component: EvaluationEmployeeAnswerComponent, title: "Received Evaluations", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Created Evaluations/:id", component: EvaluationEmployeeAnswerComponent, title: "Created Evaluations", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Medal", component: MedalComponent, title: "Medal", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Lesson Activity Types", component: LessonActivityTypeComponent, title: "Lesson Activity Type", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Lesson Resources Types", component: LessonResourcesTypeComponent, title: "Lesson Resource Type", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Student Medal", component: StudentMedalComponent, title: "Student Medal", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Lessons", component: LessonComponent, title: "Lesson", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Enter Daily Performance", component: DailyPerformanceComponent, title: "Daily Performance", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] }, 
-            { path: "Performance Type", component: PerformanceTypeComponent, title: "Performance Type", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Lesson Activity/:id", component: LessonActivityComponent, title: "Lesson Activity", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Lesson Resource/:id", component: LessonResourceComponent, title: "Lesson Resource", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Lesson Live", component: LessonLiveComponent, title: "Lesson Live", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] }, 
-            { path: "Zatca Devices", component: ZatcaDevicesComponent, title: "Zatca Devices", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Electronic-Invoice", component: ElectronicInvoiceComponent, title: "ElectronicInvoice", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Electronic-Invoice/:id", component: ElectronicInvoiceDetailComponent, title: "Electronic-Invoice", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Weight Types", component: WeightTypeComponent, title: "Weight Types", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Classroom Students/:id", component: ClassroomStudentsComponent, title: "Classroom Students", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Classroom Subject/:id", component: ClassroomSubjectsComponent, title: "Classroom Subject", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Question Bank", component: QuestionBankComponent, title: "Question Bank", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Subject Teacher/:id", component: SubjectTeacherComponent, title: "Subject Teacher", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Subject Co-Teacher/:id", component: SubjectCoTeacherComponent, title: "Subject Co-Teacher", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Student", component: StudentsComponent, title: "Student", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Create Student", component: RegistrationFormComponent, title: "Create Student", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Edit Student/:RegisterationFormParentId/:StudentId", component: RegistrationFormComponent, title: "Edit Student", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Student View/:Id", component: RegistrationConfirmationDetailsComponent, title: "Student View", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Daily Performance", component: DailyPerformanceMasterComponent, title: "Daily Performance", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Assignment", component: AssignmentComponent, title: "Assignment", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "Assignment/:id", component: AssignmentEditComponent, title: "Assignment Edit", canActivate: [noNavigateWithoutLoginGuard] },
+      {
+        path: 'Subject-UI',
+        component: SubjectsComponent,
+        title: 'Subjects',
+        canActivate: [noNavigateWithoutLoginGuard],
+      },
+      {
+        path: 'Subject-Details-UI/:subjectId',
+        component: SubjectDetailsComponent,
+        title: 'Subject-Details',
+        canActivate: [noNavigateWithoutLoginGuard],
+      },
+      {
+        path: 'week-details-UI/:subjectId/:weekId',
+        component: WeekDetailsComponent,
+        title: 'Week Details',
+        canActivate: [noNavigateWithoutLoginGuard],
+      },
+      {
+        path: 'Lesson-Resources-UI/:subjectId',
+        component: LessonResourcesComponent,
+        title: 'Lesson Resources',
+        canActivate: [noNavigateWithoutLoginGuard],
+      },
+      {
+        path: 'Assignments-UI/:subjectId',
+        component: AssignmentsComponent,
+        title: 'Assignments',
+        canActivate: [noNavigateWithoutLoginGuard],
+      },
+      {
+        path: 'Lesson-Live-UI/:subjectId',
+        component: LessonLiveUIComponent,
+        title: 'Lesson Live',
+        canActivate: [noNavigateWithoutLoginGuard],
+      },
+    ],
+  },
+  {
+    path: 'Octa',
+    component: MainLayoutComponent,
+    title: 'Octa Home',
+    canActivate: [
+      noNavigateWithoutOctaLoginGuard,
+      navigateIfOctaGuard,
+      navigateIfHaveSettingPageGuard,
+    ],
+    children: [
+      {
+        path: 'Bus Details',
+        component: BusDetailsComponent,
+        title: 'Bus',
+        canActivate: [noNavigateWithoutLoginGuard],
+      },
+      {
+        path: 'Bus Students/:domainName/:busId',
+        component: BusStudentComponent,
+        title: 'Bus Students',
+        canActivate: [noNavigateWithoutLoginGuard],
+      },
+      {
+        path: 'Bus Types',
+        component: BusTypesComponent,
+        title: 'Bus Type',
+        canActivate: [noNavigateWithoutLoginGuard],
+      },
+      {
+        path: 'Bus Status',
+        component: BusStatusComponent,
+        title: 'Bus Status',
+        canActivate: [noNavigateWithoutLoginGuard],
+      },
+      {
+        path: 'Bus Districts',
+        component: BusDistrictsComponent,
+        title: 'Bus Districts',
+        canActivate: [noNavigateWithoutLoginGuard],
+      },
+      {
+        path: 'Bus Categories',
+        component: BusCategoriesComponent,
+        title: 'Bus Category',
+        canActivate: [noNavigateWithoutLoginGuard],
+      },
+      {
+        path: 'Bus Companies',
+        component: BusCompaniesComponent,
+        title: 'Bus Company',
+        canActivate: [noNavigateWithoutLoginGuard],
+      },
+      {
+        path: 'Print Name Tag',
+        component: BusPrintNameTagComponent,
+        title: 'Print Name Tag',
+        canActivate: [noNavigateWithoutLoginGuard],
+      },
+      {
+        path: 'Domains',
+        component: DomainsComponent,
+        title: 'Domains',
+        canActivate: [noNavigateWithoutLoginGuard],
+      },
+      {
+        path: 'School Types',
+        component: SchoolTypeComponent,
+        title: 'School Types',
+        canActivate: [noNavigateWithoutLoginGuard],
+      },
+      {
+        path: 'School',
+        component: SchoolComponentOcta,
+        title: 'Schools',
+        canActivate: [noNavigateWithoutLoginGuard],
+      },
+      {
+        path: 'Account',
+        component: AccountComponent,
+        title: 'Accounts',
+        canActivate: [noNavigateWithoutLoginGuard],
+      },
+    ],
+  },
 
-        ]
-    },
-    {
-        path: "Parent",
-        component: MainLayoutComponent,
-        title: "Parent Home",
-        canActivate: [noNavigateWithoutLoginGuard, navigateIfParentGuard],
-        children: [
-            { path: "", component: HomeParentComponent, title: "ParentHome" },
-            { path: "Admission Test", component: AdmissionTestParentComponent, title: "Admission Test" },
-            { path: "Test/:registerationFormParentID/:TestId", component: RegistraionTestComponent, title: "Test" },
-            { path: "Registration Form", component: RegistrationFormComponent, title: "Registration Form" },
-            { path: "Interview Registration", component: InterviewRegistrationComponentParent, title: "Interview Registration" },
-        ]
-    },
-    {
-        path: "Student",
-        component: MainLayoutComponent,
-        title: "Student Home",
-        canActivate: [noNavigateWithoutLoginGuard, navigateIfStudentGuard],
-        children: [
-            { path: "", component: StudentHomeComponent, title: "StudentHome" },
-            { path: "Ecommerce/The Shop", component: ShopComponent, title: "Shop" },
-            { path: "Ecommerce/ShopItem/:id", component: ShopItemComponent, title: "Shop Item" },
-            { path: "Ecommerce/Cart", component: CartComponent, title: "Cart" },
-            { path: "Ecommerce/Order", component: OrderComponent, title: "Order" },
-            { path: "Ecommerce/Order/:id", component: OrderItemsComponent, title: "Order Items" },
-            { path: "Lesson Live", component: StudentLessonLiveComponent, title: "Lesson Live" },
-
-            { path: "Subject-UI", component: SubjectsComponent, title: "Subjects", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "Subject-Details-UI/:subjectId", component: SubjectDetailsComponent, title: "Subject-Details", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "week-details-UI/:subjectId/:weekId", component: WeekDetailsComponent, title: "Week Details", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "Lesson-Resources-UI/:subjectId", component: LessonResourcesComponent, title: "Lesson Resources", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "Assignments-UI/:subjectId", component: AssignmentsComponent, title: "Assignments", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "Lesson-Live-UI/:subjectId", component: LessonLiveUIComponent, title: "Lesson Live", canActivate: [noNavigateWithoutLoginGuard] },
-
-
-        ]
-    },
-    {
-        path: "Octa",
-        component: MainLayoutComponent,
-        title: "Octa Home",
-        canActivate: [noNavigateWithoutOctaLoginGuard, navigateIfOctaGuard, navigateIfHaveSettingPageGuard],
-        children: [
-            { path: "Bus Details", component: BusDetailsComponent, title: "Bus", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "Bus Students/:domainName/:busId", component: BusStudentComponent, title: "Bus Students", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "Bus Types", component: BusTypesComponent, title: "Bus Type", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "Bus Status", component: BusStatusComponent, title: "Bus Status", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "Bus Districts", component: BusDistrictsComponent, title: "Bus Districts", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "Bus Categories", component: BusCategoriesComponent, title: "Bus Category", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "Bus Companies", component: BusCompaniesComponent, title: "Bus Company", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "Print Name Tag", component: BusPrintNameTagComponent, title: "Print Name Tag", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "Domains", component: DomainsComponent, title: "Domains", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "School Types", component: SchoolTypeComponent, title: "School Types", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "School", component: SchoolComponentOcta, title: "Schools", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "Account", component: AccountComponent, title: "Accounts", canActivate: [noNavigateWithoutLoginGuard] },
-        ]
-    },
-
-    { path: '**', redirectTo: '/' }
+  { path: '**', redirectTo: '/' },
 ];
