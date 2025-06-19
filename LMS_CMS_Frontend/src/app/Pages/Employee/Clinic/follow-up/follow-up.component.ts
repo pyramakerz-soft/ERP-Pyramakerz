@@ -139,17 +139,18 @@ onClassChange(event: Event) {
   }
 }
 
-// Add this method to handle student selection changes
-onStudentChange() {
+onStudentChange(event: Event) {
+  const selectedStudentId = (event.target as HTMLSelectElement).value;
   // Clear student validation error when student changes
   delete this.validationErrors['studentId'];
 }
 
-// Add this method to handle diagnosis selection changes
-onDiagnosisChange() {
+onDiagnosisChange(event: Event) {
+  const selectedDiagnosisId = (event.target as HTMLSelectElement).value;
   // Clear diagnosis validation error when diagnosis changes
   delete this.validationErrors['diagnosisId'];
 }
+
 
   async loadGrades(schoolId: number) {
     try {

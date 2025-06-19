@@ -5,6 +5,7 @@ using LMS_CMS_BL.DTO.Inventory;
 using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains.Inventory;
 using LMS_CMS_DAL.Models.Domains.Zatca;
+using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
 using LMS_CMS_PL.Services.Zatca;
 using Microsoft.AspNetCore.Authorization;
@@ -44,10 +45,15 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
         [HttpPost("GeneratePCSID")]
         //[Authorize_Endpoint_(
         //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "" }
+        //    pages: new[] { "Electronic Invoice" }
         //)]
         public async Task<IActionResult> GeneratePCSID(long otp, long schoolPcId)
         {
+            string certificates = Path.Combine(Directory.GetCurrentDirectory(), "Invoices/Certificates");
+
+            if (!Directory.Exists(certificates)) 
+                Directory.CreateDirectory(certificates);
+
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             SchoolPCs schoolPc = await Unit_Of_Work.schoolPCs_Repository.FindByIncludesAsync(
@@ -80,21 +86,27 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                 industryBusinessCategory
             );
 
-            string pcName = $"PC{schoolPc.ID}{schoolPc.School.ID}";
+            string pcName = $"PC{schoolPc.ID}_{schoolPc.School.ID}";
 
-            S3Service s3SecretManager = new S3Service(_secretsManager);
+            //S3Service s3SecretManager = new S3Service(_secretsManager);
 
             var csrSteps = ZatcaServices.GenerateCSRandPrivateKey(csrGeneration);
+
             string csrContent = csrSteps[1].ResultedValue;
+            //string csrPath = Path.Combine(certificates, $"{pcName}_CSR.csr");
+            //System.IO.File.WriteAllText(csrPath, csrContent);
+
             string privateKeyContent = csrSteps[2].ResultedValue;
+            //string privateKeyPath = Path.Combine(certificates, $"{pcName}_PrivateKey.pem");
+            //System.IO.File.WriteAllText(privateKeyPath, privateKeyContent);
 
-            bool addCSR = await s3SecretManager.CreateOrUpdateSecretAsync($"{pcName}CSR", csrContent);
-            if (!addCSR)
-                return BadRequest("Adding CSR failed!");
+            //bool addCSR = await s3SecretManager.CreateOrUpdateSecretAsync($"{pcName}CSR", csrContent);
+            //if (!addCSR)
+            //    return BadRequest("Adding CSR failed!");
 
-            bool addPrivateKey = await s3SecretManager.CreateOrUpdateSecretAsync($"{pcName}PrivateKey", privateKeyContent);
-            if (!addPrivateKey)
-                return BadRequest("Adding Private Key failed!");
+            //bool addPrivateKey = await s3SecretManager.CreateOrUpdateSecretAsync($"{pcName}PrivateKey", privateKeyContent);
+            //if (!addPrivateKey)
+            //    return BadRequest("Adding Private Key failed!");
 
             //await InvoicingServices.GeneratePublicKey(publicKeyPath, privateKeyPath);
 
@@ -106,10 +118,10 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
             string csid = await ZatcaServices.GenerateCSID(csrJson, otp, version, _config);
 
-            bool addCSID = await s3SecretManager.CreateOrUpdateSecretAsync($"{pcName}CSID", csid);
+            //bool addCSID = await s3SecretManager.CreateOrUpdateSecretAsync($"{pcName}CSID", csid);
 
-            if (!addCSID)
-                return BadRequest("Adding CSID failed!");
+            //if (!addCSID)
+            //    return BadRequest("Adding CSID failed!");
 
             dynamic csidJson = JsonConvert.DeserializeObject(csid);
 
@@ -124,10 +136,10 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
             string pcsid = await ZatcaServices.GeneratePCSID(tokenBase64, version, requestId, _config);
 
-            bool addPCSID = await s3SecretManager.CreateOrUpdateSecretAsync($"{pcName}PCSID", pcsid);
+            //bool addPCSID = await s3SecretManager.CreateOrUpdateSecretAsync($"{pcName}PCSID", pcsid);
 
-            if (!addPCSID)
-                return BadRequest("Adding PCSID failed!");
+            //if (!addPCSID)
+            //    return BadRequest("Adding PCSID failed!");
 
             string certificateDate = ZatcaServices.GetCertificateDate(pcsid);
 
@@ -208,10 +220,9 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
         #region Report Invoice
         [HttpPost("ReportInvoice")]
-        //[HttpPost("ReportInvoice")]
         //[Authorize_Endpoint_(
         //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "" }
+        //    pages: new[] { "Electronic Invoice" }
         //)]
         public async Task<IActionResult> ReportInvoice(long masterId)
         {
@@ -341,7 +352,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
         [HttpPost("ReportInvoices")]
         //[Authorize_Endpoint_(
         //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "" }
+        //    pages: new[] { "Electronic Invoice" }
         //)]
         public async Task<IActionResult> ReportInvoices(long schoolId)
         {
@@ -482,10 +493,10 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
         #endregion
 
         #region Filter by School and Date
-        [HttpPost("FilterBySchoolAndDate")]
+        [HttpGet("FilterBySchoolAndDate")]
         //[Authorize_Endpoint_(
         //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "" }
+        //    pages: new[] { "Electronic Invoice" }
         //)]
         public async Task<IActionResult> FilterBySchoolAndDate(long schoolId, string startDate, string endDate, int pageNumber = 1, int pageSize = 10)
         {
@@ -493,13 +504,24 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
             if (pageSize < 1) pageSize = 10;
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            DateTime start = DateTime.Parse(startDate).Date;
-            DateTime end = DateTime.Parse(endDate).Date;
+            string[] sdParts = startDate.Split("/");
+            Array.Reverse(sdParts);
+            startDate = string.Join("-", sdParts);
+
+            string[] edParts = endDate.Split("/");
+            Array.Reverse(edParts);
+            endDate = string.Join("-", edParts);
+
+            DateTime.TryParse(startDate, out DateTime start);
+            DateTime.TryParse(endDate, out DateTime end);
+
+            start = start.Date;
+            end = end.Date;
 
             List<InventoryMaster> mastersBySchool = await Unit_Of_Work.inventoryMaster_Repository.SelectQuery<InventoryMaster>(
                 d => d.SchoolId == schoolId && 
                 d.IsDeleted != true &&
-                d.FlagId == 11 || d.FlagId == 12)
+                (d.FlagId == 11 || d.FlagId == 12))
                 .ToListAsync();
 
             if (mastersBySchool is null || mastersBySchool.Count == 0)
