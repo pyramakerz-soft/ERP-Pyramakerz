@@ -84,6 +84,7 @@ export class ElectronicInvoiceComponent implements OnInit {
   async loadSchools() {
     try {
       this.schools = await firstValueFrom(this.schoolService.Get(this.DomainName));
+      console.log(this.schools)
     } catch (error) {
       this.handleError('Failed to load schools');
     }
