@@ -21,7 +21,7 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         [ForeignKey("StudentClassroom")]
         public long StudentClassroomID { get; set; }
         public StudentClassroom StudentClassroom { get; set; }
-
+        public string? LinkFile { get; set; }
         public ICollection<AssignmentStudentQuestion> AssignmentStudentQuestions { get; set; } = new HashSet<AssignmentStudentQuestion>();
     }
 }

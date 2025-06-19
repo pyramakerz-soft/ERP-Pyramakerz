@@ -980,13 +980,26 @@ namespace LMS_CMS_BL.Config
 
             CreateMap<AssignmentStudent, AssignmentStudentGetDTO>()
                .ForMember(dest => dest.ClassroomID, opt => opt.MapFrom(src => src.StudentClassroom.ClassID))
+               .ForMember(dest => dest.AssignmentDegree, opt => opt.MapFrom(src => src.Assignment.Mark))
                .ForMember(dest => dest.ClassroomName, opt => opt.MapFrom(src => src.StudentClassroom.Classroom.Name))
+               .ForMember(dest => dest.AssignmentTypeID, opt => opt.MapFrom(src => src.Assignment.AssignmentTypeID))
                .ForMember(dest => dest.StudentEnglishName, opt => opt.MapFrom(src => src.StudentClassroom.Student.en_name))
                .ForMember(dest => dest.StudentArabicName, opt => opt.MapFrom(src => src.StudentClassroom.Student.ar_name))
                .ForMember(dest => dest.StudentID, opt => opt.MapFrom(src => src.StudentClassroom.StudentID));
 
+            CreateMap<AssignmentStudentQuestion, AssignmentStudentQuestionGetDTO>()
+               .ForMember(dest => dest.QuestionMark, opt => opt.MapFrom(src => src.QuestionBank.Mark))
+               .ForMember(dest => dest.QuestionTypeID, opt => opt.MapFrom(src => src.QuestionBank.QuestionTypeID));
+            CreateMap<AssignmentStudentQuestionAnswerOption, AssignmentStudentQuestionAnswerOptionGetDTO>();
+
             CreateMap<AssignmentQuestion, AssignmentQuestionGetDTO>();
             CreateMap<AssignmentType, AssignmentTypeGetDTO>();
+
+            CreateMap<AssignmentStudentAddDTO, AssignmentStudent>();
+            CreateMap<AssignmentStudentQuestionAddDTO, AssignmentStudentQuestion>();
+            CreateMap<AssignmentStudentQuestionAnswerOptionAddDTO, AssignmentStudentQuestionAnswerOption>();
+
+
         }
     } 
 }
