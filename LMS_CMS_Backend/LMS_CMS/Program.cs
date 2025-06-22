@@ -107,6 +107,7 @@ namespace LMS_CMS
             builder.Services.AddScoped<DbContextFactoryService>();
             builder.Services.AddScoped<GenerateJWTService>();
             builder.Services.AddScoped<FileImageValidationService>();
+            builder.Services.AddScoped<FileWordPdfValidationService>();
             builder.Services.AddScoped<CancelInterviewDayMessageService>();
             builder.Services.AddScoped<EmailService>();
             builder.Services.AddScoped<GenerateBarCodeEan13>(); 

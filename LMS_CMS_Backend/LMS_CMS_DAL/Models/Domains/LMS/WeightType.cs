@@ -19,5 +19,6 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public string ArabicName { get; set; }
 
         public ICollection<SubjectWeightType> SubjectWeightTypes { get; set; } = new HashSet<SubjectWeightType>();
+        public ICollection<DirectMarkClassroomStudent> DirectMarkClassroomStudents { get; set; } = new HashSet<DirectMarkClassroomStudent>();
     }
 }

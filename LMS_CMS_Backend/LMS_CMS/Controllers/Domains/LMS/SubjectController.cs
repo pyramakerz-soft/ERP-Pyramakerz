@@ -203,6 +203,11 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 }
             }
 
+            if(NewSubject.AssignmentCutOffDatePercentage > 100 || NewSubject.AssignmentCutOffDatePercentage < 0)
+            {
+                return BadRequest("Percentage must be between 0 and 100");
+            }
+
             var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/SubjectIcon");
             var subjectFolder = Path.Combine(baseFolder, NewSubject.en_name);
             if (!Directory.Exists(subjectFolder))
@@ -294,7 +299,12 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     return BadRequest(returnFileInput);
                 }
             }
-             
+
+            if (EditSubject.AssignmentCutOffDatePercentage > 100 || EditSubject.AssignmentCutOffDatePercentage < 0)
+            {
+                return BadRequest("Percentage must be between 0 and 100");
+            }
+
             Subject SubjectExists = Unit_Of_Work.subject_Repository.Select_By_Id(EditSubject.ID);
 
             string iconLinkExists = SubjectExists.IconLink;

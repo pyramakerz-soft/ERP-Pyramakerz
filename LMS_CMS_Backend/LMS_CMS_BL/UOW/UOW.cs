@@ -188,7 +188,15 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<StudentClassroom> StudentClassroom_Repository;
         GenericRepo<StudentGrade> StudentGrade_Repository;
         GenericRepo<StudentClassroomSubject> StudentClassroomSubject_Repository;
-
+        GenericRepo<Assignment> Assignment_Repository;
+        GenericRepo<AssignmentType> AssignmentType_Repository;
+        GenericRepo<AssignmentStudent> AssignmentStudent_Repository;
+        GenericRepo<AssignmentStudentIsSpecific> AssignmentStudentIsSpecific_Repository;
+        GenericRepo<AssignmentQuestion> AssignmentQuestion_Repository;
+        GenericRepo<DirectMarkClassroomStudent> DirectMarkClassroomStudent_Repository;
+        GenericRepo<AssignmentStudentQuestion> AssignmentStudentQuestion_Repository;
+        GenericRepo<ETAPOS> POS_Repository;
+        GenericRepo<AssignmentStudentQuestionAnswerOption> AssignmentStudentQuestionAnswerOption_Repository;
 
 
         public UOW(Octa_DbContext octa_Db)
@@ -2112,6 +2120,114 @@ namespace LMS_CMS_BL.UOW
                     StudentClassroomSubject_Repository = new GenericRepo<StudentClassroomSubject>(db);
                 }
                 return StudentClassroomSubject_Repository;
+            }
+        }
+        
+        public GenericRepo<AssignmentType> assignmentType_Repository
+        {
+            get
+            {
+                if (AssignmentType_Repository == null)
+                {
+                    AssignmentType_Repository = new GenericRepo<AssignmentType>(db);
+                }
+                return AssignmentType_Repository;
+            }
+        }
+        
+        public GenericRepo<Assignment> assignment_Repository
+        {
+            get
+            {
+                if (Assignment_Repository == null)
+                {
+                    Assignment_Repository = new GenericRepo<Assignment>(db);
+                }
+                return Assignment_Repository;
+            }
+        }
+         
+        public GenericRepo<AssignmentStudent> assignmentStudent_Repository
+        {
+            get
+            {
+                if (AssignmentStudent_Repository == null)
+                {
+                    AssignmentStudent_Repository = new GenericRepo<AssignmentStudent>(db);
+                }
+                return AssignmentStudent_Repository;
+            }
+        }
+        
+        public GenericRepo<AssignmentStudentIsSpecific> assignmentStudentIsSpecific_Repository
+        {
+            get
+            {
+                if (AssignmentStudentIsSpecific_Repository == null)
+                {
+                    AssignmentStudentIsSpecific_Repository = new GenericRepo<AssignmentStudentIsSpecific>(db);
+                }
+                return AssignmentStudentIsSpecific_Repository;
+            }
+        }
+        
+        public GenericRepo<AssignmentQuestion> assignmentQuestion_Repository
+        {
+            get
+            {
+                if (AssignmentQuestion_Repository == null)
+                {
+                    AssignmentQuestion_Repository = new GenericRepo<AssignmentQuestion>(db);
+                }
+                return AssignmentQuestion_Repository;
+            }
+        }
+        
+        public GenericRepo<DirectMarkClassroomStudent> directMarkClassroomStudent_Repository
+        {
+            get
+            {
+                if (DirectMarkClassroomStudent_Repository == null)
+                {
+                    DirectMarkClassroomStudent_Repository = new GenericRepo<DirectMarkClassroomStudent>(db);
+                }
+                return DirectMarkClassroomStudent_Repository;
+            }
+        }
+        
+        public GenericRepo<AssignmentStudentQuestion> assignmentStudentQuestion_Repository
+        {
+            get
+            {
+                if (AssignmentStudentQuestion_Repository == null)
+                {
+                    AssignmentStudentQuestion_Repository = new GenericRepo<AssignmentStudentQuestion>(db);
+                }
+                return AssignmentStudentQuestion_Repository;
+            }
+        }
+
+        public GenericRepo<AssignmentStudentQuestionAnswerOption> assignmentStudentQuestionAnswerOption_Repository
+        {
+            get
+            {
+                if (AssignmentStudentQuestionAnswerOption_Repository == null)
+                {
+                    AssignmentStudentQuestionAnswerOption_Repository = new GenericRepo<AssignmentStudentQuestionAnswerOption>(db);
+                }
+                return AssignmentStudentQuestionAnswerOption_Repository;
+            }
+        }
+
+        public GenericRepo<ETAPOS> pos_Repository
+        {
+            get
+            {
+                if (POS_Repository == null)
+                {
+                    POS_Repository = new GenericRepo<ETAPOS>(db);
+                }
+                return POS_Repository;
             }
         }
 

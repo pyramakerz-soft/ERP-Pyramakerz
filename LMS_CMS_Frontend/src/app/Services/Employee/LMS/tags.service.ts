@@ -26,4 +26,16 @@ export class TagsService {
       .set('Content-Type', 'application/json');
     return this.http.get<Tag[]>(`${this.baseUrl}/Tag`, { headers });
   }
+
+  GetByLessonId(id : number ,DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<Tag[]>(`${this.baseUrl}/Tag/byLessonId/${id}`, { headers });
+  }
 }

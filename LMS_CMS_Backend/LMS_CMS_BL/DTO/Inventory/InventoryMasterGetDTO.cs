@@ -53,7 +53,10 @@ namespace LMS_CMS_BL.DTO.Inventory
         public string? SaveName { get; set; }
         public string? BankName { get; set; }
         public long? InsertedByUserId { get; set; }
+        public int? ETAPOSID { get; set; }
         public DateTime? EtaInsertedDate { get; set; }
+        public string? ETAErrorMsg { get; set; }
+        public char? InvoiceType { get; set; } 
         public List<InventoryDetailsGetDTO> InventoryDetails { get; set; }
     }
 }

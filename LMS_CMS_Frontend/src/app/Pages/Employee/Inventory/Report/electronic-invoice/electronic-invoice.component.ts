@@ -10,6 +10,7 @@ import { ZatcaService } from '../../../../../Services/Employee/Zatca/zatca.servi
 import { ApiService } from '../../../../../Services/api.service';
 import { firstValueFrom } from 'rxjs';
 import { ElectronicInvoice } from '../../../../../Models/zatca/electronic-invoice';
+import { StateService } from '../../../../../Services/Employee/Inventory/state.service';
 
 @Component({
   selector: 'app-electronic-invoice',
@@ -17,7 +18,7 @@ import { ElectronicInvoice } from '../../../../../Models/zatca/electronic-invoic
   imports: [FormsModule, CommonModule],
   templateUrl: './electronic-invoice.component.html',
   styleUrls: ['./electronic-invoice.component.css'],
-  providers: [DatePipe]
+  providers: [DatePipe],
 })
 export class ElectronicInvoiceComponent implements OnInit {
   schools: School[] = [];
@@ -36,6 +37,7 @@ export class ElectronicInvoiceComponent implements OnInit {
 
   constructor(
     private schoolService: SchoolService,
+    private stateService: StateService,
     private zatcaService: ZatcaService,
     private datePipe: DatePipe,
     private apiService: ApiService,
@@ -46,11 +48,44 @@ export class ElectronicInvoiceComponent implements OnInit {
 
   ngOnInit() {
     this.loadSchools();
+    this.restoreState();
+  }
+
+  private restoreState() {
+    const savedState = this.stateService.getInvoiceState();
+    if (savedState) {
+      this.selectedSchoolId = savedState.selectedSchoolId;
+      this.dateFrom = savedState.dateFrom;
+      this.dateTo = savedState.dateTo;
+      this.transactions = savedState.transactions;
+      this.currentPage = savedState.currentPage;
+      this.totalPages = savedState.totalPages;
+      this.pageSize = savedState.pageSize;
+      this.totalRecords = savedState.totalRecords;
+      this.showTable = true;
+      this.stateService.clearInvoiceState();
+    }
+  }
+
+  private saveState() {
+    this.stateService.setInvoiceState({
+      selectedSchoolId: this.selectedSchoolId,
+      dateFrom: this.dateFrom,
+      dateTo: this.dateTo,
+      transactions: this.transactions,
+      currentPage: this.currentPage,
+      totalPages: this.totalPages,
+      pageSize: this.pageSize,
+      totalRecords: this.totalRecords,
+    });
   }
 
   async loadSchools() {
     try {
-      this.schools = await firstValueFrom(this.schoolService.Get(this.DomainName));
+      this.schools = await firstValueFrom(
+        this.schoolService.Get(this.DomainName)
+      );
+      console.log(this.schools);
     } catch (error) {
       this.handleError('Failed to load schools');
     }
@@ -67,24 +102,34 @@ export class ElectronicInvoiceComponent implements OnInit {
 
     const formattedStartDate = this.formatDateForApi(this.dateFrom);
     const formattedEndDate = this.formatDateForApi(this.dateTo);
-
-    this.zatcaService.filterBySchoolAndDate(
+    console.log(
+      'start',
       this.selectedSchoolId,
       formattedStartDate,
       formattedEndDate,
       this.currentPage,
       this.pageSize,
       this.DomainName
-    ).subscribe({
-      next: (response: any) => {
-        this.processApiResponse(response);
-        this.showTable = true;
-        this.isLoading = false;
-      },
-      error: (error) => {
-        this.handleError('Failed to load transactions');
-      }
-    });
+    );
+    this.zatcaService
+      .filterBySchoolAndDate(
+        this.selectedSchoolId,
+        formattedStartDate,
+        formattedEndDate,
+        this.currentPage,
+        this.pageSize,
+        this.DomainName
+      )
+      .subscribe({
+        next: (response: any) => {
+          this.processApiResponse(response);
+          this.showTable = true;
+          this.isLoading = false;
+        },
+        error: (error) => {
+          this.handleError('Failed to load transactions');
+        },
+      });
   }
 
   private processApiResponse(response: any) {
@@ -97,13 +142,16 @@ export class ElectronicInvoiceComponent implements OnInit {
     } else {
       this.transactions = [];
     }
-    
+
     this.totalPages = Math.ceil(this.totalRecords / this.pageSize);
   }
 
   private formatDateForApi(dateString: string): string {
     const date = new Date(dateString);
-    return date.toISOString().split('T')[0]; // YYYY-MM-DD format
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
   }
 
   changePage(page: number) {
@@ -113,14 +161,17 @@ export class ElectronicInvoiceComponent implements OnInit {
   }
 
   navigateToDetail(id: number) {
-    console.log('enter');
-    console.log(id);
+    this.saveState(); // Save state before navigating
     this.router.navigate(['/Employee/Electronic-Invoice', id]);
   }
 
   sendInvoice(invoice: ElectronicInvoice) {
     // Implement send functionality
-    Swal.fire('Success', `Invoice ${invoice.invoiceNumber} sent successfully`, 'success');
+    Swal.fire(
+      'Success',
+      `Invoice ${invoice.invoiceNumber} sent successfully`,
+      'success'
+    );
   }
 
   printInvoice(invoice: ElectronicInvoice) {

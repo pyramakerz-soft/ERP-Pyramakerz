@@ -106,6 +106,12 @@ export class ShopItemService {
     if (ShopItem.purchasePrice !== null) {
       formData.append('purchasePrice', ShopItem.purchasePrice.toString());
     }
+    if (ShopItem.itemCode !== null) {
+        formData.append('itemCode', ShopItem.itemCode.toString());
+    }
+    if (ShopItem.unitType !== null) {
+        formData.append('unitType', ShopItem.unitType.toString());
+    }
     if (ShopItem.barCode !== null) {
       formData.append('barCode', ShopItem.barCode.toString());
     }
@@ -175,6 +181,12 @@ export class ShopItemService {
     if (ShopItem.purchasePrice !== null) {
       formData.append('purchasePrice', ShopItem.purchasePrice.toString());
     }
+    if (ShopItem.itemCode !== null) {
+    formData.append('itemCode', ShopItem.itemCode.toString());
+}
+if (ShopItem.unitType !== null) {
+    formData.append('unitType', ShopItem.unitType.toString());
+}
     if (ShopItem.salesPrice !== null) {
       formData.append('salesPrice', ShopItem.salesPrice.toString());
     }

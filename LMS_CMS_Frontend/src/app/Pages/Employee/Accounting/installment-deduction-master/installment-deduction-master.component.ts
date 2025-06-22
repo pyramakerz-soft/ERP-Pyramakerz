@@ -80,6 +80,7 @@ export class InstallmentDeductionMasterComponent {
 
     this.GetAllData(this.CurrentPage, this.PageSize)
   }
+  
   Create() {
     this.mode = 'Create';
     this.router.navigateByUrl(`Employee/Installment Deduction Details`)

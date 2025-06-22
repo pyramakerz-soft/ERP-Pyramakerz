@@ -1,0 +1,161 @@
+<div class="flex justify-between items-center">
+    <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ 'Tax Issuers' | translate }}</h1>
+</div>
+
+<div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD] max-w-full">
+    <table class="overflow-auto w-full bg-[#EBEBEB] ltr:text-left rtl:text-right text-[#6F6F6F]">
+        <thead class="bg-[##EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+            <tr>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'ID' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Name' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Type' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Activity Code' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Branch ID' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Country' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Actions' | translate }}
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- No Data Row -->
+            <tr *ngIf="taxIssuers.length === 0">
+                <td colspan="7"
+                    class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                    No Data Found
+                </td>
+            </tr>
+
+            <!-- Data Rows -->
+            <tr *ngFor="let issuer of taxIssuers; let i = index"
+                [ngClass]="{'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1}"
+                class="border-t border-gray-300 text-xs md:text-sm">
+
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{ issuer.id }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ issuer.name }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ issuer.type }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ issuer.activityCode }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ issuer.branchID }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ issuer.country }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    <div class="flex space-x-4">
+                        <button *ngIf="AllowEdit && IsAllowEdit(issuer.insertedByUserId)"
+                            (click)="openModal(issuer.id)" class="text-blue-500 hover:text-blue-700">
+                            <i class="fa-solid fa-pencil"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Edit Tax Issuer Modal -->
+<div id="EditTaxIssuerModal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
+    <div class="bg-white rounded-2xl p-12 w-1/2 max-h-[95%] overflow-y-auto m-auto">
+        <div class="flex justify-between items-center">
+            <h1 class="font-semibold text-2xl leading-9">{{ 'Edit Tax Issuer' | translate }}</h1>
+            <button (click)="closeModal()" type="button"
+                class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
+        </div>
+
+        <div class="p-[16px_24px] mt-6 mb-4 flex flex-wrap justify-between">
+            <!-- Column 1 -->
+            <div class="w-[49%]">
+                <div class="flex flex-col mb-4">
+                    <label class="mb-2 primaryTxt" for="taxIssuerId">{{ 'ID' | translate }}</label>
+                    <input id="taxIssuerId" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                        [(ngModel)]="taxIssuer.id" readonly />
+                </div>
+
+                <div class="flex flex-col mb-4">
+                    <label class="mb-2 primaryTxt" for="taxIssuerName">{{ 'Name' | translate }}</label>
+                    <input id="taxIssuerName" type="text"
+                        class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                        [(ngModel)]="taxIssuer.name" />
+                </div>
+
+                <div class="flex flex-col mb-4">
+                    <label class="mb-2 primaryTxt" for="taxIssuerType">{{ 'Type' | translate }}</label>
+                    <select id="taxIssuerType" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                        [(ngModel)]="taxIssuer.type">
+                        <option value="ETA">ETA</option>
+                        <option value="ZATCA">ZATCA</option>
+                    </select>
+                </div>
+
+                <div class="flex flex-col mb-4">
+                    <label class="mb-2 primaryTxt" for="taxIssuerActivityCode">{{ 'Activity Code' | translate }}</label>
+                    <input id="taxIssuerActivityCode" type="text"
+                        class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                        [(ngModel)]="taxIssuer.activityCode" />
+                </div>
+
+                <div class="flex flex-col mb-4">
+                    <label class="mb-2 primaryTxt" for="taxIssuerBranchID">{{ 'Branch ID' | translate }}</label>
+                    <input id="taxIssuerBranchID" type="text"
+                        class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                        [(ngModel)]="taxIssuer.branchID" />
+                </div>
+            </div>
+
+            <!-- Column 2 -->
+            <div class="w-[49%]">
+                <div class="flex flex-col mb-4">
+                    <label class="mb-2 primaryTxt" for="taxIssuerCountry">{{ 'Country' | translate }}</label>
+                    <input id="taxIssuerCountry" type="text"
+                        class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                        [(ngModel)]="taxIssuer.country" />
+                </div>
+
+                <div class="flex flex-col mb-4">
+                    <label class="mb-2 primaryTxt" for="taxIssuerGovernate">{{ 'Governate' | translate }}</label>
+                    <input id="taxIssuerGovernate" type="text"
+                        class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                        [(ngModel)]="taxIssuer.governate" />
+                </div>
+
+                <div class="flex flex-col mb-4">
+                    <label class="mb-2 primaryTxt" for="taxIssuerRegionCity">{{ 'Region City' | translate }}</label>
+                    <input id="taxIssuerRegionCity" type="text"
+                        class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                        [(ngModel)]="taxIssuer.regionCity" />
+                </div>
+
+                <div class="flex flex-col mb-4">
+                    <label class="mb-2 primaryTxt" for="taxIssuerPostalCode">{{ 'Postal Code' | translate }}</label>
+                    <input id="taxIssuerPostalCode" type="text"
+                        class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                        [(ngModel)]="taxIssuer.postalCode" />
+                </div>
+
+                <div class="flex flex-col mb-4">
+                    <label class="mb-2 primaryTxt" for="taxIssuerAdditionalInfo">{{ 'Additional Info' | translate
+                        }}</label>
+                    <input id="taxIssuerAdditionalInfo" type="text"
+                        class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                        [(ngModel)]="taxIssuer.additionalInfo" />
+                </div>
+            </div>
+        </div>
+        <div class="flex justify-end">
+            <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
+                (click)="saveTaxIssuer()">
+                <span *ngIf="!isLoading">{{ 'Save' | translate }} </span>
+                <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+            </button>
+        </div>
+    </div>
+</div>

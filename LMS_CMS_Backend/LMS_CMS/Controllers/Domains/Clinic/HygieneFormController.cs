@@ -50,6 +50,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                     query => query.Include(h => h.Classroom),
                     query => query.Include(h => h.School),
                     query => query.Include(h => h.Grade),
+
                     query => query.Include(h => h.StudentHygieneTypes)?.ThenInclude(x => x.HygieneTypes)
             );
 
@@ -65,6 +66,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                     HygieneType hygieneType = new();
                     if (studentHygiene is not null)
                     {
+
                         hygieneType = Unit_Of_Work.hygieneType_Repository.First_Or_Default(h => h.Id == studentHygiene.HygieneTypeId);
                         dd.HygieneTypes?.Add(hygieneType);
                     }

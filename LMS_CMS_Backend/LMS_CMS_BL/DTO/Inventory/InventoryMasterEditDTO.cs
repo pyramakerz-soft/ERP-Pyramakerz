@@ -31,6 +31,8 @@ namespace LMS_CMS_BL.DTO.Inventory
         public long? StoreToTransformId { get; set; }
         public long? SchoolId { get; set; }
         public long? SchoolPCId { get; set; }
+        public int? ETAPOSID { get; set; }
+        public char? InvoiceType { get; set; } = 'C';
         public DateTime? EtaInsertedDate { get; set; }
 
     }

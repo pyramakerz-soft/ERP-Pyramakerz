@@ -19,6 +19,8 @@ export class ShopItem {
         public inventoryCategoriesID: number = 0,
         public inventorySubCategoriesID: number = 0,
         public inventorySubCategoriesName: string = '',
+        public itemCode: string = '',
+        public unitType: string = '',
         public schoolName: string = '',
         public schoolID: number =0, 
         public gradeName: string = '',

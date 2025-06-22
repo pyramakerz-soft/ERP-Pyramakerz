@@ -52,6 +52,15 @@ namespace LMS_CMS_BL.Config
 
             CreateMap <LMS_CMS_DAL.Models.Domains.Page, Page_GetDTO >();
 
+            //7
+            CreateMap<InventoryMaster, InventoryMasterReportDTO>()
+          .ForMember(dest => dest.FlagName, opt => opt.MapFrom(src => src.InventoryFlags.arName))
+          .ForMember(dest => dest.StoreName, opt => opt.MapFrom(src => src.Store != null ? src.Store.Name : "N/A"))
+          .ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => src.Student != null ? src.Student.en_name : "N/A"))
+          .ForMember(dest => dest.SupplierName, opt => opt.MapFrom(src => src.Supplier != null ? src.Supplier.Name : "N/A"));
+
+
+
             CreateMap<Bus, Bus_GetDTO>()
                 .ForMember(dest => dest.BusTypeName, opt => opt.MapFrom(src => src.BusType.Name))
                 .ForMember(dest => dest.BusDistrictName, opt => opt.MapFrom(src => src.BusDistrict.Name))
@@ -882,6 +891,11 @@ namespace LMS_CMS_BL.Config
             CreateMap<SemesterWorkingWeekPutDTO, SemesterWorkingWeek>();
 
             CreateMap<DailyPerformanceAddDTO, DailyPerformance>();
+            CreateMap<DailyPerformance, DailyPerformanceGetDTO>()
+               .ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => src.Student.en_name))
+               .ForMember(dest => dest.SubjectName, opt => opt.MapFrom(src => src.Subject.en_name))
+               .ForMember(dest => dest.GradeName, opt => opt.MapFrom(src => src.Subject.Grade.Name));
+
 
             CreateMap<QuestionBank, QuestionBankGetDTO>()
                  .ForMember(dest => dest.LessonName, opt => opt.MapFrom(src => src.Lesson.EnglishTitle))
@@ -953,6 +967,39 @@ namespace LMS_CMS_BL.Config
             CreateMap<StudentClassroomSubject, StudentClassroomSubjectGetDTO>()
                 .ForMember(dest => dest.SubjectEnglishName, opt => opt.MapFrom(src => src.Subject.en_name))
                 .ForMember(dest => dest.SubjectArabicName, opt => opt.MapFrom(src => src.Subject.ar_name));
+
+            CreateMap<Assignment, AssignmentGetDTO>()
+               .ForMember(dest => dest.SubjectEnglishName, opt => opt.MapFrom(src => src.Subject.en_name))
+               .ForMember(dest => dest.SubjectArabicName, opt => opt.MapFrom(src => src.Subject.ar_name))
+               .ForMember(dest => dest.SubjectWeightTypeEnglishName, opt => opt.MapFrom(src => src.SubjectWeightType.WeightType.EnglishName))
+               .ForMember(dest => dest.SubjectWeightTypeArabicName, opt => opt.MapFrom(src => src.SubjectWeightType.WeightType.ArabicName))
+               .ForMember(dest => dest.AssignmentTypeEnglishName, opt => opt.MapFrom(src => src.AssignmentType.EnglishName))
+               .ForMember(dest => dest.AssignmentTypeArabicName, opt => opt.MapFrom(src => src.AssignmentType.ArabicName));
+            CreateMap<AssignmentAddDTO, Assignment>();
+            CreateMap<AssignmentPutDTO, Assignment>(); 
+
+            CreateMap<AssignmentStudent, AssignmentStudentGetDTO>()
+               .ForMember(dest => dest.ClassroomID, opt => opt.MapFrom(src => src.StudentClassroom.ClassID))
+               .ForMember(dest => dest.AssignmentDegree, opt => opt.MapFrom(src => src.Assignment.Mark))
+               .ForMember(dest => dest.ClassroomName, opt => opt.MapFrom(src => src.StudentClassroom.Classroom.Name))
+               .ForMember(dest => dest.AssignmentTypeID, opt => opt.MapFrom(src => src.Assignment.AssignmentTypeID))
+               .ForMember(dest => dest.StudentEnglishName, opt => opt.MapFrom(src => src.StudentClassroom.Student.en_name))
+               .ForMember(dest => dest.StudentArabicName, opt => opt.MapFrom(src => src.StudentClassroom.Student.ar_name))
+               .ForMember(dest => dest.StudentID, opt => opt.MapFrom(src => src.StudentClassroom.StudentID));
+
+            CreateMap<AssignmentStudentQuestion, AssignmentStudentQuestionGetDTO>()
+               .ForMember(dest => dest.QuestionMark, opt => opt.MapFrom(src => src.QuestionBank.Mark))
+               .ForMember(dest => dest.QuestionTypeID, opt => opt.MapFrom(src => src.QuestionBank.QuestionTypeID));
+            CreateMap<AssignmentStudentQuestionAnswerOption, AssignmentStudentQuestionAnswerOptionGetDTO>();
+
+            CreateMap<AssignmentQuestion, AssignmentQuestionGetDTO>();
+            CreateMap<AssignmentType, AssignmentTypeGetDTO>();
+
+            CreateMap<AssignmentStudentAddDTO, AssignmentStudent>();
+            CreateMap<AssignmentStudentQuestionAddDTO, AssignmentStudentQuestion>();
+            CreateMap<AssignmentStudentQuestionAnswerOptionAddDTO, AssignmentStudentQuestionAnswerOption>();
+
+
         }
     } 
 }

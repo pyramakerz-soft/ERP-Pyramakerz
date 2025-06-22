@@ -177,7 +177,6 @@ namespace LMS_CMS_BL.Repository
 
             return query; // Return IQueryable to support Skip & Take
         }
-     
 
 
 
