@@ -171,6 +171,7 @@ import { StudentsComponent } from './Pages/Employee/Administrator/students/stude
 import { DailyPerformanceMasterComponent } from './Pages/Employee/LMS/daily-performance-master/daily-performance-master.component';
 
 import { AssignmentComponent } from './Pages/Employee/LMS/assignment/assignment.component';
+import { ReportItemCardComponent } from './Pages/Employee/Inventory/Report/report-item-card/report-item-card.component';
 
 
 export const routes: Routes = [
@@ -344,12 +345,12 @@ export const routes: Routes = [
             { path: "AcademicSequentialReport", component: AcademicSequentialReportComponent, title: "AcademicSequentialReport", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "TransferedFromKindergartenReport", component: TransferedFromKindergartenReportComponent, title: "TransferedFromKindergartenReport", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Template", component: TemplateComponent, title: "Template", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: 'Inventory-Transaction-Report', component: InventoryTransactionReportComponent, title: 'Inventory Transaction Report', canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], data: { reportType: 'inventory' } },
-            { path: 'Sales-Transaction-Report', component: InventoryTransactionReportComponent, title: 'Sales Transaction Report', canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], data: { reportType: 'sales' } },
-            { path: 'Purchase-Transaction-Report', component: InventoryTransactionReportComponent, title: 'Purchase Transaction Report', canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], data: { reportType: 'purchase' } },
-            { path: 'Inventory-Transaction-Report-Detailed', component: InvoiceReportMasterDetailedComponent, title: 'Inventory Transaction Report Detailed', canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], data: { reportType: 'inventory' } },
-            { path: 'Sales-Transaction-Detailed', component: InvoiceReportMasterDetailedComponent, title: 'Sales Transaction Report Detailed', canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], data: { reportType: 'sales' } },
-            { path: 'Purchase-Transaction-Report-Detailed', component: InvoiceReportMasterDetailedComponent, title: 'Purchase Transaction Report Detailed', canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], data: { reportType: 'purchase' } },
+            { path: 'Inventory-Transaction-Report', component: InventoryTransactionReportComponent, title: 'Inventory Transaction Report', canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'inventory' } },
+            { path: 'Sales-Transaction-Report', component: InventoryTransactionReportComponent, title: 'Sales Transaction Report', canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'sales' } },
+            { path: 'Purchase-Transaction-Report', component: InventoryTransactionReportComponent, title: 'Purchase Transaction Report', canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'purchase' } },
+            { path: 'Inventory-Transaction-Report-Detailed', component: InvoiceReportMasterDetailedComponent, title: 'Inventory Transaction Report Detailed', canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'inventory' } },
+            { path: 'Sales-Transaction-Detailed', component: InvoiceReportMasterDetailedComponent, title: 'Sales Transaction Report Detailed', canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'sales' } },
+            { path: 'Purchase-Transaction-Report-Detailed', component: InvoiceReportMasterDetailedComponent, title: 'Purchase Transaction Report Detailed', canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'purchase' } },
             { path: "Book Correction", component: BookCorrectionComponent, title: "BookCorrectionComponent", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Evaluation", component: EvaluationComponent, title: "Evaluation", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "EvaluationTemplateGroup/:id", component: EvaluationTemplateGroupComponent, title: "EvaluationTemplateGroup", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
@@ -384,6 +385,7 @@ export const routes: Routes = [
             { path: "Daily Performance", component: DailyPerformanceMasterComponent, title: "Daily Performance", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Assignment", component: AssignmentComponent, title: "Assignment", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Assignment/:id", component: AssignmentEditComponent, title: "Assignment Edit", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "report-item-card", component: ReportItemCardComponent, title: "report-item-card", canActivate: [noNavigateWithoutLoginGuard] },
 
         ]
 
