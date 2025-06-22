@@ -21,5 +21,6 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public ICollection<StudentClassroomSubject> StudentClassroomSubjects { get; set; } = new HashSet<StudentClassroomSubject>();
         public ICollection<DirectMarkClassroomStudent> DirectMarkClassroomStudents { get; set; } = new HashSet<DirectMarkClassroomStudent>();
         public ICollection<AssignmentStudent> AssignmentStudents { get; set; } = new HashSet<AssignmentStudent>();
+        public ICollection<AssignmentStudentIsSpecific> AssignmentStudentIsSpecifics { get; set; } = new HashSet<AssignmentStudentIsSpecific>();
     }
 }
