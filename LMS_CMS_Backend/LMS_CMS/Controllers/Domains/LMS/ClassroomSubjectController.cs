@@ -442,11 +442,13 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         public async Task<IActionResult> GetBySubjectIDWithStudentsIncluded(long SubId)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-
-            List<ClassroomSubject> classroomSubjects = await Unit_Of_Work.classroomSubject_Repository.Select_All_With_IncludesById<ClassroomSubject>(
-                    f => f.IsDeleted != true && f.SubjectID == SubId &&  f.Classroom.IsDeleted != true && f.Hide != true,
-                    query => query.Include(emp => emp.Classroom).ThenInclude(d => d.StudentClassrooms.Where(d => d.IsDeleted != true)).ThenInclude(sc => sc.StudentClassroomSubjects)
-                    );
+             
+            List<ClassroomSubject> classroomSubjects = await Unit_Of_Work.classroomSubject_Repository
+                .Select_All_With_IncludesById<ClassroomSubject>(
+                    f => f.IsDeleted != true && f.SubjectID == SubId && f.Classroom.IsDeleted != true && f.Hide != true,
+                    query => query.Include(cs => cs.Classroom).ThenInclude(c => c.StudentClassrooms).ThenInclude(sc => sc.StudentClassroomSubjects),
+                    query => query.Include(cs => cs.Classroom).ThenInclude(c => c.StudentClassrooms).ThenInclude(sc => sc.Student)
+                );
 
             if (classroomSubjects == null)
             {
@@ -455,24 +457,52 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             foreach (var classroomSubject in classroomSubjects)
             {
-                foreach (var studentClassroom in classroomSubject.Classroom.StudentClassrooms)
-                {
-                    studentClassroom.StudentClassroomSubjects = studentClassroom.StudentClassroomSubjects
-                        .Where(scs =>
+                classroomSubject.Classroom.StudentClassrooms = classroomSubject.Classroom.StudentClassrooms
+                    .Where(sc =>
+                        sc.IsDeleted != true &&
+                        sc.StudentClassroomSubjects.Any(scs =>
                             scs.IsDeleted != true &&
-                            scs.SubjectID == SubId && 
-                            scs.StudentClassroomID == studentClassroom.ID && 
-                            scs.Hide != true && 
-                            scs.Subject.IsDeleted != true)
-                        .ToList();
-                }
+                            scs.SubjectID == SubId &&
+                            scs.Hide != true
+                        )
+                    )
+                    .Select(sc =>
+                    { 
+                        sc.StudentClassroomSubjects = sc.StudentClassroomSubjects
+                            .Where(scs =>
+                                scs.IsDeleted != true &&
+                                scs.SubjectID == SubId &&
+                                scs.Hide != true
+                            )
+                            .ToList();
+
+                        return sc;
+                    })
+                    .ToList();      
             }
 
-            var d = 10;
+            List<StudentClassWhenSubject> studentClassWhenSubjects = new List<StudentClassWhenSubject> ();
+            foreach (var classroomSubject in classroomSubjects)
+            {
+                StudentClassWhenSubject studentClassWhenSubject = new StudentClassWhenSubject ();
+                studentClassWhenSubject.ClassroomID = classroomSubject.ClassroomID;
+                studentClassWhenSubject.ClassroomName = classroomSubject.Classroom.Name;
+                foreach (var classroomStudent in classroomSubject.Classroom.StudentClassrooms)
+                {
+                    StudentClassroomGetDTO studentClassroomGetDTO = new StudentClassroomGetDTO ();
+                    studentClassroomGetDTO.ID = classroomStudent.ID;
+                    studentClassroomGetDTO.StudentID = classroomStudent.Student.ID;
+                    studentClassroomGetDTO.StudentEnglishName = classroomStudent.Student.en_name;
+                    studentClassroomGetDTO.StudentArabicName = classroomStudent.Student.ar_name;
+                    studentClassroomGetDTO.ClassID = classroomStudent.ClassID;
+                    studentClassroomGetDTO.ClassName = classroomStudent.Classroom.Name;
 
-            //StudentClassroomGetDTO studentClassroomDTO = mapper.Map<StudentClassroomGetDTO>(studentClassroom);
-
-            return Ok();
+                    studentClassWhenSubject.StudentClassrooms.Add(studentClassroomGetDTO);
+                }
+                studentClassWhenSubjects.Add(studentClassWhenSubject);
+            }
+             
+            return Ok(studentClassWhenSubjects);
         }
          
         /////////////////////////////////////////////////////////////////////////////////////////////

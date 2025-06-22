@@ -515,6 +515,38 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             Unit_Of_Work.classroom_Repository.Update(classroom);
+
+            List<StudentClassroom> studentClassroomExists = Unit_Of_Work.studentClassroom_Repository.FindBy(
+                    d => d.IsDeleted != true && d.ClassID == id
+                    );
+
+            if (studentClassroomExists != null)
+            {
+                foreach (var item in studentClassroomExists)
+                {
+                    item.IsDeleted = true;
+                    item.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                    if (userTypeClaim == "octa")
+                    {
+                        item.DeletedByOctaId = userId;
+                        if (item.DeletedByUserId != null)
+                        {
+                            item.DeletedByUserId = null;
+                        }
+                    }
+                    else if (userTypeClaim == "employee")
+                    {
+                        item.DeletedByUserId = userId;
+                        if (item.DeletedByOctaId != null)
+                        {
+                            item.DeletedByOctaId = null;
+                        }
+                    }
+
+                    Unit_Of_Work.studentClassroom_Repository.Update(item);
+                }
+            }
+
             Unit_Of_Work.SaveChanges();
             return Ok();
         }
