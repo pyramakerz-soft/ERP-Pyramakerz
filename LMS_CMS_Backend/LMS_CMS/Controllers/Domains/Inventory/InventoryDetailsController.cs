@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
+
 
 namespace LMS_CMS_PL.Controllers.Domains.Inventory
 {
@@ -35,6 +37,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         )]
         public async Task<IActionResult> GetAsync()
         {
+            // الكود يربط الطلب الحالي بقاعدة البيانات المناسبة من خلال UOW.
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             List<InventoryDetails> salesItems = await Unit_Of_Work.inventoryDetails_Repository.Select_All_With_IncludesById<InventoryDetails>(
@@ -53,7 +56,127 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             return Ok(DTO);
         }
 
-        ////
+        /// ///////////////////////////////////////////////////-777
+        [HttpGet("inventory-net-summary")]
+        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Inventory" })]
+        public async Task<IActionResult> GetInventoryNetSummaryAsync(long storeId, long shopItemId, string toDate )
+        {
+            if (!DateTime.TryParse(toDate, out DateTime toDateTime))
+                return BadRequest("Invalid date format.");
+
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var flagsToExclude = new long[] { 13 };
+
+            var data = await Unit_Of_Work.inventoryDetails_Repository
+                .Select_All_With_IncludesById<InventoryDetails>(
+                    d => d.InventoryMaster != null && d.InventoryMaster.IsDeleted != true,
+                    q => q.Include(d => d.InventoryMaster).ThenInclude(im => im.InventoryFlags));
+
+
+            var filteredData = data
+                .Where(d =>
+                    d.InventoryMaster != null &&
+                    d.InventoryMaster.IsDeleted != true &&
+                    d.ShopItemID == shopItemId &&
+                    DateTime.TryParse(d.InventoryMaster.Date, out var docDate) &&
+                    docDate.Date <= toDateTime.Date &&
+                    !flagsToExclude.Contains(d.InventoryMaster.FlagId) &&
+                    (
+                        d.InventoryMaster.StoreID == storeId ||
+                        (d.InventoryMaster.FlagId == 8 && d.InventoryMaster.StoreToTransformId == storeId)
+                    ) &&
+                    d.InventoryMaster.InventoryFlags.ItemInOut != 0
+                )
+                .ToList();
+
+            var inQuantity = filteredData
+                .Where(d => d.InventoryMaster.InventoryFlags.ItemInOut == 1)
+                .Sum(d => d.Quantity);
+
+            var outQuantity = filteredData
+                .Where(d => d.InventoryMaster.InventoryFlags.ItemInOut == -1)
+                .Sum(d => d.Quantity);
+
+            var balance = inQuantity - outQuantity;
+
+            var dto = new InventoryNetSummaryDTO
+            {
+                ShopItemId = shopItemId,
+                StoreId = storeId,
+                ToDate = toDate, 
+                InQuantity = inQuantity,
+                outQuantity = outQuantity,
+                Balance = balance
+            };
+
+            return Ok(dto);
+        }
+
+        /// /////////////////////////////////////////////////////////////////////////////////////-777
+
+        [HttpGet("inventory-net-transactions")]
+        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Inventory" })]
+        public async Task<IActionResult> GetInventoryNetTransactionsAsync(
+        long storeId,
+        long shopItemId,
+        string fromDate,
+        string toDate)
+        {
+            if (!DateTime.TryParse(fromDate, out DateTime fromDateTime) ||
+                !DateTime.TryParse(toDate, out DateTime toDateTime))
+            {
+                return BadRequest("Invalid date format.");
+            }
+
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var data = (await Unit_Of_Work.inventoryDetails_Repository
+                .Select_All_With_IncludesById<InventoryDetails>(
+                        d => d.IsDeleted != true &&
+                         d.InventoryMaster != null &&
+                          d.InventoryMaster.IsDeleted != true &&
+                           d.ShopItemID == shopItemId &&
+                            (d.InventoryMaster.StoreID == storeId ||
+                             (d.InventoryMaster.FlagId == 8 && d.InventoryMaster.StoreToTransformId == storeId)),
+
+                    q => q.Include(d => d.InventoryMaster).ThenInclude(m => m.InventoryFlags),
+                    q => q.Include(d => d.InventoryMaster.Supplier),
+                    q => q.Include(d => d.InventoryMaster.Student),
+                    q => q.Include(d => d.InventoryMaster.StoreToTransform))).AsEnumerable()
+
+                .Where(d =>
+                    DateTime.TryParse(d.InventoryMaster.Date, out DateTime date) &&
+                    date >= fromDateTime &&
+                    date <= toDateTime)
+                .Select(d =>
+                {
+                    double signedQty = d.Quantity * d.InventoryMaster.InventoryFlags.ItemInOut;
+                    return new InventoryNetTransactionDTO
+                    {
+                        FlagName = d.InventoryMaster.InventoryFlags.arName,
+                        InvoiceNumber = d.InventoryMaster.InvoiceNumber,
+                        DayDate = d.InventoryMaster.Date,
+                        Notes = d.InventoryMaster.Notes,
+                        Quantity = d.Quantity,
+
+                        SupplierName = (new long[] { 9, 10, 13 }.Contains(d.InventoryMaster.FlagId)) ? d.InventoryMaster.Supplier?.Name : null,
+
+                        StudentName = (new long[] { 11, 12 }.Contains(d.InventoryMaster.FlagId)) ? d.InventoryMaster.Student?.en_name : null,
+
+                        StoreToName = (d.InventoryMaster.FlagId == 8) ? d.InventoryMaster.StoreToTransform?.Name : null,
+
+                        TotalIn = signedQty > 0 ? signedQty : 0,
+                        TotalOut = signedQty < 0 ? Math.Abs(signedQty) : 0,
+                        Balance = signedQty
+                    };
+                })
+                .ToList();
+
+            return Ok(data);
+        }
+
+        /////// // /// /// ///////////////////////////////////////////////////
 
         [HttpGet("BySaleId/{id}")]
         [Authorize_Endpoint_(
@@ -65,7 +188,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             List<InventoryDetails> salesItems = await Unit_Of_Work.inventoryDetails_Repository.Select_All_With_IncludesById<InventoryDetails>(
-                    f => f.IsDeleted != true&&f.InventoryMasterId==id,
+                    f => f.IsDeleted != true&&
+                    f.InventoryMasterId==id,
                     query => query.Include(s => s.ShopItem),
                     query => query.Include(s => s.InventoryMaster)
                     );
@@ -80,7 +204,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             return Ok(DTO);
         }
 
-        ////
+        /// //////////////////////////////////////////////////////////////////////////
 
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
@@ -92,7 +216,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             InventoryDetails salesItems = await Unit_Of_Work.inventoryDetails_Repository.FindByIncludesAsync(
-                    f => f.IsDeleted != true && f.ID == id,
+                    f => f.IsDeleted != true &&
+                    f.ID == id,
                     query => query.Include(s => s.ShopItem),
                     query => query.Include(s => s.InventoryMaster)
                     );

@@ -36,8 +36,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             _config = config;
         }
 
-
-
         [HttpGet("ByFlagId/{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
@@ -86,6 +84,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         }
 
         /////////////////////////////////////////////////////////////////////////////
+       
+
+        /// // // // /// ////////////////
 
         [HttpGet("Search")]
         [Authorize_Endpoint_(

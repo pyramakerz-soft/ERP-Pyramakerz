@@ -10,6 +10,7 @@ using LMS_CMS_DAL.Models.Octa;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.EntityFrameworkCore.Storage;
+using Org.BouncyCastle.Asn1;
 
 namespace LMS_CMS_BL.Repository
 {
@@ -176,6 +177,9 @@ namespace LMS_CMS_BL.Repository
 
             return query; // Return IQueryable to support Skip & Take
         }
+     
+
+
 
         public IQueryable<TEntity> GetAll<TEntity>() where TEntity : class
         {
@@ -186,6 +190,8 @@ namespace LMS_CMS_BL.Repository
         {
             return await db.Set<T>().Where(predicate).ToListAsync();
         }
+      
+
         ///////////////////////////////////////////////////////////////////// Octa /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         public void Add_Octa(TEntity entity)
