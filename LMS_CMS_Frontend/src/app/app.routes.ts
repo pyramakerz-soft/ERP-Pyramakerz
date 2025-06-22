@@ -170,6 +170,8 @@ import { SubjectCoTeacherComponent } from './Pages/Employee/Administrator/subjec
 import { StudentsComponent } from './Pages/Employee/Administrator/students/students.component';
 import { DailyPerformanceMasterComponent } from './Pages/Employee/LMS/daily-performance-master/daily-performance-master.component';
 import { AssignmentComponent } from './Pages/Employee/LMS/assignment/assignment.component';
+import { AssignmentStudentComponent } from './Pages/Employee/LMS/assignment-student/assignment-student.component';
+import { AssignmentDetailComponent } from './Pages/Employee/LMS/assignment-detail/assignment-detail.component';
 
 
 export const routes: Routes = [
@@ -383,7 +385,8 @@ export const routes: Routes = [
             { path: "Daily Performance", component: DailyPerformanceMasterComponent, title: "Daily Performance", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Assignment", component: AssignmentComponent, title: "Assignment", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Assignment/:id", component: AssignmentEditComponent, title: "Assignment Edit", canActivate: [noNavigateWithoutLoginGuard] },
-
+            { path: "Assignment Student/:id", component: AssignmentStudentComponent, title: "AssignmentStudent", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Assignment Details/:id", component: AssignmentDetailComponent, title: "Assignment Detail", canActivate: [noNavigateWithoutLoginGuard] },
         ]
     },
     {

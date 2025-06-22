@@ -282,30 +282,6 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             return Ok(classroomsDTO);
         }
 
-        //[HttpGet("BySubjectID/{id}")]
-        //[Authorize_Endpoint_(
-        //  allowedTypes: new[] { "octa", "employee" },
-        //  pages: new[] { "Classroom" }
-        //)]
-        //public async Task<IActionResult> BySubjectID(long id)
-        //{
-        //    UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-
-        //    List<ClassroomSubject> classroomSubjects = await Unit_Of_Work.classroomSubject_Repository.Select_All_With_IncludesById<ClassroomSubject>(
-        //            f => f.IsDeleted != true && f.SubjectID == id && f.Hide != true,
-        //            query => query.Include(emp => emp.Classroom)
-        //            );
-
-        //    if (classrooms == null || classrooms.Count == 0)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    List<ClassroomGetDTO> classroomsDTO = mapper.Map<List<ClassroomGetDTO>>(classrooms);
-
-        //    return Ok(classroomsDTO);
-        //}
-
         [HttpPost]
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee" },

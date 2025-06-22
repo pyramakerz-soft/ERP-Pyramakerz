@@ -191,6 +191,7 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<Assignment> Assignment_Repository;
         GenericRepo<AssignmentType> AssignmentType_Repository;
         GenericRepo<AssignmentStudent> AssignmentStudent_Repository;
+        GenericRepo<AssignmentStudentIsSpecific> AssignmentStudentIsSpecific_Repository;
         GenericRepo<AssignmentQuestion> AssignmentQuestion_Repository;
         GenericRepo<DirectMarkClassroomStudent> DirectMarkClassroomStudent_Repository;
         GenericRepo<AssignmentStudentQuestion> AssignmentStudentQuestion_Repository;
@@ -2155,6 +2156,18 @@ namespace LMS_CMS_BL.UOW
                     AssignmentStudent_Repository = new GenericRepo<AssignmentStudent>(db);
                 }
                 return AssignmentStudent_Repository;
+            }
+        }
+        
+        public GenericRepo<AssignmentStudentIsSpecific> assignmentStudentIsSpecific_Repository
+        {
+            get
+            {
+                if (AssignmentStudentIsSpecific_Repository == null)
+                {
+                    AssignmentStudentIsSpecific_Repository = new GenericRepo<AssignmentStudentIsSpecific>(db);
+                }
+                return AssignmentStudentIsSpecific_Repository;
             }
         }
         

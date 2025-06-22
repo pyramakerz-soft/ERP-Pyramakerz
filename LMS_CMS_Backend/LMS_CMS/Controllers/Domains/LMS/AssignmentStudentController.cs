@@ -118,16 +118,33 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             AssignmentStudent assignmentStudent = await Unit_Of_Work.assignmentStudent_Repository.FindByIncludesAsync(
-                s => s.ID == id && s.IsDeleted != true,
-                query => query.Include(e => e.Assignment)
-                              .ThenInclude(sc => sc.AssignmentQuestions),
-                query => query.Include(e => e.StudentClassroom)
-                              .ThenInclude(sc => sc.Student),
-                query => query.Include(e => e.StudentClassroom)
-                              .ThenInclude(sc => sc.Classroom),
-                query => query.Include(e => e.AssignmentStudentQuestions)
-                              .ThenInclude(q => q.AssignmentStudentQuestionAnswerOption) // Include answer options
-            );
+                 s => s.ID == id && s.IsDeleted != true,
+
+                 query => query.Include(e => e.Assignment)
+                     .ThenInclude(a => a.AssignmentQuestions)
+                         .ThenInclude(aq => aq.QuestionBank),
+
+                 query => query.Include(e => e.StudentClassroom)
+                     .ThenInclude(sc => sc.Student),
+
+                 query => query.Include(e => e.StudentClassroom)
+                     .ThenInclude(sc => sc.Classroom),
+
+                 query => query.Include(e => e.AssignmentStudentQuestions)
+                     .ThenInclude(q => q.AssignmentStudentQuestionAnswerOption),
+
+                 query => query.Include(e => e.AssignmentStudentQuestions)
+                     .ThenInclude(q => q.QuestionBank)
+                         .ThenInclude(qb => qb.QuestionBankOptions),
+
+                 query => query.Include(e => e.AssignmentStudentQuestions)
+                     .ThenInclude(q => q.QuestionBank)
+                         .ThenInclude(qb => qb.QuestionType),
+
+                 query => query.Include(e => e.AssignmentStudentQuestions)
+                     .ThenInclude(q => q.QuestionBank)
+                         .ThenInclude(qb => qb.SubBankQuestions) // ✅ This ensures subBankQuestion is populated
+             );
 
 
             if (assignmentStudent == null)

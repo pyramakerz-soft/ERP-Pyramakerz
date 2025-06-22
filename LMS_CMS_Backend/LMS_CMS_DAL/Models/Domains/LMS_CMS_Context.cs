@@ -178,6 +178,7 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<AssignmentType> AssignmentType { get; set; }
         public DbSet<Assignment> Assignment { get; set; }
         public DbSet<AssignmentStudent> AssignmentStudent { get; set; }
+        public DbSet<AssignmentStudentIsSpecific> AssignmentStudentIsSpecific { get; set; }
         public DbSet<AssignmentQuestion> AssignmentQuestion { get; set; }
         public DbSet<DirectMarkClassroomStudent> DirectMarkClassroomStudent { get; set; }
         public DbSet<AssignmentStudentQuestion> AssignmentStudentQuestion { get; set; }
@@ -1559,6 +1560,12 @@ namespace LMS_CMS_DAL.Models.Domains
               .HasForeignKey(p => p.AssignmentTypeID)
               .OnDelete(DeleteBehavior.Restrict); 
             
+            modelBuilder.Entity<Assignment>()
+              .HasOne(p => p.SubjectWeightType)
+              .WithMany(p => p.Assignments)
+              .HasForeignKey(p => p.SubjectWeightTypeID)
+              .OnDelete(DeleteBehavior.Restrict); 
+            
             modelBuilder.Entity<AssignmentStudent>()
               .HasOne(p => p.StudentClassroom)
               .WithMany(p => p.AssignmentStudents)
@@ -1568,6 +1575,18 @@ namespace LMS_CMS_DAL.Models.Domains
             modelBuilder.Entity<AssignmentStudent>()
               .HasOne(p => p.Assignment)
               .WithMany(p => p.AssignmentStudents)
+              .HasForeignKey(p => p.AssignmentID)
+              .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<AssignmentStudentIsSpecific>()
+              .HasOne(p => p.StudentClassroom)
+              .WithMany(p => p.AssignmentStudentIsSpecifics)
+              .HasForeignKey(p => p.StudentClassroomID)
+              .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<AssignmentStudentIsSpecific>()
+              .HasOne(p => p.Assignment)
+              .WithMany(p => p.AssignmentStudentIsSpecifics)
               .HasForeignKey(p => p.AssignmentID)
               .OnDelete(DeleteBehavior.Restrict);
             
