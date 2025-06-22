@@ -169,6 +169,7 @@ import { SubjectTeacherComponent } from './Pages/Employee/Administrator/subject-
 import { SubjectCoTeacherComponent } from './Pages/Employee/Administrator/subject-co-teacher/subject-co-teacher.component';
 import { StudentsComponent } from './Pages/Employee/Administrator/students/students.component';
 import { DailyPerformanceMasterComponent } from './Pages/Employee/LMS/daily-performance-master/daily-performance-master.component';
+
 import { AssignmentComponent } from './Pages/Employee/LMS/assignment/assignment.component';
 
 
@@ -385,6 +386,7 @@ export const routes: Routes = [
             { path: "Assignment/:id", component: AssignmentEditComponent, title: "Assignment Edit", canActivate: [noNavigateWithoutLoginGuard] },
 
         ]
+
     },
     {
         path: "Parent",
