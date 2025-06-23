@@ -13,6 +13,8 @@ import { AssignmentStudentService } from '../../../../Services/Employee/LMS/assi
 import { AssignmentService } from '../../../../Services/Employee/LMS/assignment.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
+import Swal from 'sweetalert2';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-assignment-detail',
@@ -45,6 +47,7 @@ export class AssignmentDetailComponent {
   ClassId: number = 0;
   IsShowTabls: boolean = false
   assignmentStudent: AssignmentStudent = new AssignmentStudent()
+  isLoading :boolean = false
 
   constructor(
     private router: Router,
@@ -72,6 +75,9 @@ export class AssignmentDetailComponent {
   GetAssignment() {
     this.assignmentStudentServ.GetById(this.AssignmentStudentId, this.DomainName).subscribe((d) => {
       this.assignmentStudent = d
+      for (let row of this.assignmentStudent.assignmentStudentQuestions) {
+        this.autoCorrectMark(row);
+      }
       console.log(this.assignmentStudent)
     })
   }
@@ -87,4 +93,61 @@ export class AssignmentDetailComponent {
     return answerObj?.answer || '';
   }
 
+  isAutoCorrectType(typeId: number): boolean {
+    return typeId === 1 || typeId === 2; // True/False or MCQ
+  }
+
+  autoCorrectMark(row: any): void {
+    const isTrueFalse = row.questionTypeID === 1;
+    const isMCQ = row.questionTypeID === 2;
+
+    if (isTrueFalse && row.questionCorrectAnswerName !== undefined) {
+      row.mark = row.answer === row.questionCorrectAnswerName ? row.questionMark : 0;
+    } else if (isMCQ && row.questionCorrectAnswerID !== undefined) {
+      row.mark = row.answerOptionID === row.questionCorrectAnswerID ? row.questionMark : 0;
+    } else if (!this.isAutoCorrectType(row.questionTypeID)) {
+      row.mark = row.mark ?? 0;
+    }
+  }
+
+  limitMark(row: any): void {
+    if (row.mark > row.questionMark) {
+      row.mark = row.questionMark;
+    } else if (row.mark < 0) {
+      row.mark = 0;
+    }
+  }
+
+  preventExceed(event: KeyboardEvent, row: any): void {
+    const value = parseInt((event.target as HTMLInputElement).value + event.key);
+    if (!isNaN(value) && value > row.questionMark) {
+      event.preventDefault();
+    }
+  }
+
+  save() {
+  this.isLoading = true;
+  this.assignmentStudentServ.Edit(this.assignmentStudent, this.DomainName)
+    .pipe(finalize(() => this.isLoading = false)) // runs after success or error
+    .subscribe({
+      next: () => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Done',
+          text: 'Updated Successfully',
+          confirmButtonColor: '#089B41',
+        });
+        this.router.navigateByUrl(`Employee/Assignment Student/${this.assignmentStudent.assignmentID}`);
+      },
+      error: (err) => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Something went wrong, please try again.',
+          confirmButtonColor: '#d33',
+        });
+        console.error('Edit error:', err);
+      }
+    });
+}
 }
