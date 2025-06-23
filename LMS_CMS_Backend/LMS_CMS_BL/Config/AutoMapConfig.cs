@@ -988,8 +988,14 @@ namespace LMS_CMS_BL.Config
                .ForMember(dest => dest.StudentID, opt => opt.MapFrom(src => src.StudentClassroom.StudentID));
 
             CreateMap<AssignmentStudentQuestion, AssignmentStudentQuestionGetDTO>()
-               .ForMember(dest => dest.QuestionMark, opt => opt.MapFrom(src => src.QuestionBank.Mark))
-               .ForMember(dest => dest.QuestionTypeID, opt => opt.MapFrom(src => src.QuestionBank.QuestionTypeID));
+                .ForMember(dest => dest.QuestionMark, opt => opt.MapFrom(src => src.QuestionBank.Mark))
+                .ForMember(dest => dest.QuestionDesc, opt => opt.MapFrom(src => src.QuestionBank.Description))
+                .ForMember(dest => dest.QuestionTypeID, opt => opt.MapFrom(src => src.QuestionBank.QuestionTypeID))
+                .ForMember(dest => dest.QuestionTypeName, opt => opt.MapFrom(src => src.QuestionBank.QuestionType.Name))
+                .ForMember(dest => dest.QuestionImage, opt => opt.MapFrom(src => src.QuestionBank.Image))
+                .ForMember(dest => dest.QuestionBankOptions, opt => opt.MapFrom(src => src.QuestionBank.QuestionBankOptions))
+                .ForMember(dest => dest.SubBankQuestion, opt => opt.MapFrom(src => src.QuestionBank.SubBankQuestions))
+                .ForMember(dest => dest.AssignmentStudentQuestionAnswerOption, opt => opt.MapFrom(src => src.AssignmentStudentQuestionAnswerOption));
             CreateMap<AssignmentStudentQuestionAnswerOption, AssignmentStudentQuestionAnswerOptionGetDTO>();
 
             CreateMap<AssignmentQuestion, AssignmentQuestionGetDTO>();
@@ -999,7 +1005,13 @@ namespace LMS_CMS_BL.Config
             CreateMap<AssignmentStudentQuestionAddDTO, AssignmentStudentQuestion>();
             CreateMap<AssignmentStudentQuestionAnswerOptionAddDTO, AssignmentStudentQuestionAnswerOption>();
 
-
+            CreateMap<Assignment, AssignmentForStudentGetDTO>()
+               .ForMember(dest => dest.SubjectEnglishName, opt => opt.MapFrom(src => src.Subject.en_name))
+               .ForMember(dest => dest.SubjectArabicName, opt => opt.MapFrom(src => src.Subject.ar_name))
+               .ForMember(dest => dest.SubjectWeightTypeEnglishName, opt => opt.MapFrom(src => src.SubjectWeightType.WeightType.EnglishName))
+               .ForMember(dest => dest.SubjectWeightTypeArabicName, opt => opt.MapFrom(src => src.SubjectWeightType.WeightType.ArabicName))
+               .ForMember(dest => dest.AssignmentTypeEnglishName, opt => opt.MapFrom(src => src.AssignmentType.EnglishName))
+               .ForMember(dest => dest.AssignmentTypeArabicName, opt => opt.MapFrom(src => src.AssignmentType.ArabicName));
         }
     } 
 }

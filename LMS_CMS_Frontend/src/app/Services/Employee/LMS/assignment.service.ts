@@ -47,7 +47,7 @@ export class AssignmentService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.get<Assignment>(`${this.baseUrl}/Assignment/${id}`, { headers })
+    return this.http.get<Assignment>(`${this.baseUrl}/Assignment/GetByID/${id}`, { headers })
   }
 
   Add(Assignment: Assignment, DomainName: string) {

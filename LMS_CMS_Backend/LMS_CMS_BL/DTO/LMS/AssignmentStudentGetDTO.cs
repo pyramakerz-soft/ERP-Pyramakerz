@@ -16,11 +16,17 @@ namespace LMS_CMS_BL.DTO.LMS
         public long AssignmentTypeID { get; set; }
         public long StudentClassroomID { get; set; }
         public string? LinkFile { get; set; }
+
         public long ClassroomID { get; set; }
-        public long StudentID { get; set; }
         public string ClassroomName { get; set; }
+
+        public long StudentID { get; set; }
         public string StudentEnglishName { get; set; }
         public string StudentArabicName { get; set; }
-        public List<AssignmentStudentQuestionGetDTO> AssignmentStudentQuestions { get; set; } 
+
+        public string AssignmentArabicName { get; set; }
+        public string AssignmentEnglishName { get; set; }
+
+        public List<AssignmentStudentQuestionGetDTO> AssignmentStudentQuestions { get; set; }
     }
 }

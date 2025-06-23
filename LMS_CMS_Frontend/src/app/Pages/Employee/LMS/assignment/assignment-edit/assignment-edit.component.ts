@@ -512,4 +512,8 @@ export class AssignmentEditComponent {
       }
     });
   }
+
+  GoToAssignmentStudent(){
+    this.router.navigateByUrl(`Employee/Assignment Student/${this.AssignmentId}`)
+  }
 }
