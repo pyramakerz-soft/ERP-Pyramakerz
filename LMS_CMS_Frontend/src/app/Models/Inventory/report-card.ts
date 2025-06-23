@@ -1,27 +1,31 @@
 // models/inventory/report-card.model.ts
 
 export interface InventoryNetSummary {
-  openingBalance: number;
-  totalIn: number;
-  totalOut: number;
-  closingBalance: number;
+  shopItemId: number;
+  storeId: number;
+  toDate: string;
+  inQuantity: number;
+  outQuantity: number;
+  balance: number;
 }
 
 export interface InventoryNetTransaction {
-  date: Date | string;
-  transactionType: string;
+  flagName: string;
   invoiceNumber: string;
-  authority: string;
+  dayDate: string;
+  notes: string | null;
   quantity: number;
-  price: number;
-  total: number;
+  supplierName: string | null;
+  studentName: string | null;
+  storeToName: string | null;
+  totalIn: number;
+  totalOut: number;
   balance: number;
-  notes?: string;
 }
 
 export interface CombinedReportData {
   isSummary: boolean;
-  date: Date | string;
+  date: string;
   transactionType: string;
   invoiceNumber: string;
   authority: string;

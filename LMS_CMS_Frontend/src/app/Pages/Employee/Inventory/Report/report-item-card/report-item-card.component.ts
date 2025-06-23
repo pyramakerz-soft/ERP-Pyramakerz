@@ -9,7 +9,7 @@ import { Store } from '../../../../../Models/Inventory/store';
 import { InventoryDetailsService } from '../../../../../Services/Employee/Inventory/inventory-details.service';
 import { StoresService } from '../../../../../Services/Employee/Inventory/stores.service';
 import { ShopItemService } from '../../../../../Services/Employee/Inventory/shop-item.service';
-import { CombinedReportData } from '../../../../../Models/Inventory/report-card';
+import { CombinedReportData, InventoryNetSummary, InventoryNetTransaction } from '../../../../../Models/Inventory/report-card';
 
 @Component({
   selector: 'app-report-item-card',
@@ -91,6 +91,8 @@ export class ReportItemCardComponent implements OnInit {
   }
   // report-item-card.component.ts
 
+  // report-item-card.component.ts
+
   async viewReport() {
     if (!this.validateFilters()) {
       console.error('Validation failed - missing required filters');
@@ -149,57 +151,109 @@ export class ReportItemCardComponent implements OnInit {
       console.error('Error loading report:', error);
       this.combinedData = [];
       this.showTable = true;
-      // Show error to user
       alert('Failed to load report data. Please check console for details.');
     } finally {
       this.isLoading = false;
     }
   }
 
-  private processReportData(summary: any, transactions: any[]) {
-    // Create summary row
+  private processReportData(
+    summary: InventoryNetSummary,
+    transactions: InventoryNetTransaction[]
+  ) {
+    // Format the toDate from summary
+    const formattedToDate = this.formatDisplayDate(summary.toDate);
+
+    // Create summary row with actual toDate
     const summaryRow: CombinedReportData = {
       isSummary: true,
-      date: 'Summary',
-      transactionType: 'Opening Balance',
+      date: formattedToDate, // Use the actual toDate instead of 'Summary'
+      transactionType: '',
       invoiceNumber: '',
       authority: '',
-      income: '',
-      outcome: '',
-      balance: summary?.openingBalance || 0,
+      income: summary.inQuantity,
+      outcome: summary.outQuantity,
+      balance: summary.balance,
     };
 
     // Process transactions
     const transactionRows = transactions.map((t) => ({
       isSummary: false,
-      date: t.date,
-      transactionType: t.transactionType,
-      invoiceNumber: t.invoiceNumber || 'N/A',
-      authority: t.authority || 'N/A',
-      income: t.quantity > 0 ? t.quantity : '',
-      outcome: t.quantity < 0 ? Math.abs(t.quantity) : '',
+      date: t.dayDate,
+      transactionType: t.flagName,
+      invoiceNumber: t.invoiceNumber,
+      authority: t.supplierName || t.studentName || t.storeToName || 'N/A',
+      income: t.totalIn > 0 ? t.totalIn : '',
+      outcome: t.totalOut > 0 ? t.totalOut : '',
       balance: t.balance,
     }));
-
-    // Calculate running balance if needed
-    let runningBalance = summary?.openingBalance || 0;
-    transactionRows.forEach((t) => {
-      runningBalance +=
-        (typeof t.income === 'number' ? t.income : 0) -
-        (typeof t.outcome === 'number' ? t.outcome : 0);
-      t.balance = runningBalance;
-    });
 
     // Combine data
     this.combinedData = [summaryRow, ...transactionRows];
     this.prepareExportData();
-
-    console.log('Combined report data:', this.combinedData);
   }
+
+  private formatDisplayDate(dateString: string): string {
+    try {
+      // First convert to Date object
+      const date = new Date(dateString);
+
+      // Format as "Month Day, Year" (e.g. "May 27, 2025")
+      return date.toLocaleDateString('en-US', {
+        month: 'long', // Full month name (e.g. "May")
+        day: 'numeric', // Day of month (e.g. "27")
+        year: 'numeric', // Full year (e.g. "2025")
+      });
+    } catch (e) {
+      console.error('Error formatting date:', dateString, e);
+      return dateString; // Return original if formatting fails
+    }
+  }
+
+  // private processReportData(summary: any, transactions: any[]) {
+  //   // Create summary row
+  //   const summaryRow: CombinedReportData = {
+  //     isSummary: true,
+  //     date: 'Summary',
+  //     transactionType: 'Opening Balance',
+  //     invoiceNumber: '',
+  //     authority: '',
+  //     income: '',
+  //     outcome: '',
+  //     balance: summary?.openingBalance || 0,
+  //   };
+
+  //   // Process transactions
+  //   const transactionRows = transactions.map((t) => ({
+  //     isSummary: false,
+  //     date: t.date,
+  //     transactionType: t.transactionType,
+  //     invoiceNumber: t.invoiceNumber || 'N/A',
+  //     authority: t.authority || 'N/A',
+  //     income: t.quantity > 0 ? t.quantity : '',
+  //     outcome: t.quantity < 0 ? Math.abs(t.quantity) : '',
+  //     balance: t.balance,
+  //   }));
+
+  //   // Calculate running balance if needed
+  //   let runningBalance = summary?.openingBalance || 0;
+  //   transactionRows.forEach((t) => {
+  //     runningBalance +=
+  //       (typeof t.income === 'number' ? t.income : 0) -
+  //       (typeof t.outcome === 'number' ? t.outcome : 0);
+  //     t.balance = runningBalance;
+  //   });
+
+  //   // Combine data
+  //   this.combinedData = [summaryRow, ...transactionRows];
+  //   this.prepareExportData();
+
+  //   console.log('Combined report data:', this.combinedData);
+  // }
 
   private prepareExportData(): void {
     this.transactionsForExport = this.combinedData.map((t) => ({
-      Date: t.isSummary ? 'Summary' : new Date(t.date).toLocaleDateString(),
+      Date: t.isSummary ? t.date : new Date(t.date).toLocaleDateString(),
       'Transaction Type': t.transactionType,
       'Invoice Number': t.invoiceNumber,
       Authority: t.authority,

@@ -6,23 +6,26 @@
 </div>
 
 <div class="my-5 flex flex-wrap justify-between items-center">
-    <div class="flex flex-col w-[24%] mb-4">
-        <label class="mb-2 font-medium" for="store">Store</label>
-        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="store"
-            [(ngModel)]="selectedStoreId" (change)="onStoreSelected()" required>
-            <option *ngFor="let store of stores" [ngValue]="store.id">{{ store.name }}</option>
-            <option *ngIf="stores.length === 0" disabled selected>No Stores Found</option>
-        </select>
-    </div>
+<!-- Store Selector -->
+<div class="flex flex-col w-[24%] mb-4">
+    <label class="mb-2 font-medium" for="store">Store</label>
+    <select class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="store" [(ngModel)]="selectedStoreId"
+        (change)="onStoreSelected()" required>
+        <option [ngValue]="null" disabled selected hidden>Choose Store</option>
+        
+        <option *ngFor="let store of stores" [ngValue]="store.id">{{ store.name }}</option>
+    </select>
+</div>
 
-    <div class="flex flex-col w-[24%] mb-4">
-        <label class="mb-2 font-medium" for="item">Item</label>
-        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="item" [(ngModel)]="selectedItemId"
-            [disabled]="!selectedStoreId" required>
-            <option *ngFor="let item of items" [ngValue]="item.id">{{ item.enName }}</option>
-            <option *ngIf="items.length === 0" disabled selected>No Items Found</option>
-        </select>
-    </div>
+<!-- Item Selector -->
+<div class="flex flex-col w-[24%] mb-4">
+    <label class="mb-2 font-medium" for="item">Item</label>
+    <select class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="item" [(ngModel)]="selectedItemId"
+        [disabled]="!selectedStoreId" required>
+        <option [ngValue]="null" disabled selected hidden>Choose Item</option>
+        <option *ngFor="let item of items" [ngValue]="item.id">{{ item.enName }}</option>
+    </select>
+</div>
 
     <div class="flex flex-col w-[24%] mb-4">
         <label class="mb-2 font-medium" for="dateFrom">Date From</label>
@@ -36,7 +39,7 @@
             [(ngModel)]="dateTo" required>
     </div>
 
-    <div class="w-[24%] flex justify-end">
+    <div class="w-[99%] flex justify-end">
         <button class="p-4 font-medium text-xl rounded-lg" (click)="viewReport()"
             [disabled]="!dateFrom || !dateTo || !selectedStoreId || !selectedItemId" [ngClass]="{ 
             'bg-gray-100 text-gray-300': !dateFrom || !dateTo || !selectedStoreId || !selectedItemId, 
@@ -61,6 +64,8 @@
         </app-pdf-print>
     </div>
 </div>
+
+<!-- report-item-card.component.html -->
 
 <div *ngIf="showTable" class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
     <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
@@ -102,9 +107,9 @@
                     'bg-white': i % 2 !== 1,
                     'font-bold': row.isSummary
                 }" class="border-t border-gray-300 text-xs md:text-sm">
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ row.isSummary ? 'Summary' : (row.date | date:'mediumDate') }}
-                </td>
+<td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+    {{ row.isSummary ? row.date : (row.date | date:'MMMM d, yyyy') }}
+</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     {{ row.transactionType }}
                 </td>
