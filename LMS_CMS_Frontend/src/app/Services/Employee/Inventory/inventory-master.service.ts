@@ -131,8 +131,8 @@ export class InventoryMasterService {
     formData.append('saveID', master.saveID?.toString() || '0');
     formData.append('bankID', master.bankID?.toString() || '0');
     formData.append('supplierId', master.supplierId?.toString() || '0');
-    formData.append('schoolId', master.schoolId.toString());
-    formData.append('schoolPCId', master.schoolPCId.toString());
+    formData.append('schoolId', master.schoolId.toString() || '0');
+    formData.append('schoolPCId', master.schoolPCId.toString() || '0');
     formData.append('storeToTransformId', master.storeToTransformId?.toString() || '0');
 
     //  if (master.inventoryDetails && master.inventoryDetails.length > 0) {
