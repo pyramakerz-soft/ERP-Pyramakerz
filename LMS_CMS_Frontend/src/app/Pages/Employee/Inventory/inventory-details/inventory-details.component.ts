@@ -481,7 +481,6 @@ export class InventoryDetailsComponent {
       }
       if (this.mode == 'Edit') {
         this.Data.inventoryDetails = this.TableData;
-        console.log(this.Data.inventoryDetails)
         this.salesItemServ.Edit(this.Data.inventoryDetails, this.DomainName).subscribe((d) => { }, (error) => { console.log(error) });
         this.salesItemServ.Add(this.NewDetailsWhenEdit, this.DomainName).subscribe((d) => { }, (error) => { });
         this.salesServ.Edit(this.Data, this.DomainName).subscribe((d) => { this.router.navigateByUrl(`Employee/${this.InventoryFlag.enName}`); },
