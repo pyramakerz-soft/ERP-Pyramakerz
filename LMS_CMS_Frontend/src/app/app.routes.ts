@@ -172,6 +172,9 @@ import { DailyPerformanceMasterComponent } from './Pages/Employee/LMS/daily-perf
 
 import { AssignmentComponent } from './Pages/Employee/LMS/assignment/assignment.component';
 import { ReportItemCardComponent } from './Pages/Employee/Inventory/Report/report-item-card/report-item-card.component';
+import { AssignmentStudentComponent } from './Pages/Employee/LMS/assignment-student/assignment-student.component';
+import { AssignmentDetailComponent } from './Pages/Employee/LMS/assignment-detail/assignment-detail.component';
+
 
 
 export const routes: Routes = [
@@ -387,6 +390,8 @@ export const routes: Routes = [
             { path: "Assignment/:id", component: AssignmentEditComponent, title: "Assignment Edit", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "report-item-card", component: ReportItemCardComponent, title: "report-item-card", canActivate: [noNavigateWithoutLoginGuard] },
 
+            { path: "Assignment Student/:id", component: AssignmentStudentComponent, title: "AssignmentStudent", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Assignment Details/:id", component: AssignmentDetailComponent, title: "Assignment Detail", canActivate: [noNavigateWithoutLoginGuard] },
         ]
 
     },

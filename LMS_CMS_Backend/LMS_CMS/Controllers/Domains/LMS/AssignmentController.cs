@@ -35,8 +35,9 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee"},
-            pages: new[] { "Assignment" }
+            allowedTypes: new[] { "octa", "employee"}
+            //,
+            //pages: new[] { "Assignment" }
         )]
         public async Task<IActionResult> GetAsync([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
@@ -108,8 +109,9 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("GetBySubjectID/{subID}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee"},
-            pages: new[] { "Assignment" }
+            allowedTypes: new[] { "octa", "employee"}
+            //,
+            //pages: new[] { "Assignment" }
         )]
         public async Task<IActionResult> GetBySubjectID(long subID, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
@@ -187,8 +189,9 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("GetByID/{id}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee"},
-            pages: new[] { "Assignment" }
+            allowedTypes: new[] { "octa", "employee"}
+            //,
+            //pages: new[] { "Assignment" }
         )]
         public async Task<IActionResult> GetByID(long id)
         {
@@ -245,16 +248,12 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("GetByStudentID/{studID}/{subjID}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Assignment" }
+            allowedTypes: new[] { "octa", "employee" }
+            //,
+            //pages: new[] { "Assignment" }
         )]
         public async Task<IActionResult> GetByStudentID(long studID, long subjID, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
-        {
-            // Subject not hidden from them
-            // All the assignment that are for there subjects but also isSpecific != true + Those if exists in AssignmentStudentIsSpecific Table
-            // Make sure That Data isn't deleted
-            // how to get StudentClass ID from Student ID (We Can Use Class in Current Year)
-
+        { 
             if (pageNumber < 1) pageNumber = 1;
             if (pageSize < 1) pageSize = 10;
 
@@ -280,6 +279,32 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             if (student == null)
             {
                 return BadRequest("No student with this id");
+            }
+
+            // Subject not hidden from them
+            // All the assignment that are for there subjects but also isSpecific != true + Those if exists in AssignmentStudentIsSpecific Table
+            // Make sure That Data isn't deleted 
+
+            // Get StudentClassID According to current academic year
+            StudentClassroom studentClassroom = Unit_Of_Work.studentClassroom_Repository.First_Or_Default(
+                d => d.IsDeleted != true && d.StudentID == studID && d.Classroom.IsDeleted != true && d.Classroom.AcademicYear.IsActive == true
+                );
+
+            if (studentClassroom == null)
+            {
+                return NotFound("This Student isn't in a Class yet in this active year");
+            }
+
+            List<Assignment> assignments = await Unit_Of_Work.assignment_Repository.Select_All_With_IncludesById<Assignment>(
+                d => d.IsDeleted != true && d.SubjectID == subjID,
+                query => query.Include(d => d.AssignmentType),
+                query => query.Include(d => d.SubjectWeightType),
+                query => query.Include(d => d.Subject)
+                );
+
+            foreach (var assignment in assignments)
+            {
+                //List<AssignmentStudent> assignmentStudents = Unit_Of_Work.assignmentStudent_Repository.FindBy(d => d.IsDeleted != true && d.AssignmentID == assignment.ID);
             }
 
             //int totalRecords = await Unit_Of_Work.assignment_Repository
@@ -336,8 +361,9 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpPost]
         [Authorize_Endpoint_(
-           allowedTypes: new[] { "octa", "employee" },
-           pages: new[] { "Assignment" }
+           allowedTypes: new[] { "octa", "employee" }
+           //,
+           //pages: new[] { "Assignment" }
         )]
         public IActionResult Add(AssignmentAddDTO NewAssignment)
         {
@@ -466,9 +492,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpPut("FileAssignment")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
-            allowEdit: 1,
-            pages: new[] { "Assignment" }
+            allowedTypes: new[] { "octa", "employee" }
+            //,
+            //allowEdit: 1,
+            //pages: new[] { "Assignment" }
         )]
         public async Task<IActionResult> FileAssignment([FromForm] AssignmentFilePutDTO EditAssignment)
         {

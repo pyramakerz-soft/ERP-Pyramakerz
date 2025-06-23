@@ -15,11 +15,20 @@ namespace LMS_CMS_BL.DTO.LMS
         public float Mark { get; set; }
         public float QuestionMark { get; set; }
         public string Answer { get; set; }
+
         public long AssignmentStudentID { get; set; }
         public long QuestionBankID { get; set; }
-        public long QuestionTypeID { get; set; }
-        public long? AnswerOptionID { get; set; }
-        public List<AssignmentStudentQuestionAnswerOptionGetDTO> AssignmentStudentQuestionAnswerOption { get; set; }
 
+        public string QuestionDesc { get; set; }
+        public string? QuestionImage { get; set; }
+
+        public long QuestionTypeID { get; set; }
+        public string QuestionTypeName { get; set; }
+
+        public long? AnswerOptionID { get; set; }
+
+        public List<QuestionBankOptionAddDTO> QuestionBankOptions { get; set; }
+        public List<SubBankQuestionAddDTO> SubBankQuestion { get; set; }
+        public List<AssignmentStudentQuestionAnswerOptionGetDTO> AssignmentStudentQuestionAnswerOption { get; set; }
     }
 }
