@@ -49,7 +49,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             var query = Unit_Of_Work.payableMaster_Repository
             .Select_All_With_IncludesById_Pagination<PayableMaster>(
                 t => t.IsDeleted != true,
-                q => q.Include(m => m.PayableDetails)
+                q => q.Include(m => m.PayableDetails).ThenInclude(pd => pd.LinkFile)
                       .Include(m => m.LinkFile)
                       .Include(m => m.PayableDocType)
             );
@@ -67,6 +67,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             if (PayableMasters == null || PayableMasters.Count == 0)
                 return NotFound("No payables found for the specified date range.");
 
+            List<Bank> banksForMaster = new();
+            List<Save> safesForMaster = new();
+           
             List<Bank> banks = new();
             List<Save> safes = new();
             List<Supplier> Suppliers = new();
@@ -82,6 +85,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
             var allDetails = PayableMasters.SelectMany(pm => pm.PayableDetails).ToList();
 
+            var saveIdsForMaster = PayableMasters.Where(r => r.LinkFileID == 5).Select(r => r.BankOrSaveID).Distinct().ToList();
+            var bankIdsForMaster = PayableMasters.Where(r => r.LinkFileID == 6).Select(r => r.BankOrSaveID).Distinct().ToList();
+
             var suppliersIds = allDetails.Where(r => r.LinkFileID == 2).Select(r => r.LinkFileTypeID).Distinct().ToList();
             var debitIds = allDetails.Where(r => r.LinkFileID == 3).Select(r => r.LinkFileTypeID).Distinct().ToList();
             var creditsIds = allDetails.Where(r => r.LinkFileID == 4).Select(r => r.LinkFileTypeID).Distinct().ToList();
@@ -95,6 +101,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             var discountIds = allDetails.Where(r => r.LinkFileID == 12).Select(r => r.LinkFileTypeID).Distinct().ToList();
             var studentIds = allDetails.Where(r => r.LinkFileID == 13).Select(r => r.LinkFileTypeID).Distinct().ToList();
 
+            banksForMaster = await Unit_Of_Work.bank_Repository.Select_All_With_IncludesById<Bank>(b => bankIdsForMaster.Contains(b.ID));
+            safesForMaster = await Unit_Of_Work.save_Repository.Select_All_With_IncludesById<Save>(s => saveIdsForMaster.Contains(s.ID));
+            
             banks = await Unit_Of_Work.bank_Repository.Select_All_With_IncludesById<Bank>(b => bankIds.Contains(b.ID));
             safes = await Unit_Of_Work.save_Repository.Select_All_With_IncludesById<Save>(s => saveIds.Contains(s.ID));
             Suppliers = await Unit_Of_Work.supplier_Repository.Select_All_With_IncludesById<Supplier>(s => suppliersIds.Contains(s.ID));
@@ -112,16 +121,20 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
             foreach (var dto in DTOs)
             {
-                //dto.LinkFileName = dto.LinkFileID switch
-                //{
-                //    5 => safes.FirstOrDefault(s => s.ID == dto.BankOrSaveID)?.Name,
-                //    6 => banks.FirstOrDefault(b => b.ID == dto.BankOrSaveID)?.Name,
-                //    _ => null
-                //};
+                dto.BankOrSaveName = dto.LinkFileID switch
+                {
+                    5 => safesForMaster.FirstOrDefault(s => s.ID == dto.BankOrSaveID)?.Name,
+                    6 => banksForMaster.FirstOrDefault(b => b.ID == dto.BankOrSaveID)?.Name,
+                    _ => null
+                };
 
+                if(dto.LinkFileID == 6)
+                {
+                    var x = banks.FirstOrDefault(b => b.ID == dto.BankOrSaveID);
+                }
                 foreach (var detail in dto.PayableDetails)
                 {
-                    detail.LinkFileTypeName = detail.LinkFileTypeID switch
+                    detail.LinkFileTypeName = detail.LinkFileID switch
                     {
                         2 => Suppliers.FirstOrDefault(s => s.ID == detail.LinkFileTypeID)?.Name,
                         3 => debits.FirstOrDefault(d => d.ID == detail.LinkFileTypeID)?.Name,
@@ -139,7 +152,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                     };
                 }
             }
-            //List<PayableDetailsGetDTO> detailsDtos = _mapper.Map<List<PayableDetailsGetDTO>>(PayableMasters);
 
             return Ok(DTOs);
         }

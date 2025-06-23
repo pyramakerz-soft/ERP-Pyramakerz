@@ -41,7 +41,7 @@ namespace LMS_CMS_DAL.Models.Domains.Inventory
         public DateTime? EtaInsertedDate { get; set; }  //
         public string? ShareLongId { get; set; }
         public string? ETAErrorMsg { get; set; }
-        public char? InvoiceType { get; set; } = 'C';
+        public char? InvoiceType { get; set; } = 'P';
         public List<string>? Attachments { get; set; }
 
         [ForeignKey("TaxIssuer")]
