@@ -57,22 +57,135 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         }
 
         /// ///////////////////////////////////////////////////-777
-        [HttpGet("inventory-net-summaryyyyyy")]
+
+
+        //[HttpGet("inventory-full-report")]
+        //[Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Inventory" })]
+        //public async Task<IActionResult> GetInventoryFullReportAsync(
+        //    long storeId,
+        //    long shopItemId,
+        //    string fromDate,
+        //    string toDate)
+        //        {
+        //    if (!DateTime.TryParse(fromDate, out DateTime fromDateTime) ||
+        //        !DateTime.TryParse(toDate, out DateTime toDateTime))
+        //        return BadRequest("Invalid date format.");
+
+        //    var Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+        //    var includes = new Func<IQueryable<InventoryDetails>, IIncludableQueryable<InventoryDetails, object>>[]
+        //    {
+        //q => q.Include(d => d.InventoryMaster).ThenInclude(m => m.InventoryFlags),
+        //q => q.Include(d => d.InventoryMaster.Supplier),
+        //q => q.Include(d => d.InventoryMaster.Student),
+        //q => q.Include(d => d.InventoryMaster.StoreToTransform)
+        //    };
+
+        //    var baseData = await Unit_Of_Work.inventoryDetails_Repository
+        //        .Select_All_With_IncludesById<InventoryDetails>(
+        //            d => d.InventoryMaster != null &&
+        //                 d.InventoryMaster.IsDeleted != true &&
+        //                 d.ShopItemID == shopItemId &&
+        //                 (d.InventoryMaster.StoreID == storeId ||
+        //                  (d.InventoryMaster.FlagId == 8 && d.InventoryMaster.StoreToTransformId == storeId)),
+        //            includes
+        //        );
+
+        //    var filteredData = baseData
+        //        .Where(d =>
+        //            DateTime.TryParse(d.InventoryMaster.Date, out DateTime docDate) &&
+        //            docDate.Date >= fromDateTime.Date &&
+        //            docDate.Date <= toDateTime.Date)
+        //        .ToList();
+
+        //    // ======= Summary Calculation =======
+        //    var flagsToExclude = new long[] { 13 };
+
+        //    var summaryData = filteredData
+        //        .Where(d => !flagsToExclude.Contains(d.InventoryMaster.FlagId) &&
+        //                    d.InventoryMaster.InventoryFlags.ItemInOut != 0)
+        //        .ToList();
+
+        //    var inQuantity = summaryData
+        //        .Where(d => d.InventoryMaster.InventoryFlags.ItemInOut == 1)
+        //        .Sum(d => d.Quantity);
+
+        //    var outQuantity = summaryData
+        //        .Where(d => d.InventoryMaster.InventoryFlags.ItemInOut == -1)
+        //        .Sum(d => d.Quantity);
+
+        //    var balance = inQuantity - outQuantity;
+
+        //    var summaryDto = new InventoryNetSummaryDTO
+        //    {
+        //        ShopItemId = shopItemId,
+        //        StoreId = storeId,
+        //        ToDate = toDateTime.AddDays(-1).ToString("yyyy-MM-dd"),
+        //        InQuantity = inQuantity,
+        //        outQuantity = outQuantity,
+        //        Balance = balance
+        //    };
+
+        //    // ======= Transactions DTO List =======
+        //    var transactionDtos = filteredData.Select(d =>
+        //    {
+        //        double signedQty = d.Quantity * d.InventoryMaster.InventoryFlags.ItemInOut;
+        //        return new InventoryNetTransactionDTO
+        //        {
+        //            FlagName = d.InventoryMaster.InventoryFlags.arName,
+        //            InvoiceNumber = d.InventoryMaster.InvoiceNumber,
+        //            DayDate = d.InventoryMaster.Date,
+        //            Notes = d.InventoryMaster.Notes,
+        //            Quantity = d.Quantity,
+
+        //            SupplierName = (new long[] { 9, 10, 13 }.Contains(d.InventoryMaster.FlagId))
+        //                ? d.InventoryMaster.Supplier?.Name
+        //                : null,
+
+        //            StudentName = (new long[] { 11, 12 }.Contains(d.InventoryMaster.FlagId))
+        //                ? d.InventoryMaster.Student?.en_name
+        //                : null,
+
+        //            StoreToName = (d.InventoryMaster.FlagId == 8)
+        //                ? d.InventoryMaster.StoreToTransform?.Name
+        //                : null,
+
+        //            TotalIn = signedQty > 0 ? signedQty : 0,
+        //            TotalOut = signedQty < 0 ? Math.Abs(signedQty) : 0,
+        //            Balance = signedQty
+        //        };
+        //    }).ToList();
+
+        //    // ======= Return Both Together =======
+        //    var result = new
+        //    {
+        //        Summary = summaryDto,
+        //        Transactions = transactionDtos
+        //    };
+
+        //    return Ok(result);
+        //}
+        ////////////////////////////////////////////////////////
+
+        [HttpGet("inventory-net-summary")]
         [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Inventory" })]
-        public async Task<IActionResult> GetInventoryNetSummaryAsync(long storeId, long shopItemId, string toDate )
+        public async Task<IActionResult> GetInventoryNetSummaryAsync(long storeId, long shopItemId, string toDate)
         {
             if (!DateTime.TryParse(toDate, out DateTime toDateTime))
                 return BadRequest("Invalid date format.");
 
-            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+            // التاريخ سيكون حتى البارحة فقط
+            var summaryDate = toDateTime.AddDays(-1).Date;
+
+            var Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             var flagsToExclude = new long[] { 13 };
 
             var data = await Unit_Of_Work.inventoryDetails_Repository
                 .Select_All_With_IncludesById<InventoryDetails>(
                     d => d.InventoryMaster != null && d.InventoryMaster.IsDeleted != true,
-                    q => q.Include(d => d.InventoryMaster).ThenInclude(im => im.InventoryFlags));
-
+                    q => q.Include(d => d.InventoryMaster).ThenInclude(im => im.InventoryFlags)
+                );
 
             var filteredData = data
                 .Where(d =>
@@ -80,7 +193,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                     d.InventoryMaster.IsDeleted != true &&
                     d.ShopItemID == shopItemId &&
                     DateTime.TryParse(d.InventoryMaster.Date, out var docDate) &&
-                    docDate.Date <= toDateTime.Date &&
+                    docDate.Date <= summaryDate &&
                     !flagsToExclude.Contains(d.InventoryMaster.FlagId) &&
                     (
                         d.InventoryMaster.StoreID == storeId ||
@@ -104,11 +217,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             {
                 ShopItemId = shopItemId,
                 StoreId = storeId,
-                ToDate = toDateTime.AddDays(-1).ToString("yyyy-MM-dd"),
+
+                ToDate = summaryDate.ToString("yyyy-MM-dd"),
                 InQuantity = inQuantity,
                 outQuantity = outQuantity,
                 Balance = balance
- 
             };
 
             return Ok(dto);
@@ -116,15 +229,67 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
 
 
-        /// /////////////////////////////////////////////////////////////////////////////////////-777
+        ///// /////////////////////////////////////////////////////////////////////////////////////-777
 
+        //[HttpGet("inventory-net-transactions")]
+        //[Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Inventory" })]
+        //public async Task<IActionResult> GetInventoryNetTransactionsAsync(long storeId, long shopItemId, string fromDate, string toDate)
+        //{
+        //    if (!DateTime.TryParse(fromDate, out DateTime fromDateTime) ||
+        //        !DateTime.TryParse(toDate, out DateTime toDateTime))
+        //    {
+        //        return BadRequest("Invalid date format.");
+        //    }
+
+        //    UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+        //    var data = (await Unit_Of_Work.inventoryDetails_Repository
+        //        .Select_All_With_IncludesById<InventoryDetails>(
+        //                d => d.IsDeleted != true &&
+        //                 d.InventoryMaster != null &&
+        //                  d.InventoryMaster.IsDeleted != true &&
+        //                   d.ShopItemID == shopItemId &&
+        //                    (d.InventoryMaster.StoreID == storeId ||
+        //                     (d.InventoryMaster.FlagId == 8 && d.InventoryMaster.StoreToTransformId == storeId)),
+
+        //            q => q.Include(d => d.InventoryMaster).ThenInclude(m => m.InventoryFlags),
+        //            q => q.Include(d => d.InventoryMaster.Supplier),
+        //            q => q.Include(d => d.InventoryMaster.Student),
+        //            q => q.Include(d => d.InventoryMaster.StoreToTransform))).AsEnumerable()
+
+        //        .Where(d =>
+        //            DateTime.TryParse(d.InventoryMaster.Date, out DateTime date) &&
+        //            date >= fromDateTime &&
+        //            date <= toDateTime)
+        //        .Select(d =>
+        //        {
+        //            double signedQty = d.Quantity * d.InventoryMaster.InventoryFlags.ItemInOut;
+        //            return new InventoryNetTransactionDTO
+        //            {
+        //                FlagName = d.InventoryMaster.InventoryFlags.arName,
+        //                InvoiceNumber = d.InventoryMaster.InvoiceNumber,
+        //                DayDate = d.InventoryMaster.Date,
+        //                Notes = d.InventoryMaster.Notes,
+        //                Quantity = d.Quantity,
+
+        //                SupplierName = (new long[] { 9, 10, 13 }.Contains(d.InventoryMaster.FlagId)) ? d.InventoryMaster.Supplier?.Name : null,
+
+        //                StudentName = (new long[] { 11, 12 }.Contains(d.InventoryMaster.FlagId)) ? d.InventoryMaster.Student?.en_name : null,
+
+        //                StoreToName = (d.InventoryMaster.FlagId == 8) ? d.InventoryMaster.StoreToTransform?.Name : null,
+
+        //                TotalIn = signedQty > 0 ? signedQty : 0,
+        //                TotalOut = signedQty < 0 ? Math.Abs(signedQty) : 0,
+        //                Balance = signedQty
+        //            };
+        //        })
+        //        .ToList();
+
+        //    return Ok(data);
+        //}
         [HttpGet("inventory-net-transactions")]
         [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Inventory" })]
-        public async Task<IActionResult> GetInventoryNetTransactionsAsync(
-        long storeId,
-        long shopItemId,
-        string fromDate,
-        string toDate)
+        public async Task<IActionResult> GetInventoryNetTransactionsAsync(long storeId, long shopItemId, string fromDate, string toDate)
         {
             if (!DateTime.TryParse(fromDate, out DateTime fromDateTime) ||
                 !DateTime.TryParse(toDate, out DateTime toDateTime))
@@ -134,49 +299,72 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            var data = (await Unit_Of_Work.inventoryDetails_Repository
-                .Select_All_With_IncludesById<InventoryDetails>(
-                        d => d.IsDeleted != true &&
-                         d.InventoryMaster != null &&
-                          d.InventoryMaster.IsDeleted != true &&
-                           d.ShopItemID == shopItemId &&
-                            (d.InventoryMaster.StoreID == storeId ||
-                             (d.InventoryMaster.FlagId == 8 && d.InventoryMaster.StoreToTransformId == storeId)),
+            var flagsToExclude = new long[] { 13 };
 
+            // ===== جلب البيانات مع Include =====
+            var allData = await Unit_Of_Work.inventoryDetails_Repository
+                .Select_All_With_IncludesById<InventoryDetails>(
+                    d => d.InventoryMaster != null &&
+                         d.InventoryMaster.IsDeleted != true &&
+                         d.IsDeleted != true &&
+                         d.ShopItemID == shopItemId &&
+                         (
+                            d.InventoryMaster.StoreID == storeId ||
+                            (d.InventoryMaster.FlagId == 8 && d.InventoryMaster.StoreToTransformId == storeId)
+                         ),
                     q => q.Include(d => d.InventoryMaster).ThenInclude(m => m.InventoryFlags),
                     q => q.Include(d => d.InventoryMaster.Supplier),
                     q => q.Include(d => d.InventoryMaster.Student),
-                    q => q.Include(d => d.InventoryMaster.StoreToTransform))).AsEnumerable()
+                    q => q.Include(d => d.InventoryMaster.StoreToTransform)
+                );
 
+            // ===== 1. حساب الرصيد السابق (قبل fromDate) =====
+            var previousBalance = allData
                 .Where(d =>
-                    DateTime.TryParse(d.InventoryMaster.Date, out DateTime date) &&
-                    date >= fromDateTime &&
-                    date <= toDateTime)
-                .Select(d =>
-                {
-                    double signedQty = d.Quantity * d.InventoryMaster.InventoryFlags.ItemInOut;
-                    return new InventoryNetTransactionDTO
-                    {
-                        FlagName = d.InventoryMaster.InventoryFlags.arName,
-                        InvoiceNumber = d.InventoryMaster.InvoiceNumber,
-                        DayDate = d.InventoryMaster.Date,
-                        Notes = d.InventoryMaster.Notes,
-                        Quantity = d.Quantity,
+                    DateTime.TryParse(d.InventoryMaster.Date, out DateTime docDate) &&
+                    docDate.Date < fromDateTime.Date &&
+                    !flagsToExclude.Contains(d.InventoryMaster.FlagId) &&
+                    d.InventoryMaster.InventoryFlags.ItemInOut != 0)
+                .Sum(d => d.Quantity * d.InventoryMaster.InventoryFlags.ItemInOut);
 
-                        SupplierName = (new long[] { 9, 10, 13 }.Contains(d.InventoryMaster.FlagId)) ? d.InventoryMaster.Supplier?.Name : null,
-
-                        StudentName = (new long[] { 11, 12 }.Contains(d.InventoryMaster.FlagId)) ? d.InventoryMaster.Student?.en_name : null,
-
-                        StoreToName = (d.InventoryMaster.FlagId == 8) ? d.InventoryMaster.StoreToTransform?.Name : null,
-
-                        TotalIn = signedQty > 0 ? signedQty : 0,
-                        TotalOut = signedQty < 0 ? Math.Abs(signedQty) : 0,
-                        Balance = signedQty
-                    };
-                })
+            // ===== 2. جلب الحركات من fromDate إلى toDate =====
+            var transactionData = allData
+                .Where(d =>
+                    DateTime.TryParse(d.InventoryMaster.Date, out DateTime docDate) &&
+                    docDate.Date >= fromDateTime.Date &&
+                    docDate.Date <= toDateTime.Date)
+                .OrderBy(d => DateTime.Parse(d.InventoryMaster.Date))
                 .ToList();
 
-            return Ok(data);
+            // ===== 3. بناء DTO مع تحديث الرصيد المتغير =====
+         
+            var runningBalance = previousBalance;
+            var transactions = new List<InventoryNetTransactionDTO>();
+
+            foreach (var d in transactionData)
+            {
+                int signedQty = d.Quantity * d.InventoryMaster.InventoryFlags.ItemInOut;
+                runningBalance += signedQty;
+
+                transactions.Add(new InventoryNetTransactionDTO
+                {
+                    FlagName = d.InventoryMaster.InventoryFlags.arName,
+                    InvoiceNumber = d.InventoryMaster.InvoiceNumber,
+                    DayDate = d.InventoryMaster.Date,
+                    Notes = d.InventoryMaster.Notes,
+                    Quantity = d.Quantity,
+
+                    SupplierName = (new long[] { 9, 10, 13 }.Contains(d.InventoryMaster.FlagId)) ? d.InventoryMaster.Supplier?.Name : null,
+                    StudentName = (new long[] { 11, 12 }.Contains(d.InventoryMaster.FlagId)) ? d.InventoryMaster.Student?.en_name : null,
+                    StoreToName = (d.InventoryMaster.FlagId == 8) ? d.InventoryMaster.StoreToTransform?.Name : null,
+
+                    TotalIn = signedQty > 0 ? signedQty : 0,
+                    TotalOut = signedQty < 0 ? Math.Abs(signedQty) : 0,
+                    Balance = runningBalance
+                });
+            }
+
+            return Ok(transactions);
         }
 
 
