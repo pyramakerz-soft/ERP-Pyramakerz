@@ -486,6 +486,7 @@ export class InventoryDetailsComponent {
         this.salesServ.Edit(this.Data, this.DomainName).subscribe((d) => { this.router.navigateByUrl(`Employee/${this.InventoryFlag.enName}`); },
           (error) => {
             this.isLoading = false;
+            console.log(error)
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
