@@ -1012,6 +1012,23 @@ namespace LMS_CMS_BL.Config
                .ForMember(dest => dest.SubjectWeightTypeArabicName, opt => opt.MapFrom(src => src.SubjectWeightType.WeightType.ArabicName))
                .ForMember(dest => dest.AssignmentTypeEnglishName, opt => opt.MapFrom(src => src.AssignmentType.EnglishName))
                .ForMember(dest => dest.AssignmentTypeArabicName, opt => opt.MapFrom(src => src.AssignmentType.ArabicName));
+
+            CreateMap<AssignmentStudent, AssignmentForStudentGetDTO>()
+               .ForMember(dest => dest.SubjectID, opt => opt.MapFrom(src => src.Assignment.SubjectID))
+               .ForMember(dest => dest.SubjectWeightTypeID, opt => opt.MapFrom(src => src.Assignment.SubjectWeightTypeID))
+               .ForMember(dest => dest.AssignmentTypeID, opt => opt.MapFrom(src => src.Assignment.AssignmentTypeID))
+               .ForMember(dest => dest.AssignmentEnglishName, opt => opt.MapFrom(src => src.Assignment.EnglishName))
+               .ForMember(dest => dest.AssignmentArabicName, opt => opt.MapFrom(src => src.Assignment.ArabicName))
+               .ForMember(dest => dest.AssignmentMark, opt => opt.MapFrom(src => src.Assignment.Mark))
+               .ForMember(dest => dest.OpenDate, opt => opt.MapFrom(src => src.Assignment.OpenDate))
+               .ForMember(dest => dest.DueDate, opt => opt.MapFrom(src => src.Assignment.DueDate))
+               .ForMember(dest => dest.CutOfDate, opt => opt.MapFrom(src => src.Assignment.CutOfDate))
+               .ForMember(dest => dest.SubjectEnglishName, opt => opt.MapFrom(src => src.Assignment.Subject.en_name))
+               .ForMember(dest => dest.SubjectArabicName, opt => opt.MapFrom(src => src.Assignment.Subject.ar_name))
+               .ForMember(dest => dest.SubjectWeightTypeEnglishName, opt => opt.MapFrom(src => src.Assignment.SubjectWeightType.WeightType.EnglishName))
+               .ForMember(dest => dest.SubjectWeightTypeArabicName, opt => opt.MapFrom(src => src.Assignment.SubjectWeightType.WeightType.ArabicName))
+               .ForMember(dest => dest.AssignmentTypeEnglishName, opt => opt.MapFrom(src => src.Assignment.AssignmentType.EnglishName))
+               .ForMember(dest => dest.AssignmentTypeArabicName, opt => opt.MapFrom(src => src.Assignment.AssignmentType.ArabicName));
         }
     } 
 }
