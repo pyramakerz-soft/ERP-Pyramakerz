@@ -40,4 +40,16 @@ export class AssignmentStudentService {
     return this.http.get<{ data: AssignmentStudent[], pagination: any }>(`${this.baseUrl}/AssignmentStudent/GetByAssignmentIDClassID/${AssignmentId}/${ClassId}?pageNumber=${pageNumber}&pageSize=${pageSize}`, { headers });
   }
 
+  Edit(data: AssignmentStudent,DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.put(`${this.baseUrl}/AssignmentStudent`,data, { headers });
+  }
+
 }

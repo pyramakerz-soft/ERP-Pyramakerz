@@ -21,8 +21,10 @@ namespace LMS_CMS_BL.DTO.LMS
 
         public string QuestionDesc { get; set; }
         public string? QuestionImage { get; set; }
+        public string? QuestionCorrectAnswerName { get; set; }
 
         public long QuestionTypeID { get; set; }
+        public long QuestionCorrectAnswerID { get; set; }
         public string QuestionTypeName { get; set; }
 
         public long? AnswerOptionID { get; set; }
