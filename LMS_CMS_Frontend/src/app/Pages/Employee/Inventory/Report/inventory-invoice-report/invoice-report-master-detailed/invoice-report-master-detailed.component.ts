@@ -110,6 +110,7 @@ items: any[] = [];
   this.categoryService.Get(this.categoryService.ApiServ.GetHeader()).subscribe({
     next: (categories) => {
       this.categories = categories;
+      console.log(this.categories);
     },
     error: (error) => {
       console.error('Error loading categories:', error);
@@ -215,6 +216,7 @@ viewReport() {
     this.pageSize
   ).subscribe({
       next: (response: any) => {
+        console.log(response);
         if (Array.isArray(response)) {
           this.transactions = response;
           this.totalRecords = response.length;
@@ -249,7 +251,7 @@ private prepareExportData(): void {
       { key: 'Store', value: t.storeName },
       { key: 'Transaction Type', value: t.flagEnName },
       { key: 'Total Amount', value: t.total },
-      { key: 'All Total', value: this.totalRecords },
+      // { key: 'All Total', value: this.totalRecords },
       { key: 'Notes', value: t.notes || 'N/A' }
     ],
     table: {

@@ -16,7 +16,6 @@ import { CombinedReportData, InventoryNetSummary, InventoryNetTransaction } from
   standalone: true,
   imports: [CommonModule, FormsModule, PdfPrintComponent],
   templateUrl: './report-item-card.component.html',
-  styleUrls: ['./report-item-card.component.css'],
 })
 export class ReportItemCardComponent implements OnInit {
   dateFrom: string = '';
