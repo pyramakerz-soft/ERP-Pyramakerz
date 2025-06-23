@@ -57,7 +57,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         }
 
         /// ///////////////////////////////////////////////////-777
-        [HttpGet("inventory-net-summary")]
+        [HttpGet("inventory-net-summaryyyyyy")]
         [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Inventory" })]
         public async Task<IActionResult> GetInventoryNetSummaryAsync(long storeId, long shopItemId, string toDate )
         {

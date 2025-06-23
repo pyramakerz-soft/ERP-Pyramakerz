@@ -89,9 +89,6 @@ export class ReportItemCardComponent implements OnInit {
         },
       });
   }
-  // report-item-card.component.ts
-
-  // report-item-card.component.ts
 
   async viewReport() {
     if (!this.validateFilters()) {
@@ -111,7 +108,7 @@ export class ReportItemCardComponent implements OnInit {
         storeId: this.selectedStoreId,
         itemId: this.selectedItemId,
         fromDate: formattedDateFrom,
-        toDate: formattedDateTo,
+        toDate: formattedDateFrom,
       });
 
       // Get summary data
@@ -119,7 +116,7 @@ export class ReportItemCardComponent implements OnInit {
         .getInventoryNetSummary(
           this.selectedStoreId!,
           this.selectedItemId!,
-          formattedDateTo,
+          formattedDateFrom,
           this.inventoryDetailsService.ApiServ.GetHeader()
         )
         .toPromise();
@@ -161,13 +158,11 @@ export class ReportItemCardComponent implements OnInit {
     summary: InventoryNetSummary,
     transactions: InventoryNetTransaction[]
   ) {
-    // Format the toDate from summary
     const formattedToDate = this.formatDisplayDate(summary.toDate);
 
-    // Create summary row with actual toDate
     const summaryRow: CombinedReportData = {
       isSummary: true,
-      date: formattedToDate, // Use the actual toDate instead of 'Summary'
+      date: formattedToDate,
       transactionType: '',
       invoiceNumber: '',
       authority: '',
@@ -198,15 +193,14 @@ export class ReportItemCardComponent implements OnInit {
       // First convert to Date object
       const date = new Date(dateString);
 
-      // Format as "Month Day, Year" (e.g. "May 27, 2025")
       return date.toLocaleDateString('en-US', {
-        month: 'long', // Full month name (e.g. "May")
-        day: 'numeric', // Day of month (e.g. "27")
-        year: 'numeric', // Full year (e.g. "2025")
+        month: 'long',
+        day: 'numeric', 
+        year: 'numeric', 
       });
     } catch (e) {
       console.error('Error formatting date:', dateString, e);
-      return dateString; // Return original if formatting fails
+      return dateString;
     }
   }
 
