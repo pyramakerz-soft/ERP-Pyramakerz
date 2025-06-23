@@ -666,9 +666,8 @@ namespace LMS_CMS_BL.Config
                 .ForMember(dest => dest.SubCategoryId, opt => opt.MapFrom(src => src.ShopItem.InventorySubCategoriesID));
 
             CreateMap<InventoryDetailsGetDTO, InventoryDetails>();
-            CreateMap<InventoryDetailsAddDTO, InventoryDetails>();
-
             CreateMap<Gender, GenderGetDTO>();
+            CreateMap<InventoryDetailsPutDTO, InventoryDetails>();
 
             CreateMap<InventoryFlags, InventoryFlagGetDTO>();
             CreateMap<Cart_ShopItem, Cart_ShopItemGetDTO>()

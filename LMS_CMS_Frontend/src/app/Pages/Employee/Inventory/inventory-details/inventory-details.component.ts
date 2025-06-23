@@ -330,12 +330,12 @@ export class InventoryDetailsComponent {
     });
   }
 
-  StoreChanged(){
+  StoreChanged() {
     this.GetCategories()
-    if(this.FlagId == 8){
-      this.Data.storeToTransformId=0
-      this.StoresForTitle =[]
-      this.StoresForTitle = this.Stores.filter(s=>s.id!=this.Data.storeID);
+    if (this.FlagId == 8) {
+      this.Data.storeToTransformId = 0
+      this.StoresForTitle = []
+      this.StoresForTitle = this.Stores.filter(s => s.id != this.Data.storeID);
     }
   }
 
@@ -411,7 +411,7 @@ export class InventoryDetailsComponent {
       this.salesItemServ.GetBySalesId(this.MasterId, this.DomainName).subscribe(
         (d) => {
           this.TableData = d;
-          console.log( this.TableData)
+          console.log(this.TableData)
           this.Data.inventoryDetails = d;
           resolve();
         },
@@ -446,6 +446,7 @@ export class InventoryDetailsComponent {
       console.log(this.Data)
       this.isLoading = true;
       // await this.SaveRow();
+      console.log(this.Data)
       if (this.mode == 'Create') {
         this.salesServ.Add(this.Data, this.DomainName).subscribe(
           (d) => {
@@ -480,20 +481,10 @@ export class InventoryDetailsComponent {
       }
       if (this.mode == 'Edit') {
         this.Data.inventoryDetails = this.TableData;
-        this.salesItemServ
-          .Edit(this.Data.inventoryDetails, this.DomainName)
-          .subscribe((d) => { });
-        console.log("new",this.NewDetailsWhenEdit)
-        this.salesItemServ
-          .Add(this.NewDetailsWhenEdit, this.DomainName)
-          .subscribe(
-            (d) => { },
-            (error) => { }
-          );
-        this.salesServ.Edit(this.Data, this.DomainName).subscribe(
-          (d) => {
-            this.router.navigateByUrl(`Employee/${this.InventoryFlag.enName}`);
-          },
+        console.log(this.Data.inventoryDetails)
+        this.salesItemServ.Edit(this.Data.inventoryDetails, this.DomainName).subscribe((d) => { }, (error) => { console.log(error) });
+        this.salesItemServ.Add(this.NewDetailsWhenEdit, this.DomainName).subscribe((d) => { }, (error) => { });
+        this.salesServ.Edit(this.Data, this.DomainName).subscribe((d) => { this.router.navigateByUrl(`Employee/${this.InventoryFlag.enName}`); },
           (error) => {
             this.isLoading = false;
             Swal.fire({
@@ -999,7 +990,7 @@ export class InventoryDetailsComponent {
           shopItemName: d.enName,
           barCode: d.barCode,
           quantity: 1,
-          salesId:0,
+          salesId: 0,
           price: price,
           totalPrice: price,
           name: '',
@@ -1062,32 +1053,32 @@ export class InventoryDetailsComponent {
         })
     }
     else {
-    if (this.Data.studentID != 0) {
-      this.salesServ.GetByStudentId(this.Data.studentID, this.DomainName).subscribe((d) => {
-        this.SalesItem = d
-        this.openModal();
-      },
-        (error) => {
-          console.log(error)
-          this.isLoading = false;
-          Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: 'There is No Sales Invoices For this student',
-            confirmButtonText: 'Okay',
-            customClass: { confirmButton: 'secondaryBg' },
-          });
-        })
+      if (this.Data.studentID != 0) {
+        this.salesServ.GetByStudentId(this.Data.studentID, this.DomainName).subscribe((d) => {
+          this.SalesItem = d
+          this.openModal();
+        },
+          (error) => {
+            console.log(error)
+            this.isLoading = false;
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'There is No Sales Invoices For this student',
+              confirmButtonText: 'Okay',
+              customClass: { confirmButton: 'secondaryBg' },
+            });
+          })
+      }
+      else {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Warning!',
+          text: 'Choose Student First',
+          confirmButtonColor: '#089B41',
+        });
+      }
     }
-    else {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Warning!',
-        text: 'Choose Student First',
-        confirmButtonColor: '#089B41',
-      });
-    }
-  }
   }
 
   // getBySalesItemBySaleId() {
@@ -1154,9 +1145,9 @@ export class InventoryDetailsComponent {
   validateNumber(event: any, field: keyof InventoryDetails): void {
     const value = event.target.value;
     if (isNaN(value) || value === '') {
-      event.target.value = ''; 
+      event.target.value = '';
       if (typeof this.Item[field] === 'string') {
-        this.Item[field] = '' as never;  
+        this.Item[field] = '' as never;
       }
     }
   }

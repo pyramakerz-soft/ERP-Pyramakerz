@@ -98,9 +98,69 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         }
         /////////////////////////////////////////////
 
+        [HttpGet("GetByAssignmentId/{id}")]
+        [Authorize_Endpoint_(
+             allowedTypes: new[] { "octa", "employee" , "student" }
+         //,
+         //pages: new[] { "Assignment" }
+         )]
+        public async Task<IActionResult> GetByAssignmentId(long id)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            Assignment assignment = await Unit_Of_Work.assignment_Repository.FindByIncludesAsync(
+                 s => s.ID == id && s.IsDeleted != true,
+
+                 query => query.Include(e => e.AssignmentQuestions)
+                         .ThenInclude(aq => aq.QuestionBank),
+
+                 query => query.Include(e => e.AssignmentQuestions)
+                     .ThenInclude(q => q.QuestionBank)
+                         .ThenInclude(qb => qb.QuestionBankOptions),
+
+                 query => query.Include(e => e.AssignmentQuestions)
+                     .ThenInclude(q => q.QuestionBank)
+                         .ThenInclude(qb => qb.QuestionType),
+
+                 query => query.Include(e => e.AssignmentQuestions)
+                     .ThenInclude(q => q.QuestionBank)
+                         .ThenInclude(qb => qb.SubBankQuestions) 
+             );
+
+            if (assignment == null)
+            {
+                return NotFound();
+            }
+
+            AssignmentGetDTO DTO = mapper.Map<AssignmentGetDTO>(assignment);
+
+            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+
+            if (DTO.AssignmentTypeID == 1)
+            {
+                if (!string.IsNullOrEmpty(DTO.LinkFile))
+                {
+                    DTO.LinkFile = $"{serverUrl}{DTO.LinkFile.Replace("\\", "/")}";
+                }
+            }
+
+            return Ok(DTO);
+        }
+        /////////////////////////////////////////////
+
         [HttpGet("GetById/{id}")]
         [Authorize_Endpoint_(
-             allowedTypes: new[] { "octa", "employee" }
+             allowedTypes: new[] { "octa", "employee", "student" }
          //,
          //pages: new[] { "Assignment" }
          )]
@@ -167,6 +227,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             return Ok(DTO);
         }
+
 
         /////////////////////////////////////////////
 
