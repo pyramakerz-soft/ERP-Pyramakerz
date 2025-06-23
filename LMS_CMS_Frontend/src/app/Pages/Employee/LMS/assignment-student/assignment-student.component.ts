@@ -48,8 +48,8 @@ export class AssignmentStudentComponent {
   isDeleting: boolean = false;
   AssignmentId: number = 0;
   ClassId: number = 0;
-  IsShowTabls:boolean=false
-  assignment:Assignment=new Assignment()
+  IsShowTabls: boolean = false
+  assignment: Assignment = new Assignment()
 
   constructor(
     private router: Router,
@@ -61,8 +61,8 @@ export class AssignmentStudentComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public assignmentStudentServ: AssignmentStudentService,
-    public classServ: ClassroomService ,
-    public assignmentServ : AssignmentService
+    public classServ: ClassroomService,
+    public assignmentServ: AssignmentService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -83,11 +83,11 @@ export class AssignmentStudentComponent {
     })
   }
 
-  GetAssignment(){
-   this.assignmentServ.GetByID(this.AssignmentId,this.DomainName).subscribe((d)=>{
-     this.assignment=d
-     console.log(this.assignment)
-   })
+  GetAssignment() {
+    this.assignmentServ.GetByID(this.AssignmentId, this.DomainName).subscribe((d) => {
+      this.assignment = d
+      console.log(this.assignment)
+    })
   }
 
   GetAllData(pageNumber: number, pageSize: number) {
@@ -137,7 +137,7 @@ export class AssignmentStudentComponent {
   }
 
   Apply() {
-    this.IsShowTabls= true
+    this.IsShowTabls = true
     this.GetAllData(this.CurrentPage, this.PageSize)
   }
 
@@ -146,11 +146,20 @@ export class AssignmentStudentComponent {
   }
 
   classChanged() {
-    this.IsShowTabls= false
-    this.TableData=[]
+    this.IsShowTabls = false
+    this.TableData = []
   }
 
-  moveToDetails(id:number){
+  moveToDetails(id: number) {
     this.router.navigateByUrl(`Employee/Assignment Details/${id}`)
   }
+
+  openFile(link: string | null) {
+    if (link) {
+      window.open(link, '_blank');
+    } else {
+      console.warn('File link is missing');
+    }
+  }
+
 }

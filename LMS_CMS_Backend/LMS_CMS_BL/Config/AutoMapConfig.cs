@@ -666,9 +666,8 @@ namespace LMS_CMS_BL.Config
                 .ForMember(dest => dest.SubCategoryId, opt => opt.MapFrom(src => src.ShopItem.InventorySubCategoriesID));
 
             CreateMap<InventoryDetailsGetDTO, InventoryDetails>();
-            CreateMap<InventoryDetailsAddDTO, InventoryDetails>();
-
             CreateMap<Gender, GenderGetDTO>();
+            CreateMap<InventoryDetailsPutDTO, InventoryDetails>();
 
             CreateMap<InventoryFlags, InventoryFlagGetDTO>();
             CreateMap<Cart_ShopItem, Cart_ShopItemGetDTO>()
@@ -991,6 +990,8 @@ namespace LMS_CMS_BL.Config
                 .ForMember(dest => dest.QuestionMark, opt => opt.MapFrom(src => src.QuestionBank.Mark))
                 .ForMember(dest => dest.QuestionDesc, opt => opt.MapFrom(src => src.QuestionBank.Description))
                 .ForMember(dest => dest.QuestionTypeID, opt => opt.MapFrom(src => src.QuestionBank.QuestionTypeID))
+                .ForMember(dest => dest.QuestionCorrectAnswerID, opt => opt.MapFrom(src => src.QuestionBank.CorrectAnswerID))
+                .ForMember(dest => dest.QuestionCorrectAnswerName, opt => opt.MapFrom(src => src.QuestionBank.CorrectAnswerName))
                 .ForMember(dest => dest.QuestionTypeName, opt => opt.MapFrom(src => src.QuestionBank.QuestionType.Name))
                 .ForMember(dest => dest.QuestionImage, opt => opt.MapFrom(src => src.QuestionBank.Image))
                 .ForMember(dest => dest.QuestionBankOptions, opt => opt.MapFrom(src => src.QuestionBank.QuestionBankOptions))
@@ -1012,6 +1013,23 @@ namespace LMS_CMS_BL.Config
                .ForMember(dest => dest.SubjectWeightTypeArabicName, opt => opt.MapFrom(src => src.SubjectWeightType.WeightType.ArabicName))
                .ForMember(dest => dest.AssignmentTypeEnglishName, opt => opt.MapFrom(src => src.AssignmentType.EnglishName))
                .ForMember(dest => dest.AssignmentTypeArabicName, opt => opt.MapFrom(src => src.AssignmentType.ArabicName));
+
+            CreateMap<AssignmentStudent, AssignmentForStudentGetDTO>()
+               .ForMember(dest => dest.SubjectID, opt => opt.MapFrom(src => src.Assignment.SubjectID))
+               .ForMember(dest => dest.SubjectWeightTypeID, opt => opt.MapFrom(src => src.Assignment.SubjectWeightTypeID))
+               .ForMember(dest => dest.AssignmentTypeID, opt => opt.MapFrom(src => src.Assignment.AssignmentTypeID))
+               .ForMember(dest => dest.AssignmentEnglishName, opt => opt.MapFrom(src => src.Assignment.EnglishName))
+               .ForMember(dest => dest.AssignmentArabicName, opt => opt.MapFrom(src => src.Assignment.ArabicName))
+               .ForMember(dest => dest.AssignmentMark, opt => opt.MapFrom(src => src.Assignment.Mark))
+               .ForMember(dest => dest.OpenDate, opt => opt.MapFrom(src => src.Assignment.OpenDate))
+               .ForMember(dest => dest.DueDate, opt => opt.MapFrom(src => src.Assignment.DueDate))
+               .ForMember(dest => dest.CutOfDate, opt => opt.MapFrom(src => src.Assignment.CutOfDate))
+               .ForMember(dest => dest.SubjectEnglishName, opt => opt.MapFrom(src => src.Assignment.Subject.en_name))
+               .ForMember(dest => dest.SubjectArabicName, opt => opt.MapFrom(src => src.Assignment.Subject.ar_name))
+               .ForMember(dest => dest.SubjectWeightTypeEnglishName, opt => opt.MapFrom(src => src.Assignment.SubjectWeightType.WeightType.EnglishName))
+               .ForMember(dest => dest.SubjectWeightTypeArabicName, opt => opt.MapFrom(src => src.Assignment.SubjectWeightType.WeightType.ArabicName))
+               .ForMember(dest => dest.AssignmentTypeEnglishName, opt => opt.MapFrom(src => src.Assignment.AssignmentType.EnglishName))
+               .ForMember(dest => dest.AssignmentTypeArabicName, opt => opt.MapFrom(src => src.Assignment.AssignmentType.ArabicName));
         }
     } 
 }

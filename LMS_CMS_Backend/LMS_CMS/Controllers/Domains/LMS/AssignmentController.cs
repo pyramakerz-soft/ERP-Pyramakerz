@@ -35,9 +35,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee"}
-            //,
-            //pages: new[] { "Assignment" }
+            allowedTypes: new[] { "octa", "employee"},
+            pages: new[] { "Assignment" }
         )]
         public async Task<IActionResult> GetAsync([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
@@ -109,9 +108,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("GetBySubjectID/{subID}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee"}
-            //,
-            //pages: new[] { "Assignment" }
+            allowedTypes: new[] { "octa", "employee"} ,
+            pages: new[] { "Assignment" }
         )]
         public async Task<IActionResult> GetBySubjectID(long subID, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
@@ -189,9 +187,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("GetByID/{id}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee"}
-            //,
-            //pages: new[] { "Assignment" }
+            allowedTypes: new[] { "octa", "employee"},
+            pages: new[] { "Assignment" }
         )]
         public async Task<IActionResult> GetByID(long id)
         {
@@ -248,15 +245,11 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("GetByStudentID/{studID}/{subjID}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" }
-            //,
-            //pages: new[] { "Assignment" }
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Assignment" }
         )]
-        public async Task<IActionResult> GetByStudentID(long studID, long subjID, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
-        { 
-            if (pageNumber < 1) pageNumber = 1;
-            if (pageSize < 1) pageSize = 10;
-
+        public async Task<IActionResult> GetByStudentID(long studID, long subjID)
+        {  
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             var userClaims = HttpContext.User.Claims;
@@ -280,11 +273,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             {
                 return BadRequest("No student with this id");
             }
-
-            // Subject not hidden from them
-            // All the assignment that are for there subjects but also isSpecific != true + Those if exists in AssignmentStudentIsSpecific Table
-            // Make sure That Data isn't deleted 
-
+             
             // Get StudentClassID According to current academic year
             StudentClassroom studentClassroom = Unit_Of_Work.studentClassroom_Repository.First_Or_Default(
                 d => d.IsDeleted != true && d.StudentID == studID && d.Classroom.IsDeleted != true && d.Classroom.AcademicYear.IsActive == true
@@ -295,75 +284,97 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return NotFound("This Student isn't in a Class yet in this active year");
             }
 
+            // Make Sure that this class has this subject id and not hidden
+            ClassroomSubject classroomSubject = Unit_Of_Work.classroomSubject_Repository.First_Or_Default(
+                d => d.IsDeleted != true && d.ClassroomID == studentClassroom.ClassID && d.SubjectID == subjID && d.Hide != true
+                );
+
+            if(classroomSubject == null)
+            {
+                return NotFound("This Subject isn't in the student classroom");
+            }
+
+            // Make sure that this subject is assigned to the student and not hidden
+            StudentClassroomSubject studentClassroomSubject = Unit_Of_Work.studentClassroomSubject_Repository.First_Or_Default(
+                d => d.IsDeleted != true && d.StudentClassroomID == studentClassroom.ID && d.SubjectID == subjID && d.Hide != true
+                );
+
+            if (studentClassroomSubject == null)
+            {
+                return NotFound("This Subject isn't assigned to this student");
+            }
+
+            List<AssignmentStudentIsSpecific> assignmentStudentIsSpecifics = await Unit_Of_Work.assignmentStudentIsSpecific_Repository.Select_All_With_IncludesById<AssignmentStudentIsSpecific>(
+                d => d.IsDeleted != true && d.StudentClassroomID == studentClassroom.ID && d.Assignment.IsDeleted != true && d.Assignment.SubjectID == subjID,
+                query => query.Include(d => d.Assignment).ThenInclude(d => d.AssignmentType),
+                query => query.Include(d => d.Assignment).ThenInclude(d => d.SubjectWeightType).ThenInclude(d =>d.WeightType),
+                query => query.Include(d => d.Assignment).ThenInclude(d => d.Subject)
+                );
+            
             List<Assignment> assignments = await Unit_Of_Work.assignment_Repository.Select_All_With_IncludesById<Assignment>(
-                d => d.IsDeleted != true && d.SubjectID == subjID,
+                d => d.IsDeleted != true && d.SubjectID == subjID && d.IsSpecificStudents != true,
                 query => query.Include(d => d.AssignmentType),
-                query => query.Include(d => d.SubjectWeightType),
+                query => query.Include(d => d.SubjectWeightType).ThenInclude(d => d.WeightType),
                 query => query.Include(d => d.Subject)
                 );
 
-            foreach (var assignment in assignments)
+            List<Assignment> allAssignments = new List<Assignment>();
+
+            if (assignmentStudentIsSpecifics != null)
             {
-                //List<AssignmentStudent> assignmentStudents = Unit_Of_Work.assignmentStudent_Repository.FindBy(d => d.IsDeleted != true && d.AssignmentID == assignment.ID);
+                allAssignments.AddRange(assignmentStudentIsSpecifics.Select(a => a.Assignment));
+            }
+            if(assignments != null)
+            {
+                allAssignments.AddRange(assignments);
+            }
+            
+            // Filter out repeated entries
+            allAssignments = allAssignments
+                .GroupBy(a => a.ID) // Group by ID (or any unique property)
+                .Select(g => g.First()) // Take the first assignment from each group
+                .ToList();
+
+            // Order by OpenDate
+            allAssignments = allAssignments.OrderBy(a => a.OpenDate).ToList();
+
+            if (allAssignments == null || allAssignments.Count == 0)
+            {
+                return NotFound("No Assignments For This Student For this Subject");
             }
 
-            //int totalRecords = await Unit_Of_Work.assignment_Repository
-            //   .CountAsync(f => f.IsDeleted != true);
+            List<AssignmentStudent> assignmentStudentsSolved = await Unit_Of_Work.assignmentStudent_Repository.Select_All_With_IncludesById<AssignmentStudent>(
+                d => d.IsDeleted != true && d.StudentClassroomID == studentClassroom.ID && d.Assignment.IsDeleted != true && d.Assignment.SubjectID == subjID,
+                query => query.Include(d => d.Assignment).ThenInclude(d => d.AssignmentType),
+                query => query.Include(d => d.Assignment).ThenInclude(d => d.SubjectWeightType).ThenInclude(d => d.WeightType),
+                query => query.Include(d => d.Assignment).ThenInclude(d => d.Subject)
+                );
+             
+            List<Assignment> unsolvedAssignments = new List<Assignment>();
 
-            //List<Assignment> Assignment = await Unit_Of_Work.assignment_Repository
-            //    .Select_All_With_IncludesById_Pagination<Assignment>(
-            //        f => f.IsDeleted != true && f.SubjectID == subID,
-            //        query => query.Include(d => d.AssignmentType),
-            //        query => query.Include(d => d.Subject),
-            //        query => query.Include(d => d.SubjectWeightType.WeightType),
-            //        query => query.Include(d => d.AssignmentStudents
-            //            .Where(e => e.IsDeleted != true && e.StudentClassroom.Student.IsDeleted != true && e.StudentClassroom.Classroom.IsDeleted != true))
-            //            .ThenInclude(d => d.StudentClassroom)
-            //            .ThenInclude(d => d.Classroom),
-            //        query => query.Include(d => d.AssignmentStudents
-            //            .Where(e => e.IsDeleted != true && e.StudentClassroom.Student.IsDeleted != true && e.StudentClassroom.Classroom.IsDeleted != true))
-            //            .ThenInclude(d => d.StudentClassroom)
-            //        .ThenInclude(d => d.Student))
-            //    .Skip((pageNumber - 1) * pageSize)
-            //    .Take(pageSize)
-            //    .ToListAsync();
+            foreach (var assignment in allAssignments)
+            {
+                // Check if this assignment has been solved by the student
+                bool isSolved = assignmentStudentsSolved.Any(a => a.AssignmentID == assignment.ID);
 
-            //if (Assignment == null || Assignment.Count == 0)
-            //{
-            //    return NotFound();
-            //}
+                if (!isSolved)
+                {
+                    unsolvedAssignments.Add(assignment); 
+                } 
+            } 
+              
+            List<AssignmentForStudentGetDTO> assignmentStudentsSolvedGetDTOs = mapper.Map<List<AssignmentForStudentGetDTO>>(assignmentStudentsSolved);
+            List<AssignmentGetDTO> unsolvedAssignmentsGetDTOs = mapper.Map<List<AssignmentGetDTO>>(unsolvedAssignments);
 
-            //List<AssignmentGetDTO> AssignmentGetDTOs = mapper.Map<List<AssignmentGetDTO>>(Assignment);
-
-            //string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-
-            //foreach (var AssignmentGetDTO in AssignmentGetDTOs)
-            //{
-            //    if (!string.IsNullOrEmpty(AssignmentGetDTO.LinkFile))
-            //    {
-            //        AssignmentGetDTO.LinkFile = $"{serverUrl}{AssignmentGetDTO.LinkFile.Replace("\\", "/")}";
-            //    }
-            //}
-
-            //var paginationMetadata = new
-            //{
-            //    TotalRecords = totalRecords,
-            //    PageSize = pageSize,
-            //    CurrentPage = pageNumber,
-            //    TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
-            //};
-
-            //return Ok(new { Data = AssignmentGetDTOs, Pagination = paginationMetadata });
-            return Ok();
+            return Ok(new { SolvedAssignments = assignmentStudentsSolvedGetDTOs, UnsolvedAssignments = unsolvedAssignmentsGetDTOs });
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////
 
         [HttpPost]
         [Authorize_Endpoint_(
-           allowedTypes: new[] { "octa", "employee" }
-           //,
-           //pages: new[] { "Assignment" }
+           allowedTypes: new[] { "octa", "employee" },
+           pages: new[] { "Assignment" }
         )]
         public IActionResult Add(AssignmentAddDTO NewAssignment)
         {
@@ -492,10 +503,9 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpPut("FileAssignment")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" }
-            //,
-            //allowEdit: 1,
-            //pages: new[] { "Assignment" }
+            allowedTypes: new[] { "octa", "employee" },
+            allowEdit: 1,
+            pages: new[] { "Assignment" }
         )]
         public async Task<IActionResult> FileAssignment([FromForm] AssignmentFilePutDTO EditAssignment)
         {

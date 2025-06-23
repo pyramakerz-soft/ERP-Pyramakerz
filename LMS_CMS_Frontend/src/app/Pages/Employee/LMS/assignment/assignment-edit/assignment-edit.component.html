@@ -136,15 +136,15 @@
                     [ngClass]="{'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1}"
                     class="border-t border-gray-300 text-xs md:text-sm">
 
-                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{
-                        row.id }}</td>
-                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.questionBank.description
-                        }}</td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{row.id }}</td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        <div [innerHTML]="row.questionBank.description"></div>
+                    </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.questionBank.mark }}</td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         <div class="flex space-x-4">
-                             <button (click)="Delete(row.id)">
-                                 <i class="fa-regular fa-trash-can"></i>
+                            <button (click)="Delete(row.id)">
+                                <i class="fa-regular fa-trash-can"></i>
                             </button>
                         </div>
                     </td>
@@ -321,7 +321,7 @@
                             </div>
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            {{ row.description }}
+                            <div [innerHTML]="row.description"></div>
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             {{ row.mark }}
@@ -450,8 +450,7 @@
                 <div class="w-[48%]">
                     <label class="block mb-2 text-sm font-medium text-gray-900">Question Type</label>
                     <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
-                        (focus)="validationErrors['type-' + i] = ''"
-                        [(ngModel)]="option.questionTypeId">
+                        (focus)="validationErrors['type-' + i] = ''" [(ngModel)]="option.questionTypeId">
                         <option value="0" disabled>Select a Type</option>
                         <option *ngFor="let ac of QuestionBankType" [value]="ac.id">{{ ac.name }}</option>
                     </select>
@@ -465,8 +464,7 @@
                     <label class="block mb-2 text-sm font-medium text-gray-900">Number Of Questions</label>
                     <input type="number" class="rounded-lg border border-solid px-4 py-3 w-full"
                         [ngClass]="{ 'input-error': !option.numberOfQuestion || option.numberOfQuestion <= 0 }"
-                        [(ngModel)]="option.numberOfQuestion"
-                        (focus)="validationErrors['count-' + i] = ''"
+                        [(ngModel)]="option.numberOfQuestion" (focus)="validationErrors['count-' + i] = ''"
                         (input)="validateNumberQuestionAssignmentTypeCount($event, i, 'numberOfQuestion')"
                         placeholder="Enter Number" />
                     <span *ngIf="validationErrors['count-' + i]" class="text-red-500 mt-1 text-sm">
