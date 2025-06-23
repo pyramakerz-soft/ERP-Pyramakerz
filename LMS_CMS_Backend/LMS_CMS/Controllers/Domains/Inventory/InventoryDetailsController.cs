@@ -498,7 +498,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         allowEdit: 1,
          pages: new[] { "Inventory" }
     )]
-        public async Task<IActionResult> EditAsync([FromBody] List<InventoryDetailsGetDTO> newSales)
+        public async Task<IActionResult> EditAsync([FromBody] List<InventoryDetailsPutDTO> newSales)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -515,60 +515,60 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
             foreach (var newSale in newSales)
             {
-            if (newSale == null)
-            {
-                return BadRequest("Sales Item cannot be null");
-            }
+                if (newSale == null)
+                {
+                    return BadRequest("Sales Item cannot be null");
+                }
                 
-            InventoryDetails salesItem = Unit_Of_Work.inventoryDetails_Repository.First_Or_Default(s => s.ID == newSale.ID && s.IsDeleted != true);
-            if (salesItem == null)
-            {
-                return NotFound("No SaleItem with this ID");
-            }
+                InventoryDetails salesItem = Unit_Of_Work.inventoryDetails_Repository.First_Or_Default(s => s.ID == newSale.ID && s.IsDeleted != true);
+                if (salesItem == null)
+                {
+                    return NotFound("No SaleItem with this ID");
+                }
 
-            ShopItem shopItem = Unit_Of_Work.shopItem_Repository.First_Or_Default(s => s.ID == newSale.ShopItemID && s.IsDeleted != true);
-            if (shopItem == null)
-            {
-                return NotFound();
-            }
+                ShopItem shopItem = Unit_Of_Work.shopItem_Repository.First_Or_Default(s => s.ID == newSale.ShopItemID && s.IsDeleted != true);
+                if (shopItem == null)
+                {
+                    return NotFound();
+                }
 
-            InventoryMaster sale = Unit_Of_Work.inventoryMaster_Repository.First_Or_Default(s => s.ID == newSale.InventoryMasterId && s.IsDeleted != true);
-            if (sale == null)
-            {
-                return NotFound();
-            }
+                InventoryMaster sale = Unit_Of_Work.inventoryMaster_Repository.First_Or_Default(s => s.ID == newSale.InventoryMasterId && s.IsDeleted != true);
+                if (sale == null)
+                {
+                    return NotFound();
+                }
              
-            if (userTypeClaim == "employee")
-            {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Inventory", roleId, userId, salesItem);
-                if (accessCheck != null)
+                if (userTypeClaim == "employee")
                 {
-                    return accessCheck;
+                    IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Inventory", roleId, userId, salesItem);
+                    if (accessCheck != null)
+                    {
+                        return accessCheck;
+                    }
                 }
-            }
 
-            mapper.Map(newSale, salesItem);
-            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-            salesItem.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
-            if (userTypeClaim == "octa")
-            {
-                salesItem.UpdatedByOctaId = userId;
-                if (salesItem.UpdatedByUserId != null)
+                mapper.Map(newSale, salesItem);
+                TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+                salesItem.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                if (userTypeClaim == "octa")
                 {
-                    salesItem.UpdatedByUserId = null;
+                    salesItem.UpdatedByOctaId = userId;
+                    if (salesItem.UpdatedByUserId != null)
+                    {
+                        salesItem.UpdatedByUserId = null;
+                    }
                 }
-            }
-            else if (userTypeClaim == "employee")
-            {
-                salesItem.UpdatedByUserId = userId;
-                if (salesItem.UpdatedByOctaId != null)
+                else if (userTypeClaim == "employee")
                 {
-                    salesItem.UpdatedByOctaId = null;
+                    salesItem.UpdatedByUserId = userId;
+                    if (salesItem.UpdatedByOctaId != null)
+                    {
+                        salesItem.UpdatedByOctaId = null;
+                    }
                 }
-            }
 
-            Unit_Of_Work.inventoryDetails_Repository.Update(salesItem);
-            Unit_Of_Work.SaveChanges();
+                Unit_Of_Work.inventoryDetails_Repository.Update(salesItem);
+                Unit_Of_Work.SaveChanges();
             }
             return Ok(newSales);
         }
