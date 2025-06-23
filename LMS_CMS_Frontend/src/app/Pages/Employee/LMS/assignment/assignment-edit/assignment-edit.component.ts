@@ -26,7 +26,7 @@ import Swal from 'sweetalert2';
 @Component({
   selector: 'app-assignment-edit',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule],
   templateUrl: './assignment-edit.component.html',
   styleUrls: ['./assignment-edit.component.css'],
 })
@@ -287,7 +287,7 @@ export class AssignmentEditComponent {
   }
 
   goBack() {
-    this.router.navigateByUrl(`Employee/Assignment Details`);
+    this.router.navigateByUrl(`Employee/Assignment`);
   }
 
   openModal() {

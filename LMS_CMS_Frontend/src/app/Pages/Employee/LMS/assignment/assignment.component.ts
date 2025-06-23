@@ -16,6 +16,8 @@ import { Subject } from '../../../../Models/LMS/subject';
 import { SubjectService } from '../../../../Services/Employee/LMS/subject.service';
 import { AssignmentType } from '../../../../Models/LMS/assignment-type';
 import { AssignmentTypeService } from '../../../../Services/Employee/LMS/assignment-type.service';
+import { SubjectWeightService } from '../../../../Services/Employee/LMS/subject-weight.service';
+import { SubjectWeight } from '../../../../Models/LMS/subject-weight';
 
 @Component({
   selector: 'app-assignment',
@@ -41,6 +43,7 @@ export class AssignmentComponent {
   User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
 
   subjects: Subject[] = [];
+  subjectWeights: SubjectWeight[] = [];
   assignmentTypes: AssignmentType[] = [];
   assignmentData: Assignment[] = [];
   assignment: Assignment = new Assignment();
@@ -62,6 +65,7 @@ export class AssignmentComponent {
     public assignmentService: AssignmentService,
     public activeRoute: ActivatedRoute,
     public subjectService: SubjectService,
+    public subjectWeightService: SubjectWeightService,
     public assignmentTypeService: AssignmentTypeService,
     public router: Router
   ) {}
@@ -77,7 +81,7 @@ export class AssignmentComponent {
     });
 
     this.GetAllData(this.CurrentPage, this.PageSize)
-    this.getSubjectData();
+    this.getSubjectData(); 
 
     this.menuService.menuItemsForEmployee$.subscribe((items) => {
       const settingsPage = this.menuService.findByPageName(this.path, items);
@@ -211,6 +215,15 @@ export class AssignmentComponent {
     )
   }
 
+  getSubjectWeightData(){
+    this.subjectWeights = []
+    this.subjectWeightService.GetBySubjectId(this.assignment.subjectID, this.DomainName).subscribe(
+      data => {
+        this.subjectWeights = data
+      }
+    )
+  }
+
   getAssignmentTypeData(){
     this.assignmentTypes = []
     this.assignmentTypeService.Get(this.DomainName).subscribe(
@@ -244,6 +257,11 @@ export class AssignmentComponent {
     if (value) {
       this.validationErrors[field] = '';
     }
+  }
+  
+  onSubjectModalChange() {  
+    this.assignment.subjectWeightTypeID = 0
+    this.getSubjectWeightData(); 
   }
 
   validateNumber(event: any, field: keyof Assignment): void {
