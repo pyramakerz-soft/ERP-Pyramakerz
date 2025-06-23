@@ -18,6 +18,10 @@ import { AssignmentType } from '../../../../Models/LMS/assignment-type';
 import { AssignmentTypeService } from '../../../../Services/Employee/LMS/assignment-type.service';
 import { SubjectWeightService } from '../../../../Services/Employee/LMS/subject-weight.service';
 import { SubjectWeight } from '../../../../Models/LMS/subject-weight';
+import { StudentClassWhenSubject } from '../../../../Models/LMS/student-class-when-subject';
+import { ClassroomSubjectService } from '../../../../Services/Employee/LMS/classroom-subject.service';
+import { Classroom } from '../../../../Models/LMS/classroom';
+import { ClassroomStudent } from '../../../../Models/LMS/classroom-student';
 
 @Component({
   selector: 'app-assignment',
@@ -42,11 +46,15 @@ export class AssignmentComponent {
   UserID: number = 0;
   User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
 
+  assignment: Assignment = new Assignment();
+  assignmentData: Assignment[] = [];
+  assignmentTypes: AssignmentType[] = [];
   subjects: Subject[] = [];
   subjectWeights: SubjectWeight[] = [];
-  assignmentTypes: AssignmentType[] = [];
-  assignmentData: Assignment[] = [];
-  assignment: Assignment = new Assignment();
+  choosedStudentsClass: ClassroomStudent[] = [];
+  choosedClass: StudentClassWhenSubject[] = [];
+  studentClassWhenSubject: StudentClassWhenSubject[] = [];
+  studentClassWhenSelectClass: StudentClassWhenSubject = new StudentClassWhenSubject(); 
   subjectID:number = 0
 
   CurrentPage:number = 1
@@ -54,6 +62,8 @@ export class AssignmentComponent {
   TotalPages:number = 1
   TotalRecords:number = 0
   isDeleting:boolean = false;
+  viewClassStudents:boolean = false;
+  viewStudents:boolean = false;
 
   isLoading = false;
 
@@ -66,6 +76,7 @@ export class AssignmentComponent {
     public activeRoute: ActivatedRoute,
     public subjectService: SubjectService,
     public subjectWeightService: SubjectWeightService,
+    public classroomSubjectService: ClassroomSubjectService,
     public assignmentTypeService: AssignmentTypeService,
     public router: Router
   ) {}
@@ -191,6 +202,17 @@ export class AssignmentComponent {
     document.getElementById('Add_Modal')?.classList.remove('flex');
     document.getElementById('Add_Modal')?.classList.add('hidden'); 
     this.validationErrors = {};
+
+    this.choosedStudentsClass = [];
+    this.choosedClass = [];
+    this.subjectWeights = []; 
+    this.assignmentTypes = [];
+    this.studentClassWhenSubject = [];
+    this.viewStudents = false
+    this.viewClassStudents = false
+    this.studentClassWhenSelectClass = new StudentClassWhenSubject()
+
+    this.assignment = new Assignment();  
   }
 
   onSubjectChange() { 
@@ -233,6 +255,15 @@ export class AssignmentComponent {
     )
   }
 
+  getClassesData(){
+    this.studentClassWhenSubject = []
+    this.classroomSubjectService.GetClassBySubjectIDWithStudentsIncluded(this.assignment.subjectID, this.DomainName).subscribe(
+      data => {
+        this.studentClassWhenSubject = data  
+      }
+    )
+  }
+
   IsAllowDelete(InsertedByID: number) {
     const IsAllow = this.EditDeleteServ.IsAllowDelete(
       InsertedByID,
@@ -261,7 +292,135 @@ export class AssignmentComponent {
   
   onSubjectModalChange() {  
     this.assignment.subjectWeightTypeID = 0
+    this.choosedClass = [] 
+    this.choosedStudentsClass = []  
     this.getSubjectWeightData(); 
+    this.getClassesData(); 
+    this.viewStudents = false
+    this.viewClassStudents = false
+    this.studentClassWhenSelectClass = new StudentClassWhenSubject()
+  }
+  
+  onIsSpecificChange(event: Event) {
+    const isChecked = (event.target as HTMLInputElement).checked;
+    this.assignment.isSpecificStudents = isChecked  
+    this.viewStudents = false
+    this.studentClassWhenSelectClass = new StudentClassWhenSubject()
+  }
+
+  removeStudentFromClass(classroom:number, event: MouseEvent){
+    event.stopPropagation(); // Prevent the click event from bubbling up
+    this.choosedClass = this.choosedClass.filter(item => item.classroomID !== classroom);
+  }
+
+  getStudentCount(classroomID: number): number {
+    return this.choosedStudentsClass.filter(student => student.classID === classroomID).length;
+  }
+
+  onClassSelectChange(classroom:StudentClassWhenSubject){
+    const index = this.choosedClass.findIndex(item => item.classroomID === classroom.classroomID);
+    if (index !== -1) {
+      this.choosedClass.splice(index, 1);
+      this.choosedStudentsClass = this.choosedStudentsClass.filter(item => item.classID !== classroom.classroomID);
+    } else {
+      this.choosedClass.push(classroom);
+      this.choosedStudentsClass.push(...classroom.studentClassrooms);
+    } 
+  }
+
+  onStudentSelectChange(studentClass:ClassroomStudent){
+    const index = this.choosedStudentsClass.findIndex(item => item.id === studentClass.id);
+    if (index !== -1) {
+      this.choosedStudentsClass.splice(index, 1);
+    } else {
+      this.choosedStudentsClass.push(studentClass);
+    } 
+    
+    const indexForClasss = this.choosedClass.findIndex(item => item.classroomID === studentClass.classID);
+    if (indexForClasss === -1) {
+      let found: StudentClassWhenSubject | undefined = this.studentClassWhenSubject.find((element) => element.classroomID == studentClass.classID);
+      if (found) {
+        this.choosedClass.push(found);
+      }
+    } else { 
+      const hasStudentInClass = this.choosedStudentsClass.some(item => item.classID === studentClass.classID);
+    
+      if (!hasStudentInClass) { 
+        this.choosedClass.splice(indexForClasss, 1);
+      }
+    } 
+  }
+  
+  onSelectAllChange(classroomID: number, event: Event): void {
+    const isChecked = (event.target as HTMLInputElement).checked;
+    const studentsInClass = this.studentClassWhenSelectClass.studentClassrooms.filter(student => student.classID === classroomID);
+    
+    if (isChecked) { 
+      studentsInClass.forEach(student => {
+        if (!this.choosedStudentsClass.some(s => s.id === student.id)) {
+          this.choosedStudentsClass.push(student);
+        }
+      });
+    } else { 
+      this.choosedStudentsClass = this.choosedStudentsClass.filter(student => student.classID !== classroomID);
+    }
+
+    const indexForClasss = this.choosedClass.findIndex(item => item.classroomID === classroomID);
+    if (indexForClasss === -1) {
+      let found: StudentClassWhenSubject | undefined = this.studentClassWhenSubject.find((element) => element.classroomID == classroomID);
+      if (found) {
+        this.choosedClass.push(found);
+      }
+    } else { 
+      const hasStudentInClass = this.choosedStudentsClass.some(item => item.classID === classroomID);
+    
+      if (!hasStudentInClass) { 
+        this.choosedClass.splice(indexForClasss, 1);
+      }
+    } 
+  }
+
+  isClassSelected(classroomID: number): boolean{
+    return this.choosedClass.some(item => item.classroomID == classroomID)
+  }
+
+  isStudentSelected(studentClassID: number): boolean{
+    return this.choosedStudentsClass.some(item => item.id == studentClassID)
+  }
+
+  isSelectAllChecked(classroomID: number): boolean {
+    const studentsInClass = this.studentClassWhenSelectClass.studentClassrooms.filter(student => student.classID === classroomID); 
+    return studentsInClass.every(student => this.choosedStudentsClass.some(selectedStudent => selectedStudent.id === student.id));
+  }
+
+  openStudent(classroom:StudentClassWhenSubject){
+    this.viewStudents = true
+    this.studentClassWhenSelectClass = classroom
+  }
+
+  returnToClases(){
+    this.viewStudents = false
+    this.studentClassWhenSelectClass = new StudentClassWhenSubject()
+  }
+
+  toggleClassesToChooseStudents(){
+    this.viewStudents = false
+    this.studentClassWhenSelectClass = new StudentClassWhenSubject()
+    if(this.assignment.subjectID){
+      if(this.viewClassStudents == false){
+        this.viewClassStudents = true
+      }else{
+        this.viewClassStudents = false
+      }
+    }else{
+      Swal.fire({
+        icon: 'warning',
+        title: 'Oops...',
+        text: 'Please Choose Subject First',
+        confirmButtonText: 'Okay',
+        customClass: { confirmButton: 'secondaryBg' },
+      });
+    }
   }
 
   validateNumber(event: any, field: keyof Assignment): void {
