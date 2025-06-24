@@ -1018,6 +1018,13 @@ namespace LMS_CMS_BL.Config
                .ForMember(dest => dest.SubjectWeightTypeArabicName, opt => opt.MapFrom(src => src.SubjectWeightType.WeightType.ArabicName))
                .ForMember(dest => dest.AssignmentTypeEnglishName, opt => opt.MapFrom(src => src.AssignmentType.EnglishName))
                .ForMember(dest => dest.AssignmentTypeArabicName, opt => opt.MapFrom(src => src.AssignmentType.ArabicName));
+            
+            CreateMap<AssignmentStudentIsSpecific, AssignmentStudentIsSpecificGetDTO>()
+               .ForMember(dest => dest.ClassroomName, opt => opt.MapFrom(src => src.StudentClassroom.Classroom.Name))
+               .ForMember(dest => dest.ClassroomID, opt => opt.MapFrom(src => src.StudentClassroom.ClassID))
+               .ForMember(dest => dest.StudentID, opt => opt.MapFrom(src => src.StudentClassroom.StudentID))
+               .ForMember(dest => dest.StudentArabicName, opt => opt.MapFrom(src => src.StudentClassroom.Student.en_name))
+               .ForMember(dest => dest.StudentEnglishName, opt => opt.MapFrom(src => src.StudentClassroom.Student.ar_name));
 
             CreateMap<AssignmentStudent, AssignmentForStudentGetDTO>()
                .ForMember(dest => dest.SubjectID, opt => opt.MapFrom(src => src.Assignment.SubjectID))
