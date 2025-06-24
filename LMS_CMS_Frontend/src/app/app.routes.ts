@@ -147,8 +147,7 @@ import { DailyPerformanceComponent } from './Pages/Employee/LMS/daily-performanc
 import { LessonResourceComponent } from './Pages/Employee/LMS/lesson-resource/lesson-resource.component';
 import { LessonActivityComponent } from './Pages/Employee/LMS/lesson-activity/lesson-activity.component';
 import { LessonLiveComponent } from './Pages/Employee/LMS/lesson-live/lesson-live.component';
-import { StudentLessonLiveComponent } from './Pages/Student/LMS/student-lesson-live/student-lesson-live.component';
-import { AssignmentDetailsComponent } from './Pages/Employee/LMS/assignment/assignment-details/assignment-details.component';
+import { StudentLessonLiveComponent } from './Pages/Student/LMS/student-lesson-live/student-lesson-live.component'; 
 import { AssignmentEditComponent } from './Pages/Employee/LMS/assignment/assignment-edit/assignment-edit.component';
 import { ZatcaDevicesComponent } from './Pages/Employee/Zatca/zatca-devices/zatca-devices.component';
 import { SubjectsComponent } from './Pages/Student/LMS/UI/subject/subjects.component';
