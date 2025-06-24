@@ -115,34 +115,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
               
             }
 
-            if (assignment.AssignmentTypeID == 1) // Text Book Assignment
-            {
-                if(newData.File == null)
-                {
-                    return BadRequest("File Is Required");
-                }
-                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/AssignmentQuestion");
-                var medalFolder = Path.Combine(baseFolder, assignment.ID.ToString());
-                if (!Directory.Exists(medalFolder))
-                {
-                    Directory.CreateDirectory(medalFolder);
-                }
-
-                if (newData.File != null && newData.File.Length > 0)
-                {
-                    var fileName = Path.GetFileName(newData.File.FileName);
-                    var filePath = Path.Combine(medalFolder, fileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await newData.File.CopyToAsync(stream);
-                    }
-                    assignment.LinkFile = $"Uploads/AssignmentQuestion/{assignment.ID.ToString()}/{fileName}";
-                }
-
-                Unit_Of_Work.assignment_Repository.Update(assignment);
-                Unit_Of_Work.SaveChanges();
-            }
-            else if (assignment.AssignmentTypeID == 2) 
+            // Text Book Assignment (assignment.AssignmentTypeID == 1) ==> handled in Assignment
+            if (assignment.AssignmentTypeID == 2) 
             {
                 foreach (var item in newData.QuestionIds)
                 {

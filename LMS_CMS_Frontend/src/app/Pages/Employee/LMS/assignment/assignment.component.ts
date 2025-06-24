@@ -223,7 +223,9 @@ export class AssignmentComponent {
     this.assignment = new Assignment()
     this.assignmentService.GetByID(Id, this.DomainName).subscribe(
       data => {
-        this.assignment = data
+        this.assignment = data 
+        this.getSubjectWeightData()
+        this.getClassesData() 
       }
     )
   }
@@ -257,9 +259,36 @@ export class AssignmentComponent {
 
   getClassesData(){
     this.studentClassWhenSubject = []
+    this.choosedClass = [];              
+    this.choosedStudentsClass = []; 
     this.classroomSubjectService.GetClassBySubjectIDWithStudentsIncluded(this.assignment.subjectID, this.DomainName).subscribe(
-      data => {
+      data => { 
         this.studentClassWhenSubject = data  
+        if(this.assignment.assignmentStudentIsSpecifics.length != 0){
+          const classroomMap = new Map<number, StudentClassWhenSubject>();
+
+          this.assignment.assignmentStudentIsSpecifics.forEach(element => {
+            var classStud = new ClassroomStudent()
+            classStud.id = element.studentClassroomID
+            classStud.studentID = element.studentID
+            classStud.studentEnglishName = element.studentEnglishName
+            classStud.studentArabicName = element.studentArabicName
+            classStud.classID = element.classroomID
+            classStud.className = element.classroomName
+            
+            this.choosedStudentsClass.push(classStud)
+
+            if (!classroomMap.has(classStud.classID)) { 
+              classroomMap.set(classStud.classID, new StudentClassWhenSubject(classStud.classID, classStud.className));
+            }
+ 
+            const classroomSubject = classroomMap.get(classStud.classID);
+            if (classroomSubject) {
+              classroomSubject.studentClassrooms.push(classStud);
+            }
+          });
+          this.choosedClass = Array.from(classroomMap.values());
+        }
       }
     )
   }
@@ -288,6 +317,12 @@ export class AssignmentComponent {
     if (value) {
       this.validationErrors[field] = '';
     }
+    
+    if(field == 'openDate' || field == 'dueDate' || field == 'cutOfDate'){
+      this.validationErrors['openDate'] = ''
+      this.validationErrors['dueDate'] = ''
+      this.validationErrors['cutOfDate'] = ''
+    }
   }
   
   onSubjectModalChange() {  
@@ -299,18 +334,21 @@ export class AssignmentComponent {
     this.viewStudents = false
     this.viewClassStudents = false
     this.studentClassWhenSelectClass = new StudentClassWhenSubject()
-  }
+    this.studentClassWhenSubject = []
+  } 
   
   onIsSpecificChange(event: Event) {
     const isChecked = (event.target as HTMLInputElement).checked;
     this.assignment.isSpecificStudents = isChecked  
     this.viewStudents = false
     this.studentClassWhenSelectClass = new StudentClassWhenSubject()
+    this.validationErrors['studentClassroomIDs'] = '';
   }
 
   removeStudentFromClass(classroom:number, event: MouseEvent){
     event.stopPropagation(); // Prevent the click event from bubbling up
     this.choosedClass = this.choosedClass.filter(item => item.classroomID !== classroom);
+    this.choosedStudentsClass = this.choosedStudentsClass.filter(item => item.classID !== classroom);
   }
 
   getStudentCount(classroomID: number): number {
@@ -318,6 +356,8 @@ export class AssignmentComponent {
   }
 
   onClassSelectChange(classroom:StudentClassWhenSubject){
+    this.validationErrors['studentClassroomIDs'] = '';
+
     const index = this.choosedClass.findIndex(item => item.classroomID === classroom.classroomID);
     if (index !== -1) {
       this.choosedClass.splice(index, 1);
@@ -329,6 +369,8 @@ export class AssignmentComponent {
   }
 
   onStudentSelectChange(studentClass:ClassroomStudent){
+    this.validationErrors['studentClassroomIDs'] = '';
+
     const index = this.choosedStudentsClass.findIndex(item => item.id === studentClass.id);
     if (index !== -1) {
       this.choosedStudentsClass.splice(index, 1);
@@ -352,6 +394,8 @@ export class AssignmentComponent {
   }
   
   onSelectAllChange(classroomID: number, event: Event): void {
+    this.validationErrors['studentClassroomIDs'] = '';
+
     const isChecked = (event.target as HTMLInputElement).checked;
     const studentsInClass = this.studentClassWhenSelectClass.studentClassrooms.filter(student => student.classID === classroomID);
     
@@ -384,7 +428,7 @@ export class AssignmentComponent {
     return this.choosedClass.some(item => item.classroomID == classroomID)
   }
 
-  isStudentSelected(studentClassID: number): boolean{
+  isStudentSelected(studentClassID: number): boolean{ 
     return this.choosedStudentsClass.some(item => item.id == studentClassID)
   }
 
@@ -394,8 +438,8 @@ export class AssignmentComponent {
   }
 
   openStudent(classroom:StudentClassWhenSubject){
-    this.viewStudents = true
-    this.studentClassWhenSelectClass = classroom
+    this.viewStudents = true  
+    this.studentClassWhenSelectClass = classroom 
   }
 
   returnToClases(){
@@ -405,6 +449,7 @@ export class AssignmentComponent {
 
   toggleClassesToChooseStudents(){
     this.viewStudents = false
+    this.validationErrors['studentClassroomIDs'] = '';
     this.studentClassWhenSelectClass = new StudentClassWhenSubject()
     if(this.assignment.subjectID){
       if(this.viewClassStudents == false){
@@ -425,7 +470,7 @@ export class AssignmentComponent {
 
   validateNumber(event: any, field: keyof Assignment): void {
     const value = event.target.value;
-    if (isNaN(value) || value === '') {
+    if (isNaN(value) || value === '' || Number(value) <= 0) {
       event.target.value = ''; 
       if (typeof this.assignment[field] === 'string') {
         this.assignment[field] = '' as never;  
@@ -443,7 +488,7 @@ export class AssignmentComponent {
       if (this.assignment.hasOwnProperty(key)) {
         const field = key as keyof Assignment;
         if (!this.assignment[field]) {
-          if (field == 'englishName' || field == 'arabicName' || field == 'mark' || field == 'assignmentTypeID' || field == 'subjectID' || field == 'openDate' || field == 'cutOfDate') {
+          if (field == 'englishName' || field == 'arabicName' || field == 'mark' || field == 'assignmentTypeID' || field == 'subjectID' || field == 'subjectWeightTypeID' || field == 'openDate' || field == 'cutOfDate') {
             this.validationErrors[field] = `*${this.capitalizeField( field )} is required`;
             isValid = false;
           }
@@ -451,6 +496,37 @@ export class AssignmentComponent {
           if (field == 'englishName' || field == 'arabicName') {
             if (this.assignment.englishName.length > 100 || this.assignment.arabicName.length > 100) {
               this.validationErrors[field] = `*${this.capitalizeField( field )} cannot be longer than 100 characters`;
+              isValid = false;
+            }
+          }else if (field == 'studentClassroomIDs') {
+            if (this.choosedStudentsClass.length == 0 && this.assignment.isSpecificStudents == true) {
+              this.validationErrors[field] = `*You have to choose students as you already selected that this assignment is for specific students`;
+              isValid = false;
+            }
+          }else if (field === 'openDate' || field === 'dueDate' || field === 'cutOfDate') {
+            const openDate = new Date(this.assignment.openDate);
+            const dueDate = new Date(this.assignment.dueDate);
+            const cutOfDate = new Date(this.assignment.cutOfDate);
+
+            if (this.assignment.openDate && this.assignment.dueDate && openDate > dueDate) {
+              this.validationErrors['openDate'] = '*Open Date must be before or equal to Due Date';
+              this.validationErrors['dueDate'] = '*Due Date must be after or equal to Open Date';
+              isValid = false;
+            }
+
+            if (this.assignment.dueDate && this.assignment.cutOfDate && dueDate > cutOfDate) {
+              this.validationErrors['dueDate'] = '*Due Date must be before or equal to Cut Off Date';
+              this.validationErrors['cutOfDate'] = '*Cut Off Date must be after or equal to Due Date';
+              isValid = false;
+            }
+
+            if (this.assignment.dueDate && openDate > dueDate || cutOfDate < dueDate) {
+              this.validationErrors['dueDate'] = '*Due Date must be between Open Date and Cut Off Date';
+              isValid = false;
+            }
+
+            if (this.assignment.cutOfDate && (cutOfDate < openDate || cutOfDate < dueDate)) {
+              this.validationErrors['cutOfDate'] = '*Cut Off Date must be after both Open Date and Due Date';
               isValid = false;
             }
           } else {
@@ -465,6 +541,15 @@ export class AssignmentComponent {
   Save() {  
     if (this.isFormValid()) {
       this.isLoading = true;   
+      if(this.assignment.isSpecificStudents == true){
+        this.assignment.studentClassroomIDs = []
+        this.choosedStudentsClass.forEach(element => {
+          this.assignment.studentClassroomIDs.push(element.id)
+        });
+      }else{
+        this.assignment.studentClassroomIDs = []
+      }
+
       if (this.assignment.id == 0) { 
         this.assignmentService.Add(this.assignment, this.DomainName).subscribe(
           (result: any) => {
