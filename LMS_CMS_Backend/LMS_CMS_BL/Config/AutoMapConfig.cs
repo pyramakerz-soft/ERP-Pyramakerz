@@ -907,6 +907,8 @@ namespace LMS_CMS_BL.Config
                  .ForMember(dest => dest.SubjectName, opt => opt.MapFrom(src => src.Lesson.Subject.en_name))
                  .ForMember(dest => dest.BloomLevelName, opt => opt.MapFrom(src => src.BloomLevel.EnglishName))
                  .ForMember(dest => dest.DokLevelName, opt => opt.MapFrom(src => src.DokLevel.EnglishName))
+                 .ForMember(dest => dest.QuestionBankOptionsDTO, opt => opt.MapFrom(src => src.QuestionBankOptions))
+                 .ForMember(dest => dest.SubBankQuestionsDTO, opt => opt.MapFrom(src => src.SubBankQuestions))
                  .ForMember(dest => dest.QuestionTypeName, opt => opt.MapFrom(src => src.QuestionType.Name));
             CreateMap<QuestionBankEditDTO, QuestionBank>();
             CreateMap<DTO.LMS.QuestionBankAddDTO, QuestionBank>();
@@ -978,6 +980,7 @@ namespace LMS_CMS_BL.Config
                .ForMember(dest => dest.SubjectWeightTypeEnglishName, opt => opt.MapFrom(src => src.SubjectWeightType.WeightType.EnglishName))
                .ForMember(dest => dest.SubjectWeightTypeArabicName, opt => opt.MapFrom(src => src.SubjectWeightType.WeightType.ArabicName))
                .ForMember(dest => dest.AssignmentTypeEnglishName, opt => opt.MapFrom(src => src.AssignmentType.EnglishName))
+               .ForMember(dest => dest.AssignmentQuestions, opt => opt.MapFrom(src => src.AssignmentQuestions))
                .ForMember(dest => dest.AssignmentTypeArabicName, opt => opt.MapFrom(src => src.AssignmentType.ArabicName));
             CreateMap<AssignmentAddDTO, Assignment>();
             CreateMap<AssignmentPutDTO, Assignment>(); 
@@ -1042,6 +1045,11 @@ namespace LMS_CMS_BL.Config
                .ForMember(dest => dest.SubjectWeightTypeArabicName, opt => opt.MapFrom(src => src.Assignment.SubjectWeightType.WeightType.ArabicName))
                .ForMember(dest => dest.AssignmentTypeEnglishName, opt => opt.MapFrom(src => src.Assignment.AssignmentType.EnglishName))
                .ForMember(dest => dest.AssignmentTypeArabicName, opt => opt.MapFrom(src => src.Assignment.AssignmentType.ArabicName));
+       
+            CreateMap<POSAddDTO, ETAPOS>();
+            CreateMap<POSEditDTO, ETAPOS>();
+            CreateMap<ETAPOS, POSGetDTO>();
+
         }
     } 
 }

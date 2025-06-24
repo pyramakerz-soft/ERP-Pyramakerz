@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { AssignmentStudent } from '../../../Models/LMS/assignment-student';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ApiService } from '../../api.service';
+import { Assignment } from '../../../Models/LMS/assignment';
 
 @Injectable({
   providedIn: 'root'
@@ -28,6 +29,18 @@ export class AssignmentStudentService {
     return this.http.get<AssignmentStudent>(`${this.baseUrl}/AssignmentStudent/GetByID/${id}`, { headers })
   }
 
+  GetByAssignmentId(id: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<Assignment>(`${this.baseUrl}/AssignmentStudent/GetByAssignmentId/${id}`, { headers })
+  }
+
   GetByAssignmentClass(AssignmentId: number, ClassId: number, DomainName: string, pageNumber: number, pageSize: number) {
     if (DomainName != null) {
       this.header = DomainName
@@ -40,7 +53,7 @@ export class AssignmentStudentService {
     return this.http.get<{ data: AssignmentStudent[], pagination: any }>(`${this.baseUrl}/AssignmentStudent/GetByAssignmentIDClassID/${AssignmentId}/${ClassId}?pageNumber=${pageNumber}&pageSize=${pageSize}`, { headers });
   }
 
-  Edit(data: AssignmentStudent,DomainName: string) {
+  Edit(data: AssignmentStudent, DomainName: string) {
     if (DomainName != null) {
       this.header = DomainName
     }
@@ -49,7 +62,32 @@ export class AssignmentStudentService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.put(`${this.baseUrl}/AssignmentStudent`,data, { headers });
+    return this.http.put(`${this.baseUrl}/AssignmentStudent`, data, { headers });
   }
 
+  Add(data: AssignmentStudent, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.post(`${this.baseUrl}/AssignmentStudent`, data, { headers });
+  }
+
+  AddWhenTextBookAssignment(data: AssignmentStudent, DomainName: string) {
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', DomainName || '')
+      .set('Authorization', `Bearer ${token}`);
+    const formData = new FormData();
+    formData.append('assignmentID', data.assignmentID.toString());
+    formData.append('studentID', data.studentID.toString());
+    if (data.file instanceof File) {
+      formData.append('File', data.file);
+    }
+    return this.http.post(`${this.baseUrl}/AssignmentStudent/AddWhenTextBookAssignment`, formData, { headers });
+  }
 }

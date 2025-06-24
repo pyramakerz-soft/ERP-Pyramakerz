@@ -115,44 +115,101 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
               
             }
 
+<<<<<<< HEAD
+            if (assignment.AssignmentTypeID == 1) // Text Book Assignment
+            {
+                if(newData.File == null)
+                {
+                    return BadRequest("File Is Required");
+                }
+                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Assignment");
+                var medalFolder = Path.Combine(baseFolder, assignment.ID.ToString());
+                if (!Directory.Exists(medalFolder))
+                {
+                    Directory.CreateDirectory(medalFolder);
+                }
+
+                if (newData.File != null && newData.File.Length > 0)
+                {
+                    var fileName = Path.GetFileName(newData.File.FileName);
+                    var filePath = Path.Combine(medalFolder, fileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await newData.File.CopyToAsync(stream);
+                    }
+                    assignment.LinkFile = $"Uploads/Assignment/{assignment.ID.ToString()}/{fileName}";
+                }
+
+                Unit_Of_Work.assignment_Repository.Update(assignment);
+                Unit_Of_Work.SaveChanges();
+            }
+            else if (assignment.AssignmentTypeID == 2)
+=======
             // Text Book Assignment (assignment.AssignmentTypeID == 1) ==> handled in Assignment
             if (assignment.AssignmentTypeID == 2) 
+>>>>>>> f25f2815d2920c751732aa7d19155fc89da68c32
             {
                 foreach (var item in newData.QuestionIds)
                 {
-                    QuestionBank questionBank = Unit_Of_Work.questionBank_Repository.First_Or_Default(q=>q.ID == item && q.IsDeleted!= true);
+                    var questionBank = Unit_Of_Work.questionBank_Repository.First_Or_Default(q => q.ID == item && q.IsDeleted != true);
                     if (questionBank != null)
-                    { 
-                        AssignmentQuestion assignmentQuestion = new AssignmentQuestion();
-                        assignmentQuestion.QuestionBankID = item;
-                        assignmentQuestion.AssignmentID = assignment.ID;
-                        TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-                        assignmentQuestion.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
-                        if (userTypeClaim == "octa")
-                        {
-                            assignmentQuestion.InsertedByOctaId = userId;
-                        }
-                        else if (userTypeClaim == "employee")
-                        {
-                            assignmentQuestion.InsertedByUserId = userId;
-                        }
+                    {
+                        var assignmentQuestion = Unit_Of_Work.assignmentQuestion_Repository
+                            .First_Or_Default(a => a.QuestionBankID == item && a.AssignmentID == assignment.ID);
 
-                        Unit_Of_Work.assignmentQuestion_Repository.Add(assignmentQuestion);
-                        Unit_Of_Work.SaveChanges();
+                        if (assignmentQuestion != null)
+                        {
+                            if (assignmentQuestion.IsDeleted == true)
+                            {
+                                assignmentQuestion.IsDeleted = false;
+                                Unit_Of_Work.assignmentQuestion_Repository.Update(assignmentQuestion);
+                                Unit_Of_Work.SaveChanges();
+                            }
+                            else
+                            {
+                                return BadRequest($"Question bank with ID {item} already exists in this assignment.");
+                            }
+                        }
+                        else
+                        {
+                            var newAssignmentQuestion = new AssignmentQuestion
+                            {
+                                QuestionBankID = item,
+                                AssignmentID = assignment.ID,
+                                InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time"))
+                            };
+
+                            if (userTypeClaim == "octa")
+                                newAssignmentQuestion.InsertedByOctaId = userId;
+                            else if (userTypeClaim == "employee")
+                                newAssignmentQuestion.InsertedByUserId = userId;
+
+                            Unit_Of_Work.assignmentQuestion_Repository.Add(newAssignmentQuestion);
+                            Unit_Of_Work.SaveChanges();
+                        }
                     }
                 }
-
             }
             else if (assignment.AssignmentTypeID == 3) // Randomized by tag/type
             {
                 var selectedQuestions = new List<QuestionBank>();
 
-                var existingQuestionIds = Unit_Of_Work.assignmentQuestion_Repository
+                // Get all assignment questions (including soft-deleted)
+                var allAssignmentQuestions = Unit_Of_Work.assignmentQuestion_Repository
                     .FindBy(q => q.AssignmentID == assignment.ID)
+                    .ToList();
+
+                var activeQuestionIds = allAssignmentQuestions
+                    .Where(q => q.IsDeleted != true)
                     .Select(q => q.QuestionBankID)
                     .ToHashSet();
 
+                var softDeletedQuestions = allAssignmentQuestions
+                    .Where(q => q.IsDeleted == true)
+                    .ToDictionary(q => q.QuestionBankID, q => q);
+
                 List<long> questionBankIds;
+
                 if (newData.SelectedTagsIds != null && newData.SelectedTagsIds.Count > 0)
                 {
                     var questionBankTags = Unit_Of_Work.questionBankTags_Repository.FindBy(
@@ -189,32 +246,51 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                             q => q.IsDeleted != true
                                 && q.QuestionTypeID == item.QuestionTypeId
                                 && questionBankIds.Contains(q.ID)
-                                && !existingQuestionIds.Contains(q.ID)
                         );
 
                         var random = new Random();
                         var randomizedQuestions = filteredQuestions
                             .OrderBy(q => random.Next())
-                            .Take((int)item.NumberOfQuestion)
                             .ToList();
 
-                        selectedQuestions.AddRange(randomizedQuestions);
+                        foreach (var q in randomizedQuestions)
+                        {
+                            if (activeQuestionIds.Contains(q.ID))
+                                continue; // Skip already added
+
+                            if (softDeletedQuestions.TryGetValue(q.ID, out var softDeletedAssignment))
+                            {
+                                // Restore soft-deleted question
+                                softDeletedAssignment.IsDeleted = false;
+                                softDeletedAssignment.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time"));
+                                if (userTypeClaim == "octa")
+                                    softDeletedAssignment.UpdatedByOctaId = userId;
+                                else if (userTypeClaim == "employee")
+                                    softDeletedAssignment.UpdatedByUserId = userId;
+
+                                Unit_Of_Work.assignmentQuestion_Repository.Update(softDeletedAssignment);
+                                Unit_Of_Work.SaveChanges();
+
+                                activeQuestionIds.Add(q.ID); // track restored
+                                continue;
+                            }
+
+                            // Add new assignment question
+                            var assignmentQuestion = new AssignmentQuestion
+                            {
+                                QuestionBankID = q.ID,
+                                AssignmentID = assignment.ID,
+                                InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time")),
+                                InsertedByOctaId = userTypeClaim == "octa" ? userId : null,
+                                InsertedByUserId = userTypeClaim == "employee" ? userId : null
+                            };
+
+                            Unit_Of_Work.assignmentQuestion_Repository.Add(assignmentQuestion);
+                            Unit_Of_Work.SaveChanges();
+
+                            activeQuestionIds.Add(q.ID);
+                        }
                     }
-                }
-
-                foreach (var item in selectedQuestions)
-                {
-                    var assignmentQuestion = new AssignmentQuestion
-                    {
-                        QuestionBankID = item.ID,
-                        AssignmentID = assignment.ID,
-                        InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time")),
-                        InsertedByOctaId = userTypeClaim == "octa" ? userId : null,
-                        InsertedByUserId = userTypeClaim == "employee" ? userId : null
-                    };
-
-                    Unit_Of_Work.assignmentQuestion_Repository.Add(assignmentQuestion);
-                    Unit_Of_Work.SaveChanges();
                 }
             }
             return Ok();

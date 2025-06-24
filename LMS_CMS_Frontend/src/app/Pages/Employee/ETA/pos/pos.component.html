@@ -3,10 +3,10 @@
         <h1 class="font-semibold text-2xl leading-9">POS</h1>
         <div class="flex justify-between items-center">
             <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
-            <!-- <button (click)="Create()"
+            <button (click)="openModal()"
                 class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
                 Create POS
-            </button> -->
+            </button>
         </div>
     </div>
 
@@ -18,11 +18,7 @@
                         <th
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                             ID
-                        </th>
-                        <th
-                            class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            Name
-                        </th>
+                        </th> 
                         <th
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                             Client ID
@@ -48,7 +44,7 @@
                 <tbody>
                     <!-- No Data Row -->
                     <tr *ngIf="POSData.length === 0">
-                        <td colspan="7"
+                        <td colspan="6"
                             class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
                             No Data Found
                         </td>
@@ -60,24 +56,30 @@
                         class="border-t border-gray-300 text-xs md:text-sm">
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             {{ row.id }}
+                        </td> 
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ row.clientID }}
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            {{ row.name }}
+                            {{ row.clientSecret }}
                         </td>
-                        <!-- <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ row.clientSecret2 }}
+                        </td>
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ row.deviceSerialNumber }}
+                        </td>
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             <div class="flex space-x-4">
                                 <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)"
                                     (click)="Delete(row.id)">
                                     <i class="fa-regular fa-trash-can"></i>
                                 </button>
-                                <button *ngIf="AllowEdit && IsAllowEdit(row.insertedByUserId)" (click)="Edit(row)">
+                                <button *ngIf="AllowEdit && IsAllowEdit(row.insertedByUserId)" (click)="openModal(row.id)">
                                     <i class="fa-solid fa-pencil"></i>
-                                </button>
-                                <button (click)="view(row.id)">
-                                    <i class="fa-solid fa-eye"></i>
-                                </button>
+                                </button> 
                             </div>
-                        </td> -->
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -85,39 +87,89 @@
     </div>
 </div>
 
-<!-- Modal -->
-<!-- <div id="default-modal" tabindex="-1" aria-hidden="true" [ngClass]="{ hidden: !isModalVisible }"
-    class="fixed top-0 left-0 right-0 z-50 flex justify-center items-center w-full h-full bg-black/50">
-    <div class="relative bg-white w-[669px] h-[257px] rounded-2xl p-12 gap-4 shadow-md">
-        <button (click)="closeModal()"
-            class="absolute top-4 right-4 text-gray-400 hover:text-gray-900 transition duration-200">
-            <i class="fa-solid fa-xmark text-2xl"></i>
+<div class="mt-8 flex justify-between items-center">
+    <div class="flex items-center space-x-4">
+        <button class="flex items-center space-x-2 rounded-lg border py-3 px-4"
+            (click)="changeCurrentPage(CurrentPage-1)" [disabled]="CurrentPage === 1 || POSData.length == 0"
+            [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === 1 || POSData.length == 0}">
+            <i class="fa-solid fa-arrow-left"></i>
+            <p>Previous</p>
         </button>
-
-        <h1 *ngIf="mode == 'Create'" class="font-semibold text-2xl leading-9">
-            Create Job Category
-        </h1>
-        <h1 *ngIf="mode == 'Edit'" class="font-semibold text-2xl leading-9">
-            Edit Job Category
-        </h1>
-        <div class="mt-4 bg-[#F7F7F7] w-[573px] h-auto rounded-[24px] p-[16px_24px] gap-[20px]">
-            <h6 class="font-medium text-base leading-6">Job Category Name</h6>
-            <div class="flex justify-start mt-2 gap-2 items-start">
-                <div class="flex flex-col">
-                    <input type="text" class="w-[404px] h-[45px] rounded-lg border border-solid border-gray-300 px-2"
-                        [(ngModel)]="jobCategories.name" placeholder="Enter Name" (ngModelChange)="
-              onInputValueChange({ field: 'name', value: $event })
-            " />
-                    <span *ngIf="validationErrors['name']" class="text-red-500 ml-3 font-normal">{{
-                        validationErrors["name"]
-                        }}</span>
-                </div>
-                <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
-                    (click)="CreateOREdit()">
-                    <span *ngIf="!isLoading">Save</span>
-                    <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
-                </button>
+        <div class="flex">
+            <div *ngFor="let page of [].constructor(TotalPages); let i = index" class="rounded-lg py-[10px] w-[40px]"
+                [ngClass]="{'border': i+1 == CurrentPage || POSData.length == 0}" (click)="changeCurrentPage(i+1)">
+                <p class="text-center">{{ i + 1 }}</p>
             </div>
         </div>
+        <button class="flex items-center space-x-2 rounded-lg border py-3 px-4"
+            (click)="changeCurrentPage(CurrentPage+1)" [disabled]="CurrentPage === TotalPages || POSData.length == 0"
+            [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === TotalPages || POSData.length == 0}">
+            <p>Next</p>
+            <i class="fa-solid fa-arrow-right"></i>
+        </button>
     </div>
-</div> -->
+
+    <div class="flex items-center space-x-2">
+        <input (input)="validateNumberForPagination($event)" class="rounded-lg border py-3 px-4 w-[73px]" [(ngModel)]="PageSize"
+            min="1" (input)="validatePageSize($event)" (ngModelChange)="changeCurrentPage(CurrentPage)">
+        <p>items Per Page</p>
+    </div>
+
+    <div>
+        <p>{{CurrentPage}} of {{TotalPages}} pages ({{TotalRecords}} Item)</p>
+    </div>
+</div>
+
+
+<!-- Modal -->
+
+<div id="Add_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
+    <div class="bg-white rounded-2xl p-12 w-[669px] max-h-[90%] overflow-y-auto">
+        <div class="flex justify-between items-center">
+            <h1 *ngIf="pos.id == 0" class="font-semibold text-2xl leading-9">Create POS</h1>
+            <h1 *ngIf="pos.id != 0" class="font-semibold text-2xl leading-9">Edit POS</h1>
+            <button (click)="closeModal()" type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
+        </div>
+        
+        <div class="mt-6 mb-4 flex justify-between flex-wrap"> 
+            <div class="flex flex-col mb-4 w-[49%]">
+                <label class="mb-2 primaryTxt" for="clientID">Client ID</label>
+                <input id="clientID" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Client ID"
+                [(ngModel)]="pos.clientID" 
+                (ngModelChange)="onInputValueChange({ field: 'clientID', value: $event })"/>
+                <span *ngIf="validationErrors['clientID']" class="text-red-500 ml-3 font-normal">{{ validationErrors['clientID'] }}</span>
+            </div> 
+            <div class="flex flex-col mb-4 w-[49%]">
+                <label class="mb-2 primaryTxt" for="clientSecret">Client Secret</label>
+                <input id="clientSecret" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Client Secret"
+                [(ngModel)]="pos.clientSecret" 
+                (ngModelChange)="onInputValueChange({ field: 'clientSecret', value: $event })"/>
+                <span *ngIf="validationErrors['clientSecret']" class="text-red-500 ml-3 font-normal">{{ validationErrors['clientSecret'] }}</span>
+            </div> 
+            <div class="flex flex-col mb-4 w-[49%]">
+                <label class="mb-2 primaryTxt" for="clientSecret2">Client ID</label>
+                <input id="clientSecret2" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Client Secret 2"
+                [(ngModel)]="pos.clientSecret2" 
+                (ngModelChange)="onInputValueChange({ field: 'clientSecret2', value: $event })"/>
+                <span *ngIf="validationErrors['clientSecret2']" class="text-red-500 ml-3 font-normal">{{ validationErrors['clientSecret2'] }}</span>
+            </div> 
+            <div class="flex flex-col mb-4 w-[49%]">
+                <label class="mb-2 primaryTxt" for="deviceSerialNumber">Device Serial Number</label>
+                <input id="deviceSerialNumber" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Device Serial Number"
+                [(ngModel)]="pos.deviceSerialNumber" 
+                (ngModelChange)="onInputValueChange({ field: 'deviceSerialNumber', value: $event })"/>
+                <span *ngIf="validationErrors['deviceSerialNumber']" class="text-red-500 ml-3 font-normal">{{ validationErrors['deviceSerialNumber'] }}</span>
+            </div> 
+        </div> 
+
+        <div class="flex justify-end">
+            <button
+            [disabled]="isLoading"
+            class="secondaryBg text-white font-medium px-4 py-2 rounded-lg cursor-pointer"
+            (click)="Save()">
+            <span *ngIf="!isLoading">Save</span>
+            <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+          </button>
+        </div>
+    </div>
+</div>

@@ -58,14 +58,14 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
-             
+
             if (ETAPOSs == null || ETAPOSs.Count == 0)
             {
                 return NotFound("No ETAPOS records found.");
             }
 
             var ETAPOSDtos = _mapper.Map<List<POSGetDTO>>(ETAPOSs);
-             
+
             var paginationMetadata = new
             {
                 TotalRecords = totalRecords,
@@ -119,7 +119,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Point Of Sale" }
         )]
-        public async Task<ActionResult> Add([FromBody] POSAddDTO posDto)
+        public async Task<ActionResult> Add(POSAddDTO posDto)
         {
             if (!ModelState.IsValid)
             {
@@ -142,7 +142,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
 
             ETAPOS newETAPOS = _mapper.Map<ETAPOS>(posDto);
 
-            Unit_Of_Work.pos_Repository.Update(newETAPOS);
+            Unit_Of_Work.pos_Repository.Add(newETAPOS);
             Unit_Of_Work.SaveChanges();
 
             return CreatedAtAction(nameof(GetById), new { id = newETAPOS.ID }, posDto);
@@ -155,7 +155,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Point Of Sale" }
         )]
-        public async Task<ActionResult> Update([FromBody] POSEditDTO posDto)
+        public async Task<ActionResult> Update(POSEditDTO posDto)
         {
             if (!ModelState.IsValid)
             {
@@ -193,7 +193,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
         #endregion
 
         #region Delete
-        [HttpDelete]
+        [HttpDelete("{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Point Of Sale" }

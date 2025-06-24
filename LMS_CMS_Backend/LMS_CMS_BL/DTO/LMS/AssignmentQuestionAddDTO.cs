@@ -16,6 +16,6 @@ namespace LMS_CMS_BL.DTO.LMS
         public List<long>? QuestionIds { get; set; }
         public List<long>? SelectedTagsIds { get; set; }
         public List<QuestionAssignmentTypeCountDTO>? QuestionAssignmentTypeCountDTO { get; set; }
-        //public IFormFile? File { get; set; }
+        public IFormFile? File { get; set; }
     }
 }
