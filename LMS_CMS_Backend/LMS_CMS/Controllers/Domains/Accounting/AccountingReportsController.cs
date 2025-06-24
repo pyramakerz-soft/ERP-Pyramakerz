@@ -101,10 +101,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                     _ => null
                 };
 
-                if(dto.LinkFileID == 6)
-                {
-                    var x = banks.FirstOrDefault(b => b.ID == dto.BankOrSaveID);
-                }
+                //if(dto.LinkFileID == 6)
+                //{
+                //    var x = banks.FirstOrDefault(b => b.ID == dto.BankOrSaveID);
+                //}
                 foreach (var detail in dto.PayableDetails)
                 {
                     detail.LinkFileTypeName = detail.LinkFileID switch
@@ -132,115 +132,107 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
         #region Receivables
         [HttpGet("GetReceivablesByDate/{id}")]
-        public async Task<ActionResult> GetReceivablesByDate(long id, string startDate, string endDate, int pageNumber, int pageSize)
+        public async Task<ActionResult> GetReceivablesByDate(long id, string startDate, string endDate, int pageNumber = 1, int pageSize = 10)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             DateTime start = DateTime.Parse(startDate);
             DateTime end = DateTime.Parse(endDate);
 
-            List<ReceivableDetails> ReceivableDetails = await Unit_Of_Work.receivableDetails_Repository.Select_All_With_IncludesById_Pagination<ReceivableDetails>(
-                t => t.IsDeleted != true && t.ReceivableMasterID == id &&
-                    t.InsertedAt.Value.Date >= start && t.InsertedAt.Value.Date <= end,
-                query => query.Include(Master => Master.ReceivableMaster),
-                query => query.Include(Master => Master.LinkFile)
-            )
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
+            //List<ReceivableDetails> ReceivableDetails = await Unit_Of_Work.receivableDetails_Repository.Select_All_With_IncludesById_Pagination<ReceivableDetails>(
+            //    t => t.IsDeleted != true && t.ReceivableMasterID == id &&
+            //        t.InsertedAt.Value.Date >= start && t.InsertedAt.Value.Date <= end,
+            //    query => query.Include(Master => Master.ReceivableMaster),
+            //    query => query.Include(Master => Master.LinkFile)
+            //)
+            //    .Skip((pageNumber - 1) * pageSize)
+            //    .Take(pageSize)
+            //    .ToListAsync();
 
-            if (ReceivableDetails == null || ReceivableDetails.Count == 0)
+            var query = Unit_Of_Work.receivableMaster_Repository
+            .Select_All_With_IncludesById_Pagination<ReceivableMaster>(
+                t => t.IsDeleted != true,
+                q => q.Include(m => m.ReceivableDetails).ThenInclude(pd => pd.LinkFile)
+                      .Include(m => m.LinkFile)
+                      .Include(m => m.ReceivableDocType)
+            );
+
+            if (query == null || query.ToList().Count == 0)
                 return NotFound("No receivables found for the specified date range.");
 
-            var suppliersIds = ReceivableDetails.Where(r => r.LinkFileID == 2).Select(r => r.LinkFileTypeID).Distinct().ToList();
-            var debitIds = ReceivableDetails.Where(r => r.LinkFileID == 3).Select(r => r.LinkFileTypeID).Distinct().ToList();
-            var creditsIds = ReceivableDetails.Where(r => r.LinkFileID == 4).Select(r => r.LinkFileTypeID).Distinct().ToList();
-            var saveIds = ReceivableDetails.Where(r => r.LinkFileID == 5).Select(r => r.LinkFileTypeID).Distinct().ToList();
-            var bankIds = ReceivableDetails.Where(r => r.LinkFileID == 6).Select(r => r.LinkFileTypeID).Distinct().ToList();
-            var incomesIds = ReceivableDetails.Where(r => r.LinkFileID == 7).Select(r => r.LinkFileTypeID).Distinct().ToList();
-            var outcomesIds = ReceivableDetails.Where(r => r.LinkFileID == 8).Select(r => r.LinkFileTypeID).Distinct().ToList();
-            var assetsIds = ReceivableDetails.Where(r => r.LinkFileID == 9).Select(r => r.LinkFileTypeID).Distinct().ToList();
-            var employeesIds = ReceivableDetails.Where(r => r.LinkFileID == 10).Select(r => r.LinkFileTypeID).Distinct().ToList();
-            var feeIds = ReceivableDetails.Where(r => r.LinkFileID == 11).Select(r => r.LinkFileTypeID).Distinct().ToList();
-            var discountIds = ReceivableDetails.Where(r => r.LinkFileID == 12).Select(r => r.LinkFileTypeID).Distinct().ToList();
-            var studentIds = ReceivableDetails.Where(r => r.LinkFileID == 13).Select(r => r.LinkFileTypeID).Distinct().ToList();
+            List<ReceivableMaster> ReceivableMasters = query
+                .AsEnumerable()
+                .Where(t => DateTime.TryParse(t.Date, out var d) && d >= start && d <= end)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            if (ReceivableMasters == null || ReceivableMasters.Count == 0)
+                return NotFound("No receivables found for the specified date range.");
+
+            var allDetails = ReceivableMasters.SelectMany(pm => pm.ReceivableDetails).ToList();
+
+            var saveIdsForMaster = ReceivableMasters.Where(r => r.LinkFileID == 5).Select(r => r.BankOrSaveID).Distinct().ToList();
+            var bankIdsForMaster = ReceivableMasters.Where(r => r.LinkFileID == 6).Select(r => r.BankOrSaveID).Distinct().ToList();
+
+            var suppliersIds = allDetails.Where(r => r.LinkFileID == 2).Select(r => r.LinkFileTypeID).Distinct().ToList();
+            var debitIds = allDetails.Where(r => r.LinkFileID == 3).Select(r => r.LinkFileTypeID).Distinct().ToList();
+            var creditsIds = allDetails.Where(r => r.LinkFileID == 4).Select(r => r.LinkFileTypeID).Distinct().ToList();
+            var saveIds = allDetails.Where(r => r.LinkFileID == 5).Select(r => r.LinkFileTypeID).Distinct().ToList();
+            var bankIds = allDetails.Where(r => r.LinkFileID == 6).Select(r => r.LinkFileTypeID).Distinct().ToList();
+            var incomesIds = allDetails.Where(r => r.LinkFileID == 7).Select(r => r.LinkFileTypeID).Distinct().ToList();
+            var outcomesIds = allDetails.Where(r => r.LinkFileID == 8).Select(r => r.LinkFileTypeID).Distinct().ToList();
+            var assetsIds = allDetails.Where(r => r.LinkFileID == 9).Select(r => r.LinkFileTypeID).Distinct().ToList();
+            var employeesIds = allDetails.Where(r => r.LinkFileID == 10).Select(r => r.LinkFileTypeID).Distinct().ToList();
+            var feeIds = allDetails.Where(r => r.LinkFileID == 11).Select(r => r.LinkFileTypeID).Distinct().ToList();
+            var discountIds = allDetails.Where(r => r.LinkFileID == 12).Select(r => r.LinkFileTypeID).Distinct().ToList();
+            var studentIds = allDetails.Where(r => r.LinkFileID == 13).Select(r => r.LinkFileTypeID).Distinct().ToList(); 
+            
+            var banksForMaster = await Unit_Of_Work.bank_Repository.Select_All_With_IncludesById<Bank>(b => bankIdsForMaster.Contains(b.ID));
+            var safesForMaster = await Unit_Of_Work.save_Repository.Select_All_With_IncludesById<Save>(s => saveIdsForMaster.Contains(s.ID));
 
             var banks = await Unit_Of_Work.bank_Repository.Select_All_With_IncludesById<Bank>(b => bankIds.Contains(b.ID));
-            var saves = await Unit_Of_Work.save_Repository.Select_All_With_IncludesById<Save>(s => saveIds.Contains(s.ID));
-            var Suppliers = await Unit_Of_Work.supplier_Repository.Select_All_With_IncludesById<Supplier>(s => suppliersIds.Contains(s.ID));
-            var Debit = await Unit_Of_Work.debit_Repository.Select_All_With_IncludesById<Debit>(s => debitIds.Contains(s.ID));
-            var Credits = await Unit_Of_Work.credit_Repository.Select_All_With_IncludesById<Credit>(s => creditsIds.Contains(s.ID));
-            var Incomes = await Unit_Of_Work.income_Repository.Select_All_With_IncludesById<Income>(s => incomesIds.Contains(s.ID));
-            var Outcomes = await Unit_Of_Work.outcome_Repository.Select_All_With_IncludesById<Outcome>(s => outcomesIds.Contains(s.ID));
-            var Assets = await Unit_Of_Work.asset_Repository.Select_All_With_IncludesById<Asset>(s => assetsIds.Contains(s.ID));
-            var Employees = await Unit_Of_Work.employee_Repository.Select_All_With_IncludesById<Employee>(s => employeesIds.Contains(s.ID));
-            var Fees = await Unit_Of_Work.tuitionFeesType_Repository.Select_All_With_IncludesById<TuitionFeesType>(s => feeIds.Contains(s.ID));
-            var Discount = await Unit_Of_Work.tuitionDiscountType_Repository.Select_All_With_IncludesById<TuitionDiscountType>(s => discountIds.Contains(s.ID));
-            var Students = await Unit_Of_Work.student_Repository.Select_All_With_IncludesById<Student>(s => studentIds.Contains(s.ID));
+            var safes = await Unit_Of_Work.save_Repository.Select_All_With_IncludesById<Save>(s => saveIds.Contains(s.ID));
+            var suppliers = await Unit_Of_Work.supplier_Repository.Select_All_With_IncludesById<Supplier>(s => suppliersIds.Contains(s.ID));
+            var debits = await Unit_Of_Work.debit_Repository.Select_All_With_IncludesById<Debit>(s => debitIds.Contains(s.ID));
+            var credits = await Unit_Of_Work.credit_Repository.Select_All_With_IncludesById<Credit>(s => creditsIds.Contains(s.ID));
+            var incomes = await Unit_Of_Work.income_Repository.Select_All_With_IncludesById<Income>(s => incomesIds.Contains(s.ID));
+            var outcomes = await Unit_Of_Work.outcome_Repository.Select_All_With_IncludesById<Outcome>(s => outcomesIds.Contains(s.ID));
+            var assets = await Unit_Of_Work.asset_Repository.Select_All_With_IncludesById<Asset>(s => assetsIds.Contains(s.ID));
+            var employees = await Unit_Of_Work.employee_Repository.Select_All_With_IncludesById<Employee>(s => employeesIds.Contains(s.ID));
+            var fees = await Unit_Of_Work.tuitionFeesType_Repository.Select_All_With_IncludesById<TuitionFeesType>(s => feeIds.Contains(s.ID));
+            var discounts = await Unit_Of_Work.tuitionDiscountType_Repository.Select_All_With_IncludesById<TuitionDiscountType>(s => discountIds.Contains(s.ID));
+            var students = await Unit_Of_Work.student_Repository.Select_All_With_IncludesById<Student>(s => studentIds.Contains(s.ID));
 
-            List<ReceivableDetailsGetDTO> DTOs = _mapper.Map<List<ReceivableDetailsGetDTO>>(ReceivableDetails);
+            List<ReceivableMasterGetDTO> DTOs = _mapper.Map<List<ReceivableMasterGetDTO>>(ReceivableMasters);
 
             foreach (var dto in DTOs)
             {
-                if (dto.LinkFileID == 6) // Bank
+                dto.BankOrSaveName = dto.LinkFileID switch
                 {
-                    var bank = banks.FirstOrDefault(b => b.ID == dto.LinkFileTypeID); 
-                    dto.LinkFileTypeName = bank?.Name;
-                }
-                else if (dto.LinkFileID == 5) // Save
+                    5 => safesForMaster.FirstOrDefault(s => s.ID == dto.BankOrSaveID)?.Name,
+                    6 => banksForMaster.FirstOrDefault(b => b.ID == dto.BankOrSaveID)?.Name,
+                    _ => null
+                };
+
+                foreach (var detail in dto.ReceivableDetails)
                 {
-                    var save = saves.FirstOrDefault(s => s.ID == dto.LinkFileTypeID);
-                    dto.LinkFileTypeName = save?.Name;
-                }
-                else if (dto.LinkFileID == 2) // Supplier
-                {
-                    var supplier = Suppliers.FirstOrDefault(s => s.ID == dto.LinkFileTypeID);
-                    dto.LinkFileTypeName = supplier?.Name;
-                }
-                else if (dto.LinkFileID == 3) // Debit
-                {
-                    var debit = Debit.FirstOrDefault(d => d.ID == dto.LinkFileTypeID);
-                    dto.LinkFileTypeName = debit?.Name;
-                }
-                else if (dto.LinkFileID == 4) // Credit
-                {
-                    var credit = Credits.FirstOrDefault(c => c.ID == dto.LinkFileTypeID);
-                    dto.LinkFileTypeName = credit?.Name;
-                }
-                else if (dto.LinkFileID == 7) // Income
-                {
-                    var income = Incomes.FirstOrDefault(i => i.ID == dto.LinkFileTypeID);
-                    dto.LinkFileTypeName = income?.Name;
-                }
-                else if (dto.LinkFileID == 8) // Outcome
-                {
-                    var outcome = Outcomes.FirstOrDefault(o => o.ID == dto.LinkFileTypeID);
-                    dto.LinkFileTypeName = outcome?.Name;
-                }
-                else if (dto.LinkFileID == 9) // Asset
-                {
-                    var asset = Assets.FirstOrDefault(a => a.ID == dto.LinkFileTypeID);
-                    dto.LinkFileTypeName = asset?.Name;
-                }
-                else if (dto.LinkFileID == 10) // Employee
-                {
-                    var employee = Employees.FirstOrDefault(e => e.ID == dto.LinkFileTypeID);
-                    dto.LinkFileTypeName = employee?.en_name;
-                }
-                else if (dto.LinkFileID == 11) // Fee
-                {
-                    var fee = Fees.FirstOrDefault(f => f.ID == dto.LinkFileTypeID);
-                    dto.LinkFileTypeName = fee?.Name;
-                }
-                else if (dto.LinkFileID == 12) // Discount
-                {
-                    var discount = Discount.FirstOrDefault(d => d.ID == dto.LinkFileTypeID);
-                    dto.LinkFileTypeName = discount?.Name;
-                }
-                else if (dto.LinkFileID == 13) // Student
-                {
-                    var student = Students.FirstOrDefault(s => s.ID == dto.LinkFileTypeID);
-                    dto.LinkFileTypeName = student?.en_name;
+                    detail.LinkFileTypeName = detail.LinkFileID switch
+                    {
+                        2 => suppliers.FirstOrDefault(s => s.ID == detail.LinkFileTypeID)?.Name,
+                        3 => debits.FirstOrDefault(d => d.ID == detail.LinkFileTypeID)?.Name,
+                        4 => credits.FirstOrDefault(c => c.ID == detail.LinkFileTypeID)?.Name,
+                        5 => safes.FirstOrDefault(s => s.ID == detail.LinkFileTypeID)?.Name,
+                        6 => banks.FirstOrDefault(b => b.ID == detail.LinkFileTypeID)?.Name,
+                        7 => incomes.FirstOrDefault(s => s.ID == detail.LinkFileTypeID)?.Name,
+                        8 => outcomes.FirstOrDefault(s => s.ID == detail.LinkFileTypeID)?.Name,
+                        9 => assets.FirstOrDefault(s => s.ID == detail.LinkFileTypeID)?.Name,
+                        10 => employees.FirstOrDefault(s => s.ID == detail.LinkFileTypeID)?.en_name,
+                        11 => fees.FirstOrDefault(s => s.ID == detail.LinkFileTypeID)?.Name,
+                        12 => discounts.FirstOrDefault(s => s.ID == detail.LinkFileTypeID)?.Name,
+                        13 => students.FirstOrDefault(s => s.ID == detail.LinkFileTypeID)?.en_name,
+                        _ => null
+                    };
                 }
             }
 
