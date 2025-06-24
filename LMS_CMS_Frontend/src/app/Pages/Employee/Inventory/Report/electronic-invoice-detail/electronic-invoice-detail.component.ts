@@ -113,13 +113,13 @@ export class ElectronicInvoiceDetailComponent implements OnInit {
       error: (masterError) => {
         console.error('Error loading invoice master data:', masterError);
         this.isLoading = false;
-        this.router.navigate(['/Employee/Electronic-Invoice']);
+        this.router.navigate(['/Employee/Zatca Electronic-Invoice']);
       }
     });
   }
 
   goBack() {
-    this.router.navigate(['/Employee/Electronic-Invoice']);
+    this.router.navigate(['/Employee/Zatca Electronic-Invoice']);
   }
 
   sendInvoice() {
