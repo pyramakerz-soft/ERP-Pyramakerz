@@ -142,6 +142,36 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return NotFound();
             }
 
+            if (assignment != null)
+            {
+                // Filter AssignmentQuestions where QuestionBank is not deleted
+                assignment.AssignmentQuestions = assignment.AssignmentQuestions .Where(aq =>
+                        aq.IsDeleted != true &&              
+                        aq.QuestionBank != null &&
+                        aq.QuestionBank.IsDeleted != true).ToList();
+
+                foreach (var aq in assignment.AssignmentQuestions)
+                {
+                    var qb = aq.QuestionBank;
+
+                    // Filter QuestionBankOptions
+                    if (qb?.QuestionBankOptions != null)
+                    {
+                        qb.QuestionBankOptions = qb.QuestionBankOptions
+                            .Where(opt => opt.IsDeleted != true)
+                            .ToList();
+                    }
+
+                    // Filter SubBankQuestions
+                    if (qb?.SubBankQuestions != null)
+                    {
+                        qb.SubBankQuestions = qb.SubBankQuestions
+                            .Where(sub => sub.IsDeleted != true)
+                            .ToList();
+                    }
+                }
+            }
+
             AssignmentGetDTO DTO = mapper.Map<AssignmentGetDTO>(assignment);
 
             string serverUrl = $"{Request.Scheme}://{Request.Host}/";
@@ -233,22 +263,39 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpPost]
         [Authorize_Endpoint_(
-          allowedTypes: new[] { "octa", "employee" }
+          allowedTypes: new[] { "octa", "employee" ,"student" }
           //,
           //pages: new[] { "Book Correction" }
       )]
-        public async Task<IActionResult> Add([FromForm] AssignmentStudentAddDTO newData)
+        public async Task<IActionResult> Add(AssignmentStudentAddDTO newData)
         {
 
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             if (newData == null)
                 return BadRequest("Answers are empty");
+
             // Get user info
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
             var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
             if (userIdClaim == null || userTypeClaim == null || !long.TryParse(userIdClaim, out long userId))
                 return Unauthorized("Invalid user claims.");
+
+            Assignment assignment = Unit_Of_Work.assignment_Repository.First_Or_Default(a => a.ID == newData.AssignmentID && a.IsDeleted != true);
+            if (assignment == null)
+            {
+                return BadRequest("There is no assignment with this id");
+            }
+            if (assignment.AssignmentTypeID == 1)
+            {
+                return BadRequest("this assignment TextBookAssignment");
+            }
+
+            StudentClassroom studentClassroom = Unit_Of_Work.studentClassroom_Repository.First_Or_Default(s => s.IsDeleted != true && s.StudentID == newData.StudentId && s.Classroom.IsDeleted != true && s.Classroom.AcademicYear.IsDeleted != true && s.Classroom.AcademicYear.IsActive == true);
+            if (studentClassroom == null)
+            {
+                return BadRequest("this Student Not Exist In any classroom");
+            }
 
             // Get all valid assignment questions
             var assignmentQuestions = Unit_Of_Work.assignmentQuestion_Repository
@@ -284,10 +331,23 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 newData.AssignmentStudentQuestions.Add(unansweredQuestion); 
             }
 
+            foreach (var question in newData.AssignmentStudentQuestions ?? new List<AssignmentStudentQuestionAddDTO>())
+            {
+                if (question.AnswerOptionID == 0)
+                    question.AnswerOptionID = null;
+
+                foreach (var option in question.AssignmentStudentQuestionAnswerOption ?? new List<AssignmentStudentQuestionAnswerOptionAddDTO>())
+                {
+                    if (option.SubBankQuestionID == 0) option.SubBankQuestionID = null;
+                    if (option.AssignmentStudentQuestionID == 0) option.AssignmentStudentQuestionID = null;
+                    if (option.SelectedOpionID == 0) option.SelectedOpionID = null;
+                }
+            }
+
             // Map the main entity
             var assignmentStudent = mapper.Map<AssignmentStudent>(newData);
 
-
+            assignmentStudent.StudentClassroomID = studentClassroom.ID;
             // Set inserted timestamps and user
             var cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             assignmentStudent.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
@@ -302,6 +362,108 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             return Ok();
         }
+        /////////////////////////////////////////////
+
+        [HttpPost("AddWhenTextBookAssignment")]
+        [Authorize_Endpoint_(
+          allowedTypes: new[] { "octa", "employee", "student" }
+          //,
+          //pages: new[] { "Book Correction" }
+      )]
+        public async Task<IActionResult> AddWhenTextBookAssignment([FromForm]AssignmentStudentAddDTOFile newData)
+        {
+
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            if (newData == null)
+                return BadRequest("Answers are empty");
+
+            // Get user info
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+            if (userIdClaim == null || userTypeClaim == null || !long.TryParse(userIdClaim, out long userId))
+                return Unauthorized("Invalid user claims.");
+
+            StudentClassroom studentClassroom = Unit_Of_Work.studentClassroom_Repository.First_Or_Default(s => s.IsDeleted != true && s.StudentID == newData.StudentId && s.Classroom.IsDeleted != true && s.Classroom.AcademicYear.IsDeleted != true && s.Classroom.AcademicYear.IsActive == true);
+            if (studentClassroom == null)
+            {
+                return BadRequest("this Student Not Exist In any classroom");
+            }
+
+            
+            Assignment assignment= Unit_Of_Work.assignment_Repository.First_Or_Default(a=>a.ID==newData.AssignmentID && a.IsDeleted!= true);
+            if (assignment == null)
+            {
+                return BadRequest("There is no assignment with this id");
+            }
+            if(assignment.AssignmentTypeID != 1)
+            {
+                return BadRequest("this assignment not TextBookAssignment");
+            }
+
+            // Map the main entity
+            if (newData.File == null)
+            {
+                return BadRequest("File Is Required");
+            }
+            var allowedExtensions = new[] { ".pdf", ".doc", ".docx" };
+            var allowedMimeTypes = new[] {
+                "application/pdf",
+                "application/msword",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            };
+            var maxFileSize = 25 * 1024 * 1024; // 25 MB
+
+            var fileExtension = Path.GetExtension(newData.File.FileName).ToLower();
+            var contentType = newData.File.ContentType;
+
+            if (!allowedExtensions.Contains(fileExtension) || !allowedMimeTypes.Contains(contentType))
+            {
+                return BadRequest("Only PDF or Word (.doc/.docx) files are allowed.");
+            }
+            if (newData.File.Length > maxFileSize)
+            {
+                return BadRequest("File size exceeds the 25 MB limit.");
+            }
+
+            AssignmentStudent assignmentStudent = new AssignmentStudent();
+            assignmentStudent.AssignmentID = newData.AssignmentID;
+            assignmentStudent.StudentClassroomID = studentClassroom.ID;
+            // Set inserted timestamps and user
+            var cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            assignmentStudent.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            if (userTypeClaim == "octa")
+                assignmentStudent.InsertedByOctaId = userId;
+            else if (userTypeClaim == "employee")
+                assignmentStudent.InsertedByUserId = userId;
+
+            Unit_Of_Work.assignmentStudent_Repository.Add(assignmentStudent);
+            Unit_Of_Work.SaveChanges();
+
+            var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/AssignmentStudent");
+            var medalFolder = Path.Combine(baseFolder, assignmentStudent.ID.ToString());
+            if (!Directory.Exists(medalFolder))
+            {
+                Directory.CreateDirectory(medalFolder);
+            }
+
+            if (newData.File != null && newData.File.Length > 0)
+            {
+                var fileName = Path.GetFileName(newData.File.FileName);
+                var filePath = Path.Combine(medalFolder, fileName);
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await newData.File.CopyToAsync(stream);
+                }
+                assignmentStudent.LinkFile = $"Uploads/AssignmentStudent/{assignmentStudent.ID.ToString()}/{fileName}";
+            }
+
+            Unit_Of_Work.assignmentStudent_Repository.Update(assignmentStudent);
+            Unit_Of_Work.SaveChanges();
+
+            return Ok();
+        }
+
 
         /////////////////////////////////////////////
 

@@ -16,11 +16,11 @@ studentName: any;
         public studentEnglishName: string = '',
         public studentArabicName: string = '',
         public linkFile: string = '',
+        public file: File|null = null,
         public assignmentID: number = 0,
         public assignmentDegree: number = 0,
         public assignmentTypeID: number = 0 ,
         public assignmentStudentQuestions: AssignmentStudentQuestion[] = []
-
     ) {}
 }
 

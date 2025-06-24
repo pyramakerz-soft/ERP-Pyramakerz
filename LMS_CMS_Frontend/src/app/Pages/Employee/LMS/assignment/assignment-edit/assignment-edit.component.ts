@@ -322,29 +322,6 @@ export class AssignmentEditComponent {
       .join(' ');
   }
 
-  async onSearchEvent(event: { key: string; value: any }) {
-    // this.key = event.key;
-    // this.value = event.value;
-    // try {
-    //   const data: Semester[] = await firstValueFrom(this.semesterService.GetByAcademicYearId(this.academicYearId, this.DomainName));
-    //   this.semesterData = data || [];
-    //   if (this.value !== "") {
-    //     const numericValue = isNaN(Number(this.value)) ? this.value : parseInt(this.value, 10);
-    //     this.semesterData = this.semesterData.filter(t => {
-    //       const fieldValue = t[this.key as keyof typeof t];
-    //       if (typeof fieldValue === 'string') {
-    //         return fieldValue.toLowerCase().includes(this.value.toLowerCase());
-    //       }
-    //       if (typeof fieldValue === 'number') {
-    //         return fieldValue.toString().includes(numericValue.toString())
-    //       }
-    //       return fieldValue == this.value;
-    //     });
-    //   }
-    // } catch (error) {
-    //   this.semesterData = [];
-    // }
-  }
 
   onImageFileSelected(event: any) {
     const file: File = event.target.files[0];
@@ -390,10 +367,11 @@ export class AssignmentEditComponent {
   Save() {
     this.assignmentQuestion.assignmentID = this.AssignmentId;
     this.assignmentQuestion.questionIds = this.selectedQuestions;
-
+    this.assignmentQuestion.lessonId = this.SelectedLessonID;
+    this.assignmentQuestion.selectedTagsIds = this.selectedTagsIds;
     if (this.isFormValid()) {
       this.isLoading = true;
-      console.log(this.AssignmentId, this.assignmentQuestion.assignmentID);
+      console.log(168, this.assignmentQuestion);
 
       this.AssigmentQuestionServ.Add(
         this.assignmentQuestion,
@@ -414,12 +392,22 @@ export class AssignmentEditComponent {
           this.isLoading = false;
           this.closeModal();
 
-          Swal.fire({
-            icon: 'error',
-            title: 'Failed',
-            text: 'Something went wrong while adding questions.',
-            confirmButtonColor: '#d33',
-          });
+          const errorMessage = err?.error || 'Something went wrong while adding questions.';
+          if (errorMessage.includes("already exists in this assignment")) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Failed',
+              text: errorMessage, 
+              confirmButtonColor: '#d33',
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Failed',
+              text: "Something went wrong while adding questions",
+              confirmButtonColor: '#d33',
+            });
+          }
         },
         complete: () => {
           this.isLoading = false;
@@ -513,7 +501,7 @@ export class AssignmentEditComponent {
     });
   }
 
-  GoToAssignmentStudent(){
+  GoToAssignmentStudent() {
     this.router.navigateByUrl(`Employee/Assignment Student/${this.AssignmentId}`)
   }
 }
