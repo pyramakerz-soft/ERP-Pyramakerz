@@ -642,7 +642,9 @@ namespace LMS_CMS_BL.Config
                 .ForMember(dest => dest.ShopItemName, opt => opt.MapFrom(src => src.ShopItem.EnName));
             CreateMap<ShopItemSizeAddDTO, ShopItemSize>();
 
-            CreateMap<InventoryMaster, InventoryMasterGetDTO>()
+
+
+            CreateMap<InventoryMaster, InventoryMasterGetDTO>()  // InventoryMasterGetDTO 
                  .ForMember(dest => dest.SaveName, opt => opt.MapFrom(src => src.Save != null ? src.Save.Name : null))
                  .ForMember(dest => dest.BankName, opt => opt.MapFrom(src => src.Bank != null ? src.Bank.Name : null))
                  .ForMember(dest => dest.FlagArName, opt => opt.MapFrom(src => src.InventoryFlags.arName))
@@ -655,6 +657,8 @@ namespace LMS_CMS_BL.Config
                  .ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => src.Student != null ? src.Student.User_Name : null))
                  .ForMember(dest => dest.SupplierName, opt => opt.MapFrom(src => src.Supplier != null ? src.Supplier.Name : null))
                  .ForMember(dest => dest.QrImage, opt => opt.MapFrom(src => Convert.ToBase64String(src.QrImage)));
+
+
             CreateMap<InventoryMasterAddDTO, InventoryMaster>();
             CreateMap<InventoryMasterEditDTO, InventoryMaster>();
 

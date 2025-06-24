@@ -225,66 +225,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             return Ok(dto);
         }
 
-
-
         ///// /////////////////////////////////////////////////////////////////////////////////////-777
-
-        //[HttpGet("inventory-net-transactions")]
-        //[Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Inventory" })]
-        //public async Task<IActionResult> GetInventoryNetTransactionsAsync(long storeId, long shopItemId, string fromDate, string toDate)
-        //{
-        //    if (!DateTime.TryParse(fromDate, out DateTime fromDateTime) ||
-        //        !DateTime.TryParse(toDate, out DateTime toDateTime))
-        //    {
-        //        return BadRequest("Invalid date format.");
-        //    }
-
-        //    UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-
-        //    var data = (await Unit_Of_Work.inventoryDetails_Repository
-        //        .Select_All_With_IncludesById<InventoryDetails>(
-        //                d => d.IsDeleted != true &&
-        //                 d.InventoryMaster != null &&
-        //                  d.InventoryMaster.IsDeleted != true &&
-        //                   d.ShopItemID == shopItemId &&
-        //                    (d.InventoryMaster.StoreID == storeId ||
-        //                     (d.InventoryMaster.FlagId == 8 && d.InventoryMaster.StoreToTransformId == storeId)),
-
-        //            q => q.Include(d => d.InventoryMaster).ThenInclude(m => m.InventoryFlags),
-        //            q => q.Include(d => d.InventoryMaster.Supplier),
-        //            q => q.Include(d => d.InventoryMaster.Student),
-        //            q => q.Include(d => d.InventoryMaster.StoreToTransform))).AsEnumerable()
-
-        //        .Where(d =>
-        //            DateTime.TryParse(d.InventoryMaster.Date, out DateTime date) &&
-        //            date >= fromDateTime &&
-        //            date <= toDateTime)
-        //        .Select(d =>
-        //        {
-        //            double signedQty = d.Quantity * d.InventoryMaster.InventoryFlags.ItemInOut;
-        //            return new InventoryNetTransactionDTO
-        //            {
-        //                FlagName = d.InventoryMaster.InventoryFlags.arName,
-        //                InvoiceNumber = d.InventoryMaster.InvoiceNumber,
-        //                DayDate = d.InventoryMaster.Date,
-        //                Notes = d.InventoryMaster.Notes,
-        //                Quantity = d.Quantity,
-
-        //                SupplierName = (new long[] { 9, 10, 13 }.Contains(d.InventoryMaster.FlagId)) ? d.InventoryMaster.Supplier?.Name : null,
-
-        //                StudentName = (new long[] { 11, 12 }.Contains(d.InventoryMaster.FlagId)) ? d.InventoryMaster.Student?.en_name : null,
-
-        //                StoreToName = (d.InventoryMaster.FlagId == 8) ? d.InventoryMaster.StoreToTransform?.Name : null,
-
-        //                TotalIn = signedQty > 0 ? signedQty : 0,
-        //                TotalOut = signedQty < 0 ? Math.Abs(signedQty) : 0,
-        //                Balance = signedQty
-        //            };
-        //        })
-        //        .ToList();
-
-        //    return Ok(data);
-        //}
+     
         [HttpGet("inventory-net-transactions")]
         [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Inventory" })]
         public async Task<IActionResult> GetInventoryNetTransactionsAsync(long storeId, long shopItemId, string fromDate, string toDate)
@@ -335,7 +277,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 .ToList();
 
             // ===== 3. بناء DTO مع تحديث الرصيد المتغير =====
-         
+
             var runningBalance = previousBalance;
             var transactions = new List<InventoryNetTransactionDTO>();
 
@@ -364,7 +306,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
             return Ok(transactions);
         }
-
 
 
         /////// // /// /// ///////////////////////////////////////////////////
