@@ -642,7 +642,9 @@ namespace LMS_CMS_BL.Config
                 .ForMember(dest => dest.ShopItemName, opt => opt.MapFrom(src => src.ShopItem.EnName));
             CreateMap<ShopItemSizeAddDTO, ShopItemSize>();
 
-            CreateMap<InventoryMaster, InventoryMasterGetDTO>()
+
+
+            CreateMap<InventoryMaster, InventoryMasterGetDTO>()  // InventoryMasterGetDTO 
                  .ForMember(dest => dest.SaveName, opt => opt.MapFrom(src => src.Save != null ? src.Save.Name : null))
                  .ForMember(dest => dest.BankName, opt => opt.MapFrom(src => src.Bank != null ? src.Bank.Name : null))
                  .ForMember(dest => dest.FlagArName, opt => opt.MapFrom(src => src.InventoryFlags.arName))
@@ -655,6 +657,7 @@ namespace LMS_CMS_BL.Config
                  .ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => src.Student != null ? src.Student.User_Name : null))
                  .ForMember(dest => dest.SupplierName, opt => opt.MapFrom(src => src.Supplier != null ? src.Supplier.Name : null))
                  .ForMember(dest => dest.QrImage, opt => opt.MapFrom(src => Convert.ToBase64String(src.QrImage)));
+
             CreateMap<InventoryMasterAddDTO, InventoryMaster>()
                        .ForMember(dest => dest.InventoryDetails, opt => opt.MapFrom(src => src.InventoryDetails));
             CreateMap<InventoryDetailsAddDTO, InventoryDetails>();
@@ -1018,6 +1021,13 @@ namespace LMS_CMS_BL.Config
                .ForMember(dest => dest.SubjectWeightTypeArabicName, opt => opt.MapFrom(src => src.SubjectWeightType.WeightType.ArabicName))
                .ForMember(dest => dest.AssignmentTypeEnglishName, opt => opt.MapFrom(src => src.AssignmentType.EnglishName))
                .ForMember(dest => dest.AssignmentTypeArabicName, opt => opt.MapFrom(src => src.AssignmentType.ArabicName));
+            
+            CreateMap<AssignmentStudentIsSpecific, AssignmentStudentIsSpecificGetDTO>()
+               .ForMember(dest => dest.ClassroomName, opt => opt.MapFrom(src => src.StudentClassroom.Classroom.Name))
+               .ForMember(dest => dest.ClassroomID, opt => opt.MapFrom(src => src.StudentClassroom.ClassID))
+               .ForMember(dest => dest.StudentID, opt => opt.MapFrom(src => src.StudentClassroom.StudentID))
+               .ForMember(dest => dest.StudentArabicName, opt => opt.MapFrom(src => src.StudentClassroom.Student.en_name))
+               .ForMember(dest => dest.StudentEnglishName, opt => opt.MapFrom(src => src.StudentClassroom.Student.ar_name));
 
             CreateMap<AssignmentStudent, AssignmentForStudentGetDTO>()
                .ForMember(dest => dest.SubjectID, opt => opt.MapFrom(src => src.Assignment.SubjectID))
@@ -1035,6 +1045,11 @@ namespace LMS_CMS_BL.Config
                .ForMember(dest => dest.SubjectWeightTypeArabicName, opt => opt.MapFrom(src => src.Assignment.SubjectWeightType.WeightType.ArabicName))
                .ForMember(dest => dest.AssignmentTypeEnglishName, opt => opt.MapFrom(src => src.Assignment.AssignmentType.EnglishName))
                .ForMember(dest => dest.AssignmentTypeArabicName, opt => opt.MapFrom(src => src.Assignment.AssignmentType.ArabicName));
+       
+            CreateMap<POSAddDTO, ETAPOS>();
+            CreateMap<POSEditDTO, ETAPOS>();
+            CreateMap<ETAPOS, POSGetDTO>();
+
         }
     } 
 }

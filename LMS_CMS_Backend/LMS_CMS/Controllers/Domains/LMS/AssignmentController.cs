@@ -64,11 +64,11 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     query => query.Include(d => d.AssignmentType),
                     query => query.Include(d => d.Subject),
                     query => query.Include(d => d.SubjectWeightType.WeightType),
-                    query => query.Include(d => d.AssignmentStudents
+                    query => query.Include(d => d.AssignmentStudentIsSpecifics
                         .Where(e => e.IsDeleted != true && e.StudentClassroom.Student.IsDeleted != true && e.StudentClassroom.Classroom.IsDeleted != true))
                         .ThenInclude(d => d.StudentClassroom)
                         .ThenInclude(d => d.Classroom),
-                    query => query.Include(d => d.AssignmentStudents
+                    query => query.Include(d => d.AssignmentStudentIsSpecifics
                         .Where(e => e.IsDeleted != true && e.StudentClassroom.Student.IsDeleted != true && e.StudentClassroom.Classroom.IsDeleted != true))
                         .ThenInclude(d => d.StudentClassroom)
                         .ThenInclude(d => d.Student))
@@ -143,11 +143,11 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     query => query.Include(d => d.AssignmentType),
                     query => query.Include(d => d.Subject),
                     query => query.Include(d => d.SubjectWeightType.WeightType),
-                    query => query.Include(d => d.AssignmentStudents
+                    query => query.Include(d => d.AssignmentStudentIsSpecifics
                         .Where(e => e.IsDeleted != true && e.StudentClassroom.Student.IsDeleted != true && e.StudentClassroom.Classroom.IsDeleted != true))
                         .ThenInclude(d => d.StudentClassroom)
                         .ThenInclude(d => d.Classroom),
-                    query => query.Include(d => d.AssignmentStudents
+                    query => query.Include(d => d.AssignmentStudentIsSpecifics
                         .Where(e => e.IsDeleted != true && e.StudentClassroom.Student.IsDeleted != true && e.StudentClassroom.Classroom.IsDeleted != true))
                         .ThenInclude(d => d.StudentClassroom)
                     .ThenInclude(d => d.Student))
@@ -215,11 +215,11 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     query => query.Include(d => d.AssignmentType),
                     query => query.Include(d => d.Subject),
                     query => query.Include(d => d.SubjectWeightType.WeightType),
-                    query => query.Include(d => d.AssignmentStudents
+                    query => query.Include(d => d.AssignmentStudentIsSpecifics
                         .Where(e => e.IsDeleted != true && e.StudentClassroom.Student.IsDeleted != true && e.StudentClassroom.Classroom.IsDeleted != true))
                         .ThenInclude(d => d.StudentClassroom)
                         .ThenInclude(d => d.Classroom),
-                    query => query.Include(d => d.AssignmentStudents
+                    query => query.Include(d => d.AssignmentStudentIsSpecifics
                         .Where(e => e.IsDeleted != true && e.StudentClassroom.Student.IsDeleted != true && e.StudentClassroom.Classroom.IsDeleted != true))
                         .ThenInclude(d => d.StudentClassroom)
                         .ThenInclude(d => d.Student));

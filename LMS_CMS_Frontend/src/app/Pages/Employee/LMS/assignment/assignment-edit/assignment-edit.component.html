@@ -8,10 +8,10 @@
     </button>
 </div>
 
-<div class="bg-white rounded-lg shadow-sm p-6">
+<div>
     <!-- Basic Information Section -->
     <div class="flex flex-wrap justify-between gap-4 mb-6">
-        <div class="bg-[#EBEBEB] p-4  w-[32%]">
+        <div class="bg-[#EBEBEB] p-4 w-[32%]">
             <p class="font-semibold text-sm text-[#6F6F6F] mb-2">Assignment Name</p>
             <p class="font-medium text-base text-[#1E1E1E]">
                 {{assignment.englishName}}
@@ -19,14 +19,14 @@
         </div>
 
         <!-- Assignment Type -->
-        <div class="bg-[#EBEBEB] p-4  w-[32%]">
+        <div class="bg-[#EBEBEB] p-4 w-[32%]">
             <p class="font-semibold text-sm text-[#6F6F6F] mb-2">Assignment Type</p>
             <p class="font-medium text-base text-[#1E1E1E]">
                 {{assignment.assignmentTypeEnglishName}}
             </p>
         </div>
 
-        <div class="bg-[#EBEBEB] p-4  w-[32%]">
+        <div class="bg-[#EBEBEB] p-4 w-[32%]">
             <p class="font-semibold text-sm text-[#6F6F6F] mb-2">Open Date</p>
             <p class="font-medium text-base text-[#1E1E1E]">
                 {{assignment.openDate}}
@@ -36,7 +36,7 @@
 
     <!-- Dates Section -->
     <div class="flex flex-wrap justify-between gap-4 mb-4">
-        <div class="bg-[#EBEBEB] p-4  w-[32%]">
+        <div class="bg-[#EBEBEB] p-4 w-[32%]">
             <p class="font-semibold text-sm text-[#6F6F6F] mb-2">Due Date</p>
             <p class="font-medium text-base text-[#1E1E1E]">
                 {{assignment.dueDate}}
@@ -44,14 +44,14 @@
         </div>
 
         <!-- Assignment Type -->
-        <div class="bg-[#EBEBEB] p-4  w-[32%]">
+        <div class="bg-[#EBEBEB] p-4 w-[32%]">
             <p class="font-semibold text-sm text-[#6F6F6F] mb-2">Cut Off Date</p>
             <p class="font-medium text-base text-[#1E1E1E]">
                 {{assignment.cutOfDate}}
             </p>
         </div>
 
-        <div class="bg-[#EBEBEB] p-4  w-[32%]">
+        <div class="bg-[#EBEBEB] p-4 w-[32%]">
             <p class="font-semibold text-sm text-[#6F6F6F] mb-2">Subject</p>
             <p class="font-medium text-base text-[#1E1E1E]">
                 {{assignment.subjectEnglishName}}
@@ -163,18 +163,18 @@
                 class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
         </div>
 
-        <div class="w-full mb-4">
+        <div class="mt-6 w-full mb-4">
             <div class="bg-[#F6F6F6] flex items-center space-x-4 w-full rounded-md border-dashed border-2">
                 <div class="flex justify-center w-full">
                     <label for="file-upload"
                         class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
-                        <img *ngIf="!assignmentQuestion.file" src="Images/Icon frame.png" class="w-1/4">
-                        <img *ngIf="assignmentQuestion.file" src="Images/FileAttached.png" class="w-1/4">
+                        <img *ngIf="!assignment.fileFile" src="Images/Icon frame.png" class="w-1/4">
+                        <img *ngIf="assignment.fileFile" src="Images/FileAttached.png" class="w-1/4">
                         <p class="font-normal text-xs md:text-sm text-[#8E8E93] mt-3"><span class="secondaryTxt">Click
-                                to Upload </span></p>
+                                to Upload (Word - PDF)</span></p>
                         <p class="font-normal text-xs md:text-sm text-[#8E8E93]"> (Max. File size: 25 MB)</p>
                     </label>
-                    <input id="file-upload" type="file" class="hidden" (change)="onImageFileSelected($event)" />
+                    <input id="file-upload" type="file" class="hidden" (change)="onFileSelected($event)" />
                 </div>
             </div>
         </div>
@@ -182,7 +182,7 @@
 
         <div class="flex justify-end mt-6">
             <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
-                (click)="Save()">
+                (click)="SaveFile()">
                 <span *ngIf="!isLoading">Save</span>
                 <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
             </button>

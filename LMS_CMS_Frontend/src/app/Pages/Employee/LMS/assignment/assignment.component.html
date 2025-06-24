@@ -157,8 +157,8 @@
 <div id="Add_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
     <div class="bg-white rounded-2xl p-12 w-[669px] max-h-[90%] overflow-y-auto">
         <div class="flex justify-between items-center">
-            <h1 *ngIf="assignment.id == 0" class="font-semibold text-2xl leading-9">Create Lesson</h1>
-            <h1 *ngIf="assignment.id != 0" class="font-semibold text-2xl leading-9">Edit Lesson</h1>
+            <h1 *ngIf="assignment.id == 0" class="font-semibold text-2xl leading-9">Create Assignment</h1>
+            <h1 *ngIf="assignment.id != 0" class="font-semibold text-2xl leading-9">Edit Assignment</h1>
             <button (click)="closeModal()" type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
         </div>
         
@@ -166,7 +166,8 @@
             <div class="flex flex-col mb-4 w-full">
                 <label class="mb-2 primaryTxt" for="Subject">Subject</label>
                 <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Subject"
-                    (change)="onSubjectModalChange()"
+                    [ngClass]="{ 'bg-[#EBEBEB]': assignment.id != 0 }"
+                    [disabled]="assignment.id != 0" (change)="onSubjectModalChange()"
                     [(ngModel)]="assignment.subjectID" (ngModelChange)="onInputValueChange({ field: 'subjectID', value: $event })">
                     <option [value]="0" disabled selected hidden>Choose Subject</option>
                     <option *ngFor="let c of subjects" [value]="c.id">{{ c.en_name }}</option>
@@ -254,6 +255,7 @@
                         </button>
                     </span>
                 </div>
+                <span *ngIf="validationErrors['studentClassroomIDs']" class="text-red-500 ml-3 font-normal">{{ validationErrors['studentClassroomIDs'] }}</span>
                 <div *ngIf="viewClassStudents" class="rounded-lg shadow">
                     <div *ngIf="studentClassWhenSubject.length != 0" class="p-4 rounded-lg border">
                         <div *ngIf="viewStudents">

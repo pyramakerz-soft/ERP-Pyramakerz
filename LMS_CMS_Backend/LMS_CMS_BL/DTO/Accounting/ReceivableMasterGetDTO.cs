@@ -21,5 +21,6 @@ namespace LMS_CMS_BL.DTO.Accounting
         public string BankOrSaveName { get; set; }
         public long InsertedByUserId { get; set; }
 
+        public List<ReceivableDetailsGetDTO>? ReceivableDetails { get; set; }
     }
 }

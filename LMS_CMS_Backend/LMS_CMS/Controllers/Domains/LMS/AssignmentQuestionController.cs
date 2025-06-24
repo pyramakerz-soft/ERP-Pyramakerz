@@ -115,6 +115,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
               
             }
 
+<<<<<<< HEAD
             if (assignment.AssignmentTypeID == 1) // Text Book Assignment
             {
                 if(newData.File == null)
@@ -143,6 +144,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 Unit_Of_Work.SaveChanges();
             }
             else if (assignment.AssignmentTypeID == 2)
+=======
+            // Text Book Assignment (assignment.AssignmentTypeID == 1) ==> handled in Assignment
+            if (assignment.AssignmentTypeID == 2) 
+>>>>>>> f25f2815d2920c751732aa7d19155fc89da68c32
             {
                 foreach (var item in newData.QuestionIds)
                 {
