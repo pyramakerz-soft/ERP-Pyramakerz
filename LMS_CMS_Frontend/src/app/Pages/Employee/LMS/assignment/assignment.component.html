@@ -166,11 +166,24 @@
             <div class="flex flex-col mb-4 w-full">
                 <label class="mb-2 primaryTxt" for="Subject">Subject</label>
                 <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Subject"
+                    (change)="onSubjectModalChange()"
                     [(ngModel)]="assignment.subjectID" (ngModelChange)="onInputValueChange({ field: 'subjectID', value: $event })">
                     <option [value]="0" disabled selected hidden>Choose Subject</option>
                     <option *ngFor="let c of subjects" [value]="c.id">{{ c.en_name }}</option>
                     <option *ngIf="subjects.length === 0" disabled selected>No Data Found</option>
                 </select> 
+                <span *ngIf="validationErrors['subjectID']" class="text-red-500 ml-3 font-normal">{{ validationErrors['subjectID'] }}</span>
+            </div>  
+            <div class="flex flex-col mb-4 w-full">
+                <label class="mb-2" for="Subjectweight" [ngClass]="{ 'text-gray-400': !assignment.subjectID, 'primaryTxt': assignment.subjectID }">Subject Weight Type</label>
+                <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Subject"
+                    [disabled]="!assignment.subjectID" [ngClass]="{ 'bg-[#EBEBEB]': !assignment.subjectID }"
+                    [(ngModel)]="assignment.subjectWeightTypeID" (ngModelChange)="onInputValueChange({ field: 'subjectWeightTypeID', value: $event })">
+                    <option [value]="0" disabled selected hidden>Choose Subject Weight Type</option>
+                    <option *ngFor="let c of subjectWeights" [value]="c.id">{{ c.weightTypeEnglishName }}</option>
+                    <option *ngIf="subjectWeights.length === 0" disabled selected>No Data Found</option>
+                </select> 
+                <span *ngIf="validationErrors['subjectWeightTypeID']" class="text-red-500 ml-3 font-normal">{{ validationErrors['subjectWeightTypeID'] }}</span>
             </div>  
             <div class="flex flex-col mb-4 w-full">
                 <label class="mb-2 primaryTxt" for="englishName">English Name</label>
@@ -194,6 +207,7 @@
                     <option *ngFor="let c of assignmentTypes" [value]="c.id">{{ c.englishName }}</option>
                     <option *ngIf="assignmentTypes.length === 0" disabled selected>No Data Found</option>
                 </select> 
+                <span *ngIf="validationErrors['assignmentTypeID']" class="text-red-500 ml-3 font-normal">{{ validationErrors['assignmentTypeID'] }}</span>
             </div>  
             <div class="flex flex-col mb-4 w-[49%]">
                 <label class="mb-2 primaryTxt" for="mark">Mark</label>
@@ -220,6 +234,83 @@
                 [(ngModel)]="assignment.cutOfDate" 
                 (ngModelChange)="onInputValueChange({ field: 'cutOfDate', value: $event })"/>
                 <span *ngIf="validationErrors['cutOfDate']" class="text-red-500 ml-3 font-normal">{{ validationErrors['cutOfDate'] }}</span>
+            </div>
+            <div class="flex w-full space-x-5 items-center mb-4">
+                <input type="checkbox" id="specific" class="w-5 h-5"
+                (change)="onIsSpecificChange($event)"
+                [checked]="assignment.isSpecificStudents">
+                <label for="specific" class="text-sm">Is The Assignment For specific students?</label>
+            </div>
+            <div class="flex flex-col mb-4 w-full" *ngIf="assignment.isSpecificStudents">
+                <label class="mb-2 primaryTxt">Classes ({{choosedStudentsClass.length}})</label>
+                
+                <div class="border border-gray-300 rounded-lg px-4 py-3 flex flex-wrap gap-2 mb-4" (click)="toggleClassesToChooseStudents()">
+                    <span *ngIf="choosedClass.length == 0" class="text-gray-400 font-normal">Click To Choose Students</span>
+                    <span *ngFor="let classroom of choosedClass; let i = index"
+                        class="flex items-center mr-2 mb-1 bg-gray-200 rounded px-3 py-2">
+                        {{ classroom.classroomName }} ({{ getStudentCount(classroom.classroomID) }})
+                        <button type="button" class="ml-2 text-white bg-[#6F6F6F] rounded px-1" (click)="removeStudentFromClass(classroom.classroomID, $event)">
+                            &times;
+                        </button>
+                    </span>
+                </div>
+                <div *ngIf="viewClassStudents" class="rounded-lg shadow">
+                    <div *ngIf="studentClassWhenSubject.length != 0" class="p-4 rounded-lg border">
+                        <div *ngIf="viewStudents">
+                            <div class="flex items-center space-x-5 rtl:space-x-reverse mb-5">
+                                <i class="fa-solid fa-chevron-left rtl:rotate-180 cursor-pointer" (click)="returnToClases()"></i>
+                                <h1 class="primaryTxt font-semibold text-lg leading-9">{{studentClassWhenSelectClass.classroomName}} ({{studentClassWhenSelectClass.studentClassrooms.length}})</h1>
+                            </div>
+                            <div *ngIf="studentClassWhenSelectClass.studentClassrooms.length != 0" class="mb-6">
+                                <div class="flex justify-between w-full items-center">
+                                    <div class="flex space-x-5 items-center">
+                                        <input type="checkbox" [id]="studentClassWhenSelectClass.classroomID" class="w-5 h-5"
+                                            [checked]="isSelectAllChecked(studentClassWhenSelectClass.classroomID)"
+                                            (change)="onSelectAllChange(studentClassWhenSelectClass.classroomID, $event)">
+                                        <label [for]="studentClassWhenSelectClass.classroomID" class="text-sm">Select All</label>
+                                    </div> 
+                                </div>
+                                <hr class="my-2 border">
+                            </div>
+                            <div *ngIf="studentClassWhenSelectClass.studentClassrooms.length == 0" class="border">
+                                <p class="text-center primaryTxt text-xs">
+                                    No Data Found
+                                </p> 
+                            </div>
+                            <div *ngFor="let studentClass of studentClassWhenSelectClass.studentClassrooms; let i = index">
+                                <div class="flex justify-between w-full items-center" [ngClass]="{ 'mb-4': i != (studentClassWhenSelectClass.studentClassrooms.length - 1)}">
+                                    <div class="flex space-x-5 items-center">
+                                        <input type="checkbox" [id]="studentClass.id" class="w-5 h-5"
+                                            (change)="onStudentSelectChange(studentClass)"
+                                            [checked]="isStudentSelected(studentClass.id)">
+                                        <label [for]="studentClass.id" class="text-sm">{{studentClass.studentEnglishName}}</label>
+                                    </div> 
+                                </div>
+                                <hr class="my-2" *ngIf="i != (studentClassWhenSelectClass.studentClassrooms.length - 1)">
+                            </div>
+                        </div>
+
+                        <div *ngIf="!viewStudents">
+                            <div *ngFor="let studentClass of studentClassWhenSubject; let i = index">
+                                <div class="flex justify-between w-full items-center" [ngClass]="{ 'mb-4': i != (studentClassWhenSubject.length - 1)}">
+                                    <div class="flex space-x-5 items-center">
+                                        <input type="checkbox" [id]="studentClass.classroomID" class="w-5 h-5"
+                                            (change)="onClassSelectChange(studentClass)"
+                                            [checked]="isClassSelected(studentClass.classroomID)">
+                                        <label [for]="studentClass.classroomID" class="text-sm">{{studentClass.classroomName}} ({{studentClass.studentClassrooms.length}})</label>
+                                    </div>
+                                    <i class="fa-solid fa-chevron-left ltr:rotate-180 cursor-pointer text-gray-400" (click)="openStudent(studentClass)"></i>
+                                </div>
+                                <hr class="my-2" *ngIf="i != (studentClassWhenSubject.length - 1)">
+                            </div>
+                        </div>
+                    </div>
+                    <div *ngIf="studentClassWhenSubject.length == 0" class="rounded-lg border">
+                        <p class="text-center primaryTxt text-xs">
+                            No Data Found
+                        </p>
+                    </div>
+                </div> 
             </div>
         </div> 
 

@@ -750,7 +750,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             Master.VatPercent = vat;
             Master.VatAmount = Master.Total * Master.VatPercent;
             Master.TotalWithVat = Master.Total + Master.VatAmount;
-            Master.SchoolPCId = newData.SchoolPCId;
+            //Master.SchoolPCId = newData.SchoolPCId;
 
             Unit_Of_Work.inventoryMaster_Repository.Update(Master);
             await Unit_Of_Work.SaveChangesAsync();
@@ -847,6 +847,18 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             else
             {
                 newSale.SaveID = null;
+            }
+            if (newSale.SchoolPCId != 0 && newSale.SchoolPCId != null)
+            {
+                SchoolPCs SchoolPCId = Unit_Of_Work.schoolPCs_Repository.First_Or_Default(b => b.ID == newSale.SchoolPCId && b.IsDeleted != true);
+                if (SchoolPCId == null)
+                {
+                    return NotFound("SchoolPCId not found.");
+                }
+            }
+            else
+            {
+                newSale.SchoolPCId = null;
             }
             if (newSale.StoreToTransformId != 0 && newSale.StoreToTransformId != null)
             {

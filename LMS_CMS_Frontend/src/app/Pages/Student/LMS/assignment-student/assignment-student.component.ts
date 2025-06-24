@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { Assignment } from '../../../../Models/LMS/assignment';
 import { AssignmentStudent } from '../../../../Models/LMS/assignment-student';
 import { TokenData } from '../../../../Models/token-data';
 import { AccountService } from '../../../../Services/account.service';
@@ -13,18 +12,15 @@ import { AssignmentStudentService } from '../../../../Services/Employee/LMS/assi
 import { AssignmentService } from '../../../../Services/Employee/LMS/assignment.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
-import Swal from 'sweetalert2';
-import { finalize } from 'rxjs';
 
 @Component({
-  selector: 'app-assignment-detail',
+  selector: 'app-assignment-student',
   standalone: true,
   imports: [FormsModule, CommonModule],
-  templateUrl: './assignment-detail.component.html',
-  styleUrl: './assignment-detail.component.css'
+  templateUrl: './assignment-student.component.html',
+  styleUrl: './assignment-student.component.css'
 })
-export class AssignmentDetailComponent {
-
+export class AssignmentStudentComponent {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
   TableData: AssignmentStudent[] = [];
 
@@ -47,7 +43,7 @@ export class AssignmentDetailComponent {
   ClassId: number = 0;
   IsShowTabls: boolean = false
   assignmentStudent: AssignmentStudent = new AssignmentStudent()
-  isLoading :boolean = false
+  isLoading: boolean = false
 
   constructor(
     private router: Router,
@@ -125,29 +121,8 @@ export class AssignmentDetailComponent {
     }
   }
 
-  save() {
-  this.isLoading = true;
-  this.assignmentStudentServ.Edit(this.assignmentStudent, this.DomainName)
-    .pipe(finalize(() => this.isLoading = false)) // runs after success or error
-    .subscribe({
-      next: () => {
-        Swal.fire({
-          icon: 'success',
-          title: 'Done',
-          text: 'Updated Successfully',
-          confirmButtonColor: '#089B41',
-        });
-        this.router.navigateByUrl(`Employee/Assignment Student/${this.assignmentStudent.assignmentID}`);
-      },
-      error: (err) => {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Something went wrong, please try again.',
-          confirmButtonColor: '#d33',
-        });
-        console.error('Edit error:', err);
-      }
-    });
-}
+  Submit() {
+    this.isLoading = true;
+
+  }
 }

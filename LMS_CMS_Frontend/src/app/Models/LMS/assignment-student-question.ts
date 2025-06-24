@@ -9,7 +9,7 @@ export class AssignmentStudentQuestion {
         public assignmentStudentID: number = 0,
         public questionBankID: number = 0,
         public questionTypeID: number = 0,
-        public AnswerOptionID: number = 0,
+        public answerOptionID: number = 0,
         public answer: string = "",
         public questionDesc: string = "",
         public questionImage: string = "",

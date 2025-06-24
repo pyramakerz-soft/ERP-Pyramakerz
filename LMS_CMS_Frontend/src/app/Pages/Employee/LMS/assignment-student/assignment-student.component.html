@@ -67,11 +67,17 @@
                         {{ row.degree }}
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        <button class="flex space-x-4" *ngIf="assignment.assignmentTypeID == 1" (click)="moveToDetails(row.id)">
-                          <i class="fa-regular fa-file"></i>
+                        <button class="flex space-x-4 items-center" *ngIf="assignment.assignmentTypeID == 1 && row.linkFile != null"
+                            (click)="openFile( row.linkFile)">
+                            <i class="fa-regular fa-file"></i>
                         </button>
-                        <button class="flex space-x-4" *ngIf="assignment.assignmentTypeID == 2 || assignment.assignmentTypeID == 3" (click)="moveToDetails(row.id)">
-                          <i class="fa-solid fa-pencil"></i>
+                        <button class="flex space-x-4 items-center" *ngIf="assignment.assignmentTypeID == 1 && row.linkFile == null">
+                            __
+                        </button>
+                        <button class="flex space-x-4"
+                            *ngIf="assignment.assignmentTypeID == 2 || assignment.assignmentTypeID == 3"
+                            (click)="moveToDetails(row.id)">
+                            <i class="fa-solid fa-pencil"></i>
                         </button>
                     </td>
                 </tr>
