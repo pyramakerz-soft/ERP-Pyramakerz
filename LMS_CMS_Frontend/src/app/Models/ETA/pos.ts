@@ -1,7 +1,6 @@
 export class POS {
     constructor(
-        public id: number = 0,
-        public name: string = '', 
+        public id: number = 0, 
         public clientID: string = '', 
         public clientSecret: string = '', 
         public clientSecret2: string = '', 
