@@ -135,9 +135,7 @@ export class POSComponent {
   closeModal() {
     document.getElementById('Add_Modal')?.classList.remove('flex');
     document.getElementById('Add_Modal')?.classList.add('hidden'); 
-    this.validationErrors = {};
-
-    this.POSData = []; 
+    this.validationErrors = {}; 
     this.pos = new POS();  
   }
 
@@ -188,56 +186,18 @@ export class POSComponent {
     } 
   }
 
-isFormValid(): boolean {
+  isFormValid(): boolean {
     let isValid = true;
-    for (const key in this.assignment) { 
-      if (this.assignment.hasOwnProperty(key)) {
-        const field = key as keyof Assignment;
-        if (!this.assignment[field]) {
-          if (field == 'englishName' || field == 'arabicName' || field == 'mark' || field == 'assignmentTypeID' || field == 'subjectID' || field == 'subjectWeightTypeID' || field == 'openDate' || field == 'cutOfDate') {
+    for (const key in this.pos) { 
+      if (this.pos.hasOwnProperty(key)) {
+        const field = key as keyof POS;
+        if (!this.pos[field]) {
+          if (field == 'clientID' || field == 'clientSecret' || field == 'clientSecret2' || field == 'deviceSerialNumber') {
             this.validationErrors[field] = `*${this.capitalizeField( field )} is required`;
             isValid = false;
           }
-        } else {
-          if (field == 'englishName' || field == 'arabicName') {
-            if (this.assignment.englishName.length > 100 || this.assignment.arabicName.length > 100) {
-              this.validationErrors[field] = `*${this.capitalizeField( field )} cannot be longer than 100 characters`;
-              isValid = false;
-            }
-          }else if (field == 'studentClassroomIDs') {
-            if (this.choosedStudentsClass.length == 0 && this.assignment.isSpecificStudents == true) {
-              this.validationErrors[field] = `*You have to choose students as you already selected that this assignment is for specific students`;
-              isValid = false;
-            }
-          }else if (field === 'openDate' || field === 'dueDate' || field === 'cutOfDate') {
-            const openDate = new Date(this.assignment.openDate);
-            const dueDate = new Date(this.assignment.dueDate);
-            const cutOfDate = new Date(this.assignment.cutOfDate);
-
-            if (this.assignment.openDate && this.assignment.dueDate && openDate > dueDate) {
-              this.validationErrors['openDate'] = '*Open Date must be before or equal to Due Date';
-              this.validationErrors['dueDate'] = '*Due Date must be after or equal to Open Date';
-              isValid = false;
-            }
-
-            if (this.assignment.dueDate && this.assignment.cutOfDate && dueDate > cutOfDate) {
-              this.validationErrors['dueDate'] = '*Due Date must be before or equal to Cut Off Date';
-              this.validationErrors['cutOfDate'] = '*Cut Off Date must be after or equal to Due Date';
-              isValid = false;
-            }
-
-            if (this.assignment.dueDate && openDate > dueDate || cutOfDate < dueDate) {
-              this.validationErrors['dueDate'] = '*Due Date must be between Open Date and Cut Off Date';
-              isValid = false;
-            }
-
-            if (this.assignment.cutOfDate && (cutOfDate < openDate || cutOfDate < dueDate)) {
-              this.validationErrors['cutOfDate'] = '*Cut Off Date must be after both Open Date and Due Date';
-              isValid = false;
-            }
-          } else {
-            this.validationErrors[field] = '';
-          }
+        } else { 
+          this.validationErrors[field] = '';
         }
       }
     } 
@@ -247,17 +207,8 @@ isFormValid(): boolean {
   Save() {  
     if (this.isFormValid()) {
       this.isLoading = true;   
-      if(this.assignment.isSpecificStudents == true){
-        this.assignment.studentClassroomIDs = []
-        this.choosedStudentsClass.forEach(element => {
-          this.assignment.studentClassroomIDs.push(element.id)
-        });
-      }else{
-        this.assignment.studentClassroomIDs = []
-      }
-
-      if (this.assignment.id == 0) { 
-        this.assignmentService.Add(this.assignment, this.DomainName).subscribe(
+      if (this.pos.id == 0) { 
+        this.posService.Add(this.pos, this.DomainName).subscribe(
           (result: any) => {
             this.closeModal();
             this.GetAllData(this.CurrentPage, this.PageSize)
@@ -275,7 +226,7 @@ isFormValid(): boolean {
           }
         );
       } else {
-        this.assignmentService.Edit(this.assignment, this.DomainName).subscribe(
+        this.posService.Edit(this.pos, this.DomainName).subscribe(
           (result: any) => {
             this.closeModal();
             this.GetAllData(this.CurrentPage, this.PageSize)

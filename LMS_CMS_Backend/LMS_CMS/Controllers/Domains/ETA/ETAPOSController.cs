@@ -142,7 +142,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
 
             ETAPOS newETAPOS = _mapper.Map<ETAPOS>(posDto);
 
-            Unit_Of_Work.pos_Repository.Update(newETAPOS);
+            Unit_Of_Work.pos_Repository.Add(newETAPOS);
             Unit_Of_Work.SaveChanges();
 
             return CreatedAtAction(nameof(GetById), new { id = newETAPOS.ID }, posDto);

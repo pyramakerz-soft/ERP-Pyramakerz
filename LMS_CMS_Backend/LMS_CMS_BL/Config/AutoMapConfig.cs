@@ -1042,6 +1042,11 @@ namespace LMS_CMS_BL.Config
                .ForMember(dest => dest.SubjectWeightTypeArabicName, opt => opt.MapFrom(src => src.Assignment.SubjectWeightType.WeightType.ArabicName))
                .ForMember(dest => dest.AssignmentTypeEnglishName, opt => opt.MapFrom(src => src.Assignment.AssignmentType.EnglishName))
                .ForMember(dest => dest.AssignmentTypeArabicName, opt => opt.MapFrom(src => src.Assignment.AssignmentType.ArabicName));
+       
+            CreateMap<POSAddDTO, ETAPOS>();
+            CreateMap<POSEditDTO, ETAPOS>();
+            CreateMap<ETAPOS, POSGetDTO>();
+
         }
     } 
 }
