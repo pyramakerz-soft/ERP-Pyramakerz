@@ -35,17 +35,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             DateTime start = DateTime.Parse(startDate).Date;
             DateTime end = DateTime.Parse(endDate).Date;
 
-            //List<PayableMaster> PayableMasters = await Unit_Of_Work.payableMaster_Repository.Select_All_With_IncludesById_Pagination<PayableMaster>(
-            //    t => t.IsDeleted != true &&
-            //    DateTime.Parse(t.Date) >= start && DateTime.Parse(t.Date) <= end,
-            //    query => query.Include(Master => Master.PayableDetails),
-            //    query => query.Include(Master => Master.LinkFile),
-            //    query => query.Include(Master => Master.PayableDocType)
-            //    )
-            //    .Skip((pageNumber - 1) * pageSize)
-            //    .Take(pageSize)
-            //    .ToListAsync();
-
             var query = Unit_Of_Work.payableMaster_Repository
             .Select_All_With_IncludesById_Pagination<PayableMaster>(
                 t => t.IsDeleted != true,
@@ -67,22 +56,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             if (PayableMasters == null || PayableMasters.Count == 0)
                 return NotFound("No payables found for the specified date range.");
 
-            List<Bank> banksForMaster = new();
-            List<Save> safesForMaster = new();
-           
-            List<Bank> banks = new();
-            List<Save> safes = new();
-            List<Supplier> Suppliers = new();
-            List<Debit> debits = new();
-            List<Credit> credits = new();
-            List<Income> incomes = new();
-            List<Outcome> outcomes = new();
-            List<Asset> assets = new();
-            List<Employee> employees = new();
-            List<TuitionFeesType> fees = new();
-            List<TuitionDiscountType> discounts = new();
-            List<Student> students = new();
-
             var allDetails = PayableMasters.SelectMany(pm => pm.PayableDetails).ToList();
 
             var saveIdsForMaster = PayableMasters.Where(r => r.LinkFileID == 5).Select(r => r.BankOrSaveID).Distinct().ToList();
@@ -101,21 +74,21 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             var discountIds = allDetails.Where(r => r.LinkFileID == 12).Select(r => r.LinkFileTypeID).Distinct().ToList();
             var studentIds = allDetails.Where(r => r.LinkFileID == 13).Select(r => r.LinkFileTypeID).Distinct().ToList();
 
-            banksForMaster = await Unit_Of_Work.bank_Repository.Select_All_With_IncludesById<Bank>(b => bankIdsForMaster.Contains(b.ID));
-            safesForMaster = await Unit_Of_Work.save_Repository.Select_All_With_IncludesById<Save>(s => saveIdsForMaster.Contains(s.ID));
+            var banksForMaster = await Unit_Of_Work.bank_Repository.Select_All_With_IncludesById<Bank>(b => bankIdsForMaster.Contains(b.ID));
+            var safesForMaster = await Unit_Of_Work.save_Repository.Select_All_With_IncludesById<Save>(s => saveIdsForMaster.Contains(s.ID));
             
-            banks = await Unit_Of_Work.bank_Repository.Select_All_With_IncludesById<Bank>(b => bankIds.Contains(b.ID));
-            safes = await Unit_Of_Work.save_Repository.Select_All_With_IncludesById<Save>(s => saveIds.Contains(s.ID));
-            Suppliers = await Unit_Of_Work.supplier_Repository.Select_All_With_IncludesById<Supplier>(s => suppliersIds.Contains(s.ID));
-            debits = await Unit_Of_Work.debit_Repository.Select_All_With_IncludesById<Debit>(s => debitIds.Contains(s.ID));
-            credits = await Unit_Of_Work.credit_Repository.Select_All_With_IncludesById<Credit>(s => creditsIds.Contains(s.ID));
-            incomes = await Unit_Of_Work.income_Repository.Select_All_With_IncludesById<Income>(s => incomesIds.Contains(s.ID));
-            outcomes = await Unit_Of_Work.outcome_Repository.Select_All_With_IncludesById<Outcome>(s => outcomesIds.Contains(s.ID));
-            assets = await Unit_Of_Work.asset_Repository.Select_All_With_IncludesById<Asset>(s => assetsIds.Contains(s.ID));
-            employees = await Unit_Of_Work.employee_Repository.Select_All_With_IncludesById<Employee>(s => employeesIds.Contains(s.ID));
-            fees = await Unit_Of_Work.tuitionFeesType_Repository.Select_All_With_IncludesById<TuitionFeesType>(s => feeIds.Contains(s.ID));
-            discounts = await Unit_Of_Work.tuitionDiscountType_Repository.Select_All_With_IncludesById<TuitionDiscountType>(s => discountIds.Contains(s.ID));
-            students = await Unit_Of_Work.student_Repository.Select_All_With_IncludesById<Student>(s => studentIds.Contains(s.ID));
+            var banks = await Unit_Of_Work.bank_Repository.Select_All_With_IncludesById<Bank>(b => bankIds.Contains(b.ID));
+            var safes = await Unit_Of_Work.save_Repository.Select_All_With_IncludesById<Save>(s => saveIds.Contains(s.ID));
+            var Suppliers = await Unit_Of_Work.supplier_Repository.Select_All_With_IncludesById<Supplier>(s => suppliersIds.Contains(s.ID));
+            var debits = await Unit_Of_Work.debit_Repository.Select_All_With_IncludesById<Debit>(s => debitIds.Contains(s.ID));
+            var credits = await Unit_Of_Work.credit_Repository.Select_All_With_IncludesById<Credit>(s => creditsIds.Contains(s.ID));
+            var incomes = await Unit_Of_Work.income_Repository.Select_All_With_IncludesById<Income>(s => incomesIds.Contains(s.ID));
+            var outcomes = await Unit_Of_Work.outcome_Repository.Select_All_With_IncludesById<Outcome>(s => outcomesIds.Contains(s.ID));
+            var assets = await Unit_Of_Work.asset_Repository.Select_All_With_IncludesById<Asset>(s => assetsIds.Contains(s.ID));
+            var employees = await Unit_Of_Work.employee_Repository.Select_All_With_IncludesById<Employee>(s => employeesIds.Contains(s.ID));
+            var fees = await Unit_Of_Work.tuitionFeesType_Repository.Select_All_With_IncludesById<TuitionFeesType>(s => feeIds.Contains(s.ID));
+            var discounts = await Unit_Of_Work.tuitionDiscountType_Repository.Select_All_With_IncludesById<TuitionDiscountType>(s => discountIds.Contains(s.ID));
+            var students = await Unit_Of_Work.student_Repository.Select_All_With_IncludesById<Student>(s => studentIds.Contains(s.ID));
 
             List<PayableMasterGetDTO> DTOs = _mapper.Map<List<PayableMasterGetDTO>>(PayableMasters);
 
