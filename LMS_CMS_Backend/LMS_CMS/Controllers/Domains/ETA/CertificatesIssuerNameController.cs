@@ -16,11 +16,13 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
     {
         private readonly DbContextFactoryService _dbContextFactory;
         private readonly IMapper _mapper;
+        private readonly CheckPageAccessService _checkPageAccessService;
 
-        public CertificatesIssuerNameController(DbContextFactoryService dbContextFactory, IMapper mapper)
+        public CertificatesIssuerNameController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService)
         {
             _dbContextFactory = dbContextFactory;
             _mapper = mapper;
+            _checkPageAccessService = checkPageAccessService;
         }
 
         #region Get All
@@ -142,6 +144,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
         [HttpPut("Edit")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
+            allowEdit: 1,
             pages: new[] { "Certificate Issuer" }
         )]
         public IActionResult Edit(CertificatesIssuerNameEditDTO certIssuerDTO)
@@ -153,6 +156,9 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
 
             long.TryParse(userIdClaim, out long userId);
             var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
 
             if (userIdClaim == null || userTypeClaim == null)
             {
@@ -169,6 +175,15 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
             if (certificatesIssuerName == null)
             {
                 return NotFound($"CertificatesIssuerName with ID {certIssuerDTO.ID} not found.");
+            }
+
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Bus Details", roleId, userId, certificatesIssuerName);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
             }
 
             _mapper.Map(certIssuerDTO, certificatesIssuerName);
@@ -205,6 +220,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
         [HttpDelete]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
+            allowDelete: 1,
             pages: new[] { "Certificate Issuer" }
         )]
         public IActionResult Delete(int id)
@@ -216,6 +232,8 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
 
             long.TryParse(userIdClaim, out long userId);
             var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
 
             if (userIdClaim == null || userTypeClaim == null)
             {
@@ -228,12 +246,22 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
             {
                 return NotFound($"CertificatesIssuerName with ID {id} not found.");
             }
-    
-            certificatesIssuerName.IsDeleted = true;
-            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-            certificatesIssuerName.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            else
+            {
+                if (userTypeClaim == "employee")
+                {
+                    IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Certificate Issuer", roleId, userId, certificatesIssuerName);
+                    if (accessCheck != null)
+                    {
+                        return accessCheck;
+                    }
+                }
 
-            if (userTypeClaim == "octa")
+                certificatesIssuerName.IsDeleted = true;
+                TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+                certificatesIssuerName.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+
+                if (userTypeClaim == "octa")
                 {
                     certificatesIssuerName.DeletedByOctaId = userId;
                     if (certificatesIssuerName.DeletedByUserId != null)
@@ -249,11 +277,10 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
                         certificatesIssuerName.DeletedByOctaId = null;
                     }
                 }
-    
                 Unit_Of_Work.certificatesIssuerName_Repository.Update(certificatesIssuerName);
                 Unit_Of_Work.SaveChanges();
-    
-                return Ok("Certificate deleted successfully");
+                return Ok(new { message = "Certificate Issuer Name has Successfully been deleted" });
+            }
         }
         #endregion
     }
