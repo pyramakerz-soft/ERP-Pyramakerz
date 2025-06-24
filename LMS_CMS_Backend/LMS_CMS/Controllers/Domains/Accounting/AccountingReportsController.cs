@@ -310,8 +310,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
         //    var allDetails = AccountingEntriesMasters.SelectMany(pm => pm.AccountingEntriesDetails).ToList();
 
-        //    var saveIdsForMaster = AccountingEntriesMasters.Where(r => r.AccountingTreeChart.LinkFileID == 5).Select(r => r.BankOrSaveID).Distinct().ToList();
-        //    var bankIdsForMaster = AccountingEntriesMasters.Where(r => r.LinkFileID == 6).Select(r => r.BankOrSaveID).Distinct().ToList();
+        //    //var saveIdsForMaster = AccountingEntriesMasters.Where(r => r.AccountingTreeChart.LinkFileID == 5).Select(r => r.BankOrSaveID).Distinct().ToList();
+        //    //var bankIdsForMaster = AccountingEntriesMasters.Where(r => r.LinkFileID == 6).Select(r => r.BankOrSaveID).Distinct().ToList();
 
         //    var suppliersIds = allDetails.Where(r => r.AccountingTreeChart.LinkFileID == 2).Select(r => r.SubAccountingID).Distinct().ToList();
         //    var debitIds = details.Where(r => r.AccountingTreeChart.LinkFileID == 3).Select(r => r.SubAccountingID).Distinct().ToList();
