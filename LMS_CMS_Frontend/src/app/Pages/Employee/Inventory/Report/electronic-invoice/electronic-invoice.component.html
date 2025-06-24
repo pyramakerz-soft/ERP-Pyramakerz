@@ -106,7 +106,7 @@
                         {{ transaction.flagEnName || 'N/A' }}
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ transaction.total | currency }}
+                        {{ transaction.total }}
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         <span *ngIf="transaction.isValid" class="flex items-center gap-1" style="color: #267C15;">

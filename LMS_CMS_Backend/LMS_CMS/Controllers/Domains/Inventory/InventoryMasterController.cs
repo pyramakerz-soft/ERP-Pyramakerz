@@ -88,63 +88,67 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
         /// // // // /// ////////////////
 
-        [HttpGet("Search")]
-        [Authorize_Endpoint_(
-         allowedTypes: new[] { "octa", "employee" },
-         pages: new[] { "Inventory" }
-        )]
-        public async Task<IActionResult> GetSearch([FromQuery] InventoryMasterSearch obj)
-        {
-            var unitOfWork = _dbContextFactory.CreateOneDbContext(HttpContext);
+[HttpGet("Search")]
+ [Authorize_Endpoint_(
+      allowedTypes: new[] { "octa", "employee" },
+      pages: new[] { "Inventory" }
+  )]
+ public async Task<IActionResult> GetSearch([FromQuery] InventoryMasterSearch obj)
+ {
+     UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            if (obj.FlagIds == null || !obj.FlagIds.Any())
-                return BadRequest("FlagIds cannot be null or empty.");
+     if (obj.FlagIds == null || !obj.FlagIds.Any())
+         return BadRequest("FlagIds cannot be null or empty.");
 
-            if (!DateTime.TryParse(obj.DateFrom, out var dateFrom) || !DateTime.TryParse(obj.DateTo, out var dateTo))
-                return BadRequest("Invalid date format.");
+     if (!DateTime.TryParse(obj.DateFrom, out var dateFrom) || !DateTime.TryParse(obj.DateTo, out var rawDateTo))
+         return BadRequest("Invalid date format.");
 
-            if (dateFrom > dateTo)
-                return BadRequest("DateFrom cannot be after DateTo.");
+     var dateTo = rawDateTo.Date.AddDays(1).AddTicks(-1);
 
-            var data = await unitOfWork.inventoryMaster_Repository.Select_All_With_IncludesById<InventoryMaster>(
-                f => f.IsDeleted != true && obj.FlagIds.Contains(f.FlagId),
-                query => query
-                    .Include(x => x.Store)
-                    .Include(x => x.Student)
-                    .Include(x => x.InventoryFlags)
-                    .Include(x => x.InventoryDetails)
-                        .ThenInclude(detail => detail.ShopItem)
-                            .ThenInclude(shopItem => shopItem.InventorySubCategories)
-                                .ThenInclude(subCategory => subCategory.InventoryCategories)
-                    .Include(x => x.Save) 
-                    .Include(x => x.Bank)
-            );
+     if (dateFrom > dateTo)
+         return BadRequest("DateFrom cannot be after DateTo.");
 
-            var filteredData = data.Where(f =>
-                DateTime.TryParse(f.Date, out var parsedDate) &&
-                parsedDate >= dateFrom && parsedDate <= dateTo &&
-                (obj.StoredId == null || (f.Store != null && f.Store.ID == obj.StoredId)) &&
-                f.InventoryDetails.Any(detail =>
-                    (obj.CategoryId == null || detail.ShopItem.InventorySubCategories.InventoryCategoriesID == obj.CategoryId) &&
-                    (obj.SubCategoryId == null || detail.ShopItem.InventorySubCategoriesID == obj.SubCategoryId) &&
-                    (obj.ItemId == null || detail.ShopItemID == obj.ItemId)
-                )
-            ).ToList();
+  
+     var data = await Unit_Of_Work.inventoryMaster_Repository.Select_All_With_IncludesById<InventoryMaster>(
+         f => f.IsDeleted != true && obj.FlagIds.Contains(f.FlagId),
+         query => query
+             .Include(x => x.Store)
+             .Include(x => x.Student)
+             .Include(x => x.InventoryFlags)
+             .Include(x => x.InventoryDetails)
+                 .ThenInclude(detail => detail.ShopItem)
+                     .ThenInclude(shopItem => shopItem.InventorySubCategories)
+                         .ThenInclude(subCategory => subCategory.InventoryCategories)
+             .Include(x => x.Save)
+             .Include(x => x.Bank)
+     );
 
-            if (!filteredData.Any())
-                return NotFound("No records found matching the search criteria.");
+    
+     var filteredData = data.Where(f =>
+         DateTime.TryParse(f.Date, out var parsedDate) &&
+         parsedDate >= dateFrom && parsedDate <= dateTo &&
+         (obj.StoredId == null || (f.Store != null && f.Store.ID == obj.StoredId)) &&
+         f.InventoryDetails.Any(detail =>
+             (obj.CategoryId == null || detail.ShopItem.InventorySubCategories.InventoryCategoriesID == obj.CategoryId) &&
+             (obj.SubCategoryId == null || detail.ShopItem.InventorySubCategoriesID == obj.SubCategoryId) &&
+             (obj.ItemId == null || detail.ShopItemID == obj.ItemId)
+         )
+     ).ToList();
 
-            var allTotal = filteredData.Sum(item => (item.Total) * (item.InventoryFlags?.FlagValue ?? 0));
+     if (!filteredData.Any())
+         return NotFound("No records found matching the search criteria.");
 
-            var dto = mapper.Map<List<InventoryMasterGetDTO>>(filteredData);
+     var allTotal = filteredData.Sum(item => (item.Total) * (item.InventoryFlags?.FlagValue ?? 0));
 
-            return Ok(new
-            {
-                AllTotal = allTotal,
-                Data = dto
-            });
-            
-        }
+     
+     var dto = mapper.Map<List<InventoryMasterGetDTO>>(filteredData);
+
+     return Ok(new
+     {
+         AllTotal = allTotal,
+         Data = dto
+     });
+ }
 
         // // // // // // // // 
         //[HttpGet("report-inventory-master")]

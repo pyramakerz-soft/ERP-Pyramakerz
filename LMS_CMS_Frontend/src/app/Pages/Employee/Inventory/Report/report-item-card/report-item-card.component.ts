@@ -163,7 +163,7 @@ export class ReportItemCardComponent implements OnInit {
       isSummary: true,
       date: formattedToDate,
       transactionType: '',
-      invoiceNumber: '',
+      invoiceNumber: '0',
       authority: '',
       income: summary.inQuantity,
       outcome: summary.outQuantity,

@@ -250,7 +250,8 @@ private prepareExportData(): void {
       { key: 'Date', value: new Date(t.date).toLocaleDateString() },
       { key: 'Store', value: t.storeName },
       { key: 'Transaction Type', value: t.flagEnName },
-      { key: 'Total Amount', value: t.total },
+      { key: 'Invoice Number', value: t.invoiceNumber },
+      { key: 'Total Price', value: t.total },
       // { key: 'All Total', value: this.totalRecords },
       { key: 'Notes', value: t.notes || 'N/A' }
     ],
