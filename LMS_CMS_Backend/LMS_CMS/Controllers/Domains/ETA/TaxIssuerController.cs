@@ -134,7 +134,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
             Unit_Of_Work.taxIssuer_Repository.Add(taxIssuer);
             Unit_Of_Work.SaveChanges();
 
-            return Ok(taxIssuer);
+            return CreatedAtAction(nameof(GetByID), new { Id = taxIssuer .ID }, taxIssuerAdd);
         }
         #endregion
 

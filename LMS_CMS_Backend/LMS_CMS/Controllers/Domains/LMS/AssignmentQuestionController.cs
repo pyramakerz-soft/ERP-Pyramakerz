@@ -108,46 +108,14 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return BadRequest("Assignment Question cannot be null");
             }
 
-            Assignment assignment = Unit_Of_Work.assignment_Repository.First_Or_Default(a => a.ID == newData.AssignmentID && a.IsDeleted!= true);
-            if (assignment == null) 
+            Assignment assignment = Unit_Of_Work.assignment_Repository.First_Or_Default(a => a.ID == newData.AssignmentID && a.IsDeleted != true);
+            if (assignment == null)
             {
                 return BadRequest("There Is No Assignment With This Id");
-              
+
             }
-
-<<<<<<< HEAD
-            if (assignment.AssignmentTypeID == 1) // Text Book Assignment
-            {
-                if(newData.File == null)
-                {
-                    return BadRequest("File Is Required");
-                }
-                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Assignment");
-                var medalFolder = Path.Combine(baseFolder, assignment.ID.ToString());
-                if (!Directory.Exists(medalFolder))
-                {
-                    Directory.CreateDirectory(medalFolder);
-                }
-
-                if (newData.File != null && newData.File.Length > 0)
-                {
-                    var fileName = Path.GetFileName(newData.File.FileName);
-                    var filePath = Path.Combine(medalFolder, fileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await newData.File.CopyToAsync(stream);
-                    }
-                    assignment.LinkFile = $"Uploads/Assignment/{assignment.ID.ToString()}/{fileName}";
-                }
-
-                Unit_Of_Work.assignment_Repository.Update(assignment);
-                Unit_Of_Work.SaveChanges();
-            }
-            else if (assignment.AssignmentTypeID == 2)
-=======
             // Text Book Assignment (assignment.AssignmentTypeID == 1) ==> handled in Assignment
             if (assignment.AssignmentTypeID == 2) 
->>>>>>> f25f2815d2920c751732aa7d19155fc89da68c32
             {
                 foreach (var item in newData.QuestionIds)
                 {

@@ -69,7 +69,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
                 jsonPath = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/JSONCredits/{inv}");
             
 
-            if (master.InvoiceType == 'C')
+            if (master.InvoiceType == 'P')
             {
                 string token = EtaServices.AuthenticatePOS(Unit_Of_Work, etaPosID);
 
