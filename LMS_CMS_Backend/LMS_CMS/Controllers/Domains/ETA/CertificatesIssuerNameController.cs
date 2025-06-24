@@ -52,7 +52,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
 
             List<CertificatesIssuerNameGetDTO> certNameDTO = _mapper.Map<List<CertificatesIssuerNameGetDTO>>(certificatesIssuerNames);
 
-            return Ok(certificatesIssuerNames);
+            return Ok(certNameDTO);
         }
         #endregion
 
