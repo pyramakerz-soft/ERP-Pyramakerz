@@ -4,6 +4,7 @@ import { ApiService } from '../../api.service';
 import { ClassroomSubject } from '../../../Models/LMS/classroom-subject';
 import { ClassroomSubjectGroupBy } from '../../../Models/LMS/classroom-subject-group-by';
 import { ClassroomSubjectCoTeacher } from '../../../Models/LMS/classroom-subject-co-teacher';
+import { StudentClassWhenSubject } from '../../../Models/LMS/student-class-when-subject';
 
 @Injectable({
   providedIn: 'root'
@@ -26,6 +27,18 @@ export class ClassroomSubjectService {
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
     return this.http.get<ClassroomSubject[]>(`${this.baseUrl}/ClassroomSubject/GetByClassroom/${classID}`, { headers });
+  }
+
+  GetClassBySubjectIDWithStudentsIncluded(SubId: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<StudentClassWhenSubject[]>(`${this.baseUrl}/ClassroomSubject/GetClassBySubjectIDWithStudentsIncluded/${SubId}`, { headers });
   }
 
   GetByEmpId(EmpId: number, DomainName: string) {

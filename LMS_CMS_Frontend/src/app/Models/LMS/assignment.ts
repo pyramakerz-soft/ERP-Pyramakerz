@@ -21,6 +21,7 @@ export class Assignment {
         public subjectWeightTypeID: number = 0,
         public subjectWeightTypeEnglishName: string = '',
         public subjectWeightTypeArabicName: string = '',
+        public studentClassroomIDs : number[]=[] ,
         public assignmentQuestions : AssignmentQuestion[]=[] ,
         public assignmentStudents : AssignmentStudent[]=[] ,
         public insertedByUserId: number = 0
