@@ -209,7 +209,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
 
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "certificatesIssuerName", roleId, userId, certificatesIssuerName);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Certificate Issuer", roleId, userId, certificatesIssuerName);
                 if (accessCheck != null)
                 {
                     return accessCheck;
