@@ -1,36 +1,43 @@
 ﻿using AutoMapper;
 using LMS_CMS_BL.DTO.ETA;
+using LMS_CMS_BL.DTO.LMS;
 using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains.ETA;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace LMS_CMS_PL.Controllers.Domains.ETA
 {
     [Route("api/with-domain/[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class ETAPOSController : ControllerBase
     {
         private readonly DbContextFactoryService _dbContextFactory;
         private readonly IMapper _mapper;
+        private readonly CheckPageAccessService _checkPageAccessService;
 
-        public ETAPOSController(DbContextFactoryService dbContextFactory, IMapper mapper)
+        public ETAPOSController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService)
         {
             _dbContextFactory = dbContextFactory;
             _mapper = mapper;
+            _checkPageAccessService = checkPageAccessService;
         }
 
         #region Get All
         [HttpGet("GetAll")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "ETAPOS" }
+            pages: new[] { "Point Of Sale" }
         )]
-        public async Task<ActionResult> GetAll()
+        public async Task<ActionResult> GetAll([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             var userClaims = HttpContext.User.Claims;
@@ -44,7 +51,15 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            List<ETAPOS> ETAPOSs = await Unit_Of_Work.pos_Repository.FindByAsync<ETAPOS>(x => x.IsDeleted != true);
+            int totalRecords = await Unit_Of_Work.pos_Repository
+               .CountAsync(f => f.IsDeleted != true);
+
+            List<ETAPOS> ETAPOSs = await Unit_Of_Work.pos_Repository
+                .Select_All_With_IncludesById_Pagination<ETAPOS>(
+                    f => f.IsDeleted != true)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
 
             if (ETAPOSs == null || ETAPOSs.Count == 0)
             {
@@ -53,7 +68,15 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
 
             var ETAPOSDtos = _mapper.Map<List<POSGetDTO>>(ETAPOSs);
 
-            return Ok(ETAPOSDtos);
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = ETAPOSDtos, Pagination = paginationMetadata });
         }
         #endregion
 
@@ -61,7 +84,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "ETAPOS" }
+            pages: new[] { "Point Of Sale" }
         )]
         public async Task<ActionResult> GetById(int id)
         {
@@ -96,9 +119,9 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
         [HttpPost("Add")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "ETAPOS" }
+            pages: new[] { "Point Of Sale" }
         )]
-        public async Task<ActionResult> Add([FromBody] POSAddDTO posDto)
+        public async Task<ActionResult> Add(POSAddDTO posDto)
         {
             if (!ModelState.IsValid)
             {
@@ -121,7 +144,27 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
 
             ETAPOS newETAPOS = _mapper.Map<ETAPOS>(posDto);
 
-            Unit_Of_Work.pos_Repository.Update(newETAPOS);
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            newETAPOS.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+
+            if (userTypeClaim == "octa")
+            {
+                newETAPOS.InsertedByOctaId = userId;
+                if (newETAPOS.InsertedByUserId != null)
+                {
+                    newETAPOS.InsertedByUserId = null;
+                }
+            }
+            else if (userTypeClaim == "employee")
+            {
+                newETAPOS.InsertedByUserId = userId;
+                if (newETAPOS.InsertedByOctaId != null)
+                {
+                    newETAPOS.InsertedByOctaId = null;
+                }
+            }
+
+            Unit_Of_Work.pos_Repository.Add(newETAPOS);
             Unit_Of_Work.SaveChanges();
 
             return CreatedAtAction(nameof(GetById), new { id = newETAPOS.ID }, posDto);
@@ -132,9 +175,10 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
         [HttpPut("Edit")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "ETAPOS" }
+            allowEdit: 1,
+            pages: new[] { "Point Of Sale" }
         )]
-        public async Task<ActionResult> Update([FromBody] POSEditDTO posDto)
+        public async Task<IActionResult> Update(POSEditDTO posDto)
         {
             if (!ModelState.IsValid)
             {
@@ -150,6 +194,10 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
 
             var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
 
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+
+            long.TryParse(userRoleClaim, out long roleId);
+
             if (userIdClaim == null || userTypeClaim == null)
             {
                 return Unauthorized("User ID or Type claim not found.");
@@ -162,23 +210,59 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
                 return NotFound($"ETAPOS with ID {posDto.ID} not found.");
             }
 
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Point Of Sale", roleId, userId, existingETAPOS);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
+            }
+
+            if (userTypeClaim == "octa")
+            {
+                existingETAPOS.UpdatedByOctaId = userId;
+                if (existingETAPOS.UpdatedByUserId != null)
+                {
+                    existingETAPOS.UpdatedByUserId = null;
+                }
+            }
+            else if (userTypeClaim == "employee")
+            {
+                existingETAPOS.UpdatedByUserId = userId;
+                if (existingETAPOS.UpdatedByOctaId != null)
+                {
+                    existingETAPOS.UpdatedByOctaId = null;
+                }
+            }
+
             _mapper.Map(posDto, existingETAPOS);
+
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+
+            existingETAPOS.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
 
             Unit_Of_Work.pos_Repository.Update(existingETAPOS);
             Unit_Of_Work.SaveChanges();
 
-            return Ok();
+            return Ok(posDto);
         }
         #endregion
 
         #region Delete
-        [HttpDelete]
+        [HttpDelete("{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "ETAPOS" }
+            allowDelete: 1,
+            pages: new[] { "Point Of Sale" }
         )]
-        public async Task<ActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
+            if (id == 0)
+            {
+                return BadRequest("POS ID cannot be null.");
+            }
+
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             var userClaims = HttpContext.User.Claims;
@@ -187,6 +271,9 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
             long.TryParse(userIdClaim, out long userId);
 
             var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
 
             if (userIdClaim == null || userTypeClaim == null)
             {
@@ -197,15 +284,42 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
 
             if (existingETAPOS == null)
             {
-                return NotFound($"ETAPOS with ID {id} not found.");
+                return NotFound($"POS with ID {id} not found.");
             }
+            else
+            {
+                if (userTypeClaim == "employee")
+                {
+                    IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Point Of Sale", roleId, userId, existingETAPOS);
+                    if (accessCheck != null)
+                    {
+                        return accessCheck;
+                    }
+                }
 
-            existingETAPOS.IsDeleted = true;
-
-            Unit_Of_Work.pos_Repository.Update(existingETAPOS);
-            Unit_Of_Work.SaveChanges();
-
-            return Ok();
+                existingETAPOS.IsDeleted = true;
+                TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+                existingETAPOS.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                if (userTypeClaim == "octa")
+                {
+                    existingETAPOS.DeletedByOctaId = userId;
+                    if (existingETAPOS.DeletedByUserId != null)
+                    {
+                        existingETAPOS.DeletedByUserId = null;
+                    }
+                }
+                else if (userTypeClaim == "employee")
+                {
+                    existingETAPOS.DeletedByUserId = userId;
+                    if (existingETAPOS.DeletedByOctaId != null)
+                    {
+                        existingETAPOS.DeletedByOctaId = null;
+                    }
+                }
+                Unit_Of_Work.pos_Repository.Update(existingETAPOS);
+                Unit_Of_Work.SaveChanges();
+                return Ok(new { message = "POS has Successfully been deleted" });
+            }
         }
         #endregion
     }

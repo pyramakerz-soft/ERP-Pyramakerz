@@ -1,10 +1,14 @@
 ﻿using AutoMapper;
+using LMS_CMS_BL.DTO.Bus;
 using LMS_CMS_BL.DTO.ETA;
 using LMS_CMS_BL.UOW;
+using LMS_CMS_DAL.Models.Domains.BusModule;
 using LMS_CMS_DAL.Models.Domains.ETA;
+using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace LMS_CMS_PL.Controllers.Domains.ETA
 {
@@ -15,21 +19,26 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
     {
         private readonly DbContextFactoryService _dbContextFactory;
         private readonly IMapper _mapper;
+        private readonly CheckPageAccessService _checkPageAccessService;
 
-        public CertificatesIssuerNameController(DbContextFactoryService dbContextFactory, IMapper mapper)
+        public CertificatesIssuerNameController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService)
         {
             _dbContextFactory = dbContextFactory;
             _mapper = mapper;
+            _checkPageAccessService = checkPageAccessService;
         }
 
         #region Get All
-        [HttpGet("get")]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "" }
-        //)]
-        public async Task<IActionResult> Get()
+        [HttpGet("getAll")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Certificate Issuer" }
+        )]
+        public async Task<IActionResult> GetAll([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             var userClaims = HttpContext.User.Claims;
@@ -43,7 +52,15 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            List<CertificatesIssuerName> certificatesIssuerNames =  Unit_Of_Work.certificatesIssuerName_Repository.Select_All();
+            int totalRecords = await Unit_Of_Work.certificatesIssuerName_Repository
+               .CountAsync(f => f.IsDeleted != true);
+
+            List<CertificatesIssuerName> certificatesIssuerNames = await Unit_Of_Work.certificatesIssuerName_Repository
+                .Select_All_With_IncludesById_Pagination<CertificatesIssuerName>(
+                x => x.IsDeleted != true)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
 
             if (certificatesIssuerNames == null || !certificatesIssuerNames.Any())
             {
@@ -52,16 +69,24 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
 
             List<CertificatesIssuerNameGetDTO> certNameDTO = _mapper.Map<List<CertificatesIssuerNameGetDTO>>(certificatesIssuerNames);
 
-            return Ok(certificatesIssuerNames);
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = certNameDTO, Pagination = paginationMetadata });
         }
         #endregion
 
         #region Get By ID
-        [HttpGet("id")]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "SchoolPCs" }
-        //)]
+        [HttpGet("{id}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Certificate Issuer" }
+        )]
         public async Task<IActionResult> GetByID(int id)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -81,7 +106,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
 
             if (certificatesIssuerName == null)
             {
-                return NotFound($"CertificatesIssuerName with ID {id} not found.");
+                return NotFound($"Certificate with ID {id} not found.");
             }
 
             CertificatesIssuerNameGetDTO certNameDTO = _mapper.Map<CertificatesIssuerNameGetDTO>(certificatesIssuerName);
@@ -92,10 +117,10 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
 
         #region Create
         [HttpPost("Add")]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "SchoolPCs" }
-        //)]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Certificate Issuer" }
+        )]
         public IActionResult Add(CertificatesIssuerNameAddDTO certIssuerAdd)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -124,25 +149,34 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
             if (userTypeClaim == "octa")
             {
                 certificatesIssuerName.InsertedByOctaId = userId;
+                if (certificatesIssuerName.InsertedByUserId != null)
+                {
+                    certificatesIssuerName.InsertedByUserId = null;
+                }
             }
             else if (userTypeClaim == "employee")
             {
                 certificatesIssuerName.InsertedByUserId = userId;
+                if (certificatesIssuerName.InsertedByOctaId != null)
+                {
+                    certificatesIssuerName.InsertedByOctaId = null;
+                }
             }
 
             Unit_Of_Work.certificatesIssuerName_Repository.Add(certificatesIssuerName);
             Unit_Of_Work.SaveChanges();
 
-            return Ok(certificatesIssuerName);
+            return CreatedAtAction(nameof(GetByID), new { Id = certificatesIssuerName.ID }, certIssuerAdd);
         }
         #endregion
 
         #region Update
         [HttpPut("Edit")]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "SchoolPCs" }
-        //)]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            allowEdit: 1,
+            pages: new[] { "Certificate Issuer" }
+        )]
         public IActionResult Edit(CertificatesIssuerNameEditDTO certIssuerDTO)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -152,6 +186,9 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
 
             long.TryParse(userIdClaim, out long userId);
             var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
 
             if (userIdClaim == null || userTypeClaim == null)
             {
@@ -168,6 +205,15 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
             if (certificatesIssuerName == null)
             {
                 return NotFound($"CertificatesIssuerName with ID {certIssuerDTO.ID} not found.");
+            }
+
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "certificatesIssuerName", roleId, userId, certificatesIssuerName);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
             }
 
             _mapper.Map(certIssuerDTO, certificatesIssuerName);
@@ -196,18 +242,24 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
             Unit_Of_Work.certificatesIssuerName_Repository.Update(certificatesIssuerName);
             Unit_Of_Work.SaveChanges();
 
-            return Ok(certificatesIssuerName);
+            return Ok(certIssuerDTO);
         }
         #endregion
 
         #region Delete
-        [HttpDelete]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "SchoolPCs" }
-        //)]
+        [HttpDelete("{id}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            allowDelete: 1,
+            pages: new[] { "Certificate Issuer" }
+        )]
         public IActionResult Delete(int id)
         {
+            if (id == 0)
+            {
+                return BadRequest("Certificate ID cannot be null.");
+            }
+
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             var userClaims = HttpContext.User.Claims;
@@ -215,6 +267,8 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
 
             long.TryParse(userIdClaim, out long userId);
             var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
 
             if (userIdClaim == null || userTypeClaim == null)
             {
@@ -225,14 +279,24 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
     
             if (certificatesIssuerName == null)
             {
-                return NotFound($"CertificatesIssuerName with ID {id} not found.");
+                return NotFound($"Certificate with ID {id} not found.");
             }
-    
-            certificatesIssuerName.IsDeleted = true;
-            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-            certificatesIssuerName.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            else
+            {
+                if (userTypeClaim == "employee")
+                {
+                    IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Certificate Issuer", roleId, userId, certificatesIssuerName);
+                    if (accessCheck != null)
+                    {
+                        return accessCheck;
+                    }
+                }
 
-            if (userTypeClaim == "octa")
+                certificatesIssuerName.IsDeleted = true;
+                TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+                certificatesIssuerName.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+
+                if (userTypeClaim == "octa")
                 {
                     certificatesIssuerName.DeletedByOctaId = userId;
                     if (certificatesIssuerName.DeletedByUserId != null)
@@ -248,11 +312,10 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
                         certificatesIssuerName.DeletedByOctaId = null;
                     }
                 }
-    
                 Unit_Of_Work.certificatesIssuerName_Repository.Update(certificatesIssuerName);
                 Unit_Of_Work.SaveChanges();
-    
-                return Ok("Certificate deleted successfully");
+                return Ok(new { message = "Certificate has Successfully been deleted" });
+            }
         }
         #endregion
     }

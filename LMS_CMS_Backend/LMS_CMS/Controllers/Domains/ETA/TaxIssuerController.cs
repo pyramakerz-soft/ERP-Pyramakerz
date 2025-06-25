@@ -61,7 +61,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "TaxIssuer" }
+            pages: new[] { "Tax Issuer" }
         )]
         public async Task<IActionResult> GetByID(string id)
         {
@@ -95,7 +95,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
         [HttpPost("Add")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "TaxIssuer" }
+            pages: new[] { "Tax Issuer" }
         )]
         public IActionResult Add(TaxIssuerAddDTO taxIssuerAdd)
         {
@@ -134,7 +134,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
             Unit_Of_Work.taxIssuer_Repository.Add(taxIssuer);
             Unit_Of_Work.SaveChanges();
 
-            return Ok(taxIssuer);
+            return CreatedAtAction(nameof(GetByID), new { Id = taxIssuer .ID }, taxIssuerAdd);
         }
         #endregion
 
@@ -142,7 +142,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
         [HttpPut("Edit")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "TaxIssuer" }
+            pages: new[] { "Tax Issuer" }
         )]
         public IActionResult Edit(TaxIssuerEditDTO taxIssuerDTO)
         {
@@ -205,7 +205,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
         [HttpDelete]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "TaxIssuer" }
+            pages: new[] { "Tax Issuer" }
         )]
         public IActionResult Delete(string id)
         {

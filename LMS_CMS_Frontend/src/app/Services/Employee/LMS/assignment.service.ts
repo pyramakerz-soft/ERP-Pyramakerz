@@ -77,6 +77,26 @@ export class AssignmentService {
       .set('Content-Type', 'application/json');
     return this.http.put(`${this.baseUrl}/Assignment`, Assignment, { headers });
   }
+ 
+  FileAssignment(Assignment: Assignment, DomainName: string){
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+
+    const formData = new FormData();
+    formData.append('id', Assignment.id.toString() ?? '');
+    formData.append('linkFile', Assignment.linkFile ?? ''); 
+
+    if (Assignment.fileFile) {
+      formData.append('fileFile', Assignment.fileFile, Assignment.fileFile.name);
+    } 
+ 
+    return this.http.put(`${this.baseUrl}/Assignment/FileAssignment`, formData, { headers });
+  }
 
   Delete(id: number, DomainName: string) {
     if (DomainName != null) {

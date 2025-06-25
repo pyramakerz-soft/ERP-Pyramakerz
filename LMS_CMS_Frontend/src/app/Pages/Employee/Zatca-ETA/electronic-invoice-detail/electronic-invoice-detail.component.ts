@@ -2,12 +2,14 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule, DatePipe } from '@angular/common';
-import { InventoryDetailsService } from '../../../../../Services/Employee/Inventory/inventory-details.service';
-import { ApiService } from '../../../../../Services/api.service';
+
 import { FormsModule } from '@angular/forms';
-import { ElectronicInvoice } from '../../../../../Models/zatca/electronic-invoice';
-import { InventoryMasterService } from '../../../../../Services/Employee/Inventory/inventory-master.service';
-import { PdfPrintComponent } from "../../../../../Component/pdf-print/pdf-print.component";
+import { PdfPrintComponent } from '../../../../Component/pdf-print/pdf-print.component';
+import { ElectronicInvoice } from '../../../../Models/zatca/electronic-invoice';
+import { InventoryDetailsService } from '../../../../Services/Employee/Inventory/inventory-details.service';
+import { InventoryMasterService } from '../../../../Services/Employee/Inventory/inventory-master.service';
+import { ApiService } from '../../../../Services/api.service';
+
 
 @Component({
   selector: 'app-electronic-invoice-detail',
@@ -113,13 +115,13 @@ export class ElectronicInvoiceDetailComponent implements OnInit {
       error: (masterError) => {
         console.error('Error loading invoice master data:', masterError);
         this.isLoading = false;
-        this.router.navigate(['/Employee/Electronic-Invoice']);
+        this.router.navigate(['/Employee/Zatca Electronic-Invoice']);
       }
     });
   }
 
   goBack() {
-    this.router.navigate(['/Employee/Electronic-Invoice']);
+    this.router.navigate(['/Employee/Zatca Electronic-Invoice']);
   }
 
   sendInvoice() {

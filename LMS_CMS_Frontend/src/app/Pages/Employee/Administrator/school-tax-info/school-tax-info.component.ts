@@ -24,7 +24,7 @@ import { TaxIssuer } from '../../../../Models/Administrator/tax-issuer.model';
 })
 export class TaxIssuerComponent {
   // schoolData: School[] = [];
-    taxIssuers: TaxIssuer[] = []; // Changed from schoolData to taxIssuers
+  taxIssuers: TaxIssuer[] = []; // Changed from schoolData to taxIssuers
 
   school: School = new School();
   taxIssuer: any = {};
@@ -38,7 +38,18 @@ export class TaxIssuerComponent {
 
   DomainName: string = '';
   UserID: number = 0;
-  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
+  User_Data_After_Login: TokenData = new TokenData(
+    '',
+    0,
+    0,
+    0,
+    0,
+    '',
+    '',
+    '',
+    '',
+    ''
+  );
 
   constructor(
     public account: AccountService,
@@ -49,7 +60,7 @@ export class TaxIssuerComponent {
     public schoolService: SchoolService,
     public taxIssuerService: TaxIssuerService,
     public router: Router
-  ) { }
+  ) {}
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -57,7 +68,7 @@ export class TaxIssuerComponent {
     this.DomainName = this.ApiServ.GetHeader();
 
     // this.getSchoolData();
-this.getTaxIssuers(); 
+    this.getTaxIssuers();
     this.menuService.menuItemsForEmployee$.subscribe((items) => {
       const settingsPage = this.menuService.findByPageName(this.path, items);
       if (settingsPage) {
@@ -73,37 +84,46 @@ this.getTaxIssuers();
   //   });
   // }
 
-    getTaxIssuers() {
+  getTaxIssuers() {
     this.taxIssuerService.getAll(this.DomainName).subscribe({
       next: (data) => {
-        console.log(data)
+        console.log(data);
         this.taxIssuers = data;
       },
       error: (error) => {
         console.error('Error loading tax issuers:', error);
-      }
+      },
     });
   }
 
   getTaxTypeDisplay(school: School): string {
-    if (school.streetName || school.buildingNumber || school.city || school.crn || school.postalZone) {
+    if (
+      school.streetName ||
+      school.buildingNumber ||
+      school.city ||
+      school.crn ||
+      school.postalZone
+    ) {
       return 'ZATCA';
-    } else if (school.vatNumber) {//recheck
+    } else if (school.vatNumber) {
+      //recheck
       return 'ETA';
     }
     return 'Not Set';
   }
 
   GetSchoolById(schoolId: number) {
-    this.schoolService.GetBySchoolId(schoolId, this.DomainName).subscribe((data) => {
-      this.school = data;
-      this.selectedTaxType = this.getTaxTypeDisplay(data);
-      
-      // Load tax issuer data if ETA is selected
-      if (this.selectedTaxType === 'ETA' && data.vatNumber) {
-        this.getTaxIssuerById(data.vatNumber);
-      }
-    });
+    this.schoolService
+      .GetBySchoolId(schoolId, this.DomainName)
+      .subscribe((data) => {
+        this.school = data;
+        this.selectedTaxType = this.getTaxTypeDisplay(data);
+
+        // Load tax issuer data if ETA is selected
+        if (this.selectedTaxType === 'ETA' && data.vatNumber) {
+          this.getTaxIssuerById(data.vatNumber);
+        }
+      });
   }
 
   getTaxIssuerById(id: string) {
@@ -128,22 +148,21 @@ this.getTaxIssuers();
           floor: '',
           room: '',
           landMark: '',
-          additionalInfo: ''
+          additionalInfo: '',
         };
       }
     );
   }
 
-  openModal(schoolId: number) {
-    this.GetSchoolById(schoolId);
-    document.getElementById('Tax_Modal')?.classList.remove('hidden');
-    document.getElementById('Tax_Modal')?.classList.add('flex');
+  openModal(taxIssuerId: string) {
+    this.getTaxIssuerById(taxIssuerId);
+    document.getElementById('EditTaxIssuerModal')?.classList.remove('hidden');
+    document.getElementById('EditTaxIssuerModal')?.classList.add('flex');
   }
 
   closeModal() {
-    document.getElementById('Tax_Modal')?.classList.remove('flex');
-    document.getElementById('Tax_Modal')?.classList.add('hidden');
-    this.school = new School();
+    document.getElementById('EditTaxIssuerModal')?.classList.remove('flex');
+    document.getElementById('EditTaxIssuerModal')?.classList.add('hidden');
     this.taxIssuer = {};
     this.validationErrors = {};
   }
@@ -164,7 +183,10 @@ this.getTaxIssuers();
     }
   }
 
-  onInputValueChange(event: { field: string; value: any }, model: 'school' | 'taxIssuer' = 'school') {
+  onInputValueChange(
+    event: { field: string; value: any },
+    model: 'school' | 'taxIssuer' = 'school'
+  ) {
     const { field, value } = event;
     if (model === 'school') {
       (this.school as any)[field] = value;
@@ -186,7 +208,7 @@ this.getTaxIssuers();
 
   SaveSchool() {
     this.isLoading = true;
-    
+
     if (this.selectedTaxType === 'ETA') {
       this.saveTaxIssuer();
     } else {
@@ -194,37 +216,34 @@ this.getTaxIssuers();
     }
   }
 
-saveTaxIssuer() {
-  // Ensure all required fields are set
-  this.taxIssuer = {
-    ...this.taxIssuer,
-    type: this.taxIssuer.type || 'Zatca', // Default type if not set
-    country: this.taxIssuer.country || '' // Default country if not set
-  };
+  saveTaxIssuer() {
+    this.isLoading = true;
 
-  // Ensure VAT number is set in school
-  if (this.taxIssuer.id) {
-    this.school.vatNumber = this.taxIssuer.id;
+    this.taxIssuerService.edit(this.taxIssuer, this.DomainName).subscribe(
+      (result: any) => {
+        this.closeModal();
+        this.isLoading = false;
+        this.getTaxIssuers();
+        Swal.fire({
+          icon: 'success',
+          title: 'Saved successfully',
+          showConfirmButton: false,
+          timer: 1500,
+        });
+      },
+      (error) => {
+        this.isLoading = false;
+        Swal.fire({
+          icon: 'error',
+          title: 'Error saving tax issuer',
+          text: error.message || 'Please try again',
+          confirmButtonText: 'Okay',
+          customClass: { confirmButton: 'secondaryBg' },
+        });
+        console.error('Error details:', error);
+      }
+    );
   }
-
-  this.taxIssuerService.edit(this.taxIssuer, this.DomainName).subscribe(
-    (result: any) => {
-      // After saving tax issuer, save school info
-      this.saveZatcaInfo();
-    },
-    (error) => {
-      this.isLoading = false;
-      Swal.fire({
-        icon: 'error',
-        title: 'Error saving tax issuer',
-        text: error.message || 'Please try again',
-        confirmButtonText: 'Okay',
-        customClass: { confirmButton: 'secondaryBg' },
-      });
-      console.error('Error details:', error); // Log detailed error
-    }
-  );
-}
 
   saveZatcaInfo() {
     this.schoolService.Edit(this.school, this.DomainName).subscribe(
@@ -237,7 +256,7 @@ saveTaxIssuer() {
           icon: 'success',
           title: 'Saved successfully',
           showConfirmButton: false,
-          timer: 1500
+          timer: 1500,
         });
       },
       (error) => {
@@ -261,18 +280,14 @@ saveTaxIssuer() {
       showCancelButton: true,
       confirmButtonColor: '#3085d6',
       cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes, delete it!'
+      confirmButtonText: 'Yes, delete it!',
     }).then((result) => {
       if (result.isConfirmed) {
         this.isLoading = true;
         this.schoolService.Delete(schoolId, this.DomainName).subscribe(
           () => {
             this.isLoading = false;
-            Swal.fire(
-              'Deleted!',
-              'The school has been deleted.',
-              'success'
-            );
+            Swal.fire('Deleted!', 'The school has been deleted.', 'success');
             this.getTaxIssuers();
           },
           (error) => {

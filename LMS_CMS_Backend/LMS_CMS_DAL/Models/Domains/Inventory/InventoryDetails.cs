@@ -13,9 +13,12 @@ namespace LMS_CMS_DAL.Models.Domains.Inventory
         [Key]
         public long ID { get; set; } 
         //public string BarCode { get; set; }
+
         public int Quantity { get; set; }  //
         public decimal Price { get; set; }  //
         public decimal TotalPrice { get; set; }  //
+        public decimal? AverageCost { get; set; }
+
         public string? Notes { get; set; }
 
         [ForeignKey("ShopItem")]

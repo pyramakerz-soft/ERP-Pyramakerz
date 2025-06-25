@@ -43,10 +43,10 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
         #region Generate PCSID
         [HttpPost("GeneratePCSID")]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "Electronic Invoice" }
-        //)]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Zatca Electronic-Invoice" }
+        )]
         public async Task<IActionResult> GeneratePCSID(long otp, long schoolPcId)
         {
             string certificates = Path.Combine(Directory.GetCurrentDirectory(), "Invoices/Certificates");
@@ -220,10 +220,10 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
         #region Report Invoice
         [HttpPost("ReportInvoice")]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "Electronic Invoice" }
-        //)]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Zatca Electronic-Invoice" }
+        )]
         public async Task<IActionResult> ReportInvoice(long masterId)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -350,10 +350,10 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
         #region Report Invoices
         [HttpPost("ReportInvoices")]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "Electronic Invoice" }
-        //)]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Zatca Electronic-Invoice" }
+        )]
         public async Task<IActionResult> ReportInvoices(long schoolId)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -494,10 +494,10 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
         #region Filter by School and Date
         [HttpGet("FilterBySchoolAndDate")]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "Electronic Invoice" }
-        //)]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Zatca Electronic-Invoice" }
+        )]
         public async Task<IActionResult> FilterBySchoolAndDate(long schoolId, string startDate, string endDate, int pageNumber = 1, int pageSize = 10)
         {
             if (pageNumber < 1) pageNumber = 1;

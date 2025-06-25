@@ -11,8 +11,8 @@ namespace LMS_CMS_BL.DTO.LMS
     {
         public float Degree { get; set; }
         public long AssignmentID { get; set; }
-        public long StudentClassroomID { get; set; }
-        public IFormFile File { get; set; }
+        public long StudentId { get; set; }
+        //public IFormFile? File { get; set; }
         public List<AssignmentStudentQuestionAddDTO>? AssignmentStudentQuestions { get; set; }
     }
 }

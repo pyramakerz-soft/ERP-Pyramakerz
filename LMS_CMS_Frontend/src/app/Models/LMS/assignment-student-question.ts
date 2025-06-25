@@ -1,3 +1,4 @@
+import { AssignmentStudentQuestionAnswerOption } from "./assignment-student-question-answer-option";
 import { QuestionBankOption } from "./question-bank-option";
 import { SubBankQuestion } from "./sub-bank-question";
 
@@ -14,9 +15,10 @@ export class AssignmentStudentQuestion {
         public questionDesc: string = "",
         public questionImage: string = "",
         public questionTypeName: string = "",
-        public assignmentStudentQuestionAnswerOption: AssignmentStudentQuestion[] = [],
+        public assignmentStudentQuestionAnswerOption: AssignmentStudentQuestionAnswerOption[] = [],
         public questionBankOptions: QuestionBankOption[] = [],
         public subBankQuestion: SubBankQuestion[] = [],
+        public answerPool: string[] = [],
     ) { }
 }
 

@@ -3309,6 +3309,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<string>("MyGetDate")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -3321,6 +3324,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.Property<long?>("UpdatedByUserId")
                         .HasColumnType("bigint");
+
+                    b.Property<string>("UserName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ID");
 
@@ -3961,6 +3967,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .HasColumnType("bigint");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("ID"));
+
+                    b.Property<decimal?>("AverageCost")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");

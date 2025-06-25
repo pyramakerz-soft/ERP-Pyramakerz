@@ -147,17 +147,15 @@ import { DailyPerformanceComponent } from './Pages/Employee/LMS/daily-performanc
 import { LessonResourceComponent } from './Pages/Employee/LMS/lesson-resource/lesson-resource.component';
 import { LessonActivityComponent } from './Pages/Employee/LMS/lesson-activity/lesson-activity.component';
 import { LessonLiveComponent } from './Pages/Employee/LMS/lesson-live/lesson-live.component';
-import { StudentLessonLiveComponent } from './Pages/Student/LMS/student-lesson-live/student-lesson-live.component';
-import { AssignmentDetailsComponent } from './Pages/Employee/LMS/assignment/assignment-details/assignment-details.component';
+import { StudentLessonLiveComponent } from './Pages/Student/LMS/student-lesson-live/student-lesson-live.component'; 
 import { AssignmentEditComponent } from './Pages/Employee/LMS/assignment/assignment-edit/assignment-edit.component';
 import { ZatcaDevicesComponent } from './Pages/Employee/Zatca/zatca-devices/zatca-devices.component';
 import { SubjectsComponent } from './Pages/Student/LMS/UI/subject/subjects.component';
 import { SubjectDetailsComponent } from './Pages/Student/LMS/UI/subject-details/subject-details.component';
 import { WeekDetailsComponent } from './Pages/Student/LMS/UI/week-details/week-details.component';
-import { ElectronicInvoiceComponent } from './Pages/Employee/Inventory/Report/electronic-invoice/electronic-invoice.component';
+import { ElectronicInvoiceComponent } from './Pages/Employee/Zatca-ETA/electronic-invoice/electronic-invoice.component';
 import { LessonResourcesComponent } from './Pages/Student/LMS/UI/lesson-resources/lesson-resources.component';
 import { AssignmentsComponent } from './Pages/Student/LMS/UI/assignments/assignments.component';
-import { ElectronicInvoiceDetailComponent } from './Pages/Employee/Inventory/Report/electronic-invoice-detail/electronic-invoice-detail.component';
 import { ClassroomViewComponent } from './Pages/Employee/LMS/classroom-view/classroom-view.component';
 import { QuestionBankComponent } from './Pages/Employee/LMS/question-bank/question-bank.component';
 import { LessonLiveUIComponent } from './Pages/Student/LMS/UI/lesson-live/lesson-live.component';
@@ -171,10 +169,13 @@ import { StudentsComponent } from './Pages/Employee/Administrator/students/stude
 import { DailyPerformanceMasterComponent } from './Pages/Employee/LMS/daily-performance-master/daily-performance-master.component';
 
 import { AssignmentComponent } from './Pages/Employee/LMS/assignment/assignment.component';
+import { ReportItemCardComponent } from './Pages/Employee/Inventory/Report/report-item-card/report-item-card.component';
 import { AssignmentStudentComponent } from './Pages/Employee/LMS/assignment-student/assignment-student.component';
 import { AssignmentStudentComponent as AssignmentStudentStudentComponent } from './Pages/Student/LMS/assignment-student/assignment-student.component';
 import { AssignmentDetailComponent } from './Pages/Employee/LMS/assignment-detail/assignment-detail.component';
-
+import { POSComponent } from './Pages/Employee/ETA/pos/pos.component';
+import { CertificatesIssuerComponent } from './Pages/Employee/ETA/certificates-issuer/certificates-issuer.component';
+import { ElectronicInvoiceDetailComponent } from './Pages/Employee/Zatca-ETA/electronic-invoice-detail/electronic-invoice-detail.component'; 
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -231,7 +232,9 @@ export const routes: Routes = [
             { path: "Semester/:domainName/:Id", component: SemesterComponent, title: "Semester", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Working Weeks/:domainName/:Id", component: SemesterViewComponent, title: "Semester", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] }, //
             { path: "School", component: SchoolComponentEmployee, title: "Schools", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "TaxIssuer", component: TaxIssuerComponent, title: "TaxIssuer", canActivate: [noNavigateWithoutLoginGuard] },
+            
+            { path: "Tax Issuer", component: TaxIssuerComponent, title: "TaxIssuer", canActivate: [noNavigateWithoutLoginGuard] },
+
             { path: "Registration Form", component: RegistrationFormComponent, title: "Registration Form", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Registration Form Field", component: RegistrationFormFieldComponent, title: "RegistrationFormField", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Registration Form Field/:id", component: FieldsComponent, title: "CategoryFields", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
@@ -347,12 +350,12 @@ export const routes: Routes = [
             { path: "AcademicSequentialReport", component: AcademicSequentialReportComponent, title: "AcademicSequentialReport", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "TransferedFromKindergartenReport", component: TransferedFromKindergartenReportComponent, title: "TransferedFromKindergartenReport", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Template", component: TemplateComponent, title: "Template", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: 'Inventory-Transaction-Report', component: InventoryTransactionReportComponent, title: 'Inventory Transaction Report', canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], data: { reportType: 'inventory' } },
-            { path: 'Sales-Transaction-Report', component: InventoryTransactionReportComponent, title: 'Sales Transaction Report', canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], data: { reportType: 'sales' } },
-            { path: 'Purchase-Transaction-Report', component: InventoryTransactionReportComponent, title: 'Purchase Transaction Report', canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], data: { reportType: 'purchase' } },
-            { path: 'Inventory-Transaction-Report-Detailed', component: InvoiceReportMasterDetailedComponent, title: 'Inventory Transaction Report Detailed', canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], data: { reportType: 'inventory' } },
-            { path: 'Sales-Transaction-Detailed', component: InvoiceReportMasterDetailedComponent, title: 'Sales Transaction Report Detailed', canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], data: { reportType: 'sales' } },
-            { path: 'Purchase-Transaction-Report-Detailed', component: InvoiceReportMasterDetailedComponent, title: 'Purchase Transaction Report Detailed', canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], data: { reportType: 'purchase' } },
+            { path: 'Inventory-Transaction-Report', component: InventoryTransactionReportComponent, title: 'Inventory Transaction Report', canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'inventory' } },
+            { path: 'Sales-Transaction-Report', component: InventoryTransactionReportComponent, title: 'Sales Transaction Report', canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'sales' } },
+            { path: 'Purchase-Transaction-Report', component: InventoryTransactionReportComponent, title: 'Purchase Transaction Report', canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'purchase' } },
+            { path: 'Inventory-Transaction-Report-Detailed', component: InvoiceReportMasterDetailedComponent, title: 'Inventory Transaction Report Detailed', canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'inventory' } },
+            { path: 'Sales-Transaction-Detailed', component: InvoiceReportMasterDetailedComponent, title: 'Sales Transaction Report Detailed', canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'sales' } },
+            { path: 'Purchase-Transaction-Report-Detailed', component: InvoiceReportMasterDetailedComponent, title: 'Purchase Transaction Report Detailed', canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'purchase' } },
             { path: "Book Correction", component: BookCorrectionComponent, title: "BookCorrectionComponent", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Evaluation", component: EvaluationComponent, title: "Evaluation", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "EvaluationTemplateGroup/:id", component: EvaluationTemplateGroupComponent, title: "EvaluationTemplateGroup", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
@@ -371,9 +374,11 @@ export const routes: Routes = [
             { path: "Lesson Activity/:id", component: LessonActivityComponent, title: "Lesson Activity", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Lesson Resource/:id", component: LessonResourceComponent, title: "Lesson Resource", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Lesson Live", component: LessonLiveComponent, title: "Lesson Live", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Zatca Devices", component: ZatcaDevicesComponent, title: "Zatca Devices", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Electronic-Invoice", component: ElectronicInvoiceComponent, title: "ElectronicInvoice", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "Electronic-Invoice/:id", component: ElectronicInvoiceDetailComponent, title: "Electronic-Invoice", canActivate: [noNavigateWithoutLoginGuard] },
+            
+            { path: "Zatca Devices", component: ZatcaDevicesComponent, title: "Zatca Devices", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Zatca Electronic-Invoice", component: ElectronicInvoiceComponent, title: "ElectronicInvoice", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Zatca Electronic-Invoice/:id", component: ElectronicInvoiceDetailComponent, title: "Electronic-Invoice", canActivate: [noNavigateWithoutLoginGuard] },
+
             { path: "Weight Types", component: WeightTypeComponent, title: "Weight Types", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Classroom Students/:id", component: ClassroomStudentsComponent, title: "Classroom Students", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Classroom Subject/:id", component: ClassroomSubjectsComponent, title: "Classroom Subject", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
@@ -387,8 +392,12 @@ export const routes: Routes = [
             { path: "Daily Performance", component: DailyPerformanceMasterComponent, title: "Daily Performance", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Assignment", component: AssignmentComponent, title: "Assignment", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Assignment/:id", component: AssignmentEditComponent, title: "Assignment Edit", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "report-item-card", component: ReportItemCardComponent, title: "report-item-card", canActivate: [noNavigateWithoutLoginGuard] },
+
             { path: "Assignment Student/:id", component: AssignmentStudentComponent, title: "AssignmentStudent", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Assignment Details/:id", component: AssignmentDetailComponent, title: "Assignment Detail", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Point Of Sale", component: POSComponent, title: "Point Of Sale", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Certificate Issuer", component: CertificatesIssuerComponent, title: "Certificate Issuer", canActivate: [noNavigateWithoutLoginGuard] },
         ]
 
     },

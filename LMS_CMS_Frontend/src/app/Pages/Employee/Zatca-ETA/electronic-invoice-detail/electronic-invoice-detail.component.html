@@ -92,15 +92,15 @@
         <h3 class="text-lg font-semibold mb-4">Invoice Summary</h3>
         <div class="flex justify-between mb-2">
             <span class="font-medium">Sub total:</span>
-            <span>{{invoice.total | currency}}</span>
+            <span>{{invoice.total}}</span>
         </div>
         <div class="flex justify-between mb-2">
             <span class="font-medium">Taxes & Fees:</span>
-            <span>{{invoice.vatAmount | currency}}</span>
+            <span>{{invoice.vatAmount}}</span>
         </div>
         <div class="flex justify-between font-bold text-lg mt-4 pt-2 border-t">
             <span>Total:</span>
-            <span class="text-[#089B41]">{{invoice.totalWithVat | currency}}</span>
+            <span class="text-[#089B41]">{{invoice.totalWithVat}}</span>
         </div>
     </div>
 </div>
@@ -115,9 +115,9 @@
         { keyEn: 'VAT Registration Number:'+ '123456789900003' }
       ]" [tableHeaders]="['Product', 'Quantity', 'Price', 'Tax', 'Total']" [tableData]="getInvoiceTableData()"
             [PsNotes]="[
-        { EnNote: 'Amount w/o Taxes: ' + (invoice.total | currency) },
-        { EnNote: 'VAT Amount: ' + (invoice.vatAmount | currency) },
-        { EnNote: 'Total with VAT: ' + (invoice.totalWithVat | currency) }
+        { EnNote: 'Amount w/o Taxes: ' + (invoice.total) },
+        { EnNote: 'VAT Amount: ' + (invoice.vatAmount) },
+        { EnNote: 'Total with VAT: ' + (invoice.totalWithVat) }
       ]" #pdfPrint></app-pdf-print>
     </div>
 </div>

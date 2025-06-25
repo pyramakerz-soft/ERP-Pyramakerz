@@ -22,6 +22,7 @@ import { QuestionBankTypeService } from '../../../../../Services/Employee/LMS/qu
 import { QuestionBankType } from '../../../../../Models/LMS/question-bank-type';
 import { QuestionBank } from '../../../../../Models/LMS/question-bank';
 import Swal from 'sweetalert2';
+import { AssignmentService } from '../../../../../Services/Employee/LMS/assignment.service';
 
 @Component({
   selector: 'app-assignment-edit',
@@ -89,6 +90,7 @@ export class AssignmentEditComponent {
     public activeRoute: ActivatedRoute,
     public router: Router,
     public AssigmentQuestionServ: AssignmentQuestionService,
+    public assignmentService: AssignmentService,
     public LessonServ: LessonService,
     public tagServ: TagsService,
     public QuestionBankServ: QuestionBankService,
@@ -113,8 +115,7 @@ export class AssignmentEditComponent {
       this.AssignmentId,
       this.DomainName
     ).subscribe((d) => {
-      this.assignment = d;
-      console.log(d, this.assignment);
+      this.assignment = d;  
     });
   }
 
@@ -314,6 +315,7 @@ export class AssignmentEditComponent {
       modal.classList.remove('flex');
       modal.classList.add('hidden');
     }
+    this.assignment.fileFile = null;
   }
 
   getFormattedQuestionTypes(): string {
@@ -322,39 +324,34 @@ export class AssignmentEditComponent {
       .join(' ');
   }
 
-  async onSearchEvent(event: { key: string; value: any }) {
-    // this.key = event.key;
-    // this.value = event.value;
-    // try {
-    //   const data: Semester[] = await firstValueFrom(this.semesterService.GetByAcademicYearId(this.academicYearId, this.DomainName));
-    //   this.semesterData = data || [];
-    //   if (this.value !== "") {
-    //     const numericValue = isNaN(Number(this.value)) ? this.value : parseInt(this.value, 10);
-    //     this.semesterData = this.semesterData.filter(t => {
-    //       const fieldValue = t[this.key as keyof typeof t];
-    //       if (typeof fieldValue === 'string') {
-    //         return fieldValue.toLowerCase().includes(this.value.toLowerCase());
-    //       }
-    //       if (typeof fieldValue === 'number') {
-    //         return fieldValue.toString().includes(numericValue.toString())
-    //       }
-    //       return fieldValue == this.value;
-    //     });
-    //   }
-    // } catch (error) {
-    //   this.semesterData = [];
-    // }
-  }
 
-  onImageFileSelected(event: any) {
+  onFileSelected(event: any) {
     const file: File = event.target.files[0];
 
     if (file) {
-      this.assignmentQuestion.file = file;
-      this.validationErrors['file'] = ``;
-    }
-  }
+      const allowedExtensions = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+      if (!allowedExtensions.includes(file.type)) {
+        this.validationErrors['file'] = 'Only PDF or Word files are allowed.';
+        this.assignment.fileFile = null;
+        return; 
+      }
 
+      if (file.size > 25 * 1024 * 1024) {
+        this.validationErrors['file'] = 'The file size exceeds the maximum limit of 25 MB.';
+        this.assignment.fileFile = null;
+        return; 
+      }
+      else{
+        this.assignment.fileFile = file;
+        this.validationErrors['file'] = ``;
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+      }
+    }
+
+    event.target.value = '';
+  } 
+  
   addTypeBlock() {
     this.validationErrors['questionAssignmentTypeCountDTO'] = ``;
     this.assignmentQuestion.questionAssignmentTypeCountDTO.push({
@@ -390,11 +387,10 @@ export class AssignmentEditComponent {
   Save() {
     this.assignmentQuestion.assignmentID = this.AssignmentId;
     this.assignmentQuestion.questionIds = this.selectedQuestions;
-
+    this.assignmentQuestion.lessonId = this.SelectedLessonID;
+    this.assignmentQuestion.selectedTagsIds = this.selectedTagsIds;
     if (this.isFormValid()) {
-      this.isLoading = true;
-      console.log(this.AssignmentId, this.assignmentQuestion.assignmentID);
-
+      this.isLoading = true; 
       this.AssigmentQuestionServ.Add(
         this.assignmentQuestion,
         this.DomainName
@@ -414,10 +410,55 @@ export class AssignmentEditComponent {
           this.isLoading = false;
           this.closeModal();
 
+          const errorMessage = err?.error || 'Something went wrong while adding questions.';
+          if (errorMessage.includes("already exists in this assignment")) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Failed',
+              text: errorMessage, 
+              confirmButtonColor: '#d33',
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Failed',
+              text: "Something went wrong while adding questions",
+              confirmButtonColor: '#d33',
+            });
+          }
+        },
+        complete: () => {
+          this.isLoading = false;
+        },
+      });
+    }
+  }
+
+  SaveFile() { 
+    if (this.isFormValid()) {
+      this.isLoading = true; 
+      this.assignmentService.FileAssignment(
+        this.assignment,
+        this.DomainName
+      ).subscribe({
+        next: (d) => { 
+          Swal.fire({
+            icon: 'success',
+            title: 'Done',
+            text: 'Added Successfully',
+            confirmButtonColor: '#089B41',
+          });
+          this.closeModal();
+          this.getAssignmentData();
+        },
+        error: (err) => { 
+          this.isLoading = false;
+          this.closeModal();
+
           Swal.fire({
             icon: 'error',
             title: 'Failed',
-            text: 'Something went wrong while adding questions.',
+            text: err.error,
             confirmButtonColor: '#d33',
           });
         },
@@ -428,11 +469,10 @@ export class AssignmentEditComponent {
     }
   }
 
-  isFormValid(): boolean {
-    console.log(2121, this.assignmentQuestion.file);
+  isFormValid(): boolean { 
     let isValid = true;
     if (this.assignment.assignmentTypeID == 1) {
-      if (this.assignmentQuestion.file == null) {
+      if (this.assignment.fileFile == null) {
         this.validationErrors['file'] = `Choose File First`;
         isValid = false;
       }
@@ -495,7 +535,7 @@ export class AssignmentEditComponent {
             Swal.fire({
               icon: 'success',
               title: 'Deleted!',
-              text: 'Device has been deleted.',
+              text: 'Question has been deleted.',
               confirmButtonText: 'Okay'
             });
           },
@@ -513,7 +553,7 @@ export class AssignmentEditComponent {
     });
   }
 
-  GoToAssignmentStudent(){
+  GoToAssignmentStudent() {
     this.router.navigateByUrl(`Employee/Assignment Student/${this.AssignmentId}`)
   }
 }

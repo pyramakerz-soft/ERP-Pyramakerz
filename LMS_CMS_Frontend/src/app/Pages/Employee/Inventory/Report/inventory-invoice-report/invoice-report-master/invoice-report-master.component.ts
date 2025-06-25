@@ -23,30 +23,37 @@ interface FlagOption {
   standalone: true,
   imports: [CommonModule, FormsModule, PdfPrintComponent],
   templateUrl: './invoice-report-master.component.html',
-  styleUrl: './invoice-report-master.component.css'
+  styleUrl: './invoice-report-master.component.css',
 })
 export class InventoryTransactionReportComponent implements OnInit {
-
-
   getTableDataWithHeader(): any[] {
-    return this.transactions.map(transaction => ({
-      header: `Invoice #${transaction.invoiceNumber} - ${transaction.storeName} - ${new Date(transaction.date).toLocaleDateString()}`,
+    return this.transactions.map((transaction) => ({
+      header: `Invoice #${transaction.invoiceNumber} - ${
+        transaction.storeName
+      } - ${new Date(transaction.date).toLocaleDateString()}`,
       data: [
         { key: 'Transaction Type', value: transaction.flagEnName },
         { key: 'Total Amount', value: transaction.total },
-        { key: 'Payment Type', value: transaction.isCash ? 'Cash' : transaction.isVisa ? 'Visa' : 'Other' },
-        { key: 'Notes', value: transaction.notes || 'N/A' }
+        {
+          key: 'Payment Type',
+          value: transaction.isCash
+            ? 'Cash'
+            : transaction.isVisa
+            ? 'Visa'
+            : 'Other',
+        },
+        { key: 'Notes', value: transaction.notes || 'N/A' },
       ],
       details: {
         headers: ['Item ID', 'Quantity', 'Price', 'Total Price', 'Notes'],
-        data: transaction.inventoryDetails.map(detail => ({
+        data: transaction.inventoryDetails.map((detail) => ({
           'Item ID': detail.id,
-          'Quantity': detail.quantity,
-          'Price': detail.price,
+          Quantity: detail.quantity,
+          Price: detail.price,
           'Total Price': detail.totalPrice,
-          'Notes': detail.notes || 'N/A'
-        }))
-      }
+          Notes: detail.notes || 'N/A',
+        })),
+      },
     }));
   }
   dateFrom: string = '';
@@ -69,14 +76,16 @@ export class InventoryTransactionReportComponent implements OnInit {
     reportHeaderTwoEn: 'Transaction Summary',
     reportHeaderOneAr: 'تقرير المخزون',
     reportHeaderTwoAr: 'ملخص المعاملات',
-    reportImage: 'assets/images/logo.png'
+    reportImage: 'assets/images/logo.png',
   };
 
   @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;
 
-
   getStoreName(): string {
-    return this.stores.find(s => s.id === this.selectedStoreId)?.name || 'All Stores';
+    return (
+      this.stores.find((s) => s.id === this.selectedStoreId)?.name ||
+      'All Stores'
+    );
   }
 
   getInfoRows(): any[] {
@@ -96,21 +105,20 @@ export class InventoryTransactionReportComponent implements OnInit {
       { id: 5, name: 'Disbursement Adjustment' },
       { id: 6, name: 'Gifts' },
       { id: 7, name: 'Damaged' },
-      { id: 8, name: 'Transfer to Warehouse' }
+      { id: 8, name: 'Transfer to Warehouse' },
     ],
     sales: [
       { id: 11, name: 'Sales' },
-      { id: 12, name: 'Sales Returns' }
+      { id: 12, name: 'Sales Returns' },
     ],
     purchase: [
       { id: 9, name: 'Purchases' },
       { id: 10, name: 'Purchase Returns' },
-      { id: 13, name: 'Purchase Order' }
-    ]
+      { id: 13, name: 'Purchase Order' },
+    ],
   };
 
   currentFlags: FlagOption[] = [];
-
 
   currentPage: number = 1;
   pageSize: number = 10;
@@ -129,27 +137,29 @@ export class InventoryTransactionReportComponent implements OnInit {
     private categoryService: InventoryCategoryService,
     private subCategoryService: InventorySubCategoriesService,
     private shopItemService: ShopItemService
-  ) { }
+  ) {}
 
   ngOnInit() {
-    this.route.data.subscribe(data => {
+    this.route.data.subscribe((data) => {
       this.reportType = data['reportType'];
       this.currentFlags = this.availableFlags[this.reportType];
-      this.selectedFlagIds = this.currentFlags.map(flag => flag.id);
+      this.selectedFlagIds = this.currentFlags.map((flag) => flag.id);
     });
     this.loadStores();
     this.loadCategories();
     this.selectedStoreId = null; // Initialize with null for "Select All"
   }
   loadCategories() {
-    this.categoryService.Get(this.categoryService.ApiServ.GetHeader()).subscribe({
-      next: (categories) => {
-        this.categories = categories;
-      },
-      error: (error) => {
-        console.error('Error loading categories:', error);
-      }
-    });
+    this.categoryService
+      .Get(this.categoryService.ApiServ.GetHeader())
+      .subscribe({
+        next: (categories) => {
+          this.categories = categories;
+        },
+        error: (error) => {
+          console.error('Error loading categories:', error);
+        },
+      });
   }
 
   onCategorySelected() {
@@ -158,14 +168,18 @@ export class InventoryTransactionReportComponent implements OnInit {
     this.items = [];
 
     if (this.selectedCategoryId) {
-      this.subCategoryService.GetByCategoryId(this.selectedCategoryId, this.subCategoryService.ApiServ.GetHeader())
+      this.subCategoryService
+        .GetByCategoryId(
+          this.selectedCategoryId,
+          this.subCategoryService.ApiServ.GetHeader()
+        )
         .subscribe({
           next: (subCategories) => {
             this.subCategories = subCategories;
           },
           error: (error) => {
             console.error('Error loading subcategories:', error);
-          }
+          },
         });
     } else {
       this.subCategories = [];
@@ -176,23 +190,25 @@ export class InventoryTransactionReportComponent implements OnInit {
     this.selectedItemId = null;
 
     if (this.selectedSubCategoryId) {
-      this.shopItemService.GetBySubCategory(this.selectedSubCategoryId, this.shopItemService.ApiServ.GetHeader())
+      this.shopItemService
+        .GetBySubCategory(
+          this.selectedSubCategoryId,
+          this.shopItemService.ApiServ.GetHeader()
+        )
         .subscribe({
           next: (items) => {
             this.items = items;
           },
           error: (error) => {
             console.error('Error loading items:', error);
-          }
+          },
         });
     } else {
       this.items = [];
     }
   }
 
-
-  // selectedFlagId: number = 0; 
-
+  // selectedFlagId: number = 0;
 
   onFlagSelected() {
     this.selectedFlagIds = [];
@@ -249,10 +265,9 @@ export class InventoryTransactionReportComponent implements OnInit {
       error: (error) => {
         console.error('Error loading stores:', error);
         this.isLoading = false;
-      }
+      },
     });
   }
-
 
   viewReport() {
     if (!this.validateFilters()) return;
@@ -263,48 +278,58 @@ export class InventoryTransactionReportComponent implements OnInit {
     const formattedDateFrom = this.formatDateForAPI(this.dateFrom);
     const formattedDateTo = this.formatDateForAPI(this.dateTo);
 
-    this.inventoryMasterService.searchInvoice(
-      this.inventoryMasterService.ApiServ.GetHeader(),
-      this.selectedStoreId,
-      formattedDateFrom,
-      formattedDateTo,
-      this.selectedFlagIds,
-      this.selectedCategoryId,
-      this.selectedSubCategoryId,
-      this.selectedItemId,
-      this.currentPage,
-      this.pageSize
-    ).subscribe({
-      next: (response: any) => {
-        if (response?.data) {
-          this.transactions = response.data;
-          this.totalRecords = response.allTotal || response.data.length;
-          this.totalPages = Math.ceil(this.totalRecords / this.pageSize);
-        } else {
-          this.transactions = [];
-        }
+    this.inventoryMasterService
+      .searchInvoice(
+        this.inventoryMasterService.ApiServ.GetHeader(),
+        this.selectedStoreId,
+        formattedDateFrom,
+        formattedDateTo,
+        this.selectedFlagIds,
+        this.selectedCategoryId,
+        this.selectedSubCategoryId,
+        this.selectedItemId,
+        this.currentPage,
+        this.pageSize
+      )
+      .subscribe({
+        next: (response: any) => {
+          console.log(response)
+          if (response?.data) {
+            this.transactions = response.data;
+            this.totalRecords =
+              response.pagination?.totalRecords || response.data.length;
+            this.totalPages =
+              response.pagination?.totalPages ||
+              Math.ceil(response.data.length / this.pageSize);
+          } else {
+            this.transactions = [];
+            this.totalRecords = 0;
+            this.totalPages = 1;
+          }
 
-        this.prepareExportData();
-        this.showTable = true;
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Error loading transactions:', error);
-        this.transactions = [];
-        this.showTable = true;
-        this.isLoading = false;
-      }
-    });
+          this.prepareExportData();
+          this.showTable = true;
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error loading transactions:', error);
+          this.transactions = [];
+          this.totalRecords = 0;
+          this.totalPages = 1;
+          this.showTable = true;
+          this.isLoading = false;
+        },
+      });
   }
 
   private prepareExportData(): void {
-    this.transactionsForExport = this.transactions.map(t => ({
+    this.transactionsForExport = this.transactions.map((t) => ({
       'Invoice #': t.invoiceNumber,
-      'Date': new Date(t.date).toLocaleDateString(),
-      'Store': t.storeName,
+      Date: new Date(t.date).toLocaleDateString(),
+      Store: t.storeName,
       'Total Amount': t.total,
       'Transaction Type': t.flagEnName,
-      'Notes': t.notes || 'N/A'
+      Notes: t.notes || 'N/A',
     }));
   }
 
@@ -325,12 +350,13 @@ export class InventoryTransactionReportComponent implements OnInit {
   }
 
   private validateFilters(): boolean {
-    return !!this.dateFrom && !!this.dateTo &&
+    return (
+      !!this.dateFrom &&
+      !!this.dateTo &&
       this.selectedStoreId !== undefined && // Changed from null to undefined check
-      this.selectedFlagIds.length > 0;
+      this.selectedFlagIds.length > 0
+    );
   }
-
-
 
   changePage(page: number) {
     this.currentPage = page;
@@ -346,7 +372,7 @@ export class InventoryTransactionReportComponent implements OnInit {
     this.showPDF = true;
     setTimeout(() => {
       this.pdfComponentRef.downloadPDF();
-      setTimeout(() => this.showPDF = false, 2000);
+      setTimeout(() => (this.showPDF = false), 2000);
     }, 500);
   }
 
@@ -358,9 +384,9 @@ export class InventoryTransactionReportComponent implements OnInit {
 
     this.showPDF = true;
     setTimeout(() => {
-      const printContents = document.getElementById("Data")?.innerHTML;
+      const printContents = document.getElementById('Data')?.innerHTML;
       if (!printContents) {
-        console.error("Element not found!");
+        console.error('Element not found!');
         return;
       }
 
@@ -401,11 +427,10 @@ export class InventoryTransactionReportComponent implements OnInit {
       return 'All Types';
     }
     return this.currentFlags
-      .filter(flag => this.selectedFlagIds.includes(flag.id))
-      .map(flag => flag.name)
+      .filter((flag) => this.selectedFlagIds.includes(flag.id))
+      .map((flag) => flag.name)
       .join(', ');
   }
-
 
   printReport() {
     const data = {
@@ -413,25 +438,38 @@ export class InventoryTransactionReportComponent implements OnInit {
       reportHeaderTwoEn: 'Transaction Summary',
       reportHeaderOneAr: 'تقرير المخزون',
       reportHeaderTwoAr: 'ملخص المعاملات',
-      reportImage: '' // Update with your logo
+      reportImage: '', // Update with your logo
     };
 
-    const tableHeaders = ['ID', 'Invoice #', 'Date', 'Store', 'Transaction Type', 'Total Amount', 'Notes'];
+    const tableHeaders = [
+      'ID',
+      'Invoice #',
+      'Date',
+      'Store',
+      'Transaction Type',
+      'Total Amount',
+      'Notes',
+    ];
 
-    const tableData = this.transactions.map(t => ({
-      'ID': t.id,
+    const tableData = this.transactions.map((t) => ({
+      ID: t.id,
       'Invoice #': t.invoiceNumber,
-      'Date': t.date,
-      'Store': t.storeName,
+      Date: t.date,
+      Store: t.storeName,
       'Transaction Type': t.flagEnName,
       'Total Amount': t.total,
-      'Notes': t.notes
+      Notes: t.notes,
     }));
 
     const infoRows = [
       { keyEn: 'From Date', valueEn: this.dateFrom },
       { keyEn: 'To Date', valueEn: this.dateTo },
-      { keyEn: 'Store', valueEn: this.stores.find(s => s.id === this.selectedStoreId)?.name || 'All Stores' }
+      {
+        keyEn: 'Store',
+        valueEn:
+          this.stores.find((s) => s.id === this.selectedStoreId)?.name ||
+          'All Stores',
+      },
     ];
 
     const pdfComponent = new PdfPrintComponent();
@@ -446,20 +484,19 @@ export class InventoryTransactionReportComponent implements OnInit {
     });
   }
 
-
   exportExcel() {
     const worksheet = XLSX.utils.json_to_sheet(
-      this.transactions.map(t => ({
+      this.transactions.map((t) => ({
         'Invoice #': t.invoiceNumber,
-        'Date': new Date(t.date).toLocaleDateString(),
-        'Store': t.storeName,
+        Date: new Date(t.date).toLocaleDateString(),
+        Store: t.storeName,
         'Transaction Type': t.flagEnName,
         'Total Amount': t.total,
         'Payment Type': t.isCash ? 'Cash' : t.isVisa ? 'Visa' : 'Other',
         'Cash Amount': t.cashAmount,
         'Visa Amount': t.visaAmount,
         'Remaining Amount': t.remaining,
-        'Notes': t.notes || 'N/A'
+        Notes: t.notes || 'N/A',
       }))
     );
 

@@ -3,14 +3,14 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
-import { SchoolService } from '../../../../../Services/Employee/school.service';
-import { School } from '../../../../../Models/school';
+import { SchoolService } from '../../../../Services/Employee/school.service';
+import { School } from '../../../../Models/school';
 import Swal from 'sweetalert2';
-import { ZatcaService } from '../../../../../Services/Employee/Zatca/zatca.service';
-import { ApiService } from '../../../../../Services/api.service';
+import { ZatcaService } from '../../../../Services/Employee/Zatca/zatca.service';
+import { ApiService } from '../../../../Services/api.service';
 import { firstValueFrom } from 'rxjs';
-import { ElectronicInvoice } from '../../../../../Models/zatca/electronic-invoice';
-import { StateService } from '../../../../../Services/Employee/Inventory/state.service';
+import { ElectronicInvoice } from '../../../../Models/zatca/electronic-invoice';
+import { StateService } from '../../../../Services/Employee/Inventory/state.service';
 
 @Component({
   selector: 'app-electronic-invoice',
@@ -162,7 +162,7 @@ export class ElectronicInvoiceComponent implements OnInit {
 
   navigateToDetail(id: number) {
     this.saveState(); // Save state before navigating
-    this.router.navigate(['/Employee/Electronic-Invoice', id]);
+    this.router.navigate(['/Employee/Zatca Electronic-Invoice', id]);
   }
 
   sendInvoice(invoice: ElectronicInvoice) {

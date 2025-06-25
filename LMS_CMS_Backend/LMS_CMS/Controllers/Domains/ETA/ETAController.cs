@@ -4,6 +4,7 @@ using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains.ETA;
 using LMS_CMS_DAL.Models.Domains.Inventory;
 using LMS_CMS_DAL.Models.Domains.LMS;
+using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
 using LMS_CMS_PL.Services.ETA;
 using Microsoft.AspNetCore.Authorization;
@@ -32,10 +33,10 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
 
         #region Submit Invoice
         [HttpPost("SubmitInvoice")]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "" }
-        //)]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "ETA Electronic-Invoice" }
+        )]
         public async Task<IActionResult> SubmitInvoice(long masterId, int etaPosID = 0, long salesInvoiceId = 0)
         {
             string apiBaseUrl = "https://api.invoicing.eta.gov.eg";
@@ -68,7 +69,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
                 jsonPath = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/JSONCredits/{inv}");
             
 
-            if (master.InvoiceType == 'C')
+            if (master.InvoiceType == 'P')
             {
                 string token = EtaServices.AuthenticatePOS(Unit_Of_Work, etaPosID);
 
@@ -144,10 +145,10 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
 
         #region Submit Invoices
         [HttpPost("SubmitInvoices")]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "" }
-        //)]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "ETA Electronic-Invoice" }
+        )]
         public async Task<IActionResult> SubmitInvoices(long schoolId)
         {
             string apiBaseUrl = "https://api.invoicing.eta.gov.eg";
@@ -246,10 +247,10 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
 
         #region Filter by School and Date
         [HttpPost("FilterBySchoolAndDate")]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "" }
-        //)]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "ETA Electronic-Invoice" }
+        )]
         public async Task<IActionResult> FilterBySchoolAndDate(long schoolId, string startDate, string endDate, int pageNumber = 1, int pageSize = 10)
         {
             if (pageNumber < 1) pageNumber = 1;

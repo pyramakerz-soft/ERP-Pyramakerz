@@ -26,10 +26,10 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
         #region Get
         [HttpGet]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "SchoolPCs" }
-        //)]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Zatca Devices" }
+        )]
         public async Task<IActionResult> Get()
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -68,10 +68,10 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
         #region GetByID
         [HttpGet("id")]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "SchoolPCs" }
-        //)]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Zatca Devices" }
+        )]
         public async Task<IActionResult> GetByID(long id)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -104,10 +104,10 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
         #region Get By School Id
         [HttpGet("GetBySchoolId")]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "SchoolPCs" , "Inventory" }
-        //)]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Zatca Devices", "Inventory" }
+        )]
         public async Task<IActionResult> GetBySchoolId(long schoolId)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -142,10 +142,10 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
         #region Add PC
         [HttpPost]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "SchoolPCs" , "Inventory" }
-        //)]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Zatca Devices", "Inventory" }
+        )]
         public IActionResult Add(SchoolPCsAddDTO schoolPCsDto)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -189,10 +189,10 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
         #region Update PC
         [HttpPut("Edit")]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "SchoolPCs" }
-        //)]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Zatca Devices" }
+        )]
         public IActionResult Update(SchoolPCsPutDTO SchoolPCsDto)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -252,10 +252,10 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
         #region Delete PC
         [HttpDelete]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "SchoolPCs" }
-        //)]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Zatca Devices" }
+        )]
         public IActionResult Delete(long id)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);

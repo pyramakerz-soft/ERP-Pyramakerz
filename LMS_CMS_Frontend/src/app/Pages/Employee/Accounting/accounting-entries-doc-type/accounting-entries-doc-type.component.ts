@@ -23,7 +23,7 @@ import { firstValueFrom } from 'rxjs';
   styleUrl: './accounting-entries-doc-type.component.css'
 })
 export class AccountingEntriesDocTypeComponent {
-User_Data_After_Login: TokenData = new TokenData(
+  User_Data_After_Login: TokenData = new TokenData(
     '',
     0,
     0,
@@ -67,9 +67,9 @@ User_Data_After_Login: TokenData = new TokenData(
     public BusTypeServ: BusTypeService,
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
-    public ApiServ: ApiService ,
-    public AccountingEntriesDocTypeServ:AccountingEntriesDocTypeService,
-  ) {}
+    public ApiServ: ApiService,
+    public AccountingEntriesDocTypeServ: AccountingEntriesDocTypeService,
+  ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
@@ -93,8 +93,8 @@ User_Data_After_Login: TokenData = new TokenData(
 
   GetAllData() {
     this.TableData = []
-    this.AccountingEntriesDocTypeServ.Get(this.DomainName).subscribe((d)=>{
-      this.TableData=d
+    this.AccountingEntriesDocTypeServ.Get(this.DomainName).subscribe((d) => {
+      this.TableData = d
     })
   }
 
@@ -115,7 +115,7 @@ User_Data_After_Login: TokenData = new TokenData(
       cancelButtonText: 'Cancel',
     }).then((result) => {
       if (result.isConfirmed) {
-        this.AccountingEntriesDocTypeServ.Delete(id,this.DomainName).subscribe((d)=>{
+        this.AccountingEntriesDocTypeServ.Delete(id, this.DomainName).subscribe((d) => {
           this.GetAllData()
         })
       }
@@ -124,8 +124,8 @@ User_Data_After_Login: TokenData = new TokenData(
 
   Edit(row: AccountingEntriesDocType) {
     this.mode = 'Edit';
-    this.AccountingEntriesDocTypeServ.GetById(row.id,this.DomainName).subscribe((d)=>{
-      this.accountingEntriesDocType=d
+    this.AccountingEntriesDocTypeServ.GetById(row.id, this.DomainName).subscribe((d) => {
+      this.accountingEntriesDocType = d
     })
     this.openModal();
   }
@@ -150,41 +150,41 @@ User_Data_After_Login: TokenData = new TokenData(
 
   CreateOREdit() {
     if (this.isFormValid()) {
-      this.isLoading=true
+      this.isLoading = true
       if (this.mode == 'Create') {
-        this.AccountingEntriesDocTypeServ.Add(this.accountingEntriesDocType,this.DomainName).subscribe((d)=>{
+        this.AccountingEntriesDocTypeServ.Add(this.accountingEntriesDocType, this.DomainName).subscribe((d) => {
           this.GetAllData();
           this.closeModal()
           this.isLoading = false
-       },
-        err => {
-          this.isLoading = false
-          Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: 'Try Again Later!',
-            confirmButtonText: 'Okay',
-            customClass: { confirmButton: 'secondaryBg' },
-          });
-        })
+        },
+          err => {
+            this.isLoading = false
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'Try Again Later!',
+              confirmButtonText: 'Okay',
+              customClass: { confirmButton: 'secondaryBg' },
+            });
+          })
       }
       if (this.mode == 'Edit') {
-        this.AccountingEntriesDocTypeServ.Edit(this.accountingEntriesDocType,this.DomainName).subscribe((d)=>{
+        this.AccountingEntriesDocTypeServ.Edit(this.accountingEntriesDocType, this.DomainName).subscribe((d) => {
           this.GetAllData();
           this.closeModal()
           this.isLoading = false
 
         },
-        err => {
-          this.isLoading = false
-          Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: 'Try Again Later!',
-            confirmButtonText: 'Okay',
-            customClass: { confirmButton: 'secondaryBg' },
-          });
-        })
+          err => {
+            this.isLoading = false
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'Try Again Later!',
+              confirmButtonText: 'Okay',
+              customClass: { confirmButton: 'secondaryBg' },
+            });
+          })
       }
     }
   }
@@ -198,64 +198,65 @@ User_Data_After_Login: TokenData = new TokenData(
     this.isModalVisible = true;
   }
 
-   isFormValid(): boolean {
-       let isValid = true;
-         for (const key in this.accountingEntriesDocType) {
-           if (this.accountingEntriesDocType.hasOwnProperty(key)) {
-             const field = key as keyof AccountingEntriesDocType;
-             if (!this.accountingEntriesDocType[field]) {
-               if (
-                 field == 'name' 
-               ) {
-                 this.validationErrors[field] = `*${this.capitalizeField(
-                   field
-                 )} is required`;
-                 isValid = false;
-               }
-             }
-           }
-         }
-      return isValid;
-    }
-    capitalizeField(field: keyof AccountingEntriesDocType): string {
-      return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
-    }
-    onInputValueChange(event: { field: keyof AccountingEntriesDocType; value: any }) {
-      const { field, value } = event;
-      (this.accountingEntriesDocType as any)[field] = value;
-      if (value) {
-        this.validationErrors[field] = '';
-      }
-    }
-  
-    async onSearchEvent(event: { key: string; value: any }) {
-      this.key = event.key;
-      this.value = event.value;
-      try {
-        const data: AccountingEntriesDocType[] = await firstValueFrom(
-          this.AccountingEntriesDocTypeServ.Get(this.DomainName)
-        );
-        this.TableData = data || [];
-  
-        if (this.value !== '') {
-          const numericValue = isNaN(Number(this.value))
-            ? this.value
-            : parseInt(this.value, 10);
-  
-          this.TableData = this.TableData.filter((t) => {
-            const fieldValue = t[this.key as keyof typeof t];
-            if (typeof fieldValue === 'string') {
-              return fieldValue.toLowerCase().includes(this.value.toLowerCase());
-            }
-            if (typeof fieldValue === 'number') { 
-              return fieldValue.toString().includes(numericValue.toString())
-            }
-            return fieldValue == this.value;
-          });
+  isFormValid(): boolean {
+    let isValid = true;
+    for (const key in this.accountingEntriesDocType) {
+      if (this.accountingEntriesDocType.hasOwnProperty(key)) {
+        const field = key as keyof AccountingEntriesDocType;
+        if (!this.accountingEntriesDocType[field]) {
+          if (
+            field == 'name'
+          ) {
+            this.validationErrors[field] = `*${this.capitalizeField(
+              field
+            )} is required`;
+            isValid = false;
+          }
         }
-      } catch (error) {
-        this.TableData = [];
       }
     }
+    return isValid;
+  }
+
+  capitalizeField(field: keyof AccountingEntriesDocType): string {
+    return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
   
+  onInputValueChange(event: { field: keyof AccountingEntriesDocType; value: any }) {
+    const { field, value } = event;
+    (this.accountingEntriesDocType as any)[field] = value;
+    if (value) {
+      this.validationErrors[field] = '';
+    }
+  }
+
+  async onSearchEvent(event: { key: string; value: any }) {
+    this.key = event.key;
+    this.value = event.value;
+    try {
+      const data: AccountingEntriesDocType[] = await firstValueFrom(
+        this.AccountingEntriesDocTypeServ.Get(this.DomainName)
+      );
+      this.TableData = data || [];
+
+      if (this.value !== '') {
+        const numericValue = isNaN(Number(this.value))
+          ? this.value
+          : parseInt(this.value, 10);
+
+        this.TableData = this.TableData.filter((t) => {
+          const fieldValue = t[this.key as keyof typeof t];
+          if (typeof fieldValue === 'string') {
+            return fieldValue.toLowerCase().includes(this.value.toLowerCase());
+          }
+          if (typeof fieldValue === 'number') {
+            return fieldValue.toString().includes(numericValue.toString())
+          }
+          return fieldValue == this.value;
+        });
+      }
+    } catch (error) {
+      this.TableData = [];
+    }
+  }
+}
