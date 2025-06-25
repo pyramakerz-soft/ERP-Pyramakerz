@@ -1,8 +1,10 @@
-// tax-issuer.model.ts
 export class TaxIssuer {
     constructor(
         public id: number = 0,
         public name: string = '',
+        public typeID: number = 0,
+        public taxType: string = '',
+        public branchID: string = '',
         public activityCode: string = '',
         public governate: string = '',
         public regionCity: string = '',
@@ -13,22 +15,6 @@ export class TaxIssuer {
         public room: string = '',
         public landMark: string = '',
         public additionalInfo: string = '',
-
-        public type: string = '',
-        public branchID: string = '',
-        public country: string = '',
-        public insertedByUserId: number = 0,
-        public insertedByOctaId: number | null = null,
-        public insertedAt: string = '',
-        public updatedByUserId: number | null = null,
-        public updatedByOctaId: number | null = null,
-        public updatedAt: string = '',
-        public deletedByUserId: number | null = null,
-        public deletedByOctaId: number | null = null,
-        public deletedAt: string | null = null,
-        public isDeleted: boolean | null = null
+        public countryCode: string = ''
     ) {}
-}
-
-// public string TaxType { get; set; }  
-// public string CountryCode { get; set; }  
+} 

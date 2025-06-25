@@ -15,7 +15,7 @@ export class TaxIssuerService {
   constructor(public http: HttpClient, public ApiServ: ApiService) {
     this.baseUrl = ApiServ.BaseUrl;
   } 
-  
+
   getById(id: number, DomainName: string): Observable<TaxIssuer> {
     if (DomainName != null) {
       this.header = DomainName;
@@ -25,19 +25,18 @@ export class TaxIssuerService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.get<TaxIssuer>(`${this.baseUrl}/TaxIssuer/id?id=${id}`, { headers });
+    return this.http.get<TaxIssuer>(`${this.baseUrl}/TaxIssuer/${id}`, { headers });
   }
-
-  edit(taxIssuer: TaxIssuer, DomainName: string): Observable<TaxIssuer> {
+ 
+  edit(taxIssuer: TaxIssuer, DomainName: string) {
     if (DomainName != null) {
-      this.header = DomainName;
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-
-    return this.http.put<TaxIssuer>(`${this.baseUrl}/TaxIssuer/Edit`, taxIssuer, { headers });
+    return this.http.put(`${this.baseUrl}/TaxIssuer/Edit`, taxIssuer, { headers });
   }
 }
