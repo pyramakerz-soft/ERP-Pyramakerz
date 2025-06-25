@@ -20,8 +20,8 @@ export class ApiService {
     // const hostname = window.location.hostname;
     // var Header = hostname.split('.')[0]
 
-    var Header = 'ss';
+    var Header = 'Domain_One';
 
-
+    return Header;
   }
 }
