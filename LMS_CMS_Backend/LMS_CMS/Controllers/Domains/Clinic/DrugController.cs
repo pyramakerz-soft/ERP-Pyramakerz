@@ -6,6 +6,7 @@ using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace LMS_CMS_PL.Controllers.Domains.Clinic
 {
@@ -29,7 +30,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Drugs" }
         )]
-        public IActionResult Get()
+        public async Task<IActionResult> Get()
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -44,7 +45,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            List<Drug> drugs = Unit_Of_Work.drug_Repository.FindBy(d => d.IsDeleted != true);
+            List<Drug> drugs = await Unit_Of_Work.drug_Repository
+                .Select_All_With_IncludesById<Drug>(
+                d => d.IsDeleted != true,
+                query => query.Include(x => x.InsertedByEmployee));
             
             if (drugs == null || drugs.Count == 0)
             {
@@ -63,7 +67,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Drugs" }
         )]
-        public IActionResult GetByID(long id)
+        public async Task<IActionResult> GetByID(long id)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -77,7 +81,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             {
                 return Unauthorized("User ID or Type claim not found.");
             }
-            Drug drug = Unit_Of_Work.drug_Repository.First_Or_Default(d => d.Id == id && d.IsDeleted != true);
+            Drug drug = await Unit_Of_Work.drug_Repository.FindByIncludesAsync(
+                d => d.Id == id && d.IsDeleted != true,
+                query => query.Include(x => x.InsertedByEmployee));
 
             if (drug == null)
             {

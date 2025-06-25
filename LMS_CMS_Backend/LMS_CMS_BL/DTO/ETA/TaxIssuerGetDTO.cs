@@ -18,5 +18,7 @@ namespace LMS_CMS_BL.DTO.ETA
         public string? Room { get; set; }
         public string? LandMark { get; set; }
         public string? AdditionalInfo { get; set; }
+        public long? InsertedByUserId { get; set; }
+        public string? en_name { get; set; }
     }
 }

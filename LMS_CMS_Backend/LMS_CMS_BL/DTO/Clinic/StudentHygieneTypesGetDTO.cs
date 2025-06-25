@@ -9,12 +9,12 @@ namespace LMS_CMS_BL.DTO.Clinic
         public long HygieneFormId { get; set; }
         public long StudentId { get; set; }
         public string Student { get; set; }
-        //public long HygieneTypeId { get; set; }
-        //public string HygieneType { get; set; }n
         public ICollection<HygieneTypeGetDTO>? HygieneTypes { get; set; }
         public bool Attendance { get; set; }
         public bool SelectAll { get; set; }
         public string? Comment { get; set; }
         public string? ActionTaken { get; set; }
+        public long? InsertedByUserId { get; set; }
+        public string? en_name { get; set; }
     }
 }
