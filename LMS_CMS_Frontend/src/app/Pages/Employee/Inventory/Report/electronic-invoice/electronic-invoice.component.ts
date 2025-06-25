@@ -162,7 +162,7 @@ export class ElectronicInvoiceComponent implements OnInit {
 
   navigateToDetail(id: number) {
     this.saveState(); // Save state before navigating
-    this.router.navigate(['/Employee/Electronic-Invoice', id]);
+    this.router.navigate(['/Employee/Zatca Electronic-Invoice', id]);
   }
 
   sendInvoice(invoice: ElectronicInvoice) {

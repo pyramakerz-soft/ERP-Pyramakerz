@@ -96,6 +96,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         //    if (obj.FlagIds == null || !obj.FlagIds.Any())
         //        return BadRequest("FlagIds cannot be null or empty.");
 
+
         //    if (!DateTime.TryParse(obj.DateFrom, out var dateFrom) || !DateTime.TryParse(obj.DateTo, out var rawDateTo))
         //        return BadRequest("Invalid date format.");
 
@@ -156,8 +157,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            if (obj.FlagIds == null || !obj.FlagIds.Any())
-                return BadRequest("FlagIds cannot be null or empty.");
+     if (obj.FlagIds == null || !obj.FlagIds.Any())
+         return BadRequest("FlagIds cannot be null or empty.");
 
             if (!DateTime.TryParse(obj.DateFrom, out var dateFrom) || !DateTime.TryParse(obj.DateTo, out var rawDateTo))
                 return BadRequest("Invalid date format.");

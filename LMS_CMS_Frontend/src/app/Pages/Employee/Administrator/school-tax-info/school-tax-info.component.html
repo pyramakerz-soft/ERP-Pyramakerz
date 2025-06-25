@@ -51,10 +51,9 @@
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ issuer.country }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     <div class="flex space-x-4">
-                        <button *ngIf="AllowEdit && IsAllowEdit(issuer.insertedByUserId)"
-                            (click)="openModal(issuer.id)" class="text-blue-500 hover:text-blue-700">
-                            <i class="fa-solid fa-pencil"></i>
-                        </button>
+<button (click)="openModal(issuer.id)">
+    <i class="fa-solid fa-pencil"></i>
+</button>
                     </div>
                 </td>
             </tr>
