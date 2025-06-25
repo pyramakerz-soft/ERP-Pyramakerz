@@ -23,11 +23,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
             _mapper = mapper;
         }
 
-        [HttpGet("Get")]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "Certificate Issuer" }
-        //)]
+        [HttpGet("Get")] 
         public IActionResult Get()
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);

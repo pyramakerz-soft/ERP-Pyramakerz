@@ -131,10 +131,17 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
                 return NotFound($"Tax Issuer with ID {taxIssuerDTO.ID} not found.");
             }
 
-            TaxCustomer taxCustomer = Unit_Of_Work.taxCustomer_Repository.First_Or_Default(x => x.ID == taxIssuerDTO.TypeID);
+            if(taxIssuerDTO.TypeID != null && taxIssuerDTO.TypeID != 0)
+            {
+                TaxCustomer taxCustomer = Unit_Of_Work.taxCustomer_Repository.First_Or_Default(x => x.ID == taxIssuerDTO.TypeID);
 
-            if (taxCustomer == null)
-                return NotFound("Type ID is not found!");
+                if (taxCustomer == null)
+                    return NotFound("Type ID is not found!");
+            }
+            else
+            {
+                taxIssuerDTO.TypeID = null;
+            }
 
             _mapper.Map(taxIssuerDTO, taxIssuer);
 

@@ -5,6 +5,7 @@ namespace LMS_CMS_BL.DTO.ETA
     {
         public string ID { get; set; }
         public string TaxType { get; set; }
+        public int TypeID { get; set; }
         public string Name { get; set; }
         public string ActivityCode { get; set; }
         public string BranchID { get; set; }

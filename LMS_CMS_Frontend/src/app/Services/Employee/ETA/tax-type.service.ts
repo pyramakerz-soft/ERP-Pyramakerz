@@ -23,6 +23,6 @@ export class TaxTypeService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-      return this.http.get<TaxType[]>(`${this.baseUrl}/`, { headers });
+    return this.http.get<TaxType[]>(`${this.baseUrl}/TaxCustomer/Get`, { headers });
   }
 }

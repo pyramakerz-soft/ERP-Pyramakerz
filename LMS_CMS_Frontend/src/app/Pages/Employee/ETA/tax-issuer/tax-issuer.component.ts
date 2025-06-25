@@ -47,21 +47,24 @@ export class TaxIssuerComponent {
  
     this.GetById()  
     this.Getcountries()  
+    this.GetType()  
   }
 
   GetById(){
     this.taxData = new TaxIssuer()
     this.taxIssuerService.getById(1, this.DomainName).subscribe(
       data => {
-        this.taxData = data   
+        this.taxData = data    
+        if(this.taxData.typeID == 0){
+          this.taxData.typeID = null
+        }
       }
     )
   }
   
   Getcountries(){
     this.countryService.Get().subscribe(data => this.countries = data)  
-  }
-  
+  } 
   
   GetType(){
     this.taxTypeService.Get(this.DomainName).subscribe(data => this.taxTypes = data)  
@@ -78,10 +81,9 @@ export class TaxIssuerComponent {
     document.getElementById('Add_Modal')?.classList.add('hidden');   
   }
 
-  save(){
-    this.taxDataToEdit.typeID = 1
-    console.log(this.taxDataToEdit)
+  save(){ 
     this.isLoading = true;
+    
     this.taxIssuerService.edit(this.taxDataToEdit, this.DomainName).subscribe(
       (result: any) => {
         this.closeModal();

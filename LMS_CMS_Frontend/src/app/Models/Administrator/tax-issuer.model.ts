@@ -2,7 +2,7 @@ export class TaxIssuer {
     constructor(
         public id: number = 0,
         public name: string = '',
-        public typeID: number = 0,
+        public typeID: number|null = null,
         public taxType: string = '',
         public branchID: string = '',
         public activityCode: string = '',
