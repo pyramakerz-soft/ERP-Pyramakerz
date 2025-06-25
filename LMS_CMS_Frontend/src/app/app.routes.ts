@@ -162,7 +162,7 @@ import { LessonLiveUIComponent } from './Pages/Student/LMS/UI/lesson-live/lesson
 import { WeightTypeComponent } from './Pages/Employee/LMS/weight-type/weight-type.component';
 import { ClassroomStudentsComponent } from './Pages/Employee/LMS/classroom-students/classroom-students.component';
 import { ClassroomSubjectsComponent } from './Pages/Employee/LMS/classroom-subjects/classroom-subjects.component';
-import { TaxIssuerComponent } from './Pages/Employee/Administrator/school-tax-info/school-tax-info.component';
+import { TaxIssuerComponent } from './Pages/Employee/ETA/school-tax-info/school-tax-info.component';
 import { SubjectTeacherComponent } from './Pages/Employee/Administrator/subject-teacher/subject-teacher.component';
 import { SubjectCoTeacherComponent } from './Pages/Employee/Administrator/subject-co-teacher/subject-co-teacher.component';
 import { StudentsComponent } from './Pages/Employee/Administrator/students/students.component';
@@ -175,6 +175,7 @@ import { AssignmentStudentComponent as AssignmentStudentStudentComponent } from 
 import { AssignmentDetailComponent } from './Pages/Employee/LMS/assignment-detail/assignment-detail.component';
 import { POSComponent } from './Pages/Employee/ETA/pos/pos.component';
 import { ElectronicInvoiceDetailComponent } from './Pages/Employee/Zatca-ETA/electronic-invoice-detail/electronic-invoice-detail.component';
+import { SchoolComponent } from './Pages/Employee/Zatca/school/school.component';
 
 
 
@@ -377,8 +378,8 @@ export const routes: Routes = [
             { path: "Lesson Live", component: LessonLiveComponent, title: "Lesson Live", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             
             { path: "Zatca Devices", component: ZatcaDevicesComponent, title: "Zatca Devices", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "Zatca Electronic-Invoice", component: ElectronicInvoiceComponent, title: "ElectronicInvoice", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "Zatca Electronic-Invoice/:id", component: ElectronicInvoiceDetailComponent, title: "Electronic-Invoice", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Zatca Electronic-Invoice", component: ElectronicInvoiceComponent, title: "Zatca Electronic-Invoice", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Zatca Electronic-Invoice/:id", component: ElectronicInvoiceDetailComponent, title: "Zatca Electronic-Invoice", canActivate: [noNavigateWithoutLoginGuard] },
 
             { path: "Weight Types", component: WeightTypeComponent, title: "Weight Types", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Classroom Students/:id", component: ClassroomStudentsComponent, title: "Classroom Students", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
@@ -398,6 +399,8 @@ export const routes: Routes = [
             { path: "Assignment Student/:id", component: AssignmentStudentComponent, title: "AssignmentStudent", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Assignment Details/:id", component: AssignmentDetailComponent, title: "Assignment Detail", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Point Of Sale", component: POSComponent, title: "Point Of Sale", canActivate: [noNavigateWithoutLoginGuard] },
+
+            { path: "school zatca", component: SchoolComponent, title: "school zatca", canActivate: [noNavigateWithoutLoginGuard] },
         ]
 
     },

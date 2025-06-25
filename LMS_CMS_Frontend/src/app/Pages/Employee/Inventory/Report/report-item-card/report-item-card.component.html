@@ -9,8 +9,7 @@
 <!-- Store Selector -->
 <div class="flex flex-col w-[24%] mb-4">
     <label class="mb-2 font-medium" for="store">Store</label>
-    <select class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="store" [(ngModel)]="selectedStoreId"
-        (change)="onStoreSelected()" required>
+    <select class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="store" [(ngModel)]="selectedStoreId" required>
         <option [ngValue]="null" disabled selected hidden>Choose Store</option>
         
         <option *ngFor="let store of stores" [ngValue]="store.id">{{ store.name }}</option>
@@ -20,24 +19,23 @@
 <!-- Item Selector -->
 <div class="flex flex-col w-[24%] mb-4">
     <label class="mb-2 font-medium" for="item">Item</label>
-    <select class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="item" [(ngModel)]="selectedItemId"
-        [disabled]="!selectedStoreId" required>
+    <select class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="item" [(ngModel)]="selectedItemId" required>
         <option [ngValue]="null" disabled selected hidden>Choose Item</option>
         <option *ngFor="let item of items" [ngValue]="item.id">{{ item.enName }}</option>
     </select>
 </div>
 
-    <div class="flex flex-col w-[24%] mb-4">
-        <label class="mb-2 font-medium" for="dateFrom">Date From</label>
-        <input type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="dateFrom"
-            [(ngModel)]="dateFrom" required>
-    </div>
+<div class="flex flex-col w-[24%] mb-4">
+    <label class="mb-2 font-medium" for="dateFrom">Date From</label>
+    <input type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="dateFrom"
+        [(ngModel)]="dateFrom" (change)="validateDateRange()" required>
+</div>
 
-    <div class="flex flex-col w-[24%] mb-4">
-        <label class="mb-2 font-medium" for="dateTo">Date To</label>
-        <input type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="dateTo"
-            [(ngModel)]="dateTo" required>
-    </div>
+<div class="flex flex-col w-[24%] mb-4">
+    <label class="mb-2 font-medium" for="dateTo">Date To</label>
+    <input type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="dateTo" [(ngModel)]="dateTo"
+        (change)="validateDateRange()" required>
+</div>
 
     <div class="w-[99%] flex justify-end">
         <button class="p-4 font-medium text-xl rounded-lg" (click)="viewReport()"

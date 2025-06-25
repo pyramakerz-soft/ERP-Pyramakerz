@@ -19,25 +19,27 @@
             </select>
         </div>
 
-        <!-- Date From -->
-        <div class="flex flex-col w-[32%] mb-4">
-            <label class="mb-2 font-medium" for="dateFrom">Date From</label>
-            <input type="date" id="dateFrom" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                [(ngModel)]="dateFrom">
-        </div>
+<!-- Date From -->
+<div class="flex flex-col w-[32%] mb-4">
+    <label class="mb-2 font-medium" for="dateFrom">Date From</label>
+    <input type="date" id="dateFrom" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+        [(ngModel)]="dateFrom" (change)="validateDateRange()">
+</div>
 
-        <!-- Date To -->
-        <div class="flex flex-col w-[32%] mb-4">
-            <label class="mb-2 font-medium" for="dateTo">Date To</label>
-            <input type="date" id="dateTo" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                [(ngModel)]="dateTo">
-        </div>
+<!-- Date To -->
+<div class="flex flex-col w-[32%] mb-4">
+    <label class="mb-2 font-medium" for="dateTo">Date To</label>
+    <input type="date" id="dateTo" class="rounded-lg border border-solid border-gray-300 px-4 py-3" [(ngModel)]="dateTo"
+        (change)="validateDateRange()">
+</div>
     </div>
 
     <!-- Action Buttons -->
     <div class="w-full flex justify-end mb-5 gap-4">
         <button class="p-4 font-medium text-xl rounded-lg secondaryBg text-white" (click)="viewReport()"
-            [disabled]="!selectedSchoolId || !dateFrom || !dateTo || isLoading">
+            [disabled]="!selectedSchoolId || !dateFrom || !dateTo || isLoading" [ngClass]="{ 
+            'bg-gray-100 text-gray-300': !dateFrom || !dateTo || !selectedSchoolId, 
+            'secondaryBg text-white': dateFrom && dateTo && selectedSchoolId}">
             <span *ngIf="!isLoading">View Report</span>
             <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
         </button>
