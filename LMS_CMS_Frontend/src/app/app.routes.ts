@@ -174,10 +174,11 @@ import { AssignmentStudentComponent } from './Pages/Employee/LMS/assignment-stud
 import { AssignmentStudentComponent as AssignmentStudentStudentComponent } from './Pages/Student/LMS/assignment-student/assignment-student.component';
 import { AssignmentDetailComponent } from './Pages/Employee/LMS/assignment-detail/assignment-detail.component';
 import { POSComponent } from './Pages/Employee/ETA/pos/pos.component';
-import { ElectronicInvoiceDetailComponent } from './Pages/Employee/Zatca-ETA/electronic-invoice-detail/electronic-invoice-detail.component';
 import { SchoolComponent } from './Pages/Employee/Zatca/school/school.component';
 
 
+import { CertificatesIssuerComponent } from './Pages/Employee/ETA/certificates-issuer/certificates-issuer.component';
+import { ElectronicInvoiceDetailComponent } from './Pages/Employee/Zatca-ETA/electronic-invoice-detail/electronic-invoice-detail.component'; 
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -401,6 +402,7 @@ export const routes: Routes = [
             { path: "Point Of Sale", component: POSComponent, title: "Point Of Sale", canActivate: [noNavigateWithoutLoginGuard] },
 
             { path: "school zatca", component: SchoolComponent, title: "school zatca", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Certificate Issuer", component: CertificatesIssuerComponent, title: "Certificate Issuer", canActivate: [noNavigateWithoutLoginGuard] },
         ]
 
     },

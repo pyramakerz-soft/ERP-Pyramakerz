@@ -21,7 +21,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 {
     [Route("api/with-domain/[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class ZatcaController : ControllerBase
     {
         private readonly ICsrGenerator _csrGenerator;
@@ -518,6 +518,12 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
             start = start.Date;
             end = end.Date;
 
+            if (end < start)
+                return BadRequest("Start date must be equal or greater than End date");
+            
+            int totalRecords = await Unit_Of_Work.inventoryMaster_Repository
+               .CountAsync(f => f.IsDeleted != true && (f.FlagId == 11 || f.FlagId == 12));
+
             List<InventoryMaster> mastersBySchool = await Unit_Of_Work.inventoryMaster_Repository.SelectQuery<InventoryMaster>(
                 d => d.SchoolId == schoolId && 
                 d.IsDeleted != true &&
@@ -533,9 +539,20 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                 .Take(pageSize)
                 .ToList();
 
+            if (mastersByDate is null || mastersByDate.Count == 0)
+                return NotFound("No invoices found.");
+
             List<InventoryMasterGetDTO> DTO = _mapper.Map<List<InventoryMasterGetDTO>>(mastersByDate);
 
-            return Ok(DTO);
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = DTO, Pagination = paginationMetadata });
         }
         #endregion
     }
