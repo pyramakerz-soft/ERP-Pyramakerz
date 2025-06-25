@@ -22,6 +22,8 @@ namespace LMS_CMS_BL.DTO.Clinic
 
         public string? Recommendation { get; set; }
         public bool SendSMSToParent { get; set; }
+        public long? InsertedByUserId { get; set; }
+        public string? en_name { get; set; }
         public DateTime InsertedAt { get; set; }
     }
 }

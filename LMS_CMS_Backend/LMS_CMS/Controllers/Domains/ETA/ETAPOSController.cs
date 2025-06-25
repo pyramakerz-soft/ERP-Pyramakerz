@@ -56,7 +56,8 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
 
             List<ETAPOS> ETAPOSs = await Unit_Of_Work.pos_Repository
                 .Select_All_With_IncludesById_Pagination<ETAPOS>(
-                    f => f.IsDeleted != true)
+                    f => f.IsDeleted != true,
+                    query => query.Include(x => x.InsertedByEmployee))
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
@@ -102,7 +103,10 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            ETAPOS ETAPOS = Unit_Of_Work.pos_Repository.First_Or_Default(x => x.ID == id && x.IsDeleted != true);
+            ETAPOS ETAPOS = await Unit_Of_Work.pos_Repository
+                .FindByIncludesAsync(
+                x => x.ID == id && x.IsDeleted != true,
+                query => query.Include(x => x.InsertedByEmployee));
 
             if (ETAPOS == null)
             {
