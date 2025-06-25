@@ -25,7 +25,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
         }
 
         #region Get All
-        [HttpGet]
+        [HttpGet("Get")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Tax Issuer" }
@@ -202,7 +202,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
             Unit_Of_Work.taxIssuer_Repository.Update(taxIssuer);
             Unit_Of_Work.SaveChanges();
 
-            return Ok(taxIssuer);
+            return Ok(taxIssuerDTO);
         }
         #endregion
 
