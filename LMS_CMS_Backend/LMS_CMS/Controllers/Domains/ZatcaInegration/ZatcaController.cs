@@ -1,6 +1,7 @@
 ﻿using Amazon.S3;
 using Amazon.SecretsManager;
 using AutoMapper;
+using LMS_CMS_BL.DTO;
 using LMS_CMS_BL.DTO.Inventory;
 using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains.Inventory;
@@ -354,15 +355,15 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Zatca Electronic-Invoice" }
         )]
-        public async Task<IActionResult> ReportInvoices([FromBody] long schoolId, [FromBody] long[]? selectedInvoices = null)
+        public async Task<IActionResult> ReportInvoices(InvoiceSubmitDTO dto)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             List<InventoryMaster> masters = new();
-            if (selectedInvoices == null)
+            if (dto.selectedInvoices == null)
             {
                 masters = await Unit_Of_Work.inventoryMaster_Repository.Select_All_With_IncludesById<List<InventoryMaster>>(
-                    d => d.SchoolId == schoolId &&
+                    d => d.SchoolId == dto.schoolId &&
                     d.IsDeleted != true &&
                     (d.FlagId == 11 || d.FlagId == 12),
                     query => query.Include(s => s.School)
@@ -374,7 +375,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
             else
             {
                 InventoryMaster master = new();
-                foreach (var invId in selectedInvoices)
+                foreach (var invId in dto.selectedInvoices)
                 {
                     master = Unit_Of_Work.inventoryMaster_Repository.First_Or_Default(x => x.ID == invId);
 

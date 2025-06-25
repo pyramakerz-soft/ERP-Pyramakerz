@@ -83,7 +83,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
 
             TaxIssuer? taxIssuer = await Unit_Of_Work.taxIssuer_Repository
                 .FindByIncludesAsync(x => x.ID == id && x.IsDeleted != true,
-                query => query.Include(x => x.InsertedByEmployee);
+                query => query.Include(x => x.InsertedByEmployee));
 
             if (taxIssuer == null)
             {
