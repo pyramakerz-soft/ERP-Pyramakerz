@@ -93,8 +93,7 @@ export class CertificatesIssuerComponent {
           this.PageSize = data.pagination.pageSize
           this.TotalPages = data.pagination.totalPages
           this.TotalRecords = data.pagination.totalRecords 
-          this.certificatesIssuerData = data.data
-        console.log(this.certificatesIssuerData)
+          this.certificatesIssuerData = data.data 
         }, 
         (error) => { 
           if(error.status == 404){
