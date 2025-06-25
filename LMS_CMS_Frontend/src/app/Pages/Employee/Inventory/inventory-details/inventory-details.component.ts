@@ -750,7 +750,7 @@ export class InventoryDetailsComponent {
       if (this.Data.hasOwnProperty(key)) {
         const field = key as keyof InventoryMaster;
         if (!this.Data[field]) {
-          if (field == 'storeID' || field == 'date' || field == 'schoolId') {
+          if (field == 'storeID' || field == 'date' || field == 'schoolId'||field == 'schoolPCId') {
             this.validationErrors[field] = `*${this.capitalizeField(
               field
             )} is required`;

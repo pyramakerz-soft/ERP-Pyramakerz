@@ -16,6 +16,7 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { AssignmentService } from '../../../../Services/Employee/LMS/assignment.service';
 import { Assignment } from '../../../../Models/LMS/assignment';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-assignment-student',
@@ -49,6 +50,7 @@ export class AssignmentStudentComponent {
   AssignmentId: number = 0;
   ClassId: number = 0;
   IsShowTabls: boolean = false
+  editDegree: boolean = false
   assignment: Assignment = new Assignment()
 
   constructor(
@@ -162,4 +164,22 @@ export class AssignmentStudentComponent {
     }
   }
 
+  saveDegree(row: any): void {
+    if (row.degree <= row.assignmentDegree) {
+      this.editDegree = false
+      this.assignmentStudentServ.Edit(row, this.DomainName).subscribe((d) => {
+        console.log(d)
+        this.GetAllData(this.CurrentPage, this.PageSize)
+      }, error => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'Try Again Later!',
+          confirmButtonText: 'Okay',
+          customClass: { confirmButton: 'secondaryBg' },
+        });
+        this.GetAllData(this.CurrentPage, this.PageSize)
+      })
+    }
+  }
 }
