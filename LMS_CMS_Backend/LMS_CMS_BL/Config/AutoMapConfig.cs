@@ -932,7 +932,7 @@ namespace LMS_CMS_BL.Config
             CreateMap<QuestionBankType, QuestionBankTypeGetDTO>();
 
             CreateMap<TaxIssuer, TaxIssuerGetDTO>()
-                .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.TaxCustomer.Type))
+                .ForMember(dest => dest.TaxType, opt => opt.MapFrom(src => src.TaxCustomer.Type))
                 .ForMember(dest => dest.en_name, opt => opt.MapFrom(src => src.InsertedByEmployee.en_name));
             CreateMap<TaxIssuerAddDTO, TaxIssuer>();
             CreateMap<TaxIssuerEditDTO, TaxIssuer>();
@@ -957,7 +957,7 @@ namespace LMS_CMS_BL.Config
             CreateMap<SubjectResourceAddDTO, SubjectResource>();
 
             CreateMap<CertificatesIssuerName, CertificatesIssuerNameGetDTO>()
-                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.InsertedByEmployee.User_Name));
+                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.InsertedByEmployee.en_name));
             CreateMap<CertificatesIssuerNameAddDTO, CertificatesIssuerName>();
             CreateMap<CertificatesIssuerNameEditDTO, CertificatesIssuerName>();
 

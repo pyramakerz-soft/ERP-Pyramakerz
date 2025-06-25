@@ -57,7 +57,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
 
             List<CertificatesIssuerName> certificatesIssuerNames = await Unit_Of_Work.certificatesIssuerName_Repository
                 .Select_All_With_IncludesById_Pagination<CertificatesIssuerName>(
-                x => x.IsDeleted != true)
+                x => x.IsDeleted != true, query => query.Include(d => d.InsertedByEmployee))
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
