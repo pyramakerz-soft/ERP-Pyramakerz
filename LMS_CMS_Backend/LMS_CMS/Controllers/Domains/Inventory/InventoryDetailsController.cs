@@ -58,6 +58,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
         /// ///////////////////////////////////////////////////-777
 
+
         //[HttpGet("inventory-full-report")]
         //[Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Inventory" })]
         //public async Task<IActionResult> GetInventoryFullReportAsync(
@@ -216,6 +217,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             {
                 ShopItemId = shopItemId,
                 StoreId = storeId,
+
                 ToDate = summaryDate.ToString("yyyy-MM-dd"),
                 InQuantity = inQuantity,
                 outQuantity = outQuantity,
@@ -308,7 +310,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         }
 
 
-        /////// // /// /// ///////////////////////////////////////////////////
 
 
         [HttpGet("BySaleId/{id}")]

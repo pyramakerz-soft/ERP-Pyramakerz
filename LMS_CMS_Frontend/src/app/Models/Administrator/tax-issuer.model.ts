@@ -1,7 +1,7 @@
 // tax-issuer.model.ts
 export class TaxIssuer {
     constructor(
-        public id: number = 0,
+        public id: string = '',
         public type: string = '',
         public name: string = '',
         public activityCode: string = '',
