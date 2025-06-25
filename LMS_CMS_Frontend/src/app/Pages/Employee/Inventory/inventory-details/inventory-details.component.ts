@@ -763,7 +763,7 @@ export class InventoryDetailsComponent {
       Swal.fire({
         icon: 'warning',
         title: 'Warning!',
-        text: 'SalesItems Is Required',
+        text: 'Items Is Required',
         confirmButtonColor: '#089B41',
       });
       return false;
@@ -772,7 +772,7 @@ export class InventoryDetailsComponent {
       Swal.fire({
         icon: 'warning',
         title: 'Warning!',
-        text: 'SalesItems Is Required',
+        text: 'Items Is Required',
         confirmButtonColor: '#089B41',
       });
       return false;
