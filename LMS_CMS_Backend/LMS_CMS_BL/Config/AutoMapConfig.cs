@@ -947,7 +947,7 @@ namespace LMS_CMS_BL.Config
             CreateMap<SubjectResourceAddDTO, SubjectResource>();
 
             CreateMap<CertificatesIssuerName, CertificatesIssuerNameGetDTO>()
-                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.InsertedByEmployee.User_Name));
+                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.InsertedByEmployee.en_name));
             CreateMap<CertificatesIssuerNameAddDTO, CertificatesIssuerName>();
             CreateMap<CertificatesIssuerNameEditDTO, CertificatesIssuerName>();
 

@@ -94,6 +94,7 @@ export class CertificatesIssuerComponent {
           this.TotalPages = data.pagination.totalPages
           this.TotalRecords = data.pagination.totalRecords 
           this.certificatesIssuerData = data.data
+        console.log(this.certificatesIssuerData)
         }, 
         (error) => { 
           if(error.status == 404){
@@ -206,7 +207,7 @@ export class CertificatesIssuerComponent {
 
   Save() {  
     if (this.isFormValid()) {
-      this.isLoading = true;   
+      this.isLoading = true;    
       if (this.certificatesIssuer.id == 0) { 
         this.certificatesIssuerService.Add(this.certificatesIssuer, this.DomainName).subscribe(
           (result: any) => {

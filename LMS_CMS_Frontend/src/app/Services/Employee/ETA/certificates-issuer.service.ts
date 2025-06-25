@@ -23,7 +23,7 @@ export class CertificatesIssuerService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-      return this.http.get<{ data: CertificatesIssuer[], pagination: any }>(`${this.baseUrl}/CertificatesIssuer/getAll?pageNumber=${pageNumber}&pageSize=${pageSize}`, { headers });
+      return this.http.get<{ data: CertificatesIssuer[], pagination: any }>(`${this.baseUrl}/CertificatesIssuerName/getAll?pageNumber=${pageNumber}&pageSize=${pageSize}`, { headers });
   }
 
    GetByID(id: number,DomainName:string) {
@@ -35,7 +35,7 @@ export class CertificatesIssuerService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.get<CertificatesIssuer>(`${this.baseUrl}/CertificatesIssuer/${id}`, { headers })
+    return this.http.get<CertificatesIssuer>(`${this.baseUrl}/CertificatesIssuerName/${id}`, { headers })
   }
 
   Add(CertificatesIssuer: CertificatesIssuer, DomainName: string) {
@@ -48,7 +48,7 @@ export class CertificatesIssuerService {
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
 
-    return this.http.post(`${this.baseUrl}/CertificatesIssuer/Add`, CertificatesIssuer, {
+    return this.http.post(`${this.baseUrl}/CertificatesIssuerName/Add`, CertificatesIssuer, {
       headers: headers,
       responseType: 'text' as 'json'
     });
@@ -63,7 +63,7 @@ export class CertificatesIssuerService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.put(`${this.baseUrl}/CertificatesIssuer/Edit`, CertificatesIssuer, { headers });
+    return this.http.put(`${this.baseUrl}/CertificatesIssuerName/Edit`, CertificatesIssuer, { headers });
   }
 
   Delete(id: number, DomainName: string) {
@@ -75,6 +75,6 @@ export class CertificatesIssuerService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.delete(`${this.baseUrl}/CertificatesIssuer/${id}`, { headers })
+    return this.http.delete(`${this.baseUrl}/CertificatesIssuerName/${id}`, { headers })
   }
 }
