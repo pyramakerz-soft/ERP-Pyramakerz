@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using LMS_CMS_BL.DTO;
 using LMS_CMS_BL.DTO.Inventory;
 using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains.Inventory;
@@ -148,7 +149,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "ETA Electronic-Invoice" }
         )]
-        public async Task<IActionResult> SubmitInvoices([FromBody] long schoolId, [FromBody] long[]? selectedInvoices = null)
+        public async Task<IActionResult> SubmitInvoices([FromBody] InvoiceSubmitDTO dto)
         {
             string apiBaseUrl = "https://api.invoicing.eta.gov.eg";
             string idSrvBaseUrl = "https://id.eta.gov.eg";
@@ -157,10 +158,10 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
 
             List<InventoryMaster> masters = new();
 
-            if (selectedInvoices == null)
+            if (dto.selectedInvoices == null)
             {
                 masters = await Unit_Of_Work.inventoryMaster_Repository.Select_All_With_IncludesById<List<InventoryMaster>>(
-                    d => d.SchoolId == schoolId &&
+                    d => d.SchoolId == dto.schoolId &&
                     (d.FlagId == 11 || d.FlagId == 12) &&
                     d.IsDeleted != true,
                     query => query.Include(s => s.TaxIssuer),
@@ -176,7 +177,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
             else
             {
                 InventoryMaster master = new();
-                foreach (var invId in selectedInvoices)
+                foreach (var invId in dto.selectedInvoices)
                 {
                     master = Unit_Of_Work.inventoryMaster_Repository.First_Or_Default(x => x.ID == invId);
                     
@@ -185,7 +186,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
                 }
             }
 
-            School school = Unit_Of_Work.school_Repository.First_Or_Default(x => x.ID == schoolId && x.IsDeleted != true);
+            School school = Unit_Of_Work.school_Repository.First_Or_Default(x => x.ID == dto.schoolId && x.IsDeleted != true);
 
             if (school is null)
                 return NotFound("School not found.");
