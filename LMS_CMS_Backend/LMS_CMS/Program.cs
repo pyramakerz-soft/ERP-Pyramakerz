@@ -212,7 +212,7 @@ namespace LMS_CMS
             /// For Endpoint, to check if the user has access for this endpoint or not
             /// Make sure to be here before UseAuthorization
             app.UseMiddleware<Endpoint_Authorization_Middleware>();
-             app.UseRouting();
+             
             app.UseAuthorization();
 
             //app.Urls.Add("http://0.0.0.0:5000");
@@ -222,12 +222,8 @@ namespace LMS_CMS
             //   .AllowAnyHeader()
             //);
 
-            app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllers();
-});
-app.UseDefaultFiles();
-app.UseStaticFiles();
+            app.MapControllers();
+
             app.Run();
         }
     }
