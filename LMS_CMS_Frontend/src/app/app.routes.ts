@@ -153,10 +153,9 @@ import { ZatcaDevicesComponent } from './Pages/Employee/Zatca/zatca-devices/zatc
 import { SubjectsComponent } from './Pages/Student/LMS/UI/subject/subjects.component';
 import { SubjectDetailsComponent } from './Pages/Student/LMS/UI/subject-details/subject-details.component';
 import { WeekDetailsComponent } from './Pages/Student/LMS/UI/week-details/week-details.component';
-import { ElectronicInvoiceComponent } from './Pages/Employee/Inventory/Report/electronic-invoice/electronic-invoice.component';
+import { ElectronicInvoiceComponent } from './Pages/Employee/Zatca-ETA/electronic-invoice/electronic-invoice.component';
 import { LessonResourcesComponent } from './Pages/Student/LMS/UI/lesson-resources/lesson-resources.component';
 import { AssignmentsComponent } from './Pages/Student/LMS/UI/assignments/assignments.component';
-import { ElectronicInvoiceDetailComponent } from './Pages/Employee/Inventory/Report/electronic-invoice-detail/electronic-invoice-detail.component';
 import { ClassroomViewComponent } from './Pages/Employee/LMS/classroom-view/classroom-view.component';
 import { QuestionBankComponent } from './Pages/Employee/LMS/question-bank/question-bank.component';
 import { LessonLiveUIComponent } from './Pages/Student/LMS/UI/lesson-live/lesson-live.component';
@@ -176,8 +175,7 @@ import { AssignmentStudentComponent as AssignmentStudentStudentComponent } from 
 import { AssignmentDetailComponent } from './Pages/Employee/LMS/assignment-detail/assignment-detail.component';
 import { POSComponent } from './Pages/Employee/ETA/pos/pos.component';
 import { CertificatesIssuerComponent } from './Pages/Employee/ETA/certificates-issuer/certificates-issuer.component';
-
-
+import { ElectronicInvoiceDetailComponent } from './Pages/Employee/Zatca-ETA/electronic-invoice-detail/electronic-invoice-detail.component'; 
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -234,7 +232,9 @@ export const routes: Routes = [
             { path: "Semester/:domainName/:Id", component: SemesterComponent, title: "Semester", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Working Weeks/:domainName/:Id", component: SemesterViewComponent, title: "Semester", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] }, //
             { path: "School", component: SchoolComponentEmployee, title: "Schools", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "TaxIssuer", component: TaxIssuerComponent, title: "TaxIssuer", canActivate: [noNavigateWithoutLoginGuard] },
+            
+            { path: "Tax Issuer", component: TaxIssuerComponent, title: "TaxIssuer", canActivate: [noNavigateWithoutLoginGuard] },
+
             { path: "Registration Form", component: RegistrationFormComponent, title: "Registration Form", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Registration Form Field", component: RegistrationFormFieldComponent, title: "RegistrationFormField", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Registration Form Field/:id", component: FieldsComponent, title: "CategoryFields", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
@@ -375,7 +375,7 @@ export const routes: Routes = [
             { path: "Lesson Resource/:id", component: LessonResourceComponent, title: "Lesson Resource", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Lesson Live", component: LessonLiveComponent, title: "Lesson Live", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             
-            { path: "Zatca Devices", component: ZatcaDevicesComponent, title: "Zatca Devices", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
+            { path: "Zatca Devices", component: ZatcaDevicesComponent, title: "Zatca Devices", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Zatca Electronic-Invoice", component: ElectronicInvoiceComponent, title: "ElectronicInvoice", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Zatca Electronic-Invoice/:id", component: ElectronicInvoiceDetailComponent, title: "Electronic-Invoice", canActivate: [noNavigateWithoutLoginGuard] },
 
