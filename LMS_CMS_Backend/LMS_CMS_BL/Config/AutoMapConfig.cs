@@ -1062,6 +1062,8 @@ namespace LMS_CMS_BL.Config
             CreateMap<ETAPOS, POSGetDTO>()
                 .ForMember(dest => dest.en_name, opt => opt.MapFrom(x => x.InsertedByEmployee.en_name));
 
+            CreateMap<TaxCustomer, TaxCustomerGetDTO>();
+
         }
     } 
 }
