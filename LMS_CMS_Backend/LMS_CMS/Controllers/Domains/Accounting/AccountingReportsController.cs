@@ -39,7 +39,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             DateTime start = DateTime.Parse(startDate).Date;
-            DateTime end = DateTime.Parse(endDate).Date;
+            DateTime end = DateTime.Parse(endDate).Date; 
+            
+            if (end < start)
+                return BadRequest("Start date must be equal or greater than End date");
+
+            int totalRecords = await Unit_Of_Work.payableMaster_Repository
+               .CountAsync(f => f.IsDeleted != true);
 
             var query = await Unit_Of_Work.payableMaster_Repository
             .Select_All_With_IncludesById_Pagination<PayableMaster>(
@@ -133,7 +139,15 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 }
             }
 
-            return Ok(DTOs);
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = DTOs, Pagination = paginationMetadata });
         }
         #endregion
 
@@ -150,15 +164,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             DateTime start = DateTime.Parse(startDate);
             DateTime end = DateTime.Parse(endDate);
 
-            //List<ReceivableDetails> ReceivableDetails = await Unit_Of_Work.receivableDetails_Repository.Select_All_With_IncludesById_Pagination<ReceivableDetails>(
-            //    t => t.IsDeleted != true && t.ReceivableMasterID == id &&
-            //        t.InsertedAt.Value.Date >= start && t.InsertedAt.Value.Date <= end,
-            //    query => query.Include(Master => Master.ReceivableMaster),
-            //    query => query.Include(Master => Master.LinkFile)
-            //)
-            //    .Skip((pageNumber - 1) * pageSize)
-            //    .Take(pageSize)
-            //    .ToListAsync();
+            if (end < start)
+                return BadRequest("Start date must be equal or greater than End date");
+
+            int totalRecords = await Unit_Of_Work.receivableMaster_Repository
+               .CountAsync(f => f.IsDeleted != true);
 
             var query = await Unit_Of_Work.receivableMaster_Repository
             .Select_All_With_IncludesById_Pagination<ReceivableMaster>(
@@ -248,7 +258,15 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 }
             }
 
-            return Ok(DTOs);
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = DTOs, Pagination = paginationMetadata });
         }
         #endregion
 
@@ -264,6 +282,12 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
             DateTime start = DateTime.Parse(startDate);
             DateTime end = DateTime.Parse(endDate);
+
+            if (end < start)
+                return BadRequest("Start date must be equal or greater than End date");
+
+            int totalRecords = await Unit_Of_Work.installmentDeductionMaster_Repository
+               .CountAsync(f => f.IsDeleted != true);
 
             List<InstallmentDeductionMaster> query = await Unit_Of_Work.installmentDeductionMaster_Repository.Select_All_With_IncludesById_Pagination<InstallmentDeductionMaster> (
                    f => f.IsDeleted != true,
@@ -287,7 +311,15 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
             List<InstallmentDeductionMasterGetDTO> DTO = _mapper.Map<List<InstallmentDeductionMasterGetDTO>>(InstallmentDeductionMasters);
 
-            return Ok(DTO);
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = DTO, Pagination = paginationMetadata });
         }
         #endregion
 
@@ -375,6 +407,12 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             DateTime start = DateTime.Parse(startDate);
             DateTime end = DateTime.Parse(endDate);
 
+            if (end < start)
+                return BadRequest("Start date must be equal or greater than End date");
+
+            int totalRecords = await unit_of_work.feesActivation_Repository
+               .CountAsync(f => f.IsDeleted != true);
+
             List<FeesActivation> query = await unit_of_work.feesActivation_Repository.Select_All_With_IncludesById_Pagination<FeesActivation>(
                 x => x.IsDeleted != true,
                 query => query.Include(x => x.AcademicYear),
@@ -399,7 +437,15 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
             List<FeesActivationGetDTO> feesActDto = _mapper.Map<List<FeesActivationGetDTO>>(FeesActivations);
 
-            return Ok(feesActDto);
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = feesActDto, Pagination = paginationMetadata });
         }
         #endregion
     }

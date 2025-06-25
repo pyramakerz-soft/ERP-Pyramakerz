@@ -6,6 +6,7 @@ using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace LMS_CMS_PL.Controllers.Domains.ETA
 {
@@ -44,7 +45,9 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            List<TaxIssuer> taxIssuers = Unit_Of_Work.taxIssuer_Repository.Select_All();
+            List<TaxIssuer> taxIssuers = await Unit_Of_Work.taxIssuer_Repository
+                .Select_All_With_IncludesById<TaxIssuer>(x => x.IsDeleted != true,
+                query => query.Include(x => x.InsertedByEmployee));
 
             if (taxIssuers == null || !taxIssuers.Any())
             {
@@ -78,7 +81,9 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            TaxIssuer? taxIssuer = Unit_Of_Work.taxIssuer_Repository.First_Or_Default(x => x.ID == id && x.IsDeleted != true);
+            TaxIssuer? taxIssuer = await Unit_Of_Work.taxIssuer_Repository
+                .FindByIncludesAsync(x => x.ID == id && x.IsDeleted != true,
+                query => query.Include(x => x.InsertedByEmployee);
 
             if (taxIssuer == null)
             {

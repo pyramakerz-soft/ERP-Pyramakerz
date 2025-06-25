@@ -7,6 +7,8 @@ namespace LMS_CMS_BL.DTO.Clinic
         public long ID { get; set; }
         [Required(ErrorMessage = "Name is required")]
         public string Name { get; set; }
+        public long? InsertedByUserId { get; set; }
+        public string? en_name { get; set; }
         public DateTime InsertedAt { get; set; }
     }
 }

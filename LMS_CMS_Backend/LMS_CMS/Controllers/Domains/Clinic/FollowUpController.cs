@@ -53,7 +53,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                 query => query.Include(f => f.Grade),
                 query => query.Include(f => f.Classroom),
                 query => query.Include(f => f.Student),
-                query => query.Include(f => f.Diagnosis)
+                query => query.Include(f => f.Diagnosis),
+                query => query.Include(x => x.InsertedByEmployee)
             );
 
             if (followUps == null || followUps.Count == 0)
@@ -108,7 +109,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                     query => query.Include(f => f.Grade),
                     query => query.Include(f => f.Classroom),
                     query => query.Include(f => f.Student),
-                    query => query.Include(f => f.Diagnosis)
+                    query => query.Include(f => f.Diagnosis),
+                    query => query.Include(x => x.InsertedByEmployee)
                 );
 
             if (followUp == null)

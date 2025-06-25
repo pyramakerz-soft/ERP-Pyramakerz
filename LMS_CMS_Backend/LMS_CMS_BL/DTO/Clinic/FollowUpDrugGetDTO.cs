@@ -8,5 +8,7 @@
         public string Drug { get; set; }
         public long DoseId { get; set; }
         public string Dose { get; set; }
+        public long? InsertedByUserId { get; set; }
+        public string? en_name { get; set; }
     }
 }
