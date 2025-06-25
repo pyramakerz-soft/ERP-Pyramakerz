@@ -161,13 +161,11 @@ import { QuestionBankComponent } from './Pages/Employee/LMS/question-bank/questi
 import { LessonLiveUIComponent } from './Pages/Student/LMS/UI/lesson-live/lesson-live.component';
 import { WeightTypeComponent } from './Pages/Employee/LMS/weight-type/weight-type.component';
 import { ClassroomStudentsComponent } from './Pages/Employee/LMS/classroom-students/classroom-students.component';
-import { ClassroomSubjectsComponent } from './Pages/Employee/LMS/classroom-subjects/classroom-subjects.component';
-import { TaxIssuerComponent } from './Pages/Employee/Administrator/school-tax-info/school-tax-info.component';
+import { ClassroomSubjectsComponent } from './Pages/Employee/LMS/classroom-subjects/classroom-subjects.component'; 
 import { SubjectTeacherComponent } from './Pages/Employee/Administrator/subject-teacher/subject-teacher.component';
 import { SubjectCoTeacherComponent } from './Pages/Employee/Administrator/subject-co-teacher/subject-co-teacher.component';
 import { StudentsComponent } from './Pages/Employee/Administrator/students/students.component';
-import { DailyPerformanceMasterComponent } from './Pages/Employee/LMS/daily-performance-master/daily-performance-master.component';
-
+import { DailyPerformanceMasterComponent } from './Pages/Employee/LMS/daily-performance-master/daily-performance-master.component'; 
 import { AssignmentComponent } from './Pages/Employee/LMS/assignment/assignment.component';
 import { ReportItemCardComponent } from './Pages/Employee/Inventory/Report/report-item-card/report-item-card.component';
 import { AssignmentStudentComponent } from './Pages/Employee/LMS/assignment-student/assignment-student.component';
@@ -176,6 +174,7 @@ import { AssignmentDetailComponent } from './Pages/Employee/LMS/assignment-detai
 import { POSComponent } from './Pages/Employee/ETA/pos/pos.component';
 import { CertificatesIssuerComponent } from './Pages/Employee/ETA/certificates-issuer/certificates-issuer.component';
 import { ElectronicInvoiceDetailComponent } from './Pages/Employee/Zatca-ETA/electronic-invoice-detail/electronic-invoice-detail.component'; 
+import { TaxIssuerComponent } from './Pages/Employee/ETA/tax-issuer/tax-issuer.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -231,10 +230,7 @@ export const routes: Routes = [
             { path: "Academic Years", component: AcademicYearComponent, title: "Academic Year", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Semester/:domainName/:Id", component: SemesterComponent, title: "Semester", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Working Weeks/:domainName/:Id", component: SemesterViewComponent, title: "Semester", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] }, //
-            { path: "School", component: SchoolComponentEmployee, title: "Schools", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            
-            { path: "Tax Issuer", component: TaxIssuerComponent, title: "TaxIssuer", canActivate: [noNavigateWithoutLoginGuard] },
-
+            { path: "School", component: SchoolComponentEmployee, title: "Schools", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] }, 
             { path: "Registration Form", component: RegistrationFormComponent, title: "Registration Form", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Registration Form Field", component: RegistrationFormFieldComponent, title: "RegistrationFormField", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Registration Form Field/:id", component: FieldsComponent, title: "CategoryFields", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
@@ -378,6 +374,7 @@ export const routes: Routes = [
             { path: "Zatca Devices", component: ZatcaDevicesComponent, title: "Zatca Devices", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Zatca Electronic-Invoice", component: ElectronicInvoiceComponent, title: "ElectronicInvoice", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Zatca Electronic-Invoice/:id", component: ElectronicInvoiceDetailComponent, title: "Electronic-Invoice", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Tax Issuer", component: TaxIssuerComponent, title: "TaxIssuer", canActivate: [noNavigateWithoutLoginGuard] },
 
             { path: "Weight Types", component: WeightTypeComponent, title: "Weight Types", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Classroom Students/:id", component: ClassroomStudentsComponent, title: "Classroom Students", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
