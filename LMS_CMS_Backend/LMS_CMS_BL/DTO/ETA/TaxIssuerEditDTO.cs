@@ -4,7 +4,7 @@ namespace LMS_CMS_BL.DTO.ETA
     public class TaxIssuerEditDTO
     {
         public string ID { get; set; }
-        public int? TaxType { get; set; }
+        public int? TypeID { get; set; }
         public string Name { get; set; }
         public string ActivityCode { get; set; }
         public string BranchID { get; set; }

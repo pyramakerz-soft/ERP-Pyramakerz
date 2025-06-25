@@ -47,7 +47,8 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
 
             List<TaxIssuer> taxIssuers = await Unit_Of_Work.taxIssuer_Repository
                 .Select_All_With_IncludesById<TaxIssuer>(x => x.IsDeleted != true,
-                query => query.Include(x => x.InsertedByEmployee));
+                query => query.Include(x => x.InsertedByEmployee),
+                query => query.Include(x => x.TaxCustomer));
 
             if (taxIssuers == null || !taxIssuers.Any())
             {
@@ -83,7 +84,8 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
 
             TaxIssuer? taxIssuer = await Unit_Of_Work.taxIssuer_Repository
                 .FindByIncludesAsync(x => x.ID == id && x.IsDeleted != true,
-                query => query.Include(x => x.InsertedByEmployee));
+                query => query.Include(x => x.InsertedByEmployee),
+                query => query.Include(x => x.TaxCustomer));
 
             if (taxIssuer == null)
             {
@@ -175,6 +177,11 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
             {
                 return NotFound($"Tax Issuer with ID {taxIssuerDTO.ID} not found.");
             }
+
+            TaxCustomer taxCustomer = Unit_Of_Work.taxCustomer_Repository.First_Or_Default(x => x.ID == taxIssuerDTO.TypeID);
+
+            if (taxCustomer == null)
+                return NotFound("Type ID is not found!");
 
             _mapper.Map(taxIssuerDTO, taxIssuer);
 
