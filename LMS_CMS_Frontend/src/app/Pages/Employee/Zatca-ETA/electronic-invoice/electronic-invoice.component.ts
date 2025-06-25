@@ -3,14 +3,14 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
-import { SchoolService } from '../../../../../Services/Employee/school.service';
-import { School } from '../../../../../Models/school';
+import { SchoolService } from '../../../../Services/Employee/school.service';
+import { School } from '../../../../Models/school';
 import Swal from 'sweetalert2';
-import { ZatcaService } from '../../../../../Services/Employee/Zatca/zatca.service';
-import { ApiService } from '../../../../../Services/api.service';
+import { ZatcaService } from '../../../../Services/Employee/Zatca/zatca.service';
+import { ApiService } from '../../../../Services/api.service';
 import { firstValueFrom } from 'rxjs';
-import { ElectronicInvoice } from '../../../../../Models/zatca/electronic-invoice';
-import { StateService } from '../../../../../Services/Employee/Inventory/state.service';
+import { ElectronicInvoice } from '../../../../Models/zatca/electronic-invoice';
+import { StateService } from '../../../../Services/Employee/Inventory/state.service';
 
 @Component({
   selector: 'app-electronic-invoice',
