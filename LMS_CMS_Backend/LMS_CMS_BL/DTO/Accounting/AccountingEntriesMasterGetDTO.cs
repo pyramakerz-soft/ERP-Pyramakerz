@@ -16,5 +16,6 @@ namespace LMS_CMS_BL.DTO.Accounting
         public long AccountingEntriesDocTypeID { get; set; }
         public string AccountingEntriesDocTypeName { get; set; }
         public long InsertedByUserId { get; set; }
+        public List<AccountingEntriesDetailsGetDTO>? AccountingEntriesDetails { get; set; }
     }
 }
