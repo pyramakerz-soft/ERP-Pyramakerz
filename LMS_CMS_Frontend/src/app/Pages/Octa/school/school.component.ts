@@ -205,7 +205,7 @@ export class SchoolComponent {
           }
         );
       } else{
-        this.schoolService.Edit(this.school,this.DomainName).subscribe(
+        this.schoolService.EditOcta(this.school,this.DomainName).subscribe(
           (result: any) => {
             this.closeModal()
             this.schoolService.Get(this.DomainName).subscribe(
