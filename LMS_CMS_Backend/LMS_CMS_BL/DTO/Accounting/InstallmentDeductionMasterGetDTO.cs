@@ -20,5 +20,6 @@ namespace LMS_CMS_BL.DTO.Accounting
         public long StudentID { get; set; }
         public string? StudentName { get; set; }
         public long InsertedByUserId { get; set; }
+        public List<InstallmentDeductionDetailsGetDTO>? InstallmentDeductionDetails { get; set; }
     }
 }

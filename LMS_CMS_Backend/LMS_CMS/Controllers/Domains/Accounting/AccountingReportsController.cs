@@ -290,7 +290,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             List<InstallmentDeductionMaster> query = await Unit_Of_Work.installmentDeductionMaster_Repository.Select_All_With_IncludesById_Pagination<InstallmentDeductionMaster> (
                    f => f.IsDeleted != true,
                    query => query.Include(d => d.InstallmentDeductionDetails)
-                   .ThenInclude(x => x.TuitionFeesType)
+                   .ThenInclude(x => x.TuitionFeesType),
+                   query => query.Include(d => d.Student),
+                   query => query.Include(d => d.Employee)
                 )
                 .ToListAsync();
 
