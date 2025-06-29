@@ -8,7 +8,7 @@ namespace LMS_CMS_BL.DTO.Accounting
 {
     public class PayableDetailsAddDTO
     {
-        public int Amount { get; set; }
+        public decimal Amount { get; set; }
         public string? Notes { get; set; }
         public long PayableMasterID { get; set; }
         public long LinkFileID { get; set; }

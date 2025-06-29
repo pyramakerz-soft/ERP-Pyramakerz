@@ -12,8 +12,8 @@ namespace LMS_CMS_BL.DTO.Accounting
     {
         [Key]
         public long ID { get; set; }
-        public int CreditAmount { get; set; }
-        public int DebitAmount { get; set; }
+        public decimal CreditAmount { get; set; }
+        public decimal DebitAmount { get; set; }
         public string Note { get; set; }
         public long AccountingTreeChartID { get; set; }
         public string AccountingTreeChartName { get; set; }

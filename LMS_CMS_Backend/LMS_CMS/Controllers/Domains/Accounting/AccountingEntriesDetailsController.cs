@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Asn1.Cmp;
 
 namespace LMS_CMS_PL.Controllers.Domains.Accounting
 {
@@ -284,6 +285,21 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 return BadRequest("There is no Sub Accounting Tree Chart with this ID");
             }
 
+            if((newDetails.CreditAmount != null && newDetails.CreditAmount != 0) && (newDetails.DebitAmount != null && newDetails.DebitAmount != 0))
+            {
+                return BadRequest("You have to define if it is debit or credit");
+            }
+
+            if(newDetails.DebitAmount == 0)
+            {
+                newDetails.DebitAmount = null;
+            }
+
+            if(newDetails.CreditAmount == 0)
+            {
+                newDetails.CreditAmount = null;
+            }
+
             AccountingEntriesDetails AccountingEntriesDetails;
 
             if (AccountingTreeChart.LinkFileID != null)
@@ -521,7 +537,22 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             {
                 return BadRequest("there is no Accounting Tree Chart with this ID");
             }
-             
+
+            if ((newDetail.CreditAmount != null && newDetail.CreditAmount != 0) && (newDetail.DebitAmount != null && newDetail.DebitAmount != 0))
+            {
+                return BadRequest("You have to define if it is debit or credit");
+            }
+
+            if (newDetail.DebitAmount == 0)
+            {
+                newDetail.DebitAmount = null;
+            }
+
+            if (newDetail.CreditAmount == 0)
+            {
+                newDetail.CreditAmount = null;
+            }
+
             if (userTypeClaim == "employee")
             {
                 IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Accounting Entries Details", roleId, userId, AccountingEntriesDetails);

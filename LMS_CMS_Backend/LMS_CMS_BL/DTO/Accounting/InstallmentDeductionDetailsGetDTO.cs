@@ -11,7 +11,7 @@ namespace LMS_CMS_BL.DTO.Accounting
     public class InstallmentDeductionDetailsGetDTO
     {
         public long ID { get; set; }
-        public int Amount { get; set; }
+        public decimal Amount { get; set; }
         public string Date { get; set; }
         public long InstallmentDeductionMasterID { get; set; }
         public string? InstallmentDeductionMasterName { get; set; }
