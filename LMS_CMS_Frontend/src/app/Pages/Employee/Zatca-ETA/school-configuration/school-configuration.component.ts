@@ -1,37 +1,34 @@
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { SearchComponent } from '../../../../Component/search/search.component';
-import { CommonModule } from '@angular/common';
-import { School } from '../../../../Models/school';
-import { TokenData } from '../../../../Models/token-data';
 import { ActivatedRoute, Router } from '@angular/router';
+import { SearchComponent } from '../../../../Component/search/search.component';
+import { TokenData } from '../../../../Models/token-data';
+import { School } from '../../../../Models/school';
 import { AccountService } from '../../../../Services/account.service';
 import { ApiService } from '../../../../Services/api.service';
 import { SchoolService } from '../../../../Services/Employee/school.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
-import { TranslateModule } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
-import { Day } from '../../../../Models/day';
-import { DaysService } from '../../../../Services/Octa/days.service';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
-  selector: 'app-school',
+  selector: 'app-school-configuration',
   standalone: true,
   imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
-  templateUrl: './school.component.html',
-  styleUrl: './school.component.css',
+  templateUrl: './school-configuration.component.html',
+  styleUrl: './school-configuration.component.css'
 })
-export class SchoolComponent {
-  keysArray: string[] = ['id', 'name', 'address', 'schoolTypeName'];
+export class SchoolConfigurationComponent {
+  ETA_Zatca: string = '';
+  keysArray: string[] = ['id', 'name', 'address'];
   key: string = 'id';
   value: any = '';
 
   schoolData: School[] = [];
   school: School = new School();
-  editBuilding: boolean = false;
-  validationErrors: { [key in keyof School]?: string } = {};
 
   AllowEdit: boolean = false;
   AllowEditForOthers: boolean = false;
@@ -39,33 +36,20 @@ export class SchoolComponent {
 
   DomainName: string = '';
   UserID: number = 0;
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
   isLoading = false;
-  WeekDays:Day[]=[]
-  
-  constructor(
-    public account: AccountService,
-    public ApiServ: ApiService,
-    public EditDeleteServ: DeleteEditPermissionService,
-    private menuService: MenuService,
-    public activeRoute: ActivatedRoute,
-    public schoolService: SchoolService,
-    public DaysServ: DaysService,
-    public router: Router
-  ) { }
+   
+  constructor(public account: AccountService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService,private menuService: MenuService, 
+    public activeRoute: ActivatedRoute, public schoolService: SchoolService, private router: Router) {}
 
-  ngOnInit() {
+  ngOnInit(): void { 
+    const currentUrl = this.router.url;
+    if (currentUrl.includes('ETA')) {
+      this.ETA_Zatca = 'ETA';
+    } else if (currentUrl.includes('Zatca')) {
+      this.ETA_Zatca = 'Zatca';
+    }
+
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
 
@@ -101,17 +85,10 @@ export class SchoolComponent {
       });
   }
 
-  GetAllDays() {
-    this.DaysServ.Get(this.DomainName).subscribe((d) => {
-      this.WeekDays = d;
-    });
-  }
-
   openModal(schoolId: number) {
     this.GetSchoolById(schoolId);
 
-    this.getSchoolData();
-    this.GetAllDays()
+    this.getSchoolData(); 
 
     document.getElementById('Add_Modal')?.classList.remove('hidden');
     document.getElementById('Add_Modal')?.classList.add('flex');
@@ -121,9 +98,7 @@ export class SchoolComponent {
     document.getElementById('Add_Modal')?.classList.remove('flex');
     document.getElementById('Add_Modal')?.classList.add('hidden');
 
-    this.school = new School();
-
-    this.validationErrors = {};
+    this.school = new School(); 
   }
 
   async onSearchEvent(event: { key: string; value: any }) {
@@ -156,87 +131,10 @@ export class SchoolComponent {
     }
   }
 
-  capitalizeField(field: keyof School): string {
-    return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
-  }
-
-  onInputValueChange(event: { field: keyof School; value: any }) {
-    const { field, value } = event;
-
-    (this.school as any)[field] = value;
-    if (value) {
-      this.validationErrors[field] = '';
-    }
-  }
- 
-  isFormValid(): boolean {
-    let isValid = true;
-    for (const key in this.school) {
-      if (this.school.hasOwnProperty(key)) {
-        const field = key as keyof School;
-        if (!this.school[field]) {
-          if (field == 'name') {
-            this.validationErrors[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
-            isValid = false;
-          }
-        } else {
-          if (field == 'name') {
-            if (this.school.name.length > 100) {
-              this.validationErrors[field] = `*${this.capitalizeField(
-                field
-              )} cannot be longer than 100 characters`;
-              isValid = false;
-            }
-          } else {
-            this.validationErrors[field] = '';
-          }
-        }
-      }
-    }
-    return isValid;
-  }
-
-  onImageFileSelected(event: any) {
-    const file: File = event.target.files[0];
-
-    if (file) {
-      if (file.size > 25 * 1024 * 1024) {
-        this.validationErrors['reportImageFile'] =
-          'The file size exceeds the maximum limit of 25 MB.';
-        this.school.reportImageFile = null;
-        return;
-      }
-      if (file.type === 'image/jpeg' || file.type === 'image/png') {
-        this.school.reportImageFile = file;
-        this.validationErrors['reportImageFile'] = '';
-
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-      } else {
-        this.validationErrors['reportImageFile'] =
-          'Invalid file type. Only JPEG, JPG and PNG are allowed.';
-        this.school.reportImageFile = null;
-        return;
-      }
-    }
-  }
-
-  validateNumber(event: any, field: keyof School): void {
-    const value = event.target.value;
-    if (isNaN(value) || value === '') {
-      event.target.value = '';
-      if (typeof this.school[field] === 'string') {
-        this.school[field] = '' as never;
-      }
-    }
-  }
-
-  SaveSchool() { 
-    if (this.isFormValid()) {
-      this.isLoading = true;
-      this.schoolService.Edit(this.school, this.DomainName).subscribe(
+  SaveSchool() {  
+    this.isLoading = true;
+    if(this.ETA_Zatca == "ETA"){
+      this.schoolService.EditEta(this.school, this.DomainName).subscribe(
         (result: any) => {
           this.closeModal();
           this.isLoading = false;
@@ -252,7 +150,25 @@ export class SchoolComponent {
             customClass: { confirmButton: 'secondaryBg' },
           });
         }
-      );
+      ); 
+    }else if(this.ETA_Zatca == "Zatca"){
+      this.schoolService.EditZatca(this.school, this.DomainName).subscribe(
+        (result: any) => {
+          this.closeModal();
+          this.isLoading = false;
+          this.getSchoolData();
+        },
+        (error) => {
+          this.isLoading = false;
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Try Again Later!',
+            confirmButtonText: 'Okay',
+            customClass: { confirmButton: 'secondaryBg' },
+          });
+        }
+      ); 
     }
   }
 }

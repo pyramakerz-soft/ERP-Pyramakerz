@@ -1,0 +1,129 @@
+<div class="flex justify-between items-center">
+    <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ 'Schools' | translate }}</h1>
+    <div class="flex justify-between items-center ">
+        <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
+    </div>
+</div>
+
+<div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD] max-w-full">
+    <table class="overflow-auto w-full bg-[#EBEBEB] ltr:text-left rtl:text-right text-[#6F6F6F]">
+        <thead class="bg-[##EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+            <tr>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'ID' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'School Name' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Address' | translate }}
+                </th>
+                <th *ngIf="ETA_Zatca == 'Zatca'" class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Vat Number' | translate }}
+                </th>
+                <th *ngIf="ETA_Zatca == 'Zatca'" class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'CRN' | translate }}
+                </th> 
+                <th *ngIf="ETA_Zatca == 'ETA'" class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Client ID' | translate }}
+                </th> 
+                <th *ngIf="ETA_Zatca == 'ETA'" class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Secret Number 1' | translate }}
+                </th> 
+                <th *ngIf="ETA_Zatca == 'ETA'" class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Secret Number 2' | translate }}
+                </th> 
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Actions' | translate }}
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- No Data Row -->
+            <tr *ngIf="schoolData.length === 0">
+                <td [attr.colspan]="ETA_Zatca === 'Zatca' ? 6 : 7" class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                    No Data Found
+                </td>
+            </tr>
+
+            <!-- Data Rows -->
+            <tr *ngFor="let row of schoolData; let i = index"
+                [ngClass]="{'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1}"
+                class="border-t border-gray-300 text-xs md:text-sm"> 
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{ row.id }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.name }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.address }}</td>
+                <td *ngIf="ETA_Zatca == 'Zatca'" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.vatNumber }}</td>
+                <td *ngIf="ETA_Zatca == 'Zatca'" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.crn }}</td> 
+                <td *ngIf="ETA_Zatca == 'ETA'" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.clientID }}</td> 
+                <td *ngIf="ETA_Zatca == 'ETA'" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.secretNumber1 }}</td> 
+                <td *ngIf="ETA_Zatca == 'ETA'" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.secretNumber2 }}</td> 
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    <div class="flex space-x-4"> 
+                        <button *ngIf="AllowEdit" (click)="openModal(row.id)">
+                            <i class="fa-solid fa-pencil"></i>
+                        </button> 
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+
+<!-- Edit School Modal -->
+<div id="Add_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
+    <div class="bg-white rounded-2xl p-12 w-1/2 max-h-[95%] overflow-y-auto m-auto">
+        <div class="flex justify-between items-center">
+            <h1 class="font-semibold text-2xl leading-9">{{ 'Edit School' | translate }}</h1>
+            <button (click)="closeModal()" type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
+        </div>
+        
+        <div class="p-[16px_24px] mt-6 mb-4 flex flex-wrap justify-between">
+            <div class="flex flex-col mb-4 w-[49%]">
+                <label class="mb-2 primaryTxt" for="name">{{ 'School Name' | translate }}</label>
+                <input disabled id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'School Name' | translate }}"
+                [(ngModel)]="school.name"/> 
+            </div>   
+            <div class="flex flex-col mb-4 w-[49%]">
+                <label class="mb-2 primaryTxt" for="Address">{{ 'School Address' | translate }}</label>
+                <input disabled id="Address" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'School Address' | translate }}"
+                [(ngModel)]="school.address"/> 
+            </div>   
+            <div *ngIf="ETA_Zatca == 'Zatca'" class="flex flex-col mb-4 w-[49%]">
+                <label class="mb-2 primaryTxt" for="vatNumber">{{ 'Vat Number' | translate }}</label>
+                <input id="vatNumber" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'Vat Number' | translate }}"
+                [(ngModel)]="school.vatNumber"/>
+            </div> 
+            <div *ngIf="ETA_Zatca == 'Zatca'" class="flex flex-col mb-4 w-[49%]">
+                <label class="mb-2 primaryTxt" for="crn">{{ 'CRN' | translate }}</label>
+                <input id="crn" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'CRN' | translate }}"
+                [(ngModel)]="school.crn"/>
+            </div> 
+            <div *ngIf="ETA_Zatca == 'ETA'" class="flex flex-col mb-4 w-[49%]">
+                <label class="mb-2 primaryTxt" for="clientID">{{ 'Client ID' | translate }}</label>
+                <input id="clientID" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'Client ID' | translate }}"
+                [(ngModel)]="school.clientID"/>
+            </div> 
+            <div *ngIf="ETA_Zatca == 'ETA'" class="flex flex-col mb-4 w-[49%]">
+                <label class="mb-2 primaryTxt" for="sn1">{{ 'Secret Number 1' | translate }}</label>
+                <input id="sn1" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'Secret Number 1' | translate }}"
+                [(ngModel)]="school.secretNumber1"/>
+            </div> 
+            <div *ngIf="ETA_Zatca == 'ETA'" class="flex flex-col mb-4 w-[49%]">
+                <label class="mb-2 primaryTxt" for="sn2">{{ 'Secret Number 2' | translate }}</label>
+                <input id="sn2" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'Secret Number 2' | translate }}"
+                [(ngModel)]="school.secretNumber2"/>
+            </div> 
+        </div>
+        <div class="flex justify-end">
+            <button
+            [disabled]="isLoading"
+            class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
+            (click)="SaveSchool()">
+            <span *ngIf="!isLoading">{{ 'Save' | translate }} </span>
+            <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+          </button>
+        </div>
+    </div>
+</div>

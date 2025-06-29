@@ -68,24 +68,16 @@ export class SchoolService {
     formData.append('reportHeaderOneEn', school.reportHeaderOneEn?.toString() ?? '');
     formData.append('reportHeaderOneAr', school.reportHeaderOneAr?.toString() ?? '');
     formData.append('reportHeaderTwoEn', school.reportHeaderTwoEn?.toString() ?? '');
-    formData.append('reportHeaderTwoAr', school.reportHeaderTwoAr?.toString() ?? '');
-    formData.append('vatNumber', school.vatNumber?.toString() ?? '');
+    formData.append('reportHeaderTwoAr', school.reportHeaderTwoAr?.toString() ?? ''); 
     formData.append('maximumPeriodCountTimeTable', school.maximumPeriodCountTimeTable?.toString() ?? '');
     formData.append('maximumPeriodCountRemedials', school.maximumPeriodCountRemedials?.toString() ?? '');
     formData.append('postalZone', school.postalZone?.toString() ?? '');
-    formData.append('city', school.city?.toString() ?? '');
-    formData.append('crn', school.crn?.toString() ?? '');
+    formData.append('city', school.city?.toString() ?? ''); 
     formData.append('citySubdivision', school.citySubdivision?.toString() ?? '');
     formData.append('buildingNumber', school.buildingNumber?.toString() ?? '');
     formData.append('streetName', school.streetName?.toString() ?? '');
     formData.append('weekEndDayID', school.weekEndDayID?.toString() ?? '');
-    formData.append('weekStartDayID', school.weekStartDayID?.toString() ?? '');
-
-    // Add the missing fields
-    formData.append('clientID', school.clientID?.toString() ?? '');
-    formData.append('secretNumber1', school.secretNumber1?.toString() ?? '');
-    formData.append('secretNumber2', school.secretNumber2?.toString() ?? '');
-
+    formData.append('weekStartDayID', school.weekStartDayID?.toString() ?? ''); 
     if (school.reportImageFile) {
       formData.append('reportImageFile', school.reportImageFile, school.reportImageFile.name);
     } else if (school.reportImage) {
@@ -93,6 +85,42 @@ export class SchoolService {
     }
 
     return this.http.put(`${this.baseUrl}/Schools`, formData, { headers });
+  }
+
+  EditOcta(school: School, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.put(`${this.baseUrl}/Schools/OctaSchool`, school, { headers });
+  }
+
+  EditZatca(school: School, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.put(`${this.baseUrl}/Schools/ZatcaSchool`, school, { headers });
+  }
+
+  EditEta(school: School, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.put(`${this.baseUrl}/Schools/EtaSchool`, school, { headers });
   }
 
   Delete(id:number, DomainName:string){

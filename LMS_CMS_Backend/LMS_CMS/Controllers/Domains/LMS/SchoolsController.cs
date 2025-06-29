@@ -214,12 +214,6 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 }
             }
 
-            SchoolType schoolType = Unit_Of_Work.schoolType_Repository.First_Or_Default(s => s.ID == newSchool.SchoolTypeID);
-            if (schoolType == null)
-            {
-                return BadRequest("there is no School Type with this id");
-            }
-
             if (newSchool.ReportImageFile != null)
             {
                 string returnFileInput = _fileImageValidationService.ValidateImageFile(newSchool.ReportImageFile);
@@ -337,6 +331,193 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             Unit_Of_Work.school_Repository.Update(school);
             Unit_Of_Work.SaveChanges();
             return Ok(newSchool);
+        }
+
+        ////////////////////////////////////////////////////
+
+        [HttpPut("OctaSchool")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa" }
+        )]
+        public async Task<IActionResult> EditOcta(SchoolEditOctaDTO editedSchool)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+              
+            School school = Unit_Of_Work.school_Repository.First_Or_Default(s => s.ID == editedSchool.ID); 
+            if (school == null || school.IsDeleted == true)
+            {
+                return NotFound("No School with this ID");
+            }
+
+            SchoolType schoolType = Unit_Of_Work.schoolType_Repository.First_Or_Default(s => s.ID == editedSchool.SchoolTypeID);
+            if (schoolType == null)
+            {
+                return BadRequest("there is no School Type with this id");
+            }
+
+            mapper.Map(editedSchool, school);
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            school.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            if (userTypeClaim == "octa")
+            {
+                school.UpdatedByOctaId = userId;
+                if (school.UpdatedByUserId != null)
+                {
+                    school.UpdatedByUserId = null;
+                }
+            }
+            else if (userTypeClaim == "employee")
+            {
+                school.UpdatedByUserId = userId;
+                if (school.UpdatedByOctaId != null)
+                {
+                    school.UpdatedByOctaId = null;
+                }
+            }
+
+            Unit_Of_Work.school_Repository.Update(school);
+            Unit_Of_Work.SaveChanges();
+            return Ok();
+        }
+
+        ////////////////////////////////////////////////////
+        
+        [HttpPut("ZatcaSchool")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            allowEdit: 1,
+            pages: new[] { "Zatca School Configuration" }
+        )]
+        public async Task<IActionResult> EditZatca(SchoolEditZatcaDTO editedSchool)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+              
+            School school = Unit_Of_Work.school_Repository.First_Or_Default(s => s.ID == editedSchool.ID); 
+            if (school == null || school.IsDeleted == true)
+            {
+                return NotFound("No School with this ID");
+            }
+
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Zatca School Configuration", roleId, userId, school);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
+            }
+
+            mapper.Map(editedSchool, school);
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            school.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            if (userTypeClaim == "octa")
+            {
+                school.UpdatedByOctaId = userId;
+                if (school.UpdatedByUserId != null)
+                {
+                    school.UpdatedByUserId = null;
+                }
+            }
+            else if (userTypeClaim == "employee")
+            {
+                school.UpdatedByUserId = userId;
+                if (school.UpdatedByOctaId != null)
+                {
+                    school.UpdatedByOctaId = null;
+                }
+            }
+
+            Unit_Of_Work.school_Repository.Update(school);
+            Unit_Of_Work.SaveChanges();
+            return Ok();
+        }
+
+        ////////////////////////////////////////////////////
+        
+        [HttpPut("EtaSchool")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            allowEdit: 1,
+            pages: new[] { "ETA School Configuration" }
+        )]
+        public async Task<IActionResult> EditEta(SchoolEditEtaDTO editedSchool)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+              
+            School school = Unit_Of_Work.school_Repository.First_Or_Default(s => s.ID == editedSchool.ID); 
+            if (school == null || school.IsDeleted == true)
+            {
+                return NotFound("No School with this ID");
+            }
+
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "ETA School Configuration", roleId, userId, school);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
+            }
+
+            mapper.Map(editedSchool, school);
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            school.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            if (userTypeClaim == "octa")
+            {
+                school.UpdatedByOctaId = userId;
+                if (school.UpdatedByUserId != null)
+                {
+                    school.UpdatedByUserId = null;
+                }
+            }
+            else if (userTypeClaim == "employee")
+            {
+                school.UpdatedByUserId = userId;
+                if (school.UpdatedByOctaId != null)
+                {
+                    school.UpdatedByOctaId = null;
+                }
+            }
+
+            Unit_Of_Work.school_Repository.Update(school);
+            Unit_Of_Work.SaveChanges();
+            return Ok();
         }
 
         ////////////////////////////////////////////////////
