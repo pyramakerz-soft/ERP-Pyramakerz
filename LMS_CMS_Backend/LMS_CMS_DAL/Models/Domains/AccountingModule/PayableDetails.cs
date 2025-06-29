@@ -13,7 +13,7 @@ namespace LMS_CMS_DAL.Models.Domains.AccountingModule
     {
         [Key]
         public long ID { get; set; }
-        public int Amount { get; set; }
+        public decimal Amount { get; set; }
         public string? Notes { get; set; }
         [ForeignKey("PayableMaster")]
         public long PayableMasterID { get; set; }
