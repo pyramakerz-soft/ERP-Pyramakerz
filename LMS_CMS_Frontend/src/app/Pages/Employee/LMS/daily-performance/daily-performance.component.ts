@@ -63,7 +63,7 @@ export class DailyPerformanceComponent {
   SelectedGradeId: number = 0;
   SelectedClassId: number = 0;
   SelectedSubjectId: number = 0;
-  dailyPerformanceMaster : DailyPerformanceMaster =  new DailyPerformanceMaster()
+  dailyPerformanceMaster: DailyPerformanceMaster = new DailyPerformanceMaster()
   TableData: DailyPerformance[] = [];
   isModalVisible: boolean = false;
   mode: string = '';
@@ -85,7 +85,7 @@ export class DailyPerformanceComponent {
   StudentMedals: StudentMedal[] = []
   studentMedal: StudentMedal = new StudentMedal()
   IsValid: boolean = true
-  IsStudentPerformance : boolean = true
+  IsStudentPerformance: boolean = true
 
   constructor(
     public activeRoute: ActivatedRoute,
@@ -270,35 +270,35 @@ export class DailyPerformanceComponent {
   }
 
   submitRatings() {
-      if(this.PerformanceTypesSelected.length==0){
-       this.IsStudentPerformance=false
-      } 
-      else{
-        this.isLoading= true
-        this.dailyPerformanceMaster.subjectID=this.SelectedSubjectId
-        this.dailyPerformanceMaster.classroomID=this.SelectedClassId
-        this.dailyPerformanceMaster.dailyPerformances=this.RatedStudent
-        console.log(this.dailyPerformanceMaster)
-        this.StudentPerformanceServ.Add(this.dailyPerformanceMaster, this.DomainName).subscribe((d) => {
-          if (this.SelectedMedalId && this.selectedStudentIds.length) {
-            this.selectedStudentIds.forEach(element => {
-              this.studentMedal = new StudentMedal()
-              this.studentMedal.studentID = element
-              this.studentMedal.medalID = this.SelectedMedalId
-              this.studentMedalServ.Add(this.studentMedal, this.DomainName).subscribe((d) => { })
-            });
-          }
-          this.isLoading= false
-          Swal.fire({
-            icon: 'success',
-            title: 'Done',
-            text: 'Saved Succeessfully',
-            confirmButtonColor: '#089B41',
-          }).then(() => {
-            window.location.reload();
+    if (this.PerformanceTypesSelected.length == 0) {
+      this.IsStudentPerformance = false
+    }
+    else {
+      this.isLoading = true
+      this.dailyPerformanceMaster.subjectID = this.SelectedSubjectId
+      this.dailyPerformanceMaster.classroomID = this.SelectedClassId
+      this.dailyPerformanceMaster.dailyPerformances = this.RatedStudent
+      console.log(this.dailyPerformanceMaster)
+      this.StudentPerformanceServ.Add(this.dailyPerformanceMaster, this.DomainName).subscribe((d) => {
+        if (this.SelectedMedalId && this.selectedStudentIds.length) {
+          this.selectedStudentIds.forEach(element => {
+            this.studentMedal = new StudentMedal()
+            this.studentMedal.studentID = element
+            this.studentMedal.medalID = this.SelectedMedalId
+            this.studentMedalServ.Add(this.studentMedal, this.DomainName).subscribe((d) => { })
           });
-        })
-      }
+        }
+        this.isLoading = false
+        Swal.fire({
+          icon: 'success',
+          title: 'Done',
+          text: 'Saved Succeessfully',
+          confirmButtonColor: '#089B41',
+        }).then(() => {
+          window.location.reload();
+        });
+      })
+    }
   }
 
   isStudentSelected(id: number): boolean {
@@ -366,5 +366,9 @@ export class DailyPerformanceComponent {
     else {
       this.closeModal()
     }
+  }
+
+  moveToBack() {
+    this.router.navigateByUrl('Employee/Enter Daily Performance');
   }
 }

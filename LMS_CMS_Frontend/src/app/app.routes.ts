@@ -176,6 +176,7 @@ import { CertificatesIssuerComponent } from './Pages/Employee/ETA/certificates-i
 import { ElectronicInvoiceDetailComponent } from './Pages/Employee/Zatca-ETA/electronic-invoice-detail/electronic-invoice-detail.component'; 
 import { TaxIssuerComponent } from './Pages/Employee/ETA/tax-issuer/tax-issuer.component';
 import { SchoolConfigurationComponent } from './Pages/Employee/Zatca-ETA/school-configuration/school-configuration.component';
+import { DailyPerformanceViewComponent } from './Pages/Employee/LMS/daily-performance-view/daily-performance-view.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -389,6 +390,7 @@ export const routes: Routes = [
             { path: "Edit Student/:RegisterationFormParentId/:StudentId", component: RegistrationFormComponent, title: "Edit Student", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Student View/:Id", component: RegistrationConfirmationDetailsComponent, title: "Student View", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Enter Daily Performance", component: DailyPerformanceMasterComponent, title: "Daily Performance", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
+            { path: "Daily Performance View/:id", component: DailyPerformanceViewComponent, title: "Daily Performance View", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Assignment", component: AssignmentComponent, title: "Assignment", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Assignment/:id", component: AssignmentEditComponent, title: "Assignment Edit", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "report-item-card", component: ReportItemCardComponent, title: "report-item-card", canActivate: [noNavigateWithoutLoginGuard] },
