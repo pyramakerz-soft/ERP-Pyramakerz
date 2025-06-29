@@ -28,15 +28,15 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         }
         /////////////////////////////////////////////
 
-        [HttpGet]
+        [HttpGet("GetMasterByClassSubject/{ClassId}/{SubjectId}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" }
           )]
-        public async Task<IActionResult> GetAsync()
+        public async Task<IActionResult> GetAsync(long ClassId , long SubjectId)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            List<DailyPerformance> Data;
+            List<DailyPerformanceMaster> Data;
 
             var userClaims = HttpContext.User.Claims;
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
@@ -48,21 +48,68 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            Data = await Unit_Of_Work.dailyPerformance_Repository.Select_All_With_IncludesById<DailyPerformance>(
-                    f => f.IsDeleted != true,
-                    query => query.Include(emp => emp.Subject).ThenInclude(s => s.Grade),
-                    query => query.Include(emp => emp.Student)
-                    );
+            Data = await Unit_Of_Work.dailyPerformanceMaster_Repository
+                .Select_All_With_IncludesById<DailyPerformanceMaster>(
+                    f => f.IsDeleted != true && f.ClassroomID == ClassId && f.SubjectID == SubjectId,
+                    query => query.Include(m => m.Subject).ThenInclude(s => s.Grade),
+                    query => query.Include(m => m.Classroom),
+                    query => query.Include(m => m.DailyPerformances).ThenInclude(dp => dp.Student),
+                    query => query.Include(m => m.DailyPerformances).ThenInclude(dp => dp.StudentPerformance).ThenInclude(sp => sp.PerformanceType)
+                );
+
 
             if (Data == null || Data.Count == 0)
             {
                 return NotFound();
             }
 
-            List<DailyPerformanceGetDTO> Dto = mapper.Map<List<DailyPerformanceGetDTO>>(Data);
+            List<DailyPerformanceMasterGetDTO> Dto = mapper.Map<List<DailyPerformanceMasterGetDTO>>(Data);
 
             return Ok(Dto);
         }
+
+        /////////////////////////////////////////////
+
+        [HttpGet("GetById/{id}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" }
+          )]
+        public async Task<IActionResult> GetByIdAsync(long id)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            DailyPerformanceMaster Data;
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            Data = await Unit_Of_Work.dailyPerformanceMaster_Repository
+                .FindByIncludesAsync(
+                    f => f.IsDeleted != true  && f.ID == id,
+                    query => query.Include(m => m.Subject).ThenInclude(s => s.Grade),
+                    query => query.Include(m => m.Classroom),
+                    query => query.Include(m => m.DailyPerformances).ThenInclude(dp => dp.Student),
+                    query => query.Include(m => m.DailyPerformances).ThenInclude(dp => dp.StudentPerformance).ThenInclude(sp => sp.PerformanceType)
+                );
+
+
+            if (Data == null )
+            {
+                return NotFound();
+            }
+
+            DailyPerformanceMasterGetDTO Dto = mapper.Map<DailyPerformanceMasterGetDTO>(Data);
+
+            return Ok(Dto);
+        }
+
         /////////////////////////////////////////////
 
         [HttpPost]
@@ -70,7 +117,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
           allowedTypes: new[] { "octa", "employee" },
            pages: new[] { "Enter Daily Performance", "Daily Performance" }
         )]
-        public async Task<IActionResult> Add(List<DailyPerformanceAddDTO> Newtypes)
+        public async Task<IActionResult> Add(DailyPerformanceMasterAddDTO NewData)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -83,41 +130,39 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             {
                 return Unauthorized("User ID or Type claim not found.");
             }
-            if (Newtypes == null)
+            if (NewData == null)
             {
                 return BadRequest("Type is empty");
             }
 
-            foreach (var type in Newtypes)
+            Subject subject = Unit_Of_Work.subject_Repository.First_Or_Default(s=>s.ID== NewData.SubjectID && s.IsDeleted != true);
+            if (subject == null)
             {
-                Student stu = Unit_Of_Work.student_Repository.First_Or_Default(s => s.ID == type.StudentID && s.IsDeleted != true);
-                if (stu == null)
-                {
-                    return BadRequest("student id not exist");
-                }
-
-                Subject s = Unit_Of_Work.subject_Repository.First_Or_Default(s => s.ID == type.SubjectID && s.IsDeleted != true);
-                if (s == null)
-                {
-                    return BadRequest("Subject id not exist");
-                }
-                DailyPerformance Type = mapper.Map<DailyPerformance>(type);
-
-                TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-                Type.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
-                if (userTypeClaim == "octa")
-                {
-                    Type.InsertedByOctaId = userId;
-                }
-                else if (userTypeClaim == "employee")
-                {
-                    Type.InsertedByUserId = userId;
-                }
-                Unit_Of_Work.dailyPerformance_Repository.Add(Type);
-
+                return BadRequest("There is no subject with this id");
             }
+
+            Classroom classroom = Unit_Of_Work.classroom_Repository.First_Or_Default(s => s.ID == NewData.ClassroomID && s.IsDeleted != true);
+            if (classroom == null)
+            {
+                return BadRequest("There is no classroom with this id");
+            }
+
+            DailyPerformanceMaster dailyPerformanceMaster = mapper.Map<DailyPerformanceMaster>(NewData);
+
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            dailyPerformanceMaster.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            if (userTypeClaim == "octa")
+            {
+                dailyPerformanceMaster.InsertedByOctaId = userId;
+            }
+            else if (userTypeClaim == "employee")
+            {
+                dailyPerformanceMaster.InsertedByUserId = userId;
+            }
+            Unit_Of_Work.dailyPerformanceMaster_Repository.Add(dailyPerformanceMaster);
+
             Unit_Of_Work.SaveChanges();
-            return Ok(Newtypes);
+            return Ok(NewData);
         }
 
     }

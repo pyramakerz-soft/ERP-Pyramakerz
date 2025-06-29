@@ -2,17 +2,17 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace LMS_CMS_BL.DTO.LMS
 {
-    public class DailyPerformanceAddDTO
+    public class DailyPerformanceMasterAddDTO
     {
-        public string? Comment { get; set; }
-        public long StudentID { get; set; }
-        public List<StudentPerformanceAddDTO> StudentPerformance { get; set; } 
+        public long SubjectID { get; set; }
+        public long ClassroomID { get; set; }
+        public List<DailyPerformanceAddDTO> DailyPerformances { get; set; }
+
     }
 }

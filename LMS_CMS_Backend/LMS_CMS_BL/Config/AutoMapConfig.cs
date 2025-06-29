@@ -839,7 +839,7 @@ namespace LMS_CMS_BL.Config
             CreateMap<PerformanceTypeAddDTO, PerformanceType>();
             CreateMap<PerformanceTypeEditDTO, PerformanceType>();
 
-            CreateMap<StudentPerformanceAddDTO, StudentPerformanceAddDTO>();
+            CreateMap<StudentPerformance, StudentPerformanceAddDTO>();
 
             CreateMap<LessonLive, LessonLiveGetDTO>()
                  .ForMember(dest => dest.WeekDayName, opt => opt.MapFrom(src => src.WeekDay.Name))
@@ -899,12 +899,14 @@ namespace LMS_CMS_BL.Config
             CreateMap<SemesterWorkingWeekAddDTO, SemesterWorkingWeek>();
             CreateMap<SemesterWorkingWeekPutDTO, SemesterWorkingWeek>();
 
+            CreateMap<DailyPerformanceMaster, DailyPerformanceMasterGetDTO>()
+                .ForMember(dest => dest.SubjectName, opt => opt.MapFrom(src => src.Subject.en_name))
+                .ForMember(dest => dest.ClassroomName, opt => opt.MapFrom(src => src.Classroom.Name))
+                .ForMember(dest => dest.GradeName, opt => opt.MapFrom(src => src.Subject.Grade.Name));
+            CreateMap<DailyPerformanceMasterAddDTO, DailyPerformanceMaster>();
             CreateMap<DailyPerformanceAddDTO, DailyPerformance>();
             CreateMap<DailyPerformance, DailyPerformanceGetDTO>()
-               .ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => src.Student.en_name))
-               .ForMember(dest => dest.SubjectName, opt => opt.MapFrom(src => src.Subject.en_name))
-               .ForMember(dest => dest.GradeName, opt => opt.MapFrom(src => src.Subject.Grade.Name));
-
+               .ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => src.Student.en_name));
 
             CreateMap<QuestionBank, QuestionBankGetDTO>()
                  .ForMember(dest => dest.LessonName, opt => opt.MapFrom(src => src.Lesson.EnglishTitle))
