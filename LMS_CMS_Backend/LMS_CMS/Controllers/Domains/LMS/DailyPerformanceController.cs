@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace LMS_CMS_PL.Controllers.Domains.LMS
 {
@@ -73,41 +74,46 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet("GetById/{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" }
-          )]
+        )]
         public async Task<IActionResult> GetByIdAsync(long id)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            DailyPerformanceMaster Data;
-
-            var userClaims = HttpContext.User.Claims;
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-            long.TryParse(userIdClaim, out long userId);
             var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
 
             if (userIdClaim == null || userTypeClaim == null)
-            {
                 return Unauthorized("User ID or Type claim not found.");
-            }
 
-            Data = await Unit_Of_Work.dailyPerformanceMaster_Repository
+            var data = await Unit_Of_Work.dailyPerformanceMaster_Repository
                 .FindByIncludesAsync(
-                    f => f.IsDeleted != true  && f.ID == id,
+                    f => f.IsDeleted != true && f.ID == id,
                     query => query.Include(m => m.Subject).ThenInclude(s => s.Grade),
                     query => query.Include(m => m.Classroom),
                     query => query.Include(m => m.DailyPerformances).ThenInclude(dp => dp.Student),
                     query => query.Include(m => m.DailyPerformances).ThenInclude(dp => dp.StudentPerformance).ThenInclude(sp => sp.PerformanceType)
                 );
 
-
-            if (Data == null )
-            {
+            if (data == null)
                 return NotFound();
-            }
 
-            DailyPerformanceMasterGetDTO Dto = mapper.Map<DailyPerformanceMasterGetDTO>(Data);
+            var dto = mapper.Map<DailyPerformanceMasterGetDTO>(data);
 
-            return Ok(Dto);
+            // ✅ Extract unique PerformanceTypeIDs from DTO
+            var uniquePerformanceTypeIds = dto.DailyPerformances
+                .SelectMany(p => p.StudentPerformance)
+                .Select(sp => sp.PerformanceTypeID)
+                .Distinct()
+                .ToList();
+            List<PerformanceType> performanceTypes = Unit_Of_Work.performanceType_Repository.FindBy(s => uniquePerformanceTypeIds.Contains(s.ID));
+
+            List<PerformanceTypeGetDTO> performance = mapper.Map<List<PerformanceTypeGetDTO>>(performanceTypes);
+            // ✅ Return both master DTO and list of unique type IDs
+            return Ok(new
+            {
+                master = dto,
+                performanceTypes = performance
+            });
         }
 
         /////////////////////////////////////////////

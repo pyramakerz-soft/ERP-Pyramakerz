@@ -1,1 +1,63 @@
-<p>daily-performance-view works!</p>
+<div class="flex justify-between items-center">
+    <div class="flex justify-between items-center space-x-5">
+        <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToBack()"></i>
+        <h1 class="font-semibold text-2xl leading-9">
+            {{dailyPerformanceMaster.classroomName}}
+        </h1>
+    </div>
+</div>
+
+<div class="mt-5">
+    <div>
+        <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
+            <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
+                <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+                    <tr>
+                        <th
+                            class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            Student
+                        </th>
+                        <th *ngFor="let type of performanceTypes"
+                            class="py-3 px-4 min-w-[100px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0 text-center">
+                            {{ type.englishName }}
+                        </th>
+                        <th
+                            class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            Comment
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- No Data Row -->
+                    <tr *ngIf="dailyPerformanceMaster.dailyPerformances.length === 0">
+                        <td colspan="5"
+                            class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                            No Data Found
+                        </td>
+                    </tr>
+
+                    <!-- Data Rows -->
+                    <tr *ngFor="let row of dailyPerformanceMaster.dailyPerformances; let i = index"
+                        [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
+                        class="border-t border-gray-300 text-xs md:text-sm">
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ row.studentName }}
+                        </td>
+                        <td *ngFor="let type of performanceTypes" class="py-4 px-4 border border-[#EAECF0] text-center">
+                            <ng-container *ngFor="let star of [1, 2, 3, 4, 5]">
+                                <i class="fa-star text-xl" [ngClass]="{
+                                    'fa-solid text-yellow-400': star <= getStars(row.studentID, type.id),
+                                    'fa-regular text-gray-400': star > getStars(row.studentID, type.id) }">
+                                </i>
+                            </ng-container>
+                        </td>
+
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ row.comment }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

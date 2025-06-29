@@ -16,7 +16,7 @@ export class DailyPerformanceService {
     this.baseUrl = ApiServ.BaseUrl
   }
 
-  Get(ClassId :number , Subject : number ,DomainName: string) {
+  Get(ClassId: number, Subject: number, DomainName: string) {
     if (DomainName != null) {
       this.header = DomainName
     }
@@ -26,6 +26,18 @@ export class DailyPerformanceService {
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
     return this.http.get<DailyPerformanceMaster[]>(`${this.baseUrl}/DailyPerformance/GetMasterByClassSubject/${ClassId}/${Subject}`, { headers })
+  }
+
+  GetById(id: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<any>(`${this.baseUrl}/DailyPerformance/GetById/${id}`, { headers })
   }
 
   Add(DailyPerformance: DailyPerformanceMaster, DomainName: string) {
