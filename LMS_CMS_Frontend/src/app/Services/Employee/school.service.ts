@@ -51,49 +51,49 @@ export class SchoolService {
     return this.http.post(`${this.baseUrl}/Schools`, school, { headers })
   }
 
-Edit(school: School, DomainName: string) {
-  if (DomainName != null) {
-    this.header = DomainName;
+  Edit(school: School, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName;
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`);
+
+    const formData = new FormData();
+    formData.append('id', school.id.toString() ?? '');
+    formData.append('name', school.name.toString() ?? '');
+    formData.append('schoolTypeID', String(school.schoolTypeID) ?? '');
+    formData.append('address', school.address?.toString() ?? '');
+    formData.append('reportHeaderOneEn', school.reportHeaderOneEn?.toString() ?? '');
+    formData.append('reportHeaderOneAr', school.reportHeaderOneAr?.toString() ?? '');
+    formData.append('reportHeaderTwoEn', school.reportHeaderTwoEn?.toString() ?? '');
+    formData.append('reportHeaderTwoAr', school.reportHeaderTwoAr?.toString() ?? '');
+    formData.append('vatNumber', school.vatNumber?.toString() ?? '');
+    formData.append('maximumPeriodCountTimeTable', school.maximumPeriodCountTimeTable?.toString() ?? '');
+    formData.append('maximumPeriodCountRemedials', school.maximumPeriodCountRemedials?.toString() ?? '');
+    formData.append('postalZone', school.postalZone?.toString() ?? '');
+    formData.append('city', school.city?.toString() ?? '');
+    formData.append('crn', school.crn?.toString() ?? '');
+    formData.append('citySubdivision', school.citySubdivision?.toString() ?? '');
+    formData.append('buildingNumber', school.buildingNumber?.toString() ?? '');
+    formData.append('streetName', school.streetName?.toString() ?? '');
+    formData.append('weekEndDayID', school.weekEndDayID?.toString() ?? '');
+    formData.append('weekStartDayID', school.weekStartDayID?.toString() ?? '');
+
+    // Add the missing fields
+    formData.append('clientID', school.clientID?.toString() ?? '');
+    formData.append('secretNumber1', school.secretNumber1?.toString() ?? '');
+    formData.append('secretNumber2', school.secretNumber2?.toString() ?? '');
+
+    if (school.reportImageFile) {
+      formData.append('reportImageFile', school.reportImageFile, school.reportImageFile.name);
+    } else if (school.reportImage) {
+      formData.append('reportImage', school.reportImage?.toString() ?? '');
+    }
+
+    return this.http.put(`${this.baseUrl}/Schools`, formData, { headers });
   }
-  const token = localStorage.getItem("current_token");
-  const headers = new HttpHeaders()
-    .set('domain-name', this.header)
-    .set('Authorization', `Bearer ${token}`);
-
-  const formData = new FormData();
-  formData.append('id', school.id.toString() ?? '');
-  formData.append('name', school.name.toString() ?? '');
-  formData.append('schoolTypeID', String(school.schoolTypeID) ?? '');
-  formData.append('address', school.address?.toString() ?? '');
-  formData.append('reportHeaderOneEn', school.reportHeaderOneEn?.toString() ?? '');
-  formData.append('reportHeaderOneAr', school.reportHeaderOneAr?.toString() ?? '');
-  formData.append('reportHeaderTwoEn', school.reportHeaderTwoEn?.toString() ?? '');
-  formData.append('reportHeaderTwoAr', school.reportHeaderTwoAr?.toString() ?? '');
-  formData.append('vatNumber', school.vatNumber?.toString() ?? '');
-  formData.append('maximumPeriodCountTimeTable', school.maximumPeriodCountTimeTable?.toString() ?? '');
-  formData.append('maximumPeriodCountRemedials', school.maximumPeriodCountRemedials?.toString() ?? '');
-  formData.append('postalZone', school.postalZone?.toString() ?? '');
-  formData.append('city', school.city?.toString() ?? '');
-  formData.append('crn', school.crn?.toString() ?? '');
-  formData.append('citySubdivision', school.citySubdivision?.toString() ?? '');
-  formData.append('buildingNumber', school.buildingNumber?.toString() ?? '');
-  formData.append('streetName', school.streetName?.toString() ?? '');
-  formData.append('weekEndDayID', school.weekEndDayID?.toString() ?? '');
-  formData.append('weekStartDayID', school.weekStartDayID?.toString() ?? '');
-
-  // Add the missing fields
-  formData.append('clientID', school.clientID?.toString() ?? '');
-  formData.append('secretNumber1', school.secretNumber1?.toString() ?? '');
-  formData.append('secretNumber2', school.secretNumber2?.toString() ?? '');
-
-  if (school.reportImageFile) {
-    formData.append('reportImageFile', school.reportImageFile, school.reportImageFile.name);
-  } else if (school.reportImage) {
-    formData.append('reportImage', school.reportImage?.toString() ?? '');
-  }
-
-  return this.http.put(`${this.baseUrl}/Schools`, formData, { headers });
-}
 
   Delete(id:number, DomainName:string){
      if(DomainName!=null) {

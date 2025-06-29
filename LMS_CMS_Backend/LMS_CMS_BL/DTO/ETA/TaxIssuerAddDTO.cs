@@ -4,11 +4,11 @@ namespace LMS_CMS_BL.DTO.ETA
     public class TaxIssuerAddDTO
     {
         public string ID { get; set; }
-        public string Type { get; set; }
+        public int? TaxTypeID { get; set; }
         public string Name { get; set; }
         public string ActivityCode { get; set; }
         public string BranchID { get; set; }
-        public string Country { get; set; }
+        public string CountryCode { get; set; }
         public string Governate { get; set; }
         public string RegionCity { get; set; }
         public string Street { get; set; }

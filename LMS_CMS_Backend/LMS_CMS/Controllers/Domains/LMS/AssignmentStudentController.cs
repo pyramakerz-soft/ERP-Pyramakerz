@@ -291,12 +291,29 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return BadRequest("this assignment TextBookAssignment");
             }
 
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            DateTime today = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            if (assignment.CutOfDate != null)
+            {
+                DateTime cutOffDateTime = assignment.CutOfDate.ToDateTime(TimeOnly.MaxValue); // Treats it as end of day
+
+                if (today > cutOffDateTime)
+                {
+                    return BadRequest("Submission failed: The assignment deadline has passed.");
+                }
+            }
+
             StudentClassroom studentClassroom = Unit_Of_Work.studentClassroom_Repository.First_Or_Default(s => s.IsDeleted != true && s.StudentID == newData.StudentId && s.Classroom.IsDeleted != true && s.Classroom.AcademicYear.IsDeleted != true && s.Classroom.AcademicYear.IsActive == true);
             if (studentClassroom == null)
             {
                 return BadRequest("this Student Not Exist In any classroom");
             }
 
+            AssignmentStudent assignmentStudent = Unit_Of_Work.assignmentStudent_Repository.First_Or_Default(s=>s.AssignmentID==newData.AssignmentID && s.StudentClassroomID== studentClassroom.ID && s.IsDeleted != true);
+            if (assignmentStudent != null)
+            {
+                return BadRequest("You have already submitted this assignment and cannot submit it again.");
+            }
             // Get all valid assignment questions
             var assignmentQuestions = Unit_Of_Work.assignmentQuestion_Repository
                 .FindBy(s => s.AssignmentID == newData.AssignmentID && s.Assignment.IsDeleted !=true && s.QuestionBank.IsDeleted != true);
@@ -345,11 +362,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             // Map the main entity
-            var assignmentStudent = mapper.Map<AssignmentStudent>(newData);
+            assignmentStudent = mapper.Map<AssignmentStudent>(newData);
 
             assignmentStudent.StudentClassroomID = studentClassroom.ID;
             // Set inserted timestamps and user
-            var cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             assignmentStudent.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
             if (userTypeClaim == "octa")
                 assignmentStudent.InsertedByOctaId = userId;
@@ -389,8 +405,12 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             {
                 return BadRequest("this Student Not Exist In any classroom");
             }
+            AssignmentStudent assignmentStudent = Unit_Of_Work.assignmentStudent_Repository.First_Or_Default(s => s.AssignmentID == newData.AssignmentID && s.StudentClassroomID == studentClassroom.ID && s.IsDeleted != true);
+            if (assignmentStudent != null)
+            {
+                return BadRequest("You have already submitted this assignment and cannot submit it again.");
+            }
 
-            
             Assignment assignment= Unit_Of_Work.assignment_Repository.First_Or_Default(a=>a.ID==newData.AssignmentID && a.IsDeleted!= true);
             if (assignment == null)
             {
@@ -399,6 +419,18 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             if(assignment.AssignmentTypeID != 1)
             {
                 return BadRequest("this assignment not TextBookAssignment");
+            }
+
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            DateTime today = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            if (assignment.CutOfDate != null)
+            {
+                DateTime cutOffDateTime = assignment.CutOfDate.ToDateTime(TimeOnly.MaxValue); // Treats it as end of day
+
+                if (today > cutOffDateTime)
+                {
+                    return BadRequest("Submission failed: The assignment deadline has passed");
+                }
             }
 
             // Map the main entity
@@ -426,11 +458,11 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return BadRequest("File size exceeds the 25 MB limit.");
             }
 
-            AssignmentStudent assignmentStudent = new AssignmentStudent();
+            assignmentStudent = new AssignmentStudent();
             assignmentStudent.AssignmentID = newData.AssignmentID;
             assignmentStudent.StudentClassroomID = studentClassroom.ID;
             // Set inserted timestamps and user
-            var cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            //var cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             assignmentStudent.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
             if (userTypeClaim == "octa")
                 assignmentStudent.InsertedByOctaId = userId;
@@ -493,58 +525,82 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                       .ThenInclude(a => a.AssignmentQuestions)
                           .ThenInclude(aq => aq.QuestionBank),
                 q => q.Include(e => e.AssignmentStudentQuestions)
-                      .ThenInclude(sq => sq.QuestionBank)
+                      .ThenInclude(sq => sq.QuestionBank),
+                q => q.Include(e => e.Assignment)
+                      .ThenInclude(a => a.Subject)
             );
 
             if (assignmentStudent == null)
                 return NotFound("Assignment student not found.");
-
-            var assignmentQuestions = assignmentStudent.Assignment.AssignmentQuestions.ToList();
-
-            // Step 1: Save the new marks
-            foreach (var questionDto in newData.AssignmentStudentQuestions)
+            if (assignmentStudent.Assignment.AssignmentTypeID == 1)
             {
-                var studentQuestion = assignmentStudent.AssignmentStudentQuestions
-                    .FirstOrDefault(q => q.ID == questionDto.ID);
-
-                if (studentQuestion != null)
+                if(assignmentStudent.Degree> assignmentStudent.Assignment.Mark)
                 {
-                    studentQuestion.Mark = questionDto.Mark;
+                    return BadRequest($"Degree cannot exceed assignment mark");
+                }
+                else
+                {
+                   assignmentStudent.Degree= newData.Degree;
                 }
             }
-
-            // Step 2: Validate and calculate degree
-            double totalQuestionMarks = 0;
-            double totalStudentMarks = 0;
-
-            foreach (var studentQuestion in assignmentStudent.AssignmentStudentQuestions)
+            else
             {
-                var questionBank = studentQuestion.QuestionBank;
-                if (questionBank == null)
-                    return BadRequest($"Question bank not found for student question ID {studentQuestion.ID}");
+                var assignmentQuestions = assignmentStudent.Assignment.AssignmentQuestions.ToList();
 
-                double maxMark = questionBank.Mark;
+                // Step 1: Save the new marks
+                foreach (var questionDto in newData.AssignmentStudentQuestions)
+                {
+                    var studentQuestion = assignmentStudent.AssignmentStudentQuestions
+                        .FirstOrDefault(q => q.ID == questionDto.ID);
 
-                if (studentQuestion.Mark > maxMark)
-                    return BadRequest($"Mark for question ID {studentQuestion.ID} cannot exceed {maxMark}");
+                    if (studentQuestion != null)
+                    {
+                        studentQuestion.Mark = questionDto.Mark;
+                    }
+                }
 
-                totalQuestionMarks += maxMark;
-                totalStudentMarks += studentQuestion.Mark;
+                // Step 2: Validate and calculate degree
+                double totalQuestionMarks = 0;
+                double totalStudentMarks = 0;
+
+                foreach (var studentQuestion in assignmentStudent.AssignmentStudentQuestions)
+                {
+                    var questionBank = studentQuestion.QuestionBank;
+                    if (questionBank == null)
+                        return BadRequest($"Question bank not found for student question ID {studentQuestion.ID}");
+
+                    double maxMark = questionBank.Mark;
+
+                    if (studentQuestion.Mark > maxMark)
+                        return BadRequest($"Mark for question ID {studentQuestion.ID} cannot exceed {maxMark}");
+
+                    totalQuestionMarks += maxMark;
+                    totalStudentMarks += studentQuestion.Mark;
+                }
+
+                var assignmentDegree = assignmentStudent.Assignment.Mark;
+                assignmentStudent.Degree = totalQuestionMarks > 0
+                       ? (float)((totalStudentMarks * assignmentDegree) / totalQuestionMarks)
+                       : 0;
             }
 
-            var assignmentDegree = assignmentStudent.Assignment.Mark;
-            assignmentStudent.Degree = totalQuestionMarks > 0
-                   ? (float)((totalStudentMarks * assignmentDegree) / totalQuestionMarks)
-                   : 0;
-
-            /// If He Submit After DueDate 
-            if (assignmentStudent.InsertedAt.HasValue && assignmentStudent.InsertedAt.Value > assignmentStudent.Assignment.CutOfDate.ToDateTime(TimeOnly.MinValue))
+            if (assignmentStudent.InsertedAt.HasValue && assignmentStudent.Assignment != null && assignmentStudent.Assignment.DueDate != null) 
             {
-                double penaltyRatio = assignmentStudent.Assignment.Subject.AssignmentCutOffDatePercentage;
+                var insertedDate = assignmentStudent.InsertedAt.Value.Date;
+                var dueDate = assignmentStudent.Assignment.DueDate;
 
-                if (penaltyRatio > 0 && penaltyRatio <= 1)
+                // Convert DateOnly to DateTime for comparison
+                var dueDateTime = dueDate.ToDateTime(TimeOnly.MinValue);
+
+                if (insertedDate > dueDateTime)
                 {
-                    assignmentStudent.Degree -= (float)(assignmentStudent.Degree * penaltyRatio);
+                    double penaltyRatio = assignmentStudent.Assignment.Subject?.AssignmentCutOffDatePercentage ?? 0;
+                    penaltyRatio = penaltyRatio / 100;
+                    if (penaltyRatio > 0 && penaltyRatio <= 1 && assignmentStudent.Degree > 0)
+                    {
+                        float penalty = (float)(assignmentStudent.Degree * penaltyRatio);
+                        assignmentStudent.Degree -= penalty;
+                    }
                 }
             }
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");

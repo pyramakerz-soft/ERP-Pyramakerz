@@ -63,15 +63,35 @@
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ row.studentEnglishName }}
                     </td>
-                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ row.degree }}
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0" *ngIf="assignment.assignmentTypeID==1" >
+                        <div class="flex items-center gap-2">
+                            <input *ngIf="editDegree" type="number" [(ngModel)]="row.degree"
+                                [max]="row.assignmentDegree" min="0"
+                                class="w-20 px-2 py-1 border border-gray-300 rounded" />
+                            <span *ngIf="!editDegree">{{ row.degree }}</span>
+                            / {{ row.assignmentDegree }}
+                            <button *ngIf="editDegree" (click)="saveDegree(row)">
+                                <i class="far fa-check-circle secondaryTxt"></i>
+                            </button>
+                            <button *ngIf="!editDegree" (click)="editDegree = true">
+                                <i class="fa-solid fa-pencil"></i>
+                            </button>
+                        </div>
+                        <div *ngIf="row.degree > row.assignmentDegree" class="text-red-500 text-sm mt-1">
+                            Degree cannot exceed {{ row.assignmentDegree }}.
+                        </div>
+                    </td>
+                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0" *ngIf="assignment.assignmentTypeID!=1" >
+                        {{ row.degree }} / {{ row.assignmentDegree }}
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        <button class="flex space-x-4 items-center" *ngIf="assignment.assignmentTypeID == 1 && row.linkFile != null"
+                        <button class="flex space-x-4 items-center"
+                            *ngIf="assignment.assignmentTypeID == 1 && row.linkFile != null"
                             (click)="openFile( row.linkFile)">
                             <i class="fa-regular fa-file"></i>
                         </button>
-                        <button class="flex space-x-4 items-center" *ngIf="assignment.assignmentTypeID == 1 && row.linkFile == null">
+                        <button class="flex space-x-4 items-center"
+                            *ngIf="assignment.assignmentTypeID == 1 && row.linkFile == null">
                             __
                         </button>
                         <button class="flex space-x-4"

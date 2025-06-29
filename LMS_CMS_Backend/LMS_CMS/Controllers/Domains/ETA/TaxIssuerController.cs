@@ -25,39 +25,40 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
         }
 
         #region Get All
-        [HttpGet]
-        [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Tax Issuer" }
-        )]
-        public async Task<IActionResult> Get()
-        {
-            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+        //[HttpGet("Get")]
+        //[Authorize_Endpoint_(
+        //    allowedTypes: new[] { "octa", "employee" },
+        //    pages: new[] { "Tax Issuer" }
+        //)]
+        //public async Task<IActionResult> Get()
+        //{
+        //    UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            var userClaims = HttpContext.User.Claims;
-            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-            long.TryParse(userIdClaim, out long userId);
+        //    var userClaims = HttpContext.User.Claims;
+        //    var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+        //    long.TryParse(userIdClaim, out long userId);
 
-            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+        //    var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
 
-            if (userIdClaim == null || userTypeClaim == null)
-            {
-                return Unauthorized("User ID or Type claim not found.");
-            }
+        //    if (userIdClaim == null || userTypeClaim == null)
+        //    {
+        //        return Unauthorized("User ID or Type claim not found.");
+        //    }
 
-            List<TaxIssuer> taxIssuers = await Unit_Of_Work.taxIssuer_Repository
-                .Select_All_With_IncludesById<TaxIssuer>(x => x.IsDeleted != true,
-                query => query.Include(x => x.InsertedByEmployee));
+        //    List<TaxIssuer> taxIssuers = await Unit_Of_Work.taxIssuer_Repository
+        //        .Select_All_With_IncludesById<TaxIssuer>(x => x.IsDeleted != true,
+        //        query => query.Include(x => x.InsertedByEmployee),
+        //        query => query.Include(x => x.TaxCustomer));
 
-            if (taxIssuers == null || !taxIssuers.Any())
-            {
-                return NotFound("No tax issuers found.");
-            }
+        //    if (taxIssuers == null || !taxIssuers.Any())
+        //    {
+        //        return NotFound("No tax issuers found.");
+        //    }
 
-            var taxIssuerDtos = _mapper.Map<List<TaxIssuerGetDTO>>(taxIssuers);
+        //    var taxIssuerDtos = _mapper.Map<List<TaxIssuerGetDTO>>(taxIssuers);
 
-            return Ok(taxIssuerDtos);
-        }
+        //    return Ok(taxIssuerDtos);
+        //}
         #endregion
 
         #region Get By ID
@@ -83,7 +84,8 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
 
             TaxIssuer? taxIssuer = await Unit_Of_Work.taxIssuer_Repository
                 .FindByIncludesAsync(x => x.ID == id && x.IsDeleted != true,
-                query => query.Include(x => x.InsertedByEmployee));
+                query => query.Include(x => x.InsertedByEmployee),
+                query => query.Include(x => x.TaxCustomer));
 
             if (taxIssuer == null)
             {
@@ -93,53 +95,6 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
             var taxIssuerDto = _mapper.Map<TaxIssuerGetDTO>(taxIssuer);
 
             return Ok(taxIssuerDto);
-        }
-        #endregion
-
-        #region Create
-        [HttpPost("Add")]
-        [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Tax Issuer" }
-        )]
-        public IActionResult Add(TaxIssuerAddDTO taxIssuerAdd)
-        {
-            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-
-            var userClaims = HttpContext.User.Claims;
-            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-
-            long.TryParse(userIdClaim, out long userId);
-            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
-
-            if (userIdClaim == null || userTypeClaim == null)
-            {
-                return Unauthorized("User ID or Type claim not found.");
-            }
-
-            if (!ModelState.IsValid)
-            {
-                return BadRequest();
-            }
-
-            TaxIssuer taxIssuer = _mapper.Map<TaxIssuer>(taxIssuerAdd);
-
-            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-            taxIssuer.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
-
-            if (userTypeClaim == "octa")
-            {
-                taxIssuer.InsertedByOctaId = userId;
-            }
-            else if (userTypeClaim == "employee")
-            {
-                taxIssuer.InsertedByUserId = userId;
-            }
-
-            Unit_Of_Work.taxIssuer_Repository.Add(taxIssuer);
-            Unit_Of_Work.SaveChanges();
-
-            return CreatedAtAction(nameof(GetByID), new { Id = taxIssuer .ID }, taxIssuerAdd);
         }
         #endregion
 
@@ -176,6 +131,18 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
                 return NotFound($"Tax Issuer with ID {taxIssuerDTO.ID} not found.");
             }
 
+            if(taxIssuerDTO.TypeID != null && taxIssuerDTO.TypeID != 0)
+            {
+                TaxCustomer taxCustomer = Unit_Of_Work.taxCustomer_Repository.First_Or_Default(x => x.ID == taxIssuerDTO.TypeID);
+
+                if (taxCustomer == null)
+                    return NotFound("Type ID is not found!");
+            }
+            else
+            {
+                taxIssuerDTO.TypeID = null;
+            }
+
             _mapper.Map(taxIssuerDTO, taxIssuer);
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
@@ -202,63 +169,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
             Unit_Of_Work.taxIssuer_Repository.Update(taxIssuer);
             Unit_Of_Work.SaveChanges();
 
-            return Ok(taxIssuer);
-        }
-        #endregion
-
-        #region Delete
-        [HttpDelete]
-        [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Tax Issuer" }
-        )]
-        public IActionResult Delete(string id)
-        {
-            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-
-            var userClaims = HttpContext.User.Claims;
-            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-
-            long.TryParse(userIdClaim, out long userId);
-            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
-
-            if (userIdClaim == null || userTypeClaim == null)
-            {
-                return Unauthorized("User ID or Type claim not found.");
-            }
-
-            TaxIssuer taxIssuer = Unit_Of_Work.taxIssuer_Repository.First_Or_Default(x => x.ID == id && x.IsDeleted != true);
-
-            if (taxIssuer == null)
-            {
-                return NotFound($"Tax Issuer with ID {id} not found.");
-            }
-
-            taxIssuer.IsDeleted = true;
-            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-            taxIssuer.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
-
-            if (userTypeClaim == "octa")
-            {
-                taxIssuer.DeletedByOctaId = userId;
-                if (taxIssuer.DeletedByUserId != null)
-                {
-                    taxIssuer.DeletedByUserId = null;
-                }
-            }
-            else if (userTypeClaim == "employee")
-            {
-                taxIssuer.DeletedByUserId = userId;
-                if (taxIssuer.DeletedByOctaId != null)
-                {
-                    taxIssuer.DeletedByOctaId = null;
-                }
-            }
-
-            Unit_Of_Work.taxIssuer_Repository.Update(taxIssuer);
-            Unit_Of_Work.SaveChanges();
-
-            return Ok("Tax Issuer deleted successfully");
+            return Ok(taxIssuerDTO);
         }
         #endregion
     }
