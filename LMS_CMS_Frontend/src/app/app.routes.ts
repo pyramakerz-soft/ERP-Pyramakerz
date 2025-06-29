@@ -376,7 +376,8 @@ export const routes: Routes = [
             { path: "Lesson Live", component: LessonLiveComponent, title: "Lesson Live", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             
             { path: "Zatca Devices", component: ZatcaDevicesComponent, title: "Zatca Devices", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "Zatca Electronic-Invoice", component: ElectronicInvoiceComponent, title: "ElectronicInvoice", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Zatca Electronic-Invoice", component: ElectronicInvoiceComponent, title: "ElectronicInvoice", canActivate: [noNavigateWithoutLoginGuard] ,data: { system: 'zatca' }  },
+            { path: "ETA Electronic-Invoice", component: ElectronicInvoiceComponent, title: "ElectronicInvoice", canActivate: [noNavigateWithoutLoginGuard] ,data: { system: 'eta' }   },
             { path: "Zatca Electronic-Invoice/:id", component: ElectronicInvoiceDetailComponent, title: "Electronic-Invoice", canActivate: [noNavigateWithoutLoginGuard] },
 
             { path: "Weight Types", component: WeightTypeComponent, title: "Weight Types", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },

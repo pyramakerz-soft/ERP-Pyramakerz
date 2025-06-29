@@ -75,4 +75,42 @@ export class ZatcaService {
       headers,
     });
   }
+
+  // Update the reportInvoice method to match Swagger
+  reportInvoice(masterId: number, DomainName: string): Observable<any> {
+    const headers = new HttpHeaders()
+      .set('domain-name', DomainName)
+      .set('Authorization', `Bearer ${localStorage.getItem('current_token')}`)
+      .set('accept', '*/*');
+
+    const params = new HttpParams().set('masterId', masterId.toString());
+
+    // Change from GET to POST with empty body as shown in Swagger
+    return this.http.post(`${this.baseUrl}/Zatca/ReportInvoice`, null, {
+      headers,
+      params,
+    });
+  }
+
+  // The reportInvoices method is correct as is
+  reportInvoices(
+    schoolId: number,
+    selectedInvoices: number[],
+    DomainName: string
+  ): Observable<any> {
+    const headers = new HttpHeaders()
+      .set('domain-name', DomainName)
+      .set('Authorization', `Bearer ${localStorage.getItem('current_token')}`)
+      .set('Content-Type', 'application/json')
+      .set('accept', '*/*');
+
+    const body = {
+      schoolId,
+      selectedInvoices,
+    };
+
+    return this.http.post(`${this.baseUrl}/Zatca/ReportInvoices`, body, {
+      headers,
+    });
+  }
 }

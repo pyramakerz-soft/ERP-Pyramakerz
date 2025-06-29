@@ -34,27 +34,22 @@
         </div>
     </div>
 
-    <!-- Action Buttons -->
     <div class="w-full flex justify-end mb-5 gap-4">
         <button class="p-4 font-medium text-xl rounded-lg secondaryBg text-white" (click)="viewReport()"
             [disabled]="!selectedSchoolId || !dateFrom || !dateTo || isLoading">
             <span *ngIf="!isLoading">View Report</span>
             <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
         </button>
-
+    
         <button class="p-2 font-medium text-xl rounded-lg flex items-center gap-2" (click)="printAll()"
             [disabled]="transactions.length === 0">
             <i><img src="Images/PrintOutline.png" alt=""></i>
-            <!-- <span>Print All</span> -->
         </button>
-
+    
         <button class="p-2 font-medium text-xl rounded-lg flex items-center gap-2" (click)="sendAll()"
             [disabled]="transactions.length === 0">
-            <i class=""><img src="Images/SendPaperPlane.png" alt=""></i>
-            <!-- <span>Send All</span> -->
+            <i><img src="Images/SendPaperPlane.png" alt=""></i>
         </button>
-
-
     </div>
 
     <!-- Results Table -->
@@ -62,6 +57,10 @@
         <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
             <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
                 <tr>
+    <th class="py-3 px-4 min-w-[40px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+        <input type="checkbox" [checked]="selectedInvoices.length === transactions.length && transactions.length > 0"
+            (change)="toggleSelectAll($event)">
+    </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         ID
                     </th>
@@ -84,7 +83,7 @@
             </thead>
             <tbody>
                 <tr *ngIf="transactions.length === 0">
-                    <td colspan="6"
+                    <td colspan="7"
                         class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
                         No Data Found
                     </td>
@@ -93,6 +92,10 @@
                 <tr *ngFor="let transaction of transactions; let i = index"
                     [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
                     class="border-t border-gray-300 text-xs md:text-sm">
+<td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+    <input type="checkbox" [checked]="selectedInvoices.includes(transaction.id)"
+        (change)="toggleInvoiceSelection(transaction.id)">
+</td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         <a (click)="navigateToDetail(transaction.id)"
                             class="text-blue-500 hover:text-blue-700 cursor-pointer">
@@ -120,15 +123,12 @@
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         <div class="flex gap-2">
-                            <button (click)="printInvoice(transaction)"
-                                class="filter brightness-0 p-2 rounded">
+                            <button (click)="printInvoice(transaction)" class="filter brightness-0 p-2 rounded">
                                 <i><img src="Images/PrintOutline.png" alt=""></i>
                             </button>
-                            <button (click)="sendInvoice(transaction)"
-                                class="filter brightness-0 p-2 rounded">
+                            <button (click)="sendInvoice(transaction)" class="filter brightness-0 p-2 rounded">
                                 <i><img src="Images/SendPaperPlane.png" alt=""></i>
                             </button>
-
                         </div>
                     </td>
                 </tr>

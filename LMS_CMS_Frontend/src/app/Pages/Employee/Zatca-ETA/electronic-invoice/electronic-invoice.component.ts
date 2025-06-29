@@ -2,7 +2,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, DatePipe } from '@angular/common';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { SchoolService } from '../../../../Services/Employee/school.service';
 import { School } from '../../../../Models/school';
 import Swal from 'sweetalert2';
@@ -11,6 +11,7 @@ import { ApiService } from '../../../../Services/api.service';
 import { firstValueFrom } from 'rxjs';
 import { ElectronicInvoice } from '../../../../Models/zatca/electronic-invoice';
 import { StateService } from '../../../../Services/Employee/Inventory/state.service';
+import { EtaService } from '../../../../Services/Employee/ETA/eta.service';
 
 @Component({
   selector: 'app-electronic-invoice',
@@ -26,6 +27,8 @@ export class ElectronicInvoiceComponent implements OnInit {
   dateFrom: string = '';
   dateTo: string = '';
   DomainName: string = '';
+  currentSystem: 'zatca' | 'eta' = 'zatca'; // Will be overridden by route data
+  selectedInvoices: number[] = [];
 
   showTable = false;
   transactions: ElectronicInvoice[] = [];
@@ -35,15 +38,22 @@ export class ElectronicInvoiceComponent implements OnInit {
   totalRecords = 0;
   isLoading = false;
 
+  // Modify the constructor to include ActivatedRoute
   constructor(
     private schoolService: SchoolService,
     private stateService: StateService,
     private zatcaService: ZatcaService,
+    private etaService: EtaService,
     private datePipe: DatePipe,
     private apiService: ApiService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute // Add this
   ) {
     this.DomainName = this.apiService.GetHeader();
+    // Get the system from route data
+    this.route.data.subscribe((data) => {
+      this.currentSystem = data['system'] || 'zatca'; // Default to zatca if not specified
+    });
   }
 
   ngOnInit() {
@@ -85,7 +95,6 @@ export class ElectronicInvoiceComponent implements OnInit {
       this.schools = await firstValueFrom(
         this.schoolService.Get(this.DomainName)
       );
-      console.log(this.schools);
     } catch (error) {
       this.handleError('Failed to load schools');
     }
@@ -102,15 +111,7 @@ export class ElectronicInvoiceComponent implements OnInit {
 
     const formattedStartDate = this.formatDateForApi(this.dateFrom);
     const formattedEndDate = this.formatDateForApi(this.dateTo);
-    console.log(
-      'start',
-      this.selectedSchoolId,
-      formattedStartDate,
-      formattedEndDate,
-      this.currentPage,
-      this.pageSize,
-      this.DomainName
-    );
+
     this.zatcaService
       .filterBySchoolAndDate(
         this.selectedSchoolId,
@@ -144,6 +145,7 @@ export class ElectronicInvoiceComponent implements OnInit {
     }
 
     this.totalPages = Math.ceil(this.totalRecords / this.pageSize);
+    this.selectedInvoices = [];
   }
 
   private formatDateForApi(dateString: string): string {
@@ -161,31 +163,132 @@ export class ElectronicInvoiceComponent implements OnInit {
   }
 
   navigateToDetail(id: number) {
-    this.saveState(); // Save state before navigating
-    this.router.navigate(['/Employee/Zatca Electronic-Invoice', id]);
+    this.saveState();
+    const routePrefix =
+      this.currentSystem === 'zatca'
+        ? '/Employee/Zatca Electronic-Invoice'
+        : '/Employee/ETA Electronic-Invoice';
+    this.router.navigate([routePrefix, id]);
+  }
+
+  toggleInvoiceSelection(id: number) {
+    const index = this.selectedInvoices.indexOf(id);
+    if (index === -1) {
+      this.selectedInvoices.push(id);
+    } else {
+      this.selectedInvoices.splice(index, 1);
+    }
+  }
+
+  toggleSelectAll(event: Event) {
+    const isChecked = (event.target as HTMLInputElement).checked;
+    this.selectedInvoices = isChecked ? this.transactions.map((t) => t.id) : [];
   }
 
   sendInvoice(invoice: ElectronicInvoice) {
-    // Implement send functionality
-    Swal.fire(
-      'Success',
-      `Invoice ${invoice.invoiceNumber} sent successfully`,
-      'success'
-    );
-  }
-
-  printInvoice(invoice: ElectronicInvoice) {
-    // Implement print functionality
-    window.print();
+    if (this.currentSystem == 'zatca') {
+      console.log('zatcaaa');
+      console.log(invoice.id);
+      this.zatcaService.reportInvoice(invoice.id, this.DomainName).subscribe({
+        next: () => {
+          Swal.fire(
+            'Success',
+            'Invoice reported to ZATCA successfully',
+            'success'
+          );
+          invoice.isValid = true;
+        },
+        error: (error) => {
+          Swal.fire('Error', 'Failed to report invoice to ZATCA', 'error');
+        },
+      });
+    } else {
+      console.log('eta');
+      this.etaService
+        .submitInvoice(invoice.id, 0, 0, this.DomainName)
+        .subscribe({
+          next: () => {
+            Swal.fire(
+              'Success',
+              'Invoice submitted to ETA successfully',
+              'success'
+            );
+            invoice.isValid = true;
+          },
+          error: (error) => {
+            Swal.fire('Error', 'Failed to submit invoice to ETA', 'error');
+          },
+        });
+    }
   }
 
   sendAll() {
-    // Implement send all functionality
-    Swal.fire('Success', 'All invoices sent successfully', 'success');
+    // If no invoices are selected, select all automatically
+    if (this.selectedInvoices.length === 0) {
+      this.selectedInvoices = this.transactions.map((t) => t.id);
+
+      // If still no invoices (empty transactions array), show warning
+      if (this.selectedInvoices.length === 0) {
+        Swal.fire('Warning', 'No invoices available to send', 'warning');
+        return;
+      }
+    }
+
+    if (this.currentSystem == 'zatca') {
+      console.log(this.selectedInvoices);
+      this.zatcaService
+        .reportInvoices(
+          this.selectedSchoolId!,
+          this.selectedInvoices,
+          this.DomainName
+        )
+        .subscribe({
+          next: () => {
+            Swal.fire(
+              'Success',
+              'Invoices reported to ZATCA successfully',
+              'success'
+            );
+            this.transactions.forEach((t) => {
+              if (this.selectedInvoices.includes(t.id)) t.isValid = true;
+            });
+            this.selectedInvoices = [];
+          },
+          error: (error) => {
+            Swal.fire('Error', 'Failed to report invoices to ZATCA', 'error');
+          },
+        });
+    } else {
+      this.etaService
+        .submitInvoices(
+          this.selectedSchoolId!,
+          this.selectedInvoices,
+          this.DomainName
+        )
+        .subscribe({
+          next: () => {
+            Swal.fire(
+              'Success',
+              'Invoices submitted to ETA successfully',
+              'success'
+            );
+            this.transactions.forEach((t) => {
+              if (this.selectedInvoices.includes(t.id)) t.isValid = true;
+            });
+            this.selectedInvoices = [];
+          },
+          error: (error) => {
+            Swal.fire('Error', 'Failed to submit invoices to ETA', 'error');
+          },
+        });
+    }
+  }
+
+  printInvoice(invoice: ElectronicInvoice) {
+    window.print();
   }
 
   printAll() {
-    // Implement print all functionality
     window.print();
   }
 
