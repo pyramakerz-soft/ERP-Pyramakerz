@@ -309,7 +309,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             if (InstallmentDeductionMasters == null || InstallmentDeductionMasters.Count == 0)
                 return NotFound("No installment masters found for the specified date range.");
 
-            List<InstallmentDeductionMasterGetDTO> DTO = _mapper.Map<List<InstallmentDeductionMasterGetDTO>>(InstallmentDeductionMasters);
+            List<InstallmentDeductionMasterGetDTO> DTOs = _mapper.Map<List<InstallmentDeductionMasterGetDTO>>(InstallmentDeductionMasters);
 
             var paginationMetadata = new
             {
@@ -319,7 +319,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
             };
 
-            return Ok(new { Data = DTO, Pagination = paginationMetadata });
+            return Ok(new { Data = DTOs, Pagination = paginationMetadata });
         }
         #endregion
 
@@ -349,6 +349,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
             if (query == null || query.Count == 0)
                 return NotFound("No accounting entries found for the specified date range.");
+
+            foreach (var entry in query)
+            {
+                entry.AccountingEntriesDetails = entry.AccountingEntriesDetails
+                    .Where(d => d.IsDeleted != true)
+                    .ToList();
+            }
 
             List<AccountingEntriesMaster> AccountingEntriesMasters = query
                 .AsEnumerable()
