@@ -38,7 +38,7 @@ export class SchoolPCsService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.get<SchoolPCs[]>(`${this.baseUrl}/SchoolPCs/GetBySchoolId?schoolId=${id}`, { headers })
+    return this.http.get<SchoolPCs[]>(`${this.baseUrl}/SchoolPCs/GetBySchoolId/${id}`, { headers })
   }
 
   Create(data: ZatcaDevice, DomainName: string): Observable<any> {
@@ -78,7 +78,7 @@ Delete(id: number, DomainName: string): Observable<any> {
     .set('Authorization', `Bearer ${token}`)
     .set('accept', 'text/plain'); // Accept plain text response
 
-  return this.http.delete(`${this.baseUrl}/SchoolPCs?id=${id}`, {
+  return this.http.delete(`${this.baseUrl}/SchoolPCs/${id}`, {
     headers,
     responseType: 'text' // Tell HttpClient to expect text response
   });
@@ -93,6 +93,6 @@ GetById(id: number, DomainName: string): Observable<ZatcaDevice> {
     .set('Authorization', `Bearer ${token}`)
     .set('accept', '*/*');
     
-  return this.http.get<ZatcaDevice>(`${this.baseUrl}/SchoolPCs/id?id=${id}`, { headers });
+  return this.http.get<ZatcaDevice>(`${this.baseUrl}/SchoolPCs/${id}`, { headers });
 }
 }
