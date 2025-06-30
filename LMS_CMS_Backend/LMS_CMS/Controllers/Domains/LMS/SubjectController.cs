@@ -480,5 +480,48 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             Unit_Of_Work.SaveChanges();
             return Ok();
         }
+
+        [HttpGet("GetBySudent/{StudentId}")]
+        [Authorize_Endpoint_(
+           allowedTypes: new[] { "octa", "employee" , "student" },
+           pages: new[] { "Subject" }
+       )]
+        public async Task<IActionResult> GetByStudentId(long StudentId)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            Student student = Unit_Of_Work.student_Repository.First_Or_Default(s=>s.ID== StudentId && s.IsDeleted != true);
+            if(student == null)
+            {
+                return BadRequest("There is no student with this id");
+            }
+            StudentGrade studentGrade = Unit_Of_Work.studentGrade_Repository.First_Or_Default(s => s.StudentID == StudentId && s.IsDeleted != true && s.Grade.IsDeleted != true && s.AcademicYear.IsActive == true);
+            if (studentGrade == null)
+            { 
+                return BadRequest("this student not exist in grade for this year");
+            }
+
+            List<Subject> subjects = await Unit_Of_Work.subject_Repository.Select_All_With_IncludesById<Subject>(
+                    f => f.IsDeleted != true && f.GradeID == studentGrade.GradeID
+                    );
+
+            if (subjects == null || subjects.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<SubjectGetDTO> subjectsDTO = mapper.Map<List<SubjectGetDTO>>(subjects);
+
+            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+            foreach (var subject in subjectsDTO)
+            {
+                if (!string.IsNullOrEmpty(subject.IconLink))
+                {
+                    subject.IconLink = $"{serverUrl}{subject.IconLink.Replace("\\", "/")}";
+                }
+            }
+
+            return Ok(subjectsDTO);
+        }
     }
 }

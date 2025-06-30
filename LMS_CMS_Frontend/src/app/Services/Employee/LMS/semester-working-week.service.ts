@@ -37,6 +37,18 @@ export class SemesterWorkingWeekService {
       .set('Content-Type', 'application/json');
     return this.http.get<SemesterWorkingWeek>(`${this.baseUrl}/SemesterWorkingWeek/GetByID/${id}`, { headers })
   }
+
+  GetBySubjectID(SubjectId: number,StudentId: number,DomainName:string) {
+    if(DomainName!=null) {
+      this.header=DomainName 
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<SemesterWorkingWeek[]>(`${this.baseUrl}/SemesterWorkingWeek/GetBySubjectID/${SubjectId}/${StudentId}`, { headers })
+  }
  
   GenerateWeeks(id: number,DomainName:string) {
     if(DomainName!=null) {
