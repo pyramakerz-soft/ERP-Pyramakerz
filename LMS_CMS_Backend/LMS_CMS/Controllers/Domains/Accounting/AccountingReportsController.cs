@@ -28,10 +28,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
         #region Payables
         [HttpGet("GetPayablesByDate")]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "" }
-        //)]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Payable Report" }
+        )]
         public async Task<ActionResult> GetPayablesByDate(string startDate, string endDate, int pageNumber = 1, int pageSize = 10)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -158,10 +158,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
         #region Receivables
         [HttpGet("GetReceivablesByDate")]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "" }
-        //)]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Receivable Report" }
+        )]
         public async Task<ActionResult> GetReceivablesByDate(string startDate, string endDate, int pageNumber = 1, int pageSize = 10)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -284,10 +284,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
         #region Installment Deduction
         [HttpGet("GetInstallmentDeductionsByDate")]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "" }
-        //)]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Installment Deduction Report" }
+        )]
         public async Task<ActionResult> GetInstallmentDeductionsByDate(string startDate, string endDate, int pageNumber = 1, int pageSize = 10)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -346,10 +346,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
         #region Accounting Entries
         [HttpGet("GetAccountingEntriesByDate")]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "" }
-        //)]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Accounting Entries Report" }
+        )]
         public async Task<ActionResult> GetAccountingEntriesByDate(string startDate, string endDate, int pageNumber = 1, int pageSize = 10)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -459,10 +459,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
         #region Fees Activation
         [HttpGet("GetFeesActivationByDate")]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "" }
-        //)]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Fees Activation Report" }
+        )]
         public async Task<ActionResult> GetFeesActivationByDate(string startDate, string endDate, int pageNumber = 1, int pageSize = 10)
         {
             UOW unit_of_work = _dbContextFactory.CreateOneDbContext(HttpContext);

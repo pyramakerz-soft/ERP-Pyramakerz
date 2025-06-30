@@ -241,7 +241,7 @@ export class StudentsInformationFormReportComponent {
               month: 'long',
               day: 'numeric'
             });
-            resolve();
+            resolve(); 
           },
           error: (err) => {
             reject(err);
