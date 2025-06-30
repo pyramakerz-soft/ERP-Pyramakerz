@@ -4,12 +4,14 @@ using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains;
 using LMS_CMS_DAL.Models.Domains.Inventory;
 using LMS_CMS_PL.Attribute;
+using System.Linq;
 using LMS_CMS_PL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
+using System;
 
 
 namespace LMS_CMS_PL.Controllers.Domains.Inventory
@@ -58,113 +60,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
         /// ///////////////////////////////////////////////////-777
 
-        //[HttpGet("inventory-full-report")]
-        //[Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Inventory" })]
-        //public async Task<IActionResult> GetInventoryFullReportAsync(
-        //    long storeId,
-        //    long shopItemId,
-        //    string fromDate,
-        //    string toDate)
-        //        {
-        //    if (!DateTime.TryParse(fromDate, out DateTime fromDateTime) ||
-        //        !DateTime.TryParse(toDate, out DateTime toDateTime))
-        //        return BadRequest("Invalid date format.");
-
-        //    var Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-
-        //    var includes = new Func<IQueryable<InventoryDetails>, IIncludableQueryable<InventoryDetails, object>>[]
-        //    {
-        //q => q.Include(d => d.InventoryMaster).ThenInclude(m => m.InventoryFlags),
-        //q => q.Include(d => d.InventoryMaster.Supplier),
-        //q => q.Include(d => d.InventoryMaster.Student),
-        //q => q.Include(d => d.InventoryMaster.StoreToTransform)
-        //    };
-
-        //    var baseData = await Unit_Of_Work.inventoryDetails_Repository
-        //        .Select_All_With_IncludesById<InventoryDetails>(
-        //            d => d.InventoryMaster != null &&
-        //                 d.InventoryMaster.IsDeleted != true &&
-        //                 d.ShopItemID == shopItemId &&
-        //                 (d.InventoryMaster.StoreID == storeId ||
-        //                  (d.InventoryMaster.FlagId == 8 && d.InventoryMaster.StoreToTransformId == storeId)),
-        //            includes
-        //        );
-
-        //    var filteredData = baseData
-        //        .Where(d =>
-        //            DateTime.TryParse(d.InventoryMaster.Date, out DateTime docDate) &&
-        //            docDate.Date >= fromDateTime.Date &&
-        //            docDate.Date <= toDateTime.Date)
-        //        .ToList();
-
-        //    // ======= Summary Calculation =======
-        //    var flagsToExclude = new long[] { 13 };
-
-        //    var summaryData = filteredData
-        //        .Where(d => !flagsToExclude.Contains(d.InventoryMaster.FlagId) &&
-        //                    d.InventoryMaster.InventoryFlags.ItemInOut != 0)
-        //        .ToList();
-
-        //    var inQuantity = summaryData
-        //        .Where(d => d.InventoryMaster.InventoryFlags.ItemInOut == 1)
-        //        .Sum(d => d.Quantity);
-
-        //    var outQuantity = summaryData
-        //        .Where(d => d.InventoryMaster.InventoryFlags.ItemInOut == -1)
-        //        .Sum(d => d.Quantity);
-
-        //    var balance = inQuantity - outQuantity;
-
-        //    var summaryDto = new InventoryNetSummaryDTO
-        //    {
-        //        ShopItemId = shopItemId,
-        //        StoreId = storeId,
-        //        ToDate = toDateTime.AddDays(-1).ToString("yyyy-MM-dd"),
-        //        InQuantity = inQuantity,
-        //        outQuantity = outQuantity,
-        //        Balance = balance
-        //    };
-
-        //    // ======= Transactions DTO List =======
-        //    var transactionDtos = filteredData.Select(d =>
-        //    {
-        //        double signedQty = d.Quantity * d.InventoryMaster.InventoryFlags.ItemInOut;
-        //        return new InventoryNetTransactionDTO
-        //        {
-        //            FlagName = d.InventoryMaster.InventoryFlags.arName,
-        //            InvoiceNumber = d.InventoryMaster.InvoiceNumber,
-        //            DayDate = d.InventoryMaster.Date,
-        //            Notes = d.InventoryMaster.Notes,
-        //            Quantity = d.Quantity,
-
-        //            SupplierName = (new long[] { 9, 10, 13 }.Contains(d.InventoryMaster.FlagId))
-        //                ? d.InventoryMaster.Supplier?.Name
-        //                : null,
-
-        //            StudentName = (new long[] { 11, 12 }.Contains(d.InventoryMaster.FlagId))
-        //                ? d.InventoryMaster.Student?.en_name
-        //                : null,
-
-        //            StoreToName = (d.InventoryMaster.FlagId == 8)
-        //                ? d.InventoryMaster.StoreToTransform?.Name
-        //                : null,
-
-        //            TotalIn = signedQty > 0 ? signedQty : 0,
-        //            TotalOut = signedQty < 0 ? Math.Abs(signedQty) : 0,
-        //            Balance = signedQty
-        //        };
-        //    }).ToList();
-
-        //    // ======= Return Both Together =======
-        //    var result = new
-        //    {
-        //        Summary = summaryDto,
-        //        Transactions = transactionDtos
-        //    };
-
-        //    return Ok(result);
-        //}
-        ////////////////////////////////////////////////////////
 
         [HttpGet("inventory-net-summary")]
         [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Inventory" })]
@@ -227,7 +122,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         }
 
         ///// /////////////////////////////////////////////////////////////////////////////////////-777
-     
+
         [HttpGet("inventory-net-transactions")]
         [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Inventory" })]
         public async Task<IActionResult> GetInventoryNetTransactionsAsync(long storeId, long shopItemId, string fromDate, string toDate)
@@ -307,7 +202,139 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
             return Ok(transactions);
         }
+        ///// /////////////////////////////////////////////////////////////////////////////////////-777
+        [HttpGet("CalculateMovingAverageCost")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Inventory" }
+        )]
+        public async Task<ActionResult<List<CalculatedAverageCostDto>>> CalculateMovingAverageCost(
+        [FromQuery] DateTime fromDate,
+        [FromQuery] DateTime toDate)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+            var includedFlags = new List<long> { 1, 9 };
 
+            // جلب البيانات أولًا
+            var allDetails = await Unit_Of_Work.inventoryDetails_Repository.Query()
+                .Include(d => d.InventoryMaster)
+                .Include(d => d.InventoryMaster.InventoryFlags)
+                .Where(d =>
+                    d.InventoryMaster != null &&
+                    d.InventoryMaster.IsDeleted != true &&
+                    d.InventoryMaster.Date != null &&
+                    d.InventoryMaster.FlagId != 13)
+                .ToListAsync();
+
+            // Reset AverageCost
+            var detailsToReset = allDetails
+                .Where(d =>
+                    DateTime.TryParse(d.InventoryMaster.Date, out var parsedDate) &&
+                    parsedDate >= fromDate && parsedDate <= toDate)
+                .ToList();
+
+            foreach (var detail in detailsToReset)
+            {
+                detail.AverageCost = null;
+                Unit_Of_Work.inventoryDetails_Repository.Update(detail);
+            }
+
+            // TotalPrice → AverageCost (للحركات الواردة فقط)
+            var detailsToUpdate = allDetails
+                .Where(d =>
+                    DateTime.TryParse(d.InventoryMaster.Date, out var parsedDate) &&
+                    parsedDate >= fromDate && parsedDate <= toDate &&
+                    includedFlags.Contains(d.InventoryMaster.FlagId))
+                .ToList();
+
+            foreach (var detail in detailsToUpdate)
+            {
+                detail.AverageCost = detail.TotalPrice;
+                Unit_Of_Work.inventoryDetails_Repository.Update(detail);
+            }
+
+            var dtoList = new List<CalculatedAverageCostDto>();
+            var currentDate = fromDate;
+
+            while (currentDate <= toDate)
+            {
+                var filteredDailyDetails = allDetails
+                    .Where(d =>
+                        DateTime.TryParse(d.InventoryMaster.Date, out var parsedDate) &&
+                        parsedDate.Date == currentDate.Date &&
+                        d.InventoryMaster.InventoryFlags.ItemInOut != 0 &&
+                        !includedFlags.Contains(d.InventoryMaster.FlagId))
+                    .ToList();
+
+                foreach (var detail in filteredDailyDetails)
+                {
+                    var avgCost = await CalculateItemAvgCost(detail.ShopItemID, currentDate);
+                    detail.AverageCost = avgCost * detail.Quantity;
+                    Unit_Of_Work.inventoryDetails_Repository.Update(detail);
+
+                    dtoList.Add(new CalculatedAverageCostDto
+                    {
+                        ShopItemId = detail.ShopItemID,
+                        DayDate = currentDate,
+                        AverageCost = avgCost,
+                        Quantity = detail.Quantity,
+                        Price = detail.Price,
+                        TotalPrice = detail.TotalPrice
+                    });
+                }
+
+                currentDate = currentDate.AddDays(1);
+            }
+
+            await Unit_Of_Work.SaveChangesAsync();
+            return Ok(dtoList);
+        }
+
+
+        ///// /////////////////////////////////////////////////////////////////////////////////////-777
+        private async Task<decimal> CalculateItemAvgCost(long shopItemId, DateTime date)
+        {
+            var includedFlags = new List<long> { 1, 9 };
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var allTransactions = await Unit_Of_Work.inventoryDetails_Repository.Query()
+                .Include(d => d.InventoryMaster)
+                .Include(d => d.InventoryMaster.InventoryFlags)
+                .Where(d =>
+                    d.ShopItemID == shopItemId &&
+                    d.InventoryMaster != null &&
+                    d.InventoryMaster.Date != null &&
+                    d.InventoryMaster.IsDeleted != true &&
+                    d.InventoryMaster.InventoryFlags.ItemInOut != 0)
+                .ToListAsync();
+
+            var validTransactions = allTransactions
+                .Where(d =>
+                    DateTime.TryParse(d.InventoryMaster.Date, out var transactionDate) &&
+                    (
+                        transactionDate < date ||
+                        (transactionDate == date && includedFlags.Contains(d.InventoryMaster.FlagId))
+                    ))
+                .ToList();
+
+            decimal totalCost = 0;
+            decimal totalQuantity = 0;
+
+            foreach (var transaction in validTransactions)
+            {
+                var itemInOut = transaction.InventoryMaster.InventoryFlags.ItemInOut;
+                var avgCost = transaction.AverageCost ?? 0;
+
+                totalCost += itemInOut * avgCost;
+                totalQuantity += itemInOut * transaction.Quantity;
+            }
+
+            return totalQuantity == 0 ? 0 : totalCost / totalQuantity;
+        }
+
+
+
+        ///// /////////////////////////////////////////////////////////////////////////////////////-777
 
 
 
