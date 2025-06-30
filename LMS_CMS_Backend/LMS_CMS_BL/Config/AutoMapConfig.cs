@@ -640,7 +640,7 @@ namespace LMS_CMS_BL.Config
 
 
 
-            CreateMap<InventoryMaster, InventoryMasterGetDTO>()  // InventoryMasterGetDTO 
+            CreateMap<InventoryMaster, InventoryMasterGetDTO>()  
                  .ForMember(dest => dest.SaveName, opt => opt.MapFrom(src => src.Save != null ? src.Save.Name : null))
                  .ForMember(dest => dest.BankName, opt => opt.MapFrom(src => src.Bank != null ? src.Bank.Name : null))
                  .ForMember(dest => dest.FlagArName, opt => opt.MapFrom(src => src.InventoryFlags.arName))
