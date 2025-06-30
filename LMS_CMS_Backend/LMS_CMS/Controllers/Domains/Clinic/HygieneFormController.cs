@@ -50,8 +50,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                     query => query.Include(h => h.Classroom),
                     query => query.Include(h => h.School),
                     query => query.Include(h => h.Grade),
-
-                    query => query.Include(h => h.StudentHygieneTypes)?.ThenInclude(x => x.HygieneTypes)
+                    query => query.Include(h => h.StudentHygieneTypes)?.ThenInclude(x => x.HygieneTypes),
+                    query => query.Include(x => x.InsertedByEmployee)
             );
 
             foreach (var ff in hygieneForms)
@@ -110,7 +110,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                     query => query.Include(x => x.Classroom),
                     query => query.Include(x => x.School),
                     query => query.Include(x => x.Grade),
-                    query => query.Include(x => x.StudentHygieneTypes)?.ThenInclude(x => x.HygieneTypes)
+                    query => query.Include(x => x.StudentHygieneTypes)?.ThenInclude(x => x.HygieneTypes),
+                    query => query.Include(x => x.InsertedByEmployee)
                 );
 
             if (hygieneForm == null)

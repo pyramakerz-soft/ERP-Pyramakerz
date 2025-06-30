@@ -168,16 +168,7 @@ export class SchoolComponent {
       this.validationErrors[field] = '';
     }
   }
-
-  IsAllowEdit(InsertedByID: number) {
-    const IsAllow = this.EditDeleteServ.IsAllowEdit(
-      InsertedByID,
-      this.UserID,
-      this.AllowEditForOthers
-    );
-    return IsAllow;
-  }
-
+ 
   isFormValid(): boolean {
     let isValid = true;
     for (const key in this.school) {

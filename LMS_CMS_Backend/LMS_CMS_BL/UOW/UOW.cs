@@ -196,8 +196,9 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<DirectMarkClassroomStudent> DirectMarkClassroomStudent_Repository;
         GenericRepo<AssignmentStudentQuestion> AssignmentStudentQuestion_Repository;
         GenericRepo<ETAPOS> POS_Repository;
+        GenericRepo<TaxCustomer> TaxCustomer_Repository;
         GenericRepo<AssignmentStudentQuestionAnswerOption> AssignmentStudentQuestionAnswerOption_Repository;
-
+        GenericRepo<DailyPerformanceMaster> DailyPerformanceMaster_Repository;
 
         public UOW(Octa_DbContext octa_Db)
         {
@@ -2216,6 +2217,30 @@ namespace LMS_CMS_BL.UOW
                     AssignmentStudentQuestionAnswerOption_Repository = new GenericRepo<AssignmentStudentQuestionAnswerOption>(db);
                 }
                 return AssignmentStudentQuestionAnswerOption_Repository;
+            }
+        }
+
+        public GenericRepo<TaxCustomer> taxCustomer_Repository
+        {
+            get
+            {
+                if (TaxCustomer_Repository == null)
+                {
+                    TaxCustomer_Repository = new GenericRepo<TaxCustomer>(db);
+                }
+                return TaxCustomer_Repository;
+            }
+        }
+
+        public GenericRepo<DailyPerformanceMaster> dailyPerformanceMaster_Repository
+        {
+            get
+            {
+                if (DailyPerformanceMaster_Repository == null)
+                {
+                    DailyPerformanceMaster_Repository = new GenericRepo<DailyPerformanceMaster>(db);
+                }
+                return DailyPerformanceMaster_Repository;
             }
         }
 

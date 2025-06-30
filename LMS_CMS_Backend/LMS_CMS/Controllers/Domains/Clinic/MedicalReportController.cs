@@ -30,7 +30,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Medical Report" }
         )]
-        public IActionResult GetAllMHByParent()
+        public async Task<IActionResult> GetAllMHByParent()
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
             var userClaims = HttpContext.User.Claims;
@@ -44,7 +44,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                 return Unauthorized("User ID or Type claim not found.");
             }
             
-            List<MedicalHistory> medicalHistory = Unit_Of_Work.medicalHistory_Repository.FindBy(t => t.IsDeleted != true && t.InsertedByUserId != null);
+            List<MedicalHistory> medicalHistory = await Unit_Of_Work.medicalHistory_Repository
+                .Select_All_With_IncludesById<MedicalHistory>(t => t.IsDeleted != true && t.InsertedByUserId != null,
+                query => query.Include(x => x.InsertedByEmployee));
             
             if (medicalHistory == null || medicalHistory.Count == 0)
             {
@@ -63,7 +65,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Medical Report" }
         )]
-        public IActionResult GetAllMHByDoctor()
+        public async Task<IActionResult> GetAllMHByDoctor()
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
             var userClaims = HttpContext.User.Claims;
@@ -77,7 +79,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            List<MedicalHistory> medicalHistory = Unit_Of_Work.medicalHistory_Repository.FindBy(t => t.IsDeleted != true && t.InsertedByUserId == null);
+            List<MedicalHistory> medicalHistory = await Unit_Of_Work.medicalHistory_Repository
+                .Select_All_With_IncludesById<MedicalHistory>(t => t.IsDeleted != true && t.InsertedByUserId == null,
+                query => query.Include(x => x.InsertedByEmployee));
 
             if (medicalHistory == null || medicalHistory.Count == 0)
             {
@@ -115,7 +119,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                     d => d.IsDeleted != true,
                     query => query.Include(h => h.Classroom),
                     query => query.Include(h => h.School),
-                    query => query.Include(h => h.Grade)
+                    query => query.Include(h => h.Grade),
+                    query => query.Include(x => x.InsertedByEmployee)
                 );
 
             if (hygieneForms == null || hygieneForms.Count == 0)
@@ -171,7 +176,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                     query => query.Include(h => h.Classroom),
                     query => query.Include(h => h.School),
                     query => query.Include(h => h.Grade),
-                    query => query.Include(h => h.FollowUpDrugs)
+                    query => query.Include(h => h.FollowUpDrugs),
+                    query => query.Include(x => x.InsertedByEmployee)
                 );
             
             if (followUps == null || followUps.Count == 0)

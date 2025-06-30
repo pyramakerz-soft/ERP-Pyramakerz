@@ -67,7 +67,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
         #endregion
 
         #region GetByID
-        [HttpGet("id")]
+        [HttpGet("{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Zatca Devices" }

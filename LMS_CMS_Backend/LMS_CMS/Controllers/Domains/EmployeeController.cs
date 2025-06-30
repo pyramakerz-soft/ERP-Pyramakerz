@@ -78,8 +78,18 @@ namespace LMS_CMS_PL.Controllers.Domains
             {
                 List<EmployeeAttachment> employeeAttachments = Unit_Of_Work.employeeAttachment_Repository.FindBy(s => s.EmployeeID == employeeDTO.ID);
                 List<EmployeeAttachmentDTO> filesDTO = mapper.Map<List<EmployeeAttachmentDTO>>(employeeAttachments);
-                if(filesDTO!=null)
-                employeeDTO.Files = filesDTO;
+                string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+                if (filesDTO != null)
+                {
+                    employeeDTO.Files = filesDTO;
+                    foreach (var file in filesDTO)
+                    {
+                        if (!string.IsNullOrEmpty(file.Link))
+                        {
+                            file.Link = $"{serverUrl}{file.Link.Replace("\\", "/")}";
+                        }
+                    }
+                }
                 else
                 employeeDTO.Files = new List<EmployeeAttachmentDTO>();
 
@@ -156,8 +166,18 @@ namespace LMS_CMS_PL.Controllers.Domains
             {
                 List<EmployeeAttachment> employeeAttachments = Unit_Of_Work.employeeAttachment_Repository.FindBy(s => s.EmployeeID == employeeDTO.ID);
                 List<EmployeeAttachmentDTO> filesDTO = mapper.Map<List<EmployeeAttachmentDTO>>(employeeAttachments);
+                string serverUrl = $"{Request.Scheme}://{Request.Host}/";
                 if (filesDTO != null)
+                {
                     employeeDTO.Files = filesDTO;
+                    foreach (var file in filesDTO)
+                    {
+                        if (!string.IsNullOrEmpty(file.Link))
+                        {
+                            file.Link = $"{serverUrl}{file.Link.Replace("\\", "/")}";
+                        }
+                    }
+                }
                 else
                     employeeDTO.Files = new List<EmployeeAttachmentDTO>();
 
@@ -191,21 +211,20 @@ namespace LMS_CMS_PL.Controllers.Domains
             Employee_GetDTO employeeDTO = mapper.Map<Employee_GetDTO>(employee);
             List<EmployeeAttachment> employeeAttachments = Unit_Of_Work.employeeAttachment_Repository.FindBy(s => s.EmployeeID == employeeDTO.ID &&s.IsDeleted!=true);
             List<EmployeeAttachmentDTO> filesDTO = mapper.Map<List<EmployeeAttachmentDTO>>(employeeAttachments);
+            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
             if (filesDTO != null)
-                employeeDTO.Files = filesDTO;
-            else
-                employeeDTO.Files = new List<EmployeeAttachmentDTO>();
-
-            foreach (var file in filesDTO)
             {
-                string filePath = Path.Combine("Uploads", "Attachments", employee.User_Name.Trim(), file.Name);
-
-                if (System.IO.File.Exists(filePath))
+                employeeDTO.Files = filesDTO;
+                foreach (var file in filesDTO)
                 {
-                    var fileInfo = new FileInfo(filePath); 
-                    file.Size = Math.Round(fileInfo.Length / (1024.0 * 1024.0), 2);
+                    if (!string.IsNullOrEmpty(file.Link))
+                    {
+                        file.Link = $"{serverUrl}{file.Link.Replace("\\", "/")}";
+                    }
                 }
             }
+            else
+                employeeDTO.Files = new List<EmployeeAttachmentDTO>();
 
             ////////
 
@@ -438,7 +457,7 @@ namespace LMS_CMS_PL.Controllers.Domains
                     EmployeeAttachment uploadedFile = new EmployeeAttachment
                     {
                         EmployeeID = employee.ID,
-                        Link = $"{Request.Scheme}://{Request.Host}/Uploads/Attachments/{employee.User_Name}/{file.file.FileName}",
+                        Link = $"Uploads/Attachments/{employee.User_Name}/{file.file.FileName}",
                         Name = file.Name,
                     };
 
@@ -629,7 +648,7 @@ namespace LMS_CMS_PL.Controllers.Domains
                     EmployeeAttachment uploadedFile = new EmployeeAttachment
                     {
                         EmployeeID = oldEmp.ID,
-                        Link = $"{Request.Scheme}://{Request.Host}/Uploads/Attachments/{oldEmp.User_Name}/{file.file.FileName}",
+                        Link = $"Uploads/Attachments/{oldEmp.User_Name}/{file.file.FileName}",
                         Name = file.Name,
                     };
 

@@ -13,8 +13,8 @@ namespace LMS_CMS_DAL.Models.Domains.AccountingModule
     {
         [Key]
         public long ID { get; set; }
-        public int CreditAmount { get; set; }
-        public int DebitAmount { get; set; }
+        public decimal? CreditAmount { get; set; }
+        public decimal? DebitAmount { get; set; }
         public string? Note { get; set; }
         [ForeignKey("AccountingTreeChart")]
         public long AccountingTreeChartID { get; set; }

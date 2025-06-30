@@ -7,5 +7,7 @@
         public string ClientSecret { get; set; }
         public string ClientSecret2 { get; set; }
         public string deviceSerialNumber { get; set; }
+        public long? InsertedByUserId { get; set; }
+        public string? en_name { get; set; }
     }
 }

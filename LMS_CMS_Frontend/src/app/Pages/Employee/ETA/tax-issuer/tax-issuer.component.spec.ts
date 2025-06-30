@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { SchoolTaxInfoComponent } from './school-tax-info.component';
+import { TaxIssuerComponent } from './tax-issuer.component';
 
-describe('SchoolTaxInfoComponent', () => {
-  let component: SchoolTaxInfoComponent;
-  let fixture: ComponentFixture<SchoolTaxInfoComponent>;
+describe('TaxIssuerComponent', () => {
+  let component: TaxIssuerComponent;
+  let fixture: ComponentFixture<TaxIssuerComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SchoolTaxInfoComponent]
+      imports: [TaxIssuerComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(SchoolTaxInfoComponent);
+    fixture = TestBed.createComponent(TaxIssuerComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

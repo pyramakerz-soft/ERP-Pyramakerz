@@ -51,6 +51,7 @@ export class AssignmentStudentComponent {
   assignmentStudent: AssignmentStudent = new AssignmentStudent()
   isLoading: boolean = false
   validationErrors: { [key in keyof AssignmentStudent]?: string } = {};
+  questionValidationErrors: { [index: number]: string } = {};
   emptyStringList: string[] = [];
 
   constructor(
@@ -150,20 +151,17 @@ export class AssignmentStudentComponent {
       }));
     }
 
-    // if (type === 4) {
-    //   // Drag & Drop – match sub-questions
-    //   console.log(question.subBankQuestionsDTO)
-    //   question.answerPool = (question.subBankQuestionsDTO || []).map((sub: SubBankQuestion) => sub.answer);
-    //   console.log(question.answerPool)
-    //   return (question.subBankQuestionsDTO || []).map((sub: SubBankQuestion) => ({
-    //     id: 0,
-    //     order: 0,
-    //     answer: '',
-    //     assignmentStudentQuestionID: null,
-    //     selectedOpionID: null,
-    //     subBankQuestionID: sub.id
-    //   }));
-    // }
+    if (type === 4) {
+      // Drag & Drop – match sub-questions
+      return (question.subBankQuestionsDTO || []).map((sub: SubBankQuestion) => ({
+        id: 0,
+        order: 0,
+        answer: '',
+        assignmentStudentQuestionID: null,
+        selectedOpionID: null,
+        subBankQuestionID: sub.id
+      }));
+    }
 
     // Default case for Essay, MCQ, True/False
     return [{
@@ -181,39 +179,56 @@ export class AssignmentStudentComponent {
   }
 
   Submit() {
-    if (this.isFormValid()) {
-      this.isLoading = true;
-      if (this.assignment.assignmentTypeID == 1) {
-        this.assignmentStudentServ.AddWhenTextBookAssignment(this.assignmentStudent, this.DomainName).subscribe((d) => {
+    if (!this.isFormValid()) return;
+    console.log(this.assignmentStudent)
+    this.isLoading = true;
+    const isTextbook = this.assignment.assignmentTypeID === 1;
+    const submitObservable = isTextbook
+      ? this.assignmentStudentServ.AddWhenTextBookAssignment(this.assignmentStudent, this.DomainName)
+      : this.assignmentStudentServ.Add(this.assignmentStudent, this.DomainName);
+
+    submitObservable.subscribe({
+      next: () => {
+        this.isLoading = false;
+        Swal.fire({
+          icon: 'success',
+          title: 'Done',
+          text: 'Assignment submitted successfully.',
+          confirmButtonColor: '#089B41',
+        });
+      },
+      error: (err) => {
+        this.isLoading = false;
+        const errorMessage = typeof err === 'string' ? err : err?.error || '';
+
+        if (errorMessage.includes("cut-off date") || errorMessage.includes("deadline has passed")) {
           Swal.fire({
-            icon: 'success',
-            title: 'Done',
-            text: 'Assignment Supmited Succeessfully',
-            confirmButtonColor: '#089B41',
+            icon: 'error',
+            title: 'Submission Blocked',
+            text: 'You cannot submit this assignment. The cut-off date has passed.',
+            confirmButtonText: 'Okay',
+            customClass: { confirmButton: 'secondaryBg' },
           });
-          this.isLoading = false;
-        },
-          err => {
-            this.isLoading = false;
-            console.log(err)
-          })
-      }
-      else {
-        this.assignmentStudentServ.Add(this.assignmentStudent, this.DomainName).subscribe((d) => {
+        } else if (errorMessage.includes("You have already submitted this assignment and cannot submit it again") ) {
           Swal.fire({
-            icon: 'success',
-            title: 'Done',
-            text: 'Assignment Supmited Succeessfully',
-            confirmButtonColor: '#089B41',
+            icon: 'error',
+            title: 'Submission Blocked',
+            text: 'You have already submitted this assignment and cannot submit it again.',
+            confirmButtonText: 'Okay',
+            customClass: { confirmButton: 'secondaryBg' },
           });
-          this.isLoading = false;
-        },
-          err => {
-            this.isLoading = false;
-            console.log(err)
-          })
+        }
+        else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Failed',
+            text: 'Something went wrong while submitting the assignment.',
+            confirmButtonText: 'Close',
+            customClass: { confirmButton: 'secondaryBg' },
+          });
+        }
       }
-    }
+    });
   }
 
   onImageFileSelected(event: any) {
@@ -246,25 +261,72 @@ export class AssignmentStudentComponent {
   }
 
   isFormValid(): boolean {
+    this.validationErrors = {};
+    this.questionValidationErrors = {};
     let isValid = true;
-    for (const key in this.assignmentStudent) {
-      if (this.assignmentStudent.hasOwnProperty(key)) {
-        const field = key as keyof AssignmentStudent;
-        if (this.assignment.assignmentTypeID == 1) {
-          if (!this.assignmentStudent[field]) {
-            if (
-              field == 'file'
-            ) {
-              this.validationErrors[field] = `*${this.capitalizeField(
-                field
-              )} is required`;
+
+    if (this.assignment.assignmentTypeID === 1) {
+      if (!this.assignmentStudent.file) {
+        this.validationErrors['file'] = '*File is required';
+        isValid = false;
+      }
+    } else {
+      this.assignmentStudent.assignmentStudentQuestions.forEach((q, index) => {
+        switch (q.questionTypeID) {
+          case 1: // True/False
+            if (!q.answer || q.answer.trim() === '') {
+              this.questionValidationErrors[index] = 'Please answer this question.';
               isValid = false;
             }
-          }
-        }else if (this.assignment.assignmentTypeID != 1) {
-          
+            break;
+          case 6: // Essay
+            if (!q.answer || q.answer.trim() === '') {
+              this.questionValidationErrors[index] = 'Please answer this question.';
+              isValid = false;
+            }
+            break;
+
+          case 2: // MCQ
+            if (!q.answerOptionID) {
+              this.questionValidationErrors[index] = 'Please select an option.';
+              isValid = false;
+            }
+            break;
+
+          case 3: // Fill in the Blank
+            if (
+              q.assignmentStudentQuestionAnswerOption?.some(
+                (opt) => !opt.answer || opt.answer.trim() === ''
+              )
+            ) {
+              this.questionValidationErrors[index] = 'Fill in all blanks.';
+              isValid = false;
+            }
+            break;
+
+          case 4: // Drag & Drop
+            if (
+              q.subBankQuestion?.some(
+                (sub) => !sub.answer || sub.answer.trim() === ''
+              )
+            ) {
+              this.questionValidationErrors[index] = 'Complete all matches.';
+              isValid = false;
+            }
+            break;
+
+          case 5: // Ordering
+            if (
+              q.assignmentStudentQuestionAnswerOption?.some(
+                (opt) => !opt.answer || opt.answer.trim() === ''
+              )
+            ) {
+              this.questionValidationErrors[index] = 'Order all items.';
+              isValid = false;
+            }
+            break;
         }
-      }
+      });
     }
     return isValid;
   }
@@ -279,10 +341,12 @@ export class AssignmentStudentComponent {
 
   onDropMatch(row: AssignmentStudentQuestion, sub: SubBankQuestion, event: CdkDragDrop<string[]>) {
     const droppedAnswer = event.item.data;
-
     if (!sub.answer && row.answerPool.includes(droppedAnswer)) {
       sub.answer = droppedAnswer;
-
+      const answerOption = row.assignmentStudentQuestionAnswerOption.find(opt => opt.subBankQuestionID === sub.id);
+      if (answerOption) {
+        answerOption.answer = droppedAnswer;
+      }
       const index = row.answerPool.indexOf(droppedAnswer);
       if (index > -1) {
         row.answerPool.splice(index, 1);

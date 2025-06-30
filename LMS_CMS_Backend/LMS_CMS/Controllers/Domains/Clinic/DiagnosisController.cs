@@ -6,6 +6,7 @@ using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace LMS_CMS_PL.Controllers.Domains.Clinic
 {
@@ -29,7 +30,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Diagnosis" }
         )]
-        public IActionResult Get()
+        public async Task<IActionResult> Get()
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -44,7 +45,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                 return Unauthorized("User ID or Type claim not found.");
             }
             
-            List<Diagnosis> diagnosis = Unit_Of_Work.diagnosis_Repository.FindBy(t => t.IsDeleted != true);
+            List<Diagnosis> diagnosis = await Unit_Of_Work.diagnosis_Repository
+                .Select_All_With_IncludesById<Diagnosis>(
+                t => t.IsDeleted != true,
+                query => query.Include(x => x.InsertedByEmployee));
 
             if (diagnosis == null || diagnosis.Count == 0)
             {
@@ -63,7 +67,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Diagnosis" }
         )]
-        public IActionResult GetByID(long id)
+        public async Task<IActionResult> GetByID(long id)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -78,7 +82,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                 return Unauthorized("User ID or Type claim not found.");
             }
             
-            Diagnosis diagnosis = Unit_Of_Work.diagnosis_Repository.First_Or_Default(d => d.Id == id && d.IsDeleted != true);
+            Diagnosis diagnosis = await Unit_Of_Work.diagnosis_Repository
+                .FindByIncludesAsync(
+                d => d.Id == id && d.IsDeleted != true,
+                query => query.Include(x => x.InsertedByEmployee));
 
             if (diagnosis == null)
             {

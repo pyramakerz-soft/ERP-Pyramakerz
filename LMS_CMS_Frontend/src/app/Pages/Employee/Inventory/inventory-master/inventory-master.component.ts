@@ -92,7 +92,7 @@ export class InventoryMasterComponent {
  
    Delete(id: number) {
      Swal.fire({
-       title: 'Are you sure you want to delete this Sales?',
+       title: 'Are you sure you want to delete this Invoice?',
        icon: 'warning',
        showCancelButton: true,
        confirmButtonColor: '#089B41',
@@ -147,6 +147,7 @@ export class InventoryMasterComponent {
          this.TableData = this.TableData.filter((t) => {
            const fieldValue = t[this.key as keyof typeof t];
            if (typeof fieldValue === 'string') {
+            console.log(fieldValue,this.value ,this.key)
              return fieldValue.toLowerCase().includes(this.value.toLowerCase());
            }
            if (typeof fieldValue === 'number') {

@@ -54,7 +54,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                     query => query.Include(h => h.Classroom),
                     query => query.Include(h => h.School),
                     query => query.Include(h => h.Grade),
-                    query => query.Include(h => h.Student)
+                    query => query.Include(h => h.Student),
+                    query => query.Include(x => x.InsertedByEmployee)
                 );
 
             if (medicalHistories == null || medicalHistories.Count == 0)
@@ -88,7 +89,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             allowedTypes: new[] { "octa", "employee", "parent" },
             pages: new[] { "Medical History" }
         )]
-        public IActionResult GetByParent()
+        public async Task<IActionResult> GetByParent()
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -102,7 +103,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            List<MedicalHistory> medicalHistories = Unit_Of_Work.medicalHistory_Repository.FindBy(m => m.IsDeleted != true);
+            List<MedicalHistory> medicalHistories = await Unit_Of_Work.medicalHistory_Repository
+                .Select_All_With_IncludesById<MedicalHistory>(m => m.IsDeleted != true,
+                query => query.Include(x => x.InsertedByEmployee));
 
             if (medicalHistories == null || medicalHistories.Count == 0)
             {
@@ -154,7 +157,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                     query => query.Include(m => m.School),
                     query => query.Include(m => m.Grade),
                     query => query.Include(m => m.Classroom),
-                    query => query.Include(m => m.Student)
+                    query => query.Include(m => m.Student),
+                    query => query.Include(x => x.InsertedByEmployee)
             );
 
             if (medicalHistory == null || medicalHistory.IsDeleted == true)
@@ -200,7 +204,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            MedicalHistory medicalHistory = await Unit_Of_Work.medicalHistory_Repository.Select_By_IdAsync(id);
+            MedicalHistory medicalHistory = await Unit_Of_Work.medicalHistory_Repository
+                .FindByIncludesAsync(x => x.Id == id,
+                query => query.Include(x => x.InsertedByEmployee));
 
             if (medicalHistory == null || medicalHistory.IsDeleted == true)
             {

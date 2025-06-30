@@ -11,10 +11,10 @@ namespace LMS_CMS_BL.DTO.Accounting
     public class FeesActivationGetDTO
     {
         [Key]
-        public long FeeActivationID { get; set; }
-        public float Amount { get; set; }
+        public long ID { get; set; }
+        public decimal Amount { get; set; }
         public float Discount { get; set; }
-        public float Net { get; set; }
+        public decimal Net { get; set; }
         public string Date { get; set; }
         public long FeeTypeID { get; set; }
         public string? FeeTypeName { get; set; }
@@ -25,16 +25,5 @@ namespace LMS_CMS_BL.DTO.Accounting
         public long? InsertedByUserId { get; set; }
         public long AcademicYearId { get; set; }
         public string? AcademicYearName { get; set; }
-
-        public long? StudentAcademicYearID { get; set; }
-        public long? SchoolID { get; set; }
-        public string? SchoolName { get; set; }
-        public long? ClassID { get; set; }
-        public string? ClassName { get; set; }
-        public long? GradeID { get; set; }
-        public string? GradeName { get; set; }
-        public long? SectionId { get; set; }
-        public string? SectionName { get; set; }
-
     }
 }

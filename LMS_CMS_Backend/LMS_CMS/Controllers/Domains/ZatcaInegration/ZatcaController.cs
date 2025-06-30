@@ -1,6 +1,7 @@
 ﻿using Amazon.S3;
 using Amazon.SecretsManager;
 using AutoMapper;
+using LMS_CMS_BL.DTO;
 using LMS_CMS_BL.DTO.Inventory;
 using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains.Inventory;
@@ -21,7 +22,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 {
     [Route("api/with-domain/[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class ZatcaController : ControllerBase
     {
         private readonly ICsrGenerator _csrGenerator;
@@ -64,6 +65,9 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
             if (schoolPc is null)
                 return NotFound("School PC not found.");
 
+            if (string.IsNullOrEmpty(schoolPc.SerialNumber))
+                return BadRequest("Serial Number can not be null");
+
             string commonName = schoolPc.School.Name;
             string serialNumber = $"1-{schoolPcId}|2-{schoolPc.PCName}|3-{schoolPc.SerialNumber}";
             string organizationIdentifier = schoolPc.School.VatNumber;
@@ -73,6 +77,18 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
             string invoiceType = "0100";
             string locationAddress = schoolPc.School.City;
             string industryBusinessCategory = "Learning";
+
+            if (string.IsNullOrEmpty(commonName))
+                return BadRequest("Common Name can not be null");
+
+            if (string.IsNullOrEmpty(organizationIdentifier))
+                return BadRequest("Organization Identifier (Vat Number) can not be null");
+
+            if (string.IsNullOrEmpty(organizationUnitName))
+                return BadRequest("Organization Name can not be null");
+
+            if (string.IsNullOrEmpty(locationAddress))
+                return BadRequest("City can not be null");
 
             CsrGenerationDto csrGeneration = new(
                 commonName,
@@ -354,19 +370,34 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Zatca Electronic-Invoice" }
         )]
-        public async Task<IActionResult> ReportInvoices(long schoolId)
+        public async Task<IActionResult> ReportInvoices(InvoiceSubmitDTO dto)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            List<InventoryMaster> masters = await Unit_Of_Work.inventoryMaster_Repository.Select_All_With_IncludesById<List<InventoryMaster>>(
-                d => d.SchoolId == schoolId && 
-                d.IsDeleted != true &&
-                (d.FlagId == 11 || d.FlagId == 12),
-                query => query.Include(s => s.School)
-            );
+            List<InventoryMaster> masters = new();
+            if (dto.selectedInvoices == null)
+            {
+                masters = await Unit_Of_Work.inventoryMaster_Repository.Select_All_With_IncludesById<List<InventoryMaster>>(
+                    d => d.SchoolId == dto.schoolId &&
+                    d.IsDeleted != true &&
+                    (d.FlagId == 11 || d.FlagId == 12),
+                    query => query.Include(s => s.School)
+                );
 
-            if (masters is null || masters.Count == 0)
-                return NotFound("No invoices found.");
+                if (masters is null || masters.Count == 0)
+                    return NotFound("No invoices found.");
+            }
+            else
+            {
+                InventoryMaster master = new();
+                foreach (var invId in dto.selectedInvoices)
+                {
+                    master = Unit_Of_Work.inventoryMaster_Repository.First_Or_Default(x => x.ID == invId);
+
+                    if (master != null)
+                        masters.Add(master);
+                }
+            }            
 
             //var request = HttpContext.Request;
             //var domain = request.Host.Host;
@@ -377,115 +408,119 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
             string subDomainValue = _domainService.GetSubdomain(HttpContext);
             string subDomain = !subDomainValue.IsNullOrEmpty() ? subDomainValue : "test";
 
-            foreach (var master in masters)
+            if (masters != null && masters.Count > 0)
             {
-                SchoolPCs pc = Unit_Of_Work.schoolPCs_Repository.First_Or_Default(
-                d => d.ID == master.SchoolPCId && d.IsDeleted != true
-                );
-
-                if (pc == null)
+                foreach (var master in masters)
                 {
-                    return NotFound("PC not found.");
-                }
+                    SchoolPCs pc = Unit_Of_Work.schoolPCs_Repository.First_Or_Default(
+                    d => d.ID == master.SchoolPCId && d.IsDeleted != true
+                    );
 
-                if (pc.CertificateDate == null)
-                {
-                    return BadRequest("Please Create the Certificate.");
-                }
-
-                if (pc.CertificateDate.Value <= DateOnly.FromDateTime(DateTime.Now.AddDays(1)))
-                {
-                    return BadRequest("Please Update the Certificate.");
-                }
-
-                if (master.IsValid == 0 || master.IsValid == null)
-                {
-                    try
+                    if (pc == null)
                     {
-                        string dateTime = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ");
-                        string date = DateTime.Parse(dateTime).ToString("yyyy-MM-dd");
-                        string time = DateTime.Parse(dateTime).ToString("HH:mm:ss").Replace(":", "");
+                        return NotFound("PC not found.");
+                    }
 
-                        string xmlPath = string.Empty;
-                        if (master.FlagId == 11)
-                            xmlPath = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/XMLInvoices");
+                    if (pc.CertificateDate == null)
+                    {
+                        return BadRequest("Please Create the Certificate.");
+                    }
 
-                        if (master.FlagId == 12)
-                            xmlPath = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/XMLCredits");
+                    if (pc.CertificateDate.Value <= DateOnly.FromDateTime(DateTime.Now.AddDays(1)))
+                    {
+                        return BadRequest("Please Update the Certificate.");
+                    }
 
-                        if (master.IsValid == 0 || master.IsValid == null)
+                    if (master.IsValid == 0 || master.IsValid == null)
+                    {
+                        try
                         {
-                            string pcName = $"PC{master.SchoolPCId}{master.School?.ID}";
+                            string dateTime = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ");
+                            string date = DateTime.Parse(dateTime).ToString("yyyy-MM-dd");
+                            string time = DateTime.Parse(dateTime).ToString("HH:mm:ss").Replace(":", "");
 
-                            AmazonS3Client secretS3Client = new AmazonS3Client();
-                            S3Service s3 = new S3Service(_config, "AWS:Region");
-
-                            InventoryMaster lastMaster = Unit_Of_Work.inventoryMaster_Repository
-                                .SelectQuery<InventoryMaster>(i => i.IsDeleted != true && (i.FlagId == 11 || i.FlagId == 12))
-                                .OrderByDescending(i => i.ID)
-                                .FirstOrDefault();
-
-                            string lastInvoiceHash = "";
-                            if (master.FlagId == 11 || master.FlagId == 12)
-                                lastInvoiceHash = lastMaster?.InvoiceHash;
-
-                            bool result = await ZatcaServices.GenerateInvoiceXML(xmlPath, master, lastInvoiceHash, s3, dateTime);
-
-                            if (!result)
-                                return BadRequest("Failed to generate XML file.");
-
-                            string certContent = await s3.GetSecret($"{pcName}PCSID");
-
-                            dynamic certObject = JsonConvert.DeserializeObject(certContent);
-                            string token = certObject.binarySecurityToken;
-                            string secret = certObject.secret;
-
-                            HttpResponseMessage response = await ZatcaServices.InvoiceReporting(xmlPath, token, secret, _config);
-                            response.EnsureSuccessStatusCode();
-
-                            string responseContent = await response.Content.ReadAsStringAsync();
-                            dynamic responseJson = JsonConvert.DeserializeObject(responseContent);
-                            master.Status = responseJson.reportingStatus;
-
-                            if (response.IsSuccessStatusCode)
-                            {
-                                master.IsValid = 1;
-                            }
-                            else
-                            {
-                                master.IsValid = 0;
-                            }
-
-                            Unit_Of_Work.inventoryMaster_Repository.Update(master);
-                            Unit_Of_Work.SaveChanges();
-
-                            S3Service s3Client = new S3Service(secretS3Client, _config, "AWS:Bucket", "AWS:Folder");
-
-                            string subDirectory = string.Empty;
+                            string xmlPath = string.Empty;
                             if (master.FlagId == 11)
-                                subDirectory = "Invoices/";
-                            else if (master.FlagId == 12)
-                                subDirectory = "Credits/";
+                                xmlPath = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/XMLInvoices");
 
-                            bool uploaded = await s3Client.UploadAsync(xmlPath, subDirectory, $"{domain}/{subDomain}");
+                            if (master.FlagId == 12)
+                                xmlPath = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/XMLCredits");
 
-                            if (!uploaded)
-                                return BadRequest("Uploading Invoice failed!");
-
-                            xmlPath = Path.Combine(xmlPath, $"{master.School.CRN}_{date.Replace("-", "")}T{time.Replace(":", "")}_{date}-{master.StoreID}_{master.FlagId}_{master.ID}.xml");
-
-                            if (System.IO.File.Exists(xmlPath))
+                            if (master.IsValid == 0 || master.IsValid == null)
                             {
-                                System.IO.File.Delete(xmlPath);
+                                string pcName = $"PC{master.SchoolPCId}{master.School?.ID}";
+
+                                AmazonS3Client secretS3Client = new AmazonS3Client();
+                                S3Service s3 = new S3Service(_config, "AWS:Region");
+
+                                InventoryMaster? lastMaster = Unit_Of_Work.inventoryMaster_Repository
+                                    .SelectQuery<InventoryMaster>(i => i.IsDeleted != true && (i.FlagId == 11 || i.FlagId == 12))
+                                    .OrderByDescending(i => i.ID)
+                                    .FirstOrDefault();
+
+                                string lastInvoiceHash = "";
+                                if (master.FlagId == 11 || master.FlagId == 12)
+                                    lastInvoiceHash = lastMaster?.InvoiceHash;
+
+                                bool result = await ZatcaServices.GenerateInvoiceXML(xmlPath, master, lastInvoiceHash, s3, dateTime);
+
+                                if (!result)
+                                    return BadRequest("Failed to generate XML file.");
+
+                                string certContent = await s3.GetSecret($"{pcName}PCSID");
+
+                                dynamic certObject = JsonConvert.DeserializeObject(certContent);
+                                string token = certObject.binarySecurityToken;
+                                string secret = certObject.secret;
+
+                                HttpResponseMessage response = await ZatcaServices.InvoiceReporting(xmlPath, token, secret, _config);
+                                response.EnsureSuccessStatusCode();
+
+                                string responseContent = await response.Content.ReadAsStringAsync();
+                                dynamic responseJson = JsonConvert.DeserializeObject(responseContent);
+                                master.Status = responseJson.reportingStatus;
+
+                                if (response.IsSuccessStatusCode)
+                                {
+                                    master.IsValid = 1;
+                                }
+                                else
+                                {
+                                    master.IsValid = 0;
+                                }
+
+                                Unit_Of_Work.inventoryMaster_Repository.Update(master);
+                                Unit_Of_Work.SaveChanges();
+
+                                S3Service s3Client = new S3Service(secretS3Client, _config, "AWS:Bucket", "AWS:Folder");
+
+                                string subDirectory = string.Empty;
+                                if (master.FlagId == 11)
+                                    subDirectory = "Invoices/";
+                                else if (master.FlagId == 12)
+                                    subDirectory = "Credits/";
+
+                                bool uploaded = await s3Client.UploadAsync(xmlPath, subDirectory, $"{domain}/{subDomain}");
+
+                                if (!uploaded)
+                                    return BadRequest("Uploading Invoice failed!");
+
+                                xmlPath = Path.Combine(xmlPath, $"{master.School.CRN}_{date.Replace("-", "")}T{time.Replace(":", "")}_{date}-{master.StoreID}_{master.FlagId}_{master.ID}.xml");
+
+                                if (System.IO.File.Exists(xmlPath))
+                                {
+                                    System.IO.File.Delete(xmlPath);
+                                }
                             }
                         }
-                    }
-                    catch (Exception ex)
-                    {
-                        return BadRequest($"Error reporting invoice {master.ID}: {ex.Message}");
+                        catch (Exception ex)
+                        {
+                            return BadRequest($"Error reporting invoice {master.ID}: {ex.Message}");
+                        }
                     }
                 }
             }
+
             Unit_Of_Work.SaveChanges();
 
             return Ok();
@@ -518,6 +553,12 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
             start = start.Date;
             end = end.Date;
 
+            if (end < start)
+                return BadRequest("Start date must be equal or greater than End date");
+            
+            int totalRecords = await Unit_Of_Work.inventoryMaster_Repository
+               .CountAsync(f => f.IsDeleted != true && (f.FlagId == 11 || f.FlagId == 12));
+
             List<InventoryMaster> mastersBySchool = await Unit_Of_Work.inventoryMaster_Repository.SelectQuery<InventoryMaster>(
                 d => d.SchoolId == schoolId && 
                 d.IsDeleted != true &&
@@ -533,9 +574,20 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                 .Take(pageSize)
                 .ToList();
 
+            if (mastersByDate is null || mastersByDate.Count == 0)
+                return NotFound("No invoices found.");
+
             List<InventoryMasterGetDTO> DTO = _mapper.Map<List<InventoryMasterGetDTO>>(mastersByDate);
 
-            return Ok(DTO);
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = DTO, Pagination = paginationMetadata });
         }
         #endregion
     }

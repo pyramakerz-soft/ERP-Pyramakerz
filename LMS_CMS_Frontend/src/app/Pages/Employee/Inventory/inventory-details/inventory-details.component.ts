@@ -750,7 +750,7 @@ export class InventoryDetailsComponent {
       if (this.Data.hasOwnProperty(key)) {
         const field = key as keyof InventoryMaster;
         if (!this.Data[field]) {
-          if (field == 'storeID' || field == 'date' || field == 'schoolId') {
+          if (field == 'storeID' || field == 'date' || field == 'schoolId'||field == 'schoolPCId') {
             this.validationErrors[field] = `*${this.capitalizeField(
               field
             )} is required`;
@@ -763,7 +763,7 @@ export class InventoryDetailsComponent {
       Swal.fire({
         icon: 'warning',
         title: 'Warning!',
-        text: 'SalesItems Is Required',
+        text: 'Items Is Required',
         confirmButtonColor: '#089B41',
       });
       return false;
@@ -772,7 +772,7 @@ export class InventoryDetailsComponent {
       Swal.fire({
         icon: 'warning',
         title: 'Warning!',
-        text: 'SalesItems Is Required',
+        text: 'Items Is Required',
         confirmButtonColor: '#089B41',
       });
       return false;
