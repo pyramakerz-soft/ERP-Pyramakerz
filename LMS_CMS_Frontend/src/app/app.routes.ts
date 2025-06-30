@@ -170,6 +170,7 @@ import { AssignmentComponent } from './Pages/Employee/LMS/assignment/assignment.
 import { ReportItemCardComponent } from './Pages/Employee/Inventory/Report/report-item-card/report-item-card.component';
 import { AssignmentStudentComponent } from './Pages/Employee/LMS/assignment-student/assignment-student.component';
 import { AssignmentStudentComponent as AssignmentStudentStudentComponent } from './Pages/Student/LMS/assignment-student/assignment-student.component';
+import { SubjectComponent as SubjectStudentComponent } from './Pages/Student/LMS/subject/subject.component';
 import { AssignmentDetailComponent } from './Pages/Employee/LMS/assignment-detail/assignment-detail.component';
 import { POSComponent } from './Pages/Employee/ETA/pos/pos.component';
 import { CertificatesIssuerComponent } from './Pages/Employee/ETA/certificates-issuer/certificates-issuer.component';
@@ -434,6 +435,8 @@ export const routes: Routes = [
             { path: "Assignments-UI/:subjectId", component: AssignmentsComponent, title: "Assignments", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Lesson-Live-UI/:subjectId", component: LessonLiveUIComponent, title: "Lesson Live", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Assignment/:id", component: AssignmentStudentStudentComponent, title: "Assignment", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Subject", component: SubjectStudentComponent, title: "Subject", canActivate: [noNavigateWithoutLoginGuard] },
+
         ]
     },
     {
