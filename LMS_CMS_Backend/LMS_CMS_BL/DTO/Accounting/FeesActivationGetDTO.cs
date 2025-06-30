@@ -11,7 +11,7 @@ namespace LMS_CMS_BL.DTO.Accounting
     public class FeesActivationGetDTO
     {
         [Key]
-        public long ID { get; set; }
+        public long FeeActivationID { get; set; }
         public decimal Amount { get; set; }
         public float Discount { get; set; }
         public decimal Net { get; set; }

@@ -689,9 +689,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
 
         [HttpDelete("{id}")]
         [Authorize_Endpoint_(
-        allowedTypes: new[] { "octa", "employee" },
-        allowDelete: 1,
-       pages: new[] { "Admission Test" }
+            allowedTypes: new[] { "octa", "employee" },
+            allowDelete: 1,
+           pages: new[] { "Admission Test" }
        )]
         public IActionResult Delete(long id)
         {
