@@ -57,6 +57,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             if (query == null || query.ToList().Count == 0)
                 return NotFound("No payables found for the specified date range.");
 
+            foreach (var entry in query)
+            {
+                entry.PayableDetails = entry.PayableDetails
+                    .Where(d => d.IsDeleted != true)
+                    .ToList();
+            }
+
             List<PayableMaster> PayableMasters = query
                 .AsEnumerable() 
                 .Where(t => DateTime.TryParse(t.Date, out var d) && d >= start && d <= end)
@@ -180,6 +187,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             if (query == null || query.ToList().Count == 0)
                 return NotFound("No receivables found for the specified date range.");
 
+            foreach (var entry in query)
+            {
+                entry.ReceivableDetails = entry.ReceivableDetails
+                    .Where(d => d.IsDeleted != true)
+                    .ToList();
+            }
+
             List<ReceivableMaster> ReceivableMasters = query
                 .AsEnumerable()
                 .Where(t => DateTime.TryParse(t.Date, out var d) && d >= start && d <= end)
@@ -299,6 +313,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             if (query == null || query.Count == 0)
                 return NotFound("No installment masters found for the specified date range.");
 
+            foreach (var entry in query)
+            {
+                entry.InstallmentDeductionDetails = entry.InstallmentDeductionDetails
+                    .Where(d => d.IsDeleted != true)
+                    .ToList();
+            }
+
             List<InstallmentDeductionMaster> InstallmentDeductionMasters = query
                 .AsEnumerable()
                 .Where(t => DateTime.TryParse(t.Date, out var d) && d >= start && d <= end)
@@ -325,10 +346,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
         #region Accounting Entries
         [HttpGet("GetAccountingEntriesByDate")]
-        [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "" }
-        )]
+        //[Authorize_Endpoint_(
+        //    allowedTypes: new[] { "octa", "employee" },
+        //    pages: new[] { "" }
+        //)]
         public async Task<ActionResult> GetAccountingEntriesByDate(string startDate, string endDate, int pageNumber = 1, int pageSize = 10)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -475,7 +496,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 .ToList();
 
             if (FeesActivations == null || FeesActivations.Count == 0)
-                return NotFound("No receivables found for the specified date range.");
+                return NotFound("No fees activation found for the specified date range.");
 
             List<FeesActivationGetDTO> feesActDto = _mapper.Map<List<FeesActivationGetDTO>>(FeesActivations);
 
