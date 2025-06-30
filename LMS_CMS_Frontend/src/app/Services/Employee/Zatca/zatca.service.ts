@@ -16,7 +16,7 @@ export class ZatcaService {
     this.baseUrl = ApiServ.BaseUrl;
   }
 
-  generateCertificate(schoolPcId: number, DomainName: string): Observable<any> {
+  generateCertificate(schoolPcId: number, otp: number, DomainName: string): Observable<any> {
     if (DomainName != null) {
       this.header = DomainName;
     }
@@ -25,8 +25,7 @@ export class ZatcaService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('accept', '*/*');
-
-    const otp = '123345'; // Fixed OTP as per requirements
+ 
     return this.http.post(
       `${this.baseUrl}/Zatca/GeneratePCSID?otp=${otp}&schoolPcId=${schoolPcId}`,
       null,

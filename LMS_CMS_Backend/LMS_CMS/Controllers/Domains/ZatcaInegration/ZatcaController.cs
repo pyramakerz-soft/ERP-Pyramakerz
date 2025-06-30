@@ -46,7 +46,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
         [HttpPost("GeneratePCSID")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Zatca Electronic-Invoice" }
+            pages: new[] { "Zatca Electronic-Invoice", "Zatca Devices" }
         )]
         public async Task<IActionResult> GeneratePCSID(long otp, long schoolPcId)
         {
