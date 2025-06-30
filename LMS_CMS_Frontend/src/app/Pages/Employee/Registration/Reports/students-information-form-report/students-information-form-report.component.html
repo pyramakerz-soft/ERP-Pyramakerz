@@ -88,7 +88,8 @@
             <tr *ngIf="students?.length === 0">
                 <td class="text-center p-4">No Data Found</td>
             </tr>
-            <tr *ngFor="let SelectedStudent of students; let i = index" [ngClass]="{ 'bg-gray-100': i % 2 === 1 }">
+            <tr *ngFor="let SelectedStudent of students; let i = index" [ngClass]="{ 'bg-gray-100': i % 2 === 1, 'bg-white': i%2 !=1 }" 
+            class="border-t border-gray-300 text-xs md:text-sm">
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     {{ SelectedStudent.id }}
                 </td>
@@ -107,7 +108,7 @@
             </tr>
         </tbody>
     </table>
-</div>
+</div> 
 
 <div class="absolute -top-[9999px] -left-[9999px]">
     <div id="Data" class="hidden">
