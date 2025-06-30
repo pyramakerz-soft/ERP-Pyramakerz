@@ -4,12 +4,12 @@
     </div>
 </div>
 
-<div class="flex flex-wrap justify-start gap-6 mt-6">
-    <div *ngFor="let subject of subjectData" class="w-[33%] bg-[#F7F7F7] rounded-2xl p-4 shadow text-center">
+<div class="flex flex-wrap justify-start gap-3 mt-6">
+    <div *ngFor="let subject of subjectData" class="w-[30%] h-[250px] bg-[#F7F7F7] rounded-2xl p-1 shadow text-center overflow-hidden">
         <h1 class="text-lg font-bold text-[#003366] mb-4">{{ subject.en_name }}</h1>
-        <img *ngIf="subject.iconLink" [src]="subject.iconLink" alt="Subject Icon"
-            class="mx-auto rounded-md mb-4 w-[80%]">
-        <div class="flex flex-wrap justify-center gap-6 text-sm text-[#4F4F4F]">
+        <img *ngIf="subject.iconLink" [src]="subject.iconLink" alt="Subject Icon" (click)="moveToWeeks(subject.id)"
+            class="mx-auto mb-4 w-[80%] h-[100px] object-contain rounded-md" />
+        <div class="flex flex-wrap justify-center gap-3 text-sm text-[#4F4F4F]">
             <div class="flex items-center w-[40%] space-x-1">
                 <img src="Icons/Assignments.png" alt="Assignments" />
                 <span>Assignments</span>
@@ -23,5 +23,6 @@
                 <span>Lesson Live</span>
             </div>
         </div>
+
     </div>
 </div>

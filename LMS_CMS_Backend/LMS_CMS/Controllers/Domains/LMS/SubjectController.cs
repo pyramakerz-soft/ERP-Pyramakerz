@@ -483,35 +483,40 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("GetBySudent/{StudentId}")]
         [Authorize_Endpoint_(
-           allowedTypes: new[] { "octa", "employee" , "student" },
-           pages: new[] { "Subject" }
-       )]
+     allowedTypes: new[] { "octa", "employee", "student" },
+     pages: new[] { "Subject" }
+ )]
         public async Task<IActionResult> GetByStudentId(long StudentId)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            Student student = Unit_Of_Work.student_Repository.First_Or_Default(s=>s.ID== StudentId && s.IsDeleted != true);
-            if(student == null)
+            Student student = Unit_Of_Work.student_Repository.First_Or_Default(s => s.ID == StudentId && s.IsDeleted != true);
+            if (student == null)
             {
-                return BadRequest("There is no student with this id");
-            }
-            StudentGrade studentGrade = Unit_Of_Work.studentGrade_Repository.First_Or_Default(s => s.StudentID == StudentId && s.IsDeleted != true && s.Grade.IsDeleted != true && s.AcademicYear.IsActive == true);
-            if (studentGrade == null)
-            { 
-                return BadRequest("this student not exist in grade for this year");
+                return BadRequest("There is no student with this ID");
             }
 
-            List<Subject> subjects = await Unit_Of_Work.subject_Repository.Select_All_With_IncludesById<Subject>(
-                    f => f.IsDeleted != true && f.GradeID == studentGrade.GradeID
-                    );
+            StudentClassroom studentClassroom = Unit_Of_Work.studentClassroom_Repository
+                .First_Or_Default(s => s.StudentID == StudentId && s.IsDeleted != true && s.Classroom.IsDeleted != true && s.Classroom.AcademicYear.IsActive == true);
 
-            if (subjects == null || subjects.Count == 0)
+            if (studentClassroom == null)
+            {
+                return BadRequest("This student is not enrolled in a classroom for the current academic year.");
+            }
+
+            List<StudentClassroomSubject> studentClassroomSubject = await Unit_Of_Work.studentClassroomSubject_Repository
+                .Select_All_With_IncludesById<StudentClassroomSubject>(
+                    f => f.IsDeleted != true && f.StudentClassroomID == studentClassroom.ID
+                );
+
+            if (studentClassroomSubject == null || studentClassroomSubject.Count == 0)
             {
                 return NotFound();
             }
 
+            List<long> subjectIds = studentClassroomSubject.Select(s => s.SubjectID).Distinct().ToList();
+            List<Subject> subjects = Unit_Of_Work.subject_Repository.FindBy(s => subjectIds.Contains(s.ID)).ToList();
             List<SubjectGetDTO> subjectsDTO = mapper.Map<List<SubjectGetDTO>>(subjects);
-
             string serverUrl = $"{Request.Scheme}://{Request.Host}/";
             foreach (var subject in subjectsDTO)
             {

@@ -85,6 +85,65 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+        [HttpGet("GetByWeekID/{WeekId}")]
+        [Authorize_Endpoint_(
+          allowedTypes: new[] { "octa", "employee", "student" },
+          pages: new[] { "Lesson Resource" }
+      )]
+        public async Task<IActionResult> GetByWeekID(long WeekId)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var semesterWorkingWeek = Unit_Of_Work.semesterWorkingWeek_Repository
+                .First_Or_Default(s => s.ID == WeekId && s.IsDeleted != true);
+            if (semesterWorkingWeek == null)
+                return BadRequest("No SemesterWorkingWeek with this ID");
+
+            var lessons = Unit_Of_Work.lesson_Repository
+                .FindBy(d => d.IsDeleted != true && d.SemesterWorkingWeekID == WeekId);
+            if (lessons == null || lessons.Count == 0)
+                return NotFound("No Lesson in this SemesterWorkingWeek");
+
+            var lessonIds = lessons.Select(s => s.ID).Distinct().ToList();
+
+            var LessonResource = await Unit_Of_Work.lessonResource_Repository
+                .Select_All_With_IncludesById<LessonResource>(
+                    f => f.IsDeleted != true && lessonIds.Contains(f.LessonID),
+                    query => query.Include(emp => emp.LessonResourceType)
+                );
+
+            var LessonResourceTypes = Unit_Of_Work.lessonResourceType_Repository
+                .FindBy(s => s.IsDeleted != true);
+
+            if (LessonResourceTypes == null || LessonResourceTypes.Count == 0)
+                return NotFound("No LessonResourceTypes");
+
+            var LessonResourceDTO = mapper.Map<List<LessonResourceGetDTO>>(LessonResource);
+
+            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+            foreach (var item in LessonResourceDTO)
+            {
+                if (!string.IsNullOrEmpty(item.AttachmentLink) &&
+                    item.AttachmentLink.StartsWith("Uploads", StringComparison.OrdinalIgnoreCase))
+                {
+                    item.AttachmentLink = $"{serverUrl}{item.AttachmentLink.Replace("\\", "/")}";
+                }
+            }
+
+            var LessonResourceTypesDTO = mapper.Map<List<LessonResourceTypeGetDTo>>(LessonResourceTypes);
+
+            foreach (var typeDto in LessonResourceTypesDTO)
+            {
+                typeDto.Resources = LessonResourceDTO
+                    .Where(a => a.LessonResourceTypeID == typeDto.ID)
+                    .ToList();
+            }
+
+            return Ok(LessonResourceTypesDTO);
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
         [HttpGet("GetById/{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },

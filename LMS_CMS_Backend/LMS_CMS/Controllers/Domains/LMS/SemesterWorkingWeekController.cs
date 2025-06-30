@@ -91,48 +91,61 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("GetBySubjectID/{Subjectid}/{StudentId}")]
         [Authorize_Endpoint_(
-           allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Working Weeks" }
+              allowedTypes: new[] { "octa", "employee", "student" },
+              pages: new[] { "Working Weeks" }
          )]
-        public async Task<IActionResult> GetBySubjectID(long Subjectid , long StudentId)
+        public async Task<IActionResult> GetBySubjectID(long Subjectid, long StudentId)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-            Subject subject =Unit_Of_Work.subject_Repository.First_Or_Default(s=>s.ID == Subjectid && s.IsDeleted != true);
+
+            var subject = Unit_Of_Work.subject_Repository.First_Or_Default(s => s.ID == Subjectid && s.IsDeleted != true);
             if (subject == null)
             {
-                return BadRequest("there is no subject with this id");
+                return BadRequest("There is no subject with this ID.");
             }
 
-            StudentGrade studentGrade = Unit_Of_Work.studentGrade_Repository.First_Or_Default(s => s.GradeID == subject.GradeID && s.StudentID == StudentId && s.IsDeleted != true && s.AcademicYear.IsActive == true && s.AcademicYear.IsDeleted!= true);
+            var studentGrade = Unit_Of_Work.studentGrade_Repository.First_Or_Default(s =>
+                s.GradeID == subject.GradeID &&
+                s.StudentID == StudentId &&
+                s.IsDeleted != true &&
+                s.AcademicYear.IsActive == true &&
+                s.AcademicYear.IsDeleted != true);
+
             if (studentGrade == null)
             {
-                return BadRequest("this student not exist in current academic year");
+                return BadRequest("This student does not exist in the current academic year.");
             }
 
-            Semester semester = Unit_Of_Work.semester_Repository.First_Or_Default(s => s.AcademicYearID == studentGrade.AcademicYearID && s.IsCurrent == true);
+            var semester = Unit_Of_Work.semester_Repository.First_Or_Default(s =>
+                s.AcademicYearID == studentGrade.AcademicYearID &&
+                s.IsCurrent == true);
+
             if (semester == null)
             {
-                return BadRequest("there is no semester For this academic year");
+                return BadRequest("There is no current semester for this academic year.");
             }
 
+            var semesterWorkingWeek = Unit_Of_Work.semesterWorkingWeek_Repository
+                .FindBy(f => f.IsDeleted != true && f.SemesterID == semester.ID);
 
-            List<SemesterWorkingWeek> semesterWorkingWeek =  Unit_Of_Work.semesterWorkingWeek_Repository.FindBy( f => f.IsDeleted != true && f.SemesterID == semester.ID);
-
-            if (semesterWorkingWeek == null)
+            if (semesterWorkingWeek == null || !semesterWorkingWeek.Any())
             {
                 return NotFound();
             }
 
-            List<SemesterWorkingWeekGetDTO> semesterWorkingWeekDTO = mapper.Map<List<SemesterWorkingWeekGetDTO>>(semesterWorkingWeek);
+            var semesterWorkingWeekDTO = mapper.Map<List<SemesterWorkingWeekGetDTO>>(semesterWorkingWeek);
 
-            return Ok(semesterWorkingWeekDTO);
+            return Ok(new
+            {
+                subjectName = subject.en_name,
+                weeks = semesterWorkingWeekDTO
+            });
         }
-
         ////////////////////////////////////////////////////
 
         [HttpPost("GenerateWeeks/{semesterId}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
+            allowedTypes: new[] { "octa", "employee"  },
             pages: new[] { "Working Weeks" }
         )]
         public async Task<IActionResult> GenerateAsync(long semesterId)

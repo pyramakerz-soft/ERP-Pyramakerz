@@ -1,27 +1,26 @@
 <div class="flex justify-between items-center">
-    <div class="flex justify-between items-center space-x-5">
-        <h1 class="primaryTxt font-semibold text-2xl leading-9"></h1>
+    <h1 class="primaryTxt font-semibold text-2xl leading-9">{{SubjectName}}</h1>
+    <div class="flex justify-between items-center space-x-4">
+        <button class="secondaryBorder secondaryTxt rounded-lg px-4 py-3 flex items-center justify-center gap-2">
+            <img src="Icons/GreenResource.png" />
+            Resources
+        </button>
+        <button class="secondaryBorder secondaryTxt rounded-lg px-4 py-3 flex items-center justify-center gap-2">
+            <img src="Icons/Assignment2.png" />
+            Assignments
+        </button>
+        <button class="secondaryBorder secondaryTxt rounded-lg px-4 py-3 flex items-center justify-center gap-2">
+            <img src="Icons/GreenLessonLive.png"  />
+            Lesson Live
+        </button>
     </div>
 </div>
 
-<div class="flex flex-wrap justify-start gap-6 mt-6">
-    <div *ngFor="let subject of subjectData" class="w-[33%] bg-[#F7F7F7] rounded-2xl p-4 shadow text-center">
-        <h1 class="text-lg font-bold text-[#003366] mb-4">{{ subject.en_name }}</h1>
-        <img *ngIf="subject.iconLink" [src]="subject.iconLink" alt="Subject Icon"
-            class="mx-auto rounded-md mb-4 w-[80%]">
-        <div class="flex flex-wrap justify-center gap-6 text-sm text-[#4F4F4F]">
-            <div class="flex items-center w-[40%] space-x-1">
-                <img src="Icons/Assignments.png" alt="Assignments" />
-                <span>Assignments</span>
-            </div>
-            <div class="flex items-center w-[40%] space-x-1">
-                <img src="Icons/Resources.png" alt="Resources" />
-                <span>Resources</span>
-            </div>
-            <div class="flex items-center w-[40%] space-x-1">
-                <img src="Icons/LessonLive.png" alt="Lesson Live" />
-                <span>Lesson Live</span>
-            </div>
-        </div>
+<div class="flex flex-wrap justify-between mt-6 gap-2">
+    <div *ngFor="let week of WorkingWeekData; let i = index"
+        class="w-[15%] rounded-2xl shadow text-center flex space-x-2 p-3 items-center"
+        [ngStyle]="{ 'background-color': getRandomColor(i) }">
+        <img src="Icons/ColoredFile.png" alt="ColoredFile" class="w-[20%]" />
+        <h1 class="text-lg font-bold text-[#003366] mb-4">{{ week.englishName }}</h1>
     </div>
 </div>

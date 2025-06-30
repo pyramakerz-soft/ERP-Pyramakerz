@@ -8,6 +8,8 @@ import { ApiService } from '../../../../Services/api.service';
 import { SubjectService } from '../../../../Services/Employee/LMS/subject.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { Subject } from '../../../../Models/LMS/subject';
+import { SemesterWorkingWeekService } from '../../../../Services/Employee/LMS/semester-working-week.service';
+import { SemesterWorkingWeek } from '../../../../Models/LMS/semester-working-week';
 
 @Component({
   selector: 'app-subject-weeks',
@@ -17,14 +19,17 @@ import { Subject } from '../../../../Models/LMS/subject';
   styleUrl: './subject-weeks.component.css'
 })
 export class SubjectWeeksComponent {
- subjectData: Subject[] = []
+  WorkingWeekData: SemesterWorkingWeek[] = []
   path: string = ""
   DomainName: string = "";
   UserID: number = 0;
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
+  SubjectID: number = 0;
+  SubjectName: string = ""
+  bgColors: string[] = ['#F7F7F7', '#D7F7FF', '#FFF1D7', '#E8EBFF'];
 
   constructor(public account: AccountService, public router: Router, public ApiServ: ApiService,
-    public activeRoute: ActivatedRoute, private menuService: MenuService, public subjectService: SubjectService) { }
+    public activeRoute: ActivatedRoute, private menuService: MenuService, public SemesterWorkingWeekServ: SemesterWorkingWeekService) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -33,14 +38,19 @@ export class SubjectWeeksComponent {
     this.activeRoute.url.subscribe(url => {
       this.path = url[0].path
     });
-    this.getSubjectData()
+    this.SubjectID = Number(this.activeRoute.snapshot.paramMap.get('id'));
+    this.getSemesterWorkingWeekData()
   }
 
-  getSubjectData() {
-    this.subjectService.GetByStudentId(this.UserID,this.DomainName).subscribe(
+  getRandomColor(index: number): string {
+    return this.bgColors[index % this.bgColors.length];
+  }
+
+  getSemesterWorkingWeekData() {
+    this.SemesterWorkingWeekServ.GetBySubjectID(this.SubjectID, this.UserID, this.DomainName).subscribe(
       (data) => {
-        this.subjectData = data;
-        console.log( this.subjectData)
+        this.WorkingWeekData = data.weeks;
+        this.SubjectName = data.subjectName;
       }
     )
   }

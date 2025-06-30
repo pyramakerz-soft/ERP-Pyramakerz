@@ -46,4 +46,7 @@ export class SubjectComponent {
     )
   }
 
+  moveToWeeks(subjectId : number){
+    this.router.navigateByUrl(`Student/SubjectWeeks/${subjectId}`)
+  }
 }

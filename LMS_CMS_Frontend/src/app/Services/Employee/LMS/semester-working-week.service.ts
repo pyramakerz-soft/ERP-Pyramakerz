@@ -47,7 +47,7 @@ export class SemesterWorkingWeekService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.get<SemesterWorkingWeek[]>(`${this.baseUrl}/SemesterWorkingWeek/GetBySubjectID/${SubjectId}/${StudentId}`, { headers })
+    return this.http.get<any>(`${this.baseUrl}/SemesterWorkingWeek/GetBySubjectID/${SubjectId}/${StudentId}`, { headers })
   }
  
   GenerateWeeks(id: number,DomainName:string) {

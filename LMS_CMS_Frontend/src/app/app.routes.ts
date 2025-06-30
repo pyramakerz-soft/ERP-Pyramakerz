@@ -178,6 +178,7 @@ import { ElectronicInvoiceDetailComponent } from './Pages/Employee/Zatca-ETA/ele
 import { TaxIssuerComponent } from './Pages/Employee/ETA/tax-issuer/tax-issuer.component';
 import { SchoolConfigurationComponent } from './Pages/Employee/Zatca-ETA/school-configuration/school-configuration.component';
 import { DailyPerformanceViewComponent } from './Pages/Employee/LMS/daily-performance-view/daily-performance-view.component';
+import { SubjectWeeksComponent } from './Pages/Student/LMS/subject-weeks/subject-weeks.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -436,6 +437,7 @@ export const routes: Routes = [
             { path: "Lesson-Live-UI/:subjectId", component: LessonLiveUIComponent, title: "Lesson Live", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Assignment/:id", component: AssignmentStudentStudentComponent, title: "Assignment", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Subject", component: SubjectStudentComponent, title: "Subject", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "SubjectWeeks/:id", component: SubjectWeeksComponent, title: "SubjectWeeks", canActivate: [noNavigateWithoutLoginGuard] },
 
         ]
     },
