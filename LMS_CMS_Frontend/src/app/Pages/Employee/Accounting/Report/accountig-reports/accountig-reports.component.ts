@@ -173,6 +173,16 @@ export class AccountigReportsComponent {
     }
     return [];
   }
+ 
+  get fileName(): string {
+    switch (this.type) {
+      case 'Payable': return 'Payable Report';
+      case 'Receivable': return 'Receivable Report';
+      case 'Installment Deduction': return 'Installment Deduction Report';
+      case 'Accounting Entries': return 'Accounting Entries Report';
+      default: return 'Accounting Report';
+    }
+  }
 
   changeCurrentPage(currentPage:number){
     this.CurrentPage = currentPage
@@ -191,96 +201,281 @@ export class AccountigReportsComponent {
     this.PageSize = 0
   } 
 
-  Print() {
-    this.showPDF = true;
-    setTimeout(() => {
-      const printContents = document.getElementById("Data")?.innerHTML;
-      if (!printContents) {
-        console.error("Element not found!");
-        return;
-      }
-  
-      // Create a print-specific stylesheet
-      const printStyle = `
-        <style>
-          @page { size: auto; margin: 0mm; }
-          body { 
-            margin: 0; 
-          }
-  
-          @media print {
-            body > *:not(#print-container) {
-              display: none !important;
-            }
-            #print-container {
-              display: block !important;
-              position: static !important;
-              top: auto !important;
-              left: auto !important;
-              width: 100% !important;
-              height: auto !important;
-              background: white !important;
-              box-shadow: none !important;
-              margin: 0 !important;
-            }
-          }
-        </style>
-      `;
-  
-      // Create a container for printing
-      const printContainer = document.createElement('div');
-      printContainer.id = 'print-container';
-      printContainer.innerHTML = printStyle + printContents;
-  
-      // Add to body and print
-      document.body.appendChild(printContainer);
-      window.print();
-      
-      // Clean up
-      setTimeout(() => {
-        document.body.removeChild(printContainer);
-        this.showPDF = false;
-      }, 100);
-    }, 500);
+  getInfoRows(): any[] {
+    const rows = [
+      { keyEn: 'Start Date: ' + this.SelectedStartDate, valueEn: '' },
+      { keyEn: 'End Date: ' + this.SelectedEndDate, valueEn: '' }
+    ];  
+    return rows;
   }
 
-  DownloadAsPDF() {
+  getTableDataWithHeader(): any[] {
+    return this.DataToPrint.map((item: any) => ({
+      header: item.header,
+      data: item.summary,
+      tableHeaders: item.table.headers,
+      tableData: item.table.data,
+    }));
+  } 
+
+  Print() {
+    this.DataToPrint = []
+    
+    this.GetDataForPrint().subscribe((result) => {
+      this.DataToPrint = result;
+      this.showPDF = true;
+      setTimeout(() => {
+        const printContents = document.getElementById("Data")?.innerHTML;
+        if (!printContents) {
+          console.error("Element not found!");
+          return;
+        }
+    
+        // Create a print-specific stylesheet
+        const printStyle = `
+          <style>
+            @page { size: auto; margin: 0mm; }
+            body { 
+              margin: 0; 
+            }
+    
+            @media print {
+              body > *:not(#print-container) {
+                display: none !important;
+              }
+              #print-container {
+                display: block !important;
+                position: static !important;
+                top: auto !important;
+                left: auto !important;
+                width: 100% !important;
+                height: auto !important;
+                background: white !important;
+                box-shadow: none !important;
+                margin: 0 !important;
+              }
+            }
+          </style>
+        `;
+    
+        // Create a container for printing
+        const printContainer = document.createElement('div');
+        printContainer.id = 'print-container';
+        printContainer.innerHTML = printStyle + printContents;
+    
+        // Add to body and print
+        document.body.appendChild(printContainer);
+        window.print();
+        
+        // Clean up
+        setTimeout(() => {
+          document.body.removeChild(printContainer);
+          this.showPDF = false;
+        }, 100);
+      }, 500); 
+    });
+  }
+
+  DownloadAsPDF() { 
+    this.DataToPrint = []
+
+    this.GetDataForPrint().subscribe((result) => {
+      this.DataToPrint = result;
+
+      this.showPDF = true;
+
+      setTimeout(() => {
+        this.pdfComponentRef.downloadPDF();  
+        setTimeout(() => this.showPDF = false, 2000);
+      }, 500);
+    });
+  }
+
+  GetDataForPrint(): Observable<any[]> {
+    switch (this.type) {
+      case 'Payable': 
+        return this.reportsService
+          .GetPayablesByDate(this.SelectedStartDate, this.SelectedEndDate, this.DomainName, 1, this.TotalRecords)
+          .pipe(
+            map(data => {
+              return data.data.map((t: any) => ({
+                header: `${this.type} Invoice ${t.id}`,
+                summary: [  
+                  { key: 'Doc Type', value: t.payableDocTypesName }, 
+                  { key: 'Doc Number', value: t.docNumber },
+                  { key: 'Date', value: t.date },
+                  { key: 'Bank Or Save ?', value: t.linkFileName },
+                  { key: 'Bank Or Save Data', value: t.bankOrSaveName },
+                  { key: 'Notes', value: t.notes || 'N/A' },
+                ],
+                table: {
+                  headers: [
+                    'ID',
+                    'Amount',
+                    'Link File',
+                    'Link File Type'
+                  ],
+                  data:
+                    t.payableDetails?.map((d:any) => ({
+                      ID: d.id,
+                      Amount: d.amount,
+                      'Link File': d.linkFileName,
+                      'Link File Type': d.linkFileTypeName,
+                    })) || [],
+                },
+              }));
+            }),
+            catchError(error => {
+              if (error.status === 404) {
+                return of([]);
+              }
+              throw error;
+            })
+          );
+      case 'Receivable': 
+        return this.reportsService
+          .GetReceivablesByDate(this.SelectedStartDate, this.SelectedEndDate, this.DomainName, 1, this.TotalRecords)
+          .pipe(
+            map(data => {
+              return data.data.map((t: any) => ({
+                header: `${this.type} Invoice ${t.id}`,
+                summary: [  
+                  { key: 'Doc Type', value: t.receivableDocTypesName }, 
+                  { key: 'Doc Number', value: t.docNumber },
+                  { key: 'Date', value: t.date },
+                  { key: 'Bank Or Save ?', value: t.linkFileName },
+                  { key: 'Bank Or Save Data', value: t.bankOrSaveName },
+                  { key: 'Notes', value: t.notes || 'N/A' },
+                ],
+                table: {
+                  headers: [
+                    'ID',
+                    'Amount',
+                    'Link File',
+                    'Link File Type'
+                  ],
+                  data:
+                    t.receivableDetails?.map((d:any) => ({
+                      ID: d.id,
+                      Amount: d.amount,
+                      'Link File': d.linkFileName,
+                      'Link File Type': d.linkFileTypeName,
+                    })) || [],
+                },
+              }));
+            }),
+            catchError(error => {
+              if (error.status === 404) {
+                return of([]);
+              }
+              throw error;
+            })
+          );
+      case 'Installment Deduction': 
+        return this.reportsService
+          .GetInstallmentDeductionsByDate(this.SelectedStartDate, this.SelectedEndDate, this.DomainName, 1, this.TotalRecords)
+          .pipe(
+            map(data => {
+              return data.data.map((t: any) => ({
+                header: `${this.type} Invoice ${t.id}`,
+                summary: [   
+                  { key: 'Doc Number', value: t.docNumber },
+                  { key: 'Date', value: t.date },
+                  { key: 'Employee Name', value: t.employeeName },
+                  { key: 'Student  Name', value: t.studentName }, 
+                  { key: 'Notes', value: t.notes || 'N/A' },
+                ],
+                table: {
+                  headers: [
+                    'ID',
+                    'Amount',
+                    'Date',
+                    'Fee Type'
+                  ],
+                  data:
+                    t.installmentDeductionDetails?.map((d:any) => ({
+                      ID: d.id,
+                      Amount: d.amount,
+                      'Date': d.date,
+                      'Fee Type': d.feeTypeName,
+                    })) || [],
+                },
+              }));
+            }),
+            catchError(error => {
+              if (error.status === 404) {
+                return of([]);
+              }
+              throw error;
+            })
+          );
+      case 'Accounting Entries': 
+        return this.reportsService
+          .GetAccountingEntriesByDate(this.SelectedStartDate, this.SelectedEndDate, this.DomainName, 1, this.TotalRecords)
+          .pipe(
+            map(data => {
+              return data.data.map((t: any) => ({
+                header: `${this.type} Invoice ${t.id}`,
+                summary: [  
+                  { key: 'Doc Type', value: t.accountingEntriesDocTypeName }, 
+                  { key: 'Doc Number', value: t.docNumber },
+                  { key: 'Date', value: t.date }, 
+                  { key: 'Notes', value: t.notes || 'N/A' },
+                ],
+                table: {
+                  headers: [
+                    'ID',
+                    'Credit Amount',
+                    'Debit Amount',
+                    'Accounting Tree Chart',
+                    'Sub Accounting'
+                  ],
+                  data:
+                    t.accountingEntriesDetails?.map((d:any) => ({
+                      ID: d.id,
+                      'Credit Amount': d.creditAmount,
+                      'Debit Amount': d.debitAmount,
+                      'Accounting Tree Chart': d.accountingTreeChartName,
+                      'Sub Accounting': d.subAccountingName
+                    })) || [],
+                },
+              }));
+            }),
+            catchError(error => {
+              if (error.status === 404) {
+                return of([]);
+              }
+              throw error;
+            })
+          );
+    }  
+    return of([]);
+  }
+ 
+  DownloadAsExcel() {
     // this.GetDataForPrint().subscribe((result) => {
     //   this.DataToPrint = result;
 
-    //   this.showPDF = true;
+    //   const headers = ['ID', 'Amount', 'Discount', 'Net', 'Date', 'Fee Type', 'Fee Discount Type', 'Student Name', 'Academic Year'];
 
-    //   setTimeout(() => {
-    //     this.pdfComponentRef.downloadPDF();  
-    //     setTimeout(() => this.showPDF = false, 2000);
-    //   }, 500);
+    //   const dataRows = this.DataToPrint.map((row: any) =>
+    //     headers.map(header => row[header] ?? '')
+    //   );
+
+    //   this.sharedReportsService.generateExcelReport({
+    //     infoRows: [
+    //       { key: 'Start Date', value: this.SelectedStartDate },
+    //       { key: 'End Date', value: this.SelectedEndDate }
+    //     ],
+    //     filename: "Fees Activation Report.xlsx",
+    //     tables: [
+    //       {
+    //         title: "Fees Activation",
+    //         headers,
+    //         data: dataRows
+    //       }
+    //     ]
+    //   });
     // });
   }
-
-  // DownloadAsExcel() {
-  //   this.GetDataForPrint().subscribe((result) => {
-  //     this.DataToPrint = result;
-
-  //     const headers = ['ID', 'Amount', 'Discount', 'Net', 'Date', 'Fee Type', 'Fee Discount Type', 'Student Name', 'Academic Year'];
-
-  //     const dataRows = this.DataToPrint.map((row: any) =>
-  //       headers.map(header => row[header] ?? '')
-  //     );
-
-  //     this.sharedReportsService.generateExcelReport({
-  //       infoRows: [
-  //         { key: 'Start Date', value: this.SelectedStartDate },
-  //         { key: 'End Date', value: this.SelectedEndDate }
-  //       ],
-  //       filename: "Fees Activation Report.xlsx",
-  //       tables: [
-  //         {
-  //           title: "Fees Activation",
-  //           headers,
-  //           data: dataRows
-  //         }
-  //       ]
-  //     });
-  //   });
-  // }
 }
