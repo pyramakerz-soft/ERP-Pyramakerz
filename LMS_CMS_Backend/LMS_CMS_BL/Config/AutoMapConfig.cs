@@ -538,6 +538,7 @@ namespace LMS_CMS_BL.Config
             CreateMap<ReceivableDocTypeAddDTO, ReceivableDocType>();
  
             CreateMap<FeesActivation, FeesActivationGetDTO>()
+                .ForMember(dest => dest.FeeActivationID, opt => opt.MapFrom(src => src.ID))
                 .ForMember(dest => dest.FeeTypeName, opt => opt.MapFrom(src => src.TuitionFeesType.Name))
                 .ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => src.Student.User_Name))
                 .ForMember(dest => dest.AcademicYearName, opt => opt.MapFrom(src => src.AcademicYear.Name))
