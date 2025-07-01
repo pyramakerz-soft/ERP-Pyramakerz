@@ -10,6 +10,7 @@ namespace LMS_CMS_BL.DTO.LMS
     {
         public long ID { get; set; }
         public int Period { get; set; }
+        public string Name { get; set; }
         public string LiveLink { get; set; }
         public string? RecordLink { get; set; }
         public long WeekDayID { get; set; }

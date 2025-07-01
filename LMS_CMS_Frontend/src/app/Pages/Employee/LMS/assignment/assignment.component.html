@@ -298,6 +298,11 @@
                     validationErrors['cutOfDate'] }}</span>
             </div>
             <div class="flex w-full space-x-5 items-center mb-4">
+                <input type="checkbox" id="isVisibleToStudent" class="w-5 h-5"
+                     [(ngModel)]="assignment.isVisibleToStudent">
+                <label for="isVisibleToStudent" class="text-sm">Is Visible To Student?</label>
+            </div>
+            <div class="flex w-full space-x-5 items-center mb-4">
                 <input type="checkbox" id="specific" class="w-5 h-5" (change)="onIsSpecificChange($event)"
                     [checked]="assignment.isSpecificStudents">
                 <label for="specific" class="text-sm">Is The Assignment For specific students?</label>

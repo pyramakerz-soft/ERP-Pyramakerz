@@ -242,7 +242,8 @@ export class AssignmentComponent {
     if (Id) {
       this.getAssignmentById(Id);
     }
-
+     
+    this.assignment= new Assignment();
     this.getSubjectData();
     this.getAssignmentTypeData();
 
