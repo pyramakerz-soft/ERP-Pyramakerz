@@ -172,6 +172,44 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+        [HttpGet("BySubject/{id}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" , "student" },
+            pages: new[] { "Lesson Live" }
+        )]
+        public async Task<IActionResult> GetBySubjectId(long id)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            if (id == 0)
+            {
+                return BadRequest("Enter subject ID");
+            }
+            Subject subject = Unit_Of_Work.subject_Repository.First_Or_Default(s => s.ID == id && s.IsDeleted != true);
+            if (subject == null)
+            {
+                return BadRequest("No subject With This ID");
+            }
+
+            List<LessonLive> lessonLives = await Unit_Of_Work.lessonLive_Repository.Select_All_With_IncludesById<LessonLive>(
+                    b => b.IsDeleted != true && b.SubjectID == id,
+                    query => query.Include(d => d.Classroom),
+                    query => query.Include(d => d.WeekDay),
+                    query => query.Include(d => d.Subject)
+                    );
+
+            if (lessonLives == null || lessonLives.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<LessonLiveGetDTO> lessonLivesDTO = mapper.Map<List<LessonLiveGetDTO>>(lessonLives);
+
+            return Ok(lessonLivesDTO);
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
         [HttpPost]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" } ,

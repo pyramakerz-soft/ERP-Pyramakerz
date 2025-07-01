@@ -13,10 +13,10 @@ export class LessonResourceService {
   constructor(public http: HttpClient, public ApiServ: ApiService) {
     this.baseUrl = ApiServ.BaseUrl
   }
- 
-  GetByID(id: number,DomainName:string) {
-    if(DomainName!=null) {
-      this.header=DomainName 
+
+  GetByID(id: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
@@ -26,9 +26,21 @@ export class LessonResourceService {
     return this.http.get<LessonResource>(`${this.baseUrl}/LessonResource/GetByID/${id}`, { headers })
   }
 
-  GetByLessonId(id:number, DomainName:string) {
-    if(DomainName!=null) {
-      this.header=DomainName 
+  GetByWeekIDGroupByType(Subject: number, WeekId: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<any>(`${this.baseUrl}/LessonResource/GetByWeekID/${Subject}/${WeekId}`, { headers })
+  }
+
+  GetByLessonId(id: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
@@ -36,24 +48,24 @@ export class LessonResourceService {
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
     return this.http.get<LessonResource[]>(`${this.baseUrl}/LessonResource/GetByLessonID/${id}`, { headers })
-  } 
+  }
 
-  Add(lessonResource: LessonResource,DomainName:string) { 
-    if(DomainName!=null) {
-      this.header=DomainName 
+  Add(lessonResource: LessonResource, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
       .set('domain-name', this.header)
-      .set('Authorization', `Bearer ${token}`) 
+      .set('Authorization', `Bearer ${token}`)
 
     const formData = new FormData();
 
     formData.append('englishTitle', lessonResource.englishTitle);
     formData.append('arabicTitle', lessonResource.arabicTitle);
-    formData.append('attachmentLink', lessonResource.attachmentLink || '');  
-    formData.append('lessonID', lessonResource.lessonID?.toString() ?? ''); 
-    formData.append('lessonResourceTypeID', lessonResource.lessonResourceTypeID?.toString() ?? '');   
+    formData.append('attachmentLink', lessonResource.attachmentLink || '');
+    formData.append('lessonID', lessonResource.lessonID?.toString() ?? '');
+    formData.append('lessonResourceTypeID', lessonResource.lessonResourceTypeID?.toString() ?? '');
     if (lessonResource.classes && lessonResource.classes.length != 0) {
       lessonResource.classes.forEach(item => {
         formData.append('classes', item.toString());
@@ -62,7 +74,7 @@ export class LessonResourceService {
 
     if (lessonResource.attachmentFile) {
       formData.append('attachmentFile', lessonResource.attachmentFile, lessonResource.attachmentFile.name);
-    }  
+    }
 
     return this.http.post(`${this.baseUrl}/LessonResource`, formData, {
       headers: headers,
@@ -70,9 +82,9 @@ export class LessonResourceService {
     });
   }
 
-  Edit(lessonResource: LessonResource,DomainName:string) {
-    if(DomainName!=null) {
-      this.header=DomainName 
+  Edit(lessonResource: LessonResource, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
@@ -84,10 +96,10 @@ export class LessonResourceService {
     formData.append('id', lessonResource.id?.toString() ?? '');
     formData.append('englishTitle', lessonResource.englishTitle);
     formData.append('arabicTitle', lessonResource.arabicTitle);
-    formData.append('attachmentLink', lessonResource.attachmentLink || ''); 
-    formData.append('lessonID', lessonResource.lessonID?.toString() ?? ''); 
-    formData.append('lessonResourceTypeID', lessonResource.lessonResourceTypeID?.toString() ?? ''); 
- 
+    formData.append('attachmentLink', lessonResource.attachmentLink || '');
+    formData.append('lessonID', lessonResource.lessonID?.toString() ?? '');
+    formData.append('lessonResourceTypeID', lessonResource.lessonResourceTypeID?.toString() ?? '');
+
     if (lessonResource.classes && lessonResource.classes.length != 0) {
       lessonResource.classes.forEach(item => {
         formData.append('classes', item.toString());
@@ -97,17 +109,17 @@ export class LessonResourceService {
       lessonResource.newClassRooms.forEach(item => {
         formData.append('newClassRooms', item.toString());
       });
-    } 
+    }
 
     if (lessonResource.attachmentFile) {
       formData.append('attachmentFile', lessonResource.attachmentFile, lessonResource.attachmentFile.name);
-    }  
+    }
     return this.http.put(`${this.baseUrl}/LessonResource`, formData, { headers });
   }
- 
-  Delete(id: number,DomainName:string) {
-    if(DomainName!=null) {
-      this.header=DomainName 
+
+  Delete(id: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()

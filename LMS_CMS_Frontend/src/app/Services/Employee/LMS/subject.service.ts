@@ -72,6 +72,7 @@ export class SubjectService {
     formData.append('totalMark', Subject.totalMark?.toString() ?? '');
     formData.append('hideFromGradeReport', String(Subject.hideFromGradeReport));
     formData.append('numberOfSessionPerWeek', Subject.numberOfSessionPerWeek?.toString() ?? '');
+    formData.append('assignmentCutOffDatePercentage', Subject.assignmentCutOffDatePercentage?.toString() ?? '');
     formData.append('gradeID', String(Subject.gradeID));
     formData.append('subjectCategoryID', String(Subject.subjectCategoryID));
 
@@ -106,6 +107,7 @@ export class SubjectService {
     formData.append('totalMark', Subject.totalMark?.toString() ?? '');
     formData.append('hideFromGradeReport', String(Subject.hideFromGradeReport));
     formData.append('numberOfSessionPerWeek', Subject.numberOfSessionPerWeek?.toString() ?? '');
+    formData.append('assignmentCutOffDatePercentage', Subject.assignmentCutOffDatePercentage?.toString() ?? '');
     formData.append('gradeID', String(Subject.gradeID));
     formData.append('subjectCategoryID', String(Subject.subjectCategoryID));
 

@@ -38,15 +38,23 @@ export class SubjectComponent {
   }
 
   getSubjectData() {
-    this.subjectService.GetByStudentId(this.UserID,this.DomainName).subscribe(
+    this.subjectService.GetByStudentId(this.UserID, this.DomainName).subscribe(
       (data) => {
         this.subjectData = data;
-        console.log( this.subjectData)
+        console.log(this.subjectData)
       }
     )
   }
 
-  moveToWeeks(subjectId : number){
+  moveToWeeks(subjectId: number) {
     this.router.navigateByUrl(`Student/SubjectWeeks/${subjectId}`)
+  }
+
+  moveToSubjectResources(subjectId: number) {
+    this.router.navigateByUrl(`Student/SubjectResources/${subjectId}`)
+  }
+
+  moveToSubjectLive(subjectId: number) {
+    this.router.navigateByUrl(`Student/SubjectLive/${subjectId}`)
   }
 }

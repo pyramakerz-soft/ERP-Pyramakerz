@@ -1,26 +1,31 @@
 <div class="flex justify-between items-center">
-    <h1 class="primaryTxt font-semibold text-2xl leading-9">{{SubjectName}}</h1>
+    <div class="flex justify-start items-center space-x-5">
+        <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToBack()"></i>
+        <h1 class="primaryTxt font-semibold text-2xl leading-9">{{SubjectName}}</h1>
+    </div>
     <div class="flex justify-between items-center space-x-4">
-        <button class="secondaryBorder secondaryTxt rounded-lg px-4 py-3 flex items-center justify-center gap-2">
+        <button class="secondaryBorder secondaryTxt rounded-lg px-4 py-3 flex items-center justify-center gap-2"
+            (click)="moveToSubjectResources()">
             <img src="Icons/GreenResource.png" />
             Resources
         </button>
         <button class="secondaryBorder secondaryTxt rounded-lg px-4 py-3 flex items-center justify-center gap-2">
-            <img src="Icons/Assignment2.png" />
+            <img src="Icons/GreenAssignment.png" />
             Assignments
         </button>
-        <button class="secondaryBorder secondaryTxt rounded-lg px-4 py-3 flex items-center justify-center gap-2">
-            <img src="Icons/GreenLessonLive.png"  />
+        <button class="secondaryBorder secondaryTxt rounded-lg px-4 py-3 flex items-center justify-center gap-2"
+            (click)="moveToSubjectLive()">
+            <img src="Icons/GreenLessonLive.png" />
             Lesson Live
         </button>
     </div>
 </div>
 
-<div class="flex flex-wrap justify-between mt-6 gap-2">
-    <div *ngFor="let week of WorkingWeekData; let i = index"
+<div class="flex flex-wrap justify-start mt-6 gap-4 items-center">
+    <div *ngFor="let week of WorkingWeekData; let i = index" (click)="moveToLessons(week.id)"
         class="w-[15%] rounded-2xl shadow text-center flex space-x-2 p-3 items-center"
         [ngStyle]="{ 'background-color': getRandomColor(i) }">
         <img src="Icons/ColoredFile.png" alt="ColoredFile" class="w-[20%]" />
-        <h1 class="text-lg font-bold text-[#003366] mb-4">{{ week.englishName }}</h1>
+        <h1 class="text-lg font-bold text-[#003366]">{{ week.englishName }}</h1>
     </div>
 </div>

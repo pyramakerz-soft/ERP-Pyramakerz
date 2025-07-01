@@ -9,16 +9,16 @@ import { ApiService } from '../../api.service';
 export class LessonLiveService {
 
 
- baseUrl = ""
+  baseUrl = ""
   header = ""
 
   constructor(public http: HttpClient, public ApiServ: ApiService) {
     this.baseUrl = ApiServ.BaseUrl
   }
 
-  Get(DomainName:string) {
-    if(DomainName!=null) {
-      this.header=DomainName 
+  Get(DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
@@ -28,9 +28,9 @@ export class LessonLiveService {
     return this.http.get<LessonLive[]>(`${this.baseUrl}/LessonLive`, { headers })
   }
 
-  GetByID(id: number,DomainName:string) {
-    if(DomainName!=null) {
-      this.header=DomainName 
+  GetByID(id: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
@@ -40,9 +40,9 @@ export class LessonLiveService {
     return this.http.get<LessonLive>(`${this.baseUrl}/LessonLive/${id}`, { headers })
   }
 
-  GetByStudentID(id: number,DomainName:string) {
-    if(DomainName!=null) {
-      this.header=DomainName 
+  GetByStudentID(id: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
@@ -52,9 +52,21 @@ export class LessonLiveService {
     return this.http.get<LessonLive[]>(`${this.baseUrl}/LessonLive/ByStudentId/${id}`, { headers })
   }
 
-  GetByClassId(id: number,DomainName:string) {
-    if(DomainName!=null) {
-      this.header=DomainName 
+  GetBySubjectID(id: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<LessonLive[]>(`${this.baseUrl}/LessonLive/BySubject/${id}`, { headers })
+  }
+
+  GetByClassId(id: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
@@ -64,9 +76,9 @@ export class LessonLiveService {
     return this.http.get<LessonLive[]>(`${this.baseUrl}/LessonLive/ByClassId/${id}`, { headers })
   }
 
-  Add(LessonLive: LessonLive,DomainName:string) {
-    if(DomainName!=null) {
-      this.header=DomainName 
+  Add(LessonLive: LessonLive, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
@@ -80,9 +92,9 @@ export class LessonLiveService {
     });
   }
 
-  Edit(LessonLive: LessonLive,DomainName:string) {
-    if(DomainName!=null) {
-      this.header=DomainName 
+  Edit(LessonLive: LessonLive, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
@@ -92,9 +104,9 @@ export class LessonLiveService {
     return this.http.put(`${this.baseUrl}/LessonLive`, LessonLive, { headers });
   }
 
-  Delete(id: number,DomainName:string) {
-    if(DomainName!=null) {
-      this.header=DomainName 
+  Delete(id: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
