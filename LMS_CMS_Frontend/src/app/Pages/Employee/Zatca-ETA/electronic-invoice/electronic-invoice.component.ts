@@ -116,15 +116,26 @@ export class ElectronicInvoiceComponent implements OnInit {
     return { valid: true };
   }
 
+  onFilterChange() {
+    // Hide the table whenever any filter changes
+    this.showTable = false;
+
+    // Also clear the existing data
+    this.transactions = [];
+    this.selectedInvoices = [];
+  }
+
   async viewReport() {
     const validation = this.validateFilters();
     if (!validation.valid) {
-      Swal.fire('Error', validation.message, 'error');
+      // Swal.fire('Error', validation.message, 'error');
       return;
     }
 
     this.isLoading = true;
-    this.showTable = false;
+    this.showTable = false; // Hide while loading
+    this.transactions = [];
+    this.selectedInvoices = [];
 
     try {
       const formattedStartDate = this.formatDateForApi(this.dateFrom);
@@ -154,6 +165,7 @@ export class ElectronicInvoiceComponent implements OnInit {
       this.showTable = true;
     } catch (error) {
       this.handleError('Failed to load transactions', error);
+      // The handleError method will now show the table with empty data
     } finally {
       this.isLoading = false;
     }
@@ -314,7 +326,12 @@ export class ElectronicInvoiceComponent implements OnInit {
     console.error(message, error);
     this.isLoading = false;
     this.isSubmitting = false;
-    Swal.fire({
+
+    this.showTable = true;
+    this.transactions = [];
+    this.selectedInvoices = [];
+
+    console.log({
       icon: 'error',
       title: 'Error',
       text: message,

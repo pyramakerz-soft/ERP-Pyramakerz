@@ -1,23 +1,23 @@
-// electronic-invoice-detail.component.ts
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule, DatePipe } from '@angular/common';
-
 import { FormsModule } from '@angular/forms';
 import { PdfPrintComponent } from '../../../../Component/pdf-print/pdf-print.component';
 import { ElectronicInvoice } from '../../../../Models/zatca/electronic-invoice';
 import { InventoryDetailsService } from '../../../../Services/Employee/Inventory/inventory-details.service';
 import { InventoryMasterService } from '../../../../Services/Employee/Inventory/inventory-master.service';
 import { ApiService } from '../../../../Services/api.service';
-
+import { ZatcaService } from '../../../../Services/Employee/Zatca/zatca.service';
+import { EtaService } from '../../../../Services/Employee/ETA/eta.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-electronic-invoice-detail',
-  imports: [CommonModule, FormsModule, PdfPrintComponent],
   standalone: true,
+  imports: [CommonModule, FormsModule, PdfPrintComponent],
   templateUrl: './electronic-invoice-detail.component.html',
   styleUrls: ['./electronic-invoice-detail.component.css'],
-  providers: [DatePipe]
+  providers: [DatePipe],
 })
 export class ElectronicInvoiceDetailComponent implements OnInit {
   @ViewChild('pdfPrint') pdfPrint!: PdfPrintComponent;
@@ -51,10 +51,21 @@ export class ElectronicInvoiceDetailComponent implements OnInit {
     supplierId: null,
     storeToTransformId: null,
     schoolId: 0,
-    schoolPCId: 0
+    schoolPCId: 0,
   };
   isLoading = false;
+  isSubmitting = false;
   DomainName: string = '';
+  currentSystem: 'zatca' | 'eta' = 'zatca';
+  showPDF = false;
+
+  school = {
+    reportHeaderOneEn: 'Invoice Report',
+    reportHeaderTwoEn: 'Simplified Tax Invoice',
+    reportHeaderOneAr: 'تقرير الفاتورة',
+    reportHeaderTwoAr: 'فاتورة ضريبة مبسطة',
+    reportImage: 'assets/images/logo.png',
+  };
 
   constructor(
     private route: ActivatedRoute,
@@ -62,121 +73,124 @@ export class ElectronicInvoiceDetailComponent implements OnInit {
     private inventoryDetailsService: InventoryDetailsService,
     private inventoryMasterService: InventoryMasterService,
     public ApiServ: ApiService,
-    private datePipe: DatePipe
+    private datePipe: DatePipe,
+    private zatcaService: ZatcaService,
+    private etaService: EtaService
   ) {}
 
   ngOnInit() {
     this.invoiceId = +this.route.snapshot.params['id'];
     this.DomainName = this.ApiServ.GetHeader();
+
+    // Determine system from route data
+    this.currentSystem = this.route.snapshot.data['system'] || 'zatca';
+
     this.loadInvoice();
   }
 
+  // Update the loadInvoice() method in electronic-invoice-detail.component.ts
   loadInvoice() {
     this.isLoading = true;
-    
-    // First get the master invoice data
-    this.inventoryMasterService.GetById(this.invoiceId, this.DomainName).subscribe({
-      next: (masterData) => {
-        console.log('masterData')
-        console.log(masterData)
-        // Map the master data to our invoice object
-        this.invoice = {
-          ...this.invoice,
-          id: masterData.id,
-          invoiceNumber: masterData.invoiceNumber.toString(),
-          date: masterData.date,
-          total: masterData.total,
-          vatAmount: masterData.vatAmount,
-          totalWithVat: masterData.totalWithVat,
-          flagEnName: masterData.flagEnName,
-          student: masterData.studentName,
-          storeName: masterData.storeName,
-          isValid: true // Default to true or determine from response
-        };
 
-        // Then get the inventory details
-        this.inventoryDetailsService.GetBySalesId(this.invoiceId, this.DomainName).subscribe({
-          next: (details) => {
-            console.log('details')
-            console.log(details)
-            this.invoice.inventoryDetails = details.map(item => ({
-              ...item,
-              itemName: item.shopItemName,
-              tax: 0 // Default tax value
-            }));
-            this.isLoading = false;
-          },
-          error: (detailsError) => {
-            console.error('Error loading invoice details:', detailsError);
-            this.isLoading = false;
-          }
-        });
-      },
-      error: (masterError) => {
-        console.error('Error loading invoice master data:', masterError);
-        this.isLoading = false;
-        this.router.navigate(['/Employee/Zatca Electronic-Invoice']);
-      }
-    });
+    this.inventoryMasterService
+      .GetById(this.invoiceId, this.DomainName)
+      .subscribe({
+        next: (masterData: any) => {
+          // Use 'any' temporarily or create a proper type
+          this.invoice = {
+            ...this.invoice,
+            id: masterData.id,
+            invoiceNumber: masterData.invoiceNumber?.toString() || '',
+            date: masterData.date,
+            total: masterData.total,
+            vatAmount: masterData.vatAmount,
+            totalWithVat: masterData.totalWithVat,
+            flagEnName: masterData.flagEnName,
+            student: masterData.studentName,
+            studentAddress: masterData.studentAddress || null,
+            storeName: masterData.storeName,
+            isValid: masterData.isValid || null,
+            qrCode: masterData.qrCode || null,
+            qrImage: masterData.qrImage || null,
+            invoiceHash: masterData.invoiceHash || null,
+            uuid: masterData.uuid || null,
+          };
+
+          this.inventoryDetailsService
+            .GetBySalesId(this.invoiceId, this.DomainName)
+            .subscribe({
+              next: (details: any) => {
+                this.invoice.inventoryDetails = details.map((item: any) => ({
+                  ...item,
+                  itemName: item.shopItemName,
+                  tax: item.tax || 0,
+                }));
+                this.isLoading = false;
+              },
+              error: (detailsError) => {
+                console.error('Error loading invoice details:', detailsError);
+                this.isLoading = false;
+              },
+            });
+        },
+        error: (masterError) => {
+          console.error('Error loading invoice master data:', masterError);
+          this.isLoading = false;
+          this.goBack();
+        },
+      });
   }
 
   goBack() {
-    this.router.navigate(['/Employee/Zatca Electronic-Invoice']);
+    const routePrefix =
+      this.currentSystem === 'zatca'
+        ? '/Employee/Zatca Electronic-Invoice'
+        : '/Employee/ETA Electronic-Invoice';
+    this.router.navigate([routePrefix]);
   }
 
   sendInvoice() {
-    // Implement send functionality
-    alert(`Invoice ${this.invoice.invoiceNumber} sent successfully`);
+    this.isSubmitting = true;
+
+    const serviceCall =
+      this.currentSystem === 'zatca'
+        ? this.zatcaService.reportInvoice(this.invoiceId, this.DomainName)
+        : this.etaService.submitInvoice(this.invoiceId, 0, 0, this.DomainName);
+
+    serviceCall.subscribe({
+      next: () => {
+        Swal.fire(
+          'Success',
+          `Invoice ${
+            this.currentSystem === 'zatca'
+              ? 'reported to ZATCA'
+              : 'submitted to ETA'
+          } successfully`,
+          'success'
+        );
+        this.invoice.isValid = true;
+      },
+      error: (error) => {
+        Swal.fire(
+          'Error',
+          `Failed to ${
+            this.currentSystem === 'zatca' ? 'report' : 'submit'
+          } invoice`,
+          'error'
+        );
+        console.error('Error submitting invoice:', error);
+      },
+      complete: () => {
+        this.isSubmitting = false;
+      },
+    });
   }
 
-    showPDF = false;
-  school = {
-    reportHeaderOneEn: 'Invoice Report',
-    reportHeaderTwoEn: 'Simplified Tax Invoice',
-    reportHeaderOneAr: 'تقرير الفاتورة',
-    reportHeaderTwoAr: 'فاتورة ضريبة مبسطة',
-    reportImage: 'assets/images/logo.png'
-  };
-
-  
   printInvoice() {
     this.showPDF = true;
     setTimeout(() => {
-      const printContents = document.getElementById("invoiceData")?.innerHTML;
-      if (!printContents) {
-        console.error("Element not found!");
-        return;
-      }
-
-      const printStyle = `
-        <style>
-          @page { size: auto; margin: 0mm; }
-          body { margin: 0; }
-          @media print {
-            body > *:not(#print-container) { display: none !important; }
-            #print-container {
-              display: block !important;
-              position: static !important;
-              width: 100% !important;
-              height: auto !important;
-              background: white !important;
-              margin: 0 !important;
-            }
-          }
-        </style>
-      `;
-
-      const printContainer = document.createElement('div');
-      printContainer.id = 'print-container';
-      printContainer.innerHTML = printStyle + printContents;
-
-      document.body.appendChild(printContainer);
-      window.print();
-
-      setTimeout(() => {
-        document.body.removeChild(printContainer);
-        this.showPDF = false;
-      }, 100);
+      this.pdfPrint.downloadPDF();
+      setTimeout(() => (this.showPDF = false), 1000);
     }, 500);
   }
 
@@ -184,24 +198,31 @@ export class ElectronicInvoiceDetailComponent implements OnInit {
     return this.datePipe.transform(date, 'dd MMMM yyyy') || '';
   }
 
-  // calculateSubtotal(): number {
-  //   return this.invoice.inventoryDetails?.reduce((sum, item) => sum + (item.price * item.quantity), 0) || 0;
-  // }
-
-  // calculateTax(): number {
-  //   return this.invoice.inventoryDetails?.reduce((sum, item) => sum + (item.tax || 0), 0) || 0;
-  // }
-
   getInvoiceTableData(): any[] {
     if (!this.invoice.inventoryDetails) return [];
-    
-    return this.invoice.inventoryDetails.map(item => ({
-      'Product': item.itemName,
-      'Quantity': item.quantity,
-      'Price': item.price,
-      'Tax': this.invoice.vatAmount,
-      'Total': item.totalPrice
+
+    return this.invoice.inventoryDetails.map((item) => ({
+      Product: item.itemName || 'N/A',
+      Quantity: item.quantity || 0,
+      Price: item.price || 0,
+      Tax: item.tax || 0,
+      Total: item.totalPrice || 0,
     }));
+  }
+
+  getQRCodeImage(): string {
+    if (this.invoice.qrImage) {
+      return `data:image/png;base64,${this.invoice.qrImage}`;
+    }
+    return '';
+  }
+
+  getInvoiceSummary(): any[] {
+    return [
+      { key: 'Subtotal', value: this.invoice.total },
+      { key: 'VAT Amount', value: this.invoice.vatAmount },
+      { key: 'Total with VAT', value: this.invoice.totalWithVat },
+    ];
   }
 
 }
