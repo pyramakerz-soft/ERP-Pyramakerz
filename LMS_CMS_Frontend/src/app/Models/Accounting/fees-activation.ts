@@ -25,5 +25,4 @@ export class FeesActivation {
         public sectionName: string = '',
         public sectionId: number = 0,
     ) {}
-}
-
+} 

@@ -46,7 +46,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
         [HttpPost("GeneratePCSID")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Zatca Electronic-Invoice" }
+            pages: new[] { "Zatca Electronic-Invoice", "Zatca Devices" }
         )]
         public async Task<IActionResult> GeneratePCSID(long otp, long schoolPcId)
         {
@@ -65,6 +65,9 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
             if (schoolPc is null)
                 return NotFound("School PC not found.");
 
+            if (string.IsNullOrEmpty(schoolPc.SerialNumber))
+                return BadRequest("Serial Number can not be null");
+
             string commonName = schoolPc.School.Name;
             string serialNumber = $"1-{schoolPcId}|2-{schoolPc.PCName}|3-{schoolPc.SerialNumber}";
             string organizationIdentifier = schoolPc.School.VatNumber;
@@ -74,6 +77,18 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
             string invoiceType = "0100";
             string locationAddress = schoolPc.School.City;
             string industryBusinessCategory = "Learning";
+
+            if (string.IsNullOrEmpty(commonName))
+                return BadRequest("Common Name can not be null");
+
+            if (string.IsNullOrEmpty(organizationIdentifier))
+                return BadRequest("Organization Identifier (Vat Number) can not be null");
+
+            if (string.IsNullOrEmpty(organizationUnitName))
+                return BadRequest("Organization Name can not be null");
+
+            if (string.IsNullOrEmpty(locationAddress))
+                return BadRequest("City can not be null");
 
             CsrGenerationDto csrGeneration = new(
                 commonName,

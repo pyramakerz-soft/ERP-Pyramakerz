@@ -42,6 +42,7 @@ export class ZatcaDevicesComponent implements OnInit {
   IsEmployee: boolean = true;
   
   isModalVisible: boolean = false;
+  isCertificateModalVisible: boolean = false;
   mode: string = "";
   isLoading = false;
   
@@ -50,9 +51,11 @@ export class ZatcaDevicesComponent implements OnInit {
   value: any = "";
   keysArray: string[] = ['id', 'pcName', 'serialNumber', 'schoolName'];
   validationErrors: { [key: string]: string } = {};
+  
+  otp: number|null = null;
+  deviceToGenerateID: number = 0;
 
-  constructor(
-    private router: Router,
+  constructor( 
     private menuService: MenuService,
     public activeRoute: ActivatedRoute,
     public account: AccountService,
@@ -100,10 +103,7 @@ export class ZatcaDevicesComponent implements OnInit {
   async GetTableData() {
     this.TableData = [];
     try {
-      const data = await firstValueFrom(this.schoolPCsService.GetAll(this.DomainName));
-
-      console.log('data')
-      console.log(data)
+      const data = await firstValueFrom(this.schoolPCsService.GetAll(this.DomainName)); 
       this.TableData = data;
     } catch (error) {
       this.TableData = [];
@@ -169,6 +169,17 @@ private getSchoolIdFromName(schoolName: string): number {
     this.validationErrors = {};
   }
 
+  openCertificate(devideID:number) {
+    this.isCertificateModalVisible = true;
+    this.deviceToGenerateID = devideID
+  }
+
+  closeCertificateModal() {
+    this.isCertificateModalVisible = false;
+    this.deviceToGenerateID = 0
+    this.otp = null
+  }
+
   isFormValid(): boolean {
     this.validationErrors = {};
     let isValid = true;
@@ -218,18 +229,14 @@ AddNewDevice() {
     this.zatcaDevice.serialNumber,
     Number(this.zatcaDevice.schoolId),
     '', // schoolName can be empty
-  );
-
-  console.log('Sending payload:', payload);
-
+  ); 
   this.schoolPCsService.Create(payload, this.DomainName).subscribe({
     next: () => {
       this.GetTableData();
       this.closeModal();
       this.isLoading = false;
     },
-    error: (error) => {
-      console.error('Error:', error);
+    error: (error) => { 
       this.isLoading = false;
       Swal.fire({
         icon: 'error',
@@ -316,43 +323,44 @@ Delete(id: number) {
     }
   });
 }
-generateCertificate(id: number) {
-  Swal.fire({
-    title: 'Generate Certificate',
-    text: 'Are you sure you want to generate a certificate for this device?',
-    icon: 'question',
-    showCancelButton: true,
-    confirmButtonColor: '#FF7519',
-    cancelButtonColor: '#17253E',
-    confirmButtonText: 'Generate',
-    cancelButtonText: 'Cancel'
-  }).then((result) => {
-    if (result.isConfirmed) {
-      this.isLoading = true;
-      this.zatcaService.generateCertificate(id, this.DomainName).subscribe({
-        next: () => {
-          this.isLoading = false;
-          Swal.fire({
-            icon: 'success',
-            title: 'Success',
-            text: 'Certificate generated successfully',
-            confirmButtonText: 'Okay'
-          });
-          this.GetTableData(); // Refresh table data
-        },
-        error: (error) => {
-          this.isLoading = false;
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: error.error?.message || 'Failed to generate certificate',
-            confirmButtonText: 'Okay'
-          });
-        }
-      });
-    }
-  });
-}
+
+  generateCertificate() {
+    Swal.fire({
+      title: 'Generate Certificate',
+      text: 'Are you sure you want to generate a certificate for this device?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#FF7519',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: 'Generate',
+      cancelButtonText: 'Cancel'
+    }).then((result) => {
+      if (result.isConfirmed && this.otp) {
+        this.isLoading = true;
+        this.zatcaService.generateCertificate(this.deviceToGenerateID, this.otp, this.DomainName).subscribe({
+          next: () => {
+            this.isLoading = false;
+            Swal.fire({
+              icon: 'success',
+              title: 'Success',
+              text: 'Certificate generated successfully',
+              confirmButtonText: 'Okay'
+            });
+            this.GetTableData(); // Refresh table data
+          },
+          error: (error) => {
+            this.isLoading = false;
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: error.error?.message || 'Failed to generate certificate',
+              confirmButtonText: 'Okay'
+            });
+          }
+        });
+      }
+    });
+  }
 
   formatDate(date: string | null): string {
     if (!date) return '';

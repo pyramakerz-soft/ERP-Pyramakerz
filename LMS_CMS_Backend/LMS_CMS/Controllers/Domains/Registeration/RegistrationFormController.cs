@@ -517,8 +517,12 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                 Unit_Of_Work.SaveChanges();
 
                 /// 5) Delete Registeration Form Submittion
-                registerationFormSubmittion.IsDeleted = true;
-                Unit_Of_Work.registerationFormSubmittion_Repository.Update(registerationFormSubmittion);
+                List<RegisterationFormSubmittion> registerationFormSubmittions =Unit_Of_Work.registerationFormSubmittion_Repository.FindBy(s => s.RegisterationFormParentID == registerationFormParent.ID);
+                foreach (var item in registerationFormSubmittions)
+                {
+                    item.IsDeleted = true;
+                }
+                Unit_Of_Work.registerationFormSubmittion_Repository.UpdateRange(registerationFormSubmittions);
                 Unit_Of_Work.SaveChanges();
 
             }

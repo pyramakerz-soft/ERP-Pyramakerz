@@ -1,0 +1,18 @@
+﻿using LMS_CMS_DAL.Models.Domains.LMS;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace LMS_CMS_BL.DTO.LMS
+{
+    public class DailyPerformanceMasterAddDTO
+    {
+        public long SubjectID { get; set; }
+        public long ClassroomID { get; set; }
+        public List<DailyPerformanceAddDTO> DailyPerformances { get; set; }
+
+    }
+}

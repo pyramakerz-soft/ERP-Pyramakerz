@@ -17,24 +17,12 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         [Required(ErrorMessage = "Name is required")]
         [StringLength(100, ErrorMessage = "School cannot be longer than 100 characters.")]
         public string Name { get; set; }
-        public string?  Address { get; set; }
-        public string? StreetName { get; set; }
-        public string? BuildingNumber { get; set; }
-        public string? CitySubdivision { get; set; }
-        public string? City { get; set; }
-        public string? PostalZone { get; set; }
-        [ForeignKey("SchoolType")]
-        public long SchoolTypeID { get; set; }
+        public string? Address { get; set; }
         public string? ReportHeaderOneEn { get; set; }
         public string? ReportHeaderOneAr { get; set; }
         public string? ReportHeaderTwoEn { get; set; }
         public string? ReportHeaderTwoAr { get; set; }
         public string? ReportImage { get; set; }
-        public string? VatNumber { get; set; }
-        public string? CRN { get; set; } //Commercial Registration Number
-        public string? ClientID { get; set; } 
-        public string? SecretNumber1 { get; set; } 
-        public string? SecretNumber2 { get; set; } 
         public int? MaximumPeriodCountTimeTable { get; set; }
         public int? MaximumPeriodCountRemedials { get; set; }
         [ForeignKey("WeekStartDay")]
@@ -45,7 +33,21 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public long? WeekEndDayID { get; set; }
         public Days? WeekEndDay { get; set; }
 
+        public string? City { get; set; }
+        public string? CitySubdivision { get; set; }
+        public string? PostalZone { get; set; }
+        public string? StreetName { get; set; }
+        public string? BuildingNumber { get; set; }
+        public string? VatNumber { get; set; }
+        public string? CRN { get; set; } //Commercial Registration Number
+        public string? ClientID { get; set; } 
+        public string? SecretNumber1 { get; set; } 
+        public string? SecretNumber2 { get; set; } 
+        
+        [ForeignKey("SchoolType")]
+        public long SchoolTypeID { get; set; }
         public SchoolType SchoolType { get; set; }
+        
         public ICollection<AcademicYear> AcademicYears { get; set; } = new HashSet<AcademicYear>();
         //public ICollection<StudentAcademicYear> StudentAcademicYears { get; set; } = new HashSet<StudentAcademicYear>();
         public ICollection<Section> Sections { get; set; } = new HashSet<Section>();

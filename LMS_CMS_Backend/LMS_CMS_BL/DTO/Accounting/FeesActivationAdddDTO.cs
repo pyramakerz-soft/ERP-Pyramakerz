@@ -9,9 +9,9 @@ namespace LMS_CMS_BL.DTO.Accounting
 {
     public class FeesActivationAdddDTO
     {
-        public float Amount { get; set; }
+        public decimal Amount { get; set; }
         public float Discount { get; set; }
-        public float Net { get; set; }
+        public decimal Net { get; set; }
         public string Date { get; set; }
         public long FeeTypeID { get; set; }
         public long? FeeDiscountTypeID { get; set; }

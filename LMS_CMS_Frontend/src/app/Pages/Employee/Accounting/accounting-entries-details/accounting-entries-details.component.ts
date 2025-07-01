@@ -223,8 +223,9 @@ export class AccountingEntriesDetailsComponent {
       this.validationErrorsForDetails[field] = '';
     }
      
-    if((this.newDetails.creditAmount || this.editedRowData.creditAmount) && 
-    (this.newDetails.debitAmount || this.editedRowData.debitAmount) && 
+    if(((this.newDetails.creditAmount || this.editedRowData.creditAmount) ||
+    (this.newDetails.debitAmount || this.editedRowData.debitAmount)) && 
+    (this.newDetails.subAccountingID || this.editedRowData.subAccountingID) &&
     (!isNaN(this.newDetails.creditAmount?this.newDetails.creditAmount:0) && !isNaN(this.newDetails.debitAmount?this.newDetails.debitAmount:0)) && 
     (!isNaN(this.editedRowData.creditAmount? this.editedRowData.creditAmount:0) && !isNaN(this.editedRowData.debitAmount?this.editedRowData.debitAmount:0)) &&  
     (this.newDetails.accountingTreeChartID || this.editedRowData.accountingTreeChartID)){
@@ -249,7 +250,7 @@ export class AccountingEntriesDetailsComponent {
     if (isNaN(value) || value === '') {
       event.target.value = ''; 
       if (typeof this.newDetails[field] === 'string') {
-        this.newDetails[field] = '' as never;  
+        this.newDetails[field] = null as never;  
       }
     }
   }
@@ -259,7 +260,7 @@ export class AccountingEntriesDetailsComponent {
     if (isNaN(value) || value === '') {
       event.target.value = ''; 
       if (typeof this.editedRowData[field] === 'string') {
-        this.editedRowData[field] = '' as never;  
+        this.editedRowData[field] = null as never;  
       }
     }
   }
@@ -333,19 +334,24 @@ export class AccountingEntriesDetailsComponent {
   }
 
   SaveNewDetails(){
-    this.isLoading = true;
-    this.newDetails.accountingEntriesMasterID = this.AccountingEntriesID
-    this.accountingEntriesDetailsService.Add(this.newDetails, this.DomainName).subscribe(
-      (data) => {
-        this.isLoading = false;
-        this.isNewDetails = false
-        this.newDetails = new AccountingEntriesDetails()
-        this.GetAccountingEntriesDetails()
-        this.editingRowId = null; 
-        this.editedRowData = new AccountingEntriesDetails(); 
-        this.isDetailsValid = false
-      }
-    )
+    if(this.isDetailsValid){
+      this.isLoading = true;
+      this.newDetails.accountingEntriesMasterID = this.AccountingEntriesID
+      this.accountingEntriesDetailsService.Add(this.newDetails, this.DomainName).subscribe(
+        (data) => {
+          this.isLoading = false;
+          this.isNewDetails = false
+          this.newDetails = new AccountingEntriesDetails()
+          this.GetAccountingEntriesDetails()
+          this.editingRowId = null; 
+          this.editedRowData = new AccountingEntriesDetails(); 
+          this.isDetailsValid = false
+        }, 
+        (error) => {
+          this.isLoading = false; 
+        }
+      )
+    }
   }
 
   EditDetail(row: AccountingEntriesDetails) {
@@ -373,19 +379,29 @@ export class AccountingEntriesDetailsComponent {
     }
   }
 
-  SaveEditedDetail() {
-    this.isLoading = true;
-    this.accountingEntriesDetailsService.Edit(this.editedRowData, this.DomainName).subscribe(
-      (data) =>{
-        this.isLoading = false;
-        this.editingRowId = null; 
-        this.editedRowData = new AccountingEntriesDetails(); 
-        this.isDetailsValid = false
-        this.isNewDetails = false
-        this.newDetails = new AccountingEntriesDetails()
-        this.GetAccountingEntriesDetails()
-      }
-    )
+  SaveEditedDetail() { 
+    if(this.isDetailsValid){
+      this.isLoading = true;
+      this.accountingEntriesDetailsService.Edit(this.editedRowData, this.DomainName).subscribe(
+        (data) =>{
+          this.isLoading = false;
+          this.editingRowId = null; 
+          this.editedRowData = new AccountingEntriesDetails(); 
+          this.isDetailsValid = false
+          this.isNewDetails = false
+          this.newDetails = new AccountingEntriesDetails()
+          this.GetAccountingEntriesDetails()
+        }, 
+        (error) => {
+          this.isLoading = false; 
+          Swal.fire({
+            icon: 'warning', 
+            title: error.error,
+            confirmButtonText: 'Okay'
+          });
+        }
+      )
+    }
   } 
 
   DeleteDetail(id: number) {
@@ -448,8 +464,7 @@ export class AccountingEntriesDetailsComponent {
     this.showPDF = true;
     setTimeout(() => {
       const printContents = document.getElementById("Data")?.innerHTML;
-      if (!printContents) {
-        console.error("Element not found!");
+      if (!printContents) { 
         return;
       }
 

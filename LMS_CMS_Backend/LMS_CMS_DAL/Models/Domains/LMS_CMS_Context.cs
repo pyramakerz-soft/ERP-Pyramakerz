@@ -184,7 +184,7 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<AssignmentStudentQuestion> AssignmentStudentQuestion { get; set; }
         public DbSet<ETAPOS> ETAPOS { get; set; }
         public DbSet<AssignmentStudentQuestionAnswerOption> AssignmentStudentQuestionAnswerOption { get; set; }
-
+        public DbSet<DailyPerformanceMaster> DailyPerformanceMaster { get; set; }
 
 
         public LMS_CMS_Context(DbContextOptions<LMS_CMS_Context> options)
@@ -1435,9 +1435,9 @@ namespace LMS_CMS_DAL.Models.Domains
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<DailyPerformance>()
-                .HasOne(p => p.Subject)
-                .WithMany(p => p.DailyPerformance)
-                .HasForeignKey(p => p.SubjectID)
+                .HasOne(p => p.DailyPerformanceMaster)
+                .WithMany(p => p.DailyPerformances)
+                .HasForeignKey(p => p.DailyPerformanceMasterID)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<DailyPerformance>()
@@ -1450,6 +1450,18 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasOne(p => p.DailyPerformance)
                 .WithMany(p => p.StudentPerformance)
                 .HasForeignKey(p => p.DailyPerformanceID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<DailyPerformanceMaster>()
+                .HasOne(p => p.Subject)
+                .WithMany(p => p.DailyPerformanceMaster)
+                .HasForeignKey(p => p.SubjectID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<DailyPerformanceMaster>()
+                .HasOne(p => p.Classroom)
+                .WithMany(p => p.DailyPerformanceMaster)
+                .HasForeignKey(p => p.ClassroomID)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<QuestionBank>()

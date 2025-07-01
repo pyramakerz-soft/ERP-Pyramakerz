@@ -27,25 +27,13 @@ import { Classroom } from '../../../../../Models/LMS/classroom';
   templateUrl: './students-information-form-report.component.html',
   styleUrl: './students-information-form-report.component.css'
 })
-export class StudentsInformationFormReportComponent {
-
-  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
-
-  File: any;
-  DomainName: string = '';
-  UserID: number = 0;
-  path: string = '';
-
-  AllowEdit: boolean = false;
-  AllowDelete: boolean = false;
-  AllowEditForOthers: boolean = false;
-  AllowDeleteForOthers: boolean = false;
+export class StudentsInformationFormReportComponent { 
+  DomainName: string = '';  
   schools: School[] = []
   students: Student[] = []
   academicYears: AcademicYear[] = []
   Grades: Grade[] = []
-  class: Classroom[] = []
-  isLoading: boolean = false
+  class: Classroom[] = [] 
 
   SelectedSchoolId: number = 0;
   SelectedYearId: number = 0;
@@ -54,9 +42,7 @@ export class StudentsInformationFormReportComponent {
   showPDF: boolean = false
 
   school: School = new School()
-  showTable: boolean = false
-  searchQuery: string = '';
-  isSearching: boolean = false; // Track search mode
+  showTable: boolean = false 
 
   DataToPrint: any = null
   CurrentDate : any =new Date()
@@ -68,10 +54,8 @@ export class StudentsInformationFormReportComponent {
   constructor(
     public activeRoute: ActivatedRoute,
     public account: AccountService,
-    public ApiServ: ApiService,
-    private menuService: MenuService,
-    public EditDeleteServ: DeleteEditPermissionService,
-    private router: Router,
+    public ApiServ: ApiService, 
+    public EditDeleteServ: DeleteEditPermissionService, 
     private SchoolServ: SchoolService,
     private academicYearServ: AcadimicYearService,
     private studentServ: StudentService,
@@ -80,23 +64,9 @@ export class StudentsInformationFormReportComponent {
     public reportsService: ReportsService 
   ) { }
 
-  ngOnInit() {
-    this.User_Data_After_Login = this.account.Get_Data_Form_Token();
-    this.UserID = this.User_Data_After_Login.id;
-    this.DomainName = this.ApiServ.GetHeader();
-    this.activeRoute.url.subscribe((url) => {
-      this.path = url[0].path;
-    });
-    this.direction = document.dir || 'ltr';
-    this.menuService.menuItemsForEmployee$.subscribe((items) => {
-      const settingsPage = this.menuService.findByPageName(this.path, items);
-      if (settingsPage) {
-        this.AllowEdit = settingsPage.allow_Edit;
-        this.AllowDelete = settingsPage.allow_Delete;
-        this.AllowDeleteForOthers = settingsPage.allow_Delete_For_Others;
-        this.AllowEditForOthers = settingsPage.allow_Edit_For_Others;
-      }
-    });
+  ngOnInit() { 
+    this.DomainName = this.ApiServ.GetHeader(); 
+    this.direction = document.dir || 'ltr'; 
     this.getAllSchools()
     this.getAllYears()
   }
@@ -271,7 +241,7 @@ export class StudentsInformationFormReportComponent {
               month: 'long',
               day: 'numeric'
             });
-            resolve();
+            resolve(); 
           },
           error: (err) => {
             reject(err);

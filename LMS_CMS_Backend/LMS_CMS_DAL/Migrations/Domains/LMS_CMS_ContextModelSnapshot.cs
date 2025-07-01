@@ -51,11 +51,11 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<long>("AccountingTreeChartID")
                         .HasColumnType("bigint");
 
-                    b.Property<int>("CreditAmount")
-                        .HasColumnType("int");
+                    b.Property<decimal?>("CreditAmount")
+                        .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("DebitAmount")
-                        .HasColumnType("int");
+                    b.Property<decimal?>("DebitAmount")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
@@ -650,8 +650,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<long?>("AcademicYearId")
                         .HasColumnType("bigint");
 
-                    b.Property<float>("Amount")
-                        .HasColumnType("real");
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Date")
                         .IsRequired()
@@ -687,8 +687,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<float>("Net")
-                        .HasColumnType("real");
+                    b.Property<decimal>("Net")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<long>("StudentID")
                         .HasColumnType("bigint");
@@ -788,8 +788,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("ID"));
 
-                    b.Property<int>("Amount")
-                        .HasColumnType("int");
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Date")
                         .IsRequired()
@@ -1024,8 +1024,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("ID"));
 
-                    b.Property<int>("Amount")
-                        .HasColumnType("int");
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
@@ -1218,8 +1218,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("ID"));
 
-                    b.Property<int>("Amount")
-                        .HasColumnType("int");
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
@@ -5642,6 +5642,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<string>("Comment")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<long>("DailyPerformanceMasterID")
+                        .HasColumnType("bigint");
+
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
 
@@ -5666,6 +5669,62 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<long>("StudentID")
                         .HasColumnType("bigint");
 
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("UpdatedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("UpdatedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("DailyPerformanceMasterID");
+
+                    b.HasIndex("DeletedByUserId");
+
+                    b.HasIndex("InsertedByUserId");
+
+                    b.HasIndex("StudentID");
+
+                    b.HasIndex("UpdatedByUserId");
+
+                    b.ToTable("DailyPerformance");
+                });
+
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.LMS.DailyPerformanceMaster", b =>
+                {
+                    b.Property<long>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("ID"));
+
+                    b.Property<long>("ClassroomID")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("DeletedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("DeletedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("InsertedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("InsertedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("InsertedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool?>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<long>("SubjectID")
                         .HasColumnType("bigint");
 
@@ -5680,17 +5739,17 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.HasKey("ID");
 
+                    b.HasIndex("ClassroomID");
+
                     b.HasIndex("DeletedByUserId");
 
                     b.HasIndex("InsertedByUserId");
-
-                    b.HasIndex("StudentID");
 
                     b.HasIndex("SubjectID");
 
                     b.HasIndex("UpdatedByUserId");
 
-                    b.ToTable("DailyPerformance");
+                    b.ToTable("DailyPerformanceMaster");
                 });
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.LMS.DirectMarkClassroomStudent", b =>
@@ -12949,6 +13008,12 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.LMS.DailyPerformance", b =>
                 {
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.LMS.DailyPerformanceMaster", "DailyPerformanceMaster")
+                        .WithMany("DailyPerformances")
+                        .HasForeignKey("DailyPerformanceMasterID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "DeletedByEmployee")
                         .WithMany()
                         .HasForeignKey("DeletedByUserId");
@@ -12963,8 +13028,39 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "UpdatedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("UpdatedByUserId");
+
+                    b.Navigation("DailyPerformanceMaster");
+
+                    b.Navigation("DeletedByEmployee");
+
+                    b.Navigation("InsertedByEmployee");
+
+                    b.Navigation("Student");
+
+                    b.Navigation("UpdatedByEmployee");
+                });
+
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.LMS.DailyPerformanceMaster", b =>
+                {
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.LMS.Classroom", "Classroom")
+                        .WithMany("DailyPerformanceMaster")
+                        .HasForeignKey("ClassroomID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "DeletedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("DeletedByUserId");
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "InsertedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("InsertedByUserId");
+
                     b.HasOne("LMS_CMS_DAL.Models.Domains.LMS.Subject", "Subject")
-                        .WithMany("DailyPerformance")
+                        .WithMany("DailyPerformanceMaster")
                         .HasForeignKey("SubjectID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -12973,11 +13069,11 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .WithMany()
                         .HasForeignKey("UpdatedByUserId");
 
+                    b.Navigation("Classroom");
+
                     b.Navigation("DeletedByEmployee");
 
                     b.Navigation("InsertedByEmployee");
-
-                    b.Navigation("Student");
 
                     b.Navigation("Subject");
 
@@ -15491,6 +15587,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
                 {
                     b.Navigation("ClassroomSubjects");
 
+                    b.Navigation("DailyPerformanceMaster");
+
                     b.Navigation("EvaluationEmployees");
 
                     b.Navigation("LessonLives");
@@ -15508,6 +15606,11 @@ namespace LMS_CMS_DAL.Migrations.Domains
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.LMS.DailyPerformance", b =>
                 {
                     b.Navigation("StudentPerformance");
+                });
+
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.LMS.DailyPerformanceMaster", b =>
+                {
+                    b.Navigation("DailyPerformances");
                 });
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.LMS.DokLevel", b =>
@@ -15715,7 +15818,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.Navigation("ClassroomSubjects");
 
-                    b.Navigation("DailyPerformance");
+                    b.Navigation("DailyPerformanceMaster");
 
                     b.Navigation("LessonLives");
 

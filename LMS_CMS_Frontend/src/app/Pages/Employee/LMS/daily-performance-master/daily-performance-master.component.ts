@@ -23,6 +23,7 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { StudentService } from '../../../../Services/student.service';
 import { Subject } from '../../../../Models/LMS/subject';
+import { DailyPerformanceMaster } from '../../../../Models/LMS/daily-performance-master';
 
 @Component({
   selector: 'app-daily-performance-master',
@@ -45,7 +46,6 @@ export class DailyPerformanceMasterComponent {
   AllowEditForOthers: boolean = false;
   AllowDeleteForOthers: boolean = false;
   schools: School[] = []
-  students: Student[] = []
   Grades: Grade[] = []
   class: Classroom[] = []
   subjects: Subject[] = []
@@ -56,7 +56,7 @@ export class DailyPerformanceMasterComponent {
   SelectedClassId: number = 0;
   SelectedSubjectId: number = 0;
 
-  TableData: DailyPerformance[] = [];
+  TableData: DailyPerformanceMaster[] = [];
   isModalVisible: boolean = false;
 
   IsView: boolean = false
@@ -79,7 +79,7 @@ export class DailyPerformanceMasterComponent {
     public MedalServ: MedalService,
     public subjectServ: SubjectService,
     public PerformanceTypeServ: PerformanceTypeService,
-    public StudentPerformanceServ: DailyPerformanceService
+    public DailyPerformanceServ: DailyPerformanceService
   ) { }
 
   ngOnInit() {
@@ -108,12 +108,6 @@ export class DailyPerformanceMasterComponent {
     })
   }
 
-  Done() {
-    this.IsView = true;
-    this.students = [];
-      
-  }
-
   getAllSubject() {
     this.subjects = []
     this.SelectedSubjectId = 0
@@ -132,9 +126,6 @@ export class DailyPerformanceMasterComponent {
     })
   }
 
-  saveSelection() {
-  }
-
   getAllClassByGradeId() {
     this.class = []
     this.SelectedClassId = 0
@@ -144,8 +135,18 @@ export class DailyPerformanceMasterComponent {
     })
   }
 
-  GetAllData() {
-    this.TableData = [];
-   
+  Done() {
+    this.IsView = true;
+    this.DailyPerformanceServ.Get(this.SelectedClassId, this.SelectedSubjectId, this.DomainName).subscribe((d) => {
+      this.TableData = d
+    })
+  }
+
+  Create() {
+    this.router.navigateByUrl('Employee/Create Daily Performance')
+  }
+
+  View(id: number) {
+    this.router.navigateByUrl('Employee/Daily Performance View/'+id)
   }
 }

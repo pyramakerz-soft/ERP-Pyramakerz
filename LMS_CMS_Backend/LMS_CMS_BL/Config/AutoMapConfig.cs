@@ -179,16 +179,12 @@ namespace LMS_CMS_BL.Config
 
             CreateMap<School, School_GetDTO>()
                  .ForMember(dest => dest.SchoolTypeName, opt => opt.MapFrom(src => src.SchoolType.Name))
-                 .ForMember(dest => dest.SchoolTypeID, opt => opt.MapFrom(src => src.SchoolType.ID));
-            CreateMap<School_GetDTO, School>();
-
-            CreateMap<School, SchoolAddDTO>()
-                .ForMember(dest => dest.SchoolTypeID, opt => opt.MapFrom(src => src.SchoolType.ID));
-            CreateMap<SchoolAddDTO, School>();
-
-            CreateMap<School, SchoolEditDTO>()
-                .ForMember(dest => dest.SchoolTypeID, opt => opt.MapFrom(src => src.SchoolType.ID));
+                 .ForMember(dest => dest.SchoolTypeID, opt => opt.MapFrom(src => src.SchoolType.ID)); 
+            CreateMap<SchoolAddDTO, School>(); 
             CreateMap<SchoolEditDTO, School>();
+            CreateMap<SchoolEditOctaDTO, School>();
+            CreateMap<SchoolEditZatcaDTO, School>();
+            CreateMap<SchoolEditEtaDTO, School>();
 
             CreateMap<EmployeeTypeViolation, EmployeeTypeViolationGetDTO>()
                 .ForMember(dest => dest.ViolationID, opt => opt.MapFrom(src => src.Violation.ID))
@@ -644,7 +640,7 @@ namespace LMS_CMS_BL.Config
 
 
 
-            CreateMap<InventoryMaster, InventoryMasterGetDTO>()  // InventoryMasterGetDTO 
+            CreateMap<InventoryMaster, InventoryMasterGetDTO>()  
                  .ForMember(dest => dest.SaveName, opt => opt.MapFrom(src => src.Save != null ? src.Save.Name : null))
                  .ForMember(dest => dest.BankName, opt => opt.MapFrom(src => src.Bank != null ? src.Bank.Name : null))
                  .ForMember(dest => dest.FlagArName, opt => opt.MapFrom(src => src.InventoryFlags.arName))
@@ -843,7 +839,7 @@ namespace LMS_CMS_BL.Config
             CreateMap<PerformanceTypeAddDTO, PerformanceType>();
             CreateMap<PerformanceTypeEditDTO, PerformanceType>();
 
-            CreateMap<StudentPerformanceAddDTO, StudentPerformanceAddDTO>();
+            CreateMap<StudentPerformance, StudentPerformanceAddDTO>();
 
             CreateMap<LessonLive, LessonLiveGetDTO>()
                  .ForMember(dest => dest.WeekDayName, opt => opt.MapFrom(src => src.WeekDay.Name))
@@ -903,12 +899,14 @@ namespace LMS_CMS_BL.Config
             CreateMap<SemesterWorkingWeekAddDTO, SemesterWorkingWeek>();
             CreateMap<SemesterWorkingWeekPutDTO, SemesterWorkingWeek>();
 
+            CreateMap<DailyPerformanceMaster, DailyPerformanceMasterGetDTO>()
+                .ForMember(dest => dest.SubjectName, opt => opt.MapFrom(src => src.Subject.en_name))
+                .ForMember(dest => dest.ClassroomName, opt => opt.MapFrom(src => src.Classroom.Name))
+                .ForMember(dest => dest.GradeName, opt => opt.MapFrom(src => src.Subject.Grade.Name));
+            CreateMap<DailyPerformanceMasterAddDTO, DailyPerformanceMaster>();
             CreateMap<DailyPerformanceAddDTO, DailyPerformance>();
             CreateMap<DailyPerformance, DailyPerformanceGetDTO>()
-               .ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => src.Student.en_name))
-               .ForMember(dest => dest.SubjectName, opt => opt.MapFrom(src => src.Subject.en_name))
-               .ForMember(dest => dest.GradeName, opt => opt.MapFrom(src => src.Subject.Grade.Name));
-
+               .ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => src.Student.en_name));
 
             CreateMap<QuestionBank, QuestionBankGetDTO>()
                  .ForMember(dest => dest.LessonName, opt => opt.MapFrom(src => src.Lesson.EnglishTitle))
