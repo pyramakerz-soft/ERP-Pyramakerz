@@ -190,4 +190,97 @@ export class AccountigReportsComponent {
     const value = event.target.value;
     this.PageSize = 0
   } 
+
+  Print() {
+    this.showPDF = true;
+    setTimeout(() => {
+      const printContents = document.getElementById("Data")?.innerHTML;
+      if (!printContents) {
+        console.error("Element not found!");
+        return;
+      }
+  
+      // Create a print-specific stylesheet
+      const printStyle = `
+        <style>
+          @page { size: auto; margin: 0mm; }
+          body { 
+            margin: 0; 
+          }
+  
+          @media print {
+            body > *:not(#print-container) {
+              display: none !important;
+            }
+            #print-container {
+              display: block !important;
+              position: static !important;
+              top: auto !important;
+              left: auto !important;
+              width: 100% !important;
+              height: auto !important;
+              background: white !important;
+              box-shadow: none !important;
+              margin: 0 !important;
+            }
+          }
+        </style>
+      `;
+  
+      // Create a container for printing
+      const printContainer = document.createElement('div');
+      printContainer.id = 'print-container';
+      printContainer.innerHTML = printStyle + printContents;
+  
+      // Add to body and print
+      document.body.appendChild(printContainer);
+      window.print();
+      
+      // Clean up
+      setTimeout(() => {
+        document.body.removeChild(printContainer);
+        this.showPDF = false;
+      }, 100);
+    }, 500);
+  }
+
+  DownloadAsPDF() {
+    // this.GetDataForPrint().subscribe((result) => {
+    //   this.DataToPrint = result;
+
+    //   this.showPDF = true;
+
+    //   setTimeout(() => {
+    //     this.pdfComponentRef.downloadPDF();  
+    //     setTimeout(() => this.showPDF = false, 2000);
+    //   }, 500);
+    // });
+  }
+
+  // DownloadAsExcel() {
+  //   this.GetDataForPrint().subscribe((result) => {
+  //     this.DataToPrint = result;
+
+  //     const headers = ['ID', 'Amount', 'Discount', 'Net', 'Date', 'Fee Type', 'Fee Discount Type', 'Student Name', 'Academic Year'];
+
+  //     const dataRows = this.DataToPrint.map((row: any) =>
+  //       headers.map(header => row[header] ?? '')
+  //     );
+
+  //     this.sharedReportsService.generateExcelReport({
+  //       infoRows: [
+  //         { key: 'Start Date', value: this.SelectedStartDate },
+  //         { key: 'End Date', value: this.SelectedEndDate }
+  //       ],
+  //       filename: "Fees Activation Report.xlsx",
+  //       tables: [
+  //         {
+  //           title: "Fees Activation",
+  //           headers,
+  //           data: dataRows
+  //         }
+  //       ]
+  //     });
+  //   });
+  // }
 }
