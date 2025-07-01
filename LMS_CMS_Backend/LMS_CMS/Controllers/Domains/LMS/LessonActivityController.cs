@@ -73,12 +73,12 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        [HttpGet("GetByWeekID/{WeekId}")]
+        [HttpGet("GetByWeekID/{SubjectId}/{WeekId}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee", "student" },
             pages: new[] { "Lesson Activity" }
         )]
-        public async Task<IActionResult> GetByWeekID(long WeekId)
+        public async Task<IActionResult> GetByWeekID(long SubjectId, long WeekId)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -87,6 +87,12 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             if (semesterWorkingWeek == null)
                 return BadRequest("No SemesterWorkingWeek with this ID");
 
+            Subject subject = Unit_Of_Work.subject_Repository.First_Or_Default(s=>s.ID == SubjectId);
+            if (subject == null)
+            {
+                return BadRequest("No subject with this ID");
+
+            }
             var lessons = Unit_Of_Work.lesson_Repository
                 .FindBy(d => d.IsDeleted != true && d.SemesterWorkingWeekID == WeekId);
             if (lessons == null || lessons.Count == 0)
@@ -126,7 +132,12 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     .ToList();
             }
 
-            return Ok(lessonActivitiesTypeDTO);
+            return Ok(new
+            {
+                subjectName = subject.en_name,
+                weekName = semesterWorkingWeek.EnglishName,
+                data = lessonActivitiesTypeDTO
+            });
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -55,4 +55,19 @@ export class SubjectWeeksComponent {
     )
   }
 
+  moveToLessons(weekid:number){
+    this.router.navigateByUrl(`Student/SubjectWeeksLesson/${this.SubjectID}/${weekid}`)
+  }
+
+  moveToSubjectResources(){
+    this.router.navigateByUrl(`Student/SubjectResources/${this.SubjectID}`)
+  }
+
+  moveToSubjectLive(){
+    this.router.navigateByUrl(`Student/SubjectLive/${this.SubjectID}`)
+  }
+
+  moveToBack(){
+    this.router.navigateByUrl(`Student/Subject`)
+  }
 }

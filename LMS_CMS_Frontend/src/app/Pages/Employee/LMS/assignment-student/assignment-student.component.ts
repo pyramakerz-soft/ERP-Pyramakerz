@@ -17,6 +17,10 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { AssignmentService } from '../../../../Services/Employee/LMS/assignment.service';
 import { Assignment } from '../../../../Models/LMS/assignment';
 import Swal from 'sweetalert2';
+import { Grade } from '../../../../Models/LMS/grade';
+import { School } from '../../../../Models/school';
+import { GradeService } from '../../../../Services/Employee/LMS/grade.service';
+import { SchoolService } from '../../../../Services/Employee/school.service';
 
 @Component({
   selector: 'app-assignment-student',
@@ -53,6 +57,12 @@ export class AssignmentStudentComponent {
   editDegree: boolean = false
   assignment: Assignment = new Assignment()
 
+  schools: School[] = []
+  Grades: Grade[] = []
+
+  SelectedSchoolId: number = 0;
+  SelectedGradeId: number = 0;
+
   constructor(
     private router: Router,
     private menuService: MenuService,
@@ -63,6 +73,8 @@ export class AssignmentStudentComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public assignmentStudentServ: AssignmentStudentService,
+    private SchoolServ: SchoolService,
+    private GradeServ: GradeService,
     public classServ: ClassroomService,
     public assignmentServ: AssignmentService
   ) { }
@@ -76,19 +88,39 @@ export class AssignmentStudentComponent {
     this.AssignmentId = Number(this.activeRoute.snapshot.paramMap.get('id'));
     this.GetAssignment()
     this.GetAllData(this.CurrentPage, this.PageSize)
-    this.GetAllClasses()
-  }
-
-  GetAllClasses() {
-    this.classServ.Get(this.DomainName).subscribe((d) => {
-      this.classes = d
-    })
+    this.getAllSchools()
   }
 
   GetAssignment() {
     this.assignmentServ.GetByID(this.AssignmentId, this.DomainName).subscribe((d) => {
       this.assignment = d
       console.log(this.assignment)
+    })
+  }
+
+  getAllSchools() {
+    this.schools = []
+    this.SchoolServ.Get(this.DomainName).subscribe((d) => {
+      this.schools = d
+    })
+  }
+
+  getAllGradesBySchoolId() {
+    this.Grades = []
+    this.IsShowTabls = false
+    this.SelectedGradeId = 0
+    this.ClassId = 0
+    this.GradeServ.GetBySchoolId(this.SelectedSchoolId, this.DomainName).subscribe((d) => {
+      this.Grades = d
+    })
+  }
+
+  getAllClassByGradeId() {
+    this.classes = []
+    this.ClassId = 0
+    this.IsShowTabls = false
+    this.classServ.GetByGradeId(this.SelectedGradeId, this.DomainName).subscribe((d) => {
+      this.classes = d
     })
   }
 
