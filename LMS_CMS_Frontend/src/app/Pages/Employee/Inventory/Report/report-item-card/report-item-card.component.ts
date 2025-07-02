@@ -9,11 +9,8 @@ import { Store } from '../../../../../Models/Inventory/store';
 import { InventoryDetailsService } from '../../../../../Services/Employee/Inventory/inventory-details.service';
 import { StoresService } from '../../../../../Services/Employee/Inventory/stores.service';
 import { ShopItemService } from '../../../../../Services/Employee/Inventory/shop-item.service';
-import {
-  CombinedReportData,
-  InventoryNetSummary,
-  InventoryNetTransaction,
-} from '../../../../../Models/Inventory/report-card';
+import { CombinedReportData, InventoryNetSummary, InventoryNetTransaction } from '../../../../../Models/Inventory/report-card';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-report-item-card',
@@ -55,6 +52,7 @@ export class ReportItemCardComponent implements OnInit {
   ngOnInit() {
     this.showAverageColumn = this.route.snapshot.data['showAverage'] || false;
     this.loadStores();
+    this.loadItems();
   }
 
   loadStores() {
@@ -71,14 +69,14 @@ export class ReportItemCardComponent implements OnInit {
     });
   }
 
-  onStoreSelected() {
-    if (this.selectedStoreId) {
-      this.loadItems();
-    } else {
-      this.items = [];
-      this.selectedItemId = null;
-    }
-  }
+  // onStoreSelected() {
+  //   if (this.selectedStoreId) {
+  //     this.loadItems();
+  //   } else {
+  //     this.items = [];
+  //     this.selectedItemId = null;
+  //   }
+  // }
 
   loadItems() {
     this.isLoading = true;
@@ -106,8 +104,7 @@ export class ReportItemCardComponent implements OnInit {
   }
 
   async viewReport() {
-    if (!this.validateFilters()) {
-      console.error('Validation failed - missing required filters');
+    if (!this.validateDateRange()) {
       return;
     }
 
@@ -167,6 +164,25 @@ export class ReportItemCardComponent implements OnInit {
     } finally {
       this.isLoading = false;
     }
+  }
+
+  validateDateRange(): boolean {
+    if (this.dateFrom && this.dateTo) {
+      const fromDate = new Date(this.dateFrom);
+      const toDate = new Date(this.dateTo);
+
+      if (fromDate > toDate) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Invalid Date Range',
+          text: '"Date From" cannot be after "Date To"',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'OK',
+        });
+        return false;
+      }
+    }
+    return true;
   }
 
   private async processReportData(

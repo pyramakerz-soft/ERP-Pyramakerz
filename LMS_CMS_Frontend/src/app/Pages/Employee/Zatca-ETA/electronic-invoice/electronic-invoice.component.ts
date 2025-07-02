@@ -132,11 +132,16 @@ export class ElectronicInvoiceComponent implements OnInit {
       return;
     }
 
+    if (!this.validateDateRange()) {
+      return;
+    }
+
     this.isLoading = true;
     this.showTable = false; // Hide while loading
     this.transactions = [];
     this.selectedInvoices = [];
 
+<<<<<<< HEAD
     try {
       const formattedStartDate = this.formatDateForApi(this.dateFrom);
       const formattedEndDate = this.formatDateForApi(this.dateTo);
@@ -169,6 +174,59 @@ export class ElectronicInvoiceComponent implements OnInit {
     } finally {
       this.isLoading = false;
     }
+=======
+    const formattedStartDate = this.formatDateForApi(this.dateFrom);
+    const formattedEndDate = this.formatDateForApi(this.dateTo);
+
+    this.zatcaService
+      .filterBySchoolAndDate(
+        this.selectedSchoolId,
+        formattedStartDate,
+        formattedEndDate,
+        this.currentPage,
+        this.pageSize,
+        this.DomainName
+      )
+      .subscribe({
+        next: (response: any) => {
+          this.processApiResponse(response);
+          this.showTable = true;
+          this.isLoading = false;
+        },
+        error: (error) => {
+          // Handle 404 differently
+          if (error.status === 404) {
+            this.transactions = [];
+            this.totalRecords = 0;
+            this.totalPages = 1;
+            this.currentPage = 1;
+            this.showTable = true;
+          } else {
+            this.handleError('Failed to load transactions');
+          }
+          this.isLoading = false;
+        },
+      });
+>>>>>>> 6b714bcdaf0efa59051f06cf78200c53d920e095
+  }
+
+  validateDateRange(): boolean {
+    if (this.dateFrom && this.dateTo) {
+      const fromDate = new Date(this.dateFrom);
+      const toDate = new Date(this.dateTo);
+
+      if (fromDate > toDate) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Invalid Date Range',
+          text: '"Date From" cannot be after "Date To"',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'OK',
+        });
+        return false;
+      }
+    }
+    return true;
   }
 
   private processApiResponse(response: any) {
