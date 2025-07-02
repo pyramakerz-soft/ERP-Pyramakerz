@@ -172,7 +172,7 @@ import { AssignmentStudentComponent } from './Pages/Employee/LMS/assignment-stud
 import { AssignmentStudentComponent as AssignmentStudentStudentComponent } from './Pages/Student/LMS/assignment-student/assignment-student.component';
 import { SubjectComponent as SubjectStudentComponent } from './Pages/Student/LMS/subject/subject.component';
 import { AssignmentDetailComponent } from './Pages/Employee/LMS/assignment-detail/assignment-detail.component';
-import { POSComponent } from './Pages/Employee/ETA/pos/pos.component';
+import { POSComponent } from './Pages/Employee/ETA/pos/pos.component'; 
 import { CertificatesIssuerComponent } from './Pages/Employee/ETA/certificates-issuer/certificates-issuer.component';
 import { ElectronicInvoiceDetailComponent } from './Pages/Employee/Zatca-ETA/electronic-invoice-detail/electronic-invoice-detail.component'; 
 import { TaxIssuerComponent } from './Pages/Employee/ETA/tax-issuer/tax-issuer.component';
@@ -402,7 +402,7 @@ export const routes: Routes = [
             { path: "Assignment/:id", component: AssignmentEditComponent, title: "Assignment Edit", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "report-item-card", component: ReportItemCardComponent, title: "report-item-card", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Assignment Student/:id", component: AssignmentStudentComponent, title: "AssignmentStudent", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "Assignment Details/:id", component: AssignmentDetailComponent, title: "Assignment Detail", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Assignment Details/:id", component: AssignmentDetailComponent, title: "Assignment Detail", canActivate: [noNavigateWithoutLoginGuard] }, 
             { path: "Fees Activation Report", component: FeesActivationReportComponent, title: "Fees Activation Report", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Receivable Report", component: AccountigReportsComponent, title: "Receivable Report", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Payable Report", component: AccountigReportsComponent, title: "Payable Report", canActivate: [noNavigateWithoutLoginGuard] },

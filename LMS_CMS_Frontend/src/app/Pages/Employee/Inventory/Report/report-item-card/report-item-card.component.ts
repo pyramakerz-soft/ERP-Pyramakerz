@@ -10,6 +10,7 @@ import { InventoryDetailsService } from '../../../../../Services/Employee/Invent
 import { StoresService } from '../../../../../Services/Employee/Inventory/stores.service';
 import { ShopItemService } from '../../../../../Services/Employee/Inventory/shop-item.service';
 import { CombinedReportData, InventoryNetSummary, InventoryNetTransaction } from '../../../../../Models/Inventory/report-card';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-report-item-card',
@@ -48,6 +49,7 @@ export class ReportItemCardComponent implements OnInit {
 
   ngOnInit() {
     this.loadStores();
+    this.loadItems();
   }
 
   loadStores() {
@@ -64,14 +66,14 @@ export class ReportItemCardComponent implements OnInit {
     });
   }
 
-  onStoreSelected() {
-    if (this.selectedStoreId) {
-      this.loadItems();
-    } else {
-      this.items = [];
-      this.selectedItemId = null;
-    }
-  }
+  // onStoreSelected() {
+  //   if (this.selectedStoreId) {
+  //     this.loadItems();
+  //   } else {
+  //     this.items = [];
+  //     this.selectedItemId = null;
+  //   }
+  // }
 
   loadItems() {
     this.isLoading = true;
@@ -90,8 +92,7 @@ export class ReportItemCardComponent implements OnInit {
   }
 
   async viewReport() {
-    if (!this.validateFilters()) {
-      console.error('Validation failed - missing required filters');
+    if (!this.validateDateRange()) {
       return;
     }
 
@@ -153,6 +154,25 @@ export class ReportItemCardComponent implements OnInit {
     }
   }
 
+  validateDateRange(): boolean {
+    if (this.dateFrom && this.dateTo) {
+      const fromDate = new Date(this.dateFrom);
+      const toDate = new Date(this.dateTo);
+
+      if (fromDate > toDate) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Invalid Date Range',
+          text: '"Date From" cannot be after "Date To"',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'OK',
+        });
+        return false;
+      }
+    }
+    return true;
+  }
+
   private processReportData(
     summary: InventoryNetSummary,
     transactions: InventoryNetTransaction[]
@@ -162,9 +182,9 @@ export class ReportItemCardComponent implements OnInit {
     const summaryRow: CombinedReportData = {
       isSummary: true,
       date: formattedToDate,
-      transactionType: '',
-      invoiceNumber: '0',
-      authority: '',
+      transactionType: 'Previous balance',
+      invoiceNumber: '-',
+      authority: 'Authority',
       income: summary.inQuantity,
       outcome: summary.outQuantity,
       balance: summary.balance,
@@ -194,8 +214,8 @@ export class ReportItemCardComponent implements OnInit {
 
       return date.toLocaleDateString('en-US', {
         month: 'long',
-        day: 'numeric', 
-        year: 'numeric', 
+        day: 'numeric',
+        year: 'numeric',
       });
     } catch (e) {
       console.error('Error formatting date:', dateString, e);

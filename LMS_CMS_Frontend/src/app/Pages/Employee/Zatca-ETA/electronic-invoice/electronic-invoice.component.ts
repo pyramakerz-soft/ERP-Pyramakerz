@@ -97,20 +97,16 @@ export class ElectronicInvoiceComponent implements OnInit {
       return;
     }
 
+    if (!this.validateDateRange()) {
+      return;
+    }
+
     this.isLoading = true;
     this.showTable = false;
 
     const formattedStartDate = this.formatDateForApi(this.dateFrom);
     const formattedEndDate = this.formatDateForApi(this.dateTo);
-    console.log(
-      'start',
-      this.selectedSchoolId,
-      formattedStartDate,
-      formattedEndDate,
-      this.currentPage,
-      this.pageSize,
-      this.DomainName
-    );
+
     this.zatcaService
       .filterBySchoolAndDate(
         this.selectedSchoolId,
@@ -127,9 +123,38 @@ export class ElectronicInvoiceComponent implements OnInit {
           this.isLoading = false;
         },
         error: (error) => {
-          this.handleError('Failed to load transactions');
+          // Handle 404 differently
+          if (error.status === 404) {
+            this.transactions = [];
+            this.totalRecords = 0;
+            this.totalPages = 1;
+            this.currentPage = 1;
+            this.showTable = true;
+          } else {
+            this.handleError('Failed to load transactions');
+          }
+          this.isLoading = false;
         },
       });
+  }
+
+  validateDateRange(): boolean {
+    if (this.dateFrom && this.dateTo) {
+      const fromDate = new Date(this.dateFrom);
+      const toDate = new Date(this.dateTo);
+
+      if (fromDate > toDate) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Invalid Date Range',
+          text: '"Date From" cannot be after "Date To"',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'OK',
+        });
+        return false;
+      }
+    }
+    return true;
   }
 
   private processApiResponse(response: any) {
@@ -192,6 +217,8 @@ export class ElectronicInvoiceComponent implements OnInit {
   private handleError(message: string) {
     console.error(message);
     this.isLoading = false;
-    Swal.fire('Error', message, 'error');
+    if (!(message.includes('404') || message.includes('Not Found'))) {
+      Swal.fire('Error', message, 'error');
+    }
   }
 }
