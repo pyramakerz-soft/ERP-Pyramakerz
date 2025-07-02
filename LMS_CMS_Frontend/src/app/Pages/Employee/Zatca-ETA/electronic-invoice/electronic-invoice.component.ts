@@ -1,8 +1,7 @@
-// electronic-invoice.component.ts
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, DatePipe } from '@angular/common';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { SchoolService } from '../../../../Services/Employee/school.service';
 import { School } from '../../../../Models/school';
 import Swal from 'sweetalert2';
@@ -11,6 +10,7 @@ import { ApiService } from '../../../../Services/api.service';
 import { firstValueFrom } from 'rxjs';
 import { ElectronicInvoice } from '../../../../Models/zatca/electronic-invoice';
 import { StateService } from '../../../../Services/Employee/Inventory/state.service';
+import { EtaService } from '../../../../Services/Employee/ETA/eta.service';
 
 @Component({
   selector: 'app-electronic-invoice',
@@ -26,6 +26,8 @@ export class ElectronicInvoiceComponent implements OnInit {
   dateFrom: string = '';
   dateTo: string = '';
   DomainName: string = '';
+  currentSystem: 'zatca' | 'eta' = 'zatca';
+  selectedInvoices: number[] = [];
 
   showTable = false;
   transactions: ElectronicInvoice[] = [];
@@ -34,16 +36,22 @@ export class ElectronicInvoiceComponent implements OnInit {
   pageSize = 10;
   totalRecords = 0;
   isLoading = false;
+  isSubmitting = false;
 
   constructor(
     private schoolService: SchoolService,
     private stateService: StateService,
     private zatcaService: ZatcaService,
+    private etaService: EtaService,
     private datePipe: DatePipe,
     private apiService: ApiService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {
     this.DomainName = this.apiService.GetHeader();
+    this.route.data.subscribe((data) => {
+      this.currentSystem = data['system'] || 'zatca';
+    });
   }
 
   ngOnInit() {
@@ -85,15 +93,42 @@ export class ElectronicInvoiceComponent implements OnInit {
       this.schools = await firstValueFrom(
         this.schoolService.Get(this.DomainName)
       );
-      console.log(this.schools);
     } catch (error) {
-      this.handleError('Failed to load schools');
+      this.handleError('Failed to load schools', error);
     }
   }
 
-  viewReport() {
-    if (!this.selectedSchoolId || !this.dateFrom || !this.dateTo) {
-      Swal.fire('Error', 'Please select school and date range', 'error');
+  private validateFilters(): { valid: boolean; message?: string } {
+    if (!this.selectedSchoolId) {
+      return { valid: false, message: 'Please select a school' };
+    }
+    if (!this.dateFrom || !this.dateTo) {
+      return { valid: false, message: 'Please select both date range fields' };
+    }
+
+    const fromDate = new Date(this.dateFrom);
+    const toDate = new Date(this.dateTo);
+
+    if (fromDate > toDate) {
+      return { valid: false, message: 'End date must be after start date' };
+    }
+
+    return { valid: true };
+  }
+
+  onFilterChange() {
+    // Hide the table whenever any filter changes
+    this.showTable = false;
+
+    // Also clear the existing data
+    this.transactions = [];
+    this.selectedInvoices = [];
+  }
+
+  async viewReport() {
+    const validation = this.validateFilters();
+    if (!validation.valid) {
+      // Swal.fire('Error', validation.message, 'error');
       return;
     }
 
@@ -102,40 +137,42 @@ export class ElectronicInvoiceComponent implements OnInit {
     }
 
     this.isLoading = true;
-    this.showTable = false;
+    this.showTable = false; // Hide while loading
+    this.transactions = [];
+    this.selectedInvoices = [];
 
-    const formattedStartDate = this.formatDateForApi(this.dateFrom);
-    const formattedEndDate = this.formatDateForApi(this.dateTo);
+    try {
+      const formattedStartDate = this.formatDateForApi(this.dateFrom);
+      const formattedEndDate = this.formatDateForApi(this.dateTo);
 
-    this.zatcaService
-      .filterBySchoolAndDate(
-        this.selectedSchoolId,
-        formattedStartDate,
-        formattedEndDate,
-        this.currentPage,
-        this.pageSize,
-        this.DomainName
-      )
-      .subscribe({
-        next: (response: any) => {
-          this.processApiResponse(response);
-          this.showTable = true;
-          this.isLoading = false;
-        },
-        error: (error) => {
-          // Handle 404 differently
-          if (error.status === 404) {
-            this.transactions = [];
-            this.totalRecords = 0;
-            this.totalPages = 1;
-            this.currentPage = 1;
-            this.showTable = true;
-          } else {
-            this.handleError('Failed to load transactions');
-          }
-          this.isLoading = false;
-        },
-      });
+      const response = await firstValueFrom(
+        this.currentSystem === 'zatca'
+          ? this.zatcaService.filterBySchoolAndDate(
+              this.selectedSchoolId!,
+              formattedStartDate,
+              formattedEndDate,
+              this.currentPage,
+              this.pageSize,
+              this.DomainName
+            )
+          : this.zatcaService.filterBySchoolAndDate(
+              this.selectedSchoolId!,
+              formattedStartDate,
+              formattedEndDate,
+              this.currentPage,
+              this.pageSize,
+              this.DomainName
+            )
+      );
+
+      this.processApiResponse(response);
+      this.showTable = true;
+    } catch (error) {
+      this.handleError('Failed to load transactions', error);
+      // The handleError method will now show the table with empty data
+    } finally {
+      this.isLoading = false;
+    }
   }
 
   validateDateRange(): boolean {
@@ -166,9 +203,11 @@ export class ElectronicInvoiceComponent implements OnInit {
       this.totalRecords = response.totalRecords || response.data.length;
     } else {
       this.transactions = [];
+      this.totalRecords = 0;
     }
 
     this.totalPages = Math.ceil(this.totalRecords / this.pageSize);
+    this.selectedInvoices = [];
   }
 
   private formatDateForApi(dateString: string): string {
@@ -186,39 +225,151 @@ export class ElectronicInvoiceComponent implements OnInit {
   }
 
   navigateToDetail(id: number) {
-    this.saveState(); // Save state before navigating
-    this.router.navigate(['/Employee/Zatca Electronic-Invoice', id]);
+    this.saveState();
+    const routePrefix =
+      this.currentSystem === 'zatca'
+        ? '/Employee/Zatca Electronic-Invoice'
+        : '/Employee/ETA Electronic-Invoice';
+    this.router.navigate([routePrefix, id]);
+  }
+
+  toggleInvoiceSelection(id: number) {
+    const index = this.selectedInvoices.indexOf(id);
+    if (index === -1) {
+      this.selectedInvoices.push(id);
+    } else {
+      this.selectedInvoices.splice(index, 1);
+    }
+  }
+
+  toggleSelectAll(event: Event) {
+    const isChecked = (event.target as HTMLInputElement).checked;
+    this.selectedInvoices = isChecked ? this.transactions.map((t) => t.id) : [];
   }
 
   sendInvoice(invoice: ElectronicInvoice) {
-    // Implement send functionality
-    Swal.fire(
-      'Success',
-      `Invoice ${invoice.invoiceNumber} sent successfully`,
-      'success'
-    );
-  }
+    this.isSubmitting = true;
 
-  printInvoice(invoice: ElectronicInvoice) {
-    // Implement print functionality
-    window.print();
+    const serviceCall =
+      this.currentSystem === 'zatca'
+        ? this.zatcaService.reportInvoice(invoice.id, this.DomainName)
+        : this.etaService.submitInvoice(invoice.id, 0, 0, this.DomainName);
+
+    serviceCall.subscribe({
+      next: () => {
+        Swal.fire(
+          'Success',
+          `Invoice ${
+            this.currentSystem === 'zatca'
+              ? 'reported to ZATCA'
+              : 'submitted to ETA'
+          } successfully`,
+          'success'
+        );
+        invoice.isValid = true;
+      },
+      error: (error) => {
+        this.handleError(
+          `Failed to ${
+            this.currentSystem === 'zatca' ? 'report' : 'submit'
+          } invoice`,
+          error
+        );
+      },
+      complete: () => {
+        this.isSubmitting = false;
+      },
+    });
   }
 
   sendAll() {
-    // Implement send all functionality
-    Swal.fire('Success', 'All invoices sent successfully', 'success');
+    if (this.selectedInvoices.length === 0) {
+      this.selectedInvoices = this.transactions.map((t) => t.id);
+
+      if (this.selectedInvoices.length === 0) {
+        Swal.fire('Warning', 'No invoices available to send', 'warning');
+        return;
+      }
+    }
+
+    this.isSubmitting = true;
+
+    const serviceCall =
+      this.currentSystem === 'zatca'
+        ? this.zatcaService.reportInvoices(
+            this.selectedSchoolId!,
+            this.selectedInvoices,
+            this.DomainName
+          )
+        : this.etaService.submitInvoices(
+            this.selectedSchoolId!,
+            this.selectedInvoices,
+            this.DomainName
+          );
+
+    serviceCall.subscribe({
+      next: () => {
+        Swal.fire(
+          'Success',
+          `Invoices ${
+            this.currentSystem === 'zatca'
+              ? 'reported to ZATCA'
+              : 'submitted to ETA'
+          } successfully`,
+          'success'
+        );
+        this.transactions.forEach((t) => {
+          if (this.selectedInvoices.includes(t.id)) t.isValid = true;
+        });
+        this.selectedInvoices = [];
+      },
+      error: (error) => {
+        this.handleError(
+          `Failed to ${
+            this.currentSystem === 'zatca' ? 'report' : 'submit'
+          } invoices`,
+          error
+        );
+      },
+      complete: () => {
+        this.isSubmitting = false;
+      },
+    });
   }
 
   printAll() {
-    // Implement print all functionality
+    if (this.transactions.length === 0) {
+      Swal.fire('Warning', 'No data to print', 'warning');
+      return;
+    }
     window.print();
   }
 
-  private handleError(message: string) {
-    console.error(message);
+  private handleError(message: string, error?: any) {
+    console.error(message, error);
     this.isLoading = false;
-    if (!(message.includes('404') || message.includes('Not Found'))) {
-      Swal.fire('Error', message, 'error');
-    }
+    this.isSubmitting = false;
+
+    this.showTable = true;
+    this.transactions = [];
+    this.selectedInvoices = [];
+
+    console.log({
+      icon: 'error',
+      title: 'Error',
+      text: message,
+    });
+  }
+
+  get isViewReportDisabled(): boolean {
+    return (
+      !this.selectedSchoolId || !this.dateFrom || !this.dateTo || this.isLoading
+    );
+  }
+
+  get viewReportButtonClass(): string {
+    return this.isViewReportDisabled
+      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+      : 'secondaryBg text-white hover:bg-opacity-90';
   }
 }
