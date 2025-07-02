@@ -1,8 +1,9 @@
-<!-- electronic-invoice.component.html -->
 <div class="flex flex-col">
     <!-- Header and Filters -->
     <div class="flex justify-between items-center mb-5">
-        <h1 class="font-semibold text-2xl leading-9">Electronic Invoices</h1>
+        <h1 class="font-semibold text-2xl leading-9">
+            {{ currentSystem === 'zatca' ? 'ZATCA' : 'ETA' }} Electronic Invoices
+        </h1>
     </div>
 
     <!-- Filters Row -->
@@ -11,7 +12,7 @@
         <div class="flex flex-col w-[32%] mb-4">
             <label class="mb-2 font-medium" for="school">School</label>
             <select id="school" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                [(ngModel)]="selectedSchoolId">
+                [(ngModel)]="selectedSchoolId" (ngModelChange)="onFilterChange()">
                 <option [ngValue]="null" disabled selected hidden>Select School</option>
                 <option *ngFor="let school of schools" [ngValue]="school.id">
                     {{ school.name }}
@@ -19,44 +20,41 @@
             </select>
         </div>
 
-<!-- Date From -->
-<div class="flex flex-col w-[32%] mb-4">
-    <label class="mb-2 font-medium" for="dateFrom">Date From</label>
-    <input type="date" id="dateFrom" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-        [(ngModel)]="dateFrom" (change)="validateDateRange()">
-</div>
+        <!-- Date From -->
+        <div class="flex flex-col w-[32%] mb-4">
+            <label class="mb-2 font-medium" for="dateFrom">Date From</label>
+            <input type="date" id="dateFrom" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                [(ngModel)]="dateFrom" (ngModelChange)="onFilterChange()">
+        </div>
 
-<!-- Date To -->
-<div class="flex flex-col w-[32%] mb-4">
-    <label class="mb-2 font-medium" for="dateTo">Date To</label>
-    <input type="date" id="dateTo" class="rounded-lg border border-solid border-gray-300 px-4 py-3" [(ngModel)]="dateTo"
-        (change)="validateDateRange()">
-</div>
+        <!-- Date To -->
+        <div class="flex flex-col w-[32%] mb-4">
+            <label class="mb-2 font-medium" for="dateTo">Date To</label>
+            <input type="date" id="dateTo" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                [(ngModel)]="dateTo" (ngModelChange)="onFilterChange()">
+        </div>
     </div>
 
-    <!-- Action Buttons -->
     <div class="w-full flex justify-end mb-5 gap-4">
-        <button class="p-4 font-medium text-xl rounded-lg secondaryBg text-white" (click)="viewReport()"
-            [disabled]="!selectedSchoolId || !dateFrom || !dateTo || isLoading" [ngClass]="{ 
-            'bg-gray-100 text-gray-300': !dateFrom || !dateTo || !selectedSchoolId, 
-            'secondaryBg text-white': dateFrom && dateTo && selectedSchoolId}">
+        <button class="p-4 font-medium text-xl rounded-lg transition-all" (click)="viewReport()"
+            [disabled]="!showViewReportBtn || isLoading"
+            [ngClass]="{'bg-gray-300 text-gray-500 cursor-not-allowed': !showViewReportBtn || isLoading, 'secondaryBg text-white hover:bg-opacity-90': showViewReportBtn && !isLoading}">
             <span *ngIf="!isLoading">View Report</span>
             <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
         </button>
 
-        <button class="p-2 font-medium text-xl rounded-lg flex items-center gap-2" (click)="printAll()"
-            [disabled]="transactions.length === 0">
-            <i><img src="Images/PrintOutline.png" alt=""></i>
-            <!-- <span>Print All</span> -->
+        <button class="p-2 font-medium text-3xl rounded-lg flex items-center gap-2 secondaryTxt" (click)="printAll()"
+            [disabled]="transactions.length === 0 || isLoading"
+            [ngClass]="{'opacity-50 cursor-not-allowed': transactions.length === 0 || isLoading}">
+            <i class="fa-solid fa-print"></i>
         </button>
 
-        <button class="p-2 font-medium text-xl rounded-lg flex items-center gap-2" (click)="sendAll()"
-            [disabled]="transactions.length === 0">
-            <i class=""><img src="Images/SendPaperPlane.png" alt=""></i>
-            <!-- <span>Send All</span> -->
+        <button class="p-2 font-medium text-3xl rounded-lg flex items-center gap-2 secondaryTxt" (click)="sendAll()"
+            [disabled]="transactions.length === 0 || isSubmitting"
+            [ngClass]="{'opacity-50 cursor-not-allowed': transactions.length === 0 || isSubmitting}">
+            <i class="fa-regular fa-paper-plane"></i>
+            <span *ngIf="isSubmitting">Sending...</span>
         </button>
-
-
     </div>
 
     <!-- Results Table -->
@@ -64,6 +62,11 @@
         <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
             <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
                 <tr>
+                    <th class="py-3 px-4 min-w-[40px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        <input type="checkbox"
+                            [checked]="selectedInvoices.length === transactions.length && transactions.length > 0"
+                            (change)="toggleSelectAll($event)" [disabled]="transactions.length === 0">
+                    </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         ID
                     </th>
@@ -86,7 +89,7 @@
             </thead>
             <tbody>
                 <tr *ngIf="transactions.length === 0">
-                    <td colspan="6"
+                    <td colspan="7"
                         class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
                         No Data Found
                     </td>
@@ -95,6 +98,10 @@
                 <tr *ngFor="let transaction of transactions; let i = index"
                     [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
                     class="border-t border-gray-300 text-xs md:text-sm">
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        <input type="checkbox" [checked]="selectedInvoices.includes(transaction.id)"
+                            (change)="toggleInvoiceSelection(transaction.id)" [disabled]="isSubmitting">
+                    </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         <a (click)="navigateToDetail(transaction.id)"
                             class="text-blue-500 hover:text-blue-700 cursor-pointer">
@@ -121,16 +128,18 @@
                         </span>
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        <div class="flex gap-2">
-                            <button (click)="printInvoice(transaction)"
-                                class="filter brightness-0 p-2 rounded">
-                                <i><img src="Images/PrintOutline.png" alt=""></i>
+                        <div class="flex gap-4">
+                            <button (click)="printAll()" class="" [disabled]="isSubmitting">
+                                <i class="fa-solid fa-print text-lg"></i>
                             </button>
                             <button (click)="sendInvoice(transaction)"
-                                class="filter brightness-0 p-2 rounded">
-                                <i><img src="Images/SendPaperPlane.png" alt=""></i>
+                                class="text-gray-700 hover:text-gray-900 rounded-lg" [disabled]="isSubmitting">
+                                <i class="fa-regular fa-paper-plane text-lg"></i>
                             </button>
-
+                            <button (click)="navigateToDetail(transaction.id)"
+                                class="text-gray-700 hover:text-gray-900 rounded-lg">
+                                <i class="fa-regular fa-eye text-lg"></i>
+                            </button>
                         </div>
                     </td>
                 </tr>
@@ -141,28 +150,32 @@
     <!-- Pagination -->
     <div *ngIf="showTable" class="mt-8 flex justify-between items-center">
         <div class="flex items-center space-x-4">
-            <button class="flex items-center space-x-2 rounded-lg border py-3 px-4" (click)="changePage(currentPage-1)"
-                [disabled]="currentPage === 1 || transactions.length == 0"
-                [ngClass]="{'cursor-not-allowed opacity-50': currentPage === 1 || transactions.length == 0}">
+            <button class="flex items-center space-x-2 rounded-lg border py-3 px-6 hover:bg-gray-50"
+                (click)="changePage(currentPage-1)"
+                [disabled]="currentPage === 1 || transactions.length == 0 || isLoading"
+                [ngClass]="{'cursor-not-allowed opacity-50': currentPage === 1 || transactions.length == 0 || isLoading}">
                 <i class="fa-solid fa-arrow-left"></i>
                 <p>Previous</p>
             </button>
-            <div class="flex">
+            <div class="flex gap-2">
                 <div *ngFor="let page of [].constructor(totalPages); let i = index"
-                    class="rounded-lg py-[10px] w-[40px]"
-                    [ngClass]="{'border': i+1 == currentPage || transactions.length == 0}" (click)="changePage(i+1)">
+                    class="rounded-lg py-3 px-4 cursor-pointer border hover:bg-gray-50" [ngClass]="{
+                        'font-bold border-gray-500': i+1 == currentPage,
+                        'opacity-50': transactions.length == 0 || isLoading
+                    }" (click)="!isLoading && changePage(i+1)">
                     <p class="text-center">{{ i + 1 }}</p>
                 </div>
             </div>
-            <button class="flex items-center space-x-2 rounded-lg border py-3 px-4" (click)="changePage(currentPage+1)"
-                [disabled]="currentPage === totalPages || transactions.length == 0"
-                [ngClass]="{'cursor-not-allowed opacity-50': currentPage === totalPages || transactions.length == 0}">
+            <button class="flex items-center space-x-2 rounded-lg border py-3 px-6 hover:bg-gray-50"
+                (click)="changePage(currentPage+1)"
+                [disabled]="currentPage === totalPages || transactions.length == 0 || isLoading"
+                [ngClass]="{'cursor-not-allowed opacity-50': currentPage === totalPages || transactions.length == 0 || isLoading}">
                 <p>Next</p>
                 <i class="fa-solid fa-arrow-right"></i>
             </button>
         </div>
 
-        <div>
+        <div [ngClass]="{'opacity-50': isLoading}">
             <p>{{currentPage}} of {{totalPages}} pages ({{totalRecords}} Items)</p>
         </div>
     </div>

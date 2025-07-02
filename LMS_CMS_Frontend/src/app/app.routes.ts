@@ -379,8 +379,11 @@ export const routes: Routes = [
             { path: "Lesson Resource/:id", component: LessonResourceComponent, title: "Lesson Resource", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Lesson Live", component: LessonLiveComponent, title: "Lesson Live", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Zatca Devices", component: ZatcaDevicesComponent, title: "Zatca Devices", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "Zatca Electronic-Invoice", component: ElectronicInvoiceComponent, title: "ElectronicInvoice", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "Zatca Electronic-Invoice/:id", component: ElectronicInvoiceDetailComponent, title: "Electronic-Invoice", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Zatca Electronic-Invoice", component: ElectronicInvoiceComponent, title: "Zatca ElectronicInvoice", canActivate: [noNavigateWithoutLoginGuard] ,data: { system: 'zatca' }  },
+            { path: "ETA Electronic-Invoice", component: ElectronicInvoiceComponent, title: "ETA ElectronicInvoice", canActivate: [noNavigateWithoutLoginGuard] ,data: { system: 'eta' }   },
+            { path: "Zatca Electronic-Invoice/:id", component: ElectronicInvoiceDetailComponent, title: "ZATCA Invoice Details", canActivate: [noNavigateWithoutLoginGuard],data: { system: 'zatca' } },
+            { path: "ETA Electronic-Invoice/:id", component: ElectronicInvoiceDetailComponent, title: "ETA Invoice Details", canActivate: [noNavigateWithoutLoginGuard],data: { system: 'eta' }},
+
             { path: "Tax Issuer", component: TaxIssuerComponent, title: "Tax Issuer", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Zatca School Configuration", component: SchoolConfigurationComponent, title: "Zatca School Configuration", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "ETA School Configuration", component: SchoolConfigurationComponent, title: "ETA School Configuration", canActivate: [noNavigateWithoutLoginGuard] },
@@ -400,7 +403,20 @@ export const routes: Routes = [
             { path: "Daily Performance View/:id", component: DailyPerformanceViewComponent, title: "Daily Performance View", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Assignment", component: AssignmentComponent, title: "Assignment", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Assignment/:id", component: AssignmentEditComponent, title: "Assignment Edit", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "report-item-card", component: ReportItemCardComponent, title: "report-item-card", canActivate: [noNavigateWithoutLoginGuard] },
+{
+  path: "report-item-card",
+  component: ReportItemCardComponent,
+  title: "Item Card Report",
+  canActivate: [noNavigateWithoutLoginGuard],
+  data: { showAverage: false }
+},
+{
+  path: "report-item-card-with-average",
+  component: ReportItemCardComponent,
+  title: "Item Card Report With Average",
+  canActivate: [noNavigateWithoutLoginGuard],
+  data: { showAverage: true }
+},
             { path: "Assignment Student/:id", component: AssignmentStudentComponent, title: "AssignmentStudent", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Assignment Details/:id", component: AssignmentDetailComponent, title: "Assignment Detail", canActivate: [noNavigateWithoutLoginGuard] }, 
             { path: "Fees Activation Report", component: FeesActivationReportComponent, title: "Fees Activation Report", canActivate: [noNavigateWithoutLoginGuard] },
