@@ -354,7 +354,7 @@ export const routes: Routes = [
             { path: 'Sales-Transaction-Report', component: InventoryTransactionReportComponent, title: 'Sales Transaction Report', canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'sales' } },
             { path: 'Purchase-Transaction-Report', component: InventoryTransactionReportComponent, title: 'Purchase Transaction Report', canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'purchase' } },
             { path: 'Inventory-Transaction-Report-Detailed', component: InvoiceReportMasterDetailedComponent, title: 'Inventory Transaction Report Detailed', canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'inventory' } },
-            { path: ' ', component: InvoiceReportMasterDetailedComponent, title: 'Sales Transaction Report Detailed', canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'sales' } },
+            { path: 'SalesSalesSales', component: InvoiceReportMasterDetailedComponent, title: 'Sales Transaction Report Detailed', canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'sales' } },
             { path: 'Purchase-Transaction-Report-Detailed', component: InvoiceReportMasterDetailedComponent, title: 'Purchase Transaction Report Detailed', canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'purchase' } },
             { path: "Book Correction", component: BookCorrectionComponent, title: "BookCorrectionComponent", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Evaluation", component: EvaluationComponent, title: "Evaluation", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
@@ -377,22 +377,10 @@ export const routes: Routes = [
             { path: "Zatca Devices", component: ZatcaDevicesComponent, title: "Zatca Devices", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Zatca Electronic-Invoice", component: ElectronicInvoiceComponent, title: "Zatca ElectronicInvoice", canActivate: [noNavigateWithoutLoginGuard] ,data: { system: 'zatca' }  },
             { path: "ETA Electronic-Invoice", component: ElectronicInvoiceComponent, title: "ETA ElectronicInvoice", canActivate: [noNavigateWithoutLoginGuard] ,data: { system: 'eta' }   },
-  { 
-    path: "Zatca Electronic-Invoice/:id", 
-    component: ElectronicInvoiceDetailComponent, 
-    title: "ZATCA Invoice Details", 
-    canActivate: [noNavigateWithoutLoginGuard],
-    data: { system: 'zatca' }
-  },
-    { 
-    path: "ETA Electronic-Invoice/:id", 
-    component: ElectronicInvoiceDetailComponent, 
-    title: "ETA Invoice Details", 
-    canActivate: [noNavigateWithoutLoginGuard],
-    data: { system: 'eta' }
-  },
-  
-              { path: "Tax Issuer", component: TaxIssuerComponent, title: "Tax Issuer", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Zatca Electronic-Invoice/:id", component: ElectronicInvoiceDetailComponent, title: "ZATCA Invoice Details", canActivate: [noNavigateWithoutLoginGuard],data: { system: 'zatca' } },
+            { path: "ETA Electronic-Invoice/:id", component: ElectronicInvoiceDetailComponent, title: "ETA Invoice Details", canActivate: [noNavigateWithoutLoginGuard],data: { system: 'eta' }},
+
+            { path: "Tax Issuer", component: TaxIssuerComponent, title: "Tax Issuer", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Zatca School Configuration", component: SchoolConfigurationComponent, title: "Zatca School Configuration", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "ETA School Configuration", component: SchoolConfigurationComponent, title: "ETA School Configuration", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Point Of Sale", component: POSComponent, title: "Point Of Sale", canActivate: [noNavigateWithoutLoginGuard] },
