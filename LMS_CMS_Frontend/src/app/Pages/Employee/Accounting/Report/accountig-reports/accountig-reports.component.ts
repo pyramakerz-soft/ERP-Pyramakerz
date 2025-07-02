@@ -13,6 +13,7 @@ import Swal from 'sweetalert2';
 import { catchError, map, Observable, of } from 'rxjs';
 import { BankService } from '../../../../../Services/Employee/Accounting/bank.service';
 import { SaveService } from '../../../../../Services/Employee/Accounting/save.service';
+import * as XLSX from 'xlsx';
 
 @Component({
   selector: 'app-accountig-reports',
@@ -453,29 +454,41 @@ export class AccountigReportsComponent {
   }
  
   DownloadAsExcel() {
-    // this.GetDataForPrint().subscribe((result) => {
-    //   this.DataToPrint = result;
+    this.GetDataForPrint().subscribe((result) => {
+      this.DataToPrint = result;  
+      // const data = this.DataToPrint.flatMap((t:any) =>
+      //   t.payableDetails.map((d:any) => ({ 
+      //     ID: d.id, 
+      //   }))
+      // );
+  
+      const worksheet = XLSX.utils.json_to_sheet(this.DataToPrint );
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Transaction Details');
+  
+      const dateStr = new Date().toISOString().slice(0, 10);
+      XLSX.writeFile(workbook, `Inventory_Transaction_Details_${dateStr}.xlsx`); 
 
-    //   const headers = ['ID', 'Amount', 'Discount', 'Net', 'Date', 'Fee Type', 'Fee Discount Type', 'Student Name', 'Academic Year'];
+      // const headers = ['ID', 'Amount', 'Discount', 'Net', 'Date', 'Fee Type', 'Fee Discount Type', 'Student Name', 'Academic Year'];
 
-    //   const dataRows = this.DataToPrint.map((row: any) =>
-    //     headers.map(header => row[header] ?? '')
-    //   );
+      // const dataRows = this.DataToPrint.map((row: any) =>
+      //   headers.map(header => row[header] ?? '')
+      // );
 
-    //   this.sharedReportsService.generateExcelReport({
-    //     infoRows: [
-    //       { key: 'Start Date', value: this.SelectedStartDate },
-    //       { key: 'End Date', value: this.SelectedEndDate }
-    //     ],
-    //     filename: "Fees Activation Report.xlsx",
-    //     tables: [
-    //       {
-    //         title: "Fees Activation",
-    //         headers,
-    //         data: dataRows
-    //       }
-    //     ]
-    //   });
-    // });
+      // this.sharedReportsService.generateExcelReport({
+      //   infoRows: [
+      //     { key: 'Start Date', value: this.SelectedStartDate },
+      //     { key: 'End Date', value: this.SelectedEndDate }
+      //   ],
+      //   filename: "Fees Activation Report.xlsx",
+      //   tables: [
+      //     {
+      //       title: "Fees Activation",
+      //       headers,
+      //       data: dataRows
+      //     }
+      //   ]
+      // });
+    });
   }
 }
