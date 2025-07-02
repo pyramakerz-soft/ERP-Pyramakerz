@@ -203,8 +203,7 @@ export class DebitsComponent {
   closeModal() {
     this.isModalVisible = false;
     this.validationErrors = {}
-    this.isLoading = false
-    this.GetAllData();
+    this.isLoading = false 
   }
 
   openModal() {

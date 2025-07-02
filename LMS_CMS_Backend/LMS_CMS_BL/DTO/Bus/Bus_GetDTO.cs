@@ -30,9 +30,9 @@ namespace LMS_CMS_BL.DTO.Bus
         public long? UpdatedByUserId { get; set; }
         public long? DeletedByOctaId { get; set; }
         public long? DeletedByUserId { get; set; }
-        public int MorningPrice { get; set; }
-        public int BackPrice { get; set; }
-        public int TwoWaysPrice { get; set; }
+        public decimal MorningPrice { get; set; }
+        public decimal BackPrice { get; set; }
+        public decimal TwoWaysPrice { get; set; }
 
     }
 }

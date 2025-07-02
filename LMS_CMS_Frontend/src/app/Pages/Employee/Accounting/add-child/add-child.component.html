@@ -39,7 +39,7 @@
             <!-- No Data Row -->
             <tr *ngIf="TableData.length === 0">
               <td
-                colspan="11"
+                colspan="3"
                 class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm"
               >
                 No Data Found
@@ -110,7 +110,7 @@
             <h6 class="font-medium text-base leading-6 mb-1 mt-3">Student</h6>
             <input type="text"
             class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"
-            [(ngModel)]="Student.user_Name" 
+            [(ngModel)]="Student.en_name" 
             [disabled]="true" 
             />
             
