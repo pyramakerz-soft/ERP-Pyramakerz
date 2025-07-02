@@ -152,7 +152,7 @@ export class AddEditSubjectComponent {
         const field = key as keyof Subject;
         if (!this.subject[field]) {
           if(field == "ar_name" || field == "en_name" || field == "creditHours" || field == "gradeID" || field == "numberOfSessionPerWeek" || field == "orderInCertificate"
-             || field == "passByDegree"  || field == "totalMark"  || field == "subjectCategoryID"  || field == "subjectCode"
+             || field == "passByDegree"  || field == "totalMark"  || field == "subjectCategoryID"  || field == "subjectCode" || field == "assignmentCutOffDatePercentage"
           ){
             this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
             isValid = false;

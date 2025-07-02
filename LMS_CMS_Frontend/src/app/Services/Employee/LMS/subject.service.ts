@@ -14,9 +14,9 @@ export class SubjectService {
     this.baseUrl = ApiServ.BaseUrl
   }
 
-  Get(DomainName:string) {
-    if(DomainName!=null) {
-      this.header=DomainName 
+  Get(DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
@@ -25,10 +25,10 @@ export class SubjectService {
       .set('Content-Type', 'application/json');
     return this.http.get<Subject[]>(`${this.baseUrl}/Subject`, { headers })
   }
- 
-  GetByGradeId(GradeId:number, DomainName:string) {
-    if(DomainName!=null) {
-      this.header=DomainName 
+
+  GetByGradeId(GradeId: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
@@ -38,16 +38,28 @@ export class SubjectService {
     return this.http.get<Subject[]>(`${this.baseUrl}/Subject/GetByGrade/${GradeId}`, { headers })
   }
 
+  GetByStudentId(StudentId: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<Subject[]>(`${this.baseUrl}/Subject/GetBySudent/${StudentId}`, { headers })
+  }
+
   Add(Subject: Subject, DomainName: string) {
     if (DomainName != null) {
       this.header = DomainName;
     }
-  
+
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`);
-  
+
     const formData = new FormData();
     formData.append('en_name', Subject.en_name ?? '');
     formData.append('ar_name', Subject.ar_name ?? '');
@@ -60,27 +72,28 @@ export class SubjectService {
     formData.append('totalMark', Subject.totalMark?.toString() ?? '');
     formData.append('hideFromGradeReport', String(Subject.hideFromGradeReport));
     formData.append('numberOfSessionPerWeek', Subject.numberOfSessionPerWeek?.toString() ?? '');
+    formData.append('assignmentCutOffDatePercentage', Subject.assignmentCutOffDatePercentage?.toString() ?? '');
     formData.append('gradeID', String(Subject.gradeID));
     formData.append('subjectCategoryID', String(Subject.subjectCategoryID));
-  
+
     if (Subject.iconFile) {
       formData.append('iconFile', Subject.iconFile, Subject.iconFile.name);
-    } 
-   
+    }
+
     return this.http.post(`${this.baseUrl}/Subject`, formData, { headers });
   }
-  
 
-  Edit(Subject: Subject,DomainName:string) {
+
+  Edit(Subject: Subject, DomainName: string) {
     if (DomainName != null) {
       this.header = DomainName;
     }
-  
+
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`);
-   
+
     const formData = new FormData();
     formData.append('id', Subject.id.toString() ?? '');
     formData.append('en_name', Subject.en_name.toString() ?? '');
@@ -94,21 +107,22 @@ export class SubjectService {
     formData.append('totalMark', Subject.totalMark?.toString() ?? '');
     formData.append('hideFromGradeReport', String(Subject.hideFromGradeReport));
     formData.append('numberOfSessionPerWeek', Subject.numberOfSessionPerWeek?.toString() ?? '');
+    formData.append('assignmentCutOffDatePercentage', Subject.assignmentCutOffDatePercentage?.toString() ?? '');
     formData.append('gradeID', String(Subject.gradeID));
     formData.append('subjectCategoryID', String(Subject.subjectCategoryID));
-  
+
     if (Subject.iconFile) {
       formData.append('iconFile', Subject.iconFile, Subject.iconFile.name);
     } else if (Subject.iconLink) {
       formData.append('iconLink', Subject.iconLink?.toString() ?? '');
-    } 
+    }
 
     return this.http.put(`${this.baseUrl}/Subject`, formData, { headers });
   }
 
-  Delete(id: number,DomainName:string) {
-    if(DomainName!=null) {
-      this.header=DomainName 
+  Delete(id: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
@@ -118,9 +132,9 @@ export class SubjectService {
     return this.http.delete(`${this.baseUrl}/Subject/${id}`, { headers })
   }
 
-  GetByID(id: number,DomainName:string) {
-    if(DomainName!=null) {
-      this.header=DomainName 
+  GetByID(id: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()

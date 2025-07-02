@@ -55,7 +55,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
             }
 
             List<RegisterationFormSubmittion> registerationFormSubmittions = await Unit_Of_Work.registerationFormSubmittion_Repository.Select_All_With_IncludesById<RegisterationFormSubmittion>(
-                    r => r.IsDeleted != true && r.RegisterationFormParentID == id,
+                    r => r.RegisterationFormParentID == id,
                     query => query.Include(emp => emp.RegisterationFormParent),
                     query => query.Include(emp => emp.CategoryField).ThenInclude(f => f.RegistrationCategory),
                     query => query.Include(emp => emp.FieldOption));
@@ -222,7 +222,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
             }
             foreach (var item in newData)
             {
-                RegisterationFormSubmittion registerationFormSubmittion = Unit_Of_Work.registerationFormSubmittion_Repository.First_Or_Default(r => r.ID == item.ID && r.IsDeleted != true);
+                RegisterationFormSubmittion registerationFormSubmittion = Unit_Of_Work.registerationFormSubmittion_Repository.First_Or_Default(r => r.ID == item.ID);
                 if (registerationFormSubmittion == null)
                 {
                     return NotFound("Registeration Form Submittion Test not found");

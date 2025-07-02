@@ -422,7 +422,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
             InventoryMasterGetDTO DTO = mapper.Map<InventoryMasterGetDTO>(Data);
             string serverUrl = $"{Request.Scheme}://{Request.Host}/Uploads/Master";
-            //subject.IconLink = $"{serverUrl}{subject.IconLink.Replace("\\", "/")}";
             if (Data.Attachments != null)
             {
                 DTO.Attachments = Data.Attachments.Select(filePath =>

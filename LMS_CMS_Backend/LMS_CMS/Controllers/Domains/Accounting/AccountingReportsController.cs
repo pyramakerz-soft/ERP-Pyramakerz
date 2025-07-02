@@ -9,8 +9,6 @@ using LMS_CMS_PL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Drawing.Printing;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace LMS_CMS_PL.Controllers.Domains.Accounting
 {
@@ -30,16 +28,19 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
         #region Payables
         [HttpGet("GetPayablesByDate")]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "" }
-        //)]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Payable Report" }
+        )]
         public async Task<ActionResult> GetPayablesByDate(string startDate, string endDate, int pageNumber = 1, int pageSize = 10)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             DateTime start = DateTime.Parse(startDate).Date;
-            DateTime end = DateTime.Parse(endDate).Date;
+            DateTime end = DateTime.Parse(endDate).Date; 
+            
+            if (end < start)
+                return BadRequest("Start date must be equal or greater than End date");
 
             var query = await Unit_Of_Work.payableMaster_Repository
             .Select_All_With_IncludesById_Pagination<PayableMaster>(
@@ -52,6 +53,15 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
             if (query == null || query.ToList().Count == 0)
                 return NotFound("No payables found for the specified date range.");
+
+            foreach (var entry in query)
+            {
+                entry.PayableDetails = entry.PayableDetails
+                    .Where(d => d.IsDeleted != true)
+                    .ToList();
+            }
+
+            int totalRecords = query.Where(t => DateTime.TryParse(t.Date, out var d) && d >= start && d <= end).Count();
 
             List<PayableMaster> PayableMasters = query
                 .AsEnumerable() 
@@ -133,16 +143,24 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 }
             }
 
-            return Ok(DTOs);
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = DTOs, Pagination = paginationMetadata });
         }
         #endregion
 
         #region Receivables
         [HttpGet("GetReceivablesByDate")]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "" }
-        //)]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Receivable Report" }
+        )]
         public async Task<ActionResult> GetReceivablesByDate(string startDate, string endDate, int pageNumber = 1, int pageSize = 10)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -150,15 +168,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             DateTime start = DateTime.Parse(startDate);
             DateTime end = DateTime.Parse(endDate);
 
-            //List<ReceivableDetails> ReceivableDetails = await Unit_Of_Work.receivableDetails_Repository.Select_All_With_IncludesById_Pagination<ReceivableDetails>(
-            //    t => t.IsDeleted != true && t.ReceivableMasterID == id &&
-            //        t.InsertedAt.Value.Date >= start && t.InsertedAt.Value.Date <= end,
-            //    query => query.Include(Master => Master.ReceivableMaster),
-            //    query => query.Include(Master => Master.LinkFile)
-            //)
-            //    .Skip((pageNumber - 1) * pageSize)
-            //    .Take(pageSize)
-            //    .ToListAsync();
+            if (end < start)
+                return BadRequest("Start date must be equal or greater than End date");
 
             var query = await Unit_Of_Work.receivableMaster_Repository
             .Select_All_With_IncludesById_Pagination<ReceivableMaster>(
@@ -171,6 +182,15 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
             if (query == null || query.ToList().Count == 0)
                 return NotFound("No receivables found for the specified date range.");
+
+            foreach (var entry in query)
+            {
+                entry.ReceivableDetails = entry.ReceivableDetails
+                    .Where(d => d.IsDeleted != true)
+                    .ToList();
+            }
+
+            int totalRecords = query.Where(t => DateTime.TryParse(t.Date, out var d) && d >= start && d <= end).Count();
 
             List<ReceivableMaster> ReceivableMasters = query
                 .AsEnumerable()
@@ -248,32 +268,54 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 }
             }
 
-            return Ok(DTOs);
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = DTOs, Pagination = paginationMetadata });
         }
         #endregion
 
         #region Installment Deduction
-        [HttpGet("GetInsDeducByDate")]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "" }
-        //)]
-        public async Task<ActionResult> GetInsDeducByDate(string startDate, string endDate, int pageNumber, int pageSize)
+        [HttpGet("GetInstallmentDeductionsByDate")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Installment Deduction Report" }
+        )]
+        public async Task<ActionResult> GetInstallmentDeductionsByDate(string startDate, string endDate, int pageNumber = 1, int pageSize = 10)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             DateTime start = DateTime.Parse(startDate);
             DateTime end = DateTime.Parse(endDate);
 
+            if (end < start)
+                return BadRequest("Start date must be equal or greater than End date");
+
             List<InstallmentDeductionMaster> query = await Unit_Of_Work.installmentDeductionMaster_Repository.Select_All_With_IncludesById_Pagination<InstallmentDeductionMaster> (
                    f => f.IsDeleted != true,
                    query => query.Include(d => d.InstallmentDeductionDetails)
-                   .ThenInclude(x => x.TuitionFeesType)
+                   .ThenInclude(x => x.TuitionFeesType),
+                   query => query.Include(d => d.Student),
+                   query => query.Include(d => d.Employee)
                 )
                 .ToListAsync();
 
             if (query == null || query.Count == 0)
                 return NotFound("No installment masters found for the specified date range.");
+
+            foreach (var entry in query)
+            {
+                entry.InstallmentDeductionDetails = entry.InstallmentDeductionDetails
+                    .Where(d => d.IsDeleted != true)
+                    .ToList();
+            }
+
+            int totalRecords = query.Where(t => DateTime.TryParse(t.Date, out var d) && d >= start && d <= end).Count();
 
             List<InstallmentDeductionMaster> InstallmentDeductionMasters = query
                 .AsEnumerable()
@@ -285,95 +327,147 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             if (InstallmentDeductionMasters == null || InstallmentDeductionMasters.Count == 0)
                 return NotFound("No installment masters found for the specified date range.");
 
-            List<InstallmentDeductionMasterGetDTO> DTO = _mapper.Map<List<InstallmentDeductionMasterGetDTO>>(InstallmentDeductionMasters);
+            List<InstallmentDeductionMasterGetDTO> DTOs = _mapper.Map<List<InstallmentDeductionMasterGetDTO>>(InstallmentDeductionMasters);
 
-            return Ok(DTO);
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = DTOs, Pagination = paginationMetadata });
         }
         #endregion
 
         #region Accounting Entries
-        //[HttpGet("GetAccEntriesByDate")]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "" }
-        //)]
-        //public async Task<ActionResult> GetAccEntriesByDate(string startDate, string endDate, int pageNumber, int pageSize)
-        //{
-        //    UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+        [HttpGet("GetAccountingEntriesByDate")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Accounting Entries Report" }
+        )]
+        public async Task<ActionResult> GetAccountingEntriesByDate(string startDate, string endDate, int pageNumber = 1, int pageSize = 10)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-        //    DateTime start = DateTime.Parse(startDate);
-        //    DateTime end = DateTime.Parse(endDate);
+            DateTime start = DateTime.Parse(startDate);
+            DateTime end = DateTime.Parse(endDate);
 
-        //    List<AccountingEntriesMaster> query = await Unit_Of_Work.accountingEntriesMaster_Repository.Select_All_With_IncludesById_Pagination<AccountingEntriesMaster>(
-        //            t => t.IsDeleted != true,
-        //            query => query.Include(Master => Master.AccountingEntriesDetails)
-        //            .ThenInclude(x => x.AccountingTreeChart),
-        //            query => query.Include(x => x.AccountingEntriesDocType)
-        //    )
-        //    .ToListAsync();
+            List<AccountingEntriesMaster> query = await Unit_Of_Work.accountingEntriesMaster_Repository.Select_All_With_IncludesById_Pagination<AccountingEntriesMaster>(
+                    t => t.IsDeleted != true,
+                    query => query.Include(x => x.AccountingEntriesDocType),
+                    query => query.Include(Master => Master.AccountingEntriesDetails)
+                    .ThenInclude(x => x.AccountingTreeChart)
+            )
+            .ToListAsync();
 
-        //    if (query == null || query.Count == 0)
-        //        return NotFound("No accounting entries found for the specified date range.");
+            if (query == null || query.Count == 0)
+                return NotFound("No accounting entries found for the specified date range.");
 
-        //    List<AccountingEntriesMaster> AccountingEntriesMasters = query
-        //        .AsEnumerable()
-        //        .Where(t => DateTime.TryParse(t.Date, out var d) && d >= start && d <= end)
-        //        .Skip((pageNumber - 1) * pageSize)
-        //        .Take(pageSize)
-        //        .ToList();
+            foreach (var entry in query)
+            {
+                entry.AccountingEntriesDetails = entry.AccountingEntriesDetails
+                    .Where(d => d.IsDeleted != true)
+                    .ToList();
+            }
 
-        //    if (AccountingEntriesMasters == null || AccountingEntriesMasters.Count == 0)
-        //        return NotFound("No accounting entries masters found for the specified date range.");
+            int totalRecords = query.Where(t => DateTime.TryParse(t.Date, out var d) && d >= start && d <= end).Count();
 
-        //    var allDetails = AccountingEntriesMasters.SelectMany(pm => pm.AccountingEntriesDetails).ToList();
+            List<AccountingEntriesMaster> AccountingEntriesMasters = query
+                .AsEnumerable()
+                .Where(t => DateTime.TryParse(t.Date, out var d) && d >= start && d <= end)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
 
-        //    //var saveIdsForMaster = AccountingEntriesMasters.Where(r => r.AccountingTreeChart.LinkFileID == 5).Select(r => r.BankOrSaveID).Distinct().ToList();
-        //    //var bankIdsForMaster = AccountingEntriesMasters.Where(r => r.LinkFileID == 6).Select(r => r.BankOrSaveID).Distinct().ToList();
+            if (AccountingEntriesMasters == null || AccountingEntriesMasters.Count == 0)
+                return NotFound("No accounting entries masters found for the specified date range.");
 
-        //    var suppliersIds = allDetails.Where(r => r.AccountingTreeChart.LinkFileID == 2).Select(r => r.SubAccountingID).Distinct().ToList();
-        //    var debitIds = details.Where(r => r.AccountingTreeChart.LinkFileID == 3).Select(r => r.SubAccountingID).Distinct().ToList();
-        //    var creditsIds = details.Where(r => r.AccountingTreeChart.LinkFileID == 4).Select(r => r.SubAccountingID).Distinct().ToList();
-        //    var saveIds = details.Where(r => r.AccountingTreeChart.LinkFileID == 5).Select(r => r.SubAccountingID).Distinct().ToList();
-        //    var bankIds = details.Where(r => r.AccountingTreeChart.LinkFileID == 6).Select(r => r.SubAccountingID).Distinct().ToList();
-        //    var incomesIds = details.Where(r => r.AccountingTreeChart.LinkFileID == 7).Select(r => r.SubAccountingID).Distinct().ToList();
-        //    var outcomesIds = details.Where(r => r.AccountingTreeChart.LinkFileID == 8).Select(r => r.SubAccountingID).Distinct().ToList();
-        //    var assetsIds = details.Where(r => r.AccountingTreeChart.LinkFileID == 9).Select(r => r.SubAccountingID).Distinct().ToList();
-        //    var employeesIds = details.Where(r => r.AccountingTreeChart.LinkFileID == 10).Select(r => r.SubAccountingID).Distinct().ToList();
-        //    var feeIds = details.Where(r => r.AccountingTreeChart.LinkFileID == 11).Select(r => r.SubAccountingID).Distinct().ToList();
-        //    var discountIds = details.Where(r => r.AccountingTreeChart.LinkFileID == 12).Select(r => r.SubAccountingID).Distinct().ToList();
-        //    var studentIds = details.Where(r => r.AccountingTreeChart.LinkFileID == 13).Select(r => r.SubAccountingID).Distinct().ToList();
+            var allDetails = AccountingEntriesMasters.SelectMany(pm => pm.AccountingEntriesDetails).ToList();
 
-        //    var banks = await Unit_Of_Work.bank_Repository.Select_All_With_IncludesById<Bank>(b => bankIds.Contains(b.ID));
-        //    var saves = await Unit_Of_Work.save_Repository.Select_All_With_IncludesById<Save>(s => saveIds.Contains(s.ID));
-        //    var Suppliers = await Unit_Of_Work.supplier_Repository.Select_All_With_IncludesById<Supplier>(s => suppliersIds.Contains(s.ID));
-        //    var Debit = await Unit_Of_Work.debit_Repository.Select_All_With_IncludesById<Debit>(s => debitIds.Contains(s.ID));
-        //    var Credits = await Unit_Of_Work.credit_Repository.Select_All_With_IncludesById<Credit>(s => creditsIds.Contains(s.ID));
-        //    var Incomes = await Unit_Of_Work.income_Repository.Select_All_With_IncludesById<Income>(s => incomesIds.Contains(s.ID));
-        //    var Outcomes = await Unit_Of_Work.outcome_Repository.Select_All_With_IncludesById<Outcome>(s => outcomesIds.Contains(s.ID));
-        //    var Assets = await Unit_Of_Work.asset_Repository.Select_All_With_IncludesById<Asset>(s => assetsIds.Contains(s.ID));
-        //    var Employees = await Unit_Of_Work.employee_Repository.Select_All_With_IncludesById<Employee>(s => employeesIds.Contains(s.ID));
-        //    var Fees = await Unit_Of_Work.tuitionFeesType_Repository.Select_All_With_IncludesById<TuitionFeesType>(s => feeIds.Contains(s.ID));
-        //    var Discount = await Unit_Of_Work.tuitionDiscountType_Repository.Select_All_With_IncludesById<TuitionDiscountType>(s => discountIds.Contains(s.ID));
-        //    var Students = await Unit_Of_Work.student_Repository.Select_All_With_IncludesById<Student>(s => studentIds.Contains(s.ID));
+            var suppliersIds = allDetails.Where(r => r.AccountingTreeChart.LinkFileID == 2).Select(r => r.SubAccountingID).Distinct().ToList();
+            var debitIds = allDetails.Where(r => r.AccountingTreeChart.LinkFileID == 3).Select(r => r.SubAccountingID).Distinct().ToList();
+            var creditsIds = allDetails.Where(r => r.AccountingTreeChart.LinkFileID == 4).Select(r => r.SubAccountingID).Distinct().ToList();
+            var saveIds = allDetails.Where(r => r.AccountingTreeChart.LinkFileID == 5).Select(r => r.SubAccountingID).Distinct().ToList();
+            var bankIds = allDetails.Where(r => r.AccountingTreeChart.LinkFileID == 6).Select(r => r.SubAccountingID).Distinct().ToList();
+            var incomesIds = allDetails.Where(r => r.AccountingTreeChart.LinkFileID == 7).Select(r => r.SubAccountingID).Distinct().ToList();
+            var outcomesIds = allDetails.Where(r => r.AccountingTreeChart.LinkFileID == 8).Select(r => r.SubAccountingID).Distinct().ToList();
+            var assetsIds = allDetails.Where(r => r.AccountingTreeChart.LinkFileID == 9).Select(r => r.SubAccountingID).Distinct().ToList();
+            var employeesIds = allDetails.Where(r => r.AccountingTreeChart.LinkFileID == 10).Select(r => r.SubAccountingID).Distinct().ToList();
+            var feeIds = allDetails.Where(r => r.AccountingTreeChart.LinkFileID == 11).Select(r => r.SubAccountingID).Distinct().ToList();
+            var discountIds = allDetails.Where(r => r.AccountingTreeChart.LinkFileID == 12).Select(r => r.SubAccountingID).Distinct().ToList();
+            var studentIds = allDetails.Where(r => r.AccountingTreeChart.LinkFileID == 13).Select(r => r.SubAccountingID).Distinct().ToList();
 
-        //    List<AccountingEntriesMasterGetDTO> accEntriesDto = _mapper.Map<List<AccountingEntriesMasterGetDTO>>(details);
+            var banks = await Unit_Of_Work.bank_Repository.Select_All_With_IncludesById<Bank>(b => bankIds.Contains(b.ID));
+            var safes = await Unit_Of_Work.save_Repository.Select_All_With_IncludesById<Save>(s => saveIds.Contains(s.ID));
+            var suppliers = await Unit_Of_Work.supplier_Repository.Select_All_With_IncludesById<Supplier>(s => suppliersIds.Contains(s.ID));
+            var debits = await Unit_Of_Work.debit_Repository.Select_All_With_IncludesById<Debit>(s => debitIds.Contains(s.ID));
+            var credits = await Unit_Of_Work.credit_Repository.Select_All_With_IncludesById<Credit>(s => creditsIds.Contains(s.ID));
+            var incomes = await Unit_Of_Work.income_Repository.Select_All_With_IncludesById<Income>(s => incomesIds.Contains(s.ID));
+            var outcomes = await Unit_Of_Work.outcome_Repository.Select_All_With_IncludesById<Outcome>(s => outcomesIds.Contains(s.ID));
+            var assets = await Unit_Of_Work.asset_Repository.Select_All_With_IncludesById<Asset>(s => assetsIds.Contains(s.ID));
+            var employees = await Unit_Of_Work.employee_Repository.Select_All_With_IncludesById<Employee>(s => employeesIds.Contains(s.ID));
+            var fees = await Unit_Of_Work.tuitionFeesType_Repository.Select_All_With_IncludesById<TuitionFeesType>(s => feeIds.Contains(s.ID));
+            var discounts = await Unit_Of_Work.tuitionDiscountType_Repository.Select_All_With_IncludesById<TuitionDiscountType>(s => discountIds.Contains(s.ID));
+            var students = await Unit_Of_Work.student_Repository.Select_All_With_IncludesById<Student>(s => studentIds.Contains(s.ID));
 
-        //    return Ok(accEntriesDto);
-        //}
+            List<AccountingEntriesMasterGetDTO> DTOs = _mapper.Map<List<AccountingEntriesMasterGetDTO>>(AccountingEntriesMasters);
+
+            foreach (var dto in DTOs)
+            {
+                foreach (var detail in dto.AccountingEntriesDetails)
+                {
+                    AccountingTreeChart acc = Unit_Of_Work.accountingTreeChart_Repository.First_Or_Default(
+                        ac => ac.ID == detail.AccountingTreeChartID && ac.IsDeleted != true
+                    );
+
+                    detail.SubAccountingName = acc.LinkFileID switch
+                    {
+                        2 => suppliers.FirstOrDefault(s => s.ID == detail.SubAccountingID)?.Name,
+                        3 => debits.FirstOrDefault(d => d.ID == detail.SubAccountingID)?.Name,
+                        4 => credits.FirstOrDefault(c => c.ID == detail.SubAccountingID)?.Name,
+                        5 => safes.FirstOrDefault(s => s.ID == detail.SubAccountingID)?.Name,
+                        6 => banks.FirstOrDefault(b => b.ID == detail.SubAccountingID)?.Name,
+                        7 => incomes.FirstOrDefault(s => s.ID == detail.SubAccountingID)?.Name,
+                        8 => outcomes.FirstOrDefault(s => s.ID == detail.SubAccountingID)?.Name,
+                        9 => assets.FirstOrDefault(s => s.ID == detail.SubAccountingID)?.Name,
+                        10 => employees.FirstOrDefault(s => s.ID == detail.SubAccountingID)?.en_name,
+                        11 => fees.FirstOrDefault(s => s.ID == detail.SubAccountingID)?.Name,
+                        12 => discounts.FirstOrDefault(s => s.ID == detail.SubAccountingID)?.Name,
+                        13 => students.FirstOrDefault(s => s.ID == detail.SubAccountingID)?.en_name,
+                        _ => null
+                    };
+                }
+            }
+
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = DTOs, Pagination = paginationMetadata });
+        }
         #endregion
 
         #region Fees Activation
-        [HttpGet("GetFeesActByDate")]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "" }
-        //)]
-        public async Task<ActionResult> GetFeesActByDate(string startDate, string endDate, int pageNumber, int pageSize)
+        [HttpGet("GetFeesActivationByDate")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Fees Activation Report" }
+        )]
+        public async Task<ActionResult> GetFeesActivationByDate(string startDate, string endDate, int pageNumber = 1, int pageSize = 10)
         {
             UOW unit_of_work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             DateTime start = DateTime.Parse(startDate);
             DateTime end = DateTime.Parse(endDate);
+
+            if (end < start)
+                return BadRequest("Start date must be equal or greater than End date");
 
             List<FeesActivation> query = await unit_of_work.feesActivation_Repository.Select_All_With_IncludesById_Pagination<FeesActivation>(
                 x => x.IsDeleted != true,
@@ -387,6 +481,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             if (query == null || query.Count == 0)
                 return NotFound("No fees activation found for the specified date range.");
 
+            int totalRecords = query.Where(t => DateTime.TryParse(t.Date, out var d) && d >= start && d <= end).Count();
+
             List<FeesActivation> FeesActivations = query
                 .AsEnumerable()
                 .Where(t => DateTime.TryParse(t.Date, out var d) && d >= start && d <= end)
@@ -395,11 +491,19 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 .ToList();
 
             if (FeesActivations == null || FeesActivations.Count == 0)
-                return NotFound("No receivables found for the specified date range.");
+                return NotFound("No fees activation found for the specified date range.");
 
             List<FeesActivationGetDTO> feesActDto = _mapper.Map<List<FeesActivationGetDTO>>(FeesActivations);
 
-            return Ok(feesActDto);
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = feesActDto, Pagination = paginationMetadata });
         }
         #endregion
     }

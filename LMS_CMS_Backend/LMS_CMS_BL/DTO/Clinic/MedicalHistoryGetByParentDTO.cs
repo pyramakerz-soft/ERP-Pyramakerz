@@ -9,5 +9,7 @@
         public string? SecReport { get; set; }
         public DateTime? InsertedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
+        public long? InsertedByUserId { get; set; }
+        public string? en_name { get; set; }
     }
 }

@@ -15,6 +15,8 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import Swal from 'sweetalert2';
 import { finalize } from 'rxjs';
+import { SubBankQuestion } from '../../../../Models/LMS/sub-bank-question';
+import { AssignmentStudentQuestion } from '../../../../Models/LMS/assignment-student-question';
 
 @Component({
   selector: 'app-assignment-detail',
@@ -86,7 +88,8 @@ export class AssignmentDetailComponent {
     this.router.navigateByUrl(`Employee/Assignment Student/${this.assignmentStudent.assignmentID}`)
   }
 
-  getAnswerForSubBankQuestion(row: any, subBankQuestionID: number): string {
+  getAnswerForSubBankQuestion(row: AssignmentStudentQuestion, subBankQuestionID: number): string {
+    console.log(row)
     const answerObj = row.assignmentStudentQuestionAnswerOption.find(
       (a: any) => a.subBankQuestionID === subBankQuestionID
     );

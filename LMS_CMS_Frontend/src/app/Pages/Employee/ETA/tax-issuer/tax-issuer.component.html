@@ -1,0 +1,226 @@
+<div class="">
+    <div class="flex justify-between">
+        <h1 class="font-semibold text-2xl leading-9">Tax Issuer</h1> 
+    </div>
+
+    <div>
+        <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
+            <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
+                <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+                    <tr>
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            ID
+                        </th> 
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            Name
+                        </th>  
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            Activity Code
+                        </th>  
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            Tax Type
+                        </th>  
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            Country Code
+                        </th>  
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            Branch ID
+                        </th>  
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            Governate
+                        </th>  
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            Region City
+                        </th>  
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            Street
+                        </th>  
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            Building Number
+                        </th>  
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            Postal Code
+                        </th>  
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            Floor
+                        </th>  
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            Room
+                        </th>  
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            Land Mark
+                        </th>  
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            Additional Info
+                        </th>  
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            Actions
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>  
+                    <tr class="bg-white border-t border-gray-300 text-xs md:text-sm">
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ taxData.id }}
+                        </td> 
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ taxData.name }}
+                        </td>  
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ taxData.activityCode }}
+                        </td>  
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ taxData.taxType }}
+                        </td>  
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ taxData.countryCode }}
+                        </td>  
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ taxData.branchID }}
+                        </td>  
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ taxData.governate }}
+                        </td>  
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ taxData.regionCity }}
+                        </td>  
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ taxData.street }}
+                        </td>  
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ taxData.buildingNumber }}
+                        </td>  
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ taxData.postalCode }}
+                        </td>  
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ taxData.floor }}
+                        </td>  
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ taxData.room }}
+                        </td>  
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ taxData.landMark }}
+                        </td>  
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ taxData.additionalInfo }}
+                        </td>   
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            <div class="flex space-x-4"> 
+                                <button (click)="openModal()">
+                                    <i class="fa-solid fa-pencil"></i>
+                                </button> 
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+ 
+
+<!-- Modal -->
+<div id="Add_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
+    <div class="bg-white rounded-2xl p-12 w-[669px] max-h-[90%] overflow-y-auto">
+        <div class="flex justify-between items-center"> 
+            <h1 class="font-semibold text-2xl leading-9">Tax Issuer</h1>
+            <button (click)="closeModal()" type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
+        </div>
+        
+        <div class="mt-6 mb-4 flex justify-between flex-wrap"> 
+            <div class="flex flex-col mb-4 w-[49%]">
+                <label class="mb-2 primaryTxt" for="name">Name</label>
+                <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Name"
+                [(ngModel)]="taxDataToEdit.name"/> 
+            </div>  
+            <div class="flex flex-col mb-4 w-[49%]">
+                <label class="mb-2 primaryTxt" for="Activity">Activity Code</label>
+                <input id="Activity" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Activity Code"
+                [(ngModel)]="taxDataToEdit.activityCode"/> 
+            </div>  
+            <div class="flex flex-col w-[49%] mb-4">
+                <label class="mb-2 primaryTxt" for="country">Country Code</label>
+                <select [(ngModel)]="taxDataToEdit.countryCode"
+                class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="country" >
+                    <option [value]="null" disabled selected hidden>Select Country Code</option>
+                    <option *ngFor="let status of countries" [value]="status.iso">{{ status.iso }}</option>
+                    <option *ngIf="countries.length === 0" disabled selected>No Data Found</option>
+                </select>
+            </div>
+            <div class="flex flex-col w-[49%] mb-4">
+                <label class="mb-2 primaryTxt" for="taxTypes">Tax Type</label>
+                <select [(ngModel)]="taxDataToEdit.typeID"
+                class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="taxTypes" >
+                    <option [value]="null" disabled selected hidden>Select Tax Type</option>
+                    <option *ngFor="let status of taxTypes" [value]="status.id">{{ status.type }}</option>
+                    <option *ngIf="taxTypes.length === 0" disabled selected>No Data Found</option>
+                </select>
+            </div>
+            <div class="flex flex-col mb-4 w-[49%]">
+                <label class="mb-2 primaryTxt" for="BranchID">Branch ID</label>
+                <input id="BranchID" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Branch ID"
+                [(ngModel)]="taxDataToEdit.branchID"/> 
+            </div>  
+            <div class="flex flex-col mb-4 w-[49%]">
+                <label class="mb-2 primaryTxt" for="Governate">Governate</label>
+                <input id="Governate" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Governate"
+                [(ngModel)]="taxDataToEdit.governate"/> 
+            </div>  
+            <div class="flex flex-col mb-4 w-[49%]">
+                <label class="mb-2 primaryTxt" for="RegionCity">Region City</label>
+                <input id="RegionCity" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Region City"
+                [(ngModel)]="taxDataToEdit.regionCity"/> 
+            </div>  
+            <div class="flex flex-col mb-4 w-[49%]">
+                <label class="mb-2 primaryTxt" for="Street">Street</label>
+                <input id="Street" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Street"
+                [(ngModel)]="taxDataToEdit.street"/> 
+            </div>  
+            <div class="flex flex-col mb-4 w-[49%]">
+                <label class="mb-2 primaryTxt" for="BuildingNumber">Building Number</label>
+                <input id="BuildingNumber" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Building Number"
+                [(ngModel)]="taxDataToEdit.buildingNumber"/> 
+            </div>  
+            <div class="flex flex-col mb-4 w-[49%]">
+                <label class="mb-2 primaryTxt" for="PostalCode">Postal Code</label>
+                <input id="PostalCode" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Postal Code"
+                [(ngModel)]="taxDataToEdit.postalCode"/> 
+            </div>  
+            <div class="flex flex-col mb-4 w-[49%]">
+                <label class="mb-2 primaryTxt" for="Floor">Floor</label>
+                <input id="Floor" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Floor"
+                [(ngModel)]="taxDataToEdit.floor"/> 
+            </div>   
+            <div class="flex flex-col mb-4 w-[49%]">
+                <label class="mb-2 primaryTxt" for="Room">Room</label>
+                <input id="Room" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Room"
+                [(ngModel)]="taxDataToEdit.room"/> 
+            </div>   
+            <div class="flex flex-col mb-4 w-[49%]">
+                <label class="mb-2 primaryTxt" for="LandMark">Land Mark</label>
+                <input id="LandMark" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Land Mark"
+                [(ngModel)]="taxDataToEdit.landMark"/> 
+            </div>   
+            <div class="flex flex-col mb-4 w-[49%]">
+                <label class="mb-2 primaryTxt" for="AdditionalInfo">Additional Info</label>
+                <input id="AdditionalInfo" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Additional Info"
+                [(ngModel)]="taxDataToEdit.additionalInfo"/> 
+            </div>   
+        </div> 
+
+        <div class="flex justify-end">
+            <button
+                [disabled]="isLoading"
+                class="secondaryBg text-white font-medium px-4 py-2 rounded-lg cursor-pointer"
+                (click)="save()">
+                <span *ngIf="!isLoading">Save</span>
+                <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+            </button>
+        </div>
+    </div>
+</div>
+ 
+
+ <!-- public int? TypeID { get; set; }   
+ public string? CountryCode { get; set; }   -->

@@ -13,13 +13,14 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         [Key]
         public long ID { get; set; }
         public string? Comment { get; set; }
-        [ForeignKey("Subject")]
-        public long SubjectID { get; set; }
-        public Subject Subject { get; set; }
 
         [ForeignKey("Student")]
         public long StudentID { get; set; }
         public Student Student { get; set; }
+
+        [ForeignKey("DailyPerformanceMaster")]
+        public long DailyPerformanceMasterID { get; set; }
+        public DailyPerformanceMaster DailyPerformanceMaster { get; set; }
         public ICollection<StudentPerformance> StudentPerformance { get; set; } = new HashSet<StudentPerformance>();
     }
 }

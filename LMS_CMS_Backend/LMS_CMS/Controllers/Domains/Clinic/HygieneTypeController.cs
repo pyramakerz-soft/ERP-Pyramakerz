@@ -6,6 +6,7 @@ using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace LMS_CMS_PL.Controllers.Domains.Clinic
 {
@@ -29,7 +30,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Hygiene Types" }
         )]
-        public IActionResult Get()
+        public async Task<IActionResult> Get()
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -44,7 +45,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            List<HygieneType> HygieneTypes = Unit_Of_Work.hygieneType_Repository.FindBy(t => t.IsDeleted != true);
+            List<HygieneType> HygieneTypes = await Unit_Of_Work.hygieneType_Repository
+                .Select_All_With_IncludesById<HygieneType>(
+                t => t.IsDeleted != true,
+                query => query.Include(x => x.InsertedByEmployee));
 
             if (HygieneTypes == null || HygieneTypes.Count == 0)
             {
@@ -63,7 +67,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Hygiene Types" }
         )]
-        public IActionResult GetById(long id)
+        public async Task<IActionResult> GetById(long id)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -83,7 +87,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            HygieneType hygieneType = Unit_Of_Work.hygieneType_Repository.First_Or_Default(h => h.Id == id && h.IsDeleted != true);
+            HygieneType hygieneType = await Unit_Of_Work.hygieneType_Repository
+                .FindByIncludesAsync(
+                h => h.Id == id && h.IsDeleted != true,
+                query => query.Include(x => x.InsertedByEmployee));
 
             if (hygieneType == null)
             {

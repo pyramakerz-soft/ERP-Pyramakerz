@@ -28,6 +28,7 @@ import { DailyPerformanceService } from '../../../../Services/Employee/LMS/daily
 import Swal from 'sweetalert2';
 import { StudentPerformance } from '../../../../Models/LMS/student-performance';
 import { StudentMedal } from '../../../../Models/LMS/student-medal';
+import { DailyPerformanceMaster } from '../../../../Models/LMS/daily-performance-master';
 
 @Component({
   selector: 'app-daily-performance',
@@ -62,7 +63,7 @@ export class DailyPerformanceComponent {
   SelectedGradeId: number = 0;
   SelectedClassId: number = 0;
   SelectedSubjectId: number = 0;
-
+  dailyPerformanceMaster: DailyPerformanceMaster = new DailyPerformanceMaster()
   TableData: DailyPerformance[] = [];
   isModalVisible: boolean = false;
   mode: string = '';
@@ -84,7 +85,7 @@ export class DailyPerformanceComponent {
   StudentMedals: StudentMedal[] = []
   studentMedal: StudentMedal = new StudentMedal()
   IsValid: boolean = true
-  IsStudentPerformance : boolean = true
+  IsStudentPerformance: boolean = true
 
   constructor(
     public activeRoute: ActivatedRoute,
@@ -94,7 +95,6 @@ export class DailyPerformanceComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     private router: Router,
     private SchoolServ: SchoolService,
-    private academicYearServ: AcadimicYearService,
     private studentServ: StudentService,
     private GradeServ: GradeService,
     private ClassroomServ: ClassroomService,
@@ -150,14 +150,8 @@ export class DailyPerformanceComponent {
         this.RatedStudent.push({
           id: 0,
           studentID: student.id,
-          subjectID: this.SelectedSubjectId,
           comment: "",
-          subjectName: "",
-          className: "",
-          gradeName: "",
           studentName: "",
-          gradeID: 0,
-          classID: 0,
           insertedByUserId: 0,
           studentPerformance: this.PerformanceTypesSelected.map(type => ({
             id: 0,
@@ -187,9 +181,6 @@ export class DailyPerformanceComponent {
     this.GradeServ.GetBySchoolId(this.SelectedSchoolId, this.DomainName).subscribe((d) => {
       this.Grades = d
     })
-  }
-
-  saveSelection() {
   }
 
   getAllClassByGradeId() {
@@ -275,31 +266,35 @@ export class DailyPerformanceComponent {
   }
 
   submitRatings() {
-      if(this.PerformanceTypesSelected.length==0){
-       this.IsStudentPerformance=false
-      } 
-      else{
-        this.isLoading= true
-        this.StudentPerformanceServ.Add(this.RatedStudent, this.DomainName).subscribe((d) => {
-          if (this.SelectedMedalId && this.selectedStudentIds.length) {
-            this.selectedStudentIds.forEach(element => {
-              this.studentMedal = new StudentMedal()
-              this.studentMedal.studentID = element
-              this.studentMedal.medalID = this.SelectedMedalId
-              this.studentMedalServ.Add(this.studentMedal, this.DomainName).subscribe((d) => { })
-            });
-          }
-          this.isLoading= false
-          Swal.fire({
-            icon: 'success',
-            title: 'Done',
-            text: 'Saved Succeessfully',
-            confirmButtonColor: '#089B41',
-          }).then(() => {
-            window.location.reload();
+    if (this.PerformanceTypesSelected.length == 0) {
+      this.IsStudentPerformance = false
+    }
+    else {
+      this.isLoading = true
+      this.dailyPerformanceMaster.subjectID = this.SelectedSubjectId
+      this.dailyPerformanceMaster.classroomID = this.SelectedClassId
+      this.dailyPerformanceMaster.dailyPerformances = this.RatedStudent
+      console.log(this.dailyPerformanceMaster)
+      this.StudentPerformanceServ.Add(this.dailyPerformanceMaster, this.DomainName).subscribe((d) => {
+        if (this.SelectedMedalId && this.selectedStudentIds.length) {
+          this.selectedStudentIds.forEach(element => {
+            this.studentMedal = new StudentMedal()
+            this.studentMedal.studentID = element
+            this.studentMedal.medalID = this.SelectedMedalId
+            this.studentMedalServ.Add(this.studentMedal, this.DomainName).subscribe((d) => { })
           });
-        })
-      }
+        }
+        this.isLoading = false
+        Swal.fire({
+          icon: 'success',
+          title: 'Done',
+          text: 'Saved Succeessfully',
+          confirmButtonColor: '#089B41',
+        }).then(() => {
+          window.location.reload();
+        });
+      })
+    }
   }
 
   isStudentSelected(id: number): boolean {
@@ -367,5 +362,9 @@ export class DailyPerformanceComponent {
     else {
       this.closeModal()
     }
+  }
+
+  moveToBack() {
+    this.router.navigateByUrl('Employee/Enter Daily Performance');
   }
 }

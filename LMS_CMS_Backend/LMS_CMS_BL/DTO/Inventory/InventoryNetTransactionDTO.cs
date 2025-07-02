@@ -10,13 +10,13 @@ namespace LMS_CMS_BL.DTO.Inventory
     {
         public string FlagName { get; set; }
         public string InvoiceNumber { get; set; }
-        public string DayDate { get; set; } // أو DateTime لو حابب
+        public string DayDate { get; set; }
         public string Notes { get; set; }
 
         public double Quantity { get; set; }
 
-        public double TotalIn { get; set; }     // الكمية الموجبة
-        public double TotalOut { get; set; }    // الكمية السالبة
+        public double TotalIn { get; set; }     
+        public double TotalOut { get; set; }    
         public double Balance { get; set; }     // الرصيد التراكمي حتى هذه الحركة
 
         public string SupplierName { get; set; }    // للمشتريات

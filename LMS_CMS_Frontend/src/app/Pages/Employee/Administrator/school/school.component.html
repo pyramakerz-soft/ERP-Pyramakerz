@@ -20,23 +20,13 @@
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'School type' | translate }}
-                </th>
+                </th> 
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ 'VatNumber' | translate }}
-                </th>
-
-
-                <!-- <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ 'clientID' | translate }}
-                </th>
+                    {{ 'City' | translate }}
+                </th> 
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ 'Secret Number 1' | translate }}
-                </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ 'Secret Number 2' | translate }}
-                </th> -->
-
-                
+                    {{ 'Street Name' | translate }}
+                </th> 
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Actions' | translate }}
                 </th>
@@ -45,7 +35,7 @@
         <tbody>
             <!-- No Data Row -->
             <tr *ngIf="schoolData.length === 0">
-                <td colspan="6" class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                <td colspan="7" class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
                     No Data Found
                 </td>
             </tr>
@@ -53,23 +43,16 @@
             <!-- Data Rows -->
             <tr *ngFor="let row of schoolData; let i = index"
                 [ngClass]="{'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1}"
-                class="border-t border-gray-300 text-xs md:text-sm">
-
+                class="border-t border-gray-300 text-xs md:text-sm"> 
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{ row.id }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.name }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.address }}</td>
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.schoolTypeName }}</td>
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.vatNumber }}</td>
-
-
-                <!-- <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.clientID || 'na' }}</td>
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.secretNumber1 || 'na' }}</td>
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.secretNumber2 || 'na' }}</td> -->
-
-
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.schoolTypeName }}</td> 
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.city }}</td> 
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.streetName }}</td> 
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     <div class="flex space-x-4"> 
-                        <button *ngIf="AllowEdit && IsAllowEdit(row.insertedByUserId)" (click)="openModal(row.id)">
+                        <button *ngIf="AllowEdit" (click)="openModal(row.id)">
                             <i class="fa-solid fa-pencil"></i>
                         </button> 
                     </div>
@@ -99,99 +82,28 @@
             <div class="flex flex-col mb-4 w-[49%]">
                 <label class="mb-2 primaryTxt" for="address">{{ 'Address' | translate }}</label>
                 <input id="address" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'Address' | translate }}"
-                [(ngModel)]="school.address" 
-                (ngModelChange)="onInputValueChange({ field: 'address', value: $event })"/>
+                [(ngModel)]="school.address"/>
             </div>
             <div class="flex flex-col mb-4 w-[49%]">
                 <label class="mb-2 primaryTxt" for="header1">{{ 'Report Header 1 English' | translate }}</label>
                 <textarea id="header1" class="rounded-lg border border-solid border-gray-300 px-4 py-3 min-h-28" placeholder="{{ 'Enter' | translate }} {{ 'Report Header 1 English' | translate }}"
-                [(ngModel)]="school.reportHeaderOneEn"
-                (ngModelChange)="onInputValueChange({ field: 'reportHeaderOneEn', value: $event })"></textarea>
+                [(ngModel)]="school.reportHeaderOneEn"></textarea>
             </div>
             <div class="flex flex-col mb-4 w-[49%]">
                 <label class="mb-2 primaryTxt" for="headerar1">{{ 'Report Header 1 Arabic' | translate }}</label>
                 <textarea id="headerar1" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3 min-h-28" placeholder="{{ 'Enter' | translate }} {{ 'Report Header 1 Arabic' | translate }}"
-                [(ngModel)]="school.reportHeaderOneAr" 
-                (ngModelChange)="onInputValueChange({ field: 'reportHeaderOneAr', value: $event })"></textarea>
+                [(ngModel)]="school.reportHeaderOneAr"></textarea>
             </div>
             <div class="flex flex-col mb-4 w-[49%]">
                 <label class="mb-2 primaryTxt" for="header2">{{ 'Report Header 2 English' | translate }}</label>
                 <textarea id="header2" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3 min-h-28" placeholder="{{ 'Enter' | translate }} {{ 'Report Header 2 English' | translate }}"
-                [(ngModel)]="school.reportHeaderTwoEn" 
-                (ngModelChange)="onInputValueChange({ field: 'reportHeaderTwoEn', value: $event })"></textarea>
+                [(ngModel)]="school.reportHeaderTwoEn"></textarea>
             </div>
             <div class="flex flex-col mb-4 w-[49%]">
                 <label class="mb-2 primaryTxt" for="headerar2">{{ 'Report Header 2 Arabic' | translate }}</label>
                 <textarea id="headerar2" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3 min-h-28" placeholder="{{ 'Enter' | translate }} {{ 'Report Header 2 Arabic' | translate }}"
-                [(ngModel)]="school.reportHeaderTwoAr" 
-                (ngModelChange)="onInputValueChange({ field: 'reportHeaderTwoAr', value: $event })"></textarea>
-            </div>
-            <!-- <div class="flex flex-col mb-4 w-[49%]">
-                <label class="mb-2 primaryTxt" for="VatNumber">{{ 'VatNumber' | translate }}</label>
-                <input id="VatNumber" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'VatNumber' | translate }}"
-                [(ngModel)]="school.vatNumber" 
-                (ngModelChange)="onInputValueChange({ field: 'vatNumber', value: $event })"/>
-            </div> -->
-
-
-            <!-- <div class="flex flex-col mb-4 w-[49%]">
-                <label class="mb-2 primaryTxt" for="clientID">{{ 'clientID' | translate }}</label>
-                <input id="clientID" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'clientID' | translate }}"
-                [(ngModel)]="school.clientID" 
-                (ngModelChange)="onInputValueChange({ field: 'clientID', value: $event })"/>
-            </div>
-            <div class="flex flex-col mb-4 w-[49%]">
-                <label class="mb-2 primaryTxt" for="secretNumber1">{{ 'secretNumber1' | translate }}</label>
-                <input id="secretNumber1" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'secretNumber1' | translate }}"
-                [(ngModel)]="school.secretNumber1" 
-                (ngModelChange)="onInputValueChange({ field: 'secretNumber1', value: $event })"/>
-            </div>
-            <div class="flex flex-col mb-4 w-[49%]">
-                <label class="mb-2 primaryTxt" for="secretNumber2">{{ 'secretNumber2' | translate }}</label>
-                <input id="secretNumber2" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'secretNumber2' | translate }}"
-                [(ngModel)]="school.secretNumber2" 
-                (ngModelChange)="onInputValueChange({ field: 'secretNumber2', value: $event })"/>
-            </div> -->
-
-
-            <!-- <div class="flex flex-col mb-4 w-[49%]">
-                <label class="mb-2 primaryTxt" for="streetName">{{ 'Street Name' | translate }}</label>
-                <input id="streetName" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'StreetName' | translate }}"
-                [(ngModel)]="school.streetName" 
-                (ngModelChange)="onInputValueChange({ field: 'streetName', value: $event })"/>
-            </div>
-            <div class="flex flex-col mb-4 w-[49%]">
-                <label class="mb-2 primaryTxt" for="buildingNumber">{{ 'Building Number' | translate }}</label>
-                <input id="buildingNumber" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'BuildingNumber' | translate }}"
-                [(ngModel)]="school.buildingNumber" 
-                (ngModelChange)="onInputValueChange({ field: 'buildingNumber', value: $event })"/>
-            </div>
-            <div class="flex flex-col mb-4 w-[49%]">
-                <label class="mb-2 primaryTxt" for="citySubdivision">{{ 'City Subdivision' | translate }}</label>
-                <input id="citySubdivision" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'CitySubdivision' | translate }}"
-                [(ngModel)]="school.citySubdivision" 
-                (ngModelChange)="onInputValueChange({ field: 'citySubdivision', value: $event })"/>
-            </div>
-            <div class="flex flex-col mb-4 w-[49%]">
-                <label class="mb-2 primaryTxt" for="city">{{ 'City' | translate }}</label>
-                <input id="city" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'City' | translate }}"
-                [(ngModel)]="school.city" 
-                (ngModelChange)="onInputValueChange({ field: 'city', value: $event })"/>
-            </div>
-            <div class="flex flex-col mb-4 w-[49%]">
-                <label class="mb-2 primaryTxt" for="crn">{{ 'CRN' | translate }}</label>
-                <input id="crn" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'crn' | translate }}"
-                [(ngModel)]="school.crn" 
-                (ngModelChange)="onInputValueChange({ field: 'crn', value: $event })"/>
-            </div>
-            <div class="flex flex-col mb-4 w-[49%]">
-                <label class="mb-2 primaryTxt" for="PostalZone">{{ 'Postal Zone' | translate }}</label>
-                <input id="PostalZone" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'Postal Zone' | translate }}"
-                [(ngModel)]="school.postalZone" 
-                (ngModelChange)="onInputValueChange({ field: 'postalZone', value: $event })"/>
-            </div> -->
-
-
+                [(ngModel)]="school.reportHeaderTwoAr"></textarea>
+            </div> 
             <div class="w-full mb-4">
                 <label class="mb-2 primaryTxt" for="PostalZone">{{ 'School Logo' | translate }}</label>
                 <div class="bg-[#F6F6F6] flex items-center space-x-4 w-full rounded-md border-dashed border-2">
@@ -206,46 +118,62 @@
                         <input id="file-upload" type="file" class="hidden" (change)="onImageFileSelected($event)" accept="image/jpeg, image/png"  />
                     </div>
                 </div>
+                <span *ngIf="validationErrors['reportImageFile']" class="text-red-500 ml-3 font-normal">{{ validationErrors['reportImageFile'] }}</span>
             </div>
             <div class="flex flex-col mb-4 w-[49%]">
                 <label class="mb-2 primaryTxt" for="maximumPeriodCountTimeTable">{{ 'Maximum Period Count (Time Table)' | translate }}</label>
                 <input id="maximumPeriodCountTimeTable" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'Maximum Period Count (Time Table)' | translate }}"
-                [(ngModel)]="school.maximumPeriodCountTimeTable"   (input)="validateNumber($event, 'maximumPeriodCountTimeTable')"
-                (ngModelChange)="onInputValueChange({ field: 'maximumPeriodCountTimeTable', value: $event })"/>
+                [(ngModel)]="school.maximumPeriodCountTimeTable" (input)="validateNumber($event, 'maximumPeriodCountTimeTable')" />
             </div>
             <div class="flex flex-col mb-4 w-[49%]">
                 <label class="mb-2 primaryTxt" for="maximumPeriodCountRemedials">{{ 'Maximum Period Count (remedials)' | translate }}</label>
                 <input id="maximumPeriodCountRemedials" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'Maximum Period Count (remedials)' | translate }}"
-                [(ngModel)]="school.maximumPeriodCountRemedials"  (input)="validateNumber($event, 'maximumPeriodCountRemedials')"
-                (ngModelChange)="onInputValueChange({ field: 'maximumPeriodCountRemedials', value: $event })"/>
+                [(ngModel)]="school.maximumPeriodCountRemedials" (input)="validateNumber($event, 'maximumPeriodCountRemedials')" />
             </div>
-
             <div class="flex w-[49%] flex-col mb-4">
-                <label class="mb-2" for="weekStartDayID">Week Start Day</label>
-                <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="weekStartDayID"
-                  (ngModelChange)="onInputValueChange({ field: 'weekStartDayID', value: $event })" [(ngModel)]="school.weekStartDayID">
+                <label class="mb-2 primaryTxt" for="weekStartDayID">Week Start Day</label>
+                <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="weekStartDayID" [(ngModel)]="school.weekStartDayID">
                   <option [value]="null" disabled selected hidden>Choose Day</option>
                   <option *ngFor="let s of WeekDays" [value]="s.id">{{ s.name }}</option>
                   <option *ngIf="WeekDays.length === 0" disabled selected>
                     No Data Found
                   </option>
-                </select>
-                <span *ngIf="validationErrors['weekStartDayID']" class="text-red-500 ml-3 font-normal">{{
-                  validationErrors["weekStartDayID"]}}</span>
+                </select> 
             </div>
-
             <div class="flex w-[49%] flex-col mb-4">
-                <label class="mb-2" for="weekEndDayID">Week End Day</label>
-                <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="weekEndDayID"
-                  (ngModelChange)="onInputValueChange({ field: 'weekEndDayID', value: $event })" [(ngModel)]="school.weekEndDayID">
+                <label class="mb-2 primaryTxt" for="weekEndDayID">Week End Day</label>
+                <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="weekEndDayID" [(ngModel)]="school.weekEndDayID">
                   <option [value]="null" disabled selected hidden>Choose Day</option>
                   <option *ngFor="let s of WeekDays" [value]="s.id">{{ s.name }}</option>
                   <option *ngIf="WeekDays.length === 0" disabled selected>
                     No Data Found
                   </option>
-                </select>
-                <span *ngIf="validationErrors['weekEndDayID']" class="text-red-500 ml-3 font-normal">{{
-                  validationErrors["weekEndDayID"]}}</span>
+                </select> 
+            </div>  
+            <div class="flex flex-col mb-4 w-[49%]">
+                <label class="mb-2 primaryTxt" for="city">{{ 'City' | translate }}</label>
+                <input id="city" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'City' | translate }}"
+                [(ngModel)]="school.city"/>
+            </div>
+            <div class="flex flex-col mb-4 w-[49%]">
+                <label class="mb-2 primaryTxt" for="citySubdivision">{{ 'City Subdivision' | translate }}</label>
+                <input id="citySubdivision" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'CitySubdivision' | translate }}"
+                [(ngModel)]="school.citySubdivision"/>
+            </div>
+            <div class="flex flex-col mb-4 w-[49%]">
+                <label class="mb-2 primaryTxt" for="streetName">{{ 'Street Name' | translate }}</label>
+                <input id="streetName" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'StreetName' | translate }}"
+                [(ngModel)]="school.streetName"/>
+            </div>
+            <div class="flex flex-col mb-4 w-[49%]">
+                <label class="mb-2 primaryTxt" for="buildingNumber">{{ 'Building Number' | translate }}</label>
+                <input id="buildingNumber" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'BuildingNumber' | translate }}"
+                [(ngModel)]="school.buildingNumber"/>
+            </div> 
+            <div class="flex flex-col mb-4 w-[49%]">
+                <label class="mb-2 primaryTxt" for="PostalZone">{{ 'Postal Zone' | translate }}</label>
+                <input id="PostalZone" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'Postal Zone' | translate }}"
+                [(ngModel)]="school.postalZone"/>
             </div> 
         </div>
         <div class="flex justify-end">

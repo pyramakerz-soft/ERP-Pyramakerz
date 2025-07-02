@@ -9,7 +9,7 @@ namespace LMS_CMS_BL.DTO.Accounting
 {
     public class ReceivableDetailsAddDTO
     {
-        public int Amount { get; set; }
+        public decimal Amount { get; set; }
         public string? Notes { get; set; } 
         public long ReceivableMasterID { get; set; } 
         public long LinkFileID { get; set; }
