@@ -32,7 +32,7 @@ import { SchoolService } from '../../../../Services/Employee/school.service';
   styleUrl: './lesson-live.component.css'
 })
 export class LessonLiveComponent {
- User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -58,7 +58,7 @@ export class LessonLiveComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'liveLink' , 'weekDayName' ,'classroomName' ,'subjectEnglishName'];
+  keysArray: string[] = ['id', 'liveLink', 'weekDayName', 'classroomName', 'subjectEnglishName'];
 
   live: LessonLive = new LessonLive();
 
@@ -72,19 +72,19 @@ export class LessonLiveComponent {
   Years: AcademicYear[] = []
   ClassesForFilter: Classroom[] = []
 
-  constructor( 
+  constructor(
     private menuService: MenuService,
     public activeRoute: ActivatedRoute,
     public account: AccountService,
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
-    public LessonLiveServ: LessonLiveService ,
-    public ClassroomServ :ClassroomService ,
-    public weekdaysServ : DaysService ,
-    public acadimicYearService : AcadimicYearService ,
-    public schoolService : SchoolService ,
-    public SubjectServ : SubjectService 
+    public LessonLiveServ: LessonLiveService,
+    public ClassroomServ: ClassroomService,
+    public weekdaysServ: DaysService,
+    public acadimicYearService: AcadimicYearService,
+    public schoolService: SchoolService,
+    public SubjectServ: SubjectService
   ) { }
 
   ngOnInit() {
@@ -105,40 +105,40 @@ export class LessonLiveComponent {
       }
     });
 
-    this.GetAllSchools(); 
+    this.GetAllSchools();
   }
 
   onSchoolChange() {
     this.selectedYear = 0;
     this.selectedClass = 0
-    this.Years = []; 
+    this.Years = [];
     this.ClassesForFilter = []
 
-    if (this.selectedSchool){
+    if (this.selectedSchool) {
       this.acadimicYearService.GetBySchoolId(this.selectedSchool, this.DomainName).subscribe(
         (data) => {
           this.Years = data
         }
-      ) 
+      )
     }
-  } 
+  }
 
-  onYearChange() { 
-    this.selectedClass = 0 
+  onYearChange() {
+    this.selectedClass = 0
     this.ClassesForFilter = []
 
-    if (this.selectedYear){
+    if (this.selectedYear) {
       this.ClassroomServ.GetByAcYearId(this.selectedYear, this.DomainName).subscribe(
         (data) => {
           this.ClassesForFilter = data
         }
-      ) 
+      )
     }
-  }  
-  
+  }
+
   onClassChange() {
     this.GetLessonsByClassID()
-  } 
+  }
 
   GetLessonsByClassID() {
     this.TableData = [];
@@ -252,7 +252,7 @@ export class LessonLiveComponent {
           }
         );
       }
-    } 
+    }
   }
 
   getAllSubject() {
@@ -266,7 +266,7 @@ export class LessonLiveComponent {
   getAllDays() {
     this.days = []
     this.live.weekDayID = 0
-    this.weekdaysServ.Get( this.DomainName).subscribe((d) => {
+    this.weekdaysServ.Get(this.DomainName).subscribe((d) => {
       this.days = d
     })
   }
@@ -278,14 +278,14 @@ export class LessonLiveComponent {
     if (classs) {
       this.SelectedGradeId = classs.gradeID;
       this.getAllSubject();
-    } 
+    }
   }
 
   getAllClass() {
     this.SelectedClassId = 0
-    this.classrooms =[]
-    this.SelectedSubjectId=0
-    this.subject =[]
+    this.classrooms = []
+    this.SelectedSubjectId = 0
+    this.subject = []
     this.ClassroomServ.Get(this.DomainName).subscribe((d) => {
       this.classrooms = d
     })
@@ -311,9 +311,10 @@ export class LessonLiveComponent {
         if (!this.live[field]) {
           if (
             field == 'period' ||
-            field == 'liveLink'||
-            field == 'weekDayID'||
-            field == 'classroomID'||
+            field == 'name' ||
+            field == 'liveLink' ||
+            field == 'weekDayID' ||
+            field == 'classroomID' ||
             field == 'subjectID'
           ) {
             this.validationErrors[field] = `*${this.capitalizeField(
@@ -372,10 +373,16 @@ export class LessonLiveComponent {
   validateNumber(event: any, field: keyof LessonLive): void {
     const value = event.target.value;
     if (isNaN(value) || value === '') {
-      event.target.value = ''; 
+      event.target.value = '';
       if (typeof this.live[field] === 'string') {
-        this.live[field] = '' as never;  
+        this.live[field] = '' as never;
       }
+    }
+  }
+
+  openLink(url: string): void {
+    if (url) {
+      window.open(url, '_blank');
     }
   }
 }

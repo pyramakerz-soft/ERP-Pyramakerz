@@ -23,6 +23,7 @@ export class Subject {
         public subjectCategoryName : string = '',
         public iconFile : File|null = null,
         public iconLink : string = "",
+        public assignmentCutOffDatePercentage : number|null = null,
         public insertedAt: string = '',
     ) {}
 } 

@@ -4963,6 +4963,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<bool>("IsSpecificStudents")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsVisibleToStudent")
+                        .HasColumnType("bit");
+
                     b.Property<string>("LinkFile")
                         .HasColumnType("nvarchar(max)");
 
@@ -6754,6 +6757,10 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .HasColumnType("bit");
 
                     b.Property<string>("LiveLink")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

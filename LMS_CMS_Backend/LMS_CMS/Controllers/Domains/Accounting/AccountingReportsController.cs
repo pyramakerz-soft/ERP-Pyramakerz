@@ -42,9 +42,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             if (end < start)
                 return BadRequest("Start date must be equal or greater than End date");
 
-            int totalRecords = await Unit_Of_Work.payableMaster_Repository
-               .CountAsync(f => f.IsDeleted != true);
-
             var query = await Unit_Of_Work.payableMaster_Repository
             .Select_All_With_IncludesById_Pagination<PayableMaster>(
                 t => t.IsDeleted != true,
@@ -63,6 +60,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                     .Where(d => d.IsDeleted != true)
                     .ToList();
             }
+
+            int totalRecords = query.Where(t => DateTime.TryParse(t.Date, out var d) && d >= start && d <= end).Count();
 
             List<PayableMaster> PayableMasters = query
                 .AsEnumerable() 
@@ -172,9 +171,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             if (end < start)
                 return BadRequest("Start date must be equal or greater than End date");
 
-            int totalRecords = await Unit_Of_Work.receivableMaster_Repository
-               .CountAsync(f => f.IsDeleted != true);
-
             var query = await Unit_Of_Work.receivableMaster_Repository
             .Select_All_With_IncludesById_Pagination<ReceivableMaster>(
                 t => t.IsDeleted != true,
@@ -193,6 +189,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                     .Where(d => d.IsDeleted != true)
                     .ToList();
             }
+
+            int totalRecords = query.Where(t => DateTime.TryParse(t.Date, out var d) && d >= start && d <= end).Count();
 
             List<ReceivableMaster> ReceivableMasters = query
                 .AsEnumerable()
@@ -298,9 +296,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             if (end < start)
                 return BadRequest("Start date must be equal or greater than End date");
 
-            int totalRecords = await Unit_Of_Work.installmentDeductionMaster_Repository
-               .CountAsync(f => f.IsDeleted != true);
-
             List<InstallmentDeductionMaster> query = await Unit_Of_Work.installmentDeductionMaster_Repository.Select_All_With_IncludesById_Pagination<InstallmentDeductionMaster> (
                    f => f.IsDeleted != true,
                    query => query.Include(d => d.InstallmentDeductionDetails)
@@ -319,6 +314,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                     .Where(d => d.IsDeleted != true)
                     .ToList();
             }
+
+            int totalRecords = query.Where(t => DateTime.TryParse(t.Date, out var d) && d >= start && d <= end).Count();
 
             List<InstallmentDeductionMaster> InstallmentDeductionMasters = query
                 .AsEnumerable()
@@ -357,9 +354,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             DateTime start = DateTime.Parse(startDate);
             DateTime end = DateTime.Parse(endDate);
 
-            int totalRecords = await Unit_Of_Work.accountingEntriesMaster_Repository
-               .CountAsync(f => f.IsDeleted != true);
-
             List<AccountingEntriesMaster> query = await Unit_Of_Work.accountingEntriesMaster_Repository.Select_All_With_IncludesById_Pagination<AccountingEntriesMaster>(
                     t => t.IsDeleted != true,
                     query => query.Include(x => x.AccountingEntriesDocType),
@@ -377,6 +371,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                     .Where(d => d.IsDeleted != true)
                     .ToList();
             }
+
+            int totalRecords = query.Where(t => DateTime.TryParse(t.Date, out var d) && d >= start && d <= end).Count();
 
             List<AccountingEntriesMaster> AccountingEntriesMasters = query
                 .AsEnumerable()
@@ -473,9 +469,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             if (end < start)
                 return BadRequest("Start date must be equal or greater than End date");
 
-            int totalRecords = await unit_of_work.feesActivation_Repository
-               .CountAsync(f => f.IsDeleted != true);
-
             List<FeesActivation> query = await unit_of_work.feesActivation_Repository.Select_All_With_IncludesById_Pagination<FeesActivation>(
                 x => x.IsDeleted != true,
                 query => query.Include(x => x.AcademicYear),
@@ -487,6 +480,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
             if (query == null || query.Count == 0)
                 return NotFound("No fees activation found for the specified date range.");
+
+            int totalRecords = query.Where(t => DateTime.TryParse(t.Date, out var d) && d >= start && d <= end).Count();
 
             List<FeesActivation> FeesActivations = query
                 .AsEnumerable()

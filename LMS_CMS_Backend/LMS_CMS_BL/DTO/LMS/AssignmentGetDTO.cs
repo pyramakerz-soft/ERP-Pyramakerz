@@ -19,6 +19,7 @@ namespace LMS_CMS_BL.DTO.LMS
         public DateOnly DueDate { get; set; }
         public DateOnly CutOfDate { get; set; }
         public bool IsSpecificStudents { get; set; }
+        public bool IsVisibleToStudent { get; set; }
         public string? LinkFile { get; set; } 
         public long SubjectID { get; set; }  
         public string SubjectEnglishName { get; set; }  
