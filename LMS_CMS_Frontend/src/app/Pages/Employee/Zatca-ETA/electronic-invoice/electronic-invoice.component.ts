@@ -30,6 +30,7 @@ export class ElectronicInvoiceComponent implements OnInit {
   selectedInvoices: number[] = [];
 
   showTable = false;
+  showViewReportBtn = false;
   transactions: ElectronicInvoice[] = [];
   currentPage = 1;
   totalPages = 1;
@@ -71,6 +72,7 @@ export class ElectronicInvoiceComponent implements OnInit {
       this.pageSize = savedState.pageSize;
       this.totalRecords = savedState.totalRecords;
       this.showTable = true;
+      this.showViewReportBtn = true;
       this.stateService.clearInvoiceState();
     }
   }
@@ -98,50 +100,39 @@ export class ElectronicInvoiceComponent implements OnInit {
     }
   }
 
-  private validateFilters(): { valid: boolean; message?: string } {
-    if (!this.selectedSchoolId) {
-      return { valid: false, message: 'Please select a school' };
-    }
-    if (!this.dateFrom || !this.dateTo) {
-      return { valid: false, message: 'Please select both date range fields' };
-    }
-
-    const fromDate = new Date(this.dateFrom);
-    const toDate = new Date(this.dateTo);
-
-    if (fromDate > toDate) {
-      return { valid: false, message: 'End date must be after start date' };
-    }
-
-    return { valid: true };
-  }
-
   onFilterChange() {
-    // Hide the table whenever any filter changes
     this.showTable = false;
-
-    // Also clear the existing data
+    this.showViewReportBtn = this.selectedSchoolId !== null && this.dateFrom !== '' && this.dateTo !== '';
     this.transactions = [];
     this.selectedInvoices = [];
   }
 
   async viewReport() {
-    const validation = this.validateFilters();
-    if (!validation.valid) {
-      // Swal.fire('Error', validation.message, 'error');
+    if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
+      Swal.fire({
+        title: 'Invalid Date Range',
+        text: 'Start date cannot be later than end date.',
+        icon: 'warning',
+        confirmButtonText: 'OK',
+      });
       return;
     }
 
-    if (!this.validateDateRange()) {
+    if (!this.selectedSchoolId) {
+      Swal.fire({
+        title: 'Missing Information',
+        text: 'Please select a school',
+        icon: 'warning',
+        confirmButtonText: 'OK',
+      });
       return;
     }
 
     this.isLoading = true;
-    this.showTable = false; // Hide while loading
+    this.showTable = false;
     this.transactions = [];
     this.selectedInvoices = [];
 
-<<<<<<< HEAD
     try {
       const formattedStartDate = this.formatDateForApi(this.dateFrom);
       const formattedEndDate = this.formatDateForApi(this.dateTo);
@@ -170,63 +161,9 @@ export class ElectronicInvoiceComponent implements OnInit {
       this.showTable = true;
     } catch (error) {
       this.handleError('Failed to load transactions', error);
-      // The handleError method will now show the table with empty data
     } finally {
       this.isLoading = false;
     }
-=======
-    const formattedStartDate = this.formatDateForApi(this.dateFrom);
-    const formattedEndDate = this.formatDateForApi(this.dateTo);
-
-    this.zatcaService
-      .filterBySchoolAndDate(
-        this.selectedSchoolId,
-        formattedStartDate,
-        formattedEndDate,
-        this.currentPage,
-        this.pageSize,
-        this.DomainName
-      )
-      .subscribe({
-        next: (response: any) => {
-          this.processApiResponse(response);
-          this.showTable = true;
-          this.isLoading = false;
-        },
-        error: (error) => {
-          // Handle 404 differently
-          if (error.status === 404) {
-            this.transactions = [];
-            this.totalRecords = 0;
-            this.totalPages = 1;
-            this.currentPage = 1;
-            this.showTable = true;
-          } else {
-            this.handleError('Failed to load transactions');
-          }
-          this.isLoading = false;
-        },
-      });
->>>>>>> 6b714bcdaf0efa59051f06cf78200c53d920e095
-  }
-
-  validateDateRange(): boolean {
-    if (this.dateFrom && this.dateTo) {
-      const fromDate = new Date(this.dateFrom);
-      const toDate = new Date(this.dateTo);
-
-      if (fromDate > toDate) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Invalid Date Range',
-          text: '"Date From" cannot be after "Date To"',
-          confirmButtonColor: '#3085d6',
-          confirmButtonText: 'OK',
-        });
-        return false;
-      }
-    }
-    return true;
   }
 
   private processApiResponse(response: any) {
@@ -258,7 +195,6 @@ export class ElectronicInvoiceComponent implements OnInit {
     this.currentPage = page;
     this.viewReport();
   }
-
   navigateToDetail(id: number) {
     this.saveState();
     const routePrefix =
@@ -384,16 +320,9 @@ export class ElectronicInvoiceComponent implements OnInit {
     console.error(message, error);
     this.isLoading = false;
     this.isSubmitting = false;
-
     this.showTable = true;
     this.transactions = [];
     this.selectedInvoices = [];
-
-    console.log({
-      icon: 'error',
-      title: 'Error',
-      text: message,
-    });
   }
 
   get isViewReportDisabled(): boolean {

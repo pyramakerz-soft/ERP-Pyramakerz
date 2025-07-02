@@ -8,7 +8,7 @@
     <div class="flex flex-col w-[24%] mb-4">
         <label class="mb-2 font-medium" for="store">Store</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="store"
-            [(ngModel)]="selectedStoreId">
+            [(ngModel)]="selectedStoreId" (ngModelChange)="onFilterChange()">
             <option [ngValue]="null">Select All</option>
             <option *ngFor="let store of stores" [ngValue]="store.id">{{ store.name }}</option>
             <option *ngIf="stores.length === 0" disabled selected>No Data Found</option>
@@ -18,13 +18,13 @@
     <div class="flex flex-col w-[24%] mb-4">
         <label class="mb-2 font-medium" for="dateFrom">Date From</label>
         <input type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="dateFrom"
-            [(ngModel)]="dateFrom">
+            [(ngModel)]="dateFrom" (ngModelChange)="onFilterChange()">
     </div>
 
     <div class="flex flex-col w-[24%] mb-4">
         <label class="mb-2 font-medium" for="dateTo">Date To</label>
         <input type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="dateTo"
-            [(ngModel)]="dateTo">
+            [(ngModel)]="dateTo" (ngModelChange)="onFilterChange()">
     </div>
 
     <div class="flex flex-col w-[24%] mb-4">
@@ -37,7 +37,7 @@
             </option>
         </select>
     </div>
-    <!-- For Category dropdown -->
+
     <div class="flex flex-col w-[24%] mb-4">
         <label class="mb-2 font-medium" for="flags">Category</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
@@ -49,7 +49,6 @@
         </select>
     </div>
 
-    <!-- For SubCategory dropdown -->
     <div class="flex flex-col w-[24%] mb-4">
         <label class="mb-2 font-medium" for="flags"> Sub Category</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
@@ -62,7 +61,6 @@
         </select>
     </div>
 
-    <!-- For Item dropdown -->
     <div class="flex flex-col w-[24%] mb-4">
         <label class="mb-2 font-medium" for="flags">Item</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
@@ -74,16 +72,16 @@
         </select>
     </div>
 
-    <div class="w-[24%] flex justify-end">
-        <button class="p-4 font-medium text-xl rounded-lg" (click)="viewReport()"
-            [disabled]="!dateFrom || !dateTo || selectedStoreId === undefined || selectedFlagIds.length === 0"
-            [ngClass]="{ 
-            'bg-gray-100 text-gray-300': !dateFrom || !dateTo || selectedStoreId === undefined || selectedFlagIds.length === 0, 
-            'secondaryBg text-white': dateFrom && dateTo && selectedStoreId !== undefined && selectedFlagIds.length > 0
+<div class="w-[24%] flex justify-end">
+    <button class="p-4 font-medium text-xl rounded-lg" (click)="viewReport()"
+        [disabled]="!showViewReportBtn || isLoading" [ngClass]="{ 
+            'bg-gray-100 text-gray-300 cursor-not-allowed': !showViewReportBtn || isLoading, 
+            'secondaryBg text-white': showViewReportBtn && !isLoading
         }">
-            View Report
-        </button>
-    </div>
+        <span *ngIf="!isLoading">View Report</span>
+        <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+    </button>
+</div>
 </div>
 
 <div *ngIf="showTable" class="mb-5 flex justify-end space-x-4">
@@ -102,7 +100,6 @@
     </div>
 </div>
 
-
 <div *ngIf="showTable" class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
     <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
         <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
@@ -116,7 +113,6 @@
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     Store
                 </th>
-                <!-- Conditionally show Student or Supplier column based on reportType -->
                 <th *ngIf="reportType === 'sales'"
                     class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     Student
@@ -153,7 +149,6 @@
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     {{ transaction.storeName }}
                 </td>
-                <!-- Conditionally show Student or Supplier data based on reportType -->
                 <td *ngIf="reportType === 'sales'" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     {{ transaction.studentName || 'N/A' }}
                 </td>
@@ -171,7 +166,6 @@
     </table>
 </div>
 
-<!-- Pagination -->
 <div *ngIf="showTable" class="mt-8 flex justify-between items-center">
     <div class="flex items-center space-x-4">
         <button class="flex items-center space-x-2 rounded-lg border py-3 px-4" (click)="changePage(currentPage-1)"
