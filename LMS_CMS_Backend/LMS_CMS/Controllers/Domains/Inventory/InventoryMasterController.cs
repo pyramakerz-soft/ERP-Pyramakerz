@@ -743,7 +743,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
             if (Master.ETAPOSID == null || Master.ETAPOSID == 0)
             {
-                Master.InvoiceType = 'B';
+                Master.InvoiceType = 'P';
             }
 
             Master.uuid = Guid.NewGuid().ToString();
