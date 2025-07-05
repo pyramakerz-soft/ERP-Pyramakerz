@@ -25,6 +25,7 @@ namespace LMS_CMS_BL.UOW
     {
         LMS_CMS_Context db;
         Octa_DbContext octa_Db;
+        public LMS_CMS_Context DbContext => db;
 
         GenericRepo<Employee> Employee_Repository;
         GenericRepo<Parent> Parent_Repository;

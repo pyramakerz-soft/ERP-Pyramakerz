@@ -1,4 +1,5 @@
-﻿using LMS_CMS_DAL.Models.Domains.AccountingModule;
+﻿using LMS_CMS_DAL.AccountingModule.Reports;
+using LMS_CMS_DAL.Models.Domains.AccountingModule;
 using LMS_CMS_DAL.Models.Domains.Administration;
 using LMS_CMS_DAL.Models.Domains.BusModule;
 using LMS_CMS_DAL.Models.Domains.ClinicModule;
@@ -1774,6 +1775,9 @@ namespace LMS_CMS_DAL.Models.Domains
                .Ignore(r => r.Employee)
                .Ignore(r => r.Student)
                .Ignore(r => r.Save);
+
+            modelBuilder.Entity<AccountingEntriesReport>()
+                .HasNoKey().ToView(null);
         }
     }
 }
