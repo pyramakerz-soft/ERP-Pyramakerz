@@ -27,6 +27,7 @@ export class Assignment {
         public assignmentQuestions : AssignmentQuestion[]=[] ,
         public assignmentStudents : AssignmentStudent[]=[] ,
         public assignmentStudentIsSpecifics : AssignmentStudent[]=[] ,
-        public insertedByUserId: number = 0
+        public insertedByUserId: number = 0,
+        public insertedByUserName: string = ''
     ) {}
 }

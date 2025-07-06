@@ -196,6 +196,7 @@ export class AssignmentStudentComponent {
           text: 'Assignment submitted successfully.',
           confirmButtonColor: '#089B41',
         });
+       this.router.navigateByUrl(`Student/SubjectAssignment/${this.assignment.subjectID}`)
       },
       error: (err) => {
         this.isLoading = false;

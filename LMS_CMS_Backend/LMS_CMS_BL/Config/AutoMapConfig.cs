@@ -990,6 +990,7 @@ namespace LMS_CMS_BL.Config
                .ForMember(dest => dest.SubjectWeightTypeEnglishName, opt => opt.MapFrom(src => src.SubjectWeightType.WeightType.EnglishName))
                .ForMember(dest => dest.SubjectWeightTypeArabicName, opt => opt.MapFrom(src => src.SubjectWeightType.WeightType.ArabicName))
                .ForMember(dest => dest.AssignmentTypeEnglishName, opt => opt.MapFrom(src => src.AssignmentType.EnglishName))
+               .ForMember(dest => dest.InsertedByUserName, opt => opt.MapFrom(src => src.InsertedByEmployee.en_name))
                .ForMember(dest => dest.AssignmentQuestions, opt => opt.MapFrom(src => src.AssignmentQuestions))
                .ForMember(dest => dest.AssignmentTypeArabicName, opt => opt.MapFrom(src => src.AssignmentType.ArabicName));
             CreateMap<AssignmentAddDTO, Assignment>();
@@ -998,6 +999,8 @@ namespace LMS_CMS_BL.Config
             CreateMap<AssignmentStudent, AssignmentStudentGetDTO>()
                .ForMember(dest => dest.ClassroomID, opt => opt.MapFrom(src => src.StudentClassroom.ClassID))
                .ForMember(dest => dest.AssignmentDegree, opt => opt.MapFrom(src => src.Assignment.Mark))
+               .ForMember(dest => dest.SubjectId, opt => opt.MapFrom(src => src.Assignment.SubjectID))
+               .ForMember(dest => dest.SubjectName, opt => opt.MapFrom(src => src.Assignment.Subject.en_name))
                .ForMember(dest => dest.ClassroomName, opt => opt.MapFrom(src => src.StudentClassroom.Classroom.Name))
                .ForMember(dest => dest.AssignmentTypeID, opt => opt.MapFrom(src => src.Assignment.AssignmentTypeID))
                .ForMember(dest => dest.StudentEnglishName, opt => opt.MapFrom(src => src.StudentClassroom.Student.en_name))
@@ -1045,7 +1048,7 @@ namespace LMS_CMS_BL.Config
                .ForMember(dest => dest.AssignmentTypeID, opt => opt.MapFrom(src => src.Assignment.AssignmentTypeID))
                .ForMember(dest => dest.AssignmentEnglishName, opt => opt.MapFrom(src => src.Assignment.EnglishName))
                .ForMember(dest => dest.AssignmentArabicName, opt => opt.MapFrom(src => src.Assignment.ArabicName))
-               .ForMember(dest => dest.AssignmentMark, opt => opt.MapFrom(src => src.Assignment.Mark))
+               .ForMember(dest => dest.AssignmentDegree, opt => opt.MapFrom(src => src.Assignment.Mark))
                .ForMember(dest => dest.OpenDate, opt => opt.MapFrom(src => src.Assignment.OpenDate))
                .ForMember(dest => dest.DueDate, opt => opt.MapFrom(src => src.Assignment.DueDate))
                .ForMember(dest => dest.CutOfDate, opt => opt.MapFrom(src => src.Assignment.CutOfDate))
@@ -1054,6 +1057,8 @@ namespace LMS_CMS_BL.Config
                .ForMember(dest => dest.SubjectWeightTypeEnglishName, opt => opt.MapFrom(src => src.Assignment.SubjectWeightType.WeightType.EnglishName))
                .ForMember(dest => dest.SubjectWeightTypeArabicName, opt => opt.MapFrom(src => src.Assignment.SubjectWeightType.WeightType.ArabicName))
                .ForMember(dest => dest.AssignmentTypeEnglishName, opt => opt.MapFrom(src => src.Assignment.AssignmentType.EnglishName))
+               .ForMember(dest => dest.IsVisibleToStudent, opt => opt.MapFrom(src => src.Assignment.IsVisibleToStudent))
+               .ForMember(dest => dest.InsertedByUserName, opt => opt.MapFrom(src => src.Assignment.InsertedByEmployee.en_name))
                .ForMember(dest => dest.AssignmentTypeArabicName, opt => opt.MapFrom(src => src.Assignment.AssignmentType.ArabicName));
        
             CreateMap<POSAddDTO, ETAPOS>();

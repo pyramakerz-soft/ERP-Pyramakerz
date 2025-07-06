@@ -102,7 +102,7 @@
                                 <i class="fa-solid fa-pencil"></i>
                             </button>
                         </div>
-                        <div *ngIf="row.degree > row.assignmentDegree" class="text-red-500 text-sm mt-1">
+                        <div *ngIf="row.degree!= null && row.degree > row.assignmentDegree" class="text-red-500 text-sm mt-1">
                             Degree cannot exceed {{ row.assignmentDegree }}.
                         </div>
                     </td>
