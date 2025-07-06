@@ -21,8 +21,6 @@ export class ApiService {
 
     var Header = 'domain_ga';
 
-    var Header = 'z';
-
     return Header;
   }
 }
