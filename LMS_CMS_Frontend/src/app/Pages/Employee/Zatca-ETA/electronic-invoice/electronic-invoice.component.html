@@ -49,12 +49,12 @@
             <i class="fa-solid fa-print"></i>
         </button>
 
-        <button class="p-2 font-medium text-3xl rounded-lg flex items-center gap-2 secondaryTxt" (click)="sendAll()"
-            [disabled]="transactions.length === 0 || isSubmitting"
-            [ngClass]="{'opacity-50 cursor-not-allowed': transactions.length === 0 || isSubmitting}">
-            <i class="fa-regular fa-paper-plane"></i>
-            <span *ngIf="isSubmitting">Sending...</span>
-        </button>
+<button class="p-2 font-medium text-3xl rounded-lg flex items-center gap-2 secondaryTxt" (click)="sendAll()"
+    [disabled]="transactions.length === 0 || isSubmitting"
+    [ngClass]="{'opacity-50 cursor-not-allowed': transactions.length === 0 || isSubmitting}">
+    <i *ngIf="!isSubmitting" class="fa-regular fa-paper-plane"></i>
+    <i *ngIf="isSubmitting" class="fas fa-spinner fa-spin"></i>
+</button>
     </div>
 
     <!-- Results Table -->
@@ -103,10 +103,7 @@
                             (change)="toggleInvoiceSelection(transaction.id)" [disabled]="isSubmitting">
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        <a (click)="navigateToDetail(transaction.id)"
-                            class="text-blue-500 hover:text-blue-700 cursor-pointer">
                             {{ transaction.id }}
-                        </a>
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ transaction.date | date:'mediumDate' }}
@@ -132,10 +129,11 @@
                             <button (click)="printAll()" class="" [disabled]="isSubmitting">
                                 <i class="fa-solid fa-print text-lg"></i>
                             </button>
-                            <button (click)="sendInvoice(transaction)"
-                                class="text-gray-700 hover:text-gray-900 rounded-lg" [disabled]="isSubmitting">
-                                <i class="fa-regular fa-paper-plane text-lg"></i>
-                            </button>
+<button (click)="sendInvoice(transaction)" class="text-gray-700 hover:text-gray-900 rounded-lg"
+    [disabled]="isSubmitting || sendingInvoiceId === transaction.id">
+    <i *ngIf="sendingInvoiceId !== transaction.id" class="fa-regular fa-paper-plane text-lg"></i>
+    <i *ngIf="sendingInvoiceId === transaction.id" class="fas fa-spinner fa-spin text-lg"></i>
+</button>
                             <button (click)="navigateToDetail(transaction.id)"
                                 class="text-gray-700 hover:text-gray-900 rounded-lg">
                                 <i class="fa-regular fa-eye text-lg"></i>

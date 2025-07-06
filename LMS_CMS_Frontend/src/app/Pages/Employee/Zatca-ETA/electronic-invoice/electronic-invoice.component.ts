@@ -39,6 +39,8 @@ export class ElectronicInvoiceComponent implements OnInit {
   isLoading = false;
   isSubmitting = false;
 
+  sendingInvoiceId: number | null = null;
+
   constructor(
     private schoolService: SchoolService,
     private stateService: StateService,
@@ -102,7 +104,10 @@ export class ElectronicInvoiceComponent implements OnInit {
 
   onFilterChange() {
     this.showTable = false;
-    this.showViewReportBtn = this.selectedSchoolId !== null && this.dateFrom !== '' && this.dateTo !== '';
+    this.showViewReportBtn =
+      this.selectedSchoolId !== null &&
+      this.dateFrom !== '' &&
+      this.dateTo !== '';
     this.transactions = [];
     this.selectedInvoices = [];
   }
@@ -218,94 +223,108 @@ export class ElectronicInvoiceComponent implements OnInit {
     this.selectedInvoices = isChecked ? this.transactions.map((t) => t.id) : [];
   }
 
-  sendInvoice(invoice: ElectronicInvoice) {
-    this.isSubmitting = true;
+  // Replace the existing sendInvoice method with this:
+  async sendInvoice(invoice: ElectronicInvoice) {
+    this.sendingInvoiceId = invoice.id;
 
-    const serviceCall =
-      this.currentSystem === 'zatca'
-        ? this.zatcaService.reportInvoice(invoice.id, this.DomainName)
-        : this.etaService.submitInvoice(invoice.id, 0, 0, this.DomainName);
+    try {
+      const serviceCall =
+        this.currentSystem === 'zatca'
+          ? this.zatcaService.reportInvoice(invoice.id, this.DomainName)
+          : this.etaService.submitInvoice(invoice.id, 0, 0, this.DomainName);
 
-    serviceCall.subscribe({
-      next: () => {
-        Swal.fire(
-          'Success',
-          `Invoice ${
-            this.currentSystem === 'zatca'
-              ? 'reported to ZATCA'
-              : 'submitted to ETA'
-          } successfully`,
-          'success'
-        );
-        invoice.isValid = true;
-      },
-      error: (error) => {
-        this.handleError(
-          `Failed to ${
-            this.currentSystem === 'zatca' ? 'report' : 'submit'
-          } invoice`,
-          error
-        );
-      },
-      complete: () => {
-        this.isSubmitting = false;
-      },
-    });
+      await firstValueFrom(serviceCall);
+
+      Swal.fire(
+        'Success',
+        `Invoice ${
+          this.currentSystem === 'zatca'
+            ? 'reported to ZATCA'
+            : 'submitted to ETA'
+        } successfully`,
+        'success'
+      );
+      invoice.isValid = true;
+    } catch (error) {
+      this.handleError(
+        `Failed to ${
+          this.currentSystem === 'zatca' ? 'report' : 'submit'
+        } invoice`,
+        error
+      );
+      Swal.fire(
+        'Error',
+        `Failed to ${
+          this.currentSystem === 'zatca' ? 'report' : 'submit'
+        } invoice. Please try again.`,
+        'error'
+      );
+    } finally {
+      this.sendingInvoiceId = null;
+    }
   }
 
-  sendAll() {
+  async sendAll() {
+    // Check if no invoices are selected
     if (this.selectedInvoices.length === 0) {
-      this.selectedInvoices = this.transactions.map((t) => t.id);
-
-      if (this.selectedInvoices.length === 0) {
-        Swal.fire('Warning', 'No invoices available to send', 'warning');
-        return;
-      }
+      Swal.fire({
+        title: 'No Selection',
+        text: 'Please select at least one invoice to send',
+        icon: 'warning',
+        confirmButtonText: 'OK',
+      });
+      return;
     }
 
     this.isSubmitting = true;
 
-    const serviceCall =
-      this.currentSystem === 'zatca'
-        ? this.zatcaService.reportInvoices(
-            this.selectedSchoolId!,
-            this.selectedInvoices,
-            this.DomainName
-          )
-        : this.etaService.submitInvoices(
-            this.selectedSchoolId!,
-            this.selectedInvoices,
-            this.DomainName
-          );
+    try {
+      const serviceCall =
+        this.currentSystem === 'zatca'
+          ? this.zatcaService.reportInvoices(
+              this.selectedSchoolId!,
+              this.selectedInvoices,
+              this.DomainName
+            )
+          : this.etaService.submitInvoices(
+              this.selectedSchoolId!,
+              this.selectedInvoices,
+              this.DomainName
+            );
 
-    serviceCall.subscribe({
-      next: () => {
-        Swal.fire(
-          'Success',
-          `Invoices ${
-            this.currentSystem === 'zatca'
-              ? 'reported to ZATCA'
-              : 'submitted to ETA'
-          } successfully`,
-          'success'
-        );
-        this.transactions.forEach((t) => {
-          if (this.selectedInvoices.includes(t.id)) t.isValid = true;
-        });
-        this.selectedInvoices = [];
-      },
-      error: (error) => {
-        this.handleError(
-          `Failed to ${
-            this.currentSystem === 'zatca' ? 'report' : 'submit'
-          } invoices`,
-          error
-        );
-      },
-      complete: () => {
-        this.isSubmitting = false;
-      },
-    });
+      await firstValueFrom(serviceCall);
+
+      Swal.fire(
+        'Success',
+        `Invoices ${
+          this.currentSystem === 'zatca'
+            ? 'reported to ZATCA'
+            : 'submitted to ETA'
+        } successfully`,
+        'success'
+      );
+
+      this.transactions.forEach((t) => {
+        if (this.selectedInvoices.includes(t.id)) t.isValid = true;
+      });
+      this.selectedInvoices = [];
+    } catch (error) {
+      this.handleError(
+        `Failed to ${
+          this.currentSystem === 'zatca' ? 'report' : 'submit'
+        } invoices`,
+        error
+      );
+      Swal.fire(
+        'Error',
+        `Failed to ${
+          this.currentSystem === 'zatca' ? 'report' : 'submit'
+        } invoices. Please try again.`,
+        'error'
+      );
+    } finally {
+      this.isSubmitting = false;
+    }
   }
 
   printAll() {
@@ -320,9 +339,6 @@ export class ElectronicInvoiceComponent implements OnInit {
     console.error(message, error);
     this.isLoading = false;
     this.isSubmitting = false;
-    this.showTable = true;
-    this.transactions = [];
-    this.selectedInvoices = [];
   }
 
   get isViewReportDisabled(): boolean {
