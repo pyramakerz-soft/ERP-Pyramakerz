@@ -1,7 +1,7 @@
 // models/inventory/report-card.model.ts
 
 export interface InventoryNetSummary {
-  shopItemId: number;
+  shopItemId: string;
   storeId: number;
   toDate: string;
   inQuantity: number;
