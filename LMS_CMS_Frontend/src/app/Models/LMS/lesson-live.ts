@@ -2,6 +2,7 @@ export class LessonLive {
     constructor(
         public id: number = 0,
         public period: number = 0,
+        public name: string = '',
         public liveLink: string = '',
         public recordLink: string = '',
         public weekDayName: string = '',

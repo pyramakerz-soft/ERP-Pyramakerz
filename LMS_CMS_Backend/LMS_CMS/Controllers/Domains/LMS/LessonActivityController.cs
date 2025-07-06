@@ -73,10 +73,79 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+        [HttpGet("GetByWeekID/{SubjectId}/{WeekId}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee", "student" },
+            pages: new[] { "Lesson Activity" }
+        )]
+        public async Task<IActionResult> GetByWeekID(long SubjectId, long WeekId)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var semesterWorkingWeek = Unit_Of_Work.semesterWorkingWeek_Repository
+                .First_Or_Default(s => s.ID == WeekId && s.IsDeleted != true);
+            if (semesterWorkingWeek == null)
+                return BadRequest("No SemesterWorkingWeek with this ID");
+
+            Subject subject = Unit_Of_Work.subject_Repository.First_Or_Default(s=>s.ID == SubjectId);
+            if (subject == null)
+            {
+                return BadRequest("No subject with this ID");
+
+            }
+            var lessons = Unit_Of_Work.lesson_Repository
+                .FindBy(d => d.IsDeleted != true && d.SemesterWorkingWeekID == WeekId);
+            if (lessons == null || lessons.Count == 0)
+                return NotFound("No Lesson in this SemesterWorkingWeek");
+
+            var lessonIds = lessons.Select(s => s.ID).Distinct().ToList();
+
+            var lessonActivities = await Unit_Of_Work.lessonActivity_Repository
+                .Select_All_With_IncludesById<LessonActivity>(
+                    f => f.IsDeleted != true && lessonIds.Contains(f.LessonID),
+                    query => query.Include(emp => emp.LessonActivityType)
+                );
+
+            var lessonActivityTypes = Unit_Of_Work.lessonActivityType_Repository
+                .FindBy(s => s.IsDeleted != true);
+            if (lessonActivityTypes == null || lessonActivityTypes.Count == 0)
+                return NotFound("No LessonActivityType");
+
+            var lessonActivitiesDTO = mapper.Map<List<LessonActivityGetDTO>>(lessonActivities);
+            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+            foreach (var item in lessonActivitiesDTO)
+            {
+                if (!string.IsNullOrEmpty(item.AttachmentLink) &&
+                    item.AttachmentLink.StartsWith("Uploads", StringComparison.OrdinalIgnoreCase))
+                {
+                    item.AttachmentLink = $"{serverUrl}{item.AttachmentLink.Replace("\\", "/")}";
+                }
+            }
+
+            var lessonActivitiesTypeDTO = mapper.Map<List<LessonActivityTypeGetDTO>>(lessonActivityTypes);
+
+            // Attach Activities to their corresponding types, empty if none
+            foreach (var typeDto in lessonActivitiesTypeDTO)
+            {
+                typeDto.Activities = lessonActivitiesDTO
+                    .Where(a => a.LessonActivityTypeID == typeDto.ID)
+                    .ToList();
+            }
+
+            return Ok(new
+            {
+                subjectName = subject.en_name,
+                weekName = semesterWorkingWeek.EnglishName,
+                data = lessonActivitiesTypeDTO
+            });
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
         [HttpGet("GetById/{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Lesson Activity" }
+            pages: new[] { "Lesson Activity"}
         )]
         public async Task<IActionResult> GetById(long id)
         {

@@ -426,33 +426,102 @@ export class InvoiceReportMasterDetailedComponent implements OnInit {
   }
 
   exportExcel() {
-    const data = this.transactions.flatMap((t) =>
-      t.inventoryDetails.map((d) => ({
-        'Invoice #': t.invoiceNumber,
-        Date: new Date(t.date).toLocaleDateString(),
-        Store: t.storeName,
-        // Conditionally add Student/Supplier column
-        ...(this.reportType === 'sales'
-          ? { Student: t.studentName || 'N/A' }
-          : {}),
-        ...(this.reportType === 'purchase'
-          ? { Supplier: t.supplierName || 'N/A' }
-          : {}),
-        'Transaction Type': t.flagEnName,
-        'Total Amount': t.total,
-        'Item ID': d.shopItemID,
-        Quantity: d.quantity,
-        Price: d.price,
-        'Total Price': d.totalPrice,
-        Notes: d.notes || 'N/A',
-      }))
-    );
+    if (this.transactions.length === 0) {
+      alert('No data to export!');
+      return;
+    }
 
-    const worksheet = XLSX.utils.json_to_sheet(data);
+    // Prepare data in the same structure as shown in the UI
+    const excelData = [];
+
+    // Add headers
+    excelData.push([
+      `${this.reportType.toUpperCase()} TRANSACTION REPORT DETAILED`,
+    ]);
+    excelData.push([]); // empty row
+    excelData.push(['From Date:', this.dateFrom]);
+    excelData.push(['To Date:', this.dateTo]);
+    excelData.push(['Store:', this.getStoreName()]);
+    excelData.push([]); // empty row
+
+    // Add transaction data
+    this.transactions.forEach((transaction) => {
+      // Add invoice header
+      excelData.push([`Invoice #${transaction.invoiceNumber}`]);
+      excelData.push([
+        'Date:',
+        new Date(transaction.date).toLocaleDateString(),
+      ]);
+      excelData.push(['Store:', transaction.storeName]);
+
+      // Conditionally add Student/Supplier
+      if (this.reportType === 'sales') {
+        excelData.push(['Student:', transaction.studentName || 'N/A']);
+      }
+      if (this.reportType === 'purchase') {
+        excelData.push(['Supplier:', transaction.supplierName || 'N/A']);
+      }
+
+      excelData.push(['Transaction Type:', transaction.flagEnName]);
+      excelData.push(['Total Price:', transaction.total]);
+      excelData.push(['Notes:', transaction.notes || 'N/A']);
+      excelData.push([]); // empty row
+
+      // Add items table header
+      excelData.push([
+        'ID',
+        'Item ID',
+        'Name',
+        'Quantity',
+        'Price',
+        'Total Price',
+        'Notes',
+      ]);
+
+      // Add items
+      if (
+        transaction.inventoryDetails &&
+        transaction.inventoryDetails.length > 0
+      ) {
+        transaction.inventoryDetails.forEach((item) => {
+          excelData.push([
+            item.id,
+            item.shopItemID,
+            item.shopItemName || item.name || 'N/A',
+            item.quantity,
+            item.price,
+            item.totalPrice,
+            item.notes || 'N/A',
+          ]);
+        });
+      } else {
+        excelData.push(['No items found for this invoice']);
+      }
+
+      excelData.push([]); // empty row
+      excelData.push([]); // empty row for spacing between invoices
+    });
+
+    // Create worksheet
+    const worksheet = XLSX.utils.aoa_to_sheet(excelData);
+
+    // Apply styling through column widths
+    const colWidths = [
+      { wch: 10 }, // ID
+      { wch: 10 }, // Item ID
+      { wch: 30 }, // Name
+      { wch: 10 }, // Quantity
+      { wch: 10 }, // Price
+      { wch: 12 }, // Total Price
+      { wch: 30 }, // Notes
+    ];
+    worksheet['!cols'] = colWidths;
+
+    // Create workbook and save
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Transaction Details');
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Transactions');
 
     const dateStr = new Date().toISOString().slice(0, 10);
-    XLSX.writeFile(workbook, `Inventory_Transaction_Details_${dateStr}.xlsx`);
+    XLSX.writeFile(workbook, `${this.reportType}_Transactions_${dateStr}.xlsx`);
   }
 }

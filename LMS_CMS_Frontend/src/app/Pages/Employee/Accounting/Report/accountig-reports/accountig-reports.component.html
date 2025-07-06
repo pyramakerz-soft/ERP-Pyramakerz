@@ -1,0 +1,230 @@
+<div class="flex justify-between mb-3">
+    <h1 class="font-semibold text-2xl leading-9">{{ type }}</h1>
+</div>
+
+<div class="flex justify-start items-center space-x-4">
+    <div class="w-[30%]">
+        <label for="fromDate" class="block mb-2 text-sm font-medium text-gray-900">Start Date</label>
+        <input id="fromDate" type="date" [(ngModel)]="SelectedStartDate" (change)="DateChange()"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"> 
+    </div> 
+    <div class="w-[30%]">
+        <label for="toDate" class="block mb-2 text-sm font-medium text-gray-900">End Date</label>
+        <input id="toDate" type="date" [(ngModel)]="SelectedEndDate" (change)="DateChange()"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"> 
+    </div> 
+
+    <div class="mt-7 ml-2">
+        <button class="p-3 font-medium text-xl rounded-lg" (click)="ViewReport()"
+            [disabled]="!showViewReportBtn"
+            [ngClass]="{ 'bg-gray-100 text-gray-300': !showViewReportBtn, 'secondaryBg text-white': showViewReportBtn}">
+            View Report
+        </button>
+    </div>
+</div>
+  
+<div *ngIf="showTable" class="mt-5 flex justify-end space-x-4">
+    <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="DownloadAsExcel()">
+    <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()">
+    <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()">
+</div>
+
+<div *ngIf="showTable" class="mt-5">
+    <div *ngIf="tableData.length == 0" class="w-full justify-center items-center flex">
+        <span
+            class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+            No Data Found
+        </span>
+    </div>
+    <div *ngFor="let data of tableData; let i = index" class="border rounded-lg mb-4">
+         <div class="flex rounded-lg justify-between items-center cursor-pointer px-4 py-3 bg-[#394b6e3a]" (click)="toggleCollapse(i)">
+            <h3 class="text-lg font-semibold">{{type}} Invoice {{ data.id || 'Document ' + (i + 1) }} </h3>
+            <i class="fa" [ngClass]="{
+                'fa-chevron-down': !collapsedItems.has(i),
+                'fa-chevron-up': collapsedItems.has(i) }">
+            </i>
+        </div>
+         <div *ngIf="collapsedItems.has(i)" class="p-4 bg-white">
+             <div class="flex justify-between">
+                <div *ngIf="type != 'Installment Deduction'" class="flex flex-col w-[22%]">
+                    <label class="mb-2 primaryTxt font-medium" [for]="'docType' + i">Doc Type</label> 
+                    <input [id]="'docType' + i" type="text"
+                        class="rounded-lg border border-solid border-gray-300 px-4 py-3 text-lg" disabled 
+                        [value]="data.payableDocTypesName || data.receivableDocTypesName || data.accountingEntriesDocTypeName" />
+                </div>
+                <div class="flex flex-col w-[22%]">
+                    <label class="mb-2 primaryTxt font-medium" [for]="'docNumber' + i">Doc Number</label>
+                    <input [id]="'docNumber' + i" type="text"
+                        class="rounded-lg border border-solid border-gray-300 px-4 py-3 text-lg" disabled 
+                        [(ngModel)]="data.docNumber" />
+                </div>
+                <div class="flex flex-col w-[22%]">
+                        <label class="mb-2 primaryTxt font-medium" [for]="'date' + i">Date</label>
+                        <input [id]="'date' + i" type="date"
+                            class="rounded-lg border border-solid border-gray-300 px-4 py-3 text-lg"
+                            [(ngModel)]="data.date" disabled/> 
+                </div> 
+                <div *ngIf="type == 'Installment Deduction'" class="flex flex-col w-[22%]">
+                        <label class="mb-2 primaryTxt font-medium" [for]="'employeeName' + i">Employee Name</label>
+                        <input [id]="'employeeName' + i" type="text"
+                            class="rounded-lg border border-solid border-gray-300 px-4 py-3 text-lg"
+                            [(ngModel)]="data.employeeName" disabled/> 
+                </div> 
+                <div *ngIf="type == 'Installment Deduction'" class="flex flex-col w-[22%]">
+                        <label class="mb-2 primaryTxt font-medium" [for]="'studentName' + i">Student Name</label>
+                        <input [id]="'studentName' + i" type="text"
+                            class="rounded-lg border border-solid border-gray-300 px-4 py-3 text-lg"
+                            [(ngModel)]="data.studentName" disabled/> 
+                </div> 
+                <div *ngIf="type != 'Installment Deduction' && type != 'Accounting Entries'"  class="flex flex-col w-[22%]">
+                    <div class="mb-2 flex justify-evenly">
+                        <div class="flex space-x-2 items-center">
+                            <input type="radio" disabled [id]="'save' + i" class="square-radio" [name]="'linkFile' + i"
+                                [(ngModel)]="data.linkFileID" 
+                                [value]="5" />
+                            <label [for]="'save' + i" class="ml-2 font-medium">Safe</label>
+                        </div>
+    
+                        <div class="flex space-x-2 items-center">
+                            <input type="radio" disabled [id]="'bank' + i" class="square-radio" [name]="'linkFile' + i"
+                                [(ngModel)]="data.linkFileID" 
+                                [value]="6" />
+                            <label [for]="'bank' + i" class="ml-2 font-medium">Bank</label>
+                        </div> 
+                    </div>
+                    <input [id]="'bankOrSave' + i" type="text"
+                            class="rounded-lg border border-solid border-gray-300 px-4 py-3 text-lg"
+                            [(ngModel)]="data.bankOrSaveName" disabled/>  
+                </div>
+             </div> 
+             <div class="mt-5 flex flex-col">
+                 <label class="mb-2 primaryTxt font-medium" [for]="'notes' + i">Notes</label>
+                 <textarea [id]="'notes' + i" class="w-full rounded-lg border border-solid border-gray-300 px-4 py-3"
+                     disabled [(ngModel)]="data.notes">
+                 </textarea>
+             </div>
+     
+             <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
+                 <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
+                     <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+                         <tr>
+                             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                ID
+                             </th>
+                             <th *ngIf="type != 'Accounting Entries'"  class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                Amount
+                             </th>
+                             <th  *ngIf="type != 'Installment Deduction' && type != 'Accounting Entries'" class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                Link File
+                             </th>
+                             <th  *ngIf="type != 'Installment Deduction' && type != 'Accounting Entries'" class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                Link File Type
+                             </th>
+                             <th  *ngIf="type == 'Installment Deduction'" class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                Date
+                             </th>
+                             <th  *ngIf="type == 'Installment Deduction'" class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                Fee Type
+                             </th> 
+                             <th  *ngIf="type == 'Accounting Entries'" class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                Credit Amount
+                             </th>
+                             <th  *ngIf="type == 'Accounting Entries'" class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                Debit Amount
+                             </th> 
+                             <th  *ngIf="type == 'Accounting Entries'" class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                Accounting Tree Chart
+                             </th>
+                             <th  *ngIf="type == 'Accounting Entries'" class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                Sub Accounting
+                             </th> 
+                         </tr>
+                     </thead>
+                     <tbody>
+                         <tr *ngIf="getDetails(data).length === 0">
+                             <td [attr.colspan]="type === 'Accounting Entries' ? 6 : 4"
+                                 class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                                 No Data Found
+                             </td>
+                         </tr>
+                         <tr *ngFor="let detail of getDetails(data); let i = index" [ngClass]="{ 'bg-gray-100': i % 2 === 1, 'bg-white': i%2 !=1 }" 
+                         class="border-t border-gray-300 text-xs md:text-sm">
+                             <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                 {{ detail.id }}
+                             </td>
+                             <td *ngIf="type != 'Accounting Entries'" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                 {{ detail.amount }}
+                             </td> 
+                             <td *ngIf="type != 'Installment Deduction' && type != 'Accounting Entries'" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                 {{ detail.linkFileName }}
+                             </td> 
+                             <td *ngIf="type != 'Installment Deduction' && type != 'Accounting Entries'" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                 {{ detail.linkFileTypeName }}
+                             </td>   
+                             <td *ngIf="type == 'Installment Deduction'" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                 {{ detail.date }}
+                             </td> 
+                             <td *ngIf="type == 'Installment Deduction'" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                 {{ detail.feeTypeName }}
+                             </td>   
+                             <td *ngIf="type == 'Accounting Entries'" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                 {{ detail.creditAmount }}
+                             </td> 
+                             <td *ngIf="type == 'Accounting Entries'" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                 {{ detail.debitAmount }}
+                             </td>   
+                             <td *ngIf="type == 'Accounting Entries'" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                 {{ detail.accountingTreeChartName }}
+                             </td> 
+                             <td *ngIf="type == 'Accounting Entries'" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                 {{ detail.subAccountingName }}
+                             </td>   
+                         </tr>
+                     </tbody>
+                 </table>
+             </div> 
+         </div>
+    </div> 
+ 
+</div> 
+
+<div *ngIf="showTable" class="mt-8 flex justify-between items-center">
+    <div class="flex items-center space-x-4">
+        <button class="flex items-center space-x-2 rounded-lg border py-3 px-4"
+            (click)="changeCurrentPage(CurrentPage-1)" [disabled]="CurrentPage === 1 || tableData.length == 0"
+            [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === 1 || tableData.length == 0}">
+            <i class="fa-solid fa-arrow-left"></i>
+            <p>Previous</p>
+        </button>
+        <div class="flex">
+            <div *ngFor="let page of [].constructor(TotalPages); let i = index" class="rounded-lg py-[10px] w-[40px]"
+                [ngClass]="{'border': i+1 == CurrentPage || tableData.length == 0}" (click)="changeCurrentPage(i+1)">
+                <p class="text-center">{{ i + 1 }}</p>
+            </div>
+        </div>
+        <button class="flex items-center space-x-2 rounded-lg border py-3 px-4"
+            (click)="changeCurrentPage(CurrentPage+1)" [disabled]="CurrentPage === TotalPages || tableData.length == 0"
+            [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === TotalPages || tableData.length == 0}">
+            <p>Next</p>
+            <i class="fa-solid fa-arrow-right"></i>
+        </button>
+    </div>
+
+    <div class="flex items-center space-x-2">
+        <input (input)="validateNumberForPagination($event)" class="rounded-lg border py-3 px-4 w-[73px]" [(ngModel)]="PageSize"
+            min="1" (input)="validatePageSize($event)" (ngModelChange)="changeCurrentPage(CurrentPage)">
+        <p>items Per Page</p>
+    </div>
+
+    <div>
+        <p>{{CurrentPage}} of {{TotalPages}} pages ({{TotalRecords}} Item)</p>
+    </div>
+</div>
+ 
+<div class="absolute -top-[9999px] -left-[9999px]">
+    <div id="Data" class="hidden">
+        <app-pdf-print *ngIf="showPDF" [fileName]="fileName"
+            [infoRows]="getInfoRows()" [tableDataWithHeaderArray]="getTableDataWithHeader()" #pdfComponentRef>
+        </app-pdf-print>
+    </div>
+</div>

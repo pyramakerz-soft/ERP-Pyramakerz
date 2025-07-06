@@ -95,7 +95,6 @@ export class DailyPerformanceComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     private router: Router,
     private SchoolServ: SchoolService,
-    private academicYearServ: AcadimicYearService,
     private studentServ: StudentService,
     private GradeServ: GradeService,
     private ClassroomServ: ClassroomService,
@@ -182,9 +181,6 @@ export class DailyPerformanceComponent {
     this.GradeServ.GetBySchoolId(this.SelectedSchoolId, this.DomainName).subscribe((d) => {
       this.Grades = d
     })
-  }
-
-  saveSelection() {
   }
 
   getAllClassByGradeId() {

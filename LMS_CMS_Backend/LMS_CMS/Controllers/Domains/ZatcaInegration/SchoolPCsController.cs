@@ -103,7 +103,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
         #endregion
 
         #region Get By School Id
-        [HttpGet("GetBySchoolId")]
+        [HttpGet("GetBySchoolId/{schoolId}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Zatca Devices", "Inventory" }
@@ -188,7 +188,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
         #endregion
 
         #region Update PC
-        [HttpPut("Edit")]
+        [HttpPut]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Zatca Devices" }
@@ -251,7 +251,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
         #endregion
 
         #region Delete PC
-        [HttpDelete]
+        [HttpDelete("{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Zatca Devices" }

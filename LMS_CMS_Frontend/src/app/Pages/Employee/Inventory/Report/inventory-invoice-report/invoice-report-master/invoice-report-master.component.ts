@@ -11,7 +11,7 @@ import { PdfPrintComponent } from '../../../../../../Component/pdf-print/pdf-pri
 import { InventoryCategoryService } from '../../../../../../Services/Employee/Inventory/inventory-category.service';
 import { InventorySubCategoriesService } from '../../../../../../Services/Employee/Inventory/inventory-sub-categories.service';
 import { ShopItemService } from '../../../../../../Services/Employee/Inventory/shop-item.service';
-
+import Swal from 'sweetalert2';
 
 interface FlagOption {
   id: number;
@@ -56,16 +56,18 @@ export class InventoryTransactionReportComponent implements OnInit {
       },
     }));
   }
+
   dateFrom: string = '';
   dateTo: string = '';
   selectedStoreId: number | null = null;
   stores: Store[] = [];
   transactions: InventoryMaster[] = [];
   showTable: boolean = false;
+  showViewReportBtn: boolean = false;
   isLoading: boolean = false;
   reportType: string = '';
-  selectedFlagId: number = -1; // single selected id
-  selectedFlagIds: number[] = []; // array to send to backend
+  selectedFlagId: number = -1;
+  selectedFlagIds: number[] = [];
 
   @ViewChild(PdfPrintComponent) pdfPrintComponent!: PdfPrintComponent;
 
@@ -93,9 +95,9 @@ export class InventoryTransactionReportComponent implements OnInit {
       { keyEn: 'From Date: ' + this.dateFrom },
       { keyEn: 'To Date: ' + this.dateTo },
       { keyEn: 'Store: ' + this.getStoreName() },
-      // { keyEn: 'Transaction Types: ' + this.getSelectedFlagNames() }
     ];
   }
+
   availableFlags: { [key: string]: FlagOption[] } = {
     inventory: [
       { id: 1, name: 'Opening Balances' },
@@ -130,6 +132,7 @@ export class InventoryTransactionReportComponent implements OnInit {
   categories: any[] = [];
   subCategories: any[] = [];
   items: any[] = [];
+
   constructor(
     private route: ActivatedRoute,
     private inventoryMasterService: InventoryMasterService,
@@ -143,12 +146,16 @@ export class InventoryTransactionReportComponent implements OnInit {
     this.route.data.subscribe((data) => {
       this.reportType = data['reportType'];
       this.currentFlags = this.availableFlags[this.reportType];
-      this.selectedFlagIds = this.currentFlags.map((flag) => flag.id);
+      this.selectedFlagIds = this.getAllFlagsForReportType(); // Default to all flags
     });
     this.loadStores();
     this.loadCategories();
-    this.selectedStoreId = null; // Initialize with null for "Select All"
+    this.selectedStoreId = null; // Default to "Select All" for store
+    this.selectedCategoryId = null; // Default to "Select All" for category
+    this.selectedSubCategoryId = null; // Default to "Select All" for subcategory
+    this.selectedItemId = null; // Default to "Select All" for item
   }
+
   loadCategories() {
     this.categoryService
       .Get(this.categoryService.ApiServ.GetHeader())
@@ -208,8 +215,6 @@ export class InventoryTransactionReportComponent implements OnInit {
     }
   }
 
-  // selectedFlagId: number = 0;
-
   onFlagSelected() {
     this.selectedFlagIds = [];
     if (this.selectedFlagId == -1) {
@@ -217,6 +222,7 @@ export class InventoryTransactionReportComponent implements OnInit {
     } else {
       this.selectedFlagIds = [this.selectedFlagId];
     }
+    this.onFilterChange();
   }
 
   getAllFlagsForReportType(): number[] {
@@ -232,28 +238,11 @@ export class InventoryTransactionReportComponent implements OnInit {
     return [];
   }
 
-  //  onFlagsChange() {
-
-  //   if (this.selectedFlagIds.includes(0) && !this.selectedFlagIds.includes(0)) {
-
-  //     this.selectedFlagIds = [0, ...this.currentFlags.map(flag => flag.id)];
-  //   }
-
-  //   else if (!this.selectedFlagIds.includes(0) && this.selectedFlagIds.includes(0)) {
-
-  //     this.selectedFlagIds = [];
-  //   }
-
-  //   else if (this.selectedFlagIds.length === this.currentFlags.length && !this.selectedFlagIds.includes(0)) {
-
-  //     this.selectedFlagIds = [0, ...this.selectedFlagIds];
-  //   }
-
-  //   else if (this.selectedFlagIds.includes(0) && this.selectedFlagIds.length < this.currentFlags.length + 1) {
-
-  //     this.selectedFlagIds = this.selectedFlagIds.filter(id => id !== 0);
-  //   }
-  // }
+  onFilterChange() {
+    this.showTable = false;
+    this.showViewReportBtn = this.dateFrom !== '' && this.dateTo !== '';
+    this.transactions = [];
+  }
 
   loadStores() {
     this.isLoading = true;
@@ -270,7 +259,15 @@ export class InventoryTransactionReportComponent implements OnInit {
   }
 
   viewReport() {
-    if (!this.validateFilters()) return;
+    if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
+      Swal.fire({
+        title: 'Invalid Date Range',
+        text: 'Start date cannot be later than end date.',
+        icon: 'warning',
+        confirmButtonText: 'OK',
+      });
+      return;
+    }
 
     this.isLoading = true;
     this.showTable = false;
@@ -281,10 +278,10 @@ export class InventoryTransactionReportComponent implements OnInit {
     this.inventoryMasterService
       .searchInvoice(
         this.inventoryMasterService.ApiServ.GetHeader(),
-        this.selectedStoreId,
+        this.selectedStoreId, // Can be null for "Select All"
         formattedDateFrom,
         formattedDateTo,
-        this.selectedFlagIds,
+        this.selectedFlagIds, // Already contains all flags by default
         this.selectedCategoryId,
         this.selectedSubCategoryId,
         this.selectedItemId,
@@ -293,7 +290,6 @@ export class InventoryTransactionReportComponent implements OnInit {
       )
       .subscribe({
         next: (response: any) => {
-          console.log(response)
           if (response?.data) {
             this.transactions = response.data;
             this.totalRecords =
@@ -342,20 +338,10 @@ export class InventoryTransactionReportComponent implements OnInit {
       return '';
     }
 
-    // Format as DD/MM/YYYY (what backend expects)
     const day = date.getDate().toString().padStart(2, '0');
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const year = date.getFullYear();
     return `${day}/${month}/${year}`;
-  }
-
-  private validateFilters(): boolean {
-    return (
-      !!this.dateFrom &&
-      !!this.dateTo &&
-      this.selectedStoreId !== undefined && // Changed from null to undefined check
-      this.selectedFlagIds.length > 0
-    );
   }
 
   changePage(page: number) {
@@ -365,7 +351,7 @@ export class InventoryTransactionReportComponent implements OnInit {
 
   DownloadAsPDF() {
     if (this.transactionsForExport.length === 0) {
-      alert('No data to export!');
+      Swal.fire('Warning', 'No data to export!', 'warning');
       return;
     }
 
@@ -378,7 +364,7 @@ export class InventoryTransactionReportComponent implements OnInit {
 
   Print() {
     if (this.transactionsForExport.length === 0) {
-      alert('No data to print!');
+      Swal.fire('Warning', 'No data to print!', 'warning');
       return;
     }
 
@@ -430,58 +416,6 @@ export class InventoryTransactionReportComponent implements OnInit {
       .filter((flag) => this.selectedFlagIds.includes(flag.id))
       .map((flag) => flag.name)
       .join(', ');
-  }
-
-  printReport() {
-    const data = {
-      reportHeaderOneEn: 'Inventory Report',
-      reportHeaderTwoEn: 'Transaction Summary',
-      reportHeaderOneAr: 'تقرير المخزون',
-      reportHeaderTwoAr: 'ملخص المعاملات',
-      reportImage: '', // Update with your logo
-    };
-
-    const tableHeaders = [
-      'ID',
-      'Invoice #',
-      'Date',
-      'Store',
-      'Transaction Type',
-      'Total Amount',
-      'Notes',
-    ];
-
-    const tableData = this.transactions.map((t) => ({
-      ID: t.id,
-      'Invoice #': t.invoiceNumber,
-      Date: t.date,
-      Store: t.storeName,
-      'Transaction Type': t.flagEnName,
-      'Total Amount': t.total,
-      Notes: t.notes,
-    }));
-
-    const infoRows = [
-      { keyEn: 'From Date', valueEn: this.dateFrom },
-      { keyEn: 'To Date', valueEn: this.dateTo },
-      {
-        keyEn: 'Store',
-        valueEn:
-          this.stores.find((s) => s.id === this.selectedStoreId)?.name ||
-          'All Stores',
-      },
-    ];
-
-    const pdfComponent = new PdfPrintComponent();
-    pdfComponent.school = data;
-    pdfComponent.Title = `${this.reportType} Transaction Report`;
-    pdfComponent.tableHeaders = tableHeaders;
-    pdfComponent.tableData = tableData;
-    pdfComponent.infoRows = infoRows;
-
-    setTimeout(() => {
-      pdfComponent.print();
-    });
   }
 
   exportExcel() {

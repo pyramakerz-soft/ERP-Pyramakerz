@@ -1,0 +1,23 @@
+<div class="flex justify-start items-center space-x-5">
+    <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToBack()"></i>
+    <h1 class="primaryTxt font-semibold text-2xl leading-9">{{SubjectName}} Lesson Live</h1>
+</div>
+
+<div class="flex flex-wrap justify-start mt-6 gap-6">
+    <div *ngFor="let live of LessonLivesData; let i = index"
+        class="w-[33%] rounded-2xl shadow text-center flex flex-col space-x-2 p-3 "
+        [ngStyle]="{ 'background-color': getRandomColor(i) }">
+        <div class="flex justify-start items-center space-x-3 mb-3">
+            <img src="Icons/Live.png" />
+            <h1 class="text-lg font-bold text-[#004279] ">live</h1>
+        </div>
+        <div class="flex justify-start items-center space-x-2 text-[#6F6F6F] cursor-pointer" (click)="openLink(live.liveLink)">
+            <i class="fa-solid fa-link"></i>
+            <p class="text-lg font-bold text-[#6F6F6F] ">Live Link</p>
+        </div>
+        <div class="flex justify-start items-center space-x-2 text-[#6F6F6F] cursor-pointer" (click)="openLink(live.recordLink)">
+            <i class="fa-solid fa-record-vinyl"></i>
+            <p class="text-lg font-bold text-[#6F6F6F] ">Record Link</p>
+        </div>
+    </div>
+</div>

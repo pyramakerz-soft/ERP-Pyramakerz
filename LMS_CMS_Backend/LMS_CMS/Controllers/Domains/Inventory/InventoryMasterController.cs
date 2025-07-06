@@ -422,7 +422,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
             InventoryMasterGetDTO DTO = mapper.Map<InventoryMasterGetDTO>(Data);
             string serverUrl = $"{Request.Scheme}://{Request.Host}/Uploads/Master";
-            //subject.IconLink = $"{serverUrl}{subject.IconLink.Replace("\\", "/")}";
             if (Data.Attachments != null)
             {
                 DTO.Attachments = Data.Attachments.Select(filePath =>
@@ -744,7 +743,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
             if (Master.ETAPOSID == null || Master.ETAPOSID == 0)
             {
-                Master.InvoiceType = 'B';
+                Master.InvoiceType = 'P';
             }
 
             Master.uuid = Guid.NewGuid().ToString();

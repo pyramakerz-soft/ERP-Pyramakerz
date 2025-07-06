@@ -148,4 +148,24 @@ export class InventoryDetailsService {
       { headers }
     );
   }
+
+  getMovingAverageCost(
+    fromDate: string,
+    toDate: string,
+    DomainName: string
+  ): Observable<any> {
+    if (DomainName != null) {
+      this.header = DomainName;
+    }
+    const token = localStorage.getItem('current_token');
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+
+    return this.http.get<any>(
+      `${this.baseUrl}/InventoryDetails/CalculateMovingAverageCost?fromDate=${fromDate}&toDate=${toDate}`,
+      { headers }
+    );
+  }
 }

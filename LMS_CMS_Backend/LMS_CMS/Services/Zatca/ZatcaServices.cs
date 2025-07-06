@@ -1,17 +1,17 @@
-﻿using System.Text;
-using Newtonsoft.Json;
-using System.Net.Http.Headers;
-using System.Xml;
-using System.Security.Cryptography.Xml;
-using System.Security.Cryptography;
-using LMS_CMS_DAL.Models.Domains.Inventory;
-using System.Diagnostics;
-using Newtonsoft.Json.Linq;
-using Zatca.EInvoice.SDK.Contracts.Models;
-using Zatca.EInvoice.SDK;
-using System.Security.Cryptography.X509Certificates;
+﻿using LMS_CMS_DAL.Models.Domains.Inventory;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Diagnostics;
 using System.Drawing;
+using System.Net.Http.Headers;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using System.Security.Cryptography.Xml;
+using System.Text;
+using System.Xml;
+using Zatca.EInvoice.SDK;
+using Zatca.EInvoice.SDK.Contracts.Models;
 using ZXing.Windows.Compatibility;
 
 namespace LMS_CMS_PL.Services.Zatca
@@ -184,6 +184,7 @@ namespace LMS_CMS_PL.Services.Zatca
         {
 
             string examplePath = Path.Combine(Directory.GetCurrentDirectory(), "Services/Zatca/Invoice");
+            string certificates = Path.Combine(Directory.GetCurrentDirectory(), "Invoices/Certificates");
 
             if (!Directory.Exists(xmalPath))
             {
@@ -297,9 +298,9 @@ namespace LMS_CMS_PL.Services.Zatca
 
                 // TaxTotal
                 XmlElement taxTotal = inv.CreateElement("cac", "TaxTotal", nsMgr.LookupNamespace("cac"));
-                XmlElement taxAmount = AppendElementWithText(inv, taxTotal, "cbc", "TaxAmount", (itemDetail.TotalPrice * master.VatPercent).ToString(), nsMgr);
+                XmlElement taxAmount = AppendElementWithText(inv, taxTotal, "cbc", "TaxAmount", (itemDetail.TotalPrice * master.VatPercent)?.ToString("F2"), nsMgr);
                 taxAmount.SetAttribute("currencyID", "SAR");
-                XmlElement roundingAmount = AppendElementWithText(inv, taxTotal, "cbc", "RoundingAmount", itemTotalPriceWithVat.ToString(), nsMgr);
+                XmlElement roundingAmount = AppendElementWithText(inv, taxTotal, "cbc", "RoundingAmount", itemTotalPriceWithVat.ToString("F2"), nsMgr);
                 roundingAmount.SetAttribute("currencyID", "SAR");
                 invoiceLine.AppendChild(taxTotal);
 
@@ -324,7 +325,7 @@ namespace LMS_CMS_PL.Services.Zatca
                 priceAmount.SetAttribute("currencyID", "SAR");
 
                 XmlElement allowanceCharge = inv.CreateElement("cac", "AllowanceCharge", nsMgr.LookupNamespace("cac"));
-                AppendElementWithText(inv, allowanceCharge, "cbc", "ChargeIndicator", "true", nsMgr);
+                AppendElementWithText(inv, allowanceCharge, "cbc", "ChargeIndicator", "false", nsMgr);
                 AppendElementWithText(inv, allowanceCharge, "cbc", "AllowanceChargeReason", "discount", nsMgr);
                 XmlElement amount = AppendElementWithText(inv, allowanceCharge, "cbc", "Amount", "0.00", nsMgr);
                 amount.SetAttribute("currencyID", "SAR");
@@ -379,7 +380,11 @@ namespace LMS_CMS_PL.Services.Zatca
 
             SaveFormatted(inv, newXmlPath);
 
-            string certContent = await s3.GetSecret($"{pcName}PCSID");
+            string pcName2 = $"PC{master.SchoolPCId}_{master.SchoolId}";
+
+            string certPath = Path.Combine(certificates, $"{pcName2}_PCSID.json");
+            string certContent = File.ReadAllText(certPath);
+            //string certContent = await s3.GetSecret($"{pcName}PCSID");
 
             dynamic certObject = JsonConvert.DeserializeObject(certContent);
             string base64Cert = certObject.binarySecurityToken;
@@ -387,7 +392,10 @@ namespace LMS_CMS_PL.Services.Zatca
             byte[] certBytes = Convert.FromBase64String(base64Cert);
             string certDecoded = Encoding.UTF8.GetString(certBytes);
 
-            string privateKeyContent = await s3.GetSecret($"{pcName}PrivateKey");
+            //string privateKeyContent = await s3.GetSecret($"{pcName}PrivateKey");
+            string privateKeyPath = Path.Combine(certificates, $"{pcName2}_PrivateKey.pem");
+
+            string privateKeyContent = File.ReadAllText(privateKeyPath);
 
             privateKeyContent = privateKeyContent
                 .Replace("-----BEGIN EC PRIVATE KEY-----", "")

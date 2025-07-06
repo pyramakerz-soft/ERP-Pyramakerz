@@ -13,6 +13,7 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         [Key]
         public long ID { get; set; }
         public int Period { get; set; }
+        public string Name { get; set; }
         public string LiveLink { get; set; }
         public string? RecordLink { get; set; }
 

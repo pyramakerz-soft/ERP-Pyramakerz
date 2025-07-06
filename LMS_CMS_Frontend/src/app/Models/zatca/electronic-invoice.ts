@@ -33,6 +33,7 @@ export interface ElectronicInvoice {
   flagEnName?: string;
   student?: string;
   studentAddress?: string;
+  
   inventoryDetails?: {
     id: number;
     price: number;

@@ -529,8 +529,8 @@ namespace LMS_CMS_BL.Config
             CreateMap<LinkFile, LinkFileGetDTO>();
 
             CreateMap<EmployeeStudent, EmployeeStudentGetDTO>()
-                .ForMember(dest => dest.EmployeeName, opt => opt.MapFrom(src => src.employee.User_Name))
-                .ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => src.Student.User_Name));
+                .ForMember(dest => dest.EmployeeName, opt => opt.MapFrom(src => src.employee.en_name))
+                .ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => src.Student.en_name));
             CreateMap<EmployeeStudentAddDTO, EmployeeStudent>();
 
             CreateMap<ReceivableDocType, ReceivableDocTypeGetDTO>();
@@ -538,8 +538,9 @@ namespace LMS_CMS_BL.Config
             CreateMap<ReceivableDocTypeAddDTO, ReceivableDocType>();
  
             CreateMap<FeesActivation, FeesActivationGetDTO>()
+                .ForMember(dest => dest.FeeActivationID, opt => opt.MapFrom(src => src.ID))
                 .ForMember(dest => dest.FeeTypeName, opt => opt.MapFrom(src => src.TuitionFeesType.Name))
-                .ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => src.Student.User_Name))
+                .ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => src.Student.en_name))
                 .ForMember(dest => dest.AcademicYearName, opt => opt.MapFrom(src => src.AcademicYear.Name))
                 .ForMember(dest => dest.FeeDiscountTypeName, opt => opt.MapFrom(src => src.TuitionDiscountType.Name));
             CreateMap<FeesActivationAdddDTO, FeesActivation>();
@@ -547,8 +548,8 @@ namespace LMS_CMS_BL.Config
 
 
             CreateMap<InstallmentDeductionMaster, InstallmentDeductionMasterGetDTO>()
-                .ForMember(dest => dest.EmployeeName, opt => opt.MapFrom(src => src.Employee.User_Name))
-                .ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => src.Student.User_Name));
+                .ForMember(dest => dest.EmployeeName, opt => opt.MapFrom(src => src.Employee.en_name))
+                .ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => src.Student.en_name));
             CreateMap<InstallmentDeductionMasterGetDTO, InstallmentDeductionMaster>();
             CreateMap<InstallmentDeductionMasterAddDTO, InstallmentDeductionMaster>();
 
@@ -650,7 +651,7 @@ namespace LMS_CMS_BL.Config
                  .ForMember(dest => dest.FlagValue, opt => opt.MapFrom(src => src.InventoryFlags.FlagValue))
                  .ForMember(dest => dest.ItemInOut, opt => opt.MapFrom(src => src.InventoryFlags.ItemInOut ))
                  .ForMember(dest => dest.StoreName, opt => opt.MapFrom(src => src.Store != null ? src.Store.Name : null))
-                 .ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => src.Student != null ? src.Student.User_Name : null))
+                 .ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => src.Student != null ? src.Student.en_name : null))
                  .ForMember(dest => dest.SupplierName, opt => opt.MapFrom(src => src.Supplier != null ? src.Supplier.Name : null))
                  .ForMember(dest => dest.QrImage, opt => opt.MapFrom(src => Convert.ToBase64String(src.QrImage)));
 

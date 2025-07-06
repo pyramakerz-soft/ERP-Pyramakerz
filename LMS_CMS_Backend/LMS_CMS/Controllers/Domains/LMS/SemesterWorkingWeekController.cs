@@ -89,9 +89,63 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         ////////////////////////////////////////////////////
 
+        [HttpGet("GetBySubjectID/{Subjectid}/{StudentId}")]
+        [Authorize_Endpoint_(
+              allowedTypes: new[] { "octa", "employee", "student" },
+              pages: new[] { "Working Weeks" }
+         )]
+        public async Task<IActionResult> GetBySubjectID(long Subjectid, long StudentId)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var subject = Unit_Of_Work.subject_Repository.First_Or_Default(s => s.ID == Subjectid && s.IsDeleted != true);
+            if (subject == null)
+            {
+                return BadRequest("There is no subject with this ID.");
+            }
+
+            var studentGrade = Unit_Of_Work.studentGrade_Repository.First_Or_Default(s =>
+                s.GradeID == subject.GradeID &&
+                s.StudentID == StudentId &&
+                s.IsDeleted != true &&
+                s.AcademicYear.IsActive == true &&
+                s.AcademicYear.IsDeleted != true);
+
+            if (studentGrade == null)
+            {
+                return BadRequest("This student does not exist in the current academic year.");
+            }
+
+            var semester = Unit_Of_Work.semester_Repository.First_Or_Default(s =>
+                s.AcademicYearID == studentGrade.AcademicYearID &&
+                s.IsCurrent == true);
+
+            if (semester == null)
+            {
+                return BadRequest("There is no current semester for this academic year.");
+            }
+
+            var semesterWorkingWeek = Unit_Of_Work.semesterWorkingWeek_Repository
+                .FindBy(f => f.IsDeleted != true && f.SemesterID == semester.ID);
+
+            if (semesterWorkingWeek == null || !semesterWorkingWeek.Any())
+            {
+                return NotFound();
+            }
+
+            var semesterWorkingWeekDTO = mapper.Map<List<SemesterWorkingWeekGetDTO>>(semesterWorkingWeek);
+
+            return Ok(new
+            {
+                subjectName = subject.en_name,
+                weeks = semesterWorkingWeekDTO
+            });
+        }
+        ////////////////////////////////////////////////////
+
         [HttpPost("GenerateWeeks/{semesterId}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
+            allowedTypes: new[] { "octa", "employee"  },
             pages: new[] { "Working Weeks" }
         )]
         public async Task<IActionResult> GenerateAsync(long semesterId)
