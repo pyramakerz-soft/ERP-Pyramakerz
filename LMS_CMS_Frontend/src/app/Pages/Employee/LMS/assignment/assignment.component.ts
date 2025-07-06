@@ -230,7 +230,7 @@ export class AssignmentComponent {
   }
 
   View(id: number) {
-    this.router.navigateByUrl(`Employee/Assignment/${id}`)
+    this.router.navigateByUrl(`Employee/Assignment View/${id}`)
   }
 
   validateNumberForPagination(event: any): void {

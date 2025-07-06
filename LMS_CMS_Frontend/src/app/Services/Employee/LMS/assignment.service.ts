@@ -13,8 +13,8 @@ export class AssignmentService {
   constructor(public http: HttpClient, public ApiServ: ApiService) {
     this.baseUrl = ApiServ.BaseUrl
   }
- 
-  Get(DomainName: string, pageNumber:number, pageSize:number) {
+
+  Get(DomainName: string, pageNumber: number, pageSize: number) {
     if (DomainName != null) {
       this.header = DomainName
     }
@@ -23,10 +23,10 @@ export class AssignmentService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-      return this.http.get<{ data: Assignment[], pagination: any }>(`${this.baseUrl}/Assignment?pageNumber=${pageNumber}&pageSize=${pageSize}`, { headers });
+    return this.http.get<{ data: Assignment[], pagination: any }>(`${this.baseUrl}/Assignment?pageNumber=${pageNumber}&pageSize=${pageSize}`, { headers });
   }
 
-  GetBySubjectID(subjectID:number, DomainName: string, pageNumber:number, pageSize:number) {
+  GetBySubjectID(subjectID: number, DomainName: string, pageNumber: number, pageSize: number) {
     if (DomainName != null) {
       this.header = DomainName
     }
@@ -35,12 +35,12 @@ export class AssignmentService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-      return this.http.get<{ data: Assignment[], pagination: any }>(`${this.baseUrl}/Assignment/GetBySubjectID/${subjectID}?pageNumber=${pageNumber}&pageSize=${pageSize}`, { headers });
+    return this.http.get<{ data: Assignment[], pagination: any }>(`${this.baseUrl}/Assignment/GetBySubjectID/${subjectID}?pageNumber=${pageNumber}&pageSize=${pageSize}`, { headers });
   }
 
-  GetByID(id: number,DomainName:string) {
-    if(DomainName!=null) {
-      this.header=DomainName 
+  GetByID(id: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
@@ -48,6 +48,18 @@ export class AssignmentService {
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
     return this.http.get<Assignment>(`${this.baseUrl}/Assignment/GetByID/${id}`, { headers })
+  }
+
+  GetByStudentID(StudentId: number, SubjectId: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<any>(`${this.baseUrl}/Assignment/GetByStudentID/${StudentId}/${SubjectId}`, { headers })
   }
 
   Add(Assignment: Assignment, DomainName: string) {
@@ -77,8 +89,8 @@ export class AssignmentService {
       .set('Content-Type', 'application/json');
     return this.http.put(`${this.baseUrl}/Assignment`, Assignment, { headers });
   }
- 
-  FileAssignment(Assignment: Assignment, DomainName: string){
+
+  FileAssignment(Assignment: Assignment, DomainName: string) {
     if (DomainName != null) {
       this.header = DomainName
     }
@@ -89,12 +101,12 @@ export class AssignmentService {
 
     const formData = new FormData();
     formData.append('id', Assignment.id.toString() ?? '');
-    formData.append('linkFile', Assignment.linkFile ?? ''); 
+    formData.append('linkFile', Assignment.linkFile ?? '');
 
     if (Assignment.fileFile) {
       formData.append('fileFile', Assignment.fileFile, Assignment.fileFile.name);
-    } 
- 
+    }
+
     return this.http.put(`${this.baseUrl}/Assignment/FileAssignment`, formData, { headers });
   }
 
