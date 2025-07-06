@@ -33,7 +33,9 @@ export class NavMenuComponent {
   User_Data_After_Login = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   subscription: Subscription | undefined;
   PasswordError: string = ""; 
+  OldPasswordError: string = ""; 
   password:string =""
+  confirmPassword:string =""
   isLoading = false;
   editpasss:EditPass=new EditPass();
   DomainName: string = "";
@@ -200,7 +202,9 @@ export class NavMenuComponent {
     document.getElementById("ChangePassModal")?.classList.add("hidden");
 
     this.PasswordError = ""; 
+    this.OldPasswordError = ""; 
     this.password = ""; 
+    this.confirmPassword = ""; 
     this.isLoading = false;
     this.editpasss = new EditPass();
   }
@@ -208,46 +212,71 @@ export class NavMenuComponent {
   onPasswordChange() {
     this.PasswordError = "" 
   } 
+
+  onoldPasswordChange() {
+    this.OldPasswordError = "" 
+  } 
   
   Save(){
-    if(this.password != ""){
-      this.editpasss.Id=this.User_Data_After_Login.id;
-      this.editpasss.Password=this.password
-      this.isLoading = true
-      this.EmpServ.EditPassword(this.editpasss,this.DomainName).subscribe(()=>{
-          this.closeModal()
-          Swal.fire({
-            icon: 'success',
-            title: 'Done',
-            text: 'Updatedd Successfully',
-            confirmButtonColor: '#089B41',
-          });
-        },
-        (error) => {  
-          this.isLoading = false
-          switch(true) {
-            case error.error.errors?.Password !== undefined:
-              Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: error.error.errors.Password[0] || 'An unexpected error occurred',
-                confirmButtonColor: '#089B41',
-              });
-              break; 
-            
-            default:
-              Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: error.error.errors || 'An unexpected error occurred',
-                confirmButtonColor: '#089B41',
-              });
-              break;
-          }
-        } 
-      ) 
-    } else{
-      this.PasswordError = "Passworrd Can't be Empty"
+    if(this.password != this.confirmPassword){
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Password and Confirm Password is not the same',
+        confirmButtonColor: '#089B41',
+      });
+    }else{
+      if(this.password != "" && this.editpasss.oldPassword != ""){
+        this.editpasss.id=this.User_Data_After_Login.id;
+        this.editpasss.password=this.password 
+        this.isLoading = true
+        this.EmpServ.EditPassword(this.editpasss,this.DomainName).subscribe(()=>{
+            this.closeModal()
+            Swal.fire({
+              icon: 'success',
+              title: 'Done',
+              text: 'Updatedd Successfully',
+              confirmButtonColor: '#089B41',
+            });
+          },
+          (error) => {   
+            this.isLoading = false
+            switch(true) {
+              case error.error.errors?.Password !== undefined:
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: error.error.errors.Password[0] || 'An unexpected error occurred',
+                  confirmButtonColor: '#089B41',
+                });
+                break; 
+              case error.error == "Old Password isn't right":
+                  Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.error,
+                    confirmButtonColor: '#089B41',
+                  });
+                  break;
+              default:
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: error.error.errors || 'An unexpected error occurred',
+                  confirmButtonColor: '#089B41',
+                });
+                break;
+            }
+          } 
+        ) 
+      } else{
+        if(this.password == ""){
+          this.PasswordError = "Password Can't be Empty"
+        }
+        if(this.editpasss.oldPassword == ""){
+          this.OldPasswordError = "Old Password Can't be Empty"
+        }
+      }
     }
   }
 }

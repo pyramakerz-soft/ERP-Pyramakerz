@@ -296,15 +296,24 @@ export class RoleAddEditComponent {
             });
             this.router.navigateByUrl("Employee/Role")
           },
-          error: (error) => {
+          error: (error) => { 
             this.isLoading=false
-            const errorMessage = error?.error || 'An unexpected error occurred';
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              confirmButtonColor: '#089B41',
-              text: errorMessage,
-            });
+            if(error.error.errors.Name[0].includes("Role cannot be longer than 100 characters")){
+              Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Role cannot be longer than 100 characters',
+                confirmButtonText: 'Okay',
+                customClass: { confirmButton: 'secondaryBg' },
+              });
+            }else{ 
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.error || 'An unexpected error occurred',
+                confirmButtonColor: '#089B41',
+              });
+            } 
           },
         });
       }
@@ -328,20 +337,29 @@ export class RoleAddEditComponent {
                 text: "You Are Not Allowed To Edit This",
               });
             }else{
-              const errorMessage = error?.error || 'An unexpected error occurred';
-              this.isLoading=false
-              Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                confirmButtonColor: '#089B41',
-                text: errorMessage,
-              });
+              if(error.error.errors.Name[0].includes("Role cannot be longer than 100 characters")){
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Oops...',
+                  text: 'Name cannot be longer than 100 characters',
+                  confirmButtonText: 'Okay',
+                  customClass: { confirmButton: 'secondaryBg' },
+                });
+              }else{ 
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: error.error || 'An unexpected error occurred',
+                  confirmButtonColor: '#089B41',
+                });
+              } 
             }
           },
         });
       }
     }
   }
+
   onInputValueChange(event: { field: keyof RolePut, value: any }) {
     const { field, value } = event;
     if (field == "name") {
@@ -351,6 +369,7 @@ export class RoleAddEditComponent {
       }
     }
   }
+  
   isFormValid(): boolean {
     let isValid = true;
     for (const key in this.DataToSave) {
@@ -379,6 +398,7 @@ export class RoleAddEditComponent {
 
     return isValid;
   }
+  
   capitalizeField(field: keyof RolePut): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }

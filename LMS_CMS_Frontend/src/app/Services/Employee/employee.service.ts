@@ -49,7 +49,6 @@ export class EmployeeService {
     if (DomainName != null) {
       this.header = DomainName;
     }
-    console.log(employee)
     const token = localStorage.getItem('current_token');
     const headers = new HttpHeaders()
       .set('Authorization', `Bearer ${token}`)
@@ -105,7 +104,6 @@ export class EmployeeService {
       this.header = DomainName;
     }
 
-    console.log(employee)
     const token = localStorage.getItem('current_token');
     const headers = new HttpHeaders()
       .set('Authorization', `Bearer ${token}`)
@@ -132,7 +130,6 @@ export class EmployeeService {
     if (employee.files && employee.files.length > 0) {
       let uploadIndex = 0;
       employee.files.forEach((file) => {
-        console.log(file)
         if (file.file instanceof File) {
           formData.append(`files[${uploadIndex}].file`, file.file, file.file.name);
           formData.append(`files[${uploadIndex}].name`, file.name);
@@ -250,7 +247,7 @@ export class EmployeeService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.put(`${this.baseUrl}/Employee/${editpass.Id}`, editpass, { headers });
+    return this.http.put(`${this.baseUrl}/Employee/${editpass.id}`, editpass, { headers });
   }
 
   EditAccountingEmployee(employee: AccountingEmployee, DomainName?: string) {

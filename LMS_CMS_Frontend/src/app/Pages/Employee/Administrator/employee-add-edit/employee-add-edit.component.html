@@ -1,7 +1,7 @@
 <div class="flex justify-between items-center">
     <div class="flex justify-between items-center space-x-5">
         <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToEmployee()"></i>
-        <h1 class="font-semibold text-2xl leading-9">
+        <h1 class="primaryTxt font-semibold text-2xl leading-9">
             {{ mode == 'Create' ? 'Create Employee' : 'Edit Employee' }}
         </h1>
     </div>
@@ -33,7 +33,9 @@
     <div class="flex flex-col mb-4 w-[49%]">
         <label class="mb-2 primaryTxt" for="name">Arabic Name</label>
         <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-            placeholder="Enter Arabic Name" [(ngModel)]="Data.ar_name" />
+            (ngModelChange)="onInputValueChange({ field: 'ar_name', value: $event })" placeholder="Enter Arabic Name" [(ngModel)]="Data.ar_name" />
+        <span *ngIf="validationErrors['ar_name']" class="text-red-500 ml-3 font-normal">{{
+            validationErrors["ar_name"]}}</span>
     </div>
 
     <div *ngIf="mode == 'Create'" class="flex flex-col mb-4 w-[49%]">

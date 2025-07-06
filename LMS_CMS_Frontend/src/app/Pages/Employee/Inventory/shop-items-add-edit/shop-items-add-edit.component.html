@@ -26,7 +26,7 @@
     </div>
 
     <div class="flex flex-col mb-4 w-[49%]">
-        <label class="font-medium text-base leading-6 mb-1 mt-3" for="enDes">English Description</label>
+        <label class="font-medium primaryTxt text-base leading-6 mb-1 mt-3" for="enDes">English Description</label>
         <div class="flex justify-start gap-2 items-start">
             <div class="flex flex-col w-full">
                 <textarea id="enDes"
@@ -40,7 +40,7 @@
     </div>
 
     <div class="flex flex-col mb-4 w-[49%]">
-        <label class="font-medium text-base leading-6 mb-1 mt-3" for="arDes">Arabic Description</label>
+        <label class="font-medium primaryTxt text-base leading-6 mb-1 mt-3" for="arDes">Arabic Description</label>
         <div class="flex justify-start gap-2 items-start">
             <div class="flex flex-col w-full">
                 <textarea id="arDes"
@@ -80,7 +80,7 @@
     </div>
 
     <div class="flex flex-col w-[49%] mb-4">
-        <label class="mb-2 font-medium" for="Category">Category</label>
+        <label class="mb-2 font-medium primaryTxt" for="Category">Category</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Category"
             [(ngModel)]="CategoryId" (change)="onCategoryChange($event)">
             <option [value]="0" disabled selected hidden>Choose Category</option>
@@ -90,7 +90,7 @@
     </div>
 
     <div class="flex flex-col w-[49%] mb-4">
-        <label class="mb-2 font-medium" for="Sub"
+        <label class="mb-2 font-medium primaryTxt" for="Sub"
             [ngClass]="{ 'text-gray-400': !CategoryId, 'primaryTxt': CategoryId }">Sub Category</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Sub"
             [(ngModel)]="ShopItem.inventorySubCategoriesID" [disabled]="!CategoryId"
@@ -105,7 +105,7 @@
     </div>
 
     <div class="flex flex-col w-[49%] mb-4">
-        <label class="mb-2 font-medium" for="School">Schools</label>
+        <label class="mb-2 font-medium primaryTxt" for="School">Schools</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="School"
             [(ngModel)]="ShopItem.schoolID" (change)="onSchoolChange($event)"
             (ngModelChange)="onInputValueChange({ field: 'schoolID', value: $event })">
@@ -118,7 +118,7 @@
     </div>
 
     <div class="flex flex-col w-[49%] mb-4">
-        <label class="mb-2" for="Grade" [ngClass]="{ 'text-gray-400': !SchoolId, 'primaryTxt': SchoolId }">Grade
+        <label class="mb-2 font-medium" for="Grade" [ngClass]="{ 'text-gray-400': !SchoolId, 'primaryTxt': SchoolId }">Grade
             Level</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Grade"
             [disabled]="!SchoolId" [ngClass]="{ 'bg-[#EBEBEB]': !SchoolId }" [(ngModel)]="ShopItem.gradeID">
@@ -130,7 +130,7 @@
     </div>
 
     <div class="flex flex-col w-[49%] mb-4">
-        <label class="mb-2 font-medium" for="Gender">Gender</label>
+        <label class="mb-2 font-medium primaryTxt" for="Gender">Gender</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Gender"
             [(ngModel)]="ShopItem.genderID">
             <option [value]="0 || null" disabled selected hidden>Choose Gender</option>
@@ -206,7 +206,7 @@
     </div>
 
     <div class="flex flex-col mb-4 w-[49%]">
-        <label class="font-medium text-base leading-6 mb-1 mt-3">Main Image</label>
+        <label class="primaryTxt font-medium text-base leading-6 mb-1 mt-3">Main Image</label>
         <div class="bg-[#F6F6F6] flex items-center space-x-4 w-full rounded-md border-dashed mb-4 border-2">
             <div class="flex justify-center w-full">
                 <label for="imageMain" class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
@@ -230,7 +230,7 @@
     </div>
 
     <div class="flex flex-col mb-4 w-[49%]">
-        <label class="font-medium text-base leading-6 mb-1 mt-3">Other Image</label>
+        <label class="primaryTxt font-medium text-base leading-6 mb-1 mt-3">Other Image</label>
         <div class="bg-[#F6F6F6] flex items-center space-x-4 w-full rounded-md border-dashed mb-4 border-2">
             <div class="flex justify-center w-full">
                 <label for="otherImage" class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">

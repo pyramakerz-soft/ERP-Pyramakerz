@@ -216,24 +216,34 @@ export class InterviewTimeTableComponent {
   //       this.interviewTimeTableBySchoolData = data
   //     }
   //   )
-  // }
-
+  // } 
+ 
   async getinterviewByYearId(id: number) {
     try {
-      const data = await lastValueFrom(this.interviewTimeTableService.GetByYearId(id, this.DomainName));
+      const data = await lastValueFrom(
+        this.interviewTimeTableService.GetByYearId(id, this.DomainName)
+      );
       this.interviewTimeTableByYearData = data;
     } catch (error) {
       console.error('Error fetching year data:', error);
+      this.interviewTimeTableByYearData = [];
     }
   }
 
   async getinterviewBySchoolId(id: number) {
     try {
-      const data = await lastValueFrom(this.interviewTimeTableService.GetBySchoolId(id, this.DomainName));
+      const data = await lastValueFrom(
+        this.interviewTimeTableService.GetBySchoolId(id, this.DomainName)
+      );
       this.interviewTimeTableBySchoolData = data;
     } catch (error) {
       console.error('Error fetching school data:', error);
+      this.interviewTimeTableBySchoolData = [];
     }
+  }
+
+  getTimeTableDataForSearch(): Promise<any[]> {
+    return lastValueFrom(this.interviewTimeTableService.Get(this.DomainName));
   }
 
   IsAllowDelete(InsertedByID: number) {
@@ -471,10 +481,9 @@ export class InterviewTimeTableComponent {
   }
 
   async Search() {
-    this.interviewTimeTableBySchoolData = []
-    this.interviewTimeTableByYearData = []
-
-    this.getTimeTableData()
+    this.interviewTimeTableBySchoolData = [];
+    this.interviewTimeTableByYearData = [];
+    this.interviewTimeTableData = await this.getTimeTableDataForSearch();
 
     if (this.selectedSchool != 0) {
       await this.getinterviewBySchoolId(this.selectedSchool)
@@ -483,26 +492,25 @@ export class InterviewTimeTableComponent {
       await this.getinterviewByYearId(this.selectedYear)
     }
 
+    if ((this.selectedSchool !== 0 && this.interviewTimeTableBySchoolData.length === 0) ||
+      (this.selectedYear !== 0 && this.interviewTimeTableByYearData.length === 0)) {
+        this.interviewTimeTableData = [];
+      return;
+    }
+ 
     let filteredData = [...this.interviewTimeTableData];
 
     if (this.selectedSchool !== 0) {
-      filteredData = filteredData.filter(item =>
-        this.interviewTimeTableBySchoolData.some(schoolItem => schoolItem.id === item.id)
-      );
+      const schoolIds = new Set(this.interviewTimeTableBySchoolData.map(item => item.id));
+      filteredData = filteredData.filter(item => schoolIds.has(item.id));
     }
 
     if (this.selectedYear !== 0) {
-      filteredData = filteredData.filter(item =>
-        this.interviewTimeTableByYearData.some(yearItem => yearItem.id === item.id)
-      );
+      const yearIds = new Set(this.interviewTimeTableByYearData.map(item => item.id));
+      filteredData = filteredData.filter(item => yearIds.has(item.id));
     }
 
-    if ((this.selectedSchool != 0 && this.interviewTimeTableBySchoolData.length == 0) ||
-      (this.selectedYear != 0 && this.interviewTimeTableByYearData.length == 0)) {
-      filteredData = []
-    }
-
-    this.interviewTimeTableData = filteredData;
+    this.interviewTimeTableData = filteredData;           
   }
 
   deleteInterview(id: number) {
