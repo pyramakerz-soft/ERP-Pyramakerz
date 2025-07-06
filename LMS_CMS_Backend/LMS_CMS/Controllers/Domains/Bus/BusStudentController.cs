@@ -63,7 +63,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Bus
             }
 
             busStudents = await Unit_Of_Work.busStudent_Repository.Select_All_With_IncludesById<BusStudent>(
-                bus => bus.BusID == busId && bus.IsDeleted != true,
+                bus => bus.BusID == busId && bus.IsDeleted != true && bus.Student.IsDeleted != true && bus.Bus.IsDeleted != true,
                 query => query.Include(bus => bus.Bus),
                 query => query.Include(stu => stu.Student),
                 query => query.Include(busCat => busCat.BusCategory),
@@ -151,7 +151,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Bus
                     if (studentClass != null)
                     { 
                         dto.ClassID = studentClass.ClassID;
-                        var classroom = Unit_Of_Work.classroom_Repository.Select_By_Id(dto.SectionID);
+                        var classroom = Unit_Of_Work.classroom_Repository.Select_By_Id(dto.ClassID);
                         dto.ClassName = classroom.Name;
                     }
                 }
@@ -246,7 +246,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Bus
             if (studentClass != null)
             {
                 busStudentDTO.ClassID = studentClass.ClassID;
-                var classroom = Unit_Of_Work.classroom_Repository.Select_By_Id(busStudentDTO.SectionID);
+                var classroom = Unit_Of_Work.classroom_Repository.Select_By_Id(busStudentDTO.ClassID);
                 busStudentDTO.ClassName = classroom.Name;
             }
 

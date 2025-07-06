@@ -68,6 +68,9 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
             if (string.IsNullOrEmpty(schoolPc.SerialNumber))
                 return BadRequest("Serial Number can not be null");
 
+            if (string.IsNullOrEmpty(schoolPc.School.VatNumber))
+                return BadRequest("Vat Number can not be null");
+
             string commonName = schoolPc.School.Name;
             string serialNumber = $"1-{schoolPcId}|2-{schoolPc.PCName}|3-{schoolPc.SerialNumber}";
             string organizationIdentifier = schoolPc.School.VatNumber;
@@ -80,9 +83,6 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
             if (string.IsNullOrEmpty(commonName))
                 return BadRequest("Common Name can not be null");
-
-            if (string.IsNullOrEmpty(organizationIdentifier))
-                return BadRequest("Organization Identifier (Vat Number) can not be null");
 
             if (string.IsNullOrEmpty(organizationUnitName))
                 return BadRequest("Organization Name can not be null");
@@ -109,12 +109,12 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
             var csrSteps = ZatcaServices.GenerateCSRandPrivateKey(csrGeneration);
 
             string csrContent = csrSteps[1].ResultedValue;
-            //string csrPath = Path.Combine(certificates, $"{pcName}_CSR.csr");
-            //System.IO.File.WriteAllText(csrPath, csrContent);
+            string csrPath = Path.Combine(certificates, $"{pcName}_CSR.csr");
+            System.IO.File.WriteAllText(csrPath, csrContent);
 
             string privateKeyContent = csrSteps[2].ResultedValue;
-            //string privateKeyPath = Path.Combine(certificates, $"{pcName}_PrivateKey.pem");
-            //System.IO.File.WriteAllText(privateKeyPath, privateKeyContent);
+            string privateKeyPath = Path.Combine(certificates, $"{pcName}_PrivateKey.pem");
+            System.IO.File.WriteAllText(privateKeyPath, privateKeyContent);
 
             //bool addCSR = await s3SecretManager.CreateOrUpdateSecretAsync($"{pcName}CSR", csrContent);
             //if (!addCSR)
@@ -134,6 +134,9 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
             string csid = await ZatcaServices.GenerateCSID(csrJson, otp, version, _config);
 
+            string csidPath = Path.Combine(certificates, $"{pcName}_CSID.json");
+            System.IO.File.WriteAllText(csidPath, csid);
+
             //bool addCSID = await s3SecretManager.CreateOrUpdateSecretAsync($"{pcName}CSID", csid);
 
             //if (!addCSID)
@@ -151,6 +154,9 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
             string requestId = csidJson.requestID.ToString();
 
             string pcsid = await ZatcaServices.GeneratePCSID(tokenBase64, version, requestId, _config);
+
+            string pcsidPath = Path.Combine(certificates, $"{pcName}_PCSID.json");
+            System.IO.File.WriteAllText(pcsidPath, pcsid);
 
             //bool addPCSID = await s3SecretManager.CreateOrUpdateSecretAsync($"{pcName}PCSID", pcsid);
 
@@ -242,12 +248,15 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
         )]
         public async Task<IActionResult> ReportInvoice(long masterId)
         {
+            string certificates = Path.Combine(Directory.GetCurrentDirectory(), "Invoices/Certificates");
+
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             InventoryMaster master = await Unit_Of_Work.inventoryMaster_Repository.FindByIncludesAsync(
                 d => d.ID == masterId &&
                 d.IsDeleted != true &&
                 (d.FlagId == 11 || d.FlagId == 12),
+                query => query.Include(x => x.InventoryDetails).ThenInclude(x => x.ShopItem),
                 query => query.Include(s => s.School)
             );
 
@@ -284,9 +293,13 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
             if (master.FlagId == 12)
                 xmlPath = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/XMLCredits");
 
+            string pcName = $"PC{pc.ID}_{pc.School.ID}";
+
+            string pcsidPath = Path.Combine(certificates, $"{pcName}_PCSID.json");
+
             if (master.IsValid == 0 || master.IsValid == null)
             {
-                string pcName = $"PC{master.SchoolPCId}{master.School?.ID}";
+                //string pcName = $"PC{master.SchoolPCId}{master.School?.ID}";
 
                 AmazonS3Client secretS3Client = new AmazonS3Client();
                 S3Service s3 = new S3Service(_config, "AWS:Region");
@@ -305,13 +318,16 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                 if (!result)
                     return BadRequest("Failed to generate XML file.");
 
-                string certContent = await s3.GetSecret($"{pcName}PCSID");
+                //string certContent = await s3.GetSecret($"{pcName}PCSID");
+                string certContent = System.IO.File.ReadAllText(pcsidPath);
 
                 dynamic certObject = JsonConvert.DeserializeObject(certContent);
                 string token = certObject.binarySecurityToken;
                 string secret = certObject.secret;
 
-                HttpResponseMessage response = await ZatcaServices.InvoiceReporting(xmlPath, token, secret, _config);
+                string xmlFile = Path.Combine(xmlPath, $"{master.School.CRN}_{date.Replace("-", "")}T{time.Replace(":", "")}_{date}-{master.StoreID}_{master.FlagId}_{master.ID}.xml");
+
+                HttpResponseMessage response = await ZatcaServices.InvoiceReporting(xmlFile, token, secret, _config);
                 response.EnsureSuccessStatusCode();
 
                 string responseContent = await response.Content.ReadAsStringAsync();
@@ -321,6 +337,8 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                 if (response.IsSuccessStatusCode)
                 {
                     master.IsValid = 1;
+                    master.QRCode = ZatcaServices.GetQRCode(xmlFile);
+                    master.QrImage = ZatcaServices.GenerateQrImage(master.QRCode);
                 }
                 else
                 {
@@ -354,10 +372,10 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
                 xmlPath = Path.Combine(xmlPath, $"{master.School.CRN}_{date.Replace("-", "")}T{time.Replace(":", "")}_{date}-{master.StoreID}_{master.FlagId}_{master.ID}.xml");
 
-                if (System.IO.File.Exists(xmlPath))
-                {
-                    System.IO.File.Delete(xmlPath);
-                }
+                //if (System.IO.File.Exists(xmlPath))
+                //{
+                //    System.IO.File.Delete(xmlPath);
+                //}
             }
 
             return master.IsValid == 1 ? Ok(master.Status) : BadRequest(master.Status);

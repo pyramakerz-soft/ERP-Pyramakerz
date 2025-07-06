@@ -46,17 +46,17 @@
         <div class="mt-5 flex justify-between">
             <div class="flex flex-col w-[30%]" *ngIf="!isCreate">
                 <label class="mb-2 primaryTxt font-medium" for="total">Total Credit</label>
-                <input id="total" type="text" disabled class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                <input id="totalCredit" type="text" disabled class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                     [(ngModel)]="totalCredit" />
             </div>
             <div class="flex flex-col w-[30%]" *ngIf="!isCreate">
                 <label class="mb-2 primaryTxt font-medium" for="total">Total Debit</label>
-                <input id="total" type="text" disabled class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                <input id="totalDebit" type="text" disabled class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                     [(ngModel)]="totalDebit" />
             </div>
             <div class="flex flex-col w-[30%]" *ngIf="!isCreate">
                 <label class="mb-2 primaryTxt font-medium" for="total">The Difference</label>
-                <input id="total" type="text" disabled class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                <input id="totalDifference" type="text" disabled class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                     [(ngModel)]="theDifference" />
             </div>
         </div>

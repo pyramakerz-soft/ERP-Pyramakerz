@@ -32,7 +32,7 @@ namespace LMS_CMS_BL.DTO.Inventory
         public long? SchoolId { get; set; }
         public long? SchoolPCId { get; set; }
         public int? ETAPOSID { get; set; }
-        public char? InvoiceType { get; set; } = 'C';
+        public char? InvoiceType { get; set; }
         public DateTime? EtaInsertedDate { get; set; }
 
     }
