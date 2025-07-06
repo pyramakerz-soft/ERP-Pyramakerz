@@ -134,7 +134,7 @@ export class ElectronicInvoiceComponent implements OnInit {
     }
 
     this.isLoading = true;
-    this.showTable = false;
+    this.showTable = true; 
     this.transactions = [];
     this.selectedInvoices = [];
 
@@ -143,27 +143,17 @@ export class ElectronicInvoiceComponent implements OnInit {
       const formattedEndDate = this.formatDateForApi(this.dateTo);
 
       const response = await firstValueFrom(
-        this.currentSystem === 'zatca'
-          ? this.zatcaService.filterBySchoolAndDate(
-              this.selectedSchoolId!,
-              formattedStartDate,
-              formattedEndDate,
-              this.currentPage,
-              this.pageSize,
-              this.DomainName
-            )
-          : this.zatcaService.filterBySchoolAndDate(
-              this.selectedSchoolId!,
-              formattedStartDate,
-              formattedEndDate,
-              this.currentPage,
-              this.pageSize,
-              this.DomainName
-            )
+        this.zatcaService.filterBySchoolAndDate(
+          this.selectedSchoolId!,
+          formattedStartDate,
+          formattedEndDate,
+          this.currentPage,
+          this.pageSize,
+          this.DomainName
+        )
       );
 
       this.processApiResponse(response);
-      this.showTable = true;
     } catch (error) {
       this.handleError('Failed to load transactions', error);
     } finally {
@@ -200,6 +190,7 @@ export class ElectronicInvoiceComponent implements OnInit {
     this.currentPage = page;
     this.viewReport();
   }
+
   navigateToDetail(id: number) {
     this.saveState();
     const routePrefix =
@@ -223,7 +214,6 @@ export class ElectronicInvoiceComponent implements OnInit {
     this.selectedInvoices = isChecked ? this.transactions.map((t) => t.id) : [];
   }
 
-  // Replace the existing sendInvoice method with this:
   async sendInvoice(invoice: ElectronicInvoice) {
     this.sendingInvoiceId = invoice.id;
 
@@ -351,5 +341,17 @@ export class ElectronicInvoiceComponent implements OnInit {
     return this.isViewReportDisabled
       ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
       : 'secondaryBg text-white hover:bg-opacity-90';
+  }
+
+  validatePageSize(event: any) {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+    }
+  }
+
+  validateNumberForPagination(event: any): void {
+    const value = event.target.value;
+    this.pageSize = value ? parseInt(value, 10) : 10;
   }
 }
