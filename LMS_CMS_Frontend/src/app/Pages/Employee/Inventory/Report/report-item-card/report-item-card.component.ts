@@ -221,7 +221,7 @@ export class ReportItemCardComponent implements OnInit {
       };
 
       if (this.showAverageColumn) {
-        row.average = await this.getAverageCost(summary.shopItemId, t.dayDate);
+        row.average = await this.getAverageCost(summary.shopItemId);
       }
 
       transactionRows.push(row);
@@ -232,7 +232,7 @@ export class ReportItemCardComponent implements OnInit {
     this.prepareExportData();
   }
 
-  private async getAverageCost(itemId: number, date?: string): Promise<number> {
+  private async getAverageCost(date?: string): Promise<number> {
     try {
       const formattedDateFrom = this.formatDateForAPI(this.dateFrom);
       const formattedDateTo = date
@@ -241,7 +241,6 @@ export class ReportItemCardComponent implements OnInit {
 
       const response = await this.inventoryDetailsService
         .getMovingAverageCost(
-          itemId,
           formattedDateFrom,
           formattedDateTo,
           this.inventoryDetailsService.ApiServ.GetHeader()

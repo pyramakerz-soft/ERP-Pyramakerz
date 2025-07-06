@@ -150,7 +150,6 @@ export class InventoryDetailsService {
   }
 
   getMovingAverageCost(
-    itemId: number,
     fromDate: string,
     toDate: string,
     DomainName: string
@@ -165,7 +164,7 @@ export class InventoryDetailsService {
       .set('Content-Type', 'application/json');
 
     return this.http.get<any>(
-      `${this.baseUrl}/InventoryDetails/CalculateMovingAverageCost?shopItemId=${itemId}&fromDate=${fromDate}&toDate=${toDate}`,
+      `${this.baseUrl}/InventoryDetails/CalculateMovingAverageCost?fromDate=${fromDate}&toDate=${toDate}`,
       { headers }
     );
   }
