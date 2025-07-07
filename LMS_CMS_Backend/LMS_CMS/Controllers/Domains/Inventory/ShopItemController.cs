@@ -473,26 +473,28 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
         //////////////////////////////////////////////////////////////////////////////
 
-        [HttpGet("ByBarcode/{BarCode}")]
+        [HttpGet("ByBarcode/{BarCode}/{StoreId}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Shop Item", "Shop" }
          )]
-        public async Task<IActionResult> GetbyIdAsync(string BarCode)
+        public async Task<IActionResult> GetbyIdAsync(string BarCode,long StoreId)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+            
 
             ShopItem shopItem = await Unit_Of_Work.shopItem_Repository.FindByIncludesAsync(
                 d => d.BarCode == BarCode && d.IsDeleted != true,
-                query => query.Include(sub => sub.InventorySubCategories),
-                query => query.Include(sub => sub.School),
-                query => query.Include(sub => sub.Grade),
-                query => query.Include(sub => sub.Gender),
-                query => query.Include(sub => sub.ShopItemColor),
-                query => query.Include(sub => sub.ShopItemSize)
+                query => query.Include(sub => sub.InventorySubCategories).ThenInclude(a=>a.InventoryCategories)
                 );
 
             if (shopItem == null)
+            {
+                return NotFound();
+            }
+
+            StoreCategories storeCategories = Unit_Of_Work.storeCategories_Repository.First_Or_Default(s => s.StoreID == StoreId && s.InventoryCategoriesID == shopItem.InventorySubCategories.InventoryCategoriesID);
+            if (storeCategories == null)
             {
                 return NotFound();
             }
