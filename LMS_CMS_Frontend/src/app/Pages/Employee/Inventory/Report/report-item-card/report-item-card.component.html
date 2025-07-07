@@ -8,7 +8,7 @@
 <!-- Store Selector -->
 <div class="flex flex-col w-[24%] mb-4">
     <label class="mb-2 font-medium" for="store">Store</label>
-    <select class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="store" [(ngModel)]="selectedStoreId" required>
+    <select class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="store" [(ngModel)]="selectedStoreId" (ngModelChange)="onFilterChange()" required>
         <option [ngValue]="null" disabled selected hidden>Choose Store</option>
         <option *ngFor="let store of stores" [ngValue]="store.id">{{ store.name }}</option>
     </select>
@@ -18,7 +18,7 @@
 <div class="flex flex-col w-[24%] mb-4">
     <label class="mb-2 font-medium" for="item">Item</label>
     <select class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="item" [(ngModel)]="selectedItemId"
-        [disabled]="!selectedStoreId" (ngModelChange)="onFilterChange()" required>
+     (ngModelChange)="onFilterChange()" required>
         <option [ngValue]="null" disabled selected hidden>Choose Item</option>
         <option *ngFor="let item of items" [ngValue]="item.id">{{ item.enName }}</option>
     </select>

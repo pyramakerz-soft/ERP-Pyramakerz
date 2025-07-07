@@ -50,6 +50,13 @@ export class MainLayoutComponent {
               label: 'The Shop', route: 'Ecommerce/The Shop'
             }
           ], icon: 'E-Commerce'
+        },
+        {
+          label: 'LMS', subItems: [
+            {
+              label: 'Subject', route: 'Subject'
+            }
+          ], icon: 'LMS'
         }
       ]
     } else if (this.User_Data_After_Login.type == "parent") {

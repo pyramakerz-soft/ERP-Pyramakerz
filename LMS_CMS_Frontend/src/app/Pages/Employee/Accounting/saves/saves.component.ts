@@ -232,6 +232,11 @@ export class SavesComponent {
         }
       }
     }
+
+    if (this.save.name.length > 100) {
+      isValid = false;
+      this.validationErrors['name']='Name cannot be longer than 100 characters.'
+    }
     return isValid;
   }
   capitalizeField(field: keyof Saves): string {

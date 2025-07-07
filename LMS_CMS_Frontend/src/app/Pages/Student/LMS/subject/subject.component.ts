@@ -57,4 +57,8 @@ export class SubjectComponent {
   moveToSubjectLive(subjectId: number) {
     this.router.navigateByUrl(`Student/SubjectLive/${subjectId}`)
   }
+
+  moveToSubjectAssignments(subjectId: number) {
+    this.router.navigateByUrl(`Student/SubjectAssignment/${subjectId}`)
+  }
 }

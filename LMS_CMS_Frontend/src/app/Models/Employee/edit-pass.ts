@@ -1,6 +1,7 @@
 export class EditPass {
     constructor(
-        public Id: number = 0,
-        public Password: string = '',
+        public id: number = 0,
+        public password: string = '',
+        public oldPassword: string = '',
     ) {}
 }
