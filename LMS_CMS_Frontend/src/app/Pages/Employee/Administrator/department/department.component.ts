@@ -162,13 +162,23 @@ export class DepartmentComponent {
           },
           (error) => {
             this.isLoading = false; // Hide spinner
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: 'Try Again Later!',
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' },
-            });
+            if(error.error.includes("Name cannot be longer than 100 characters")){
+              Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Name cannot be longer than 100 characters',
+                confirmButtonText: 'Okay',
+                customClass: { confirmButton: 'secondaryBg' },
+              });
+            }else{
+              Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Try Again Later!',
+                confirmButtonText: 'Okay',
+                customClass: { confirmButton: 'secondaryBg' },
+              });
+            }
           }
         );
       }
@@ -181,13 +191,23 @@ export class DepartmentComponent {
           },
           (error) => {
             this.isLoading = false; // Hide spinner
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: 'Try Again Later!',
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' },
-            });
+            if(error.error.includes("Name cannot be longer than 100 characters")){
+              Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Name cannot be longer than 100 characters',
+                confirmButtonText: 'Okay',
+                customClass: { confirmButton: 'secondaryBg' },
+              });
+            }else{
+              Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Try Again Later!',
+                confirmButtonText: 'Okay',
+                customClass: { confirmButton: 'secondaryBg' },
+              });
+            } 
           }
         );
       }

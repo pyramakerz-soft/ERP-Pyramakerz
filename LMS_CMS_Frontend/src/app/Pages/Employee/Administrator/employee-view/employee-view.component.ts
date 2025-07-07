@@ -38,7 +38,9 @@ export class EmployeeViewComponent {
 
   PasswordError: string = "";
   isChange = false;
-  password: string = ""
+  OldPasswordError: string = ""; 
+  password:string =""
+  confirmPassword:string =""
 
   editpasss: EditPass = new EditPass();
 
@@ -70,8 +72,7 @@ export class EmployeeViewComponent {
         this.path = url[0].path
         this.EmpId = Number(this.activeRoute.snapshot.paramMap.get('id'))
         this.EmpServ.Get_Employee_By_ID(this.EmpId, this.DomainName).subscribe(async (data) => {
-          this.Data = data;
-          console.log(this.Data)
+          this.Data = data; 
           if (data.files == null) {
             this.Data.files = []
           }
@@ -159,49 +160,84 @@ export class EmployeeViewComponent {
   }
 
   UpdatePassword() {
-    this.editpasss.Id = this.EmpId;
-    this.editpasss.Password = this.password
-    this.EmpServ.EditPassword(this.editpasss, this.DomainName).subscribe(() => {
-      this.isChange = false
-      this.password = '';
+    if(this.password != this.confirmPassword){
       Swal.fire({
-        icon: 'success',
-        title: 'Done',
-        text: 'Updatedd Successfully',
+        icon: 'error',
+        title: 'Error',
+        text: 'Password and Confirm Password is not the same',
         confirmButtonColor: '#089B41',
       });
-    },
-      (error) => {
-        switch (true) {
-          case error.error.errors?.Password !== undefined:
+    }else{
+      if(this.password != "" && this.editpasss.oldPassword != ""){
+        this.editpasss.id=this.User_Data_After_Login.id;
+        this.editpasss.password=this.password 
+        this.EmpServ.EditPassword(this.editpasss,this.DomainName).subscribe(()=>{
+            this.isChange = false
+            this.password = '';
+            this.editpasss = new EditPass()
+            this.confirmPassword = ''; 
+            this.PasswordError = ''; 
+            this.OldPasswordError = ''; 
             Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: error.error.errors.Password[0] || 'An unexpected error occurred',
+              icon: 'success',
+              title: 'Done',
+              text: 'Updatedd Successfully',
               confirmButtonColor: '#089B41',
             });
-            break;
-
-          default:
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: error.error.errors || 'An unexpected error occurred',
-              confirmButtonColor: '#089B41',
-            });
-            break;
+          },
+          (error) => {   
+            switch(true) {
+              case error.error.errors?.Password !== undefined:
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: error.error.errors.Password[0] || 'An unexpected error occurred',
+                  confirmButtonColor: '#089B41',
+                });
+                break; 
+              case error.error == "Old Password isn't right":
+                  Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.error,
+                    confirmButtonColor: '#089B41',
+                  });
+                  break;
+              default:
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: error.error.errors || 'An unexpected error occurred',
+                  confirmButtonColor: '#089B41',
+                });
+                break;
+            }
+          } 
+        ) 
+      } else{
+        if(this.password == ""){
+          this.PasswordError = "Password Can't be Empty"
+        }
+        if(this.editpasss.oldPassword == ""){
+          this.OldPasswordError = "Old Password Can't be Empty"
         }
       }
-    )
+    } 
   }
 
   CancelUpdatePassword() {
     this.isChange = false
     this.password = '';
   }
+   
   onPasswordChange() {
-    this.PasswordError = ""
-  }
+    this.PasswordError = "" 
+  } 
+
+  onoldPasswordChange() {
+    this.OldPasswordError = "" 
+  } 
+  
   IsAllowEdit() {
     const IsAllow = this.EditDeleteServ.IsAllowEdit(this.Data.insertedByUserId, this.UserID, this.AllowEditForOthers);
     return IsAllow;

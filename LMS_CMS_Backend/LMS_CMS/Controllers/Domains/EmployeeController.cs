@@ -901,9 +901,7 @@ namespace LMS_CMS_PL.Controllers.Domains
 
         [HttpPut("{id}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
-            allowEdit: 1,
-            pages: new[] { "Employee" }
+            allowedTypes: new[] { "octa", "employee" }
         )]
         public async Task<IActionResult> EditpasswordAsync(EditPasswordDTO model)
         {
@@ -930,14 +928,11 @@ namespace LMS_CMS_PL.Controllers.Domains
             {
                 return NotFound("Employee not found.");
             }
-             
-            if (userTypeClaim == "employee")
+
+            bool isMatch = BCrypt.Net.BCrypt.Verify(model.OldPassword, oldEmp.Password);
+            if (isMatch == false)
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Employee", roleId, userId, oldEmp);
-                if (accessCheck != null)
-                {
-                    return accessCheck;
-                }
+                return BadRequest("Old Password isn't right");
             }
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");

@@ -15,7 +15,7 @@
     </app-table>
 
 <app-modal [title]="editDrug ? 'Drug' : 'Create Drug'" [isEditMode]="editDrug"
-    [buttonText]="editDrug ? 'Save' : 'Create'" [isLoading]="isSaving" (save)="saveDrug()" (close)="closeModal()"
+    [buttonText]="'Save'" [isLoading]="isSaving" (save)="saveDrug()" (close)="closeModal()"
     [ngClass]="{ hidden: !isModalVisible }">
         <!-- Modal Content -->
         <div class="flex flex-col w-full mb-4">

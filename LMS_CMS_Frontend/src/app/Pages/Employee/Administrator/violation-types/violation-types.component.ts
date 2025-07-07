@@ -187,15 +187,24 @@ export class ViolationTypesComponent {
              this.isLoading=false
             },
             error: (error) => {
-             this.isLoading=false
-              const errorMessage =
-                error?.error || 'An unexpected error occurred';
+             this.isLoading=false  
+             if(error.error.errors.ViolationName[0].includes("Name cannot be longer than 100 characters")){
+              Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Name cannot be longer than 100 characters',
+                confirmButtonText: 'Okay',
+                customClass: { confirmButton: 'secondaryBg' },
+              });
+            }else{ 
+              const errorMessage = error?.error || 'An unexpected error occurred';
               Swal.fire({
                 icon: 'error',
                 title: 'Error',
                 confirmButtonColor: '#089B41',
                 text: errorMessage,
               });
+            }
             },
           });
       } else if (this.mode == 'Edit') {
@@ -209,14 +218,23 @@ export class ViolationTypesComponent {
             },
             error: (error) => {
               this.isLoading=false
-              const errorMessage =
-                error?.error || 'An unexpected error occurred';
-              Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                confirmButtonColor: '#089B41',
-                text: errorMessage,
-              });
+              if(error.error.errors.ViolationName[0].includes("Name cannot be longer than 100 characters")){
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Oops...',
+                  text: 'Name cannot be longer than 100 characters',
+                  confirmButtonText: 'Okay',
+                  customClass: { confirmButton: 'secondaryBg' },
+                });
+              }else{ 
+                const errorMessage = error?.error || 'An unexpected error occurred';
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  confirmButtonColor: '#089B41',
+                  text: errorMessage,
+                });
+              }
             },
           });
       }

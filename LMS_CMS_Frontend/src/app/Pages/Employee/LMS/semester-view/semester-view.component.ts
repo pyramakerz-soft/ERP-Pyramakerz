@@ -100,6 +100,12 @@ export class SemesterViewComponent {
           this.semesterWorkingWeekService.GenerateWeeks(this.semesterId, this.DomainName).subscribe(
             data => {
               this.GetWorkingWeeksBySemesterById(this.semesterId);
+            }, error => {
+              Swal.fire({ 
+                title: error.error,
+                icon: 'error', 
+                confirmButtonColor: '#089B41', 
+              })
             }
           );
         }
@@ -118,6 +124,12 @@ export class SemesterViewComponent {
           this.semesterWorkingWeekService.GenerateWeeks(this.semesterId, this.DomainName).subscribe(
             data => {
               this.GetWorkingWeeksBySemesterById(this.semesterId);
+            }, error => {
+              Swal.fire({ 
+                title: error.error,
+                icon: 'error', 
+                confirmButtonColor: '#089B41', 
+              })
             }
           );
         }

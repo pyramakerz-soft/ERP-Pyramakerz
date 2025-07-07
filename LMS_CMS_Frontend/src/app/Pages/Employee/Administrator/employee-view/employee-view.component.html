@@ -163,8 +163,13 @@
         (click)="CancelUpdatePassword()">Cancel</button>
 
     <input *ngIf="isChange" type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl mt-2"
+        (input)="onoldPasswordChange()" placeholder="Enter old password" [(ngModel)]="editpasss.oldPassword">
+    <span *ngIf="OldPasswordError" class="text-red-500 text-sm font-normal">{{ OldPasswordError }}</span>
+    <input *ngIf="isChange" type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl mt-2"
         placeholder="Enter the password" (input)="onPasswordChange()" [(ngModel)]="password">
     <span *ngIf="PasswordError" class="text-red-500 text-sm font-normal">{{ PasswordError }}</span>
+    <input *ngIf="isChange" type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl mt-2"
+        placeholder="Enter the password again" [(ngModel)]="confirmPassword">
 </div>
 
 <div *ngIf="Data.files.length > 0" class="bg-white p-4 rounded-lg">
