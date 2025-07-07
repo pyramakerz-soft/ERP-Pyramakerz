@@ -118,10 +118,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                     _ => null
                 };
 
-                //if(dto.LinkFileID == 6)
-                //{
-                //    var x = banks.FirstOrDefault(b => b.ID == dto.BankOrSaveID);
-                //}
                 foreach (var detail in dto.PayableDetails)
                 {
                     detail.LinkFileTypeName = detail.LinkFileID switch

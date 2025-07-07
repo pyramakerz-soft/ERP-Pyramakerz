@@ -25,7 +25,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         [HttpGet("AccountingEntries")]
         //[Authorize_Endpoint_(
         //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "Payable Report" }
+        //    pages: new[] { "" }
         //)]
         public async Task<IActionResult> GetAccountingEntriesAsync(DateTime fromDate, DateTime toDate)
         {
