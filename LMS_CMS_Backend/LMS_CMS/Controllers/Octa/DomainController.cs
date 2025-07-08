@@ -123,17 +123,6 @@ namespace LMS_CMS_PL.Controllers.Octa
 
             addedPageIds.Add(page.ID);
 
-            //LMS_CMS_DAL.Models.Domains.Page pageNew = new LMS_CMS_DAL.Models.Domains.Page
-            //{
-            //    ID = page.ID,
-            //    en_name = page.en_name,
-            //    ar_name = page.ar_name,
-            //    IsDisplay = page.IsDisplay,
-            //    Page_ID = page.Page_ID
-            //};
-
-            //Unit_Of_Work.page_Repository.Add(pageNew);
-
             var alreadyExists = Unit_Of_Work.page_Repository.Select_By_Id(page.ID);
             if (alreadyExists == null)
             {
@@ -635,24 +624,24 @@ namespace LMS_CMS_PL.Controllers.Octa
                     {
                         foreach (var page in pagesToInsert)
                         {
-                            LMS_CMS_DAL.Models.Domains.Page pageNew = new LMS_CMS_DAL.Models.Domains.Page
+                            if (page.Page_ID != null)
                             {
-                                ID = page.ID,
-                                en_name = page.en_name,
-                                ar_name = page.ar_name,
-                                Order = page.Order,
-                                enDisplayName_name = page.enDisplayName_name,
-                                arDisplayName_name = page.arDisplayName_name,
-                                IsDisplay = page.IsDisplay,
-                                Page_ID = page.Page_ID
-                            };
+                                if (domainPageIDs.Contains((long)page.Page_ID))
+                                {
+                                    AddPageWithChildren(page, Unit_Of_Work); 
+                                }
+                            }
+                        }
 
-                            Unit_Of_Work.page_Repository.Add(pageNew);
+                        Unit_Of_Work.SaveChanges();
 
+                        var pagesAfterSaving = Unit_Of_Work.page_Repository.Select_All();
+                        foreach (var item in pagesAfterSaving)
+                        {
                             Role_Detailes roleDetail = new Role_Detailes
                             {
                                 Role_ID = 1, // Admin Role
-                                Page_ID = page.ID,
+                                Page_ID = item.ID,
                                 Allow_Edit = true,
                                 Allow_Delete = true,
                                 Allow_Edit_For_Others = true,
@@ -667,9 +656,64 @@ namespace LMS_CMS_PL.Controllers.Octa
                                 Unit_Of_Work.role_Detailes_Repository.Add(roleDetail);
                             }
                         }
-
-                        Unit_Of_Work.SaveChanges();
                     }
+
+                    foreach (var octaPage in pagesInOcta)
+                    {
+                        var domainPage = Unit_Of_Work.page_Repository.Select_By_Id(octaPage.ID);
+                        if (domainPage != null)
+                        {
+                            bool needsUpdate = false;
+
+                            if (domainPage.en_name != octaPage.en_name)
+                            {
+                                domainPage.en_name = octaPage.en_name;
+                                needsUpdate = true;
+                            }
+
+                            if (domainPage.ar_name != octaPage.ar_name)
+                            {
+                                domainPage.ar_name = octaPage.ar_name;
+                                needsUpdate = true;
+                            }
+
+                            if (domainPage.IsDisplay != octaPage.IsDisplay)
+                            {
+                                domainPage.IsDisplay = octaPage.IsDisplay;
+                                needsUpdate = true;
+                            }
+
+                            if (domainPage.Page_ID != octaPage.Page_ID)
+                            {
+                                domainPage.Page_ID = octaPage.Page_ID;
+                                needsUpdate = true;
+                            }
+
+                            if (domainPage.arDisplayName_name != octaPage.arDisplayName_name)
+                            {
+                                domainPage.arDisplayName_name = octaPage.arDisplayName_name;
+                                needsUpdate = true;
+                            }
+
+                            if (domainPage.enDisplayName_name != octaPage.enDisplayName_name)
+                            {
+                                domainPage.enDisplayName_name = octaPage.enDisplayName_name;
+                                needsUpdate = true;
+                            }
+
+                            if (domainPage.Order != octaPage.Order)
+                            {
+                                domainPage.Order = octaPage.Order;
+                                needsUpdate = true;
+                            }
+
+                            if (needsUpdate)
+                            {
+                                Unit_Of_Work.page_Repository.Update(domainPage); // or just SaveChanges if tracked
+                            }
+                        }
+                    }
+                    Unit_Of_Work.SaveChanges();
                 }
                 existDomain.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
                 existDomain.UpdatedByUserId = userId;
