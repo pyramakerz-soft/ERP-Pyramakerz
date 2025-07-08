@@ -857,9 +857,9 @@ namespace LMS_CMS_PL.Controllers.Domains
         //////////////////////////////////////////////////////
 
 
-      [HttpDelete("DeleteFiles/{id}")]
-    public IActionResult DeleteFiles(long id)
-    {
+        [HttpDelete("DeleteFiles/{id}")]
+        public IActionResult DeleteFiles(long id)
+        {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             //TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
@@ -899,7 +899,7 @@ namespace LMS_CMS_PL.Controllers.Domains
 
         ///////////////////////////////////////////////////////////////////////////
 
-        [HttpPut("{id}")]
+        [HttpPut("EditPass")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" }
         )]

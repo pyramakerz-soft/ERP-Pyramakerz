@@ -3,7 +3,6 @@ export class Account {
         public user_Name: string = '',
         public arabic_Name: string = '',
         public password: string = '',
-        public id: number = 0,
-        public insertedAt:string = '',
+        public id: number = 0, 
     ) {}
 }
