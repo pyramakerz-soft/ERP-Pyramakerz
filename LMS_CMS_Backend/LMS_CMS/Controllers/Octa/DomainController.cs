@@ -386,7 +386,15 @@ namespace LMS_CMS_PL.Controllers.Octa
 
             foreach (Domain domain in domains)
             {
-                await _dynamicDatabaseService.ApplyMigrations(domain.Name);
+                try
+                { 
+                    await _dynamicDatabaseService.ApplyMigrations(domain.Name);
+                }
+                catch (Exception ex)
+                {
+                    // Log the error
+                    return BadRequest(new { message = $"Failed to apply migrations for domain {domain.Name}: {ex.Message}" });
+                }
             }
              
             return Ok(new { message = "Migrations are Updated successfully." });
