@@ -150,6 +150,8 @@ export class InventoryDetailsService {
   }
 
   getMovingAverageCost(
+    storeId: number,
+    shopItemId: number,
     fromDate: string,
     toDate: string,
     DomainName: string
@@ -166,9 +168,9 @@ export class InventoryDetailsService {
     // Encode the dates to match API format (MM/DD/YYYY)
     const encodedFromDate = encodeURIComponent(fromDate);
     const encodedToDate = encodeURIComponent(toDate);
-
+console.log(storeId , shopItemId)
     return this.http.get<any[]>(
-      `${this.baseUrl}/InventoryDetails/CalculateMovingAverageCost?fromDate=${encodedFromDate}&toDate=${encodedToDate}`,
+      `${this.baseUrl}/InventoryDetails/AverageCost?storeId=${storeId}&shopItemId=${shopItemId}&fromDate=${encodedFromDate}&toDate=${encodedToDate}`,
       { headers }
     );
   }

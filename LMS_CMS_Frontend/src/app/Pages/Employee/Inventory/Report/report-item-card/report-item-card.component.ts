@@ -128,7 +128,7 @@ export class ReportItemCardComponent implements OnInit {
         .getInventoryNetSummary(
           this.selectedStoreId!,
           this.selectedItemId!,
-          formattedDateTo,
+          formattedDateFrom,
           this.inventoryDetailsService.ApiServ.GetHeader()
         )
         .toPromise();
@@ -263,6 +263,8 @@ export class ReportItemCardComponent implements OnInit {
 
       const response = await this.inventoryDetailsService
         .getMovingAverageCost(
+          this.selectedStoreId!,
+          this.selectedItemId!,
           formattedDateFrom,
           formattedDateTo,
           this.inventoryDetailsService.ApiServ.GetHeader()
@@ -272,22 +274,23 @@ export class ReportItemCardComponent implements OnInit {
       console.log('Full API response:', response);
 
       if (response && response.length > 0) {
-        // Filter response for the specific item
-        const itemData = response.filter((item) => item.shopItemId === itemId);
+        // Fix: Use 'shopItemID' instead of 'shopItemId' to match API response
+        const itemData = response.filter((item) => item.shopItemID === itemId);
         console.log('Filtered data for itemId', itemId, ':', itemData);
 
-        // Sort by date (newest first)
-        const sortedData = itemData.sort(
-          (a, b) =>
-            new Date(b.dayDate).getTime() - new Date(a.dayDate).getTime()
-        );
-        console.log('Sorted data (newest first):', sortedData);
+        if (itemData.length > 0) {
+          // Sort by date (newest first)
+          const sortedData = itemData.sort(
+            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+          );
+          console.log('Sorted data (newest first):', sortedData);
 
-        const latestAverage = sortedData[0]?.averageCost || 0;
-        console.log('Selected average cost:', latestAverage);
+          const latestAverage = sortedData[0]?.averageCost || 0;
+          console.log('Selected average cost:', latestAverage);
 
-        console.groupEnd();
-        return latestAverage;
+          console.groupEnd();
+          return latestAverage;
+        }
       }
 
       console.log('No data found in response');
