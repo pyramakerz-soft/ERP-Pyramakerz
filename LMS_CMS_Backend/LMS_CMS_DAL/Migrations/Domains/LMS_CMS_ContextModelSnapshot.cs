@@ -37,40 +37,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.ToTable("HygieneTypeStudentHygieneTypes", (string)null);
                 });
 
-            modelBuilder.Entity("LMS_CMS_DAL.AccountingModule.Reports.AccountingEntriesReport", b =>
-                {
-                    b.Property<string>("Account")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal?>("Credit")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal?>("Debit")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<long>("InvoiceNumber")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("MainAccount")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<long>("MainAccountNo")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("SubAccount")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<long>("SubAccountNo")
-                        .HasColumnType("bigint");
-
-                    b.ToTable((string)null);
-
-                    b.ToView(null, (string)null);
-                });
-
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.AccountingModule.AccountingEntriesDetails", b =>
                 {
                     b.Property<long>("ID")
