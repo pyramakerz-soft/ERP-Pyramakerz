@@ -112,5 +112,7 @@ namespace LMS_CMS_DAL.Models.Domains
         public ICollection<ClassroomSubjectCoTeacher> ClassroomSubjectCoTeachers { get; set; } = new HashSet<ClassroomSubjectCoTeacher>();
         public ICollection<SubjectSupervisor> SubjectSupervisors { get; set; } = new HashSet<SubjectSupervisor>();
         public ICollection<GradeSupervisor> GradeSupervisors { get; set; } = new HashSet<GradeSupervisor>();
+        public ICollection<TimeTableSubject> TimeTableSubjects { get; set; } = new HashSet<TimeTableSubject>();
+
     }
 }

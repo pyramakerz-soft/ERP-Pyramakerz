@@ -44,5 +44,7 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public ICollection<LessonResourceClassroom> LessonResourceClassrooms { get; set; } = new HashSet<LessonResourceClassroom>();
         public ICollection<LessonLive> LessonLives { get; set; } = new HashSet<LessonLive>();
         public ICollection<ClassroomSubject> ClassroomSubjects { get; set; } = new HashSet<ClassroomSubject>();
+        public ICollection<TimeTableClassroom> TimeTableClassrooms { get; set; } = new HashSet<TimeTableClassroom>();
+
     }
 }

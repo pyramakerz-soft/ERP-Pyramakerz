@@ -200,6 +200,11 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<TaxCustomer> TaxCustomer_Repository;
         GenericRepo<AssignmentStudentQuestionAnswerOption> AssignmentStudentQuestionAnswerOption_Repository;
         GenericRepo<DailyPerformanceMaster> DailyPerformanceMaster_Repository;
+        GenericRepo<TimeTable> TimeTable_Repository;
+        GenericRepo<TimeTableClassroom> TimeTableClassroom_Repository;
+        GenericRepo<TimeTableSession> TimeTableSession_Repository;
+        GenericRepo<TimeTableSubject> TimeTableSubject_Repository;
+
 
         public UOW(Octa_DbContext octa_Db)
         {
@@ -2244,6 +2249,54 @@ namespace LMS_CMS_BL.UOW
                 return DailyPerformanceMaster_Repository;
             }
         }
+        public GenericRepo<TimeTable> timeTable_Repository
+        {
+            get
+            {
+                if (TimeTable_Repository == null)
+                {
+                    TimeTable_Repository = new GenericRepo<TimeTable>(db);
+                }
+                return TimeTable_Repository;
+            }
+        }
+
+        public GenericRepo<TimeTableClassroom> timeTableClassroom_Repository
+        {
+            get
+            {
+                if (TimeTableClassroom_Repository == null)
+                {
+                    TimeTableClassroom_Repository = new GenericRepo<TimeTableClassroom>(db);
+                }
+                return TimeTableClassroom_Repository;
+            }
+        }
+
+        public GenericRepo<TimeTableSession> timeTableSession_Repository
+        {
+            get
+            {
+                if (TimeTableSession_Repository == null)
+                {
+                    TimeTableSession_Repository = new GenericRepo<TimeTableSession>(db);
+                }
+                return TimeTableSession_Repository;
+            }
+        }
+
+        public GenericRepo<TimeTableSubject> timeTableSubject_Repository
+        {
+            get
+            {
+                if (TimeTableSubject_Repository == null)
+                {
+                    TimeTableSubject_Repository = new GenericRepo<TimeTableSubject>(db);
+                }
+                return TimeTableSubject_Repository;
+            }
+        }
+
 
         public GenericRepo<ETAPOS> pos_Repository
         {

@@ -809,6 +809,20 @@ export class InventoryDetailsComponent {
       return false;
     }
     console.log(this.Data.inventoryDetails)
+    if (this.mode === 'Create') {
+      for (const item of this.Data.inventoryDetails) {
+        if (!item.quantity || !item.quantity || isNaN(Number(item.quantity))) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Warning!',
+            text: 'Each item must have a valid quantity.',
+            confirmButtonColor: '#089B41',
+          });
+        //  this.validationErrors['inventoryDetails'] = 'quantity must have a valid Number';
+          return false;
+        }
+      }
+    }
     return isValid;
   }
   capitalizeField(field: keyof InventoryMaster): string {
