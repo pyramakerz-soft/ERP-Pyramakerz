@@ -294,6 +294,7 @@ export class RoleAddEditComponent {
               text: 'Role Added Succeessfully',
               confirmButtonColor: '#089B41',
             });
+            this.isLoading=false
             this.router.navigateByUrl("Employee/Role")
           },
           error: (error) => { 
@@ -326,6 +327,7 @@ export class RoleAddEditComponent {
               text: 'Role Edited Succeessfully',
               confirmButtonColor: '#089B41',
             });
+            this.isLoading=false
             this.router.navigateByUrl("Employee/Role")
           },
           error: (error) => { 

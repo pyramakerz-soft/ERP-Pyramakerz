@@ -376,21 +376,19 @@ namespace LMS_CMS_PL.Controllers.Octa
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa" }
         )]
-        public async Task<IActionResult> ReRunMigrations(string domainName)
-        {
-            if (string.IsNullOrWhiteSpace(domainName))
+        public async Task<IActionResult> ReRunMigrations()
+        { 
+            List<Domain> domains = _Unit_Of_Work.domain_Octa_Repository.FindBy_Octa(d => d.IsDeleted != true);
+            if (domains == null || domains.Count == 0)
             {
-                return BadRequest("Invalid domain name.");
+                return Conflict("Domains doesn't exist.");
             }
 
-            var existingDomain = _Unit_Of_Work.domain_Octa_Repository.First_Or_Default_Octa(d => d.Name == domainName);
-            if (existingDomain == null)
+            foreach (Domain domain in domains)
             {
-                return Conflict("Domain doesn't exist.");
+                await _dynamicDatabaseService.ApplyMigrations(domain.Name);
             }
-
-            await _dynamicDatabaseService.ApplyMigrations(domainName);
-
+             
             return Ok(new { message = "Migrations are Updated successfully." });
         }
 
@@ -568,6 +566,101 @@ namespace LMS_CMS_PL.Controllers.Octa
                 message = "Domain and database Updated successfully.",
                 notFoundPages = notFoundPages.Any() ? notFoundPages : null,
                 notModulePages = notModulePages.Any() ? notModulePages : null
+            });
+        }
+        
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpPut("AddMissingPages")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa" }
+        )]
+        public async Task<IActionResult> AddMissingPages()
+        {
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            if (userIdClaim == null)
+            {
+                return Unauthorized("User Id claim not found.");
+            } 
+
+            List<Domain> existingDomains = _Unit_Of_Work.domain_Octa_Repository.FindBy_Octa(d => d.IsDeleted != true);
+            if (existingDomains == null || existingDomains.Count == 0)
+            {
+                return Conflict("No Domain exist.");
+            }
+            foreach(Domain existDomain in existingDomains)
+            {
+                HttpContext.Items["ConnectionString"] = _getConnectionStringService.BuildConnectionString(existDomain.Name);
+                UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+                var existingPages = Unit_Of_Work.page_Repository.Select_All();
+            }
+
+            //// 3) Get The Deleted Ones (By Default it will delete the role details as on delete cascade)
+            //if (existingPages != null && existingPages.Count != 0)
+            //{
+            //    for (int i = 0; i < existingPages.Count; i++)
+            //    {
+            //        if (!domain.Pages.Contains(existingPages[i].ID) && existingPages[i].Page_ID == null)
+            //        {
+            //            var page = _Unit_Of_Work.page_Octa_Repository.Select_By_Id_Octa(existingPages[i].ID);
+            //            if (page != null)
+            //            {
+            //                DeletePageWithChildren(page, Unit_Of_Work);
+            //            }
+            //        }
+            //    }
+            //    Unit_Of_Work.SaveChanges();
+            //}
+
+            //// Delete pages that are in domain and not in Octa
+            //var pagesInDomain = Unit_Of_Work.page_Repository.Select_All();
+            //var pagesInOcta = _Unit_Of_Work.page_Octa_Repository.Select_All_Octa();
+            //var pagesNotInOcta = pagesInDomain.Where(domainPage => !pagesInOcta.Any(octaPage => octaPage.ID == domainPage.ID)).ToList();
+
+            //// Check if there are any pages not in `pagesInOcta`
+            //if (pagesNotInOcta.Any())
+            //{
+            //    for (int i = 0; i < pagesNotInOcta.Count; i++)
+            //    {
+            //        Unit_Of_Work.page_Repository.Delete(pagesNotInOcta[i].ID);
+            //    }
+            //}
+
+            //TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            ////// Add all pages to Admin role
+            //foreach (var pageId in addedPageIds)
+            //{
+            //    Role_Detailes roleDetail = new Role_Detailes
+            //    {
+            //        Role_ID = 1, // Admin Role
+            //        Page_ID = pageId,
+            //        Allow_Edit = true,
+            //        Allow_Delete = true,
+            //        Allow_Edit_For_Others = true,
+            //        Allow_Delete_For_Others = true,
+            //    };
+            //    roleDetail.InsertedByOctaId = userId;
+            //    roleDetail.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+
+            //    Role_Detailes existingRoleDetail = Unit_Of_Work.role_Detailes_Repository.First_Or_Default(d => d.IsDeleted != true && d.Role_ID == roleDetail.Role_ID && d.Page_ID == roleDetail.Page_ID);
+            //    if (existingRoleDetail == null)
+            //    {
+            //        Unit_Of_Work.role_Detailes_Repository.Add(roleDetail);
+            //    }
+            //}
+
+            //Unit_Of_Work.SaveChanges();
+
+            //existingDomain.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            //existingDomain.UpdatedByUserId = userId;
+
+            //_Unit_Of_Work.SaveOctaChanges();
+
+            return Ok(new
+            {
+                message = "Pages Updated successfully." 
             });
         }
 

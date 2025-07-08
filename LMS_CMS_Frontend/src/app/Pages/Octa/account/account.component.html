@@ -87,7 +87,7 @@
             </div>
      
             <div *ngIf="!editAccount" class="flex flex-col w-[49%] mb-4">
-                <label class="mb-2 primaryTxt" for="pass">Password</label>
+                <label class="mb-2 primaryTxt" for="pass" autocomplete="new-password">Password</label>
                 <input id="pass" type="password" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Password"
                 [(ngModel)]="accountToMake.password" 
                 (ngModelChange)="onInputValueChange({ field: 'password', value: $event })"/>

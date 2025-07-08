@@ -139,7 +139,7 @@ namespace LMS_CMS_PL.Controllers.Octa
 
         [HttpPut("EditPass")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" }
+            allowedTypes: new[] { "octa" }
         )]
         public async Task<IActionResult> EditpasswordAsync(EditPasswordDTO editedAcc)
         {

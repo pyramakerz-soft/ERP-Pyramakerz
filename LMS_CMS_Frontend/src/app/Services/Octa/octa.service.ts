@@ -2,6 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ApiService } from '../api.service';
 import { Account } from '../../Models/Octa/account';
+import { EditPass } from '../../Models/Employee/edit-pass';
 
 @Injectable({
   providedIn: 'root'
@@ -65,4 +66,11 @@ export class OctaService {
     return this.http.delete(`${this.baseUrl}/Octa/${id}`, { headers })
   }
 
+  EditPassword(editpass: EditPass, DomainName?: string) { 
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders() 
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.put(`${this.baseUrl}/Octa/EditPass`, editpass, { headers });
+  }
 }
