@@ -39,6 +39,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             new SqlParameter("@DateTo", toDate)
             ).ToListAsync();
 
+            if (result == null || !result.Any())
+            {
+                return NotFound("No accounting entries found for the specified date range.");
+            }
+
             return Ok(result);
         }
         #endregion
