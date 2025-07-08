@@ -271,6 +271,17 @@ export class ShopItemsAddEditComponent {
         }
       }
     }
+
+    if (this.ShopItem.enName.length > 100) {
+      isValid = false;
+      this.validationErrors['enName']='English Name cannot be longer than 100 characters.'
+    }
+
+    if (this.ShopItem.arName.length > 100) {
+      isValid = false;
+      this.validationErrors['arName']='Arabic Name cannot be longer than 100 characters.'
+    }
+
     return isValid;
   }
 

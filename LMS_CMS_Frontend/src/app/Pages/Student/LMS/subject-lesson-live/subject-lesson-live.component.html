@@ -9,7 +9,7 @@
         [ngStyle]="{ 'background-color': getRandomColor(i) }">
         <div class="flex justify-start items-center space-x-3 mb-3">
             <img src="Icons/Live.png" />
-            <h1 class="text-lg font-bold text-[#004279] ">live</h1>
+            <h1 class="text-lg font-bold text-[#004279] ">{{live.name}}</h1>
         </div>
         <div class="flex justify-start items-center space-x-2 text-[#6F6F6F] cursor-pointer" (click)="openLink(live.liveLink)">
             <i class="fa-solid fa-link"></i>

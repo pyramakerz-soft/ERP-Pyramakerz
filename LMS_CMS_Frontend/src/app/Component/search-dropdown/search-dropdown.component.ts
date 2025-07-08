@@ -82,6 +82,7 @@ export class SearchDropdownComponent {
     this.searchTerm = item[this.displayProperty];
     this.selectedValueChange.emit(item.id);
     this.showDropdown = false;
+    this.validationErrors=[]
   }
 
   hideDropdown(): void {

@@ -1,7 +1,7 @@
 <div class="rounded-lg py-2 lg:py-3 px-3 lg:px-6 primaryBg">
     <div class="flex items-center justify-between">
         <div>
-            <img src="Images/OctaWhiteLogo2.png">
+            <img src="Images/OctaWhiteLogo3.png">
         </div>
         <div>
             <input type="text"
@@ -85,10 +85,22 @@
         </div>
 
         <div class="mt-6 flex flex-wrap justify-between mb-4">
-            <div class="flex flex-col w-full"> 
+            <div class="flex flex-col w-full mb-4"> 
+                <label class="primaryTxt mb-2 font-medium" for="OldPassword">Old Password</label>
+                <input id="OldPassword" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Old password"
+                (input)="onoldPasswordChange()" [(ngModel)]="editpasss.oldPassword"/> 
+                <span *ngIf="OldPasswordError" class="text-red-500 text-sm font-normal">{{ OldPasswordError }}</span>
+            </div> 
+            <div class="flex flex-col w-full mb-4"> 
+                <label class="primaryTxt mb-2 font-medium" for="Password">Password</label>
                 <input id="Password" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter the password"
                 (input)="onPasswordChange()" [(ngModel)]="password"/>
                 <span *ngIf="PasswordError" class="text-red-500 text-sm font-normal">{{ PasswordError }}</span>
+            </div> 
+            <div class="flex flex-col w-full mb-4"> 
+                <label class="primaryTxt mb-2 font-medium" for="confirmPassword">Confirm Password</label>
+                <input id="confirmPassword" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter the password Again"
+                [(ngModel)]="confirmPassword"/> 
             </div> 
         </div> 
         <div class="flex justify-end">

@@ -76,7 +76,7 @@ export class ShopItemService {
     return this.http.get<ShopItem>(`${this.baseUrl}/ShopItem/${id}`, { headers })
   }
 
-  GetByBarcode(barcode: string, DomainName: string) {
+  GetByBarcode(StoreId : number ,barcode: string, DomainName: string) {
     if (DomainName != null) {
       this.header = DomainName
     }
@@ -85,7 +85,7 @@ export class ShopItemService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.get<ShopItem>(`${this.baseUrl}/ShopItem/ByBarcode/${barcode}`, { headers })
+    return this.http.get<ShopItem>(`${this.baseUrl}/ShopItem/ByBarcode/${barcode}/${StoreId}`, { headers })
   }
 
   Add(ShopItem: ShopItem, DomainName: string) {

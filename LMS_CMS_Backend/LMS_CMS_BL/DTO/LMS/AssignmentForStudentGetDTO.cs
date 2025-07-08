@@ -15,8 +15,8 @@ namespace LMS_CMS_BL.DTO.LMS
         public long StudentClassroomID { get; set; }
         public string AssignmentEnglishName { get; set; }
         public string AssignmentArabicName { get; set; }
-        public float Mark { get; set; }
-        public float AssignmentMark { get; set; }
+        public float? Degree { get; set; }
+        public float AssignmentDegree { get; set; }
         public DateOnly OpenDate { get; set; }
         public DateOnly DueDate { get; set; }
         public DateOnly CutOfDate { get; set; } 
@@ -28,6 +28,10 @@ namespace LMS_CMS_BL.DTO.LMS
         public string AssignmentTypeArabicName { get; set; }
         public long SubjectWeightTypeID { get; set; }
         public string SubjectWeightTypeEnglishName { get; set; }
-        public string SubjectWeightTypeArabicName { get; set; }  
+        public string SubjectWeightTypeArabicName { get; set; }
+        public bool IsVisibleToStudent { get; set; }
+        public string? InsertedByUserName { get; set; }
+
+
     }
 }

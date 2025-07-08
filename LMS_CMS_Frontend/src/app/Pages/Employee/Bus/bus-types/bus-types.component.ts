@@ -12,13 +12,15 @@ import { Domain } from '../../../../Models/domain';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { ApiService } from '../../../../Services/api.service';
 import { SearchComponent } from '../../../../Component/search/search.component';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
 
 @Component({
   selector: 'app-bus-types',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './bus-types.component.html',
   styleUrls: ['./bus-types.component.css'],
 })
@@ -61,6 +63,8 @@ export class BusTypesComponent {
 
   validationErrors: { [key in keyof BusType]?: string } = {};
   isLoading = false;
+  isRtl: boolean = false;
+  subscription!: Subscription;
 
   constructor(
     private router: Router,
@@ -70,8 +74,10 @@ export class BusTypesComponent {
     public BusTypeServ: BusTypeService,
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
-    public ApiServ: ApiService
-  ) {}
+    public ApiServ: ApiService,
+    private languageService: LanguageService
+
+  ) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -101,6 +107,11 @@ export class BusTypesComponent {
       this.AllowEdit = true;
       this.AllowDelete = true;
     }
+
+    this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   Create() {
@@ -184,6 +195,12 @@ export class BusTypesComponent {
         }
       }
     }
+
+    if (this.busType.name.length > 100) {
+      isValid = false;
+      this.validationErrors['name'] = 'Name cannot be longer than 100 characters.'
+    }
+
     return isValid;
   }
 
@@ -226,7 +243,7 @@ export class BusTypesComponent {
       }
     );
   }
-  
+
   CreateOREdit() {
     if (this.isFormValid()) {
       if (this.mode === 'add') {
@@ -270,8 +287,8 @@ export class BusTypesComponent {
 
   async onSearchEvent(event: { key: string; value: any }) {
     this.key = event.key;
-    this.value = event.value; 
-    
+    this.value = event.value;
+
     const data: BusType[] = await firstValueFrom(
       this.BusTypeServ.Get(this.DomainName)
     );

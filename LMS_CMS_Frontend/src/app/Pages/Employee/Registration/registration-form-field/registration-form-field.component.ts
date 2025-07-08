@@ -207,6 +207,17 @@ export class RegistrationFormFieldComponent {
         }
       }
     }
+
+    if (this.Category.enName.length > 100) {
+      this.validationErrors['enName'] = `*English Name cannot be longer than 100 characters`;
+      isValid = false;
+    }
+
+    if (this.Category.arName.length > 100) {
+      this.validationErrors['arName'] = `*Arabic Name cannot be longer than 100 characters`;
+      isValid = false;
+    }
+
     return isValid;
   }
   capitalizeField(field: keyof RegistrationCategory): string {

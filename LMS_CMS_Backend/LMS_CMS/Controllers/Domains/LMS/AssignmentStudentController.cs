@@ -215,6 +215,9 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                      .ThenInclude(a => a.AssignmentQuestions)
                          .ThenInclude(aq => aq.QuestionBank),
 
+                  query => query.Include(e => e.Assignment)
+                     .ThenInclude(aq => aq.Subject),
+
                  query => query.Include(e => e.StudentClassroom)
                      .ThenInclude(sc => sc.Student),
 
@@ -365,6 +368,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             assignmentStudent = mapper.Map<AssignmentStudent>(newData);
 
             assignmentStudent.StudentClassroomID = studentClassroom.ID;
+            assignmentStudent.Degree=null;
             // Set inserted timestamps and user
             assignmentStudent.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
             if (userTypeClaim == "octa")
@@ -584,22 +588,25 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                        : 0;
             }
 
-            if (assignmentStudent.InsertedAt.HasValue && assignmentStudent.Assignment != null && assignmentStudent.Assignment.DueDate != null) 
+            if (newData.EvaluationConsideringTheDelay==true)
             {
-                var insertedDate = assignmentStudent.InsertedAt.Value.Date;
-                var dueDate = assignmentStudent.Assignment.DueDate;
-
-                // Convert DateOnly to DateTime for comparison
-                var dueDateTime = dueDate.ToDateTime(TimeOnly.MinValue);
-
-                if (insertedDate > dueDateTime)
+                if (assignmentStudent.InsertedAt.HasValue && assignmentStudent.Assignment != null && assignmentStudent.Assignment.DueDate != null) 
                 {
-                    double penaltyRatio = assignmentStudent.Assignment.Subject?.AssignmentCutOffDatePercentage ?? 0;
-                    penaltyRatio = penaltyRatio / 100;
-                    if (penaltyRatio > 0 && penaltyRatio <= 1 && assignmentStudent.Degree > 0)
+                    var insertedDate = assignmentStudent.InsertedAt.Value.Date;
+                    var dueDate = assignmentStudent.Assignment.DueDate;
+
+                    // Convert DateOnly to DateTime for comparison
+                    var dueDateTime = dueDate.ToDateTime(TimeOnly.MinValue);
+
+                    if (insertedDate > dueDateTime)
                     {
-                        float penalty = (float)(assignmentStudent.Degree * penaltyRatio);
-                        assignmentStudent.Degree -= penalty;
+                        double penaltyRatio = assignmentStudent.Assignment.Subject?.AssignmentCutOffDatePercentage ?? 0;
+                        penaltyRatio = penaltyRatio / 100;
+                        if (penaltyRatio > 0 && penaltyRatio <= 1 && assignmentStudent.Degree > 0)
+                        {
+                            float penalty = (float)(assignmentStudent.Degree * penaltyRatio);
+                            assignmentStudent.Degree -= penalty;
+                        }
                     }
                 }
             }

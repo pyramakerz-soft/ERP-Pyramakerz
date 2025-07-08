@@ -10,7 +10,7 @@ namespace LMS_CMS_BL.DTO.LMS
     public class AssignmentStudentGetDTO
     {
         public long? ID { get; set; }
-        public float Degree { get; set; }
+        public float? Degree { get; set; }
         public float AssignmentDegree { get; set; }
         public long AssignmentID { get; set; }
         public long AssignmentTypeID { get; set; }
@@ -23,6 +23,9 @@ namespace LMS_CMS_BL.DTO.LMS
         public long StudentID { get; set; }
         public string StudentEnglishName { get; set; }
         public string StudentArabicName { get; set; }
+
+        public long SubjectId { get; set; }
+        public string SubjectName { get; set; }
 
         public string AssignmentArabicName { get; set; }
         public string AssignmentEnglishName { get; set; }

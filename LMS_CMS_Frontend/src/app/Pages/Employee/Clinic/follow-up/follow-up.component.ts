@@ -296,6 +296,9 @@ export class FollowUpComponent implements OnInit {
 
   closeDrugModal() {
     this.isDrugModalVisible = false;
+    this.drugValidationErrors = {};
+    this.validationErrors = {};
+    this.doseValidationErrors = {};
   }
 
   async saveDrug() {
@@ -326,6 +329,9 @@ export class FollowUpComponent implements OnInit {
 
   closeDoseModal() {
     this.isDoseModalVisible = false;
+    this.drugValidationErrors = {};
+    this.validationErrors = {};
+    this.doseValidationErrors = {};
   }
 
   async saveDose() {
@@ -399,6 +405,9 @@ export class FollowUpComponent implements OnInit {
     this.grades = [];
     this.classes = [];
     this.students = [];
+    this.drugValidationErrors = {};
+    this.validationErrors = {};
+    this.doseValidationErrors = {};
   }
 
   isSaving: boolean = false;

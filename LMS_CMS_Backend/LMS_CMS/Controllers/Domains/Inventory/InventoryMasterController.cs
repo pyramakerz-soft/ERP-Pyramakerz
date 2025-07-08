@@ -668,11 +668,29 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
             }
 
-            newData.InventoryDetails.RemoveAll(item =>
+            List<ShopItem> existingShopItems = new List<ShopItem>();
+
+            for (int i = newData.InventoryDetails.Count - 1; i >= 0; i--)
             {
-                var shopItem = Unit_Of_Work.shopItem_Repository.First_Or_Default(s => s.ID == item.ShopItemID && s.IsDeleted != true);
-                return shopItem == null;
-            });
+                var item = newData.InventoryDetails[i];
+
+                var shopItem = await Unit_Of_Work.shopItem_Repository.FindByIncludesAsync(
+                    s => s.ID == item.ShopItemID && s.IsDeleted != true,
+                    query => query.Include(store => store.InventorySubCategories),
+                    query => query.Include(store => store.InventorySubCategories).ThenInclude(s=>s.InventoryCategories)
+                );
+
+                if (shopItem == null)
+                {
+                    newData.InventoryDetails.RemoveAt(i); // Remove invalid item
+                }
+                else
+                {
+                    existingShopItems.Add(shopItem); 
+                }
+            }
+
+
 
             foreach (var item in newData.InventoryDetails)
             {
@@ -707,6 +725,27 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
             Unit_Of_Work.inventoryMaster_Repository.Add(Master);
             await Unit_Of_Work.SaveChangesAsync();
+
+            // If Transfer to Store
+            if(newData.FlagId == 8 && newData.StoreToTransformId!= null)
+            {
+                List<long> CategortyIds = existingShopItems.Select(s => s.InventorySubCategories.InventoryCategoriesID).ToList();
+                List<StoreCategories> storeCategories = Unit_Of_Work.storeCategories_Repository.FindBy(s => s.StoreID == newData.StoreToTransformId && s.IsDeleted != true);
+                List<long> ExistedCategoriesId = storeCategories.Select(s => s.InventoryCategoriesID).ToList();
+                List<long> missingCategoryIds = CategortyIds.Where(id => !ExistedCategoriesId.Contains(id)).Distinct().ToList();
+                List<StoreCategories> newStoreCategories = missingCategoryIds.Select(id => new StoreCategories
+                {
+                    StoreID = newData.StoreToTransformId.Value,
+                    InventoryCategoriesID = id,
+                    IsDeleted = false,
+                }).ToList();
+
+                // Add to DB
+                Unit_Of_Work.storeCategories_Repository.AddRange(newStoreCategories);
+            }
+
+
+
             long SaleID = 0;
             SaleID = Master.ID;
 

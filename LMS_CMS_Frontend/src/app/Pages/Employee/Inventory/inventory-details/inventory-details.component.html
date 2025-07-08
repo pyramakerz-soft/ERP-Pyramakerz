@@ -26,7 +26,7 @@
   <div class="flex flex-col w-[24%] mb-4">
     <label class="mb-2" for="store">Store</label>
     <select *ngIf="!IsPrint" class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Store"
-      (change)="StoreChanged()" (ngModelChange)="onInputValueChange({ field: 'storeID', value: $event })"
+      (change)="StoreChanged()" (ngModelChange)="onInputValueChange({ field: 'storeID', value: $event })"  [disabled]="mode === 'Edit'"
       [(ngModel)]="Data.storeID">
       <option [value]="0" disabled selected hidden>Choose Store</option>
       <option *ngFor="let s of Stores" [value]="s.id">{{ s.name }}</option>
@@ -289,7 +289,7 @@
   </div>
 </div>
 
-<div class="my-5 flex justify-end space-x-4">
+<div class="my-5 flex justify-end space-x-4" *ngIf="mode == 'Edit'">
   <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="DownloadAsExcel()">
   <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()">
   <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()">
@@ -413,7 +413,7 @@
             {{ row.shopItemName }}
           </td>
           <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-            <input [(ngModel)]="row.quantity" (ngModelChange)="CalculateTotalPrice(row)" type="number"
+            <input [(ngModel)]="row.quantity" (ngModelChange)="CalculateTotalPrice(row)"(input)="validateNumber($event, 'quantity')" type="text"
               class="w-full border border-gray-300 px-2 py-1 rounded-md" />
           </td>
           <td *ngIf="!IsPriceEditable && mode === 'Create'"
@@ -422,7 +422,7 @@
           </td>
           <td *ngIf="IsPriceEditable || mode === 'Edit'"
             class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-            <input [(ngModel)]="row.price" (ngModelChange)="EditPrice(row)" type="number"
+            <input [(ngModel)]="row.price" (ngModelChange)="EditPrice(row)" (input)="validateNumber($event, 'price')" type="text"
               class="w-full border border-gray-300 px-2 py-1 rounded-md" />
           </td>
           <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
@@ -501,7 +501,7 @@
             {{ row.shopItemName }}
           </td>
           <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-            <input [(ngModel)]="row.quantity" (ngModelChange)="CalculateTotalPrice(row)" type="number"
+            <input [(ngModel)]="row.quantity" (ngModelChange)="CalculateTotalPrice(row)" (input)="validateNumber($event, 'quantity')" type="text"
               class="w-full border border-gray-300 px-2 py-1 rounded-md" />
           </td>
           <td *ngIf="!IsPriceEditable && mode === 'Create'"
@@ -510,7 +510,7 @@
           </td>
           <td *ngIf="IsPriceEditable || mode === 'Edit'"
             class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-            <input [(ngModel)]="row.price" (ngModelChange)="EditPrice(row)" type="number"
+            <input [(ngModel)]="row.price" (ngModelChange)="EditPrice(row)" (input)="validateNumber($event, 'price')" type="text"
               class="w-full border border-gray-300 px-2 py-1 rounded-md" />
           </td>
           <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
