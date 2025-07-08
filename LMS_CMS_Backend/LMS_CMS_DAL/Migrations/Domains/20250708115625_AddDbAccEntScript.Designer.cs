@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LMS_CMS_DAL.Migrations.LMS_CMS_
 {
     [DbContext(typeof(LMS_CMS_Context))]
-    [Migration("20250708110825_AddDbAccEntScript")]
+    [Migration("20250708115625_AddDbAccEntScript")]
     partial class AddDbAccEntScript
     {
         /// <inheritdoc />
