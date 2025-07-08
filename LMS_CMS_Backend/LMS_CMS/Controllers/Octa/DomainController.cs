@@ -23,6 +23,7 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using MimeKit;
+using System.Linq;
 
 namespace LMS_CMS_PL.Controllers.Octa
 {
@@ -585,6 +586,7 @@ namespace LMS_CMS_PL.Controllers.Octa
         )]
         public async Task<IActionResult> AddMissingPages()
         {
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
             long.TryParse(userIdClaim, out long userId);
             if (userIdClaim == null)
@@ -599,6 +601,7 @@ namespace LMS_CMS_PL.Controllers.Octa
             }
 
             var pagesInOcta = _Unit_Of_Work.page_Octa_Repository.Select_All_Octa();
+            var globalPageIds = pagesInOcta.Select(p => p.ID).ToHashSet();
 
             foreach (Domain existDomain in existingDomains)
             {
@@ -606,67 +609,73 @@ namespace LMS_CMS_PL.Controllers.Octa
                 UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
                 var existingPagesForDomain = Unit_Of_Work.page_Repository.Select_All();
+                var domainPageIDs = existingPagesForDomain.Select(p => p.ID).ToHashSet();
+
+                if (existingPagesForDomain != null && existingPagesForDomain.Count != 0)
+                {
+                    var pagesToDelete = existingPagesForDomain
+                        .Where(p => !globalPageIds.Contains(p.ID))
+                        .ToList();
+
+                    if (pagesToDelete.Count > 0)
+                    {
+                        foreach (var page in pagesToDelete)
+                        {
+                            Unit_Of_Work.page_Repository.Delete(page.ID);
+                        }
+
+                        Unit_Of_Work.SaveChanges();
+                    }
+
+                    var pagesToInsert = pagesInOcta
+                        .Where(octaPage => !domainPageIDs.Contains(octaPage.ID))  
+                        .ToList();
+
+                    if (pagesToInsert.Count > 0)
+                    {
+                        foreach (var page in pagesToInsert)
+                        {
+                            LMS_CMS_DAL.Models.Domains.Page pageNew = new LMS_CMS_DAL.Models.Domains.Page
+                            {
+                                ID = page.ID,
+                                en_name = page.en_name,
+                                ar_name = page.ar_name,
+                                Order = page.Order,
+                                enDisplayName_name = page.enDisplayName_name,
+                                arDisplayName_name = page.arDisplayName_name,
+                                IsDisplay = page.IsDisplay,
+                                Page_ID = page.Page_ID
+                            };
+
+                            Unit_Of_Work.page_Repository.Add(pageNew);
+
+                            Role_Detailes roleDetail = new Role_Detailes
+                            {
+                                Role_ID = 1, // Admin Role
+                                Page_ID = page.ID,
+                                Allow_Edit = true,
+                                Allow_Delete = true,
+                                Allow_Edit_For_Others = true,
+                                Allow_Delete_For_Others = true,
+                            };
+                            roleDetail.InsertedByOctaId = userId;
+                            roleDetail.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+
+                            Role_Detailes existingRoleDetail = Unit_Of_Work.role_Detailes_Repository.First_Or_Default(d => d.IsDeleted != true && d.Role_ID == roleDetail.Role_ID && d.Page_ID == roleDetail.Page_ID);
+                            if (existingRoleDetail == null)
+                            {
+                                Unit_Of_Work.role_Detailes_Repository.Add(roleDetail);
+                            }
+                        }
+
+                        Unit_Of_Work.SaveChanges();
+                    }
+                }
+                existDomain.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                existDomain.UpdatedByUserId = userId;
             }
 
-            // 3) Get The Deleted Ones (By Default it will delete the role details as on delete cascade)
-            //if (existingPages != null && existingPages.Count != 0)
-            //{
-            //    for (int i = 0; i < existingPages.Count; i++)
-            //    {
-            //        if (!domain.Pages.Contains(existingPages[i].ID) && existingPages[i].Page_ID == null)
-            //        {
-            //            var page = _Unit_Of_Work.page_Octa_Repository.Select_By_Id_Octa(existingPages[i].ID);
-            //            if (page != null)
-            //            {
-            //                DeletePageWithChildren(page, Unit_Of_Work);
-            //            }
-            //        }
-            //    }
-            //    Unit_Of_Work.SaveChanges();
-            //}
-
-            //// Delete pages that are in domain and not in Octa
-            
-            //var pagesNotInOcta = pagesInDomain.Where(domainPage => !pagesInOcta.Any(octaPage => octaPage.ID == domainPage.ID)).ToList();
-
-            //// Check if there are any pages not in `pagesInOcta`
-            //if (pagesNotInOcta.Any())
-            //{
-            //    for (int i = 0; i < pagesNotInOcta.Count; i++)
-            //    {
-            //        Unit_Of_Work.page_Repository.Delete(pagesNotInOcta[i].ID);
-            //    }
-            //}
-
-            //TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-            ////// Add all pages to Admin role
-            //foreach (var pageId in addedPageIds)
-            //{
-            //    Role_Detailes roleDetail = new Role_Detailes
-            //    {
-            //        Role_ID = 1, // Admin Role
-            //        Page_ID = pageId,
-            //        Allow_Edit = true,
-            //        Allow_Delete = true,
-            //        Allow_Edit_For_Others = true,
-            //        Allow_Delete_For_Others = true,
-            //    };
-            //    roleDetail.InsertedByOctaId = userId;
-            //    roleDetail.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
-
-            //    Role_Detailes existingRoleDetail = Unit_Of_Work.role_Detailes_Repository.First_Or_Default(d => d.IsDeleted != true && d.Role_ID == roleDetail.Role_ID && d.Page_ID == roleDetail.Page_ID);
-            //    if (existingRoleDetail == null)
-            //    {
-            //        Unit_Of_Work.role_Detailes_Repository.Add(roleDetail);
-            //    }
-            //}
-
-            //Unit_Of_Work.SaveChanges();
-
-            //existingDomain.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
-            //existingDomain.UpdatedByUserId = userId;
-
-            //_Unit_Of_Work.SaveOctaChanges();
+            _Unit_Of_Work.SaveOctaChanges();
 
             return Ok(new
             {
