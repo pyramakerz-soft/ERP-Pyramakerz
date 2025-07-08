@@ -589,15 +589,18 @@ namespace LMS_CMS_PL.Controllers.Octa
             {
                 return Conflict("No Domain exist.");
             }
-            foreach(Domain existDomain in existingDomains)
+
+            var pagesInOcta = _Unit_Of_Work.page_Octa_Repository.Select_All_Octa();
+
+            foreach (Domain existDomain in existingDomains)
             {
                 HttpContext.Items["ConnectionString"] = _getConnectionStringService.BuildConnectionString(existDomain.Name);
                 UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-                var existingPages = Unit_Of_Work.page_Repository.Select_All();
+                var existingPagesForDomain = Unit_Of_Work.page_Repository.Select_All();
             }
 
-            //// 3) Get The Deleted Ones (By Default it will delete the role details as on delete cascade)
+            // 3) Get The Deleted Ones (By Default it will delete the role details as on delete cascade)
             //if (existingPages != null && existingPages.Count != 0)
             //{
             //    for (int i = 0; i < existingPages.Count; i++)
@@ -615,8 +618,7 @@ namespace LMS_CMS_PL.Controllers.Octa
             //}
 
             //// Delete pages that are in domain and not in Octa
-            //var pagesInDomain = Unit_Of_Work.page_Repository.Select_All();
-            //var pagesInOcta = _Unit_Of_Work.page_Octa_Repository.Select_All_Octa();
+            
             //var pagesNotInOcta = pagesInDomain.Where(domainPage => !pagesInOcta.Any(octaPage => octaPage.ID == domainPage.ID)).ToList();
 
             //// Check if there are any pages not in `pagesInOcta`
