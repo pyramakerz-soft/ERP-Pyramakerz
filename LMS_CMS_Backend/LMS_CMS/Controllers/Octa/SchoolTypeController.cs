@@ -168,7 +168,7 @@ namespace LMS_CMS_PL.Controllers.Octa
             }
 
             LMS_CMS_DAL.Models.Octa.SchoolType st = _Unit_Of_Work.schoolType_Octa_Repository.First_Or_Default_Octa(
-                s => s.Name == schoolType.Name
+                s => s.Name == schoolType.Name && s.ID != schoolType.ID
                 );
 
             if (st != null)

@@ -11,10 +11,12 @@
         <button (click)="printInvoice()" class="p-1 flex items-center gap-2 secondaryTxt text-3xl"
             [disabled]="isSubmitting">
             <i class="fa-solid fa-print"></i> </button>
-        <button (click)="sendInvoice()" class="p-1 flex items-center gap-2 secondaryTxt text-3xl"
-            [disabled]="isSubmitting">
-            <i class="fa-regular fa-paper-plane"></i> <span *ngIf="isSubmitting">Sending...</span>
-        </button>
+<!-- Replace the existing send button in electronic-invoice-detail.component.html with this: -->
+<button (click)="sendInvoice()" class="p-2 font-medium text-3xl rounded-lg flex items-center gap-2 secondaryTxt"
+    [disabled]="isSubmitting" [ngClass]="{'opacity-50 cursor-not-allowed': isSubmitting}">
+    <i *ngIf="!isSubmitting" class="fa-regular fa-paper-plane"></i>
+    <i *ngIf="isSubmitting" class="fas fa-spinner fa-spin"></i>
+</button>
     </div>
 </div>
 

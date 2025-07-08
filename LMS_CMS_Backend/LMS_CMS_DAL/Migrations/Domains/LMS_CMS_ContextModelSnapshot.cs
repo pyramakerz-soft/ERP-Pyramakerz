@@ -49,8 +49,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<decimal?>("Debit")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<long>("InvoiceNumber")
-                        .HasColumnType("bigint");
+                    b.Property<string>("InvoiceNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("MainAccount")
                         .IsRequired()

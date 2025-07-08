@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LMS_CMS_DAL.Migrations.LMS_CMS_
 {
     [DbContext(typeof(LMS_CMS_Context))]
-    [Migration("20250707072710_AddDbFuncionScript")]
-    partial class AddDbFuncionScript
+    [Migration("20250708115625_AddDbAccEntScript")]
+    partial class AddDbAccEntScript
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -52,8 +52,9 @@ namespace LMS_CMS_DAL.Migrations.LMS_CMS_
                     b.Property<decimal?>("Debit")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<long>("InvoiceNumber")
-                        .HasColumnType("bigint");
+                    b.Property<string>("InvoiceNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("MainAccount")
                         .IsRequired()

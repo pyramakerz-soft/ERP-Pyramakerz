@@ -247,7 +247,7 @@ export class EmployeeService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.put(`${this.baseUrl}/Employee/${editpass.id}`, editpass, { headers });
+    return this.http.put(`${this.baseUrl}/Employee/EditPass`, editpass, { headers });
   }
 
   EditAccountingEmployee(employee: AccountingEmployee, DomainName?: string) {

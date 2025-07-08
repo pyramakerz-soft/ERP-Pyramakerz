@@ -66,6 +66,8 @@ export class SchoolTypeComponent {
       this.editSchoolType = false
     }
     this.validationErrors = {}; 
+
+    this.isSaved = false
   }
 
   async onSearchEvent(event: { key: string, value: any }) {

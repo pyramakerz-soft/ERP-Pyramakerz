@@ -232,12 +232,34 @@ export class ReportItemCardComponent implements OnInit {
     this.prepareExportData();
   }
 
-  private async getAverageCost(date?: string): Promise<number> {
+  private async getAverageCost(itemId: number, date?: string): Promise<number> {
     try {
-      const formattedDateFrom = this.formatDateForAPI(this.dateFrom);
+      console.group('getAverageCost Debug Info');
+      console.log('Input parameters:', { itemId, date });
+
+      // Format dates as MM/DD/YYYY
+      const formatDateForAverageAPI = (dateString: string): string => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) {
+          console.error('Invalid date:', dateString);
+          return '';
+        }
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        const year = date.getFullYear();
+        return `${month}/${day}/${year}`;
+      };
+
+      const formattedDateFrom = formatDateForAverageAPI(this.dateFrom);
       const formattedDateTo = date
-        ? this.formatDateForAPI(date)
-        : this.formatDateForAPI(this.dateTo);
+        ? formatDateForAverageAPI(date)
+        : formatDateForAverageAPI(this.dateTo);
+
+      console.log('Formatted dates for API:', {
+        fromDate: formattedDateFrom,
+        toDate: formattedDateTo,
+      });
 
       const response = await this.inventoryDetailsService
         .getMovingAverageCost(
@@ -247,12 +269,33 @@ export class ReportItemCardComponent implements OnInit {
         )
         .toPromise();
 
+      console.log('Full API response:', response);
+
       if (response && response.length > 0) {
-        return response[response.length - 1].averageCost || 0;
+        // Filter response for the specific item
+        const itemData = response.filter((item) => item.shopItemId === itemId);
+        console.log('Filtered data for itemId', itemId, ':', itemData);
+
+        // Sort by date (newest first)
+        const sortedData = itemData.sort(
+          (a, b) =>
+            new Date(b.dayDate).getTime() - new Date(a.dayDate).getTime()
+        );
+        console.log('Sorted data (newest first):', sortedData);
+
+        const latestAverage = sortedData[0]?.averageCost || 0;
+        console.log('Selected average cost:', latestAverage);
+
+        console.groupEnd();
+        return latestAverage;
       }
+
+      console.log('No data found in response');
+      console.groupEnd();
       return 0;
     } catch (error) {
-      console.error('Error fetching average cost:', error);
+      console.error('Error in getAverageCost:', error);
+      console.groupEnd();
       return 0;
     }
   }
