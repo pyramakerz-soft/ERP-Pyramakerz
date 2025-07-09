@@ -3,12 +3,16 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import * as XLSX from 'xlsx';
-import { PdfPrintComponent } from '../../../../../Component/pdf-print/pdf-print.component';
-import { Store } from '../../../../../Models/Inventory/store';
-import { InventoryDetailsService } from '../../../../../Services/Employee/Inventory/inventory-details.service';
-import { StoresService } from '../../../../../Services/Employee/Inventory/stores.service';
-import { ShopItemService } from '../../../../../Services/Employee/Inventory/shop-item.service';
-import { CombinedReportData, InventoryNetSummary, InventoryNetTransaction } from '../../../../../Models/Inventory/report-card';
+import { PdfPrintComponent } from '../../../../../../Component/pdf-print/pdf-print.component';
+import { Store } from '../../../../../../Models/Inventory/store';
+import { InventoryDetailsService } from '../../../../../../Services/Employee/Inventory/inventory-details.service';
+import { StoresService } from '../../../../../../Services/Employee/Inventory/stores.service';
+import { ShopItemService } from '../../../../../../Services/Employee/Inventory/shop-item.service';
+import {
+  CombinedReportData,
+  InventoryNetSummary,
+  InventoryNetTransaction,
+} from '../../../../../../Models/Inventory/report-card';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -103,7 +107,24 @@ export class ReportItemCardComponent implements OnInit {
   }
 
   async viewReport() {
-    if (!this.validateDateRange()) {
+    if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
+      Swal.fire({
+        title: 'Invalid Date Range',
+        text: 'Start date cannot be later than end date.',
+        icon: 'warning',
+        confirmButtonText: 'OK',
+      });
+      return;
+    }
+
+    if (!this.selectedStoreId || !this.selectedItemId) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Missing Information',
+        text: 'Please select both Store and Item',
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: 'OK',
+      });
       return;
     }
 
@@ -127,7 +148,7 @@ export class ReportItemCardComponent implements OnInit {
         .getInventoryNetSummary(
           this.selectedStoreId!,
           this.selectedItemId!,
-          formattedDateTo,
+          formattedDateFrom,
           this.inventoryDetailsService.ApiServ.GetHeader()
         )
         .toPromise();
@@ -231,27 +252,53 @@ export class ReportItemCardComponent implements OnInit {
     this.prepareExportData();
   }
 
-  private async getAverageCost(date?: string): Promise<number> {
+  private async getAverageCost(itemId: number, date?: string): Promise<number> {
     try {
-      const formattedDateFrom = this.formatDateForAPI(this.dateFrom);
+      console.group('getAverageCost Debug Info');
+      console.log('Input parameters:', { itemId, date });
+
+      // Format dates as MM/DD/YYYY
+      const formatDateForAverageAPI = (dateString: string): string => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) {
+          console.error('Invalid date:', dateString);
+          return '';
+        }
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        const year = date.getFullYear();
+        return `${month}/${day}/${year}`;
+      };
+
+      const formattedDateFrom = formatDateForAverageAPI(this.dateFrom);
       const formattedDateTo = date
-        ? this.formatDateForAPI(date)
-        : this.formatDateForAPI(this.dateTo);
+        ? formatDateForAverageAPI(date)
+        : formatDateForAverageAPI(this.dateTo);
+
+      console.log('Formatted dates for API:', {
+        fromDate: formattedDateFrom,
+        toDate: formattedDateTo,
+      });
 
       const response = await this.inventoryDetailsService
         .getMovingAverageCost(
+          this.selectedStoreId!,
+          this.selectedItemId!,
           formattedDateFrom,
           formattedDateTo,
           this.inventoryDetailsService.ApiServ.GetHeader()
         )
         .toPromise();
 
-      if (response && response.length > 0) {
-        return response[response.length - 1].averageCost || 0;
-      }
+      console.log('Full API response:', response);
+
+      console.log('No data found in response');
+      console.groupEnd();
       return 0;
     } catch (error) {
-      console.error('Error fetching average cost:', error);
+      console.error('Error in getAverageCost:', error);
+      console.groupEnd();
       return 0;
     }
   }
@@ -296,14 +343,14 @@ export class ReportItemCardComponent implements OnInit {
     return `${day}/${month}/${year}`;
   }
 
-  private validateFilters(): boolean {
-    return (
-      !!this.dateFrom &&
-      !!this.dateTo &&
-      this.selectedStoreId !== null &&
-      this.selectedItemId !== null
-    );
-  }
+  // private validateFilters(): boolean {
+  //   return (
+  //     !!this.dateFrom &&
+  //     !!this.dateTo &&
+  //     this.selectedStoreId !== null &&
+  //     this.selectedItemId !== null
+  //   );
+  // }
 
   DownloadAsPDF() {
     if (this.transactionsForExport.length === 0) {

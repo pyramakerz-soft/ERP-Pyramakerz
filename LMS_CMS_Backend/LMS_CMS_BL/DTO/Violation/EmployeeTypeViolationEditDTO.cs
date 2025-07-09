@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,6 +10,8 @@ namespace LMS_CMS_BL.DTO.Violation
     public class EmployeeTypeViolationEditDTO
     {
         public long ViolationId { get; set; }
+        [Required(ErrorMessage = "Name is required")]
+        [StringLength(100, ErrorMessage = "Name cannot be longer than 100 characters.")] 
         public String ViolationName { get; set; }
         public List<long> EmployeeTypeID { get; set; }
     }

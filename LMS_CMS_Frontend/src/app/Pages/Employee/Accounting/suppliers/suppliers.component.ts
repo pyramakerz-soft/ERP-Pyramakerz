@@ -259,6 +259,11 @@ export class SuppliersComponent {
       isValid = false;
       this.validationErrors['email']='Email is not valid.'
     }
+    
+    if (this.Supplier.name.length > 100) {
+      isValid = false;
+      this.validationErrors['name']='Name cannot be longer than 100 characters.'
+    }
 
     return isValid;
   }

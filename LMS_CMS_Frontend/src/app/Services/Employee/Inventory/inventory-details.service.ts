@@ -104,8 +104,7 @@ export class InventoryDetailsService {
       headers,
     });
   }
-  // inventory-details.service.ts
-
+  
   getInventoryNetSummary(
     storeId: number,
     itemId: number,
@@ -150,10 +149,12 @@ export class InventoryDetailsService {
   }
 
   getMovingAverageCost(
+    storeId: number,
+    shopItemId: number,
     fromDate: string,
     toDate: string,
     DomainName: string
-  ): Observable<any> {
+  ): Observable<any[]> {
     if (DomainName != null) {
       this.header = DomainName;
     }
@@ -163,8 +164,12 @@ export class InventoryDetailsService {
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
 
-    return this.http.get<any>(
-      `${this.baseUrl}/InventoryDetails/CalculateMovingAverageCost?fromDate=${fromDate}&toDate=${toDate}`,
+    // Encode the dates to match API format (MM/DD/YYYY)
+    const encodedFromDate = encodeURIComponent(fromDate);
+    const encodedToDate = encodeURIComponent(toDate);
+console.log(storeId , shopItemId)
+    return this.http.get<any[]>(
+      `${this.baseUrl}/InventoryDetails/AverageCost?storeId=${storeId}&shopItemId=${shopItemId}&fromDate=${encodedFromDate}&toDate=${encodedToDate}`,
       { headers }
     );
   }

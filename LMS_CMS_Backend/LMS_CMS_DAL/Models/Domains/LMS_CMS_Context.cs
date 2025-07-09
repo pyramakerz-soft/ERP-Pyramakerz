@@ -186,6 +186,11 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<ETAPOS> ETAPOS { get; set; }
         public DbSet<AssignmentStudentQuestionAnswerOption> AssignmentStudentQuestionAnswerOption { get; set; }
         public DbSet<DailyPerformanceMaster> DailyPerformanceMaster { get; set; }
+        public DbSet<TimeTable> TimeTable { get; set; }
+        public DbSet<TimeTableClassroom> TimeTableClassroom { get; set; }
+        public DbSet<TimeTableSession> TimeTableSession { get; set; }
+        public DbSet<TimeTableSubject> TimeTableSubject { get; set; }
+
 
 
         public LMS_CMS_Context(DbContextOptions<LMS_CMS_Context> options)
@@ -1651,6 +1656,54 @@ namespace LMS_CMS_DAL.Models.Domains
               .HasForeignKey(p => p.SelectedOpionID)
               .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<TimeTable>()
+              .HasOne(p => p.AcademicYear)
+              .WithMany(p => p.TimeTables)
+              .HasForeignKey(p => p.AcademicYearID)
+              .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TimeTableClassroom>()
+              .HasOne(p => p.TimeTable)
+              .WithMany(p => p.TimeTableClassrooms)
+              .HasForeignKey(p => p.TimeTableID)
+              .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TimeTableClassroom>()
+              .HasOne(p => p.Classroom)
+              .WithMany(p => p.TimeTableClassrooms)
+              .HasForeignKey(p => p.ClassroomID)
+              .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TimeTableSession>()
+              .HasOne(p => p.TimeTableClassroom)
+              .WithMany(p => p.TimeTableSessions)
+              .HasForeignKey(p => p.TimeTableClassroomID)
+              .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TimeTableSubject>()
+              .HasOne(p => p.TimeTableSession)
+              .WithMany(p => p.TimeTableSubjects)
+              .HasForeignKey(p => p.TimeTableSessionID)
+              .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TimeTableSubject>()
+              .HasOne(p => p.Subject)
+              .WithMany(p => p.TimeTableSubjects)
+              .HasForeignKey(p => p.SubjectID)
+              .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TimeTableSubject>()
+              .HasOne(p => p.Teacher)
+              .WithMany(p => p.TimeTableSubjects)
+              .HasForeignKey(p => p.TeacherID)
+              .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TimeTableClassroom>()
+              .HasOne(p => p.Day)
+              .WithMany(p => p.TimeTableClassrooms)
+              .HasForeignKey(p => p.DayId)
+              .OnDelete(DeleteBehavior.Restrict);
+
             ///////////////////////// Exception: /////////////////////////
             modelBuilder.Entity<Bus>()
                 .HasOne(b => b.DeletedByEmployee)
@@ -1720,6 +1773,12 @@ namespace LMS_CMS_DAL.Models.Domains
                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<GradeSupervisor>()
+                .HasOne(f => f.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(f => f.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TimeTableSubject>()
                 .HasOne(f => f.DeletedByEmployee)
                 .WithMany()
                 .HasForeignKey(f => f.DeletedByUserId)

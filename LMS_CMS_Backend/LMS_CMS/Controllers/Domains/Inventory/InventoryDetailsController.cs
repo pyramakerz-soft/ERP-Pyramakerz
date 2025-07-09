@@ -111,7 +111,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             {
                 ShopItemId = shopItemId,
                 StoreId = storeId,
-
                 ToDate = summaryDate.ToString("yyyy-MM-dd"),
                 InQuantity = inQuantity,
                 outQuantity = outQuantity,
@@ -203,219 +202,166 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             return Ok(transactions);
         }
         ///// /////////////////////////////////////////////////////////////////////////////////////-777
-[HttpGet("CalculateMovingAverageCost")]
-   [Authorize_Endpoint_(
-       allowedTypes: new[] { "octa", "employee" },
-       pages: new[] { "Inventory" }
-   )]
-   public async Task<ActionResult<List<CalculatedAverageCostDto>>> CalculateMovingAverageCost(
-   [FromQuery] DateTime fromDate,
-   [FromQuery] DateTime toDate)
-   {
-       UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-       var includedFlags = new List<long> { 1, 9 };
-
-       // جلب البيانات أولًا
-       var allDetails = await Unit_Of_Work.inventoryDetails_Repository.Query()
-           .Include(d => d.InventoryMaster)
-           .Include(d => d.InventoryMaster.InventoryFlags)
-           .Where(d =>
-               d.InventoryMaster != null &&
-               d.InventoryMaster.IsDeleted != true &&
-               d.InventoryMaster.Date != null &&
-               d.InventoryMaster.FlagId != 13)
-           .ToListAsync();
-
-       // Reset AverageCost
-       var detailsToReset = allDetails
-           .Where(d =>
-               DateTime.TryParse(d.InventoryMaster.Date, out var parsedDate) &&
-               parsedDate >= fromDate && parsedDate <= toDate)
-           .ToList();
-
-       foreach (var detail in detailsToReset)
-       {
-           detail.AverageCost = null;
-           Unit_Of_Work.inventoryDetails_Repository.Update(detail);
-       }
-
-            // TotalPrice → AverageCost (للحركات الواردة فقط)
-            var detailsToUpdate = allDetails
-                .Where(d =>
-                    DateTime.TryParse(d.InventoryMaster.Date, out var parsedDate) &&
-                    parsedDate >= fromDate && parsedDate <= toDate &&
-                    includedFlags.Contains(d.InventoryMaster.FlagId))  //
-                .ToList();
-            ///
-
-       foreach (var detail in detailsToUpdate)
-       {
-           detail.AverageCost = detail.TotalPrice;
-           Unit_Of_Work.inventoryDetails_Repository.Update(detail);
-       }
-       var dtoList = new List<CalculatedAverageCostDto>();
-
-            var dtoList = new List<CalculatedAverageCostDto>();
-
-            var currentDate = fromDate;
-            //
-
-            while (currentDate <= toDate)
-            {
-                var filteredDailyDetails = allDetails
-                    .Where(d =>
-                        DateTime.TryParse(d.InventoryMaster.Date, out var parsedDate) &&
-                        parsedDate.Date == currentDate.Date &&
-                        // d.InventoryMaster.InventoryFlags.ItemInOut != 0 &&
-                        !includedFlags.Contains(d.InventoryMaster.FlagId))  //
-                    .ToList();
-
-               dtoList.Add(new CalculatedAverageCostDto
-               {
-                   ShopItemId = detail.ShopItemID,
-                   DayDate = currentDate,
-                   AverageCost = avgCost,
-                   Quantity = detail.Quantity,
-                   Price = detail.Price,
-                   TotalPrice = detail.TotalPrice
-               });
-           }
-
-           currentDate = currentDate.AddDays(1);
-       }
-
-       await Unit_Of_Work.SaveChangesAsync();
-       return Ok(dtoList);
-   }
-   //===
-   private async Task<decimal> CalculateItemAvgCost(long shopItemId, DateTime date)
- {
-     var includedFlags = new List<long> { 1, 9 }; // Opening + Purchases
-     UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-
-     var allTransactions = await Unit_Of_Work.inventoryDetails_Repository.Query()
-         .Include(d => d.InventoryMaster)
-         .Include(d => d.InventoryMaster.InventoryFlags)
-         .Where(d =>
-             d.ShopItemID == shopItemId &&
-             d.InventoryMaster != null &&
-             d.InventoryMaster.Date != null &&
-             d.InventoryMaster.IsDeleted != true &&
-             d.InventoryMaster.InventoryFlags.ItemInOut != 0)
-         .OrderBy(d => d.InventoryMaster.Date) // الترتيب الزمني مهم
-         .ToListAsync();
-
-     decimal runningQuantity = 0;
-     decimal runningTotalCost = 0;
-     decimal currentAvgCost = 0;
-
-     foreach (var transaction in allTransactions)
-     {
-         if (!DateTime.TryParse(transaction.InventoryMaster.Date, out var transactionDate))
-             continue;
-
-         if (transactionDate > date)
-             break;
-
-         var quantity = transaction.Quantity;
-         var itemInOut = transaction.InventoryMaster.InventoryFlags.ItemInOut;
-        // var unitCost = transaction.AverageCost ?? (transaction.TotalPrice / transaction.Quantity);
-         var unitCost = transaction.TotalPrice / transaction.Quantity;
-
-
-        ///// /////////////////////////////////////////////////////////////////////////////////////-777
-        //private async Task<decimal> CalculateItemAvgCost(long shopItemId, DateTime date)
-        //{
-        //    var includedFlags = new List<long> { 1, 9 };
-        //    UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-
-        //    var allTransactions = await Unit_Of_Work.inventoryDetails_Repository.Query()
-        //        .Include(d => d.InventoryMaster)
-        //        .Include(d => d.InventoryMaster.InventoryFlags)
-        //        .Where(d =>
-        //            d.ShopItemID == shopItemId &&
-        //            d.InventoryMaster != null &&
-        //            d.InventoryMaster.Date != null &&
-        //            d.InventoryMaster.IsDeleted != true &&
-        //            d.InventoryMaster.InventoryFlags.ItemInOut != 0)
-        //        .ToListAsync();
-
-        //    var validTransactions = allTransactions
-        //        .Where(d =>
-        //            DateTime.TryParse(d.InventoryMaster.Date, out var transactionDate) &&
-        //            (
-        //                transactionDate < date ||
-        //                (transactionDate == date && includedFlags.Contains(d.InventoryMaster.FlagId))
-        //            ))
-        //        .ToList();
-
-        //    decimal totalCost = 0;
-        //    decimal totalQuantity = 0;
-
-        //    foreach (var transaction in validTransactions)
-        //    {
-        //        var itemInOut = transaction.InventoryMaster.InventoryFlags.ItemInOut;
-        //        var avgCost = transaction.AverageCost ?? 0;
-
-        //        totalCost += itemInOut * avgCost;
-        //        totalQuantity += itemInOut * transaction.Quantity;
-        //    }
-
-        //    return totalQuantity == 0 ? 0 : totalCost / totalQuantity;
-        //}
-
-
-        // /////////////////////////////////////////////////////////////////////////
-        private async Task<decimal> CalculateItemAvgCost(long shopItemId, DateTime date)
+        [HttpGet("AverageCost")]
+        [Authorize_Endpoint_(
+                allowedTypes: new[] { "octa", "employee" },
+                pages: new[] { "Inventory" }
+            )]
+        public async Task<IActionResult> CalculateAverageCostAsync(string fromDate, string toDate)
         {
-            var includedFlags = new List<long> { 1, 9 }; // Opening + Purchases
-            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+            if (!DateTime.TryParse(fromDate, out var parsedFromDate) || !DateTime.TryParse(toDate, out var rawToDate))
+                return BadRequest("The date format is incorrect");
 
-            var allTransactions = await Unit_Of_Work.inventoryDetails_Repository.Query()
-                .Include(d => d.InventoryMaster)
-                .Include(d => d.InventoryMaster.InventoryFlags)
-                .Where(d =>
-                    d.ShopItemID == shopItemId &&
-                    d.InventoryMaster != null &&
-                    d.InventoryMaster.Date != null &&
-                    d.InventoryMaster.IsDeleted != true &&
-                    d.InventoryMaster.InventoryFlags.ItemInOut != 0)
-                .OrderBy(d => d.InventoryMaster.Date) // الترتيب الزمني مهم
-                .ToListAsync();
+            var parsedToDate = rawToDate.Date.AddDays(1).AddTicks(-1);
 
-            decimal runningQuantity = 0;
-            decimal runningTotalCost = 0;
-            decimal currentAvgCost = 0;
+            if (parsedFromDate > parsedToDate)
+                return BadRequest("The start date cannot be after the end date.");
 
-            foreach (var transaction in allTransactions)
+            var Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            // تصفية المرحلة 1: تصفير AverageCost للجميع داخل الفترة
+            var data = await Unit_Of_Work.inventoryMaster_Repository
+                .Select_All_With_IncludesById<InventoryMaster>(
+                    im => im.IsDeleted != true,
+                    query => query.Include(im => im.InventoryDetails)
+                    .Include(im => im.InventoryFlags)
+                    );
+
+            var filteredData = data
+                .Where(im => DateTime.TryParse(im.Date, out var parsedDate) &&
+                             parsedDate >= parsedFromDate &&
+                             parsedDate <= parsedToDate)
+                .SelectMany(im => im.InventoryDetails)
+                .ToList();
+
+            foreach (var item in filteredData)
             {
-                if (!DateTime.TryParse(transaction.InventoryMaster.Date, out var transactionDate))
-                    continue;
-
-                if (transactionDate > date)
-                    break;
-
-                var quantity = transaction.Quantity;
-                var itemInOut = transaction.InventoryMaster.InventoryFlags.ItemInOut;
-               // var unitCost = transaction.AverageCost ?? (transaction.TotalPrice / transaction.Quantity);
-                var unitCost = transaction.TotalPrice / transaction.Quantity;
-
-
-                if (itemInOut == 1) // حركة إدخال
-                {
-                    runningTotalCost += quantity * unitCost;
-                    runningQuantity += quantity;
-                    currentAvgCost = runningQuantity == 0 ? 0 : runningTotalCost / runningQuantity;
-                }
-                else if (itemInOut == -1) // حركة إخراج
-                {
-                    // نستخدم متوسط التكلفة الحالي للإخراج
-                    runningTotalCost -= quantity * currentAvgCost;
-                    runningQuantity -= quantity;
-                }
+                item.AverageCost = 0;
+                Unit_Of_Work.inventoryDetails_Repository.Update(item);
             }
 
-            return runningQuantity == 0 ? 0 : runningTotalCost / runningQuantity;
+            await Unit_Of_Work.SaveChangesAsync();
+
+            // المرحلة 2: إدخال AverageCost = TotalPrice لعمليات الافتتاح والمشتريات
+            var purchasesData = await Unit_Of_Work.inventoryMaster_Repository
+                .Select_All_With_IncludesById<InventoryMaster>(
+                    im => im.IsDeleted != true &&
+                          im.Date != null &&
+                          (im.FlagId == 1 || im.FlagId == 9),
+                    query => query.Include(im => im.InventoryDetails));
+
+            var filteredPurchases = purchasesData
+                .Where(im => DateTime.TryParse(im.Date, out var parsedDate) &&
+                             parsedDate >= parsedFromDate &&
+                             parsedDate <= parsedToDate)
+                .SelectMany(im => im.InventoryDetails)
+                .ToList();
+
+            foreach (var item in filteredPurchases)
+            {
+                item.AverageCost = item.TotalPrice;
+                Unit_Of_Work.inventoryDetails_Repository.Update(item);
+            }
+
+            await Unit_Of_Work.SaveChangesAsync();
+
+            // المرحلة 3: حساب المتوسط لباقي الحركات يوم بيوم
+            var currentDate = parsedFromDate.Date;
+
+            while (currentDate <= parsedToDate.Date)
+            {
+                var dailyData = await Unit_Of_Work.inventoryMaster_Repository
+                    .Select_All_With_IncludesById<InventoryMaster>(
+                        im => im.IsDeleted != true &&
+                              im.Date != null &&
+                              im.FlagId != 1 &&
+                              im.FlagId != 9,
+                        query => query.Include(im => im.InventoryDetails));
+
+                var filteredDailyData = dailyData
+                    .Where(im => DateTime.TryParse(im.Date, out var parsedDate) &&
+                                 parsedDate.Date == currentDate.Date)
+                    .SelectMany(im => im.InventoryDetails)
+                    .ToList();
+
+                foreach (var item in filteredDailyData)
+                {
+                    decimal? averageCost = await CalculateAverageCostForItem(item.ShopItemID, currentDate.ToString("yyyy-MM-dd"));
+                    item.AverageCost = (averageCost * item.Quantity) ?? 0;
+                    Unit_Of_Work.inventoryDetails_Repository.Update(item);
+                }
+
+                await Unit_Of_Work.SaveChangesAsync();
+                currentDate = currentDate.AddDays(1);
+            }
+
+            // المرحلة الأخيرة: استخراج النتائج
+            var resultData = await Unit_Of_Work.inventoryMaster_Repository
+                .Select_All_With_IncludesById<InventoryMaster>(
+                    im => im.IsDeleted != true && im.Date != null,
+                    query => query.Include(im => im.InventoryDetails));
+
+            var resultItems = resultData
+             .Where(im => DateTime.TryParse(im.Date, out var parsedDate) &&
+                          parsedDate >= parsedFromDate &&
+                          parsedDate <= parsedToDate)
+             .SelectMany(im => im.InventoryDetails)
+             .Select(id => new 
+             {
+                 AverageCost = id.AverageCost,
+                 Date = id.InventoryMaster.Date,
+                 ShopItemID = id.ShopItemID,
+                 Quantity = id.Quantity,
+                 Price = id.Price,
+                 TotalPrice = id.TotalPrice,
+                 FlagId = id.InventoryMaster.FlagId,
+                 enName = id.InventoryMaster.InventoryFlags.enName,
+                 ItemInOut = id.InventoryMaster.InventoryFlags.ItemInOut
+             });
+
+            if (!resultItems.Any())
+                return NotFound("No stock details found after processing");
+
+            return Ok(resultItems);
+
+        }
+
+        private async Task<decimal> CalculateAverageCostForItem(long shopItemId, string date)
+        {
+            if (!DateTime.TryParse(date, out var targetDate))
+                throw new ArgumentException("The date format is incorrect", nameof(date));
+
+            var Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var query = Unit_Of_Work.inventoryDetails_Repository.Query()
+                .Include(id => id.InventoryMaster)
+                    .ThenInclude(im => im.InventoryFlags)
+                .Where(id => id.InventoryMaster.IsDeleted != true &&
+                             id.ShopItemID == shopItemId &&
+                             id.InventoryMaster.InventoryFlags.ItemInOut != 0);
+
+            var dbItems = await query.ToListAsync();
+
+            var items = dbItems
+                .Where(id => DateTime.TryParse(id.InventoryMaster.Date, out var imDate) &&
+                             (imDate.Date < targetDate.Date ||
+                              (imDate.Date == targetDate.Date &&
+                               (id.InventoryMaster.FlagId == 1 || id.InventoryMaster.FlagId == 9))))
+                .ToList();
+
+            if (!items.Any())
+                return 0;
+
+            decimal sumWeightedCost = items.Sum(id =>
+                id.InventoryMaster.InventoryFlags.ItemInOut * (id.AverageCost ?? 0));
+
+            decimal sumWeightedQuantity = items.Sum(id =>
+                id.InventoryMaster.InventoryFlags.ItemInOut * id.Quantity);
+
+            if (sumWeightedQuantity == 0)
+                return 0;
+
+            return sumWeightedCost / sumWeightedQuantity;
         }
 
 

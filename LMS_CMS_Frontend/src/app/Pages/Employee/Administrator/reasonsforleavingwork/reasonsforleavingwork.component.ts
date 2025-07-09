@@ -159,18 +159,27 @@ export class ReasonsforleavingworkComponent {
           .subscribe(
             (d) => {
               this.GetAllData();
+              this.closeModal();
               this.isLoading = false;
             },
             (error) => {
               this.isLoading = false;
-              Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'Try Again Later!',
-                confirmButtonText: 'Okay',
-                customClass: { confirmButton: 'secondaryBg' },
-              });
-              return false;
+              if(error.error.includes("Name cannot be longer than 100 characters")){
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Oops...',
+                  text: 'Name cannot be longer than 100 characters',
+                  confirmButtonText: 'Okay',
+                  customClass: { confirmButton: 'secondaryBg' },
+                });
+              }else{ 
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: error.error || 'An unexpected error occurred',
+                  confirmButtonColor: '#089B41',
+                });
+              } 
             }
           );
       }
@@ -180,22 +189,30 @@ export class ReasonsforleavingworkComponent {
           .subscribe(
             (d) => {
               this.GetAllData();
+              this.closeModal();
               this.isLoading = false;
             },
             (error) => {
               this.isLoading = false;
-              Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'Try Again Later!',
-                confirmButtonText: 'Okay',
-                customClass: { confirmButton: 'secondaryBg' },
-              });
-              return false;
+              if(error.error.includes("Name cannot be longer than 100 characters")){
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Oops...',
+                  text: 'Name cannot be longer than 100 characters',
+                  confirmButtonText: 'Okay',
+                  customClass: { confirmButton: 'secondaryBg' },
+                });
+              }else{ 
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: error.error || 'An unexpected error occurred',
+                  confirmButtonColor: '#089B41',
+                });
+              } 
             }
           );
-      }
-      this.closeModal();
+      } 
     } 
   }
 

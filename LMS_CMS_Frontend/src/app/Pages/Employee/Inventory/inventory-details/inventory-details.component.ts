@@ -332,6 +332,11 @@ export class InventoryDetailsComponent {
 
   StoreChanged() {
     this.GetCategories()
+    this.Data.inventoryDetails = []
+    this.subCategories = [];
+    this.ShopItems = []; // Clear items when category changes
+    this.SelectedCategoryId = null;
+    this.SelectedSubCategoryId = null;
     if (this.FlagId == 8) {
       this.Data.storeToTransformId = 0
       this.StoresForTitle = []
@@ -441,12 +446,10 @@ export class InventoryDetailsComponent {
       });
     }
   }
+
   async Save() {
     if (this.isFormValid()) {
-      console.log(this.Data)
       this.isLoading = true;
-      // await this.SaveRow();
-      console.log(this.Data)
       if (this.mode == 'Create') {
         this.salesServ.Add(this.Data, this.DomainName).subscribe(
           (d) => {
@@ -467,7 +470,6 @@ export class InventoryDetailsComponent {
             this.router.navigateByUrl(`Employee/${this.InventoryFlag.enName}`);
           },
           (error) => {
-            console.log(error)
             this.isLoading = false;
             Swal.fire({
               icon: 'error',
@@ -486,7 +488,6 @@ export class InventoryDetailsComponent {
         this.salesServ.Edit(this.Data, this.DomainName).subscribe((d) => { this.router.navigateByUrl(`Employee/${this.InventoryFlag.enName}`); },
           (error) => {
             this.isLoading = false;
-            console.log(error)
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
@@ -750,7 +751,7 @@ export class InventoryDetailsComponent {
       if (this.Data.hasOwnProperty(key)) {
         const field = key as keyof InventoryMaster;
         if (!this.Data[field]) {
-          if (field == 'storeID' || field == 'date' || field == 'schoolId'||field == 'schoolPCId') {
+          if (field == 'storeID' || field == 'date' || field == 'schoolId' || field == 'schoolPCId') {
             this.validationErrors[field] = `*${this.capitalizeField(
               field
             )} is required`;
@@ -806,6 +807,21 @@ export class InventoryDetailsComponent {
     ) {
       this.validationErrors['bankID'] = 'Bank Is Required';
       return false;
+    }
+    console.log(this.Data.inventoryDetails)
+    if (this.mode === 'Create') {
+      for (const item of this.Data.inventoryDetails) {
+        if (!item.quantity || !item.quantity || isNaN(Number(item.quantity))) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Warning!',
+            text: 'Each item must have a valid quantity.',
+            confirmButtonColor: '#089B41',
+          });
+        //  this.validationErrors['inventoryDetails'] = 'quantity must have a valid Number';
+          return false;
+        }
+      }
     }
     return isValid;
   }
@@ -908,7 +924,7 @@ export class InventoryDetailsComponent {
   async DownloadAsExcel() {
     const headerKeyMap = [
       { header: 'BarCode', key: 'barCode' },
-      { header: 'Item_Id', key: 'id' },
+      { header: 'Item_Id', key: 'shopItemID' },
       { header: 'Item_Name', key: 'shopItemName' },
       { header: 'Quantity', key: 'quantity' },
       { header: 'Price', key: 'price' },
@@ -972,7 +988,7 @@ export class InventoryDetailsComponent {
   SearchOnBarCode() {
     if (!this.BarCode) return;
 
-    this.shopitemServ.GetByBarcode(this.BarCode, this.DomainName).subscribe(
+    this.shopitemServ.GetByBarcode(this.Data.storeID, this.BarCode, this.DomainName).subscribe(
       (d) => {
         let price = 0;
 
@@ -1011,7 +1027,7 @@ export class InventoryDetailsComponent {
       (error) => {
         Swal.fire({
           icon: 'error',
-          title: 'This Item Not Exist',
+          title: 'Item not found',
           confirmButtonText: 'Okay',
           customClass: { confirmButton: 'secondaryBg' },
         });
@@ -1081,54 +1097,6 @@ export class InventoryDetailsComponent {
     }
   }
 
-  // getBySalesItemBySaleId() {
-  //   console.log(this.SaleId)
-  //   if (this.SaleId != 0) {
-  //     this.salesItemServ.GetBySalesId(this.SaleId, this.DomainName).subscribe((d) => {
-  //       this.SalesItem = d
-  //       this.openModal();
-  //     },
-  //       (error) => {
-  //         console.log(error)
-  //         this.isLoading = false;
-  //         Swal.fire({
-  //           icon: 'error',
-  //           title: 'Oops...',
-  //           text: 'There is No Sales Invoice With this id',
-  //           confirmButtonText: 'Okay',
-  //           customClass: { confirmButton: 'secondaryBg' },
-  //         });
-  //       })
-  //   }
-  //   else {
-  //     if (this.Data.studentID != 0) {
-  //       this.salesServ.GetByStudentId(this.Data.studentID, this.DomainName).subscribe((d) => {
-  //         this.SalesItem = d
-  //         this.openModal();
-  //       },
-  //       (error) => {
-  //         console.log(error)
-  //         this.isLoading = false;
-  //         Swal.fire({
-  //           icon: 'error',
-  //           title: 'Oops...',
-  //           text: 'There is No Sales Invoices For this student',
-  //           confirmButtonText: 'Okay',
-  //           customClass: { confirmButton: 'secondaryBg' },
-  //         });
-  //       })
-  //     }
-  //     else {
-  //       Swal.fire({
-  //         icon: 'warning',
-  //         title: 'Warning!',
-  //         text: 'Choose Student First',
-  //         confirmButtonColor: '#089B41',
-  //       });
-  //     }
-  //   }
-  // }
-
   async SelectItemFromSaleInvoive(row: InventoryDetails) {
     this.Item.id = Date.now();
     this.Item.price = row.price
@@ -1152,3 +1120,4 @@ export class InventoryDetailsComponent {
     }
   }
 }
+

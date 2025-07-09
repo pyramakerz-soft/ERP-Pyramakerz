@@ -23,6 +23,7 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using MimeKit;
+using System.Linq;
 
 namespace LMS_CMS_PL.Controllers.Octa
 {
@@ -121,17 +122,6 @@ namespace LMS_CMS_PL.Controllers.Octa
                 return;
 
             addedPageIds.Add(page.ID);
-
-            //LMS_CMS_DAL.Models.Domains.Page pageNew = new LMS_CMS_DAL.Models.Domains.Page
-            //{
-            //    ID = page.ID,
-            //    en_name = page.en_name,
-            //    ar_name = page.ar_name,
-            //    IsDisplay = page.IsDisplay,
-            //    Page_ID = page.Page_ID
-            //};
-
-            //Unit_Of_Work.page_Repository.Add(pageNew);
 
             var alreadyExists = Unit_Of_Work.page_Repository.Select_By_Id(page.ID);
             if (alreadyExists == null)
@@ -376,21 +366,27 @@ namespace LMS_CMS_PL.Controllers.Octa
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa" }
         )]
-        public async Task<IActionResult> ReRunMigrations(string domainName)
-        {
-            if (string.IsNullOrWhiteSpace(domainName))
+        public async Task<IActionResult> ReRunMigrations()
+        { 
+            List<Domain> domains = _Unit_Of_Work.domain_Octa_Repository.FindBy_Octa(d => d.IsDeleted != true);
+            if (domains == null || domains.Count == 0)
             {
-                return BadRequest("Invalid domain name.");
+                return Conflict("Domains doesn't exist.");
             }
 
-            var existingDomain = _Unit_Of_Work.domain_Octa_Repository.First_Or_Default_Octa(d => d.Name == domainName);
-            if (existingDomain == null)
+            foreach (Domain domain in domains)
             {
-                return Conflict("Domain doesn't exist.");
+                try
+                { 
+                    await _dynamicDatabaseService.ApplyMigrations(domain.Name);
+                }
+                catch (Exception ex)
+                {
+                    // Log the error
+                    return BadRequest(new { message = $"Failed to apply migrations for domain {domain.Name}: {ex.Message}" });
+                }
             }
-
-            await _dynamicDatabaseService.ApplyMigrations(domainName);
-
+             
             return Ok(new { message = "Migrations are Updated successfully." });
         }
 
@@ -568,6 +564,166 @@ namespace LMS_CMS_PL.Controllers.Octa
                 message = "Domain and database Updated successfully.",
                 notFoundPages = notFoundPages.Any() ? notFoundPages : null,
                 notModulePages = notModulePages.Any() ? notModulePages : null
+            });
+        }
+        
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpPut("AddMissingPages")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa" }
+        )]
+        public async Task<IActionResult> AddMissingPages()
+        {
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            if (userIdClaim == null)
+            {
+                return Unauthorized("User Id claim not found.");
+            } 
+
+            List<Domain> existingDomains = _Unit_Of_Work.domain_Octa_Repository.FindBy_Octa(d => d.IsDeleted != true);
+            if (existingDomains == null || existingDomains.Count == 0)
+            {
+                return Conflict("No Domain exist.");
+            }
+
+            var pagesInOcta = _Unit_Of_Work.page_Octa_Repository.Select_All_Octa();
+            var globalPageIds = pagesInOcta.Select(p => p.ID).ToHashSet();
+
+            foreach (Domain existDomain in existingDomains)
+            {
+                HttpContext.Items["ConnectionString"] = _getConnectionStringService.BuildConnectionString(existDomain.Name);
+                UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+                var existingPagesForDomain = Unit_Of_Work.page_Repository.Select_All();
+                var domainPageIDs = existingPagesForDomain.Select(p => p.ID).ToHashSet();
+
+                if (existingPagesForDomain != null && existingPagesForDomain.Count != 0)
+                {
+                    var pagesToDelete = existingPagesForDomain
+                        .Where(p => !globalPageIds.Contains(p.ID))
+                        .ToList();
+
+                    if (pagesToDelete.Count > 0)
+                    {
+                        foreach (var page in pagesToDelete)
+                        {
+                            Unit_Of_Work.page_Repository.Delete(page.ID);
+                        }
+
+                        Unit_Of_Work.SaveChanges();
+                    }
+
+                    var pagesToInsert = pagesInOcta
+                        .Where(octaPage => !domainPageIDs.Contains(octaPage.ID))  
+                        .ToList();
+
+                    if (pagesToInsert.Count > 0)
+                    {
+                        foreach (var page in pagesToInsert)
+                        {
+                            if (page.Page_ID != null)
+                            {
+                                if (domainPageIDs.Contains((long)page.Page_ID))
+                                {
+                                    AddPageWithChildren(page, Unit_Of_Work); 
+                                }
+                            }
+                        }
+
+                        Unit_Of_Work.SaveChanges();
+
+                        var pagesAfterSaving = Unit_Of_Work.page_Repository.Select_All();
+                        foreach (var item in pagesAfterSaving)
+                        {
+                            Role_Detailes roleDetail = new Role_Detailes
+                            {
+                                Role_ID = 1, // Admin Role
+                                Page_ID = item.ID,
+                                Allow_Edit = true,
+                                Allow_Delete = true,
+                                Allow_Edit_For_Others = true,
+                                Allow_Delete_For_Others = true,
+                            };
+                            roleDetail.InsertedByOctaId = userId;
+                            roleDetail.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+
+                            Role_Detailes existingRoleDetail = Unit_Of_Work.role_Detailes_Repository.First_Or_Default(d => d.IsDeleted != true && d.Role_ID == roleDetail.Role_ID && d.Page_ID == roleDetail.Page_ID);
+                            if (existingRoleDetail == null)
+                            {
+                                Unit_Of_Work.role_Detailes_Repository.Add(roleDetail);
+                            }
+                        }
+                    }
+
+                    foreach (var octaPage in pagesInOcta)
+                    {
+                        var domainPage = Unit_Of_Work.page_Repository.Select_By_Id(octaPage.ID);
+                        if (domainPage != null)
+                        {
+                            bool needsUpdate = false;
+
+                            if (domainPage.en_name != octaPage.en_name)
+                            {
+                                domainPage.en_name = octaPage.en_name;
+                                needsUpdate = true;
+                            }
+
+                            if (domainPage.ar_name != octaPage.ar_name)
+                            {
+                                domainPage.ar_name = octaPage.ar_name;
+                                needsUpdate = true;
+                            }
+
+                            if (domainPage.IsDisplay != octaPage.IsDisplay)
+                            {
+                                domainPage.IsDisplay = octaPage.IsDisplay;
+                                needsUpdate = true;
+                            }
+
+                            if (domainPage.Page_ID != octaPage.Page_ID)
+                            {
+                                domainPage.Page_ID = octaPage.Page_ID;
+                                needsUpdate = true;
+                            }
+
+                            if (domainPage.arDisplayName_name != octaPage.arDisplayName_name)
+                            {
+                                domainPage.arDisplayName_name = octaPage.arDisplayName_name;
+                                needsUpdate = true;
+                            }
+
+                            if (domainPage.enDisplayName_name != octaPage.enDisplayName_name)
+                            {
+                                domainPage.enDisplayName_name = octaPage.enDisplayName_name;
+                                needsUpdate = true;
+                            }
+
+                            if (domainPage.Order != octaPage.Order)
+                            {
+                                domainPage.Order = octaPage.Order;
+                                needsUpdate = true;
+                            }
+
+                            if (needsUpdate)
+                            {
+                                Unit_Of_Work.page_Repository.Update(domainPage);  
+                            }
+                        }
+                    }
+                    Unit_Of_Work.SaveChanges();
+                }
+                existDomain.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                existDomain.UpdatedByUserId = userId;
+            }
+
+            _Unit_Of_Work.SaveOctaChanges();
+
+            return Ok(new
+            {
+                message = "Pages Updated successfully." 
             });
         }
 

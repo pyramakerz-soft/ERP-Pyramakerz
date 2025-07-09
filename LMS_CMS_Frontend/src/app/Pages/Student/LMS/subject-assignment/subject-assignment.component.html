@@ -1,0 +1,101 @@
+<div class="flex justify-start items-center space-x-5">
+    <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToBack()"></i>
+    <h1 class="primaryTxt font-semibold text-2xl leading-9">Assignments</h1>
+</div>
+
+<div *ngIf="mode=='solved'" class="flex justify-start items-center space-x-5 mt-5">
+    <button class="secondaryBg text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2"
+        (click)="TurnChoice('solved')">
+        Solved
+    </button>
+    <button class="bg-[#EBEBEB] text-[#6F6F6F] rounded-lg px-4 py-3 flex items-center justify-center gap-2"
+        (click)="TurnChoice('unsolved')">
+        UnSolved
+    </button>
+</div>
+
+<div *ngIf="mode=='unsolved'" class="flex justify-start items-center space-x-5 mt-5">
+    <button class="bg-[#EBEBEB] text-[#6F6F6F] rounded-lg px-4 py-3 flex items-center justify-center gap-2"
+        (click)="TurnChoice('solved')">
+        Solved
+    </button>
+    <button class="secondaryBg text-white px-4 py-3 rounded-lg flex items-center justify-center gap-2"
+        (click)="TurnChoice('unsolved')">
+        UnSolved
+    </button>
+</div>
+
+<div *ngIf="mode=='solved'" class=" mt-5">
+    <div *ngFor="let Assginment of SolvedAssignment; let i = index">
+        <div
+            class="flex justify-between items-start bg-white rounded-xl shadow-sm p-4 mb-4 border-l-4 border-green-700">
+            <div class="space-y-1">
+                <h2 class="text-[#003366] font-semibold text-sm">{{Assginment.assignmentEnglishName}}</h2>
+                <p class="text-sm text-[#6F6F6F]">
+                    <span class="font-medium">By</span> {{Assginment.insertedByUserName}}
+                </p>
+            </div>
+            <div class="flex flex-col items-end space-y-2">
+                <div *ngIf="Assginment.isVisibleToStudent" class="flex items-center space-x-2 text-sm">
+                    <button class="secondaryBg text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2"
+                        (click)="MoveToAssignmentView(Assginment.id)">
+                        View Answers
+                    </button>
+                </div>
+                <div class="flex items-center space-x-2 text-sm">
+                    <span class="text-green-600">Finished</span>
+                    <span *ngIf="Assginment.degree!=null"class="text-[#1A1A1A]">{{Assginment.degree}}/{{Assginment.assignmentDegree}}</span>
+                    <span *ngIf="Assginment.degree==null" class="text-[#1A1A1A]">--/{{Assginment.assignmentDegree}}</span>
+                </div>
+                <div class="flex space-x-4 text-xs text-gray-400">
+                    <div class="flex items-center space-x-1">
+                        <i class="fa-solid fa-hourglass-half"></i>
+                        <span class="font-semibold text-gray-500">Due Date</span>
+                        <span>{{Assginment.dueDate}}</span>
+                    </div>
+                    <div class="flex items-center space-x-1">
+                        <i class="fa-solid fa-hourglass-half"></i>
+                        <span class="font-semibold text-gray-500">Cutoff Date</span>
+                        <span>{{Assginment.cutOfDate}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div *ngIf="mode=='unsolved'" class="mt-5">
+    <div *ngFor="let Assginment of UnSolvedAssignment; let i = index">
+        <div class="flex justify-between items-start bg-white rounded-xl shadow-sm p-4 mb-4 border-l-4"
+            [ngClass]="isPastDueOrCutoff(Assginment.dueDate, Assginment.cutOfDate) ? 'border-[#E03138]' : 'border-green-700'">
+            <div class="space-y-1">
+                <h2 class="text-[#003366] font-semibold text-sm">{{ Assginment.englishName }}</h2>
+                <p class="text-sm text-[#6F6F6F]">
+                    <span class="font-medium">By</span> {{ Assginment.insertedByUserName }}
+                </p>
+            </div>
+            <div class="flex flex-col items-end space-y-2">
+                <button *ngIf="!isPastCutoff(Assginment.cutOfDate)"
+                    class="secondaryBg text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2"
+                    (click)="MoveToAssignmentToSolve(Assginment.id)">
+                    Solve
+                </button>
+                <div *ngIf="isPastCutoff( Assginment.cutOfDate)">
+                    <span class="text-[#E03138]">Submission Closed</span>
+                </div>
+                <div class="flex space-x-4 text-xs text-gray-400">
+                    <div class="flex items-center space-x-1">
+                        <i class="fa-solid fa-hourglass-half"></i>
+                        <span class="font-semibold text-gray-500">Due Date</span>
+                        <span>{{ Assginment.dueDate }}</span>
+                    </div>
+                    <div class="flex items-center space-x-1">
+                        <i class="fa-solid fa-hourglass-half"></i>
+                        <span class="font-semibold text-gray-500">Cutoff Date</span>
+                        <span>{{ Assginment.cutOfDate }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -857,9 +857,9 @@ namespace LMS_CMS_PL.Controllers.Domains
         //////////////////////////////////////////////////////
 
 
-      [HttpDelete("DeleteFiles/{id}")]
-    public IActionResult DeleteFiles(long id)
-    {
+        [HttpDelete("DeleteFiles/{id}")]
+        public IActionResult DeleteFiles(long id)
+        {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             //TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
@@ -897,67 +897,7 @@ namespace LMS_CMS_PL.Controllers.Domains
             }
         }
 
-        ///////////////////////////////////////////////////////////////////////////
-
-        [HttpPut("{id}")]
-        [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
-            allowEdit: 1,
-            pages: new[] { "Employee" }
-        )]
-        public async Task<IActionResult> EditpasswordAsync(EditPasswordDTO model)
-        {
-            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-            var userClaims = HttpContext.User.Claims;
-            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-            long.TryParse(userIdClaim, out long userId);
-            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
-            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
-            long.TryParse(userRoleClaim, out long roleId);
-
-            if (userIdClaim == null || userTypeClaim == null)
-            {
-                return Unauthorized("User ID or Type claim not found.");
-            }
-
-            if (model.Password == "")
-            {
-                return BadRequest("password cannot be empty");
-            }
-
-            Employee oldEmp = await Unit_Of_Work.employee_Repository.Select_By_IdAsync(model.Id);
-            if (oldEmp == null || oldEmp.IsDeleted == true)
-            {
-                return NotFound("Employee not found.");
-            }
-             
-            if (userTypeClaim == "employee")
-            {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Employee", roleId, userId, oldEmp);
-                if (accessCheck != null)
-                {
-                    return accessCheck;
-                }
-            }
-
-            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-            if (userTypeClaim == "octa")
-            {
-                oldEmp.UpdatedByOctaId = userId;
-                oldEmp.UpdatedByUserId = null;
-            }
-            else if (userTypeClaim == "employee")
-            {
-                oldEmp.UpdatedByUserId = userId;
-                oldEmp.UpdatedByOctaId = null;
-            }
-            oldEmp.Password = BCrypt.Net.BCrypt.HashPassword(model.Password);
-            oldEmp.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
-            Unit_Of_Work.employee_Repository.Update(oldEmp);
-            await Unit_Of_Work.SaveChangesAsync();
-            return Ok();
-        }
-
+  
         ///////////////////////////////////////////////////////////////////////////////////////
 
         [HttpGet("getByAccountingEmployee/{id}")]

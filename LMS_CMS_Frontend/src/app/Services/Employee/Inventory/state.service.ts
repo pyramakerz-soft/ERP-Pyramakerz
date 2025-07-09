@@ -1,4 +1,4 @@
-// state.service.ts
+//state saver 
 import { Injectable } from '@angular/core';
 import { ElectronicInvoice } from '../../../Models/zatca/electronic-invoice';
 
