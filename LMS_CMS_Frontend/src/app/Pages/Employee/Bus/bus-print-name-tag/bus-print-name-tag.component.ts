@@ -79,7 +79,7 @@ export class BusPrintNameTagComponent {
       this.IsEmployee = false;
       this.AllowEdit = true;
       this.AllowDelete = true;
-    }
+    } 
   }
 
   GetAllDomains() {

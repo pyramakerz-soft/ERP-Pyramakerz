@@ -70,10 +70,9 @@ export class InterviewRegistrationComponent {
   }
 
   getInterviewByYearID(){
-        this.interviewTimeTableService.GetByYearId(this.academicYearIdID, this.DomainName).subscribe(
+      this.interviewTimeTableService.GetByYearId(this.academicYearIdID, this.DomainName).subscribe(
           (data) => { 
         this.interviewTimeTable = data
-
         this.filterFutureDates()
         this.generateCalendar()
       }
@@ -196,14 +195,28 @@ export class InterviewRegistrationComponent {
         }
       )
     }
-  } 
+  }  
 
   filterFutureDates() {
-    const now = new Date();  
-  
+    const now = new Date();
+
     this.interviewTimeTable = this.interviewTimeTable.filter((interviewTime) => {
-      const interviewDateTime = new Date(`${interviewTime.date} ${interviewTime.fromTime}`);
-      return interviewDateTime >= now;
+      const [month, day, year] = interviewTime.date.split('/').map(Number);
+
+      // Parse fromTime
+      const [fromTimeStr, fromMeridian] = interviewTime.fromTime.split(' ');
+      let [fromHours, fromMinutes] = fromTimeStr.split(':').map(Number);
+      if (fromMeridian === 'PM' && fromHours !== 12) fromHours += 12;
+      if (fromMeridian === 'AM' && fromHours === 12) fromHours = 0;
+
+      // Parse toTime
+      const [toTimeStr, toMeridian] = interviewTime.toTime.split(' ');
+      let [toHours, toMinutes] = toTimeStr.split(':').map(Number);
+      if (toMeridian === 'PM' && toHours !== 12) toHours += 12;
+      if (toMeridian === 'AM' && toHours === 12) toHours = 0;
+
+      const interviewEnd = new Date(year, month - 1, day, toHours, toMinutes);
+      return interviewEnd >= now; // include if interview is ongoing or in the future
     }); 
   }
 
@@ -221,7 +234,7 @@ export class InterviewRegistrationComponent {
       this.calendarMonths.push({ month, year });
       currentMonth = new Date(year, month + 1, 1);
     }
-    
+    console.log(this.calendarMonths)
     this.currentMonth = this.calendarMonths[0].month
     this.currentYear = this.calendarMonths[0].year 
   }
