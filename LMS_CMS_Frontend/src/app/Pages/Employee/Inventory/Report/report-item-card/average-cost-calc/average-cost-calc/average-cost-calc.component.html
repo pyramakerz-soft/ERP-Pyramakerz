@@ -29,14 +29,12 @@
     </div>
 </div>
 
-<div *ngIf="isLoading || calculationComplete" class="mt-6">
-    <div class="w-full bg-gray-200 rounded-full h-4">
-        <div class="bg-blue-600 h-4 rounded-full" [style.width.%]="progress"></div>
-    </div>
-    <p class="text-center mt-2">{{message}}</p>
-    <div class="flex justify-end mt-4">
-        <button class="p-4 font-medium text-xl rounded-lg bg-gray-400 text-white" (click)="dismiss()">
+<div *ngIf="isLoading || calculationComplete" class="mt-6 flex flex-col items-center">
+        <div class="w-[75%] bg-gray-200 rounded-full h-4 mx-auto">
+            <div class="secondaryBg h-4 rounded-full" [style.width.%]="progress"></div>
+        </div>
+        <p class="text-center mt-2">{{message}}</p>
+        <button class="mt-4 px-4 py-2 font-medium text-sm rounded bg-gray-400 text-white" (click)="dismiss()">
             Dismiss
         </button>
-    </div>
 </div>
