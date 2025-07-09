@@ -104,8 +104,7 @@ export class InventoryDetailsService {
       headers,
     });
   }
-  // inventory-details.service.ts
-
+  
   getInventoryNetSummary(
     storeId: number,
     itemId: number,

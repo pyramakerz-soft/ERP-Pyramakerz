@@ -4,12 +4,16 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import * as XLSX from 'xlsx';
-import { PdfPrintComponent } from '../../../../../Component/pdf-print/pdf-print.component';
-import { Store } from '../../../../../Models/Inventory/store';
-import { InventoryDetailsService } from '../../../../../Services/Employee/Inventory/inventory-details.service';
-import { StoresService } from '../../../../../Services/Employee/Inventory/stores.service';
-import { ShopItemService } from '../../../../../Services/Employee/Inventory/shop-item.service';
-import { CombinedReportData, InventoryNetSummary, InventoryNetTransaction } from '../../../../../Models/Inventory/report-card';
+import { PdfPrintComponent } from '../../../../../../Component/pdf-print/pdf-print.component';
+import { Store } from '../../../../../../Models/Inventory/store';
+import { InventoryDetailsService } from '../../../../../../Services/Employee/Inventory/inventory-details.service';
+import { StoresService } from '../../../../../../Services/Employee/Inventory/stores.service';
+import { ShopItemService } from '../../../../../../Services/Employee/Inventory/shop-item.service';
+import {
+  CombinedReportData,
+  InventoryNetSummary,
+  InventoryNetTransaction,
+} from '../../../../../../Models/Inventory/report-card';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -104,7 +108,24 @@ export class ReportItemCardComponent implements OnInit {
   }
 
   async viewReport() {
-    if (!this.validateDateRange()) {
+    if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
+      Swal.fire({
+        title: 'Invalid Date Range',
+        text: 'Start date cannot be later than end date.',
+        icon: 'warning',
+        confirmButtonText: 'OK',
+      });
+      return;
+    }
+
+    if (!this.selectedStoreId || !this.selectedItemId) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Missing Information',
+        text: 'Please select both Store and Item',
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: 'OK',
+      });
       return;
     }
 
@@ -273,26 +294,6 @@ export class ReportItemCardComponent implements OnInit {
 
       console.log('Full API response:', response);
 
-      if (response && response.length > 0) {
-        // Fix: Use 'shopItemID' instead of 'shopItemId' to match API response
-        const itemData = response.filter((item) => item.shopItemID === itemId);
-        console.log('Filtered data for itemId', itemId, ':', itemData);
-
-        if (itemData.length > 0) {
-          // Sort by date (newest first)
-          const sortedData = itemData.sort(
-            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-          );
-          console.log('Sorted data (newest first):', sortedData);
-
-          const latestAverage = sortedData[0]?.averageCost || 0;
-          console.log('Selected average cost:', latestAverage);
-
-          console.groupEnd();
-          return latestAverage;
-        }
-      }
-
       console.log('No data found in response');
       console.groupEnd();
       return 0;
@@ -343,14 +344,14 @@ export class ReportItemCardComponent implements OnInit {
     return `${day}/${month}/${year}`;
   }
 
-  private validateFilters(): boolean {
-    return (
-      !!this.dateFrom &&
-      !!this.dateTo &&
-      this.selectedStoreId !== null &&
-      this.selectedItemId !== null
-    );
-  }
+  // private validateFilters(): boolean {
+  //   return (
+  //     !!this.dateFrom &&
+  //     !!this.dateTo &&
+  //     this.selectedStoreId !== null &&
+  //     this.selectedItemId !== null
+  //   );
+  // }
 
   DownloadAsPDF() {
     if (this.transactionsForExport.length === 0) {

@@ -26,14 +26,14 @@
 
 <div class="flex flex-col w-[24%] mb-4">
     <label class="mb-2 font-medium" for="dateFrom">Date From</label>
-    <input type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="dateFrom"
-        [(ngModel)]="dateFrom" (ngModelChange)="onFilterChange()" [max]="dateTo" required>
-</div>
+    <input type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="dateFrom" [(ngModel)]="dateFrom"
+         (ngModelChange)="onFilterChange()" required>
+    </div>
 
 <div class="flex flex-col w-[24%] mb-4">
     <label class="mb-2 font-medium" for="dateTo">Date To</label>
     <input type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="dateTo" [(ngModel)]="dateTo"
-        (ngModelChange)="onFilterChange()" [min]="dateFrom" required>
+         (ngModelChange)="onFilterChange()" required>
 </div>
 
     <div class="w-[99%] flex justify-end">
