@@ -180,6 +180,7 @@ export class RegistrationFormComponent {
       this.DomainName
     ).subscribe((data) => {
       this.registrationForm.registerationFormSubmittions = data;
+      console.log(this.registrationForm.registerationFormSubmittions)
       this.selectedSchool =
         this.registrationForm.registerationFormSubmittions.find(
           (s) => s.categoryFieldID == 7
