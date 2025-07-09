@@ -111,24 +111,45 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             Unit_Of_Work.SaveChanges();
 
             /////////////////////// Create the TimeTableSession
-             
-            foreach (var classroom in timeTableClassrooms)
+            // 4. Map DayId to Grade property
+            Dictionary<long, Func<Grade, int>> dayToPeriodCount = new Dictionary<long, Func<Grade, int>>
             {
-                if (classroom.DayId ==1)
-                {
-                    for(int i = 0;i< classroom.Classroom.Grade.MON; i++)
-                    {
-                        TimeTableSession timeTableSession =  new TimeTableSession();
-                        timeTableSession.TimeTableClassroomID= classroom.ID;
-                        if (userTypeClaim == "octa")
-                            timeTableSession.InsertedByOctaId = userId;
-                        else if (userTypeClaim == "employee")
-                            timeTableSession.InsertedByUserId = userId;
+                { 1, g => g.MON ?? 0 },
+                { 2, g => g.TUS ?? 0 },
+                { 3, g => g.WED ?? 0 },
+                { 4, g => g.THRU ?? 0 },
+                { 5, g => g.FRI ?? 0 },
+                { 6, g => g.SAT ?? 0 },
+                { 7, g => g.SUN ?? 0 }
+            };
 
-                        Unit_Of_Work.timeTableSession_Repository.Add(timeTableSession);
-                        Unit_Of_Work.SaveChanges();
-                    }
+            List<TimeTableSession> sessions = new List<TimeTableSession>();
+            foreach (TimeTableClassroom ttClassroom in timeTableClassrooms)
+            {
+
+                int sessionCount = dayToPeriodCount[ttClassroom.DayId.Value](ttClassroom.Classroom.Grade);
+
+                for (int i = 0; i < sessionCount; i++)
+                {
+                    TimeTableSession session = new TimeTableSession
+                    {
+                        TimeTableClassroomID = ttClassroom.ID,
+                        InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone),
+                        InsertedByOctaId = userTypeClaim == "octa" ? userId : null,
+                        InsertedByUserId = userTypeClaim == "employee" ? userId : null
+                    };
+                    sessions.Add(session);
                 }
+            }
+
+            Unit_Of_Work.timeTableSession_Repository.AddRange(sessions);
+            Unit_Of_Work.SaveChanges();
+
+            /////////////////////// Create the TimeTableSession
+            foreach (var session in sessions)
+            {
+                List<ClassroomSubject> classroomSubject = Unit_Of_Work.classroomSubject_Repository.FindBy(s => s.ClassroomID == session.TimeTableClassroom.ClassroomID);
+                
             }
 
             return Ok();
