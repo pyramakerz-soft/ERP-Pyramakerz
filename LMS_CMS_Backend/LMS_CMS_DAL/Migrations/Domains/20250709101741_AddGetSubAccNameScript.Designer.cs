@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LMS_CMS_DAL.Migrations.LMS_CMS_
 {
     [DbContext(typeof(LMS_CMS_Context))]
-    [Migration("20250709094215_AddGetSubAccScript")]
-    partial class AddGetSubAccScript
+    [Migration("20250709101741_AddGetSubAccNameScript")]
+    partial class AddGetSubAccNameScript
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -8877,9 +8877,8 @@ namespace LMS_CMS_DAL.Migrations.LMS_CMS_
                     b.Property<long>("ClassroomID")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("Day")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<long?>("DayId")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
@@ -8917,6 +8916,8 @@ namespace LMS_CMS_DAL.Migrations.LMS_CMS_
                     b.HasKey("ID");
 
                     b.HasIndex("ClassroomID");
+
+                    b.HasIndex("DayId");
 
                     b.HasIndex("DeletedByUserId");
 
@@ -14834,6 +14835,11 @@ namespace LMS_CMS_DAL.Migrations.LMS_CMS_
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Days", "Day")
+                        .WithMany("TimeTableClassrooms")
+                        .HasForeignKey("DayId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "DeletedByEmployee")
                         .WithMany()
                         .HasForeignKey("DeletedByUserId");
@@ -14853,6 +14859,8 @@ namespace LMS_CMS_DAL.Migrations.LMS_CMS_
                         .HasForeignKey("UpdatedByUserId");
 
                     b.Navigation("Classroom");
+
+                    b.Navigation("Day");
 
                     b.Navigation("DeletedByEmployee");
 
@@ -15842,6 +15850,8 @@ namespace LMS_CMS_DAL.Migrations.LMS_CMS_
                     b.Navigation("LessonLives");
 
                     b.Navigation("StartDaySchool");
+
+                    b.Navigation("TimeTableClassrooms");
                 });
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.ECommerce.Cart", b =>
