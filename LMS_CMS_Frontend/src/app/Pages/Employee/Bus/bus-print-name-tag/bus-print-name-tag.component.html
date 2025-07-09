@@ -1,5 +1,5 @@
 <div class="flex justify-between">
-    <h1 class="font-semibold text-2xl leading-9">Print Name Tag</h1>
+    <h1 class="primaryTxt font-semibold text-2xl leading-9">Print Name Tag</h1>
     <div class="flex justify-between items-center ">
         <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
     </div>
@@ -20,7 +20,7 @@
         <label for="buses" class="mb-2 text-sm font-medium text-gray-900">Buses</label>
         <select id="buses" (change)="getDataByBusId($event)"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg  w-full p-2.5">
-            <option *ngIf="busId == -1" [value]="0" disabled selected hidden>Select a Bus</option>
+            <option [value]="-1" disabled selected hidden>Select a Bus</option>
             <option *ngFor="let bus of BusData" [value]="bus.id">
                 {{ bus.name }}
             </option>
@@ -32,7 +32,7 @@
         <label for="buses" class="mb-2 text-sm font-medium text-gray-900">Buses</label>
         <select id="buses" (change)="getDataByBusId($event)" [(ngModel)]="busId"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5">
-            <option *ngIf="busId == -1" [value]="0" disabled selected hidden>Select a Bus</option>
+            <option [value]="-1" disabled selected hidden>Select a Bus</option>
             <option *ngFor="let bus of BusData" [value]="bus.id">
                 {{ bus.name }}
             </option>
