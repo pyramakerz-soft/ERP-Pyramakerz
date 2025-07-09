@@ -18,7 +18,7 @@ namespace LMS_CMS_DAL.Models.Domains.Inventory
         public decimal Price { get; set; }  //
         public decimal TotalPrice { get; set; }  //
         public decimal? AverageCost { get; set; }
-
+        public decimal? CostBalance { get; set; }
         public string? Notes { get; set; }
 
         [ForeignKey("ShopItem")]

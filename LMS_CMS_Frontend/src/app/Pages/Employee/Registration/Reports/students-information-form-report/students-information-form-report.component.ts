@@ -25,90 +25,140 @@ import { Classroom } from '../../../../../Models/LMS/classroom';
   standalone: true,
   imports: [CommonModule, FormsModule, PdfPrintComponent],
   templateUrl: './students-information-form-report.component.html',
-  styleUrl: './students-information-form-report.component.css'
+  styleUrl: './students-information-form-report.component.css',
 })
-export class StudentsInformationFormReportComponent { 
-  DomainName: string = '';  
-  schools: School[] = []
-  students: Student[] = []
-  academicYears: AcademicYear[] = []
-  Grades: Grade[] = []
-  class: Classroom[] = [] 
+export class StudentsInformationFormReportComponent {
+  showViewReportBtn = false;
+
+  DomainName: string = '';
+  schools: School[] = [];
+  students: Student[] = [];
+  academicYears: AcademicYear[] = [];
+  Grades: Grade[] = [];
+  class: Classroom[] = [];
 
   SelectedSchoolId: number = 0;
   SelectedYearId: number = 0;
   SelectedGradeId: number = 0;
   SelectedClassId: number = 0;
-  showPDF: boolean = false
+  showPDF: boolean = false;
 
-  school: School = new School()
-  showTable: boolean = false 
+  school: School = new School();
+  showTable: boolean = false;
 
-  DataToPrint: any = null
-  CurrentDate : any =new Date()
-  ArabicCurrentDate : any =new Date()
-  direction: string = "";
-  tableData: any[]=[];
+  DataToPrint: any = null;
+  CurrentDate: any = new Date();
+  ArabicCurrentDate: any = new Date();
+  direction: string = '';
+  tableData: any[] = [];
   @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;
 
   constructor(
     public activeRoute: ActivatedRoute,
     public account: AccountService,
-    public ApiServ: ApiService, 
-    public EditDeleteServ: DeleteEditPermissionService, 
+    public ApiServ: ApiService,
+    public EditDeleteServ: DeleteEditPermissionService,
     private SchoolServ: SchoolService,
     private academicYearServ: AcadimicYearService,
     private studentServ: StudentService,
     private GradeServ: GradeService,
     private ClassroomServ: ClassroomService,
-    public reportsService: ReportsService 
-  ) { }
+    public reportsService: ReportsService
+  ) {}
 
-  ngOnInit() { 
-    this.DomainName = this.ApiServ.GetHeader(); 
-    this.direction = document.dir || 'ltr'; 
-    this.getAllSchools()
-    this.getAllYears()
+  ngOnInit() {
+    this.DomainName = this.ApiServ.GetHeader();
+    this.direction = document.dir || 'ltr';
+    this.getAllSchools();
+    this.getAllYears();
+    this.showTable = false; // Hide table initially
+    this.showViewReportBtn = false; // Disable view report initially
   }
 
   getAllSchools() {
     this.SchoolServ.Get(this.DomainName).subscribe((d) => {
-      this.schools = d
-    })
+      this.schools = d;
+    });
   }
 
   getAllYears() {
-    this.academicYearServ.GetBySchoolId(this.SelectedSchoolId, this.DomainName).subscribe((d) => {
-      this.academicYears = d
-    })
+    this.academicYearServ
+      .GetBySchoolId(this.SelectedSchoolId, this.DomainName)
+      .subscribe((d) => {
+        this.academicYears = d;
+      });
   }
 
   getAllGrades() {
-    this.GradeServ.GetBySchoolId(this.SelectedSchoolId, this.DomainName).subscribe((d) => {
-      this.Grades = d
-    })
+    this.GradeServ.GetBySchoolId(
+      this.SelectedSchoolId,
+      this.DomainName
+    ).subscribe((d) => {
+      this.Grades = d;
+    });
   }
 
   getAllClass() {
-    this.ClassroomServ.GetByGradeAndAcYearId(this.SelectedGradeId,this.SelectedYearId, this.DomainName).subscribe((d) => {
-      this.class = d
-    })
+    this.ClassroomServ.GetByGradeAndAcYearId(
+      this.SelectedGradeId,
+      this.SelectedYearId,
+      this.DomainName
+    ).subscribe((d) => {
+      this.class = d;
+    });
+  }
+
+  onSchoolChange() {
+    this.SelectedYearId = 0;
+    this.SelectedGradeId = 0;
+    this.SelectedClassId = 0;
+    this.showTable = false;
+    this.showViewReportBtn = this.SelectedSchoolId !== 0;
+    this.getAllYears();
+  }
+
+  onYearChange() {
+    this.SelectedGradeId = 0;
+    this.SelectedClassId = 0;
+    this.showTable = false;
+    this.showViewReportBtn =
+      this.SelectedSchoolId !== 0 && this.SelectedYearId !== 0;
+    this.getAllGrades();
+  }
+
+  onGradeChange() {
+    this.SelectedClassId = 0;
+    this.showTable = false;
+    this.showViewReportBtn =
+      this.SelectedSchoolId !== 0 &&
+      this.SelectedYearId !== 0 &&
+      this.SelectedGradeId !== 0;
+    this.getAllClass();
+  }
+
+  onClassChange() {
+    this.showTable = false;
+    this.showViewReportBtn =
+      this.SelectedSchoolId !== 0 &&
+      this.SelectedYearId !== 0 &&
+      this.SelectedGradeId !== 0 &&
+      this.SelectedClassId !== 0;
   }
 
   async ViewReport() {
-    await this.GetData()
-    this.showTable = true
+    await this.GetData();
+    this.showTable = true;
   }
 
   Print() {
     this.showPDF = true;
     setTimeout(() => {
-      const printContents = document.getElementById("Data")?.innerHTML;
+      const printContents = document.getElementById('Data')?.innerHTML;
       if (!printContents) {
-        console.error("Element not found!");
+        console.error('Element not found!');
         return;
       }
-  
+
       // Create a print-specific stylesheet
       const printStyle = `
         <style>
@@ -135,16 +185,16 @@ export class StudentsInformationFormReportComponent {
           }
         </style>
       `;
-  
+
       // Create a container for printing
       const printContainer = document.createElement('div');
       printContainer.id = 'print-container';
       printContainer.innerHTML = printStyle + printContents;
-  
+
       // Add to body and print
       document.body.appendChild(printContainer);
       window.print();
-      
+
       // Clean up
       setTimeout(() => {
         document.body.removeChild(printContainer);
@@ -157,95 +207,129 @@ export class StudentsInformationFormReportComponent {
     this.showPDF = true;
     setTimeout(() => {
       this.pdfComponentRef.downloadPDF(); // Call manual download
-      setTimeout(() => this.showPDF = false, 2000);
+      setTimeout(() => (this.showPDF = false), 2000);
     }, 500);
   }
-
 
   formatDate(dateString: string, dir: string): string {
     const date = new Date(dateString);
     const locale = dir === 'rtl' ? 'ar-EG' : 'en-US';
-    return date.toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    return date.toLocaleDateString(locale, {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
   }
 
   async DownloadAsExcel() {
-    const headers = ['No', 'Name', 'الاسم', 'Mobile_1', 'Mobile_2', 'Passport', 'Nationality', 'Note', 'Date_Of_Birth', 'Place_Of_Birth', 'Passport_Expired', 'identities_Expired', 'Admission_Date', 'Identity_of_Father', 'Email_Address', 'Bus', 'Religion', 'Pre_School'];
-  
-    const dataRows = this.tableData.map(row =>
-      headers.map(header => row[header] ?? '')
+    const headers = [
+      'No',
+      'Name',
+      'الاسم',
+      'Mobile_1',
+      'Mobile_2',
+      'Passport',
+      'Nationality',
+      'Note',
+      'Date_Of_Birth',
+      'Place_Of_Birth',
+      'Passport_Expired',
+      'identities_Expired',
+      'Admission_Date',
+      'Identity_of_Father',
+      'Email_Address',
+      'Bus',
+      'Religion',
+      'Pre_School',
+    ];
+
+    const dataRows = this.tableData.map((row) =>
+      headers.map((header) => row[header] ?? '')
     );
-  
+
     await this.reportsService.generateExcelReport({
       mainHeader: {
         en: this.school.reportHeaderOneEn,
-        ar: this.school.reportHeaderOneAr
+        ar: this.school.reportHeaderOneAr,
       },
       subHeaders: [
         {
           en: this.school.reportHeaderTwoEn,
-          ar: this.school.reportHeaderTwoAr
-        }
+          ar: this.school.reportHeaderTwoAr,
+        },
       ],
       infoRows: [
         { key: 'Date', value: this.CurrentDate },
-        { key: 'School', value: this.school.name }
+        { key: 'School', value: this.school.name },
       ],
       reportImage: this.school.reportImage,
-      filename: "Student Information Report.xlsx",
+      filename: 'Student Information Report.xlsx',
       tables: [
         {
-          title: "Students List",
+          title: 'Students List',
           headers,
-          data: dataRows
-        }
-      ]
+          data: dataRows,
+        },
+      ],
     });
   }
-  
 
   GetData(): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.studentServ.GetByClassIDReport( this.SelectedSchoolId,this.SelectedClassId, this.DomainName)
+      this.studentServ
+        .GetByClassIDReport(
+          this.SelectedSchoolId,
+          this.SelectedClassId,
+          this.DomainName
+        )
         .subscribe({
           next: (d) => {
-            this.DataToPrint = d; 
+            this.DataToPrint = d;
             this.school = d.school;
-            this.students=d.students
-            this.tableData = this.students.map((student: any, index: number) => {
-              return {
-                No: index + 1, // No
-                Name: student.en_name || '',
-                الاسم: student.ar_name || '',
-                Mobile_1: student.mobile || '',
-                Mobile_2: student.phone || '',
-                Passport: student.passportNo || '',
-                Nationality: student.nationalityEnName || '',
-                Note: student.note || '',
-                Date_Of_Birth: student.dateOfBirth || '',
-                Place_Of_Birth: student.placeOfBirth || '',
-                Passport_Expired: student.passportExpiredDate || '',
-                identities_Expired: student.nationalIDExpiredDate || '',
-                Admission_Date: student.admissionDate || '',
-                Identity_of_Father: student.guardianNationalID || '',
-                Email_Address: student.email || '',
-                Bus: student.isRegisteredToBus ? 'Yes' : 'No',
-                Religion: student.religion || '',
-                Pre_School: student.previousSchool || ''
-              };
-            });
-            this.CurrentDate=d.date
-            this.CurrentDate = this.formatDate(this.CurrentDate, this.direction);
-            this.ArabicCurrentDate = new Date(this.CurrentDate).toLocaleDateString('ar-EG', {
+            this.students = d.students;
+            this.tableData = this.students.map(
+              (student: any, index: number) => {
+                return {
+                  No: index + 1, // No
+                  Name: student.en_name || '',
+                  الاسم: student.ar_name || '',
+                  Mobile_1: student.mobile || '',
+                  Mobile_2: student.phone || '',
+                  Passport: student.passportNo || '',
+                  Nationality: student.nationalityEnName || '',
+                  Note: student.note || '',
+                  Date_Of_Birth: student.dateOfBirth || '',
+                  Place_Of_Birth: student.placeOfBirth || '',
+                  Passport_Expired: student.passportExpiredDate || '',
+                  identities_Expired: student.nationalIDExpiredDate || '',
+                  Admission_Date: student.admissionDate || '',
+                  Identity_of_Father: student.guardianNationalID || '',
+                  Email_Address: student.email || '',
+                  Bus: student.isRegisteredToBus ? 'Yes' : 'No',
+                  Religion: student.religion || '',
+                  Pre_School: student.previousSchool || '',
+                };
+              }
+            );
+            this.CurrentDate = d.date;
+            this.CurrentDate = this.formatDate(
+              this.CurrentDate,
+              this.direction
+            );
+            this.ArabicCurrentDate = new Date(
+              this.CurrentDate
+            ).toLocaleDateString('ar-EG', {
               weekday: 'long',
               year: 'numeric',
               month: 'long',
-              day: 'numeric'
+              day: 'numeric',
             });
-            resolve(); 
+            resolve();
           },
           error: (err) => {
             reject(err);
-          }
+          },
         });
     });
   }

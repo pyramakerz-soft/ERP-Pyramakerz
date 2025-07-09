@@ -1,4 +1,3 @@
-// models/inventory/report-card.model.ts
 
 export interface InventoryNetSummary {
   shopItemId: number;
