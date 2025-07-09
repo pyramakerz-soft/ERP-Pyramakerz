@@ -20,5 +20,6 @@ namespace LMS_CMS_DAL.Models.Domains
         public ICollection<School> StartDaySchool { get; set; } = new HashSet<School>();
         public ICollection<School> EndDaySchool { get; set; } = new HashSet<School>();
         public ICollection<LessonLive> LessonLives { get; set; } = new HashSet<LessonLive>();
+        public ICollection<TimeTableClassroom> TimeTableClassrooms { get; set; } = new HashSet<TimeTableClassroom>();
     }
 }
