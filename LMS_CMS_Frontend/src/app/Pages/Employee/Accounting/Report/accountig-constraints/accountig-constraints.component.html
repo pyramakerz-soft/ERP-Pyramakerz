@@ -1,0 +1,155 @@
+<!-- <div class="flex justify-between mb-3">
+    <h1 class="font-semibold text-2xl leading-9">Fees Activation</h1>
+</div>
+
+<div class="flex justify-start items-center space-x-4">
+    <div class="w-[30%]">
+        <label for="fromDate" class="block mb-2 text-sm font-medium text-gray-900">Start Date</label>
+        <input id="fromDate" type="date" [(ngModel)]="SelectedStartDate" (change)="DateChange()"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"> 
+    </div> 
+    <div class="w-[30%]">
+        <label for="toDate" class="block mb-2 text-sm font-medium text-gray-900">End Date</label>
+        <input id="toDate" type="date" [(ngModel)]="SelectedEndDate" (change)="DateChange()"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"> 
+    </div> 
+
+    <div class="mt-7 ml-2">
+        <button class="p-3 font-medium text-xl rounded-lg" (click)="ViewReport()"
+            [disabled]="!showViewReportBtn"
+            [ngClass]="{ 'bg-gray-100 text-gray-300': !showViewReportBtn, 'secondaryBg text-white': showViewReportBtn}">
+            View Report
+        </button>
+    </div>
+</div>
+
+
+
+<div *ngIf="showTable" class="mt-5 flex justify-end space-x-4">
+    <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="DownloadAsExcel()">
+    <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()">
+    <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()">
+</div>
+
+<div *ngIf="showTable" class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
+    <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
+        <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+            <tr>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    ID
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    Amount
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    Discount
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    Net
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    Date
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    Fee Type 
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    Fee Discount Type
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    Student Name
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    Academic Year 
+                </th>  
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngIf="tableData.length === 0">
+                <td colspan="9"
+                    class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                    No Data Found
+                </td>
+            </tr>
+            <tr *ngFor="let fee of tableData; let i = index" [ngClass]="{ 'bg-gray-100': i % 2 === 1, 'bg-white': i%2 !=1 }" 
+            class="border-t border-gray-300 text-xs md:text-sm">
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ fee.feeActivationID }}
+                </td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ fee.amount }}
+                </td> 
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ fee.discount }}
+                </td> 
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ fee.net }}
+                </td> 
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ fee.date }}
+                </td> 
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ fee.feeTypeName }}
+                </td> 
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ fee.feeDiscountTypeName }}
+                </td> 
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ fee.studentName }}
+                </td> 
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ fee.academicYearName }}
+                </td> 
+            </tr>
+        </tbody>
+    </table>
+</div> 
+
+<div *ngIf="showTable" class="mt-8 flex justify-between items-center">
+    <div class="flex items-center space-x-4">
+        <button class="flex items-center space-x-2 rounded-lg border py-3 px-4"
+            (click)="changeCurrentPage(CurrentPage-1)" [disabled]="CurrentPage === 1 || tableData.length == 0"
+            [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === 1 || tableData.length == 0}">
+            <i class="fa-solid fa-arrow-left"></i>
+            <p>Previous</p>
+        </button>
+        <div class="flex">
+            <div *ngFor="let page of [].constructor(TotalPages); let i = index" class="rounded-lg py-[10px] w-[40px]"
+                [ngClass]="{'border': i+1 == CurrentPage || tableData.length == 0}" (click)="changeCurrentPage(i+1)">
+                <p class="text-center">{{ i + 1 }}</p>
+            </div>
+        </div>
+        <button class="flex items-center space-x-2 rounded-lg border py-3 px-4"
+            (click)="changeCurrentPage(CurrentPage+1)" [disabled]="CurrentPage === TotalPages || tableData.length == 0"
+            [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === TotalPages || tableData.length == 0}">
+            <p>Next</p>
+            <i class="fa-solid fa-arrow-right"></i>
+        </button>
+    </div>
+
+    <div class="flex items-center space-x-2">
+        <input (input)="validateNumberForPagination($event)" class="rounded-lg border py-3 px-4 w-[73px]" [(ngModel)]="PageSize"
+            min="1" (input)="validatePageSize($event)" (ngModelChange)="changeCurrentPage(CurrentPage)">
+        <p>items Per Page</p>
+    </div>
+
+    <div>
+        <p>{{CurrentPage}} of {{TotalPages}} pages ({{TotalRecords}} Item)</p>
+    </div>
+</div>
+ 
+<div class="absolute -top-[9999px] -left-[9999px]">
+    <div id="Data" class="hidden">
+        <app-pdf-print *ngIf="showPDF" [fileName]="'Fees Activation'"
+            [infoRows]="[
+                {
+                keyEn: 'Start Date :' + this.SelectedStartDate,
+                },
+                {
+                keyEn: 'End Date : ' + this.SelectedEndDate,
+                }
+            ]"
+            [tableHeaders]="['ID', 'Amount', 'Discount', 'Net', 'Date' , 'Fee Type' , 'Fee Discount Type' , 'Student Name' , 'Academic Year']"
+            [tableData]="DataToPrint" #pdfComponentRef></app-pdf-print>
+    </div>
+</div>  -->

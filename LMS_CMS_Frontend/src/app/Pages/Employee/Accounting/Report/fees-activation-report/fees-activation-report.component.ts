@@ -41,8 +41,7 @@ export class FeesActivationReportComponent {
   constructor(
     public activeRoute: ActivatedRoute,
     public account: AccountService,
-    public ApiServ: ApiService, 
-    public EditDeleteServ: DeleteEditPermissionService,  
+    public ApiServ: ApiService,  
     public reportsService: ReportsService, 
     public sharedReportsService: SharedReportsService 
   ) { }
