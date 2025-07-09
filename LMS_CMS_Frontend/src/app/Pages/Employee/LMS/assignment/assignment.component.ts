@@ -156,18 +156,17 @@ export class AssignmentComponent {
 
   GetAllData(pageNumber: number, pageSize: number) {
     this.assignmentData = []
-    this.IsView=true
-    console.log(this.IsView)
+    this.IsView=true 
     this.CurrentPage = 1
     this.TotalPages = 1
     this.TotalRecords = 0
     if (this.subjectID != 0) {
       this.assignmentService.GetBySubjectID(this.subjectID, this.DomainName, pageNumber, pageSize).subscribe(
-        (data) => {
-          console.log(data)
+        (data) => { 
           this.CurrentPage = data.pagination.currentPage
           this.PageSize = data.pagination.pageSize
           this.TotalPages = data.pagination.totalPages
+          console.log(this.TotalPages)
           this.TotalRecords = data.pagination.totalRecords
           this.assignmentData = data.data
         },
