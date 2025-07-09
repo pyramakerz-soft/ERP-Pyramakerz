@@ -1,11 +1,14 @@
 ﻿using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.AccountingModule.Reports;
 using LMS_CMS_DAL.Models.Domains;
+using LMS_CMS_DAL.Models.Domains.AccountingModule;
+using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_PL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace LMS_CMS_PL.Controllers.Domains.Accounting
 {
@@ -27,7 +30,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         //    allowedTypes: new[] { "octa", "employee" },
         //    pages: new[] { "" }
         //)]
-        public async Task<IActionResult> GetAccountingEntriesAsync(DateTime fromDate, DateTime toDate)
+        public async Task<IActionResult> GetAccountingEntriesAsync(DateTime fromDate, DateTime toDate, int pageNumber = 1, int pageSize = 10)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
             var context = Unit_Of_Work.DbContext;
@@ -44,7 +47,25 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 return NotFound("No accounting entries found for the specified date range.");
             }
 
-            return Ok(result);
+            int totalRecords = result.Count();
+
+            List<AccountingEntriesReport> paginatedResult = result
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            if (paginatedResult == null || !paginatedResult.Any())
+                return NotFound("No accounting entries found for the specified page.");
+
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = paginatedResult, Pagination = paginationMetadata });
         }
         #endregion
     }

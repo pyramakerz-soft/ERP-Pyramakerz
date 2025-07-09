@@ -4,16 +4,19 @@ using LMS_CMS_DAL.Models.Domains;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace LMS_CMS_DAL.Migrations.Domains
+namespace LMS_CMS_DAL.Migrations.LMS_CMS_
 {
     [DbContext(typeof(LMS_CMS_Context))]
-    partial class LMS_CMS_ContextModelSnapshot : ModelSnapshot
+    [Migration("20250709094215_AddGetSubAccScript")]
+    partial class AddGetSubAccScript
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -8874,8 +8877,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<long>("ClassroomID")
                         .HasColumnType("bigint");
 
-                    b.Property<long?>("DayId")
-                        .HasColumnType("bigint");
+                    b.Property<string>("Day")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
@@ -8913,8 +8917,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.HasKey("ID");
 
                     b.HasIndex("ClassroomID");
-
-                    b.HasIndex("DayId");
 
                     b.HasIndex("DeletedByUserId");
 
@@ -14832,11 +14834,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("LMS_CMS_DAL.Models.Domains.Days", "Day")
-                        .WithMany("TimeTableClassrooms")
-                        .HasForeignKey("DayId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "DeletedByEmployee")
                         .WithMany()
                         .HasForeignKey("DeletedByUserId");
@@ -14856,8 +14853,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .HasForeignKey("UpdatedByUserId");
 
                     b.Navigation("Classroom");
-
-                    b.Navigation("Day");
 
                     b.Navigation("DeletedByEmployee");
 
@@ -15847,8 +15842,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Navigation("LessonLives");
 
                     b.Navigation("StartDaySchool");
-
-                    b.Navigation("TimeTableClassrooms");
                 });
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.ECommerce.Cart", b =>
