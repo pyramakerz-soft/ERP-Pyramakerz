@@ -22,10 +22,7 @@
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
                     Arabic Name
-                </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Date
-                </th>
+                </th> 
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     Actions
                 </th>
@@ -34,7 +31,7 @@
         <tbody>
             <!-- No Data Row -->
             <tr *ngIf="accountData.length === 0">
-                <td colspan="5" class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                <td colspan="4" class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
                     No Data Found
                 </td>
             </tr>
@@ -46,8 +43,7 @@
 
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{ row.id }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.user_Name }}</td>
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.arabic_Name }}</td>
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.insertedAt | date:'MMM d, yyyy' }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.arabic_Name }}</td> 
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     <div class="flex space-x-4">
                         <button>
@@ -77,7 +73,7 @@
             <div class="flex flex-col w-[49%] mb-4">
                 <label class="mb-2 primaryTxt" for="name">Username</label>
                 <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Username"
-                [(ngModel)]="account.user_Name" 
+                [(ngModel)]="accountToMake.user_Name" 
                 (ngModelChange)="onInputValueChange({ field: 'user_Name', value: $event })"/>
                 <span *ngIf="validationErrors['user_Name']" class="text-red-500 ml-3 font-normal">{{ validationErrors['user_Name'] }}</span>
             </div> 
@@ -85,15 +81,15 @@
             <div class="flex flex-col w-[49%] mb-4">
                 <label class="mb-2 primaryTxt" for="arname">Arabic Name</label>
                 <input id="arname" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Arabic Name"
-                [(ngModel)]="account.arabic_Name" 
+                [(ngModel)]="accountToMake.arabic_Name" 
                 (ngModelChange)="onInputValueChange({ field: 'arabic_Name', value: $event })"/>
                 <span *ngIf="validationErrors['arabic_Name']" class="text-red-500 ml-3 font-normal">{{ validationErrors['arabic_Name'] }}</span>
             </div>
-    
-            <div class="flex flex-col w-[49%] mb-4">
-                <label class="mb-2 primaryTxt" for="pass">Password</label>
+     
+            <div *ngIf="!editAccount" class="flex flex-col w-[49%] mb-4">
+                <label class="mb-2 primaryTxt" for="pass" autocomplete="new-password">Password</label>
                 <input id="pass" type="password" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Password"
-                [(ngModel)]="account.password" 
+                [(ngModel)]="accountToMake.password" 
                 (ngModelChange)="onInputValueChange({ field: 'password', value: $event })"/>
                 <span *ngIf="validationErrors['password']" class="text-red-500 ml-3 font-normal">{{ validationErrors['password'] }}</span>
             </div>

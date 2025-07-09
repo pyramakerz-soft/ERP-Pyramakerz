@@ -483,9 +483,9 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("GetBySudent/{StudentId}")]
         [Authorize_Endpoint_(
-     allowedTypes: new[] { "octa", "employee", "student" },
-     pages: new[] { "Subject" }
- )]
+             allowedTypes: new[] { "octa", "employee", "student" },
+             pages: new[] { "Subject" }
+         )]
         public async Task<IActionResult> GetByStudentId(long StudentId)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);

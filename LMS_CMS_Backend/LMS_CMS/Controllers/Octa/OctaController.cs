@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using LMS_CMS_BL.DTO;
 using LMS_CMS_BL.DTO.LMS;
 using LMS_CMS_BL.DTO.Octa;
 using LMS_CMS_BL.UOW;
@@ -128,13 +129,54 @@ namespace LMS_CMS_PL.Controllers.Octa
                 return NotFound("No Octa with this ID");
             }
 
-            mapper.Map(editedAcc, octaExists);
-            octaExists.Password = BCrypt.Net.BCrypt.HashPassword(editedAcc.Password);
+            mapper.Map(editedAcc, octaExists); 
             octaExists.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
             octaExists.UpdatedByUserId = userId;
             _Unit_Of_Work.octa_Repository.Update_Octa(octaExists);
             _Unit_Of_Work.SaveOctaChanges();
             return Ok(editedAcc);
+        }
+
+        [HttpPut("EditPass")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa" }
+        )]
+        public async Task<IActionResult> EditpasswordAsync(EditPasswordDTO editedAcc)
+        {
+            var userClaims = HttpContext.User.Claims;
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            if (editedAcc == null)
+            {
+                return BadRequest("Octa cannot be null");
+            }
+
+            LMS_CMS_DAL.Models.Octa.Octa octaExists = _Unit_Of_Work.octa_Repository.First_Or_Default_Octa(b => b.ID == editedAcc.Id && b.IsDeleted != true);
+            if (octaExists == null || octaExists.IsDeleted == true)
+            {
+                return NotFound("No Octa with this ID");
+            }
+
+            bool isMatch = BCrypt.Net.BCrypt.Verify(editedAcc.OldPassword, octaExists.Password);
+            if (isMatch == false)
+            {
+                return BadRequest("Old Password isn't right");
+            } 
+
+            octaExists.Password = BCrypt.Net.BCrypt.HashPassword(editedAcc.Password);
+            octaExists.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            octaExists.UpdatedByUserId = userId;
+            _Unit_Of_Work.octa_Repository.Update_Octa(octaExists);
+            _Unit_Of_Work.SaveOctaChanges();
+            return Ok();
         }
 
         [HttpDelete("{id}")]

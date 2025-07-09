@@ -14,6 +14,7 @@ import { EditPass } from '../../Models/Employee/edit-pass';
 import Swal from 'sweetalert2';
 import { EmployeeService } from '../../Services/Employee/employee.service';
 import { ApiService } from '../../Services/api.service';
+import { OctaService } from '../../Services/Octa/octa.service';
 
 @Component({
   selector: 'app-nav-menu',
@@ -40,8 +41,8 @@ export class NavMenuComponent {
   editpasss:EditPass=new EditPass();
   DomainName: string = "";
 
-  constructor(private router: Router, public account: AccountService, public languageService: LanguageService, public ApiServ: ApiService,
-    private translate: TranslateService, private communicationService: NewTokenService, private logOutService: LogOutService, public EmpServ: EmployeeService) { }
+  constructor(private router: Router, public account: AccountService, public languageService: LanguageService, public ApiServ: ApiService, public octaService:OctaService,
+    private translate: TranslateService, private communicationService: NewTokenService, private logOutService: LogOutService) { }
 
   ngOnInit() {
     this.GetUserInfo();
@@ -59,21 +60,19 @@ export class NavMenuComponent {
     this.allTokens = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      const value = localStorage.getItem(key || '');
-
+      const value = localStorage.getItem(key || ''); 
       if (key && key.includes('token') && key != "current_token" && key != "token") {
         if (value) {
-          this.User_Data_After_Login = jwtDecode(value)
-          if (this.User_Data_After_Login.user_Name)
-            this.allTokens.push({ id: count, key: this.User_Data_After_Login.user_Name, KeyInLocal: key, value: value || '', UserType: this.User_Data_After_Login.type });
+          var user:TokenData = jwtDecode(value)
+          if (user.user_Name)
+            this.allTokens.push({ id: count, key: user.user_Name, KeyInLocal: key, value: value || '', UserType: user.type });
           count++;
         }
 
       }
     }
   }
-
-
+ 
   gotologin() {
     localStorage.setItem("GoToLogin", "true");
     this.router.navigateByUrl('')
@@ -101,11 +100,10 @@ export class NavMenuComponent {
   }
 
   GetUserInfo() {
-    let token = localStorage.getItem("current_token")
-    let User_Data_After_Login = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
-    User_Data_After_Login = this.account.Get_Data_Form_Token()
-    this.User_Type = User_Data_After_Login.type
-    this.userName = User_Data_After_Login.user_Name 
+    let token = localStorage.getItem("current_token") 
+    this.User_Data_After_Login = this.account.Get_Data_Form_Token()
+    this.User_Type = this.User_Data_After_Login.type
+    this.userName = this.User_Data_After_Login.user_Name 
   }
 
   togglePopup(): void {
@@ -217,7 +215,7 @@ export class NavMenuComponent {
     this.OldPasswordError = "" 
   } 
   
-  Save(){
+  Save(){ 
     if(this.password != this.confirmPassword){
       Swal.fire({
         icon: 'error',
@@ -230,45 +228,87 @@ export class NavMenuComponent {
         this.editpasss.id=this.User_Data_After_Login.id;
         this.editpasss.password=this.password 
         this.isLoading = true
-        this.EmpServ.EditPassword(this.editpasss,this.DomainName).subscribe(()=>{
-            this.closeModal()
-            Swal.fire({
-              icon: 'success',
-              title: 'Done',
-              text: 'Updatedd Successfully',
-              confirmButtonColor: '#089B41',
-            });
-          },
-          (error) => {   
-            this.isLoading = false
-            switch(true) {
-              case error.error.errors?.Password !== undefined:
-                Swal.fire({
-                  icon: 'error',
-                  title: 'Error',
-                  text: error.error.errors.Password[0] || 'An unexpected error occurred',
-                  confirmButtonColor: '#089B41',
-                });
-                break; 
-              case error.error == "Old Password isn't right":
+        if(this.User_Data_After_Login.type == "octa"){
+          this.octaService.EditPassword(this.editpasss,this.DomainName).subscribe(()=>{
+              this.closeModal()
+              Swal.fire({
+                icon: 'success',
+                title: 'Done',
+                text: 'Updatedd Successfully',
+                confirmButtonColor: '#089B41',
+              });
+            },
+            (error) => {   
+              this.isLoading = false
+              switch(true) {
+                case error.error.errors?.Password !== undefined:
                   Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: error.error,
+                    text: error.error.errors.Password[0] || 'An unexpected error occurred',
+                    confirmButtonColor: '#089B41',
+                  });
+                  break; 
+                case error.error == "Old Password isn't right":
+                    Swal.fire({
+                      icon: 'error',
+                      title: 'Error',
+                      text: error.error,
+                      confirmButtonColor: '#089B41',
+                    });
+                    break;
+                default:
+                  Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.error.errors || 'An unexpected error occurred',
                     confirmButtonColor: '#089B41',
                   });
                   break;
-              default:
-                Swal.fire({
-                  icon: 'error',
-                  title: 'Error',
-                  text: error.error.errors || 'An unexpected error occurred',
-                  confirmButtonColor: '#089B41',
-                });
-                break;
-            }
-          } 
-        ) 
+              }
+            } 
+          ) 
+        }else{
+          this.account.EditPassword(this.editpasss,this.DomainName).subscribe(()=>{
+              this.closeModal()
+              Swal.fire({
+                icon: 'success',
+                title: 'Done',
+                text: 'Updatedd Successfully',
+                confirmButtonColor: '#089B41',
+              });
+            },
+            (error) => {   
+              this.isLoading = false
+              switch(true) {
+                case error.error.errors?.Password !== undefined:
+                  Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.error.errors.Password[0] || 'An unexpected error occurred',
+                    confirmButtonColor: '#089B41',
+                  });
+                  break; 
+                case error.error == "Old Password isn't right":
+                    Swal.fire({
+                      icon: 'error',
+                      title: 'Error',
+                      text: error.error,
+                      confirmButtonColor: '#089B41',
+                    });
+                    break;
+                default:
+                  Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.error.errors || 'An unexpected error occurred',
+                    confirmButtonColor: '#089B41',
+                  });
+                  break;
+              }
+            } 
+          ) 
+        }
       } else{
         if(this.password == ""){
           this.PasswordError = "Password Can't be Empty"

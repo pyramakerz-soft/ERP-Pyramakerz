@@ -20,7 +20,7 @@ export class AccountComponent {
   value: any = "";
 
   accountData:Account[] = []
-  account:Account = new Account()
+  accountToMake:Account = new Account()
   editAccount:boolean = false
   validationErrors: { [key in keyof Account]?: string } = {};
 
@@ -39,8 +39,9 @@ export class AccountComponent {
   }
 
   GetAccountById(accountId: number) {
+    this.accountToMake = new Account()
     this.octaService.GetByID(accountId).subscribe((data) => {
-      this.account = data;
+      this.accountToMake = data;
     });
   }
 
@@ -48,7 +49,7 @@ export class AccountComponent {
     if (accountId) {
       this.editAccount = true;
       this.GetAccountById(accountId); 
-    }
+    } 
     
     document.getElementById("Add_Modal")?.classList.remove("hidden");
     document.getElementById("Add_Modal")?.classList.add("flex");
@@ -58,7 +59,7 @@ export class AccountComponent {
     document.getElementById("Add_Modal")?.classList.remove("flex");
     document.getElementById("Add_Modal")?.classList.add("hidden");
 
-    this.account= new Account()
+    this.accountToMake= new Account()
 
     if(this.editAccount){
       this.editAccount = false
@@ -93,22 +94,22 @@ export class AccountComponent {
   }
 
   capitalizeField(field: keyof Account): string {
-      return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
+    return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
 
   isFormValid(): boolean {
     let isValid = true;
-    for (const key in this.account) {
-      if (this.account.hasOwnProperty(key)) {
+    for (const key in this.accountToMake) {
+      if (this.accountToMake.hasOwnProperty(key)) {
         const field = key as keyof Account;
-        if (!this.account[field]) {
+        if (!this.accountToMake[field]) {
           if(field == "user_Name" || field == "arabic_Name" || field == "password"){
             this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
             isValid = false;
           }
         } else {
           if(field == "user_Name" || field == "arabic_Name"){
-            if(this.account.user_Name.length > 100 || this.account.arabic_Name.length > 100){
+            if(this.accountToMake.user_Name.length > 100 || this.accountToMake.arabic_Name.length > 100){
               this.validationErrors[field] = `*${this.capitalizeField(field)} cannot be longer than 100 characters`
               isValid = false;
             }
@@ -124,7 +125,7 @@ export class AccountComponent {
   onInputValueChange(event: { field: keyof Account, value: any }) {
     const { field, value } = event;
     if (field == "user_Name" || field == "arabic_Name" || field == "password") {
-      (this.account as any)[field] = value;
+      (this.accountToMake as any)[field] = value;
       if (value) {
         this.validationErrors[field] = '';
       }
@@ -134,7 +135,7 @@ export class AccountComponent {
   SaveAccount(){
     if(this.isFormValid()){
       if(this.editAccount == false){
-        this.octaService.Add(this.account).subscribe(
+        this.octaService.Add(this.accountToMake).subscribe(
           (result: any) => {
             this.closeModal()
             this.getAccountData()
@@ -143,7 +144,7 @@ export class AccountComponent {
           }
         );
       } else{
-        this.octaService.Edit(this.account).subscribe(
+        this.octaService.Edit(this.accountToMake).subscribe(
           (result: any) => {
             this.closeModal()
             this.getAccountData()

@@ -2,8 +2,10 @@
 {
     public class AccountingEntriesReport
     {
+        public long MasterID { get; set; }
+        public long DetailsID { get; set; }
         public string Account { get; set; }
-        public long InvoiceNumber { get; set; }
+        public string InvoiceNumber { get; set; }
         public long MainAccountNo { get; set; }
         public string MainAccount { get; set; }
         public long SubAccountNo { get; set; }
