@@ -104,25 +104,33 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
             string pcName = $"PC{schoolPc.ID}_{schoolPc.School.ID}";
 
-            //S3Service s3SecretManager = new S3Service(_secretsManager);
+            S3Service s3SecretManager = new S3Service(_secretsManager);
 
             var csrSteps = ZatcaServices.GenerateCSRandPrivateKey(csrGeneration);
 
             string csrContent = csrSteps[1].ResultedValue;
-            string csrPath = Path.Combine(certificates, $"{pcName}_CSR.csr");
-            System.IO.File.WriteAllText(csrPath, csrContent);
-
             string privateKeyContent = csrSteps[2].ResultedValue;
-            string privateKeyPath = Path.Combine(certificates, $"{pcName}_PrivateKey.pem");
-            System.IO.File.WriteAllText(privateKeyPath, privateKeyContent);
 
-            //bool addCSR = await s3SecretManager.CreateOrUpdateSecretAsync($"{pcName}CSR", csrContent);
-            //if (!addCSR)
-            //    return BadRequest("Adding CSR failed!");
+            string filesEnvironment = _config.GetValue<string>("ZatcaFilesEnvironment");
 
-            //bool addPrivateKey = await s3SecretManager.CreateOrUpdateSecretAsync($"{pcName}PrivateKey", privateKeyContent);
-            //if (!addPrivateKey)
-            //    return BadRequest("Adding Private Key failed!");
+            if (filesEnvironment == "local")
+            {
+                string csrPath = Path.Combine(certificates, $"{pcName}_CSR.csr");
+                System.IO.File.WriteAllText(csrPath, csrContent);
+
+                string privateKeyPath = Path.Combine(certificates, $"{pcName}_PrivateKey.pem");
+                System.IO.File.WriteAllText(privateKeyPath, privateKeyContent);
+            }
+            else
+            {
+                bool addCSR = await s3SecretManager.CreateOrUpdateSecretAsync($"{pcName}CSR", csrContent);
+                if (!addCSR)
+                    return BadRequest("Adding CSR failed!");
+
+                bool addPrivateKey = await s3SecretManager.CreateOrUpdateSecretAsync($"{pcName}PrivateKey", privateKeyContent);
+                if (!addPrivateKey)
+                    return BadRequest("Adding Private Key failed!");
+            }            
 
             //await InvoicingServices.GeneratePublicKey(publicKeyPath, privateKeyPath);
 
@@ -134,13 +142,18 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
             string csid = await ZatcaServices.GenerateCSID(csrJson, otp, version, _config);
 
-            string csidPath = Path.Combine(certificates, $"{pcName}_CSID.json");
-            System.IO.File.WriteAllText(csidPath, csid);
+            if (filesEnvironment == "local")
+            {
+                string csidPath = Path.Combine(certificates, $"{pcName}_CSID.json");
+                System.IO.File.WriteAllText(csidPath, csid);
+            }
+            else
+            {
+                bool addCSID = await s3SecretManager.CreateOrUpdateSecretAsync($"{pcName}CSID", csid);
 
-            //bool addCSID = await s3SecretManager.CreateOrUpdateSecretAsync($"{pcName}CSID", csid);
-
-            //if (!addCSID)
-            //    return BadRequest("Adding CSID failed!");
+                if (!addCSID)
+                    return BadRequest("Adding CSID failed!");
+            }
 
             dynamic csidJson = JsonConvert.DeserializeObject(csid);
 
@@ -155,13 +168,18 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
             string pcsid = await ZatcaServices.GeneratePCSID(tokenBase64, version, requestId, _config);
 
-            string pcsidPath = Path.Combine(certificates, $"{pcName}_PCSID.json");
-            System.IO.File.WriteAllText(pcsidPath, pcsid);
+            if (filesEnvironment == "local")
+            {
+                string pcsidPath = Path.Combine(certificates, $"{pcName}_PCSID.json");
+                System.IO.File.WriteAllText(pcsidPath, pcsid);
+            }
+            else
+            {
+                bool addPCSID = await s3SecretManager.CreateOrUpdateSecretAsync($"{pcName}PCSID", pcsid);
 
-            //bool addPCSID = await s3SecretManager.CreateOrUpdateSecretAsync($"{pcName}PCSID", pcsid);
-
-            //if (!addPCSID)
-            //    return BadRequest("Adding PCSID failed!");
+                if (!addPCSID)
+                    return BadRequest("Adding PCSID failed!");
+            }
 
             string certificateDate = ZatcaServices.GetCertificateDate(pcsid);
 
@@ -293,14 +311,14 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
             if (master.FlagId == 12)
                 xmlPath = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/XMLCredits");
 
-            string pcName = $"PC{pc.ID}_{pc.School.ID}";
+            string pcName = $"PC{master.SchoolPCId}_{master.School.ID}";
+            
+            string filesEnvironment = _config.GetValue<string>("ZatcaFilesEnvironment");
 
             string pcsidPath = Path.Combine(certificates, $"{pcName}_PCSID.json");
 
             if (master.IsValid == 0 || master.IsValid == null)
             {
-                //string pcName = $"PC{master.SchoolPCId}{master.School?.ID}";
-
                 AmazonS3Client secretS3Client = new AmazonS3Client();
                 S3Service s3 = new S3Service(_config, "AWS:Region");
 
@@ -313,13 +331,31 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                 if (master.FlagId == 11 || master.FlagId == 12)
                     lastInvoiceHash = lastMaster?.InvoiceHash;
 
-                bool result = await ZatcaServices.GenerateInvoiceXML(xmlPath, master, lastInvoiceHash, s3, dateTime);
+                bool result = await ZatcaServices.GenerateInvoiceXML(xmlPath, master, lastInvoiceHash, s3, dateTime, _config);
 
                 if (!result)
                     return BadRequest("Failed to generate XML file.");
 
-                //string certContent = await s3.GetSecret($"{pcName}PCSID");
-                string certContent = System.IO.File.ReadAllText(pcsidPath);
+                string certContent = string.Empty;
+
+                if (filesEnvironment == "local")
+                {
+                    certContent = await s3.GetSecret($"{pcName}PCSID");
+
+                    if (string.IsNullOrEmpty(certContent))
+                    {
+                        return BadRequest("PCSID not found or empty.");
+                    }
+                }
+                else
+                {
+                    certContent = System.IO.File.ReadAllText(pcsidPath);
+
+                    if (!System.IO.File.Exists(pcsidPath) || string.IsNullOrEmpty(certContent))
+                    {
+                        return BadRequest("PCSID not found or empty.");
+                    }
+                }                
 
                 dynamic certObject = JsonConvert.DeserializeObject(certContent);
                 string token = certObject.binarySecurityToken;
@@ -348,14 +384,9 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                 Unit_Of_Work.inventoryMaster_Repository.Update(master);
                 Unit_Of_Work.SaveChanges();
 
-                //var request = HttpContext.Request;
-                //var domain = request.Host.Host;
-                //var hostParts = request.Host.Value.Split('.');
-                //string subDomain = hostParts.Length > 2 ? hostParts[0] : "test";
-
                 var domain = _domainService.GetDomain(HttpContext);
                 string subDomainValue = _domainService.GetSubdomain(HttpContext);
-                string subDomain = !subDomainValue.IsNullOrEmpty() ? subDomainValue : "test";
+                string subDomain = !subDomainValue.IsNullOrEmpty() ? subDomainValue : "Local";
 
                 S3Service s3Client = new S3Service(secretS3Client, _config, "AWS:Bucket", "AWS:Folder");
 
@@ -480,7 +511,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                                 if (master.FlagId == 11 || master.FlagId == 12)
                                     lastInvoiceHash = lastMaster?.InvoiceHash;
 
-                                bool result = await ZatcaServices.GenerateInvoiceXML(xmlPath, master, lastInvoiceHash, s3, dateTime);
+                                bool result = await ZatcaServices.GenerateInvoiceXML(xmlPath, master, lastInvoiceHash, s3, dateTime, _config);
 
                                 if (!result)
                                     return BadRequest("Failed to generate XML file.");

@@ -13,6 +13,7 @@ using System.Xml;
 using Zatca.EInvoice.SDK;
 using Zatca.EInvoice.SDK.Contracts.Models;
 using ZXing.Windows.Compatibility;
+using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace LMS_CMS_PL.Services.Zatca
 {
@@ -180,7 +181,7 @@ namespace LMS_CMS_PL.Services.Zatca
             return response;
         }
 
-        public static async Task<bool> GenerateInvoiceXML(string xmalPath, InventoryMaster master, string lastInvoiceHash, S3Service s3, string dateTime)
+        public static async Task<bool> GenerateInvoiceXML(string xmalPath, InventoryMaster master, string lastInvoiceHash, S3Service s3, string dateTime, IConfiguration config)
         {
 
             string examplePath = Path.Combine(Directory.GetCurrentDirectory(), "Services/Zatca/Invoice");
@@ -195,8 +196,6 @@ namespace LMS_CMS_PL.Services.Zatca
 
             string date = invDate.ToString("yyyy-MM-dd");
             string time = invDate.ToString("HH:mm:ss");
-
-            string pcName = $"PC{master.SchoolPCId}{master.SchoolId}";
 
             string newXmlPath = Path.Combine(xmalPath, $"{master.School.CRN}_{date.Replace("-", "")}T{time.Replace(":", "")}_{date}-{master.StoreID}_{master.FlagId}_{master.ID}.xml");
 
@@ -380,22 +379,32 @@ namespace LMS_CMS_PL.Services.Zatca
 
             SaveFormatted(inv, newXmlPath);
 
-            string pcName2 = $"PC{master.SchoolPCId}_{master.SchoolId}";
+            string pcName = $"PC{master.SchoolPCId}_{master.SchoolId}";
 
-            string certPath = Path.Combine(certificates, $"{pcName2}_PCSID.json");
-            string certContent = File.ReadAllText(certPath);
-            //string certContent = await s3.GetSecret($"{pcName}PCSID");
+            string filesEnvironment = config.GetValue<string>("ZatcaFilesEnvironment");
+
+            string certContent = string.Empty;
+            string privateKeyContent = string.Empty;
+
+            if (filesEnvironment == "local")
+            {
+                string certPath = Path.Combine(certificates, $"{pcName}_PCSID.json");
+                certContent = File.ReadAllText(certPath);
+
+                string privateKeyPath = Path.Combine(certificates, $"{pcName}_PrivateKey.pem");
+                privateKeyContent = File.ReadAllText(privateKeyPath);
+            }
+            else
+            {
+                certContent = await s3.GetSecret($"{pcName}PCSID");
+                privateKeyContent = await s3.GetSecret($"{pcName}PrivateKey");
+            }
 
             dynamic certObject = JsonConvert.DeserializeObject(certContent);
             string base64Cert = certObject.binarySecurityToken;
 
             byte[] certBytes = Convert.FromBase64String(base64Cert);
             string certDecoded = Encoding.UTF8.GetString(certBytes);
-
-            //string privateKeyContent = await s3.GetSecret($"{pcName}PrivateKey");
-            string privateKeyPath = Path.Combine(certificates, $"{pcName2}_PrivateKey.pem");
-
-            string privateKeyContent = File.ReadAllText(privateKeyPath);
 
             privateKeyContent = privateKeyContent
                 .Replace("-----BEGIN EC PRIVATE KEY-----", "")
