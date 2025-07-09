@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using LMS_CMS_BL.DTO.LMS;
 using LMS_CMS_BL.UOW;
+using LMS_CMS_DAL.Models.Domains;
 using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
@@ -28,13 +29,9 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         }
 
         /////////////////
-        
+
         [HttpPost]
-        [Authorize_Endpoint_(
-              allowedTypes: new[] { "octa", "employee" }
-              //,
-              //pages: new[] { "Building" }
-          )]
+        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" })]
         public async Task<IActionResult> GenerateAsync(long SchoolId)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -44,41 +41,96 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
 
             if (userIdClaim == null || userTypeClaim == null)
-            {
                 return Unauthorized("User ID or Type claim not found.");
-            }
 
-            School school = Unit_Of_Work.school_Repository.First_Or_Default(s=>s.ID == SchoolId && s.IsDeleted !=true);
-            if(school == null)
-            {
+            School school = Unit_Of_Work.school_Repository.First_Or_Default(s => s.ID == SchoolId && s.IsDeleted != true);
+            if (school == null)
                 return BadRequest("No School With This Id");
-            }
 
-            AcademicYear academicYear = Unit_Of_Work.academicYear_Repository.First_Or_Default(a=>a.SchoolID== SchoolId && a.IsDeleted != true && a.IsActive== true);
+            AcademicYear academicYear = Unit_Of_Work.academicYear_Repository.First_Or_Default(a =>a.SchoolID == SchoolId && a.IsDeleted != true && a.IsActive == true);
             if (academicYear == null)
-            {
                 return BadRequest("There is no active academic year in this school");
-            }
 
-            ///////// Create TimeTable First
-            TimeTable timeTable = new TimeTable();
-            timeTable.AcademicYearID = academicYear.ID;
-            Unit_Of_Work.academicYear_Repository.Add(academicYear);
+            /////////////////////// Create the timetable
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            TimeTable timeTable = new TimeTable
+            {
+                AcademicYearID = academicYear.ID,
+                InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone)
+            };
+            if (userTypeClaim == "octa")
+                timeTable.InsertedByOctaId = userId;
+            else if (userTypeClaim == "employee")
+                timeTable.InsertedByUserId = userId;
+
+            Unit_Of_Work.timeTable_Repository.Add(timeTable);
             Unit_Of_Work.SaveChanges();
 
-            List<Grade> Grades = await Unit_Of_Work.grade_Repository.Select_All_With_IncludesById<Grade>(sem => sem.IsDeleted != true && sem.Section.SchoolID == SchoolId,
-                                    query => query.Include(emp => emp.Section));
+            /////////////////////// Create the TimeTableClassroom
+            // Get Grades and Classrooms
+            List<Grade> Grades = await Unit_Of_Work.grade_Repository.Select_All_With_IncludesById<Grade>(g => g.IsDeleted != true && g.Section.SchoolID == SchoolId,
+                query => query.Include(g => g.Section));
 
             if (Grades == null || Grades.Count == 0)
-            {
                 return BadRequest("There is no grades in this school");
+
+            List<long> gradesIds = Grades.Select(g => g.ID).ToList();
+            List<Classroom> classes = Unit_Of_Work.classroom_Repository.FindBy(c => gradesIds.Contains(c.GradeID) && c.AcademicYearID == academicYear.ID);
+
+            // Determine valid days based on start/end
+            List<Days> allDays = Unit_Of_Work.days_Repository.Select_All().OrderBy(d => d.ID).ToList();
+            List<Days> days = new List<Days>();
+
+            if (school.WeekStartDayID <= school.WeekEndDayID)
+            {
+                days = allDays.Where(d => d.ID >= school.WeekStartDayID && d.ID <= school.WeekEndDayID).ToList();
+            }
+            else
+            {
+                days = allDays.Where(d => d.ID >= school.WeekStartDayID || d.ID <= school.WeekEndDayID).ToList();
             }
 
-            List<long> gradesIds = Grades.Select(g=>g.ID).ToList();
-            List<Classroom> classes = Unit_Of_Work.classroom_Repository.FindBy(c => gradesIds.Contains(c.GradeID));
-            List<string> days = new List<string>();
-            
-            
+            // Create TimeTableClassroom combinations
+            List<TimeTableClassroom> timeTableClassrooms = new List<TimeTableClassroom>();
+            foreach (var classroom in classes)
+            {
+                foreach (var day in days)
+                {
+                    timeTableClassrooms.Add(new TimeTableClassroom
+                    {
+                        ClassroomID = classroom.ID,
+                        DayId = day.ID,
+                        TimeTableID = timeTable.ID,
+                        InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone),
+                        InsertedByOctaId = userTypeClaim == "octa" ? userId : null,
+                        InsertedByUserId = userTypeClaim == "employee" ? userId : null
+                    });
+                }
+            }
+            Unit_Of_Work.timeTableClassroom_Repository.AddRange(timeTableClassrooms);
+            Unit_Of_Work.SaveChanges();
+
+            /////////////////////// Create the TimeTableSession
+             
+            foreach (var classroom in timeTableClassrooms)
+            {
+                if (classroom.DayId ==1)
+                {
+                    for(int i = 0;i< classroom.Classroom.Grade.MON; i++)
+                    {
+                        TimeTableSession timeTableSession =  new TimeTableSession();
+                        timeTableSession.TimeTableClassroomID= classroom.ID;
+                        if (userTypeClaim == "octa")
+                            timeTableSession.InsertedByOctaId = userId;
+                        else if (userTypeClaim == "employee")
+                            timeTableSession.InsertedByUserId = userId;
+
+                        Unit_Of_Work.timeTableSession_Repository.Add(timeTableSession);
+                        Unit_Of_Work.SaveChanges();
+                    }
+                }
+            }
+
             return Ok();
         }
 
