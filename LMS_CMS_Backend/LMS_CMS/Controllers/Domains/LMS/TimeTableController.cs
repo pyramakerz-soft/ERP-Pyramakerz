@@ -77,8 +77,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             List<long> gradesIds = Grades.Select(g=>g.ID).ToList();
             List<Classroom> classes = Unit_Of_Work.classroom_Repository.FindBy(c => gradesIds.Contains(c.GradeID));
             List<string> days = new List<string>();
-
-
+            
+            
             return Ok();
         }
 
