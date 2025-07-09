@@ -12,11 +12,17 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
     {
         [Key]
         public long ID { get; set; }
-        public string Day { get; set; }
+
+
+        [ForeignKey("Day")]
+        public long? DayId { get; set; }
+        public Days? Day { get; set; }
+
 
         [ForeignKey("TimeTable")]
         public long TimeTableID { get; set; }
         public TimeTable TimeTable { get; set; }
+
 
         [ForeignKey("Classroom")]
         public long ClassroomID { get; set; }

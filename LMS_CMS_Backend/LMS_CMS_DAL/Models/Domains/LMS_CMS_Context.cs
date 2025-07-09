@@ -1698,6 +1698,12 @@ namespace LMS_CMS_DAL.Models.Domains
               .HasForeignKey(p => p.TeacherID)
               .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<TimeTableClassroom>()
+              .HasOne(p => p.Day)
+              .WithMany(p => p.TimeTableClassrooms)
+              .HasForeignKey(p => p.DayId)
+              .OnDelete(DeleteBehavior.Restrict);
+
             ///////////////////////// Exception: /////////////////////////
             modelBuilder.Entity<Bus>()
                 .HasOne(b => b.DeletedByEmployee)
