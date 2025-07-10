@@ -286,13 +286,23 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                      .Include(tt => tt.TimeTableClassrooms)
                          .ThenInclude(tc => tc.Classroom)
                      .Include(tt => tt.TimeTableClassrooms)
-                         .ThenInclude(tc => tc.Classroom.Grade) 
+                         .ThenInclude(tc => tc.Day)
+                     .Include(tt => tt.TimeTableClassrooms)
+                         .ThenInclude(tc => tc.Classroom.Grade)
+                     .Include(tt => tt.AcademicYear)
              );
 
             if (timeTable == null)
             {
                 return BadRequest("No timetable with this ID");
             }
+
+            School school = Unit_Of_Work.school_Repository.First_Or_Default(s=>s.ID== timeTable.AcademicYear.SchoolID && s.IsDeleted != true );
+            if (school == null)
+            {
+                return BadRequest("No school with this ID");
+            }
+
             TimeTableGetDTO Dto = mapper.Map<TimeTableGetDTO>(timeTable);
 
             var groupedResult = Dto.TimeTableClassrooms
@@ -331,7 +341,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }).ToList();
 
             // Return the grouped result as JSON
-            return Ok(groupedResult);
+            return Ok(new { Data = groupedResult, TimeTableName = timeTable.Name, MaxPeriods = school.MaximumPeriodCountTimeTable });
         }
     }
 }

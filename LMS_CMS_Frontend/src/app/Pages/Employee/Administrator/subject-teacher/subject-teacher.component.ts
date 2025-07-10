@@ -42,6 +42,7 @@ export class SubjectTeacherComponent {
 
   DomainName: string = '';
   UserID: number = 0;
+  TeacherId: number = 0;
   SupjectTeacherData: any[] = []; 
   areAllClassroomsOpen: boolean = true;
   SupjectTeacher: ClassroomSubject = new ClassroomSubject()
@@ -68,6 +69,7 @@ export class SubjectTeacherComponent {
     this.DomainName = this.ApiServ.GetHeader();
      
     this.SupjectTeacher.teacherID = Number(this.activeRoute.snapshot.paramMap.get('id'));
+    this.TeacherId = Number(this.activeRoute.snapshot.paramMap.get('id'));
      this.EmpServ.Get_Employee_By_ID(this.SupjectTeacher.teacherID, this.DomainName).subscribe(async (data) => {
           this.employee = data; 
         }) 
@@ -80,6 +82,7 @@ export class SubjectTeacherComponent {
   }
 
   GetData() {
+    console.log(this.SupjectTeacher.teacherID)
     this.ClassroomSubjectServ.GetByEmpId(this.SupjectTeacher.teacherID, this.DomainName).subscribe((d) => {
       this.SupjectTeacherData = d
       console.log(this.SupjectTeacherData)
@@ -159,6 +162,8 @@ export class SubjectTeacherComponent {
     document.getElementById("Add_Modal")?.classList.add("hidden");
 
     this.SupjectTeacher = new ClassroomSubject()
+    this.SupjectTeacher.teacherID = this.TeacherId
+      this.validationErrors = {};
   }
 
   capitalizeField(field: keyof ClassroomSubject): string {
