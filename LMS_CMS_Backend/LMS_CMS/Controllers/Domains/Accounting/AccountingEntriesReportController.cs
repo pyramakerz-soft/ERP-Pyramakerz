@@ -39,7 +39,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             var context = Unit_Of_Work.DbContext;
 
             var result = await context.Set<AccountingEntriesReport>().FromSqlRaw(@"
-                SELECT * FROM dbo.FilterEntries(@DateFrom, @DateTo) ORDER BY InvoiceNumber
+                SELECT * FROM dbo.FilterEntries(@DateFrom, @DateTo) ORDER BY MasterID, InvoiceNumber
             ",
             new SqlParameter("@DateFrom", fromDate),
             new SqlParameter("@DateTo", toDate)
