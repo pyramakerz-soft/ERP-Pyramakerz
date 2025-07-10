@@ -190,6 +190,7 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<TimeTableClassroom> TimeTableClassroom { get; set; }
         public DbSet<TimeTableSession> TimeTableSession { get; set; }
         public DbSet<TimeTableSubject> TimeTableSubject { get; set; }
+        public DbSet<AccountingConfigurations> AccountingConfigurations { get; set; }
 
 
 
