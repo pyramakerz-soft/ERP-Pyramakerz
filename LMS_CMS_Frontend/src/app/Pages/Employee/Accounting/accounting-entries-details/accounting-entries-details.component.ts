@@ -196,7 +196,7 @@ export class AccountingEntriesDetailsComponent {
       if (this.accountingEntries.hasOwnProperty(key)) {
         const field = key as keyof AccountingEntries;
         if (!this.accountingEntries[field]) {
-          if(field == "accountingEntriesDocTypeID" || field == "date"){
+          if(field == "accountingEntriesDocTypeID" || field == "date" || field == "docNumber"){
             this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
             isValid = false;
           }
