@@ -186,7 +186,7 @@ export class PayableDetailsComponent {
       if (this.payable.hasOwnProperty(key)) {
         const field = key as keyof Payable;
         if (!this.payable[field]) {
-          if (field == "payableDocTypeID" || field == "linkFileID" || field == "bankOrSaveID" || field == "date") {
+          if (field == "payableDocTypeID" || field == "linkFileID" || field == "bankOrSaveID" || field == "date" || field == "docNumber") {
             this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
             isValid = false;
           }
