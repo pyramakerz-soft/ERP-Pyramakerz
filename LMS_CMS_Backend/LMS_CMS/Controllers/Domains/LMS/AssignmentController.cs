@@ -135,7 +135,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             int totalRecords = await Unit_Of_Work.assignment_Repository
-               .CountAsync(f => f.IsDeleted != true);
+               .CountAsync(f => f.IsDeleted != true && f.SubjectID == subID);
 
             List<Assignment> Assignment = await Unit_Of_Work.assignment_Repository
                 .Select_All_With_IncludesById_Pagination<Assignment>(

@@ -165,8 +165,7 @@ export class AssignmentComponent {
         (data) => { 
           this.CurrentPage = data.pagination.currentPage
           this.PageSize = data.pagination.pageSize
-          this.TotalPages = data.pagination.totalPages
-          console.log(this.TotalPages)
+          this.TotalPages = data.pagination.totalPages 
           this.TotalRecords = data.pagination.totalRecords
           this.assignmentData = data.data
         },
@@ -216,9 +215,9 @@ export class AssignmentComponent {
     }
   }
 
-  changeCurrentPage(currentPage: number) {
+  changeCurrentPage(currentPage: number) { 
     this.CurrentPage = currentPage
-    this.GetAllData(this.CurrentPage, this.PageSize)
+    this.GetAllData(this.CurrentPage, this.PageSize) 
   }
 
   validatePageSize(event: any) {
@@ -660,12 +659,13 @@ export class AssignmentComponent {
     });
   }
 
-  async onSearchEvent(event: { key: string; value: any }) {
+  async onSearchEvent(event: { key: string; value: any }) { 
+    this.PageSize = this.TotalRecords
     this.key = event.key;
     this.value = event.value;
     try {
       const data: any = await firstValueFrom(
-        this.assignmentService.Get(this.DomainName, this.CurrentPage, this.PageSize)
+        this.assignmentService.GetBySubjectID(this.subjectID, this.DomainName, this.CurrentPage, this.PageSize)
       );
       this.assignmentData = data.data || [];
 
