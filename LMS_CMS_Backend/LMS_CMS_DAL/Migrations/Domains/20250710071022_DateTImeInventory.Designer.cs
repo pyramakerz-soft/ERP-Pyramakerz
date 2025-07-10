@@ -9,11 +9,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace LMS_CMS_DAL.Migrations.LMS_CMS_
+namespace LMS_CMS_DAL.Migrations.Domains
 {
     [DbContext(typeof(LMS_CMS_Context))]
-    [Migration("20250709115111_UpdateAccEntScript")]
-    partial class UpdateAccEntScript
+    [Migration("20250710071022_DateTImeInventory")]
+    partial class DateTImeInventory
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -4128,9 +4128,8 @@ namespace LMS_CMS_DAL.Migrations.LMS_CMS_
                     b.Property<decimal?>("CashAmount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("Date")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");

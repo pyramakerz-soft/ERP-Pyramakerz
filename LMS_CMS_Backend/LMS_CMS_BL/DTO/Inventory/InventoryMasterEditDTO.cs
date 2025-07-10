@@ -11,7 +11,7 @@ namespace LMS_CMS_BL.DTO.Inventory
     {
         public long ID { get; set; }
         public string? InvoiceNumber { get; set; }
-        public string Date { get; set; }
+        public DateTime Date { get; set; }
         public bool IsCash { get; set; }
         public bool IsVisa { get; set; }
         public int? CashAmount { get; set; }

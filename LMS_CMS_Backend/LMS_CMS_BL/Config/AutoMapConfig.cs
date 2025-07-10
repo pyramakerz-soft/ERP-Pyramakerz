@@ -1068,6 +1068,24 @@ namespace LMS_CMS_BL.Config
 
             CreateMap<TaxCustomer, TaxCustomerGetDTO>();
 
+            CreateMap<TimeTableAddDTO, TimeTable>();
+            CreateMap<TimeTableGetDTO, TimeTable>();
+            CreateMap<TimeTable, TimeTableGetDTO>()
+                .ForMember(dest => dest.AcademicYearName, opt => opt.MapFrom(src => src.AcademicYear.Name));
+            CreateMap<TimeTableClassroom,TimeTableClassroomGetDTO>()
+                .ForMember(dest => dest.TimeTableName, opt => opt.MapFrom(src => src.TimeTable.Name))
+                .ForMember(dest => dest.DayName, opt => opt.MapFrom(src => src.Day.Name))
+                .ForMember(dest => dest.GradeId, opt => opt.MapFrom(src => src.Classroom.GradeID))
+                .ForMember(dest => dest.GradeName, opt => opt.MapFrom(src => src.Classroom.Grade.Name))
+                .ForMember(dest => dest.ClassroomName, opt => opt.MapFrom(src => src.Classroom.Name));
+            CreateMap<TimeTableSession ,TimeTableSessionGetDto>();
+            CreateMap<TimeTableSubject, TimeTableSubjectGetDto>()
+                .ForMember(dest => dest.SubjectName, opt => opt.MapFrom(src => src.Subject.en_name))
+                .ForMember(dest => dest.TeacherName, opt => opt.MapFrom(src => src.Teacher.en_name));
+
+
+
+
         }
     } 
 }

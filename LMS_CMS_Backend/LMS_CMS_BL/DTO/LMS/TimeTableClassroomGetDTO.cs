@@ -19,5 +19,9 @@ namespace LMS_CMS_BL.DTO.LMS
         public string TimeTableName { get; set; }
         public long ClassroomID { get; set; }
         public string ClassroomName { get; set; }
+        public long GradeId { get; set; }
+        public string GradeName { get; set; }
+        public ICollection<TimeTableSessionGetDto> TimeTableSessions { get; set; }
+
     }
 }
