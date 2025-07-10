@@ -17,6 +17,8 @@ namespace LMS_CMS_BL.DTO.LMS
         public bool IsFavourite { get; set; }
         public long AcademicYearID { get; set; }
         public string AcademicYearName { get; set; }
+        public ICollection<TimeTableClassroomGetDTO> TimeTableClassrooms { get; set; }
+
 
     }
 }

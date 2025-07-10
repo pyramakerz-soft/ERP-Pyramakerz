@@ -57,6 +57,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             {
                 AcademicYearID = academicYear.ID,
                 Name= timeTableAddDTO.name,
+                IsFavourite = timeTableAddDTO.IsFavourite,
                 InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone)
             };
             if (userTypeClaim == "octa")
@@ -235,25 +236,31 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             // Fetch the TimeTable and related entities including Classroom, Sessions, and Subjects
             TimeTable timeTable = await Unit_Of_Work.timeTable_Repository.FindByIncludesAsync(
-                        t => t.ID == id && t.IsDeleted != true,
-                        query => query.Include(ac => ac.TimeTableClassrooms)
-                                        .ThenInclude(s => s.TimeTableSessions) 
-                                        .ThenInclude(s => s.TimeTableSubjects)  
-                                        .ThenInclude(ts => ts.Subject) ,
-                        query => query.Include(ac => ac.TimeTableClassrooms)
-                                        .ThenInclude(s => s.TimeTableSessions) 
-                                        .ThenInclude(s => s.TimeTableSubjects) 
-                                        .ThenInclude(ts => ts.Teacher)
-                    );
+                 t => t.ID == id && t.IsDeleted != true,
+                 query => query
+                     .Include(tt => tt.TimeTableClassrooms)
+                         .ThenInclude(tc => tc.TimeTableSessions)
+                             .ThenInclude(ts => ts.TimeTableSubjects)
+                                 .ThenInclude(tss => tss.Subject)
+                     .Include(tt => tt.TimeTableClassrooms)
+                         .ThenInclude(tc => tc.TimeTableSessions)
+                             .ThenInclude(ts => ts.TimeTableSubjects)
+                                 .ThenInclude(tss => tss.Teacher)
+                     .Include(tt => tt.TimeTableClassrooms)
+                         .ThenInclude(tc => tc.Classroom)
+                     .Include(tt => tt.TimeTableClassrooms)
+                         .ThenInclude(tc => tc.Classroom.Grade) 
+             );
+
             if (timeTable == null)
             {
                 return BadRequest("No timetable with this ID");
             }
 
-           
+            TimeTableGetDTO Dto = mapper.Map<TimeTableGetDTO>(timeTable);
 
             // Return the grouped result as JSON
-            return Ok();
+            return Ok(Dto);
         }
     }
 }
