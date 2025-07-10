@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LMS_CMS_DAL.Migrations.LMS_CMS_
 {
     [DbContext(typeof(LMS_CMS_Context))]
-    [Migration("20250709115111_UpdateAccEntScript")]
-    partial class UpdateAccEntScript
+    [Migration("20250710062807_AddGetAccountInfoScript")]
+    partial class AddGetAccountInfoScript
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

@@ -8,11 +8,13 @@
 
   <ItemGroup>
     <None Remove="DbScripts\FilterEntries.sql" />
+    <None Remove="DbScripts\GetSubAccountInfo.sql" />
     <None Remove="DbScripts\GetSubAccountName.sql" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="DbScripts\FilterEntries.sql" />
+    <EmbeddedResource Include="DbScripts\GetSubAccountInfo.sql" />
     <EmbeddedResource Include="DbScripts\GetSubAccountName.sql" />
   </ItemGroup>
 
