@@ -54,7 +54,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 query => query.Include(x => x.PurchaseReturn));
 
             if (accConfig == null)
-                return NotFound($"Tax issuer with ID {id} not found.");
+                return NotFound($"Accounting Configuration with ID {id} not found.");
 
             var accConfigDto = _mapper.Map<AccountingConfigurationsGetDTO>(accConfig);
 
@@ -88,25 +88,35 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             if (acc == null)
                 return NotFound($"Accounting configuration with ID {accDTO.ID} not found.");
 
-            AccountingTreeChart? tree = Unit_Of_Work.accountingTreeChart_Repository.First_Or_Default(x => x.ID == accDTO.SalesID && x.IsDeleted != true);
+            AccountingTreeChart? tree;
+                
+            if(accDTO.SalesID != null)
+            {
+                tree = Unit_Of_Work.accountingTreeChart_Repository.First_Or_Default(x => x.ID == accDTO.SalesID && x.IsDeleted != true);
 
-            if (tree == null)
-                return NotFound($"Sales account with ID {accDTO.SalesID} not found.");
+                if (tree == null)
+                    return NotFound($"Sales account with ID {accDTO.SalesID} not found.");
+            }
+            if (accDTO.SalesReturnID != null)
+            {
+                tree = Unit_Of_Work.accountingTreeChart_Repository.First_Or_Default(x => x.ID == accDTO.SalesReturnID && x.IsDeleted != true);
+                if (tree == null)
+                    return NotFound($"Sales Return account with ID {accDTO.SalesReturnID} not found.");
+            }
 
-            tree = Unit_Of_Work.accountingTreeChart_Repository.First_Or_Default(x => x.ID == accDTO.SalesReturnID && x.IsDeleted != true);
+            if (accDTO.PurchaseID != null)
+            {
+                tree = Unit_Of_Work.accountingTreeChart_Repository.First_Or_Default(x => x.ID == accDTO.PurchaseID && x.IsDeleted != true);
+                if (tree == null)
+                    return NotFound($"Purchase account with ID {accDTO.PurchaseID} not found.");
+            }
 
-            if (tree == null)
-                return NotFound($"Sales Return account with ID {accDTO.SalesReturnID} not found.");
-
-            tree = Unit_Of_Work.accountingTreeChart_Repository.First_Or_Default(x => x.ID == accDTO.PurchaseID && x.IsDeleted != true);
-
-            if (tree == null)
-                return NotFound($"Purchase account with ID {accDTO.PurchaseID} not found.");
-
-            tree = Unit_Of_Work.accountingTreeChart_Repository.First_Or_Default(x => x.ID == accDTO.PurchaseReturnID && x.IsDeleted != true);
-
-            if (tree == null)
-                return NotFound($"Purchase Return account with ID {accDTO.PurchaseReturnID} not found.");
+            if (accDTO.PurchaseReturnID != null)
+            {
+                tree = Unit_Of_Work.accountingTreeChart_Repository.First_Or_Default(x => x.ID == accDTO.PurchaseReturnID && x.IsDeleted != true);
+                if (tree == null)
+                    return NotFound($"Purchase Return account with ID {accDTO.PurchaseReturnID} not found.");
+            }
 
             _mapper.Map(accDTO, acc);
 

@@ -27,21 +27,21 @@
                 </thead>
                 <tbody>  
                     <tr class="bg-white border-t border-gray-300 text-xs md:text-sm">
-                        <!-- <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             {{ accountConfigData.id }}
                         </td> 
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            {{ accountConfigData.name }}
+                            {{ accountConfigData.purchase }}
                         </td>  
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            {{ accountConfigData.activityCode }}
+                            {{ accountConfigData.purchaseReturn }}
                         </td>  
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            {{ accountConfigData.accountConfigType }}
+                            {{ accountConfigData.sales }}
                         </td>  
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            {{ accountConfigData.countryCode }}
-                        </td>     -->
+                            {{ accountConfigData.salesReturn }}
+                        </td>    
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             <div class="flex space-x-4"> 
                                 <button (click)="openModal()">
@@ -58,7 +58,7 @@
  
 
 <!-- Modal -->
-<!-- <div id="Add_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
+<div id="Add_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
     <div class="bg-white rounded-2xl p-12 w-[669px] max-h-[90%] overflow-y-auto">
         <div class="flex justify-between items-center"> 
             <h1 class="font-semibold text-2xl leading-9">Tax Issuer</h1>
@@ -67,12 +67,39 @@
         
         <div class="mt-6 mb-4 flex justify-between flex-wrap">  
             <div class="flex flex-col w-[49%] mb-4">
-                <label class="mb-2 primaryTxt" for="taxTypes">Tax Type</label>
-                <select [(ngModel)]="taxDataToEdit.typeID"
-                class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="taxTypes" >
-                    <option [value]="null" disabled selected hidden>Select Tax Type</option>
-                    <option *ngFor="let status of taxTypes" [value]="status.id">{{ status.type }}</option>
-                    <option *ngIf="taxTypes.length === 0" disabled selected>No Data Found</option>
+                <label class="mb-2 primaryTxt" for="Purchase">Purchase</label>
+                <select [(ngModel)]="accountConfigDataToEdit.purchaseID"
+                class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Purchase" >
+                    <option [value]="null" disabled selected hidden>Select Purchase Account</option>
+                    <option *ngFor="let acountTree of accountingTreeCharts" [value]="acountTree.id">{{ acountTree.name }}</option>
+                    <option *ngIf="accountingTreeCharts.length === 0" disabled selected>No Data Found</option>
+                </select>
+            </div>   
+            <div class="flex flex-col w-[49%] mb-4">
+                <label class="mb-2 primaryTxt" for="PurchaseReturn">Purchase Return</label>
+                <select [(ngModel)]="accountConfigDataToEdit.purchaseReturnID"
+                class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="PurchaseReturn" >
+                    <option [value]="null" disabled selected hidden>Select Purchase Return Account</option>
+                    <option *ngFor="let acountTree of accountingTreeCharts" [value]="acountTree.id">{{ acountTree.name }}</option>
+                    <option *ngIf="accountingTreeCharts.length === 0" disabled selected>No Data Found</option>
+                </select>
+            </div>   
+            <div class="flex flex-col w-[49%] mb-4">
+                <label class="mb-2 primaryTxt" for="Sales">Sales</label>
+                <select [(ngModel)]="accountConfigDataToEdit.salesID"
+                class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Sales" >
+                    <option [value]="null" disabled selected hidden>Select Sales Account</option>
+                    <option *ngFor="let acountTree of accountingTreeCharts" [value]="acountTree.id">{{ acountTree.name }}</option>
+                    <option *ngIf="accountingTreeCharts.length === 0" disabled selected>No Data Found</option>
+                </select>
+            </div>   
+            <div class="flex flex-col w-[49%] mb-4">
+                <label class="mb-2 primaryTxt" for="SalesReturn">Sales Return</label>
+                <select [(ngModel)]="accountConfigDataToEdit.salesReturnID"
+                class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="SalesReturn" >
+                    <option [value]="null" disabled selected hidden>Select SalesReturn Account</option>
+                    <option *ngFor="let acountTree of accountingTreeCharts" [value]="acountTree.id">{{ acountTree.name }}</option>
+                    <option *ngIf="accountingTreeCharts.length === 0" disabled selected>No Data Found</option>
                 </select>
             </div>   
         </div> 
@@ -87,4 +114,4 @@
             </button>
         </div>
     </div>
-</div>  -->
+</div> 

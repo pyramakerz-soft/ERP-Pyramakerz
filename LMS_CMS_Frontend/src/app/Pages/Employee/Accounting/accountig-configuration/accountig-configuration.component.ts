@@ -7,11 +7,13 @@ import { ApiService } from '../../../../Services/api.service';
 import Swal from 'sweetalert2';
 import { AccountingConfiguration } from '../../../../Models/Accounting/accounting-configuration';
 import { AccountingConfigurationService } from '../../../../Services/Employee/Accounting/accounting-configuration.service';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-accountig-configuration',
   standalone: true,
-  imports: [],
+  imports: [FormsModule, CommonModule],
   templateUrl: './accountig-configuration.component.html',
   styleUrl: './accountig-configuration.component.css'
 })
@@ -45,9 +47,11 @@ export class AccountigConfigurationComponent {
 
   GetById(){
     this.accountConfigData = new AccountingConfiguration()
+    this.accountConfigDataToEdit = new AccountingConfiguration()
     this.accountingConfigurationService.getById(1, this.DomainName).subscribe(
       data => {
         this.accountConfigData = data   
+        this.accountConfigDataToEdit = data   
       }
     )
   }
@@ -55,20 +59,20 @@ export class AccountigConfigurationComponent {
   GetAccountingTree(){
     this.accountingTreeChartService.GetBySubID(this.DomainName).subscribe(data => this.accountingTreeCharts = data)  
   } 
-   
+  
   openModal() {  
     document.getElementById('Add_Modal')?.classList.remove('hidden');
     document.getElementById('Add_Modal')?.classList.add('flex');
   }
-
+  
   closeModal() {
+    this.accountConfigDataToEdit = new AccountingConfiguration()
     document.getElementById('Add_Modal')?.classList.remove('flex');
     document.getElementById('Add_Modal')?.classList.add('hidden');   
   }
 
   save(){ 
     this.isLoading = true;
-    
     this.accountingConfigurationService.edit(this.accountConfigDataToEdit, this.DomainName).subscribe(
       (result: any) => {
         this.closeModal();

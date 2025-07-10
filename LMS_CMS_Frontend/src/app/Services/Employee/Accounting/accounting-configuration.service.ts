@@ -24,7 +24,7 @@ export class AccountingConfigurationService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.get<AccountingConfiguration>(`${this.baseUrl}/AccountingConfiguration/${id}`, { headers });
+    return this.http.get<AccountingConfiguration>(`${this.baseUrl}/AccountingConfigurations/${id}`, { headers });
   }
  
   edit(accountingConfiguration: AccountingConfiguration, DomainName: string) {
@@ -36,6 +36,6 @@ export class AccountingConfigurationService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.put(`${this.baseUrl}/AccountingConfiguration/Edit`, accountingConfiguration, { headers });
+    return this.http.put(`${this.baseUrl}/AccountingConfigurations/Edit`, accountingConfiguration, { headers });
   }
 }
