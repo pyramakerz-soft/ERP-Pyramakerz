@@ -5,7 +5,7 @@
 namespace LMS_CMS_DAL.Migrations.LMS_CMS_
 {
     /// <inheritdoc />
-    public partial class updateDbAccEntScript : Migration
+    public partial class updatesOnDbAccEntScript : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
