@@ -265,56 +265,56 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
         #endregion
 
         #region Filter by School and Date
-        [HttpPost("FilterBySchoolAndDate")]
-        [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "ETA Electronic-Invoice" }
-        )]
-        public async Task<IActionResult> FilterBySchoolAndDate(long schoolId, string startDate, string endDate, int pageNumber = 1, int pageSize = 10)
-        {
-            if (pageNumber < 1) pageNumber = 1;
-            if (pageSize < 1) pageSize = 10;
-            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+        //[HttpPost("FilterBySchoolAndDate")]
+        //[Authorize_Endpoint_(
+        //    allowedTypes: new[] { "octa", "employee" },
+        //    pages: new[] { "ETA Electronic-Invoice" }
+        //)]
+        //public async Task<IActionResult> FilterBySchoolAndDate(long schoolId, string startDate, string endDate, int pageNumber = 1, int pageSize = 10)
+        //{
+        //    if (pageNumber < 1) pageNumber = 1;
+        //    if (pageSize < 1) pageSize = 10;
+        //    UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            DateTime start = DateTime.Parse(startDate).Date;
-            DateTime end = DateTime.Parse(endDate).Date;
+        //    DateTime start = DateTime.Parse(startDate).Date;
+        //    DateTime end = DateTime.Parse(endDate).Date;
 
-            if (end < start)
-                return BadRequest("Start date must be equal or greater than End date");
+        //    if (end < start)
+        //        return BadRequest("Start date must be equal or greater than End date");
 
-            int totalRecords = await Unit_Of_Work.inventoryMaster_Repository
-               .CountAsync(f => f.IsDeleted != true && (f.FlagId == 11 || f.FlagId == 12));
+        //    int totalRecords = await Unit_Of_Work.inventoryMaster_Repository
+        //       .CountAsync(f => f.IsDeleted != true && (f.FlagId == 11 || f.FlagId == 12));
 
-            List<InventoryMaster> mastersBySchool = await Unit_Of_Work.inventoryMaster_Repository.SelectQuery<InventoryMaster>(
-                d => d.SchoolId == schoolId && 
-                d.IsDeleted != true &&
-                (d.FlagId == 11 || d.FlagId == 12))
-                .ToListAsync();
+        //    List<InventoryMaster> mastersBySchool = await Unit_Of_Work.inventoryMaster_Repository.SelectQuery<InventoryMaster>(
+        //        d => d.SchoolId == schoolId && 
+        //        d.IsDeleted != true &&
+        //        (d.FlagId == 11 || d.FlagId == 12))
+        //        .ToListAsync();
 
-            if (mastersBySchool is null || mastersBySchool.Count == 0)
-                return NotFound("No invoices found.");
+        //    if (mastersBySchool is null || mastersBySchool.Count == 0)
+        //        return NotFound("No invoices found.");
 
-            List<InventoryMaster> mastersByDate = mastersBySchool
-                .Where(d => DateTime.Parse(d.Date).Date >= start && DateTime.Parse(d.Date).Date <= end)
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize)
-            .ToList();
+        //    List<InventoryMaster> mastersByDate = mastersBySchool
+        //        .Where(d => DateTime.Parse(d.Date).Date >= start && DateTime.Parse(d.Date).Date <= end)
+        //    .Skip((pageNumber - 1) * pageSize)
+        //    .Take(pageSize)
+        //    .ToList();
 
-            if (mastersByDate is null || mastersByDate.Count == 0)
-                return NotFound("No invoices found.");
+        //    if (mastersByDate is null || mastersByDate.Count == 0)
+        //        return NotFound("No invoices found.");
 
-            List<InventoryMasterGetDTO> DTO = _mapper.Map<List<InventoryMasterGetDTO>>(mastersByDate);
+        //    List<InventoryMasterGetDTO> DTO = _mapper.Map<List<InventoryMasterGetDTO>>(mastersByDate);
 
-            var paginationMetadata = new
-            {
-                TotalRecords = totalRecords,
-                PageSize = pageSize,
-                CurrentPage = pageNumber,
-                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
-            };
+        //    var paginationMetadata = new
+        //    {
+        //        TotalRecords = totalRecords,
+        //        PageSize = pageSize,
+        //        CurrentPage = pageNumber,
+        //        TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+        //    };
 
-            return Ok(new { Data = DTO, Pagination = paginationMetadata });
-        }
+        //    return Ok(new { Data = DTO, Pagination = paginationMetadata });
+        //}
         #endregion
     }
 }
