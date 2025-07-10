@@ -204,6 +204,7 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<TimeTableClassroom> TimeTableClassroom_Repository;
         GenericRepo<TimeTableSession> TimeTableSession_Repository;
         GenericRepo<TimeTableSubject> TimeTableSubject_Repository;
+        GenericRepo<AccountingConfigurations> AccountingConfigurations_Repository;
 
 
         public UOW(Octa_DbContext octa_Db)
@@ -2307,6 +2308,19 @@ namespace LMS_CMS_BL.UOW
                     POS_Repository = new GenericRepo<ETAPOS>(db);
                 }
                 return POS_Repository;
+            }
+        }
+
+
+        public GenericRepo<AccountingConfigurations> accountingConfigurations_Repository
+        {
+            get
+            {
+                if (AccountingConfigurations_Repository == null)
+                {
+                    AccountingConfigurations_Repository = new GenericRepo<AccountingConfigurations>(db);
+                }
+                return AccountingConfigurations_Repository;
             }
         }
 
