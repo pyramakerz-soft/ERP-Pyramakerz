@@ -27,6 +27,43 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             this.mapper = mapper;
             _checkPageAccessService = checkPageAccessService;
         }
+        /////////////////
+        
+        [HttpGet("BySchoolId/{SchoolId}")]
+        [Authorize_Endpoint_(
+           allowedTypes: new[] { "octa", "employee" }
+       )]
+        public IActionResult Get(long SchoolId)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+                return Unauthorized("User ID or Type claim not found.");
+
+            School school = Unit_Of_Work.school_Repository.First_Or_Default(s=>s.ID == SchoolId & s.IsDeleted != true);
+            if (school == null)
+            {
+                return BadRequest("No school with this ID");
+            }
+
+            AcademicYear academicYear = Unit_Of_Work.academicYear_Repository.First_Or_Default(a=>a.SchoolID==SchoolId & a.IsDeleted != true && a.IsActive==true);
+            if (academicYear == null)
+            {
+                return BadRequest("No active academic year in this school");
+            }
+            List<TimeTable> timeTable = Unit_Of_Work.timeTable_Repository.FindBy(t => t.IsDeleted != true && t.AcademicYearID== academicYear.ID);
+
+            if (timeTable == null)
+            {
+                return NotFound();
+            }
+            List<TimeTableGetDTO> Dto = mapper.Map<List<TimeTableGetDTO>>(timeTable);
+
+            return Ok(Dto);
+        }
 
         /////////////////
 
@@ -129,7 +166,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             foreach (TimeTableClassroom ttClassroom in timeTableClassrooms)
             {
 
-                int sessionCount = dayToPeriodCount[ttClassroom.DayId.Value](ttClassroom.Classroom.Grade);
+                int sessionCount = dayToPeriodCount[ttClassroom.DayId](ttClassroom.Classroom.Grade);
 
                 for (int i = 0; i < sessionCount; i++)
                 {
@@ -159,7 +196,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 List<TimeTableSession> classSessions = kvp.Value;
 
                 // Group sessions by day
-                var sessionsByDay = classSessions.GroupBy(s => s.TimeTableClassroom.DayId).ToDictionary(g => g.Key.Value, g => g.ToList());
+                var sessionsByDay = classSessions.GroupBy(s => s.TimeTableClassroom.DayId).ToDictionary(g => g.Key, g => g.ToList());
 
                 // Get valid classroom subjects and their weekly quota
                 List<ClassroomSubject> classroomSubjects = Unit_Of_Work.classroomSubject_Repository.FindBy(cs => cs.ClassroomID == classroomId && cs.IsDeleted!= true && !cs.Hide);
@@ -177,7 +214,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
                 foreach (var session in allClassSessions)
                 {
-                    long dayId = session.TimeTableClassroom.DayId ?? 0;
+                    long dayId = session.TimeTableClassroom.DayId;
 
                     // Select subject that still needs assignments and hasn’t been used on this day
                     var eligibleSubjects = subjectSessionLimits.Keys
@@ -222,8 +259,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
-      allowedTypes: new[] { "octa", "employee" }
-  )]
+            allowedTypes: new[] { "octa", "employee" }
+        )]
         public async Task<IActionResult> GetByIdAsync(long id)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -256,11 +293,45 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             {
                 return BadRequest("No timetable with this ID");
             }
-
             TimeTableGetDTO Dto = mapper.Map<TimeTableGetDTO>(timeTable);
 
+            var groupedResult = Dto.TimeTableClassrooms
+            .GroupBy(tc => new { tc.DayId, tc.DayName })
+            .Select(dayGroup => new TimeTableDayGroupDTO
+            {
+                DayId = dayGroup.Key.DayId,
+                DayName = dayGroup.Key.DayName,
+                Grades = dayGroup
+                    .GroupBy(tc => new { tc.GradeId, tc.GradeName })
+                    .Select(gradeGroup => new GradeGroupDTO
+                    {
+                        GradeId = gradeGroup.Key.GradeId,
+                        GradeName = gradeGroup.Key.GradeName,
+                        Classrooms = gradeGroup
+                            .GroupBy(tc => new { tc.ClassroomID, tc.ClassroomName })
+                            .Select(classGroup => new ClassroomGroupDTO
+                            {
+                                ClassroomId = classGroup.Key.ClassroomID,
+                                ClassroomName = classGroup.Key.ClassroomName,
+                                Sessions = classGroup
+                                    .SelectMany(c => c.TimeTableSessions)
+                                    .Select(session => new SessionGroupDTO
+                                    {
+                                        SessionId = session.ID,
+                                        Subjects = session.TimeTableSubjects.Select(s => new SubjectTeacherDTO
+                                        {
+                                            SubjectId = s.SubjectID,
+                                            SubjectName = s.SubjectName,
+                                            TeacherId = s.TeacherID,
+                                            TeacherName = s.TeacherName
+                                        }).ToList()
+                                    }).ToList()
+                            }).ToList()
+                    }).ToList()
+            }).ToList();
+
             // Return the grouped result as JSON
-            return Ok(Dto);
+            return Ok(groupedResult);
         }
     }
 }

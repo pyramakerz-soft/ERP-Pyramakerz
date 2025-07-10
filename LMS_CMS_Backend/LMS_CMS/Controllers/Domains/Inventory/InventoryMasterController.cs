@@ -393,9 +393,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
-        allowedTypes: new[] { "octa", "employee" },
-          pages: new[] { "Inventory" }
-    )]
+            allowedTypes: new[] { "octa", "employee" },
+              pages: new[] { "Inventory" }
+        )]
         public async Task<IActionResult> GetById(long id)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -435,9 +435,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
         [HttpGet("SalesByStudentId/{id}")]
         [Authorize_Endpoint_(
-     allowedTypes: new[] { "octa", "employee" },
-     pages: new[] { "Inventory" }
- )]
+             allowedTypes: new[] { "octa", "employee" },
+             pages: new[] { "Inventory" }
+         )]
         public async Task<IActionResult> GetByStudentId(long id)
         {
             if (id == 0)
