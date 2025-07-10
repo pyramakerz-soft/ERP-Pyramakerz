@@ -9,7 +9,7 @@ import { ReportsService as SharedReportsService } from '../../../../../Services/
 import { ApiService } from '../../../../../Services/api.service';
 import Swal from 'sweetalert2';
 import { AccountingConstraintsReport } from '../../../../../Models/Accounting/accounting-constraints-report';
-import { map, Observable } from 'rxjs';
+import { catchError, map, Observable, of } from 'rxjs';
 
 @Component({
   selector: 'app-accountig-constraints',
@@ -159,10 +159,10 @@ export class AccountigConstraintsComponent {
           { key: 'Start Date', value: this.SelectedStartDate },
           { key: 'End Date', value: this.SelectedEndDate }
         ],
-        filename: "Fees Activation Report.xlsx",
+        filename: "Accounting Constraints Report.xlsx",
         tables: [
           {
-            title: "Fees Activation",
+            title: "Accounting Constraints Report",
             headers,
             data: dataRows
           }
@@ -200,24 +200,23 @@ export class AccountigConstraintsComponent {
   
   GetDataForPrint(): Observable<any[]> {
   return this.reportsService
-    .GetFeesActivationByDate(this.SelectedStartDate, this.SelectedEndDate, this.DomainName, 1, this.TotalRecords)
+    .GetAccountingEntriesReportByDate(this.SelectedStartDate, this.SelectedEndDate, this.DomainName, 1, this.TotalRecords)
     .pipe(
       map(data => {
         return data.data.map((acc: AccountingConstraintsReport) => ({
-          'Master ID': fee.feeActivationID,
-          'Details ID': fee.amount,
-          Account: fee.discount,
-          'Invoice Number': fee.net,
-          'Main Account ID': fee.date,
-          "Main Account": fee.feeTypeName,
-          "Sub Account ID": fee.feeDiscountTypeName,
-          "Sub Account": fee.studentName,
-          "Credit": fee.academicYearName
-          "Debit": fee.academicYearName
-          "Credit": fee.academicYearName
+          'Master ID': acc.masterID,
+          'Details ID': acc.detailsID,
+          Account: acc.account,
+          'Invoice Number': acc.invoiceNumber,
+          'Main Account ID': acc.mainAccountNo,
+          "Main Account": acc.mainAccount,
+          "Sub Account ID": acc.subAccountNo,
+          "Sub Account": acc.subAccount,
+          "Credit": acc.credit,
+          "Debit": acc.debit, 
+          "Date": acc.date
         }));
-      }),
-      [  'Main Account' , 'Sub Account ID' , 'Sub Account' , 'Credit' , 'Debit' , 'Date']
+      }), 
       catchError(error => {
         if (error.status === 404) {
           return of([]);
