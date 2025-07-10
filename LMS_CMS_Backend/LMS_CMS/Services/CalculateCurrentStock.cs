@@ -14,7 +14,7 @@ namespace LMS_CMS_PL.Services
                                     join flag in db.InventoryFlags on master.FlagId equals flag.ID
                                     where master.StoreID == storeId
                                           && details.ShopItemID == shopItemId
-                                          && master.Date.CompareTo(date) <= 0
+                                          && EF.Functions.DateDiffDay(master.Date, date) >= 0
                                           && master.IsDeleted != true
                                           && details.IsDeleted != true
                                     select details.Quantity * flag.ItemInOut
@@ -32,7 +32,7 @@ namespace LMS_CMS_PL.Services
                                     join flag in db.InventoryFlags on master.FlagId equals flag.ID
                                     where master.StoreToTransformId == storeId
                                           && details.ShopItemID == shopItemId
-                                          && master.Date.CompareTo(date) <= 0
+                                          && EF.Functions.DateDiffDay(master.Date, date) >= 0
                                           && master.IsDeleted != true
                                           && details.IsDeleted != true
                                     select details.Quantity * 1
