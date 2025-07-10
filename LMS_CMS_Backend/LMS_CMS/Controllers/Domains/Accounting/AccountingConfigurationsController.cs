@@ -56,7 +56,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             if (accConfig == null)
                 return NotFound($"Tax issuer with ID {id} not found.");
 
-            var accConfigDto = _mapper.Map<AccountingConfigurations>(accConfig);
+            var accConfigDto = _mapper.Map<AccountingConfigurationsGetDTO>(accConfig);
 
             return Ok(accConfigDto);
         }
