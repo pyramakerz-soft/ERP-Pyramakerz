@@ -32,6 +32,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         //)]
         public async Task<IActionResult> GetAccountingEntriesAsync(DateTime fromDate, DateTime toDate, int pageNumber = 1, int pageSize = 10)
         {
+            if (toDate < fromDate)
+                return BadRequest("Start date must be equal or greater than End date");
+
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
             var context = Unit_Of_Work.DbContext;
 

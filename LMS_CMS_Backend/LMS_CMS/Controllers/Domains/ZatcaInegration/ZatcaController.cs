@@ -577,67 +577,48 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
         #endregion
 
         #region Filter by School and Date
-        //[HttpGet("FilterBySchoolAndDate")]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "Zatca Electronic-Invoice" }
-        //)]
-        //public async Task<IActionResult> FilterBySchoolAndDate(long schoolId, string startDate, string endDate, int pageNumber = 1, int pageSize = 10)
-        //{
-        //    if (pageNumber < 1) pageNumber = 1;
-        //    if (pageSize < 1) pageSize = 10;
-        //    UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+        [HttpGet("FilterBySchoolAndDate")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Zatca Electronic-Invoice" }
+        )]
+        public async Task<IActionResult> FilterBySchoolAndDate(long schoolId, DateTime startDate, DateTime endDate, int pageNumber = 1, int pageSize = 10)
+        {
+            if (endDate < startDate)
+                return BadRequest("Start date must be equal or greater than End date");
 
-        //    string[] sdParts = startDate.Split("/");
-        //    Array.Reverse(sdParts);
-        //    startDate = string.Join("-", sdParts);
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
 
-        //    string[] edParts = endDate.Split("/");
-        //    Array.Reverse(edParts);
-        //    endDate = string.Join("-", edParts);
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-        //    DateTime.TryParse(startDate, out DateTime start);
-        //    DateTime.TryParse(endDate, out DateTime end);
+            int totalRecords = await Unit_Of_Work.inventoryMaster_Repository
+               .CountAsync(f => f.IsDeleted != true && (f.FlagId == 11 || f.FlagId == 12));
 
-        //    start = start.Date;
-        //    end = end.Date;
+            List<InventoryMaster> result = await Unit_Of_Work.inventoryMaster_Repository.Select_All_With_IncludesById_Pagination<InventoryMaster>(
+                d => d.SchoolId == schoolId &&
+                d.IsDeleted != true &&
+                (d.FlagId == 11 || d.FlagId == 12) &&
+                d.Date.Date >= startDate && d.Date.Date <= endDate.AddDays(1)) 
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
 
-        //    if (end < start)
-        //        return BadRequest("Start date must be equal or greater than End date");
-            
-        //    int totalRecords = await Unit_Of_Work.inventoryMaster_Repository
-        //       .CountAsync(f => f.IsDeleted != true && (f.FlagId == 11 || f.FlagId == 12));
+            if (result is null || !result.Any())
+                return NotFound("No invoices found.");
 
-        //    List<InventoryMaster> mastersBySchool = await Unit_Of_Work.inventoryMaster_Repository.SelectQuery<InventoryMaster>(
-        //        d => d.SchoolId == schoolId && 
-        //        d.IsDeleted != true &&
-        //        (d.FlagId == 11 || d.FlagId == 12))
-        //        .ToListAsync();
+            List<InventoryMasterGetDTO> DTO = _mapper.Map<List<InventoryMasterGetDTO>>(result);
 
-        //    if (mastersBySchool is null || mastersBySchool.Count == 0)
-        //        return NotFound("No invoices found.");
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
 
-        //    List<InventoryMaster> mastersByDate = mastersBySchool
-        //        .Where(d => DateTime.Parse(d.Date).Date >= start && DateTime.Parse(d.Date).Date <= end)
-        //        .Skip((pageNumber - 1) * pageSize)
-        //        .Take(pageSize)
-        //        .ToList();
-
-        //    if (mastersByDate is null || mastersByDate.Count == 0)
-        //        return NotFound("No invoices found.");
-
-        //    List<InventoryMasterGetDTO> DTO = _mapper.Map<List<InventoryMasterGetDTO>>(mastersByDate);
-
-        //    var paginationMetadata = new
-        //    {
-        //        TotalRecords = totalRecords,
-        //        PageSize = pageSize,
-        //        CurrentPage = pageNumber,
-        //        TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
-        //    };
-
-        //    return Ok(new { Data = DTO, Pagination = paginationMetadata });
-        //}
+            return Ok(new { Data = DTO, Pagination = paginationMetadata });
+        }
         #endregion
     }
 }
