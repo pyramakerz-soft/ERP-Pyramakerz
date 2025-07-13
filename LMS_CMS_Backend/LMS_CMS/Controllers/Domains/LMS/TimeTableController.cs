@@ -186,91 +186,90 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             /////////////////////// Create the TimeTableSession
             
-            Random rng = new Random();
-            List<TimeTableSubject> timeTableSubjects = new List<TimeTableSubject>();
-            var assignedTeachersPerDayPeriod = new Dictionary<(long ClassroomId, long DayId, int PeriodIndex), List<long>>();
-            // Group sessions by classroom
-            var sessionsGroupedByClassroom = sessions.GroupBy(s => s.TimeTableClassroom.ClassroomID).ToDictionary(g => g.Key, g => g.ToList());
-            foreach (var kvp in sessionsGroupedByClassroom)
-            {
-                long classroomId = kvp.Key;
-                List<TimeTableSession> classSessions = kvp.Value;
+            //Random rng = new Random();
+            //List<TimeTableSubject> timeTableSubjects = new List<TimeTableSubject>();
+            //var assignedTeachersPerDayPeriod = new Dictionary<(long ClassroomId, long DayId, int PeriodIndex), List<long>>();
+            //// Group sessions by classroom
+            //var sessionsGroupedByClassroom = sessions.GroupBy(s => s.TimeTableClassroom.ClassroomID).ToDictionary(g => g.Key, g => g.ToList());
+            //foreach (var kvp in sessionsGroupedByClassroom)
+            //{
+            //    long classroomId = kvp.Key;
+            //    List<TimeTableSession> classSessions = kvp.Value;
 
-                // Group sessions by day
-                var sessionsByDay = classSessions.GroupBy(s => s.TimeTableClassroom.DayId).ToDictionary(g => g.Key, g => g.ToList());
+            //    // Group sessions by day
+            //    var sessionsByDay = classSessions.GroupBy(s => s.TimeTableClassroom.DayId).ToDictionary(g => g.Key, g => g.ToList());
 
-                // Get valid classroom subjects
-                List<ClassroomSubject> classroomSubjects = Unit_Of_Work.classroomSubject_Repository.FindBy(cs => cs.ClassroomID == classroomId && cs.IsDeleted!= true && !cs.Hide);
+            //    // Get valid classroom subjects
+            //    List<ClassroomSubject> classroomSubjects = Unit_Of_Work.classroomSubject_Repository.FindBy(cs => cs.ClassroomID == classroomId && cs.IsDeleted!= true && !cs.Hide);
 
-                // Get NumberOfSessionPerWeek For Each subjects
+            //    // Get NumberOfSessionPerWeek For Each subjects
 
-                Dictionary<long, int> subjectSessionLimits = classroomSubjects.ToDictionary(cs => cs.SubjectID, cs => Unit_Of_Work.subject_Repository.First_Or_Default(s => s.ID == cs.SubjectID)?.NumberOfSessionPerWeek ?? 0);
+            //    Dictionary<long, int> subjectSessionLimits = classroomSubjects.ToDictionary(cs => cs.SubjectID, cs => Unit_Of_Work.subject_Repository.First_Or_Default(s => s.ID == cs.SubjectID)?.NumberOfSessionPerWeek ?? 0);
 
-                // Track Number Of Use Each Subject
-                Dictionary<long, int> assignedCount = subjectSessionLimits.ToDictionary(k => k.Key, k => 0);
+            //    // Track Number Of Use Each Subject
+            //    Dictionary<long, int> assignedCount = subjectSessionLimits.ToDictionary(k => k.Key, k => 0);
 
-                // Track Number Of Use Each Subject Per Day
-                HashSet<(long DayId, long SubjectId)> assignedPerDay = new HashSet<(long, long)>();
+            //    // Track Number Of Use Each Subject Per Day
+            //    HashSet<(long DayId, long SubjectId)> assignedPerDay = new HashSet<(long, long)>();
 
-                // All Session 
-                List<TimeTableSession> allClassSessions = classSessions.OrderBy(x => x.ID).ToList();
+            //    // All Session 
+            //    List<TimeTableSession> allClassSessions = classSessions.OrderBy(x => x.ID).ToList();
 
-                // Assign Subject And Teacher Random For Each Session
-                foreach (var session in allClassSessions)
-                {
-                    long dayId = session.TimeTableClassroom.DayId;
+            //    // Assign Subject And Teacher Random For Each Session
+            //    foreach (var session in allClassSessions)
+            //    {
+            //        long dayId = session.TimeTableClassroom.DayId;
+            //        int periodIndex = 1;
 
-                    // Select subject that Number Of Use < NumberOfSessionPerWeek && not use in this day 
-                    var eligibleSubjects = subjectSessionLimits.Keys
-                        .Where(subjectId =>
-                            assignedCount[subjectId] < subjectSessionLimits[subjectId] &&
-                            !assignedPerDay.Contains((dayId, subjectId)))
-                        .ToList();
+            //        // Select subject that Number Of Use < NumberOfSessionPerWeek && not use in this day 
+            //        var eligibleSubjects = subjectSessionLimits.Keys
+            //            .Where(subjectId =>
+            //                assignedCount[subjectId] < subjectSessionLimits[subjectId] &&
+            //                !assignedPerDay.Contains((dayId, subjectId)))
+            //            .ToList();
 
-                    if (eligibleSubjects.Count == 0)
-                        continue; // skip this session, nothing available
+            //        if (eligibleSubjects.Count == 0)
+            //            continue; // skip this session, nothing available
 
-                    // Pick one randomly
-                    long selectedSubjectId = eligibleSubjects[rng.Next(eligibleSubjects.Count)];
+            //        // Pick one randomly
+            //        long selectedSubjectId = eligibleSubjects[rng.Next(eligibleSubjects.Count)];
 
-                    // Find teacher
-                    long? teacherId = Unit_Of_Work.classroomSubject_Repository.First_Or_Default(cs => cs.ClassroomID == classroomId && cs.SubjectID == selectedSubjectId)?.TeacherID;
-                    assignedTeachersPerDayPeriod.TryGetValue((0, dayId, periodIndex), out var assignedTeachers);
-                    if (assignedTeachers == null)
-                        assignedTeachers = new List<long>();
+            //        // Find teacher
+            //        long? teacherId = Unit_Of_Work.classroomSubject_Repository.First_Or_Default(cs => cs.ClassroomID == classroomId && cs.SubjectID == selectedSubjectId)?.TeacherID;
+            //        assignedTeachersPerDayPeriod.TryGetValue((0, dayId, periodIndex), out var assignedTeachers);
+            //        if (assignedTeachers == null)
+            //            assignedTeachers = new List<long>();
 
-                    if (teacherId != null && assignedTeachers.Contains(teacherId.Value))
-                    {
-                        teacherId = null; // Teacher already assigned at this day/period in another class
-                    }
-                    else if (teacherId != null)
-                    {
-                        assignedTeachers.Add(teacherId.Value);
-                        assignedTeachersPerDayPeriod[(0, dayId, periodIndex)] = assignedTeachers;
-                    }
-
-
+            //        if (teacherId != null && assignedTeachers.Contains(teacherId.Value))
+            //        {
+            //            teacherId = null; // Teacher already assigned at this day/period in another class
+            //        }
+            //        else if (teacherId != null)
+            //        {
+            //            assignedTeachers.Add(teacherId.Value);
+            //            assignedTeachersPerDayPeriod[(0, dayId, periodIndex)] = assignedTeachers;
+            //        }
 
 
-                    // Add assignment
-                    timeTableSubjects.Add(new TimeTableSubject
-                    {
-                        TimeTableSessionID = session.ID,
-                        SubjectID = selectedSubjectId,
-                        TeacherID = teacherId,
-                        InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone),
-                        InsertedByOctaId = userTypeClaim == "octa" ? userId : null,
-                        InsertedByUserId = userTypeClaim == "employee" ? userId : null
-                    });
+            //        // Add assignment  
+            //        timeTableSubjects.Add(new TimeTableSubject
+            //        {
+            //            TimeTableSessionID = session.ID,
+            //            SubjectID = selectedSubjectId,
+            //            TeacherID = teacherId,
+            //            InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone),
+            //            InsertedByOctaId = userTypeClaim == "octa" ? userId : null,
+            //            InsertedByUserId = userTypeClaim == "employee" ? userId : null
+            //        });
 
-                    // Track the assignment
-                    assignedCount[selectedSubjectId]++;
-                    assignedPerDay.Add((dayId, selectedSubjectId));
-                }
-            }
+            //        // Track the assignment
+            //        assignedCount[selectedSubjectId]++;
+            //        assignedPerDay.Add((dayId, selectedSubjectId));
+            //    }
+            //}
 
             // Save all subjects
-            Unit_Of_Work.timeTableSubject_Repository.AddRange(timeTableSubjects);
+            //Unit_Of_Work.timeTableSubject_Repository.AddRange(timeTableSubjects);
             Unit_Of_Work.SaveChanges();
             return Ok();
         }

@@ -190,7 +190,7 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<TimeTableClassroom> TimeTableClassroom { get; set; }
         public DbSet<TimeTableSession> TimeTableSession { get; set; }
         public DbSet<TimeTableSubject> TimeTableSubject { get; set; }
-        public DbSet<AccountingConfigurations> AccountingConfigurations { get; set; }
+        public DbSet<AccountingConfigs> AccountingConfigs { get; set; }
 
 
 
@@ -1703,6 +1703,30 @@ namespace LMS_CMS_DAL.Models.Domains
               .HasOne(p => p.Day)
               .WithMany(p => p.TimeTableClassrooms)
               .HasForeignKey(p => p.DayId)
+              .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AccountingConfigs>()
+              .HasOne(p => p.Sales)
+              .WithMany(p => p.AccountingConfigurationsSales)
+              .HasForeignKey(p => p.SalesID)
+              .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AccountingConfigs>()
+               .HasOne(p => p.SalesReturn)
+              .WithMany(p => p.AccountingConfigurationsSalesReturns)
+              .HasForeignKey(p => p.SalesReturnID)
+              .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AccountingConfigs>()
+               .HasOne(p => p.Purchase)
+              .WithMany(p => p.AccountingConfigurationsPurchases)
+              .HasForeignKey(p => p.PurchaseID)
+              .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AccountingConfigs>()
+                .HasOne(p => p.PurchaseReturn)
+              .WithMany(p => p.AccountingConfigurationsPurchasesReturns)
+              .HasForeignKey(p => p.PurchaseReturnID)
               .OnDelete(DeleteBehavior.Restrict);
 
             ///////////////////////// Exception: /////////////////////////

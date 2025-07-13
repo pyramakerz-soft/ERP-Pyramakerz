@@ -14,12 +14,12 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
     [Route("api/with-domain/[controller]")]
     [ApiController]
     [Authorize]
-    public class AccountingConfigurationsController : ControllerBase
+    public class AccountingConfigsController : ControllerBase
     {
         private readonly DbContextFactoryService _dbContextFactory;
         private readonly IMapper _mapper;
 
-        public AccountingConfigurationsController(DbContextFactoryService dbContextFactory, IMapper mapper)
+        public AccountingConfigsController(DbContextFactoryService dbContextFactory, IMapper mapper)
         {
             _dbContextFactory = dbContextFactory;
             _mapper = mapper;
@@ -46,8 +46,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            AccountingConfigurations? accConfig = await Unit_Of_Work.accountingConfigurations_Repository
-                .FindByIncludesAsync(x => x.ID == id && x.IsDeleted != true,
+            AccountingConfigs? accConfig = await Unit_Of_Work.accountingConfigs_Repository
+                .FindByIncludesAsync(x => x.ID == id,
                 query => query.Include(x => x.Sales),
                 query => query.Include(x => x.SalesReturn),
                 query => query.Include(x => x.Purchase),
@@ -56,7 +56,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             if (accConfig == null)
                 return NotFound($"Accounting Configuration with ID {id} not found.");
 
-            var accConfigDto = _mapper.Map<AccountingConfigurationsGetDTO>(accConfig);
+            var accConfigDto = _mapper.Map<AccountingConfigsGetDTO>(accConfig);
 
             return Ok(accConfigDto);
         }
@@ -68,7 +68,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         //    allowedTypes: new[] { "octa", "employee" },
         //    pages: new[] { "" }
         //)]
-        public IActionResult Edit(AccountingConfigurationsEditDTO accDTO)
+        public IActionResult Edit(AccountingConfigsEditDTO accDTO)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -83,14 +83,14 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            AccountingConfigurations? acc = Unit_Of_Work.accountingConfigurations_Repository.First_Or_Default(x => x.ID == accDTO.ID && x.IsDeleted != true);
+            AccountingConfigs? acc = Unit_Of_Work.accountingConfigs_Repository.First_Or_Default(x => x.ID == accDTO.ID);
 
             if (acc == null)
                 return NotFound($"Accounting configuration with ID {accDTO.ID} not found.");
 
             AccountingTreeChart? tree;
-                
-            if(accDTO.SalesID != null)
+
+            if (accDTO.SalesID != null)
             {
                 tree = Unit_Of_Work.accountingTreeChart_Repository.First_Or_Default(x => x.ID == accDTO.SalesID && x.IsDeleted != true);
 
@@ -120,28 +120,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
             _mapper.Map(accDTO, acc);
 
-            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-
-            acc.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
-
-            if (userTypeClaim == "octa")
-            {
-                acc.UpdatedByOctaId = userId;
-                if (acc.UpdatedByUserId != null)
-                {
-                    acc.UpdatedByUserId = null;
-                }
-            }
-            else if (userTypeClaim == "employee")
-            {
-                acc.UpdatedByUserId = userId;
-                if (acc.UpdatedByOctaId != null)
-                {
-                    acc.UpdatedByOctaId = null;
-                }
-            }
-
-            Unit_Of_Work.accountingConfigurations_Repository.Update(acc);
+            Unit_Of_Work.accountingConfigs_Repository.Update(acc);
             Unit_Of_Work.SaveChanges();
 
             return Ok(accDTO);

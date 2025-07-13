@@ -5,13 +5,13 @@
 namespace LMS_CMS_DAL.Migrations.LMS_CMS_
 {
     /// <inheritdoc />
-    public partial class AddDefaultValuesToAccConfig : Migration
+    public partial class InsertEmptyValuesIntoAccConfigsTable : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.Sql(@"
-                INSERT INTO AccountingConfigurations (SalesID, SalesReturnID, PurchaseID, PurchaseReturnID)
+                INSERT INTO AccountingConfigs (SalesID, SalesReturnID, PurchaseID, PurchaseReturnID)
                 VALUES 
                 (NULL, NULL, NULL, NULL);
             ");
@@ -20,9 +20,7 @@ namespace LMS_CMS_DAL.Migrations.LMS_CMS_
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql(@"
-                DELETE FROM AccountingConfigurations
-            ");
+
         }
     }
 }

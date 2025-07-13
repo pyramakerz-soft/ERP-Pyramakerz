@@ -1,4 +1,3 @@
-// src/app/Models/zatca/electronic-invoice.ts
 export interface ElectronicInvoice {
   id: number;
   invoiceNumber: string;
