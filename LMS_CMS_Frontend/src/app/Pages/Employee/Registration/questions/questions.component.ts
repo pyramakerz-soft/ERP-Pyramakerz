@@ -393,7 +393,11 @@ export class QuestionsComponent {
 
       const reader = new FileReader();
       reader.readAsDataURL(file);
-
+      if (file.size > 25 * 1024 * 1024) {
+        this.validationErrors['imageFile'] = 'The file size exceeds the maximum limit of 25 MB.';
+        this.question.imageFile = null;
+        return;
+      }
       if (fileType.startsWith('image/')) {
         this.question.videoFile = null;
         this.question.video = "";
@@ -409,6 +413,7 @@ export class QuestionsComponent {
       }
     }
   }
+
 
   async onSearchEvent(event: { key: string; value: any }) {
     this.key = event.key;

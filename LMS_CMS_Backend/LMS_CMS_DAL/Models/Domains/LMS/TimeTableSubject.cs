@@ -18,11 +18,11 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public TimeTableSession TimeTableSession { get; set; }
 
         [ForeignKey("Subject")]
-        public long SubjectID { get; set; }
-        public Subject Subject { get; set; }
+        public long? SubjectID { get; set; }
+        public Subject? Subject { get; set; }
 
         [ForeignKey("Teacher")]
-        public long TeacherID { get; set; }
-        public Employee Teacher { get; set; }
+        public long? TeacherID { get; set; }
+        public Employee? Teacher { get; set; }
     }
 }

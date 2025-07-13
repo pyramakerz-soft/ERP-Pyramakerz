@@ -2,7 +2,10 @@
     <div class="flex-grow flex-col space-y-8">
         <div class="flex justify-between items-center">
             <p *ngIf="this.path == 'Registration Form'" class="primaryTxt text-2xl font-semibold">{{ isRtl ? "استمارة التسجيل" : RegistrationFormData.name }}</p>
-            <p *ngIf="this.path == 'Edit Student'" class="primaryTxt text-2xl font-semibold">Edit Student</p>
+            <div *ngIf="this.path == 'Edit Student'" class="flex justify-between items-center space-x-5 "> 
+                <i class="fa-solid fa-chevron-left cursor-pointer rtl:rotate-180"(click)="moveToStudents()"></i>
+                <p class="primaryTxt text-2xl font-semibold">Edit Student</p>
+            </div>
             <p *ngIf="this.path == 'Create Student'" class="primaryTxt text-2xl font-semibold">Create Student</p>
             <div class="w-[500px] flec flex-col space-y-2">
                 <p>{{currentCategory}} {{ 'of' | translate }} {{ RegistrationFormData.categories.length }} {{
@@ -71,7 +74,7 @@
                             @if(field.id != 7 && field.id != 8 && field.id != 9){
                             <select *ngSwitchCase="7" id="{{cat.enName}}_{{field.enName}}"
                                 class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                                [value]="getSelectedOption(field.id)"
+                                [ngModel]="getSelectedOption(field.id)"
                                 (change)="FillData($event, field.id, field.fieldTypeID)"
                                 [class.error-border]="isFieldInvalid(field)">
                                 <option value="null" style="color: gray;" disabled selected hidden>{{ 'Choose' |
@@ -82,12 +85,11 @@
                                     </option>
                                 </ng-container>
 
-
                                 <ng-container *ngIf="field.id == 5 ">
                                     <option *ngFor="let nationality of nationalities" [value]="nationality.id">
                                         {{ nationality.name }}
                                     </option>
-                                </ng-container>
+                                </ng-container> 
 
                                 <ng-container *ngIf="field.id == 6">
                                     <option value="islam">{{ 'Islam' | translate }}</option>
