@@ -13,7 +13,13 @@ import { HygieneTypes } from '../../../../Models/Clinic/hygiene-types';
 @Component({
   selector: 'app-hygiene-types',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent, ModalComponent, TableComponent],
+  imports: [
+    FormsModule,
+    CommonModule,
+    SearchComponent,
+    ModalComponent,
+    TableComponent,
+  ],
   templateUrl: './hygiene-types.component.html',
   styleUrls: ['./hygiene-types.component.css'],
 })
@@ -23,8 +29,8 @@ export class HygieneTypesComponent implements OnInit {
 
   validationErrors: { [key: string]: string } = {};
   keysArray: string[] = ['id', 'type'];
-  key: string = "id";
-  value: any = "";
+  key: string = 'id';
+  value: any = '';
   isModalVisible = false;
   hygieneTypes: HygieneTypes[] = [];
   DomainName: string = '';
@@ -35,106 +41,120 @@ export class HygieneTypesComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.DomainName = this.apiService.GetHeader(); 
+    this.DomainName = this.apiService.GetHeader();
     this.getHygieneTypes();
   }
 
-  
-async getHygieneTypes() {
-  try {
-    const data = await firstValueFrom(this.hygieneTypesService.Get(this.DomainName));
-    this.hygieneTypes = data.map((item) => {
-      const insertedAtDate = new Date(item.insertedAt);
+  async getHygieneTypes() {
+    try {
+      const data = await firstValueFrom(
+        this.hygieneTypesService.Get(this.DomainName)
+      );
+      this.hygieneTypes = data.map((item) => {
+        const insertedAtDate = new Date(item.insertedAt);
 
-      
-      const options: Intl.DateTimeFormatOptions = {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      };
-      const formattedDate: string = insertedAtDate.toLocaleDateString(undefined, options);
+        // Log the raw and parsed date for debugging
+        console.log('Raw insertedAt:', item.insertedAt);
+        console.log('Parsed Date:', insertedAtDate);
 
-      
-      return {
-        ...item,
-        insertedAt: formattedDate, 
-        actions: { delete: true, edit: true }, 
-      };
-    });
-  } catch (error) {
-    console.error('Error loading data:', error);
-    this.hygieneTypes = []; 
+        const options: Intl.DateTimeFormatOptions = {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        };
+        const formattedDate: string = insertedAtDate.toLocaleDateString(
+          undefined,
+          options
+        );
+
+        return {
+          ...item,
+          insertedAt: formattedDate,
+          actions: { delete: true, edit: true },
+        };
+      });
+    } catch (error) {
+      console.error('Error loading data:', error);
+      this.hygieneTypes = [];
+    }
   }
-}
 
+  openModal(id?: number) {
+    if (id) {
+      this.editHygieneType = true;
 
-  
-openModal(id?: number) {
-  if (id) {
-    this.editHygieneType = true;
-    
-    const originalHygieneType = this.hygieneTypes.find((ht) => ht.id === id)!;
-    this.hygieneType = new HygieneTypes(
-      originalHygieneType.id,
-      originalHygieneType.type,
-      new Date(originalHygieneType.insertedAt),
-      originalHygieneType.insertedByUserId 
-    );
-  } else {
-    this.hygieneType = new HygieneTypes(0, '', new Date(), 0);
-    this.editHygieneType = false;
+      const originalHygieneType = this.hygieneTypes.find((ht) => ht.id === id)!;
+      this.hygieneType = new HygieneTypes(
+        originalHygieneType.id,
+        originalHygieneType.type,
+        new Date(originalHygieneType.insertedAt),
+        originalHygieneType.insertedByUserId
+      );
+    } else {
+      this.hygieneType = new HygieneTypes(0, '', new Date(), 0);
+      this.editHygieneType = false;
+    }
+    this.isModalVisible = true;
   }
-  this.isModalVisible = true;
-}
 
-  
   closeModal() {
-    this.isModalVisible = false; 
-    this.hygieneType = new HygieneTypes(0, '', new Date(), 0); 
+    this.isModalVisible = false;
+    this.hygieneType = new HygieneTypes(0, '', new Date(), 0);
     this.editHygieneType = false;
     this.validationErrors = {};
   }
 
   isSaving: boolean = false;
-saveHygieneType() {
-  if (this.validateForm()) {
-    const isEditing = this.editHygieneType;
-    const domainName = this.DomainName;
-    const hygieneType = { ...this.hygieneType };
-    
-    // Disable the save button during submission
-    this.isSaving = true;
+  saveHygieneType() {
+    if (this.validateForm()) {
+      const isEditing = this.editHygieneType;
+      const domainName = this.DomainName;
+      const hygieneType = { ...this.hygieneType };
 
-    const operation = isEditing 
-      ? this.hygieneTypesService.Edit(hygieneType, domainName)
-      : this.hygieneTypesService.Add(hygieneType, domainName);
+      // Disable the save button during submission
+      this.isSaving = true;
 
-    operation.subscribe({
-      next: () => {
-        this.getHygieneTypes();
-        this.closeModal();
-        Swal.fire('Success', `Hygiene type ${isEditing ? 'updated' : 'created'} successfully`, 'success');
-        this.isSaving = false;
-      },
-      error: (err) => {
-        console.error(`Error ${isEditing ? 'updating' : 'creating'} hygiene type:`, err);
-        Swal.fire('Error', `Failed to ${isEditing ? 'update' : 'create'} hygiene type`, 'error');
-        this.isSaving = false;
-      }
-    });
+      const operation = isEditing
+        ? this.hygieneTypesService.Edit(hygieneType, domainName)
+        : this.hygieneTypesService.Add(hygieneType, domainName);
+
+      operation.subscribe({
+        next: () => {
+          this.getHygieneTypes();
+          this.closeModal();
+          Swal.fire(
+            'Success',
+            `Hygiene type ${isEditing ? 'updated' : 'created'} successfully`,
+            'success'
+          );
+          this.isSaving = false;
+        },
+        error: (err) => {
+          console.error(
+            `Error ${isEditing ? 'updating' : 'creating'} hygiene type:`,
+            err
+          );
+          Swal.fire(
+            'Error',
+            `Failed to ${isEditing ? 'update' : 'create'} hygiene type`,
+            'error'
+          );
+          this.isSaving = false;
+        },
+      });
+    }
   }
-}
 
-private formatDate(date: Date | string): string {
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
-  const options: Intl.DateTimeFormatOptions = {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  };
-  return dateObj.toLocaleDateString(undefined, options);
-}
-  
+  private formatDate(date: Date | string): string {
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    const options: Intl.DateTimeFormatOptions = {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    };
+    return dateObj.toLocaleDateString(undefined, options);
+  }
+
   deleteHygieneType(row: any) {
     Swal.fire({
       title: 'Are you sure you want to delete this Hygiene Type?',
@@ -143,7 +163,7 @@ private formatDate(date: Date | string): string {
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
       confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel'
+      cancelButtonText: 'Cancel',
     }).then((result) => {
       if (result.isConfirmed) {
         this.hygieneTypesService.Delete(row.id, this.DomainName).subscribe({
@@ -159,7 +179,6 @@ private formatDate(date: Date | string): string {
     });
   }
 
-  
   validateForm(): boolean {
     let isValid = true;
     if (!this.hygieneType.type) {
@@ -171,7 +190,6 @@ private formatDate(date: Date | string): string {
     return isValid;
   }
 
-  
   onInputValueChange(event: { field: string; value: any }) {
     const { field, value } = event;
     (this.hygieneType as any)[field] = value;
@@ -180,25 +198,21 @@ private formatDate(date: Date | string): string {
     }
   }
 
-async onSearchEvent(event: { key: string, value: any }) {
+  async onSearchEvent(event: { key: string; value: any }) {
     this.key = event.key;
     this.value = event.value;
-    
-    
-    await this.getHygieneTypes();
-    
-    if (this.value != "") {
-        this.hygieneTypes = this.hygieneTypes.filter(t => {
-            const fieldValue = t[this.key as keyof typeof t];
-            
-            
-            const searchString = this.value.toString().toLowerCase();
-            const fieldString = fieldValue?.toString().toLowerCase() || '';
-            
-            
-            return fieldString.includes(searchString);
-        });
-    }
-}
 
-} 
+    await this.getHygieneTypes();
+
+    if (this.value != '') {
+      this.hygieneTypes = this.hygieneTypes.filter((t) => {
+        const fieldValue = t[this.key as keyof typeof t];
+
+        const searchString = this.value.toString().toLowerCase();
+        const fieldString = fieldValue?.toString().toLowerCase() || '';
+
+        return fieldString.includes(searchString);
+      });
+    }
+  }
+}
