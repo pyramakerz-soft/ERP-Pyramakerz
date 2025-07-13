@@ -12,6 +12,7 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
     {
         [Key]
         public long ID { get; set; }
+        public int PeriodIndex { get; set; }
 
         [ForeignKey("TimeTableClassroom")]
         public long TimeTableClassroomID { get; set; }
