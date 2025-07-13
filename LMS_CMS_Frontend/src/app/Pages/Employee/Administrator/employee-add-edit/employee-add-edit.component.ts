@@ -202,6 +202,10 @@ export class EmployeeAddEditComponent {
     if (input.files) {
       for (let i = 0; i < input.files.length; i++) {
         const file = input.files[i];
+        const maxSizeInBytes = 25 * 1024 * 1024; // 25MB in bytes
+        if (file.size > maxSizeInBytes) {
+          continue;
+        }
         this.NewFile = new EmployeeAttachment();
         this.NewFile.file = file;
         this.NewFile.name = file.name.replace(/\.[^/.]+$/, '');
@@ -520,8 +524,8 @@ export class EmployeeAddEditComponent {
     this.dropdownOpen = false;
   }
 
-  onFloorsSupervisorChange(){
-     if (!this.isFloorMonitor) {
+  onFloorsSupervisorChange() {
+    if (!this.isFloorMonitor) {
       if (this.mode === 'Edit') {
         this.Data.deletedFloorsSelected = this.Data.deletedFloorsSelected || [];
         const selectedIds = (this.floorsSelected || []).map(s => s.id);

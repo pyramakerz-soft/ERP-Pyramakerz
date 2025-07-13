@@ -44,35 +44,37 @@
                 <!-- Attendance -->
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     <label class="inline-flex items-center cursor-pointer">
-                        <input type="checkbox" [(ngModel)]="student['attendance']" (ngModelChange)="onAttendanceChange(student)"
-                            class="sr-only peer" [disabled]="isViewOnly">
+                        <input type="checkbox" [(ngModel)]="student['attendance']"
+                            (ngModelChange)="onAttendanceChange(student)" class="sr-only peer" [disabled]="isViewOnly">
                         <div
                             class="relative w-11 h-6 bg-[#EAECF0] peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#089B41]/50 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#089B41]">
                         </div>
                     </label>
                 </td>
 
-<!-- Select All for Row (Conditionally Rendered) -->
-<td *ngIf="showSelectAll" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-    <div class="flex gap-2">
-        <!-- Select All True -->
-        <button (click)="setAllHygieneTypesForStudent(student, true)"
-            [disabled]="isViewOnly || student['attendance'] !== true"
-            class="w-8 h-8 rounded-full flex items-center justify-center text-white bg-gray-300" [ngClass]="{
-                    'bg-green-500': !isViewOnly && student['attendance'] === true && student['hygieneTypeSelectAll'] === true,
-                }">
-            <i class="fas fa-check"></i>
-        </button>
-        <!-- Select All False -->
-        <button (click)="setAllHygieneTypesForStudent(student, false)"
-            [disabled]="isViewOnly || student['attendance'] !== true"
-            class="w-8 h-8 rounded-full flex items-center justify-center text-white bg-gray-300" [ngClass]="{
-                    'bg-red-500': !isViewOnly && student['attendance'] === true && student['hygieneTypeSelectAll'] === false,
-                }">
-            <i class="fas fa-times"></i>
-        </button>
-    </div>
-</td>
+                <!-- Select All for Row (Conditionally Rendered) -->
+                <td *ngIf="showSelectAll" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    <div class="flex gap-2">
+                        <!-- Select All True -->
+                        <button (click)="setAllHygieneTypesForStudent(student, true)"
+                            [disabled]="isViewOnly || student['attendance'] !== true || hygieneTypes.length === 0"
+                            class="w-8 h-8 rounded-full flex items-center justify-center text-white bg-gray-300"
+                            [ngClass]="{
+                                'bg-green-500': !isViewOnly && student['attendance'] === true && student['hygieneTypeSelectAll'] === true && hygieneTypes.length > 0
+                            }">
+                            <i class="fas fa-check"></i>
+                        </button>
+                        <!-- Select All False -->
+                        <button (click)="setAllHygieneTypesForStudent(student, false)"
+                            [disabled]="isViewOnly || student['attendance'] !== true || hygieneTypes.length === 0"
+                            class="w-8 h-8 rounded-full flex items-center justify-center text-white bg-gray-300"
+                            [ngClass]="{
+                                'bg-red-500': !isViewOnly && student['attendance'] === true && student['hygieneTypeSelectAll'] === false && hygieneTypes.length > 0
+                            }">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </td>
 
                 <!-- Hygiene Types -->
                 <td *ngFor="let hygieneType of hygieneTypes"

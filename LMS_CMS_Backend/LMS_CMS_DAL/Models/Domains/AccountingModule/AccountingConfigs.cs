@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace LMS_CMS_DAL.Models.Domains.AccountingModule
 {
-    public class AccountingConfigurations : AuditableEntity
+    public class AccountingConfigs
     {
         [Key]
         public int ID { get; set; }

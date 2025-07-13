@@ -262,7 +262,6 @@ export class InvoiceReportMasterDetailedComponent implements OnInit {
       summary: [
         { key: 'Date', value: new Date(t.date).toLocaleDateString() },
         { key: 'Store', value: t.storeName },
-        // Add student/supplier info based on report type
         ...(this.reportType === 'sales'
           ? [{ key: 'Student', value: t.studentName || 'N/A' }]
           : []),

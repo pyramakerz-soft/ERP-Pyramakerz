@@ -185,9 +185,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             Unit_Of_Work.SaveChanges();
 
             /////////////////////// Create the TimeTableSession
-            
+
             Random rng = new Random();
             List<TimeTableSubject> timeTableSubjects = new List<TimeTableSubject>();
+            var assignedTeachersPerDayPeriod = new Dictionary<(long ClassroomId, long DayId, int PeriodIndex), List<long>>();
             // Group sessions by classroom
             var sessionsGroupedByClassroom = sessions.GroupBy(s => s.TimeTableClassroom.ClassroomID).ToDictionary(g => g.Key, g => g.ToList());
             foreach (var kvp in sessionsGroupedByClassroom)
@@ -198,25 +199,29 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 // Group sessions by day
                 var sessionsByDay = classSessions.GroupBy(s => s.TimeTableClassroom.DayId).ToDictionary(g => g.Key, g => g.ToList());
 
-                // Get valid classroom subjects and their weekly quota
-                List<ClassroomSubject> classroomSubjects = Unit_Of_Work.classroomSubject_Repository.FindBy(cs => cs.ClassroomID == classroomId && cs.IsDeleted!= true && !cs.Hide);
+                // Get valid classroom subjects
+                List<ClassroomSubject> classroomSubjects = Unit_Of_Work.classroomSubject_Repository.FindBy(cs => cs.ClassroomID == classroomId && cs.IsDeleted != true && !cs.Hide);
+
+                // Get NumberOfSessionPerWeek For Each subjects
 
                 Dictionary<long, int> subjectSessionLimits = classroomSubjects.ToDictionary(cs => cs.SubjectID, cs => Unit_Of_Work.subject_Repository.First_Or_Default(s => s.ID == cs.SubjectID)?.NumberOfSessionPerWeek ?? 0);
 
-                // Track assignments: SubjectId -> Count
+                // Track Number Of Use Each Subject
                 Dictionary<long, int> assignedCount = subjectSessionLimits.ToDictionary(k => k.Key, k => 0);
 
-                // Track daily assignments: (DayId, SubjectId) -> assigned
+                // Track Number Of Use Each Subject Per Day
                 HashSet<(long DayId, long SubjectId)> assignedPerDay = new HashSet<(long, long)>();
 
-                // Flatten sessions
+                // All Session 
                 List<TimeTableSession> allClassSessions = classSessions.OrderBy(x => x.ID).ToList();
 
+                // Assign Subject And Teacher Random For Each Session
                 foreach (var session in allClassSessions)
                 {
                     long dayId = session.TimeTableClassroom.DayId;
+                    int periodIndex = 1;
 
-                    // Select subject that still needs assignments and hasn’t been used on this day
+                    // Select subject that Number Of Use < NumberOfSessionPerWeek && not use in this day 
                     var eligibleSubjects = subjectSessionLimits.Keys
                         .Where(subjectId =>
                             assignedCount[subjectId] < subjectSessionLimits[subjectId] &&
@@ -230,9 +235,23 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     long selectedSubjectId = eligibleSubjects[rng.Next(eligibleSubjects.Count)];
 
                     // Find teacher
-                    long teacherId = Unit_Of_Work.classroomSubject_Repository.First_Or_Default(cs => cs.ClassroomID == classroomId && cs.SubjectID == selectedSubjectId)?.TeacherID ?? 1;
+                    long? teacherId = Unit_Of_Work.classroomSubject_Repository.First_Or_Default(cs => cs.ClassroomID == classroomId && cs.SubjectID == selectedSubjectId)?.TeacherID;
+                    assignedTeachersPerDayPeriod.TryGetValue((0, dayId, periodIndex), out var assignedTeachers);
+                    if (assignedTeachers == null)
+                        assignedTeachers = new List<long>();
 
-                    // Add assignment
+                    if (teacherId != null && assignedTeachers.Contains(teacherId.Value))
+                    {
+                        teacherId = null; // Teacher already assigned at this day/period in another class
+                    }
+                    else if (teacherId != null)
+                    {
+                        assignedTeachers.Add(teacherId.Value);
+                        assignedTeachersPerDayPeriod[(0, dayId, periodIndex)] = assignedTeachers;
+                    }
+
+
+                    // Add assignment  
                     timeTableSubjects.Add(new TimeTableSubject
                     {
                         TimeTableSessionID = session.ID,
@@ -249,7 +268,6 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 }
             }
 
-            // Save all subjects
             Unit_Of_Work.timeTableSubject_Repository.AddRange(timeTableSubjects);
             Unit_Of_Work.SaveChanges();
             return Ok();

@@ -46,9 +46,9 @@ export class StudentsComponent {
   UserID: number = 0;
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   isLoading = false
-  preSelectedYear: number | null = null;  
-  preSelectedGrade: number | null = null;  
-  preSelectedClassroom: number | null = null;  
+  preSelectedYear: number | null = null;
+  preSelectedGrade: number | null = null;
+  preSelectedClassroom: number | null = null;
 
   constructor(public account: AccountService, public buildingService: BuildingService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService,
     private menuService: MenuService, public activeRoute: ActivatedRoute, public schoolService: SchoolService, public StudentService: StudentService, public employeeServ: EmployeeService,
@@ -132,10 +132,6 @@ export class StudentsComponent {
         });
       }
     });
-  }
-
-  handleStudentSelected(students: number[]) {
-    
   }
 
   closeModal() {

@@ -150,10 +150,10 @@ export class InventoryTransactionReportComponent implements OnInit {
     });
     this.loadStores();
     this.loadCategories();
-    this.selectedStoreId = null; // Default to "Select All" for store
-    this.selectedCategoryId = null; // Default to "Select All" for category
-    this.selectedSubCategoryId = null; // Default to "Select All" for subcategory
-    this.selectedItemId = null; // Default to "Select All" for item
+    this.selectedStoreId = null;
+    this.selectedCategoryId = null;
+    this.selectedSubCategoryId = null;
+    this.selectedItemId = null;
   }
 
   loadCategories() {
