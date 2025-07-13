@@ -170,9 +170,9 @@
                                         {{ getMonthDate(month.month, month.year) | date: 'MMM' }} {{ month.year }}
                                     </h2>
                                     <div class="flex space-x-3 text-3xl">
-                                        <p *ngIf="currentMonth!=calendarMonths[0].month" (click)="lastMonth(); showTime()">
+                                        <p *ngIf="currentMonth!=calendarMonths[0].month || currentYear!=calendarMonths[0].year" (click)="lastMonth(); showTime()">
                                             &lt;</p>
-                                        <p *ngIf="currentMonth!=calendarMonths[calendarMonths.length-1].month"
+                                        <p *ngIf="currentMonth!=calendarMonths[calendarMonths.length-1].month || currentYear!=calendarMonths[calendarMonths.length-1].year"
                                             (click)="nextMonth(); showTime()">&gt;</p>
                                     </div>
                                 </div>

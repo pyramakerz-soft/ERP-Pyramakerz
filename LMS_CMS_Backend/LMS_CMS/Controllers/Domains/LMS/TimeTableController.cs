@@ -27,12 +27,49 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             this.mapper = mapper;
             _checkPageAccessService = checkPageAccessService;
         }
+        /////////////////
+        
+        [HttpGet("BySchoolId/{SchoolId}")]
+        [Authorize_Endpoint_(
+           allowedTypes: new[] { "octa", "employee" }
+       )]
+        public IActionResult Get(long SchoolId)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+                return Unauthorized("User ID or Type claim not found.");
+
+            School school = Unit_Of_Work.school_Repository.First_Or_Default(s=>s.ID == SchoolId & s.IsDeleted != true);
+            if (school == null)
+            {
+                return BadRequest("No school with this ID");
+            }
+
+            AcademicYear academicYear = Unit_Of_Work.academicYear_Repository.First_Or_Default(a=>a.SchoolID==SchoolId & a.IsDeleted != true && a.IsActive==true);
+            if (academicYear == null)
+            {
+                return BadRequest("No active academic year in this school");
+            }
+            List<TimeTable> timeTable = Unit_Of_Work.timeTable_Repository.FindBy(t => t.IsDeleted != true && t.AcademicYearID== academicYear.ID);
+
+            if (timeTable == null)
+            {
+                return NotFound();
+            }
+            List<TimeTableGetDTO> Dto = mapper.Map<List<TimeTableGetDTO>>(timeTable);
+
+            return Ok(Dto);
+        }
 
         /////////////////
 
         [HttpPost]
         [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" })]
-        public async Task<IActionResult> GenerateAsync(long SchoolId)
+        public async Task<IActionResult> GenerateAsync(TimeTableAddDTO timeTableAddDTO)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -43,11 +80,11 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             if (userIdClaim == null || userTypeClaim == null)
                 return Unauthorized("User ID or Type claim not found.");
 
-            School school = Unit_Of_Work.school_Repository.First_Or_Default(s => s.ID == SchoolId && s.IsDeleted != true);
+            School school = Unit_Of_Work.school_Repository.First_Or_Default(s => s.ID == timeTableAddDTO.SchoolID && s.IsDeleted != true);
             if (school == null)
                 return BadRequest("No School With This Id");
 
-            AcademicYear academicYear = Unit_Of_Work.academicYear_Repository.First_Or_Default(a =>a.SchoolID == SchoolId && a.IsDeleted != true && a.IsActive == true);
+            AcademicYear academicYear = Unit_Of_Work.academicYear_Repository.First_Or_Default(a =>a.SchoolID == timeTableAddDTO.SchoolID && a.IsDeleted != true && a.IsActive == true);
             if (academicYear == null)
                 return BadRequest("There is no active academic year in this school");
 
@@ -56,6 +93,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             TimeTable timeTable = new TimeTable
             {
                 AcademicYearID = academicYear.ID,
+                Name= timeTableAddDTO.name,
+                IsFavourite = timeTableAddDTO.IsFavourite,
                 InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone)
             };
             if (userTypeClaim == "octa")
@@ -68,7 +107,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             /////////////////////// Create the TimeTableClassroom
             // Get Grades and Classrooms
-            List<Grade> Grades = await Unit_Of_Work.grade_Repository.Select_All_With_IncludesById<Grade>(g => g.IsDeleted != true && g.Section.SchoolID == SchoolId,
+            List<Grade> Grades = await Unit_Of_Work.grade_Repository.Select_All_With_IncludesById<Grade>(g => g.IsDeleted != true && g.Section.SchoolID == timeTableAddDTO.SchoolID,
                 query => query.Include(g => g.Section));
 
             if (Grades == null || Grades.Count == 0)
@@ -127,7 +166,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             foreach (TimeTableClassroom ttClassroom in timeTableClassrooms)
             {
 
-                int sessionCount = dayToPeriodCount[ttClassroom.DayId.Value](ttClassroom.Classroom.Grade);
+                int sessionCount = dayToPeriodCount[ttClassroom.DayId](ttClassroom.Classroom.Grade);
 
                 for (int i = 0; i < sessionCount; i++)
                 {
@@ -146,14 +185,163 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             Unit_Of_Work.SaveChanges();
 
             /////////////////////// Create the TimeTableSession
-            foreach (var session in sessions)
+            
+            Random rng = new Random();
+            List<TimeTableSubject> timeTableSubjects = new List<TimeTableSubject>();
+            // Group sessions by classroom
+            var sessionsGroupedByClassroom = sessions.GroupBy(s => s.TimeTableClassroom.ClassroomID).ToDictionary(g => g.Key, g => g.ToList());
+            foreach (var kvp in sessionsGroupedByClassroom)
             {
-                List<ClassroomSubject> classroomSubject = Unit_Of_Work.classroomSubject_Repository.FindBy(s => s.ClassroomID == session.TimeTableClassroom.ClassroomID);
-                
+                long classroomId = kvp.Key;
+                List<TimeTableSession> classSessions = kvp.Value;
+
+                // Group sessions by day
+                var sessionsByDay = classSessions.GroupBy(s => s.TimeTableClassroom.DayId).ToDictionary(g => g.Key, g => g.ToList());
+
+                // Get valid classroom subjects and their weekly quota
+                List<ClassroomSubject> classroomSubjects = Unit_Of_Work.classroomSubject_Repository.FindBy(cs => cs.ClassroomID == classroomId && cs.IsDeleted!= true && !cs.Hide);
+
+                Dictionary<long, int> subjectSessionLimits = classroomSubjects.ToDictionary(cs => cs.SubjectID, cs => Unit_Of_Work.subject_Repository.First_Or_Default(s => s.ID == cs.SubjectID)?.NumberOfSessionPerWeek ?? 0);
+
+                // Track assignments: SubjectId -> Count
+                Dictionary<long, int> assignedCount = subjectSessionLimits.ToDictionary(k => k.Key, k => 0);
+
+                // Track daily assignments: (DayId, SubjectId) -> assigned
+                HashSet<(long DayId, long SubjectId)> assignedPerDay = new HashSet<(long, long)>();
+
+                // Flatten sessions
+                List<TimeTableSession> allClassSessions = classSessions.OrderBy(x => x.ID).ToList();
+
+                foreach (var session in allClassSessions)
+                {
+                    long dayId = session.TimeTableClassroom.DayId;
+
+                    // Select subject that still needs assignments and hasn’t been used on this day
+                    var eligibleSubjects = subjectSessionLimits.Keys
+                        .Where(subjectId =>
+                            assignedCount[subjectId] < subjectSessionLimits[subjectId] &&
+                            !assignedPerDay.Contains((dayId, subjectId)))
+                        .ToList();
+
+                    if (eligibleSubjects.Count == 0)
+                        continue; // skip this session, nothing available
+
+                    // Pick one randomly
+                    long selectedSubjectId = eligibleSubjects[rng.Next(eligibleSubjects.Count)];
+
+                    // Find teacher
+                    long teacherId = Unit_Of_Work.classroomSubject_Repository.First_Or_Default(cs => cs.ClassroomID == classroomId && cs.SubjectID == selectedSubjectId)?.TeacherID ?? 1;
+
+                    // Add assignment
+                    timeTableSubjects.Add(new TimeTableSubject
+                    {
+                        TimeTableSessionID = session.ID,
+                        SubjectID = selectedSubjectId,
+                        TeacherID = teacherId,
+                        InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone),
+                        InsertedByOctaId = userTypeClaim == "octa" ? userId : null,
+                        InsertedByUserId = userTypeClaim == "employee" ? userId : null
+                    });
+
+                    // Track the assignment
+                    assignedCount[selectedSubjectId]++;
+                    assignedPerDay.Add((dayId, selectedSubjectId));
+                }
             }
 
+            // Save all subjects
+            Unit_Of_Work.timeTableSubject_Repository.AddRange(timeTableSubjects);
+            Unit_Of_Work.SaveChanges();
             return Ok();
         }
 
+        /////////////////
+
+        [HttpGet("{id}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" }
+        )]
+        public async Task<IActionResult> GetByIdAsync(long id)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+                return Unauthorized("User ID or Type claim not found.");
+
+            // Fetch the TimeTable and related entities including Classroom, Sessions, and Subjects
+            TimeTable timeTable = await Unit_Of_Work.timeTable_Repository.FindByIncludesAsync(
+                 t => t.ID == id && t.IsDeleted != true,
+                 query => query
+                     .Include(tt => tt.TimeTableClassrooms)
+                         .ThenInclude(tc => tc.TimeTableSessions)
+                             .ThenInclude(ts => ts.TimeTableSubjects)
+                                 .ThenInclude(tss => tss.Subject)
+                     .Include(tt => tt.TimeTableClassrooms)
+                         .ThenInclude(tc => tc.TimeTableSessions)
+                             .ThenInclude(ts => ts.TimeTableSubjects)
+                                 .ThenInclude(tss => tss.Teacher)
+                     .Include(tt => tt.TimeTableClassrooms)
+                         .ThenInclude(tc => tc.Classroom)
+                     .Include(tt => tt.TimeTableClassrooms)
+                         .ThenInclude(tc => tc.Day)
+                     .Include(tt => tt.TimeTableClassrooms)
+                         .ThenInclude(tc => tc.Classroom.Grade)
+                     .Include(tt => tt.AcademicYear)
+             );
+
+            if (timeTable == null)
+            {
+                return BadRequest("No timetable with this ID");
+            }
+
+            School school = Unit_Of_Work.school_Repository.First_Or_Default(s=>s.ID== timeTable.AcademicYear.SchoolID && s.IsDeleted != true );
+            if (school == null)
+            {
+                return BadRequest("No school with this ID");
+            }
+
+            TimeTableGetDTO Dto = mapper.Map<TimeTableGetDTO>(timeTable);
+
+            var groupedResult = Dto.TimeTableClassrooms
+            .GroupBy(tc => new { tc.DayId, tc.DayName })
+            .Select(dayGroup => new TimeTableDayGroupDTO
+            {
+                DayId = dayGroup.Key.DayId,
+                DayName = dayGroup.Key.DayName,
+                Grades = dayGroup
+                    .GroupBy(tc => new { tc.GradeId, tc.GradeName })
+                    .Select(gradeGroup => new GradeGroupDTO
+                    {
+                        GradeId = gradeGroup.Key.GradeId,
+                        GradeName = gradeGroup.Key.GradeName,
+                        Classrooms = gradeGroup
+                            .GroupBy(tc => new { tc.ClassroomID, tc.ClassroomName })
+                            .Select(classGroup => new ClassroomGroupDTO
+                            {
+                                ClassroomId = classGroup.Key.ClassroomID,
+                                ClassroomName = classGroup.Key.ClassroomName,
+                                Sessions = classGroup
+                                    .SelectMany(c => c.TimeTableSessions)
+                                    .Select(session => new SessionGroupDTO
+                                    {
+                                        SessionId = session.ID,
+                                        Subjects = session.TimeTableSubjects.Select(s => new SubjectTeacherDTO
+                                        {
+                                            SubjectId = s.SubjectID,
+                                            SubjectName = s.SubjectName,
+                                            TeacherId = s.TeacherID,
+                                            TeacherName = s.TeacherName
+                                        }).ToList()
+                                    }).ToList()
+                            }).ToList()
+                    }).ToList()
+            }).ToList();
+
+            // Return the grouped result as JSON
+            return Ok(new { Data = groupedResult, TimeTableName = timeTable.Name, MaxPeriods = school.MaximumPeriodCountTimeTable });
+        }
     }
 }

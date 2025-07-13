@@ -582,51 +582,32 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Zatca Electronic-Invoice" }
         )]
-        public async Task<IActionResult> FilterBySchoolAndDate(long schoolId, string startDate, string endDate, int pageNumber = 1, int pageSize = 10)
+        public async Task<IActionResult> FilterBySchoolAndDate(long schoolId, DateTime startDate, DateTime endDate, int pageNumber = 1, int pageSize = 10)
         {
+            if (endDate < startDate)
+                return BadRequest("Start date must be equal or greater than End date");
+
             if (pageNumber < 1) pageNumber = 1;
             if (pageSize < 1) pageSize = 10;
+
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            string[] sdParts = startDate.Split("/");
-            Array.Reverse(sdParts);
-            startDate = string.Join("-", sdParts);
-
-            string[] edParts = endDate.Split("/");
-            Array.Reverse(edParts);
-            endDate = string.Join("-", edParts);
-
-            DateTime.TryParse(startDate, out DateTime start);
-            DateTime.TryParse(endDate, out DateTime end);
-
-            start = start.Date;
-            end = end.Date;
-
-            if (end < start)
-                return BadRequest("Start date must be equal or greater than End date");
-            
             int totalRecords = await Unit_Of_Work.inventoryMaster_Repository
                .CountAsync(f => f.IsDeleted != true && (f.FlagId == 11 || f.FlagId == 12));
 
-            List<InventoryMaster> mastersBySchool = await Unit_Of_Work.inventoryMaster_Repository.SelectQuery<InventoryMaster>(
-                d => d.SchoolId == schoolId && 
+            List<InventoryMaster> result = await Unit_Of_Work.inventoryMaster_Repository.Select_All_With_IncludesById_Pagination<InventoryMaster>(
+                d => d.SchoolId == schoolId &&
                 d.IsDeleted != true &&
-                (d.FlagId == 11 || d.FlagId == 12))
-                .ToListAsync();
-
-            if (mastersBySchool is null || mastersBySchool.Count == 0)
-                return NotFound("No invoices found.");
-
-            List<InventoryMaster> mastersByDate = mastersBySchool
-                .Where(d => DateTime.Parse(d.Date).Date >= start && DateTime.Parse(d.Date).Date <= end)
+                (d.FlagId == 11 || d.FlagId == 12) &&
+                d.Date.Date >= startDate && d.Date.Date <= endDate.AddDays(1)) 
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
-                .ToList();
+                .ToListAsync();
 
-            if (mastersByDate is null || mastersByDate.Count == 0)
+            if (result is null || !result.Any())
                 return NotFound("No invoices found.");
 
-            List<InventoryMasterGetDTO> DTO = _mapper.Map<List<InventoryMasterGetDTO>>(mastersByDate);
+            List<InventoryMasterGetDTO> DTO = _mapper.Map<List<InventoryMasterGetDTO>>(result);
 
             var paginationMetadata = new
             {

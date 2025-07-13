@@ -12,5 +12,6 @@
         public string SubAccount { get; set; }
         public decimal? Debit { get; set; }
         public decimal? Credit { get; set; }
+        public DateOnly Date { get; set; }
     }
 }

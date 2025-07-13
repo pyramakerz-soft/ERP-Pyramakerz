@@ -182,7 +182,7 @@ export class ReceivableDetailsComponent {
       if (this.receivable.hasOwnProperty(key)) {
         const field = key as keyof Receivable;
         if (!this.receivable[field]) {
-          if (field == "receivableDocTypesID" || field == "linkFileID" || field == "bankOrSaveID" || field == "date") {
+          if (field == "receivableDocTypesID" || field == "linkFileID" || field == "bankOrSaveID" || field == "date" || field == "docNumber") {
             this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
             isValid = false;
           }

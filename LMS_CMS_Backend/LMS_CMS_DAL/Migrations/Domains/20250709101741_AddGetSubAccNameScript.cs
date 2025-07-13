@@ -11,7 +11,7 @@ namespace LMS_CMS_DAL.Migrations.LMS_CMS_
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             var assembly = typeof(AddGetSubAccNameScript).Assembly;
-            var subAccName = "LMS_CMS_DAL.DbScripts.GetSubAccountName.sql"; // Use actual namespace path
+            var subAccName = "LMS_CMS_DAL.DbScripts.GetSubAccountInfo.sql"; // Use actual namespace path
 
             using var saStream = assembly.GetManifestResourceStream(subAccName);
             using var saReader = new StreamReader(saStream);
@@ -29,7 +29,7 @@ namespace LMS_CMS_DAL.Migrations.LMS_CMS_
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql("DROP FUNCTION IF EXISTS [dbo].[GetSubAccountName];");
+            migrationBuilder.Sql("DROP FUNCTION IF EXISTS [dbo].[GetSubAccountInfo];");
             migrationBuilder.Sql("DROP FUNCTION IF EXISTS [dbo].[FilterEntries];");
         }
     }

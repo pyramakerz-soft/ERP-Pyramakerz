@@ -46,6 +46,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<decimal?>("Credit")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
                     b.Property<decimal?>("Debit")
                         .HasColumnType("decimal(18,2)");
 
@@ -76,6 +79,75 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.ToTable((string)null);
 
                     b.ToView(null, (string)null);
+                });
+
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.AccountingModule.AccountingConfigurations", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("DeletedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("DeletedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("InsertedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("InsertedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("InsertedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool?>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<long?>("PurchaseID")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("PurchaseReturnID")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("SalesID")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("SalesReturnID")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("UpdatedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("UpdatedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("DeletedByUserId");
+
+                    b.HasIndex("InsertedByUserId");
+
+                    b.HasIndex("PurchaseID");
+
+                    b.HasIndex("PurchaseReturnID");
+
+                    b.HasIndex("SalesID");
+
+                    b.HasIndex("SalesReturnID");
+
+                    b.HasIndex("UpdatedByUserId");
+
+                    b.ToTable("AccountingConfigurations");
                 });
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.AccountingModule.AccountingEntriesDetails", b =>
@@ -4125,9 +4197,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<decimal?>("CashAmount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("Date")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
@@ -8877,7 +8948,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<long>("ClassroomID")
                         .HasColumnType("bigint");
 
-                    b.Property<long?>("DayId")
+                    b.Property<long>("DayId")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime?>("DeletedAt")
@@ -10595,6 +10666,51 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .HasForeignKey("StudentHygieneTypesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.AccountingModule.AccountingConfigurations", b =>
+                {
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "DeletedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("DeletedByUserId");
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "InsertedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("InsertedByUserId");
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.AccountingModule.AccountingTreeChart", "Purchase")
+                        .WithMany()
+                        .HasForeignKey("PurchaseID");
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.AccountingModule.AccountingTreeChart", "PurchaseReturn")
+                        .WithMany()
+                        .HasForeignKey("PurchaseReturnID");
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.AccountingModule.AccountingTreeChart", "Sales")
+                        .WithMany()
+                        .HasForeignKey("SalesID");
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.AccountingModule.AccountingTreeChart", "SalesReturn")
+                        .WithMany()
+                        .HasForeignKey("SalesReturnID");
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "UpdatedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("UpdatedByUserId");
+
+                    b.Navigation("DeletedByEmployee");
+
+                    b.Navigation("InsertedByEmployee");
+
+                    b.Navigation("Purchase");
+
+                    b.Navigation("PurchaseReturn");
+
+                    b.Navigation("Sales");
+
+                    b.Navigation("SalesReturn");
+
+                    b.Navigation("UpdatedByEmployee");
                 });
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.AccountingModule.AccountingEntriesDetails", b =>
@@ -14838,7 +14954,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Days", "Day")
                         .WithMany("TimeTableClassrooms")
                         .HasForeignKey("DayId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "DeletedByEmployee")
                         .WithMany()
