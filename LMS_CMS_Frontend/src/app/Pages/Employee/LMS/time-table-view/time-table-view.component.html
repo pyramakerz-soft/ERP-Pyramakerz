@@ -1,0 +1,47 @@
+<div class="flex justify-between items-center">
+    <div class="flex justify-between items-center space-x-5">
+        <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToTimeTable()"></i>
+        <h1 class="font-semibold text-2xl leading-9">
+            {{TimeTableName}}
+        </h1>
+    </div>
+</div>
+
+<div class="overflow-x-auto">
+    <div *ngFor="let day of TimeTable" class="mb-10 border rounded shadow">
+        <div class="bg-gray-300 text-center font-bold py-2">
+            {{ day.dayName }}
+        </div>
+
+        <div *ngFor="let grade of day.grades" class="p-2">
+            <div class="text-md font-semibold mb-1">
+                Grade: {{ grade.gradeName }}
+            </div>
+
+            <table class="table-auto w-full text-sm text-left border-collapse border border-gray-300">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="border p-2">Class Name</th>
+                        <th class="border p-2" *ngFor="let i of [].constructor(9); let period = index">
+                            Session {{ period + 1 }}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let classroom of grade.classrooms">
+                        <td class="border p-2 font-medium">
+                            {{ classroom.classroomName }}
+                        </td>
+                        <td class="border p-2" *ngFor="let session of classroom.sessions">
+                            <div *ngFor="let subject of session.subjects">
+                                <div class="font-semibold text-blue-600">{{ subject.subjectName }}</div>
+                                <div class="text-gray-500 text-xs">{{ subject.teacherName }}</div>
+                            </div>
+                            <div *ngIf="session.subjects.length === 0" class="text-gray-400">--</div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

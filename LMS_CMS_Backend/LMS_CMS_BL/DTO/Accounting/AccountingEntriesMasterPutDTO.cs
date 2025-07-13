@@ -9,7 +9,7 @@ namespace LMS_CMS_BL.DTO.Accounting
     public class AccountingEntriesMasterPutDTO
     {
         public long ID { get; set; }
-        public string? DocNumber { get; set; }
+        public string DocNumber { get; set; }
         public string Date { get; set; }
         public string? Notes { get; set; }
         public long AccountingEntriesDocTypeID { get; set; }

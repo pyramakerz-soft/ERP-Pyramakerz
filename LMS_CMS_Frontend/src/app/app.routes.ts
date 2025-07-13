@@ -188,6 +188,10 @@ import { SubjectAssignmentComponent } from './Pages/Student/LMS/subject-assignme
 import { StudentAssignmentViewComponent } from './Pages/Student/LMS/student-assignment-view/student-assignment-view.component'; 
 import { AccountigConstraintsComponent } from './Pages/Employee/Accounting/Report/accountig-constraints/accountig-constraints.component'; 
 import { AverageCostCalcComponent } from './Pages/Employee/Inventory/Report/report-item-card/average-cost-calc/average-cost-calc/average-cost-calc.component'; 
+import { AccountigConfigurationComponent } from './Pages/Employee/Accounting/accountig-configuration/accountig-configuration.component';
+import { TimeTable } from './Models/LMS/time-table';
+import { TimeTableComponent } from './Pages/Employee/LMS/time-table/time-table.component';
+import { TimeTableViewComponent } from './Pages/Employee/LMS/time-table-view/time-table-view.component'; 
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -416,7 +420,10 @@ export const routes: Routes = [
             { path: "Installment Deduction Report", component: AccountigReportsComponent, title: "Installment Deduction Report", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Accounting Entries Report", component: AccountigReportsComponent, title: "Accounting Entries Report", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Accounting Constraints Report", component: AccountigConstraintsComponent, title: "Accounting Constraints Report", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Accounting Configuration", component: AccountigConfigurationComponent, title: "Accounting Configuration", canActivate: [noNavigateWithoutLoginGuard] },
             { path: 'average cost calculation', component: AverageCostCalcComponent, title: 'Average Cost Calculator', canActivate: [noNavigateWithoutLoginGuard], },
+            { path: 'Time Table', component: TimeTableComponent, title: 'Time Table', canActivate: [noNavigateWithoutLoginGuard], },
+            { path: 'Time Table View/:id', component: TimeTableViewComponent, title: 'Time Table View', canActivate: [noNavigateWithoutLoginGuard], },
         ]
     },
     {
