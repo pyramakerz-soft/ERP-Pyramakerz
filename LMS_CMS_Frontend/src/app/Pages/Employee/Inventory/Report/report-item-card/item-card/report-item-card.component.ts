@@ -144,7 +144,6 @@ export class ReportItemCardComponent implements OnInit {
         toDate: formattedDateTo,
       });
 
-      // Get summary data
       const summaryResponse = await this.inventoryDetailsService
         .getInventoryNetSummary(
           this.selectedStoreId!,

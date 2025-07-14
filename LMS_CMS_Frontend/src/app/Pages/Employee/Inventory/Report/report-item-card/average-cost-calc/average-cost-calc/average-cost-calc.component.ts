@@ -19,6 +19,7 @@ export class AverageCostCalcComponent {
   progress: number = 0;
   calculationComplete: boolean = false;
   message: string = '';
+  errorMessage: string = '';
 
   constructor(
     private inventoryDetailsService: InventoryDetailsService,
@@ -27,7 +28,7 @@ export class AverageCostCalcComponent {
 
   validateDateRange(): boolean {
     if (!this.dateFrom || !this.dateTo) {
-      return true; // Let the required field validation handle empty cases
+      return true; 
     }
 
     const fromDate = new Date(this.dateFrom);
@@ -80,12 +81,13 @@ export class AverageCostCalcComponent {
     this.calculationComplete = false;
     this.progress = 0;
     this.message = 'Starting calculation...';
+    this.errorMessage = '';
 
     try {
       const formattedFromDate = this.formatDateForAPI(this.dateFrom);
       const formattedToDate = this.formatDateForAPI(this.dateTo);
 
-      // Simulate progress updates
+      
       const interval = setInterval(() => {
         this.progress += 10;
         if (this.progress >= 90) clearInterval(interval);
@@ -94,8 +96,8 @@ export class AverageCostCalcComponent {
 
       await this.inventoryDetailsService
         .getMovingAverageCost(
-          0, // storeId
-          0, // shopItemId
+          0, 
+          0, 
           formattedFromDate,
           formattedToDate,
           this.inventoryDetailsService.ApiServ.GetHeader()
@@ -108,7 +110,9 @@ export class AverageCostCalcComponent {
       this.calculationComplete = true;
     } catch (error) {
       console.error('Error calculating average cost:', error);
-      this.message = 'Error calculating average cost';
+      this.message = '';
+      this.errorMessage =
+        'Error calculating average cost. Please try again.';
       this.progress = 0;
     } finally {
       this.isLoading = false;
@@ -117,5 +121,6 @@ export class AverageCostCalcComponent {
 
   dismiss() {
     this.router.navigate(['../']);
+    this.errorMessage = '';
   }
 }
