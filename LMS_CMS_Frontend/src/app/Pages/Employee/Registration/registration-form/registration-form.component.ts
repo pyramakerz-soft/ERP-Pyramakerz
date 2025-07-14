@@ -223,7 +223,7 @@ export class RegistrationFormComponent {
     if (fieldId == 6 || fieldId == 14) {
       return entry?.textAnswer ?? null;
     }
-    console.log('Nationalities:', this.nationalities);
+    console.log('Nationalities:', entry);
     return entry?.selectedFieldOptionID ?? null;
   }
 
@@ -726,5 +726,9 @@ export class RegistrationFormComponent {
     //////
 
     this.isSuccess = true;
+  }
+
+  moveToStudents(){
+      this.router.navigateByUrl(`Employee/Student`)
   }
 }

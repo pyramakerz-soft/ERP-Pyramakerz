@@ -84,34 +84,13 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.ToView(null, (string)null);
                 });
 
-            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.AccountingModule.AccountingConfigurations", b =>
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.AccountingModule.AccountingConfigs", b =>
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<long?>("DeletedByOctaId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("DeletedByUserId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("InsertedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<long?>("InsertedByOctaId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("InsertedByUserId")
-                        .HasColumnType("bigint");
-
-                    b.Property<bool?>("IsDeleted")
-                        .HasColumnType("bit");
 
                     b.Property<long?>("PurchaseID")
                         .HasColumnType("bigint");
@@ -125,20 +104,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<long?>("SalesReturnID")
                         .HasColumnType("bigint");
 
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<long?>("UpdatedByOctaId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("UpdatedByUserId")
-                        .HasColumnType("bigint");
-
                     b.HasKey("ID");
-
-                    b.HasIndex("DeletedByUserId");
-
-                    b.HasIndex("InsertedByUserId");
 
                     b.HasIndex("PurchaseID");
 
@@ -148,9 +114,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.HasIndex("SalesReturnID");
 
-                    b.HasIndex("UpdatedByUserId");
-
-                    b.ToTable("AccountingConfigurations");
+                    b.ToTable("AccountingConfigs");
                 });
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.AccountingModule.AccountingEntriesDetails", b =>
@@ -4116,6 +4080,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
+
+                    b.Property<decimal?>("QuantityBalance")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<long?>("SalesId")
                         .HasColumnType("bigint");
@@ -9033,6 +9000,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<int>("PeriodIndex")
+                        .HasColumnType("int");
+
                     b.Property<long>("TimeTableClassroomID")
                         .HasColumnType("bigint");
 
@@ -9087,10 +9057,10 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<long>("SubjectID")
+                    b.Property<long?>("SubjectID")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("TeacherID")
+                    b.Property<long?>("TeacherID")
                         .HasColumnType("bigint");
 
                     b.Property<long>("TimeTableSessionID")
@@ -10671,39 +10641,27 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.AccountingModule.AccountingConfigurations", b =>
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.AccountingModule.AccountingConfigs", b =>
                 {
-                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "DeletedByEmployee")
-                        .WithMany()
-                        .HasForeignKey("DeletedByUserId");
-
-                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "InsertedByEmployee")
-                        .WithMany()
-                        .HasForeignKey("InsertedByUserId");
-
                     b.HasOne("LMS_CMS_DAL.Models.Domains.AccountingModule.AccountingTreeChart", "Purchase")
-                        .WithMany()
-                        .HasForeignKey("PurchaseID");
+                        .WithMany("AccountingConfigurationsPurchases")
+                        .HasForeignKey("PurchaseID")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("LMS_CMS_DAL.Models.Domains.AccountingModule.AccountingTreeChart", "PurchaseReturn")
-                        .WithMany()
-                        .HasForeignKey("PurchaseReturnID");
+                        .WithMany("AccountingConfigurationsPurchasesReturns")
+                        .HasForeignKey("PurchaseReturnID")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("LMS_CMS_DAL.Models.Domains.AccountingModule.AccountingTreeChart", "Sales")
-                        .WithMany()
-                        .HasForeignKey("SalesID");
+                        .WithMany("AccountingConfigurationsSales")
+                        .HasForeignKey("SalesID")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("LMS_CMS_DAL.Models.Domains.AccountingModule.AccountingTreeChart", "SalesReturn")
-                        .WithMany()
-                        .HasForeignKey("SalesReturnID");
-
-                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "UpdatedByEmployee")
-                        .WithMany()
-                        .HasForeignKey("UpdatedByUserId");
-
-                    b.Navigation("DeletedByEmployee");
-
-                    b.Navigation("InsertedByEmployee");
+                        .WithMany("AccountingConfigurationsSalesReturns")
+                        .HasForeignKey("SalesReturnID")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Purchase");
 
@@ -10712,8 +10670,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Navigation("Sales");
 
                     b.Navigation("SalesReturn");
-
-                    b.Navigation("UpdatedByEmployee");
                 });
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.AccountingModule.AccountingEntriesDetails", b =>
@@ -15034,14 +14990,12 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.HasOne("LMS_CMS_DAL.Models.Domains.LMS.Subject", "Subject")
                         .WithMany("TimeTableSubjects")
                         .HasForeignKey("SubjectID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "Teacher")
                         .WithMany("TimeTableSubjects")
                         .HasForeignKey("TeacherID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("LMS_CMS_DAL.Models.Domains.LMS.TimeTableSession", "TimeTableSession")
                         .WithMany("TimeTableSubjects")
@@ -15785,6 +15739,14 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.AccountingModule.AccountingTreeChart", b =>
                 {
+                    b.Navigation("AccountingConfigurationsPurchases");
+
+                    b.Navigation("AccountingConfigurationsPurchasesReturns");
+
+                    b.Navigation("AccountingConfigurationsSales");
+
+                    b.Navigation("AccountingConfigurationsSalesReturns");
+
                     b.Navigation("AccountingEntriesDetails");
 
                     b.Navigation("Assets");
