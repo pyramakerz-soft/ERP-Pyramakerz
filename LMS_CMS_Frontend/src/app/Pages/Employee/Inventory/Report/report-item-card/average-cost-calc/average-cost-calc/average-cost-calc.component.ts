@@ -28,7 +28,7 @@ export class AverageCostCalcComponent {
 
   validateDateRange(): boolean {
     if (!this.dateFrom || !this.dateTo) {
-      return true; 
+      return true;
     }
 
     const fromDate = new Date(this.dateFrom);
@@ -54,10 +54,10 @@ export class AverageCostCalcComponent {
       console.error('Invalid date:', dateString);
       return '';
     }
+    const year = date.getFullYear();
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const day = date.getDate().toString().padStart(2, '0');
-    const year = date.getFullYear();
-    return `${month}/${day}/${year}`;
+    return `${year}-${month}-${day}`;
   }
 
   onDateChange() {
@@ -87,32 +87,20 @@ export class AverageCostCalcComponent {
       const formattedFromDate = this.formatDateForAPI(this.dateFrom);
       const formattedToDate = this.formatDateForAPI(this.dateTo);
 
-      
-      const interval = setInterval(() => {
-        this.progress += 10;
-        if (this.progress >= 90) clearInterval(interval);
-        this.message = `Calculating... ${this.progress}%`;
-      }, 300);
+      // TODO: Replace with new endpoint when available
+      // await this.inventoryDetailsService.getAverageCostTable(
+      //   formattedFromDate,
+      //   formattedToDate,
+      //   this.inventoryDetailsService.ApiServ.GetHeader()
+      // ).toPromise().then(response => {
+      //   console.log('Average Cost Table Response:', response);
+      // });
 
-      await this.inventoryDetailsService
-        .getMovingAverageCost(
-          0, 
-          0, 
-          formattedFromDate,
-          formattedToDate,
-          this.inventoryDetailsService.ApiServ.GetHeader()
-        )
-        .toPromise();
-
-      clearInterval(interval);
-      this.progress = 100;
-      this.message = 'Calculation completed successfully';
-      this.calculationComplete = true;
+      this.message = 'Waiting for new endpoint implementation...';
     } catch (error) {
       console.error('Error calculating average cost:', error);
       this.message = '';
-      this.errorMessage =
-        'Error calculating average cost. Please try again.';
+      this.errorMessage = 'Error calculating average cost. Please try again.';
       this.progress = 0;
     } finally {
       this.isLoading = false;
@@ -120,7 +108,7 @@ export class AverageCostCalcComponent {
   }
 
   dismiss() {
-    this.router.navigate(['../']);
+    this.router.navigate(['/Employee/report item card with average']);
     this.errorMessage = '';
   }
 }

@@ -6,12 +6,14 @@
     <div class="w-[30%]">
         <label for="dateFrom" class="block mb-2 text-sm font-medium text-gray-900">Start Date</label>
         <input id="dateFrom" type="date" [(ngModel)]="dateFrom" required
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            (change)="onDateChange()">
     </div>
     <div class="w-[30%]">
         <label for="dateTo" class="block mb-2 text-sm font-medium text-gray-900">End Date</label>
         <input id="dateTo" type="date" [(ngModel)]="dateTo" required
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            (change)="onDateChange()">
     </div>
     <div class="mt-7 ml-2">
         <button class="p-3 font-medium text-xl rounded-lg" (click)="calculateAverage()"
@@ -31,6 +33,6 @@
         Dismiss
     </button>
 </div>
-<div *ngIf="errorMessage" class="mt-4 text-center text-red-600 ">
+<div *ngIf="errorMessage" class="mt-4 text-center text-red-600">
     {{errorMessage}}
 </div>

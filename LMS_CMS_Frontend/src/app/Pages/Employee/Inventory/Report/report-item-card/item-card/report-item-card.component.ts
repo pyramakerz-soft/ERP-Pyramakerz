@@ -281,9 +281,7 @@ export class ReportItemCardComponent implements OnInit {
       });
 
       const response = await this.inventoryDetailsService
-        .getMovingAverageCost(
-          this.selectedStoreId!,
-          this.selectedItemId!,
+        .GetAverageCost(
           formattedDateFrom,
           formattedDateTo,
           this.inventoryDetailsService.ApiServ.GetHeader()
