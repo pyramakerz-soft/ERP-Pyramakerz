@@ -846,6 +846,7 @@ namespace LMS_CMS_BL.Config
                  .ForMember(dest => dest.WeekDayName, opt => opt.MapFrom(src => src.WeekDay.Name))
                  .ForMember(dest => dest.SubjectEnglishName, opt => opt.MapFrom(src => src.Subject.en_name))
                  .ForMember(dest => dest.SubjectArabicName, opt => opt.MapFrom(src => src.Subject.ar_name))
+                 .ForMember(dest => dest.AcademicYearID, opt => opt.MapFrom(src => src.Classroom.AcademicYearID))
                  .ForMember(dest => dest.ClassroomName, opt => opt.MapFrom(src => src.Classroom.Name));
 
             CreateMap<LessonLiveAddDTO, LessonLive>();

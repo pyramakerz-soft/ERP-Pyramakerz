@@ -22,7 +22,7 @@
                 <thead class="bg-gray-100">
                     <tr>
                         <th class="border p-2">Class Name</th>
-                        <th class="border p-2" *ngFor="let i of [].constructor(9); let period = index">
+                        <th class="border p-2" *ngFor="let i of [].constructor(MaxPeriods); let period = index">
                             Session {{ period + 1 }}
                         </th>
                     </tr>

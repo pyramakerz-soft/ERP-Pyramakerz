@@ -16,7 +16,11 @@
 
         public string BuildConnectionString(string domainName)
         {
+<<<<<<< HEAD
             var dataSource = "DESKTOP-531QG4Q";
+=======
+            var dataSource = "DESKTOP-3BNN4KG";
+>>>>>>> 59ad349a82c973b8ec5591da38d6084132b3ca35
             var initialCatalog = domainName;
 
             return $"Data Source={dataSource};Initial Catalog={initialCatalog};Integrated Security = True;TrustServerCertificate=True";

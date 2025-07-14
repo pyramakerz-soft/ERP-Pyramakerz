@@ -16,6 +16,9 @@ namespace LMS_CMS_BL.DTO.LMS
         public long EvaluatorID { get; set; }
         public String EvaluatorArabicName { get; set; }
         public String EvaluatorEnglishName { get; set; }
+        public long EvaluationBookCorrectionID { get; set; }
+        public String EvaluationBookCorrectionEnglishName { get; set; }
+        public String EvaluationBookCorrectionArabicName { get; set; }
         public long EvaluatedID { get; set; }
         public String EvaluatedArabicName { get; set; }
         public String EvaluatedEnglishName { get; set; }

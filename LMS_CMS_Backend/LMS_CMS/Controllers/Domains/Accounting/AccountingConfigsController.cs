@@ -27,10 +27,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
         #region Get By ID
         [HttpGet("{id}")]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "" }
-        //)]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Accounting Configuration" }
+        )]
         public async Task<IActionResult> GetByID(int id)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -46,8 +46,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            AccountingConfigs? accConfig = await Unit_Of_Work.accountingConfigs_Repository
-                .FindByIncludesAsync(x => x.ID == id,
+            AccountingConfigs? accConfig = await Unit_Of_Work.accountingConfigs_Repository.FindByIncludesAsync(x => x.ID == id,
                 query => query.Include(x => x.Sales),
                 query => query.Include(x => x.SalesReturn),
                 query => query.Include(x => x.Purchase),
@@ -64,10 +63,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
         #region Edit
         [HttpPut("Edit")]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "" }
-        //)]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Accounting Configuration" }
+        )]
         public IActionResult Edit(AccountingConfigsEditDTO accDTO)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);

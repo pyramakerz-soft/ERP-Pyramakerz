@@ -94,7 +94,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             {
                 AcademicYearID = academicYear.ID,
                 Name= timeTableAddDTO.name,
-                IsFavourite = timeTableAddDTO.IsFavourite,
+                IsFavourite = false,
                 InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone)
             };
             if (userTypeClaim == "octa")
@@ -173,6 +173,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     TimeTableSession session = new TimeTableSession
                     {
                         TimeTableClassroomID = ttClassroom.ID,
+                        PeriodIndex = i+1,
                         InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone),
                         InsertedByOctaId = userTypeClaim == "octa" ? userId : null,
                         InsertedByUserId = userTypeClaim == "employee" ? userId : null
@@ -184,90 +185,136 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             Unit_Of_Work.timeTableSession_Repository.AddRange(sessions);
             Unit_Of_Work.SaveChanges();
 
-            /////////////////////// Create the TimeTableSession
+            /////////////////////// Assign Subjects to Sessions
 
+            // Initialize random generator for shuffling subjects
             Random rng = new Random();
+
+            // List to hold all TimeTableSubject records to be inserted
             List<TimeTableSubject> timeTableSubjects = new List<TimeTableSubject>();
-            var assignedTeachersPerDayPeriod = new Dictionary<(long ClassroomId, long DayId, int PeriodIndex), List<long>>();
-            // Group sessions by classroom
-            var sessionsGroupedByClassroom = sessions.GroupBy(s => s.TimeTableClassroom.ClassroomID).ToDictionary(g => g.Key, g => g.ToList());
+
+            // Dictionary to track which teachers are assigned on a specific day and period across all classes
+            var assignedTeachersPerDayPeriod = new Dictionary<(long DayId, int PeriodIndex), List<long>>();
+
+            // Group sessions by ClassroomID so that we can handle each classroom separately
+            var sessionsGroupedByClassroom = sessions .GroupBy(s => s.TimeTableClassroom.ClassroomID)
+                .ToDictionary(g => g.Key, g => g.ToList()); // key value
+
+            // Iterate over each classroom's sessions 
             foreach (var kvp in sessionsGroupedByClassroom)
             {
                 long classroomId = kvp.Key;
-                List<TimeTableSession> classSessions = kvp.Value;
 
-                // Group sessions by day
-                var sessionsByDay = classSessions.GroupBy(s => s.TimeTableClassroom.DayId).ToDictionary(g => g.Key, g => g.ToList());
+                // Sort sessions in the classroom by DayId then by PeriodIndex (period within the day)
+                var classSessions = kvp.Value
+                    .OrderBy(s => s.TimeTableClassroom.DayId)
+                    .ThenBy(s => s.PeriodIndex)
+                    .ToList();
 
-                // Get valid classroom subjects
+                // Get all subjects linked to this classroom that are not deleted or hidden
                 List<ClassroomSubject> classroomSubjects = Unit_Of_Work.classroomSubject_Repository.FindBy(cs => cs.ClassroomID == classroomId && cs.IsDeleted != true && !cs.Hide);
 
-                // Get NumberOfSessionPerWeek For Each subjects
-
+                // For each subject, determine how many sessions per week it requires
                 Dictionary<long, int> subjectSessionLimits = classroomSubjects.ToDictionary(cs => cs.SubjectID, cs => Unit_Of_Work.subject_Repository.First_Or_Default(s => s.ID == cs.SubjectID)?.NumberOfSessionPerWeek ?? 0);
 
-                // Track Number Of Use Each Subject
+                // Track how many times each subject has been assigned so far
                 Dictionary<long, int> assignedCount = subjectSessionLimits.ToDictionary(k => k.Key, k => 0);
 
-                // Track Number Of Use Each Subject Per Day
-                HashSet<(long DayId, long SubjectId)> assignedPerDay = new HashSet<(long, long)>();
+                // Group the sessions by day so we handle sessions day by day
+                var sessionsByDay = classSessions.GroupBy(s => s.TimeTableClassroom.DayId);
 
-                // All Session 
-                List<TimeTableSession> allClassSessions = classSessions.OrderBy(x => x.ID).ToList();
-
-                // Assign Subject And Teacher Random For Each Session
-                foreach (var session in allClassSessions)
+                foreach (var dayGroup in sessionsByDay)
                 {
-                    long dayId = session.TimeTableClassroom.DayId;
-                    int periodIndex = 1;
+                    long dayId = dayGroup.Key;
 
-                    // Select subject that Number Of Use < NumberOfSessionPerWeek && not use in this day 
-                    var eligibleSubjects = subjectSessionLimits.Keys
-                        .Where(subjectId =>
-                            assignedCount[subjectId] < subjectSessionLimits[subjectId] &&
-                            !assignedPerDay.Contains((dayId, subjectId)))
-                        .ToList();
+                    // Sort sessions in the day by PeriodIndex
+                    var daySessions = dayGroup.OrderBy(s => s.PeriodIndex).ToList();
+                    int sessionCursor = 0;
 
-                    if (eligibleSubjects.Count == 0)
-                        continue; // skip this session, nothing available
+                    // Shuffle the classroom subjects for this day to avoid static ordering
+                    var randomizedSubjects = classroomSubjects.OrderBy(x => rng.Next()).ToList();
 
-                    // Pick one randomly
-                    long selectedSubjectId = eligibleSubjects[rng.Next(eligibleSubjects.Count)];
-
-                    // Find teacher
-                    long? teacherId = Unit_Of_Work.classroomSubject_Repository.First_Or_Default(cs => cs.ClassroomID == classroomId && cs.SubjectID == selectedSubjectId)?.TeacherID;
-                    assignedTeachersPerDayPeriod.TryGetValue((0, dayId, periodIndex), out var assignedTeachers);
-                    if (assignedTeachers == null)
-                        assignedTeachers = new List<long>();
-
-                    if (teacherId != null && assignedTeachers.Contains(teacherId.Value))
+                    while (sessionCursor < daySessions.Count)
                     {
-                        teacherId = null; // Teacher already assigned at this day/period in another class
+                        var session = daySessions[sessionCursor];
+                        int periodIndex = session.PeriodIndex;
+
+                        // Get all subjects that still need sessions and have not reached their weekly number of sessions
+                        var eligibleSubjects = randomizedSubjects
+                            .Where(cs => assignedCount[cs.SubjectID] < subjectSessionLimits[cs.SubjectID])
+                            .Select(cs => Unit_Of_Work.subject_Repository.First_Or_Default(s => s.ID == cs.SubjectID))
+                            .Where(s => s != null)
+                            .ToList();
+
+                        if (!eligibleSubjects.Any())
+                        {
+                            sessionCursor++;
+                            continue; // No eligible subjects, skip to next session
+                        }
+
+                        // Group eligible subjects by Category and Grade so similar ones are assigned together
+                        var groupedSubjects = eligibleSubjects
+                            .GroupBy(s => new { s.SubjectCategoryID, s.GradeID })
+                            .OrderBy(x => rng.Next()) // Shuffle the groups
+                            .ToList();
+
+                        foreach (var group in groupedSubjects)
+                        {
+                            if (sessionCursor >= daySessions.Count) break;
+
+                            var currentSession = daySessions[sessionCursor];
+                            periodIndex = currentSession.PeriodIndex;
+
+                            foreach (var subject in group)
+                            {
+                                long selectedSubjectId = subject.ID;
+
+                                // Skip if the subject already reached its weekly limit
+                                if (assignedCount[selectedSubjectId] >= subjectSessionLimits[selectedSubjectId])
+                                    continue;
+
+                                // Get the teacher assigned to this subject in this classroom
+                                long? teacherId = Unit_Of_Work.classroomSubject_Repository
+                                    .First_Or_Default(cs => cs.ClassroomID == classroomId && cs.SubjectID == selectedSubjectId)?.TeacherID;
+
+                                // Check if any teacher is already assigned at this day and period
+                                assignedTeachersPerDayPeriod.TryGetValue((dayId, periodIndex), out var assignedTeachers);
+                                if (assignedTeachers == null)
+                                    assignedTeachers = new List<long>();
+
+                                // Prevent the same teacher from being double booked in the same period
+                                if (teacherId != null && assignedTeachers.Contains(teacherId.Value))
+                                {
+                                    teacherId = null; // Set to null if already assigned elsewhere in same period
+                                }
+                                else if (teacherId != null)
+                                {
+                                    assignedTeachers.Add(teacherId.Value);
+                                    assignedTeachersPerDayPeriod[(dayId, periodIndex)] = assignedTeachers;
+                                }
+
+                                // Create a TimeTableSubject entry linking session, subject, and teacher
+                                timeTableSubjects.Add(new TimeTableSubject
+                                {
+                                    TimeTableSessionID = currentSession.ID,
+                                    SubjectID = selectedSubjectId,
+                                    TeacherID = teacherId,
+                                    InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone),
+                                    InsertedByOctaId = userTypeClaim == "octa" ? userId : null,
+                                    InsertedByUserId = userTypeClaim == "employee" ? userId : null
+                                });
+
+                                // Mark subject as assigned
+                                assignedCount[selectedSubjectId]++;
+                            }
+
+                            sessionCursor++; // Move to next session
+                        }
                     }
-                    else if (teacherId != null)
-                    {
-                        assignedTeachers.Add(teacherId.Value);
-                        assignedTeachersPerDayPeriod[(0, dayId, periodIndex)] = assignedTeachers;
-                    }
-
-
-                    // Add assignment  
-                    timeTableSubjects.Add(new TimeTableSubject
-                    {
-                        TimeTableSessionID = session.ID,
-                        SubjectID = selectedSubjectId,
-                        TeacherID = teacherId,
-                        InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone),
-                        InsertedByOctaId = userTypeClaim == "octa" ? userId : null,
-                        InsertedByUserId = userTypeClaim == "employee" ? userId : null
-                    });
-
-                    // Track the assignment
-                    assignedCount[selectedSubjectId]++;
-                    assignedPerDay.Add((dayId, selectedSubjectId));
                 }
             }
 
+            // Save all timetable subjects to the database
             Unit_Of_Work.timeTableSubject_Repository.AddRange(timeTableSubjects);
             Unit_Of_Work.SaveChanges();
             return Ok();
