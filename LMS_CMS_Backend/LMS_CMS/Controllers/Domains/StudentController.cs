@@ -203,7 +203,7 @@ namespace LMS_CMS_PL.Controllers.Domains
             //);
 
             List<StudentClassroom> studentClassrooms = await Unit_Of_Work.studentClassroom_Repository.Select_All_With_IncludesById<StudentClassroom>(
-                query => query.IsDeleted != true && query.ClassID == Id,
+                query => query.IsDeleted != true && query.ClassID == Id && query.Student.IsDeleted != true,
                 query => query.Include(stu => stu.Student)
             );
 
