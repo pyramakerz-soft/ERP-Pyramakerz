@@ -9,7 +9,7 @@ export class QuestionBank {
     public image?: string,
     public imageForm: File|null = null,
     public difficultyLevel: number = 0,
-    public mark: number = 0,
+    public mark: number|null = null,
     public essayAnswer?: string,
     public lessonID: number = 0,
     public lessonName: string = '',

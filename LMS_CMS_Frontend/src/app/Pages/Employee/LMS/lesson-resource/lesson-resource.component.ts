@@ -307,36 +307,34 @@ export class LessonResourceComponent {
 
   Save() {  
     this.lessonResource.lessonID = this.lessonId
+    this.lessonResource.classes = [];
+    this.lessonResource.newClassRooms = [];
  
-    if(this.editLessonResource == true){
-      this.lessonResource.classes = [];
-      this.lessonResource.newClassRooms = [];
+    if(this.SpecificClassroom == true){
+      if(this.editLessonResource == true){
 
-      if (this.lessonResource.classrooms && this.lessonResource.classrooms.length > 0) { 
-        const existingIds = this.lessonResource.classrooms.map(c => c.id); 
-        this.AllSelectedClassRooms.forEach(selected => {
-          if (existingIds.includes(selected.id)) { 
-            this.lessonResource.classes.push(selected.id);
-          } else { 
-            this.lessonResource.newClassRooms.push(selected.id);
-          }
-        });
-      } else { 
-        this.lessonResource.newClassRooms = this.AllSelectedClassRooms.map(c => c.id);
+        if (this.lessonResource.classrooms && this.lessonResource.classrooms.length > 0) { 
+          const existingIds = this.lessonResource.classrooms.map(c => c.id); 
+          this.AllSelectedClassRooms.forEach(selected => {
+            if (existingIds.includes(selected.id)) { 
+              this.lessonResource.classes.push(selected.id);
+            } else { 
+              this.lessonResource.newClassRooms.push(selected.id);
+            }
+          });
+        } else { 
+          this.lessonResource.newClassRooms = this.AllSelectedClassRooms.map(c => c.id);
+        }
+
+      }else{
+        if(this.AllSelectedClassRooms.length != 0){  
+          this.lessonResource.classes = this.AllSelectedClassRooms.map(c => c.id);
+        } else{
+          this.lessonResource.classes = []
+        }
       }
+    } 
 
-    }else{
-      if(this.AllSelectedClassRooms.length != 0){ 
-        // this.AllSelectedClassRooms.forEach( element => {
-        //   this.lessonResource.classes.push(element.id)
-        // });
-
-        this.lessonResource.classes = this.AllSelectedClassRooms.map(c => c.id);
-      } else{
-        this.lessonResource.classes = []
-      }
-    }
- 
     if (this.isFormValid()) {
       this.isLoading = true;  
         

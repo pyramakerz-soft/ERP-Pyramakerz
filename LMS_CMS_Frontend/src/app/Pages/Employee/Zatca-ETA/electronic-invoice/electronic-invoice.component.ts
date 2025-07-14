@@ -45,8 +45,7 @@ export class ElectronicInvoiceComponent implements OnInit {
     private schoolService: SchoolService,
     private stateService: StateService,
     private zatcaService: ZatcaService,
-    private etaService: EtaService,
-    private datePipe: DatePipe,
+    private etaService: EtaService, 
     private apiService: ApiService,
     private router: Router,
     private route: ActivatedRoute
@@ -138,19 +137,25 @@ export class ElectronicInvoiceComponent implements OnInit {
     this.transactions = [];
     this.selectedInvoices = [];
 
-    try {
-      const formattedStartDate = this.formatDateForApi(this.dateFrom);
-      const formattedEndDate = this.formatDateForApi(this.dateTo);
-
+    try { 
       const response = await firstValueFrom(
-        this.zatcaService.filterBySchoolAndDate(
-          this.selectedSchoolId!,
-          formattedStartDate,
-          formattedEndDate,
-          this.currentPage,
-          this.pageSize,
-          this.DomainName
-        )
+        this.currentSystem === 'zatca'
+          ? this.zatcaService.filterBySchoolAndDate(
+              this.selectedSchoolId!,
+              this.dateFrom,
+              this.dateTo,
+              this.currentPage,
+              this.pageSize,
+              this.DomainName
+            )
+          : this.etaService.filterBySchoolAndDate(
+              this.selectedSchoolId!,
+              this.dateFrom,
+              this.dateTo,
+              this.currentPage,
+              this.pageSize,
+              this.DomainName
+            ) 
       );
 
       this.processApiResponse(response);

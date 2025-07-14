@@ -114,7 +114,7 @@
                     {{ acc.debit }}
                 </td> 
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ acc.date }}
+                    {{ acc.date | date: 'MMM d, y, h:mm a' }}
                 </td> 
             </tr>
         </tbody>

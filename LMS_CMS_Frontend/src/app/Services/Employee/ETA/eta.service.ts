@@ -1,6 +1,6 @@
 
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { ApiService } from '../../api.service';
 import { Observable } from 'rxjs';
 
@@ -13,6 +13,34 @@ export class EtaService {
 
   constructor(public http: HttpClient, public ApiServ: ApiService) {
     this.baseUrl = ApiServ.BaseUrl;
+  }
+
+  filterBySchoolAndDate(
+    schoolId: number,
+    startDate: string,
+    endDate: string,
+    pageNumber: number,
+    pageSize: number,
+    DomainName: string
+  ): Observable<any> {
+    // Set domain name header
+    const headers = new HttpHeaders()
+      .set('domain-name', DomainName)
+      .set('Authorization', `Bearer ${localStorage.getItem('current_token')}`)
+      .set('accept', '*/*');
+
+    // Create URL with query parameters
+    const url = `${this.baseUrl}/ETA/FilterBySchoolAndDate`;
+
+    // Create params object
+    const params = new HttpParams()
+      .set('schoolId', schoolId.toString())
+      .set('startDate', startDate)
+      .set('endDate', endDate)
+      .set('pageNumber', pageNumber.toString())
+      .set('pageSize', pageSize.toString());
+
+    return this.http.get(url, { headers, params });
   }
 
   /**
@@ -74,4 +102,6 @@ export class EtaService {
       headers,
     });
   }
+
+  
 }
