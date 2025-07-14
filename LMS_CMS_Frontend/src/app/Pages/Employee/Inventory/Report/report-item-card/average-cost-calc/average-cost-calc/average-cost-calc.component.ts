@@ -19,6 +19,7 @@ export class AverageCostCalcComponent {
   progress: number = 0;
   calculationComplete: boolean = false;
   message: string = '';
+  errorMessage: string = '';
 
   constructor(
     private inventoryDetailsService: InventoryDetailsService,
@@ -27,7 +28,7 @@ export class AverageCostCalcComponent {
 
   validateDateRange(): boolean {
     if (!this.dateFrom || !this.dateTo) {
-      return true; // Let the required field validation handle empty cases
+      return true;
     }
 
     const fromDate = new Date(this.dateFrom);
@@ -53,10 +54,10 @@ export class AverageCostCalcComponent {
       console.error('Invalid date:', dateString);
       return '';
     }
+    const year = date.getFullYear();
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const day = date.getDate().toString().padStart(2, '0');
-    const year = date.getFullYear();
-    return `${month}/${day}/${year}`;
+    return `${year}-${month}-${day}`;
   }
 
   onDateChange() {
@@ -80,35 +81,26 @@ export class AverageCostCalcComponent {
     this.calculationComplete = false;
     this.progress = 0;
     this.message = 'Starting calculation...';
+    this.errorMessage = '';
 
     try {
       const formattedFromDate = this.formatDateForAPI(this.dateFrom);
       const formattedToDate = this.formatDateForAPI(this.dateTo);
 
-      // Simulate progress updates
-      const interval = setInterval(() => {
-        this.progress += 10;
-        if (this.progress >= 90) clearInterval(interval);
-        this.message = `Calculating... ${this.progress}%`;
-      }, 300);
+      // TODO: Replace with new endpoint when available
+      // await this.inventoryDetailsService.getAverageCostTable(
+      //   formattedFromDate,
+      //   formattedToDate,
+      //   this.inventoryDetailsService.ApiServ.GetHeader()
+      // ).toPromise().then(response => {
+      //   console.log('Average Cost Table Response:', response);
+      // });
 
-      await this.inventoryDetailsService
-        .getMovingAverageCost(
-          0, // storeId
-          0, // shopItemId
-          formattedFromDate,
-          formattedToDate,
-          this.inventoryDetailsService.ApiServ.GetHeader()
-        )
-        .toPromise();
-
-      clearInterval(interval);
-      this.progress = 100;
-      this.message = 'Calculation completed successfully';
-      this.calculationComplete = true;
+      this.message = 'Waiting for new endpoint implementation...';
     } catch (error) {
       console.error('Error calculating average cost:', error);
-      this.message = 'Error calculating average cost';
+      this.message = '';
+      this.errorMessage = 'Error calculating average cost. Please try again.';
       this.progress = 0;
     } finally {
       this.isLoading = false;
@@ -116,6 +108,7 @@ export class AverageCostCalcComponent {
   }
 
   dismiss() {
-    this.router.navigate(['../']);
+    this.router.navigate(['/Employee/report item card with average']);
+    this.errorMessage = '';
   }
 }

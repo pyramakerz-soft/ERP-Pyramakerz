@@ -148,9 +148,7 @@ export class InventoryDetailsService {
     );
   }
 
-  getMovingAverageCost(
-    storeId: number,
-    shopItemId: number,
+  GetAverageCost(
     fromDate: string,
     toDate: string,
     DomainName: string
@@ -167,9 +165,9 @@ export class InventoryDetailsService {
     //(MM/DD/YYYY)
     const encodedFromDate = encodeURIComponent(fromDate);
     const encodedToDate = encodeURIComponent(toDate);
-console.log(storeId , shopItemId)
     return this.http.get<any[]>(
-      `${this.baseUrl}/InventoryDetails/AverageCost?storeId=${storeId}&shopItemId=${shopItemId}&fromDate=${encodedFromDate}&toDate=${encodedToDate}`,
+      `${this.baseUrl}/InventoryDetails/AverageCost?fromDate=${encodedFromDate}&toDate=${encodedToDate}`,
+      //              /InventoryDetails/AverageCost?fromDate=2020-07-14&toDate=2026-07-14
       { headers }
     );
   }
