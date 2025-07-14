@@ -15,8 +15,8 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
 
 
         [ForeignKey("Day")]
-        public long? DayId { get; set; }
-        public Days? Day { get; set; }
+        public long DayId { get; set; }
+        public Days Day { get; set; }
 
 
         [ForeignKey("TimeTable")]

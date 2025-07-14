@@ -126,7 +126,8 @@ export class StockingComponent {
      return IsAllow;
    }
  
-   async onSearchEvent(event: { key: string; value: any }) {
+  async onSearchEvent(event: { key: string; value: any }) {
+    this.PageSize = this.TotalRecords
      this.key = event.key;
      this.value = event.value;
      try {

@@ -28,7 +28,10 @@ namespace LMS_CMS_DAL.Models.Domains.AccountingModule
         public long? LinkFileID { get; set; } 
         [ForeignKey("MotionType")]
         public long MotionTypeID { get; set; }
-
+        public ICollection<AccountingConfigs> AccountingConfigurationsSales { get; set; } = new List<AccountingConfigs>();
+        public ICollection<AccountingConfigs> AccountingConfigurationsSalesReturns { get; set; } = new List<AccountingConfigs>();
+        public ICollection<AccountingConfigs> AccountingConfigurationsPurchases { get; set; } = new List<AccountingConfigs>();
+        public ICollection<AccountingConfigs> AccountingConfigurationsPurchasesReturns { get; set; } = new List<AccountingConfigs>();
         public AccountingTreeChart Parent { get; set; }
         public LinkFile LinkFile { get; set; }
         public SubType SubType { get; set; }

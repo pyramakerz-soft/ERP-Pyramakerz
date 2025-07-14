@@ -73,6 +73,7 @@ constructor(
   }
 
   async onSearchEvent(event: { key: string; value: any }) {
+    this.PageSize = this.TotalRecords
     this.key = event.key;
     this.value = event.value;
     try {

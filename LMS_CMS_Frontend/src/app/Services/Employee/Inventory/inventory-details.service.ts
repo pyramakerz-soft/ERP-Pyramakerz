@@ -164,7 +164,7 @@ export class InventoryDetailsService {
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
 
-    // Encode the dates to match API format (MM/DD/YYYY)
+    //(MM/DD/YYYY)
     const encodedFromDate = encodeURIComponent(fromDate);
     const encodedToDate = encodeURIComponent(toDate);
 console.log(storeId , shopItemId)

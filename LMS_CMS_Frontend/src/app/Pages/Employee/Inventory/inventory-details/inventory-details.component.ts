@@ -595,10 +595,12 @@ export class InventoryDetailsComponent {
 
   DeleteWhenCreate(img: File) {
     this.Data.attachment = this.Data.attachment.filter((i) => i != img);
+    console.log(this.Data.attachment)
   }
 
   DeleteWhenEdit(img: File) {
     this.Data.NewAttachments = this.Data.NewAttachments.filter((i) => i != img);
+    console.log(this.Data.attachment)
   }
 
   DeleteExistedImg(img: string) {
@@ -667,6 +669,7 @@ export class InventoryDetailsComponent {
 
   onImageFileSelected(event: any) {
     const files: FileList = event.target.files;
+    const input = event.target as HTMLInputElement;
 
     if (this.mode === 'Create') {
       this.Data.attachment = this.Data.attachment || [];
@@ -676,8 +679,11 @@ export class InventoryDetailsComponent {
       if (!this.Data.NewAttachments) {
         this.Data.NewAttachments = [];
       }
+      console.log(1,this.Data.NewAttachments)
       Array.from(files).forEach((file) => this.Data.NewAttachments.push(file));
+      console.log(2,this.Data.NewAttachments)
     }
+    input.value = '';
   }
 
   openFile(file: any) {
