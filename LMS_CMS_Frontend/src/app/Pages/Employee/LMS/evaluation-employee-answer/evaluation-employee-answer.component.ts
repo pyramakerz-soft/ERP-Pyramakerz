@@ -79,7 +79,7 @@ export class EvaluationEmployeeAnswerComponent {
 
   GetData() {
     this.EvaluationEmployeeServ.GetEvaluations(this.EvaluationId, this.DomainName).subscribe((d) => {
-      this.data = d;
+      this.data = d; 
       if(this.data.feedback===null){
         this.data.feedback=''
       }

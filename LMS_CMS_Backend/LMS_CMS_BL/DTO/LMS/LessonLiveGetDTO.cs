@@ -18,6 +18,7 @@ namespace LMS_CMS_BL.DTO.LMS
         public string RecordLink { get; set; }
         public long WeekDayID { get; set; }
         public string WeekDayName { get; set; }
+        public long AcademicYearID { get; set; }
         public long ClassroomID { get; set; }
         public string ClassroomName { get; set; }
         public long SubjectID { get; set; }

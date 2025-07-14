@@ -46,8 +46,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            AccountingConfigs? accConfig = await Unit_Of_Work.accountingConfigs_Repository
-                .FindByIncludesAsync(x => x.ID == id,
+            AccountingConfigs? accConfig = await Unit_Of_Work.accountingConfigs_Repository.FindByIncludesAsync(x => x.ID == id,
                 query => query.Include(x => x.Sales),
                 query => query.Include(x => x.SalesReturn),
                 query => query.Include(x => x.Purchase),

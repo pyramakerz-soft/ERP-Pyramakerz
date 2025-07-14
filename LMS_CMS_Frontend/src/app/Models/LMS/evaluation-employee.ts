@@ -19,6 +19,8 @@ export class EvaluationEmployee {
         public evaluationTemplateName: string = '',
         public classroomID: number = 0,
         public evaluationBookCorrectionID: number = 0,
+        public evaluationBookCorrectionEnglishName: string = '',
+        public evaluationBookCorrectionArabicName: string = '',
         public evaluationEmployeeQuestionGroups: EvaluationTemplateGroups[] = [],
         public evaluationEmployeeStudentBookCorrections: EvaluationEmployeeStudentBookCorrectionAdd[] = []
     ) { }

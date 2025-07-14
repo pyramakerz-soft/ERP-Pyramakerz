@@ -248,7 +248,6 @@ export class MedicalHistoryModalComponent implements OnInit, OnChanges {
   async saveMedicalHistory() {
     if (this.isFormValid()) {
       try {
-        // Disable the save button during submission
         this.isSaving = true;
 
         const domainName = this.apiService.GetHeader();
