@@ -14,6 +14,9 @@ namespace LMS_CMS_BL.DTO.Inventory
         public int Quantity { get; set; }
         public decimal Price { get; set; }
         public decimal TotalPrice { get; set; }
+        public long FlagId { get; set; }
+        public string enName { get; set; }
+        public int ItemInOut { get; set; }
 
     }
 }

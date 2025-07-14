@@ -2,7 +2,6 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-
 import * as XLSX from 'xlsx';
 import { PdfPrintComponent } from '../../../../../../Component/pdf-print/pdf-print.component';
 import { Store } from '../../../../../../Models/Inventory/store';
