@@ -16,7 +16,7 @@
 
         public string BuildConnectionString(string domainName)
         {
-            var dataSource = "SW-13\\SQLEXPRESS";
+            var dataSource = "DESKTOP-531QG4Q";
             var initialCatalog = domainName;
 
             return $"Data Source={dataSource};Initial Catalog={initialCatalog};Integrated Security = True;TrustServerCertificate=True";
