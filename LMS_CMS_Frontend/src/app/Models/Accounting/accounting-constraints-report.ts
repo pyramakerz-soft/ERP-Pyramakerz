@@ -3,6 +3,7 @@ export class AccountingConstraintsReport {
         public masterID: number = 0,
         public detailsID: number = 0,
         public account: string = '',
+        public serial: number = 0,
         public invoiceNumber: string = '',
         public mainAccountNo :number =0,
         public mainAccount: string = '',

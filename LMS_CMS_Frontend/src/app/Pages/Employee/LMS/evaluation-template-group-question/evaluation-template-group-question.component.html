@@ -120,7 +120,7 @@
             <div class="flex flex-col mb-4 w-[49%]">
                 <label class="mb-2 primaryTxt" for="arabicTitle">Arabic Title</label>
                 <input id="arabicTitle" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                    placeholder="Enter Arabic Title" [(ngModel)]="question.arabicTitle"
+                    placeholder="Enter Arabic Title" [(ngModel)]="question.arabicTitle" 
                     (ngModelChange)="onInputValueChange({ field: 'arabicTitle', value: $event })" />
                 <span *ngIf="validationErrors['arabicTitle']"
                     class="text-red-500 ml-3 font-normal">{{validationErrors['arabicTitle'] }}</span>
@@ -128,7 +128,7 @@
             <div class="flex flex-col mb-4 w-[49%]">
                 <label class="mb-2 primaryTxt" for="mark">Mark</label>
                 <input id="mark" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                    placeholder="Enter Arabic Title" [(ngModel)]="question.mark"
+                    placeholder="Enter Mark" [(ngModel)]="question.mark" (input)="validateNumber($event, 'mark')"
                     (ngModelChange)="onInputValueChange({ field: 'mark', value: $event })" />
                 <span *ngIf="validationErrors['mark']" class="text-red-500 ml-3 font-normal">{{validationErrors['mark']
                     }}</span>

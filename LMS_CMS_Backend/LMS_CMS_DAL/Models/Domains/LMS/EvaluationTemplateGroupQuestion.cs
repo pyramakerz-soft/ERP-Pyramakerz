@@ -16,7 +16,7 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public string EnglishTitle { get; set; }
         [Required(ErrorMessage = "Arabic Title is required")]
         public string ArabicTitle { get; set; }
-        public int Mark { get; set; }
+        public decimal Mark { get; set; }
 
         [ForeignKey("EvaluationTemplateGroup")]
         public long EvaluationTemplateGroupID { get; set; }
