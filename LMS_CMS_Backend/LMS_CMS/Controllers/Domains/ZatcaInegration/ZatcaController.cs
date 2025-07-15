@@ -284,6 +284,9 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
             if (master is null)
                 return NotFound("Invoice not found.");
 
+            if (string.IsNullOrEmpty(master.School.CRN))
+                return BadRequest("School CRN can not be null or empty");
+
             SchoolPCs pc = Unit_Of_Work.schoolPCs_Repository.First_Or_Default(
                 d => d.ID == master.SchoolPCId && d.IsDeleted != true
             );
