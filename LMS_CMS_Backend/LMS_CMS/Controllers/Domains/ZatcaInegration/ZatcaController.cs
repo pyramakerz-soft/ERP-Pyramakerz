@@ -69,7 +69,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                 return BadRequest("Serial Number can not be null");
 
             if (string.IsNullOrEmpty(schoolPc.School.VatNumber))
-                return BadRequest("Vat Number can not be null");
+                return BadRequest("Vat Number for school can not be null");
 
             string commonName = schoolPc.School.Name;
             string serialNumber = $"1-{schoolPcId}|2-{schoolPc.PCName}|3-{schoolPc.SerialNumber}";
@@ -81,14 +81,11 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
             string locationAddress = schoolPc.School.City;
             string industryBusinessCategory = "Learning";
 
-            if (string.IsNullOrEmpty(commonName))
-                return BadRequest("Common Name can not be null");
-
-            if (string.IsNullOrEmpty(organizationUnitName))
-                return BadRequest("Organization Name can not be null");
+            if (string.IsNullOrEmpty(commonName) || string.IsNullOrEmpty(organizationUnitName))
+                return BadRequest("School Name can not be null");
 
             if (string.IsNullOrEmpty(locationAddress))
-                return BadRequest("City can not be null");
+                return BadRequest("School City can not be null");
 
             CsrGenerationDto csrGeneration = new(
                 commonName,
@@ -340,18 +337,18 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
                 if (filesEnvironment == "local")
                 {
-                    certContent = await s3.GetSecret($"{pcName}PCSID");
+                    certContent = System.IO.File.ReadAllText(pcsidPath);
 
-                    if (string.IsNullOrEmpty(certContent))
+                    if (!System.IO.File.Exists(pcsidPath) || string.IsNullOrEmpty(certContent))
                     {
                         return BadRequest("PCSID not found or empty.");
                     }
                 }
                 else
                 {
-                    certContent = System.IO.File.ReadAllText(pcsidPath);
+                    certContent = await s3.GetSecret($"{pcName}PCSID");
 
-                    if (!System.IO.File.Exists(pcsidPath) || string.IsNullOrEmpty(certContent))
+                    if (string.IsNullOrEmpty(certContent))
                     {
                         return BadRequest("PCSID not found or empty.");
                     }
