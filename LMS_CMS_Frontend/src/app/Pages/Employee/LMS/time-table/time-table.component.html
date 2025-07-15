@@ -13,13 +13,14 @@
     <div class="w-full">
         <label for="School1" class="block mb-2 text-sm font-medium text-gray-900">School</label>
         <select id="School1" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
-            [(ngModel)]="SelectedSchoolId" (change)="GetAllData();">
+            [(ngModel)]="SelectedSchoolId" (change)="GetAllData();"  (ngModelChange)="onInputValueChange({ field: 'schoolID', value: $event })">
             <option value=0 disabled selected hidden>Select a School</option>
             <option *ngFor="let stu of schools" [value]="stu.id">
                 {{ stu.name }}
             </option>
             <option *ngIf="schools.length === 0" disabled selected>No Data Found</option>
         </select>
+        <span *ngIf="validationErrors['schoolID']" class="text-red-500 ml-3 font-normal">{{ validationErrors['schoolID'] }}</span>
     </div>
 </div>
 
@@ -58,9 +59,9 @@
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{ row.id }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.name }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.insertedAt | date: 'dd/MM/yyyy HH:mm' }}</td>
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.isFavourite }}
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     <div class="flex w-full space-x-5 items-center mb-4">
-                        <input type="checkbox" id="hide" class="w-5 h-5" [(ngModel)]="row.isFavourite">
+                        <input type="checkbox" id="hide" class="w-5 h-5" [(ngModel)]="row.isFavourite" (change)="EditFavourite(row.id,row.isFavourite);">
                     </div>
                 </td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">

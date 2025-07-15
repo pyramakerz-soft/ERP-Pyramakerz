@@ -41,8 +41,7 @@
         <tbody>
           <!-- No Data Row -->
           <tr *ngIf="TableData.length === 0">
-            <td colspan="7"
-              class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+            <td colspan="7" class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
               No Data Found
             </td>
           </tr>
@@ -145,8 +144,9 @@
       </div>
 
       <div class="flex flex-col mb-4 w-[49%]">
-        <label class="mb-2 primaryTxt" for="lessonID">Lesson</label>
+        <label class="mb-2" [ngClass]="{ 'text-gray-400': !questionBank.subjectID, 'primaryTxt': questionBank.subjectID }" for="lessonID">Lesson</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="lessonID"
+        [ngClass]="{ 'bg-[#EBEBEB]': !questionBank.subjectID }"
           [disabled]="!questionBank.subjectID" [(ngModel)]="questionBank.lessonID"
           (ngModelChange)="onInputValueChange({ field: 'lessonID', value: $event })">
           <option [value]="0" disabled selected hidden>Choose Lesson</option>
@@ -157,8 +157,8 @@
           }}</span>
       </div>
 
-      <div class="flex flex-col mb-4 w-[49%]">
-        <label class="block mb-2 text-sm font-medium text-gray-900" for="ac">Tags</label>
+      <div class="flex flex-col mb-4 w-[49%]" #dropdownContainer>
+        <label class="mb-2 primaryTxt" for="ac">Tags</label>
         <div class="relative">
           <div class="border border-gray-300 rounded-lg px-4 py-3 cursor-pointer min-h-[48px]"
             (click)="toggleDropdown()" tabindex="0">
@@ -352,7 +352,7 @@
                   class="w-[450px] h-[45px] rounded-lg border border-solid border-gray-300 px-2"
                   (ngModelChange)="onInputValueChange({ field: 'questionBankOptionsDTO', value: $event })"
                   placeholder="Enter Option" />
-                
+
               </div>
               <button class="secondaryBg text-white font-medium px-5 py-2 rounded-lg" (click)="AddOption()">
                 Add
@@ -374,7 +374,7 @@
                     class="border-t border-gray-300 text-xs md:text-sm">
                     <td class="py-3 px-4">
                       <input type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3 w-full"
-                        [(ngModel)]="row.option"  (ngModelChange)="onOptionEdit(row)"/>
+                        [(ngModel)]="row.option" (ngModelChange)="onOptionEdit(row)" />
                     </td>
                     <td class="py-3 px-4 text-center">
                       <button (click)="deleteOption(i)" class="text-red-500 hover:text-red-700">
@@ -385,7 +385,7 @@
                 </tbody>
               </table>
               <span *ngIf="validationErrors['questionBankOptionsDTO']" class="text-red-500 ml-3 font-normal">{{
-                  validationErrors['questionBankOptionsDTO'] }}</span>
+                validationErrors['questionBankOptionsDTO'] }}</span>
             </div>
           </div>
         </div>
@@ -396,13 +396,15 @@
             <div class="flex flex-col w-[45%]">
               <label class="mb-2 primaryTxt">Question {{ i + 1 }}</label>
               <input type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                placeholder="Enter Question" [(ngModel)]="subQuestion.description" (ngModelChange)="onsubQuestionEdit(subQuestion)"
+                placeholder="Enter Question" [(ngModel)]="subQuestion.description"
+                (ngModelChange)="onsubQuestionEdit(subQuestion)"
                 (ngModelChange)="onInputValueChange({ field: 'subBankQuestionsDTO', value: $event })" />
             </div>
             <div class="flex flex-col w-[45%]">
               <label class="mb-2 primaryTxt">Answer</label>
               <input type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                placeholder="Enter Answer" [(ngModel)]="subQuestion.answer" (ngModelChange)="onsubQuestionEdit(subQuestion)"
+                placeholder="Enter Answer" [(ngModel)]="subQuestion.answer"
+                (ngModelChange)="onsubQuestionEdit(subQuestion)"
                 (ngModelChange)="onInputValueChange({ field: 'subBankQuestionsDTO', value: $event })" />
             </div>
             <div class="flex flex-col justify-center pt-7">

@@ -50,6 +50,12 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
         )]
         public async Task<IActionResult> GeneratePCSID(long otp, long schoolPcId)
         {
+            if (schoolPcId == 0 )
+                return BadRequest("School PC ID can not be null or 0");
+
+            if (!ModelState.IsValid)
+                return BadRequest("OTP must be 6-digit and only numbers");
+
             string certificates = Path.Combine(Directory.GetCurrentDirectory(), "Invoices/Certificates");
 
             if (!Directory.Exists(certificates)) 
@@ -69,7 +75,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                 return BadRequest("Serial Number can not be null");
 
             if (string.IsNullOrEmpty(schoolPc.School.VatNumber))
-                return BadRequest("Vat Number can not be null");
+                return BadRequest("Vat Number for school can not be null");
 
             string commonName = schoolPc.School.Name;
             string serialNumber = $"1-{schoolPcId}|2-{schoolPc.PCName}|3-{schoolPc.SerialNumber}";
@@ -81,14 +87,11 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
             string locationAddress = schoolPc.School.City;
             string industryBusinessCategory = "Learning";
 
-            if (string.IsNullOrEmpty(commonName))
-                return BadRequest("Common Name can not be null");
-
-            if (string.IsNullOrEmpty(organizationUnitName))
-                return BadRequest("Organization Name can not be null");
+            if (string.IsNullOrEmpty(commonName) || string.IsNullOrEmpty(organizationUnitName))
+                return BadRequest("School Name can not be null");
 
             if (string.IsNullOrEmpty(locationAddress))
-                return BadRequest("City can not be null");
+                return BadRequest("School City can not be null");
 
             CsrGenerationDto csrGeneration = new(
                 commonName,
@@ -189,7 +192,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
             Unit_Of_Work.schoolPCs_Repository.Update(schoolPc);
             Unit_Of_Work.SaveChanges();
 
-            return Ok(certificateDate);
+            return Ok(new { message = certificateDate });
         }
         #endregion
 
@@ -281,6 +284,9 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
             if (master is null)
                 return NotFound("Invoice not found.");
 
+            if (string.IsNullOrEmpty(master.School.CRN))
+                return BadRequest("School CRN can not be null or empty");
+
             SchoolPCs pc = Unit_Of_Work.schoolPCs_Repository.First_Or_Default(
                 d => d.ID == master.SchoolPCId && d.IsDeleted != true
             );
@@ -340,18 +346,18 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
 
                 if (filesEnvironment == "local")
                 {
-                    certContent = await s3.GetSecret($"{pcName}PCSID");
+                    certContent = System.IO.File.ReadAllText(pcsidPath);
 
-                    if (string.IsNullOrEmpty(certContent))
+                    if (!System.IO.File.Exists(pcsidPath) || string.IsNullOrEmpty(certContent))
                     {
                         return BadRequest("PCSID not found or empty.");
                     }
                 }
                 else
                 {
-                    certContent = System.IO.File.ReadAllText(pcsidPath);
+                    certContent = await s3.GetSecret($"{pcName}PCSID");
 
-                    if (!System.IO.File.Exists(pcsidPath) || string.IsNullOrEmpty(certContent))
+                    if (string.IsNullOrEmpty(certContent))
                     {
                         return BadRequest("PCSID not found or empty.");
                     }
@@ -409,7 +415,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                 //}
             }
 
-            return master.IsValid == 1 ? Ok(master.Status) : BadRequest(master.Status);
+            return master.IsValid == 1 ? Ok(new { message = master.Status } ) : BadRequest(master.Status);
         }
         #endregion
 
@@ -421,6 +427,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
         )]
         public async Task<IActionResult> ReportInvoices(InvoiceSubmitDTO dto)
         {
+            string certificates = Path.Combine(Directory.GetCurrentDirectory(), "Invoices/Certificates");
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             List<InventoryMaster> masters = new();
@@ -430,6 +437,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                     d => d.SchoolId == dto.schoolId &&
                     d.IsDeleted != true &&
                     (d.FlagId == 11 || d.FlagId == 12),
+                    query => query.Include(x => x.InventoryDetails).ThenInclude(x => x.ShopItem),
                     query => query.Include(s => s.School)
                 );
 
@@ -441,7 +449,13 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                 InventoryMaster master = new();
                 foreach (var invId in dto.selectedInvoices)
                 {
-                    master = Unit_Of_Work.inventoryMaster_Repository.First_Or_Default(x => x.ID == invId);
+                    master = await Unit_Of_Work.inventoryMaster_Repository.FindByIncludesAsync(
+                        x => x.ID == invId && 
+                        x.IsDeleted != true &&
+                        (x.FlagId == 11 || x.FlagId == 12),
+                        query => query.Include(x => x.InventoryDetails).ThenInclude(x => x.ShopItem),
+                        query => query.Include(s => s.School)
+                        );
 
                     if (master != null)
                         masters.Add(master);
@@ -457,10 +471,15 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
             string subDomainValue = _domainService.GetSubdomain(HttpContext);
             string subDomain = !subDomainValue.IsNullOrEmpty() ? subDomainValue : "test";
 
+            string filesEnvironment = _config.GetValue<string>("ZatcaFilesEnvironment");
+
             if (masters != null && masters.Count > 0)
             {
                 foreach (var master in masters)
                 {
+                    if (string.IsNullOrEmpty(master.School.CRN))
+                        return BadRequest("School CRN can not be null or empty");
+
                     SchoolPCs pc = Unit_Of_Work.schoolPCs_Repository.First_Or_Default(
                     d => d.ID == master.SchoolPCId && d.IsDeleted != true
                     );
@@ -495,72 +514,92 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                             if (master.FlagId == 12)
                                 xmlPath = Path.Combine(Directory.GetCurrentDirectory(), $"Invoices/XMLCredits");
 
-                            if (master.IsValid == 0 || master.IsValid == null)
+                            string pcName = $"PC{master.SchoolPCId}_{master.School.ID}";
+
+                            AmazonS3Client secretS3Client = new AmazonS3Client();
+                            S3Service s3 = new S3Service(_config, "AWS:Region");
+
+                            InventoryMaster? lastMaster = Unit_Of_Work.inventoryMaster_Repository
+                                .SelectQuery<InventoryMaster>(i => i.IsDeleted != true && (i.FlagId == 11 || i.FlagId == 12))
+                                .OrderByDescending(i => i.ID)
+                                .FirstOrDefault();
+
+                            string lastInvoiceHash = "";
+                            if (master.FlagId == 11 || master.FlagId == 12)
+                                lastInvoiceHash = lastMaster?.InvoiceHash;
+
+                            bool result = await ZatcaServices.GenerateInvoiceXML(xmlPath, master, lastInvoiceHash, s3, dateTime, _config);
+
+                            if (!result)
+                                return BadRequest("Failed to generate XML file.");
+
+                            string certContent = string.Empty;
+                            string pcsidPath = Path.Combine(certificates, $"{pcName}_PCSID.json");
+
+                            if (filesEnvironment == "local")
                             {
-                                string pcName = $"PC{master.SchoolPCId}{master.School?.ID}";
+                                certContent = System.IO.File.ReadAllText(pcsidPath);
 
-                                AmazonS3Client secretS3Client = new AmazonS3Client();
-                                S3Service s3 = new S3Service(_config, "AWS:Region");
-
-                                InventoryMaster? lastMaster = Unit_Of_Work.inventoryMaster_Repository
-                                    .SelectQuery<InventoryMaster>(i => i.IsDeleted != true && (i.FlagId == 11 || i.FlagId == 12))
-                                    .OrderByDescending(i => i.ID)
-                                    .FirstOrDefault();
-
-                                string lastInvoiceHash = "";
-                                if (master.FlagId == 11 || master.FlagId == 12)
-                                    lastInvoiceHash = lastMaster?.InvoiceHash;
-
-                                bool result = await ZatcaServices.GenerateInvoiceXML(xmlPath, master, lastInvoiceHash, s3, dateTime, _config);
-
-                                if (!result)
-                                    return BadRequest("Failed to generate XML file.");
-
-                                string certContent = await s3.GetSecret($"{pcName}PCSID");
-
-                                dynamic certObject = JsonConvert.DeserializeObject(certContent);
-                                string token = certObject.binarySecurityToken;
-                                string secret = certObject.secret;
-
-                                HttpResponseMessage response = await ZatcaServices.InvoiceReporting(xmlPath, token, secret, _config);
-                                response.EnsureSuccessStatusCode();
-
-                                string responseContent = await response.Content.ReadAsStringAsync();
-                                dynamic responseJson = JsonConvert.DeserializeObject(responseContent);
-                                master.Status = responseJson.reportingStatus;
-
-                                if (response.IsSuccessStatusCode)
+                                if (!System.IO.File.Exists(pcsidPath) || string.IsNullOrEmpty(certContent))
                                 {
-                                    master.IsValid = 1;
-                                }
-                                else
-                                {
-                                    master.IsValid = 0;
-                                }
-
-                                Unit_Of_Work.inventoryMaster_Repository.Update(master);
-                                Unit_Of_Work.SaveChanges();
-
-                                S3Service s3Client = new S3Service(secretS3Client, _config, "AWS:Bucket", "AWS:Folder");
-
-                                string subDirectory = string.Empty;
-                                if (master.FlagId == 11)
-                                    subDirectory = "Invoices/";
-                                else if (master.FlagId == 12)
-                                    subDirectory = "Credits/";
-
-                                bool uploaded = await s3Client.UploadAsync(xmlPath, subDirectory, $"{domain}/{subDomain}");
-
-                                if (!uploaded)
-                                    return BadRequest("Uploading Invoice failed!");
-
-                                xmlPath = Path.Combine(xmlPath, $"{master.School.CRN}_{date.Replace("-", "")}T{time.Replace(":", "")}_{date}-{master.StoreID}_{master.FlagId}_{master.ID}.xml");
-
-                                if (System.IO.File.Exists(xmlPath))
-                                {
-                                    System.IO.File.Delete(xmlPath);
+                                    return BadRequest("PCSID not found or empty.");
                                 }
                             }
+                            else
+                            {
+                                certContent = await s3.GetSecret($"{pcName}PCSID");
+
+                                if (string.IsNullOrEmpty(certContent))
+                                {
+                                    return BadRequest("PCSID not found or empty.");
+                                }
+                            }
+
+                            dynamic certObject = JsonConvert.DeserializeObject(certContent);
+                            string token = certObject.binarySecurityToken;
+                            string secret = certObject.secret;
+
+                            string xmlFile = Path.Combine(xmlPath, $"{master.School.CRN}_{date.Replace("-", "")}T{time.Replace(":", "")}_{date}-{master.StoreID}_{master.FlagId}_{master.ID}.xml");
+
+                            HttpResponseMessage response = await ZatcaServices.InvoiceReporting(xmlFile, token, secret, _config);
+                            response.EnsureSuccessStatusCode();
+
+                            string responseContent = await response.Content.ReadAsStringAsync();
+                            dynamic responseJson = JsonConvert.DeserializeObject(responseContent);
+                            master.Status = responseJson.reportingStatus;
+
+                            if (response.IsSuccessStatusCode)
+                            {
+                                master.IsValid = 1;
+                            }
+                            else
+                            {
+                                master.IsValid = 0;
+                            }
+
+                            Unit_Of_Work.inventoryMaster_Repository.Update(master);
+                            Unit_Of_Work.SaveChanges();
+
+                            S3Service s3Client = new S3Service(secretS3Client, _config, "AWS:Bucket", "AWS:Folder");
+
+                            string subDirectory = string.Empty;
+                            if (master.FlagId == 11)
+                                subDirectory = "Invoices/";
+                            else if (master.FlagId == 12)
+                                subDirectory = "Credits/";
+
+                            bool uploaded = await s3Client.UploadAsync(xmlPath, subDirectory, $"{domain}/{subDomain}");
+
+                            if (!uploaded)
+                                return BadRequest("Uploading Invoice failed!");
+
+                            xmlPath = Path.Combine(xmlPath, $"{master.School.CRN}_{date.Replace("-", "")}T{time.Replace(":", "")}_{date}-{master.StoreID}_{master.FlagId}_{master.ID}.xml");
+
+                            //if (System.IO.File.Exists(xmlPath))
+                            //{
+                            //    System.IO.File.Delete(xmlPath);
+                            //}
+                            
                         }
                         catch (Exception ex)
                         {

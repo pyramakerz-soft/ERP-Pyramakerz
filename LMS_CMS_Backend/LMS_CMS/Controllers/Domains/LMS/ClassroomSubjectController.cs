@@ -445,7 +445,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
              
             List<ClassroomSubject> classroomSubjects = await Unit_Of_Work.classroomSubject_Repository
                 .Select_All_With_IncludesById<ClassroomSubject>(
-                    f => f.IsDeleted != true && f.SubjectID == SubId && f.Classroom.IsDeleted != true && f.Hide != true,
+                    f => f.IsDeleted != true && f.SubjectID == SubId && f.Classroom.IsDeleted != true && f.Hide != true && f.Subject.IsDeleted != true,
                     query => query.Include(cs => cs.Classroom).ThenInclude(c => c.StudentClassrooms).ThenInclude(sc => sc.StudentClassroomSubjects),
                     query => query.Include(cs => cs.Classroom).ThenInclude(c => c.StudentClassrooms).ThenInclude(sc => sc.Student)
                 );
@@ -461,6 +461,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     .Where(sc =>
                         sc.IsDeleted != true &&
                         sc.StudentClassroomSubjects.Any(scs =>
+                            scs.StudentClassroom.Student.IsDeleted != true &&
                             scs.IsDeleted != true &&
                             scs.SubjectID == SubId &&
                             scs.Hide != true
@@ -470,6 +471,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     { 
                         sc.StudentClassroomSubjects = sc.StudentClassroomSubjects
                             .Where(scs =>
+                                scs.StudentClassroom.Student.IsDeleted != true &&
                                 scs.IsDeleted != true &&
                                 scs.SubjectID == SubId &&
                                 scs.Hide != true

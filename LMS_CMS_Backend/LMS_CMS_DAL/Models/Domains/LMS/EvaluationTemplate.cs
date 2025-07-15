@@ -15,7 +15,7 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public string EnglishTitle { get; set; }
         [Required(ErrorMessage = "Arabic Title is required")] 
         public string ArabicTitle { get; set; }
-        public int Weight { get; set; }
+        public decimal Weight { get; set; }
         public int AfterCount { get; set; }
 
         public ICollection<EvaluationTemplateGroup> EvaluationTemplateGroups { get; set; } = new HashSet<EvaluationTemplateGroup>();

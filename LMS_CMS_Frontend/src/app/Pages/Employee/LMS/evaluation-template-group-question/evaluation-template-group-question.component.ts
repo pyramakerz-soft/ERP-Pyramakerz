@@ -227,12 +227,22 @@ export class EvaluationTemplateGroupQuestionComponent {
 
    onInputValueChange(event: { field: keyof EvaluationTemplateGroupQuestion; value: any }) {
      const { field, value } = event;
-     (this.group as any)[field] = value;
+     (this.question as any)[field] = value;
      if (value) {
        this.validationErrors[field] = '';
      }
    }
  
+   validateNumber(event: any, field: keyof EvaluationTemplateGroupQuestion): void {
+      const value = event.target.value;
+      if (isNaN(value) || value === '') {
+        event.target.value = ''; 
+        if (typeof this.question[field] === 'string') {
+          this.question[field] = '' as never;  
+        }
+      }
+    }
+
    async onSearchEvent(event: { key: string; value: any }) {
      this.key = event.key;
      this.value = event.value;

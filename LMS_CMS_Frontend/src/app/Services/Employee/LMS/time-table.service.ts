@@ -55,4 +55,31 @@ export class TimeTableService {
       responseType: 'text' as 'json'
     });
   }
+
+  EditIsFavourite(Id: number, IsFav: boolean, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName;
+    }
+    console.log(DomainName);
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('Domain-Name', this.header)  // Correct casing as in your backend
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.put(`${this.baseUrl}/TimeTable?id=${Id}&IsFavourite=${IsFav}`, {}, { headers });
+  }
+
+  Edit(Id: number, IsFav: boolean, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName;
+    }
+    console.log(DomainName);
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('Domain-Name', this.header)  // Correct casing as in your backend
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.put(`${this.baseUrl}/TimeTable?id=${Id}&IsFavourite=${IsFav}`, {}, { headers });
+  }
+
 }

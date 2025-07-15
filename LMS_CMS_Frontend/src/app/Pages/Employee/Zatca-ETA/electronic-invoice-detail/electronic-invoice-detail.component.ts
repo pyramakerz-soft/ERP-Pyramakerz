@@ -97,6 +97,7 @@ export class ElectronicInvoiceDetailComponent implements OnInit {
       .GetById(this.invoiceId, this.DomainName)
       .subscribe({
         next: (masterData: any) => {
+          console.log(masterData)
           // Use 'any' temporarily or create a proper type
           this.invoice = {
             ...this.invoice,
@@ -104,6 +105,7 @@ export class ElectronicInvoiceDetailComponent implements OnInit {
             invoiceNumber: masterData.invoiceNumber?.toString() || '',
             date: masterData.date,
             total: masterData.total,
+            vatPercent: masterData.vatPercent,
             vatAmount: masterData.vatAmount,
             totalWithVat: masterData.totalWithVat,
             flagEnName: masterData.flagEnName,
@@ -116,6 +118,7 @@ export class ElectronicInvoiceDetailComponent implements OnInit {
             invoiceHash: masterData.invoiceHash || null,
             uuid: masterData.uuid || null,
           };
+          console.log(this.invoice)
 
           this.inventoryDetailsService
             .GetBySalesId(this.invoiceId, this.DomainName)

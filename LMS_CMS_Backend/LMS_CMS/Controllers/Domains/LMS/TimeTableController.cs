@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace LMS_CMS_PL.Controllers.Domains.LMS
 {
@@ -408,5 +409,189 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             // Return the grouped result as JSON
             return Ok(new { Data = groupedResult, TimeTableName = timeTable.Name, MaxPeriods = school.MaximumPeriodCountTimeTable });
         }
+
+        /////////////////
+
+        [HttpPut]
+        [Authorize_Endpoint_(
+           allowedTypes: new[] { "octa", "employee" }
+           //,
+           //allowEdit: 1,
+           //pages: new[] { "" }
+       )]
+        public IActionResult EditFavourite(long id , bool IsFavourite)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+           
+            TimeTable timeTable= Unit_Of_Work.timeTable_Repository.First_Or_Default(t=>t.ID==id && t.IsDeleted != true);
+            if (timeTable == null)
+            {
+                return BadRequest("this time table doesn't exist");
+            }
+          
+            if(IsFavourite == true)
+            {
+                List<TimeTable> timetables = Unit_Of_Work.timeTable_Repository.FindBy(d => d.IsFavourite == true);
+                foreach (var t in timetables)
+                {
+                    t.IsFavourite = false;
+                    Unit_Of_Work.timeTable_Repository.Update(t);
+                }
+            }
+
+            timeTable.IsFavourite= IsFavourite;
+
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            timeTable.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            if (userTypeClaim == "octa")
+            {
+                timeTable.UpdatedByOctaId = userId;
+                if (timeTable.UpdatedByUserId != null)
+                {
+                    timeTable.UpdatedByUserId = null;
+                }
+
+            }
+            else if (userTypeClaim == "employee")
+            {
+                timeTable.UpdatedByUserId = userId;
+                if (timeTable.UpdatedByOctaId != null)
+                {
+                    timeTable.UpdatedByOctaId = null;
+                }
+            }
+
+            Unit_Of_Work.timeTable_Repository.Update(timeTable);
+            Unit_Of_Work.SaveChanges();
+            return Ok();
+
+        }
+
+        /////////////////
+
+        [HttpPut("Replace")]
+        [Authorize_Endpoint_(
+         allowedTypes: new[] { "octa", "employee" }
+     //,
+     //allowEdit: 1,
+     //pages: new[] { "" }
+     )]
+        public async Task<IActionResult> EditAsync(List<TimeTableReplaceEditDTO> SessionReplaced)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            foreach (var item in SessionReplaced)
+            {
+                // IsSessionsExist
+                TimeTableSession firstSession = await Unit_Of_Work.timeTableSession_Repository.FindByIncludesAsync(
+                    t => t.ID == item.FisrtSessionId,
+                    q => q.Include(tt => tt.TimeTableSubjects),
+                    q => q.Include(tt => tt.TimeTableClassroom)
+                );
+                if (firstSession == null)
+                    return BadRequest($"No TimeTableSession found with ID {item.FisrtSessionId}");
+
+
+                TimeTableSession secondSession = await Unit_Of_Work.timeTableSession_Repository.FindByIncludesAsync(
+                    t => t.ID == item.SecondSessionId,
+                    q => q.Include(tt => tt.TimeTableSubjects).ThenInclude(ts => ts.Teacher),
+                    q => q.Include(tt => tt.TimeTableClassroom)
+                );
+                if (secondSession == null)
+                    return BadRequest($"No TimeTableSession found with ID {item.SecondSessionId}");
+
+
+                if (firstSession.TimeTableClassroom.TimeTableID != secondSession.TimeTableClassroom.TimeTableID)
+                    return BadRequest("The two sessions are not in the same timetable.");
+
+                long timetableId = firstSession.TimeTableClassroom.TimeTableID;
+
+                List<long> firstSessionTeacherIds = firstSession.TimeTableSubjects
+                     .Where(s => s.TeacherID.HasValue)
+                     .Select(s => s.TeacherID.Value)
+                     .ToList();
+
+                List<TimeTableSubject> conflictingFirstTeachers = Unit_Of_Work.timeTableSubject_Repository
+                    .FindBy(e =>
+                        e.TimeTableSession.ID != item.SecondSessionId &&
+                        e.TimeTableSession.ID != item.FisrtSessionId &&
+                        e.TimeTableSession.TimeTableClassroom.TimeTableID == timetableId &&
+                        e.TimeTableSession.PeriodIndex == secondSession.PeriodIndex &&
+                        e.TimeTableSession.TimeTableClassroom.DayId == secondSession.TimeTableClassroom.DayId &&
+                        e.IsDeleted != true &&
+                        e.TeacherID.HasValue &&
+                        firstSessionTeacherIds.Contains(e.TeacherID.Value)
+                    )
+                    .ToList();
+
+                if (conflictingFirstTeachers.Any())
+                    return BadRequest("One of the teachers in the first session is already assigned in the second session slot.");
+
+                List<long> secondSessionTeacherIds = secondSession.TimeTableSubjects
+                    .Where(s => s.TeacherID.HasValue)
+                    .Select(s => s.TeacherID.Value)
+                    .ToList();
+
+                List<TimeTableSubject> conflictingSecondTeachers = Unit_Of_Work.timeTableSubject_Repository
+                    .FindBy(e =>
+                        e.TimeTableSession.ID != item.SecondSessionId &&
+                        e.TimeTableSession.ID != item.FisrtSessionId &&
+                        e.TimeTableSession.TimeTableClassroom.TimeTableID == timetableId &&
+                        e.TimeTableSession.PeriodIndex == firstSession.PeriodIndex &&
+                        e.TimeTableSession.TimeTableClassroom.DayId == firstSession.TimeTableClassroom.DayId &&
+                        e.IsDeleted != true &&
+                        e.TeacherID.HasValue &&
+                        secondSessionTeacherIds.Contains(e.TeacherID.Value)
+                    )
+                    .ToList();
+
+                if (conflictingSecondTeachers.Any())
+                    return BadRequest("One of the teachers in the second session is already assigned in the first session slot.");
+
+
+                // Swap subjects
+                foreach (TimeTableSubject item1 in firstSession.TimeTableSubjects)
+                {
+                    item1.TimeTableSessionID = item.SecondSessionId;
+                }
+
+                foreach (TimeTableSubject item1 in secondSession.TimeTableSubjects)
+                {
+                    item1.TimeTableSessionID = item.FisrtSessionId;
+                }
+
+                Unit_Of_Work.timeTableSubject_Repository.UpdateRange(firstSession.TimeTableSubjects);
+                Unit_Of_Work.timeTableSubject_Repository.UpdateRange(secondSession.TimeTableSubjects);
+                Unit_Of_Work.SaveChanges();
+            }
+            return Ok();
+
+        }
     }
+
+
 }

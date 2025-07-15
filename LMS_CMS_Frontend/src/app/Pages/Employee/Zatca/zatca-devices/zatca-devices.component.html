@@ -114,7 +114,7 @@
             <div class="flex flex-col mb-4 w-full" *ngIf="mode === 'edit' && zatcaDevice.certificateDate != null">
                 <label class="mb-2 primaryTxt" for="certificateDate">Certificate Date</label>
                 <input type="date"  class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="certificateDate" [disabled]="mode === 'edit'"
-                    [(ngModel)]="zatcaDevice.pcName" placeholder="Enter PC Name"/>
+                    [(ngModel)]="zatcaDevice.certificateDate" placeholder="Enter PC Name"/>
             </div>  
         </div>
         <div class="flex justify-end">
@@ -141,7 +141,7 @@
             <div class="flex flex-col mb-4 w-full">
                 <label class="mb-2 primaryTxt" for="otp">OTP</label>
                 <input type="text"  class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="otp"
-                    [(ngModel)]="otp" placeholder="Enter OPT"/> 
+                    [(ngModel)]="otp" placeholder="Enter OPT" (input)="validateNumber($event)"/> 
             </div> 
         </div>
         <div class="flex justify-end" *ngIf="otp != null">
