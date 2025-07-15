@@ -90,7 +90,7 @@ export class AssignmentStudentComponent {
         const base: AssignmentStudentQuestion = {
           id: 0,
           mark: 0,
-          questionMark: question.mark,
+          questionMark: question.mark ?? 0,
           answer: '', // For True/False
           assignmentStudentID: 0,
           questionBankID: question.id,

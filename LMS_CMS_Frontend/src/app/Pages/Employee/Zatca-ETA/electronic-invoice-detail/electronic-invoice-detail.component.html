@@ -60,9 +60,7 @@
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         Quantity </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Price </th>
-                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Tax </th>
+                        Price </th>  
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         Total </th>
                 </tr>
@@ -79,10 +77,7 @@
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{item.price}}
-                    </td>
-                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        {{invoice.vatAmount}}
-                    </td>
+                    </td> 
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{item.totalPrice}}
                     </td>
@@ -102,6 +97,10 @@
         </div>
         <div class="flex justify-between mb-2">
             <span class="font-medium">Taxes & Fees:</span>
+            <span>{{invoice.vatPercent ?  invoice.vatPercent* 100 : 0}} %</span>
+        </div>
+        <div class="flex justify-between mb-2">
+            <span class="font-medium">Taxes & Fees Amount:</span>
             <span>{{invoice.vatAmount}}</span>
         </div>
         <div class="flex justify-between font-bold text-lg mt-4 pt-2 border-t">

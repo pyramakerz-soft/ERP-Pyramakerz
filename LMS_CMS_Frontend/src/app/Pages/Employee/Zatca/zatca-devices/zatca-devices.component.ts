@@ -127,8 +127,7 @@ Edit(id: number) {
   this.isLoading = true;
   
   this.schoolPCsService.GetById(id, this.DomainName).subscribe({
-    next: (device) => {
-      console.log('Device loaded for editing:', device);
+    next: (device) => { 
       this.zatcaDevice = new ZatcaDevice(
         device.id,
         device.pcName,
@@ -136,12 +135,11 @@ Edit(id: number) {
         this.getSchoolIdFromName(device.school), // Convert school name to ID
         device.school,
         device.certificateDate
-      );
+      ); 
       this.isLoading = false;
       this.openModal();
     },
-    error: (error) => {
-      console.error('Error loading device:', error);
+    error: (error) => { 
       this.isLoading = false;
       Swal.fire({
         icon: 'error',
@@ -257,9 +255,7 @@ Save() {
     schoolId: Number(this.zatcaDevice.schoolId),
     school: selectedSchool ? selectedSchool.name : '',
     certificateDate: this.zatcaDevice.certificateDate
-  };
-
-  console.log('Sending update payload:', payload);
+  }; 
 
   this.schoolPCsService.Edit(this.zatcaDevice.id, payload, this.DomainName).subscribe({
     next: () => {
@@ -347,13 +343,14 @@ Delete(id: number) {
               confirmButtonText: 'Okay'
             });
             this.GetTableData(); // Refresh table data
+            this.closeCertificateModal()
           },
-          error: (error) => {
+          error: (error) => {  
             this.isLoading = false;
             Swal.fire({
               icon: 'error',
               title: 'Error',
-              text: error.error?.message || 'Failed to generate certificate',
+              text: error.error || 'Failed to generate certificate',
               confirmButtonText: 'Okay'
             });
           }
@@ -367,6 +364,15 @@ Delete(id: number) {
     return this.datePipe.transform(date, 'MMM d, yyyy') || '';
   }
 
+  validateNumber(event: any): void {
+    const value = event.target.value;
+    const intValue = parseInt(value, 10);
+    if (!/^\d+$/.test(value)) {
+      event.target.value = '';
+      this.otp = '' as never;
+    }
+  }
+ 
   IsAllowDelete(insertedByUserId: number): boolean {
     if (!this.IsEmployee) return true;
     return this.EditDeleteServ.IsAllowDelete(insertedByUserId, this.UserID, this.AllowDeleteForOthers);

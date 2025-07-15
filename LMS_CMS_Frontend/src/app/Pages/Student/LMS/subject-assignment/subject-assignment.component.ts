@@ -67,7 +67,7 @@ export class SubjectAssignmentComponent {
     this.router.navigateByUrl(`Student/Assignment/${AssignmentId}`)
   }
 
-  isPastDueOrCutoff(dueDate: string, cutOfDate: string): boolean {
+  isPastDueOrCutoff(dueDate: any, cutOfDate: string): boolean {
     const today = new Date();
     const due = new Date(dueDate);
     const cutoff = new Date(cutOfDate);

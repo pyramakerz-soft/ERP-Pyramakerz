@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { QuestionBank } from '../../../../Models/LMS/question-bank';
 import { QuestionBankService } from '../../../../Services/Employee/LMS/question-bank.service';
 import { CommonModule } from '@angular/common';
@@ -38,6 +38,8 @@ import { SubBankQuestion } from '../../../../Models/LMS/sub-bank-question';
   styleUrl: './question-bank.component.css'
 })
 export class QuestionBankComponent {
+  @ViewChild('dropdownContainer') dropdownRef!: ElementRef;
+
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   AllowEdit: boolean = false;
@@ -171,6 +173,8 @@ export class QuestionBankComponent {
   }
 
   GetAllLesson() {
+    this.lesson = []
+    this.questionBank.lessonID = 0
     this.LessonServ.GetBySubjectID(this.questionBank.subjectID, this.DomainName).subscribe((d) => {
       this.lesson = d
     })
@@ -242,6 +246,11 @@ export class QuestionBankComponent {
   }
 
   GetAllData(pageNumber: number, pageSize: number) {
+    this.TableData = []
+    this.CurrentPage  = 1
+    this.PageSize  = 10
+    this.TotalPages  = 1
+    this.TotalRecords  = 0
     this.QuestionBankServ.Get(this.DomainName, pageNumber, pageSize).subscribe(
       (data) => {
         this.CurrentPage = data.pagination.currentPage
@@ -288,7 +297,6 @@ export class QuestionBankComponent {
 
   CreateOREdit() {
     this.questionBank.questionBankTagsDTO = this.TagsSelected.map(s => s.id)
-    console.log(this.questionBank)
     if (this.isFormValid()) {
       this.isLoading = true;
       if (this.mode == 'Create') {
@@ -572,6 +580,14 @@ export class QuestionBankComponent {
 
   toggleDropdown(): void {
     this.dropdownOpen = !this.dropdownOpen;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const clickedInside = this.dropdownRef?.nativeElement.contains(event.target);
+    if (!clickedInside) {
+      this.dropdownOpen = false;
+    }
   }
 
   selectType(Type: Tag): void {

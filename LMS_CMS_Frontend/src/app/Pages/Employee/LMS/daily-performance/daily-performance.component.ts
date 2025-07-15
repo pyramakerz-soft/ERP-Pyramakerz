@@ -132,6 +132,12 @@ export class DailyPerformanceComponent {
   }
 
   View() {
+    this.SelectedMedalId = 0
+    this.selectedStudentIds = []
+    this.selectedTypeIds = []
+    this.PerformanceTypesSelected = []
+    this.selectedRating = 0
+
     this.IsView = true;
     this.getAllPerformanceType();
     this.students = [];
@@ -142,8 +148,7 @@ export class DailyPerformanceComponent {
       this.SelectedClassId,
       this.DomainName
     ).subscribe((d: any) => {
-      this.students = d.students;
-      console.log(d)
+      this.students = d.students; 
       this.RatedStudent = [];
 
       for (let student of this.students) {
@@ -197,6 +202,7 @@ export class DailyPerformanceComponent {
   }
 
   selectType(Type: PerformanceType): void {
+    this.selectedRating = 0
     this.IsStudentPerformance = true
     if (!this.PerformanceTypesSelected.some((e) => e.id === Type.id)) {
       this.PerformanceTypesSelected.push(Type);
@@ -214,6 +220,7 @@ export class DailyPerformanceComponent {
   }
 
   removeSelected(id: number): void {
+    this.selectedRating = 0
     this.PerformanceTypesSelected = this.PerformanceTypesSelected.filter((e) => e.id !== id);
     this.RatedStudent = this.RatedStudent.filter((e) => e.studentPerformance.filter((s) => s.performanceTypeID !== id));
   }
@@ -273,8 +280,7 @@ export class DailyPerformanceComponent {
       this.isLoading = true
       this.dailyPerformanceMaster.subjectID = this.SelectedSubjectId
       this.dailyPerformanceMaster.classroomID = this.SelectedClassId
-      this.dailyPerformanceMaster.dailyPerformances = this.RatedStudent
-      console.log(this.dailyPerformanceMaster)
+      this.dailyPerformanceMaster.dailyPerformances = this.RatedStudent 
       this.StudentPerformanceServ.Add(this.dailyPerformanceMaster, this.DomainName).subscribe((d) => {
         if (this.SelectedMedalId && this.selectedStudentIds.length) {
           this.selectedStudentIds.forEach(element => {

@@ -265,7 +265,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ETA
         #endregion
 
         #region Filter by School and Date
-        [HttpPost("FilterBySchoolAndDate")]
+        [HttpGet("FilterBySchoolAndDate")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "ETA Electronic-Invoice" }

@@ -62,7 +62,7 @@ export class QuestionBankService {
     // Required fields
     formData.append('Description', questionBank.description ?? '');
     formData.append('DifficultyLevel', questionBank.difficultyLevel.toString());
-    formData.append('Mark', questionBank.mark.toString());
+    formData.append('Mark', (questionBank.mark ?? 0).toString());
     formData.append('LessonID', questionBank.lessonID.toString());
     formData.append('BloomLevelID', questionBank.bloomLevelID.toString());
     formData.append('DokLevelID', questionBank.dokLevelID.toString());
@@ -126,7 +126,7 @@ export class QuestionBankService {
     formData.append('ID', questionBank.id.toString() ?? '');
     formData.append('Description', questionBank.description ?? '');
     formData.append('DifficultyLevel', questionBank.difficultyLevel.toString());
-    formData.append('Mark', questionBank.mark.toString());
+    formData.append('Mark', (questionBank.mark ?? 0).toString());
     formData.append('LessonID', questionBank.lessonID.toString());
     formData.append('BloomLevelID', questionBank.bloomLevelID.toString());
     formData.append('DokLevelID', questionBank.dokLevelID.toString());

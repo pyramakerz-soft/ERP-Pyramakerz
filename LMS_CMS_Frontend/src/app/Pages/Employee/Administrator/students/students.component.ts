@@ -90,8 +90,7 @@ export class StudentsComponent {
     this.OriginStudentData = []
     this.StudentsData = []
     this.StudentService.GetAll(this.DomainName).subscribe(
-      (data: Student[]) => {
-        console.log(data)
+      (data: Student[]) => { 
         this.OriginStudentData = data;
         this.StudentsData = data;
 

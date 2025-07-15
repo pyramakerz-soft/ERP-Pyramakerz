@@ -61,16 +61,15 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         /// ///////////////////////////////////////////////////-777
         [HttpGet("inventory-net-summary")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Inventory" })]
+      allowedTypes: new[] { "octa", "employee" },
+      pages: new[] { "Inventory" })]
         public async Task<IActionResult> GetInventoryNetSummaryAsync(long storeId, long shopItemId, DateTime toDate)
         {
-            // استخدام التاريخ حتى نهاية اليوم السابق
             var summaryDate = toDate.Date.AddDays(-1).AddTicks(9999999); // آخر لحظة من البارحة
-
             var Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
             var flagsToExclude = new long[] { 13 };
 
+            // ✅ جلب البيانات
             var data = await Unit_Of_Work.inventoryDetails_Repository
                 .Select_All_With_IncludesById<InventoryDetails>(
                     d => d.InventoryMaster != null &&
@@ -78,8 +77,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                          d.IsDeleted != true &&
                          d.ShopItemID == shopItemId &&
                          (d.InventoryMaster.StoreID == storeId ||
-                         (d.InventoryMaster.FlagId == 8 && d.InventoryMaster.StoreToTransformId == storeId)),
-
+                          (d.InventoryMaster.FlagId == 8 && d.InventoryMaster.StoreToTransformId == storeId)),
                     q => q.Include(d => d.InventoryMaster)
                           .ThenInclude(im => im.InventoryFlags));
 
@@ -91,7 +89,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                     d.InventoryMaster.InventoryFlags.ItemInOut != 0)
                 .ToList();
 
-            // ✅ الكميات
+            // ✅ حساب الكميات
             var inQuantity = filteredData
                 .Where(d => d.InventoryMaster.InventoryFlags.ItemInOut == 1)
                 .Sum(d => d.Quantity);
@@ -102,7 +100,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
             var quantityBalance = inQuantity - outQuantity;
 
-            // ✅ التكلفة
+            // ✅ حساب التكلفة
             var inCost = filteredData
                 .Where(d => d.InventoryMaster.InventoryFlags.ItemInOut == 1)
                 .Sum(d => d.Quantity * (d.AverageCost ?? 0));
@@ -113,7 +111,17 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
             var costBalance = inCost - outCost;
 
-            // ✅ النتيجة
+            // ✅ حفظ CostBalance و QuantityBalance في قاعدة البيانات
+            foreach (var detail in filteredData)
+            {
+                detail.QuantityBalance = quantityBalance;
+                detail.CostBalance = costBalance;
+                Unit_Of_Work.inventoryDetails_Repository.Update(detail);
+            }
+
+            await Unit_Of_Work.SaveChangesAsync(); // حفظ التعديلات
+
+            // ✅ إعداد النتيجة النهائية
             var dto = new InventoryNetSummaryDTO
             {
                 ShopItemId = shopItemId,
