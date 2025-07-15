@@ -127,8 +127,7 @@ Edit(id: number) {
   this.isLoading = true;
   
   this.schoolPCsService.GetById(id, this.DomainName).subscribe({
-    next: (device) => {
-      console.log('Device loaded for editing:', device);
+    next: (device) => { 
       this.zatcaDevice = new ZatcaDevice(
         device.id,
         device.pcName,
@@ -136,12 +135,11 @@ Edit(id: number) {
         this.getSchoolIdFromName(device.school), // Convert school name to ID
         device.school,
         device.certificateDate
-      );
+      ); 
       this.isLoading = false;
       this.openModal();
     },
-    error: (error) => {
-      console.error('Error loading device:', error);
+    error: (error) => { 
       this.isLoading = false;
       Swal.fire({
         icon: 'error',

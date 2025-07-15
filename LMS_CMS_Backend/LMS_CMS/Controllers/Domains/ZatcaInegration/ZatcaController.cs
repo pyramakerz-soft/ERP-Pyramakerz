@@ -412,7 +412,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                 //}
             }
 
-            return master.IsValid == 1 ? Ok(master.Status) : BadRequest(master.Status);
+            return master.IsValid == 1 ? Ok(new { message = master.Status } ) : BadRequest(master.Status);
         }
         #endregion
 
