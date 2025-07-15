@@ -556,8 +556,8 @@ export class AssignmentComponent {
             }
           } else if (field === 'openDate' || field === 'dueDate' || field === 'cutOfDate') {
             const openDate = new Date(this.assignment.openDate);
-            const dueDate = new Date(this.assignment.dueDate);
             const cutOfDate = new Date(this.assignment.cutOfDate);
+            const dueDate = this.assignment.dueDate ? new Date(this.assignment.dueDate) : cutOfDate;
 
             if (this.assignment.openDate && this.assignment.dueDate && openDate > dueDate) {
               this.validationErrors['openDate'] = '*Open Date must be before or equal to Due Date';
