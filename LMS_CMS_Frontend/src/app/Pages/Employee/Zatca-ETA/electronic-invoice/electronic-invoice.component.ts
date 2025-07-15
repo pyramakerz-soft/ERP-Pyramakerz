@@ -240,7 +240,14 @@ export class ElectronicInvoiceComponent implements OnInit {
         'success'
       );
       invoice.isValid = true;
-    } catch (error) {
+    } catch (error) { 
+      let errorMessage = 'Something went wrong';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'object' && error !== null && 'error' in error) {
+        errorMessage = (error as any).error;
+      }
+
       this.handleError(
         `Failed to ${
           this.currentSystem === 'zatca' ? 'report' : 'submit'
@@ -249,9 +256,7 @@ export class ElectronicInvoiceComponent implements OnInit {
       );
       Swal.fire(
         'Error',
-        `Failed to ${
-          this.currentSystem === 'zatca' ? 'report' : 'submit'
-        } invoice. Please try again.`,
+        errorMessage,
         'error'
       );
     } finally {
@@ -304,6 +309,13 @@ export class ElectronicInvoiceComponent implements OnInit {
       });
       this.selectedInvoices = [];
     } catch (error) {
+      let errorMessage = 'Something went wrong';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'object' && error !== null && 'error' in error) {
+        errorMessage = (error as any).error;
+      }
+
       this.handleError(
         `Failed to ${
           this.currentSystem === 'zatca' ? 'report' : 'submit'
@@ -312,9 +324,7 @@ export class ElectronicInvoiceComponent implements OnInit {
       );
       Swal.fire(
         'Error',
-        `Failed to ${
-          this.currentSystem === 'zatca' ? 'report' : 'submit'
-        } invoices. Please try again.`,
+        errorMessage,
         'error'
       );
     } finally {
@@ -330,8 +340,7 @@ export class ElectronicInvoiceComponent implements OnInit {
     window.print();
   }
 
-  private handleError(message: string, error?: any) {
-    console.error(message, error);
+  private handleError(message: string, error?: any) { 
     this.isLoading = false;
     this.isSubmitting = false;
   }

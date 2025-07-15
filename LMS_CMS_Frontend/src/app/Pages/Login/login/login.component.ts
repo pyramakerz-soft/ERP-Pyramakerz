@@ -37,6 +37,7 @@ export class LoginComponent {
 
   allTokens: { id: number, key: string; KeyInLocal: string; value: string; UserType:string}[] = [];
   User_Data_After_Login2 = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
+  isLoading: boolean = false
  
   constructor(private router: Router, public accountService: AccountService) { }
 
@@ -90,6 +91,7 @@ export class LoginComponent {
 
   SignIN() {
     if (this.isFormValid()) {
+      this.isLoading = true
       this.accountService.Login(this.userInfo).subscribe(
         (d: any) => {
           localStorage.removeItem("GoToLogin");
@@ -169,6 +171,7 @@ export class LoginComponent {
           }
 
         }, (error) => {
+          this.isLoading = false
           if (error.error === "UserName or Password is Invalid") {
             this.somthingError = "UserName or Password is Invalid"
           }else if (error.status == 400) {

@@ -192,7 +192,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
             Unit_Of_Work.schoolPCs_Repository.Update(schoolPc);
             Unit_Of_Work.SaveChanges();
 
-            return Ok(certificateDate);
+            return Ok(new { message = certificateDate });
         }
         #endregion
 
