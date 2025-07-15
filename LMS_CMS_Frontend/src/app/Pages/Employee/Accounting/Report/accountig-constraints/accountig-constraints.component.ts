@@ -148,7 +148,7 @@ export class AccountigConstraintsComponent {
     this.GetDataForPrint().subscribe((result) => {
       this.DataToPrint = result;
 
-      const headers = ['Master ID', 'Details ID', 'Account', 'Invoice Number', 'Main Account ID' , 'Main Account' , 'Sub Account ID' , 'Sub Account' , 'Credit' , 'Debit' , 'Date']; 
+      const headers = ['Master ID', 'Details ID', 'Account', 'Serial', 'Invoice Number', 'Main Account ID' , 'Main Account' , 'Sub Account ID' , 'Sub Account' , 'Credit' , 'Debit' , 'Date']; 
 
       const dataRows = this.DataToPrint.map((row: any) =>
         headers.map(header => row[header] ?? '')
@@ -207,6 +207,7 @@ export class AccountigConstraintsComponent {
           'Master ID': acc.masterID,
           'Details ID': acc.detailsID,
           Account: acc.account,
+          Serial: acc.serial,
           'Invoice Number': acc.invoiceNumber,
           'Main Account ID': acc.mainAccountNo,
           "Main Account": acc.mainAccount,

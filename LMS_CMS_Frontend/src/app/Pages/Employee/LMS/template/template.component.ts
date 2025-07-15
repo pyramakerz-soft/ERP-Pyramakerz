@@ -232,6 +232,23 @@ export class TemplateComponent {
     }
   }
 
+  validateNumber(event: any, field: keyof Template): void {
+    const value = event.target.value;
+    if (field === 'afterCount') { 
+      const intValue = parseInt(value, 10);
+      if (!/^\d+$/.test(value)) {
+        event.target.value = '';
+        this.template[field] = '' as never;
+      }
+    } else { 
+      const numberValue = parseFloat(value);
+      if (isNaN(numberValue)) {
+        event.target.value = '';
+        this.template[field] = '' as never;
+      }
+    } 
+  }
+
   async onSearchEvent(event: { key: string; value: any }) {
     this.key = event.key;
     this.value = event.value;
