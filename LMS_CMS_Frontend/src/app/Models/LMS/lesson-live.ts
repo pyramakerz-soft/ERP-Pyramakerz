@@ -9,6 +9,7 @@ export class LessonLive {
         public weekDayID: number = 0,
         public classroomName: string = '',
         public classroomID: number = 0,
+        public academicYearID: number = 0,
         public subjectEnglishName: string = '',
         public subjectID: number = 0,
         public subjectArabicName: string = '',

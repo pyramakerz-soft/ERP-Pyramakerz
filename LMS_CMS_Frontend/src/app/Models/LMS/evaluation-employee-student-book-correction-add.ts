@@ -5,5 +5,6 @@ export class EvaluationEmployeeStudentBookCorrectionAdd {
         public note: string = '',
         public questionEnglishTitle: string = '',
         public studentEnglishName: string = '',
+        public studentArabicName: string = '', 
     ) {}
 }
