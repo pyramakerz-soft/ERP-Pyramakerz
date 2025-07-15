@@ -13,11 +13,14 @@ import { EmployeeService } from '../../../../Services/Employee/employee.service'
 import Swal from 'sweetalert2';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { firstValueFrom } from 'rxjs';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-employee',
   standalone: true,
-  imports: [CommonModule, FormsModule ,SearchComponent],
+  imports: [CommonModule, FormsModule ,SearchComponent, TranslateModule],
   templateUrl: './employee.component.html',
   styleUrl: './employee.component.css'
 })
@@ -28,7 +31,8 @@ export class EmployeeComponent {
   DomainName: string = "";
   UserID: number = 0;
   path: string = "";
-
+ isRtl: boolean = false;
+  subscription!: Subscription;
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
   AllowEditForOthers: boolean = false;
@@ -40,7 +44,16 @@ export class EmployeeComponent {
   key: string= "id";
   value: any = "";
 
-  constructor(public activeRoute: ActivatedRoute, public account: AccountService, public ApiServ: ApiService, private menuService: MenuService, public EditDeleteServ: DeleteEditPermissionService, private router: Router, public EmpServ: EmployeeService) { }
+  constructor(
+    public activeRoute: ActivatedRoute, 
+    public account: AccountService,
+     public ApiServ: ApiService,
+      private menuService: MenuService, 
+    public EditDeleteServ: DeleteEditPermissionService,
+     private router: Router, 
+     public EmpServ: EmployeeService,
+        private languageService: LanguageService
+    ) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -62,6 +75,11 @@ export class EmployeeComponent {
 
       });
     }
+          this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+
   }
   GetEmployee() {
     this.EmpServ.Get_Employees(this.DomainName).subscribe((data) => {

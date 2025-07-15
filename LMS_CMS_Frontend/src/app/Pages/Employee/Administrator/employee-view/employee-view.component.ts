@@ -17,11 +17,13 @@ import { SubjectService } from '../../../../Services/Employee/LMS/subject.servic
 import { Floor } from '../../../../Models/LMS/floor';
 import { Grade } from '../../../../Models/LMS/grade';
 import { Subject } from '../../../../Models/LMS/subject';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-employee-view',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
   templateUrl: './employee-view.component.html',
   styleUrl: './employee-view.component.css'
 })
@@ -41,7 +43,8 @@ export class EmployeeViewComponent {
   OldPasswordError: string = ""; 
   password:string =""
   confirmPassword:string =""
-
+ isRtl: boolean = false;
+  subscription!: Subscription;
   editpasss: EditPass = new EditPass();
 
   AllowEdit: boolean = false;
@@ -61,6 +64,7 @@ export class EmployeeViewComponent {
   constructor(public activeRoute: ActivatedRoute, public account: AccountService, public ApiServ: ApiService, private menuService: MenuService, public EditDeleteServ: DeleteEditPermissionService, private router: Router, public EmpServ: EmployeeService, public FloorServ: FloorService,
     public GradeServ: GradeService,
     public SubjectServ: SubjectService,
+    private languageService: LanguageService
   ) { }
 
   ngOnInit() {
@@ -123,6 +127,11 @@ export class EmployeeViewComponent {
         this.AllowEditForOthers = settingsPage.allow_Edit_For_Others
       }
     });
+      this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+
   }
 
   moveToEmployee() {

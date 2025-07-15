@@ -6,152 +6,172 @@
         </h1>
     </div>
     <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg" (click)="Save()">
-        <span *ngIf="!isLoading">Save</span>
+        <span *ngIf="!isLoading"> {{ 'Save' | translate }}</span>
         <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
     </button>
 </div>
 
 <div class="mt-6 mb-4 rounded-3xl flex justify-between flex-wrap">
     <div class="flex flex-col mb-4 w-[49%]">
-        <label class="mb-2 primaryTxt" for="name">User Name</label>
+        <label class="mb-2 primaryTxt" for="name">  {{ 'User Name' | translate }}</label>
         <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-            placeholder="Enter User Name" [(ngModel)]="Data.user_Name"
+             [dir]="isRtl ? 'rtl' : 'ltr'"
+  [placeholder]="isRtl ? 'أدخل اسم المستخدم' : 'Enter User Name'"
+  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'" [(ngModel)]="Data.user_Name"
             (ngModelChange)="onInputValueChange({ field: 'user_Name', value: $event })" />
         <span *ngIf="validationErrors['user_Name']" class="text-red-500 ml-3 font-normal">{{
             validationErrors["user_Name"]}}</span>
     </div>
 
     <div class="flex flex-col mb-4 w-[49%]">
-        <label class="mb-2 primaryTxt" for="name">English Name</label>
+        <label class="mb-2 primaryTxt" for="name">  {{ 'English Name' | translate }}</label>
         <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-            (ngModelChange)="onInputValueChange({ field: 'en_name', value: $event })" placeholder="Enter English Name"
+            (ngModelChange)="onInputValueChange({ field: 'en_name', value: $event })"  [dir]="isRtl ? 'rtl' : 'ltr'"
+  [placeholder]="isRtl ? 'أدخل الاسم بالإنجليزية' : 'Enter English Name'"
+  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'"
             [(ngModel)]="Data.en_name" />
         <span *ngIf="validationErrors['en_name']" class="text-red-500 ml-3 font-normal">{{
             validationErrors["en_name"]}}</span>
     </div>
 
     <div class="flex flex-col mb-4 w-[49%]">
-        <label class="mb-2 primaryTxt" for="name">Arabic Name</label>
+        <label class="mb-2 primaryTxt" for="name">  {{ 'Arabic Name' | translate }}</label>
         <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-            (ngModelChange)="onInputValueChange({ field: 'ar_name', value: $event })" placeholder="Enter Arabic Name" [(ngModel)]="Data.ar_name" />
+            (ngModelChange)="onInputValueChange({ field: 'ar_name', value: $event })"  [dir]="isRtl ? 'rtl' : 'ltr'"
+  [placeholder]="isRtl ? 'أدخل الاسم بالعربية' : 'Enter Arabic Name'"
+  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'" [(ngModel)]="Data.ar_name" />
         <span *ngIf="validationErrors['ar_name']" class="text-red-500 ml-3 font-normal">{{
             validationErrors["ar_name"]}}</span>
     </div>
 
     <div *ngIf="mode == 'Create'" class="flex flex-col mb-4 w-[49%]">
-        <label class="mb-2 primaryTxt" for="name">Password</label>
+        <label class="mb-2 primaryTxt" for="name">  {{ 'Password' | translate }}</label>
         <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-            (ngModelChange)="onInputValueChange({ field: 'password', value: $event })" placeholder="Enter Password"
+            (ngModelChange)="onInputValueChange({ field: 'password', value: $event })"  [dir]="isRtl ? 'rtl' : 'ltr'"
+  [placeholder]="isRtl ? 'أدخل كلمة المرور' : 'Enter Password'"
+  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'"
             [(ngModel)]="Data.password" />
         <span *ngIf="validationErrors['password']" class="text-red-500 ml-3 font-normal">{{
             validationErrors["password"]}}</span>
     </div>
 
     <div class="flex flex-col mb-4 w-[49%]">
-        <label class="mb-2 primaryTxt" for="name">Mobile</label>
+        <label class="mb-2 primaryTxt" for="name">  {{ 'Mobile' | translate }}</label>
         <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
             (ngModelChange)="onInputValueChange({ field: 'mobile', value: $event })"
-            (input)="validateNumber($event, 'mobile')" placeholder="Enter Mobile" [(ngModel)]="Data.mobile" />
+            (input)="validateNumber($event, 'mobile')"  [dir]="isRtl ? 'rtl' : 'ltr'"
+  [placeholder]="isRtl ? 'أدخل رقم الجوال' : 'Enter Mobile'"
+  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'" [(ngModel)]="Data.mobile" />
         <span *ngIf="validationErrors['mobile']" class="text-red-500 ml-3 font-normal">{{
             validationErrors["mobile"]}}</span>
     </div>
 
     <div class="flex flex-col mb-4 w-[49%]">
-        <label class="mb-2 primaryTxt" for="name">Phone</label>
+        <label class="mb-2 primaryTxt" for="name">  {{ 'Phone' | translate }}</label>
         <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
             (ngModelChange)="onInputValueChange({ field: 'phone', value: $event })"
-            (input)="validateNumber($event, 'phone')" placeholder="Enter Phone" [(ngModel)]="Data.phone" />
+            (input)="validateNumber($event, 'phone')"   [dir]="isRtl ? 'rtl' : 'ltr'"
+  [placeholder]="isRtl ? 'أدخل رقم الهاتف' : 'Enter Phone'"
+  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'" [(ngModel)]="Data.phone" />
         <span *ngIf="validationErrors['phone']" class="text-red-500 ml-3 font-normal">{{
             validationErrors["phone"]}}</span>
     </div>
 
 
     <div class="flex flex-col mb-4 w-[49%]">
-        <label class="mb-2 primaryTxt" for="name">Email</label>
+        <label class="mb-2 primaryTxt" for="name">  {{ 'Email' | translate }}</label>
         <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-            (ngModelChange)="onInputValueChange({ field: 'email', value: $event })" placeholder="Enter Email"
+            (ngModelChange)="onInputValueChange({ field: 'email', value: $event })"   [dir]="isRtl ? 'rtl' : 'ltr'"
+  [placeholder]="isRtl ? 'أدخل البريد الإلكتروني' : 'Enter Email'"
+  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'"
             [(ngModel)]="Data.email" />
         <span *ngIf="validationErrors['email']" class="text-red-500 ml-3 font-normal">{{
             validationErrors["email"]}}</span>
     </div>
 
     <div class="flex flex-col mb-4 w-[49%]">
-        <label class="mb-2 primaryTxt" for="name">Address</label>
+        <label class="mb-2 primaryTxt" for="name"> {{ 'Address' | translate }}</label>
         <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-            placeholder="Enter Address" [(ngModel)]="Data.address" />
+             [dir]="isRtl ? 'rtl' : 'ltr'"
+  [placeholder]="isRtl ? 'أدخل العنوان' : 'Enter Address'"
+  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'" [(ngModel)]="Data.address" />
     </div>
 
     <div class="flex flex-col w-[49%] mb-4">
-        <label class="mb-2" for="role">Role</label>
+        <label class="mb-2" for="role">  {{ 'Role' | translate }}</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="role"
             (ngModelChange)="onInputValueChange({ field: 'role_ID', value: $event })" [(ngModel)]="Data.role_ID">
-            <option [value]="0" disabled selected hidden>Choose Role</option>
+            <option [value]="0" disabled selected hidden>  {{ 'Choose Role' | translate }}</option>
             <option *ngFor="let role of Roles" [value]="role.id">{{ role.name }}</option>
-            <option *ngIf="Roles.length === 0" disabled selected>No Data Found</option>
+            <option *ngIf="Roles.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
         </select>
         <span *ngIf="validationErrors['role_ID']" class="text-red-500 ml-3 font-normal">{{
             validationErrors["role_ID"]}}</span>
     </div>
 
     <div class="flex flex-col w-[49%] mb-4">
-        <label class="mb-2" for="employeeType">Employee Type</label>
+        <label class="mb-2" for="employeeType"> {{ 'Employee Type' | translate }}</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="employeeType"
             (ngModelChange)="onInputValueChange({ field: 'employeeTypeID', value: $event })"
             [(ngModel)]="Data.employeeTypeID">
-            <option [value]="0" disabled selected hidden>Choose Employee Type</option>
+            <option [value]="0" disabled selected hidden>  {{ 'Choose Employee Type' | translate }}</option>
             <option *ngFor="let employeeType of empTypes" [value]="employeeType.id">{{ employeeType.name }}</option>
-            <option *ngIf="empTypes.length === 0" disabled selected>No Data Found</option>
+            <option *ngIf="empTypes.length === 0" disabled selected>  {{ 'No Data Found' | translate }}</option>
         </select>
         <span *ngIf="validationErrors['employeeTypeID']" class="text-red-500 ml-3 font-normal">{{
             validationErrors["employeeTypeID"]}}</span>
     </div>
 
     <div *ngIf="Data.employeeTypeID == 2" class="flex flex-col mb-4 w-[49%]">
-        <label class="mb-2 primaryTxt" for="name">License Number</label>
+        <label class="mb-2 primaryTxt" for="name">  {{ 'License Number' | translate }}</label>
         <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
             (ngModelChange)="onInputValueChange({ field: 'licenseNumber', value: $event })"
-            (input)="validateNumber($event, 'licenseNumber')" placeholder="Enter License Number"
+            (input)="validateNumber($event, 'licenseNumber')"  [dir]="isRtl ? 'rtl' : 'ltr'"
+  [placeholder]="isRtl ? 'أدخل رقم الرخصة' : 'Enter License Number'"
+  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'"
             [(ngModel)]="Data.licenseNumber" />
         <span *ngIf="validationErrors['licenseNumber']" class="text-red-500 ml-3 font-normal">{{
             validationErrors["licenseNumber"]}}</span>
     </div>
 
     <div *ngIf="Data.employeeTypeID == 2" class="flex flex-col mb-4 w-[49%]">
-        <label class="mb-2 primaryTxt" for="expireDate">Expire Date</label>
+        <label class="mb-2 primaryTxt" for="expireDate">  {{ 'Expire Date' | translate }}</label>
         <input id="expireDate" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-            (ngModelChange)="onInputValueChange({ field: 'expireDate', value: $event })" placeholder="Enter Expiry Date"
+            (ngModelChange)="onInputValueChange({ field: 'expireDate', value: $event })" [dir]="isRtl ? 'rtl' : 'ltr'"
+  [placeholder]="isRtl ? 'أدخل تاريخ الانتهاء' : 'Enter Expiry Date'"
+  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'"
             [(ngModel)]="Data.expireDate" />
         <span *ngIf="validationErrors['expireDate']" class="text-red-500 ml-3 font-normal">{{
             validationErrors["expireDate"]}}</span>
     </div>
 
     <div *ngIf="Data.employeeTypeID == 2" class="flex flex-col w-[49%] mb-4">
-        <label class="mb-2" for="bus">Bus Comapny</label>
+        <label class="mb-2" for="bus"> {{ 'Bus Comapny' | translate }}</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="bus"
             [(ngModel)]="Data.busCompanyID">
-            <option [value]="0" disabled selected hidden>Choose Bus Company</option>
+            <option [value]="0" disabled selected hidden>  {{ 'Choose Bus Company' | translate }}</option>
             <option *ngFor="let bus of BusCompany" [value]="bus.id">{{ bus.name }}</option>
-            <option *ngIf="BusCompany.length === 0" disabled selected>No Data Found</option>
+            <option *ngIf="BusCompany.length === 0" disabled selected>  {{ 'No Data Found' | translate }}</option>
         </select>
     </div>
 
     <div class="flex align-middle space-x-2 mb-4 w-full">
         <input type="checkbox" id="canReceiveRequest" class="w-5 h-5" [(ngModel)]="Data.canReceiveRequest">
-        <label class="mb-2" for="canReceiveRequest">Can Receive Request</label>
+        <label class="mb-2" for="canReceiveRequest">  {{ 'Can Receive Request' | translate }}</label>
     </div>
 
     <div class="flex align-middle space-x-2 mb-4 w-full">
         <input type="checkbox" id="canReceiveMessage" class="w-5 h-5" [(ngModel)]="Data.canReceiveMessage">
-        <label class="mb-2" for="canReceiveMessage">Can Receive Messages</label>
+        <label class="mb-2" for="canReceiveMessage">  {{ 'Can Receive Messages' | translate }}</label>
     </div>
 
     <div class="flex align-middle space-x-2 mb-4 w-full items-center justify-between">
         <div class="flex align-middle w-[49%] space-x-2">
             <input type="checkbox" id="isFloorMonitor" class="w-5 h-5" [(ngModel)]="isFloorMonitor" (change)="onFloorsSupervisorChange()">
-            <label class="mb-2" for="isFloorMonitor">Floor Monitor</label>
+            <label class="mb-2" for="isFloorMonitor">  {{ 'Floor Monitor' | translate }}</label>
         </div>
         <div class="flex flex-col mb-4 w-[49%]" *ngIf="isFloorMonitor" >
-            <label class="block mb-2 text-sm font-medium text-gray-900" for="ac">Floors</label>
+            <label class="block mb-2 text-sm font-medium text-gray-900" for="ac">  {{ 'Floors' | translate }}</label>
             <div class="relative">
                 <div class="border border-gray-300 rounded-lg px-4 py-3 cursor-pointer min-h-[48px]"
                     (click)="toggleDropdown()" tabindex="0">
@@ -167,7 +187,7 @@
                         </div>
                     </ng-container>
                     <ng-template #placeholder>
-                        <span class="text-gray-400">Choose Floor</span>
+                        <span class="text-gray-400">  {{ 'Choose Floor' | translate }}</span>
                     </ng-template>
                 </div>
                 <div class="absolute bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10"
@@ -186,10 +206,10 @@
     <div class="flex align-middle space-x-2 mb-4 w-full items-center justify-between">
         <div class="flex align-middle w-[49%] space-x-2">
             <input type="checkbox" id="isGradeSupervisor" class="w-5 h-5" [(ngModel)]="isGradeSupervisor" (change)="onGradeSupervisorChange()">
-            <label class="mb-2" for="isGradeSupervisor">Grade Supervisor</label>
+            <label class="mb-2" for="isGradeSupervisor">  {{ 'Grade Supervisor' | translate }}</label>
         </div>
         <div class="flex flex-col mb-4 w-[49%]" *ngIf="isGradeSupervisor">
-            <label class="block mb-2 text-sm font-medium text-gray-900" for="ac">Grades</label>
+            <label class="block mb-2 text-sm font-medium text-gray-900" for="ac">  {{ 'Grades' | translate }}</label>
             <div class="relative">
                 <div class="border border-gray-300 rounded-lg px-4 py-3 cursor-pointer min-h-[48px]"
                     (click)="GradetoggleDropdown()" tabindex="0">
@@ -205,7 +225,7 @@
                         </div>
                     </ng-container>
                     <ng-template #placeholder>
-                        <span class="text-gray-400">Choose Grade</span>
+                        <span class="text-gray-400">  {{ 'Choose Grade' | translate }}</span>
                     </ng-template>
                 </div>
                 <div class="absolute bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10"
@@ -224,10 +244,10 @@
     <div class="flex align-middle space-x-2 mb-4 w-full items-center justify-between">
         <div class="flex align-middle w-[49%] space-x-2">
             <input type="checkbox" id="isSubjectSupervisor" class="w-5 h-5" [(ngModel)]="isSubjectSupervisor" (change)="onSubjectSupervisorChange()">
-            <label class="mb-2" for="isSubjectSupervisor">Subject Supervisor</label>
+            <label class="mb-2" for="isSubjectSupervisor">  {{ 'Subject Supervisor' | translate }}</label>
         </div>
         <div class="flex flex-col mb-4 w-[49%]" *ngIf="isSubjectSupervisor">
-            <label class="block mb-2 text-sm font-medium text-gray-900" for="ac">Subjects</label>
+            <label class="block mb-2 text-sm font-medium text-gray-900" for="ac">  {{ 'Subjects' | translate }}</label>
             <div class="relative">
                 <div class="border border-gray-300 rounded-lg px-4 py-3 cursor-pointer min-h-[48px]"
                     (click)="SubjecttoggleDropdown()" tabindex="0">
@@ -243,7 +263,7 @@
                         </div>
                     </ng-container>
                     <ng-template #placeholder>
-                        <span class="text-gray-400">Choose Subject</span>
+                        <span class="text-gray-400">  {{ 'Choose Subject' | translate }}</span>
                     </ng-template>
                 </div>
                 <div class="absolute bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10"
@@ -264,7 +284,7 @@
             <label for="file-upload" class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
                 <img src="Images/Icon frame.png" class="w-1/4" alt="Upload Icon">
                 <p class="font-normal text-xs md:text-sm text-[#8E8E93] mt-3">
-                    <span class="secondaryTxt">Click to Upload</span>
+                    <span class="secondaryTxt">  {{ 'Click to Upload' | translate }}</span>
                 </p>
                 <p class="font-normal text-xs md:text-sm text-[#8E8E93]"> (Max. File size: 25 MB each)</p>
             </label>
@@ -278,7 +298,7 @@
     <div class="flex flex-wrap gap-4">
         <div *ngFor="let file of Data.files; let i = index" class="flex w-full items-center gap-4 mb-4">
             <div class="flex flex-col w-[34%]">
-                <h1 class="text-sm font-semibold mb-2">Name</h1>
+                <h1 class="text-sm font-semibold mb-2">  {{ 'Name' | translate }}</h1>
                 <p class="text-sm font-medium text-gray-700 mb-4">{{ file.name }}</p>
                 <div class="border border-cacaca rounded-lg p-6">
                     <div class="flex justify-between items-center">
@@ -291,20 +311,22 @@
                         </button>
                     </div>
                     <p class="text-sm font-medium text-gray-700 mb-4">
-                        {{ file.size * 1024 }} bytes
+                        {{ file.size * 1024 }}   {{ 'bytes' | translate }}
                     </p>
                     <p class="secondaryTxt cursor-pointer hover:underline mt-2" (click)="downloadFile(file)">
-                        Click to View
+                          {{ 'Click to View' | translate }}
                     </p>
                 </div>
             </div>
 
             <div class="w-[64%]">
                 <div class="flex flex-col">
-                    <label class="mb-2 primaryTxt" for="name-{{ i }}">Add Name</label>
+                    <label class="mb-2 primaryTxt" for="name-{{ i }}">  {{ 'Add Name' | translate }}</label>
                     <input id="name-{{ i }}" type="text" [value]="file.name"
                         class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                        placeholder="Enter Attachment Name" (change)="changeFileName(file.id, $event)" />
+                         [dir]="isRtl ? 'rtl' : 'ltr'"
+  [placeholder]="isRtl ? 'أدخل اسم المرفق' : 'Enter Attachment Name'"
+  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'" (change)="changeFileName(file.id, $event)" />
                 </div>
             </div>
         </div>
@@ -315,7 +337,7 @@
     <div class="flex flex-wrap gap-4">
         <div *ngFor="let file of SelectedFiles; let i = index" class="flex w-full items-center gap-4 mb-4">
             <div class="flex flex-col w-[34%]">
-                <h1 class="text-sm font-semibold mb-2">Name</h1>
+                <h1 class="text-sm font-semibold mb-2">  {{ 'Name' | translate }}</h1>
                 <p class="text-sm font-medium text-gray-700 mb-4">{{ file.file.name }}</p>
                 <div class="border border-cacaca rounded-lg p-6">
                     <div class="flex justify-between items-center">
@@ -332,10 +354,12 @@
 
             <div class="w-[64%]">
                 <div class="flex flex-col">
-                    <label class="mb-2 primaryTxt" for="name-{{ i }}">Add Name</label>
+                    <label class="mb-2 primaryTxt" for="name-{{ i }}">  {{ 'Add Name' | translate }}</label>
                     <input id="name-{{ i }}" type="text" [value]="file.name"
                         class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                        placeholder="Enter Attachment Name" (change)="changeFileName(i, $event)" />
+                         [dir]="isRtl ? 'rtl' : 'ltr'"
+  [placeholder]="isRtl ? 'أدخل اسم المرفق' : 'Enter Attachment Name'"
+  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'" (change)="changeFileName(i, $event)" />
                 </div>
             </div>
         </div>

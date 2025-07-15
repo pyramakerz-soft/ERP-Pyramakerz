@@ -23,11 +23,14 @@ import { Grade } from '../../../../Models/LMS/grade';
 import { Subject } from '../../../../Models/LMS/subject';
 import { GradeService } from '../../../../Services/Employee/LMS/grade.service';
 import { SubjectService } from '../../../../Services/Employee/LMS/subject.service';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-employee-add-edit',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule,TranslateModule],
   templateUrl: './employee-add-edit.component.html',
   styleUrl: './employee-add-edit.component.css',
 })
@@ -47,6 +50,8 @@ export class EmployeeAddEditComponent {
   DomainName: string = '';
   UserID: number = 0;
   path: string = '';
+   isRtl: boolean = false;
+    subscription!: Subscription;
   Data: EmployeeGet = new EmployeeGet();
   BusCompany: BusType[] = [];
   Roles: Role[] = [];
@@ -91,7 +96,7 @@ export class EmployeeAddEditComponent {
     public FloorServ: FloorService,
     public GradeServ: GradeService,
     public SubjectServ: SubjectService,
-
+private languageService: LanguageService
   ) { }
 
   ngOnInit() {
@@ -156,6 +161,11 @@ export class EmployeeAddEditComponent {
         this.GetEmployeeType();
       });
     }
+      this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+
   }
 
   GetBusCompany() {
