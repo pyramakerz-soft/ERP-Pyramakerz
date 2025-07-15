@@ -14,11 +14,13 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { AccountingEntriesDocTypeService } from '../../../../Services/Employee/Accounting/accounting-entries-doc-type.service';
 import { firstValueFrom } from 'rxjs';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-accounting-entries-doc-type',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './accounting-entries-doc-type.component.html',
   styleUrl: './accounting-entries-doc-type.component.css'
 })
@@ -53,7 +55,8 @@ export class AccountingEntriesDocTypeComponent {
   key: string = 'id';
   value: any = '';
   keysArray: string[] = ['id', 'name'];
-
+ isRtl: boolean = false;
+  subscription!: Subscription;
   accountingEntriesDocType: AccountingEntriesDocType = new AccountingEntriesDocType();
 
   validationErrors: { [key in keyof AccountingEntriesDocType]?: string } = {};
@@ -69,6 +72,7 @@ export class AccountingEntriesDocTypeComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public AccountingEntriesDocTypeServ: AccountingEntriesDocTypeService,
+     private languageService: LanguageService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -76,7 +80,9 @@ export class AccountingEntriesDocTypeComponent {
     this.DomainName = this.ApiServ.GetHeader();
     this.activeRoute.url.subscribe((url) => {
       this.path = url[0].path;
-    });
+
+    }
+  );
 
     this.menuService.menuItemsForEmployee$.subscribe((items) => {
       const settingsPage = this.menuService.findByPageName(this.path, items);
@@ -89,6 +95,11 @@ export class AccountingEntriesDocTypeComponent {
     });
 
     this.GetAllData();
+
+      this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetAllData() {

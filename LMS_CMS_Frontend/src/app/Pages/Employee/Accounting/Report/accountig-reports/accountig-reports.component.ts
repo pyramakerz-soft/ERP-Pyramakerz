@@ -14,10 +14,14 @@ import { catchError, map, Observable, of } from 'rxjs';
 import { BankService } from '../../../../../Services/Employee/Accounting/bank.service';
 import { SaveService } from '../../../../../Services/Employee/Accounting/save.service';
 import * as XLSX from 'xlsx-js-style';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
+
 @Component({
   selector: 'app-accountig-reports',
   standalone: true,
-  imports: [CommonModule, FormsModule, PdfPrintComponent],
+  imports: [CommonModule, FormsModule, PdfPrintComponent , TranslateModule],
   templateUrl: './accountig-reports.component.html',
   styleUrl: './accountig-reports.component.css',
 })
@@ -36,7 +40,8 @@ export class AccountigReportsComponent {
   showTable: boolean = false;
   showViewReportBtn: boolean = false;
   DataToPrint: any = null;
-
+   isRtl: boolean = false;
+  subscription!: Subscription;
   tableData: any[] = [];
   direction: string = '';
   @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;
@@ -52,7 +57,8 @@ export class AccountigReportsComponent {
     public sharedReportsService: SharedReportsService,
     private router: Router,
     public bankService: BankService,
-    public saveService: SaveService
+    public saveService: SaveService,
+    private languageService: LanguageService
   ) {}
 
   ngOnInit() {
@@ -69,6 +75,11 @@ export class AccountigReportsComponent {
 
     this.DomainName = this.ApiServ.GetHeader();
     this.direction = document.dir || 'ltr';
+
+   this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   async ViewReport() {

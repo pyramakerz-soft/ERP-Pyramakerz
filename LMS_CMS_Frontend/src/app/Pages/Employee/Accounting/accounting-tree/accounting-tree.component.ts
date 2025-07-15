@@ -22,11 +22,13 @@ import { MotionType } from '../../../../Models/Accounting/motion-type';
 import { SubType } from '../../../../Models/Accounting/sub-type';
 import { EndType } from '../../../../Models/Accounting/end-type';
 import Swal from 'sweetalert2';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-accounting-tree',
   standalone: true,
-  imports: [SearchComponent, FormsModule, CommonModule, AccountingItemComponent],
+  imports: [SearchComponent, FormsModule, CommonModule, AccountingItemComponent , TranslateModule],
   templateUrl: './accounting-tree.component.html',
   styleUrl: './accounting-tree.component.css'
 })
@@ -71,7 +73,8 @@ export class AccountingTreeComponent {
   accountingTreeChart: AccountingTreeChart = new AccountingTreeChart();
   mainAccountingTreeChart: AccountingTreeChart = new AccountingTreeChart();
   isEdit: boolean = false;
-
+ isRtl: boolean = false;
+  subscription!: Subscription;
   validationErrors: { [key in keyof AccountingTreeChart]?: string } = {};
 
   constructor(
@@ -87,7 +90,8 @@ export class AccountingTreeComponent {
     public linkFileService: LinkFileService,
     public motionTypeService: MotionTypeService,
     public subTypeService: SubTypeService,
-    public endTypeService: EndTypeService
+    public endTypeService: EndTypeService,
+     private languageService: LanguageService
   ) { }
 
   ngOnInit() {
@@ -114,6 +118,11 @@ export class AccountingTreeComponent {
     this.GetMotionTypeData();
     this.GetSubTypeData();
     this.GetEndTypeData();
+
+     this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetAllData() {

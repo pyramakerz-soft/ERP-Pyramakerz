@@ -1,6 +1,6 @@
 <div class="">
     <div class="flex justify-between">
-      <h1 class="primaryTxt font-semibold text-2xl leading-9">Incomes</h1>
+      <h1 class="primaryTxt font-semibold text-2xl leading-9">  {{ 'Incomes' | translate }}</h1>
       <div class="flex justify-between items-center">
         <app-search
           [keysArray]="keysArray"
@@ -10,7 +10,7 @@
           (click)="Create()"
           class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2"
         >
-          Create Income
+            {{ 'Create Income' | translate }}
         </button>
       </div>
     </div>
@@ -23,19 +23,19 @@
             <tr>
               <th
                 class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                ID
+                {{ 'ID' | translate }}
               </th>
               <th
                 class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                Name
+                  {{ 'Name' | translate }}
               </th>
               <th
                 class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                Account Number
+               {{ 'Account Number' | translate }}
               </th>
               <th
                 class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                Actions
+               {{ 'Actions' | translate }}
               </th>
             </tr>
           </thead>
@@ -46,7 +46,7 @@
                 colspan="4"
                 class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm"
               >
-                No Data Found
+                 {{ 'No Data Found' | translate }}
               </td>
             </tr>
   
@@ -100,27 +100,29 @@ class="fixed top-0 left-0 right-0 z-50 flex justify-center items-center w-full h
   </button>
 
   <h1 *ngIf="mode == 'Create'" class="font-semibold text-2xl leading-9">
-    Create Income
+    {{ 'Create Income' | translate }}
   </h1>
   <h1 *ngIf="mode == 'Edit'" class="font-semibold text-2xl leading-9">
-    Edit Income
+     {{ 'Edit Income' | translate }}
   </h1>
   <div class="mt-4 bg-[#F7F7F7] w-[573px] h-auto rounded-[24px] p-[16px_24px] gap-[20px]">
     <div class="flex flex-col mt-2 gap-2 items-start">
-      <h6 class="font-medium text-base leading-6">Income Name</h6>
+      <h6 class="font-medium text-base leading-6"> {{ 'Income Name' | translate }}</h6>
       <input type="text" class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2"
-        [(ngModel)]="income.name" placeholder="Enter Name" (ngModelChange)="
+        [(ngModel)]="income.name" [dir]="isRtl ? 'rtl' : 'ltr'"
+  [placeholder]="isRtl ? 'أدخل الاسم' : 'Enter name'"
+  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'" (ngModelChange)="
               onInputValueChange({ field: 'name', value: $event })" />
       <span *ngIf="validationErrors['name']" class="text-red-500 ml-3 font-normal">{{ validationErrors["name"]}}</span>
     </div>
       <div class="flex flex-col my-4">
-        <label class="mb-2 " for="Account Number">Account Number</label>
+        <label class="mb-2 " for="Account Number">{{ 'Account Number' | translate }}</label>
         <select (ngModelChange)="onInputValueChange({ field: 'accountNumberID', value: $event })"
           class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto w-full h-[45px]"  id="accountNumberID"
           [(ngModel)]="income.accountNumberID">
-          <option [value]="0" disabled selected hidden>Choose Account Number</option>
+          <option [value]="0" disabled selected hidden> {{ 'Choose Account Number' | translate }}</option>
           <option *ngFor="let num of AccountNumbers" [value]="num.id">{{ num.name }}</option>
-          <option *ngIf="AccountNumbers.length === 0" disabled selected>No Data Found</option>
+          <option *ngIf="AccountNumbers.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
         </select>
         <span *ngIf="validationErrors['accountNumberID']" class="text-red-500 ml-3 font-normal">{{
           validationErrors['accountNumberID'] }}</span>
@@ -128,7 +130,7 @@ class="fixed top-0 left-0 right-0 z-50 flex justify-center items-center w-full h
       <div class="flex justify-end">
         <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg mt-2"
         (click)="CreateOREdit()">
-        <span *ngIf="!isLoading">Save</span>
+        <span *ngIf="!isLoading"> {{ 'Save' | translate }}</span>
         <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
       </button>
       </div>

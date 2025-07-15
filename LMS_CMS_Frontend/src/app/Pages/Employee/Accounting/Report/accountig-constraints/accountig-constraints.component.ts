@@ -10,17 +10,21 @@ import { ApiService } from '../../../../../Services/api.service';
 import Swal from 'sweetalert2';
 import { AccountingConstraintsReport } from '../../../../../Models/Accounting/accounting-constraints-report';
 import { catchError, map, Observable, of } from 'rxjs';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-accountig-constraints',
   standalone: true,
-  imports: [CommonModule, FormsModule, PdfPrintComponent],
+  imports: [CommonModule, FormsModule, PdfPrintComponent, TranslateModule],
   templateUrl: './accountig-constraints.component.html',
   styleUrl: './accountig-constraints.component.css'
 })
 export class AccountigConstraintsComponent {
   DomainName: string = '';  
   SelectedStartDate: string = '';
+   isRtl: boolean = false;
+  subscription!: Subscription;
   SelectedEndDate: string = '';
   CurrentPage:number = 1
   PageSize:number = 10
@@ -41,12 +45,19 @@ export class AccountigConstraintsComponent {
     public account: AccountService,
     public ApiServ: ApiService,  
     public reportsService: ReportsService, 
-    public sharedReportsService: SharedReportsService 
+    public sharedReportsService: SharedReportsService ,
+        private languageService: LanguageService
   ) { }
 
   ngOnInit() { 
     this.DomainName = this.ApiServ.GetHeader(); 
-    this.direction = document.dir || 'ltr';  
+    this.direction = document.dir || 'ltr'; 
+    
+    
+     this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }  
 
   async ViewReport() {
@@ -61,6 +72,8 @@ export class AccountigConstraintsComponent {
       await this.GetData(this.CurrentPage, this.PageSize) 
       this.showTable = true
     }
+
+
   }
 
   DateChange(){

@@ -1,15 +1,15 @@
 <div class="flex justify-between mb-3">
-    <h1 class="primaryTxt font-semibold text-2xl leading-9">Accounting Constraints Report</h1>
+    <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{'Accounting Constraints Report'| translate }}</h1>
 </div>
 
-<div class="flex justify-start items-center space-x-4">
-    <div class="w-[30%]">
-        <label for="fromDate" class="block mb-2 text-sm font-medium text-gray-900">Start Date</label>
+<div class="flex justify-start items-center space-x-4 ">
+    <div class="w-[30%] px-1">
+        <label for="fromDate" class="block mb-2 text-sm font-medium text-gray-900"> {{'Start Date'| translate }}</label>
         <input id="fromDate" type="date" [(ngModel)]="SelectedStartDate" (change)="DateChange()"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"> 
     </div> 
-    <div class="w-[30%]">
-        <label for="toDate" class="block mb-2 text-sm font-medium text-gray-900">End Date</label>
+    <div class="w-[30%] px-1">
+        <label for="toDate" class="block mb-2 text-sm font-medium text-gray-900">{{'End Date'| translate }}</label>
         <input id="toDate" type="date" [(ngModel)]="SelectedEndDate" (change)="DateChange()"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"> 
     </div> 
@@ -18,7 +18,7 @@
         <button class="p-3 font-medium text-xl rounded-lg" (click)="ViewReport()"
             [disabled]="!showViewReportBtn"
             [ngClass]="{ 'bg-gray-100 text-gray-300': !showViewReportBtn, 'secondaryBg text-white': showViewReportBtn}">
-            View Report
+             {{'View Report'| translate }}
         </button>
     </div>
 </div>
@@ -34,37 +34,37 @@
         <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
             <tr>  
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Master ID
+                     {{'Master ID'| translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Details ID
+                     {{'Details ID'| translate }}
                 </th> 
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Account
+                     {{'Account'| translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Invoice Number
+                     {{'Invoice Number'| translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Main Account ID
+                     {{'Main Account ID'| translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Main Account
+                     {{'Main Account'| translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Sub Account ID
+                     {{'Sub Account ID'| translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Sub Account
+                     {{'Sub Account'| translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Credit
+                     {{'Credit'| translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Debit
+                     {{'Debit'| translate }}
                 </th>  
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Date
+                     {{'Date'| translate }}
                 </th>  
             </tr>
         </thead>
@@ -72,7 +72,7 @@
             <tr *ngIf="tableData.length === 0">
                 <td colspan="11"
                     class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-                    No Data Found
+                     {{'No Data Found'| translate }}
                 </td>
             </tr>
             <tr *ngFor="let acc of tableData; let i = index" [ngClass]="{ 'bg-gray-100': i % 2 === 1, 'bg-white': i%2 !=1 }" 
@@ -116,12 +116,12 @@
 </div> 
 
 <div *ngIf="showTable" class="mt-8 flex justify-between items-center">
-    <div class="flex items-center space-x-4">
-        <button class="flex items-center space-x-2 rounded-lg border py-3 px-4"
+    <div class="flex items-center space-x-4 flex-row rtl:flex-row-reverse">
+        <button class="flex items-center space-x-2 rounded-lg border py-3 px-4 flex-row rtl:flex-row-reverse"
             (click)="changeCurrentPage(CurrentPage-1)" [disabled]="CurrentPage === 1 || tableData.length == 0"
             [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === 1 || tableData.length == 0}">
             <i class="fa-solid fa-arrow-left"></i>
-            <p>Previous</p>
+            <p>{{'Previous'| translate }}</p>
         </button>
         <div class="flex">
             <div *ngFor="let page of [].constructor(TotalPages); let i = index" class="rounded-lg py-[10px] w-[40px]"
@@ -129,10 +129,10 @@
                 <p class="text-center">{{ i + 1 }}</p>
             </div>
         </div>
-        <button class="flex items-center space-x-2 rounded-lg border py-3 px-4"
+        <button class="flex items-center space-x-2 rounded-lg border py-3 px-4 flex-row rtl:flex-row-reverse"
             (click)="changeCurrentPage(CurrentPage+1)" [disabled]="CurrentPage === TotalPages || tableData.length == 0"
             [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === TotalPages || tableData.length == 0}">
-            <p>Next</p>
+            <p>{{'Next'| translate }}</p>
             <i class="fa-solid fa-arrow-right"></i>
         </button>
     </div>
@@ -140,11 +140,11 @@
     <div class="flex items-center space-x-2">
         <input (input)="validateNumberForPagination($event)" class="rounded-lg border py-3 px-4 w-[73px]" [(ngModel)]="PageSize"
             min="1" (input)="validatePageSize($event)" (ngModelChange)="changeCurrentPage(CurrentPage)">
-        <p>items Per Page</p>
+        <p>{{'items Per Page'| translate }}</p>
     </div>
 
     <div>
-        <p>{{CurrentPage}} of {{TotalPages}} pages ({{TotalRecords}} Item)</p>
+        <p>{{CurrentPage}} {{'of'| translate }} {{TotalPages}} {{'pages'| translate }} ({{TotalRecords}} {{'Item'| translate }})</p>
     </div>
 </div>
  

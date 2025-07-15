@@ -24,11 +24,14 @@ import html2pdf from 'html2pdf.js';
 
 import { PdfPrintComponent } from '../../../../Component/pdf-print/pdf-print.component';
 import { ReportsService } from '../../../../Services/shared/reports.service';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-receivable-details',
   standalone: true,
-  imports: [CommonModule, FormsModule, PdfPrintComponent],
+  imports: [CommonModule, FormsModule, PdfPrintComponent, TranslateModule],
   templateUrl: './receivable-details.component.html',
   styleUrl: './receivable-details.component.css'
 })
@@ -45,7 +48,8 @@ export class ReceivableDetailsComponent {
 
   path: string = '';
   ReceivableID: number = 0;
-
+ isRtl: boolean = false;
+  subscription!: Subscription;
   isCreate: boolean = false
   isEdit: boolean = false
   isView: boolean = false
@@ -77,7 +81,9 @@ export class ReceivableDetailsComponent {
     public DomainServ: DomainService, public EditDeleteServ: DeleteEditPermissionService, public ApiServ: ApiService, public receivableService: ReceivableService,
     public bankService: BankService, public saveService: SaveService, public receivableDetailsService: ReceivableDetailsService, public linkFileService: LinkFileService,
 
-    public dataAccordingToLinkFileService: DataAccordingToLinkFileService, public reportsService: ReportsService) { }
+    public dataAccordingToLinkFileService: DataAccordingToLinkFileService, public reportsService: ReportsService,
+  private languageService: LanguageService
+  ) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -116,6 +122,10 @@ export class ReceivableDetailsComponent {
     });
 
     this.GetDocType()
+          this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   moveToReceivable() {

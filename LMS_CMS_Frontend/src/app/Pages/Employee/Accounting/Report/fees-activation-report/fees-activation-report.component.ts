@@ -12,11 +12,13 @@ import { ReportsService as SharedReportsService } from '../../../../../Services/
 import { FeesActivation } from '../../../../../Models/Accounting/fees-activation';
 import Swal from 'sweetalert2'; 
 import { catchError, map, Observable, of } from 'rxjs';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-fees-activation-report',
   standalone: true,
-  imports: [CommonModule, FormsModule, PdfPrintComponent],
+  imports: [CommonModule, FormsModule, PdfPrintComponent, TranslateModule],
   templateUrl: './fees-activation-report.component.html',
   styleUrl: './fees-activation-report.component.css'
 })
@@ -28,7 +30,8 @@ export class FeesActivationReportComponent {
   PageSize:number = 10
   TotalPages:number = 1
   TotalRecords:number = 0
-  
+   isRtl: boolean = false;
+  subscription!: Subscription;
   showPDF: boolean = false 
   showTable: boolean = false 
   showViewReportBtn: boolean = false 
@@ -43,12 +46,18 @@ export class FeesActivationReportComponent {
     public account: AccountService,
     public ApiServ: ApiService,  
     public reportsService: ReportsService, 
-    public sharedReportsService: SharedReportsService 
+    public sharedReportsService: SharedReportsService ,
+      private languageService: LanguageService
   ) { }
 
   ngOnInit() { 
     this.DomainName = this.ApiServ.GetHeader(); 
     this.direction = document.dir || 'ltr';  
+
+          this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }  
 
   async ViewReport() {

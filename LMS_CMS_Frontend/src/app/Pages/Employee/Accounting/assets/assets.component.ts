@@ -17,11 +17,13 @@ import { AccountingTreeChart } from '../../../../Models/Accounting/accounting-tr
 import { AssetService } from '../../../../Services/Employee/Accounting/asset.service';
 import { firstValueFrom } from 'rxjs';
 import { AccountingTreeChartService } from '../../../../Services/Employee/Accounting/accounting-tree-chart.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-assets',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './assets.component.html',
   styleUrl: './assets.component.css'
 })
@@ -45,7 +47,8 @@ export class AssetsComponent {
   AllowDeleteForOthers: boolean = false;
 
   TableData: Asset[] = [];
-
+ isRtl: boolean = false;
+  subscription!: Subscription;
   DomainName: string = '';
   UserID: number = 0;
 
@@ -74,6 +77,7 @@ export class AssetsComponent {
     public ApiServ: ApiService,
     public AssetServ: AssetService,
     public accountServ: AccountingTreeChartService,
+       private languageService: LanguageService,
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -95,6 +99,13 @@ export class AssetsComponent {
 
     this.GetAllData();
     this.GetAllAccount()
+
+
+    this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+
   }
 
   GetAllData() {

@@ -16,11 +16,13 @@ import { AccountingTreeChart } from '../../../../Models/Accounting/accounting-tr
 import { TuitionFeesTypeService } from '../../../../Services/Employee/Accounting/tuition-fees-type.service';
 import { firstValueFrom } from 'rxjs';
 import { AccountingTreeChartService } from '../../../../Services/Employee/Accounting/accounting-tree-chart.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-tuition-fees-types',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './tuition-fees-types.component.html',
   styleUrl: './tuition-fees-types.component.css'
 })
@@ -50,7 +52,8 @@ export class TuitionFeesTypesComponent {
 
   isModalVisible: boolean = false;
   mode: string = '';
-
+ isRtl: boolean = false;
+  subscription!: Subscription;
   path: string = '';
   key: string = 'id';
   value: any = '';
@@ -73,7 +76,7 @@ export class TuitionFeesTypesComponent {
     public ApiServ: ApiService,
     public TuitionFeesTypeServ: TuitionFeesTypeService,
     public accountServ: AccountingTreeChartService,
-
+private languageService: LanguageService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -95,6 +98,10 @@ export class TuitionFeesTypesComponent {
 
     this.GetAllData();
     this.GetAllAccount()
+          this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetAllData() {

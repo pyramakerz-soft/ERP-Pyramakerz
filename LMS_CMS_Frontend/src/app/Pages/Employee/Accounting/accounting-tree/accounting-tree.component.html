@@ -1,12 +1,12 @@
 <div class="flex justify-between">
-    <h1 class="primaryTxt font-semibold text-2xl leading-9">Accounting Tree</h1> 
+    <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Accounting Tree' | translate }}</h1> 
 </div>
 
 <div class="mt-7 flex justify-between">
     <div class="p-6 bg-[#F7F7F7] w-[35%] rounded-3xl overflow-x-auto">
         <div class="flex space-x-2 items-center w-full">
             <img src="Icons/Folder.png">
-            <p class="text-2xl">Accounting</p>
+            <p class="text-2xl"> {{ 'Accounting' | translate }}</p>
         </div>
 
         <div *ngIf="TableData && TableData.length > 0">
@@ -17,87 +17,91 @@
     <div class="p-6 bg-[#F7F7F7] w-[60%] rounded-3xl">
         <div class="mt-6 mb-4 flex flex-wrap justify-between font-normal">
             <div class="flex flex-col w-[49%] mb-4">
-                <label class="mb-2 primaryTxt font-medium" for="id">ID</label>
+                <label class="mb-2 primaryTxt font-medium" for="id"> {{ 'ID' | translate }}</label>
                 <input 
                 (ngModelChange)="onInputValueChange({ field: 'id', value: $event }); GetDataByID()"
-                [(ngModel)]="accountingTreeChart.id" id="id" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter ID"/>
+                [(ngModel)]="accountingTreeChart.id" id="id" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" [dir]="isRtl ? 'rtl' : 'ltr'"
+  [placeholder]="isRtl ? 'أدخل الرقم التعريفي' : 'Enter ID'"
+  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'"/>
                 <span *ngIf="validationErrors['id']" class="text-red-500 ml-3">{{ validationErrors['id'] }}</span>
             </div>
             <div class="flex flex-col w-[49%] mb-4">
-                <label class="mb-2 primaryTxt font-medium" for="name">Name</label>
+                <label class="mb-2 primaryTxt font-medium" for="name"> {{ 'Name' | translate }}</label>
                 <input [(ngModel)]="accountingTreeChart.name"
                 (ngModelChange)="onInputValueChange({ field: 'name', value: $event })"
-                 id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter name"/>
+                 id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" [dir]="isRtl ? 'rtl' : 'ltr'"
+  [placeholder]="isRtl ? 'أدخل الاسم' : 'Enter name'"
+  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'"/>
                 <span *ngIf="validationErrors['name']" class="text-red-500 ml-3 font-normal">{{ validationErrors['name'] }}</span>
             </div>
             <div class="flex flex-col w-full mb-4">
-                <label class="mb-2 primaryTxt font-medium" for="mainAccNo">Main Acc No</label>
+                <label class="mb-2 primaryTxt font-medium" for="mainAccNo"> {{ 'Main Acc No' | translate }}</label>
                 <select [(ngModel)]="accountingTreeChart.mainAccountNumberID" 
                 (ngModelChange)="onInputValueChange({ field: 'mainAccountNumberID', value: $event })"
                 (change)="GetMainByID()"
                 class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto font-normal" id="mainAccNo">
-                    <option [value]="0" disabled selected hidden>Select Main Acc No</option>
+                    <option [value]="0" disabled selected hidden> {{ 'Select Main Acc No' | translate }}</option>
                     <option *ngFor="let acc of MainData" [value]="acc.id">{{ acc.id }} {{ acc.name }}</option>
-                    <option *ngIf="accountingTreeChart.subTypeID != 2" [value]="0">No Main</option>
+                    <option *ngIf="accountingTreeChart.subTypeID != 2" [value]="0"> {{ 'No Main' | translate }}</option>
                 </select>
                 <span *ngIf="validationErrors['mainAccountNumberID']" class="text-red-500 ml-3 font-normal">{{ validationErrors['mainAccountNumberID'] }}</span>
             </div>
             <div class="flex flex-col w-[49%] mb-4">
-                <label class="mb-2 primaryTxt font-medium" for="motionType">Motion Type</label>
+                <label class="mb-2 primaryTxt font-medium" for="motionType"> {{ 'Motion Type' | translate }}</label>
                 <select [(ngModel)]="accountingTreeChart.motionTypeID"
                 (ngModelChange)="onInputValueChange({ field: 'motionTypeID', value: $event })" 
                 [disabled]="accountingTreeChart.mainAccountNumberID != 0"
                 class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="motionType">
-                    <option [value]="0" disabled selected hidden>Select Motion Type</option>
+                    <option [value]="0" disabled selected hidden> {{ 'Select Motion Type' | translate }}</option>
                     <option *ngFor="let type of MotionTypeData" [value]="type.id">{{ type.name }}</option>
-                    <option *ngIf="MotionTypeData.length === 0" disabled>No Data Found</option>
+                    <option *ngIf="MotionTypeData.length === 0" disabled> {{ 'No Data Found' | translate }}</option>
                 </select>
                 <span *ngIf="validationErrors['motionTypeID']" class="text-red-500 ml-3 font-normal">{{ validationErrors['motionTypeID'] }}</span>
             </div> 
             <div class="flex flex-col w-[49%] mb-4">
-                <label class="mb-2 primaryTxt font-medium" for="subType">Sub Type</label>
+                <label class="mb-2 primaryTxt font-medium" for="subType"> {{ 'Sub Type' | translate }}</label>
                 <select [(ngModel)]="accountingTreeChart.subTypeID" (change)="lockLinkFile()"
                 (ngModelChange)="onInputValueChange({ field: 'subTypeID', value: $event })"
                 [disabled]="isEdit == true && this.accountingTreeChart.subTypeName == 'Main'"
                 class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="subType">
-                    <option [value]="0" disabled selected hidden>Select Sub Type</option>
+                    <option [value]="0" disabled selected hidden> {{ 'Select Sub Type' | translate }}</option>
                     <option *ngFor="let type of SubTypeData" [value]="type.id">{{ type.name }}</option>
-                    <option *ngIf="SubTypeData.length === 0" disabled>No Data Found</option>
+                    <option *ngIf="SubTypeData.length === 0" disabled> {{ 'No Data Found' | translate }}</option>
                 </select>
                 <span *ngIf="validationErrors['subTypeID']" class="text-red-500 ml-3 font-normal">{{ validationErrors['subTypeID'] }}</span>
             </div>
             <div class="flex flex-col w-[49%] mb-4">
-                <label class="mb-2 primaryTxt font-medium" for="endType">End Type</label>
+                <label class="mb-2 primaryTxt font-medium" for="endType"> {{ 'End Type' | translate }}</label>
                 <select [(ngModel)]="accountingTreeChart.endTypeID"
                 (ngModelChange)="onInputValueChange({ field: 'endTypeID', value: $event })" 
                 [disabled]="accountingTreeChart.mainAccountNumberID != 0"
                 class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="endType">
-                    <option [value]="0" disabled selected hidden>Select End Type</option>
+                    <option [value]="0" disabled selected hidden> {{ 'Select End Type' | translate }}</option>
                     <option *ngFor="let type of EndTypeData" [value]="type.id">{{ type.name }}</option>
-                    <option *ngIf="EndTypeData.length === 0" disabled>No Data Found</option>
+                    <option *ngIf="EndTypeData.length === 0" disabled> {{ 'No Data Found' | translate }}</option>
                 </select>
                 <span *ngIf="validationErrors['endTypeID']" class="text-red-500 ml-3 font-normal">{{ validationErrors['endTypeID'] }}</span>
             </div>
             <div class="flex flex-col w-[49%] mb-4">
-                <label class="mb-2 primaryTxt font-medium" for="level">Level</label>
+                <label class="mb-2 primaryTxt font-medium" for="level"> {{ 'Level' | translate }}</label>
                 <input [(ngModel)]="accountingTreeChart.level" id="level" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" disabled/>
             </div>
             <div class="flex flex-col w-full mb-4">
-                <label class="mb-2 primaryTxt font-medium" for="linkFile">Link File</label>
+                <label class="mb-2 primaryTxt font-medium" for="linkFile"> {{ 'Link File' | translate }}</label>
                 <select [(ngModel)]="accountingTreeChart.linkFileID"
                 (ngModelChange)="onInputValueChange({ field: 'linkFileID', value: $event })"
                  [disabled]="accountingTreeChart.subTypeID == 1"
                 class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="linkFile">
-                    <option *ngIf="accountingTreeChart.subTypeID != 1" [value]="0" disabled selected hidden>Select Link File</option>
+                    <option *ngIf="accountingTreeChart.subTypeID != 1" [value]="0" disabled selected hidden> {{ 'Select Link File' | translate }}</option>
                     <option *ngFor="let type of LinkFileData" [value]="type.id">{{ type.name }}</option>
-                    <option *ngIf="accountingTreeChart.subTypeID != 2" [value]="0">No Link File</option>
+                    <option *ngIf="accountingTreeChart.subTypeID != 2" [value]="0"> {{ 'No Link File' | translate }}</option>
                 </select>
                 <span *ngIf="validationErrors['linkFileID']" class="text-red-500 ml-3 font-normal">{{ validationErrors['linkFileID'] }}</span>
             </div>
         </div>
         <div class="flex justify-end">
             <button class="secondaryBg text-white font-medium px-4 py-2 rounded-lg" (click)="Save()" >
-                Save
+                {{ 'Save' | translate }}
             </button>
         </div>
     </div>

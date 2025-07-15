@@ -13,11 +13,13 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-payable',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './payable.component.html',
   styleUrl: './payable.component.css'
 })
@@ -31,7 +33,8 @@ User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '',
 
   DomainName: string = '';
   UserID: number = 0;
-
+ isRtl: boolean = false;
+  subscription!: Subscription;
   keysArray: string[] = ['id', 'docNumber' ,"date", "payableDocTypesName" ,"linkFileName"];
 
   path: string = '';
@@ -48,8 +51,16 @@ User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '',
   isDeleting:boolean = false;
 
   constructor(
-    private router: Router, private menuService: MenuService, public activeRoute: ActivatedRoute, public account: AccountService, 
-    public DomainServ: DomainService, public EditDeleteServ: DeleteEditPermissionService, public ApiServ: ApiService, public payableService:PayableService){}
+    private router: Router,
+     private menuService: MenuService,
+      public activeRoute: ActivatedRoute,
+       public account: AccountService, 
+    public DomainServ: DomainService,
+     public EditDeleteServ: DeleteEditPermissionService,
+      public ApiServ: ApiService,
+       public payableService:PayableService,
+        private languageService: LanguageService
+      ){}
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -70,6 +81,10 @@ User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '',
     });
 
     this.GetPayableDate(this.DomainName, this.CurrentPage, this.PageSize)
+        this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   async onSearchEvent(event: { key: string; value: any }) {

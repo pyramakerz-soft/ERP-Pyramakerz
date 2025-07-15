@@ -13,11 +13,14 @@ import { Receivable } from '../../../../Models/Accounting/receivable';
 import { ReceivableService } from '../../../../Services/Employee/Accounting/receivable.service';
 import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-receivable',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './receivable.component.html',
   styleUrl: './receivable.component.css'
 })
@@ -33,7 +36,8 @@ export class ReceivableComponent {
   UserID: number = 0;
 
   keysArray: string[] = ['id', 'docNumber' ,"date", "receivableDocTypesName" ,"linkFileName"];
-
+ isRtl: boolean = false;
+  subscription!: Subscription;
   path: string = '';
   key: string = 'id';
   value: any = '';
@@ -48,8 +52,16 @@ export class ReceivableComponent {
   isDeleting:boolean = false;
 
   constructor(
-    private router: Router, private menuService: MenuService, public activeRoute: ActivatedRoute, public account: AccountService, 
-    public DomainServ: DomainService, public EditDeleteServ: DeleteEditPermissionService, public ApiServ: ApiService, public receivableService:ReceivableService){}
+    private router: Router, 
+    private menuService: MenuService, 
+    public activeRoute: ActivatedRoute, 
+    public account: AccountService, 
+    public DomainServ: DomainService,
+    public EditDeleteServ: DeleteEditPermissionService, 
+    public ApiServ: ApiService,
+     public receivableService:ReceivableService,
+    private languageService: LanguageService
+    ){}
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -70,6 +82,11 @@ export class ReceivableComponent {
     });
 
     this.GetReceivableDate(this.DomainName, this.CurrentPage, this.PageSize)
+      this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+
   }
 
   async onSearchEvent(event: { key: string; value: any }) {

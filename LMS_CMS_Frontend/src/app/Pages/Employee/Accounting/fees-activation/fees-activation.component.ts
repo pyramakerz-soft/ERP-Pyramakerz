@@ -29,11 +29,13 @@ import { AcadimicYearService } from '../../../../Services/Employee/LMS/academic-
 import { FeesActivationAddPut } from '../../../../Models/Accounting/fees-activation-add-put';
 import { firstValueFrom, lastValueFrom } from 'rxjs';
 import { StudentService } from '../../../../Services/student.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-fees-activation',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, TranslateModule],
   templateUrl: './fees-activation.component.html',
   styleUrl: './fees-activation.component.css'
 })
@@ -55,7 +57,8 @@ export class FeesActivationComponent {
   mode: string = '';
 
   path: string = ''; 
-
+ isRtl: boolean = false;
+  subscription!: Subscription;
   Fees: FeesActivationAddPut = new FeesActivationAddPut()
   FeesForEdit: FeesActivationAddPut = new FeesActivationAddPut()
   FeesForAdd: FeesActivationAddPut[] = []
@@ -87,6 +90,7 @@ export class FeesActivationComponent {
 
   constructor( 
     private menuService: MenuService,
+    private languageService: LanguageService,
     public activeRoute: ActivatedRoute,
     public account: AccountService,
     public ApiServ: ApiService,
@@ -101,7 +105,7 @@ export class FeesActivationComponent {
     public studentService: StudentService,
     public TuitionFeesTypeServ: TuitionFeesTypeService,
     public FeesDiscountTypeServ: TuitionDiscountTypeService,
-    public AcademicYearServ: AcadimicYearService
+    public AcademicYearServ: AcadimicYearService,
   ) { }
 
   ngOnInit() {
@@ -125,6 +129,10 @@ export class FeesActivationComponent {
     this.GetAllSchools(); 
     this.GetAllTuitionFeesType();
     this.GetAllDiscountType() 
+      this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   } 
 
   GetAllFeesData() {

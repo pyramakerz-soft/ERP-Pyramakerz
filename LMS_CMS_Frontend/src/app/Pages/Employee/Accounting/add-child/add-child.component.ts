@@ -16,11 +16,13 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { Student } from '../../../../Models/student';
 import { StudentService } from '../../../../Services/student.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-add-child',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './add-child.component.html',
   styleUrl: './add-child.component.css'
 })
@@ -59,12 +61,14 @@ export class AddChildComponent {
   NationalID: string = "";
   Student: Student = new Student();
   emplyeeStudent: EmplyeeStudent = new EmplyeeStudent();
-
+ isRtl: boolean = false;
+  subscription!: Subscription;
   validationErrors: { [key in keyof EmplyeeStudent]?: string } = {};
 
   constructor(
     private router: Router,
     private menuService: MenuService,
+    private languageService: LanguageService,
     public activeRoute: ActivatedRoute,
     public account: AccountService,
     public BusTypeServ: BusTypeService,
@@ -91,6 +95,12 @@ export class AddChildComponent {
         this.AllowEditForOthers = settingsPage.allow_Edit_For_Others;
       }
     });
+
+
+    this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
 
     this.GetAllData();
   }

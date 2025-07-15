@@ -9,11 +9,13 @@ import { AccountingConfiguration } from '../../../../Models/Accounting/accountin
 import { AccountingConfigurationService } from '../../../../Services/Employee/Accounting/accounting-configuration.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import { firstValueFrom, Subscription } from 'rxjs';
 @Component({
   selector: 'app-accountig-configuration',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, TranslateModule],
   templateUrl: './accountig-configuration.component.html',
   styleUrl: './accountig-configuration.component.css'
 })
@@ -25,14 +27,16 @@ export class AccountigConfigurationComponent {
   DomainName: string = '';
   UserID: number = 0;
   User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
-  
+   isRtl: boolean = false;
+  subscription!: Subscription;
   isLoading = false;
 
   constructor(
     public account: AccountService,
     public ApiServ: ApiService,     
     public accountingTreeChartService: AccountingTreeChartService,
-    public accountingConfigurationService: AccountingConfigurationService
+    public accountingConfigurationService: AccountingConfigurationService,
+    private languageService: LanguageService
   ) {}
 
   ngOnInit() {
@@ -43,6 +47,11 @@ export class AccountigConfigurationComponent {
  
     this.GetById()  
     this.GetAccountingTree()   
+
+      this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetById(){

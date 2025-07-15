@@ -25,11 +25,14 @@ import { AccountingTreeChartService } from '../../../../Services/Employee/Accoun
 import html2pdf from 'html2pdf.js';
 import { PdfPrintComponent } from '../../../../Component/pdf-print/pdf-print.component';
 import { ReportsService } from '../../../../Services/shared/reports.service';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-accounting-entries-details',
   standalone: true,
-  imports: [CommonModule, FormsModule, PdfPrintComponent],
+  imports: [CommonModule, FormsModule, PdfPrintComponent,TranslateModule],
   templateUrl: './accounting-entries-details.component.html',
   styleUrl: './accounting-entries-details.component.css'
 })
@@ -73,16 +76,30 @@ export class AccountingEntriesDetailsComponent {
 
   isLoading = false;
   isSaveLoading = false;
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
 
   @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;
   showPDF = false;
   
   constructor(
-    private router: Router, private menuService: MenuService, public activeRoute: ActivatedRoute, public account: AccountService, public accountingEntriesDocTypeService:AccountingEntriesDocTypeService,
-    public DomainServ: DomainService, public EditDeleteServ: DeleteEditPermissionService, public ApiServ: ApiService, public accountingEntriesService:AccountingEntriesService,
-    public bankService:BankService, public saveService:SaveService, public accountingEntriesDetailsService:AccountingEntriesDetailsService, public linkFileService:LinkFileService,
-    public dataAccordingToLinkFileService: DataAccordingToLinkFileService, public accountingTreeChartService:AccountingTreeChartService, public reportsService: ReportsService){}
+    private router: Router,
+     private menuService: MenuService, 
+     public activeRoute: ActivatedRoute,
+      public account: AccountService,
+       public accountingEntriesDocTypeService:AccountingEntriesDocTypeService,
+    public DomainServ: DomainService,
+     public EditDeleteServ: DeleteEditPermissionService, 
+     public ApiServ: ApiService,
+      public accountingEntriesService:AccountingEntriesService,
+    public bankService:BankService,
+     public saveService:SaveService,
+      public accountingEntriesDetailsService:AccountingEntriesDetailsService, 
+      public linkFileService:LinkFileService,
+    public dataAccordingToLinkFileService: DataAccordingToLinkFileService,
+     public accountingTreeChartService:AccountingTreeChartService, 
+     public reportsService: ReportsService , private languageService: LanguageService
+    ){}
     
   ngOnInit(){
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -121,6 +138,13 @@ export class AccountingEntriesDetailsComponent {
     });
 
     this.GetDocType()
+
+        this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+     
+
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   moveToAccountingEntries() {

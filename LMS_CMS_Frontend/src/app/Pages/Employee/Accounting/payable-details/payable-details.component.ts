@@ -24,11 +24,13 @@ import Swal from 'sweetalert2';
 import html2pdf from 'html2pdf.js';
 import { PdfPrintComponent } from '../../../../Component/pdf-print/pdf-print.component';
 import { ReportsService } from '../../../../Services/shared/reports.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-payable-details',
   standalone: true,
-  imports: [CommonModule, FormsModule, PdfPrintComponent],
+  imports: [CommonModule, FormsModule, PdfPrintComponent, TranslateModule],
   templateUrl: './payable-details.component.html',
   styleUrl: './payable-details.component.css'
 })
@@ -42,7 +44,8 @@ export class PayableDetailsComponent {
 
   DomainName: string = '';
   UserID: number = 0;
-
+isRtl: boolean = false;
+  subscription!: Subscription;
   path: string = '';
   PayableID: number = 0;
 
@@ -75,10 +78,24 @@ export class PayableDetailsComponent {
   showPDF = false;
   
   constructor(
-    private router: Router, private menuService: MenuService, public activeRoute: ActivatedRoute, public account: AccountService, public payableDocTypeService: PayableDocTypeService,
-    public DomainServ: DomainService, public EditDeleteServ: DeleteEditPermissionService, public ApiServ: ApiService, public payableService: PayableService,
-    public bankService: BankService, public saveService: SaveService, public payableDetailsService: PayableDetailsService, public linkFileService: LinkFileService,
-    public dataAccordingToLinkFileService: DataAccordingToLinkFileService, public reportsService: ReportsService) { }
+    private router: Router, 
+    private menuService: MenuService, 
+    public activeRoute: ActivatedRoute,
+     public account: AccountService,
+      public payableDocTypeService: PayableDocTypeService,
+    public DomainServ: DomainService,
+     public EditDeleteServ: DeleteEditPermissionService,
+      public ApiServ: ApiService, 
+      public payableService: PayableService,
+    public bankService: BankService,
+     public saveService: SaveService,
+      public payableDetailsService: PayableDetailsService,
+       public linkFileService: LinkFileService,
+    public dataAccordingToLinkFileService: DataAccordingToLinkFileService, 
+    public reportsService: ReportsService,
+    private languageService: LanguageService
+  
+  ) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -117,6 +134,11 @@ export class PayableDetailsComponent {
     });
 
     this.GetDocType()
+
+          this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   moveToPayable() {

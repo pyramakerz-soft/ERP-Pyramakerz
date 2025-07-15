@@ -16,11 +16,13 @@ import { BusTypeService } from '../../../../Services/Employee/Bus/bus-type.servi
 import { DomainService } from '../../../../Services/Employee/domain.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-bank',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './bank.component.html',
   styleUrl: './bank.component.css'
 })
@@ -44,7 +46,8 @@ export class BankComponent {
   AllowDeleteForOthers: boolean = false;
 
   TableData: Bank[] = [];
-
+isRtl: boolean = false;
+  subscription!: Subscription;
   DomainName: string = '';
   UserID: number = 0;
 
@@ -73,6 +76,7 @@ export class BankComponent {
     public ApiServ: ApiService,
     public BankServ: BankService,
     public accountServ: AccountingTreeChartService,
+    private languageService: LanguageService,
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -94,6 +98,12 @@ export class BankComponent {
 
     this.GetAllData();
     this.GetAllAccount();
+
+    
+    this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetAllData() {
