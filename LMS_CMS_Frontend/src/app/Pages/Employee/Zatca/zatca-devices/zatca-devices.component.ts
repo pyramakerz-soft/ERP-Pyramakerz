@@ -257,9 +257,7 @@ Save() {
     schoolId: Number(this.zatcaDevice.schoolId),
     school: selectedSchool ? selectedSchool.name : '',
     certificateDate: this.zatcaDevice.certificateDate
-  };
-
-  console.log('Sending update payload:', payload);
+  }; 
 
   this.schoolPCsService.Edit(this.zatcaDevice.id, payload, this.DomainName).subscribe({
     next: () => {
@@ -348,12 +346,12 @@ Delete(id: number) {
             });
             this.GetTableData(); // Refresh table data
           },
-          error: (error) => {
+          error: (error) => {  
             this.isLoading = false;
             Swal.fire({
               icon: 'error',
               title: 'Error',
-              text: error.error?.message || 'Failed to generate certificate',
+              text: error.error || 'Failed to generate certificate',
               confirmButtonText: 'Okay'
             });
           }
