@@ -343,6 +343,7 @@ Delete(id: number) {
               confirmButtonText: 'Okay'
             });
             this.GetTableData(); // Refresh table data
+            this.closeCertificateModal()
           },
           error: (error) => {  
             this.isLoading = false;
