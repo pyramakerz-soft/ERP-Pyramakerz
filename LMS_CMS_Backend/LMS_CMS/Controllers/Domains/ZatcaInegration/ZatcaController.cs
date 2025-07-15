@@ -50,6 +50,12 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
         )]
         public async Task<IActionResult> GeneratePCSID(long otp, long schoolPcId)
         {
+            if (schoolPcId == 0 )
+                return BadRequest("School PC ID can not be null or 0");
+
+            if (!ModelState.IsValid)
+                return BadRequest("OTP must be 6-digit and only numbers");
+
             string certificates = Path.Combine(Directory.GetCurrentDirectory(), "Invoices/Certificates");
 
             if (!Directory.Exists(certificates)) 
