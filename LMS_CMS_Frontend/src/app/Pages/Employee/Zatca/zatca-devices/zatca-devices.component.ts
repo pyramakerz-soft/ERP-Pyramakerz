@@ -365,6 +365,15 @@ Delete(id: number) {
     return this.datePipe.transform(date, 'MMM d, yyyy') || '';
   }
 
+  validateNumber(event: any): void {
+    const value = event.target.value;
+    const intValue = parseInt(value, 10);
+    if (!/^\d+$/.test(value)) {
+      event.target.value = '';
+      this.otp = '' as never;
+    }
+  }
+ 
   IsAllowDelete(insertedByUserId: number): boolean {
     if (!this.IsEmployee) return true;
     return this.EditDeleteServ.IsAllowDelete(insertedByUserId, this.UserID, this.AllowDeleteForOthers);

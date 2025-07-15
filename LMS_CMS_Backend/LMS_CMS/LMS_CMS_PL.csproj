@@ -36,6 +36,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Invoices\Certificates\" />
     <Folder Include="Invoices\XMLCredits\" />
     <Folder Include="Invoices\XMLInvoices\" />
     <Folder Include="Uploads\Attachments\" />
