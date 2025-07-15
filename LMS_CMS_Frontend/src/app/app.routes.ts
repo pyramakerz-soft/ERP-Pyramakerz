@@ -192,6 +192,8 @@ import { AccountigConfigurationComponent } from './Pages/Employee/Accounting/acc
 import { TimeTable } from './Models/LMS/time-table';
 import { TimeTableComponent } from './Pages/Employee/LMS/time-table/time-table.component';
 import { TimeTableViewComponent } from './Pages/Employee/LMS/time-table-view/time-table-view.component'; 
+import { TimeTableReplace } from './Models/LMS/time-table-replace';
+import { TimeTableReplaceComponent } from './Pages/Employee/LMS/time-table-replace/time-table-replace.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -426,6 +428,7 @@ export const routes: Routes = [
             { path: "Accounting Configuration", component: AccountigConfigurationComponent, title: "Accounting Configuration", canActivate: [noNavigateWithoutLoginGuard] },
             { path: 'Time Table', component: TimeTableComponent, title: 'Time Table', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Time Table View/:id', component: TimeTableViewComponent, title: 'Time Table View', canActivate: [noNavigateWithoutLoginGuard], },
+            { path: 'Time Table Replace/:id', component: TimeTableReplaceComponent, title: 'Time Table Replace', canActivate: [noNavigateWithoutLoginGuard], },
         ]
     },
     {

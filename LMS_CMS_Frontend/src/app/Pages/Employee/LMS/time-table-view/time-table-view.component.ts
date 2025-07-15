@@ -17,7 +17,7 @@ import { SearchComponent } from '../../../../Component/search/search.component';
 @Component({
   selector: 'app-time-table-view',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule],
   templateUrl: './time-table-view.component.html',
   styleUrl: './time-table-view.component.css'
 })

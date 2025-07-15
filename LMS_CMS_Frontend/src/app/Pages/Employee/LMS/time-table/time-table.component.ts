@@ -14,6 +14,7 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { firstValueFrom } from 'rxjs';
 import { School } from '../../../../Models/school';
 import { SchoolService } from '../../../../Services/Employee/school.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-time-table',
@@ -45,7 +46,7 @@ export class TimeTableComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'englishTitle', 'arabicTitle'];
+  keysArray: string[] = ['id', 'name'];
 
   TableData: TimeTable[] = [];
   schools: School[] = [];
@@ -64,7 +65,7 @@ export class TimeTableComponent {
     public ApiServ: ApiService,
     public SchoolServ: SchoolService,
     public TimeTableServ: TimeTableService
-  ) {}
+  ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
@@ -151,9 +152,13 @@ export class TimeTableComponent {
   }
 
   openModal() {
-    document.getElementById('Add_Modal')?.classList.remove('hidden');
-    document.getElementById('Add_Modal')?.classList.add('flex');
-    this.timetable = new TimeTable();
+    if (this.SelectedSchoolId == 0) {
+      this.validationErrors["schoolID"]="School is required"
+    } else {
+      document.getElementById('Add_Modal')?.classList.remove('hidden');
+      document.getElementById('Add_Modal')?.classList.add('flex');
+      this.timetable = new TimeTable();
+    }
   }
 
   closeModal() {
@@ -163,7 +168,7 @@ export class TimeTableComponent {
 
   onInputValueChange(event: { field: keyof TimeTable; value: any }) {
     const { field, value } = event;
-    if (field == 'name') {
+    if (field == 'name' || field == 'schoolID') {
       (this.timetable as any)[field] = value;
       if (value) {
         this.validationErrors[field] = '';
@@ -207,16 +212,37 @@ export class TimeTableComponent {
   Generate() {
     this.timetable.schoolID = this.SelectedSchoolId;
     if (this.isFormValid()) {
-      this.isLoading=true
+      this.isLoading = true
       this.TimeTableServ.Add(this.timetable, this.DomainName).subscribe((d) => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Done',
+          text: 'Generated Successfully',
+          confirmButtonColor: '#089B41',
+        });
         this.closeModal();
-      this.isLoading=false
+        this.isLoading = false
         this.SelectedSchoolId = 0;
+      }, error => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'An unexpected error occurred',
+          confirmButtonColor: '#089B41',
+        });
+        this.isLoading = false
       });
     }
   }
 
-  View(id:number){
+  View(id: number) {
     this.router.navigateByUrl(`Employee/Time Table View/${id}`)
+  }
+
+  EditFavourite(id:number , isFav: boolean){
+   console.log(id,isFav)
+   this.TimeTableServ.EditIsFavourite(id,isFav,this.DomainName).subscribe((d)=>{
+    this.GetAllData()
+   })
   }
 }

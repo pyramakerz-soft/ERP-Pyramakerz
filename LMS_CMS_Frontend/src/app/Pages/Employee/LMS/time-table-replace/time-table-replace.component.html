@@ -1,0 +1,61 @@
+<div class="flex justify-between items-center mb-5">
+    <div class="flex justify-between items-center space-x-5">
+        <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToTimeTable()"></i>
+        <h1 class="font-semibold text-2xl leading-9">{{TimeTableName}}</h1>
+    </div>
+</div>
+
+<div>
+    <label class="block mb-2 text-sm font-medium text-gray-900">Card Replace</label>
+    <div class="p-2 border border-dashed border-blue-500 bg-blue-50 rounded min-h-[50px]"
+        (dragover)="onDragOver($event)" (drop)="onDropHolding($event)">
+        <div *ngFor="let session of HoldingSessionsSession" draggable="true"
+            (dragstart)="onDragStartHolding($event, session)"
+            class="p-2 border border-gray-300 rounded mb-2 bg-white cursor-move">
+            <div *ngFor="let subject of session.subjects" class="ml-2">
+                <div>{{ subject.subjectName }}</div>
+                <div class="text-gray-500 text-xs">{{ subject.teacherName }}</div>
+            </div>
+        </div>
+        <div *ngIf="HoldingSessionsSession.length === 0" class="text-gray-500">No Session replaced</div>
+    </div>
+</div>
+
+<div class="overflow-x-auto mt-4">
+    <div *ngFor="let day of TimeTable" class="mb-10 border rounded shadow">
+        <div class="bg-gray-300 text-center font-bold py-2">{{ day.dayName }}</div>
+
+        <div *ngFor="let grade of day.grades" class="p-2">
+            <div class="text-md font-semibold mb-1">Grade: {{ grade.gradeName }}</div>
+
+            <table class="table-auto w-full text-sm text-left border-collapse border border-gray-300">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="border p-2">Class Name</th>
+                        <th class="border p-2" *ngFor="let i of [].constructor(MaxPeriods); let period = index">
+                            Session {{ period + 1 }}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let classroom of grade.classrooms">
+                        <td class="border p-2 font-medium">{{ classroom.classroomName }}</td>
+                        <td class="border p-2" *ngFor="let session of classroom.sessions; let periodIndex = index"
+                            draggable="true" (dragstart)="onDragStart($event, session)" (dragover)="onDragOver($event)"
+                            (drop)="onDrop($event, session, day, periodIndex)"
+                            class="border p-2 bg-gray-50 cursor-move">
+
+                            <div *ngFor="let subject of session.subjects"
+                                class="p-1 border border-gray-300 rounded mb-1 bg-white">
+                                <div class="font-semibold text-blue-600">{{ subject.subjectName }}</div>
+                                <div class="text-gray-500 text-xs">{{ subject.teacherName }}</div>
+                            </div>
+
+                            <div *ngIf="session.subjects.length === 0" class="text-gray-400">--</div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
