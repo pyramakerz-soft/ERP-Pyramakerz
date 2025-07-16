@@ -1,8 +1,6 @@
 ﻿using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.AccountingModule.Reports;
-using LMS_CMS_DAL.Models.Domains;
-using LMS_CMS_DAL.Models.Domains.AccountingModule;
-using LMS_CMS_DAL.Models.Domains.LMS;
+using LMS_CMS_DAL.Models.Domains.AccountingModule.Reports;
 using LMS_CMS_PL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -37,11 +35,23 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
             var context = Unit_Of_Work.DbContext;
 
+            int startRow = ((pageNumber - 1) * pageSize) + 1;
+            int endRow = pageNumber * pageSize;
+
             var result = await context.Set<AccountingEntriesReport>().FromSqlRaw(@"
-                SELECT * FROM dbo.EntriesFun(@DateFrom, @DateTo) ORDER BY MasterID
+                WITH EntriesWithRowNum AS (
+                    SELECT *, ROW_NUMBER() OVER (ORDER BY MasterID) AS RowNum
+                    FROM dbo.EntriesFun(@DateFrom, @DateTo)
+                )
+                SELECT *
+                FROM EntriesWithRowNum
+                WHERE RowNum BETWEEN @StartRow AND @EndRow
+                ORDER BY RowNum;
             ",
             new SqlParameter("@DateFrom", fromDate),
-            new SqlParameter("@DateTo", toDate)
+            new SqlParameter("@DateTo", toDate),
+            new SqlParameter("@StartRow", startRow),
+            new SqlParameter("@EndRow", endRow)
             ).ToListAsync();
 
             if (result == null || !result.Any())
@@ -49,15 +59,45 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 return NotFound("No accounting entries found for the specified date range.");
             }
 
-            int totalRecords = result.Count();
+            var fullTotals = await context.Set<TotalResult>()
+        .FromSqlRaw(@"
+            SELECT 
+                SUM(Debit) AS TotalDebit,
+                SUM(Credit) AS TotalCredit
+            FROM dbo.EntriesFun(@DateFrom, @DateTo)",
+            new SqlParameter("@DateFrom", fromDate),
+            new SqlParameter("@DateTo", toDate)
+        ).FirstOrDefaultAsync();
 
-            List<AccountingEntriesReport> paginatedResult = result
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
+            decimal fullDebit = fullTotals?.TotalDebit ?? 0;
+            decimal fullCredit = fullTotals?.TotalCredit ?? 0;
+            decimal fullDifference = fullDebit - fullCredit;
+
+            var groupedResult = result
+                .Where(e => e.Date != null)
+                .GroupBy(e => e.Date.Value.Date)
+                .Select(g => new
+                {
+                    Date = g.Key,
+                    Entries = g.ToList(),
+                    Totals = new
+                    {
+                        Debit = g.Sum(x => x.Debit ?? 0),
+                        Credit = g.Sum(x => x.Credit ?? 0),
+                        Difference = g.Sum(x => x.Debit ?? 0) - g.Sum(x => x.Credit ?? 0)
+                    }
+                })
+                .OrderBy(g => g.Date)
                 .ToList();
 
-            if (paginatedResult == null || !paginatedResult.Any())
-                return NotFound("No accounting entries found for the specified page.");
+            int totalRecords = await context.Set<CountResult>()
+                .FromSqlRaw(@"
+                    SELECT COUNT(MasterID) AS TotalCount 
+                    FROM dbo.EntriesFun(@DateFrom, @DateTo)",
+                    new SqlParameter("@DateFrom", DBNull.Value),
+                    new SqlParameter("@DateTo", DBNull.Value))
+                .Select(x => x.TotalCount)
+                .FirstOrDefaultAsync();
 
             var paginationMetadata = new
             {
@@ -67,7 +107,17 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
             };
 
-            return Ok(new { Data = paginatedResult, Pagination = paginationMetadata });
+            return Ok(new
+            {
+                Data = groupedResult,
+                Pagination = paginationMetadata,
+                FullTotals = new
+                {
+                    Debit = fullDebit,
+                    Credit = fullCredit,
+                    Difference = fullDifference
+                }
+            });
         }
         #endregion
     }

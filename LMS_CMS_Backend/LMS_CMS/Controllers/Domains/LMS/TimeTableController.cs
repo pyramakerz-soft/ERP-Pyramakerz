@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using LMS_CMS_BL.DTO;
 using LMS_CMS_BL.DTO.LMS;
 using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains;
@@ -130,11 +131,28 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 days = allDays.Where(d => d.ID >= school.WeekStartDayID || d.ID <= school.WeekEndDayID).ToList();
             }
 
+            // order days by school.WeekStartDayID to school.WeekEndDayID
+
+            List<Days> orderedDays;
+            if (school.WeekStartDayID <= school.WeekEndDayID)
+            {
+                orderedDays = allDays
+                    .Where(d => d.ID >= school.WeekStartDayID && d.ID <= school.WeekEndDayID)
+                    .ToList();
+            }
+            else
+            {
+                orderedDays = allDays
+                    .Where(d => d.ID >= school.WeekStartDayID)
+                    .Concat(allDays.Where(d => d.ID <= school.WeekEndDayID))
+                    .ToList();
+            }
+
             // Create TimeTableClassroom combinations
             List<TimeTableClassroom> timeTableClassrooms = new List<TimeTableClassroom>();
             foreach (var classroom in classes)
             {
-                foreach (var day in days)
+                foreach (var day in orderedDays)
                 {
                     timeTableClassrooms.Add(new TimeTableClassroom
                     {
@@ -412,6 +430,238 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         /////////////////
 
+        [HttpGet("GetAllClassesinThisTimetable/{Tid}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" }
+        )]
+        public async Task<IActionResult> GetAllClassesinThisTimetable(long Tid)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+                return Unauthorized("User ID or Type claim not found.");
+             
+            List<TimeTableClassroom> timeTableClassroom = Unit_Of_Work.timeTableClassroom_Repository.FindBy(s=>s.TimeTableID== Tid && s.IsDeleted!= true);
+            List<long> classroomsId = timeTableClassroom.Select(s=>s.ClassroomID).Distinct().ToList();
+
+            List<Classroom> classroom = Unit_Of_Work.classroom_Repository.FindBy(s => classroomsId.Contains( s.ID )&& s.IsDeleted != true);
+            List<ClassroomGetDTO> classroomsDTO = mapper.Map<List<ClassroomGetDTO>>(classroom);
+
+            return Ok(classroomsDTO);
+        }
+
+        /////////////////
+
+        [HttpGet("GetAllTeachersinThisTimetable/{Tid}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" }
+        )]
+        public async Task<IActionResult> GetAllTeachersinThisTimetable(long Tid)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+                return Unauthorized("User ID or Type claim not found.");
+
+            List<TimeTableSubject> timeTableSubjects = Unit_Of_Work.timeTableSubject_Repository.FindBy(s => s.TimeTableSession.TimeTableClassroom.TimeTableID == Tid && s.IsDeleted != true);
+            List<long> TeacherIDs = timeTableSubjects.Where(s => s.TeacherID.HasValue).Select(s => s.TeacherID.Value).Distinct().ToList();
+
+            List<Employee> employee = Unit_Of_Work.employee_Repository.FindBy(s => TeacherIDs.Contains(s.ID) && s.IsDeleted != true);
+            List<Employee_GetDTO> employeesDTO = mapper.Map<List<Employee_GetDTO>>(employee);
+
+            return Ok(employeesDTO);
+        }
+
+        /////////////////
+
+        [HttpGet("GetByIdForClassAsync/{Tid}/{ClassId}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" }
+        )]
+        public async Task<IActionResult> GetByIdForClassAsync(long Tid , long ClassId)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+                return Unauthorized("User ID or Type claim not found.");
+
+            // Fetch the TimeTable and related entities including Classroom, Sessions, and Subjects
+            TimeTable timeTable = await Unit_Of_Work.timeTable_Repository.FindByIncludesAsync(
+                t => t.ID == Tid && t.IsDeleted != true,
+                query => query
+                    .Include(tt => tt.TimeTableClassrooms.Where(tc => tc.ClassroomID == ClassId && tc.IsDeleted != true))
+                        .ThenInclude(tc => tc.TimeTableSessions)
+                            .ThenInclude(ts => ts.TimeTableSubjects)
+                                .ThenInclude(tss => tss.Subject)
+                    .Include(tt => tt.TimeTableClassrooms.Where(tc => tc.ClassroomID == ClassId && tc.IsDeleted != true))
+                        .ThenInclude(tc => tc.TimeTableSessions)
+                            .ThenInclude(ts => ts.TimeTableSubjects)
+                                .ThenInclude(tss => tss.Teacher)
+                    .Include(tt => tt.TimeTableClassrooms.Where(tc => tc.ClassroomID == ClassId && tc.IsDeleted != true))
+                        .ThenInclude(tc => tc.Classroom)
+                    .Include(tt => tt.TimeTableClassrooms.Where(tc => tc.ClassroomID == ClassId && tc.IsDeleted != true))
+                        .ThenInclude(tc => tc.Day)
+                    .Include(tt => tt.TimeTableClassrooms.Where(tc => tc.ClassroomID == ClassId && tc.IsDeleted != true))
+                        .ThenInclude(tc => tc.Classroom.Grade)
+                    .Include(tt => tt.AcademicYear)
+            );
+
+            if (timeTable == null)
+            {
+                return BadRequest("No timetable with this ID");
+            }
+
+            School school = Unit_Of_Work.school_Repository.First_Or_Default(s => s.ID == timeTable.AcademicYear.SchoolID && s.IsDeleted != true);
+            if (school == null)
+            {
+                return BadRequest("No school with this ID");
+            }
+
+            TimeTableGetDTO Dto = mapper.Map<TimeTableGetDTO>(timeTable);
+
+            var groupedResult = Dto.TimeTableClassrooms
+            .GroupBy(tc => new { tc.DayId, tc.DayName })
+            .Select(dayGroup => new TimeTableDayGroupDTO
+            {
+                DayId = dayGroup.Key.DayId,
+                DayName = dayGroup.Key.DayName,
+                Grades = dayGroup
+                    .GroupBy(tc => new { tc.GradeId, tc.GradeName })
+                    .Select(gradeGroup => new GradeGroupDTO
+                    {
+                        GradeId = gradeGroup.Key.GradeId,
+                        GradeName = gradeGroup.Key.GradeName,
+                        Classrooms = gradeGroup
+                            .GroupBy(tc => new { tc.ClassroomID, tc.ClassroomName })
+                            .Select(classGroup => new ClassroomGroupDTO
+                            {
+                                ClassroomId = classGroup.Key.ClassroomID,
+                                ClassroomName = classGroup.Key.ClassroomName,
+                                Sessions = classGroup
+                                    .SelectMany(c => c.TimeTableSessions)
+                                    .Select(session => new SessionGroupDTO
+                                    {
+                                        SessionId = session.ID,
+                                        Subjects = session.TimeTableSubjects.Select(s => new SubjectTeacherDTO
+                                        {
+                                            SubjectId = s.SubjectID,
+                                            SubjectName = s.SubjectName,
+                                            TeacherId = s.TeacherID,
+                                            TeacherName = s.TeacherName
+                                        }).ToList()
+                                    }).ToList()
+                            }).ToList()
+                    }).ToList()
+            }).ToList();
+
+            // Return the grouped result as JSON
+            return Ok(new { Data = groupedResult, TimeTableName = timeTable.Name, MaxPeriods = school.MaximumPeriodCountTimeTable });
+        }
+
+
+        /////////////////
+
+        [HttpGet("GetByIdForTeacherAsync/{Tid}/{TeacherId}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" }
+        )]
+        public async Task<IActionResult> GetByIdForTeacherAsync(long Tid, long TeacherId)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+                return Unauthorized("User ID or Type claim not found.");
+
+            // Fetch the TimeTable and related entities including Classroom, Sessions, and Subjects
+            TimeTable timeTable = await Unit_Of_Work.timeTable_Repository.FindByIncludesAsync(
+                t => t.ID == Tid && t.IsDeleted != true,
+                query => query
+                    .Include(tt => tt.TimeTableClassrooms
+                        .Where(tc => tc.IsDeleted != true))
+                        .ThenInclude(tc => tc.TimeTableSessions)
+                            .ThenInclude(ts => ts.TimeTableSubjects
+                                .Where(tss => tss.IsDeleted != true && tss.TeacherID == TeacherId))
+                                .ThenInclude(tss => tss.Subject)
+                    .Include(tt => tt.TimeTableClassrooms)
+                        .ThenInclude(tc => tc.TimeTableSessions)
+                            .ThenInclude(ts => ts.TimeTableSubjects
+                                .Where(tss => tss.IsDeleted != true && tss.TeacherID == TeacherId))
+                                .ThenInclude(tss => tss.Teacher)
+                    .Include(tt => tt.TimeTableClassrooms)
+                        .ThenInclude(tc => tc.Classroom)
+                    .Include(tt => tt.TimeTableClassrooms)
+                        .ThenInclude(tc => tc.Day)
+                    .Include(tt => tt.TimeTableClassrooms)
+                        .ThenInclude(tc => tc.Classroom.Grade)
+                    .Include(tt => tt.AcademicYear)
+            );
+
+            if (timeTable == null)
+            {
+                return BadRequest("No timetable with this ID");
+            }
+
+            School school = Unit_Of_Work.school_Repository.First_Or_Default(s => s.ID == timeTable.AcademicYear.SchoolID && s.IsDeleted != true);
+            if (school == null)
+            {
+                return BadRequest("No school with this ID");
+            }
+
+            TimeTableGetDTO Dto = mapper.Map<TimeTableGetDTO>(timeTable);
+
+            var groupedResult = Dto.TimeTableClassrooms
+            .GroupBy(tc => new { tc.DayId, tc.DayName })
+            .Select(dayGroup => new TimeTableDayGroupDTO
+            {
+                DayId = dayGroup.Key.DayId,
+                DayName = dayGroup.Key.DayName,
+                Grades = dayGroup
+                    .GroupBy(tc => new { tc.GradeId, tc.GradeName })
+                    .Select(gradeGroup => new GradeGroupDTO
+                    {
+                        GradeId = gradeGroup.Key.GradeId,
+                        GradeName = gradeGroup.Key.GradeName,
+                        Classrooms = gradeGroup
+                            .GroupBy(tc => new { tc.ClassroomID, tc.ClassroomName })
+                            .Select(classGroup => new ClassroomGroupDTO
+                            {
+                                ClassroomId = classGroup.Key.ClassroomID,
+                                ClassroomName = classGroup.Key.ClassroomName,
+                                Sessions = classGroup
+                                    .SelectMany(c => c.TimeTableSessions)
+                                    .Select(session => new SessionGroupDTO
+                                    {
+                                        SessionId = session.ID,
+                                        Subjects = session.TimeTableSubjects.Select(s => new SubjectTeacherDTO
+                                        {
+                                            SubjectId = s.SubjectID,
+                                            SubjectName = s.SubjectName,
+                                            TeacherId = s.TeacherID,
+                                            TeacherName = s.TeacherName
+                                        }).ToList()
+                                    }).ToList()
+                            }).ToList()
+                    }).ToList()
+            }).ToList();
+
+            // Return the grouped result as JSON
+            return Ok(new { Data = groupedResult, TimeTableName = timeTable.Name, MaxPeriods = school.MaximumPeriodCountTimeTable });
+        }
+
+        /////////////////
+
         [HttpPut]
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee" }
@@ -592,6 +842,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         }
     }
+
+    /////////////////
 
 
 }

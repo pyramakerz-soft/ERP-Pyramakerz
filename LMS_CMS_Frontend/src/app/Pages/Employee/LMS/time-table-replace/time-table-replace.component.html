@@ -3,15 +3,20 @@
         <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToTimeTable()"></i>
         <h1 class="font-semibold text-2xl leading-9">{{TimeTableName}}</h1>
     </div>
+
+    <button (click)="Save()"
+        class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
+        Save
+    </button>
 </div>
 
 <div>
     <label class="block mb-2 text-sm font-medium text-gray-900">Card Replace</label>
-    <div class="p-2 border border-dashed border-blue-500 bg-blue-50 rounded min-h-[50px]"
+    <div class="p-2 border border-dashed border-blue-500 bg-blue-50 rounded min-h-[50px] flex space-x-1"
         (dragover)="onDragOver($event)" (drop)="onDropHolding($event)">
         <div *ngFor="let session of HoldingSessionsSession" draggable="true"
             (dragstart)="onDragStartHolding($event, session)"
-            class="p-2 border border-gray-300 rounded mb-2 bg-white cursor-move">
+            class="p-2 border border-gray-300 rounded mb-2 bg-white cursor-move w-[10%]">
             <div *ngFor="let subject of session.subjects" class="ml-2">
                 <div>{{ subject.subjectName }}</div>
                 <div class="text-gray-500 text-xs">{{ subject.teacherName }}</div>

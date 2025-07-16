@@ -73,4 +73,8 @@ export class TimeTableViewComponent {
   moveToTimeTable() {
     this.router.navigateByUrl(`Employee/Time Table`)
   }
+
+  Replace(){
+    this.router.navigateByUrl(`Employee/Time Table Replace/`+this.TimeTableId)
+  }
 }
