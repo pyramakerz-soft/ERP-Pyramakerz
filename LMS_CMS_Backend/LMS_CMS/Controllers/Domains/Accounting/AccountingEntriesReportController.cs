@@ -49,15 +49,22 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 return NotFound("No accounting entries found for the specified date range.");
             }
 
-            int totalRecords = result.Count();
-
-            List<AccountingEntriesReport> paginatedResult = result
+            var paginatedResult = result
+                .GroupBy(e => e.Date.Value.Date)
+                .Select(g => new
+                    {
+                        Date = g.Key,
+                        Entries = g.ToList()
+                    })
+                .OrderBy(g => g.Date.Date)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
 
             if (paginatedResult == null || !paginatedResult.Any())
                 return NotFound("No accounting entries found for the specified page.");
+
+            int totalRecords = paginatedResult.Count();
 
             var paginationMetadata = new
             {

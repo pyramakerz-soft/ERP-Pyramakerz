@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using System;
+using System.Globalization;
 
 
 namespace LMS_CMS_PL.Controllers.Domains.Inventory
@@ -59,17 +60,17 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         }
 
         /// ///////////////////////////////////////////////////-777
+        
         [HttpGet("inventory-net-summary")]
         [Authorize_Endpoint_(
-      allowedTypes: new[] { "octa", "employee" },
-      pages: new[] { "Inventory" })]
+          allowedTypes: new[] { "octa", "employee" },
+          pages: new[] { "Inventory" })]
         public async Task<IActionResult> GetInventoryNetSummaryAsync(long storeId, long shopItemId, DateTime toDate)
         {
             var summaryDate = toDate.Date.AddDays(-1).AddTicks(9999999); // آخر لحظة من البارحة
             var Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
             var flagsToExclude = new long[] { 13 };
 
-            // ✅ جلب البيانات
             var data = await Unit_Of_Work.inventoryDetails_Repository
                 .Select_All_With_IncludesById<InventoryDetails>(
                     d => d.InventoryMaster != null &&
@@ -119,9 +120,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 Unit_Of_Work.inventoryDetails_Repository.Update(detail);
             }
 
-            await Unit_Of_Work.SaveChangesAsync(); // حفظ التعديلات
+            await Unit_Of_Work.SaveChangesAsync(); 
 
-            // ✅ إعداد النتيجة النهائية
             var dto = new InventoryNetSummaryDTO
             {
                 ShopItemId = shopItemId,
@@ -135,8 +135,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
             return Ok(dto);
         }
-
-
         // /////////////////////////////////////////////////////////////////////-77
 
         [HttpGet("inventory-net-transactions")]
@@ -222,109 +220,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         }
 
         /////// /////////////////////////////////////////////////////////////////////////////////////-777
-
-        //[HttpGet("AverageCost")]
-        //[Authorize_Endpoint_(
-        //     allowedTypes: new[] { "octa", "employee" },
-        //     pages: new[] { "Inventory" }
-        // )]
-        //public async Task<IActionResult> CalculateAverageCostAsync(DateTime fromDate, DateTime toDate)
-        //{
-        //    var parsedFromDate = fromDate.Date;
-        //    var parsedToDate = toDate.Date.AddDays(1).AddTicks(-1); // نهاية اليوم
-
-        //    if (parsedFromDate > parsedToDate)
-        //        return BadRequest("The start date cannot be after the end date.");
-
-        //    var Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-
-        //    // ========== المرحلة 1: تصفير AverageCost ==========
-        //    var resetData = await Unit_Of_Work.inventoryMaster_Repository
-        //        .Select_All_With_IncludesById<InventoryMaster>(
-        //            im => im.IsDeleted != true &&
-        //                  im.Date >= parsedFromDate && im.Date <= parsedToDate,
-        //            query => query.Include(im => im.InventoryDetails)
-        //                          .Include(im => im.InventoryFlags)
-        //        );
-
-        //    foreach (var item in resetData.SelectMany(im => im.InventoryDetails))
-        //    {
-        //        item.AverageCost = 0;
-        //        Unit_Of_Work.inventoryDetails_Repository.Update(item);
-        //    }
-
-        //    // ========== المرحلة 2: الحركات من نوع Opening & Purchase ==========
-        //    var purchaseData = await Unit_Of_Work.inventoryMaster_Repository
-        //        .Select_All_With_IncludesById<InventoryMaster>(
-        //            im => im.IsDeleted != true &&
-        //                  (im.FlagId == 1 || im.FlagId == 9) &&
-        //                  im.Date >= parsedFromDate && im.Date <= parsedToDate,
-        //            query => query.Include(im => im.InventoryDetails)
-        //        );
-
-        //    foreach (var item in purchaseData.SelectMany(im => im.InventoryDetails))
-        //    {
-        //        item.AverageCost = item.TotalPrice;
-        //        Unit_Of_Work.inventoryDetails_Repository.Update(item);
-        //    }
-
-        //    // ========== المرحلة 3: الحركات اليومية (غير 1 و 9) ==========
-        //    var currentDate = parsedFromDate;
-
-        //    while (currentDate <= parsedToDate.Date)
-        //    {
-        //        var dailyData = await Unit_Of_Work.inventoryMaster_Repository
-        //            .Select_All_With_IncludesById<InventoryMaster>(
-        //                im => im.IsDeleted != true &&
-        //                      im.FlagId != 1 && im.FlagId != 9 &&
-        //                      im.Date.Date == currentDate.Date,
-        //                query => query.Include(im => im.InventoryDetails)
-        //            );
-
-        //        foreach (var item in dailyData.SelectMany(im => im.InventoryDetails))
-        //        {
-        //            decimal? averageCost = await CalculateAverageCostForItem(item.ShopItemID, currentDate);
-        //            item.AverageCost = (averageCost * item.Quantity) ?? 0;
-        //            Unit_Of_Work.inventoryDetails_Repository.Update(item);
-        //        }
-
-        //        currentDate = currentDate.AddDays(1);
-        //    }
-
-        //    // ✅ حفظ كل التعديلات دفعة واحدة
-        //    await Unit_Of_Work.SaveChangesAsync();
-
-        //    // ========== المرحلة 4: تجهيز النتيجة ==========
-        //    var resultData = await Unit_Of_Work.inventoryMaster_Repository
-        //        .Select_All_With_IncludesById<InventoryMaster>(
-        //            im => im.IsDeleted != true &&
-        //                  im.Date >= parsedFromDate && im.Date <= parsedToDate,
-        //            query => query.Include(im => im.InventoryDetails)
-        //                          .Include(im => im.InventoryFlags)
-        //        );
-
-        //    var resultItems = resultData
-        //        .SelectMany(im => im.InventoryDetails)
-        //        .Select(id => new
-        //        {
-        //            AverageCost = id.AverageCost,
-        //            Date = id.InventoryMaster.Date,
-        //            ShopItemID = id.ShopItemID,
-        //            Quantity = id.Quantity,
-        //            Price = id.Price,
-        //            TotalPrice = id.TotalPrice,
-        //            FlagId = id.InventoryMaster.FlagId,
-        //            enName = id.InventoryMaster.InventoryFlags.enName,
-        //            ItemInOut = id.InventoryMaster.InventoryFlags.ItemInOut
-        //        })
-        //        .ToList();
-
-        //    if (!resultItems.Any())
-        //        return NotFound("No stock details found after processing");
-
-        //    return Ok(resultItems);
-        //}
-        // /////////////////////////////////////////////////////////////-77
         [HttpGet("AverageCost")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
@@ -344,7 +239,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             var allInventoryData = await Unit_Of_Work.inventoryMaster_Repository
                 .Select_All_With_IncludesById<InventoryMaster>(
                     im => im.IsDeleted != true &&
-                          im.Date >= parsedFromDate && im.Date <= parsedToDate,
+                    im.Date >= parsedFromDate && im.Date <= parsedToDate,
                     query => query
                         .Include(im => im.InventoryDetails)
                         .Include(im => im.InventoryFlags)
@@ -357,6 +252,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 Unit_Of_Work.inventoryDetails_Repository.Update(item);
             }
 
+
             // ========== المرحلة 2: Opening Balance & Purchases ==========
             foreach (var item in allInventoryData
                         .Where(im => im.FlagId == 1 || im.FlagId == 9)
@@ -365,7 +261,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 item.AverageCost = item.TotalPrice;
                 Unit_Of_Work.inventoryDetails_Repository.Update(item);
             }
-
+            await Unit_Of_Work.SaveChangesAsync();
             // ========== المرحلة 3: الحركات اليومية ==========
             var currentDate = parsedFromDate;
             while (currentDate <= parsedToDate.Date)
@@ -380,42 +276,18 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                     item.AverageCost = (averageCost * item.Quantity) ?? 0;
                     Unit_Of_Work.inventoryDetails_Repository.Update(item);
                 }
-
+                await Unit_Of_Work.SaveChangesAsync();
                 currentDate = currentDate.AddDays(1);
             }
+          
 
-            // ✅ حفظ كل التعديلات دفعة واحدة
-            await Unit_Of_Work.SaveChangesAsync();
-
-            // ========== المرحلة 4: إعداد النتيجة النهائية ==========
-            var resultItems = allInventoryData
-                .SelectMany(im => im.InventoryDetails)
-                .Select(id => new
-                {
-                    AverageCost = id.AverageCost,
-                    Date = id.InventoryMaster.Date,
-                    ShopItemID = id.ShopItemID,
-                    Quantity = id.Quantity,
-                    Price = id.Price,
-                    TotalPrice = id.TotalPrice,
-                    FlagId = id.InventoryMaster.FlagId,
-                    enName = id.InventoryMaster.InventoryFlags.enName,
-                    ItemInOut = id.InventoryMaster.InventoryFlags.ItemInOut
-                })
-                .ToList();
-
-            if (!resultItems.Any())
-                return NotFound("No stock details found after processing");
-
-            return Ok(resultItems);
+            return Ok("✅ Average cost updated successfully.");
         }
 
         // /////////////////////////////////////////////////////////////-7
         private async Task<decimal> CalculateAverageCostForItem(long shopItemId, DateTime targetDate)
         {
             var Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-
-            // جلب الحركات المرتبطة بالصنف قبل التاريخ المستهدف (مع الفلاتر)
             var dbItems = await Unit_Of_Work.inventoryDetails_Repository
                 .Query()
                 .Include(id => id.InventoryMaster)
@@ -447,6 +319,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             return totalWeightedCost / totalQuantity;
         }
         ///// /////////////////////////////////////////////////////////////////////////////////////-777
+     
         [HttpGet("BySaleId/{id}")]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
