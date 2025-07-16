@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace LMS_CMS_BL.DTO.Inventory
 {
-    public class InventoryNetSummaryDTO   //777-G
+    public class InventoryNetSummaryDTO   //777
     {
         public long ShopItemId { get; set; }
         public long StoreId { get; set; }
