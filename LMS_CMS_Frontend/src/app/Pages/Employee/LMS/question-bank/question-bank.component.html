@@ -133,7 +133,7 @@
       <div class="flex flex-col mb-4 w-[49%]">
         <label class="mb-2 primaryTxt" for="questionBank.subjectID">Subject</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
-          id="questionBank.subjectID" (change)="GetAllLesson();" [(ngModel)]="questionBank.subjectID"
+          id="questionBank.subjectID" (change)="onSubjectChange();" [(ngModel)]="questionBank.subjectID"
           (ngModelChange)="onInputValueChange({ field: 'subjectID', value: $event })">
           <option [value]="0" disabled selected hidden>Choose Subject</option>
           <option *ngFor="let c of subject" [value]="c.id">{{ c.en_name }}</option>
@@ -248,7 +248,8 @@
         <div class="flex flex-col mb-4 w-full"
           *ngIf="questionBank.questionTypeID!=4 &&questionBank.questionTypeID!=5 &&questionBank.questionTypeID!=0">
           <label class="mb-2 primaryTxt">description</label>
-          <quill-editor (ngModelChange)="onInputValueChange({ field: 'description', value: $event })"
+          <quill-editor #quillEditor (onEditorCreated)="onEditorCreated($event)"
+            (ngModelChange)="onInputValueChange({ field: 'description', value: $event })"
             [(ngModel)]="questionBank.description" [modules]="editorModules" theme="snow" class="quill-editor-wrapper"
             placeholder="Enter description">
           </quill-editor>

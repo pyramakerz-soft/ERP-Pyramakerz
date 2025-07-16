@@ -259,7 +259,7 @@
     <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Jobs"
       [(ngModel)]="Data.jobID" [disabled]="Data.jobCategoryId == 0 || Data.jobCategoryId == null"
       [ngClass]="{'bg-gray-300': Data.jobCategoryId == 0 || Data.jobCategoryId == null}">
-      <option [value]="null" disabled selected hidden> {{ 'Choose Job' | translate }}</option>
+      <option [value]="0" disabled selected hidden> {{ 'Choose Job' | translate }}</option>
       <option *ngFor="let job of Jobs" [value]="job.id">{{ job.name }}</option>
       <option *ngIf="Jobs.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
     </select>

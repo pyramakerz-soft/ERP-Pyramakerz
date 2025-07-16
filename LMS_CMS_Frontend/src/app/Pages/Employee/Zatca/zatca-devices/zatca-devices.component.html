@@ -141,10 +141,10 @@
             <div class="flex flex-col mb-4 w-full">
                 <label class="mb-2 primaryTxt" for="otp">OTP</label>
                 <input type="text"  class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="otp"
-                    [(ngModel)]="otp" placeholder="Enter OPT" (input)="validateNumber($event)"/> 
+                    [(ngModel)]="otp" placeholder="Enter OTP" (input)="validateNumber($event)"/> 
             </div> 
         </div>
-        <div class="flex justify-end" *ngIf="otp != null">
+        <div class="flex justify-end">
             <button [disabled]="isLoading"
                 class="secondaryBg text-white font-medium px-4 py-2 rounded-lg mt-4 flex items-center justify-center gap-2"
                 (click)="generateCertificate()">

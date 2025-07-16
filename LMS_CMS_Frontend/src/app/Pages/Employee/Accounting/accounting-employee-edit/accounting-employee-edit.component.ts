@@ -169,7 +169,9 @@ export class AccountingEmployeeEditComponent {
 
   GetAllData() {
     this.employeeServ.GetAcountingEmployee(this.EmployeeId, this.DomainName).subscribe((d: any) => {
-      this.Data = d;  
+      this.Data = d;   
+      this.JobCategoryId = this.Data.jobCategoryId
+      this.GetAllJobCategories();
       this.GetAllJobs()
       this.selectedDays = this.days
       this.selectedDays = this.days.filter(day => this.Data.days.includes(day.id));
@@ -342,6 +344,7 @@ export class AccountingEmployeeEditComponent {
   }
 
   OnSelectJobCategory() {
+    this.Data.jobID = 0
     this.JobCategoryId = this.Data.jobCategoryId;
     this.GetAllJobs();
   }

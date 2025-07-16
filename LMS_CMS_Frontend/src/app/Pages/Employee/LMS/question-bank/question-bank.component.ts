@@ -25,7 +25,7 @@ import { DomainService } from '../../../../Services/Employee/domain.service';
 import { SubjectService } from '../../../../Services/Employee/LMS/subject.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
-import { QuillModule } from 'ngx-quill';
+import { QuillEditorComponent, QuillModule } from 'ngx-quill';
 import { FormsModule } from '@angular/forms';
 import { QuestionBankOption } from '../../../../Models/LMS/question-bank-option';
 import { SubBankQuestion } from '../../../../Models/LMS/sub-bank-question';
@@ -79,27 +79,36 @@ export class QuestionBankComponent {
   NewOption: string = ""
   TagsSelected: Tag[] = [];
   dropdownOpen = false;
-  @ViewChild('quillEditor') quillEditor!: ElementRef;
+  
+  @ViewChild('quillEditor') quillEditorComponent!: QuillEditorComponent;
+  quillInstance: any;
+ 
   editorModules = {
-    toolbar: [
-      ['bold', 'italic', 'underline', 'strike'],
-      ['blockquote', 'code-block'],
-      [{ 'header': 1 }, { 'header': 2 }],
-      [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-      [{ 'script': 'sub' }, { 'script': 'super' }],
-      [{ 'indent': '-1' }, { 'indent': '+1' }],
-      [{ 'direction': 'rtl' }],
-      [{ 'size': ['small', false, 'large', 'huge'] }],
-      [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-      [{ 'color': [] }, { 'background': [] }],
-      [{ 'font': [] }],
-      [{ 'align': [] }],
-      ['link', 'image', 'video'],
-      ['clean']
-    ]
+     toolbar: {
+      container: [
+        ['bold', 'italic', 'underline', 'strike'],
+        ['blockquote', 'code-block'],
+        [{ header: 1 }, { header: 2 }],
+        [{ list: 'ordered' }, { list: 'bullet' }],
+        [{ script: 'sub' }, { script: 'super' }],
+        [{ indent: '-1' }, { indent: '+1' }],
+        [{ direction: 'rtl' }],
+        [{ size: ['small', false, 'large', 'huge'] }],
+        [{ header: [1, 2, 3, 4, 5, 6, false] }],
+        [{ color: [] }, { background: [] }],
+        [{ font: [] }],
+        [{ align: [] }],
+        ['link', 'image', 'video'],
+        ['clean']
+      ],
+      handlers: {
+        image: () => this.customImageHandler(),
+        video: () => this.customVideoHandler()
+      }
+    }
   };
+  
   constructor(
-    private router: Router,
     private menuService: MenuService,
     public activeRoute: ActivatedRoute,
     public account: AccountService,
@@ -139,7 +148,112 @@ export class QuestionBankComponent {
     this.GetAllQuestionBankType()
     this.GetAllBloomLevel()
     this.GetAllSubject()
-    this.GetAllTag()
+    this.GetAllTag() 
+  } 
+
+  onEditorCreated(quill: any) {
+    this.quillInstance = quill;
+  }
+
+  customImageHandler() {
+    const input = document.createElement('input');
+    input.setAttribute('type', 'file');
+    input.setAttribute('accept', 'image/*');
+    input.click();
+
+    input.onchange = async () => {
+      const file = input?.files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = async (e: any) => {
+          const { value: formValues } = await Swal.fire({
+            title: 'Set Image Size',
+            html:
+              `<input id="swal-input1" class="swal2-input" placeholder="Width (px)">` +
+              `<input id="swal-input2" class="swal2-input" placeholder="Height (px)">`,
+            focusConfirm: false,
+            preConfirm: () => {
+              const width = (document.getElementById('swal-input1') as HTMLInputElement).value;
+              const height = (document.getElementById('swal-input2') as HTMLInputElement).value;
+              if (!width || !height || isNaN(+width) || isNaN(+height)) {
+                Swal.showValidationMessage('Please enter numeric values.');
+                return null;
+              }
+              return { width: +width, height: +height };
+            }
+          });
+
+          if (formValues) {
+            const range = this.quillInstance.getSelection(true);
+            this.quillInstance.insertEmbed(range.index, 'image', e.target.result, 'user');
+
+            setTimeout(() => {
+              const imgElements = this.quillInstance.root.querySelectorAll('img');
+              const lastImg = imgElements[imgElements.length - 1];
+              if (lastImg) {
+                lastImg.setAttribute('width', formValues.width + '');
+                lastImg.setAttribute('height', formValues.height + '');
+                lastImg.setAttribute('style', `width:${formValues.width}px; height:${formValues.height}px`);
+                
+                // Optional: update the model directly if needed
+                this.questionBank.description = this.quillInstance.root.innerHTML;
+              }
+            }, 100);
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+  }
+ 
+  customVideoHandler() {
+    Swal.fire({
+      title: 'Enter video URL',
+      input: 'url',
+      inputPlaceholder: 'https://www.youtube.com/embed/...',
+      showCancelButton: true,
+      preConfirm: (url) => {
+        if (!url) {
+          Swal.showValidationMessage('Please enter a valid URL');
+        }
+        return url;
+      }
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        const url = result.value;
+
+        const { value: formValues } = await Swal.fire({
+          title: 'Set Video Size',
+          html:
+            `<input id="swal-input1" class="swal2-input" placeholder="Width (px)">` +
+            `<input id="swal-input2" class="swal2-input" placeholder="Height (px)">`,
+          focusConfirm: false,
+          preConfirm: () => {
+            const width = (document.getElementById('swal-input1') as HTMLInputElement).value;
+            const height = (document.getElementById('swal-input2') as HTMLInputElement).value;
+            if (!width || !height || isNaN(+width) || isNaN(+height)) {
+              Swal.showValidationMessage('Please enter numeric values.');
+              return null;
+            }
+            return { width: +width, height: +height };
+          }
+        });
+
+        if (formValues) {
+          const range = this.quillInstance.getSelection(true);
+          this.quillInstance.insertEmbed(range.index, 'video', url, 'user');
+
+          setTimeout(() => {
+            const videoElements = this.quillInstance.root.querySelectorAll('iframe, video');
+            const lastVideo = videoElements[videoElements.length - 1]; // ✅ fixed here
+            if (lastVideo) {
+              lastVideo.style.width = formValues.width + 'px';
+              lastVideo.style.height = formValues.height + 'px';
+            }
+          }, 100);
+        }
+      }
+    });
   }
 
   Delete(id: number) {
@@ -173,12 +287,17 @@ export class QuestionBankComponent {
   }
 
   GetAllLesson() {
-    this.lesson = []
-    this.questionBank.lessonID = 0
+    this.lesson = [] 
     this.LessonServ.GetBySubjectID(this.questionBank.subjectID, this.DomainName).subscribe((d) => {
       this.lesson = d
     })
   }
+
+  onSubjectChange(){
+    this.questionBank.lessonID = 0
+    this.GetAllLesson()
+  }
+
   GetAllBloomLevel() {
     this.BloomLevelServ.Get(this.DomainName).subscribe((d) => {
       this.bloomLevel = d
@@ -351,8 +470,7 @@ export class QuestionBankComponent {
           }
         );
       }
-    }
-    this.GetAllData(this.CurrentPage, this.PageSize)
+    } 
   }
 
   capitalizeField(field: keyof QuestionBank): string {
@@ -488,8 +606,7 @@ export class QuestionBankComponent {
   }
 
   onInputValueChange(event: { field: keyof QuestionBank; value: any }) {
-    const { field, value } = event;
-    console.log(field, value)
+    const { field, value } = event; 
     if (
       field == 'lessonID' ||
       field == 'subjectID' ||

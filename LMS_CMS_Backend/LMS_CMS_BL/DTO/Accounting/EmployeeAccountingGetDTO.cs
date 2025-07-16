@@ -51,6 +51,7 @@ namespace LMS_CMS_BL.DTO.Accounting
         public string? AccountNumberName { get; set; }
         public long? DepartmentID { get; set; }
         public string? DepartmentName { get; set; }
+        public long? JobCategoryID { get; set; }
         public long? JobID { get; set; }
         public string JobName { get; set; }
         public long? JobCategoryId { get; set; }

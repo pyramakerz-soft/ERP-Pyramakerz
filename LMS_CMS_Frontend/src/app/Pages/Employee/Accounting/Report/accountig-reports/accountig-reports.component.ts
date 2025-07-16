@@ -32,7 +32,7 @@ export class AccountigReportsComponent {
   SelectedStartDate: string = '';
   SelectedEndDate: string = '';
   CurrentPage: number = 1;
-  PageSize: number = 1;
+  PageSize: number = 10;
   TotalPages: number = 1;
   TotalRecords: number = 0;
 
@@ -167,7 +167,11 @@ export class AccountigReportsComponent {
         this.TotalPages = data.pagination.totalPages;
         this.TotalRecords = data.pagination.totalRecords;
         this.tableData = data.data;
-        console.log(this.tableData);
+        let count = 0
+        this.tableData.forEach(element => {
+          this.collapsedItems.add(count);
+          count ++
+        });
       },
       (error) => {
         if (error.status == 404 && this.TotalRecords != 0) {
