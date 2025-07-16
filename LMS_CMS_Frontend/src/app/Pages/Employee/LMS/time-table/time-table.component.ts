@@ -15,6 +15,9 @@ import { firstValueFrom } from 'rxjs';
 import { School } from '../../../../Models/school';
 import { SchoolService } from '../../../../Services/Employee/school.service';
 import Swal from 'sweetalert2';
+import { Classroom } from '../../../../Models/LMS/classroom';
+import { Employee } from '../../../../Models/Employee/employee';
+import { TimeTableDayGroupDTO } from '../../../../Models/LMS/time-table-day-group-dto';
 
 @Component({
   selector: 'app-time-table',
@@ -50,10 +53,20 @@ export class TimeTableComponent {
 
   TableData: TimeTable[] = [];
   schools: School[] = [];
+  Teachers: Employee[] = [];
+  classes: Classroom[] = [];
   SelectedSchoolId: number = 0;
+  SelectedTimeTableId: number = 0;
   timetable: TimeTable = new TimeTable();
   validationErrors: { [key in keyof TimeTable]?: string } = {};
   isLoading = false;
+  types = ['All', 'Class', 'Teacher'];
+  PrintType = 'All'; // default value
+  SelectedClassId: number = 0
+  SelectedTeacherId: number = 0
+  MaxPeriods: number = 0;
+  TimeTableName: string = '';
+  TimeTable: TimeTableDayGroupDTO[] = []
 
   constructor(
     private router: Router,
@@ -153,7 +166,7 @@ export class TimeTableComponent {
 
   openModal() {
     if (this.SelectedSchoolId == 0) {
-      this.validationErrors["schoolID"]="School is required"
+      this.validationErrors["schoolID"] = "School is required"
     } else {
       document.getElementById('Add_Modal')?.classList.remove('hidden');
       document.getElementById('Add_Modal')?.classList.add('flex');
@@ -164,6 +177,18 @@ export class TimeTableComponent {
   closeModal() {
     document.getElementById('Add_Modal')?.classList.remove('flex');
     document.getElementById('Add_Modal')?.classList.add('hidden');
+  }
+
+  openPrintModal(id: number) {
+    document.getElementById('Print_Modal')?.classList.remove('hidden');
+    document.getElementById('Print_Modal')?.classList.add('flex');
+    this.PrintType = 'All'
+    this.SelectedTimeTableId = id
+  }
+
+  closePrintModal() {
+    document.getElementById('Print_Modal')?.classList.remove('flex');
+    document.getElementById('Print_Modal')?.classList.add('hidden');
   }
 
   onInputValueChange(event: { field: keyof TimeTable; value: any }) {
@@ -239,10 +264,114 @@ export class TimeTableComponent {
     this.router.navigateByUrl(`Employee/Time Table View/${id}`)
   }
 
-  EditFavourite(id:number , isFav: boolean){
-   console.log(id,isFav)
-   this.TimeTableServ.EditIsFavourite(id,isFav,this.DomainName).subscribe((d)=>{
-    this.GetAllData()
-   })
+  EditFavourite(id: number, isFav: boolean) {
+    console.log(id, isFav)
+    this.TimeTableServ.EditIsFavourite(id, isFav, this.DomainName).subscribe((d) => {
+      this.GetAllData()
+    })
   }
+
+  Print() {
+    this.isLoading = true;
+
+    const printStyle = `
+    <style>
+      @page { size: auto; margin: 0mm; }
+      body { margin: 0; }
+
+      @media print {
+        body > *:not(#print-container) {
+          display: none !important;
+        }
+        #print-container {
+          display: block !important;
+          position: static !important;
+          top: auto !important;
+          left: auto !important;
+          width: 100% !important;
+          height: auto !important;
+          background: white !important;
+          box-shadow: none !important;
+          margin: 0 !important;
+        }
+      }
+    </style>
+  `;
+
+    const triggerPrint = () => {
+      setTimeout(() => {
+        const element = document.getElementById('Data');
+        if (element) {
+          element.classList.remove('hidden');
+
+          const printContents = element.innerHTML;
+          const popupWindow = window.open('', '_blank', 'width=800,height=600');
+
+          if (popupWindow) {
+            popupWindow.document.open();
+            popupWindow.document.write(`
+            <html>
+              <head>
+                <title>TimeTable - ${this.TimeTableName}</title>
+                ${printStyle}
+              </head>
+              <body>
+                <div id="print-container">
+                  ${printContents}
+                </div>
+                <script>
+                  window.onload = function() {
+                    window.print();
+                    window.onafterprint = function() { window.close(); };
+                  };
+                </script>
+              </body>
+            </html>
+          `);
+            popupWindow.document.close();
+          }
+
+          element.classList.add('hidden');
+          this.isLoading = false;
+          this.closePrintModal();
+        }
+      }, 500);
+    };
+
+    if (this.PrintType === "Class") {
+      this.TimeTableServ.GetByIdForClassAsync(this.SelectedTimeTableId, this.SelectedClassId, this.DomainName).subscribe((d) => {
+        this.TimeTable = d.data;
+        this.TimeTableName = d.timeTableName;
+        this.MaxPeriods = d.maxPeriods;
+        triggerPrint();
+      });
+    } else if (this.PrintType === "Teacher") {
+      this.TimeTableServ.GetByIdForTeacherAsync(this.SelectedTimeTableId, this.SelectedTeacherId, this.DomainName).subscribe((d) => {
+        this.TimeTable = d.data;
+        this.TimeTableName = d.timeTableName;
+        this.MaxPeriods = d.maxPeriods;
+        triggerPrint();
+      });
+    } else if (this.PrintType === "All") {
+      this.TimeTableServ.GetByID(this.SelectedTimeTableId, this.DomainName).subscribe((d) => {
+        this.TimeTable = d.data;
+        this.TimeTableName = d.timeTableName;
+        this.MaxPeriods = d.maxPeriods;
+        triggerPrint();
+      });
+    }
+  }
+
+  GetTypes() {
+    if (this.PrintType == "Class") {
+      this.TimeTableServ.GetAllClassesinThisTimetable(this.SelectedTimeTableId, this.DomainName).subscribe((d) => {
+        this.classes = d
+      })
+    } else if (this.PrintType == "Teacher") {
+      this.TimeTableServ.GetAllTeachersinThisTimetable(this.SelectedTimeTableId, this.DomainName).subscribe((d) => {
+        this.Teachers = d
+      })
+    }
+  }
+
 }
