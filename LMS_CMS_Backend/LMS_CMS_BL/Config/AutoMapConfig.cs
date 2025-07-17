@@ -513,8 +513,7 @@ namespace LMS_CMS_BL.Config
                 .ForMember(dest => dest.DepartmentName, opt => opt.MapFrom(src => src.Department.Name))
                 .ForMember(dest => dest.JobName, opt => opt.MapFrom(src => src.Job.Name))
                 .ForMember(dest => dest.JobCategoryID, opt => opt.MapFrom(src => src.Job.JobCategoryID))
-                .ForMember(dest => dest.ReasonForLeavingWork, opt => opt.MapFrom(src => src.ReasonForLeavingWork.Name))
-                .ForMember(dest => dest.JobCategoryId, opt => opt.MapFrom(src => src.Job.JobCategoryID))
+                .ForMember(dest => dest.ReasonForLeavingWork, opt => opt.MapFrom(src => src.ReasonForLeavingWork.Name)) 
                 .ForMember(dest => dest.AcademicDegreeName, opt => opt.MapFrom(src => src.AcademicDegree.Name));
 
             CreateMap<Country, CountriesGetDTO>();

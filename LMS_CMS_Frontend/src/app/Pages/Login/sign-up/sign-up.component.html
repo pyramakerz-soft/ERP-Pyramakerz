@@ -12,6 +12,7 @@
           <div class="mb-2 w-full py-2">
             <label for="user_Name" class="py-6">Username:</label>
             <input class="w-full h-[56px] rounded-[8px] border px-2 mt-1" id="user_Name" type="text"
+            placeholder="Enter Username"
             (ngModelChange)="onInputValueChange({ field: 'user_Name', value: $event })"
               [(ngModel)]="parentInfo.user_Name" (input)="onUserNameChange()" />
               <span *ngIf="validationErrors['user_Name']" class="text-red-500 ml-3 font-normal">{{ validationErrors['user_Name'] }}</span>
@@ -20,7 +21,8 @@
           <div class="mb-2 w-full py-2">
             <label for="email" class="py-6">Email:</label>
             <input class="w-full h-[56px] rounded-[8px] border px-2 mt-1" id="email" type="text"
-            (ngModelChange)="onInputValueChange({ field: 'email', value: $event })"
+              placeholder="Enter Email"
+              (ngModelChange)="onInputValueChange({ field: 'email', value: $event })"
               [(ngModel)]="parentInfo.email" (input)="onUserNameChange()" />
               <span *ngIf="validationErrors['email']" class="text-red-500 ml-3 font-normal">{{ validationErrors['email'] }}</span>
           </div>
@@ -28,7 +30,8 @@
           <div class="mb-2 w-full py-2">
             <label for="en_name" class="py-6">Name In English:</label>
             <input class="w-full h-[56px] rounded-[8px] border px-2 mt-1" id="en_name" type="text"
-            (ngModelChange)="onInputValueChange({ field: 'en_name', value: $event })"
+              placeholder="Enter English Name"
+              (ngModelChange)="onInputValueChange({ field: 'en_name', value: $event })"
               [(ngModel)]="parentInfo.en_name" (input)="onUserNameChange()" />
               <span *ngIf="validationErrors['en_name']" class="text-red-500 ml-3 font-normal">{{ validationErrors['en_name'] }}</span>
           </div>
@@ -36,7 +39,8 @@
           <div class="mb-2 w-full py-2">
             <label for="ar_name" class="py-6">Name In Arabic:</label>
             <input class="w-full h-[56px] rounded-[8px] border px-2 mt-1" id="ar_name" type="text"
-            (ngModelChange)="onInputValueChange({ field: 'ar_name', value: $event })"
+              placeholder="Enter Arabic Name"
+              (ngModelChange)="onInputValueChange({ field: 'ar_name', value: $event })"
               [(ngModel)]="parentInfo.ar_name" (input)="onUserNameChange()" />
               <span *ngIf="validationErrors['ar_name']" class="text-red-500 ml-3 font-normal">{{ validationErrors['ar_name'] }}</span>
           </div>
@@ -44,14 +48,16 @@
           <div class="mb-2 w-full py-2">
             <label for="password" class="py-6">Password:</label>
             <input class="w-full h-[56px] rounded-[8px] border px-2" id="password" type="password"
-            (ngModelChange)="onInputValueChange({ field: 'password', value: $event })"
+              placeholder="Enter Password"
+              (ngModelChange)="onInputValueChange({ field: 'password', value: $event })"
               [(ngModel)]="parentInfo.password" (input)="onPasswordChange()" />
               <span *ngIf="validationErrors['password']" class="text-red-500 ml-3 font-normal">{{ validationErrors['password'] }}</span>
           </div>
 
           <div class="mb-2 w-full py-2">
             <label for="ConfirmPassword" class="py-6">Confirm Password:</label>
-            <input class="w-full h-[56px] rounded-[8px] border px-2" id="ConfirmPassword" type="password"
+            <input class="w-full h-[56px] rounded-[8px] border px-2" id="ConfirmPassword" type="password" 
+              placeholder="Enter Password Again"  
               [(ngModel)]="ConfirmPassword" (input)="onConfirmPasswordChange()" />
             <span *ngIf="IsConfimPassEmpty" class="text-red-500 ml-3 font-normal">Confirm Password required</span>
             <span *ngIf="validationErrors['password'] && !IsConfimPassEmpty" class="text-red-500 ml-3 font-normal">{{ validationErrors['password'] }}</span>
