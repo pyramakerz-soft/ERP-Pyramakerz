@@ -1083,14 +1083,22 @@ namespace LMS_CMS_BL.Config
             CreateMap<TimeTableSubject, TimeTableSubjectGetDto>()
                 .ForMember(dest => dest.SubjectName, opt => opt.MapFrom(src => src.Subject.en_name))
                 .ForMember(dest => dest.TeacherName, opt => opt.MapFrom(src => src.Teacher.en_name));
-
-
+ 
             CreateMap<AccountingConfigs, AccountingConfigsGetDTO>()
                 .ForMember(dest => dest.Sales, opt => opt.MapFrom(src => src.Sales != null ? src.Sales.Name : null))
                 .ForMember(dest => dest.SalesReturn, opt => opt.MapFrom(src => src.SalesReturn != null ? src.SalesReturn.Name : null))
                 .ForMember(dest => dest.Purchase, opt => opt.MapFrom(src => src.Purchase != null ? src.Purchase.Name : null))
                 .ForMember(dest => dest.PurchaseReturn, opt => opt.MapFrom(src => src.PurchaseReturn != null ? src.PurchaseReturn.Name : null));
             CreateMap<AccountingConfigsEditDTO, AccountingConfigs>();
+
+            CreateMap<UserType, UserTypeGetDTO>();
+
+            CreateMap<Announcement, AnnouncementGetDTO>();
+            CreateMap<AnnouncementAddDTO, Announcement>();
+            CreateMap<AnnouncementPutDTO, Announcement>();
+
+            CreateMap<AnnouncementSharedTo, AnnouncementSharedToGetDTO>()
+                .ForMember(dest => dest.UserTypeTitle, opt => opt.MapFrom(src => src.UserType.Title));
         }
     } 
 }

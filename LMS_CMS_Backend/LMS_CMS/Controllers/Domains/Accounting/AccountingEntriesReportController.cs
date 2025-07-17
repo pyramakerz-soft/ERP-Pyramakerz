@@ -1,6 +1,7 @@
 ﻿using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.AccountingModule.Reports;
 using LMS_CMS_DAL.Models.Domains.AccountingModule.Reports;
+using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +12,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 {
     [Route("api/with-domain/[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class AccountingEntriesReportController : ControllerBase
     {
         private readonly DbContextFactoryService _dbContextFactory;
@@ -23,10 +24,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
         #region Accounting Entries
         [HttpGet("AccountingEntries")]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "" }
-        //)]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Accounting Constraints Report" }
+        )]
         public async Task<IActionResult> GetAccountingEntriesAsync(DateTime fromDate, DateTime toDate, long AccountNumber, long SubAccountNumber, int pageNumber = 1, int pageSize = 10)
         {
             if (toDate < fromDate)
