@@ -129,9 +129,9 @@
         <div class="flex flex-col w-[48%]">
           <h6 class="font-medium text-base leading-6 mb-1 mt-3"> {{ 'Name' | translate }}</h6>
           <input type="text" class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"
-            [(ngModel)]="Supplier.name" [dir]="isRtl ? 'rtl' : 'ltr'"
-  [placeholder]="isRtl ? 'أدخل العنوان' : 'Enter Title'"
-  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'"
+            [(ngModel)]="Supplier.name" 
+            placeholder="{{ 'Enter Title' | translate }}"
+
             (ngModelChange)="onInputValueChange({ field: 'name', value: $event })" />
           <span *ngIf="validationErrors['name']" class="text-red-500 font-normal">{{ validationErrors['name'] }}</span>
         </div>
@@ -162,9 +162,11 @@
         <div class="flex flex-col w-[48%]">
           <h6 class="font-medium text-base leading-6 mb-1 mt-3"> {{ 'Commercial Register' | translate }}</h6>
           <input type="text" class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"
-            [(ngModel)]="Supplier.commercialRegister"  [dir]="isRtl ? 'rtl' : 'ltr'"
-  [placeholder]="isRtl ? 'أدخل السجل التجاري' : 'Enter Commercial Register'"
-  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'"
+            [(ngModel)]="Supplier.commercialRegister" 
+            
+             placeholder="{{ 'Enter Commercial Register' | translate }}"
+            
+
             (ngModelChange)="onInputValueChange({ field: 'commercialRegister', value: $event })" />
           <span *ngIf="validationErrors['commercialRegister']" class="text-red-500 font-normal">
             {{ validationErrors['commercialRegister'] }}
@@ -174,9 +176,8 @@
         <div class="flex flex-col w-[48%]">
           <h6 class="font-medium text-base leading-6 mb-1 mt-3"> {{ 'Email' | translate }}</h6>
           <input type="text" class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"
-            [(ngModel)]="Supplier.email"  [dir]="isRtl ? 'rtl' : 'ltr'"
-  [placeholder]="isRtl ? 'أدخل البريد الإلكتروني' : 'Enter Email'"
-  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'"
+            [(ngModel)]="Supplier.email" 
+              placeholder="{{ 'Enter Email' | translate }}"
             (ngModelChange)="onInputValueChange({ field: 'email', value: $event })" />
           <span *ngIf="validationErrors['email']" class="text-red-500 font-normal">{{ validationErrors['email']
             }}</span>
@@ -185,9 +186,9 @@
         <div class="flex flex-col w-[48%]">
           <h6 class="font-medium text-base leading-6 mb-1 mt-3"> {{ 'Tax Card' | translate }}</h6>
           <input type="text" class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"
-            [(ngModel)]="Supplier.taxCard"   [dir]="isRtl ? 'rtl' : 'ltr'"
-  [placeholder]="isRtl ? 'أدخل البطاقة الضريبية' : 'Enter taxCard'"
-  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'"
+            [(ngModel)]="Supplier.taxCard" 
+             placeholder="{{ 'Enter taxCard' | translate }}"
+            
             (ngModelChange)="onInputValueChange({ field: 'taxCard', value: $event })" />
           <span *ngIf="validationErrors['taxCard']" class="text-red-500 font-normal">{{ validationErrors['taxCard']
             }}</span>
@@ -196,9 +197,8 @@
         <div class="flex flex-col w-[48%]">
           <h6 class="font-medium text-base leading-6 mb-1 mt-3"> {{ 'Address' | translate }}</h6>
           <input type="text" class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"
-            [(ngModel)]="Supplier.address" [dir]="isRtl ? 'rtl' : 'ltr'"
-  [placeholder]="isRtl ? 'أدخل العنوان' : 'Enter address'"
-  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'"
+            [(ngModel)]="Supplier.address" 
+ placeholder="{{ 'Enter Address' | translate }}"
             (ngModelChange)="onInputValueChange({ field: 'address', value: $event })" />
           <span *ngIf="validationErrors['address']" class="text-red-500 font-normal">{{ validationErrors['address']
             }}</span>
@@ -207,9 +207,9 @@
         <div class="flex flex-col w-[48%]">
           <h6 class="font-medium text-base leading-6 mb-1 mt-3"> {{ 'Contact Person' | translate }}</h6>
           <input type="text" class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"
-            [(ngModel)]="Supplier.contactPerson"  [dir]="isRtl ? 'rtl' : 'ltr'"
-  [placeholder]="isRtl ? 'أدخل اسم شخص الاتصال' : 'Enter contactPerson'"
-  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'"
+            [(ngModel)]="Supplier.contactPerson" 
+        
+             placeholder="{{ 'Enter contactPerson' | translate }}"
             (ngModelChange)="onInputValueChange({ field: 'contactPerson', value: $event })" />
           <span *ngIf="validationErrors['contactPerson']" class="text-red-500 font-normal">{{
             validationErrors['contactPerson'] }}</span>
@@ -222,30 +222,32 @@
             <div class="flex flex-col w-[32%] ">
               <input type="text" class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"
                 [(ngModel)]="Supplier.phone1" (ngModelChange)="onInputValueChange({ field: 'phone1', value: $event })"
-                (input)="validateNumber($event, 'phone1')" [dir]="isRtl ? 'rtl' : 'ltr'"
-  [placeholder]="isRtl ? 'أدخل رقم الهاتف 1' : 'Enter Phone 1'"
-  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'" />
+                (input)="validateNumber($event, 'phone1')" 
+                
+                 placeholder="{{ 'Enter Phone 1' | translate }}" />
               <span *ngIf="validationErrors['phone1']" class="text-red-500 font-normal">{{ validationErrors['phone1']
                 }}</span>
             </div>
 
             <input type="text" class="w-[32%] h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"
-              (input)="validateNumber($event, 'phone2')" [(ngModel)]="Supplier.phone2"  [dir]="isRtl ? 'rtl' : 'ltr'"
-  [placeholder]="isRtl ? 'أدخل رقم الهاتف 2' : 'Enter Phone 2'"
-  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'" />
+              (input)="validateNumber($event, 'phone2')" [(ngModel)]="Supplier.phone2" 
+              
+               placeholder="{{ 'Enter Phone 2' | translate }}" />
             <input type="text" class="w-[32%] h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"
-              (input)="validateNumber($event, 'phone3')" [(ngModel)]="Supplier.phone3"  [dir]="isRtl ? 'rtl' : 'ltr'"
-  [placeholder]="isRtl ? 'أدخل رقم الهاتف 3' : 'Enter Phone 3'"
-  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'" />
+              (input)="validateNumber($event, 'phone3')" [(ngModel)]="Supplier.phone3" 
+              
+               placeholder="{{ 'Enter Phone 3' | translate }}"
+               />
           </div>
         </div>
 
         <div class="flex flex-col w-full">
           <h6 class="font-medium text-base leading-6 mb-1 mt-3"> {{ 'Website' | translate }}</h6>
           <input type="text" class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"
-            [(ngModel)]="Supplier.website"  [dir]="isRtl ? 'rtl' : 'ltr'"
-  [placeholder]="isRtl ? 'أدخل الموقع الإلكتروني' : 'Enter website'"
-  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'"
+            [(ngModel)]="Supplier.website" 
+            
+          placeholder="{{ 'Enter website' | translate }}"
+
             (ngModelChange)="onInputValueChange({ field: 'website', value: $event })" />
           <span *ngIf="validationErrors['website']" class="text-red-500 font-normal">{{ validationErrors['website']
             }}</span>

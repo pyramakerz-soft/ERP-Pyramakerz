@@ -109,9 +109,9 @@
       <div class="flex flex-col mt-2 gap-2 items-start">
         <h6 class="font-medium text-base leading-6"> {{ 'Debit Name' | translate }}</h6>
         <input type="text" class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2"
-          [(ngModel)]="debit.name" [dir]="isRtl ? 'rtl' : 'ltr'"
-  [placeholder]="isRtl ? 'أدخل المبلغ المدين' : 'Enter Debit'"
-  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'" (ngModelChange)="
+          [(ngModel)]="debit.name" 
+          placeholder="{{ 'Enter Debit' | translate }}"
+ (ngModelChange)="
                 onInputValueChange({ field: 'name', value: $event })" />
         <span *ngIf="validationErrors['name']" class="text-red-500 ml-3 font-normal">{{ validationErrors["name"]}}</span>
       </div>

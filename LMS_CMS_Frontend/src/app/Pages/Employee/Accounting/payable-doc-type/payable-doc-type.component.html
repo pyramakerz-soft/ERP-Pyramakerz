@@ -116,9 +116,7 @@
               type="text"
               class="w-[404px] h-[45px] rounded-lg border border-solid border-gray-300 px-2"
               [(ngModel)]="data.name"
-              [dir]="isRtl ? 'rtl' : 'ltr'"
-  [placeholder]="isRtl ? 'أدخل الاسم' : 'Enter Name'"
-  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'"
+placeholder="{{ 'Enter name' | translate }}"
               (ngModelChange)="
                 onInputValueChange({ field: 'name', value: $event })
               "

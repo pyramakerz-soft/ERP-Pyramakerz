@@ -109,9 +109,7 @@ class="fixed top-0 left-0 right-0 z-50 flex justify-center items-center w-full h
     <div class="flex flex-col mt-2 gap-2 items-start">
       <h6 class="font-medium text-base leading-6"> {{ 'tuition Fees Type Name' | translate }}</h6>
       <input type="text" class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2"
-        [(ngModel)]="tuitionFeesType.name" [dir]="isRtl ? 'rtl' : 'ltr'"
-  [placeholder]="isRtl ? 'أدخل الاسم' : 'Enter name'"
-  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'" (ngModelChange)="
+        [(ngModel)]="tuitionFeesType.name" placeholder="{{ 'Enter name' | translate }}" (ngModelChange)="
               onInputValueChange({ field: 'name', value: $event })" />
       <span *ngIf="validationErrors['name']" class="text-red-500 ml-3 font-normal">{{ validationErrors["name"]}}</span>
     </div>

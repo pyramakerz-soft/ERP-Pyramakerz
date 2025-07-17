@@ -35,9 +35,7 @@
     <div class="flex flex-col mb-4 w-[49%]">
         <label class="mb-2 primaryTxt" for="name"> {{ 'Address' | translate }}</label>
         <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-            [dir]="isRtl ? 'rtl' : 'ltr'"
-  [placeholder]="isRtl ? 'أدخل اسم المستخدم' : 'Enter User Name'"
-  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'" [(ngModel)]="Data.address" />
+ placeholder="{{ 'Enter User Name' | translate }}" [(ngModel)]="Data.address" />
     </div>
 
 
@@ -45,18 +43,14 @@
         <label class="mb-2 primaryTxt" for="mobile"> {{ 'Mobile Number' | translate }}</label>
         <input id="mobile" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
             (input)="validateNumber($event, 'mobile')"
-            [dir]="isRtl ? 'rtl' : 'ltr'"
-  [placeholder]="isRtl ? 'أدخل رقم الجوال' : 'Enter User mobile'"
-  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'" [(ngModel)]="Data.mobile" />
+placeholder="{{ 'Enter User mobile' | translate }}" [(ngModel)]="Data.mobile" />
     </div>
 
     <div class="flex flex-col mb-4 w-full">
         <label class="mb-2 primaryTxt" for="name"> {{ 'Phone' | translate }}</label>
         <input id="phone" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
             (input)="validateNumber($event, 'phone')"
-            [dir]="isRtl ? 'rtl' : 'ltr'"
-  [placeholder]="isRtl ? 'أدخل رقم الهاتف' : 'Enter User phone'"
-  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'" [(ngModel)]="Data.phone" />
+placeholder="{{ 'Enter User phone' | translate }}" [(ngModel)]="Data.phone" />
     </div>
 
     <div class="flex flex-col mb-4 w-full">
@@ -65,9 +59,7 @@
             <div class="flex flex-col w-full">
                 <textarea
                     class="w-full h-[100px] rounded-lg border border-solid border-gray-300 px-2 py-1 mb-3 resize-none"
-                    [(ngModel)]="Data.note" [dir]="isRtl ? 'rtl' : 'ltr'"
-  [placeholder]="isRtl ? 'إضافة ملاحظات' : 'Add Notes'"
-  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'"></textarea>
+                    [(ngModel)]="Data.note"  placeholder="{{ 'Add Notes' | translate }}"></textarea>
             </div>
         </div>
     </div>

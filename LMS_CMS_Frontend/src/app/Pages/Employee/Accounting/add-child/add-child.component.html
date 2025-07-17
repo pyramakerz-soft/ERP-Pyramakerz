@@ -105,9 +105,7 @@
             class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"
             [(ngModel)]="NationalID"
             (ngModelChange)="SelectChild(NationalID)"
-            [dir]="isRtl ? 'rtl' : 'ltr'"
-  [placeholder]="isRtl ? 'أدخل الرقم القومي' : 'Enter National ID'"
-  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'" />
+   placeholder="{{ 'Enter National Id' | translate }}"  />
 
             <h6 class="font-medium text-base leading-6 mb-1 mt-3"> {{ 'Student' | translate }}</h6>
             <input type="text"

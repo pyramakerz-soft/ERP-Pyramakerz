@@ -15,9 +15,7 @@
     <div class="flex flex-col mb-4 w-[49%]">
         <label class="mb-2 primaryTxt" for="name">  {{ 'User Name' | translate }}</label>
         <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-             [dir]="isRtl ? 'rtl' : 'ltr'"
-  [placeholder]="isRtl ? 'أدخل اسم المستخدم' : 'Enter User Name'"
-  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'" [(ngModel)]="Data.user_Name"
+   placeholder="{{ 'Enter User Name' | translate }}" [(ngModel)]="Data.user_Name"
             (ngModelChange)="onInputValueChange({ field: 'user_Name', value: $event })" />
         <span *ngIf="validationErrors['user_Name']" class="text-red-500 ml-3 font-normal">{{
             validationErrors["user_Name"]}}</span>
@@ -26,9 +24,10 @@
     <div class="flex flex-col mb-4 w-[49%]">
         <label class="mb-2 primaryTxt" for="name">  {{ 'English Name' | translate }}</label>
         <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-            (ngModelChange)="onInputValueChange({ field: 'en_name', value: $event })"  [dir]="isRtl ? 'rtl' : 'ltr'"
-  [placeholder]="isRtl ? 'أدخل الاسم بالإنجليزية' : 'Enter English Name'"
-  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'"
+            (ngModelChange)="onInputValueChange({ field: 'en_name', value: $event })"  
+            
+            
+               placeholder="{{ 'Enter English Name' | translate }}"
             [(ngModel)]="Data.en_name" />
         <span *ngIf="validationErrors['en_name']" class="text-red-500 ml-3 font-normal">{{
             validationErrors["en_name"]}}</span>
@@ -37,9 +36,9 @@
     <div class="flex flex-col mb-4 w-[49%]">
         <label class="mb-2 primaryTxt" for="name">  {{ 'Arabic Name' | translate }}</label>
         <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-            (ngModelChange)="onInputValueChange({ field: 'ar_name', value: $event })"  [dir]="isRtl ? 'rtl' : 'ltr'"
-  [placeholder]="isRtl ? 'أدخل الاسم بالعربية' : 'Enter Arabic Name'"
-  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'" [(ngModel)]="Data.ar_name" />
+            (ngModelChange)="onInputValueChange({ field: 'ar_name', value: $event })"  
+         placeholder="{{ 'Enter Arabic Name' | translate }}"
+             [(ngModel)]="Data.ar_name" />
         <span *ngIf="validationErrors['ar_name']" class="text-red-500 ml-3 font-normal">{{
             validationErrors["ar_name"]}}</span>
     </div>
@@ -47,9 +46,8 @@
     <div *ngIf="mode == 'Create'" class="flex flex-col mb-4 w-[49%]">
         <label class="mb-2 primaryTxt" for="name">  {{ 'Password' | translate }}</label>
         <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-            (ngModelChange)="onInputValueChange({ field: 'password', value: $event })"  [dir]="isRtl ? 'rtl' : 'ltr'"
-  [placeholder]="isRtl ? 'أدخل كلمة المرور' : 'Enter Password'"
-  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'"
+            (ngModelChange)="onInputValueChange({ field: 'password', value: $event })" 
+              placeholder="{{ 'Enter Password' | translate }}"
             [(ngModel)]="Data.password" />
         <span *ngIf="validationErrors['password']" class="text-red-500 ml-3 font-normal">{{
             validationErrors["password"]}}</span>
@@ -59,9 +57,10 @@
         <label class="mb-2 primaryTxt" for="name">  {{ 'Mobile' | translate }}</label>
         <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
             (ngModelChange)="onInputValueChange({ field: 'mobile', value: $event })"
-            (input)="validateNumber($event, 'mobile')"  [dir]="isRtl ? 'rtl' : 'ltr'"
-  [placeholder]="isRtl ? 'أدخل رقم الجوال' : 'Enter Mobile'"
-  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'" [(ngModel)]="Data.mobile" />
+            (input)="validateNumber($event, 'mobile')" 
+            
+            placeholder="{{ 'Enter Mobile' | translate }}"
+             [(ngModel)]="Data.mobile" />
         <span *ngIf="validationErrors['mobile']" class="text-red-500 ml-3 font-normal">{{
             validationErrors["mobile"]}}</span>
     </div>
@@ -70,9 +69,10 @@
         <label class="mb-2 primaryTxt" for="name">  {{ 'Phone' | translate }}</label>
         <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
             (ngModelChange)="onInputValueChange({ field: 'phone', value: $event })"
-            (input)="validateNumber($event, 'phone')"   [dir]="isRtl ? 'rtl' : 'ltr'"
-  [placeholder]="isRtl ? 'أدخل رقم الهاتف' : 'Enter Phone'"
-  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'" [(ngModel)]="Data.phone" />
+            (input)="validateNumber($event, 'phone')" 
+            
+             placeholder="{{ 'Enter Phone' | translate }}"
+ [(ngModel)]="Data.phone" />
         <span *ngIf="validationErrors['phone']" class="text-red-500 ml-3 font-normal">{{
             validationErrors["phone"]}}</span>
     </div>
@@ -81,9 +81,7 @@
     <div class="flex flex-col mb-4 w-[49%]">
         <label class="mb-2 primaryTxt" for="name">  {{ 'Email' | translate }}</label>
         <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-            (ngModelChange)="onInputValueChange({ field: 'email', value: $event })"   [dir]="isRtl ? 'rtl' : 'ltr'"
-  [placeholder]="isRtl ? 'أدخل البريد الإلكتروني' : 'Enter Email'"
-  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'"
+            (ngModelChange)="onInputValueChange({ field: 'email', value: $event })"    placeholder="{{ 'Enter Email' | translate }}"
             [(ngModel)]="Data.email" />
         <span *ngIf="validationErrors['email']" class="text-red-500 ml-3 font-normal">{{
             validationErrors["email"]}}</span>
@@ -92,9 +90,7 @@
     <div class="flex flex-col mb-4 w-[49%]">
         <label class="mb-2 primaryTxt" for="name"> {{ 'Address' | translate }}</label>
         <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-             [dir]="isRtl ? 'rtl' : 'ltr'"
-  [placeholder]="isRtl ? 'أدخل العنوان' : 'Enter Address'"
-  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'" [(ngModel)]="Data.address" />
+  placeholder="{{ 'Enter Address' | translate }}" [(ngModel)]="Data.address" />
     </div>
 
     <div class="flex flex-col w-[49%] mb-4">
@@ -126,9 +122,9 @@
         <label class="mb-2 primaryTxt" for="name">  {{ 'License Number' | translate }}</label>
         <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
             (ngModelChange)="onInputValueChange({ field: 'licenseNumber', value: $event })"
-            (input)="validateNumber($event, 'licenseNumber')"  [dir]="isRtl ? 'rtl' : 'ltr'"
-  [placeholder]="isRtl ? 'أدخل رقم الرخصة' : 'Enter License Number'"
-  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'"
+            (input)="validateNumber($event, 'licenseNumber')" 
+              placeholder="{{ 'Enter License Number' | translate }}"
+
             [(ngModel)]="Data.licenseNumber" />
         <span *ngIf="validationErrors['licenseNumber']" class="text-red-500 ml-3 font-normal">{{
             validationErrors["licenseNumber"]}}</span>
@@ -137,9 +133,10 @@
     <div *ngIf="Data.employeeTypeID == 2" class="flex flex-col mb-4 w-[49%]">
         <label class="mb-2 primaryTxt" for="expireDate">  {{ 'Expire Date' | translate }}</label>
         <input id="expireDate" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-            (ngModelChange)="onInputValueChange({ field: 'expireDate', value: $event })" [dir]="isRtl ? 'rtl' : 'ltr'"
-  [placeholder]="isRtl ? 'أدخل تاريخ الانتهاء' : 'Enter Expiry Date'"
-  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'"
+            (ngModelChange)="onInputValueChange({ field: 'expireDate', value: $event })" 
+            
+              placeholder="{{ 'Enter Expiry Date' | translate }}"
+
             [(ngModel)]="Data.expireDate" />
         <span *ngIf="validationErrors['expireDate']" class="text-red-500 ml-3 font-normal">{{
             validationErrors["expireDate"]}}</span>
@@ -324,9 +321,9 @@
                     <label class="mb-2 primaryTxt" for="name-{{ i }}">  {{ 'Add Name' | translate }}</label>
                     <input id="name-{{ i }}" type="text" [value]="file.name"
                         class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                         [dir]="isRtl ? 'rtl' : 'ltr'"
-  [placeholder]="isRtl ? 'أدخل اسم المرفق' : 'Enter Attachment Name'"
-  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'" (change)="changeFileName(file.id, $event)" />
+                       
+                       placeholder="{{ 'Enter Attachment Name' | translate }}"
+ (change)="changeFileName(file.id, $event)" />
                 </div>
             </div>
         </div>
@@ -357,9 +354,9 @@
                     <label class="mb-2 primaryTxt" for="name-{{ i }}">  {{ 'Add Name' | translate }}</label>
                     <input id="name-{{ i }}" type="text" [value]="file.name"
                         class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                         [dir]="isRtl ? 'rtl' : 'ltr'"
-  [placeholder]="isRtl ? 'أدخل اسم المرفق' : 'Enter Attachment Name'"
-  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'" (change)="changeFileName(i, $event)" />
+                         
+                        placeholder="{{ 'Enter Attachment Name' | translate }}"
+                         (change)="changeFileName(i, $event)" />
                 </div>
             </div>
         </div>

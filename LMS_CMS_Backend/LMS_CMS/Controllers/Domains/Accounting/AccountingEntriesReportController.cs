@@ -27,7 +27,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         //    allowedTypes: new[] { "octa", "employee" },
         //    pages: new[] { "" }
         //)]
-        public async Task<IActionResult> GetAccountingEntriesAsync(DateTime fromDate, DateTime toDate, int pageNumber = 1, int pageSize = 10)
+        public async Task<IActionResult> GetAccountingEntriesAsync(DateTime fromDate, DateTime toDate, long AccountNumber, long SubAccountNumber, int pageNumber = 1, int pageSize = 10)
         {
             if (toDate < fromDate)
                 return BadRequest("Start date must be equal or greater than End date");
@@ -60,14 +60,14 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             }
 
             var fullTotals = await context.Set<TotalResult>()
-        .FromSqlRaw(@"
-            SELECT 
-                SUM(Debit) AS TotalDebit,
-                SUM(Credit) AS TotalCredit
-            FROM dbo.EntriesFun(@DateFrom, @DateTo)",
-            new SqlParameter("@DateFrom", fromDate),
-            new SqlParameter("@DateTo", toDate)
-        ).FirstOrDefaultAsync();
+                .FromSqlRaw(@"
+                    SELECT 
+                        SUM(Debit) AS TotalDebit,
+                        SUM(Credit) AS TotalCredit
+                    FROM dbo.EntriesFun(@DateFrom, @DateTo)",
+                    new SqlParameter("@DateFrom", fromDate),
+                    new SqlParameter("@DateTo", toDate)
+                ).FirstOrDefaultAsync();
 
             decimal fullDebit = fullTotals?.TotalDebit ?? 0;
             decimal fullCredit = fullTotals?.TotalCredit ?? 0;

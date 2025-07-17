@@ -38,8 +38,8 @@
                     <label class="mb-2 primaryTxt font-medium" for="DocType"> {{ 'Doc Number' | translate }}</label>
                     <input id="DocType" type="text"
                         class="rounded-lg border border-solid border-gray-300 px-4 py-3 text-lg" [disabled]="isView"
-                        [dir]="isRtl ? 'rtl' : 'ltr'" [placeholder]="isRtl ? 'أدخل رقم المستند' : 'Enter Doc Number'"
-                        [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'"
+                        
+                        placeholder="{{ 'Enter Doc Number' | translate }}"
                         [(ngModel)]="payable.docNumber"
                         (ngModelChange)="onInputValueChange({ field: 'docNumber', value: $event })" />
                     <span *ngIf="validationErrors['docNumber']" class="text-red-500 ml-3 font-normal">{{
@@ -102,9 +102,7 @@
             <div class="mt-5 flex flex-col">
                 <label class="mb-2 primaryTxt font-medium" for="notes"> {{ 'Notes' | translate }}</label>
                 <textarea id="notes" class="w-full rounded-lg border border-solid border-gray-300 px-4 py-3"
-                    [disabled]="isView" [dir]="isRtl ? 'rtl' : 'ltr'"
-                    [placeholder]="isRtl ? 'إضافة ملاحظات' : 'Add Notes'"
-                    [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'"
+                    [disabled]="isView"  placeholder="{{ 'Add Notes' | translate }}"
                     [(ngModel)]="payable.notes">
                 </textarea>
             </div>
@@ -223,8 +221,7 @@
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             <textarea id="notes" class="w-full rounded-lg border border-solid border-gray-300 px-4 py-3"
-                                [dir]="isRtl ? 'rtl' : 'ltr'" [placeholder]="isRtl ? 'إضافة ملاحظات' : 'Add Notes'"
-                                [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'"
+                             placeholder="{{ 'Add Notes' | translate }}"
                                 [(ngModel)]="newDetails.notes">
                             </textarea>
                         </td>
