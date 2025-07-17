@@ -82,9 +82,10 @@
       <div class="flex justify-start mt-2 gap-2 items-start">
         <div class="flex flex-col">
           <input type="text" class="w-[404px] h-[45px] rounded-lg border border-solid border-gray-300 px-2"
-            [(ngModel)]="academicDegree.name"   [dir]="isRtl ? 'rtl' : 'ltr'"
-  [placeholder]="isRtl ? 'أدخل الدرجة العلمية' : 'Enter Academic Degree'"
-  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'" (ngModelChange)="
+            [(ngModel)]="academicDegree.name"  
+            
+            placeholder="{{ 'Enter Academic Degree' | translate }}"
+ (ngModelChange)="
                 onInputValueChange({ field: 'name', value: $event })
               " />
           <span *ngIf="validationErrors['name']" class="text-red-500 ml-3 font-normal">{{ validationErrors["name"]
