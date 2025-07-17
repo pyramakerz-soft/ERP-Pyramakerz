@@ -17,7 +17,7 @@
         public string BuildConnectionString(string domainName)
         {
 
-            var dataSource = "DESKTOP-531QG4Q";
+            var dataSource = ".";
             var initialCatalog = domainName;
 
             return $"Data Source={dataSource};Initial Catalog={initialCatalog};Integrated Security = True;TrustServerCertificate=True";
