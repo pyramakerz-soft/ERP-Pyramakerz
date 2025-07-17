@@ -163,19 +163,19 @@
         (click)="CancelUpdatePassword()">   {{ 'Cancel' | translate }}</button>
 
     <input *ngIf="isChange" type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl mt-2"
-        (input)="onoldPasswordChange()"  [dir]="isRtl ? 'rtl' : 'ltr'"
-  [placeholder]="isRtl ? 'أدخل كلمة المرور القديمة' : 'Enter old password'"
-  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'" [(ngModel)]="editpasss.oldPassword">
+        (input)="onoldPasswordChange()" 
+        placeholder="{{ 'Enter old password' | translate }}"
+ [(ngModel)]="editpasss.oldPassword">
     <span *ngIf="OldPasswordError" class="text-red-500 text-sm font-normal">{{ OldPasswordError }}</span>
     <input *ngIf="isChange" type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl mt-2"
-        [dir]="isRtl ? 'rtl' : 'ltr'"
-  [placeholder]="isRtl ? 'أدخل كلمة المرور' : 'Enter the password'"
-  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'" (input)="onPasswordChange()" [(ngModel)]="password">
+       
+    placeholder="{{ 'Enter the password' | translate }}"
+ (input)="onPasswordChange()" [(ngModel)]="password">
     <span *ngIf="PasswordError" class="text-red-500 text-sm font-normal">{{ PasswordError }}</span>
     <input *ngIf="isChange" type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl mt-2"
-         [dir]="isRtl ? 'rtl' : 'ltr'"
-  [placeholder]="isRtl ? 'أعد إدخال كلمة المرور' : 'Enter the password again'"
-  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'" [(ngModel)]="confirmPassword">
+        
+  placeholder="{{ 'Enter the password again' | translate }}"
+  [(ngModel)]="confirmPassword">
 </div>
 
 <div *ngIf="Data.files.length > 0" class="bg-white p-4 rounded-lg">

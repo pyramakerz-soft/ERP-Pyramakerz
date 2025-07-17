@@ -20,18 +20,16 @@
                 <label class="mb-2 primaryTxt font-medium" for="id"> {{ 'ID' | translate }}</label>
                 <input 
                 (ngModelChange)="onInputValueChange({ field: 'id', value: $event }); GetDataByID()"
-                [(ngModel)]="accountingTreeChart.id" id="id" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" [dir]="isRtl ? 'rtl' : 'ltr'"
-  [placeholder]="isRtl ? 'أدخل الرقم التعريفي' : 'Enter ID'"
-  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'"/>
+                [(ngModel)]="accountingTreeChart.id" id="id" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" 
+                placeholder="{{ 'Enter ID' | translate }}"
+/>
                 <span *ngIf="validationErrors['id']" class="text-red-500 ml-3">{{ validationErrors['id'] }}</span>
             </div>
             <div class="flex flex-col w-[49%] mb-4">
                 <label class="mb-2 primaryTxt font-medium" for="name"> {{ 'Name' | translate }}</label>
                 <input [(ngModel)]="accountingTreeChart.name"
                 (ngModelChange)="onInputValueChange({ field: 'name', value: $event })"
-                 id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" [dir]="isRtl ? 'rtl' : 'ltr'"
-  [placeholder]="isRtl ? 'أدخل الاسم' : 'Enter name'"
-  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'"/>
+                 id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"placeholder="{{ 'Enter name' | translate }}"/>
                 <span *ngIf="validationErrors['name']" class="text-red-500 ml-3 font-normal">{{ validationErrors['name'] }}</span>
             </div>
             <div class="flex flex-col w-full mb-4">

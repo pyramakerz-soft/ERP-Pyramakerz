@@ -15,11 +15,13 @@ import { ClassroomService } from '../../../../Services/Employee/LMS/classroom.se
 import { SubjectService } from '../../../../Services/Employee/LMS/subject.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { ClassroomSubjectCoTeacher } from '../../../../Models/LMS/classroom-subject-co-teacher';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-subject-co-teacher',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule , TranslateModule],
   templateUrl: './subject-co-teacher.component.html',
   styleUrl: './subject-co-teacher.component.css'
 })
@@ -37,7 +39,8 @@ export class SubjectCoTeacherComponent {
     '',
     ''
   ); 
-
+ isRtl: boolean = false;
+  subscription!: Subscription;
   DomainName: string = '';
   UserID: number = 0;
   SupjectTeacherData: any[] = []; 
@@ -60,7 +63,8 @@ export class SubjectCoTeacherComponent {
     public ClassroomSubjectServ: ClassroomSubjectService,
     public classroomServ: ClassroomService,
     public subjectServ: SubjectService ,
-    public EmpServ: EmployeeService
+    public EmpServ: EmployeeService,
+      private languageService: LanguageService
   ) { }
 
   ngOnInit() {
@@ -75,6 +79,10 @@ export class SubjectCoTeacherComponent {
      
     this.GetData();
     this.GetAllClassrooms();
+       this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';   
   }
 
   moveToEmployee() {

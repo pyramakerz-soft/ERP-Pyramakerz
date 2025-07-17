@@ -15,11 +15,13 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { JobCategoriesService } from '../../../../Services/Employee/Administration/job-categories.service';
 import { firstValueFrom } from 'rxjs';
 import { Job } from '../../../../Models/Administrator/job';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-job-categories',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './job-categories.component.html',
   styleUrl: './job-categories.component.css',
 })
@@ -49,7 +51,8 @@ export class JobCategoriesComponent {
 
   isModalVisible: boolean = false;
   mode: string = '';
-
+ isRtl: boolean = false;
+  subscription!: Subscription;
   path: string = '';
   key: string = 'id';
   value: any = '';
@@ -69,7 +72,8 @@ export class JobCategoriesComponent {
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
-    public JobCategoryServ: JobCategoriesService
+    public JobCategoryServ: JobCategoriesService,
+     private languageService: LanguageService
   ) {}
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -90,6 +94,10 @@ export class JobCategoriesComponent {
     });
 
     this.GetAllData();
+   this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';  
   }
 
   GetAllData() {
