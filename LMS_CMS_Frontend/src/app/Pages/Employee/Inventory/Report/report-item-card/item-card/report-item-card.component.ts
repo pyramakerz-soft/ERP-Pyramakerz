@@ -2,7 +2,8 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import * as XLSX from 'xlsx';
+
+import * as XLSX from 'xlsx-js-style';
 import { PdfPrintComponent } from '../../../../../../Component/pdf-print/pdf-print.component';
 import { Store } from '../../../../../../Models/Inventory/store';
 import { InventoryDetailsService } from '../../../../../../Services/Employee/Inventory/inventory-details.service';
@@ -72,15 +73,6 @@ export class ReportItemCardComponent implements OnInit {
     });
   }
 
-  // onStoreSelected() {
-  //   if (this.selectedStoreId) {
-  //     this.loadItems();
-  //   } else {
-  //     this.items = [];
-  //     this.selectedItemId = null;
-  //   }
-  // }
-
   loadItems() {
     this.isLoading = true;
     this.shopItemService
@@ -98,10 +90,7 @@ export class ReportItemCardComponent implements OnInit {
   }
 
   onFilterChange() {
-    // Hide the table whenever any filter changes
     this.showTable = false;
-
-    // Also clear the existing data
     this.combinedData = [];
     this.transactionsForExport = [];
   }
@@ -136,13 +125,7 @@ export class ReportItemCardComponent implements OnInit {
       const formattedDateFrom = this.formatDateForAPI(this.dateFrom);
       const formattedDateTo = this.formatDateForAPI(this.dateTo);
 
-      console.log('Fetching report with parameters:', {
-        storeId: this.selectedStoreId,
-        itemId: this.selectedItemId,
-        fromDate: formattedDateFrom,
-        toDate: formattedDateTo,
-      });
-
+      // Get summary data
       const summaryResponse = await this.inventoryDetailsService
         .getInventoryNetSummary(
           this.selectedStoreId!,
@@ -152,7 +135,7 @@ export class ReportItemCardComponent implements OnInit {
         )
         .toPromise();
 
-      console.log('Summary response:', summaryResponse);
+      console.log('Summary Response:', summaryResponse); // <-- log summary
 
       if (!summaryResponse) {
         throw new Error('No summary data received');
@@ -169,135 +152,87 @@ export class ReportItemCardComponent implements OnInit {
         )
         .toPromise();
 
-      console.log('Transactions response:', transactionsResponse);
+      console.log('Transactions Response:', transactionsResponse); // <-- log transactions
 
       // Process and combine data
-      await this.processReportData(summaryResponse, transactionsResponse || []);
+      this.processReportData(summaryResponse, transactionsResponse || []);
 
       this.showTable = true;
     } catch (error) {
       console.error('Error loading report:', error);
       this.combinedData = [];
       this.showTable = true;
-      alert('Failed to load report data. Please check console for details.');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Failed to load report data',
+        confirmButtonText: 'OK',
+      });
     } finally {
       this.isLoading = false;
     }
   }
 
-  validateDateRange(): boolean {
-    if (this.dateFrom && this.dateTo) {
-      const fromDate = new Date(this.dateFrom);
-      const toDate = new Date(this.dateTo);
-
-      if (fromDate > toDate) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Invalid Date Range',
-          text: '"Date From" cannot be after "Date To"',
-          confirmButtonColor: '#3085d6',
-          confirmButtonText: 'OK',
-        });
-        return false;
-      }
-    }
-    return true;
-  }
-
-  private async processReportData(
+  private processReportData(
     summary: InventoryNetSummary,
     transactions: InventoryNetTransaction[]
   ) {
-    const formattedToDate = this.formatDisplayDate(summary.toDate);
-
     const summaryRow: any = {
       isSummary: true,
-      date: formattedToDate,
+      date: summary.toDate,
       transactionType: 'Initial Balance',
       invoiceNumber: '0',
       authority: '-',
-      income: summary.inQuantity,
-      outcome: summary.outQuantity,
-      balance: summary.balance,
+      income: summary.inQuantity ?? '-',
+      outcome: summary.outQuantity ?? '-',
+      balance: summary.quantitybalance ?? '-',
+      costBalance: summary.costBalance ?? '-',
     };
 
     if (this.showAverageColumn) {
-      summaryRow.average = await this.getAverageCost(summary.shopItemId);
+      summaryRow.price = '-';
+      summaryRow.totalPrice = '-';
+      summaryRow.averageCost = '-';
     }
 
     // Process transactions
-    const transactionRows = [];
-    for (const t of transactions) {
+    const transactionRows = transactions.map((t) => {
       const row: any = {
         isSummary: false,
-        date: t.dayDate,
-        transactionType: t.flagName,
-        invoiceNumber: t.invoiceNumber,
-        authority: t.supplierName || t.studentName || t.storeToName || 'N/A',
-        income: t.totalIn > 0 ? t.totalIn : '',
-        outcome: t.totalOut > 0 ? t.totalOut : '',
-        balance: t.balance,
+        date: t.date || '-',
+        transactionType: t.flagName || '-',
+        invoiceNumber: t.invoiceNumber || '-',
+        authority: t.supplierName || t.studentName || t.storeToName || '-',
+        income: t.itemInOut === 1 ? t.quantity ?? '-' : '-',
+        outcome: t.itemInOut === -1 ? t.quantity ?? '-' : '-',
+        balance: t.balance ?? '-',
       };
 
       if (this.showAverageColumn) {
-        row.average = await this.getAverageCost(summary.shopItemId);
+        row.price = t.price ?? '-';
+        row.totalPrice = t.totalPrice ?? '-';
+        row.averageCost = t.averageCost ?? '-';
       }
 
-      transactionRows.push(row);
-    }
+      return row;
+    });
 
     // Combine data
     this.combinedData = [summaryRow, ...transactionRows];
     this.prepareExportData();
   }
 
-  private async getAverageCost(itemId: number, date?: string): Promise<number> {
-    try {
-      console.group('getAverageCost Debug Info');
-      console.log('Input parameters:', { itemId, date });
-
-      // Format dates as MM/DD/YYYY
-      const formatDateForAverageAPI = (dateString: string): string => {
-        if (!dateString) return '';
-        const date = new Date(dateString);
-        if (isNaN(date.getTime())) {
-          console.error('Invalid date:', dateString);
-          return '';
-        }
-        const month = (date.getMonth() + 1).toString().padStart(2, '0');
-        const day = date.getDate().toString().padStart(2, '0');
-        const year = date.getFullYear();
-        return `${month}/${day}/${year}`;
-      };
-
-      const formattedDateFrom = formatDateForAverageAPI(this.dateFrom);
-      const formattedDateTo = date
-        ? formatDateForAverageAPI(date)
-        : formatDateForAverageAPI(this.dateTo);
-
-      console.log('Formatted dates for API:', {
-        fromDate: formattedDateFrom,
-        toDate: formattedDateTo,
-      });
-
-      const response = await this.inventoryDetailsService
-        .GetAverageCost(
-          formattedDateFrom,
-          formattedDateTo,
-          this.inventoryDetailsService.ApiServ.GetHeader()
-        )
-        .toPromise();
-
-      console.log('Full API response:', response);
-
-      console.log('No data found in response');
-      console.groupEnd();
-      return 0;
-    } catch (error) {
-      console.error('Error in getAverageCost:', error);
-      console.groupEnd();
-      return 0;
+  private formatDateForAPI(dateString: string): string {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+      console.error('Invalid date:', dateString);
+      return '';
     }
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   private formatDisplayDate(dateString: string): string {
@@ -315,43 +250,43 @@ export class ReportItemCardComponent implements OnInit {
   }
 
   private prepareExportData(): void {
-    this.transactionsForExport = this.combinedData.map((t) => ({
-      Date: t.isSummary ? t.date : new Date(t.date).toLocaleDateString(),
-      Transaction: t.transactionType,
-      'Invoice #': t.invoiceNumber,
-      Authority: t.authority,
-      Income: t.income,
-      Outcome: t.outcome,
-      Balance: t.balance,
-      ...(this.showAverageColumn && { Average: t.average }),
-    }));
-  }
+    this.transactionsForExport = this.combinedData.map((t) => {
+      const costBalance = t.isSummary
+        ? typeof t.costBalance === 'number'
+          ? t.costBalance.toFixed(2)
+          : '-'
+        : '-';
 
-  private formatDateForAPI(dateString: string): string {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) {
-      console.error('Invalid date:', dateString);
-      return '';
-    }
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
+      return {
+        Date: t.isSummary
+          ? t.date
+          : t.date
+          ? new Date(t.date).toLocaleDateString()
+          : '-',
+        'Transaction Type': t.transactionType || '-',
+        'Invoice #': t.invoiceNumber || '-',
+        Authority: t.authority || '-',
+        Income: t.income || '-',
+        Outcome: t.outcome || '-',
+        Balance: t.balance || '-',
+        ...(this.showAverageColumn && {
+          'Cost Balance': costBalance,
+          Price: t.price || '-',
+          'Total Price': t.totalPrice || '-',
+          'Average Cost': t.averageCost || '-',
+        }),
+      };
+    });
   }
-
-  // private validateFilters(): boolean {
-  //   return (
-  //     !!this.dateFrom &&
-  //     !!this.dateTo &&
-  //     this.selectedStoreId !== null &&
-  //     this.selectedItemId !== null
-  //   );
-  // }
 
   DownloadAsPDF() {
     if (this.transactionsForExport.length === 0) {
-      alert('No data to export!');
+      Swal.fire({
+        icon: 'warning',
+        title: 'No Data',
+        text: 'No data to export!',
+        confirmButtonText: 'OK',
+      });
       return;
     }
 
@@ -364,7 +299,12 @@ export class ReportItemCardComponent implements OnInit {
 
   Print() {
     if (this.transactionsForExport.length === 0) {
-      alert('No data to print!');
+      Swal.fire({
+        icon: 'warning',
+        title: 'No Data',
+        text: 'No data to print!',
+        confirmButtonText: 'OK',
+      });
       return;
     }
 
@@ -377,22 +317,22 @@ export class ReportItemCardComponent implements OnInit {
       }
 
       const printStyle = `
-      <style>
-        @page { size: auto; margin: 0mm; }
-        body { margin: 0; }
-        @media print {
-          body > *:not(#print-container) { display: none !important; }
-          #print-container {
-            display: block !important;
-            position: static !important;
-            width: 100% !important;
-            height: auto !important;
-            background: white !important;
-            margin: 0 !important;
+        <style>
+          @page { size: auto; margin: 0mm; }
+          body { margin: 0; }
+          @media print {
+            body > *:not(#print-container) { display: none !important; }
+            #print-container {
+              display: block !important;
+              position: static !important;
+              width: 100% !important;
+              height: auto !important;
+              background: white !important;
+              margin: 0 !important;
+            }
           }
-        }
-      </style>
-    `;
+        </style>
+      `;
 
       const printContainer = document.createElement('div');
       printContainer.id = 'print-container';
@@ -409,9 +349,172 @@ export class ReportItemCardComponent implements OnInit {
   }
 
   exportExcel() {
-    const worksheet = XLSX.utils.json_to_sheet(this.transactionsForExport);
+    if (this.combinedData.length === 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'No Data',
+        text: 'No data to export!',
+        confirmButtonText: 'OK',
+      });
+      return;
+    }
+
+    const excelData: any[] = [];
+
+    // Add report title
+    excelData.push([
+      {
+        v: `${this.school.reportHeaderOneEn} - ${this.school.reportHeaderTwoEn}`,
+        s: {
+          font: { bold: true, sz: 16 },
+          alignment: { horizontal: 'center' },
+        },
+      },
+    ]);
+    excelData.push([]); // empty row
+
+    // Add filter information
+    excelData.push([
+      { v: 'From Date:', s: { font: { bold: true } } },
+      { v: this.dateFrom, s: { font: { bold: true } } },
+    ]);
+    excelData.push([
+      { v: 'To Date:', s: { font: { bold: true } } },
+      { v: this.dateTo, s: { font: { bold: true } } },
+    ]);
+    const selectedStore = this.stores.find(
+      (s) => s.id === this.selectedStoreId
+    );
+    excelData.push([
+      { v: 'Store:', s: { font: { bold: true } } },
+      { v: selectedStore?.name || 'N/A', s: { font: { bold: true } } },
+    ]);
+    const selectedItem = this.items.find((i) => i.id === this.selectedItemId);
+    excelData.push([
+      { v: 'Item:', s: { font: { bold: true } } },
+      { v: selectedItem?.enName || 'N/A', s: { font: { bold: true } } },
+    ]);
+    excelData.push([]); // empty row
+
+    // Table headers
+    const headers = [
+      'Date',
+      'Transaction Type',
+      'Invoice #',
+      'Authority',
+      'Income',
+      'Outcome',
+      'Balance',
+    ];
+    if (this.showAverageColumn) {
+      headers.push('Cost Balance', 'Price', 'Total Price', 'Average Cost');
+    }
+    excelData.push(
+      headers.map((h) => ({
+        v: h,
+        s: {
+          font: { bold: true, color: { rgb: 'FFFFFF' } },
+          fill: { fgColor: { rgb: '4472C4' } },
+          alignment: { horizontal: 'center' },
+          border: {
+            top: { style: 'thin' },
+            bottom: { style: 'thin' },
+            left: { style: 'thin' },
+            right: { style: 'thin' },
+          },
+        },
+      }))
+    );
+
+    // Table rows
+    this.combinedData.forEach((row, idx) => {
+      const isEven = idx % 2 === 0;
+      const fillColor = isEven ? 'E9E9E9' : 'FFFFFF';
+      const getVal = (val: any) =>
+        val === null || val === undefined || val === '' ? '-' : val;
+
+      const rowData = [
+        {
+          v: row.date ? new Date(row.date).toLocaleString() : '-',
+          s: { fill: { fgColor: { rgb: fillColor } } },
+        },
+        {
+          v: getVal(row.transactionType),
+          s: { fill: { fgColor: { rgb: fillColor } } },
+        },
+        {
+          v: getVal(row.invoiceNumber),
+          s: { fill: { fgColor: { rgb: fillColor } } },
+        },
+        {
+          v: getVal(row.authority),
+          s: { fill: { fgColor: { rgb: fillColor } } },
+        },
+        { v: getVal(row.income), s: { fill: { fgColor: { rgb: fillColor } } } },
+        {
+          v: getVal(row.outcome),
+          s: { fill: { fgColor: { rgb: fillColor } } },
+        },
+        {
+          v: getVal(row.balance),
+          s: { fill: { fgColor: { rgb: fillColor } } },
+        },
+      ];
+      if (this.showAverageColumn) {
+        rowData.push(
+          {
+            v: getVal(row.costBalance),
+            s: { fill: { fgColor: { rgb: fillColor } } },
+          },
+          {
+            v: getVal(row.price),
+            s: { fill: { fgColor: { rgb: fillColor } } },
+          },
+          {
+            v: getVal(row.totalPrice),
+            s: { fill: { fgColor: { rgb: fillColor } } },
+          },
+          {
+            v: getVal(row.averageCost),
+            s: { fill: { fgColor: { rgb: fillColor } } },
+          }
+        );
+      }
+      excelData.push(rowData);
+    });
+
+    // Create worksheet
+    const worksheet = XLSX.utils.aoa_to_sheet(excelData);
+
+    // Merge title row
+    if (!worksheet['!merges']) worksheet['!merges'] = [];
+    worksheet['!merges'].push({
+      s: { r: 0, c: 0 },
+      e: { r: 0, c: headers.length - 1 },
+    });
+
+    // Set column widths
+    worksheet['!cols'] = [
+      { wch: 22 }, // Date
+      { wch: 18 }, // Transaction Type
+      { wch: 12 }, // Invoice #
+      { wch: 20 }, // Authority
+      { wch: 10 }, // Income
+      { wch: 10 }, // Outcome
+      { wch: 12 }, // Balance
+      ...(this.showAverageColumn
+        ? [
+            { wch: 14 }, // Cost Balance
+            { wch: 10 }, // Price
+            { wch: 14 }, // Total Price
+            { wch: 14 }, // Average Cost
+          ]
+        : []),
+    ];
+
+    // Create workbook and save
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Item Transactions');
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Item Card Report');
 
     const dateStr = new Date().toISOString().slice(0, 10);
     XLSX.writeFile(workbook, `Item_Card_Report_${dateStr}.xlsx`);
@@ -430,68 +533,16 @@ export class ReportItemCardComponent implements OnInit {
       { keyEn: 'To Date: ' + this.dateTo },
       { keyEn: 'Store: ' + (selectedStore?.name || 'N/A') },
       { keyEn: 'Item: ' + (selectedItem?.enName || 'N/A') },
-      ...(this.showAverageColumn ? [{ keyEn: 'Includes Average Cost' }] : []),
-    ];
-  }
-
-  getTableDataWithHeader(): any[] {
-    return [
-      {
-        header: `Item Card Report${
-          this.showAverageColumn ? ' With Average' : ''
-        } - ${
-          this.items.find((i) => i.id === this.selectedItemId)?.enName || ''
-        }`,
-        data: [
-          {
-            key: 'Store',
-            value:
-              this.stores.find((s) => s.id === this.selectedStoreId)?.name ||
-              'N/A',
-          },
-          {
-            key: 'Item',
-            value:
-              this.items.find((i) => i.id === this.selectedItemId)?.enName ||
-              'N/A',
-          },
-          { key: 'Period', value: `${this.dateFrom} to ${this.dateTo}` },
-          ...(this.showAverageColumn
-            ? [{ key: 'Includes', value: 'Average' }]
-            : []),
-        ],
-        details: {
-          headers: [
-            'Date',
-            'Transaction',
-            'Invoice #',
-            'Authority',
-            'Income',
-            'Outcome',
-            'Balance',
-            ...(this.showAverageColumn ? ['Average'] : []),
-          ],
-          data: this.combinedData.map((t) => ({
-            Date: t.isSummary
-              ? 'Summary'
-              : new Date(t.date).toLocaleDateString(),
-            Transaction: t.transactionType,
-            'Invoice #': t.invoiceNumber,
-            Authority: t.authority,
-            Income: t.income,
-            Outcome: t.outcome,
-            Balance: t.balance,
-            ...(this.showAverageColumn && { Average: t.average }),
-          })),
-        },
-      },
+      ...(this.showAverageColumn
+        ? [{ keyEn: 'Includes Cost Information' }]
+        : []),
     ];
   }
 
   getPdfTableHeaders(): string[] {
     const headers = [
       'Date',
-      'Transaction',
+      'Transaction Type',
       'Invoice #',
       'Authority',
       'Income',
@@ -500,7 +551,7 @@ export class ReportItemCardComponent implements OnInit {
     ];
 
     if (this.showAverageColumn) {
-      headers.push('Average');
+      headers.push('Cost Balance', 'Price', 'Total Price', 'Average Cost');
     }
 
     return headers;

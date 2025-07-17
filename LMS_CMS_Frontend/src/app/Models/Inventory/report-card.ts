@@ -2,16 +2,17 @@
 export interface InventoryNetSummary {
   shopItemId: number;
   storeId: number;
-  toDate: string;
+  toDate: Date;
   inQuantity: number;
   outQuantity: number;
-  balance: number;
+  quantitybalance: number;
+  costBalance: number;
 }
 
 export interface InventoryNetTransaction {
   flagName: string;
   invoiceNumber: string;
-  dayDate: string;
+  date: Date;
   notes: string | null;
   quantity: number;
   supplierName: string | null;
@@ -20,6 +21,10 @@ export interface InventoryNetTransaction {
   totalIn: number;
   totalOut: number;
   balance: number;
+  averageCost: number | null;
+  price: number;
+  totalPrice: number;
+  itemInOut: number;
 }
 
 export interface CombinedReportData {
