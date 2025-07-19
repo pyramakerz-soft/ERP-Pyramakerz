@@ -33,7 +33,7 @@ export class AccountingEmployee {
         public reasonForLeavingWork: string = '',
         public departmentID: number = 0,
         public departmentName: string = '',
-        public jobCategoryId: number = 0,
+        public jobCategoryID: number = 0,
         public jobID: number = 0,
         public jobName: string = '',
         public academicDegreeID: number = 0,

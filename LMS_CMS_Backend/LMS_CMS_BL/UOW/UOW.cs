@@ -205,6 +205,12 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<TimeTableSession> TimeTableSession_Repository;
         GenericRepo<TimeTableSubject> TimeTableSubject_Repository;
         GenericRepo<AccountingConfigs> AccountingConfigs_Repository;
+        GenericRepo<RegisteredEmployee> RegisteredEmployee_Repository;
+        GenericRepo<Announcement> Announcement_Repository;
+        GenericRepo<AnnouncementSharedTo> AnnouncementSharedTo_Repository;
+        GenericRepo<UserType> UserType_Repository;
+        GenericRepo<DiscussionRoom> DiscussionRoom_Repository;
+        GenericRepo<DiscussionRoomStudentClassroom> DiscussionRoomStudentClassroom_Repository;
 
 
         public UOW(Octa_DbContext octa_Db)
@@ -2320,6 +2326,78 @@ namespace LMS_CMS_BL.UOW
                     AccountingConfigs_Repository = new GenericRepo<AccountingConfigs>(db);
                 }
                 return AccountingConfigs_Repository;
+            }
+        }
+        
+        public GenericRepo<RegisteredEmployee> registeredEmployee_Repository
+        {
+            get
+            {
+                if (RegisteredEmployee_Repository == null)
+                {
+                    RegisteredEmployee_Repository = new GenericRepo<RegisteredEmployee>(db);
+                }
+                return RegisteredEmployee_Repository;
+            }
+        }
+        
+        public GenericRepo<Announcement> announcement_Repository
+        {
+            get
+            {
+                if (Announcement_Repository == null)
+                {
+                    Announcement_Repository = new GenericRepo<Announcement>(db);
+                }
+                return Announcement_Repository;
+            }
+        }
+        
+        public GenericRepo<AnnouncementSharedTo> announcementSharedTo_Repository
+        {
+            get
+            {
+                if (AnnouncementSharedTo_Repository == null)
+                {
+                    AnnouncementSharedTo_Repository = new GenericRepo<AnnouncementSharedTo>(db);
+                }
+                return AnnouncementSharedTo_Repository;
+            }
+        }
+        
+        public GenericRepo<UserType> userType_Repository
+        {
+            get
+            {
+                if (UserType_Repository == null)
+                {
+                    UserType_Repository = new GenericRepo<UserType>(db);
+                }
+                return UserType_Repository;
+            }
+        }
+        
+        public GenericRepo<DiscussionRoom> discussionRoom_Repository
+        {
+            get
+            {
+                if (DiscussionRoom_Repository == null)
+                {
+                    DiscussionRoom_Repository = new GenericRepo<DiscussionRoom>(db);
+                }
+                return DiscussionRoom_Repository;
+            }
+        }
+        
+        public GenericRepo<DiscussionRoomStudentClassroom> discussionRoomStudentClassroom_Repository
+        {
+            get
+            {
+                if (DiscussionRoomStudentClassroom_Repository == null)
+                {
+                    DiscussionRoomStudentClassroom_Repository = new GenericRepo<DiscussionRoomStudentClassroom>(db);
+                }
+                return DiscussionRoomStudentClassroom_Repository;
             }
         }
 

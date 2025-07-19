@@ -192,6 +192,12 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<TimeTableSession> TimeTableSession { get; set; }
         public DbSet<TimeTableSubject> TimeTableSubject { get; set; }
         public DbSet<AccountingConfigs> AccountingConfigs { get; set; }
+        public DbSet<RegisteredEmployee> RegisteredEmployee { get; set; }
+        public DbSet<Announcement> Announcement { get; set; }
+        public DbSet<AnnouncementSharedTo> AnnouncementSharedTo { get; set; }
+        public DbSet<UserType> UserType { get; set; }
+        public DbSet<DiscussionRoom> DiscussionRoom { get; set; }
+        public DbSet<DiscussionRoomStudentClassroom> DiscussionRoomStudentClassroom { get; set; }
 
 
 
@@ -255,6 +261,18 @@ namespace LMS_CMS_DAL.Models.Domains
 
             modelBuilder.Entity<OrderState>()
                .HasIndex(p => p.Name)
+               .IsUnique();
+            
+            modelBuilder.Entity<UserType>()
+               .HasIndex(p => p.Title)
+               .IsUnique();
+            
+            modelBuilder.Entity<RegisteredEmployee>()
+               .HasIndex(p => p.User_Name)
+               .IsUnique();
+            
+            modelBuilder.Entity<RegisteredEmployee>()
+               .HasIndex(p => p.Email)
                .IsUnique();
 
             ///////////////////////// No Identity: /////////////////////////
@@ -344,6 +362,10 @@ namespace LMS_CMS_DAL.Models.Domains
                 .ValueGeneratedNever();
             
             modelBuilder.Entity<AssignmentType>()
+                .Property(p => p.ID)
+                .ValueGeneratedNever();
+            
+            modelBuilder.Entity<UserType>()
                 .Property(p => p.ID)
                 .ValueGeneratedNever();
 
@@ -1713,21 +1735,45 @@ namespace LMS_CMS_DAL.Models.Domains
               .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<AccountingConfigs>()
-               .HasOne(p => p.SalesReturn)
+              .HasOne(p => p.SalesReturn)
               .WithMany(p => p.AccountingConfigurationsSalesReturns)
               .HasForeignKey(p => p.SalesReturnID)
               .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<AccountingConfigs>()
-               .HasOne(p => p.Purchase)
+              .HasOne(p => p.Purchase)
               .WithMany(p => p.AccountingConfigurationsPurchases)
               .HasForeignKey(p => p.PurchaseID)
               .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<AccountingConfigs>()
-                .HasOne(p => p.PurchaseReturn)
+              .HasOne(p => p.PurchaseReturn)
               .WithMany(p => p.AccountingConfigurationsPurchasesReturns)
               .HasForeignKey(p => p.PurchaseReturnID)
+              .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<AnnouncementSharedTo>()
+               .HasOne(p => p.Announcement)
+              .WithMany(p => p.AnnouncementSharedTos)
+              .HasForeignKey(p => p.AnnouncementID)
+              .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<AnnouncementSharedTo>()
+               .HasOne(p => p.UserType)
+              .WithMany(p => p.AnnouncementSharedTos)
+              .HasForeignKey(p => p.UserTypeID)
+              .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<DiscussionRoomStudentClassroom>()
+               .HasOne(p => p.DiscussionRoom)
+              .WithMany(p => p.DiscussionRoomStudentClassrooms)
+              .HasForeignKey(p => p.DiscussionRoomID)
+              .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<DiscussionRoomStudentClassroom>()
+               .HasOne(p => p.StudentClassroom)
+              .WithMany(p => p.DiscussionRoomStudentClassrooms)
+              .HasForeignKey(p => p.StudentClassroomID)
               .OnDelete(DeleteBehavior.Restrict);
 
             ///////////////////////// Exception: /////////////////////////

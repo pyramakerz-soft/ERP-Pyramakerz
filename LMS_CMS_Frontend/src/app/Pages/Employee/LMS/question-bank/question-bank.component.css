@@ -1,9 +1,0 @@
-.ql-editor img {
-  display: block;
-  max-width: 100%;
-  height: auto;
-  resize: both;
-  overflow: auto;
-  object-fit: contain;
-  cursor: nwse-resize;
-}
