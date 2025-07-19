@@ -14,11 +14,13 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { ReasonsforleavingworkService } from '../../../../Services/Employee/Administration/reasonsforleavingwork.service';
 import { firstValueFrom } from 'rxjs';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-reasonsforleavingwork',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './reasonsforleavingwork.component.html',
   styleUrl: './reasonsforleavingwork.component.css',
 })
@@ -48,7 +50,8 @@ export class ReasonsforleavingworkComponent {
 
   isModalVisible: boolean = false;
   mode: string = '';
-
+ isRtl: boolean = false;
+  subscription!: Subscription;
   path: string = '';
   key: string = 'id';
   value: any = '';
@@ -68,7 +71,8 @@ export class ReasonsforleavingworkComponent {
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
-    public reasonServ: ReasonsforleavingworkService
+    public reasonServ: ReasonsforleavingworkService,
+      private languageService: LanguageService
   ) {}
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -89,6 +93,12 @@ export class ReasonsforleavingworkComponent {
     });
 
     this.GetAllData();
+
+  this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+
   }
 
   GetAllData() {

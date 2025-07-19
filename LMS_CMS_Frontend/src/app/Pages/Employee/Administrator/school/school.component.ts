@@ -16,6 +16,8 @@ import Swal from 'sweetalert2';
 import { Day } from '../../../../Models/day';
 import { DaysService } from '../../../../Services/Octa/days.service';
 
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-school',
   standalone: true,
@@ -27,7 +29,8 @@ export class SchoolComponent {
   keysArray: string[] = ['id', 'name', 'address', 'schoolTypeName'];
   key: string = 'id';
   value: any = '';
-
+ isRtl: boolean = false;
+  subscription!: Subscription;
   schoolData: School[] = [];
   school: School = new School();
   editBuilding: boolean = false;
@@ -63,6 +66,8 @@ export class SchoolComponent {
     public schoolService: SchoolService,
     public DaysServ: DaysService,
     public router: Router
+    ,
+     private languageService: LanguageService
   ) { }
 
   ngOnInit() {
@@ -84,6 +89,11 @@ export class SchoolComponent {
         this.AllowEditForOthers = settingsPage.allow_Edit_For_Others;
       }
     });
+
+      this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   getSchoolData() {
