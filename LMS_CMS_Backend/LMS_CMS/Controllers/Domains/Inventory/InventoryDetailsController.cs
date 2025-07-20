@@ -281,7 +281,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             }
           
 
-            return Ok("✅ Average cost updated successfully.");
+            return Ok();
         }
 
         // /////////////////////////////////////////////////////////////-7

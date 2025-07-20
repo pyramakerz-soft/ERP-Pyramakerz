@@ -1934,6 +1934,9 @@ namespace LMS_CMS_DAL.Models.Domains
 
             modelBuilder.Entity<TotalResult>()
                 .HasNoKey().ToView(null);
+
+            modelBuilder.Entity<DailyTotalResult>()
+                .HasNoKey().ToView(null);
         }
     }
 }

@@ -97,7 +97,7 @@ export class ElectronicInvoiceDetailComponent implements OnInit {
       .GetById(this.invoiceId, this.DomainName)
       .subscribe({
         next: (masterData: any) => {
-          console.log(masterData)
+          console.log(masterData);
           // Use 'any' temporarily or create a proper type
           this.invoice = {
             ...this.invoice,
@@ -118,7 +118,7 @@ export class ElectronicInvoiceDetailComponent implements OnInit {
             invoiceHash: masterData.invoiceHash || null,
             uuid: masterData.uuid || null,
           };
-          console.log(this.invoice)
+          console.log(this.invoice);
 
           this.inventoryDetailsService
             .GetBySalesId(this.invoiceId, this.DomainName)
@@ -197,8 +197,42 @@ export class ElectronicInvoiceDetailComponent implements OnInit {
   printInvoice() {
     this.showPDF = true;
     setTimeout(() => {
-      this.pdfPrint.downloadPDF();
-      setTimeout(() => (this.showPDF = false), 1000);
+      const printContents = document.getElementById('invoiceData')?.innerHTML;
+      if (!printContents) {
+        Swal.fire('Error', 'Failed to prepare print content', 'error');
+        this.showPDF = false;
+        return;
+      }
+
+      const printStyle = `
+      <style>
+        @page { size: auto; margin: 0mm; }
+        body { margin: 0; }
+        @media print {
+          body > *:not(#print-container) { display: none !important; }
+          #print-container {
+            display: block !important;
+            position: static !important;
+            width: 100% !important;
+            height: auto !important;
+            background: white !important;
+            margin: 0 !important;
+          }
+        }
+      </style>
+    `;
+
+      const printContainer = document.createElement('div');
+      printContainer.id = 'print-container';
+      printContainer.innerHTML = printStyle + printContents;
+
+      document.body.appendChild(printContainer);
+      window.print();
+
+      setTimeout(() => {
+        document.body.removeChild(printContainer);
+        this.showPDF = false;
+      }, 100);
     }, 500);
   }
 
