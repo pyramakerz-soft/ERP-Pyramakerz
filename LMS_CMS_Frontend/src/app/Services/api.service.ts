@@ -19,13 +19,8 @@ export class ApiService {
     // const hostname = window.location.hostname;
     // var Header = hostname.split('.')[0]
 
-// <<<<<<< HEAD
-//     // var Header = 'Domain_One';
-//      var Header = 'try';
-// =======
+    var Header = 'try'; 
 
-    var Header = 'Domain_One';
-// >>>>>>> 6cf35929609061ebb69c6e6f6503bdce4fd27447
 
     return Header;
   }

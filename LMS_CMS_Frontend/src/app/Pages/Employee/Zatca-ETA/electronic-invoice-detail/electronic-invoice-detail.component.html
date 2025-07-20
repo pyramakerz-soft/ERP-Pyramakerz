@@ -8,10 +8,11 @@
     </div>
 
     <div class="flex gap-4">
-        <button (click)="printInvoice()" class="p-1 flex items-center gap-2 secondaryTxt text-3xl"
-            [disabled]="isSubmitting">
-            <i class="fa-solid fa-print"></i> </button>
-<!-- Replace the existing send button in electronic-invoice-detail.component.html with this: -->
+<button (click)="printInvoice()" class="p-1 flex items-center gap-2 secondaryTxt text-3xl"
+    [disabled]="isLoading || !invoice">
+    <i class="fa-solid fa-print"></i>
+</button>
+
 <button (click)="sendInvoice()" class="p-2 font-medium text-3xl rounded-lg flex items-center gap-2 secondaryTxt"
     [disabled]="isSubmitting" [ngClass]="{'opacity-50 cursor-not-allowed': isSubmitting}">
     <i *ngIf="!isSubmitting" class="fa-regular fa-paper-plane"></i>
@@ -114,15 +115,16 @@
     <div id="invoiceData" class="hidden">
         <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'invoice_' + invoice.invoiceNumber"
             [Title]="'Simplified Tax Invoice'" [infoRows]="[
-                { keyEn: 'Invoice Number: ' + invoice.invoiceNumber },
-                { keyEn: 'Customer Name:'+  invoice.student || 'N/A' },
-                { keyEn: 'Date:' + formatDate(invoice.date) || 'N/A' },
-                { keyEn: 'VAT Registration Number:'+ '123456789900003' }
+                { keyEn: 'Invoice Number: ' + (invoice.invoiceNumber || 'N/A') },
+                { keyEn: 'Customer Name: ' + (invoice.student || 'N/A') },
+                { keyEn: 'Date: ' + (formatDate(invoice.date) || 'N/A') },
+                { keyEn: 'VAT Registration Number: 123456789900003' }
             ]" [tableHeaders]="['Product', 'Quantity', 'Price', 'Tax', 'Total']" [tableData]="getInvoiceTableData()"
             [PsNotes]="[
-                { EnNote: 'Amount w/o Taxes: ' + (invoice.total) },
-                { EnNote: 'VAT Amount: ' + (invoice.vatAmount) },
-                { EnNote: 'Total with VAT: ' + (invoice.totalWithVat) }
-            ]" #pdfPrint></app-pdf-print>
+                { EnNote: 'Amount w/o Taxes: ' + (invoice.total || 0) },
+                { EnNote: 'VAT Amount: ' + (invoice.vatAmount || 0) },
+                { EnNote: 'Total with VAT: ' + (invoice.totalWithVat || 0) }
+            ]" #pdfPrint>
+        </app-pdf-print>
     </div>
 </div>

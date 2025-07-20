@@ -430,8 +430,6 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             return Ok(classroomSubjectsDTO);
         }
 
-
-
         /////////////////////////////////////////////////////////////////////////////////////////////
 
         [HttpGet("GetClassBySubjectIDWithStudentsIncluded/{SubId}")]
@@ -508,7 +506,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         }
          
         /////////////////////////////////////////////////////////////////////////////////////////////
-
+         
         [HttpPut]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },

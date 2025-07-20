@@ -18,5 +18,6 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public long TimeTableClassroomID { get; set; }
         public TimeTableClassroom TimeTableClassroom { get; set; }
         public ICollection<TimeTableSubject> TimeTableSubjects { get; set; } = new HashSet<TimeTableSubject>();
+        public ICollection<Duty> Duties { get; set; } = new HashSet<Duty>();
     }
 }

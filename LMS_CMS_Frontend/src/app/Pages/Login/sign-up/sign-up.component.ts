@@ -202,7 +202,7 @@ export class SignUpComponent {
     }
     if(this.ConfirmPassword != ""){
       if (this.parentInfo.password != this.ConfirmPassword) {
-        this.validationErrors['password'] = 'Password And Confirm Password not The Same';
+        this.validationErrors['password'] = 'Password And Confirm Password are not The Same';
         isValid = false;
       }
     } else{

@@ -198,6 +198,7 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<UserType> UserType { get; set; }
         public DbSet<DiscussionRoom> DiscussionRoom { get; set; }
         public DbSet<DiscussionRoomStudentClassroom> DiscussionRoomStudentClassroom { get; set; }
+        public DbSet<Duty> Duty { get; set; }
 
 
 
@@ -1776,6 +1777,18 @@ namespace LMS_CMS_DAL.Models.Domains
               .HasForeignKey(p => p.StudentClassroomID)
               .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<Duty>()
+                .HasOne(p => p.TimeTableSession)
+                .WithMany(p => p.Duties)
+                .HasForeignKey(p => p.TimeTableSessionID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Duty>()
+                .HasOne(p => p.Teacher)
+                .WithMany(p => p.Duties)
+                .HasForeignKey(p => p.TeacherID)
+                .OnDelete(DeleteBehavior.Restrict);
+
             ///////////////////////// Exception: /////////////////////////
             modelBuilder.Entity<Bus>()
                 .HasOne(b => b.DeletedByEmployee)
@@ -1856,6 +1869,12 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasForeignKey(f => f.DeletedByUserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<Duty>()
+                .HasOne(f => f.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(f => f.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             ///////////////////////// Optional ID According to other field: /////////////////////////  
             modelBuilder.Entity<ReceivableMaster>()
                 .Ignore(r => r.Bank)
@@ -1914,6 +1933,9 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasNoKey().ToView(null);
 
             modelBuilder.Entity<TotalResult>()
+                .HasNoKey().ToView(null);
+
+            modelBuilder.Entity<DailyTotalResult>()
                 .HasNoKey().ToView(null);
         }
     }

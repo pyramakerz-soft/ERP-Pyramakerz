@@ -20,6 +20,7 @@ export class AverageCostCalcComponent {
   calculationComplete: boolean = false;
   message: string = '';
   errorMessage: string = '';
+  successMessage: string = '';
 
   constructor(
     private inventoryDetailsService: InventoryDetailsService,
@@ -67,39 +68,52 @@ export class AverageCostCalcComponent {
   }
 
   async calculateAverage() {
-    if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
-      Swal.fire({
-        title: 'Invalid Date Range',
-        text: 'Start date cannot be later than end date.',
-        icon: 'warning',
-        confirmButtonText: 'OK',
-      });
+    if (!this.validateDateRange()) {
       return;
     }
 
     this.isLoading = true;
     this.calculationComplete = false;
     this.progress = 0;
-    this.message = 'Starting calculation...';
+    // this.message = 'Starting calculation...';
     this.errorMessage = '';
+    this.successMessage = '';
 
     try {
       const formattedFromDate = this.formatDateForAPI(this.dateFrom);
       const formattedToDate = this.formatDateForAPI(this.dateTo);
 
-      // TODO: Replace with new endpoint when available
-      // await this.inventoryDetailsService.getAverageCostTable(
-      //   formattedFromDate,
-      //   formattedToDate,
-      //   this.inventoryDetailsService.ApiServ.GetHeader()
-      // ).toPromise().then(response => {
-      //   console.log('Average Cost Table Response:', response);
-      // });
+      // Simulate progress (remove this in production)
+      const progressInterval = setInterval(() => {
+        this.progress += 10;
+        if (this.progress >= 90) clearInterval(progressInterval);
+      }, 300);
 
-      this.message = 'Waiting for new endpoint implementation...';
+      const response = await this.inventoryDetailsService
+        .GetAverageCost(
+          formattedFromDate,
+          formattedToDate,
+          this.inventoryDetailsService.ApiServ.GetHeader()
+        )
+        .toPromise();
+
+      clearInterval(progressInterval);
+      this.progress = 100;
+
+      console.log('Average Cost Calculation Response:', response);
+
+      if (response && response.length > 0) {
+        this.successMessage =
+          'Average cost calculation completed successfully!';
+        this.message = `Processed ${response.length} items.`;
+      } else {
+        this.successMessage =
+          'Calculation completed';
+      }
+
+      this.calculationComplete = true;
     } catch (error) {
       console.error('Error calculating average cost:', error);
-      this.message = '';
       this.errorMessage = 'Error calculating average cost. Please try again.';
       this.progress = 0;
     } finally {
@@ -109,6 +123,16 @@ export class AverageCostCalcComponent {
 
   dismiss() {
     this.router.navigate(['/Employee/report item card with average']);
+    this.resetForm();
+  }
+
+  private resetForm() {
+    this.dateFrom = '';
+    this.dateTo = '';
+    this.progress = 0;
+    this.message = '';
     this.errorMessage = '';
+    this.successMessage = '';
+    this.calculationComplete = false;
   }
 }

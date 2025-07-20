@@ -4,5 +4,6 @@
     {
         public decimal? TotalDebit { get; set; }
         public decimal? TotalCredit { get; set; }
+        public decimal? Differences { get; set; }
     }
 }

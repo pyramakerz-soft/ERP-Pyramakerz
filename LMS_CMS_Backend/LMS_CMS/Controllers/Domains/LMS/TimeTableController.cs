@@ -494,6 +494,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             if (userIdClaim == null || userTypeClaim == null)
                 return Unauthorized("User ID or Type claim not found.");
 
+            Classroom classroom = Unit_Of_Work.classroom_Repository.First_Or_Default(s => s.ID == ClassId);
+
             // Fetch the TimeTable and related entities including Classroom, Sessions, and Subjects
             TimeTable timeTable = await Unit_Of_Work.timeTable_Repository.FindByIncludesAsync(
                 t => t.ID == Tid && t.IsDeleted != true,
@@ -564,7 +566,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }).ToList();
 
             // Return the grouped result as JSON
-            return Ok(new { Data = groupedResult, TimeTableName = timeTable.Name, MaxPeriods = school.MaximumPeriodCountTimeTable });
+            return Ok(new { Data = groupedResult, TimeTableName = timeTable.Name, MaxPeriods = school.MaximumPeriodCountTimeTable , ClassName = classroom .Name});
         }
 
 
@@ -583,6 +585,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             if (userIdClaim == null || userTypeClaim == null)
                 return Unauthorized("User ID or Type claim not found.");
+
+            Employee teacher = Unit_Of_Work.employee_Repository.First_Or_Default(s => s.ID == TeacherId);
 
             // Fetch the TimeTable and related entities including Classroom, Sessions, and Subjects
             TimeTable timeTable = await Unit_Of_Work.timeTable_Repository.FindByIncludesAsync(
@@ -622,42 +626,50 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             TimeTableGetDTO Dto = mapper.Map<TimeTableGetDTO>(timeTable);
 
             var groupedResult = Dto.TimeTableClassrooms
-            .GroupBy(tc => new { tc.DayId, tc.DayName })
-            .Select(dayGroup => new TimeTableDayGroupDTO
-            {
-                DayId = dayGroup.Key.DayId,
-                DayName = dayGroup.Key.DayName,
-                Grades = dayGroup
-                    .GroupBy(tc => new { tc.GradeId, tc.GradeName })
-                    .Select(gradeGroup => new GradeGroupDTO
-                    {
-                        GradeId = gradeGroup.Key.GradeId,
-                        GradeName = gradeGroup.Key.GradeName,
-                        Classrooms = gradeGroup
-                            .GroupBy(tc => new { tc.ClassroomID, tc.ClassroomName })
-                            .Select(classGroup => new ClassroomGroupDTO
-                            {
-                                ClassroomId = classGroup.Key.ClassroomID,
-                                ClassroomName = classGroup.Key.ClassroomName,
-                                Sessions = classGroup
-                                    .SelectMany(c => c.TimeTableSessions)
-                                    .Select(session => new SessionGroupDTO
-                                    {
-                                        SessionId = session.ID,
-                                        Subjects = session.TimeTableSubjects.Select(s => new SubjectTeacherDTO
-                                        {
-                                            SubjectId = s.SubjectID,
-                                            SubjectName = s.SubjectName,
-                                            TeacherId = s.TeacherID,
-                                            TeacherName = s.TeacherName
-                                        }).ToList()
-                                    }).ToList()
-                            }).ToList()
-                    }).ToList()
-            }).ToList();
+              .GroupBy(tc => new { tc.DayId, tc.DayName })
+              .Select(dayGroup => new
+              {
+                  DayId = dayGroup.Key.DayId,
+                  DayName = dayGroup.Key.DayName,
+                  Sessions = dayGroup
+                      .SelectMany(tc => tc.TimeTableSessions.Select(session => new
+                      {
+                          Session = session,
+                          GradeId = tc.GradeId,
+                          GradeName = tc.GradeName,
+                          ClassroomId = tc.ClassroomID,
+                          ClassroomName = tc.ClassroomName
+                      }))
+                      .GroupBy(s => s.Session.ID)
+                      .Select(sessionGroup => new
+                      {
+                          SessionId = sessionGroup.Key,
+                          Subjects = sessionGroup
+                              .SelectMany(s => s.Session.TimeTableSubjects)
+                              .Where(sub => sub.TeacherID == TeacherId)
+                              .Select(sub => new
+                              {
+                                  sub.SubjectID,
+                                  sub.SubjectName,
+                                  sub.TeacherID,
+                                  sub.TeacherName
+                              }).ToList(),
+                          Classes = sessionGroup.Select(s => new
+                          {
+                              s.ClassroomId,
+                              s.ClassroomName,
+                              s.GradeId,
+                              s.GradeName
+                          }).ToList()
+                      })
+                      .Where(s => s.Subjects.Any())
+                      .ToList()
+              })
+              .Where(d => d.Sessions.Any())
+              .ToList();
 
             // Return the grouped result as JSON
-            return Ok(new { Data = groupedResult, TimeTableName = timeTable.Name, MaxPeriods = school.MaximumPeriodCountTimeTable });
+            return Ok(new { Data = groupedResult, TimeTableName = timeTable.Name, MaxPeriods = school.MaximumPeriodCountTimeTable , TeacherName = teacher.en_name });
         }
 
         /////////////////

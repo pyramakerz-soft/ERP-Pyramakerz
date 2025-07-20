@@ -194,13 +194,13 @@ import { TimeTableComponent } from './Pages/Employee/LMS/time-table/time-table.c
 import { TimeTableViewComponent } from './Pages/Employee/LMS/time-table-view/time-table-view.component'; 
 import { TimeTableReplace } from './Models/LMS/time-table-replace';
 import { TimeTableReplaceComponent } from './Pages/Employee/LMS/time-table-replace/time-table-replace.component';
+import { SignUpEmployeeComponent } from './Pages/Login/sign-up-employee/sign-up-employee.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
     { path: "Octa/login", component: OctaLoginComponent, title: "login", canActivate: [noNavigateToLoginIfLoginGuard] },
     { path: "SignUp", component: SignUpComponent, title: "SignUp", canActivate: [noNavigateToLoginIfLoginGuard] },
-
-
+    { path: "EmployeeSignUp", component: SignUpEmployeeComponent, title: "EmployeeSignUp", canActivate: [noNavigateToLoginIfLoginGuard] },
     {
         path: "Employee",
         component: MainLayoutComponent,
@@ -414,7 +414,7 @@ export const routes: Routes = [
             { path: "Assignment View/:id", component: AssignmentEditComponent, title: "Assignment Edit", canActivate: [noNavigateWithoutLoginGuard , navigateIfHaveSettingPageGuard] },
             { path: "report item card",component: ReportItemCardComponent,title: "Item Card Report",canActivate: [noNavigateWithoutLoginGuard], data: { showAverage: false }},
             { path: "report item card with average",component: ReportItemCardComponent,title: "Item Card Report With Average",canActivate: [noNavigateWithoutLoginGuard],data: { showAverage: true }},
-            { path: 'average cost calculation', component: AverageCostCalcComponent, title: 'Average Cost Calculator', canActivate: [noNavigateWithoutLoginGuard], },
+            { path: 'Average Cost Calculation', component: AverageCostCalcComponent, title: 'Average Cost Calculator', canActivate: [noNavigateWithoutLoginGuard], },
             { path: "Item Card Report",component: ReportItemCardComponent,title: "Item Card Report",canActivate: [noNavigateWithoutLoginGuard], data: { showAverage: false }},
             { path: "Item Card Report With Average",component: ReportItemCardComponent,title: "Item Card Report With Average",canActivate: [noNavigateWithoutLoginGuard],data: { showAverage: true }},
             { path: "Assignment Student/:id", component: AssignmentStudentComponent, title: "AssignmentStudent", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
