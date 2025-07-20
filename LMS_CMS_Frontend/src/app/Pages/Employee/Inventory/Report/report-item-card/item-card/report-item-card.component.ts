@@ -270,7 +270,7 @@ export class ReportItemCardComponent implements OnInit {
         Outcome: t.outcome || '-',
         Balance: t.balance || '-',
         ...(this.showAverageColumn && {
-          'Cost Balance': costBalance,
+          // 'Cost Balance': costBalance,
           Price: t.price || '-',
           'Total Price': t.totalPrice || '-',
           'Average Cost': t.averageCost || '-',
@@ -407,7 +407,9 @@ export class ReportItemCardComponent implements OnInit {
       'Balance',
     ];
     if (this.showAverageColumn) {
-      headers.push('Cost Balance', 'Price', 'Total Price', 'Average Cost');
+      headers.push(
+        // 'Cost Balance',
+         'Price', 'Total Price', 'Average Cost');
     }
     excelData.push(
       headers.map((h) => ({
@@ -551,7 +553,9 @@ export class ReportItemCardComponent implements OnInit {
     ];
 
     if (this.showAverageColumn) {
-      headers.push('Cost Balance', 'Price', 'Total Price', 'Average Cost');
+      headers.push(
+        // 'Cost Balance',
+         'Price', 'Total Price', 'Average Cost');
     }
 
     return headers;

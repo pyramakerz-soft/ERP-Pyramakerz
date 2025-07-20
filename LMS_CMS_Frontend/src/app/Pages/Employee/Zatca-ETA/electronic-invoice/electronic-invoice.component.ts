@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, DatePipe } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -11,11 +11,13 @@ import { firstValueFrom } from 'rxjs';
 import { ElectronicInvoice } from '../../../../Models/zatca/electronic-invoice';
 import { StateService } from '../../../../Services/Employee/Inventory/state.service';
 import { EtaService } from '../../../../Services/Employee/ETA/eta.service';
+import { PdfPrintComponent } from '../../../../Component/pdf-print/pdf-print.component';
+import * as XLSX from 'xlsx';
 
 @Component({
   selector: 'app-electronic-invoice',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, PdfPrintComponent],
   templateUrl: './electronic-invoice.component.html',
   styleUrls: ['./electronic-invoice.component.css'],
   providers: [DatePipe],
@@ -39,13 +41,25 @@ export class ElectronicInvoiceComponent implements OnInit {
   isLoading = false;
   isSubmitting = false;
 
+  // PDF and Export properties
+  showPDF = false;
+  transactionsForExport: any[] = [];
+  school = {
+    reportHeaderOneEn: 'Electronic Invoice Report',
+    reportHeaderTwoEn: 'Invoice Summary',
+    reportHeaderOneAr: 'تقرير الفواتير الإلكترونية',
+    reportHeaderTwoAr: 'ملخص الفواتير',
+    reportImage: 'assets/images/logo.png',
+  };
+
+  @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;
   sendingInvoiceId: number | null = null;
 
   constructor(
     private schoolService: SchoolService,
     private stateService: StateService,
     private zatcaService: ZatcaService,
-    private etaService: EtaService, 
+    private etaService: EtaService,
     private apiService: ApiService,
     private router: Router,
     private route: ActivatedRoute
@@ -133,11 +147,11 @@ export class ElectronicInvoiceComponent implements OnInit {
     }
 
     this.isLoading = true;
-    this.showTable = true; 
+    this.showTable = true;
     this.transactions = [];
     this.selectedInvoices = [];
 
-    try { 
+    try {
       const response = await firstValueFrom(
         this.currentSystem === 'zatca'
           ? this.zatcaService.filterBySchoolAndDate(
@@ -155,7 +169,7 @@ export class ElectronicInvoiceComponent implements OnInit {
               this.currentPage,
               this.pageSize,
               this.DomainName
-            ) 
+            )
       );
 
       this.processApiResponse(response);
@@ -180,14 +194,153 @@ export class ElectronicInvoiceComponent implements OnInit {
 
     this.totalPages = Math.ceil(this.totalRecords / this.pageSize);
     this.selectedInvoices = [];
+    this.prepareExportData();
   }
 
-  private formatDateForApi(dateString: string): string {
-    const date = new Date(dateString);
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
+  prepareExportData(): void {
+    this.transactionsForExport = this.transactions.map((t) => ({
+      'Invoice ID': t.id,
+      Date: new Date(t.date).toLocaleDateString(),
+      'Invoice Type': t.flagEnName || '-',
+      'Total Value': t.total,
+      Status: t.isValid ? 'Sent' : 'Not Sent',
+    }));
+  }
+
+  getInfoRows(): any[] {
+    return [
+      { keyEn: 'From Date: ' + this.dateFrom },
+      { keyEn: 'To Date: ' + this.dateTo },
+      {
+        keyEn:
+          'School: ' +
+          (this.schools.find((s) => s.id === this.selectedSchoolId)?.name ||
+            'All Schools'),
+      },
+    ];
+  }
+
+  downloadAsPDF() {
+    if (this.transactionsForExport.length === 0) {
+      Swal.fire('Warning', 'No data to export!', 'warning');
+      return;
+    }
+
+    this.showPDF = true;
+    setTimeout(() => {
+      this.pdfComponentRef.downloadPDF();
+      setTimeout(() => (this.showPDF = false), 2000);
+    }, 500);
+  }
+
+  printSingleInvoice(invoice: ElectronicInvoice) {
+    this.transactionsForExport = [
+      {
+        'Invoice ID': invoice.id,
+        Date: new Date(invoice.date).toLocaleDateString(),
+        'Invoice Type': invoice.flagEnName || '-',
+        'Total Value': invoice.total,
+        Status: invoice.isValid ? 'Sent' : 'Not Sent',
+      },
+    ];
+
+    this.printAll();
+  }
+
+  printSelectedInvoices() {
+    if (this.selectedInvoices.length === 0) {
+      Swal.fire({
+        title: 'No Selection',
+        text: 'Please select at least one invoice to print',
+        icon: 'warning',
+        confirmButtonText: 'OK',
+      });
+      return;
+    }
+
+    this.transactionsForExport = this.transactions
+      .filter((t) => this.selectedInvoices.includes(t.id))
+      .map((t) => ({
+        'Invoice ID': t.id,
+        Date: new Date(t.date).toLocaleDateString(),
+        'Invoice Type': t.flagEnName || '-',
+        'Total Value': t.total,
+        Status: t.isValid ? 'Sent' : 'Not Sent',
+      }));
+
+    this.printAll();
+  }
+
+  private printAll() {
+    if (this.transactionsForExport.length === 0) {
+      Swal.fire('Warning', 'No data to print!', 'warning');
+      return;
+    }
+
+    this.showPDF = true;
+    setTimeout(() => {
+      const printContents = document.getElementById('Data')?.innerHTML;
+      if (!printContents) {
+        console.error('Element not found!');
+        return;
+      }
+
+      const printStyle = `
+      <style>
+        @page { size: auto; margin: 0mm; }
+        body { margin: 0; }
+        @media print {
+          body > *:not(#print-container) { display: none !important; }
+          #print-container {
+            display: block !important;
+            position: static !important;
+            width: 100% !important;
+            height: auto !important;
+            background: white !important;
+            margin: 0 !important;
+          }
+        }
+      </style>
+    `;
+
+      const printContainer = document.createElement('div');
+      printContainer.id = 'print-container';
+      printContainer.innerHTML = printStyle + printContents;
+
+      document.body.appendChild(printContainer);
+      window.print();
+
+      setTimeout(() => {
+        document.body.removeChild(printContainer);
+        this.showPDF = false;
+      }, 100);
+    }, 500);
+  }
+
+  exportExcel() {
+    if (this.transactions.length === 0) {
+      Swal.fire('Warning', 'No data to export!', 'warning');
+      return;
+    }
+
+    const worksheet = XLSX.utils.json_to_sheet(
+      this.transactions.map((t) => ({
+        'Invoice ID': t.id,
+        Date: new Date(t.date).toLocaleDateString(),
+        'Invoice Type': t.flagEnName || '-',
+        'Total Value': t.total,
+        Status: t.isValid ? 'Sent' : 'Not Sent',
+        School:
+          this.schools.find((s) => s.id === this.selectedSchoolId)?.name ||
+          'N/A',
+      }))
+    );
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Invoices');
+
+    const dateStr = new Date().toISOString().slice(0, 10);
+    XLSX.writeFile(workbook, `Electronic_Invoices_${dateStr}.xlsx`);
   }
 
   changePage(page: number) {
@@ -240,11 +393,15 @@ export class ElectronicInvoiceComponent implements OnInit {
         'success'
       );
       invoice.isValid = true;
-    } catch (error) { 
+    } catch (error) {
       let errorMessage = 'Something went wrong';
       if (error instanceof Error) {
         errorMessage = error.message;
-      } else if (typeof error === 'object' && error !== null && 'error' in error) {
+      } else if (
+        typeof error === 'object' &&
+        error !== null &&
+        'error' in error
+      ) {
         errorMessage = (error as any).error;
       }
 
@@ -254,18 +411,13 @@ export class ElectronicInvoiceComponent implements OnInit {
         } invoice`,
         error
       );
-      Swal.fire(
-        'Error',
-        errorMessage,
-        'error'
-      );
+      Swal.fire('Error', errorMessage, 'error');
     } finally {
       this.sendingInvoiceId = null;
     }
   }
 
   async sendAll() {
-    // Check if no invoices are selected
     if (this.selectedInvoices.length === 0) {
       Swal.fire({
         title: 'No Selection',
@@ -312,7 +464,11 @@ export class ElectronicInvoiceComponent implements OnInit {
       let errorMessage = 'Something went wrong';
       if (error instanceof Error) {
         errorMessage = error.message;
-      } else if (typeof error === 'object' && error !== null && 'error' in error) {
+      } else if (
+        typeof error === 'object' &&
+        error !== null &&
+        'error' in error
+      ) {
         errorMessage = (error as any).error;
       }
 
@@ -322,25 +478,13 @@ export class ElectronicInvoiceComponent implements OnInit {
         } invoices`,
         error
       );
-      Swal.fire(
-        'Error',
-        errorMessage,
-        'error'
-      );
+      Swal.fire('Error', errorMessage, 'error');
     } finally {
       this.isSubmitting = false;
     }
   }
 
-  printAll() {
-    if (this.transactions.length === 0) {
-      Swal.fire('Warning', 'No data to print', 'warning');
-      return;
-    }
-    window.print();
-  }
-
-  private handleError(message: string, error?: any) { 
+  private handleError(message: string, error?: any) {
     this.isLoading = false;
     this.isSubmitting = false;
   }
