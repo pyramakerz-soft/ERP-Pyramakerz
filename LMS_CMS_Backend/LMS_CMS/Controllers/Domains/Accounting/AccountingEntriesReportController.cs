@@ -28,7 +28,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Accounting Constraints Report" }
         )]
-        public async Task<IActionResult> GetAccountingEntriesAsync(DateTime fromDate, DateTime toDate, long AccountNumber, long SubAccountNumber, int pageNumber = 1, int pageSize = 10)
+        public async Task<IActionResult> GetAccountingEntriesAsync(DateTime? fromDate, DateTime? toDate, long? AccountNumber = 0, long? SubAccountNumber = 0, int pageNumber = 1, int pageSize = 10)
         {
             if (toDate < fromDate)
                 return BadRequest("Start date must be equal or greater than End date");
@@ -39,40 +39,49 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             int startRow = ((pageNumber - 1) * pageSize) + 1;
             int endRow = pageNumber * pageSize;
 
-            var result = await context.Set<AccountingEntriesReport>().FromSqlRaw(@"
-                WITH EntriesWithRowNum AS (
-                    SELECT *, ROW_NUMBER() OVER (ORDER BY MasterID) AS RowNum
-                    FROM dbo.EntriesFun(@DateFrom, @DateTo)
-                )
-                SELECT *
-                FROM EntriesWithRowNum
-                WHERE RowNum BETWEEN @StartRow AND @EndRow
-                ORDER BY RowNum;
-            ",
-            new SqlParameter("@DateFrom", fromDate),
-            new SqlParameter("@DateTo", toDate),
-            new SqlParameter("@StartRow", startRow),
-            new SqlParameter("@EndRow", endRow)
+            //var result = await context.Set<AccountingEntriesReport>().FromSqlRaw(@"
+            //    WITH EntriesWithRowNum AS (
+            //        SELECT *, ROW_NUMBER() OVER (ORDER BY MasterID) AS RowNum
+            //        FROM dbo.EntriesFun(@DateFrom, @DateTo)
+            //    )
+            //    SELECT *
+            //    FROM EntriesWithRowNum
+            //    WHERE RowNum BETWEEN @StartRow AND @EndRow
+            //    ORDER BY RowNum;
+            //",
+            //new SqlParameter("@DateFrom", fromDate),
+            //new SqlParameter("@DateTo", toDate),
+            //new SqlParameter("@StartRow", startRow),
+            //new SqlParameter("@EndRow", endRow)
+            //).ToListAsync();
+
+            var result = await context.Set<AccountingEntriesReport>().FromSqlRaw(
+                "EXEC dbo.GetAccountingEntries @DateFrom, @DateTo, @MainAccNo, @SubAccNo, @StartRow, @EndRow",
+                new SqlParameter("@DateFrom", fromDate ?? (object)DBNull.Value),
+                new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
+                new SqlParameter("@MainAccNo", AccountNumber),
+                new SqlParameter("@SubAccNo", SubAccountNumber),
+                new SqlParameter("@StartRow", startRow),
+                new SqlParameter("@EndRow", endRow)
             ).ToListAsync();
+
 
             if (result == null || !result.Any())
             {
                 return NotFound("No accounting entries found for the specified date range.");
             }
 
-            var fullTotals = await context.Set<TotalResult>()
-                .FromSqlRaw(@"
-                    SELECT 
-                        SUM(Debit) AS TotalDebit,
-                        SUM(Credit) AS TotalCredit
-                    FROM dbo.EntriesFun(@DateFrom, @DateTo)",
-                    new SqlParameter("@DateFrom", fromDate),
-                    new SqlParameter("@DateTo", toDate)
-                ).FirstOrDefaultAsync();
+            var fullTotals = (await context.Set<TotalResult>()
+            .FromSqlRaw("EXEC dbo.GetAccountingTotals @DateFrom, @DateTo",
+                new SqlParameter("@DateFrom", fromDate ?? (object)DBNull.Value),
+                new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value))
+            .ToListAsync())
+            .FirstOrDefault();
+
 
             decimal fullDebit = fullTotals?.TotalDebit ?? 0;
             decimal fullCredit = fullTotals?.TotalCredit ?? 0;
-            decimal fullDifference = fullDebit - fullCredit;
+            decimal fullDifference = fullTotals?.Differences ?? 0;
 
             var groupedResult = result
                 .Where(e => e.Date != null)
@@ -91,14 +100,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 .OrderBy(g => g.Date)
                 .ToList();
 
-            int totalRecords = await context.Set<CountResult>()
-                .FromSqlRaw(@"
-                    SELECT COUNT(MasterID) AS TotalCount 
-                    FROM dbo.EntriesFun(@DateFrom, @DateTo)",
-                    new SqlParameter("@DateFrom", DBNull.Value),
-                    new SqlParameter("@DateTo", DBNull.Value))
-                .Select(x => x.TotalCount)
-                .FirstOrDefaultAsync();
+            int totalRecords = (await context.Set<CountResult>()
+                .FromSqlInterpolated($@"
+                    SELECT dbo.GetEntriesCount({fromDate}, {toDate}) AS TotalCount")
+                .ToListAsync())
+                .FirstOrDefault()?.TotalCount ?? 0;
 
             var paginationMetadata = new
             {
@@ -111,13 +117,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             return Ok(new
             {
                 Data = groupedResult,
-                Pagination = paginationMetadata,
                 FullTotals = new
                 {
                     Debit = fullDebit,
                     Credit = fullCredit,
                     Difference = fullDifference
-                }
+                },
+                Pagination = paginationMetadata
             });
         }
         #endregion
