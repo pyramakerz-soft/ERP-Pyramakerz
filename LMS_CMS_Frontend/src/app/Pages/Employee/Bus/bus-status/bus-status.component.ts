@@ -15,11 +15,13 @@ import { ApiService } from '../../../../Services/api.service';
 import { firstValueFrom } from 'rxjs';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import Swal from 'sweetalert2';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-bus-status',
   standalone: true,
-  imports: [CommonModule, FormsModule, SearchComponent],
+  imports: [CommonModule, FormsModule, SearchComponent, TranslateModule],
   templateUrl: './bus-status.component.html',
   styleUrl: './bus-status.component.css',
 })
@@ -37,7 +39,8 @@ export class BusStatusComponent {
     ''
   );
   busStatus: BusType = new BusType(0, '', 0);
-
+ isRtl: boolean = false;
+  subscription!: Subscription;
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
   AllowEditForOthers: boolean = false;
@@ -71,7 +74,8 @@ export class BusStatusComponent {
     public busStatusServ: BusStatusService,
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
-    public ApiServ: ApiService
+    public ApiServ: ApiService,
+      private languageService: LanguageService
   ) {}
 
   ngOnInit() {
@@ -102,6 +106,11 @@ export class BusStatusComponent {
       this.AllowEdit = true;
       this.AllowDelete = true;
     }
+
+     this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   Create() {
