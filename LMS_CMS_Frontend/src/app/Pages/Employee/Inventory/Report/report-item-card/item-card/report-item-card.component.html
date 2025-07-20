@@ -1,40 +1,41 @@
 <div class="flex justify-between">
     <h1 class="primaryTxt font-bold text-2xl leading-9">
-        Item Card{{ showAverageColumn ? ' With Average' : '' }}
+        Item Card{{ showAverageColumn ? ' With Average Information' : '' }}
     </h1>
 </div>
 
 <div class="my-5 flex flex-wrap justify-between items-center">
-<!-- Store Selector -->
-<div class="flex flex-col w-[24%] mb-4">
-    <label class="mb-2 font-medium" for="store">Store</label>
-    <select class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="store" [(ngModel)]="selectedStoreId" (ngModelChange)="onFilterChange()" required>
-        <option [ngValue]="null" disabled selected hidden>Choose Store</option>
-        <option *ngFor="let store of stores" [ngValue]="store.id">{{ store.name }}</option>
-    </select>
-</div>
-
-<!-- Item Selector -->
-<div class="flex flex-col w-[24%] mb-4">
-    <label class="mb-2 font-medium" for="item">Item</label>
-    <select class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="item" [(ngModel)]="selectedItemId"
-     (ngModelChange)="onFilterChange()" required>
-        <option [ngValue]="null" disabled selected hidden>Choose Item</option>
-        <option *ngFor="let item of items" [ngValue]="item.id">{{ item.enName }}</option>
-    </select>
-</div>
-
-<div class="flex flex-col w-[24%] mb-4">
-    <label class="mb-2 font-medium" for="dateFrom">Date From</label>
-    <input type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="dateFrom" [(ngModel)]="dateFrom"
-         (ngModelChange)="onFilterChange()" required>
+    <!-- Store Selector -->
+    <div class="flex flex-col w-[24%] mb-4">
+        <label class="mb-2 font-medium" for="store">Store</label>
+        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="store"
+            [(ngModel)]="selectedStoreId" (ngModelChange)="onFilterChange()" required>
+            <option [ngValue]="null" disabled selected hidden>Choose Store</option>
+            <option *ngFor="let store of stores" [ngValue]="store.id">{{ store.name }}</option>
+        </select>
     </div>
 
-<div class="flex flex-col w-[24%] mb-4">
-    <label class="mb-2 font-medium" for="dateTo"> Date To </label>
-    <input type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="dateTo" [(ngModel)]="dateTo"
-         (ngModelChange)="onFilterChange()" required>
-</div>
+    <!-- Item Selector -->
+    <div class="flex flex-col w-[24%] mb-4">
+        <label class="mb-2 font-medium" for="item">Item</label>
+        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="item" [(ngModel)]="selectedItemId"
+            (ngModelChange)="onFilterChange()" required>
+            <option [ngValue]="null" disabled selected hidden>Choose Item</option>
+            <option *ngFor="let item of items" [ngValue]="item.id">{{ item.enName }}</option>
+        </select>
+    </div>
+
+    <div class="flex flex-col w-[24%] mb-4">
+        <label class="mb-2 font-medium" for="dateFrom">Date From</label>
+        <input type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="dateFrom"
+            [(ngModel)]="dateFrom" (ngModelChange)="onFilterChange()" required>
+    </div>
+
+    <div class="flex flex-col w-[24%] mb-4">
+        <label class="mb-2 font-medium" for="dateTo">Date To</label>
+        <input type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="dateTo"
+            [(ngModel)]="dateTo" (ngModelChange)="onFilterChange()" required>
+    </div>
 
     <div class="w-[99%] flex justify-end">
         <button class="p-4 font-medium text-xl rounded-lg" (click)="viewReport()"
@@ -55,13 +56,12 @@
 
 <div class="absolute -top-[9999px] -left-[9999px]">
     <div id="Data" class="hidden">
-<!-- Change this line in the PDF print component -->
-<app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'Item Card Report'" [infoRows]="getInfoRows()"
-    [tableHeaders]="getPdfTableHeaders()" [tableData]="transactionsForExport" #pdfPrintComponent>
-</app-pdf-print>
+        <!-- Change this line in the PDF print component -->
+        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'Item Card Report'" [infoRows]="getInfoRows()"
+            [tableHeaders]="getPdfTableHeaders()" [tableData]="transactionsForExport" #pdfPrintComponent>
+        </app-pdf-print>
     </div>
 </div>
-
 <div *ngIf="showTable" class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
     <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
         <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
@@ -87,6 +87,18 @@
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     Balance
                 </th>
+                <!-- <th *ngIf="showAverageColumn"
+                    class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    Cost Balance
+                </th> -->
+                <th *ngIf="showAverageColumn"
+                    class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    Price
+                </th>
+                <th *ngIf="showAverageColumn"
+                    class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    Total Price
+                </th>
                 <th *ngIf="showAverageColumn"
                     class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     Average Cost
@@ -95,7 +107,7 @@
         </thead>
         <tbody>
             <tr *ngIf="combinedData.length === 0">
-                <td [attr.colspan]="showAverageColumn ? 8 : 7"
+                <td [attr.colspan]="showAverageColumn ? 11 : 7"
                     class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
                     No Data Found
                 </td>
@@ -107,7 +119,7 @@
                     'font-bold': row.isSummary
                 }" class="border-t border-gray-300 text-xs md:text-sm">
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ row.isSummary ? row.date : (row.date | date:'MMMM d, yyyy') }}
+                    {{ row.date ? (row.date | date:'MMMM d, yyyy') : '-' }}
                 </td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     {{ row.transactionType }}
@@ -127,8 +139,17 @@
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     {{ row.balance }}
                 </td>
+                <!-- <td *ngIf="showAverageColumn" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ row.isSummary ? (row.costBalance !== '-' ? (row.costBalance | number:'1.2-2') : '-') : '-' }}  
+                </td> -->
                 <td *ngIf="showAverageColumn" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ row.average | number:'1.2-2' }}
+                    {{ row.price }}
+                </td>
+                <td *ngIf="showAverageColumn" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ row.totalPrice }}
+                </td>
+                <td *ngIf="showAverageColumn" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ row.averageCost }}
                 </td>
             </tr>
         </tbody>

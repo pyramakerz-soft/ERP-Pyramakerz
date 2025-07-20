@@ -174,16 +174,101 @@
 <div class="absolute -top-[9999px] -left-[9999px]">
     <div id="Data" class="hidden">
         <div class="overflow-x-auto">
-            <div *ngFor="let day of TimeTable" class="mb-10 border rounded shadow">
+            <div class="bg-gray-300 text-center text-xl font-bold py-4 mb-4 print:mb-8 print:pb-4">
+                {{ ClassName }}
+            </div>
+
+            <table class="table-auto w-full text-sm text-left border-collapse border border-gray-300">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="border p-2">Day</th>
+                        <th class="border p-2" *ngFor="let i of [].constructor(MaxPeriods); let period = index">
+                            Session {{ period + 1 }}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let day of TimeTable">
+                        <td class="border p-2 font-medium">{{ day.dayName }}</td>
+
+                        <td class="border p-2" *ngFor="let i of [].constructor(MaxPeriods); let period = index">
+                            <ng-container *ngFor="let grade of day.grades">
+                                <ng-container *ngFor="let classroom of grade.classrooms">
+                                    <ng-container *ngIf="classroom.classroomName === ClassName">
+                                        <ng-container *ngIf="classroom.sessions[period] as session">
+                                            <div *ngFor="let subject of session.subjects">
+                                                <div class="font-semibold text-blue-600">{{ subject.subjectName }}</div>
+                                                <div class="text-gray-500 text-xs">
+                                                    {{ subject.teacherName || 'No Teacher' }}
+                                                </div>
+                                            </div>
+                                        </ng-container>
+                                        <div *ngIf="!classroom.sessions[period]" class="text-gray-400">--</div>
+                                    </ng-container>
+                                </ng-container>
+                            </ng-container>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="absolute -top-[9999px] -left-[9999px]">
+    <div id="DataTeacher" class="hidden">
+        <div class="bg-gray-300 text-center text-xl font-bold py-4 mb-4 print:mb-8 print:pb-4">
+            {{ TeacherName }}
+        </div>
+        <div class="overflow-x-auto">
+            <div class="p-2">
+                <table class="table-auto w-full text-sm text-left border-collapse border border-gray-300">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="border p-2">Day</th>
+                            <th class="border p-2" *ngFor="let i of [].constructor(MaxPeriods); let period = index">
+                                Session {{ period + 1 }}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let day of TimeTable">
+                            <td class="border p-2 font-medium">
+                                {{ day.dayName }}
+                            </td>
+                            <td class="border p-2" *ngFor="let i of [].constructor(MaxPeriods); let period = index">
+                                <ng-container *ngIf="day.sessions[period] as session">
+                                    <div *ngFor="let subject of session.subjects">
+                                        <div class="font-semibold text-blue-600">{{ subject.subjectName }}</div>
+                                        <div class="text-gray-500 text-xs" *ngFor="let classroom of session.classes">
+                                            {{ classroom.gradeName }} / {{ classroom.classroomName }}
+                                        </div>
+                                    </div>
+                                </ng-container>
+                                <div *ngIf="!day.sessions[period]" class="text-gray-400">--</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="absolute -top-[9999px] -left-[9999px]">
+    <div id="All" class="hidden">
+        <div class="overflow-x-auto">
+            <div *ngFor="let day of TimeTable2" class="mb-10 border rounded shadow">
                 <div class="bg-gray-300 text-center font-bold py-2">
                     {{ day.dayName }}
                 </div>
-
                 <div *ngFor="let grade of day.grades" class="p-2">
                     <div class="text-md font-semibold mb-1">
                         Grade: {{ grade.gradeName }}
                     </div>
-
                     <table class="table-auto w-full text-sm text-left border-collapse border border-gray-300">
                         <thead class="bg-gray-100">
                             <tr>
