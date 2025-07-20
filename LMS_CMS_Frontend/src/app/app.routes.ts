@@ -414,7 +414,7 @@ export const routes: Routes = [
             { path: "Assignment View/:id", component: AssignmentEditComponent, title: "Assignment Edit", canActivate: [noNavigateWithoutLoginGuard , navigateIfHaveSettingPageGuard] },
             { path: "report item card",component: ReportItemCardComponent,title: "Item Card Report",canActivate: [noNavigateWithoutLoginGuard], data: { showAverage: false }},
             { path: "report item card with average",component: ReportItemCardComponent,title: "Item Card Report With Average",canActivate: [noNavigateWithoutLoginGuard],data: { showAverage: true }},
-            { path: 'average cost calculation', component: AverageCostCalcComponent, title: 'Average Cost Calculator', canActivate: [noNavigateWithoutLoginGuard], },
+            { path: 'Average Cost Calculation', component: AverageCostCalcComponent, title: 'Average Cost Calculator', canActivate: [noNavigateWithoutLoginGuard], },
             { path: "Item Card Report",component: ReportItemCardComponent,title: "Item Card Report",canActivate: [noNavigateWithoutLoginGuard], data: { showAverage: false }},
             { path: "Item Card Report With Average",component: ReportItemCardComponent,title: "Item Card Report With Average",canActivate: [noNavigateWithoutLoginGuard],data: { showAverage: true }},
             { path: "Assignment Student/:id", component: AssignmentStudentComponent, title: "AssignmentStudent", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },

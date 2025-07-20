@@ -21,7 +21,7 @@ import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-accountig-reports',
   standalone: true,
-  imports: [CommonModule, FormsModule, PdfPrintComponent , TranslateModule],
+  imports: [CommonModule, FormsModule, PdfPrintComponent, TranslateModule],
   templateUrl: './accountig-reports.component.html',
   styleUrl: './accountig-reports.component.css',
 })
@@ -40,10 +40,19 @@ export class AccountigReportsComponent {
   showTable: boolean = false;
   showViewReportBtn: boolean = false;
   DataToPrint: any = null;
-   isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   tableData: any[] = [];
   direction: string = '';
+
+  school = {
+    reportHeaderOneEn: 'Accounting Report',
+    reportHeaderTwoEn: 'Detailed Transaction Summary',
+    reportHeaderOneAr: 'تقرير المحاسبة',
+    reportHeaderTwoAr: 'ملخص المعاملات التفصيلي',
+    reportImage: 'assets/images/logo.png',
+  };
+
   @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;
 
   collapsedItems: Set<number> = new Set();
@@ -76,9 +85,11 @@ export class AccountigReportsComponent {
     this.DomainName = this.ApiServ.GetHeader();
     this.direction = document.dir || 'ltr';
 
-   this.subscription = this.languageService.language$.subscribe(direction => {
-      this.isRtl = direction === 'rtl';
-    });
+    this.subscription = this.languageService.language$.subscribe(
+      (direction) => {
+        this.isRtl = direction === 'rtl';
+      }
+    );
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
@@ -167,10 +178,10 @@ export class AccountigReportsComponent {
         this.TotalPages = data.pagination.totalPages;
         this.TotalRecords = data.pagination.totalRecords;
         this.tableData = data.data;
-        let count = 0
-        this.tableData.forEach(element => {
+        let count = 0;
+        this.tableData.forEach((element) => {
           this.collapsedItems.add(count);
-          count ++
+          count++;
         });
       },
       (error) => {
@@ -239,11 +250,24 @@ export class AccountigReportsComponent {
   }
 
   getInfoRows(): any[] {
-    const rows = [
-      { keyEn: 'Start Date: ' + this.SelectedStartDate, valueEn: '' },
-      { keyEn: 'End Date: ' + this.SelectedEndDate, valueEn: '' },
+    return [
+      {
+        keyEn: 'Report Type: ' + this.type,
+        keyAr: 'نوع التقرير: ' + this.type,
+      },
+      {
+        keyEn: 'Start Date: ' + this.SelectedStartDate,
+        keyAr: 'تاريخ البدء: ' + this.SelectedStartDate,
+      },
+      {
+        keyEn: 'End Date: ' + this.SelectedEndDate,
+        keyAr: 'تاريخ الانتهاء: ' + this.SelectedEndDate,
+      },
+      {
+        keyEn: 'Generated On: ' + new Date().toLocaleDateString(),
+        keyAr: 'تم الإنشاء في: ' + new Date().toLocaleDateString(),
+      },
     ];
-    return rows;
   }
 
   getTableDataWithHeader(): any[] {
@@ -259,7 +283,6 @@ export class AccountigReportsComponent {
     this.DataToPrint = [];
 
     this.GetDataForPrint().subscribe((result) => {
-      console.log(result);
       this.DataToPrint = result;
       this.showPDF = true;
       setTimeout(() => {
@@ -269,43 +292,31 @@ export class AccountigReportsComponent {
           return;
         }
 
-        // Create a print-specific stylesheet
         const printStyle = `
           <style>
             @page { size: auto; margin: 0mm; }
-            body { 
-              margin: 0; 
-            }
-    
+            body { margin: 0; }
             @media print {
-              body > *:not(#print-container) {
-                display: none !important;
-              }
+              body > *:not(#print-container) { display: none !important; }
               #print-container {
                 display: block !important;
                 position: static !important;
-                top: auto !important;
-                left: auto !important;
                 width: 100% !important;
                 height: auto !important;
                 background: white !important;
-                box-shadow: none !important;
                 margin: 0 !important;
               }
             }
           </style>
         `;
 
-        // Create a container for printing
         const printContainer = document.createElement('div');
         printContainer.id = 'print-container';
         printContainer.innerHTML = printStyle + printContents;
 
-        // Add to body and print
         document.body.appendChild(printContainer);
         window.print();
 
-        // Clean up
         setTimeout(() => {
           document.body.removeChild(printContainer);
           this.showPDF = false;
