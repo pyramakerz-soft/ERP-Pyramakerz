@@ -39,22 +39,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             int startRow = ((pageNumber - 1) * pageSize) + 1;
             int endRow = pageNumber * pageSize;
 
-            //var result = await context.Set<AccountingEntriesReport>().FromSqlRaw(@"
-            //    WITH EntriesWithRowNum AS (
-            //        SELECT *, ROW_NUMBER() OVER (ORDER BY MasterID) AS RowNum
-            //        FROM dbo.EntriesFun(@DateFrom, @DateTo)
-            //    )
-            //    SELECT *
-            //    FROM EntriesWithRowNum
-            //    WHERE RowNum BETWEEN @StartRow AND @EndRow
-            //    ORDER BY RowNum;
-            //",
-            //new SqlParameter("@DateFrom", fromDate),
-            //new SqlParameter("@DateTo", toDate),
-            //new SqlParameter("@StartRow", startRow),
-            //new SqlParameter("@EndRow", endRow)
-            //).ToListAsync();
-
             var result = await context.Set<AccountingEntriesReport>().FromSqlRaw(
                 "EXEC dbo.GetAccountingEntries @DateFrom, @DateTo, @MainAccNo, @SubAccNo, @StartRow, @EndRow",
                 new SqlParameter("@DateFrom", fromDate ?? (object)DBNull.Value),
