@@ -1,6 +1,6 @@
 <div class="">
-    <div class="flex justify-between">
-      <h1 class="font-semibold text-2xl leading-9">Children</h1>
+    <div class="flex justify-between items-center">
+      <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ 'Children' | translate }}</h1>
       <div class="flex justify-between items-center">
         <app-search
           [keysArray]="keysArray"
@@ -10,7 +10,7 @@
           (click)="Create()"
           class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2"
         >
-          Add Child
+           {{ 'Add Child' | translate }}
         </button>
       </div>
     </div>
@@ -23,15 +23,15 @@
             <tr>
               <th
                 class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                ID
+                 {{ 'ID' | translate }}
               </th>
               <th
                 class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                Student Name
+                 {{ 'Student Name' | translate }}
               </th>
               <th
                 class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                Actions
+                {{ 'Actions' | translate }}
               </th>
             </tr>
           </thead>
@@ -39,10 +39,10 @@
             <!-- No Data Row -->
             <tr *ngIf="TableData.length === 0">
               <td
-                colspan="11"
+                colspan="3"
                 class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm"
               >
-                No Data Found
+                {{ 'No Data Found' | translate }}
               </td>
             </tr>
   
@@ -94,30 +94,30 @@
       </button>
   
       <h1 class="font-semibold text-2xl leading-9">
-        Add Child
+         {{ 'Add Child' | translate }}
       </h1>
       <div
         class="mt-4 bg-[#F7F7F7] w-[573px] h-auto rounded-[24px] p-[16px_24px] gap-[20px]">
         <div class="flex flex-col mt-2 gap-2 items-start">
             
-            <h6 class="font-medium text-base leading-6 mb-1 mt-3">National ID</h6>
+            <h6 class="font-medium text-base leading-6 mb-1 mt-3"> {{ 'National Id' | translate }}</h6>
             <input type="text"
             class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"
             [(ngModel)]="NationalID"
             (ngModelChange)="SelectChild(NationalID)"
-            placeholder="Enter National ID" />
+   placeholder="{{ 'Enter National Id' | translate }}"  />
 
-            <h6 class="font-medium text-base leading-6 mb-1 mt-3">Student</h6>
+            <h6 class="font-medium text-base leading-6 mb-1 mt-3"> {{ 'Student' | translate }}</h6>
             <input type="text"
             class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"
-            [(ngModel)]="Student.user_Name" 
+            [(ngModel)]="Student.en_name" 
             [disabled]="true" 
             />
             
           <button
             class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
             (click)="CreateOREdit()">
-            Save
+             {{ 'Save' | translate }}
           </button>
         </div>
       </div>

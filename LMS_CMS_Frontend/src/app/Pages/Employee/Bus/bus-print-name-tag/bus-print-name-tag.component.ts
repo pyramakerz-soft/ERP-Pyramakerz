@@ -15,11 +15,13 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { firstValueFrom } from 'rxjs';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-bus-print-name-tag',
   standalone: true,
-  imports: [CommonModule, FormsModule, SearchComponent],
+  imports: [CommonModule, FormsModule, SearchComponent , TranslateModule],
   templateUrl: './bus-print-name-tag.component.html',
   styleUrl: './bus-print-name-tag.component.css'
 })
@@ -28,7 +30,8 @@ export class BusPrintNameTagComponent {
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   UserID: number = 0;
   path: string = ""
-
+ isRtl: boolean = false;
+  subscription!: Subscription;
   key: string = "id";
   value: any = "";
   keysArray: string[] = ['id', 'schoolName', "studentName", "busCategoryName", "semseterName", "isException", "gradeName", "className"];
@@ -50,7 +53,16 @@ export class BusPrintNameTagComponent {
 
   IsClearBus: boolean = false;
 
-  constructor(private router: Router, private menuService: MenuService, public activeRoute: ActivatedRoute, public account: AccountService, public busStudentServ: BusStudentService, public DomainServ: DomainService, public EditDeleteServ: DeleteEditPermissionService, public ApiServ: ApiService, public BusServ: BusService) { }
+  constructor(private router: Router, 
+    private menuService: MenuService, 
+    public activeRoute: ActivatedRoute, 
+    public account: AccountService, 
+    public busStudentServ: BusStudentService, 
+    public DomainServ: DomainService, 
+    public EditDeleteServ: DeleteEditPermissionService, 
+    public ApiServ: ApiService, 
+    public BusServ: BusService,
+    private languageService: LanguageService) { }
 
   ngOnInit() {
 
@@ -79,7 +91,11 @@ export class BusPrintNameTagComponent {
       this.IsEmployee = false;
       this.AllowEdit = true;
       this.AllowDelete = true;
-    }
+    } 
+    this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetAllDomains() {

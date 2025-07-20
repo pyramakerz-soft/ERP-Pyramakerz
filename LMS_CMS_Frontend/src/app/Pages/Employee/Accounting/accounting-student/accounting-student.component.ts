@@ -16,11 +16,13 @@ import { EmployeeService } from '../../../../Services/Employee/employee.service'
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { StudentService } from '../../../../Services/student.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-accounting-student',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './accounting-student.component.html',
   styleUrl: './accounting-student.component.css'
 })
@@ -50,7 +52,8 @@ User_Data_After_Login: TokenData = new TokenData(
 
   isModalVisible: boolean = false;
   mode: string = '';
-
+ isRtl: boolean = false;
+  subscription!: Subscription;
   path: string = '';
   key: string = 'id';
   value: any = '';
@@ -68,7 +71,7 @@ User_Data_After_Login: TokenData = new TokenData(
     public ApiServ: ApiService ,
     public StudentServ: StudentService,
     public accountServ:AccountingTreeChartService ,
-
+  private languageService: LanguageService
   ) {}
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -89,6 +92,10 @@ User_Data_After_Login: TokenData = new TokenData(
     });
 
     this.GetAllData();
+      this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetAllData() {

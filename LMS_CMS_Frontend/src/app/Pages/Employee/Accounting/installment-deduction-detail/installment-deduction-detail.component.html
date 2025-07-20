@@ -1,14 +1,14 @@
 <div class="flex justify-between items-center">
     <div class="flex justify-between items-center space-x-5">
         <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToMaster()"></i>
-        <h1 *ngIf="mode=='Create'" class="font-semibold text-2xl leading-9">
-            Create Installment Deduction
+        <h1 *ngIf="mode=='Create'" class="primaryTxt font-semibold text-2xl leading-9">
+            {{ 'Create Installment Deduction' | translate }}
         </h1>
-        <h1 *ngIf="mode=='Edit'" class="font-semibold text-2xl leading-9">
-            Edit Installment Deduction
+        <h1 *ngIf="mode=='Edit'" class="primaryTxt font-semibold text-2xl leading-9">
+            {{ 'Edit Installment Deduction' | translate }}
         </h1>
-        <h1 *ngIf="mode=='View'" class="font-semibold text-2xl leading-9">
-            View Installment Deduction
+        <h1 *ngIf="mode=='View'" class="primaryTxt font-semibold text-2xl leading-9">
+            {{ 'View Installment Deduction' | translate }}
         </h1>
     </div>
 </div>
@@ -16,49 +16,52 @@
 
 <div class="mt-6 mb-4 rounded-3xl flex justify-between flex-wrap py-3">
     <div class="flex flex-col mb-4 w-[24%]">
-        <label class="mb-2 primaryTxt" for="docNumber">Doc Number</label>
+        <label class="mb-2 primaryTxt" for="docNumber"> {{ 'Doc Number' | translate }}</label>
         <input id="docNumber" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" [disabled]="mode=='View' "
-            placeholder="Enter Doc Number" [(ngModel)]="Data.docNumber" (ngModelChange)="onInputValueChange({ field: 'docNumber', value: $event })" />
+        placeholder="{{ 'Enter Doc Number' | translate }}"   
+ [(ngModel)]="Data.docNumber" (ngModelChange)="onInputValueChange({ field: 'docNumber', value: $event })" />
         <span *ngIf="validationErrors['docNumber']" class="text-red-500 ml-3 font-normal">{{ validationErrors["docNumber"]}}</span>
     </div>
 
     <div class="flex flex-col mb-4 w-[24%]">
-        <label class="mb-2 primaryTxt" for="date">Date</label>
+        <label class="mb-2 primaryTxt" for="date"> {{ 'Date' | translate }}</label>
         <input id="date" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-            placeholder="Enter Date" [(ngModel)]="Data.date" (ngModelChange)="onInputValueChange({ field: 'date', value: $event })" [disabled]="mode=='View' "/>
+placeholder="{{ 'Enter Date' | translate }}" [(ngModel)]="Data.date" (ngModelChange)="onInputValueChange({ field: 'date', value: $event })" [disabled]="mode=='View' "/>
             <span *ngIf="validationErrors['date']" class="text-red-500 ml-3 font-normal">{{ validationErrors["date"]}}</span>
     </div>
 
     <div class="flex flex-col w-[24%] mb-4">
-        <label class="mb-2" for="employeeID">Employees</label>
+        <label class="mb-2" for="employeeID"> {{ 'Employees' | translate }}</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="employeeID"  [disabled]="mode=='View' "
             [(ngModel)]="Data.employeeID" (ngModelChange)="onInputValueChange({ field: 'employeeID', value: $event })" (change)="onEmployeeChange()">
-            <option [value]=0 disabled selected hidden>Choose Employee</option>
+            <option [value]=0 disabled selected hidden> {{ 'Choose Employee' | translate }}</option>
             <option *ngFor="let emp of employees" [value]="emp.id">{{ emp.user_Name }}</option>
-            <option *ngIf="employees.length === 0" disabled selected>No Data Found</option>
+            <option *ngIf="employees.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
         </select>
         <span *ngIf="validationErrors['employeeID']" class="text-red-500 ml-3 font-normal">{{ validationErrors["employeeID"]}}</span>
     </div>  
 
     <div class="flex flex-col w-[24%] mb-4">
-        <label class="mb-2" for="studentID" [ngClass]="{ 'text-gray-400': !Data.employeeID, 'primaryTxt': Data.employeeID }">Child</label>
+        <label class="mb-2" for="studentID" [ngClass]="{ 'text-gray-400': !Data.employeeID, 'primaryTxt': Data.employeeID }"> {{ 'Child' | translate }}</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="studentID"
             [disabled]="!Data.employeeID || mode=='View' " [ngClass]="{ 'bg-[#EBEBEB]': !Data.employeeID }"
             [(ngModel)]="Data.studentID" (ngModelChange)="onInputValueChange({ field: 'studentID', value: $event })">
-            <option [value]=0 disabled selected hidden>Choose Child</option>
+            <option [value]=0 disabled selected hidden> {{ 'Choose Child' | translate }}</option>
             <option *ngFor="let stu of emplyeeStudents" [value]="stu.studentID">{{ stu.studentName }}</option>
-            <option *ngIf="emplyeeStudents.length === 0" disabled selected>No Data Found</option>
+            <option *ngIf="emplyeeStudents.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
         </select>
         <span *ngIf="validationErrors['studentID']" class="text-red-500 ml-3 font-normal">{{ validationErrors["studentID"]}}</span>
     </div>
 
     <div class="flex flex-col mb-4 w-full">
-        <label class="mb-2 primaryTxt" for="name">Notes</label>
+        <label class="mb-2 primaryTxt" for="name"> {{ 'Notes' | translate }}</label>
         <div class="flex justify-start gap-2 items-start">
             <div class="flex flex-col w-full">
                 <textarea [disabled]="mode=='View' "
                     class="w-full h-[100px] rounded-lg border border-solid border-gray-300 px-2 py-1 mb-3 resize-none"
-                    [(ngModel)]="Data.notes" placeholder="Enter Notes"></textarea>
+                    [(ngModel)]="Data.notes" 
+                    placeholder="{{ 'Enter Notes' | translate }}"
+></textarea>
             </div>
         </div>
     </div>
@@ -68,7 +71,7 @@
 <div *ngIf="mode!='View'" class="flex justify-end mb-3">
     <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
     (click)="Save()">
-    <span *ngIf="!isLoading">Save</span>
+    <span *ngIf="!isLoading">{{ 'Save' | translate }}</span>
     <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
   </button>
 </div>
@@ -77,7 +80,7 @@
     <button class="secondaryTxt secondaryBorder px-1 py-2 rounded-lg flex items-center space-x-1"
         (click)="AddDetail()">
         <div class="secondaryBorder rounded-full flex items-center p-1"><i class="fa-solid fa-plus"></i></div>
-        <p>Add</p>
+        <p> {{ 'Add' | translate }}</p>
     </button>
 </div>
 
@@ -87,22 +90,22 @@
             <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
                 <tr>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        ID
+                         {{ 'ID' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Child Name
+                         {{ 'Child Name' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Fees Type
+                         {{ 'Fees Type' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Amount
+                         {{ 'Amount' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Due Date
+                         {{ 'Due Date' | translate }}
                     </th>
                     <th *ngIf="mode=='Edit'" class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Actions
+                         {{ 'Actions' | translate }}
                     </th>
                 </tr>
             </thead>
@@ -111,7 +114,7 @@
                 <tr *ngIf="TableData.length === 0 && IsOpenToAdd==false">
                     <td colspan="6"
                         class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-                        No Data Found
+                         {{ 'No Data Found' | translate }}
                     </td>
                 </tr>
 

@@ -1,18 +1,19 @@
-﻿using System.Text;
-using Newtonsoft.Json;
-using System.Net.Http.Headers;
-using System.Xml;
-using System.Security.Cryptography.Xml;
-using System.Security.Cryptography;
-using LMS_CMS_DAL.Models.Domains.Inventory;
-using System.Diagnostics;
-using Newtonsoft.Json.Linq;
-using Zatca.EInvoice.SDK.Contracts.Models;
-using Zatca.EInvoice.SDK;
-using System.Security.Cryptography.X509Certificates;
+﻿using LMS_CMS_DAL.Models.Domains.Inventory;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Diagnostics;
 using System.Drawing;
+using System.Net.Http.Headers;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using System.Security.Cryptography.Xml;
+using System.Text;
+using System.Xml;
+using Zatca.EInvoice.SDK;
+using Zatca.EInvoice.SDK.Contracts.Models;
 using ZXing.Windows.Compatibility;
+using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace LMS_CMS_PL.Services.Zatca
 {
@@ -180,10 +181,11 @@ namespace LMS_CMS_PL.Services.Zatca
             return response;
         }
 
-        public static async Task<bool> GenerateInvoiceXML(string xmalPath, InventoryMaster master, string lastInvoiceHash, S3Service s3, string dateTime)
+        public static async Task<bool> GenerateInvoiceXML(string xmalPath, InventoryMaster master, string lastInvoiceHash, S3Service s3, string dateTime, IConfiguration config)
         {
 
             string examplePath = Path.Combine(Directory.GetCurrentDirectory(), "Services/Zatca/Invoice");
+            string certificates = Path.Combine(Directory.GetCurrentDirectory(), "Invoices/Certificates");
 
             if (!Directory.Exists(xmalPath))
             {
@@ -194,8 +196,6 @@ namespace LMS_CMS_PL.Services.Zatca
 
             string date = invDate.ToString("yyyy-MM-dd");
             string time = invDate.ToString("HH:mm:ss");
-
-            string pcName = $"PC{master.SchoolPCId}{master.SchoolId}";
 
             string newXmlPath = Path.Combine(xmalPath, $"{master.School.CRN}_{date.Replace("-", "")}T{time.Replace(":", "")}_{date}-{master.StoreID}_{master.FlagId}_{master.ID}.xml");
 
@@ -297,9 +297,9 @@ namespace LMS_CMS_PL.Services.Zatca
 
                 // TaxTotal
                 XmlElement taxTotal = inv.CreateElement("cac", "TaxTotal", nsMgr.LookupNamespace("cac"));
-                XmlElement taxAmount = AppendElementWithText(inv, taxTotal, "cbc", "TaxAmount", (itemDetail.TotalPrice * master.VatPercent).ToString(), nsMgr);
+                XmlElement taxAmount = AppendElementWithText(inv, taxTotal, "cbc", "TaxAmount", (itemDetail.TotalPrice * master.VatPercent)?.ToString("F2"), nsMgr);
                 taxAmount.SetAttribute("currencyID", "SAR");
-                XmlElement roundingAmount = AppendElementWithText(inv, taxTotal, "cbc", "RoundingAmount", itemTotalPriceWithVat.ToString(), nsMgr);
+                XmlElement roundingAmount = AppendElementWithText(inv, taxTotal, "cbc", "RoundingAmount", itemTotalPriceWithVat.ToString("F2"), nsMgr);
                 roundingAmount.SetAttribute("currencyID", "SAR");
                 invoiceLine.AppendChild(taxTotal);
 
@@ -324,7 +324,7 @@ namespace LMS_CMS_PL.Services.Zatca
                 priceAmount.SetAttribute("currencyID", "SAR");
 
                 XmlElement allowanceCharge = inv.CreateElement("cac", "AllowanceCharge", nsMgr.LookupNamespace("cac"));
-                AppendElementWithText(inv, allowanceCharge, "cbc", "ChargeIndicator", "true", nsMgr);
+                AppendElementWithText(inv, allowanceCharge, "cbc", "ChargeIndicator", "false", nsMgr);
                 AppendElementWithText(inv, allowanceCharge, "cbc", "AllowanceChargeReason", "discount", nsMgr);
                 XmlElement amount = AppendElementWithText(inv, allowanceCharge, "cbc", "Amount", "0.00", nsMgr);
                 amount.SetAttribute("currencyID", "SAR");
@@ -379,15 +379,32 @@ namespace LMS_CMS_PL.Services.Zatca
 
             SaveFormatted(inv, newXmlPath);
 
-            string certContent = await s3.GetSecret($"{pcName}PCSID");
+            string pcName = $"PC{master.SchoolPCId}_{master.SchoolId}";
+
+            string filesEnvironment = config.GetValue<string>("ZatcaFilesEnvironment");
+
+            string certContent = string.Empty;
+            string privateKeyContent = string.Empty;
+
+            if (filesEnvironment == "local")
+            {
+                string certPath = Path.Combine(certificates, $"{pcName}_PCSID.json");
+                certContent = File.ReadAllText(certPath);
+
+                string privateKeyPath = Path.Combine(certificates, $"{pcName}_PrivateKey.pem");
+                privateKeyContent = File.ReadAllText(privateKeyPath);
+            }
+            else
+            {
+                certContent = await s3.GetSecret($"{pcName}PCSID");
+                privateKeyContent = await s3.GetSecret($"{pcName}PrivateKey");
+            }
 
             dynamic certObject = JsonConvert.DeserializeObject(certContent);
             string base64Cert = certObject.binarySecurityToken;
 
             byte[] certBytes = Convert.FromBase64String(base64Cert);
             string certDecoded = Encoding.UTF8.GetString(certBytes);
-
-            string privateKeyContent = await s3.GetSecret($"{pcName}PrivateKey");
 
             privateKeyContent = privateKeyContent
                 .Replace("-----BEGIN EC PRIVATE KEY-----", "")

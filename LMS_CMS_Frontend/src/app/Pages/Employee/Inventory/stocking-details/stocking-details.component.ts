@@ -383,7 +383,7 @@ export class StockingDetailsComponent {
 
   SearchOnBarCode() {
     if (!this.BarCode) return;
-    this.shopitemServ.GetByBarcode(this.BarCode, this.DomainName).subscribe(
+    this.shopitemServ.GetByBarcode(this.Data.storeID ,this.BarCode, this.DomainName).subscribe(
       (d) => {
         const detail: StockingDetails = {
           id: Date.now() + Math.floor(Math.random() * 1000),
@@ -420,7 +420,7 @@ export class StockingDetailsComponent {
       (error) => {
         Swal.fire({
           icon: 'error',
-          title: 'This Item Not Exist',
+          title: 'Item not found',
           confirmButtonText: 'Okay',
           customClass: { confirmButton: 'secondaryBg' },
         });

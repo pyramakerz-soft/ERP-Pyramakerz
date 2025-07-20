@@ -67,9 +67,11 @@ export class LessonLiveComponent {
 
   selectedSchool: number = 0
   selectedYear: number = 0
+  selectedYearForModal: number = 0
   selectedClass: number = 0
   Schools: School[] = []
   Years: AcademicYear[] = []
+  YearsForModal: AcademicYear[] = []
   ClassesForFilter: Classroom[] = []
 
   constructor(
@@ -136,6 +138,17 @@ export class LessonLiveComponent {
     }
   }
 
+  onYearChangeForModal() {
+    this.live.classroomID = 0
+    this.live.subjectID = 0
+    this.SelectedGradeId = 0
+    this.classrooms = []
+
+    if (this.selectedYearForModal) {
+      this.getAllClass()
+    }
+  }
+
   onClassChange() {
     this.GetLessonsByClassID()
   }
@@ -151,6 +164,13 @@ export class LessonLiveComponent {
     this.Schools = [];
     this.schoolService.Get(this.DomainName).subscribe((d) => {
       this.Schools = d;
+    });
+  }
+
+  GetAllYears() {
+    this.YearsForModal = [];
+    this.acadimicYearService.Get(this.DomainName).subscribe((d) => {
+      this.YearsForModal = d;
     });
   }
 
@@ -181,8 +201,9 @@ export class LessonLiveComponent {
   Edit(row: LessonLive) {
     this.mode = 'Edit';
     this.LessonLiveServ.GetByID(row.id, this.DomainName).subscribe((d) => {
-      this.live = d;
-      this.selectClass()
+      this.live = d; 
+      this.selectedYearForModal = this.live.academicYearID; 
+      this.getAllClass() 
     });
     this.openModal();
   }
@@ -271,7 +292,7 @@ export class LessonLiveComponent {
     })
   }
 
-  selectClass() {
+  selectClass() { 
     const classs: Classroom | undefined = this.classrooms.find(
       s => s.id === Number(this.live.classroomID)
     );
@@ -286,20 +307,25 @@ export class LessonLiveComponent {
     this.classrooms = []
     this.SelectedSubjectId = 0
     this.subject = []
-    this.ClassroomServ.Get(this.DomainName).subscribe((d) => {
+    this.ClassroomServ.GetByAcYearId(this.selectedYearForModal, this.DomainName).subscribe((d) => {
       this.classrooms = d
+      if(this.live.id){
+        this.selectClass()
+      }
     })
   }
 
   closeModal() {
     this.isModalVisible = false;
+    this.selectedYearForModal = 0;
+    this.SelectedGradeId = 0;
     this.validationErrors = {};
     this.live = new LessonLive();
   }
 
-  openModal() {
-    this.getAllClass();
+  openModal() { 
     this.getAllDays();
+    this.GetAllYears();
     this.isModalVisible = true;
   }
 

@@ -48,7 +48,7 @@ namespace LMS_CMS_PL.Services
 
         public async Task ApplyMigrations(string domainName)
         {
-            string connectionString = BuildConnectionString(domainName);
+            string connectionString = BuildConnectionString(domainName); 
 
             var optionsBuilder = new DbContextOptionsBuilder<LMS_CMS_Context>();
             optionsBuilder.UseSqlServer(connectionString);
@@ -74,7 +74,7 @@ namespace LMS_CMS_PL.Services
         {
             var dataSource = _configuration["DynamicConStr:DataSource"];
             var integratedSecurity = _configuration["DynamicConStr:IntegratedSecurity"];
-            var trustServerCertificate = _configuration["DynamicConStr:TrustServerCertificate"];
+            var trustServerCertificate = _configuration["DynamicConStr:TrustServerCertificate"]; 
 
             return $"{dataSource}{domainName}{integratedSecurity}{trustServerCertificate}";
         }

@@ -19,11 +19,13 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { StudentService } from '../../../../Services/student.service';
 import Swal from 'sweetalert2';
 import { SearchStudentComponent } from '../../../../Component/Employee/search-student/search-student.component';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-students',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchStudentComponent],
+  imports: [FormsModule, CommonModule, SearchStudentComponent, TranslateModule],
   templateUrl: './students.component.html',
   styleUrl: './students.component.css'
 })
@@ -32,7 +34,8 @@ export class StudentsComponent {
   keysArray: string[] = ['id', 'name', 'academicYearName', 'floorName', 'gradeName', 'number'];
   key: string = "id";
   value: any = "";
-
+ isRtl: boolean = false;
+  subscription!: Subscription;
   OriginStudentData: Student[] = []
   StudentsData: Student[] = []
   AllowEdit: boolean = false;
@@ -46,13 +49,25 @@ export class StudentsComponent {
   UserID: number = 0;
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   isLoading = false
-  preSelectedYear: number | null = null;  
-  preSelectedGrade: number | null = null;  
-  preSelectedClassroom: number | null = null;  
+  preSelectedYear: number | null = null;
+  preSelectedGrade: number | null = null;
+  preSelectedClassroom: number | null = null;
 
-  constructor(public account: AccountService, public buildingService: BuildingService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService,
-    private menuService: MenuService, public activeRoute: ActivatedRoute, public schoolService: SchoolService, public StudentService: StudentService, public employeeServ: EmployeeService,
-    public sectionService: SectionService, public gradeService: GradeService, public acadimicYearService: AcadimicYearService, public floorService: FloorService, public router: Router) { }
+  constructor(public account: AccountService, 
+    public buildingService: BuildingService, 
+    public ApiServ: ApiService, 
+    public EditDeleteServ: DeleteEditPermissionService,
+    private menuService: MenuService, 
+    public activeRoute: ActivatedRoute, 
+    public schoolService: SchoolService, 
+    public StudentService: StudentService, 
+    public employeeServ: EmployeeService,
+    public sectionService: SectionService, 
+    public gradeService: GradeService, 
+    public acadimicYearService: AcadimicYearService, 
+    public floorService: FloorService, 
+    public router: Router,
+      private languageService: LanguageService) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -74,6 +89,11 @@ export class StudentsComponent {
         this.AllowEditForOthers = settingsPage.allow_Edit_For_Others
       }
     });
+
+       this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   IsAllowDelete(InsertedByID: number) {
@@ -90,8 +110,7 @@ export class StudentsComponent {
     this.OriginStudentData = []
     this.StudentsData = []
     this.StudentService.GetAll(this.DomainName).subscribe(
-      (data: Student[]) => {
-        console.log(data)
+      (data: Student[]) => { 
         this.OriginStudentData = data;
         this.StudentsData = data;
 
@@ -132,10 +151,6 @@ export class StudentsComponent {
         });
       }
     });
-  }
-
-  handleStudentSelected(students: number[]) {
-    
   }
 
   closeModal() {

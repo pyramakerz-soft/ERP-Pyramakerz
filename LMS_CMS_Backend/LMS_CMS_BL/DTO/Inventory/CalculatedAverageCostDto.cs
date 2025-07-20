@@ -16,4 +16,5 @@ namespace LMS_CMS_BL.DTO.Inventory
         public decimal TotalPrice { get; set; }
     }
 
+
 }

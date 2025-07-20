@@ -24,11 +24,13 @@ import { Student } from '../../../../Models/student';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-accounting-student-edit',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, TranslateModule],
   templateUrl: './accounting-student-edit.component.html',
   styleUrl: './accounting-student-edit.component.css'
 })
@@ -44,7 +46,8 @@ export class AccountingStudentEditComponent {
 
   DomainName: string = '';
   UserID: number = 0;
-
+ isRtl: boolean = false;
+  subscription!: Subscription;
   isModalVisible: boolean = false;
   mode: string = '';
 
@@ -70,6 +73,7 @@ export class AccountingStudentEditComponent {
     public accountServ: AccountingTreeChartService,
     public StudentServ: StudentService,
     public NationalityServ: NationalityService,
+      private languageService: LanguageService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -94,6 +98,10 @@ export class AccountingStudentEditComponent {
     this.GetAllData();
     this.GetAllAccount();
     this.GetAllNationalitys();
+      this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetAllData() {

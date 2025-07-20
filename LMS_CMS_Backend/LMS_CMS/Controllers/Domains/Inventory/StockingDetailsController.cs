@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace LMS_CMS_PL.Controllers.Domains.Inventory
 {
@@ -306,7 +307,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                  allowedTypes: new[] { "octa", "employee" },
                  pages: new[] { "Inventory" }
              )]
-        public async Task<IActionResult> GetCurrentStockByIDAsync(long StoreId , long ShopItemID , string date) 
+        public async Task<IActionResult> GetCurrentStockByIDAsync(long StoreId , long ShopItemID , DateTime date) 
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
             LMS_CMS_Context db = Unit_Of_Work.inventoryMaster_Repository.Database();
@@ -321,9 +322,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         [HttpGet("CurrentStockByCategoryId/{StoreId}/{CategoryId}/{date}")]
         [Authorize_Endpoint_(
                  allowedTypes: new[] { "octa", "employee" },
-                 pages: new[] { "Inventory" }
+        pages: new[] { "Inventory" }
              )]
-        public async Task<IActionResult> GetCurrentStockByCategoryId(long StoreId, long CategoryId, string date)
+        public async Task<IActionResult> GetCurrentStockByCategoryId(long StoreId, long CategoryId, DateTime date)
         {
 
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -359,7 +360,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                  allowedTypes: new[] { "octa", "employee" },
                  pages: new[] { "Inventory" }
              )]
-        public async Task<IActionResult> GetCurrentStockBySubCategoryId(long StoreId, long SubCategoryId, string date)
+        public async Task<IActionResult> GetCurrentStockBySubCategoryId(long StoreId, long SubCategoryId, DateTime date)
         {
 
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);

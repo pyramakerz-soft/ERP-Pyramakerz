@@ -20,7 +20,7 @@ namespace LMS_CMS_DAL.Models.Domains.Inventory
         //[StringLength(100, ErrorMessage = "Name cannot be longer than 100 characters.")]
         //public string Name { get; set; }
         public string? InvoiceNumber { get; set; }
-        public string Date { get; set; }
+        public DateTime Date { get; set; }
         public bool IsCash { get; set; }
         public bool IsVisa { get; set; }
         public decimal? CashAmount { get; set; }

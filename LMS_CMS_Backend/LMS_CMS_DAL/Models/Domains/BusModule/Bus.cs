@@ -19,9 +19,9 @@ namespace LMS_CMS_DAL.Models.Domains.BusModule
         public string Name { get; set; }
         public long Capacity { get; set; }
         public bool IsCapacityRestricted { get; set; }
-        public int MorningPrice { get; set; }
-        public int BackPrice { get; set; }
-        public int TwoWaysPrice { get; set; }
+        public decimal MorningPrice { get; set; }
+        public decimal BackPrice { get; set; }
+        public decimal TwoWaysPrice { get; set; }
 
 
         [ForeignKey("BusType")]

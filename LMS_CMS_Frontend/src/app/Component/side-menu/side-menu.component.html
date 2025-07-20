@@ -1,5 +1,5 @@
 <div *ngIf="!IsMenuOpen" class="primaryBg rounded-lg text-[#919191] h-[89vh] overflow-y-hidden py-10 px-3 flex flex-col items-center text-sm lg:text-xl space-y-4">
-    <img class="w-3 lg:w-fit" src="Images/logo-orange 2 2.png" (click)="toggleMenu()">
+    <img class="w-3 lg:w-fit" src="Images/logo-orange 3.png" (click)="toggleMenu()">
     <i class="fa-solid fa-magnifying-glass p-3" (click)="toggleSearch()"></i>  
     <div *ngFor="let item of menuItemsForEmployee" (click)="toggleMenu()">   
         <img class="w-3 lg:w-fit" [src]="getImageSrc(item)" />
@@ -29,19 +29,24 @@
         </div>
         <div class="text-xl" >
             <details *ngFor="let item of menuItems; let i = index" #details
-            [ngClass]="{'bg-[#FFFFFF1A] rounded-br-lg rounded-tr-lg border-l mb-3': details.open && item.subItems}">
+            [ngClass]="{'bg-[#FFFFFF1A] rounded-br-lg rounded-tr-lg border-l mb-3': details.open && item.subItems}"
+            [open]="isMenuActive(item.route) || isSubItemActive(item.subItems)"
+            [ngClass]="{
+                'bg-[#FFFFFF1A] rounded-br-lg rounded-tr-lg border-l mb-3': (isMenuActive(item.route) || isSubItemActive(item.subItems)) && item.subItems
+            }">
                 <summary 
                 [routerLink]="item.route"  
                 class="w-full px-9 py-3 lg:py-4 flex space-x-3 rtl:space-x-reverse items-center justify-between hover:bg-[rgba(255,255,255,0.1)] ltr:hover:rounded-r-lg rtl:hover:rounded-l-lg ltr:hover:border-l-2 rtl:hover:border-r-2 cursor-pointer">
                     <div class="flex items-center space-x-3 rtl:space-x-reverse w-max">
                         <img *ngIf="item.icon" class="w-3 lg:w-fit" [src]="'Icons/SideMenuIcons/' + item.icon.replace(' ',  '_') + '.png'">
-                        <p>{{ item.label }}</p>
+                        <p [ngClass]="{ 'text-white': isMenuActive(item.route) || isSubItemActive(item.subItems) }">{{ item.label }}</p>
                     </div>
                     <img *ngIf="item.subItems" class="w-3 lg:w-fit" src="Icons/Drop-Down.png">
                 </summary>
 
                 <div *ngIf="item.subItems"  class="pl-20 p-2 flex flex-col space-y-3 w-max">
-                    <a *ngFor="let subItem of item.subItems; let i = index" class="cursor-pointer hover:opacity-30" [routerLink]="subItem.route">{{ subItem.label }}</a>
+                    <a [ngClass]="{ 'text-white': isMenuActive(subItem.route) }" 
+                    *ngFor="let subItem of item.subItems; let i = index" class="cursor-pointer hover:opacity-30" [routerLink]="subItem.route">{{ subItem.label }}</a>
                 </div>
             </details>
         </div>

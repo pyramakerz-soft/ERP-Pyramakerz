@@ -180,7 +180,7 @@ export class InventoryMasterService {
 
 search(
   DomainName: string,
-  storeId: number | null,  // Update parameter type to accept null
+  storeId: number | null,
   dateFrom: string,
   dateTo: string,
   flagIds: number[],
@@ -199,7 +199,6 @@ search(
     .set('Authorization', `Bearer ${token}`)
     .set('Content-Type', 'application/json');
 
-  // Build URL with parameters
   let url = `${this.baseUrl}/InventoryMaster/Search?DateFrom=${dateFrom}&DateTo=${dateTo}`;
   
   // Add storeId if provided (or skip if null for "All Stores")
@@ -231,6 +230,8 @@ search(
 
   return this.http.get<any>(url, { headers });
 }
+
+
  searchInvoice(
   DomainName: string,
   storeId: number | null,  // Updated to accept null

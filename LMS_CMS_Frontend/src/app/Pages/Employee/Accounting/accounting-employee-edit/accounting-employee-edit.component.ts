@@ -32,11 +32,13 @@ import { EmployeeStudentService } from '../../../../Services/Employee/Accounting
 import { StudentService } from '../../../../Services/student.service';
 import Swal from 'sweetalert2';
 import { Student } from '../../../../Models/student';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import { firstValueFrom, Subscription } from 'rxjs';
 @Component({
   selector: 'app-accounting-employee-edit',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, TranslateModule],
   templateUrl: './accounting-employee-edit.component.html',
   styleUrl: './accounting-employee-edit.component.css'
 })
@@ -88,7 +90,8 @@ export class AccountingEmployeeEditComponent {
   TableData: EmplyeeStudent[] = [];
   Student: Student = new Student();
   NationalID: string = "";
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   selectedDays: { id: number; name: string }[] = [];
   isLoading = false
 
@@ -128,6 +131,7 @@ export class AccountingEmployeeEditComponent {
     public jobCategoryServ: JobCategoriesService,
     public EmplyeeStudentServ: EmployeeStudentService,
     public StudentServ: StudentService,
+    private languageService: LanguageService
   ) { }
 
   ngOnInit() {
@@ -156,11 +160,18 @@ export class AccountingEmployeeEditComponent {
     this.GetAllDepartment();
     this.GetAllAcademicDegrees();
     this.GetAllJobCategories();
+
+      this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetAllData() {
     this.employeeServ.GetAcountingEmployee(this.EmployeeId, this.DomainName).subscribe((d: any) => {
-      this.Data = d;  
+      this.Data = d;   
+      this.JobCategoryId = this.Data.jobCategoryID
+      this.GetAllJobCategories();
       this.GetAllJobs()
       this.selectedDays = this.days
       this.selectedDays = this.days.filter(day => this.Data.days.includes(day.id));
@@ -333,7 +344,8 @@ export class AccountingEmployeeEditComponent {
   }
 
   OnSelectJobCategory() {
-    this.JobCategoryId = this.Data.jobCategoryId;
+    this.Data.jobID = 0
+    this.JobCategoryId = this.Data.jobCategoryID;
     this.GetAllJobs();
   }
 

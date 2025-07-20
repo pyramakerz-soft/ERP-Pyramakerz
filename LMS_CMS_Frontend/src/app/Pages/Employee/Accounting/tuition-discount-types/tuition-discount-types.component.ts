@@ -16,11 +16,14 @@ import { AccountingTreeChart } from '../../../../Models/Accounting/accounting-tr
 import { TuitionDiscountTypeService } from '../../../../Services/Employee/Accounting/tuition-discount-type.service';
 import { firstValueFrom } from 'rxjs';
 import { AccountingTreeChartService } from '../../../../Services/Employee/Accounting/accounting-tree-chart.service';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-tuition-discount-types',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './tuition-discount-types.component.html',
   styleUrl: './tuition-discount-types.component.css'
 })
@@ -44,7 +47,8 @@ export class TuitionDiscountTypesComponent {
   AllowDeleteForOthers: boolean = false;
 
   TableData: TuitionDiscountTypes[] = [];
-
+ isRtl: boolean = false;
+  subscription!: Subscription;
   DomainName: string = '';
   UserID: number = 0;
 
@@ -73,6 +77,7 @@ export class TuitionDiscountTypesComponent {
     public ApiServ: ApiService,
     public tuitionServ: TuitionDiscountTypeService,
     public accountServ: AccountingTreeChartService,
+      private languageService: LanguageService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -94,6 +99,11 @@ export class TuitionDiscountTypesComponent {
 
     this.GetAllData();
     this.GetAllAccount()
+
+          this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetAllData() {
@@ -227,6 +237,11 @@ export class TuitionDiscountTypesComponent {
           }
         }
       }
+    }
+
+    if (this.tuitionDiscountTypes.name.length > 100) {
+      isValid = false;
+      this.validationErrors['name']='Name cannot be longer than 100 characters.'
     }
     return isValid;
   }

@@ -4,7 +4,7 @@
     <div class="w-full md:w-3/4 lg:w-[528px] md:h-1/2 lg:h-[80%] py-5 px-8 bg-white border border-gray-200 rounded-3xl shadow mb-2 flex flex-col items-center justify-center">
       
       <div class="mb-4 flex justify-center">
-        <img src="Images/LogoInLogin2.png" alt="Avatar">
+        <img src="Images/LogoInLogin3.png" alt="Avatar">
       </div>
       <span *ngIf="somthingError" class="text-red-500 text-sm font-normal">{{ somthingError }}</span>
 
@@ -27,7 +27,11 @@
         </div>
         <span *ngIf="passwordError" class="text-red-500 text-sm ml-2 font-normal mb-5">{{ passwordError }}</span>
         
-        <button (click)="SignIN()" class="mt-2 secondaryBg text-white p-2 rounded w-full">Save</button>
+        <button [disabled]="isLoading" class="mt-2 secondaryBg text-white p-2 rounded w-full"
+            (click)="SignIN()">
+            <span *ngIf="!isLoading">Save</span>
+            <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+        </button> 
       </div>
       
     </div>

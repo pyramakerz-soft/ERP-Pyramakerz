@@ -7,6 +7,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="DbScripts\FilterEntries.sql" />
+    <None Remove="DbScripts\GetSubAccountInfo.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="DbScripts\FilterEntries.sql" />
+    <EmbeddedResource Include="DbScripts\GetSubAccountInfo.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="BCrypt" Version="1.0.0" />
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.2" />
     <PackageReference Include="MailKit" Version="4.11.0" />

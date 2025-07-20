@@ -1,7 +1,7 @@
 <!-- Header Section -->
 <div class="flex justify-between items-center">
     <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
-        <i class="fa-solid fa-chevron-left cursor-pointer rtl:rotate-180 cursor-pointer" (click)="goBack()"></i>
+        <i class="fa-solid fa-chevron-left cursor-pointer rtl:rotate-180" (click)="goBack()"></i>
         <h1 class="primaryTxt font-semibold text-2xl leading-9">
             {{ currentSystem === 'zatca' ? 'ZATCA' : 'ETA' }} Invoice {{invoice.invoiceNumber}}
         </h1>
@@ -11,10 +11,12 @@
         <button (click)="printInvoice()" class="p-1 flex items-center gap-2 secondaryTxt text-3xl"
             [disabled]="isSubmitting">
             <i class="fa-solid fa-print"></i> </button>
-        <button (click)="sendInvoice()" class="p-1 flex items-center gap-2 secondaryTxt text-3xl"
-            [disabled]="isSubmitting">
-            <i class="fa-regular fa-paper-plane"></i> <span *ngIf="isSubmitting">Sending...</span>
-        </button>
+<!-- Replace the existing send button in electronic-invoice-detail.component.html with this: -->
+<button (click)="sendInvoice()" class="p-2 font-medium text-3xl rounded-lg flex items-center gap-2 secondaryTxt"
+    [disabled]="isSubmitting" [ngClass]="{'opacity-50 cursor-not-allowed': isSubmitting}">
+    <i *ngIf="!isSubmitting" class="fa-regular fa-paper-plane"></i>
+    <i *ngIf="isSubmitting" class="fas fa-spinner fa-spin"></i>
+</button>
     </div>
 </div>
 
@@ -58,9 +60,7 @@
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         Quantity </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Price </th>
-                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Tax </th>
+                        Price </th>  
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         Total </th>
                 </tr>
@@ -77,10 +77,7 @@
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{item.price}}
-                    </td>
-                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        {{invoice.vatAmount}}
-                    </td>
+                    </td> 
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{item.totalPrice}}
                     </td>
@@ -100,6 +97,10 @@
         </div>
         <div class="flex justify-between mb-2">
             <span class="font-medium">Taxes & Fees:</span>
+            <span>{{invoice.vatPercent ?  invoice.vatPercent* 100 : 0}} %</span>
+        </div>
+        <div class="flex justify-between mb-2">
+            <span class="font-medium">Taxes & Fees Amount:</span>
             <span>{{invoice.vatAmount}}</span>
         </div>
         <div class="flex justify-between font-bold text-lg mt-4 pt-2 border-t">

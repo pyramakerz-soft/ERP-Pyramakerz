@@ -22,11 +22,14 @@ import { TuitionFeesTypeService } from '../../../../Services/Employee/Accounting
 import Swal from 'sweetalert2';
 import { EmployeeStudentService } from '../../../../Services/Employee/Accounting/employee-student.service';
 import { EmplyeeStudent } from '../../../../Models/Accounting/emplyee-student';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-installment-deduction-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule , TranslateModule],
   templateUrl: './installment-deduction-detail.component.html',
   styleUrl: './installment-deduction-detail.component.css'
 })
@@ -39,7 +42,8 @@ export class InstallmentDeductionDetailComponent {
   AllowDeleteForOthers: boolean = false;
 
   Data: InstallmentDeductionMaster = new InstallmentDeductionMaster();
-
+isRtl: boolean = false;
+  subscription!: Subscription;
   DomainName: string = '';
   UserID: number = 0;
 
@@ -76,7 +80,8 @@ export class InstallmentDeductionDetailComponent {
     public EmployeeStudentServ: EmployeeStudentService,
     public installmentDeductionDetailServ: InstallmentDeductionDetailService,
     public installmentDeductionMasterServ: InstallmentDeductionMasterService,
-    public TuitionFeesTypeServ: TuitionFeesTypeService
+    public TuitionFeesTypeServ: TuitionFeesTypeService,
+    private languageService: LanguageService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -119,6 +124,12 @@ export class InstallmentDeductionDetailComponent {
     }
     this.GetAllEmployees()
     this.GetAllTuitionFeesType()
+
+
+    this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   moveToMaster() {

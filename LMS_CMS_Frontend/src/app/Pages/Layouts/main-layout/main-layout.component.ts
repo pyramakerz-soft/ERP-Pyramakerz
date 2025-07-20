@@ -50,6 +50,13 @@ export class MainLayoutComponent {
               label: 'The Shop', route: 'Ecommerce/The Shop'
             }
           ], icon: 'E-Commerce'
+        },
+        {
+          label: 'LMS', subItems: [
+            {
+              label: 'Subject', route: 'Subject'
+            }
+          ], icon: 'LMS'
         }
       ]
     } else if (this.User_Data_After_Login.type == "parent") {
@@ -158,15 +165,5 @@ export class MainLayoutComponent {
       } ,(error)=>{
         this.menuItemsForEmployee = [];
       });
-  }
-
-  // Get_All_With_Group_By() {
-  //   this.roleDetailsService.Get_All_Pages().subscribe(
-  //     (data:any) => {
-  //       this.menuItemsForEmployee = data
-  //       this.menuService.updateMenuItemsForEmployee(this.menuItemsForEmployee);
-  //     } ,(error)=>{
-  //       this.menuItemsForEmployee = [];
-  //     });
-  // }
+  } 
 }

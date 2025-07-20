@@ -1,7 +1,7 @@
 <div class="">
     <div class="flex justify-between">
-        <h1 class="font-semibold text-2xl leading-9" >{{this.path}}</h1>
-        <div class="flex justify-between items-center">
+        <h1 class="primaryTxt font-semibold text-2xl leading-9" >{{this.path}}</h1>
+        <div class="primaryTxt flex justify-between items-center">
             <app-search [keysArray]="keysArrayEvaluator" *ngIf="mode =='Evaluated' " (searchEvent)="onSearchEvent($event)"></app-search>
             <app-search [keysArray]="keysArrayEvaluated" *ngIf="mode =='Evaluator' " (searchEvent)="onSearchEvent($event)"></app-search>
         </div>

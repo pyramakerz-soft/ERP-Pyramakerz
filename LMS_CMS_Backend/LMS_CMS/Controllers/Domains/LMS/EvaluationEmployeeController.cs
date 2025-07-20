@@ -336,12 +336,19 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             List<EvaluationEmployeeStudentBookCorrection> evaluationEmployeeStudentBookCorrections = await Unit_Of_Work.evaluationEmployeeStudentBookCorrection_Repository
                 .Select_All_With_IncludesById<EvaluationEmployeeStudentBookCorrection>(
                     t => t.IsDeleted != true && t.EvaluationEmployeeID == evaluationID,
-                    query => query.Include(emp => emp.Student)
+                    query => query.Include(emp => emp.Student),
+                    query => query.Include(emp => emp.EvaluationBookCorrection)
                     );
 
             List<EvaluationEmployeeStudentBookCorrectionsGetDTO> evaluationEmployeeStudentBookCorrectionsGetDTOs = mapper.Map<List<EvaluationEmployeeStudentBookCorrectionsGetDTO>>(evaluationEmployeeStudentBookCorrections);
 
             evaluationEmployeesDTO.EvaluationEmployeeStudentBookCorrections = evaluationEmployeeStudentBookCorrectionsGetDTOs;
+            if(evaluationEmployeesDTO.EvaluationEmployeeStudentBookCorrections != null && evaluationEmployeesDTO.EvaluationEmployeeStudentBookCorrections.Count != 0)
+            {
+                evaluationEmployeesDTO.EvaluationBookCorrectionID = evaluationEmployeeStudentBookCorrections[0].EvaluationBookCorrectionID;
+                evaluationEmployeesDTO.EvaluationBookCorrectionEnglishName = evaluationEmployeeStudentBookCorrections[0].EvaluationBookCorrection.EnglishName;
+                evaluationEmployeesDTO.EvaluationBookCorrectionArabicName = evaluationEmployeeStudentBookCorrections[0].EvaluationBookCorrection.ArabicName;
+            }
 
             List<EvaluationEmployeeQuestion> evaluationEmployeeQuestions = await Unit_Of_Work.evaluationEmployeeQuestion_Repository
                 .Select_All_With_IncludesById<EvaluationEmployeeQuestion>(

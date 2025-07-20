@@ -1,6 +1,6 @@
 <div class="">
     <div class="flex justify-between items-center">
-        <h1 class="primaryTxt font-semibold text-2xl leading-9">Bus</h1>
+        <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Bus' | translate }}</h1>
         <div class="flex justify-between items-center ">
             <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
             
@@ -14,16 +14,16 @@
                 'secondaryTxt': IsChoosenDomain  
             }"
             class="rounded-lg px-4 py-3 flex items-center justify-center gap-2">
-                Create Bus
+                 {{ 'Create Bus' | translate }}
             </button>
         </div>
     </div>
 
     <div [ngClass]="{'hidden': IsEmployee}" class="mt-5">
-        <label for="domains" class="block mb-2 text-sm font-medium text-gray-900">Domains</label>
+        <label for="domains" class="block mb-2 text-sm font-medium text-gray-900"> {{ 'Domains' | translate }}</label>
         <select id="domains" (change)="getBusDataByDomainId($event)"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5">
-            <option value="" disabled selected hidden>Select a Domain</option>
+            <option value="" disabled selected hidden>{{ 'Select a Domain' | translate }}</option>
             <option *ngFor="let domain of DomainData" [value]="domain.name">
                 {{ domain.name }}
             </option>
@@ -35,46 +35,46 @@
             <thead class="bg-[##EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
                 <tr>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Bus ID
+                         {{ 'Bus ID' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
-                        Bus Name
+                         {{ 'Bus Name' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Bus Type
+                         {{ 'Bus Type' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Bus District
+                         {{ 'Bus District' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Bus Status
+                         {{ 'Bus Status' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Capacity
+                         {{ 'Capacity' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Restricted Capacity
+                         {{ 'Restricted Capacity' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Driver
+                         {{ 'Driver' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Driver Assistant
+                         {{ 'Driver Assistant' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Company
+                         {{ 'Company' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Back Price
+                         {{ 'Back Price' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Morning Price
+                         {{ 'Morning Price' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Two Ways Price
+                         {{ 'Two Ways Price' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Actions
+                    {{ 'Actions' | translate }}
                     </th>
                 </tr>
             </thead>
@@ -82,7 +82,7 @@
                 <!-- No Data Row -->
                 <tr *ngIf="busData.length === 0">
                     <td colspan="14" class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-                        No Data Found
+                     {{ 'No Data Found' | translate }}
                     </td>
                 </tr>
 
@@ -231,79 +231,79 @@
 <div id="Add_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
     <div class="bg-white rounded-2xl p-12 w-1/2">
         <div class="flex justify-between items-center">
-            <h1 *ngIf="!editBus" class="font-semibold text-2xl leading-9">Create Bus</h1>
-            <h1 *ngIf="editBus" class="font-semibold text-2xl leading-9">Edit Bus</h1>
+            <h1 *ngIf="!editBus" class="font-semibold text-2xl leading-9"> {{ 'Create Bus' | translate }}</h1>
+            <h1 *ngIf="editBus" class="font-semibold text-2xl leading-9"> {{ 'Edit Bus' | translate }}</h1>
             <button (click)="closeModal()" type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
         </div>
 
         <div class="mt-6 mb-4 flex flex-wrap justify-between">
             <div class="flex flex-col w-[49%] mb-4">
-                <label class="mb-2 primaryTxt" for="name">Name</label>
-                <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Bus Name"
+                <label class="mb-2 primaryTxt" for="name"> {{ 'Name' | translate }}</label>
+                <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder=" {{ 'Enter Bus Name' | translate }}"
                 [(ngModel)]="bus.name" 
                 (ngModelChange)="onInputValueChange({ field: 'name', value: $event })"/>
                 <span *ngIf="validationErrors['name']" class="text-red-500 ml-3 font-normal">{{ validationErrors['name'] }}</span>
             </div>
             <div class="flex flex-col w-[49%] mb-4">
-                <label class="mb-2 primaryTxt" for="type">Type</label>
+                <label class="mb-2 primaryTxt" for="type"> {{ 'Type' | translate }}</label>
                 <select [(ngModel)]="bus.busTypeID"
                 class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="type">
                     <option *ngIf="!bus.busTypeID" [value]="null" disabled selected hidden>{{ bus.busTypeName || 'Select Type' }}</option>
                     <option *ngFor="let type of BusType" [value]="type.id">{{ type.name }}</option>
-                    <option *ngIf="BusType.length === 0" disabled selected>No Data Found</option>
+                    <option *ngIf="BusType.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
                 </select>
             </div>
             <div class="flex flex-col w-[49%] mb-4">
-                <label class="mb-2 primaryTxt" for="District">District</label>
+                <label class="mb-2 primaryTxt" for="District"> {{ 'District' | translate }}</label>
                 <select [(ngModel)]="bus.busDistrictID"
                 class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="District" >
                     <option *ngIf="!bus.busDistrictID" [value]="null" disabled selected hidden>{{ bus.busDistrictName || 'Select District' }}</option>
                     <option *ngFor="let District of BusDistrict" [value]="District.id">{{ District.name }}</option>
-                    <option *ngIf="BusDistrict.length === 0" disabled selected>No Data Found</option>
+                    <option *ngIf="BusDistrict.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
                 </select>
             </div>
             <div class="flex flex-col w-[49%] mb-4">
-                <label class="mb-2 primaryTxt" for="status">Status</label>
+                <label class="mb-2 primaryTxt" for="status"> {{ 'Status' | translate }}</label>
                 <select [(ngModel)]="bus.busStatusID"
                 class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="status" >
                 <option *ngIf="!bus.busStatusID" [value]="null" disabled selected hidden>{{ bus.busStatusName || 'Select Status' }}</option>
                     <option *ngFor="let status of BusStatus" [value]="status.id">{{ status.name }}</option>
-                    <option *ngIf="BusStatus.length === 0" disabled selected>No Data Found</option>
+                    <option *ngIf="BusStatus.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
                 </select>
             </div>
             <div class="flex flex-col w-[49%] mb-4">
-                <label class="mb-2 primaryTxt" for="capacity">Capacity</label>
-                <input id="capacity" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Bus Capacity" 
+                <label class="mb-2 primaryTxt" for="capacity"> {{ 'Capacity' | translate }}</label>
+                <input id="capacity" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder=" {{ 'Enter Bus Capacity' | translate }}" 
                 [(ngModel)]="bus.capacity"
                 (ngModelChange)="onInputValueChange({ field: 'capacity', value: $event })"
                 (input)="validateNumber($event, 'capacity')"/>
                 <span *ngIf="validationErrors['capacity']" class="text-red-500 ml-3 font-normal">{{ validationErrors['capacity'] }}</span>
             </div>
             <div class="flex flex-col w-[49%] mb-4">
-                <label class="mb-2 primaryTxt" for="driver">Driver</label>
+                <label class="mb-2 primaryTxt" for="driver"> {{ 'Driver' | translate }}</label>
                 <select [(ngModel)]="bus.driverID"
                 class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="driver" >
                    <option *ngIf="!bus.driverID" [value]="null" disabled selected hidden>{{ bus.driverName || 'Select Driver' }}</option>
                     <option *ngFor="let driver of BusDriver" [value]="driver.id">{{ driver.en_name }}</option>
-                    <option *ngIf="BusDriver.length === 0" disabled selected>No Data Found</option>
+                    <option *ngIf="BusDriver.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
                 </select>
             </div>
             <div class="flex flex-col w-[49%] mb-4">
-                <label class="mb-2 primaryTxt" for="assistant">Driver Assistant</label>
+                <label class="mb-2 primaryTxt" for="assistant"> {{ 'Driver Assistant' | translate }}</label>
                 <select [(ngModel)]="bus.driverAssistantID"
                 class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="assistant" >
                     <option [value]="null" disabled selected hidden>{{ bus.driverAssistantName || 'Select driver Assistant Name' }}</option>
                     <option *ngFor="let assistant of BusDriverAssistant" [value]="assistant.id">{{assistant.en_name}}</option>
-                    <option *ngIf="BusDriverAssistant.length === 0" disabled selected>No Data Found</option>
+                    <option *ngIf="BusDriverAssistant.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
                 </select>
             </div>
             <div class="flex flex-col w-[49%] mb-4">
-                <label class="mb-2 primaryTxt" for="company">Company</label>
+                <label class="mb-2 primaryTxt" for="company"> {{ 'Company' | translate }}</label>
                 <select [(ngModel)]="bus.busCompanyID"
                   class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="company" >
                   <option [value]="null" disabled selected hidden>{{ bus.busCompanyName || 'Select Company' }}</option>
                   <option *ngFor="let company of BusCompany" [value]="company.id">{{company.name}}</option>
-                  <option *ngIf="BusCompany.length === 0" disabled selected>No Data Found</option>
+                  <option *ngIf="BusCompany.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
                 </select>
             </div>
             
@@ -311,25 +311,25 @@
                 <input type="checkbox" id="Districted" class="w-5 h-5"
                 (change)="onIsDistrictedChange($event)"
                 [checked]="bus.isCapacityRestricted">
-                <label for="Districted" class="text-sm">Restricted Capacity</label>
+                <label for="Districted" class="text-sm"> {{ 'Restricted Capacity' | translate }}</label>
             </div>
         </div>
         <div class="flex justify-between mt-4">
             <div class="flex flex-col w-[32%] mb-4">
-                <label class="mb-2 primaryTxt" for="name">Morning Price</label>
-                <input id="morningPrice" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Price"
+                <label class="mb-2 primaryTxt" for="name"> {{ 'Morning Price' | translate }}</label>
+                <input id="morningPrice" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder=" {{ 'Enter Price' | translate }}"
                 [(ngModel)]="bus.morningPrice"  (ngModelChange)="onInputValueChange({ field: 'morningPrice', value: $event })" (input)="validateNumber($event, 'morningPrice')"/>
                 <span *ngIf="validationErrors['morningPrice']" class="text-red-500 ml-3 font-normal">{{ validationErrors['morningPrice'] }}</span>
             </div>
             <div class="flex flex-col w-[32%] mb-4">
-                <label class="mb-2 primaryTxt" for="name">Back Price</label>
-                <input id="backPrice" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Price"
+                <label class="mb-2 primaryTxt" for="name"> {{ 'Back Price' | translate }}</label>
+                <input id="backPrice" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder=" {{ 'Enter Price' | translate }}"
                 [(ngModel)]="bus.backPrice" (ngModelChange)="onInputValueChange({ field: 'backPrice', value: $event })" (input)="validateNumber($event, 'backPrice')"/>
                 <span *ngIf="validationErrors['backPrice']" class="text-red-500 ml-3 font-normal">{{ validationErrors['backPrice'] }}</span>
             </div>
             <div class="flex flex-col w-[32%] mb-4">
-                <label class="mb-2 primaryTxt" for="name">Two Ways Price</label>
-                <input id="twoWaysPrice" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="Enter Price"
+                <label class="mb-2 primaryTxt" for="name"> {{ 'Two Ways Price' | translate }}</label>
+                <input id="twoWaysPrice" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder=" {{ 'Enter Price' | translate }}"
                 [(ngModel)]="bus.twoWaysPrice"  (ngModelChange)="onInputValueChange({ field: 'twoWaysPrice', value: $event })" (input)="validateNumber($event, 'twoWaysPrice')"/>
                 <span *ngIf="validationErrors['twoWaysPrice']" class="text-red-500 ml-3 font-normal">{{ validationErrors['twoWaysPrice'] }}</span>
             </div>
@@ -340,7 +340,7 @@
                 [disabled]="isLoading" 
                 class="secondaryBg text-white font-medium px-4 py-2 rounded-lg" 
                 (click)="SaveBus()">
-                <span *ngIf="!isLoading">Save</span>
+                <span *ngIf="!isLoading">{{ 'Save' | translate }}</span>
                 <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
               </button>
         </div>

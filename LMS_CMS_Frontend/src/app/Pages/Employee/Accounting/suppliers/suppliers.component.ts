@@ -19,11 +19,14 @@ import { SupplierService } from '../../../../Services/Employee/Accounting/suppli
 import { AccountingTreeChartService } from '../../../../Services/Employee/Accounting/accounting-tree-chart.service';
 import { Country } from '../../../../Models/Accounting/country';
 import { CountryService } from '../../../../Services/Employee/Accounting/country.service';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-suppliers',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './suppliers.component.html',
   styleUrl: './suppliers.component.css',
 })
@@ -50,7 +53,8 @@ export class SuppliersComponent {
 
   DomainName: string = '';
   UserID: number = 0;
-
+ isRtl: boolean = false;
+  subscription!: Subscription;
   isModalVisible: boolean = false;
   mode: string = '';
 
@@ -76,7 +80,8 @@ export class SuppliersComponent {
     public ApiServ: ApiService,
     public SupplierServ: SupplierService,
     public accountServ: AccountingTreeChartService,
-    public countryServ: CountryService
+    public countryServ: CountryService,
+     private languageService: LanguageService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -99,6 +104,10 @@ export class SuppliersComponent {
     this.GetAllData();
     this.GetAllAccount();
     this.GetAllCountries();
+          this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetAllData() {
@@ -258,6 +267,11 @@ export class SuppliersComponent {
     if (this.Supplier.email && !emailPattern.test(this.Supplier.email)) {
       isValid = false;
       this.validationErrors['email']='Email is not valid.'
+    }
+    
+    if (this.Supplier.name.length > 100) {
+      isValid = false;
+      this.validationErrors['name']='Name cannot be longer than 100 characters.'
     }
 
     return isValid;

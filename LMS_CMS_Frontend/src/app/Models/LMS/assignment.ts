@@ -8,7 +8,7 @@ export class Assignment {
         public arabicName: string = '',
         public mark: number|null = null,
         public openDate: string = '',
-        public dueDate: string = '',
+        public dueDate: string|null = null,
         public cutOfDate: string = '', 
         public isSpecificStudents: boolean = false,
         public isVisibleToStudent: boolean = false,
@@ -27,6 +27,7 @@ export class Assignment {
         public assignmentQuestions : AssignmentQuestion[]=[] ,
         public assignmentStudents : AssignmentStudent[]=[] ,
         public assignmentStudentIsSpecifics : AssignmentStudent[]=[] ,
-        public insertedByUserId: number = 0
+        public insertedByUserId: number = 0,
+        public insertedByUserName: string = ''
     ) {}
 }

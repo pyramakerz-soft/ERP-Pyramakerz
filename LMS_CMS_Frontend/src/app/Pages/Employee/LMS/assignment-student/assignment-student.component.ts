@@ -176,7 +176,7 @@ export class AssignmentStudentComponent {
   }
 
   moveToAssignment() {
-    this.router.navigateByUrl(`Employee/Assignment/${this.AssignmentId}`)
+    this.router.navigateByUrl(`Employee/Assignment View/${this.AssignmentId}`)
   }
 
   classChanged() {
@@ -185,7 +185,7 @@ export class AssignmentStudentComponent {
   }
 
   moveToDetails(id: number) {
-    this.router.navigateByUrl(`Employee/Assignment Details/${id}`)
+    this.router.navigateByUrl(`Employee/Assignment Student Answer/${id}`)
   }
 
   openFile(link: string | null) {
@@ -196,22 +196,33 @@ export class AssignmentStudentComponent {
     }
   }
 
-  saveDegree(row: any): void {
-    if (row.degree <= row.assignmentDegree) {
+  saveDegree(row: AssignmentStudent): void {
+    if (row.degree && row.degree <= row.assignmentDegree) {
       this.editDegree = false
-      this.assignmentStudentServ.Edit(row, this.DomainName).subscribe((d) => {
-        console.log(d)
-        this.GetAllData(this.CurrentPage, this.PageSize)
-      }, error => {
-        Swal.fire({
-          icon: 'error',
-          title: 'Oops...',
-          text: 'Try Again Later!',
-          confirmButtonText: 'Okay',
-          customClass: { confirmButton: 'secondaryBg' },
-        });
-        this.GetAllData(this.CurrentPage, this.PageSize)
-      })
+      Swal.fire({
+        title: 'Apply Late Submission Penalty?',
+        text: 'The student submitted after the due date. Do you want to apply the late submission penalty?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#089B41',
+        cancelButtonColor: '#17253E',
+        confirmButtonText: 'Apply Penalty',
+        cancelButtonText: 'Forgive Delay',
+      }).then((result) => {
+        row.evaluationConsideringTheDelay = result.isConfirmed;
+        this.assignmentStudentServ.Edit(row, this.DomainName).subscribe((d) => {
+          this.GetAllData(this.CurrentPage, this.PageSize)
+        }, error => {
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Try Again Later!',
+            confirmButtonText: 'Okay',
+            customClass: { confirmButton: 'secondaryBg' },
+          });
+          this.GetAllData(this.CurrentPage, this.PageSize)
+        })
+      });
     }
   }
 }

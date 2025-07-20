@@ -27,7 +27,7 @@
     <label class="mb-2" for="store">Store</label>
     <select *ngIf="!IsPrint" class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Store"
       (change)="StoreChanged()" (ngModelChange)="onInputValueChange({ field: 'storeID', value: $event })"
-      [(ngModel)]="Data.storeID">
+      [disabled]="mode === 'Edit'" [(ngModel)]="Data.storeID">
       <option [value]="0" disabled selected hidden>Choose Store</option>
       <option *ngFor="let s of Stores" [value]="s.id">{{ s.name }}</option>
       <option *ngIf="Stores.length === 0" disabled selected>
@@ -96,7 +96,8 @@
     <label class="mb-2" for="storeToTransform">Store</label>
     <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="storeToTransform"
       (ngModelChange)="
-        onInputValueChange({ field: 'storeToTransformId', value: $event })" [(ngModel)]="Data.storeToTransformId" [disabled]="Data.storeID == 0">
+        onInputValueChange({ field: 'storeToTransformId', value: $event })" [(ngModel)]="Data.storeToTransformId"
+      [disabled]="Data.storeID == 0">
       <option [value]="0" disabled selected hidden>Choose Store</option>
       <option *ngFor="let stu of StoresForTitle" [value]="stu.id">
         {{ stu.name }}
@@ -111,7 +112,7 @@
 
   <div *ngIf="FlagId == 11 || FlagId == 12" class="flex flex-col w-[24%] mb-4 relative">
     <app-search-dropdown [(selectedValue)]="Data.studentID" [placeholder]="'Search Student'"
-      [selectedName]="Data.studentName" [displayProperty]="'user_Name'" [validationKey]="'studentID'"
+      [selectedName]="Data.studentName" [displayProperty]="'en_name'" [validationKey]="'studentID'"
       [validationErrors]="validationErrors" [serviceFunction]="SearchStudents">
     </app-search-dropdown>
   </div>
@@ -289,7 +290,7 @@
   </div>
 </div>
 
-<div class="my-5 flex justify-end space-x-4">
+<div class="my-5 flex justify-end space-x-4" *ngIf="mode == 'Edit'">
   <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="DownloadAsExcel()">
   <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()">
   <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()">
@@ -348,6 +349,7 @@
     </div>
   </div>
 </div>
+
 
 <div class="print-area" *ngIf="FlagId != 12">
   <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
@@ -413,7 +415,8 @@
             {{ row.shopItemName }}
           </td>
           <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-            <input [(ngModel)]="row.quantity" (ngModelChange)="CalculateTotalPrice(row)" type="number"
+            <input [(ngModel)]="row.quantity" (ngModelChange)="CalculateTotalPrice(row)"
+              (input)="validateNumber($event, 'quantity')" type="text"
               class="w-full border border-gray-300 px-2 py-1 rounded-md" />
           </td>
           <td *ngIf="!IsPriceEditable && mode === 'Create'"
@@ -422,8 +425,8 @@
           </td>
           <td *ngIf="IsPriceEditable || mode === 'Edit'"
             class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-            <input [(ngModel)]="row.price" (ngModelChange)="EditPrice(row)" type="number"
-              class="w-full border border-gray-300 px-2 py-1 rounded-md" />
+            <input [(ngModel)]="row.price" (ngModelChange)="EditPrice(row)" (input)="validateNumber($event, 'price')"
+              type="text" class="w-full border border-gray-300 px-2 py-1 rounded-md" />
           </td>
           <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
             {{ row.totalPrice }}
@@ -501,7 +504,8 @@
             {{ row.shopItemName }}
           </td>
           <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-            <input [(ngModel)]="row.quantity" (ngModelChange)="CalculateTotalPrice(row)" type="number"
+            <input [(ngModel)]="row.quantity" (ngModelChange)="CalculateTotalPrice(row)"
+              (input)="validateNumber($event, 'quantity')" type="text"
               class="w-full border border-gray-300 px-2 py-1 rounded-md" />
           </td>
           <td *ngIf="!IsPriceEditable && mode === 'Create'"
@@ -510,8 +514,8 @@
           </td>
           <td *ngIf="IsPriceEditable || mode === 'Edit'"
             class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-            <input [(ngModel)]="row.price" (ngModelChange)="EditPrice(row)" type="number"
-              class="w-full border border-gray-300 px-2 py-1 rounded-md" />
+            <input [(ngModel)]="row.price" (ngModelChange)="EditPrice(row)" (input)="validateNumber($event, 'price')"
+              type="text" class="w-full border border-gray-300 px-2 py-1 rounded-md" />
           </td>
           <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
             {{ row.totalPrice }}
@@ -529,8 +533,8 @@
         </tr>
         <tr *ngIf="FlagId == 12">
           <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-            <input type="text" [(ngModel)]="SaleId" (dblclick)="getSalesItems()" (input)="validateNumber($event, 'salesId')"
-              class="w-full border border-gray-300 px-2 py-1 rounded-md" />
+            <input type="text" [(ngModel)]="SaleId" (dblclick)="getSalesItems()"
+              (input)="validateNumber($event, 'salesId')" class="w-full border border-gray-300 px-2 py-1 rounded-md" />
           </td>
           <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
             _
@@ -562,7 +566,7 @@
   </div>
 </div>
 
-<div class="absolute -top-[9999px] -left-[9999px]">  <!-- for print  -->
+<div class="absolute -top-[9999px] -left-[9999px]"> <!-- for print  -->
   <div id="Data" class="hidden">
     <app-pdf-print *ngIf="showPDF" [fileName]="'Inventory'" [infoRows]="[
       {
@@ -582,7 +586,7 @@
   </div>
 </div>
 
-<!-- Modal -->    <!-- in sales return only   -->
+<!-- Modal --> <!-- in sales return only   -->
 <div id="default-modal" tabindex="-1" aria-hidden="true" [ngClass]="{ hidden: !isModalVisible }"
   class="fixed top-0 left-0 right-0 z-50 flex justify-center items-center w-full h-full bg-black/50">
   <div class="relative bg-white w-[669px] h-auto rounded-2xl p-12 gap-4 shadow-md">
@@ -620,7 +624,7 @@
             <!-- No Data Row -->
             <tr
               *ngIf=" Data.inventoryDetails?.length === 0 && !IsOpenToAdd && mode === 'Create' && SelectedSopItem == null && FlagId != 12">
-              <td colspan="11"
+              <td colspan="6"
                 class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
                 No Data Found
               </td>

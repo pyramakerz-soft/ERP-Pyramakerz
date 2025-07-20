@@ -135,7 +135,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             int totalRecords = await Unit_Of_Work.assignment_Repository
-               .CountAsync(f => f.IsDeleted != true);
+               .CountAsync(f => f.IsDeleted != true && f.SubjectID == subID);
 
             List<Assignment> Assignment = await Unit_Of_Work.assignment_Repository
                 .Select_All_With_IncludesById_Pagination<Assignment>(
@@ -245,7 +245,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("GetByStudentID/{studID}/{subjID}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
+            allowedTypes: new[] { "octa", "employee" ,"student"},
             pages: new[] { "Assignment" }
         )]
         public async Task<IActionResult> GetByStudentID(long studID, long subjID)
@@ -314,6 +314,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             List<Assignment> assignments = await Unit_Of_Work.assignment_Repository.Select_All_With_IncludesById<Assignment>(
                 d => d.IsDeleted != true && d.SubjectID == subjID && d.IsSpecificStudents != true,
                 query => query.Include(d => d.AssignmentType),
+                query => query.Include(d => d.InsertedByEmployee),
                 query => query.Include(d => d.SubjectWeightType).ThenInclude(d => d.WeightType),
                 query => query.Include(d => d.Subject)
                 );
@@ -346,6 +347,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             List<AssignmentStudent> assignmentStudentsSolved = await Unit_Of_Work.assignmentStudent_Repository.Select_All_With_IncludesById<AssignmentStudent>(
                 d => d.IsDeleted != true && d.StudentClassroomID == studentClassroom.ID && d.Assignment.IsDeleted != true && d.Assignment.SubjectID == subjID,
                 query => query.Include(d => d.Assignment).ThenInclude(d => d.AssignmentType),
+                query => query.Include(d => d.Assignment).ThenInclude(d => d.InsertedByEmployee),
                 query => query.Include(d => d.Assignment).ThenInclude(d => d.SubjectWeightType).ThenInclude(d => d.WeightType),
                 query => query.Include(d => d.Assignment).ThenInclude(d => d.Subject)
                 );

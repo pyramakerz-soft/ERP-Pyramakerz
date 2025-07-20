@@ -1,11 +1,11 @@
 <div class="">
   <div class="flex justify-between">
-    <h1 class="font-semibold text-2xl leading-9">Banks</h1>
+    <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ 'البنوك' | translate }}</h1>
     <div class="flex justify-between items-center">
       <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
       <button (click)="Create()"
         class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
-        Create Bank
+         {{ 'Create Bank' | translate }}
       </button>
     </div>
   </div>
@@ -16,32 +16,32 @@
         <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
           <tr>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-              ID
+               {{ 'ID' | translate }}
             </th>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-              Name
+             {{ 'Name' | translate }}
             </th>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-              Bank Name
+                 {{ 'Bank Name' | translate }}
             </th>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-              IBAN
+                 {{ 'IBAN' | translate }}
             </th>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-              Bank Account Number
+                 {{ 'Bank Account Number' | translate }}
             </th>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-              Account Opening Date
+                 {{ 'Account Opening Date' | translate }}
             </th>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-              Account Closing Date
+                 {{ 'Account Closing Date' | translate }}
             </th>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-              Account Number
+             {{ 'Account Number' | translate }}
             </th>
 
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-              Actions
+                {{ 'Actions' | translate }}
             </th>
           </tr>
         </thead>
@@ -50,7 +50,7 @@
           <tr *ngIf="TableData.length === 0">
             <td colspan="9"
               class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-              No Data Found
+               {{ 'No Data Found' | translate }}
             </td>
           </tr>
 
@@ -108,38 +108,41 @@
       <i class="fa-solid fa-xmark text-2xl"></i>
     </button>
 
-    <h1 *ngIf="mode=='Create'" class="font-semibold text-2xl leading-9">Create bank</h1>
-    <h1 *ngIf="mode=='Edit'" class="font-semibold text-2xl leading-9">Edit bank</h1>
+    <h1 *ngIf="mode=='Create'" class="font-semibold text-2xl leading-9">  {{ 'Create Bank' | translate }}</h1>
+    <h1 *ngIf="mode=='Edit'" class="font-semibold text-2xl leading-9">  {{ 'Edit bank' | translate }}</h1>
 
     <div
       class="mt-4 bg-[#F7F7F7] w-[573px] max-h-[500px] h-auto rounded-[24px] p-[16px_24px] gap-[20px] overflow-y-auto">
-      <div class="flex flex-wrap justify-between mt-5">
+      <div class="flex flex-wrap justify-between">
 
         <div class="flex flex-col w-full">
-          <h6 class="font-medium text-base leading-6 mb-1 mt-3">Name</h6>
+          <h6 class="font-medium text-base leading-6 mb-1 mt-3">{{ 'Name' | translate }}</h6>
           <input type="text" class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"
-            [(ngModel)]="bank.name" placeholder="Enter Title "
+            [(ngModel)]="bank.name" 
+            placeholder="{{ 'Enter Title' | translate }}"
+
             (ngModelChange)="onInputValueChange({ field: 'name', value: $event })" />
           <span *ngIf="validationErrors['name']" class="text-red-500 font-normal">{{ validationErrors['name'] }}</span>
         </div>
 
         <div class="flex flex-col w-full">
-          <h6 class="font-medium text-base leading-6 mb-1 mt-3">Account Number</h6>
+          <h6 class="font-medium text-base leading-6 mb-1 mt-3"> {{ 'Account Number' | translate }}</h6>
           <select class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"
             (ngModelChange)="onInputValueChange({ field: 'accountNumberID', value: $event })"
             [(ngModel)]="bank.accountNumberID">
-            <option [value]="0" disabled selected hidden>Choose Account Number</option>
+            <option [value]="0" disabled selected hidden> {{ 'Choose Account Number' | translate }}</option>
             <option *ngFor="let Acc of AccountNumbers" [value]="Acc.id">{{ Acc.name }}</option>
-            <option *ngIf="AccountNumbers.length === 0" disabled>No Data Found</option>
+            <option *ngIf="AccountNumbers.length === 0" disabled>{{ 'No Data Found' | translate }}</option>
           </select>
           <span *ngIf="validationErrors['accountNumberID']" class="text-red-500 font-normal">{{
             validationErrors['accountNumberID'] }}</span>
         </div>
 
         <div class="flex flex-col w-full">
-          <h6 class="font-medium text-base leading-6 mb-1 mt-3">Bank Name</h6>
+          <h6 class="font-medium text-base leading-6 mb-1 mt-3"> {{ 'Bank Name' | translate }}</h6>
           <input type="text" class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"
-            [(ngModel)]="bank.bankName" placeholder="Enter bankName"
+            [(ngModel)]="bank.bankName"
+                 placeholder="{{ 'Enter bankName' | translate }}"
             (ngModelChange)="onInputValueChange({ field: 'bankName', value: $event })" />
           <span *ngIf="validationErrors['bankName']" class="text-red-500 font-normal">
             {{ validationErrors['bankName'] }}
@@ -147,36 +150,42 @@
         </div>
 
         <div class="flex flex-col w-[48%]">
-          <h6 class="font-medium text-base leading-6 mb-1 mt-3">IBAN</h6>
+          <h6 class="font-medium text-base leading-6 mb-1 mt-3"> {{ 'IBAN' | translate }}</h6>
           <input type="text" class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"
-            [(ngModel)]="bank.iban" placeholder="Enter iban"
+            [(ngModel)]="bank.iban"
+            placeholder="{{ 'Enter iban' | translate }}"
             (ngModelChange)="onInputValueChange({ field: 'iban', value: $event })" />
           <span *ngIf="validationErrors['iban']" class="text-red-500 font-normal">{{ validationErrors['iban'] }}</span>
         </div>
 
         <div class="flex flex-col w-[48%]">
-          <h6 class="font-medium text-base leading-6 mb-1 mt-3">Bank Account Number</h6>
+          <h6 class="font-medium text-base leading-6 mb-1 mt-3"> {{ 'Bank Account Number' | translate }}</h6>
           <input (input)="validateNumber($event, 'bankAccountNumber')"
             class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"
-            [(ngModel)]="bank.bankAccountName" placeholder="Enter Bank Account Number"
+            [(ngModel)]="bank.bankAccountName"
+              placeholder="{{ 'Enter Bank Account Number' | translate }}"
+
             (ngModelChange)="onInputValueChange({ field: 'bankAccountNumber', value: $event })" />
           <span *ngIf="validationErrors['bankAccountNumber']" class="text-red-500 font-normal">{{
             validationErrors['bankAccountNumber'] }}</span>
         </div>
 
         <div class="flex flex-col w-[48%]">
-          <h6 class="font-medium text-base leading-6 mb-1 mt-3">Account Opening Date</h6>
+          <h6 class="font-medium text-base leading-6 mb-1 mt-3"> {{ 'Account Opening Date' | translate }}</h6>
           <input type="date" class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"
-            [(ngModel)]="bank.accountOpeningDate" placeholder="Enter accountOpeningDate"
+            [(ngModel)]="bank.accountOpeningDate" 
+              placeholder="{{ 'Enter accountOpeningDate' | translate }}"
             (ngModelChange)="onInputValueChange({ field: 'accountOpeningDate', value: $event })" />
           <span *ngIf="validationErrors['accountOpeningDate']" class="text-red-500 font-normal">{{
             validationErrors['accountOpeningDate'] }}</span>
         </div>
 
         <div class="flex flex-col w-[48%]">
-          <h6 class="font-medium text-base leading-6 mb-1 mt-3">Account Closing Date</h6>
+          <h6 class="font-medium text-base leading-6 mb-1 mt-3"> {{ 'Account Closing Date' | translate }}</h6>
           <input type="date" class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"
-            [(ngModel)]="bank.accountClosingDate" placeholder="Enter accountClosingDate"
+            [(ngModel)]="bank.accountClosingDate" 
+              placeholder="{{ 'Enter accountClosingDate' | translate }}"
+
             (ngModelChange)="onInputValueChange({ field: 'accountClosingDate', value: $event })" />
           <span *ngIf="validationErrors['accountClosingDate']" class="text-red-500 font-normal">{{
             validationErrors['accountClosingDate'] }}</span>
@@ -186,7 +195,7 @@
         <div class="flex justify-end mt-4">
           <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
             (click)="CreateOREdit()">
-            <span *ngIf="!isLoading">Save</span>
+            <span *ngIf="!isLoading">{{ 'Save' | translate }}</span>
             <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
           </button>
         </div>

@@ -4,7 +4,9 @@ using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains;
 using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_DAL.Models.Octa;
+using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -89,6 +91,60 @@ namespace LMS_CMS_PL.Controllers.Domains
             return BadRequest("Unexpected user type.");
         }
 
+        [Authorize]
+        [HttpPut("EditPass")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee", "parent", "student" }
+        )]
+        public async Task<IActionResult> EditpasswordAsync(EditPasswordDTO model)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;  
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            if (model.Password == "")
+            {
+                return BadRequest("password cannot be empty");
+            }
+
+            dynamic user = userTypeClaim switch
+            {
+                "employee" => Unit_Of_Work.employee_Repository.First_Or_Default(emp => emp.ID == model.Id && emp.IsDeleted != true),
+                "student" => Unit_Of_Work.student_Repository.First_Or_Default(stu => stu.ID == model.Id && stu.IsDeleted != true),
+                "parent" => Unit_Of_Work.parent_Repository.First_Or_Default(par => par.ID == model.Id && par.IsDeleted != true),
+                _ => null,
+            };
+             
+            bool isMatch = BCrypt.Net.BCrypt.Verify(model.OldPassword, user.Password);
+            if (isMatch == false)
+            {
+                return BadRequest("Old Password isn't right");
+            }
+
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            if (userTypeClaim == "octa")
+            {
+                user.UpdatedByOctaId = userId;
+                user.UpdatedByUserId = null;
+            }
+            else if (userTypeClaim == "employee")
+            {
+                user.UpdatedByUserId = userId;
+                user.UpdatedByOctaId = null;
+            }
+            user.Password = BCrypt.Net.BCrypt.HashPassword(model.Password);
+            user.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            Unit_Of_Work.employee_Repository.Update(user);
+            await Unit_Of_Work.SaveChangesAsync();
+            return Ok();
+        }
     }
         
  }

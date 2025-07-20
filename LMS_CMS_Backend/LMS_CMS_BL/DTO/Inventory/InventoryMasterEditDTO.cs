@@ -11,7 +11,7 @@ namespace LMS_CMS_BL.DTO.Inventory
     {
         public long ID { get; set; }
         public string? InvoiceNumber { get; set; }
-        public string Date { get; set; }
+        public DateTime Date { get; set; }
         public bool IsCash { get; set; }
         public bool IsVisa { get; set; }
         public int? CashAmount { get; set; }
@@ -32,7 +32,7 @@ namespace LMS_CMS_BL.DTO.Inventory
         public long? SchoolId { get; set; }
         public long? SchoolPCId { get; set; }
         public int? ETAPOSID { get; set; }
-        public char? InvoiceType { get; set; } = 'C';
+        public char? InvoiceType { get; set; }
         public DateTime? EtaInsertedDate { get; set; }
 
     }

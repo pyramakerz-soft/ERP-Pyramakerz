@@ -14,11 +14,14 @@ import { BusTypeService } from '../../../../Services/Employee/Bus/bus-type.servi
 import { DomainService } from '../../../../Services/Employee/domain.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-installment-deduction-master',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './installment-deduction-master.component.html',
   styleUrl: './installment-deduction-master.component.css'
 })
@@ -37,7 +40,8 @@ export class InstallmentDeductionMasterComponent {
 
   isModalVisible: boolean = false;
   mode: string = '';
-
+ isRtl: boolean = false;
+  subscription!: Subscription;
   path: string = '';
   key: string = 'id';
   value: any = '';
@@ -58,7 +62,8 @@ export class InstallmentDeductionMasterComponent {
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
-    public InstallmentDeductionServ:InstallmentDeductionMasterService 
+    public InstallmentDeductionServ:InstallmentDeductionMasterService ,
+     private languageService: LanguageService
   ) {}
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -79,6 +84,11 @@ export class InstallmentDeductionMasterComponent {
     });
 
     this.GetAllData(this.CurrentPage, this.PageSize)
+
+      this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
   
   Create() {
@@ -127,6 +137,7 @@ export class InstallmentDeductionMasterComponent {
   }
 
   async onSearchEvent(event: { key: string; value: any }) {
+    this.PageSize = this.TotalRecords
     this.key = event.key;
     this.value = event.value;
     try {

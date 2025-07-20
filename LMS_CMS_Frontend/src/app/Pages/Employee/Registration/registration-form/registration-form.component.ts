@@ -180,6 +180,7 @@ export class RegistrationFormComponent {
       this.DomainName
     ).subscribe((data) => {
       this.registrationForm.registerationFormSubmittions = data;
+      console.log(this.registrationForm.registerationFormSubmittions)
       this.selectedSchool =
         this.registrationForm.registerationFormSubmittions.find(
           (s) => s.categoryFieldID == 7
@@ -216,9 +217,13 @@ export class RegistrationFormComponent {
     const entry = this.registrationForm.registerationFormSubmittions.find(
       (e) => e.categoryFieldID === fieldId
     );
+    if(fieldId==5){
+      console.log(fieldId ,)
+    }
     if (fieldId == 6 || fieldId == 14) {
       return entry?.textAnswer ?? null;
     }
+    console.log('Nationalities:', entry);
     return entry?.selectedFieldOptionID ?? null;
   }
 
@@ -721,5 +726,9 @@ export class RegistrationFormComponent {
     //////
 
     this.isSuccess = true;
+  }
+
+  moveToStudents(){
+      this.router.navigateByUrl(`Employee/Student`)
   }
 }

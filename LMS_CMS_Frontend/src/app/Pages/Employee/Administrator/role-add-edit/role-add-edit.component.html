@@ -1,12 +1,12 @@
 <div *ngIf="loading">
-    Loading, please wait...
+     {{ 'Loading, please wait...' | translate }}
 </div>
 
 <div *ngIf="!loading">
     <div class="flex justify-between mb-2">
         <div class="flex justify-between items-center space-x-5">
             <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToRoles()"></i> 
-            <h1 class="font-semibold text-2xl leading-9">Role</h1>
+            <h1 class="primaryTxt font-semibold text-2xl leading-9">  {{ 'Role' | translate }}</h1>
         </div>
         <div class="flex justify-between items-center">
             <button
@@ -14,16 +14,16 @@
             class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2"
             (click)="Save()"
           >
-            <span *ngIf="!isLoading">Save</span>
+            <span *ngIf="!isLoading">  {{ 'Save' | translate }}</span>
             <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
           </button>
         </div>
     </div>
 
-    <h6 class="font-medium text-base leading-6 mb-4">Role Name</h6>
+    <h6 class="font-medium text-base leading-6 mb-4">  {{ 'Role Name' | translate }}</h6>
     <div class="flex flex-col mb-4">
         <input type="text" class="rounded-lg border border-solid border-gray-300 block w-full p-2.5"  (ngModelChange)="onInputValueChange({ field: 'name', value: $event })"
-            [(ngModel)]="RoleName" placeholder="Enter new role" />
+            [(ngModel)]="RoleName" placeholder="{{ 'Enter new role' | translate }}" />
             <span *ngIf="validationErrors['name']" class="text-red-500 ml-3 font-normal">{{ validationErrors['name'] }}</span>
     </div>
 
@@ -65,25 +65,25 @@
                     <input type="checkbox" [checked]="getPermissionState(parentId, page.id, 'allow_Edit')"
                         (change)="setPermissionState(parentId, page.id, 'allow_Edit')"
                         class="h-5 w-5 mr-2 ml-2 border-2 border-[#089B41] focus:ring-0 checked:border-[#089B41] checked:bg-[#089B41] text-[#089B41]" />
-                    <label class="text-gray-700">Allow Edit</label>
+                    <label class="text-gray-700"> {{ 'Allow Edit' | translate }}</label>
                 </div>
                 <div class="flex items-center" [style.marginLeft.px]="level + 20">
                     <input type="checkbox" [checked]="getPermissionState(parentId, page.id, 'allow_Delete')"
                         (change)="setPermissionState(parentId, page.id, 'allow_Delete')"
                         class="h-5 w-5 mr-2 ml-2 border-2 border-[#089B41] focus:ring-0 checked:border-[#089B41] checked:bg-[#089B41] text-[#089B41]" />
-                    <label class="text-gray-700">Allow Delete</label>
+                    <label class="text-gray-700">  {{ 'Allow Delete' | translate }}</label>
                 </div>
                 <div class="flex items-center" [style.marginLeft.px]="level + 20">
                     <input type="checkbox" [checked]="getPermissionState(parentId, page.id, 'allow_Edit_For_Others')"
                         (change)="setPermissionState(parentId, page.id, 'allow_Edit_For_Others')"
                         class="h-5 w-5 mr-2 ml-2 border-2 border-[#089B41] focus:ring-0 checked:border-[#089B41] checked:bg-[#089B41] text-[#089B41]" />
-                    <label class="text-gray-700">Allow Edit For Others</label>
+                    <label class="text-gray-700">  {{ 'Allow Edit For Others' | translate }}</label>
                 </div>
                 <div class="flex items-center" [style.marginLeft.px]="level + 20">
                     <input type="checkbox" [checked]="getPermissionState(parentId, page.id, 'allow_Delete_For_Others')"
                         (change)="setPermissionState(parentId, page.id, 'allow_Delete_For_Others')"
                         class="h-5 w-5 mr-2 ml-2 border-2 border-[#089B41] focus:ring-0 checked:border-[#089B41] checked:bg-[#089B41] text-[#089B41]" />
-                    <label class="text-gray-700">Allow Delete For Others</label>
+                    <label class="text-gray-700">  {{ 'Allow Delete For Others' | translate }}</label>
                 </div>
             </ng-container>
             <ng-container *ngIf="page.children && page.children.length">

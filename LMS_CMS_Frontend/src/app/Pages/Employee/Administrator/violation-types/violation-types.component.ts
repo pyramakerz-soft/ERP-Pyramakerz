@@ -17,11 +17,13 @@ import Swal from 'sweetalert2';
 import { ViolationEdit } from '../../../../Models/Administrator/violation-edit';
 import { firstValueFrom } from 'rxjs';
 import { SearchComponent } from '../../../../Component/search/search.component';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-violation-types',
   standalone: true,
-  imports: [CommonModule, FormsModule , SearchComponent],
+  imports: [CommonModule, FormsModule , SearchComponent, TranslateModule],
   templateUrl: './violation-types.component.html',
   styleUrl: './violation-types.component.css',
 })
@@ -42,7 +44,8 @@ export class ViolationTypesComponent {
   DomainName: string = '';
   UserID: number = 0;
   path: string = '';
-
+ isRtl: boolean = false;
+  subscription!: Subscription;
   Data: Violation[] = [];
   violation: ViolationAdd = new ViolationAdd();
 
@@ -75,7 +78,8 @@ export class ViolationTypesComponent {
     private menuService: MenuService,
     public EditDeleteServ: DeleteEditPermissionService,
     private router: Router,
-    public empTypeServ: EmployeeTypeService
+    public empTypeServ: EmployeeTypeService,
+      private languageService: LanguageService
   ) {}
 
   ngOnInit() {
@@ -96,6 +100,12 @@ export class ViolationTypesComponent {
         this.AllowEditForOthers = settingsPage.allow_Edit_For_Others
       }
     });
+
+
+      this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetViolation() {
@@ -187,15 +197,24 @@ export class ViolationTypesComponent {
              this.isLoading=false
             },
             error: (error) => {
-             this.isLoading=false
-              const errorMessage =
-                error?.error || 'An unexpected error occurred';
+             this.isLoading=false  
+             if(error.error.errors.ViolationName[0].includes("Name cannot be longer than 100 characters")){
+              Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Name cannot be longer than 100 characters',
+                confirmButtonText: 'Okay',
+                customClass: { confirmButton: 'secondaryBg' },
+              });
+            }else{ 
+              const errorMessage = error?.error || 'An unexpected error occurred';
               Swal.fire({
                 icon: 'error',
                 title: 'Error',
                 confirmButtonColor: '#089B41',
                 text: errorMessage,
               });
+            }
             },
           });
       } else if (this.mode == 'Edit') {
@@ -209,14 +228,23 @@ export class ViolationTypesComponent {
             },
             error: (error) => {
               this.isLoading=false
-              const errorMessage =
-                error?.error || 'An unexpected error occurred';
-              Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                confirmButtonColor: '#089B41',
-                text: errorMessage,
-              });
+              if(error.error.errors.ViolationName[0].includes("Name cannot be longer than 100 characters")){
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Oops...',
+                  text: 'Name cannot be longer than 100 characters',
+                  confirmButtonText: 'Okay',
+                  customClass: { confirmButton: 'secondaryBg' },
+                });
+              }else{ 
+                const errorMessage = error?.error || 'An unexpected error occurred';
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  confirmButtonColor: '#089B41',
+                  text: errorMessage,
+                });
+              }
             },
           });
       }

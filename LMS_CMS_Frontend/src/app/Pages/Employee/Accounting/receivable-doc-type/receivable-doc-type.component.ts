@@ -14,11 +14,14 @@ import { BusTypeService } from '../../../../Services/Employee/Bus/bus-type.servi
 import { DomainService } from '../../../../Services/Employee/domain.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-receivable-doc-type',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './receivable-doc-type.component.html',
   styleUrl: './receivable-doc-type.component.css'
 })
@@ -45,7 +48,8 @@ export class ReceivableDocTypeComponent {
 
   DomainName: string = '';
   UserID: number = 0;
-
+ isRtl: boolean = false;
+  subscription!: Subscription;
   isModalVisible: boolean = false;
   mode: string = '';
 
@@ -68,7 +72,8 @@ export class ReceivableDocTypeComponent {
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
-    public ReceivableDocTypeServ: ReceivableDocTypeService
+    public ReceivableDocTypeServ: ReceivableDocTypeService,
+    private languageService: LanguageService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -89,6 +94,10 @@ export class ReceivableDocTypeComponent {
     });
 
     this.GetAllData();
+          this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetAllData() {
@@ -214,6 +223,11 @@ export class ReceivableDocTypeComponent {
           }
         }
       }
+    }
+
+    if (this.data.name.length > 100) {
+      isValid = false;
+      this.validationErrors['name']='Name cannot be longer than 100 characters.'
     }
     return isValid;
   }

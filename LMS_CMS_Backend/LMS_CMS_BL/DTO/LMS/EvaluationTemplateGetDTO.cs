@@ -13,7 +13,7 @@ namespace LMS_CMS_BL.DTO.LMS
         public long ID { get; set; }
         public string EnglishTitle { get; set; }
         public string ArabicTitle { get; set; }
-        public int Weight { get; set; }
+        public decimal Weight { get; set; }
         public int AfterCount { get; set; }
         public ICollection<EvaluationTemplateGroupDTO> EvaluationTemplateGroups { get; set; } = new HashSet<EvaluationTemplateGroupDTO>();
         public long? InsertedByUserId { get; set; }

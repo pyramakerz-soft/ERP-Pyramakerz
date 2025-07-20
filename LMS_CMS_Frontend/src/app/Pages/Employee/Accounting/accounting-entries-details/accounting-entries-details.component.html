@@ -2,23 +2,23 @@
     <div class="no-print flex justify-between items-center">
         <div class="flex justify-between items-center space-x-5">
             <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToAccountingEntries()"></i>
-            <h1 *ngIf="isCreate" class="primaryTxt font-semibold text-2xl leading-9"> Create Accounting Entries</h1>
-            <h1 *ngIf="isEdit" class="primaryTxt font-semibold text-2xl leading-9"> Edit Accounting Entries</h1>
-            <h1 *ngIf="isView" class="primaryTxt font-semibold text-2xl leading-9"> Accounting Entries</h1>
+            <h1 *ngIf="isCreate" class="primaryTxt font-semibold text-2xl leading-9">  {{ 'Create Accounting Entries' | translate }}</h1>
+            <h1 *ngIf="isEdit" class="primaryTxt font-semibold text-2xl leading-9">  {{ 'Edit Accounting Entries' | translate }}</h1>
+            <h1 *ngIf="isView" class="primaryTxt font-semibold text-2xl leading-9">  {{ 'Accounting Entries' | translate }}</h1>
         </div>
     </div>
 
     <div class="mt-6">
         <div class="flex justify-between">
             <div class="flex flex-col w-[30%]">
-                <label class="mb-2 primaryTxt font-medium" for="accountingEntriesDocTypeID">Doc Type</label>
+                <label class="mb-2 primaryTxt font-medium" for="accountingEntriesDocTypeID"> {{ 'Doc Type' | translate }}</label>
                 <select *ngIf="!isView"
                     (ngModelChange)="onInputValueChange({ field: 'accountingEntriesDocTypeID', value: $event })"
                     [disabled]="isView" class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
                     id="accountingEntriesDocTypeID" [(ngModel)]="accountingEntries.accountingEntriesDocTypeID">
-                    <option [value]="0" disabled selected hidden>Choose Doc Type</option>
+                    <option [value]="0" disabled selected hidden> {{ 'Choose Doc Type' | translate }}</option>
                     <option *ngFor="let dataType of dataTypesData" [value]="dataType.id">{{ dataType.name }}</option>
-                    <option *ngIf="dataTypesData.length === 0" disabled selected>No Data Found</option>
+                    <option *ngIf="dataTypesData.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
                 </select>
                 <div *ngIf="isView"
                     class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto text-lg">
@@ -28,13 +28,15 @@
                     validationErrors['accountingEntriesDocTypeID'] }}</span>
             </div>
             <div class="flex flex-col w-[30%]">
-                <label class="mb-2 primaryTxt font-medium" for="DocType">Doc Number</label>
+                <label class="mb-2 primaryTxt font-medium" for="DocType"> {{ 'Doc Number' | translate }}</label>
                 <input id="DocType" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                    placeholder="Enter Doc Number"
-                    [(ngModel)]="accountingEntries.docNumber" />
+                  placeholder="{{ 'Enter Doc Number' | translate }}"
+                    [(ngModel)]="accountingEntries.docNumber" (ngModelChange)="onInputValueChange({ field: 'docNumber', value: $event })"/>
+                <span *ngIf="validationErrors['docNumber']" class="text-red-500 ml-3 font-normal">{{
+                        validationErrors['docNumber'] }}</span> 
             </div>
             <div class="flex flex-col w-[30%]">
-                <label class="mb-2 primaryTxt font-medium" for="date">Date</label>
+                <label class="mb-2 primaryTxt font-medium" for="date"> {{ 'Date' | translate }}</label>
                 <input id="date" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                     [(ngModel)]="accountingEntries.date" [disabled]="isView"
                     (ngModelChange)="onInputValueChange({ field: 'date', value: $event })" />
@@ -45,26 +47,26 @@
 
         <div class="mt-5 flex justify-between">
             <div class="flex flex-col w-[30%]" *ngIf="!isCreate">
-                <label class="mb-2 primaryTxt font-medium" for="total">Total Credit</label>
-                <input id="total" type="text" disabled class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                <label class="mb-2 primaryTxt font-medium" for="total"> {{ 'Total Credit' | translate }}</label>
+                <input id="totalCredit" type="text" disabled class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                     [(ngModel)]="totalCredit" />
             </div>
             <div class="flex flex-col w-[30%]" *ngIf="!isCreate">
-                <label class="mb-2 primaryTxt font-medium" for="total">Total Debit</label>
-                <input id="total" type="text" disabled class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                <label class="mb-2 primaryTxt font-medium" for="total">{{ 'Total Debit ' | translate }}</label>
+                <input id="totalDebit" type="text" disabled class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                     [(ngModel)]="totalDebit" />
             </div>
             <div class="flex flex-col w-[30%]" *ngIf="!isCreate">
-                <label class="mb-2 primaryTxt font-medium" for="total">The Difference</label>
-                <input id="total" type="text" disabled class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                <label class="mb-2 primaryTxt font-medium" for="total">{{ 'The Difference ' | translate }}</label>
+                <input id="totalDifference" type="text" disabled class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                     [(ngModel)]="theDifference" />
             </div>
         </div>
 
         <div class="mt-5 flex flex-col">
-            <label class="mb-2 primaryTxt font-medium" for="notes">Notes</label>
+            <label class="mb-2 primaryTxt font-medium" for="notes"> {{ 'Notes' | translate }}</label>
             <textarea id="notes" class="w-full rounded-lg border border-solid border-gray-300 px-4 py-3"
-                [disabled]="isView" placeholder="Add Notes" [(ngModel)]="accountingEntries.notes">
+                [disabled]="isView"  placeholder="{{ 'Add Notes' | translate }}" [(ngModel)]="accountingEntries.notes">
             </textarea>
         </div>
     </div>
@@ -79,7 +81,7 @@
 
         <button *ngIf="!isView" [disabled]="isSaveLoading" 
             class="secondaryBg text-white font-medium px-4 py-2 rounded-lg" (click)="Save()">
-            <span *ngIf="!isSaveLoading">Save </span>
+            <span *ngIf="!isSaveLoading"> {{ 'Save' | translate }} </span>
             <i *ngIf="isSaveLoading" class="fas fa-spinner fa-spin"></i>
         </button>
     </div>
@@ -90,7 +92,7 @@
         <button class="secondaryTxt secondaryBorder px-4 py-2 rounded-lg flex items-center space-x-2"
             (click)="AddAccountingEntriesDetails()">
             <div class="secondaryBorder rounded-full flex items-center p-1"><i class="fa-solid fa-plus"></i></div>
-            <p>Add Row</p>
+            <p> {{ 'Add Row' | translate }}</p>
         </button>
     </div>
 
@@ -99,25 +101,25 @@
             <thead class="bg-[##EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
                 <tr>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        ID
+                         {{ 'ID' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
-                        Debit
+                         {{ 'Debit' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Credit
+                         {{ 'Credit' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
-                        Account Name
+                         {{ 'Account Name' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Sub Account
+                         {{ 'Sub Account' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Notes
+                         {{ 'Notes' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Actions
+                         {{ 'Actions' | translate }}
                     </th>
                 </tr>
             </thead>
@@ -126,7 +128,7 @@
                 <tr *ngIf="accountingEntriesDetailsData.length === 0 && !isNewDetails">
                     <td colspan="7"
                         class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-                        No Data Found
+                       {{ 'No Data Found' | translate }}
                     </td>
                 </tr>
 
@@ -153,9 +155,9 @@
                             (ngModelChange)="onInputValueChangeForDetails({ field: 'accountingTreeChartID', value: $event })"
                             class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
                             id="accountingTreeChartID" [(ngModel)]="newDetails.accountingTreeChartID">
-                            <option [value]="0" disabled selected hidden>Choose Account</option>
+                            <option [value]="0" disabled selected hidden> {{ 'Choose Account' | translate }}</option>
                             <option *ngFor="let acc of AccountingTreeChartData" [value]="acc.id">{{ acc.name }}</option>
-                            <option *ngIf="AccountingTreeChartData.length === 0" disabled selected>No Data Found
+                            <option *ngIf="AccountingTreeChartData.length === 0" disabled selected>{{ 'No Data Found' | translate }}
                             </option>
                         </select>
                     </td>
@@ -164,15 +166,15 @@
                             (ngModelChange)="onInputValueChangeForDetails({ field: 'subAccountingID', value: $event })"
                             class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
                             id="subAccountingID" [(ngModel)]="newDetails.subAccountingID">
-                            <option [value]="null" disabled selected hidden>Choose Sub Account Data</option>
+                            <option [value]="null" disabled selected hidden>  {{ 'Choose Sub Account Data' | translate }}</option>
                             <option *ngFor="let sub of subAccountData" [value]="sub.id">{{ sub.en_name }} {{ sub.name }}
                             </option>
-                            <option *ngIf="subAccountData.length === 0" disabled selected>No Data Found</option>
+                            <option *ngIf="subAccountData.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
                         </select>
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         <textarea id="notes" class="w-full rounded-lg border border-solid border-gray-300 px-4 py-3"
-                            placeholder="Add Notes" [(ngModel)]="newDetails.note">
+                      placeholder="{{ 'Add Notes' | translate }}" [(ngModel)]="newDetails.note">
                         </textarea>
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
@@ -215,10 +217,10 @@
                                 (ngModelChange)="onInputValueChangeForDetails({ field: 'accountingTreeChartID', value: $event })"
                                 class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
                                 id="accountingTreeChartID" [(ngModel)]="editedRowData.accountingTreeChartID">
-                                <option [value]="0" disabled selected hidden>Choose Account</option>
+                                <option [value]="0" disabled selected hidden> {{ 'Choose Account' | translate }}</option>
                                 <option *ngFor="let acc of AccountingTreeChartData" [value]="acc.id">{{ acc.name }}
                                 </option>
-                                <option *ngIf="AccountingTreeChartData.length === 0" disabled selected>No Data Found
+                                <option *ngIf="AccountingTreeChartData.length === 0" disabled selected>{{ 'No Data Found' | translate }}
                                 </option>
                             </select>
                         </td>
@@ -227,10 +229,10 @@
                                 (ngModelChange)="onInputValueChangeForDetails({ field: 'subAccountingID', value: $event })"
                                 class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
                                 id="subAccountingID" [(ngModel)]="editedRowData.subAccountingID">
-                                <option [value]="null" disabled selected hidden>Choose Sub Account Data</option>
+                                <option [value]="null" disabled selected hidden> {{ 'Choose Sub Account Data' | translate }}</option>
                                 <option *ngFor="let sub of subAccountData" [value]="sub.id">{{ sub.en_name }} {{
                                     sub.name }}</option>
-                                <option *ngIf="subAccountData.length === 0" disabled selected>No Data Found</option>
+                                <option *ngIf="subAccountData.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
                             </select>
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">

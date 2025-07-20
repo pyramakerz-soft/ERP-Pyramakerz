@@ -13,7 +13,7 @@ namespace LMS_CMS_BL.DTO.LMS
         public string EnglishTitle { get; set; }
         [Required(ErrorMessage = "Arabic Title is required")]
         public string ArabicTitle { get; set; }
-        public int Weight { get; set; }
+        public decimal Weight { get; set; }
         public int AfterCount { get; set; }
     }
 }

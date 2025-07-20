@@ -12,11 +12,13 @@ import { FormsModule } from '@angular/forms';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import Swal from 'sweetalert2';
 import { SearchComponent } from '../../../../Component/search/search.component';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-role',
   standalone: true,
-  imports: [CommonModule, FormsModule, SearchComponent],
+  imports: [CommonModule, FormsModule, SearchComponent, TranslateModule],
   templateUrl: './role.component.html',
   styleUrl: './role.component.css',
 })
@@ -44,7 +46,8 @@ export class RoleComponent {
   AllowDelete: boolean = false;
   AllowEditForOthers: boolean = false;
   AllowDeleteForOthers: boolean = false;
-
+ isRtl: boolean = false;
+  subscription!: Subscription;
   keysArray: string[] = ['id', 'name'];
   key: string = 'id';
   value: any = '';
@@ -56,7 +59,8 @@ export class RoleComponent {
     public ApiServ: ApiService,
     private menuService: MenuService,
     public EditDeleteServ: DeleteEditPermissionService,
-    private router: Router
+    private router: Router,
+          private languageService: LanguageService
   ) {}
 
   ngOnInit() {
@@ -81,6 +85,10 @@ export class RoleComponent {
         this.AllowEditForOthers = settingsPage.allow_Edit_For_Others;
       }
     });
+      this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
   async getAllRoles() {
     try {

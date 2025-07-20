@@ -14,7 +14,8 @@
         <!-- School -->
         <h6 class="font-medium text-base leading-6 mb-1 mt-3">School</h6>
         <div class="flex flex-col">
-            <select [(ngModel)]="medicalHistory.schoolId" (change)="onSchoolChange($event)"
+            <select [(ngModel)]="medicalHistory.schoolId"
+                (change)="onSchoolChange($event); clearValidationError('schoolId')"
                 class="rounded-lg border border-solid border-gray-300 py-1 overflow-y-auto w-full h-[45px] mb-3">
                 <option [value]="0" disabled selected hidden>Choose School</option>
                 <option *ngFor="let school of schools" [value]="school.id">{{ school.name }}</option>
@@ -27,7 +28,8 @@
         <!-- Grade -->
         <h6 class="font-medium text-base leading-6 mb-1 mt-3">Grade</h6>
         <div class="flex flex-col">
-            <select [(ngModel)]="medicalHistory.gradeId" (change)="onGradeChange($event)"
+            <select [(ngModel)]="medicalHistory.gradeId"
+                (change)="onGradeChange($event); clearValidationError('gradeId')"
                 class="rounded-lg border border-solid border-gray-300 py-1 overflow-y-auto w-full h-[45px] mb-3"
                 [disabled]="!medicalHistory.schoolId">
                 <option [value]="0" disabled selected hidden>Choose Grade</option>
@@ -41,7 +43,8 @@
         <!-- Class -->
         <h6 class="font-medium text-base leading-6 mb-1 mt-3">Class</h6>
         <div class="flex flex-col">
-            <select [(ngModel)]="medicalHistory.classRoomID" (change)="onClassChange($event)"
+            <select [(ngModel)]="medicalHistory.classRoomID"
+                (change)="onClassChange($event); clearValidationError('classRoomID')"
                 class="rounded-lg border border-solid border-gray-300 py-1 overflow-y-auto w-full h-[45px] mb-3"
                 [disabled]="!medicalHistory.gradeId">
                 <option [value]="0" disabled selected hidden>Choose Class</option>
@@ -55,7 +58,7 @@
         <!-- Student -->
         <h6 class="font-medium text-base leading-6 mb-1 mt-3">Student</h6>
         <div class="flex flex-col">
-            <select [(ngModel)]="medicalHistory.studentId"
+            <select [(ngModel)]="medicalHistory.studentId" (change)="clearValidationError('studentId')"
                 class="rounded-lg border border-solid border-gray-300 py-1 overflow-y-auto w-full h-[45px] mb-3"
                 [disabled]="!medicalHistory.classRoomID">
                 <option [value]="0" disabled selected hidden>Choose Student</option>
@@ -69,7 +72,7 @@
         <!-- Details -->
         <h6 class="font-medium text-base leading-6 mb-1 mt-3">Details</h6>
         <div class="flex flex-col">
-            <textarea [(ngModel)]="medicalHistory.details"
+            <textarea [(ngModel)]="medicalHistory.details" (input)="clearValidationError('details')"
                 class="w-full h-[100px] rounded-lg border border-solid border-gray-300 px-2 py-1 mb-3 resize-none"
                 placeholder="Enter Details"></textarea>
             <span *ngIf="validationErrors['details']" class="text-red-500 ml-3 font-normal">
@@ -81,6 +84,7 @@
         <h6 class="font-medium text-base leading-6 mb-1 mt-3">Permanent Drug</h6>
         <div class="flex flex-col">
             <input type="text" [(ngModel)]="medicalHistory.permanentDrug"
+                (input)="clearValidationError('permanentDrug')"
                 class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2"
                 placeholder="Enter Permanent Drug" />
             <span *ngIf="validationErrors['permanentDrug']" class="text-red-500 ml-3 font-normal">
@@ -98,7 +102,7 @@
                     <img *ngIf="firstReportPreview" [src]="firstReportPreview" class="w-full h-32 object-contain"
                         alt="Uploaded Image Preview">
                     <p class="text-xs text-gray-500 mt-2">
-                        <span class="text-[#089B41]">Click to Upload</span> or drag and drop
+                        <span class="text-[#089B41]">Click to Upload</span>
                     </p>
                     <p class="text-xs text-gray-500">(Max. File size: 25 MB)</p>
                     <input id="firstReportUpload" type="file" class="hidden" accept="image/*,video/*"
@@ -114,7 +118,7 @@
                     <img *ngIf="secReportPreview" [src]="secReportPreview" class="w-full h-32 object-contain"
                         alt="Uploaded Image Preview">
                     <p class="text-xs text-gray-500 mt-2">
-                        <span class="text-[#089B41]">Click to Upload</span> or drag and drop
+                        <span class="text-[#089B41]">Click to Upload</span>
                     </p>
                     <p class="text-xs text-gray-500">(Max. File size: 25 MB)</p>
                     <input id="secReportUpload" type="file" class="hidden" accept="image/*,video/*"
@@ -124,8 +128,7 @@
         </div>
 
         <div class="flex justify-end w-full pt-6">
-            <button (click)="saveMedicalHistory()"
-              [disabled]="isSaving"
+            <button (click)="saveMedicalHistory()" [disabled]="isSaving"
                 class="bg-[#089B41] text-white font-medium px-5 py-3 rounded-lg transition duration-200 w-full">
                 {{ isSaving ? 'Saving...' : 'Submit' }}
             </button>

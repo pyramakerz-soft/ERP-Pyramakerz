@@ -156,18 +156,16 @@ export class AssignmentComponent {
 
   GetAllData(pageNumber: number, pageSize: number) {
     this.assignmentData = []
-    this.IsView=true
-    console.log(this.IsView)
+    this.IsView=true 
     this.CurrentPage = 1
     this.TotalPages = 1
     this.TotalRecords = 0
     if (this.subjectID != 0) {
       this.assignmentService.GetBySubjectID(this.subjectID, this.DomainName, pageNumber, pageSize).subscribe(
-        (data) => {
-          console.log(data)
+        (data) => { 
           this.CurrentPage = data.pagination.currentPage
           this.PageSize = data.pagination.pageSize
-          this.TotalPages = data.pagination.totalPages
+          this.TotalPages = data.pagination.totalPages 
           this.TotalRecords = data.pagination.totalRecords
           this.assignmentData = data.data
         },
@@ -217,9 +215,9 @@ export class AssignmentComponent {
     }
   }
 
-  changeCurrentPage(currentPage: number) {
+  changeCurrentPage(currentPage: number) { 
     this.CurrentPage = currentPage
-    this.GetAllData(this.CurrentPage, this.PageSize)
+    this.GetAllData(this.CurrentPage, this.PageSize) 
   }
 
   validatePageSize(event: any) {
@@ -230,7 +228,7 @@ export class AssignmentComponent {
   }
 
   View(id: number) {
-    this.router.navigateByUrl(`Employee/Assignment/${id}`)
+    this.router.navigateByUrl(`Employee/Assignment View/${id}`)
   }
 
   validateNumberForPagination(event: any): void {
@@ -558,8 +556,8 @@ export class AssignmentComponent {
             }
           } else if (field === 'openDate' || field === 'dueDate' || field === 'cutOfDate') {
             const openDate = new Date(this.assignment.openDate);
-            const dueDate = new Date(this.assignment.dueDate);
             const cutOfDate = new Date(this.assignment.cutOfDate);
+            const dueDate = this.assignment.dueDate ? new Date(this.assignment.dueDate) : cutOfDate;
 
             if (this.assignment.openDate && this.assignment.dueDate && openDate > dueDate) {
               this.validationErrors['openDate'] = '*Open Date must be before or equal to Due Date';
@@ -661,12 +659,13 @@ export class AssignmentComponent {
     });
   }
 
-  async onSearchEvent(event: { key: string; value: any }) {
+  async onSearchEvent(event: { key: string; value: any }) { 
+    this.PageSize = this.TotalRecords
     this.key = event.key;
     this.value = event.value;
     try {
       const data: any = await firstValueFrom(
-        this.assignmentService.Get(this.DomainName, this.CurrentPage, this.PageSize)
+        this.assignmentService.GetBySubjectID(this.subjectID, this.DomainName, this.CurrentPage, this.PageSize)
       );
       this.assignmentData = data.data || [];
 

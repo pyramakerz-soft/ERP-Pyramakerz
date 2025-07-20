@@ -31,6 +31,8 @@ export class OctaLoginComponent {
   allTokens: { id: number, key: string; KeyInLocal: string; value: string; UserType:string}[] = [];
   User_Data_After_Login2 = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
 
+  isLoading: boolean = false
+
   constructor(private router: Router, public accountService: AccountService) { }
 
   ngOnInit() {
@@ -98,6 +100,7 @@ export class OctaLoginComponent {
   SignIN() {
     this.userInfo.type = "octa";
     if (this.isFormValid()) {
+      this.isLoading = true
       this.accountService.LoginOcta(this.userInfo).subscribe(
         (d: any) => { 
           localStorage.removeItem("GoToLogin");
@@ -169,6 +172,7 @@ export class OctaLoginComponent {
           this.router.navigateByUrl("Octa/Home")
           
         }, (error) => {
+          this.isLoading = false
           if (error.error === "UserName or Password is Invalid") {
             this.somthingError = "UserName or Password is Invalid"
           }

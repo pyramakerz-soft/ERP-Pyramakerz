@@ -15,11 +15,13 @@ import { RoleService } from '../../../../Services/Employee/role.service';
 import Swal from 'sweetalert2';
 import { RoleDetailsService } from '../../../../Services/Employee/role-details.service';
 import { RolePut } from '../../../../Models/Administrator/role-put';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-role-add-edit',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
   templateUrl: './role-add-edit.component.html',
   styleUrl: './role-add-edit.component.css'
 })
@@ -34,7 +36,8 @@ export class RoleAddEditComponent {
   PagecollapseStates: boolean[][] = [];
   collapseStates: boolean[] = [];
   checkboxStates: { [key: string]: boolean } = {};
-
+ isRtl: boolean = false;
+  subscription!: Subscription;
   ResultArray: {
     Rowkey: number;
     pageId: number;
@@ -54,7 +57,16 @@ export class RoleAddEditComponent {
   validationErrors: { [key in keyof RolePut]?: string } = {};
   isLoading=false
 
-  constructor(public pageServ: PageService, public RoleDetailsServ: RoleDetailsService, public activeRoute: ActivatedRoute, public account: AccountService, public ApiServ: ApiService, private menuService: MenuService, public EditDeleteServ: DeleteEditPermissionService, public RoleServ: RoleService, private router: Router) { }
+  constructor(public pageServ: PageService, 
+    public RoleDetailsServ: RoleDetailsService,
+     public activeRoute: ActivatedRoute, 
+     public account: AccountService,
+      public ApiServ: ApiService,
+       private menuService: MenuService, 
+       public EditDeleteServ: DeleteEditPermissionService, 
+       public RoleServ: RoleService,
+        private router: Router,
+              private languageService: LanguageService) { }
 
   async ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -82,6 +94,12 @@ export class RoleAddEditComponent {
         this.loading = false; // Not loading in create mode
       }
     }
+  this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+
+
   }
 
   GetRoleName() {
@@ -294,17 +312,27 @@ export class RoleAddEditComponent {
               text: 'Role Added Succeessfully',
               confirmButtonColor: '#089B41',
             });
+            this.isLoading=false
             this.router.navigateByUrl("Employee/Role")
           },
-          error: (error) => {
+          error: (error) => { 
             this.isLoading=false
-            const errorMessage = error?.error || 'An unexpected error occurred';
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              confirmButtonColor: '#089B41',
-              text: errorMessage,
-            });
+            if(error.error.errors.Name[0].includes("Role cannot be longer than 100 characters")){
+              Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Role cannot be longer than 100 characters',
+                confirmButtonText: 'Okay',
+                customClass: { confirmButton: 'secondaryBg' },
+              });
+            }else{ 
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.error || 'An unexpected error occurred',
+                confirmButtonColor: '#089B41',
+              });
+            } 
           },
         });
       }
@@ -317,6 +345,7 @@ export class RoleAddEditComponent {
               text: 'Role Edited Succeessfully',
               confirmButtonColor: '#089B41',
             });
+            this.isLoading=false
             this.router.navigateByUrl("Employee/Role")
           },
           error: (error) => { 
@@ -328,20 +357,29 @@ export class RoleAddEditComponent {
                 text: "You Are Not Allowed To Edit This",
               });
             }else{
-              const errorMessage = error?.error || 'An unexpected error occurred';
-              this.isLoading=false
-              Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                confirmButtonColor: '#089B41',
-                text: errorMessage,
-              });
+              if(error.error.errors.Name[0].includes("Role cannot be longer than 100 characters")){
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Oops...',
+                  text: 'Name cannot be longer than 100 characters',
+                  confirmButtonText: 'Okay',
+                  customClass: { confirmButton: 'secondaryBg' },
+                });
+              }else{ 
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: error.error || 'An unexpected error occurred',
+                  confirmButtonColor: '#089B41',
+                });
+              } 
             }
           },
         });
       }
     }
   }
+
   onInputValueChange(event: { field: keyof RolePut, value: any }) {
     const { field, value } = event;
     if (field == "name") {
@@ -351,6 +389,7 @@ export class RoleAddEditComponent {
       }
     }
   }
+  
   isFormValid(): boolean {
     let isValid = true;
     for (const key in this.DataToSave) {
@@ -379,6 +418,7 @@ export class RoleAddEditComponent {
 
     return isValid;
   }
+  
   capitalizeField(field: keyof RolePut): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }

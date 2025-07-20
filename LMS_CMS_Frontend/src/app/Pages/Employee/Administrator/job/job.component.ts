@@ -16,11 +16,13 @@ import { JobService } from '../../../../Services/Employee/Administration/job.ser
 import { firstValueFrom } from 'rxjs';
 import { JobCategoriesService } from '../../../../Services/Employee/Administration/job-categories.service';
 import { JobCategories } from '../../../../Models/Administrator/job-categories';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-job',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './job.component.html',
   styleUrl: './job.component.css',
 })
@@ -47,7 +49,8 @@ export class JobComponent {
 
   DomainName: string = '';
   UserID: number = 0;
-
+ isRtl: boolean = false;
+  subscription!: Subscription;
   isModalVisible: boolean = false;
   mode: string = '';
 
@@ -73,7 +76,8 @@ export class JobComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public jobServ: JobService,
-    public JobCategoryServ: JobCategoriesService
+    public JobCategoryServ: JobCategoriesService,
+    private languageService: LanguageService
   ) {}
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -95,6 +99,11 @@ export class JobComponent {
     });
 
     this.GetAllData();
+
+    this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';  
   }
 
   GetAllData() {
@@ -180,13 +189,22 @@ export class JobComponent {
           },
           (error) => {
             this.isLoading = false;
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: error.error || 'An unexpected error occurred',
-              confirmButtonColor: '#089B41',
-            });
-            return false;
+            if(error.error.includes("Name cannot be longer than 100 characters")){
+              Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Name cannot be longer than 100 characters',
+                confirmButtonText: 'Okay',
+                customClass: { confirmButton: 'secondaryBg' },
+              });
+            }else{ 
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.error || 'An unexpected error occurred',
+                confirmButtonColor: '#089B41',
+              });
+            } 
           }
         );
       }
@@ -199,13 +217,22 @@ export class JobComponent {
           },
           (error) => {
             this.isLoading = false;
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: error.error || 'An unexpected error occurred',
-              confirmButtonColor: '#089B41',
-            });
-            return false;
+            if(error.error.includes("Name cannot be longer than 100 characters")){
+              Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Name cannot be longer than 100 characters',
+                confirmButtonText: 'Okay',
+                customClass: { confirmButton: 'secondaryBg' },
+              });
+            }else{ 
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.error || 'An unexpected error occurred',
+                confirmButtonColor: '#089B41',
+              });
+            } 
           }
         );
       }

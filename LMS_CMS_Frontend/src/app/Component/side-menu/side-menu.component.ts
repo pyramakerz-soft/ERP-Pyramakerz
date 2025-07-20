@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, Input, QueryList, SimpleChanges, ViewChild, ViewChildren } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { PagesWithRoleId } from '../../Models/pages-with-role-id';
 import { SideMenuItemComponent } from '../side-menu-item/side-menu-item.component';
 import { NewTokenService } from '../../Services/shared/new-token.service';
@@ -28,7 +28,7 @@ export class SideMenuComponent {
   isRtl: boolean = false;
   subscription!: Subscription;
 
-  constructor(private languageService: LanguageService) {} 
+  constructor(private languageService: LanguageService, private router: Router) {} 
 
   ngOnInit(): void {
     this.subscription = this.languageService.language$.subscribe(direction => {
@@ -69,5 +69,17 @@ export class SideMenuComponent {
   
   getImageSrc(item: any): string {
     return `Icons/SideMenuIcons/${item.en_name.trim().replace(/ /g, '_')}.png`;
+  }
+
+  isMenuActive(route?: string): boolean {
+    if (!route) return false;
+    const currentUrl = this.router.url.toLowerCase();
+    const encodedRoute = encodeURIComponent(route.trim()).toLowerCase();
+    return currentUrl.includes(encodedRoute);
+  }
+
+  isSubItemActive(subItems?: { route: string }[]): boolean {
+    if (!subItems) return false;
+    return subItems.some(sub => this.isMenuActive(sub.route));
   }
 }

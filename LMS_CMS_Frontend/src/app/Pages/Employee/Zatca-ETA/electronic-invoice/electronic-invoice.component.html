@@ -1,7 +1,7 @@
 <div class="flex flex-col">
     <!-- Header and Filters -->
     <div class="flex justify-between items-center mb-5">
-        <h1 class="font-semibold text-2xl leading-9">
+        <h1 class="primaryTxt font-semibold text-2xl leading-9">
             {{ currentSystem === 'zatca' ? 'ZATCA' : 'ETA' }} Electronic Invoices
         </h1>
     </div>
@@ -24,41 +24,39 @@
         <div class="flex flex-col w-[32%] mb-4">
             <label class="mb-2 font-medium" for="dateFrom">Date From</label>
             <input type="date" id="dateFrom" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                [(ngModel)]="dateFrom" (ngModelChange)="onFilterChange()" [max]="dateTo">
+                [(ngModel)]="dateFrom" (ngModelChange)="onFilterChange()">
         </div>
 
         <!-- Date To -->
         <div class="flex flex-col w-[32%] mb-4">
             <label class="mb-2 font-medium" for="dateTo">Date To</label>
             <input type="date" id="dateTo" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                [(ngModel)]="dateTo" (ngModelChange)="onFilterChange()" [min]="dateFrom">
+                [(ngModel)]="dateTo" (ngModelChange)="onFilterChange()">
         </div>
     </div>
 
     <div class="w-full flex justify-end mb-5 gap-4">
         <button class="p-4 font-medium text-xl rounded-lg transition-all" (click)="viewReport()"
-            [disabled]="isViewReportDisabled" [ngClass]="viewReportButtonClass">
+            [disabled]="!showViewReportBtn || isLoading"
+            [ngClass]="{'bg-gray-300 text-gray-500 cursor-not-allowed': !showViewReportBtn || isLoading, 'secondaryBg text-white hover:bg-opacity-90': showViewReportBtn && !isLoading}">
             <span *ngIf="!isLoading">View Report</span>
             <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
         </button>
 
-        <!-- Print Button (only icon, green color) -->
         <button class="p-2 font-medium text-3xl rounded-lg flex items-center gap-2 secondaryTxt" (click)="printAll()"
             [disabled]="transactions.length === 0 || isLoading"
             [ngClass]="{'opacity-50 cursor-not-allowed': transactions.length === 0 || isLoading}">
             <i class="fa-solid fa-print"></i>
         </button>
 
-        <!-- Send Button (only icon, green color) -->
         <button class="p-2 font-medium text-3xl rounded-lg flex items-center gap-2 secondaryTxt" (click)="sendAll()"
             [disabled]="transactions.length === 0 || isSubmitting"
             [ngClass]="{'opacity-50 cursor-not-allowed': transactions.length === 0 || isSubmitting}">
-            <i class="fa-regular fa-paper-plane"></i>
-            <span *ngIf="isSubmitting">Sending...</span>
+            <i *ngIf="!isSubmitting" class="fa-regular fa-paper-plane"></i>
+            <i *ngIf="isSubmitting" class="fas fa-spinner fa-spin"></i>
         </button>
     </div>
 
-    <!-- Results Table -->
     <div *ngIf="showTable" class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
         <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
             <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
@@ -89,12 +87,11 @@
                 </tr>
             </thead>
             <tbody>
-                <tr *ngIf="transactions.length === 0">
-                    <td colspan="7"
-                        class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-                        No Data Found
-                    </td>
-                </tr>
+<tr *ngIf="transactions.length === 0">
+    <td colspan="7" class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+        No Data Found
+    </td>
+</tr>
 
                 <tr *ngFor="let transaction of transactions; let i = index"
                     [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
@@ -104,10 +101,7 @@
                             (change)="toggleInvoiceSelection(transaction.id)" [disabled]="isSubmitting">
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        <a (click)="navigateToDetail(transaction.id)"
-                            class="text-blue-500 hover:text-blue-700 cursor-pointer">
-                            {{ transaction.id }}
-                        </a>
+                        {{ transaction.id }}
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ transaction.date | date:'mediumDate' }}
@@ -130,15 +124,16 @@
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         <div class="flex gap-4">
-                            <button (click)="printAll()"
-                                class=""
-                                [disabled]="isSubmitting">
+                            <button (click)="printAll()" class="" [disabled]="isSubmitting">
                                 <i class="fa-solid fa-print text-lg"></i>
                             </button>
                             <button (click)="sendInvoice(transaction)"
                                 class="text-gray-700 hover:text-gray-900 rounded-lg"
-                                [disabled]="isSubmitting">
-                                <i class="fa-regular fa-paper-plane text-lg"></i>
+                                [disabled]="isSubmitting || sendingInvoiceId === transaction.id">
+                                <i *ngIf="sendingInvoiceId !== transaction.id"
+                                    class="fa-regular fa-paper-plane text-lg"></i>
+                                <i *ngIf="sendingInvoiceId === transaction.id"
+                                    class="fas fa-spinner fa-spin text-lg"></i>
                             </button>
                             <button (click)="navigateToDetail(transaction.id)"
                                 class="text-gray-700 hover:text-gray-900 rounded-lg">
@@ -151,26 +146,24 @@
         </table>
     </div>
 
-    <!-- Pagination -->
     <div *ngIf="showTable" class="mt-8 flex justify-between items-center">
         <div class="flex items-center space-x-4">
-            <button class="flex items-center space-x-2 rounded-lg border py-3 px-6 hover:bg-gray-50"
+            <button class="flex items-center space-x-2 rounded-lg border py-3 px-4 hover:bg-gray-50"
                 (click)="changePage(currentPage-1)"
                 [disabled]="currentPage === 1 || transactions.length == 0 || isLoading"
                 [ngClass]="{'cursor-not-allowed opacity-50': currentPage === 1 || transactions.length == 0 || isLoading}">
                 <i class="fa-solid fa-arrow-left"></i>
                 <p>Previous</p>
             </button>
-            <div class="flex gap-2">
+            <div class="flex">
                 <div *ngFor="let page of [].constructor(totalPages); let i = index"
-                    class="rounded-lg py-3 px-4 cursor-pointer border hover:bg-gray-50" [ngClass]="{
-                        'font-bold border-gray-500': i+1 == currentPage,
-                        'opacity-50': transactions.length == 0 || isLoading
-                    }" (click)="!isLoading && changePage(i+1)">
+                    class="rounded-lg py-[10px] w-[40px] cursor-pointer"
+                    [ngClass]="{'border': i+1 == currentPage || transactions.length == 0}"
+                    (click)="!isLoading && changePage(i+1)">
                     <p class="text-center">{{ i + 1 }}</p>
                 </div>
             </div>
-            <button class="flex items-center space-x-2 rounded-lg border py-3 px-6 hover:bg-gray-50"
+            <button class="flex items-center space-x-2 rounded-lg border py-3 px-4 hover:bg-gray-50"
                 (click)="changePage(currentPage+1)"
                 [disabled]="currentPage === totalPages || transactions.length == 0 || isLoading"
                 [ngClass]="{'cursor-not-allowed opacity-50': currentPage === totalPages || transactions.length == 0 || isLoading}">
@@ -179,7 +172,14 @@
             </button>
         </div>
 
-        <div [ngClass]="{'opacity-50': isLoading}">
+        <div class="flex items-center space-x-2">
+            <input (input)="validateNumberForPagination($event)" class="rounded-lg border py-3 px-4 w-[73px]"
+                [(ngModel)]="pageSize" min="1" (input)="validatePageSize($event)"
+                (ngModelChange)="changePage(currentPage)">
+            <p>items Per Page</p>
+        </div>
+
+        <div>
             <p>{{currentPage}} of {{totalPages}} pages ({{totalRecords}} Items)</p>
         </div>
     </div>

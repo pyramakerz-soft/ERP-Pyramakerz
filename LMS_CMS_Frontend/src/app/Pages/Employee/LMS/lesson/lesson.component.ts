@@ -24,7 +24,7 @@ import { AcademicYear } from '../../../../Models/LMS/academic-year';
 import { School } from '../../../../Models/school';
 import { Grade } from '../../../../Models/LMS/grade'; 
 import { SemesterWorkingWeekService } from '../../../../Services/Employee/LMS/semester-working-week.service';  
-import { QuillModule } from 'ngx-quill';
+import { QuillEditorComponent, QuillModule } from 'ngx-quill';
 import { Tag } from '../../../../Models/LMS/tag';
 import { SemesterWorkingWeek } from '../../../../Models/LMS/semester-working-week';
 
@@ -81,24 +81,32 @@ export class LessonComponent {
   SemestersModal: Semester[] = []
   WeeksModal: SemesterWorkingWeek[] = []
 
-  @ViewChild('quillEditor') quillEditor!: ElementRef;
+ @ViewChild('quillEditor') quillEditorComponent!: QuillEditorComponent;
+  quillInstance: any;
+
   editorModules = {
-    toolbar: [
-      ['bold', 'italic', 'underline', 'strike'],
-      ['blockquote', 'code-block'],
-      [{ 'header': 1 }, { 'header': 2 }],
-      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-      [{ 'script': 'sub'}, { 'script': 'super' }],
-      [{ 'indent': '-1'}, { 'indent': '+1' }],
-      [{ 'direction': 'rtl' }],
-      [{ 'size': ['small', false, 'large', 'huge'] }],
-      [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-      [{ 'color': [] }, { 'background': [] }],
-      [{ 'font': [] }],
-      [{ 'align': [] }],
-      ['link', 'image', 'video'],
-      ['clean']
-    ]
+    toolbar: {
+      container: [
+        ['bold', 'italic', 'underline', 'strike'],
+        ['blockquote', 'code-block'],
+        [{ header: 1 }, { header: 2 }],
+        [{ list: 'ordered' }, { list: 'bullet' }],
+        [{ script: 'sub' }, { script: 'super' }],
+        [{ indent: '-1' }, { indent: '+1' }],
+        [{ direction: 'rtl' }],
+        [{ size: ['small', false, 'large', 'huge'] }],
+        [{ header: [1, 2, 3, 4, 5, 6, false] }],
+        [{ color: [] }, { background: [] }],
+        [{ font: [] }],
+        [{ align: [] }],
+        ['link', 'image', 'video'],
+        ['clean']
+      ],
+      handlers: {
+        image: () => this.customImageHandler(),
+        video: () => this.customVideoHandler()
+      }
+    }
   };
 
   inputValue: string = '';
@@ -159,6 +167,110 @@ export class LessonComponent {
 
     this.getSchool()
   } 
+
+  onEditorCreated(quill: any) {
+      this.quillInstance = quill;
+    }
+  
+  customImageHandler() {
+    const input = document.createElement('input');
+    input.setAttribute('type', 'file');
+    input.setAttribute('accept', 'image/*');
+    input.click();
+
+    input.onchange = async () => {
+      const file = input?.files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = async (e: any) => {
+          const { value: formValues } = await Swal.fire({
+            title: 'Set Image Size',
+            html:
+              `<input id="swal-input1" class="swal2-input" placeholder="Width (px)">` +
+              `<input id="swal-input2" class="swal2-input" placeholder="Height (px)">`,
+            focusConfirm: false,
+            preConfirm: () => {
+              const width = (document.getElementById('swal-input1') as HTMLInputElement).value;
+              const height = (document.getElementById('swal-input2') as HTMLInputElement).value;
+              if (!width || !height || isNaN(+width) || isNaN(+height)) {
+                Swal.showValidationMessage('Please enter numeric values.');
+                return null;
+              }
+              return { width: +width, height: +height };
+            }
+          });
+
+          if (formValues) {
+            const range = this.quillInstance.getSelection(true);
+            this.quillInstance.insertEmbed(range.index, 'image', e.target.result, 'user');
+
+            setTimeout(() => {
+              const imgElements = this.quillInstance.root.querySelectorAll('img');
+              const lastImg = imgElements[imgElements.length - 1];
+              if (lastImg) {
+                lastImg.setAttribute('width', formValues.width + '');
+                lastImg.setAttribute('height', formValues.height + '');
+                lastImg.setAttribute('style', `width:${formValues.width}px; height:${formValues.height}px`);
+                 
+                this.lesson.details = this.quillInstance.root.innerHTML;
+              }
+            }, 100);
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+  }
+  
+  customVideoHandler() {
+    Swal.fire({
+      title: 'Enter video URL',
+      input: 'url',
+      inputPlaceholder: 'https://www.youtube.com/embed/...',
+      showCancelButton: true,
+      preConfirm: (url) => {
+        if (!url) {
+          Swal.showValidationMessage('Please enter a valid URL');
+        }
+        return url;
+      }
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        const url = result.value;
+
+        const { value: formValues } = await Swal.fire({
+          title: 'Set Video Size',
+          html:
+            `<input id="swal-input1" class="swal2-input" placeholder="Width (px)">` +
+            `<input id="swal-input2" class="swal2-input" placeholder="Height (px)">`,
+          focusConfirm: false,
+          preConfirm: () => {
+            const width = (document.getElementById('swal-input1') as HTMLInputElement).value;
+            const height = (document.getElementById('swal-input2') as HTMLInputElement).value;
+            if (!width || !height || isNaN(+width) || isNaN(+height)) {
+              Swal.showValidationMessage('Please enter numeric values.');
+              return null;
+            }
+            return { width: +width, height: +height };
+          }
+        });
+
+        if (formValues) {
+          const range = this.quillInstance.getSelection(true);
+          this.quillInstance.insertEmbed(range.index, 'video', url, 'user');
+
+          setTimeout(() => {
+            const videoElements = this.quillInstance.root.querySelectorAll('iframe, video');
+            const lastVideo = videoElements[videoElements.length - 1]; // ✅ fixed here
+            if (lastVideo) {
+              lastVideo.style.width = formValues.width + 'px';
+              lastVideo.style.height = formValues.height + 'px';
+            }
+          }, 100);
+        }
+      }
+    });
+  }
 
   getSchool() {
     this.Schools = []

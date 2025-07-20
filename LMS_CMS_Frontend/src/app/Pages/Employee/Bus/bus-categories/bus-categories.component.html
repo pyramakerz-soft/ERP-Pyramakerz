@@ -1,6 +1,6 @@
 <div class="">
     <div class="flex justify-between">
-        <h1 class="font-semibold text-2xl leading-9">Bus Category</h1>
+        <h1 class="primaryTxt font-semibold text-2xl leading-9">   {{ 'Bus Category' | translate }}</h1>
         <div class="flex justify-between items-center ">
             <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
         <button 
@@ -14,17 +14,17 @@
             'secondaryTxt': IsChoosenDomain  
         }"
         class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
-        Create Bus Category
+          {{ 'Create Bus Category' | translate }}
         </button>
         </div>
     </div>
     
     
     <div [ngClass]="{'hidden': IsEmployee}" class="mt-5">
-        <label for="domains" class="block mb-2 text-sm font-medium text-gray-900">Domains</label>
+        <label for="domains" class="block mb-2 text-sm font-medium text-gray-900"> {{ 'Domains' | translate }}</label>
         <select id="domains" (change)="getBusDataByDomainName($event)"
         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5">
-        <option value="" disabled selected hidden>Select a Domain</option>
+        <option value="" disabled selected hidden>   {{ 'Select a Domain' | translate }}</option>
         <option *ngFor="let domain of DomainData" [value]="domain.name">
             {{ domain.name }}
         </option>
@@ -37,25 +37,25 @@
             <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
                 <tr>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        ID
+                        {{ 'ID' | translate }}
                     </th>
                     <th
                         class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
-                        Name
+                        {{ 'Name' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Date
+                         {{ 'Date' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Actions
+                       {{ 'Actions' | translate }}
                     </th>
                 </tr>
             </thead>
             <tbody>
                 <!-- No Data Row -->
                 <tr *ngIf="TableData.length === 0">
-                    <td colspan="11" class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-                        No Data Found
+                    <td colspan="4" class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                         {{ 'No Data Found' | translate }}
                     </td>
                 </tr>
 
@@ -97,21 +97,21 @@
             <i class="fa-solid fa-xmark text-2xl"></i>
         </button>
         
-        <h1 *ngIf="!busCategory.id" class="font-semibold text-2xl leading-9">Create Bus Category</h1>
-        <h1 *ngIf="busCategory.id" class="font-semibold text-2xl leading-9">Edit Bus Category</h1>
+        <h1 *ngIf="!busCategory.id" class="font-semibold text-2xl leading-9">  {{ 'Create Bus Category' | translate }}</h1>
+        <h1 *ngIf="busCategory.id" class="font-semibold text-2xl leading-9">  {{ 'Edit Bus Category' | translate }}</h1>
         <div class="mt-4 bg-[#F7F7F7] w-[573px] h-auto rounded-[24px] p-[16px_24px] gap-[20px]">
-            <h6 class="font-medium text-base leading-6">Category Name</h6>
+            <h6 class="font-medium text-base leading-6">  {{ 'Category Name' | translate }}</h6>
             <div class="flex justify-start mt-2 gap-2 items-start">
                 <div class="flex flex-col">
                     <input type="text" class="w-[404px] h-[45px] rounded-lg border border-solid border-gray-300 px-2" 
-                        [(ngModel)]="busCategory.name" placeholder="Enter new category" (ngModelChange)="onInputValueChange({ field: 'name', value: $event })"/>
+                        [(ngModel)]="busCategory.name" placeholder="  {{ 'Enter new category' | translate }}" (ngModelChange)="onInputValueChange({ field: 'name', value: $event })"/>
                     <span *ngIf="validationErrors['name']" class="text-red-500 ml-3 font-normal">{{ validationErrors['name'] }}</span>
                 </div>
                 <button  
                 [disabled]="isLoading" 
                 class="secondaryBg text-white font-medium px-4 py-2 rounded-lg flex items-center justify-center gap-2" 
                 (click)="CreateOREdit()">
-                <span *ngIf="!isLoading">Save</span>
+                <span *ngIf="!isLoading">{{ 'Save' | translate }}</span>
                 <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
               </button>
             </div>

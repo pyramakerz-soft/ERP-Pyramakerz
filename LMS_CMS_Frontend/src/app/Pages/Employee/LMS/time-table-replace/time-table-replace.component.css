@@ -1,0 +1,8 @@
+td {
+  border: 1px solid #ccc;
+  min-height: 50px;
+}
+
+td.drag-over {
+  background-color: #f0f0f0;
+}

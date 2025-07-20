@@ -116,23 +116,23 @@
         <div class="w-[35%]">
             <label class="block mb-2 text-sm font-medium text-gray-900" for="star">Stars</label>
             <div class="border border-gray-300 rounded-lg px-4 py-3 min-h-[48px] flex items-center space-x-1">
-                <ng-container *ngFor="let star of [1, 2, 3, 4, 5]">
-                    <i class="fa-star cursor-pointer text-2xl" [ngClass]="{
-                  'fa-solid text-yellow-400': star <= selectedRating,
-                  'fa-regular text-gray-400': star > selectedRating
-                }" (click)="setStar(star)"></i>
-                </ng-container>
+                <div  *ngIf="PerformanceTypesSelected.length > 0">
+                    <ng-container *ngFor="let star of [1, 2, 3, 4, 5]">
+                        <i class="fa-star cursor-pointer text-2xl" [ngClass]="{
+                      'fa-solid text-yellow-400': star <= selectedRating,
+                      'fa-regular text-gray-400': star > selectedRating
+                    }" (click)="setStar(star)"></i>
+                    </ng-container>
+                </div>
             </div>
         </div>
 
         <!-- Apply Button -->
         <div class="mt-5 w-[25%] flex items-center justify-start space-x-3">
-            <button class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2" (click)="Applay()">
+            <button class="rounded-lg border px-4 py-3 flex items-center justify-center gap-2" (click)="Applay()"
+            [disabled]="selectedRating == 0" [ngClass]="{ 'text-gray-300 border-gray-300': selectedRating == 0 || selectedStudentIds.length == 0 , 'secondaryBorder secondaryTxt': selectedRating != 0 && selectedStudentIds.length != 0}">
                 Apply
-            </button>
-            <!-- <button class="secondaryBorder secondaryTxt rounded-lg px-4 py-3 flex items-center justify-center gap-2" (click)="submitRatings()">
-                Save
-            </button> -->
+            </button> 
             <button
             [disabled]="isLoading"
             class="secondaryBorder secondaryTxt rounded-lg px-4 py-3 flex items-center justify-center gap-2"

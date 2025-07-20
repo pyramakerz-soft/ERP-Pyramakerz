@@ -16,11 +16,13 @@ import { AccountingTreeChart } from '../../../../Models/Accounting/accounting-tr
 import { OutComeService } from '../../../../Services/Employee/Accounting/out-come.service';
 import { firstValueFrom } from 'rxjs';
 import { AccountingTreeChartService } from '../../../../Services/Employee/Accounting/accounting-tree-chart.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-outcomes',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './outcomes.component.html',
   styleUrl: './outcomes.component.css'
 })
@@ -47,7 +49,8 @@ export class OutcomesComponent {
   AccountNumbers: AccountingTreeChart[] = [];
 
   TableData: Outcome[] = [];
-
+ isRtl: boolean = false;
+  subscription!: Subscription;
   DomainName: string = '';
   UserID: number = 0;
 
@@ -75,7 +78,7 @@ export class OutcomesComponent {
     public ApiServ: ApiService,
     public OutComeServ: OutComeService,
     public accountServ: AccountingTreeChartService,
-
+    private languageService: LanguageService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -97,6 +100,10 @@ export class OutcomesComponent {
 
     this.GetAllData();
     this.GetAllAccount();
+          this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetAllData() {
@@ -229,6 +236,11 @@ export class OutcomesComponent {
           }
         }
       }
+    }
+
+    if (this.outcome.name.length > 100) {
+      isValid = false;
+      this.validationErrors['name']='Name cannot be longer than 100 characters.'
     }
     return isValid;
   }

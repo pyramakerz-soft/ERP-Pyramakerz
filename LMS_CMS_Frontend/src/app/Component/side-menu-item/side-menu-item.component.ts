@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
-import { Router, Routes } from '@angular/router';
+import { NavigationEnd, Router, Routes } from '@angular/router';
 import { PagesWithRoleId } from '../../Models/pages-with-role-id';
 import { MenuService } from '../../Services/shared/menu.service';
 import { NewTokenService } from '../../Services/shared/new-token.service';
-import { Subscription } from 'rxjs';
+import { filter, Subscription } from 'rxjs';
 import { LanguageService } from '../../Services/shared/language.service';
 
 @Component({
@@ -16,40 +16,54 @@ import { LanguageService } from '../../Services/shared/language.service';
 })
 export class SideMenuItemComponent {
   @Input() item!: any;
-  @Input() menuItems?: { label: string; route?: string;  subItems?: { label: string; route: string }[]}[] = [];
+  @Input() menuItems?: { label: string; route?: string; subItems?: { label: string; route: string }[] }[] = [];
   @Input() menuItemsForEmployee?: PagesWithRoleId[];
   subscription!: Subscription;
   isRtl: boolean = false;
 
-  constructor(private router: Router ,private menuService: MenuService ,private communicationService: NewTokenService, private languageService: LanguageService) {}
+  currentUrl: string = '';
+  routerEventsSub!: Subscription;
+
+  constructor(private router: Router, private menuService: MenuService, private communicationService: NewTokenService, private languageService: LanguageService) { }
 
   async ngOnInit() {
     this.subscription = this.communicationService.action$.subscribe((state) => {
       this.menuService.menuItemsForEmployee$.subscribe((items) => {
         this.menuItemsForEmployee = items;
-      },(error)=>{
+      }, (error) => {
         this.menuItemsForEmployee = [];
-  
+
       });
     });
     this.menuService.menuItemsForEmployee$.subscribe((items) => {
       this.menuItemsForEmployee = items;
-    },(error)=>{
+    }, (error) => {
       this.menuItemsForEmployee = [];
 
     });
-  
+
     this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
-    this.isRtl = document.documentElement.dir === 'rtl'; 
+    this.isRtl = document.documentElement.dir === 'rtl';
+
+
+    this.currentUrl = this.router.url;
+
+    // So when the user clicks a menu item or navigates to a new page you know the current URL
+    this.routerEventsSub = this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe((event: any) => {
+        this.currentUrl = event.urlAfterRedirects;
+      });
   }
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
-  } 
+    this.routerEventsSub?.unsubscribe();
+  }
 
-  navigateToRoute(routName:string): void {
+  navigateToRoute(routName: string): void {
     const routes: Routes = this.router.config;
 
     const routeExists = this.isRouteExist(routName, routes);
@@ -74,6 +88,21 @@ export class SideMenuItemComponent {
     }
     return false;
   } 
+ 
+  isActiveDeep(item: any = this.item): boolean {
+    const encoded = this.getEncodedCurrentSegment();
+
+    if (encodeURIComponent(item.en_name.trim()).toLowerCase() === encoded) {
+      return true;
+    }
+
+    return item.children?.some((child: any) => this.isActiveDeep(child)) ?? false;
+  }
+
+  private getEncodedCurrentSegment(): string {
+    const segments = this.currentUrl.toLowerCase().split('/').filter(Boolean);
+    return segments[1]; // This pulls the second segment of the URL (after /Employee)
+  }
 
   getImageSrc(item: any): string {
     return `Icons/SideMenuIcons/${item.en_name.trim().replace(/ /g, '_')}.png`;

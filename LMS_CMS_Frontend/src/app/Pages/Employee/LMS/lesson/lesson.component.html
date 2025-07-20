@@ -253,13 +253,13 @@
             <div class="flex flex-col mb-4 w-full">
                 <label class="mb-2 primaryTxt">Details</label>
                 
-                <quill-editor
-                (ngModelChange)="onInputValueChange({ field: 'details', value: $event })"
-                [(ngModel)]="lesson.details"
-                [modules]="editorModules"
-                theme="snow" 
-                class="quill-editor-wrapper"
-                placeholder="Enter lesson details" >
+                <quill-editor #quillEditor (onEditorCreated)="onEditorCreated($event)"
+                    (ngModelChange)="onInputValueChange({ field: 'details', value: $event })"
+                    [(ngModel)]="lesson.details"
+                    [modules]="editorModules"
+                    theme="snow" 
+                    class="quill-editor-wrapper"
+                    placeholder="Enter lesson details" >
                 </quill-editor>
 
                 <span *ngIf="validationErrors['details']" class="text-red-500 ml-3 font-normal">{{ validationErrors['details'] }}</span>

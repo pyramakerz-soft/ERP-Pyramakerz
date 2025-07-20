@@ -1,5 +1,5 @@
 <div class="flex justify-between">
-    <h1 class="font-semibold text-2xl leading-9">Print Name Tag</h1>
+    <h1 class="primaryTxt font-semibold text-2xl leading-9">  {{ 'Print Name Tag' | translate }}</h1>
     <div class="flex justify-between items-center ">
         <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
     </div>
@@ -7,20 +7,20 @@
 
 <div *ngIf="this.User_Data_After_Login.type === 'octa'" class="flex justify-between mt-5">
     <div class="w-[48%]">
-        <label for="buses" class=" mb-2 text-sm font-medium text-gray-900">Domains</label>
+        <label for="buses" class=" mb-2 text-sm font-medium text-gray-900">{{ 'Domains' | translate }}</label>
         <select id="buses" (change)="DomainIsChanged($event)"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg  w-full p-2.5">
-            <option [value]="null" disabled selected hidden>Select a Domain</option>
+            <option [value]="null" disabled selected hidden>{{ 'Select a Domain' | translate }}</option>
             <option *ngFor="let domain of DomainData" [value]="domain.name">
                 {{ domain.name }}
             </option>
         </select>
     </div>
     <div class="w-[48%]">
-        <label for="buses" class="mb-2 text-sm font-medium text-gray-900">Buses</label>
+        <label for="buses" class="mb-2 text-sm font-medium text-gray-900">  {{ 'Buses' | translate }}</label>
         <select id="buses" (change)="getDataByBusId($event)"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg  w-full p-2.5">
-            <option *ngIf="busId == -1" [value]="0" disabled selected hidden>Select a Bus</option>
+            <option [value]="-1" disabled selected hidden>  {{ 'Select a Bus' | translate }}</option>
             <option *ngFor="let bus of BusData" [value]="bus.id">
                 {{ bus.name }}
             </option>
@@ -29,10 +29,10 @@
 </div>
 <div *ngIf="this.User_Data_After_Login.type === 'employee'" class="mt-5">
     <div>
-        <label for="buses" class="mb-2 text-sm font-medium text-gray-900">Buses</label>
+        <label for="buses" class="mb-2 text-sm font-medium text-gray-900">  {{ 'Buses' | translate }}</label>
         <select id="buses" (change)="getDataByBusId($event)" [(ngModel)]="busId"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5">
-            <option *ngIf="busId == -1" [value]="0" disabled selected hidden>Select a Bus</option>
+            <option [value]="-1" disabled selected hidden>  {{ 'Select a Bus' | translate }}</option>
             <option *ngFor="let bus of BusData" [value]="bus.id">
                 {{ bus.name }}
             </option>
@@ -46,35 +46,35 @@
             <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
                 <tr>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        ID
+                      {{ 'ID' | translate }}
                     </th>
                     <th
                         class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
-                        School Name
+                          {{ 'School Name' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Grade
+                          {{ 'Grade' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Classes
+                          {{ 'Classes' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Student name
+                          {{ 'Student name' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Categories
+                          {{ 'Categories' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Semester
+                          {{ 'Semester' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Exception
+                          {{ 'Exception' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Date From
+                          {{ 'Date From' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Date To
+                          {{ 'Date To' | translate }}
                     </th>
                 </tr>
             </thead>
@@ -83,7 +83,7 @@
                 <tr *ngIf="busStudentData.length === 0">
                     <td colspan="11"
                         class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-                        No Data Found
+                      {{ 'No Data Found' | translate }}
                     </td>
                 </tr>
 

@@ -10,7 +10,7 @@
         <img *ngIf="subject.iconLink" [src]="subject.iconLink" alt="Subject Icon" (click)="moveToWeeks(subject.id)"
             class="mx-auto mb-4 w-[80%] h-[100px] object-contain rounded-md cursor-pointer" />
         <div class="flex flex-wrap justify-center gap-3 text-sm text-[#4F4F4F]">
-            <div class="flex items-center w-[40%] space-x-1 cursor-pointer"> 
+            <div class="flex items-center w-[40%] space-x-1 cursor-pointer" (click)="moveToSubjectAssignments(subject.id)"> 
                 <img src="Icons/Assignments.png" alt="Assignments" />
                 <span>Assignments</span>
             </div>

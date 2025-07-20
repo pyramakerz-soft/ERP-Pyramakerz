@@ -1,4 +1,12 @@
-import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, OnInit } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  OnChanges,
+  SimpleChanges,
+  OnInit,
+} from '@angular/core';
 
 import { firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
@@ -14,10 +22,10 @@ import { ApiService } from '../../../../../Services/api.service';
 
 @Component({
   selector: 'app-medical-history-modal',
-    imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule],
   standalone: true,
   templateUrl: './medical-history-modal.component.html',
-  styleUrls: ['./medical-history-modal.component.css']
+  styleUrls: ['./medical-history-modal.component.css'],
 })
 export class MedicalHistoryModalComponent implements OnInit, OnChanges {
   @Input() isVisible = false;
@@ -26,7 +34,22 @@ export class MedicalHistoryModalComponent implements OnInit, OnChanges {
   @Output() onSave = new EventEmitter<void>();
 
   editMode = false;
-  medicalHistory: MedicalHistory = new MedicalHistory(0, 0,'', 0,'', 0,'', 0,'', '', '', new Date().toISOString(), null, null);
+  medicalHistory: MedicalHistory = new MedicalHistory(
+    0,
+    0,
+    '',
+    0,
+    '',
+    0,
+    '',
+    0,
+    '',
+    '',
+    '',
+    new Date().toISOString(),
+    null,
+    null
+  );
   firstReportPreview: File | null = null;
   secReportPreview: File | null = null;
   validationErrors: { [key: string]: string } = {};
@@ -65,7 +88,22 @@ export class MedicalHistoryModalComponent implements OnInit, OnChanges {
         this.secReportPreview = this.medicalHistory.secReport;
       } else {
         this.editMode = false;
-        this.medicalHistory = new MedicalHistory(0, 0,'', 0,'', 0,'', 0,'', '', '', new Date().toISOString(), null, null);
+        this.medicalHistory = new MedicalHistory(
+          0,
+          0,
+          '',
+          0,
+          '',
+          0,
+          '',
+          0,
+          '',
+          '',
+          '',
+          new Date().toISOString(),
+          null,
+          null
+        );
         this.firstReportPreview = null;
         this.secReportPreview = null;
       }
@@ -84,7 +122,9 @@ export class MedicalHistoryModalComponent implements OnInit, OnChanges {
   async loadGrades(schoolId: number) {
     try {
       const domainName = this.apiService.GetHeader();
-      this.grades = await firstValueFrom(this.gradeService.GetBySchoolId(schoolId, domainName));
+      this.grades = await firstValueFrom(
+        this.gradeService.GetBySchoolId(schoolId, domainName)
+      );
     } catch (error) {
       console.error('Error loading grades:', error);
     }
@@ -93,7 +133,9 @@ export class MedicalHistoryModalComponent implements OnInit, OnChanges {
   async loadClasses(gradeId: number) {
     try {
       const domainName = this.apiService.GetHeader();
-      this.classes = await firstValueFrom(this.classroomService.GetByGradeId(gradeId, domainName));
+      this.classes = await firstValueFrom(
+        this.classroomService.GetByGradeId(gradeId, domainName)
+      );
     } catch (error) {
       console.error('Error loading classes:', error);
     }
@@ -102,8 +144,13 @@ export class MedicalHistoryModalComponent implements OnInit, OnChanges {
   async loadStudents(classId: number) {
     try {
       const domainName = this.apiService.GetHeader();
-      const data = await firstValueFrom(this.studentService.GetByClassID(classId, domainName));
-      this.students = data.map(student => ({ id: student.id, name: student.en_name }));
+      const data = await firstValueFrom(
+        this.studentService.GetByClassID(classId, domainName)
+      );
+      this.students = data.map((student) => ({
+        id: student.id,
+        name: student.en_name,
+      }));
     } catch (error) {
       console.error('Error loading students:', error);
     }
@@ -181,7 +228,10 @@ export class MedicalHistoryModalComponent implements OnInit, OnChanges {
       isValid = false;
     }
 
-    if (!this.medicalHistory.classRoomID || this.medicalHistory.classRoomID === 0) {
+    if (
+      !this.medicalHistory.classRoomID ||
+      this.medicalHistory.classRoomID === 0
+    ) {
       this.validationErrors['classRoomID'] = '*Class is required';
       isValid = false;
     }
@@ -195,39 +245,88 @@ export class MedicalHistoryModalComponent implements OnInit, OnChanges {
   }
 
   isSaving: boolean = false;
-async saveMedicalHistory() {
-  if (this.isFormValid()) {
-    try {
-      // Disable the save button during submission
-      this.isSaving = true;
-      
-      const domainName = this.apiService.GetHeader();
-      
-      if (this.editMode) {
-        await firstValueFrom(
-          this.medicalHistoryService.UpdateByDoctorAsync(this.medicalHistory, domainName)
-        );
-        Swal.fire('Success', 'Medical history updated successfully!', 'success');
-      } else {
-        await firstValueFrom(
-          this.medicalHistoryService.AddByDoctor(this.medicalHistory, domainName)
-        );
-        Swal.fire('Success', 'Medical history created successfully!', 'success');
-      }
+  async saveMedicalHistory() {
+    if (this.isFormValid()) {
+      try {
+        this.isSaving = true;
 
-      this.onSave.emit();
-      this.closeModal();
-    } catch (error) {
-      console.error('Error saving medical history:', error);
-      Swal.fire('Error', 'Failed to save medical history. Please try again later.', 'error');
-    } finally {
-      this.isSaving = false;
+        const domainName = this.apiService.GetHeader();
+
+        if (this.editMode) {
+          await firstValueFrom(
+            this.medicalHistoryService.UpdateByDoctorAsync(
+              this.medicalHistory,
+              domainName
+            )
+          );
+          Swal.fire(
+            'Success',
+            'Medical history updated successfully!',
+            'success'
+          );
+        } else {
+          await firstValueFrom(
+            this.medicalHistoryService.AddByDoctor(
+              this.medicalHistory,
+              domainName
+            )
+          );
+          Swal.fire(
+            'Success',
+            'Medical history created successfully!',
+            'success'
+          );
+        }
+
+        this.onSave.emit();
+        this.closeModal();
+      } catch (error) {
+        console.error('Error saving medical history:', error);
+        Swal.fire(
+          'Error',
+          'Failed to save medical history. Please try again later.',
+          'error'
+        );
+      } finally {
+        this.isSaving = false;
+      }
     }
   }
-}
+
+  // Add this method to clear validation error for a field
+  clearValidationError(field: string) {
+    if (this.validationErrors[field]) {
+      delete this.validationErrors[field];
+    }
+  }
 
   closeModal() {
     this.isVisible = false;
     this.isVisibleChange.emit(false);
+
+    // Reset form data and validation errors when closing
+    this.editMode = false;
+    this.medicalHistory = new MedicalHistory(
+      0,
+      0,
+      '',
+      0,
+      '',
+      0,
+      '',
+      0,
+      '',
+      '',
+      '',
+      new Date().toISOString(),
+      null,
+      null
+    );
+    this.firstReportPreview = null;
+    this.secReportPreview = null;
+    this.validationErrors = {};
+    this.grades = [];
+    this.classes = [];
+    this.students = [];
   }
 }

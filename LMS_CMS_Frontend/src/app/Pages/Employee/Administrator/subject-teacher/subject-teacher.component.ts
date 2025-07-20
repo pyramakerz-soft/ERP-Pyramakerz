@@ -17,11 +17,13 @@ import { SubjectService } from '../../../../Services/Employee/LMS/subject.servic
 import Swal from 'sweetalert2';
 import { EmployeeGet } from '../../../../Models/Employee/employee-get';
 import { EmployeeService } from '../../../../Services/Employee/employee.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-subject-teacher',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
   templateUrl: './subject-teacher.component.html',
   styleUrl: './subject-teacher.component.css'
 })
@@ -42,6 +44,9 @@ export class SubjectTeacherComponent {
 
   DomainName: string = '';
   UserID: number = 0;
+   isRtl: boolean = false;
+    subscription!: Subscription;
+  TeacherId: number = 0;
   SupjectTeacherData: any[] = []; 
   areAllClassroomsOpen: boolean = true;
   SupjectTeacher: ClassroomSubject = new ClassroomSubject()
@@ -59,7 +64,8 @@ export class SubjectTeacherComponent {
     public ClassroomSubjectServ: ClassroomSubjectService,
     public classroomServ: ClassroomService,
     public subjectServ: SubjectService ,
-    public EmpServ: EmployeeService
+    public EmpServ: EmployeeService,
+      private languageService: LanguageService
   ) { }
 
   ngOnInit() {
@@ -68,11 +74,17 @@ export class SubjectTeacherComponent {
     this.DomainName = this.ApiServ.GetHeader();
      
     this.SupjectTeacher.teacherID = Number(this.activeRoute.snapshot.paramMap.get('id'));
+    this.TeacherId = Number(this.activeRoute.snapshot.paramMap.get('id'));
      this.EmpServ.Get_Employee_By_ID(this.SupjectTeacher.teacherID, this.DomainName).subscribe(async (data) => {
           this.employee = data; 
         }) 
     this.GetData();
     this.GetAllClassrooms();
+
+          this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   moveToEmployee() {
@@ -80,6 +92,7 @@ export class SubjectTeacherComponent {
   }
 
   GetData() {
+    console.log(this.SupjectTeacher.teacherID)
     this.ClassroomSubjectServ.GetByEmpId(this.SupjectTeacher.teacherID, this.DomainName).subscribe((d) => {
       this.SupjectTeacherData = d
       console.log(this.SupjectTeacherData)
@@ -159,6 +172,8 @@ export class SubjectTeacherComponent {
     document.getElementById("Add_Modal")?.classList.add("hidden");
 
     this.SupjectTeacher = new ClassroomSubject()
+    this.SupjectTeacher.teacherID = this.TeacherId
+      this.validationErrors = {};
   }
 
   capitalizeField(field: keyof ClassroomSubject): string {

@@ -13,11 +13,14 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-accounting-entries',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent,TranslateModule],
   templateUrl: './accounting-entries.component.html',
   styleUrl: './accounting-entries.component.css'
 })
@@ -39,7 +42,8 @@ export class AccountingEntriesComponent {
   value: any = '';
 
   accountingEntriesData: AccountingEntries[] = []
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   CurrentPage:number = 1
   PageSize:number = 10
   TotalPages:number = 1
@@ -48,9 +52,16 @@ export class AccountingEntriesComponent {
   isDeleting:boolean = false;
 
 constructor(
-    private router: Router, private menuService: MenuService, public activeRoute: ActivatedRoute, public account: AccountService, 
-    public DomainServ: DomainService, public EditDeleteServ: DeleteEditPermissionService, public ApiServ: ApiService, public accountingEntriesService:AccountingEntriesService){}
-
+    private router: Router,
+     private menuService: MenuService, 
+     public activeRoute: ActivatedRoute,
+      public account: AccountService, 
+    public DomainServ: DomainService,
+     public EditDeleteServ: DeleteEditPermissionService, 
+     public ApiServ: ApiService, 
+     public accountingEntriesService:AccountingEntriesService,
+    private languageService: LanguageService){}
+    
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
@@ -70,9 +81,15 @@ constructor(
     });
 
     this.GetAccountingEntriesDate(this.DomainName, this.CurrentPage, this.PageSize)
+
+    this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   async onSearchEvent(event: { key: string; value: any }) {
+    this.PageSize = this.TotalRecords
     this.key = event.key;
     this.value = event.value;
     try {

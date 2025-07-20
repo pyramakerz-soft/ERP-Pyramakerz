@@ -23,11 +23,14 @@ import { Grade } from '../../../../Models/LMS/grade';
 import { Subject } from '../../../../Models/LMS/subject';
 import { GradeService } from '../../../../Services/Employee/LMS/grade.service';
 import { SubjectService } from '../../../../Services/Employee/LMS/subject.service';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-employee-add-edit',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule,TranslateModule],
   templateUrl: './employee-add-edit.component.html',
   styleUrl: './employee-add-edit.component.css',
 })
@@ -47,6 +50,8 @@ export class EmployeeAddEditComponent {
   DomainName: string = '';
   UserID: number = 0;
   path: string = '';
+   isRtl: boolean = false;
+    subscription!: Subscription;
   Data: EmployeeGet = new EmployeeGet();
   BusCompany: BusType[] = [];
   Roles: Role[] = [];
@@ -91,7 +96,7 @@ export class EmployeeAddEditComponent {
     public FloorServ: FloorService,
     public GradeServ: GradeService,
     public SubjectServ: SubjectService,
-
+private languageService: LanguageService
   ) { }
 
   ngOnInit() {
@@ -156,6 +161,11 @@ export class EmployeeAddEditComponent {
         this.GetEmployeeType();
       });
     }
+      this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+
   }
 
   GetBusCompany() {
@@ -202,6 +212,10 @@ export class EmployeeAddEditComponent {
     if (input.files) {
       for (let i = 0; i < input.files.length; i++) {
         const file = input.files[i];
+        const maxSizeInBytes = 25 * 1024 * 1024; // 25MB in bytes
+        if (file.size > maxSizeInBytes) {
+          continue;
+        }
         this.NewFile = new EmployeeAttachment();
         this.NewFile.file = file;
         this.NewFile.name = file.name.replace(/\.[^/.]+$/, '');
@@ -280,6 +294,21 @@ export class EmployeeAddEditComponent {
 
     if (this.Data.email && !this.emailPattern.test(this.Data.email)) {
       this.validationErrors['email'] = `*Email is not valid`;
+      isValid = false;
+    }
+
+    if (this.Data.user_Name.length > 100) {
+      this.validationErrors['user_Name'] = `*UserName cannot be longer than 100 characters`;
+      isValid = false;
+    }
+
+    if (this.Data.en_name.length > 100) {
+      this.validationErrors['en_name'] = `*English Name cannot be longer than 100 characters`;
+      isValid = false;
+    }
+
+    if (this.Data.ar_name.length > 100) {
+      this.validationErrors['ar_name'] = `*Arabic Name cannot be longer than 100 characters`;
       isValid = false;
     }
 
@@ -505,8 +534,8 @@ export class EmployeeAddEditComponent {
     this.dropdownOpen = false;
   }
 
-  onFloorsSupervisorChange(){
-     if (!this.isFloorMonitor) {
+  onFloorsSupervisorChange() {
+    if (!this.isFloorMonitor) {
       if (this.mode === 'Edit') {
         this.Data.deletedFloorsSelected = this.Data.deletedFloorsSelected || [];
         const selectedIds = (this.floorsSelected || []).map(s => s.id);

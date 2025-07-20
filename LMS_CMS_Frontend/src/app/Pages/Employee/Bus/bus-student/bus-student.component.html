@@ -5,53 +5,53 @@
     </div>
     <div class="flex flex-wrap justify-between">
         <div class="bg-[#EBEBEB] p-3 w-[30%] mb-4">
-            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Name</p>
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">   {{ 'Name' | translate }}</p>
             <p class="font-medium text-base text-[#1E1E1E]">{{ bus.name }}</p>
         </div>
         <div class="bg-[#EBEBEB] p-3 w-[30%] mb-4">
-            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Type</p>
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">   {{ 'Type' | translate }}</p>
             <p class="font-medium text-base text-[#1E1E1E]">{{ bus.busTypeName }}</p>
         </div>
         <div class="bg-[#EBEBEB] p-3 w-[30%] mb-4">
-            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Districts</p>
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">   {{ 'District' | translate }}</p>
             <p class="font-medium text-base text-[#1E1E1E]">{{ bus.busDistrictName }}</p>
         </div>
         <div class="bg-[#EBEBEB] p-3 w-[30%] mb-4">
-            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Status</p>
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">   {{ 'Status' | translate }}</p>
             <p class="font-medium text-base text-[#1E1E1E]">{{ bus.busStatusName }}</p>
         </div>
         <div class="bg-[#EBEBEB] p-3 w-[30%] mb-4">
-            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Capacity</p>
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">   {{ 'Capacity' | translate }}</p>
             <p class="font-medium text-base text-[#1E1E1E]">{{ bus.capacity }}</p>
         </div>
         <div class="bg-[#EBEBEB] p-3 w-[30%] mb-4">
-            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Driver</p>
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">   {{ 'Driver' | translate }}</p>
             <p class="font-medium text-base text-[#1E1E1E]">{{ bus.driverName }}</p>
         </div>
         <div class="bg-[#EBEBEB] p-3 w-[30%] mb-4">
-            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Driver Assistant</p>
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">   {{ 'Driver Assistant' | translate }}</p>
             <p class="font-medium text-base text-[#1E1E1E]">{{ bus.driverAssistantName }}</p>
         </div>
         <div class="bg-[#EBEBEB] p-3 w-[30%] mb-4">
-            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Company</p>
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">   {{ 'Company' | translate }}</p>
             <p class="font-medium text-base text-[#1E1E1E]">{{ bus.busCompanyName }}</p>
         </div>
         <div class="bg-[#EBEBEB] p-3 w-[30%] mb-4">
-            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Morning Price</p>
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">   {{ 'Morning Price' | translate }}</p>
             <p class="font-medium text-base text-[#1E1E1E]">{{ bus.morningPrice }}</p>
         </div>
         <div class="bg-[#EBEBEB] p-3 w-[30%] mb-4">
-            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Back Price</p>
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">   {{ 'Back Price' | translate }}</p>
             <p class="font-medium text-base text-[#1E1E1E]">{{ bus.backPrice }}</p>
         </div>
         <div class="bg-[#EBEBEB] p-3 w-[30%] mb-4">
-            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Two Ways Price</p>
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">   {{ 'Two Ways Price' | translate }}</p>
             <p class="font-medium text-base text-[#1E1E1E]">{{ bus.twoWaysPrice }}</p>
         </div>
         <div class="flex space-x-5 items-center w-[30%] mb-4">
             <i *ngIf="bus.isCapacityRestricted" class="secondaryTxt text-2xl fa-regular fa-square-check"></i>
             <i *ngIf="!bus.isCapacityRestricted" class="text-[#BDBDBD] text-2xl fa-regular fa-square"></i>
-            <label for="Restricted" class="text-sm">Restricted Capacity</label>
+            <label for="Restricted" class="text-sm">   {{ 'Restricted Capacity' | translate }}</label>
         </div>
     </div>
 </div>
@@ -59,18 +59,18 @@
 
 <div>
     <div class="flex justify-between my-8">
-        <h1 class="primaryTxt font-semibold text-2xl leading-9 mb-5">Students</h1>
+        <h1 class="primaryTxt font-semibold text-2xl leading-9 mb-5">   {{ 'Students' | translate }}</h1>
         <div class="flex items-center space-x-3">
             <app-search [key]="key" [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search> 
-            <button class="secondaryBg rounded-lg py-3 px-4 text-white" (click)="OpenModal()">Add Student</button>
+            <button class="secondaryBg rounded-lg py-3 px-4 text-white" (click)="OpenModal()">{{ 'Add Student' | translate }}</button>
         </div>
     </div>
 
     <div class="mt-5">
-        <label for="Years" class="block mb-2 text-sm font-medium text-gray-900">Year</label>
+        <label for="Years" class="block mb-2 text-sm font-medium text-gray-900">{{ 'Year' | translate }}</label>
         <select id="Years" (change)="getDataByAcademicYear($event)"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5">
-            <option [value]="null" disabled selected hidden >Select Year</option>
+            <option [value]="null" disabled selected hidden >   {{ 'Select Year' | translate }}</option>
             <option *ngFor="let domain of AcademicYearData" [value]="domain.name">
                 {{ domain.name }}
             </option>
@@ -83,37 +83,37 @@
             <thead class="bg-[##EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
                 <tr>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        School Name
+                       {{ 'School Name' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
-                        Grade
+                         {{ 'Grade' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Classes
+                       {{ 'Classes' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Student Name
+                         {{ 'Student name' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Categories
+                         {{ 'Categories' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Semester
+                         {{ 'Semester' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Exception
+                         {{ 'Exception' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Date From
+                       {{ 'Date From' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Date To
+                     {{ 'Date To' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Academic Year
+                         {{ 'Academic Year' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Actions
+                       {{ 'Actions' | translate }}
                     </th>
                 </tr>
             </thead>
@@ -121,7 +121,7 @@
                 <!-- No Data Row -->
                 <tr *ngIf="busStudentData.length === 0">
                     <td colspan="11" class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-                        No Data Found
+                        {{ 'No Data Found' | translate }}
                     </td>
                 </tr>
 
@@ -222,93 +222,93 @@
 <div id="Add_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
     <div class="bg-white rounded-2xl p-12 w-1/2">
         <div class="flex justify-between items-center">
-            <h1 *ngIf="!editBusStudent" class="font-semibold text-2xl leading-9">Add Student</h1>
-            <h1 *ngIf="editBusStudent" class="font-semibold text-2xl leading-9">Edit Student</h1>
+            <h1 *ngIf="!editBusStudent" class="font-semibold text-2xl leading-9"> {{ 'Add Student' | translate }}</h1>
+            <h1 *ngIf="editBusStudent" class="font-semibold text-2xl leading-9"> {{ 'Edit Student' | translate }}</h1>
             <button (click)="closeModal()" type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
         </div>
 
         <div class="mt-6 mb-4 flex flex-wrap justify-between">
             <div class="flex flex-col w-[49%] mb-4">
-                <label class="mb-2" for="school" [ngClass]="{ 'text-gray-400': editBusStudent, 'primaryTxt': !editBusStudent}">Choose School</label>
+                <label class="mb-2" for="school" [ngClass]="{ 'text-gray-400': editBusStudent, 'primaryTxt': !editBusStudent}"> {{ 'Choose School' | translate }}</label>
                 <select
                 class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="school" [(ngModel)]="selectedSchool" (change)="onSchoolChange()"
                 [disabled]="editBusStudent" [ngClass]="{ 'bg-[#EBEBEB]': editBusStudent}">
-                    <option [value]="null" disabled selected hidden>Choose School</option>
+                    <option [value]="null" disabled selected hidden> {{ 'Choose School' | translate }}</option>
                     <option *ngFor="let school of SchoolGroupByGradeGroupByClass" [value]="school.id">{{ school.name }}</option>
-                    <option *ngIf="SchoolGroupByGradeGroupByClass.length === 0" disabled selected>No Data Found</option>
+                    <option *ngIf="SchoolGroupByGradeGroupByClass.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
                 </select>
             </div>
             <div class="flex flex-col w-[49%] mb-4">
-                <label class="mb-2" for="section" [ngClass]="{ 'text-gray-400': !selectedSchool || editBusStudent, 'primaryTxt': selectedSchool && !editBusStudent }">Choose Section</label>
+                <label class="mb-2" for="section" [ngClass]="{ 'text-gray-400': !selectedSchool || editBusStudent, 'primaryTxt': selectedSchool && !editBusStudent }"> {{ 'Choose Section' | translate }}</label>
                 <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="section" [(ngModel)]="selectedSection" (change)="onSectionChange()" [disabled]="!selectedSchool || editBusStudent" [ngClass]="{ 'bg-[#EBEBEB]': !selectedSchool || editBusStudent }">
-                    <option [value]="null" disabled selected hidden>Choose Section</option>
+                    <option [value]="null" disabled selected hidden> {{ 'Choose Section' | translate }}</option>
                     <option *ngFor="let section of filteredSections" [value]="section.id">{{ section.name }}</option>
-                    <option *ngIf="filteredSections.length === 0" disabled selected>No Data Found</option>
+                    <option *ngIf="filteredSections.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
                 </select>
             </div>
             <div class="flex flex-col w-[49%] mb-4">
-                <label class="mb-2" for="grade" [ngClass]="{ 'text-gray-400': !selectedSection || editBusStudent, 'primaryTxt': selectedSection && !editBusStudent }">Choose Grade</label>
+                <label class="mb-2" for="grade" [ngClass]="{ 'text-gray-400': !selectedSection || editBusStudent, 'primaryTxt': selectedSection && !editBusStudent }"> {{ 'Choose Grade' | translate }}</label>
                 <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="grade" [(ngModel)]="selectedGrade" (change)="onGradeChange()" [disabled]="!selectedSection || editBusStudent" [ngClass]="{ 'bg-[#EBEBEB]': !selectedSection || editBusStudent }">
-                    <option [value]="null" disabled selected hidden>Choose Grade</option>
+                    <option [value]="null" disabled selected hidden> {{ 'Choose Grade' | translate }}</option>
                     <option *ngFor="let grade of filteredGrades" [value]="grade.id">{{ grade.name }}</option>
-                    <option *ngIf="filteredGrades.length === 0" disabled selected>No Data Found</option>
+                    <option *ngIf="filteredGrades.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
                 </select>
             </div>
             <div class="flex flex-col w-[49%] mb-4">
-                <label class="mb-2" [ngClass]="{ 'text-gray-400': !selectedGrade || editBusStudent, 'primaryTxt': selectedGrade && !editBusStudent}" for="class">Choose Class</label>
+                <label class="mb-2" [ngClass]="{ 'text-gray-400': !selectedGrade || editBusStudent, 'primaryTxt': selectedGrade && !editBusStudent}" for="class"> {{ 'Choose Class' | translate }}</label>
                 <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="class" [(ngModel)]="selectedClass" (change)="onClassChange()" [disabled]="!selectedGrade || editBusStudent" [ngClass]="{ 'bg-[#EBEBEB]': !selectedGrade || editBusStudent }">
-                    <option [value]="null" disabled selected hidden>Choose Class</option>
+                    <option [value]="null" disabled selected hidden> {{ 'Choose Class' | translate }}</option>
                     <option *ngFor="let classItem of filteredClasses" [value]="classItem.id">{{ classItem.name }}</option>
-                    <option *ngIf="filteredClasses.length === 0" disabled selected>No Data Found</option>
+                    <option *ngIf="filteredClasses.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
                 </select>
             </div>
             <div class="flex flex-col w-[49%] mb-4">
-                <label class="mb-2" [ngClass]="{ 'text-gray-400': !selectedClass || editBusStudent, 'primaryTxt': selectedClass && !editBusStudent}" for="student" >Choose Student</label>
+                <label class="mb-2" [ngClass]="{ 'text-gray-400': !selectedClass || editBusStudent, 'primaryTxt': selectedClass && !editBusStudent}" for="student" > {{ 'Choose Student' | translate }}</label>
                 <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="student" 
                 [(ngModel)]="busStudent.studentID" [disabled]="!selectedClass || editBusStudent" [ngClass]="{ 'bg-[#EBEBEB]': !selectedClass || editBusStudent }"
                 (ngModelChange)="onInputValueChange({ field: 'studentID', value: $event })">
-                    <option [value]="0" disabled selected hidden>Choose Student</option>
+                    <option [value]="0" disabled selected hidden> {{ 'Choose Student' | translate }}</option>
                     <option *ngFor="let stu of Students" [value]="stu.id">{{ stu.en_name }}</option>
-                    <option *ngIf="Students.length === 0 && selectedClass" disabled selected>No Data Found</option>
+                    <option *ngIf="Students.length === 0 && selectedClass" disabled selected> {{ 'No Data Found' | translate }}</option>
                 </select>
                 <span *ngIf="validationErrors['studentID']" class="text-red-500 ml-3 font-normal">{{ validationErrors['studentID'] }}</span>
             </div>
             <div class="flex flex-col w-[49%] mb-4">
-                <label class="mb-2 primaryTxt" for="categories">Bus Categories</label>
+                <label class="mb-2 primaryTxt" for="categories"> {{ 'Bus Categories' | translate }}</label>
                 <select 
                 class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="busCategory" [(ngModel)]="busStudent.busCategoryID"
                 (ngModelChange)="onInputValueChange({ field: 'busCategoryID', value: $event })">
-                    <option [value]="null" disabled selected hidden>Choose Bus Category</option>
+                    <option [value]="null" disabled selected hidden> {{ 'Choose Bus Category' | translate }}</option>
                     <option *ngFor="let cat of BusCategories" [value]="cat.id">{{ cat.name }}</option>
-                    <option *ngIf="BusCategories.length === 0" disabled selected>No Data Found</option>
+                    <option *ngIf="BusCategories.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
                 </select>
                 <span *ngIf="validationErrors['busCategoryID']" class="text-red-500 ml-3 font-normal">{{ validationErrors['busCategoryID'] }}</span>
             </div>
             <div class="flex flex-col w-[49%] mb-4">
-                <label class="mb-2 primaryTxt" for="semester">Semester</label>
+                <label class="mb-2 primaryTxt" for="semester"> {{ 'Semester' | translate }}</label>
                 <select 
                 class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="semester" [(ngModel)]="busStudent.semseterID" 
                 (ngModelChange)="onInputValueChange({ field: 'semseterID', value: $event })">
-                    <option [value]="null" disabled selected hidden>Choose Semester</option>
+                    <option [value]="null" disabled selected hidden> {{ 'Choose Semester' | translate }}</option>
                     <option *ngFor="let semester of Semesters" [value]="semester.id">{{ semester.name }}</option>
-                    <option *ngIf="Semesters.length === 0" disabled selected>No Data Found</option>
+                    <option *ngIf="Semesters.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
                 </select>
                 <span *ngIf="validationErrors['semseterID']" class="text-red-500 ml-3 font-normal">{{ validationErrors['semseterID'] }}</span>
             </div>
             <div class="flex w-full space-x-5 items-center mb-4">
                 <input type="checkbox" id="exception" class="w-5 h-5" [checked]="exception"
                 (change)="onIsExceptionChange($event)">
-                <label for="exception" class="text-sm">Exception</label>
+                <label for="exception" class="text-sm"> {{ 'Exception' | translate }}</label>
             </div>
             <div *ngIf="exception" class="flex flex-col w-[49%]">
-                <label for="from" class="mb-2 primaryTxt">Date From</label>
-                <input id="from" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="From" [(ngModel)]="busStudent.exceptionFromDate"
+                <label for="from" class="mb-2 primaryTxt"> {{ 'Date From' | translate }}</label>
+                <input id="from" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder=" {{ 'From' | translate }}" [(ngModel)]="busStudent.exceptionFromDate"
                 (ngModelChange)="onInputValueChange({ field: 'exceptionFromDate', value: $event })">
                 <span *ngIf="validationErrors['exceptionFromDate']" class="text-red-500 ml-3 font-normal">{{ validationErrors['exceptionFromDate'] }}</span>
             </div>
             <div *ngIf="exception" class="flex flex-col w-[49%]">
-                <label for="to" class="mb-2 primaryTxt">Date To</label>
-                <input id="to" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="To" [(ngModel)]="busStudent.exceptionToDate"
+                <label for="to" class="mb-2 primaryTxt"> {{ 'Date To' | translate }}</label>
+                <input id="to" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder=" {{ 'To' | translate }}" [(ngModel)]="busStudent.exceptionToDate"
                 (ngModelChange)="onInputValueChange({ field: 'exceptionToDate', value: $event })">
                 <span *ngIf="validationErrors['exceptionToDate']" class="text-red-500 ml-3 font-normal">{{ validationErrors['exceptionToDate'] }}</span>
             </div>
@@ -319,7 +319,7 @@
             [disabled]="isLoading" 
             class="secondaryBg text-white font-medium px-4 py-2 rounded-lg" 
             (click)="SaveBusStudent()">
-            <span *ngIf="!isLoading">Save</span>
+            <span *ngIf="!isLoading"> {{ 'Save' | translate }}</span>
             <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
           </button>
         </div>
@@ -330,23 +330,23 @@
 <div id="Transfer_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
     <div class="bg-white rounded-2xl p-12 w-1/2">
         <div class="flex justify-between items-center">
-            <h1 class="font-semibold text-2xl leading-9">Transfer From Bus To Bus</h1>
+            <h1 class="font-semibold text-2xl leading-9"> {{ 'Transfer From Bus To Bus' | translate }}</h1>
             <button (click)="closeTransferBusStudentModal()" type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
         </div>
         <div class="mt-4 bg-[#F7F7F7] h-auto rounded-[24px] p-[16px_24px] gap-[20px]">
-            <h6 class="font-medium text-base leading-6">Buses</h6>
+            <h6 class="font-medium text-base leading-6"> {{ 'Buses' | translate }}</h6>
             <div class="flex justify-between mt-2 gap-2">
                 <div class="w-full">
                     <select [(ngModel)]="busStudentTransfer.busID" (change)="onTransferChange()"
                         class="w-full rounded-lg border border-solid border-gray-300 h-full px-2" id="Buses" >
-                        <option [value]="null" disabled selected hidden>Choose Bus</option>
+                        <option [value]="null" disabled selected hidden> {{ 'Choose Bus' | translate }}</option>
                         <option *ngFor="let bus of busDataTransfer" [value]="bus.id">{{bus.name}}</option>
-                        <option *ngIf="busDataTransfer.length === 0" disabled selected>No Data Found</option>
+                        <option *ngIf="busDataTransfer.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
                     </select>
                 </div>
                 <button class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
                     (click)="SaveTransfer()">
-                    Save
+                  {{ 'Save' | translate }}
                 </button>
             </div>
         </div>

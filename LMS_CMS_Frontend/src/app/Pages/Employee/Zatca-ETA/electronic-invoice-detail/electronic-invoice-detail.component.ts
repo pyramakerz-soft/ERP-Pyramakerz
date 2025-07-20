@@ -10,6 +10,7 @@ import { ApiService } from '../../../../Services/api.service';
 import { ZatcaService } from '../../../../Services/Employee/Zatca/zatca.service';
 import { EtaService } from '../../../../Services/Employee/ETA/eta.service';
 import Swal from 'sweetalert2';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-electronic-invoice-detail',
@@ -96,6 +97,7 @@ export class ElectronicInvoiceDetailComponent implements OnInit {
       .GetById(this.invoiceId, this.DomainName)
       .subscribe({
         next: (masterData: any) => {
+          console.log(masterData)
           // Use 'any' temporarily or create a proper type
           this.invoice = {
             ...this.invoice,
@@ -103,6 +105,7 @@ export class ElectronicInvoiceDetailComponent implements OnInit {
             invoiceNumber: masterData.invoiceNumber?.toString() || '',
             date: masterData.date,
             total: masterData.total,
+            vatPercent: masterData.vatPercent,
             vatAmount: masterData.vatAmount,
             totalWithVat: masterData.totalWithVat,
             flagEnName: masterData.flagEnName,
@@ -115,6 +118,7 @@ export class ElectronicInvoiceDetailComponent implements OnInit {
             invoiceHash: masterData.invoiceHash || null,
             uuid: masterData.uuid || null,
           };
+          console.log(this.invoice)
 
           this.inventoryDetailsService
             .GetBySalesId(this.invoiceId, this.DomainName)
@@ -149,41 +153,45 @@ export class ElectronicInvoiceDetailComponent implements OnInit {
     this.router.navigate([routePrefix]);
   }
 
-  sendInvoice() {
+  // Update the sendInvoice method in electronic-invoice-detail.component.ts
+  async sendInvoice() {
     this.isSubmitting = true;
 
-    const serviceCall =
-      this.currentSystem === 'zatca'
-        ? this.zatcaService.reportInvoice(this.invoiceId, this.DomainName)
-        : this.etaService.submitInvoice(this.invoiceId, 0, 0, this.DomainName);
+    try {
+      const serviceCall =
+        this.currentSystem === 'zatca'
+          ? this.zatcaService.reportInvoice(this.invoiceId, this.DomainName)
+          : this.etaService.submitInvoice(
+              this.invoiceId,
+              0,
+              0,
+              this.DomainName
+            );
 
-    serviceCall.subscribe({
-      next: () => {
-        Swal.fire(
-          'Success',
-          `Invoice ${
-            this.currentSystem === 'zatca'
-              ? 'reported to ZATCA'
-              : 'submitted to ETA'
-          } successfully`,
-          'success'
-        );
-        this.invoice.isValid = true;
-      },
-      error: (error) => {
-        Swal.fire(
-          'Error',
-          `Failed to ${
-            this.currentSystem === 'zatca' ? 'report' : 'submit'
-          } invoice`,
-          'error'
-        );
-        console.error('Error submitting invoice:', error);
-      },
-      complete: () => {
-        this.isSubmitting = false;
-      },
-    });
+      await firstValueFrom(serviceCall);
+
+      Swal.fire(
+        'Success',
+        `Invoice ${
+          this.currentSystem === 'zatca'
+            ? 'reported to ZATCA'
+            : 'submitted to ETA'
+        } successfully`,
+        'success'
+      );
+      this.invoice.isValid = true;
+    } catch (error) {
+      Swal.fire(
+        'Error',
+        `Failed to ${
+          this.currentSystem === 'zatca' ? 'report' : 'submit'
+        } invoice`,
+        'error'
+      );
+      console.error('Error submitting invoice:', error);
+    } finally {
+      this.isSubmitting = false;
+    }
   }
 
   printInvoice() {
@@ -224,5 +232,4 @@ export class ElectronicInvoiceDetailComponent implements OnInit {
       { key: 'Total with VAT', value: this.invoice.totalWithVat },
     ];
   }
-
 }

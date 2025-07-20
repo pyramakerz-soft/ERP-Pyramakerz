@@ -512,8 +512,8 @@ namespace LMS_CMS_BL.Config
                 .ForMember(dest => dest.AccountNumberName, opt => opt.MapFrom(src => src.AccountNumber.Name))
                 .ForMember(dest => dest.DepartmentName, opt => opt.MapFrom(src => src.Department.Name))
                 .ForMember(dest => dest.JobName, opt => opt.MapFrom(src => src.Job.Name))
-                .ForMember(dest => dest.ReasonForLeavingWork, opt => opt.MapFrom(src => src.ReasonForLeavingWork.Name))
-                .ForMember(dest => dest.JobCategoryId, opt => opt.MapFrom(src => src.Job.JobCategoryID))
+                .ForMember(dest => dest.JobCategoryID, opt => opt.MapFrom(src => src.Job.JobCategoryID))
+                .ForMember(dest => dest.ReasonForLeavingWork, opt => opt.MapFrom(src => src.ReasonForLeavingWork.Name)) 
                 .ForMember(dest => dest.AcademicDegreeName, opt => opt.MapFrom(src => src.AcademicDegree.Name));
 
             CreateMap<Country, CountriesGetDTO>();
@@ -529,8 +529,8 @@ namespace LMS_CMS_BL.Config
             CreateMap<LinkFile, LinkFileGetDTO>();
 
             CreateMap<EmployeeStudent, EmployeeStudentGetDTO>()
-                .ForMember(dest => dest.EmployeeName, opt => opt.MapFrom(src => src.employee.User_Name))
-                .ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => src.Student.User_Name));
+                .ForMember(dest => dest.EmployeeName, opt => opt.MapFrom(src => src.employee.en_name))
+                .ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => src.Student.en_name));
             CreateMap<EmployeeStudentAddDTO, EmployeeStudent>();
 
             CreateMap<ReceivableDocType, ReceivableDocTypeGetDTO>();
@@ -540,7 +540,7 @@ namespace LMS_CMS_BL.Config
             CreateMap<FeesActivation, FeesActivationGetDTO>()
                 .ForMember(dest => dest.FeeActivationID, opt => opt.MapFrom(src => src.ID))
                 .ForMember(dest => dest.FeeTypeName, opt => opt.MapFrom(src => src.TuitionFeesType.Name))
-                .ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => src.Student.User_Name))
+                .ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => src.Student.en_name))
                 .ForMember(dest => dest.AcademicYearName, opt => opt.MapFrom(src => src.AcademicYear.Name))
                 .ForMember(dest => dest.FeeDiscountTypeName, opt => opt.MapFrom(src => src.TuitionDiscountType.Name));
             CreateMap<FeesActivationAdddDTO, FeesActivation>();
@@ -548,8 +548,8 @@ namespace LMS_CMS_BL.Config
 
 
             CreateMap<InstallmentDeductionMaster, InstallmentDeductionMasterGetDTO>()
-                .ForMember(dest => dest.EmployeeName, opt => opt.MapFrom(src => src.Employee.User_Name))
-                .ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => src.Student.User_Name));
+                .ForMember(dest => dest.EmployeeName, opt => opt.MapFrom(src => src.Employee.en_name))
+                .ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => src.Student.en_name));
             CreateMap<InstallmentDeductionMasterGetDTO, InstallmentDeductionMaster>();
             CreateMap<InstallmentDeductionMasterAddDTO, InstallmentDeductionMaster>();
 
@@ -651,7 +651,7 @@ namespace LMS_CMS_BL.Config
                  .ForMember(dest => dest.FlagValue, opt => opt.MapFrom(src => src.InventoryFlags.FlagValue))
                  .ForMember(dest => dest.ItemInOut, opt => opt.MapFrom(src => src.InventoryFlags.ItemInOut ))
                  .ForMember(dest => dest.StoreName, opt => opt.MapFrom(src => src.Store != null ? src.Store.Name : null))
-                 .ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => src.Student != null ? src.Student.User_Name : null))
+                 .ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => src.Student != null ? src.Student.en_name : null))
                  .ForMember(dest => dest.SupplierName, opt => opt.MapFrom(src => src.Supplier != null ? src.Supplier.Name : null))
                  .ForMember(dest => dest.QrImage, opt => opt.MapFrom(src => Convert.ToBase64String(src.QrImage)));
 
@@ -846,6 +846,7 @@ namespace LMS_CMS_BL.Config
                  .ForMember(dest => dest.WeekDayName, opt => opt.MapFrom(src => src.WeekDay.Name))
                  .ForMember(dest => dest.SubjectEnglishName, opt => opt.MapFrom(src => src.Subject.en_name))
                  .ForMember(dest => dest.SubjectArabicName, opt => opt.MapFrom(src => src.Subject.ar_name))
+                 .ForMember(dest => dest.AcademicYearID, opt => opt.MapFrom(src => src.Classroom.AcademicYearID))
                  .ForMember(dest => dest.ClassroomName, opt => opt.MapFrom(src => src.Classroom.Name));
 
             CreateMap<LessonLiveAddDTO, LessonLive>();
@@ -990,6 +991,7 @@ namespace LMS_CMS_BL.Config
                .ForMember(dest => dest.SubjectWeightTypeEnglishName, opt => opt.MapFrom(src => src.SubjectWeightType.WeightType.EnglishName))
                .ForMember(dest => dest.SubjectWeightTypeArabicName, opt => opt.MapFrom(src => src.SubjectWeightType.WeightType.ArabicName))
                .ForMember(dest => dest.AssignmentTypeEnglishName, opt => opt.MapFrom(src => src.AssignmentType.EnglishName))
+               .ForMember(dest => dest.InsertedByUserName, opt => opt.MapFrom(src => src.InsertedByEmployee.en_name))
                .ForMember(dest => dest.AssignmentQuestions, opt => opt.MapFrom(src => src.AssignmentQuestions))
                .ForMember(dest => dest.AssignmentTypeArabicName, opt => opt.MapFrom(src => src.AssignmentType.ArabicName));
             CreateMap<AssignmentAddDTO, Assignment>();
@@ -998,6 +1000,8 @@ namespace LMS_CMS_BL.Config
             CreateMap<AssignmentStudent, AssignmentStudentGetDTO>()
                .ForMember(dest => dest.ClassroomID, opt => opt.MapFrom(src => src.StudentClassroom.ClassID))
                .ForMember(dest => dest.AssignmentDegree, opt => opt.MapFrom(src => src.Assignment.Mark))
+               .ForMember(dest => dest.SubjectId, opt => opt.MapFrom(src => src.Assignment.SubjectID))
+               .ForMember(dest => dest.SubjectName, opt => opt.MapFrom(src => src.Assignment.Subject.en_name))
                .ForMember(dest => dest.ClassroomName, opt => opt.MapFrom(src => src.StudentClassroom.Classroom.Name))
                .ForMember(dest => dest.AssignmentTypeID, opt => opt.MapFrom(src => src.Assignment.AssignmentTypeID))
                .ForMember(dest => dest.StudentEnglishName, opt => opt.MapFrom(src => src.StudentClassroom.Student.en_name))
@@ -1045,7 +1049,7 @@ namespace LMS_CMS_BL.Config
                .ForMember(dest => dest.AssignmentTypeID, opt => opt.MapFrom(src => src.Assignment.AssignmentTypeID))
                .ForMember(dest => dest.AssignmentEnglishName, opt => opt.MapFrom(src => src.Assignment.EnglishName))
                .ForMember(dest => dest.AssignmentArabicName, opt => opt.MapFrom(src => src.Assignment.ArabicName))
-               .ForMember(dest => dest.AssignmentMark, opt => opt.MapFrom(src => src.Assignment.Mark))
+               .ForMember(dest => dest.AssignmentDegree, opt => opt.MapFrom(src => src.Assignment.Mark))
                .ForMember(dest => dest.OpenDate, opt => opt.MapFrom(src => src.Assignment.OpenDate))
                .ForMember(dest => dest.DueDate, opt => opt.MapFrom(src => src.Assignment.DueDate))
                .ForMember(dest => dest.CutOfDate, opt => opt.MapFrom(src => src.Assignment.CutOfDate))
@@ -1054,6 +1058,8 @@ namespace LMS_CMS_BL.Config
                .ForMember(dest => dest.SubjectWeightTypeEnglishName, opt => opt.MapFrom(src => src.Assignment.SubjectWeightType.WeightType.EnglishName))
                .ForMember(dest => dest.SubjectWeightTypeArabicName, opt => opt.MapFrom(src => src.Assignment.SubjectWeightType.WeightType.ArabicName))
                .ForMember(dest => dest.AssignmentTypeEnglishName, opt => opt.MapFrom(src => src.Assignment.AssignmentType.EnglishName))
+               .ForMember(dest => dest.IsVisibleToStudent, opt => opt.MapFrom(src => src.Assignment.IsVisibleToStudent))
+               .ForMember(dest => dest.InsertedByUserName, opt => opt.MapFrom(src => src.Assignment.InsertedByEmployee.en_name))
                .ForMember(dest => dest.AssignmentTypeArabicName, opt => opt.MapFrom(src => src.Assignment.AssignmentType.ArabicName));
        
             CreateMap<POSAddDTO, ETAPOS>();
@@ -1063,6 +1069,36 @@ namespace LMS_CMS_BL.Config
 
             CreateMap<TaxCustomer, TaxCustomerGetDTO>();
 
+            CreateMap<TimeTableAddDTO, TimeTable>();
+            CreateMap<TimeTableGetDTO, TimeTable>();
+            CreateMap<TimeTable, TimeTableGetDTO>()
+                .ForMember(dest => dest.AcademicYearName, opt => opt.MapFrom(src => src.AcademicYear.Name));
+            CreateMap<TimeTableClassroom,TimeTableClassroomGetDTO>()
+                .ForMember(dest => dest.TimeTableName, opt => opt.MapFrom(src => src.TimeTable.Name))
+                .ForMember(dest => dest.DayName, opt => opt.MapFrom(src => src.Day.Name))
+                .ForMember(dest => dest.GradeId, opt => opt.MapFrom(src => src.Classroom.GradeID))
+                .ForMember(dest => dest.GradeName, opt => opt.MapFrom(src => src.Classroom.Grade.Name))
+                .ForMember(dest => dest.ClassroomName, opt => opt.MapFrom(src => src.Classroom.Name));
+            CreateMap<TimeTableSession ,TimeTableSessionGetDto>();
+            CreateMap<TimeTableSubject, TimeTableSubjectGetDto>()
+                .ForMember(dest => dest.SubjectName, opt => opt.MapFrom(src => src.Subject.en_name))
+                .ForMember(dest => dest.TeacherName, opt => opt.MapFrom(src => src.Teacher.en_name));
+ 
+            CreateMap<AccountingConfigs, AccountingConfigsGetDTO>()
+                .ForMember(dest => dest.Sales, opt => opt.MapFrom(src => src.Sales != null ? src.Sales.Name : null))
+                .ForMember(dest => dest.SalesReturn, opt => opt.MapFrom(src => src.SalesReturn != null ? src.SalesReturn.Name : null))
+                .ForMember(dest => dest.Purchase, opt => opt.MapFrom(src => src.Purchase != null ? src.Purchase.Name : null))
+                .ForMember(dest => dest.PurchaseReturn, opt => opt.MapFrom(src => src.PurchaseReturn != null ? src.PurchaseReturn.Name : null));
+            CreateMap<AccountingConfigsEditDTO, AccountingConfigs>();
+
+            CreateMap<UserType, UserTypeGetDTO>();
+
+            CreateMap<Announcement, AnnouncementGetDTO>();
+            CreateMap<AnnouncementAddDTO, Announcement>();
+            CreateMap<AnnouncementPutDTO, Announcement>();
+
+            CreateMap<AnnouncementSharedTo, AnnouncementSharedToGetDTO>()
+                .ForMember(dest => dest.UserTypeTitle, opt => opt.MapFrom(src => src.UserType.Title));
         }
     } 
 }

@@ -6,7 +6,9 @@ import { Store } from '../../../../../../Models/Inventory/store';
 import { InventoryMaster } from '../../../../../../Models/Inventory/InventoryMaster';
 import { InventoryMasterService } from '../../../../../../Services/Employee/Inventory/inventory-master.service';
 import { StoresService } from '../../../../../../Services/Employee/Inventory/stores.service';
-import * as XLSX from 'xlsx';
+// import * as XLSX from 'xlsx';
+import * as XLSX from 'xlsx-js-style';
+
 import { PdfPrintComponent } from '../../../../../../Component/pdf-print/pdf-print.component';
 import { InventoryCategoryService } from '../../../../../../Services/Employee/Inventory/inventory-category.service';
 import { InventorySubCategoriesService } from '../../../../../../Services/Employee/Inventory/inventory-sub-categories.service';
@@ -260,7 +262,6 @@ export class InvoiceReportMasterDetailedComponent implements OnInit {
       summary: [
         { key: 'Date', value: new Date(t.date).toLocaleDateString() },
         { key: 'Store', value: t.storeName },
-        // Add student/supplier info based on report type
         ...(this.reportType === 'sales'
           ? [{ key: 'Student', value: t.studentName || 'N/A' }]
           : []),
@@ -425,34 +426,122 @@ export class InvoiceReportMasterDetailedComponent implements OnInit {
     }, 500);
   }
 
-  exportExcel() {
-    const data = this.transactions.flatMap((t) =>
-      t.inventoryDetails.map((d) => ({
-        'Invoice #': t.invoiceNumber,
-        Date: new Date(t.date).toLocaleDateString(),
-        Store: t.storeName,
-        // Conditionally add Student/Supplier column
-        ...(this.reportType === 'sales'
-          ? { Student: t.studentName || 'N/A' }
-          : {}),
-        ...(this.reportType === 'purchase'
-          ? { Supplier: t.supplierName || 'N/A' }
-          : {}),
-        'Transaction Type': t.flagEnName,
-        'Total Amount': t.total,
-        'Item ID': d.shopItemID,
-        Quantity: d.quantity,
-        Price: d.price,
-        'Total Price': d.totalPrice,
-        Notes: d.notes || 'N/A',
-      }))
-    );
-
-    const worksheet = XLSX.utils.json_to_sheet(data);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Transaction Details');
-
-    const dateStr = new Date().toISOString().slice(0, 10);
-    XLSX.writeFile(workbook, `Inventory_Transaction_Details_${dateStr}.xlsx`);
+exportExcel() {
+  if (this.transactions.length === 0) {
+    alert('No data to export!');
+    return;
   }
+
+  // Prepare data with styling information
+  const excelData = [];
+
+  // Add report title with styling
+  excelData.push([{ v: `${this.reportType.toUpperCase()} TRANSACTION REPORT DETAILED`, s: { font: { bold: true, size: 16 }, alignment: { horizontal: 'center' } } }]);
+  excelData.push([]); // empty row
+
+  // Add filter information with styling
+  excelData.push([
+    { v: 'From Date:', s: { font: { bold: true } } },
+    { v: this.dateFrom, s: { font: { bold: true } } }
+  ]);
+  excelData.push([
+    { v: 'To Date:', s: { font: { bold: true } } },
+    { v: this.dateTo, s: { font: { bold: true } } }
+  ]);
+  excelData.push([
+    { v: 'Store:', s: { font: { bold: true } } },
+    { v: this.getStoreName(), s: { font: { bold: true } } }
+  ]);
+  excelData.push([]); // empty row
+
+  // Add transaction data
+  this.transactions.forEach(transaction => {
+    // Add invoice header with styling
+    excelData.push([
+      { v: `Invoice #${transaction.invoiceNumber}`, s: { font: { bold: true, color: { rgb: 'FFFFFF' } }, fill: { fgColor: { rgb: '4472C4' } }} }
+    ]);
+    
+    // Add invoice details with alternating row colors
+    const details = [
+      ['Date:', new Date(transaction.date).toLocaleDateString()],
+      ['Store:', transaction.storeName],
+      ...(this.reportType === 'sales' ? [['Student:', transaction.studentName || 'N/A']] : []),
+      ...(this.reportType === 'purchase' ? [['Supplier:', transaction.supplierName || 'N/A']] : []),
+      ['Transaction Type:', transaction.flagEnName],
+      ['Total Price:', transaction.total],
+      ['Notes:', transaction.notes || 'N/A']
+    ];
+
+    details.forEach((row, i) => {
+      excelData.push([
+        { v: row[0], s: { font: { bold: true }, fill: { fgColor: { rgb: i % 2 === 0 ? 'D9E1F2' : 'FFFFFF' } } } },
+        { v: row[1], s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'D9E1F2' : 'FFFFFF' } } } }
+      ]);
+    });
+
+    excelData.push([]); // empty row
+
+    // Add items table header with styling
+    excelData.push([
+      { v: 'ID', s: { font: { bold: true }, fill: { fgColor: { rgb: '4472C4' } }, color: { rgb: 'FFFFFF' }, border: { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } } } },
+      { v: 'Item ID', s: { font: { bold: true }, fill: { fgColor: { rgb: '4472C4' } }, color: { rgb: 'FFFFFF' }, border: { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } } } },
+      { v: 'Name', s: { font: { bold: true }, fill: { fgColor: { rgb: '4472C4' } }, color: { rgb: 'FFFFFF' }, border: { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } } } },
+      { v: 'Quantity', s: { font: { bold: true }, fill: { fgColor: { rgb: '4472C4' } }, color: { rgb: 'FFFFFF' }, border: { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } } } },
+      { v: 'Price', s: { font: { bold: true }, fill: { fgColor: { rgb: '4472C4' } }, color: { rgb: 'FFFFFF' }, border: { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } } } },
+      { v: 'Total Price', s: { font: { bold: true }, fill: { fgColor: { rgb: '4472C4' } }, color: { rgb: 'FFFFFF' }, border: { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } } } },
+      { v: 'Notes', s: { font: { bold: true }, fill: { fgColor: { rgb: '4472C4' } }, color: { rgb: 'FFFFFF' }, border: { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } } } }
+    ]);
+
+    // Add items with alternating row colors
+    if (transaction.inventoryDetails && transaction.inventoryDetails.length > 0) {
+      transaction.inventoryDetails.forEach((item, i) => {
+        excelData.push([
+          { v: item.id, s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'FFFFFF' } }, border: { left: { style: 'thin' }, right: { style: 'thin' } } } },
+          { v: item.shopItemID, s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'E9E9E9' } }, border: { left: { style: 'thin' }, right: { style: 'thin' } } } },
+          { v: item.shopItemName || item.name || 'N/A', s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'E9E9E9' } }, border: { left: { style: 'thin' }, right: { style: 'thin' } } } },
+          { v: item.quantity, s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'E9E9E9' } }, border: { left: { style: 'thin' }, right: { style: 'thin' } } } },
+          { v: item.price, s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'E9E9E9' } }, border: { left: { style: 'thin' }, right: { style: 'thin' } } } },
+          { v: item.totalPrice, s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'E9E9E9' } }, border: { left: { style: 'thin' }, right: { style: 'thin' } } } },
+          { v: item.notes || 'N/A', s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'E9E9E9' } }, border: { left: { style: 'thin' }, right: { style: 'thin' } } } }
+        ]);
+      });
+    } else {
+      excelData.push([{ v: 'No items found for this invoice', s: { font: { italic: true }, alignment: { horizontal: 'center' } }, colSpan: 7 }]);
+    }
+
+    excelData.push([]); // empty row
+    excelData.push([]); // empty row for spacing between invoices
+  });
+
+  // Create worksheet
+  const worksheet = XLSX.utils.aoa_to_sheet(excelData);
+
+  // Merge cells for headers and special cells
+  if (!worksheet['!merges']) worksheet['!merges'] = [];
+  worksheet['!merges'].push(
+    { s: { r: 0, c: 0 }, e: { r: 0, c: 6 } }, // Report title
+    ...this.transactions.map((_, i) => {
+      const offset = 7 + i * (15 + (this.transactions[i].inventoryDetails?.length || 1));
+      return { s: { r: offset, c: 0 }, e: { r: offset, c: 6 } }; // Invoice headers
+    })
+  );
+
+  // Apply column widths
+  worksheet['!cols'] = [
+    { wch: 8 },  // ID
+    { wch: 10 }, // Item ID
+    { wch: 30 }, // Name
+    { wch: 10 }, // Quantity
+    { wch: 12 }, // Price
+    { wch: 12 }, // Total Price
+    { wch: 30 }  // Notes
+  ];
+
+  // Create workbook and save
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Transactions');
+  
+  const dateStr = new Date().toISOString().slice(0, 10);
+  XLSX.writeFile(workbook, `${this.reportType}_Transactions_${dateStr}.xlsx`);
+}
 }

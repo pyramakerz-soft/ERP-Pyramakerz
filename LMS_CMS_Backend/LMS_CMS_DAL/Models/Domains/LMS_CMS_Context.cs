@@ -1,4 +1,6 @@
-﻿using LMS_CMS_DAL.Models.Domains.AccountingModule;
+﻿using LMS_CMS_DAL.AccountingModule.Reports;
+using LMS_CMS_DAL.Models.Domains.AccountingModule;
+using LMS_CMS_DAL.Models.Domains.AccountingModule.Reports;
 using LMS_CMS_DAL.Models.Domains.Administration;
 using LMS_CMS_DAL.Models.Domains.BusModule;
 using LMS_CMS_DAL.Models.Domains.ClinicModule;
@@ -185,6 +187,18 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<ETAPOS> ETAPOS { get; set; }
         public DbSet<AssignmentStudentQuestionAnswerOption> AssignmentStudentQuestionAnswerOption { get; set; }
         public DbSet<DailyPerformanceMaster> DailyPerformanceMaster { get; set; }
+        public DbSet<TimeTable> TimeTable { get; set; }
+        public DbSet<TimeTableClassroom> TimeTableClassroom { get; set; }
+        public DbSet<TimeTableSession> TimeTableSession { get; set; }
+        public DbSet<TimeTableSubject> TimeTableSubject { get; set; }
+        public DbSet<AccountingConfigs> AccountingConfigs { get; set; }
+        public DbSet<RegisteredEmployee> RegisteredEmployee { get; set; }
+        public DbSet<Announcement> Announcement { get; set; }
+        public DbSet<AnnouncementSharedTo> AnnouncementSharedTo { get; set; }
+        public DbSet<UserType> UserType { get; set; }
+        public DbSet<DiscussionRoom> DiscussionRoom { get; set; }
+        public DbSet<DiscussionRoomStudentClassroom> DiscussionRoomStudentClassroom { get; set; }
+
 
 
         public LMS_CMS_Context(DbContextOptions<LMS_CMS_Context> options)
@@ -247,6 +261,18 @@ namespace LMS_CMS_DAL.Models.Domains
 
             modelBuilder.Entity<OrderState>()
                .HasIndex(p => p.Name)
+               .IsUnique();
+            
+            modelBuilder.Entity<UserType>()
+               .HasIndex(p => p.Title)
+               .IsUnique();
+            
+            modelBuilder.Entity<RegisteredEmployee>()
+               .HasIndex(p => p.User_Name)
+               .IsUnique();
+            
+            modelBuilder.Entity<RegisteredEmployee>()
+               .HasIndex(p => p.Email)
                .IsUnique();
 
             ///////////////////////// No Identity: /////////////////////////
@@ -336,6 +362,10 @@ namespace LMS_CMS_DAL.Models.Domains
                 .ValueGeneratedNever();
             
             modelBuilder.Entity<AssignmentType>()
+                .Property(p => p.ID)
+                .ValueGeneratedNever();
+            
+            modelBuilder.Entity<UserType>()
                 .Property(p => p.ID)
                 .ValueGeneratedNever();
 
@@ -1650,6 +1680,102 @@ namespace LMS_CMS_DAL.Models.Domains
               .HasForeignKey(p => p.SelectedOpionID)
               .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<TimeTable>()
+              .HasOne(p => p.AcademicYear)
+              .WithMany(p => p.TimeTables)
+              .HasForeignKey(p => p.AcademicYearID)
+              .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TimeTableClassroom>()
+              .HasOne(p => p.TimeTable)
+              .WithMany(p => p.TimeTableClassrooms)
+              .HasForeignKey(p => p.TimeTableID)
+              .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TimeTableClassroom>()
+              .HasOne(p => p.Classroom)
+              .WithMany(p => p.TimeTableClassrooms)
+              .HasForeignKey(p => p.ClassroomID)
+              .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TimeTableSession>()
+              .HasOne(p => p.TimeTableClassroom)
+              .WithMany(p => p.TimeTableSessions)
+              .HasForeignKey(p => p.TimeTableClassroomID)
+              .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TimeTableSubject>()
+              .HasOne(p => p.TimeTableSession)
+              .WithMany(p => p.TimeTableSubjects)
+              .HasForeignKey(p => p.TimeTableSessionID)
+              .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TimeTableSubject>()
+              .HasOne(p => p.Subject)
+              .WithMany(p => p.TimeTableSubjects)
+              .HasForeignKey(p => p.SubjectID)
+              .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TimeTableSubject>()
+              .HasOne(p => p.Teacher)
+              .WithMany(p => p.TimeTableSubjects)
+              .HasForeignKey(p => p.TeacherID)
+              .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TimeTableClassroom>()
+              .HasOne(p => p.Day)
+              .WithMany(p => p.TimeTableClassrooms)
+              .HasForeignKey(p => p.DayId)
+              .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AccountingConfigs>()
+              .HasOne(p => p.Sales)
+              .WithMany(p => p.AccountingConfigurationsSales)
+              .HasForeignKey(p => p.SalesID)
+              .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AccountingConfigs>()
+              .HasOne(p => p.SalesReturn)
+              .WithMany(p => p.AccountingConfigurationsSalesReturns)
+              .HasForeignKey(p => p.SalesReturnID)
+              .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AccountingConfigs>()
+              .HasOne(p => p.Purchase)
+              .WithMany(p => p.AccountingConfigurationsPurchases)
+              .HasForeignKey(p => p.PurchaseID)
+              .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AccountingConfigs>()
+              .HasOne(p => p.PurchaseReturn)
+              .WithMany(p => p.AccountingConfigurationsPurchasesReturns)
+              .HasForeignKey(p => p.PurchaseReturnID)
+              .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<AnnouncementSharedTo>()
+               .HasOne(p => p.Announcement)
+              .WithMany(p => p.AnnouncementSharedTos)
+              .HasForeignKey(p => p.AnnouncementID)
+              .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<AnnouncementSharedTo>()
+               .HasOne(p => p.UserType)
+              .WithMany(p => p.AnnouncementSharedTos)
+              .HasForeignKey(p => p.UserTypeID)
+              .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<DiscussionRoomStudentClassroom>()
+               .HasOne(p => p.DiscussionRoom)
+              .WithMany(p => p.DiscussionRoomStudentClassrooms)
+              .HasForeignKey(p => p.DiscussionRoomID)
+              .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<DiscussionRoomStudentClassroom>()
+               .HasOne(p => p.StudentClassroom)
+              .WithMany(p => p.DiscussionRoomStudentClassrooms)
+              .HasForeignKey(p => p.StudentClassroomID)
+              .OnDelete(DeleteBehavior.Restrict);
+
             ///////////////////////// Exception: /////////////////////////
             modelBuilder.Entity<Bus>()
                 .HasOne(b => b.DeletedByEmployee)
@@ -1724,6 +1850,12 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasForeignKey(f => f.DeletedByUserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<TimeTableSubject>()
+                .HasOne(f => f.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(f => f.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             ///////////////////////// Optional ID According to other field: /////////////////////////  
             modelBuilder.Entity<ReceivableMaster>()
                 .Ignore(r => r.Bank)
@@ -1774,6 +1906,15 @@ namespace LMS_CMS_DAL.Models.Domains
                .Ignore(r => r.Employee)
                .Ignore(r => r.Student)
                .Ignore(r => r.Save);
+
+            modelBuilder.Entity<AccountingEntriesReport>()
+                .HasNoKey().ToView(null);
+
+            modelBuilder.Entity<CountResult>()
+                .HasNoKey().ToView(null);
+
+            modelBuilder.Entity<TotalResult>()
+                .HasNoKey().ToView(null);
         }
     }
 }
