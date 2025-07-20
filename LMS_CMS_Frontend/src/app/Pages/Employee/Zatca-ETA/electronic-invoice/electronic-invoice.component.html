@@ -43,8 +43,8 @@
             <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
         </button>
 
-        <button class="p-2 font-medium text-3xl rounded-lg flex items-center gap-2 secondaryTxt" (click)="printAll()"
-            [disabled]="transactions.length === 0 || isLoading"
+        <button class="p-2 font-medium text-3xl rounded-lg flex items-center gap-2 secondaryTxt"
+            (click)="printSelectedInvoices()" [disabled]="transactions.length === 0 || isLoading"
             [ngClass]="{'opacity-50 cursor-not-allowed': transactions.length === 0 || isLoading}">
             <i class="fa-solid fa-print"></i>
         </button>
@@ -87,11 +87,12 @@
                 </tr>
             </thead>
             <tbody>
-<tr *ngIf="transactions.length === 0">
-    <td colspan="7" class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-        No Data Found
-    </td>
-</tr>
+                <tr *ngIf="transactions.length === 0">
+                    <td colspan="7"
+                        class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                        No Data Found
+                    </td>
+                </tr>
 
                 <tr *ngFor="let transaction of transactions; let i = index"
                     [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
@@ -107,7 +108,7 @@
                         {{ transaction.date | date:'mediumDate' }}
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ transaction.flagEnName || 'N/A' }}
+                        {{ transaction.flagEnName || '-' }}
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ transaction.total }}
@@ -124,8 +125,8 @@
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         <div class="flex gap-4">
-                            <button (click)="printAll()" class="" [disabled]="isSubmitting">
-                                <i class="fa-solid fa-print text-lg"></i>
+                            <button (click)="printSingleInvoice(transaction)" class="" [disabled]="isSubmitting">
+                                <i class="fa-solid fa-print text-lg"></i> 
                             </button>
                             <button (click)="sendInvoice(transaction)"
                                 class="text-gray-700 hover:text-gray-900 rounded-lg"
@@ -182,5 +183,14 @@
         <div>
             <p>{{currentPage}} of {{totalPages}} pages ({{totalRecords}} Items)</p>
         </div>
+    </div>
+</div>
+
+<div class="absolute -top-[9999px] -left-[9999px]">
+    <div id="Data" class="hidden">
+        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'Electronic_Invoices_Report'"
+            [infoRows]="getInfoRows()" [tableHeaders]="['Invoice ID', 'Date', 'Invoice Type', 'Total Value', 'Status']"
+            [tableData]="transactionsForExport" #pdfComponentRef>
+        </app-pdf-print>
     </div>
 </div>
