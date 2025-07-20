@@ -1099,6 +1099,15 @@ namespace LMS_CMS_BL.Config
 
             CreateMap<AnnouncementSharedTo, AnnouncementSharedToGetDTO>()
                 .ForMember(dest => dest.UserTypeTitle, opt => opt.MapFrom(src => src.UserType.Title));
+
+            CreateMap<DiscussionRoom, DiscussionRoomGetDTO>();
+            CreateMap<DiscussionRoomAdd, DiscussionRoom>();
+            CreateMap<DiscussionRoomPutDTO, DiscussionRoom>();
+
+            CreateMap<DiscussionRoomStudentClassroom, DiscussionRoomStudentClassroomGetDTO>();
+
+            CreateMap<RegisteredEmployee, RegisteredEmployeeGetDTO>(); 
+            CreateMap<RegisteredEmployeeAddDTO, RegisteredEmployee>(); 
         }
     } 
 }

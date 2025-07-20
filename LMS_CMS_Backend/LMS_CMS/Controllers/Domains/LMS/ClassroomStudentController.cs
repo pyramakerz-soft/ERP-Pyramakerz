@@ -62,7 +62,47 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////////
-        
+
+        [HttpGet("GetClassFoActiveAcademicYearWithStudentsIncluded")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" }
+        )]
+        public async Task<IActionResult> GetClassFoActiveAcademicYearWithStudentsIncluded()
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            List<StudentClassroom> studentClassrooms = await Unit_Of_Work.studentClassroom_Repository
+                .Select_All_With_IncludesById<StudentClassroom>(
+                    f => f.IsDeleted != true && f.Classroom.AcademicYear.IsActive == true && f.Classroom.IsDeleted != true && f.Student.IsDeleted != true,
+                    query => query.Include(cs => cs.Classroom),
+                    query => query.Include(cs => cs.Student)
+                );
+
+            if (studentClassrooms == null)
+            {
+                return NotFound("No Classroom Students in this active year");
+            }
+
+            var groupedStudents = studentClassrooms
+                .GroupBy(sc => sc.Classroom.ID)
+                .Select(group => new
+                {
+                    ClassroomId = group.Key,
+                    ClassroomName = group.FirstOrDefault()?.Classroom.Name, 
+                    Students = group.Select(sc => new
+                    {
+                        StudentClassId = sc.ID,
+                        StudentId = sc.Student.ID,
+                        StudentEnglishName = sc.Student.en_name,
+                        StudentArabicName = sc.Student.ar_name 
+                    }).ToList()
+                }).ToList();
+
+            return Ok(groupedStudents);
+        }
+
+        /////////////////////////////////////////////////////////////////////////////////////////////
+
         [HttpGet("GetByID/{Id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },

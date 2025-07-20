@@ -281,7 +281,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
                 }
 
                 EditAnnouncement.ImageLink = Path.Combine("Uploads", "Announcement", EditAnnouncement.ID.ToString(), EditAnnouncement.ImageFile.FileName);
-            } 
+            }
+            else
+            {
+                EditAnnouncement.ImageLink = imageLinkExists;
+            }
 
             mapper.Map(EditAnnouncement, announcementExists);
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
@@ -391,7 +395,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
 
             if (id == 0)
             {
-                return BadRequest("Enter assignment ID");
+                return BadRequest("Enter Announcement ID");
             }
 
             Announcement announcement = Unit_Of_Work.announcement_Repository.First_Or_Default(t => t.IsDeleted != true && t.ID == id);

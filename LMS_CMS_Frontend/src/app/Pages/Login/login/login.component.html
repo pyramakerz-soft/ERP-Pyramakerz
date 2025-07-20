@@ -44,7 +44,7 @@
           <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
         </button>
         
-        <div *ngIf="this.isParentHovered" class="flex justify-around mt-2">
+        <div *ngIf="this.isParentHovered || isEmployeeHovered" class="flex justify-around mt-2">
           <p class="font-poppins text-base font-normal leading-[21px]">Don’t have an account? <a (click)="SignUp()"
               class="secondaryTxt mr-2 cursor-pointer">Sign Up</a>
           </p>
