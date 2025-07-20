@@ -271,93 +271,80 @@ export class TimeTableComponent {
     })
   }
 
+  async triggerPrint() {
+    setTimeout(() => {
+      const printContents = document.getElementById("Data")?.innerHTML;
+      if (!printContents) {
+        console.error("Element not found!");
+        return;
+      }
+      // Create a print-specific stylesheet
+      const printStyle = `
+        <style>
+          @page { size: auto; margin: 0mm; }
+          body { 
+            margin: 0; 
+          }
+  
+          @media print {
+            body > *:not(#print-container) {
+              display: none !important;
+            }
+            #print-container {
+              display: block !important;
+              position: static !important;
+              top: auto !important;
+              left: auto !important;
+              width: 100% !important;
+              height: auto !important;
+              background: white !important;
+              box-shadow: none !important;
+              margin: 0 !important;
+            }
+          }
+        </style>
+      `;
+
+      // Create a container for printing
+      const printContainer = document.createElement('div');
+      printContainer.id = 'print-container';
+      printContainer.innerHTML = printStyle + printContents;
+
+      // Add to body and print
+      document.body.appendChild(printContainer);
+      window.print();
+
+      // Clean up
+      setTimeout(() => {
+        document.body.removeChild(printContainer);
+        this.closePrintModal()
+        this.isLoading = false;
+      }, 100);
+    }, 500);
+  }
+
   Print() {
     this.isLoading = true;
-
-    const printStyle = `
-    <style>
-      @page { size: auto; margin: 0mm; }
-      body { margin: 0; }
-
-      @media print {
-        body > *:not(#print-container) {
-          display: none !important;
-        }
-        #print-container {
-          display: block !important;
-          position: static !important;
-          top: auto !important;
-          left: auto !important;
-          width: 100% !important;
-          height: auto !important;
-          background: white !important;
-          box-shadow: none !important;
-          margin: 0 !important;
-        }
-      }
-    </style>
-  `;
-
-    const triggerPrint = () => {
-      setTimeout(() => {
-        const element = document.getElementById('Data');
-        if (element) {
-          element.classList.remove('hidden');
-
-          const printContents = element.innerHTML;
-          const popupWindow = window.open('', '_blank', 'width=800,height=600');
-
-          if (popupWindow) {
-            popupWindow.document.open();
-            popupWindow.document.write(`
-            <html>
-              <head>
-                <title>TimeTable - ${this.TimeTableName}</title>
-                ${printStyle}
-              </head>
-              <body>
-                <div id="print-container">
-                  ${printContents}
-                </div>
-                <script>
-                  window.onload = function() {
-                    window.print();
-                    window.onafterprint = function() { window.close(); };
-                  };
-                </script>
-              </body>
-            </html>
-          `);
-            popupWindow.document.close();
-          }
-
-          element.classList.add('hidden');
-          this.isLoading = false;
-          this.closePrintModal();
-        }
-      }, 500);
-    };
-
     if (this.PrintType === "Class") {
       this.TimeTableServ.GetByIdForClassAsync(this.SelectedTimeTableId, this.SelectedClassId, this.DomainName).subscribe((d) => {
         this.TimeTable = d.data;
         this.TimeTableName = d.timeTableName;
         this.MaxPeriods = d.maxPeriods;
-        triggerPrint();
+        this.triggerPrint();
       });
     } else if (this.PrintType === "Teacher") {
       this.TimeTableServ.GetByIdForTeacherAsync(this.SelectedTimeTableId, this.SelectedTeacherId, this.DomainName).subscribe((d) => {
         this.TimeTable = d.data;
         this.TimeTableName = d.timeTableName;
         this.MaxPeriods = d.maxPeriods;
-        triggerPrint();
+      this.triggerPrint();
       });
     } else if (this.PrintType === "All") {
       this.TimeTableServ.GetByID(this.SelectedTimeTableId, this.DomainName).subscribe((d) => {
         this.TimeTable = d.data;
         this.TimeTableName = d.timeTableName;
         this.MaxPeriods = d.maxPeriods;
-        triggerPrint();
+       this.triggerPrint();
       });
     }
   }
@@ -374,4 +361,23 @@ export class TimeTableComponent {
     }
   }
 
+  delete(id:number){
+    Swal.fire({
+      title: 'Are you sure you want to delete this Time Table?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#089B41',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'Cancel'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.TimeTableServ.Delete(id, this.DomainName).subscribe(
+          (data: any) => {
+            this.GetAllData()
+          }
+        );
+      }
+    });
+  }
 }

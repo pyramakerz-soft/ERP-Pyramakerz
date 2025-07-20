@@ -8,34 +8,36 @@ import { Employee } from '../../../Models/Employee/employee';
 import { Classroom } from '../../../Models/LMS/classroom';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class TimeTableService {
-
-  baseUrl = ""
-  header = ""
+  baseUrl = '';
+  header = '';
 
   constructor(public http: HttpClient, public ApiServ: ApiService) {
-    this.baseUrl = ApiServ.BaseUrl
+    this.baseUrl = ApiServ.BaseUrl;
   }
 
   GetBySchoolId(SchoolId: number, DomainName: string) {
     if (DomainName != null) {
-      this.header = DomainName
+      this.header = DomainName;
     }
-    const token = localStorage.getItem("current_token");
+    const token = localStorage.getItem('current_token');
     const headers = new HttpHeaders()
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.get<TimeTable[]>(`${this.baseUrl}/TimeTable/BySchoolId/${SchoolId}`, { headers });
+    return this.http.get<TimeTable[]>(
+      `${this.baseUrl}/TimeTable/BySchoolId/${SchoolId}`,
+      { headers }
+    );
   }
 
   GetByID(id: number, DomainName: string) {
     if (DomainName != null) {
-      this.header = DomainName
+      this.header = DomainName;
     }
-    const token = localStorage.getItem("current_token");
+    const token = localStorage.getItem('current_token');
     const headers = new HttpHeaders()
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
@@ -45,57 +47,69 @@ export class TimeTableService {
 
   GetAllTeachersinThisTimetable(id: number, DomainName: string) {
     if (DomainName != null) {
-      this.header = DomainName
+      this.header = DomainName;
     }
-    const token = localStorage.getItem("current_token");
+    const token = localStorage.getItem('current_token');
     const headers = new HttpHeaders()
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.get<Employee[]>(`${this.baseUrl}/TimeTable/GetAllTeachersinThisTimetable/${id}`, { headers });
+    return this.http.get<Employee[]>(
+      `${this.baseUrl}/TimeTable/GetAllTeachersinThisTimetable/${id}`,
+      { headers }
+    );
   }
 
   GetAllClassesinThisTimetable(id: number, DomainName: string) {
     if (DomainName != null) {
-      this.header = DomainName
+      this.header = DomainName;
     }
-    const token = localStorage.getItem("current_token");
+    const token = localStorage.getItem('current_token');
     const headers = new HttpHeaders()
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.get<Classroom[]>(`${this.baseUrl}/TimeTable/GetAllClassesinThisTimetable/${id}`, { headers });
+    return this.http.get<Classroom[]>(
+      `${this.baseUrl}/TimeTable/GetAllClassesinThisTimetable/${id}`,
+      { headers }
+    );
   }
 
   GetByIdForClassAsync(Tid: number, ClassId: number, DomainName: string) {
     if (DomainName != null) {
-      this.header = DomainName
+      this.header = DomainName;
     }
-    const token = localStorage.getItem("current_token");
+    const token = localStorage.getItem('current_token');
     const headers = new HttpHeaders()
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.get<any>(`${this.baseUrl}/TimeTable/GetByIdForClassAsync/${Tid}/${ClassId}`, { headers });
+    return this.http.get<any>(
+      `${this.baseUrl}/TimeTable/GetByIdForClassAsync/${Tid}/${ClassId}`,
+      { headers }
+    );
   }
 
   GetByIdForTeacherAsync(Tid: number, ClassId: number, DomainName: string) {
     if (DomainName != null) {
-      this.header = DomainName
+      this.header = DomainName;
     }
-    const token = localStorage.getItem("current_token");
+    const token = localStorage.getItem('current_token');
     const headers = new HttpHeaders()
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.get<any>(`${this.baseUrl}/TimeTable/GetByIdForTeacherAsync/${Tid}/${ClassId}`, { headers });
+    return this.http.get<any>(
+      `${this.baseUrl}/TimeTable/GetByIdForTeacherAsync/${Tid}/${ClassId}`,
+      { headers }
+    );
   }
 
   Add(TimeTable: TimeTable, DomainName: string) {
     if (DomainName != null) {
-      this.header = DomainName
+      this.header = DomainName;
     }
-    const token = localStorage.getItem("current_token");
+    const token = localStorage.getItem('current_token');
     const headers = new HttpHeaders()
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
@@ -103,7 +117,7 @@ export class TimeTableService {
 
     return this.http.post(`${this.baseUrl}/TimeTable`, TimeTable, {
       headers: headers,
-      responseType: 'text' as 'json'
+      responseType: 'text' as 'json',
     });
   }
 
@@ -112,12 +126,16 @@ export class TimeTableService {
       this.header = DomainName;
     }
     console.log(DomainName);
-    const token = localStorage.getItem("current_token");
+    const token = localStorage.getItem('current_token');
     const headers = new HttpHeaders()
-      .set('Domain-Name', this.header)  // Correct casing as in your backend
+      .set('Domain-Name', this.header) // Correct casing as in your backend
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.put(`${this.baseUrl}/TimeTable?id=${Id}&IsFavourite=${IsFav}`, {}, { headers });
+    return this.http.put(
+      `${this.baseUrl}/TimeTable?id=${Id}&IsFavourite=${IsFav}`,
+      {},
+      { headers }
+    );
   }
 
   Edit(timetable: TimeTableReplace[], DomainName: string) {
@@ -125,12 +143,25 @@ export class TimeTableService {
       this.header = DomainName;
     }
     console.log(DomainName);
-    const token = localStorage.getItem("current_token");
+    const token = localStorage.getItem('current_token');
     const headers = new HttpHeaders()
-      .set('Domain-Name', this.header)  // Correct casing as in your backend
+      .set('Domain-Name', this.header) // Correct casing as in your backend
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.put(`${this.baseUrl}/TimeTable/Replace`, timetable, { headers });
+    return this.http.put(`${this.baseUrl}/TimeTable/Replace`, timetable, {
+      headers,
+    });
   }
 
+  Delete(id: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName;
+    }
+    const token = localStorage.getItem('current_token');
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.delete(`${this.baseUrl}/TimeTable/${id}`, { headers });
+  }
 }
