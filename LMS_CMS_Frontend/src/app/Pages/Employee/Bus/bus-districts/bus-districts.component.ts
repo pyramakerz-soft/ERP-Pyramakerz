@@ -14,11 +14,13 @@ import { ApiService } from '../../../../Services/api.service';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-bus-Districts',
   standalone: true,
-  imports: [CommonModule, FormsModule, SearchComponent],
+  imports: [CommonModule, FormsModule, SearchComponent, TranslateModule],
   templateUrl: './bus-districts.component.html',
   styleUrl: './bus-districts.component.css'
 })
@@ -43,7 +45,8 @@ export class BusDistrictsComponent {
 
   isModalVisible: boolean = false;
   mode: string = "";
-
+ isRtl: boolean = false;
+  subscription!: Subscription;
   path: string = ""
   key: string = "id";
   value: any = "";
@@ -52,7 +55,15 @@ export class BusDistrictsComponent {
   validationErrors: { [key in keyof BusType]?: string } = {};
   isLoading = false;
 
-  constructor(private router: Router, public activeRoute: ActivatedRoute, private menuService: MenuService, public account: AccountService, public busDistrictServ: BusDistrictService, public DomainServ: DomainService, public EditDeleteServ: DeleteEditPermissionService, public ApiServ: ApiService) { }
+  constructor(private router: Router, 
+    public activeRoute: ActivatedRoute, 
+    private menuService: MenuService, 
+    public account: AccountService, 
+    public busDistrictServ: BusDistrictService, 
+    public DomainServ: DomainService, 
+    public EditDeleteServ: DeleteEditPermissionService, 
+    public ApiServ: ApiService ,
+    private languageService: LanguageService) { }
 
   ngOnInit() {
 
@@ -83,6 +94,10 @@ export class BusDistrictsComponent {
       this.AllowEdit = true;
       this.AllowDelete = true;
     }
+    this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   Create() {

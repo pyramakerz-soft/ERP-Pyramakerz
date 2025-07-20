@@ -30,11 +30,13 @@ import { Section } from '../../../../Models/LMS/section';
 import { SectionService } from '../../../../Services/Employee/LMS/section.service';
 import { GradeService } from '../../../../Services/Employee/LMS/grade.service';
 import { ClassroomService } from '../../../../Services/Employee/LMS/classroom.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-bus-student',
   standalone: true,
-  imports: [CommonModule, FormsModule, SearchComponent],
+  imports: [CommonModule, FormsModule, SearchComponent, TranslateModule],
   templateUrl: './bus-student.component.html',
   styleUrl: './bus-student.component.css'
 })
@@ -47,6 +49,8 @@ export class BusStudentComponent {
   busStudentData: BusStudent[] = []
   editBusStudent = false
   exception = false
+   isRtl: boolean = false;
+  subscription!: Subscription;
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
   AllowEditForOthers: boolean = false;
@@ -84,9 +88,23 @@ export class BusStudentComponent {
 
   id: number = 0;
 
-  constructor(public busService: BusService, public busStudentService: BusStudentService, public account: AccountService, public activeRoute: ActivatedRoute, public EditDeleteServ: DeleteEditPermissionService,
-    public menuService: MenuService, public ApiServ: ApiService, public schoolService: SchoolService, public busCategoryService: BusCategoryService, public sectionService: SectionService,
-    public gradeService: GradeService, public classroomService: ClassroomService, public semesterService: SemesterService, public studentService: StudentService, public router: Router, public AcademicServ: AcadimicYearService) { }
+  constructor(public busService: BusService, 
+    public busStudentService: BusStudentService, 
+    public account: AccountService, 
+    public activeRoute: ActivatedRoute, 
+    public EditDeleteServ: DeleteEditPermissionService,
+    public menuService: MenuService, 
+    public ApiServ: ApiService, 
+    public schoolService: SchoolService, 
+    public busCategoryService: BusCategoryService, 
+    public sectionService: SectionService,
+    public gradeService: GradeService, 
+    public classroomService: ClassroomService, 
+    public semesterService: SemesterService, 
+    public studentService: StudentService, 
+    public router: Router, 
+    public AcademicServ: AcadimicYearService,
+      private languageService: LanguageService) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -114,6 +132,11 @@ export class BusStudentComponent {
     this.GetSchoolsGroupByGradeGroupByClass()
     this.GetBusCategories()
     this.GetSemesters()
+      this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+
   }
 
   GetBusById(busId: number) {

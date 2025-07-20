@@ -11,6 +11,35 @@
     </button>
 </div>
 
+<div class="flex justify-start items-center space-x-4 mb-4">
+    <div class="w-[48%]">
+        <label for="day" class="block mb-2 text-sm font-medium text-gray-900">Days</label>
+        <select id="day" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [(ngModel)]="SelectedDay" (change)="FilterTimeTable();">
+            <option value=0 disabled selected hidden>Select a Day</option>
+            <option *ngFor="let day of days" [value]="day.id">
+                {{ day.name }}
+            </option>
+            <option *ngIf="days.length === 0" disabled selected>No Data Found</option>
+        </select>
+    </div>
+     <div class="w-[48%]">
+        <label for="grade" class="block mb-2 text-sm font-medium text-gray-900">Grades</label>
+        <select id="grade" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [(ngModel)]="SelectedGrade" (change)="FilterTimeTable();">
+            <option value=0 disabled selected hidden>Select a Grade</option>
+            <option *ngFor="let grade of grades" [value]="grade.id">
+                {{ grade.name }}
+            </option>
+            <option *ngIf="grades.length === 0" disabled selected>No Data Found</option>
+        </select>
+    </div>
+     <div *ngIf="SelectedDay!=0 || SelectedGrade!=0" class="rounded-full p-2 border-4" (click)="GetTimeTable()">
+        <i class="fa-solid fa-rotate-left secondaryTxt text-2xl w-8 h-8 text-center hover:cursor-pointer rounded-full"></i>
+    </div>
+</div>
+
+
 <div class="overflow-x-auto">
     <div *ngFor="let day of TimeTable" class="mb-10 border rounded shadow">
         <div class="bg-gray-300 text-center font-bold py-2">

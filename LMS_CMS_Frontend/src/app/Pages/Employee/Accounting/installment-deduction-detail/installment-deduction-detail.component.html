@@ -18,18 +18,15 @@
     <div class="flex flex-col mb-4 w-[24%]">
         <label class="mb-2 primaryTxt" for="docNumber"> {{ 'Doc Number' | translate }}</label>
         <input id="docNumber" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" [disabled]="mode=='View' "
-            [dir]="isRtl ? 'rtl' : 'ltr'"
-  [placeholder]="isRtl ? 'أدخل رقم المستند' : 'Enter Doc Number'"
-  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'" [(ngModel)]="Data.docNumber" (ngModelChange)="onInputValueChange({ field: 'docNumber', value: $event })" />
+        placeholder="{{ 'Enter Doc Number' | translate }}"   
+ [(ngModel)]="Data.docNumber" (ngModelChange)="onInputValueChange({ field: 'docNumber', value: $event })" />
         <span *ngIf="validationErrors['docNumber']" class="text-red-500 ml-3 font-normal">{{ validationErrors["docNumber"]}}</span>
     </div>
 
     <div class="flex flex-col mb-4 w-[24%]">
         <label class="mb-2 primaryTxt" for="date"> {{ 'Date' | translate }}</label>
         <input id="date" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-            [dir]="isRtl ? 'rtl' : 'ltr'"
-  [placeholder]="isRtl ? 'أدخل التاريخ' : 'Enter Date'"
-  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'" [(ngModel)]="Data.date" (ngModelChange)="onInputValueChange({ field: 'date', value: $event })" [disabled]="mode=='View' "/>
+placeholder="{{ 'Enter Date' | translate }}" [(ngModel)]="Data.date" (ngModelChange)="onInputValueChange({ field: 'date', value: $event })" [disabled]="mode=='View' "/>
             <span *ngIf="validationErrors['date']" class="text-red-500 ml-3 font-normal">{{ validationErrors["date"]}}</span>
     </div>
 
@@ -62,9 +59,9 @@
             <div class="flex flex-col w-full">
                 <textarea [disabled]="mode=='View' "
                     class="w-full h-[100px] rounded-lg border border-solid border-gray-300 px-2 py-1 mb-3 resize-none"
-                    [(ngModel)]="Data.notes" [dir]="isRtl ? 'rtl' : 'ltr'"
-  [placeholder]="isRtl ? 'أدخل الملاحظات' : 'Enter Notes'"
-  [ngClass]="isRtl ? 'text-right placeholder:text-right' : 'text-left placeholder:text-left'"></textarea>
+                    [(ngModel)]="Data.notes" 
+                    placeholder="{{ 'Enter Notes' | translate }}"
+></textarea>
             </div>
         </div>
     </div>

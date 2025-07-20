@@ -14,11 +14,13 @@ import { ApiService } from '../../../../Services/api.service';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-bus-categories',
   standalone: true,
-  imports: [CommonModule, FormsModule, SearchComponent],
+  imports: [CommonModule, FormsModule, SearchComponent, TranslateModule],
   templateUrl: './bus-categories.component.html',
   styleUrl: './bus-categories.component.css'
 })
@@ -26,7 +28,8 @@ export class BusCategoriesComponent {
 
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   busCategory: BusType = new BusType();
-
+ isRtl: boolean = false;
+  subscription!: Subscription;
   AllowEdit: boolean = true;
   AllowDelete: boolean = true;
   AllowEditForOthers: boolean = false;
@@ -53,7 +56,15 @@ export class BusCategoriesComponent {
   isLoading = false;
 
 
-  constructor(private router: Router, private menuService: MenuService, public activeRoute: ActivatedRoute, public account: AccountService, public BusTypeServ: BusCategoryService, public DomainServ: DomainService, public EditDeleteServ: DeleteEditPermissionService, public ApiServ: ApiService) { }
+  constructor(private router: Router,
+     private menuService: MenuService,
+      public activeRoute: ActivatedRoute,
+       public account: AccountService, 
+       public BusTypeServ: BusCategoryService, 
+       public DomainServ: DomainService, 
+       public EditDeleteServ: DeleteEditPermissionService, 
+       public ApiServ: ApiService,
+      private languageService: LanguageService) { }
 
   ngOnInit() {
 
@@ -84,6 +95,12 @@ export class BusCategoriesComponent {
       this.AllowEdit = true;
       this.AllowDelete = true;
     }
+
+
+          this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   Create() {

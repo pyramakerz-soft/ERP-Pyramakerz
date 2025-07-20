@@ -15,11 +15,13 @@ import { RoleService } from '../../../../Services/Employee/role.service';
 import Swal from 'sweetalert2';
 import { RoleDetailsService } from '../../../../Services/Employee/role-details.service';
 import { RolePut } from '../../../../Models/Administrator/role-put';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-role-add-edit',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
   templateUrl: './role-add-edit.component.html',
   styleUrl: './role-add-edit.component.css'
 })
@@ -34,7 +36,8 @@ export class RoleAddEditComponent {
   PagecollapseStates: boolean[][] = [];
   collapseStates: boolean[] = [];
   checkboxStates: { [key: string]: boolean } = {};
-
+ isRtl: boolean = false;
+  subscription!: Subscription;
   ResultArray: {
     Rowkey: number;
     pageId: number;
@@ -54,7 +57,16 @@ export class RoleAddEditComponent {
   validationErrors: { [key in keyof RolePut]?: string } = {};
   isLoading=false
 
-  constructor(public pageServ: PageService, public RoleDetailsServ: RoleDetailsService, public activeRoute: ActivatedRoute, public account: AccountService, public ApiServ: ApiService, private menuService: MenuService, public EditDeleteServ: DeleteEditPermissionService, public RoleServ: RoleService, private router: Router) { }
+  constructor(public pageServ: PageService, 
+    public RoleDetailsServ: RoleDetailsService,
+     public activeRoute: ActivatedRoute, 
+     public account: AccountService,
+      public ApiServ: ApiService,
+       private menuService: MenuService, 
+       public EditDeleteServ: DeleteEditPermissionService, 
+       public RoleServ: RoleService,
+        private router: Router,
+              private languageService: LanguageService) { }
 
   async ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -82,6 +94,12 @@ export class RoleAddEditComponent {
         this.loading = false; // Not loading in create mode
       }
     }
+  this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+
+
   }
 
   GetRoleName() {

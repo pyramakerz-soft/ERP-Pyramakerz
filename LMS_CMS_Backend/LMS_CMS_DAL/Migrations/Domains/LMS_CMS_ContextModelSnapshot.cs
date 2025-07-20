@@ -1000,6 +1000,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<long>("ID")
                         .HasColumnType("bigint");
 
+                    b.Property<string>("AccountType")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ArName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -1484,6 +1487,29 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.ToTable("ReceivableMaster");
                 });
 
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.AccountingModule.Reports.CountResult", b =>
+                {
+                    b.Property<int>("TotalCount")
+                        .HasColumnType("int");
+
+                    b.ToTable((string)null);
+
+                    b.ToView(null, (string)null);
+                });
+
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.AccountingModule.Reports.TotalResult", b =>
+                {
+                    b.Property<decimal?>("TotalCredit")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("TotalDebit")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.ToTable((string)null);
+
+                    b.ToView(null, (string)null);
+                });
+
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.AccountingModule.Save", b =>
                 {
                     b.Property<long>("ID")
@@ -1822,6 +1848,122 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.ToTable("AcademicDegrees");
                 });
 
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.Administration.Announcement", b =>
+                {
+                    b.Property<long>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("ID"));
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("DeletedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("DeletedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("ImageLink")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("InsertedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("InsertedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("InsertedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool?>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("UpdatedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("UpdatedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("DeletedByUserId");
+
+                    b.HasIndex("InsertedByUserId");
+
+                    b.HasIndex("UpdatedByUserId");
+
+                    b.ToTable("Announcement");
+                });
+
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.Administration.AnnouncementSharedTo", b =>
+                {
+                    b.Property<long>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("ID"));
+
+                    b.Property<long>("AnnouncementID")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("DeletedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("DeletedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("InsertedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("InsertedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("InsertedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool?>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("UpdatedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("UpdatedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("UserTypeID")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("AnnouncementID");
+
+                    b.HasIndex("DeletedByUserId");
+
+                    b.HasIndex("InsertedByUserId");
+
+                    b.HasIndex("UpdatedByUserId");
+
+                    b.HasIndex("UserTypeID");
+
+                    b.ToTable("AnnouncementSharedTo");
+                });
+
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.Administration.Department", b =>
                 {
                     b.Property<long>("ID")
@@ -2041,6 +2183,64 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.HasIndex("UpdatedByUserId");
 
                     b.ToTable("ReasonsForLeavingWork");
+                });
+
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.Administration.RegisteredEmployee", b =>
+                {
+                    b.Property<long>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("ID"));
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool?>("IsAccepted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Mobile")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("User_Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("ar_name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("en_name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("User_Name")
+                        .IsUnique();
+
+                    b.ToTable("RegisteredEmployee");
                 });
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.BusModule.Bus", b =>
@@ -5900,6 +6100,142 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.HasIndex("WeightTypeID");
 
                     b.ToTable("DirectMarkClassroomStudent");
+                });
+
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.LMS.DiscussionRoom", b =>
+                {
+                    b.Property<long>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("ID"));
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("DeletedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("DeletedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateOnly>("EndDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("ImageLink")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("InsertedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("InsertedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("InsertedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool?>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsRepeatedWeekly")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("MeetingLink")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RecordLink")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Time")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("UpdatedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("UpdatedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("DeletedByUserId");
+
+                    b.HasIndex("InsertedByUserId");
+
+                    b.HasIndex("UpdatedByUserId");
+
+                    b.ToTable("DiscussionRoom");
+                });
+
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.LMS.DiscussionRoomStudentClassroom", b =>
+                {
+                    b.Property<long>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("ID"));
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("DeletedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("DeletedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("DiscussionRoomID")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("InsertedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("InsertedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("InsertedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool?>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<long>("StudentClassroomID")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("UpdatedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("UpdatedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("DeletedByUserId");
+
+                    b.HasIndex("DiscussionRoomID");
+
+                    b.HasIndex("InsertedByUserId");
+
+                    b.HasIndex("StudentClassroomID");
+
+                    b.HasIndex("UpdatedByUserId");
+
+                    b.ToTable("DiscussionRoomStudentClassroom");
                 });
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.LMS.DokLevel", b =>
@@ -10445,6 +10781,24 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.ToTable("Role_Detailes");
                 });
 
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.UserType", b =>
+                {
+                    b.Property<long>("ID")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("Title")
+                        .IsUnique();
+
+                    b.ToTable("UserType");
+                });
+
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.ViolationModule.EmployeeTypeViolation", b =>
                 {
                     b.Property<long>("ID")
@@ -11490,6 +11844,64 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Navigation("InsertedByEmployee");
 
                     b.Navigation("UpdatedByEmployee");
+                });
+
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.Administration.Announcement", b =>
+                {
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "DeletedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("DeletedByUserId");
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "InsertedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("InsertedByUserId");
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "UpdatedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("UpdatedByUserId");
+
+                    b.Navigation("DeletedByEmployee");
+
+                    b.Navigation("InsertedByEmployee");
+
+                    b.Navigation("UpdatedByEmployee");
+                });
+
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.Administration.AnnouncementSharedTo", b =>
+                {
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Administration.Announcement", "Announcement")
+                        .WithMany("AnnouncementSharedTos")
+                        .HasForeignKey("AnnouncementID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "DeletedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("DeletedByUserId");
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "InsertedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("InsertedByUserId");
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "UpdatedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("UpdatedByUserId");
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.UserType", "UserType")
+                        .WithMany("AnnouncementSharedTos")
+                        .HasForeignKey("UserTypeID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Announcement");
+
+                    b.Navigation("DeletedByEmployee");
+
+                    b.Navigation("InsertedByEmployee");
+
+                    b.Navigation("UpdatedByEmployee");
+
+                    b.Navigation("UserType");
                 });
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.Administration.Department", b =>
@@ -13485,6 +13897,64 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Navigation("UpdatedByEmployee");
 
                     b.Navigation("WeightType");
+                });
+
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.LMS.DiscussionRoom", b =>
+                {
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "DeletedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("DeletedByUserId");
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "InsertedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("InsertedByUserId");
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "UpdatedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("UpdatedByUserId");
+
+                    b.Navigation("DeletedByEmployee");
+
+                    b.Navigation("InsertedByEmployee");
+
+                    b.Navigation("UpdatedByEmployee");
+                });
+
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.LMS.DiscussionRoomStudentClassroom", b =>
+                {
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "DeletedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("DeletedByUserId");
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.LMS.DiscussionRoom", "DiscussionRoom")
+                        .WithMany("DiscussionRoomStudentClassrooms")
+                        .HasForeignKey("DiscussionRoomID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "InsertedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("InsertedByUserId");
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.LMS.StudentClassroom", "StudentClassroom")
+                        .WithMany("DiscussionRoomStudentClassrooms")
+                        .HasForeignKey("StudentClassroomID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "UpdatedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("UpdatedByUserId");
+
+                    b.Navigation("DeletedByEmployee");
+
+                    b.Navigation("DiscussionRoom");
+
+                    b.Navigation("InsertedByEmployee");
+
+                    b.Navigation("StudentClassroom");
+
+                    b.Navigation("UpdatedByEmployee");
                 });
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.LMS.EvaluationBookCorrection", b =>
@@ -15861,6 +16331,11 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Navigation("Employees");
                 });
 
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.Administration.Announcement", b =>
+                {
+                    b.Navigation("AnnouncementSharedTos");
+                });
+
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.Administration.Department", b =>
                 {
                     b.Navigation("Employees");
@@ -16146,6 +16621,11 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Navigation("DailyPerformances");
                 });
 
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.LMS.DiscussionRoom", b =>
+                {
+                    b.Navigation("DiscussionRoomStudentClassrooms");
+                });
+
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.LMS.DokLevel", b =>
                 {
                     b.Navigation("QuestionBanks");
@@ -16337,6 +16817,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.Navigation("DirectMarkClassroomStudents");
 
+                    b.Navigation("DiscussionRoomStudentClassrooms");
+
                     b.Navigation("StudentClassroomSubjects");
                 });
 
@@ -16520,6 +17002,11 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Navigation("Employess");
 
                     b.Navigation("Role_Detailes");
+                });
+
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.UserType", b =>
+                {
+                    b.Navigation("AnnouncementSharedTos");
                 });
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.ViolationModule.Violation", b =>

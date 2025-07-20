@@ -734,10 +734,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpPut("Replace")]
         [Authorize_Endpoint_(
          allowedTypes: new[] { "octa", "employee" }
-     //,
-     //allowEdit: 1,
-     //pages: new[] { "" }
-     )]
+         //,
+         //allowEdit: 1,
+         //pages: new[] { "" }
+         )]
         public async Task<IActionResult> EditAsync(List<TimeTableReplaceEditDTO> SessionReplaced)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -779,6 +779,26 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     return BadRequest("The two sessions are not in the same timetable.");
 
                 long timetableId = firstSession.TimeTableClassroom.TimeTableID;
+
+                // validate that this subjects can add to another session 
+                List<ClassroomSubject> firstClassroomSubjects = Unit_Of_Work.classroomSubject_Repository.FindBy(cs => cs.ClassroomID == firstSession.TimeTableClassroom.ClassroomID && cs.IsDeleted != true && !cs.Hide);
+                List<ClassroomSubject> secondClassroomSubjects = Unit_Of_Work.classroomSubject_Repository.FindBy(cs => cs.ClassroomID == secondSession.TimeTableClassroom.ClassroomID && cs.IsDeleted != true && !cs.Hide);
+
+                var firstSessionSubjectIds = firstSession.TimeTableSubjects.Select(ts => ts.SubjectID).Distinct().ToList();
+                var secondSessionSubjectIds = secondSession.TimeTableSubjects.Select(ts => ts.SubjectID).Distinct().ToList();
+
+                var firstClassroomSubjectIds = firstClassroomSubjects.Select(cs => cs.SubjectID).Distinct().ToList();
+                var secondClassroomSubjectIds = secondClassroomSubjects.Select(cs => cs.SubjectID).Distinct().ToList();
+
+                // Check that all subjects in firstSession exist in second classroom subjects
+                if (firstSessionSubjectIds.Any(subId => !secondClassroomSubjectIds.Contains((long)subId)))
+                    return BadRequest("One or more subjects in the first session are not allowed in the second classroom.");
+
+                // Check that all subjects in secondSession exist in first classroom subjects
+                if (secondSessionSubjectIds.Any(subId => !firstClassroomSubjectIds.Contains((long)subId)))
+                    return BadRequest("One or more subjects in the second session are not allowed in the first classroom.");
+
+                // validate teachers are available
 
                 List<long> firstSessionTeacherIds = firstSession.TimeTableSubjects
                      .Where(s => s.TeacherID.HasValue)
@@ -823,6 +843,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     return BadRequest("One of the teachers in the second session is already assigned in the first session slot.");
 
 
+
                 // Swap subjects
                 foreach (TimeTableSubject item1 in firstSession.TimeTableSubjects)
                 {
@@ -841,9 +862,76 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             return Ok();
 
         }
-    }
 
     /////////////////
 
+    [HttpDelete("{id}")]
+    [Authorize_Endpoint_(
+           allowedTypes: new[] { "octa", "employee" }
+           //,
+           //allowDelete: 1,
+           //pages: new[] { "Academic Years" }
+       )]
+        public IActionResult Delete(long id)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            if (id == null)
+            {
+                return BadRequest("id cannot be null");
+            }
+            TimeTable timeTable = Unit_Of_Work.timeTable_Repository.Select_By_Id(id);
+
+            if (timeTable == null || timeTable.IsDeleted == true)
+            {
+                return NotFound("No TimeTable with this ID");
+            }
+
+            //if (userTypeClaim == "employee")
+            //{
+            //    IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Academic Years", roleId, userId, academicYear);
+            //    if (accessCheck != null)
+            //    {
+            //        return accessCheck;
+            //    }
+            //}
+
+            timeTable.IsDeleted = true;
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            timeTable.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            if (userTypeClaim == "octa")
+            {
+                timeTable.DeletedByOctaId = userId;
+                if (timeTable.DeletedByUserId != null)
+                {
+                    timeTable.DeletedByUserId = null;
+                }
+            }
+            else if (userTypeClaim == "employee")
+            {
+                timeTable.DeletedByUserId = userId;
+                if (timeTable.DeletedByOctaId != null)
+                {
+                    timeTable.DeletedByOctaId = null;
+                }
+            }
+
+            Unit_Of_Work.timeTable_Repository.Update(timeTable);
+            Unit_Of_Work.SaveChanges();
+            return Ok();
+        }
+    }
 }
+

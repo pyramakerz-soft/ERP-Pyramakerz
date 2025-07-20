@@ -21,11 +21,13 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { ApiService } from '../../../../Services/api.service';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { firstValueFrom } from 'rxjs';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-bus-details',
   standalone: true,
-  imports: [FormsModule,CommonModule,SearchComponent],
+  imports: [FormsModule,CommonModule,SearchComponent, TranslateModule],
   templateUrl: './bus-details.component.html',
   styleUrl: './bus-details.component.css'
 })
@@ -48,7 +50,8 @@ export class BusDetailsComponent {
   AllowDelete: boolean = false;
   AllowEditForOthers: boolean = false;
   AllowDeleteForOthers: boolean = false;
- 
+  isRtl: boolean = false;
+  subscription!: Subscription;
   IsChoosenDomain: boolean = false;
   IsEmployee: boolean = true;
   
@@ -61,7 +64,8 @@ export class BusDetailsComponent {
   path:string = ""
   isLoading = false;
 
-  constructor(public busService:BusService, public account:AccountService, public activeRoute:ActivatedRoute, public DomainServ: DomainService, public BusTypeServ: BusTypeService, 
+  constructor(public busService:BusService,
+      private languageService: LanguageService, public account:AccountService, public activeRoute:ActivatedRoute, public DomainServ: DomainService, public BusTypeServ: BusTypeService, 
     public busDistrictServ: BusDistrictService, public busStatusServ: BusStatusService, public BusCompanyServ: BusCompanyService, public EmployeeServ: EmployeeService, 
     private menuService: MenuService,public EditDeleteServ:DeleteEditPermissionService, public router:Router,public ApiServ:ApiService){}
 
@@ -96,6 +100,11 @@ export class BusDetailsComponent {
       this.AllowEdit = true;
       this.AllowDelete = true;
     }
+
+     this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';   
   }
 
   getAllDomains() {

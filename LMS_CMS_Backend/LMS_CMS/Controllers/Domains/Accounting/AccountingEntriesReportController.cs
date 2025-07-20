@@ -1,6 +1,7 @@
 ﻿using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.AccountingModule.Reports;
 using LMS_CMS_DAL.Models.Domains.AccountingModule.Reports;
+using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +12,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 {
     [Route("api/with-domain/[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class AccountingEntriesReportController : ControllerBase
     {
         private readonly DbContextFactoryService _dbContextFactory;
@@ -23,11 +24,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
         #region Accounting Entries
         [HttpGet("AccountingEntries")]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" },
-        //    pages: new[] { "" }
-        //)]
-        public async Task<IActionResult> GetAccountingEntriesAsync(DateTime fromDate, DateTime toDate, int pageNumber = 1, int pageSize = 10)
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Accounting Constraints Report" }
+        )]
+        public async Task<IActionResult> GetAccountingEntriesAsync(DateTime fromDate, DateTime toDate, long AccountNumber, long SubAccountNumber, int pageNumber = 1, int pageSize = 10)
         {
             if (toDate < fromDate)
                 return BadRequest("Start date must be equal or greater than End date");
@@ -60,14 +61,14 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             }
 
             var fullTotals = await context.Set<TotalResult>()
-        .FromSqlRaw(@"
-            SELECT 
-                SUM(Debit) AS TotalDebit,
-                SUM(Credit) AS TotalCredit
-            FROM dbo.EntriesFun(@DateFrom, @DateTo)",
-            new SqlParameter("@DateFrom", fromDate),
-            new SqlParameter("@DateTo", toDate)
-        ).FirstOrDefaultAsync();
+                .FromSqlRaw(@"
+                    SELECT 
+                        SUM(Debit) AS TotalDebit,
+                        SUM(Credit) AS TotalCredit
+                    FROM dbo.EntriesFun(@DateFrom, @DateTo)",
+                    new SqlParameter("@DateFrom", fromDate),
+                    new SqlParameter("@DateTo", toDate)
+                ).FirstOrDefaultAsync();
 
             decimal fullDebit = fullTotals?.TotalDebit ?? 0;
             decimal fullCredit = fullTotals?.TotalCredit ?? 0;

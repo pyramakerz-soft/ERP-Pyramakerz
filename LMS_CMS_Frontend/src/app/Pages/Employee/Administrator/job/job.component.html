@@ -3,17 +3,17 @@
     <div class="flex items-center space-x-4">
       <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToBack()"></i>
       <h1 class="primaryTxt font-semibold text-2xl leading-9">
-        Job Category - {{ Category.name }}
+        {{ 'Job Category' | translate }} - {{ Category.name }}
       </h1>
     </div>
   </div>
   <div class="flex justify-between">
-    <h1 class="font-semibold text-2xl leading-9">Job</h1>
+    <h1 class="font-semibold text-2xl leading-9">  {{ 'Job' | translate }}</h1>
     <div class="flex justify-between items-center">
       <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
       <button (click)="Create()"
         class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
-        Create Job
+         {{ 'Create Job' | translate }}
       </button>
     </div>
   </div>
@@ -24,16 +24,16 @@
         <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
           <tr>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-              ID
+               {{ 'ID' | translate }}
             </th>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-              Name
+                 {{ 'Name' | translate }}
             </th>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-              Job Category
+               {{ 'Job Category' | translate }}
             </th>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-              Actions
+               {{ 'Actions' | translate }}
             </th>
           </tr>
         </thead>
@@ -42,7 +42,7 @@
           <tr *ngIf="TableData.length === 0">
             <td colspan="4"
               class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-              No Data Found
+             {{ 'No Data Found' | translate }}
             </td>
           </tr>
 
@@ -87,17 +87,17 @@
     </button>
 
     <h1 *ngIf="mode == 'Create'" class="font-semibold text-2xl leading-9">
-      Create Job
+       {{ 'Create Job' | translate }}
     </h1>
     <h1 *ngIf="mode == 'Edit'" class="font-semibold text-2xl leading-9">
-      Edit Job
+       {{ 'Edit Job' | translate }}
     </h1>
     <div class="mt-4 bg-[#F7F7F7] w-[573px] h-auto rounded-[24px] p-[16px_24px] gap-[20px]">
-      <h6 class="font-medium text-base leading-6">Job Name</h6>
+      <h6 class="font-medium text-base leading-6"> {{ 'Job Name' | translate }}</h6>
       <div class="flex justify-start mt-2 gap-2 items-start">
         <div class="flex flex-col">
           <input type="text" class="w-[404px] h-[45px] rounded-lg border border-solid border-gray-300 px-2"
-            [(ngModel)]="job.name" placeholder="Enter job" (ngModelChange)="
+            [(ngModel)]="job.name" placeholder=" {{ 'Enter job' | translate }}" (ngModelChange)="
               onInputValueChange({ field: 'name', value: $event })
             " />
           <span *ngIf="validationErrors['name']" class="text-red-500 ml-3 font-normal">{{ validationErrors["name"]
@@ -105,7 +105,7 @@
         </div>
         <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
           (click)="CreateOREdit()">
-          <span *ngIf="!isLoading">Save</span>
+          <span *ngIf="!isLoading">{{ 'Save' | translate }}</span>
           <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
         </button>
       </div>
