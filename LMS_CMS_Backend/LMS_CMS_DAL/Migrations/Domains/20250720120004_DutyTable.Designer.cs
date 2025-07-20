@@ -4,6 +4,7 @@ using LMS_CMS_DAL.Models.Domains;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LMS_CMS_DAL.Migrations.Domains
 {
     [DbContext(typeof(LMS_CMS_Context))]
-    partial class LMS_CMS_ContextModelSnapshot : ModelSnapshot
+    [Migration("20250720120004_DutyTable")]
+    partial class DutyTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -6290,10 +6293,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<long>("TeacherID")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("TimeTableSessionID")
+                    b.Property<long>("TimeTableSubjectID")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime?>("UpdatedAt")
@@ -6311,9 +6311,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.HasIndex("InsertedByUserId");
 
-                    b.HasIndex("TeacherID");
-
-                    b.HasIndex("TimeTableSessionID");
+                    b.HasIndex("TimeTableSubjectID");
 
                     b.HasIndex("UpdatedByUserId");
 
@@ -14023,22 +14021,15 @@ namespace LMS_CMS_DAL.Migrations.Domains
                 {
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "DeletedByEmployee")
                         .WithMany()
-                        .HasForeignKey("DeletedByUserId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("DeletedByUserId");
 
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "InsertedByEmployee")
                         .WithMany()
                         .HasForeignKey("InsertedByUserId");
 
-                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "Teacher")
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.LMS.TimeTableSubject", "TimeTableSubject")
                         .WithMany("Duties")
-                        .HasForeignKey("TeacherID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("LMS_CMS_DAL.Models.Domains.LMS.TimeTableSession", "TimeTableSession")
-                        .WithMany("Duties")
-                        .HasForeignKey("TimeTableSessionID")
+                        .HasForeignKey("TimeTableSubjectID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -14050,9 +14041,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.Navigation("InsertedByEmployee");
 
-                    b.Navigation("Teacher");
-
-                    b.Navigation("TimeTableSession");
+                    b.Navigation("TimeTableSubject");
 
                     b.Navigation("UpdatedByEmployee");
                 });
@@ -16535,8 +16524,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.Navigation("DriverAssistant");
 
-                    b.Navigation("Duties");
-
                     b.Navigation("EmployeeAttachments");
 
                     b.Navigation("EmployeeDays");
@@ -16985,9 +16972,12 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.LMS.TimeTableSession", b =>
                 {
-                    b.Navigation("Duties");
-
                     b.Navigation("TimeTableSubjects");
+                });
+
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.LMS.TimeTableSubject", b =>
+                {
+                    b.Navigation("Duties");
                 });
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.LMS.WeightType", b =>
