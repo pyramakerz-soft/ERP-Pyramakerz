@@ -63,11 +63,11 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         /////////////////////////////////////////////////////////////////////////////////////////////
 
-        [HttpGet("GetClassFoActiveAcademicYearWithStudentsIncluded")]
+        [HttpGet("GetClassForActiveAcademicYearWithStudentsIncluded")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" }
         )]
-        public async Task<IActionResult> GetClassFoActiveAcademicYearWithStudentsIncluded()
+        public async Task<IActionResult> GetClassForActiveAcademicYearWithStudentsIncluded()
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -91,10 +91,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     ClassroomName = group.FirstOrDefault()?.Classroom.Name, 
                     Students = group.Select(sc => new
                     {
-                        StudentClassId = sc.ID,
-                        StudentId = sc.Student.ID,
-                        StudentEnglishName = sc.Student.en_name,
-                        StudentArabicName = sc.Student.ar_name 
+                        id = sc.ID,
+                        studentID = sc.Student.ID,
+                        studentEnglishName = sc.Student.en_name,
+                        studentArabicName = sc.Student.ar_name 
                     }).ToList()
                 }).ToList();
 
