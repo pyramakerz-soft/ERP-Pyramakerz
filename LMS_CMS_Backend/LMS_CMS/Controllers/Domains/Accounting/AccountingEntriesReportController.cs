@@ -67,22 +67,19 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             decimal fullCredit = fullTotals?.TotalCredit ?? 0;
             decimal fullDifference = fullTotals?.Differences ?? 0;
 
-            var groupedResult = result
-                .Where(e => e.Date != null)
-                .GroupBy(e => e.Date.Value.Date)
+            var grouped = result
+                .GroupBy(x => x.Date.Value.Date)
                 .Select(g => new
                 {
                     Date = g.Key,
                     Entries = g.ToList(),
-                    Totals = new
-                    {
-                        Debit = g.Sum(x => x.Debit ?? 0),
-                        Credit = g.Sum(x => x.Credit ?? 0),
-                        Difference = g.Sum(x => x.Debit ?? 0) - g.Sum(x => x.Credit ?? 0)
-                    }
-                })
-                .OrderBy(g => g.Date)
-                .ToList();
+                    //Totals = new
+                    //{
+                    //    Debit = g.First().DebitTotal,
+                    //    Credit = g.First().CreditTotal,
+                    //    Difference = g.First().Difference
+                    //}
+                });
 
             int totalRecords = (await context.Set<CountResult>()
                 .FromSqlInterpolated($@"
@@ -100,7 +97,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
             return Ok(new
             {
-                Data = groupedResult,
+                Data = grouped,
                 FullTotals = new
                 {
                     Debit = fullDebit,
