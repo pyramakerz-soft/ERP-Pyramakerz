@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { TimeTable } from '../../../../Models/LMS/time-table';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -66,7 +66,10 @@ export class TimeTableComponent {
   SelectedTeacherId: number = 0
   MaxPeriods: number = 0;
   TimeTableName: string = '';
-  TimeTable: TimeTableDayGroupDTO[] = []
+  TimeTable: any[] = []
+  TimeTable2: TimeTableDayGroupDTO[] = []
+  TeacherName: string = '';
+  ClassName: string = '';
 
   constructor(
     private router: Router,
@@ -77,7 +80,8 @@ export class TimeTableComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public SchoolServ: SchoolService,
-    public TimeTableServ: TimeTableService
+    public TimeTableServ: TimeTableService ,
+    private cdRef: ChangeDetectorRef
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -273,7 +277,15 @@ export class TimeTableComponent {
 
   async triggerPrint() {
     setTimeout(() => {
-      const printContents = document.getElementById("Data")?.innerHTML;
+      let printContents: string | undefined;
+      if (this.PrintType == "Teacher") {
+        printContents = document.getElementById("DataTeacher")?.innerHTML;
+      } else if (this.PrintType == "Class") {
+        printContents = document.getElementById("Data")?.innerHTML;
+        console.log(printContents)
+      } else {
+        printContents = document.getElementById("All")?.innerHTML;
+      }
       if (!printContents) {
         console.error("Element not found!");
         return;
@@ -330,21 +342,25 @@ export class TimeTableComponent {
         this.TimeTable = d.data;
         this.TimeTableName = d.timeTableName;
         this.MaxPeriods = d.maxPeriods;
+        this.ClassName=d.className
         this.triggerPrint();
       });
     } else if (this.PrintType === "Teacher") {
       this.TimeTableServ.GetByIdForTeacherAsync(this.SelectedTimeTableId, this.SelectedTeacherId, this.DomainName).subscribe((d) => {
+        console.log(this.TimeTable)
         this.TimeTable = d.data;
         this.TimeTableName = d.timeTableName;
         this.MaxPeriods = d.maxPeriods;
-      this.triggerPrint();
+        this.TeacherName=d.teacherName
+        this.triggerPrint();
       });
     } else if (this.PrintType === "All") {
       this.TimeTableServ.GetByID(this.SelectedTimeTableId, this.DomainName).subscribe((d) => {
-        this.TimeTable = d.data;
+        this.TimeTable2 = d.data;
+        console.log(this.TimeTable)
         this.TimeTableName = d.timeTableName;
         this.MaxPeriods = d.maxPeriods;
-       this.triggerPrint();
+        this.triggerPrint();
       });
     }
   }
@@ -361,7 +377,7 @@ export class TimeTableComponent {
     }
   }
 
-  delete(id:number){
+  delete(id: number) {
     Swal.fire({
       title: 'Are you sure you want to delete this Time Table?',
       icon: 'warning',

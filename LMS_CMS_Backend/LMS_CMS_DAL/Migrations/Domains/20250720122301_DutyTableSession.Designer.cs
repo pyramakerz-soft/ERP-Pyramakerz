@@ -4,6 +4,7 @@ using LMS_CMS_DAL.Models.Domains;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LMS_CMS_DAL.Migrations.Domains
 {
     [DbContext(typeof(LMS_CMS_Context))]
-    partial class LMS_CMS_ContextModelSnapshot : ModelSnapshot
+    [Migration("20250720122301_DutyTableSession")]
+    partial class DutyTableSession
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -6290,9 +6293,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<long>("TeacherID")
-                        .HasColumnType("bigint");
-
                     b.Property<long>("TimeTableSessionID")
                         .HasColumnType("bigint");
 
@@ -6310,8 +6310,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.HasIndex("DeletedByUserId");
 
                     b.HasIndex("InsertedByUserId");
-
-                    b.HasIndex("TeacherID");
 
                     b.HasIndex("TimeTableSessionID");
 
@@ -14023,18 +14021,11 @@ namespace LMS_CMS_DAL.Migrations.Domains
                 {
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "DeletedByEmployee")
                         .WithMany()
-                        .HasForeignKey("DeletedByUserId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("DeletedByUserId");
 
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "InsertedByEmployee")
                         .WithMany()
                         .HasForeignKey("InsertedByUserId");
-
-                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "Teacher")
-                        .WithMany("Duties")
-                        .HasForeignKey("TeacherID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
 
                     b.HasOne("LMS_CMS_DAL.Models.Domains.LMS.TimeTableSession", "TimeTableSession")
                         .WithMany("Duties")
@@ -14049,8 +14040,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Navigation("DeletedByEmployee");
 
                     b.Navigation("InsertedByEmployee");
-
-                    b.Navigation("Teacher");
 
                     b.Navigation("TimeTableSession");
 
@@ -16534,8 +16523,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Navigation("DrivenBuses");
 
                     b.Navigation("DriverAssistant");
-
-                    b.Navigation("Duties");
 
                     b.Navigation("EmployeeAttachments");
 

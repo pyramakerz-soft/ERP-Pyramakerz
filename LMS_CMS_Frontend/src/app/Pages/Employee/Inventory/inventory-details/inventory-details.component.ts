@@ -337,6 +337,8 @@ export class InventoryDetailsComponent {
     this.ShopItems = []; // Clear items when category changes
     this.SelectedCategoryId = null;
     this.SelectedSubCategoryId = null;
+    this.Data.remaining=0
+    this.Data.total=0
     if (this.FlagId == 8) {
       this.Data.storeToTransformId = 0
       this.StoresForTitle = []
@@ -770,7 +772,7 @@ export class InventoryDetailsComponent {
       Swal.fire({
         icon: 'warning',
         title: 'Warning!',
-        text: 'Items Is Required',
+        text: 'Items Are Required',
         confirmButtonColor: '#089B41',
       });
       return false;
@@ -779,7 +781,7 @@ export class InventoryDetailsComponent {
       Swal.fire({
         icon: 'warning',
         title: 'Warning!',
-        text: 'Items Is Required',
+        text: 'Items Are Required',
         confirmButtonColor: '#089B41',
       });
       return false;

@@ -194,13 +194,13 @@ import { TimeTableComponent } from './Pages/Employee/LMS/time-table/time-table.c
 import { TimeTableViewComponent } from './Pages/Employee/LMS/time-table-view/time-table-view.component'; 
 import { TimeTableReplace } from './Models/LMS/time-table-replace';
 import { TimeTableReplaceComponent } from './Pages/Employee/LMS/time-table-replace/time-table-replace.component';
+import { SignUpEmployeeComponent } from './Pages/Login/sign-up-employee/sign-up-employee.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
     { path: "Octa/login", component: OctaLoginComponent, title: "login", canActivate: [noNavigateToLoginIfLoginGuard] },
     { path: "SignUp", component: SignUpComponent, title: "SignUp", canActivate: [noNavigateToLoginIfLoginGuard] },
-
-
+    { path: "EmployeeSignUp", component: SignUpEmployeeComponent, title: "EmployeeSignUp", canActivate: [noNavigateToLoginIfLoginGuard] },
     {
         path: "Employee",
         component: MainLayoutComponent,

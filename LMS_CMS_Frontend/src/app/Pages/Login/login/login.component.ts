@@ -45,8 +45,10 @@ export class LoginComponent {
     window.addEventListener('popstate', this.checkLocalStorageOnNavigate);
 
     const fromSignup = sessionStorage.getItem('fromSignup') === 'true'; 
-    this.selectType(fromSignup ? 'parent' : 'student'); 
+    const fromSignupEmployee = sessionStorage.getItem('fromEmployeeSignup') === 'true';  
+    this.selectType(fromSignup ? 'parent' : fromSignupEmployee ? 'employee' : 'student'); 
     sessionStorage.removeItem('fromSignup');
+    sessionStorage.removeItem('fromEmployeeSignup');
   }
   
   ngOnDestroy(): void { 
@@ -233,6 +235,10 @@ export class LoginComponent {
 
   }
   SignUp(){
-    this.router.navigateByUrl("SignUp")
+    if(this.isEmployeeHovered){
+      this.router.navigateByUrl("EmployeeSignUp")
+    }else if(this.isParentHovered){
+      this.router.navigateByUrl("SignUp")
+    }
   }
 }

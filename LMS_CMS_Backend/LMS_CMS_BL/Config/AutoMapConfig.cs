@@ -53,11 +53,11 @@ namespace LMS_CMS_BL.Config
             CreateMap <LMS_CMS_DAL.Models.Domains.Page, Page_GetDTO >();
 
             //7
-            CreateMap<InventoryMaster, InventoryMasterReportDTO>()
-          .ForMember(dest => dest.FlagName, opt => opt.MapFrom(src => src.InventoryFlags.arName))
-          .ForMember(dest => dest.StoreName, opt => opt.MapFrom(src => src.Store != null ? src.Store.Name : "N/A"))
-          .ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => src.Student != null ? src.Student.en_name : "N/A"))
-          .ForMember(dest => dest.SupplierName, opt => opt.MapFrom(src => src.Supplier != null ? src.Supplier.Name : "N/A"));
+          //  CreateMap<InventoryMaster, InventoryMasterReportDTO>()
+          //.ForMember(dest => dest.FlagName, opt => opt.MapFrom(src => src.InventoryFlags.arName))
+          //.ForMember(dest => dest.StoreName, opt => opt.MapFrom(src => src.Store != null ? src.Store.Name : "N/A"))
+          //.ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => src.Student != null ? src.Student.en_name : "N/A"))
+          //.ForMember(dest => dest.SupplierName, opt => opt.MapFrom(src => src.Supplier != null ? src.Supplier.Name : "N/A"));
 
 
 
@@ -1099,6 +1099,15 @@ namespace LMS_CMS_BL.Config
 
             CreateMap<AnnouncementSharedTo, AnnouncementSharedToGetDTO>()
                 .ForMember(dest => dest.UserTypeTitle, opt => opt.MapFrom(src => src.UserType.Title));
+
+            CreateMap<DiscussionRoom, DiscussionRoomGetDTO>();
+            CreateMap<DiscussionRoomAdd, DiscussionRoom>();
+            CreateMap<DiscussionRoomPutDTO, DiscussionRoom>();
+
+            CreateMap<DiscussionRoomStudentClassroom, DiscussionRoomStudentClassroomGetDTO>();
+
+            CreateMap<RegisteredEmployee, RegisteredEmployeeGetDTO>(); 
+            CreateMap<RegisteredEmployeeAddDTO, RegisteredEmployee>(); 
         }
     } 
 }
