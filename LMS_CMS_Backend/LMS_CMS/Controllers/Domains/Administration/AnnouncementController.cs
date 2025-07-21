@@ -69,6 +69,43 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
         
         //////////////////////////////////////////////////////////////////////////////////////////
         
+        [HttpGet("GetByUserTypeID/{id}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Announcement" }
+        )]
+        public async Task<IActionResult> GetByUserTypeID(long id)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            List<Announcement> announcements = await Unit_Of_Work.announcement_Repository.Select_All_With_IncludesById<Announcement>(
+                f => f.IsDeleted != true &&
+                        f.AnnouncementSharedTos.Any(x => x.UserTypeID == id && x.IsDeleted != true),
+                query => query.Include(d => d.AnnouncementSharedTos.Where(d => d.IsDeleted != true))
+                                .ThenInclude(d => d.UserType)
+            );
+             
+            if (announcements == null || announcements.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<AnnouncementGetDTO> announcementGetDTO = mapper.Map<List<AnnouncementGetDTO>>(announcements);
+
+            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+            foreach (var announcement in announcementGetDTO)
+            {
+                if (!string.IsNullOrEmpty(announcement.ImageLink))
+                {
+                    announcement.ImageLink = $"{serverUrl}{announcement.ImageLink.Replace("\\", "/")}";
+                }
+            }
+
+            return Ok(announcementGetDTO);
+        }
+        
+        //////////////////////////////////////////////////////////////////////////////////////////
+        
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
