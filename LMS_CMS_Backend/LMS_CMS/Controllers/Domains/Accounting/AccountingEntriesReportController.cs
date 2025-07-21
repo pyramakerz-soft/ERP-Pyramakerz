@@ -73,12 +73,12 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 {
                     Date = g.Key,
                     Entries = g.ToList(),
-                    //Totals = new
-                    //{
-                    //    Debit = g.First().DebitTotal,
-                    //    Credit = g.First().CreditTotal,
-                    //    Difference = g.First().Difference
-                    //}
+                    Totals = new
+                    {
+                        Debit = g.Sum(x => x.Debit ?? 0),
+                        Credit = g.Sum(x => x.Credit ?? 0),
+                        Difference = g.Sum(x => x.Debit ?? 0) - g.Sum(x => x.Credit ?? 0)
+                    }
                 });
 
             int totalRecords = (await context.Set<CountResult>()
