@@ -13,5 +13,7 @@
         public decimal? Debit { get; set; }
         public decimal? Credit { get; set; }
         public DateTime? Date { get; set; }
+        public decimal? Balance { get; set; }
+        public long? LinkFileID { get; set; }
     }
 }
