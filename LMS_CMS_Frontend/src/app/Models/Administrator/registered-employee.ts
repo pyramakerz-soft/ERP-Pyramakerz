@@ -9,6 +9,8 @@ export class RegisteredEmployee {
         public phone: string = '', 
         public email: string = '', 
         public address: string = '', 
-        public recaptchaToken: string = '' 
+        public recaptchaToken: string = '', 
+        public roleID: number = 0,
+        public employeeTypeID: number = 0 
     ) {}
 } 

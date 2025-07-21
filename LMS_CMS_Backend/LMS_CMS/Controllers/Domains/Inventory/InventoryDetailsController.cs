@@ -282,7 +282,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             }
           
 
-            return Ok();
+            return Ok("✅ Average cost updated successfully.");
         }
 
         // /////////////////////////////////////////////////////////////-7
@@ -355,8 +355,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                     id.ShopItem.EnName,
                     id.ShopItem.PurchasePrice,
                     id.ShopItem.SalesPrice,
-                    id.ShopItem.Limit // ← لجلب الحد الأدنى
-                    
+                    id.ShopItem.Limit 
                 })
                 .Select(g =>
                 {
@@ -365,36 +364,29 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                     var averageCost = quantity != 0 ? totalCost / quantity : (decimal?)null;
                      var  limit = g.Key.Limit;
                     var alertMessage = (quantity <= limit)
-                        ? "⚠️ الكمية تحت الحد المسموح"
+                        ? "⚠️ The quantity is below the permissible limit "
                             : null;
-
-
                     return new StoreBalanceReportDto
                     {
                         ItemCode = g.Key.ID,
                         ItemName = g.Key.EnName,
                         Quantity = quantity,
                         AverageCost = averageCost,
-
                         PurchasePrice = g.Key.PurchasePrice,
                         TotalPurchase = quantity * g.Key.PurchasePrice,
-
                         SalesPrice = g.Key.SalesPrice,
                         TotalSales = quantity * g.Key.SalesPrice,
                         TotalCost = totalCost,
                         Limit = g.Key.Limit ,
-                        
                     };
                 })
                 .Where(x =>
                     (hasBalance && x.Quantity > 0) ||
                     (overdrawnBalance && x.Quantity < 0) ||
                     (zeroBalances && x.Quantity == 0) ||
-                    ReportFlagTypr == 5 // ← عشان نجيب البيانات كلها ونفلتر لاحقاً
+                    ReportFlagTypr == 5 
                 )
                 .ToList();
-
-            // ✅ فلترة بناءً على ReportFlagTypr
             object result;
 
             if (ReportFlagTypr == 5)
@@ -414,7 +406,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             }
             else
             {
-                // باقي أنواع التقارير
                 switch (ReportFlagTypr)
                 {
                     case 1:

@@ -54,4 +54,28 @@ export class RegisteredEmployeeService {
       responseType: 'text' as 'json'
     });
   } 
+
+  Reject(registeredEmployeeID: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.put<any>(`${this.baseUrl}/RegisteredEmployee/Reject/${registeredEmployeeID}`, {}, { headers });
+  }
+
+  Accept(registeredEmployee: RegisteredEmployee, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.put<any>(`${this.baseUrl}/RegisteredEmployee/Accept`, registeredEmployee, { headers });
+  }
 }
