@@ -7,11 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="DbScripts\EntriesFun.sql" />
     <None Remove="DbScripts\FilterEntries.sql" />
     <None Remove="DbScripts\GetSubAccountInfo.sql" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="DbScripts\EntriesFun.sql" />
     <EmbeddedResource Include="DbScripts\FilterEntries.sql" />
     <EmbeddedResource Include="DbScripts\GetSubAccountInfo.sql" />
   </ItemGroup>
