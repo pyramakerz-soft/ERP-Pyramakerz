@@ -93,6 +93,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     {
                         id = sc.ID,
                         studentID = sc.Student.ID,
+                        classID = group.Key,
                         studentEnglishName = sc.Student.en_name,
                         studentArabicName = sc.Student.ar_name 
                     }).ToList()

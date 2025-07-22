@@ -172,19 +172,18 @@
                                     {{studentClassWhenSelectClass.classroomName}}
                                     ({{studentClassWhenSelectClass.students.length}})</h1>
                             </div>
-                            <!-- <div *ngIf="studentClassWhenSelectClass.studentClassrooms.length != 0" class="mb-6">
+                            <div *ngIf="studentClassWhenSelectClass.students.length != 0" class="mb-6">
                                 <div class="flex justify-between w-full items-center">
                                     <div class="flex space-x-5 items-center">
-                                        <input type="checkbox" [id]="studentClassWhenSelectClass.classroomID"
+                                        <input type="checkbox" [id]="studentClassWhenSelectClass.classroomId"
                                             class="w-5 h-5"
-                                            [checked]="isSelectAllChecked(studentClassWhenSelectClass.classroomID)"
-                                            (change)="onSelectAllChange(studentClassWhenSelectClass.classroomID, $event)">
-                                        <label [for]="studentClassWhenSelectClass.classroomID" class="text-sm">Select
-                                            All</label>
+                                            [checked]="isSelectAllChecked(studentClassWhenSelectClass.classroomId)"
+                                            (change)="onSelectAllChange(studentClassWhenSelectClass.classroomId, $event)">
+                                        <label [for]="studentClassWhenSelectClass.classroomId" class="text-sm">Select All</label>
                                     </div>
                                 </div>
                                 <hr class="my-2 border">
-                            </div> -->
+                            </div>
                             <div *ngIf="studentClassWhenSelectClass.students.length == 0" class="border">
                                 <p class="text-center primaryTxt text-xs">
                                     No Data Found

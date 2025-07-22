@@ -234,6 +234,8 @@ export class AssignmentStudentComponent {
 
   onImageFileSelected(event: any) {
     const file: File = event.target.files[0];
+    const input = event.target as HTMLInputElement;
+
     if (file) {
       if (file.size > 25 * 1024 * 1024) {
         this.validationErrors['file'] = 'The file size exceeds the maximum limit of 25 MB.';
@@ -255,6 +257,7 @@ export class AssignmentStudentComponent {
         this.assignmentStudent.file = null;
       }
     }
+    input.value = '';
   }
 
   capitalizeField(field: keyof AssignmentStudent): string {

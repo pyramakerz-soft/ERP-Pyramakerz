@@ -152,16 +152,16 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     return BadRequest(returnFileInput);
                 }
 
-                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Announcement");
-                var subjectFolder = Path.Combine(baseFolder, discussionRoom.ID.ToString());
-                if (!Directory.Exists(subjectFolder))
+                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/DiscussionRoom"); 
+                var discussionRoomFolder = Path.Combine(baseFolder, discussionRoom.ID.ToString()); 
+                if (!Directory.Exists(discussionRoomFolder))
                 {
-                    Directory.CreateDirectory(subjectFolder);
+                    Directory.CreateDirectory(discussionRoomFolder);
                 }
 
                 if (NewDiscussionRoom.ImageFile.Length > 0)
                 {
-                    var filePath = Path.Combine(subjectFolder, NewDiscussionRoom.ImageFile.FileName);
+                    var filePath = Path.Combine(discussionRoomFolder, NewDiscussionRoom.ImageFile.FileName);
                     using (var stream = new FileStream(filePath, FileMode.Create))
                     {
                         await NewDiscussionRoom.ImageFile.CopyToAsync(stream);

@@ -92,34 +92,54 @@ export class DiscussionRoomComponent {
     )
   }
 
-  getStudentClassData(){
+  getStudentClassData(discussionRoomID?:number){
     this.studentsClass = []
     this.classroomStudentService.GetClassForActiveAcademicYearWithStudentsIncluded(this.DomainName).subscribe(
       data => {
-        this.studentsClass = data
-        console.log(this.studentsClass)
+        this.studentsClass = data 
+        if (discussionRoomID) {
+          this.getDiscussionRoomById(discussionRoomID);
+        } 
       }
     )
   }
 
   getDiscussionRoomById(id: number){
     this.discussionRoom = new DiscussionRoom()
+    this.choosedClasss = [];
+    this.choosedStudentsClass = [];
     this.discussionRoomService.GetById(id, this.DomainName).subscribe(
       data => {
-        this.discussionRoom = data 
+        this.discussionRoom = data   
+        const selectedStudentClassroomIds = data.discussionRoomStudentClassrooms.map(x => x.studentClassroomID);  
+        this.studentsClass.forEach(classroom => { 
+          const selectedStudentsInClass = classroom.students.filter(student =>
+            selectedStudentClassroomIds.includes(student.id)
+          ); 
+
+          if (selectedStudentsInClass.length > 0) { 
+            selectedStudentsInClass.forEach(student => {
+              if (!this.choosedStudentsClass.includes(student.id)) {
+                this.choosedStudentsClass.push(student.id);
+              }
+            });
+ 
+            if (!this.choosedClasss.some(c => c.classroomId === classroom.classroomId)) {
+              this.choosedClasss.push(classroom);
+            }
+          }
+        });
       }
     )
   }
 
   openModal(Id?: number) {
     this.discussionRoom= new DiscussionRoom();
-
-    if (Id) {
-      this.getDiscussionRoomById(Id);
+    if(Id){
+      this.getStudentClassData(Id) 
+    }else{
+      this.getStudentClassData() 
     }
-
-    this.getStudentClassData()
-
     document.getElementById('Add_Modal')?.classList.remove('hidden');
     document.getElementById('Add_Modal')?.classList.add('flex');
   }
@@ -147,12 +167,54 @@ export class DiscussionRoomComponent {
     } 
   } 
   
-  isClassSelected(classroomID: number): boolean {
+  isClassSelected(classroomID: number): boolean { 
     return this.choosedClasss.some(item => item.classroomId == classroomID)
   }
 
   isStudentSelected(studentClassID: number): boolean {
     return this.choosedStudentsClass.some(item => item == studentClassID)
+  }
+
+  isSelectAllChecked(classroomID: number): boolean {
+    const studentsInClass = this.studentClassWhenSelectClass.students.filter(student => student.classID === classroomID);
+    return studentsInClass.every(student => this.choosedStudentsClass.some(selectedStudent => selectedStudent === student.id));
+  }
+
+  onSelectAllChange(classroomID: number, event: Event): void {
+    this.validationErrors['studentClassrooms'] = '';
+
+    const isChecked = (event.target as HTMLInputElement).checked;
+    const studentsInClass = this.studentClassWhenSelectClass.students.filter(student => student.classID === classroomID);
+
+    if (isChecked) {
+      studentsInClass.forEach(student => {
+        if (!this.choosedStudentsClass.some(s => s === student.id)) {
+          this.choosedStudentsClass.push(student.id);
+        }
+      });
+    } else { 
+      const classroom: ClassStudentForDiscussionRoom | undefined = this.studentsClass.find(c => c.classroomId === classroomID);
+      if (!classroom) return;
+      const deselectedStudentIds = classroom.students.map(s => s.id);
+      this.choosedStudentsClass = this.choosedStudentsClass.filter(id => !deselectedStudentIds.includes(id));
+    }
+
+    const indexForClasss = this.choosedClasss.findIndex(item => item.classroomId === classroomID);
+    if (indexForClasss === -1) { 
+      let found: ClassStudentForDiscussionRoom | undefined = this.studentsClass.find((element) => element.classroomId == classroomID);
+      if (found) {
+        this.choosedClasss.push(found);
+      }
+    } else {
+      const relatedClass = this.studentsClass.find(c => c.classroomId === classroomID);
+      const hasStudentInClass = relatedClass?.students.some(student =>
+        this.choosedStudentsClass.includes(student.id)
+      ) ?? false;
+
+      if (!hasStudentInClass) {
+        this.choosedClasss.splice(indexForClasss, 1);
+      }
+    }
   }
 
   onClassSelectChange(classroom: ClassStudentForDiscussionRoom) {
@@ -166,7 +228,9 @@ export class DiscussionRoomComponent {
     } else {
       this.choosedClasss.push(classroom);
       classroom.students.forEach(element => {
-        this.choosedStudentsClass.push(element.id);
+        if (!this.choosedStudentsClass.includes(element.id)) {
+          this.choosedStudentsClass.push(element.id);
+        } 
       });
     }
   } 
@@ -174,36 +238,30 @@ export class DiscussionRoomComponent {
   onStudentSelectChange(studentClass: ClassroomStudent) {
     this.validationErrors['studentClassrooms'] = '';
 
-    const studentId = studentClass.id;
-    const classId = studentClass.classID;
-
-    const studentIndex = this.choosedStudentsClass.findIndex(id => id === studentId);
-
-    if (studentIndex !== -1) { 
-      this.choosedStudentsClass.splice(studentIndex, 1);
-    } else { 
-      this.choosedStudentsClass.push(studentId);
+    const index = this.choosedStudentsClass.findIndex(item => item === studentClass.id);
+    if (index !== -1) {
+      this.choosedStudentsClass.splice(index, 1);
+    } else {
+      this.choosedStudentsClass.push(studentClass.id);
     }
- 
-    const classIndex = this.choosedClasss.findIndex(c => c.classroomId === classId);
 
-    if (classIndex === -1) { 
-      const foundClass = this.studentsClass.find(c => c.classroomId === classId);
-      if (foundClass) {
-        this.choosedClasss.push(foundClass);
+    const indexForClasss = this.choosedClasss.findIndex(item => item.classroomId === studentClass.classID); 
+    if (indexForClasss === -1) { 
+      let found: ClassStudentForDiscussionRoom | undefined = this.studentsClass.find((element) => element.classroomId == studentClass.classID);
+      if (found) {
+        this.choosedClasss.push(found);
       }
     } else { 
-      const relatedClass = this.choosedClasss[classIndex];
-      const hasRemainingStudents = relatedClass.students.some(student =>
+      const relatedClass = this.studentsClass.find(c => c.classroomId === studentClass.classID);
+      const hasStudentInClass = relatedClass?.students.some(student =>
         this.choosedStudentsClass.includes(student.id)
-      );
+      ) ?? false;
 
-      if (!hasRemainingStudents) { 
-        this.choosedClasss.splice(classIndex, 1);
+      if (!hasStudentInClass) {
+        this.choosedClasss.splice(indexForClasss, 1);
       }
-    }
-  }
-
+    } 
+  } 
 
   getStudentCount(classroomID: number): number {
     const classroom = this.choosedClasss.find(c => c.classroomId === classroomID);
@@ -276,6 +334,16 @@ export class DiscussionRoomComponent {
       }
     } 
 
+    if (this.discussionRoom.startDate && this.discussionRoom.endDate) {
+      const start = new Date(this.discussionRoom.startDate);
+      const end = new Date(this.discussionRoom.endDate);
+
+      if (end < start) {
+        this.validationErrors['endDate'] = '*End date cannot be before start date';
+        isValid = false;
+      }
+    }
+
     if(this.choosedStudentsClass.length == 0){
       this.validationErrors['studentClassrooms'] = '*Students are required'
     }else{
@@ -300,6 +368,7 @@ export class DiscussionRoomComponent {
 
   onImageFileSelected(event: any) {
     const file: File = event.target.files[0];
+    const input = event.target as HTMLInputElement;
     
     if (file) {
       if (file.size > 25 * 1024 * 1024) {
@@ -319,37 +388,38 @@ export class DiscussionRoomComponent {
         return; 
       }
     }
+
+    input.value = '';
   }
 
   Save(){
     this.discussionRoom.studentClassrooms = []
     this.discussionRoom.studentClassrooms.push(...this.choosedStudentsClass)
-
-    console.log(this.discussionRoom)
-    // if(this.isFormValid()){ 
-    //   this.isLoading = true;
-    //   if(this.discussionRoom.id == 0){    
-    //     this.discussionRoomService.Add(this.discussionRoom, this.DomainName).subscribe(
-    //       (result: any) => {
-    //         this.closeModal();
-    //         this.getAllData()
-    //       },
-    //       error => {
-    //         this.isLoading = false;
-    //       }
-    //     );
-    //   } else{ 
-    //     this.discussionRoomService.Edit(this.discussionRoom, this.DomainName).subscribe(
-    //       (result: any) => {
-    //         this.closeModal()
-    //         this.getAllData()
-    //       },
-    //       error => {
-    //         this.isLoading = false;
-    //       }
-    //     );
-    //   } 
-    // }
+ 
+    if(this.isFormValid()){ 
+      this.isLoading = true;
+      if(this.discussionRoom.id == 0){    
+        this.discussionRoomService.Add(this.discussionRoom, this.DomainName).subscribe(
+          (result: any) => {
+            this.closeModal();
+            this.getAllData()
+          },
+          error => {
+            this.isLoading = false;
+          }
+        );
+      } else{ 
+        this.discussionRoomService.Edit(this.discussionRoom, this.DomainName).subscribe(
+          (result: any) => {
+            this.closeModal()
+            this.getAllData()
+          },
+          error => {
+            this.isLoading = false;
+          }
+        );
+      } 
+    }
   } 
 
   Delete(id: number) {

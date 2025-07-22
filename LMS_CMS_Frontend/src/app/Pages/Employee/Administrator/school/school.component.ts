@@ -210,6 +210,7 @@ export class SchoolComponent {
 
   onImageFileSelected(event: any) {
     const file: File = event.target.files[0];
+    const input = event.target as HTMLInputElement;
 
     if (file) {
       if (file.size > 25 * 1024 * 1024) {
@@ -231,6 +232,8 @@ export class SchoolComponent {
         return;
       }
     }
+
+    input.value = '';
   }
 
   validateNumber(event: any, field: keyof School): void {

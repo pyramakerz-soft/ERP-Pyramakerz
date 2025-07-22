@@ -326,6 +326,8 @@ export class ShopItemsAddEditComponent {
 
   onImageMainFileSelected(event: any) {
     const file: File = event.target.files[0];
+    const input = event.target as HTMLInputElement;
+
     this.ShopItem.mainImage = ""
     if (file) {
       if (file.size > 25 * 1024 * 1024) {
@@ -345,10 +347,14 @@ export class ShopItemsAddEditComponent {
         return; 
       }
     }
+
+    input.value = '';
   }
 
   onImageOtherFileSelected(event: any) {
     const file: File = event.target.files[0];
+    const input = event.target as HTMLInputElement;
+
     this.ShopItem.otherImage = ""
     if (file) {
       if (file.size > 25 * 1024 * 1024) {
@@ -368,5 +374,6 @@ export class ShopItemsAddEditComponent {
         return; 
       }
     }
+    input.value = '';
   }
 }
