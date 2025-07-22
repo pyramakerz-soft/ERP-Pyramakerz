@@ -195,13 +195,12 @@ import { TimeTableViewComponent } from './Pages/Employee/LMS/time-table-view/tim
 import { TimeTableReplace } from './Models/LMS/time-table-replace';
 import { TimeTableReplaceComponent } from './Pages/Employee/LMS/time-table-replace/time-table-replace.component';
 import { SignUpEmployeeComponent } from './Pages/Login/sign-up-employee/sign-up-employee.component';
-<<<<<<< HEAD
 import { DutyComponent } from './Pages/Employee/LMS/duty/duty.component';
-=======
 import { RegisteredEmployeeComponent } from './Pages/Employee/Administrator/registered-employee/registered-employee.component';
 import { RegisteredEmployeeViewComponent } from './Pages/Employee/Administrator/registered-employee-view/registered-employee-view.component';
 import { AnnouncementComponent } from './Pages/Employee/Administrator/announcement/announcement.component';
->>>>>>> 7550a65e628c6ca1efc257d00724e527fd5c630e
+import { StoreBalanceReportComponent } from './Pages/Employee/Inventory/Report/store-balance-report/store-balance-report/store-balance-report.component';
+import { AllStoresBalanceReportComponent } from './Pages/Employee/Inventory/Report/store-balance-report/all-store-balance/all-store-balance.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -440,6 +439,41 @@ export const routes: Routes = [
             { path: 'Registered Employee', component: RegisteredEmployeeComponent, title: 'Registered Employee', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Registered Employee/:id', component: RegisteredEmployeeViewComponent, title: 'Registered Employee', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Announcement', component: AnnouncementComponent, title: 'Announcement', canActivate: [noNavigateWithoutLoginGuard], },
+
+            { path: 'store-balance/quantity', component: StoreBalanceReportComponent, data: { reportType: 'QuantityOnly', title: 'Store Balance - Quantity Only' } },
+               { path: 'store-balance/purchase', component: StoreBalanceReportComponent, data: { reportType: 'PurchasePrice', title: 'Store Balance - Purchase Price' } },
+              { path: 'store-balance/sales', component: StoreBalanceReportComponent, data: { reportType: 'SalesPrice', title: 'Store Balance - Sales Price' } },
+              { path: 'store-balance/cost', component: StoreBalanceReportComponent, data: { reportType: 'Cost', title: 'Store Balance - Cost' } },
+              { path: 'store-balance/under-limit', component: StoreBalanceReportComponent, data: { reportType: 'ItemsUnderLimit', title: 'Store Balance - Items Under Limit' } },
+
+              {
+                path: "AllStoresQuantityReport",
+                component: AllStoresBalanceReportComponent,
+                title: "All Stores Quantity Report",
+                canActivate: [noNavigateWithoutLoginGuard],
+                data: { reportType: 'QuantityOnly' }
+              },
+              {
+                path: "AllStoresPurchasePriceReport",
+                component: AllStoresBalanceReportComponent,
+                title: "All Stores Purchase Price Report",
+                canActivate: [noNavigateWithoutLoginGuard],
+                data: { reportType: 'PurchasePrice' }
+              },
+              {
+                path: "AllStoresSalesPriceReport",
+                component: AllStoresBalanceReportComponent,
+                title: "All Stores Sales Price Report",
+                canActivate: [noNavigateWithoutLoginGuard],
+                data: { reportType: 'SalesPrice' }
+              },
+              {
+                path: "AllStoresCostReport",
+                component: AllStoresBalanceReportComponent,
+                title: "All Stores Cost Report",
+                canActivate: [noNavigateWithoutLoginGuard],
+                data: { reportType: 'Cost' }
+              }
         ]
     },
     {

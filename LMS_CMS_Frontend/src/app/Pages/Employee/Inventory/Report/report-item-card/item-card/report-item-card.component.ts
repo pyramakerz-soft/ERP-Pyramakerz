@@ -122,15 +122,13 @@ export class ReportItemCardComponent implements OnInit {
     this.combinedData = [];
 
     try {
-      const formattedDateFrom = this.formatDateForAPI(this.dateFrom);
-      const formattedDateTo = this.formatDateForAPI(this.dateTo);
 
       // Get summary data
       const summaryResponse = await this.inventoryDetailsService
         .getInventoryNetSummary(
           this.selectedStoreId!,
           this.selectedItemId!,
-          formattedDateFrom,
+      this.dateFrom,
           this.inventoryDetailsService.ApiServ.GetHeader()
         )
         .toPromise();
@@ -146,8 +144,8 @@ export class ReportItemCardComponent implements OnInit {
         .getInventoryNetTransactions(
           this.selectedStoreId!,
           this.selectedItemId!,
-          formattedDateFrom,
-          formattedDateTo,
+          this.dateFrom,
+          this.dateTo,
           this.inventoryDetailsService.ApiServ.GetHeader()
         )
         .toPromise();

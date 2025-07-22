@@ -5,6 +5,7 @@ import { InventoryDetails } from '../../../Models/Inventory/InventoryDetails';
 import { InventoryNetSummary, InventoryNetTransaction } from '../../../Models/Inventory/report-card';
 import { Store } from '../../../Models/Inventory/store';
 import { ApiService } from '../../api.service';
+import { StoreBalanceReport } from '../../../Models/Inventory/store-balance';
 
 @Injectable({
   providedIn: 'root',
@@ -104,7 +105,7 @@ export class InventoryDetailsService {
       headers,
     });
   }
-  
+
   getInventoryNetSummary(
     storeId: number,
     itemId: number,
@@ -168,6 +169,57 @@ export class InventoryDetailsService {
     return this.http.get<any[]>(
       `${this.baseUrl}/InventoryDetails/AverageCost?fromDate=${encodedFromDate}&toDate=${encodedToDate}`,
       //              /InventoryDetails/AverageCost?fromDate=2020-07-14&toDate=2026-07-14
+      { headers }
+    );
+  }
+
+  getStoreBalance(
+    storeId: number,
+    toDate: string,
+    reportFlagType: number,
+    categoryId: number,
+    typeId: number,
+    hasBalance: boolean,
+    overdrawnBalance: boolean,
+    zeroBalances: boolean,
+    DomainName: string
+  ): Observable<StoreBalanceReport> {
+    if (DomainName != null) {
+      this.header = DomainName;
+    }
+    const token = localStorage.getItem('current_token');
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+
+    return this.http.get<StoreBalanceReport>(
+      `${this.baseUrl}/InventoryDetails/StoreBalance?storeId=${storeId}&toDate=${toDate}&ReportFlagTypr=${reportFlagType}&categoryId=${categoryId}&typeId=${typeId}&hasBalance=${hasBalance}&overdrawnBalance=${overdrawnBalance}&zeroBalances=${zeroBalances}`,
+      { headers }
+    );
+  }
+
+  getAllStoresBalance(
+    toDate: string,
+    reportFlagType: number,
+    categoryId: number,
+    typeId: number,
+    hasBalance: boolean,
+    overdrawnBalance: boolean,
+    zeroBalances: boolean,
+    DomainName: string
+  ): Observable<StoreBalanceReport> {
+    if (DomainName != null) {
+      this.header = DomainName;
+    }
+    const token = localStorage.getItem('current_token');
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+
+    return this.http.get<StoreBalanceReport>(
+      `${this.baseUrl}/InventoryDetails/AllStoresBalance?toDate=${toDate}&ReportFlagType=${reportFlagType}&categoryId=${categoryId}&typeId=${typeId}&hasBalance=${hasBalance}&overdrawnBalance=${overdrawnBalance}&zeroBalances=${zeroBalances}`,
       { headers }
     );
   }

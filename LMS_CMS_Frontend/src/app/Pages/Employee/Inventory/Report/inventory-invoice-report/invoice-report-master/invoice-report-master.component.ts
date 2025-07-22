@@ -146,7 +146,7 @@ export class InventoryTransactionReportComponent implements OnInit {
     this.route.data.subscribe((data) => {
       this.reportType = data['reportType'];
       this.currentFlags = this.availableFlags[this.reportType];
-      this.selectedFlagIds = this.getAllFlagsForReportType(); // Default to all flags
+      this.selectedFlagIds = this.getAllFlagsForReportType();
     });
     this.loadStores();
     this.loadCategories();
@@ -161,6 +161,7 @@ export class InventoryTransactionReportComponent implements OnInit {
       .Get(this.categoryService.ApiServ.GetHeader())
       .subscribe({
         next: (categories) => {
+          console.log('Categories loaded:', categories);
           this.categories = categories;
         },
         error: (error) => {
@@ -272,8 +273,6 @@ export class InventoryTransactionReportComponent implements OnInit {
     this.isLoading = true;
     this.showTable = false;
 
-
-
     this.inventoryMasterService
       .searchInvoice(
         this.inventoryMasterService.ApiServ.GetHeader(),
@@ -289,6 +288,7 @@ export class InventoryTransactionReportComponent implements OnInit {
       )
       .subscribe({
         next: (response: any) => {
+          console.log('Response from searchInvoice:', response);
           if (response?.data) {
             this.transactions = response.data;
             this.totalRecords =
