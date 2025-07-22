@@ -1108,6 +1108,14 @@ namespace LMS_CMS_BL.Config
 
             CreateMap<RegisteredEmployee, RegisteredEmployeeGetDTO>(); 
             CreateMap<RegisteredEmployeeAddDTO, RegisteredEmployee>(); 
+
+            CreateMap<DutyAddDto, Duty>();
+            CreateMap<Duty, DutyGetDto>()
+                .ForMember(dest => dest.TeacherName, opt => opt.MapFrom(src => src.Teacher.en_name))
+                .ForMember(dest => dest.ClassName, opt => opt.MapFrom(src => src.TimeTableSession.TimeTableClassroom.Classroom.Name));
+
+
+
         }
     } 
 }
