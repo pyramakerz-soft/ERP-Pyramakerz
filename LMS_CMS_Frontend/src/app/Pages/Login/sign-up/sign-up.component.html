@@ -63,6 +63,12 @@
             validationErrors['password'] }}</span>
         </div>
 
+        <div class="mb-4 w-full">
+            <re-captcha siteKey="6LeiYYkrAAAAAJedtyRiS90PjxoBnb4C9jK7ZvwG" (resolved)="onCaptchaResolved($event)" #captchaRef>
+            </re-captcha>
+            <span *ngIf="validationErrors['recaptchaToken']" class="text-red-500 ml-3 font-normal">{{ validationErrors['recaptchaToken'] }}</span>
+        </div>
+
         <button (click)="SignUp()" [disabled]="isLoading"
           class="mb-2 secondaryBg text-white p-2 rounded w-full flex items-center justify-center">
           <span *ngIf="!isLoading">Sign Up</span>
