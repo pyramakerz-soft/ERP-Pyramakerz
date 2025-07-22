@@ -1,4 +1,3 @@
-// hygiene-form.model.ts
 export class HygieneForm {
   constructor(
     public id: number,
@@ -10,6 +9,26 @@ export class HygieneForm {
     public classRoom: string,
     public insertedAt: string,
     public date: string,
-    public studentHygieneTypes: any[]
+    public studentHygieneTypes: StudentHygieneType[]
   ) {}
+}
+
+export interface StudentHygieneType {
+  id: number;
+  studentId: number;
+  student: string;
+  en_name: string | null;
+  hygieneFormId: number;
+  attendance: boolean;
+  comment: string;
+  actionTaken: string;
+  selectAll: boolean;
+  hygieneTypes: HygieneType[];
+}
+
+export interface HygieneType {
+  id: number;
+  type: string;
+  en_name: string;
+  insertedByUserId: number;
 }
