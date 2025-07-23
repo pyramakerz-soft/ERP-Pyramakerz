@@ -1,0 +1,136 @@
+<div class="flex justify-between items-center">
+<input type="date" [(ngModel)]="date" (change)="GetByDate()" class="border p-2 rounded mb-4" />
+    <div class="flex justify-between items-center space-x-4">
+        <!-- <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search> -->
+        
+        <button (click)="openModal()"
+        class="secondaryBorder secondaryTxt rounded-lg px-4 py-3 flex items-center justify-center gap-2">
+            Create Duty
+        </button>
+    </div>
+</div>
+
+<div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD] max-w-full">
+    <table class="overflow-auto w-full bg-[#EBEBEB] text-left text-[#6F6F6F]">
+        <thead class="bg-[##EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+            <tr>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    ID
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
+                    Class
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    Date
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    period
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    Teacher
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    Actions
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- No Data Row -->
+            <tr *ngIf="TableData.length === 0">
+                <td colspan="6" class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                    No Data Found
+                </td>
+            </tr>
+
+            <!-- Data Rows -->
+            <tr *ngFor="let row of TableData; let i = index"
+                [ngClass]="{'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1}"
+                class="border-t border-gray-300 text-xs md:text-sm">
+
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{ row.id }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.className }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.date }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.period }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.teacherName }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    <div class="flex space-x-4">
+                        <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)"
+                           >
+                            <i class="fa-regular fa-trash-can"></i>
+                        </button>
+                        <button *ngIf="AllowEdit && IsAllowEdit(row.insertedByUserId)" >
+                            <i class="fa-solid fa-pencil"></i>
+                        </button>
+                    </div>
+                </td> 
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+
+
+<!-- Modal -->
+<!-- <div id="default-modal" tabindex="-1" aria-hidden="true" [ngClass]="{ hidden: !isModalVisible }"
+    class="fixed top-0 left-0 right-0 z-50 flex justify-center items-center w-full h-full bg-black/50">
+    <div class="bg-white rounded-2xl p-12 w-1/2 max-h-[95%] overflow-y-auto">
+        <div class="flex justify-between items-center">
+            <h1 *ngIf="mode == 'Create'" class="font-semibold text-2xl leading-9">Create Duty</h1>
+            <h1 *ngIf="mode == 'Edit'" class="font-semibold text-2xl leading-9">Edit Duty</h1>
+            <button (click)="closeModal()" type="button"
+                class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
+        </div>
+        <div class="mt-6 mb-4 rounded-3xl flex justify-between flex-wrap">
+             <div class="flex flex-col w-full mb-4">
+                <label for="Class" class="block mb-2 text-sm font-medium text-gray-900">School</label>
+                <select id="Class"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+                    [(ngModel)]="SelectedClassId" (change)="GetClassBySchool()">
+                    <option value="0" disabled selected hidden> Select a School</option>
+                    <option *ngFor="let a of schools" [value]="a.id">
+                        {{ a.name }}
+                    </option>
+                </select>
+            </div>
+            <div class="flex flex-col w-full mb-4">
+                <label for="Class" class="block mb-2 text-sm font-medium text-gray-900">  {{ 'Classroom' | translate }}</label>
+                <select id="Class"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+                    [(ngModel)]="SelectedClassId" (change)="GetSubjectByClassroom()">
+                    <option value="0" disabled selected hidden>  {{ 'Select a class' | translate }}</option>
+                    <option *ngFor="let ac of Classrooms" [value]="ac.id">
+                        {{ ac.name }}
+                    </option>
+                </select>
+                <span *ngIf="IsSelectedClassId" class="text-red-500 ml-3 font-normal">{{
+                    IsSelectedClassId}}</span>
+            </div>
+            <div class="flex flex-col w-full mb-4">
+                <label for="Class" class="block mb-2 text-sm font-medium text-gray-900">  {{ 'Classroom' | translate }}</label>
+                <select id="Class"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+                    [(ngModel)]="SelectedClassId" (change)="GetSubjectByClassroom()">
+                    <option value="0" disabled selected hidden>  {{ 'Select a class' | translate }}</option>
+                    <option *ngFor="let ac of Classrooms" [value]="ac.id">
+                        {{ ac.name }}
+                    </option>
+                </select>
+                <span *ngIf="IsSelectedClassId" class="text-red-500 ml-3 font-normal">{{
+                    IsSelectedClassId}}</span>
+            </div>
+            <div class="flex flex-col w-full mb-4">
+                <label for="Class" class="block mb-2 text-sm font-medium text-gray-900">  {{ 'Classroom' | translate }}</label>
+               <input type="date" [(ngModel)]="date" (change)="GetByDate()" class="border p-2 rounded mb-4" />
+                <span *ngIf="IsSelectedClassId" class="text-red-500 ml-3 font-normal">{{
+                    IsSelectedClassId}}</span>
+            </div>
+        </div>
+        <div class="flex justify-end">
+            <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
+                (click)="CreateOREdit()">
+                <span *ngIf="!isLoading">Save</span>
+                <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+            </button>
+        </div>
+    </div>
+</div> -->

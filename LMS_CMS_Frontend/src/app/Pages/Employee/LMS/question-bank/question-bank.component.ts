@@ -674,6 +674,8 @@ export class QuestionBankComponent {
 
   onImageFileSelected(event: any) {
     const file: File = event.target.files[0];
+    const input = event.target as HTMLInputElement;
+
     this.questionBank.image = ""
     if (file) {
       if (file.size > 25 * 1024 * 1024) {
@@ -693,6 +695,7 @@ export class QuestionBankComponent {
         return;
       }
     }
+    input.value = '';
   }
 
   toggleDropdown(): void {

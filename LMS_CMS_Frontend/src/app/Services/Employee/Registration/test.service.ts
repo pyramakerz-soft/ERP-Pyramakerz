@@ -88,7 +88,8 @@ export class TestService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.get<TestWithRegistrationForm[]>(`${this.baseUrl}/Test/byRegistrationFormParentIDFromEmployee/${RPID}`, { headers })
+    return this.http.get<TestWithRegistrationForm[]>(`${this.baseUrl}/Test/
+      /${RPID}`, { headers })
   }
 
   GetByRegistrationFormParentIDFromParent(RPID:number,DomainName:string) {

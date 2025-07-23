@@ -306,10 +306,7 @@
                         <button (click)="deleteFile(i)">
                             <i class="fa-regular fa-trash-can"></i>
                         </button>
-                    </div>
-                    <p class="text-sm font-medium text-gray-700 mb-4">
-                        {{ file.size * 1024 }}   {{ 'bytes' | translate }}
-                    </p>
+                    </div> 
                     <p class="secondaryTxt cursor-pointer hover:underline mt-2" (click)="downloadFile(file)">
                           {{ 'Click to View' | translate }}
                     </p>

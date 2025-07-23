@@ -78,7 +78,7 @@
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.role_Name }}</td> 
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.employeeTypeName }}</td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        <div class="flex space-x-4 rlt:flex flex-row-reverse">
+                        <div class="flex space-x-4 rtl:space-x-reverse">
                             <button (click)="Delete(row.id)" *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)" >
                                 <i class="fa-regular fa-trash-can"></i>
                             </button>

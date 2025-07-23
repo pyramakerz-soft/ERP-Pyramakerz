@@ -211,6 +211,7 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<UserType> UserType_Repository;
         GenericRepo<DiscussionRoom> DiscussionRoom_Repository;
         GenericRepo<DiscussionRoomStudentClassroom> DiscussionRoomStudentClassroom_Repository;
+        GenericRepo<Duty> Duty_Repository;
 
 
         public UOW(Octa_DbContext octa_Db)
@@ -2265,6 +2266,18 @@ namespace LMS_CMS_BL.UOW
                     TimeTable_Repository = new GenericRepo<TimeTable>(db);
                 }
                 return TimeTable_Repository;
+            }
+        }
+
+        public GenericRepo<Duty> duty_Repository
+        {
+            get
+            {
+                if (Duty_Repository == null)
+                {
+                    Duty_Repository = new GenericRepo<Duty>(db);
+                }
+                return Duty_Repository;
             }
         }
 

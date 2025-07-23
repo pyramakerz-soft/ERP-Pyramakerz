@@ -2,6 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ApiService } from '../api.service';
 import { Violation } from '../../Models/Administrator/violation';
+import { ViolationAdd } from '../../Models/Administrator/violation-add';
 
 @Injectable({
   providedIn: 'root'
@@ -25,6 +26,18 @@ baseUrl = ""
     .set('Authorization', `Bearer ${token}`)
     .set('Content-Type', 'application/json');
     return this.http.get<Violation[]>(`${this.baseUrl}/Violation`, { headers });
+  }
+
+  GetViolationByID(id:number, DomainName?:string){
+    if(DomainName!=null) {
+      this.header=DomainName 
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+    .set('domain-name', this.header) 
+    .set('Authorization', `Bearer ${token}`)
+    .set('Content-Type', 'application/json');
+    return this.http.get<Violation>(`${this.baseUrl}/Violation/${id}`, { headers });
   }
 
   Delete_Violations(id:number ,DomainName?:string){
