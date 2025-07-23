@@ -201,6 +201,8 @@ import { RegisteredEmployeeViewComponent } from './Pages/Employee/Administrator/
 import { AnnouncementComponent } from './Pages/Employee/Administrator/announcement/announcement.component';
 import { StoreBalanceReportComponent } from './Pages/Employee/Inventory/Report/store-balance-report/store-balance-report/store-balance-report.component';
 import { AllStoresBalanceReportComponent } from './Pages/Employee/Inventory/Report/store-balance-report/all-store-balance/all-store-balance.component';
+import { DiscussionRoomComponent } from './Pages/Employee/LMS/discussion-room/discussion-room.component';
+
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -446,34 +448,11 @@ export const routes: Routes = [
               { path: 'store-balance/cost', component: StoreBalanceReportComponent, data: { reportType: 'Cost', title: 'Store Balance - Cost' } },
               { path: 'store-balance/under-limit', component: StoreBalanceReportComponent, data: { reportType: 'ItemsUnderLimit', title: 'Store Balance - Items Under Limit' } },
 
-              {
-                path: "AllStoresQuantityReport",
-                component: AllStoresBalanceReportComponent,
-                title: "All Stores Quantity Report",
-                canActivate: [noNavigateWithoutLoginGuard],
-                data: { reportType: 'QuantityOnly' }
-              },
-              {
-                path: "AllStoresPurchasePriceReport",
-                component: AllStoresBalanceReportComponent,
-                title: "All Stores Purchase Price Report",
-                canActivate: [noNavigateWithoutLoginGuard],
-                data: { reportType: 'PurchasePrice' }
-              },
-              {
-                path: "AllStoresSalesPriceReport",
-                component: AllStoresBalanceReportComponent,
-                title: "All Stores Sales Price Report",
-                canActivate: [noNavigateWithoutLoginGuard],
-                data: { reportType: 'SalesPrice' }
-              },
-              {
-                path: "AllStoresCostReport",
-                component: AllStoresBalanceReportComponent,
-                title: "All Stores Cost Report",
-                canActivate: [noNavigateWithoutLoginGuard],
-                data: { reportType: 'Cost' }
-              }
+              { path: "AllStoresQuantityReport", component: AllStoresBalanceReportComponent, title: "All Stores Quantity Report", canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'QuantityOnly' } },
+              { path: "AllStoresPurchasePriceReport", component: AllStoresBalanceReportComponent, title: "All Stores Purchase Price Report", canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'PurchasePrice' } },
+              { path: "AllStoresSalesPriceReport", component: AllStoresBalanceReportComponent, title: "All Stores Sales Price Report", canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'SalesPrice' }},
+              { path: "AllStoresCostReport", component: AllStoresBalanceReportComponent, title: "All Stores Cost Report", canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'Cost' } },
+            { path: 'Discussion Room', component: DiscussionRoomComponent, title: 'Discussion Room', canActivate: [noNavigateWithoutLoginGuard], },
         ]
     },
     {

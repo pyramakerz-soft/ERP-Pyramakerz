@@ -307,7 +307,8 @@ export class SubjectViewComponent {
 
   onFileSelected(event: any) {
     const file: File = event.target.files[0];
-    
+    const input = event.target as HTMLInputElement;
+
     if (file) {
       if (file.size > 25 * 1024 * 1024) {
         this.validationErrorsForResources['file'] = 'The file size exceeds the maximum limit of 25 MB.';
@@ -321,6 +322,7 @@ export class SubjectViewComponent {
         reader.readAsDataURL(file);
       }
     }
+    input.value = '';
   }
 
   onInputValueChangeForSubjectWeight(event: { field: keyof SubjectWeight, value: any }) {

@@ -1,0 +1,283 @@
+<div class="">
+    <div class="flex justify-between">
+        <h1 class="primaryTxt font-semibold text-2xl leading-9">Discussion Room</h1>
+        <div class="flex justify-between items-center">
+            <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
+            <button (click)="openModal()"
+                class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
+                Create Discussion Room
+            </button>
+        </div>
+    </div> 
+
+    <div>
+        <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
+            <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
+                <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+                    <tr>
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            ID
+                        </th>
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            Title
+                        </th>
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            Is Repeated Weekly
+                        </th>
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            Start Date
+                        </th>
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            End Date
+                        </th>
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            Time
+                        </th>
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            Meeting Link
+                        </th>
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            Record Link
+                        </th>
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            Actions
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- No Data Row -->
+                    <tr *ngIf="TableData.length === 0">
+                        <td colspan="9"
+                            class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                            No Data Found
+                        </td>
+                    </tr>
+
+                    <!-- Data Rows -->
+                    <tr *ngFor="let row of TableData; let i = index"
+                        [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
+                        class="border-t border-gray-300 text-xs md:text-sm">
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ row.id }}
+                        </td>
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ row.title }}
+                        </td>  
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0"> 
+                            <i *ngIf="row.isRepeatedWeekly" class="secondaryTxt text-2xl fa-regular fa-square-check"></i>
+                            <i *ngIf="!row.isRepeatedWeekly" class="text-[#BDBDBD] text-2xl fa-regular fa-square"></i> 
+                        </td>  
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ row.startDate }}
+                        </td>  
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ row.endDate }}
+                        </td>  
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ row.time }}
+                        </td>  
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ row.meetingLink }}
+                        </td>  
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ row.recordLink }}
+                        </td>  
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            <div class="flex space-x-4">
+                                <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)"
+                                    (click)="Delete(row.id)">
+                                    <i class="fa-regular fa-trash-can"></i>
+                                </button>
+                                <button *ngIf="AllowEdit && IsAllowEdit(row.insertedByUserId)" (click)="openModal(row.id)">
+                                    <i class="fa-solid fa-pencil"></i>
+                                </button> 
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+ 
+
+
+<div id="Add_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
+    <div class="bg-white rounded-2xl p-12 w-[669px] max-h-[90%] overflow-y-auto">
+        <div class="flex justify-between items-center">
+            <h1 *ngIf="discussionRoom.id == 0" class="font-semibold text-2xl leading-9">Create Discussion Room</h1>
+            <h1 *ngIf="discussionRoom.id != 0" class="font-semibold text-2xl leading-9">Edit Discussion Room</h1>
+            <button (click)="closeModal()" type="button"
+                class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
+        </div>
+
+        <div class="mt-6 mb-4 flex justify-between flex-wrap">
+            <div class="flex flex-col mb-4 w-full">
+                <label class="mb-2 primaryTxt" for="title">Title</label>
+                <input id="title" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                    placeholder="Enter Title" [(ngModel)]="discussionRoom.title"
+                    (ngModelChange)="onInputValueChange({ field: 'title', value: $event })" />
+                <span *ngIf="validationErrors['title']" class="text-red-500  font-normal text-xs md:text-sm">{{ validationErrors['title'] }}</span>
+            </div>
+            <div class="flex flex-col mb-4 w-full">
+                <label class="mb-2 primaryTxt">Classes ({{choosedStudentsClass.length}})</label>
+
+                <div class="border border-gray-300 rounded-lg px-4 py-3 flex items-center justify-between cursor-pointer mb-4"
+                    (click)="toggleClassesToChooseStudents()">
+                    <div class="flex flex-wrap gap-2">
+                        <span *ngIf="choosedStudentsClass.length == 0" class="text-gray-400 font-normal">
+                            Click To Choose Students
+                        </span>
+
+                        <span *ngFor="let classroom of choosedClasss; let i = index"
+                            class="flex items-center bg-gray-200 rounded px-3 py-1 text-sm">
+                            {{ classroom.classroomName }} ({{ getStudentCount(classroom.classroomId) }})
+                            <button type="button" class="ml-2 text-white bg-[#6F6F6F] rounded px-1"
+                                (click)="removeStudentFromClass(classroom.classroomId, $event)">
+                                &times;
+                            </button>
+                        </span>
+                    </div>
+                    <i class="fa-solid fa-chevron-down text-gray-500 ml-2"></i>
+                </div>
+
+                <span *ngIf="validationErrors['studentClassrooms']" class="text-red-500 ml-3 font-normal">{{ validationErrors['studentClassrooms'] }}</span>
+
+                <div *ngIf="viewClassStudents" class="rounded-lg shadow">
+                    <div *ngIf="studentsClass.length != 0" class="p-4 rounded-lg border"> 
+                        <div *ngIf="!viewStudents">
+                            <div *ngFor="let studentClass of studentsClass; let i = index">
+                                <div class="flex justify-between w-full items-center"
+                                    [ngClass]="{ 'mb-4': i != (studentsClass.length - 1)}">
+                                    <div class="flex space-x-5 items-center">
+                                        <input type="checkbox" [id]="studentClass.classroomId" class="w-5 h-5"
+                                            (change)="onClassSelectChange(studentClass)"
+                                            [checked]="isClassSelected(studentClass.classroomId)">
+                                        <label [for]="studentClass.classroomId"
+                                            class="text-sm">{{studentClass.classroomName}}
+                                            ({{studentClass.students.length}})</label>
+                                    </div>
+                                    <i class="fa-solid fa-chevron-left ltr:rotate-180 cursor-pointer text-gray-400"
+                                        (click)="openStudent(studentClass)"></i>
+                                </div>
+                                <hr class="my-2" *ngIf="i != (studentsClass.length - 1)">
+                            </div>
+                        </div>
+
+                        <div *ngIf="viewStudents">
+                            <div class="flex items-center space-x-5 rtl:space-x-reverse mb-5">
+                                <i class="fa-solid fa-chevron-left rtl:rotate-180 cursor-pointer"
+                                    (click)="returnToClases()"></i>
+                                <h1 class="primaryTxt font-semibold text-lg leading-9">
+                                    {{studentClassWhenSelectClass.classroomName}}
+                                    ({{studentClassWhenSelectClass.students.length}})</h1>
+                            </div>
+                            <div *ngIf="studentClassWhenSelectClass.students.length != 0" class="mb-6">
+                                <div class="flex justify-between w-full items-center">
+                                    <div class="flex space-x-5 items-center">
+                                        <input type="checkbox" [id]="studentClassWhenSelectClass.classroomId"
+                                            class="w-5 h-5"
+                                            [checked]="isSelectAllChecked(studentClassWhenSelectClass.classroomId)"
+                                            (change)="onSelectAllChange(studentClassWhenSelectClass.classroomId, $event)">
+                                        <label [for]="studentClassWhenSelectClass.classroomId" class="text-sm">Select All</label>
+                                    </div>
+                                </div>
+                                <hr class="my-2 border">
+                            </div>
+                            <div *ngIf="studentClassWhenSelectClass.students.length == 0" class="border">
+                                <p class="text-center primaryTxt text-xs">
+                                    No Data Found
+                                </p>
+                            </div>
+                            <div
+                                *ngFor="let studentClass of studentClassWhenSelectClass.students; let i = index">
+                                <div class="flex justify-between w-full items-center"
+                                    [ngClass]="{ 'mb-4': i != (studentClassWhenSelectClass.students.length - 1)}">
+                                    <div class="flex space-x-5 items-center">
+                                        <input type="checkbox" [id]="studentClass.id" class="w-5 h-5"
+                                            (change)="onStudentSelectChange(studentClass)"
+                                            [checked]="isStudentSelected(studentClass.id)">
+                                        <label [for]="studentClass.id"
+                                            class="text-sm">{{studentClass.studentEnglishName}}</label>
+                                    </div>
+                                </div>
+                                <hr class="my-2"
+                                    *ngIf="i != (studentClassWhenSelectClass.students.length - 1)">
+                            </div>
+                        </div> 
+                    </div>
+                    <div *ngIf="studentsClass.length == 0" class="rounded-lg border">
+                        <p class="text-center primaryTxt text-xs">
+                            No Data Found
+                        </p>
+                    </div>
+                </div> 
+            </div>   
+            
+            <div class="flex flex-col mb-4 w-full">
+                <label class="mb-2 primaryTxt" for="meetingLink">Meetnig Link</label>
+                <input id="meetingLink" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                    placeholder="Enter Meeting Link" [(ngModel)]="discussionRoom.meetingLink"
+                    (ngModelChange)="onInputValueChange({ field: 'meetingLink', value: $event })" />
+                <span *ngIf="validationErrors['meetingLink']" class="text-red-500  font-normal text-xs md:text-sm">{{ validationErrors['meetingLink'] }}</span>
+            </div>   
+            <div class="flex w-full space-x-5 items-center mb-4">
+                <input type="checkbox" id="repeatedWeekly" class="w-5 h-5" (change)="onIsRepeatedWeeklyChange($event)"
+                    [checked]="discussionRoom.isRepeatedWeekly">
+                <label for="repeatedWeekly" class="text-sm">Is Repeated Weekly</label>
+            </div>
+            <div class="flex flex-col mb-4 w-[30%]">
+                <label class="mb-2 primaryTxt" for="startDate">Start Date</label>
+                <input id="startDate" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                    [(ngModel)]="discussionRoom.startDate"
+                    (ngModelChange)="onInputValueChange({ field: 'startDate', value: $event })" />
+                <span *ngIf="validationErrors['startDate']" class="text-red-500 ml-3 font-normal">{{
+                    validationErrors['startDate'] }}</span>
+            </div> 
+            <div class="flex flex-col mb-4 w-[30%]">
+                <label class="mb-2 primaryTxt" for="endDate">End Date</label>
+                <input id="endDate" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                    [(ngModel)]="discussionRoom.endDate"
+                    (ngModelChange)="onInputValueChange({ field: 'endDate', value: $event })" />
+                <span *ngIf="validationErrors['endDate']" class="text-red-500 ml-3 font-normal">{{ validationErrors['endDate'] }}</span>
+            </div>
+            <div class="flex flex-col mb-4 w-[30%]">
+                <label class="mb-2 primaryTxt" for="time">Time</label>
+                <input id="time" type="time" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                    [(ngModel)]="discussionRoom.time"
+                    (ngModelChange)="onInputValueChange({ field: 'time', value: $event })" />
+                <span *ngIf="validationErrors['time']" class="text-red-500 ml-3 font-normal">{{ validationErrors['time'] }}</span>
+            </div>
+            <div class="w-full mb-4"> 
+                <div class="bg-[#F6F6F6] flex items-center space-x-4 w-full rounded-md border-dashed border-2">
+                    <div class="flex justify-center w-full">
+                        <label for="file-upload" class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
+                            <img *ngIf="!discussionRoom.imageLink && !discussionRoom.imageFile" src="Images/Icon frame.png" class="w-1/4">
+                            <img *ngIf="discussionRoom.imageFile" src="Images/FileAttached.png" class="w-1/4">
+                            <img *ngIf="discussionRoom.imageLink && !discussionRoom.imageFile" [src]="discussionRoom.imageLink" class="w-1/3 object-cover">
+                            <p class="font-normal text-xs md:text-sm text-[#8E8E93] mt-3"><span class="secondaryTxt">Click to Upload </span></p>
+                            <p class="font-normal text-xs md:text-sm text-[#8E8E93]"> (Max. File size: 25 MB)</p>
+                        </label>
+                        <input id="file-upload" type="file" class="hidden" (change)="onImageFileSelected($event)" accept="image/jpeg, image/png"  />
+                    </div>
+                </div>
+                <span *ngIf="validationErrors['imageFile']" class="text-red-500  font-normal text-xs md:text-sm">{{ validationErrors['imageFile'] }}</span>
+            </div> 
+            <div class="flex flex-col mb-4 w-full">
+                <label class="mb-2 primaryTxt" for="recordLink">Record Link</label>
+                <input id="recordLink" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                    placeholder="Enter Record Link" [(ngModel)]="discussionRoom.recordLink"
+                    (ngModelChange)="onInputValueChange({ field: 'recordLink', value: $event })" />
+                <span *ngIf="validationErrors['recordLink']" class="text-red-500  font-normal text-xs md:text-sm">{{ validationErrors['recordLink'] }}</span>
+            </div>   
+        </div>
+
+        <div class="flex justify-end">
+            <button [disabled]="isLoading"
+                class="secondaryBg text-white font-medium px-4 py-2 rounded-lg cursor-pointer" (click)="Save()">
+                <span *ngIf="!isLoading">Save</span>
+                <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+            </button>
+        </div>
+    </div>
+</div>

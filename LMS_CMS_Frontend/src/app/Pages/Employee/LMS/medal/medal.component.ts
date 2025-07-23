@@ -262,6 +262,8 @@ export class MedalComponent {
 
   onImageFileSelected(event: any) {
     const file: File = event.target.files[0];
+    const input = event.target as HTMLInputElement;
+
     this.medal.imageLink=""
     if (file) {
       if (file.size > 25 * 1024 * 1024) {
@@ -281,5 +283,7 @@ export class MedalComponent {
         return; 
       }
     }
+
+    input.value = '';
   }
 }

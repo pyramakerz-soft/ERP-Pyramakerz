@@ -1,5 +1,6 @@
 ﻿using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.AccountingModule.Reports;
+using LMS_CMS_DAL.Models.Domains.AccountingModule;
 using LMS_CMS_DAL.Models.Domains.AccountingModule.Reports;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
@@ -40,7 +41,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             int startRow = ((pageNumber - 1) * pageSize) + 1;
             int endRow = pageNumber * pageSize;
 
-            var result = await context.Set<AccountingEntriesReport>().FromSqlRaw(
+            var results = await context.Set<AccountingEntriesReport>().FromSqlRaw(
                 "EXEC dbo.GetAccountingEntries @DateFrom, @DateTo, @MainAccNo, @SubAccNo, @StartRow, @EndRow",
                 new SqlParameter("@DateFrom", fromDate ?? (object)DBNull.Value),
                 new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
@@ -50,8 +51,22 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 new SqlParameter("@EndRow", endRow)
             ).ToListAsync();
 
+            decimal? runningBalance = 0;
+            if (AccountNumber > 0 && SubAccountNumber > 0)
+                foreach (var item in results)
+                {
+                    decimal? change = item.LinkFileID switch
+                    {
+                        2 or 4 or 7 => item.Credit - item.Debit,
+                        1 or 3 or 5 or 6 or 8 or 9 or 13 => item.Debit - item.Credit,
+                        _ => 0
+                    };
 
-            if (result == null || !result.Any())
+                    runningBalance += change;
+                    item.Balance = runningBalance;
+                }
+
+            if (results == null || !results.Any())
             {
                 return NotFound("No accounting entries found for the specified date range.");
             }
@@ -68,7 +83,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             decimal fullCredit = fullTotals?.TotalCredit ?? 0;
             decimal fullDifference = fullTotals?.Differences ?? 0;
 
-            var grouped = result
+            var grouped = results
                 .GroupBy(x => x.Date.Value.Date)
                 .Select(g => new
                 {

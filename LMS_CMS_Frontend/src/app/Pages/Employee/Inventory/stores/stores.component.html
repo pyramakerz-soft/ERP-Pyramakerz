@@ -84,7 +84,7 @@
 <!-- Modal -->
 <div id="default-modal" tabindex="-1" aria-hidden="true" [ngClass]="{ hidden: !isModalVisible }"
     class="fixed top-0 left-0 right-0 z-50 flex justify-center items-center w-full h-full bg-black/50">
-    <div class="relative bg-white w-[669px] h-Auto rounded-2xl p-12 gap-4 shadow-md">
+    <div class="relative bg-white w-[669px] max-h-[90%] overflow-y-auto rounded-2xl p-12 gap-4 shadow-md">
         <!-- Close Icon -->
         <button (click)="closeModal()"
             class="absolute top-4 right-4 text-gray-400 hover:text-gray-900 transition duration-200">
@@ -96,7 +96,7 @@
         <h1 *ngIf="mode == 'Edit'" class="font-semibold text-2xl leading-9">
             Edit Store
         </h1>
-        <div class="mt-4 bg-[#F7F7F7] w-[573px] h-auto rounded-[24px] p-[16px_24px] gap-[20px]">
+        <div class="mt-4 bg-[#F7F7F7] w-[573px] rounded-[24px] p-[16px_24px] gap-[20px]">
             <div class="flex flex-col mt-2 gap-2 items-start">
                 <h6 class="font-medium text-base leading-6">Store Name</h6>
                 <input type="text" class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2"
@@ -140,7 +140,7 @@
                                 </svg>
                             </div>
             
-                            <div class="absolute bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10"
+                            <div class="bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10"
                                 *ngIf="dropdownOpen">
                                 <ul>
                                     <li *ngFor="let cat of Categories"
