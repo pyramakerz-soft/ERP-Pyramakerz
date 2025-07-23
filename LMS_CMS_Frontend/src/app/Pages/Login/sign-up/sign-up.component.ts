@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { Login } from '../../../Models/login';
 import { TokenData } from '../../../Models/token-data';
@@ -10,11 +10,12 @@ import { ParentService } from '../../../Services/parent.service';
 import { ApiService } from '../../../Services/api.service';
 import Swal from 'sweetalert2';
 import { jwtDecode } from 'jwt-decode';
+import { RecaptchaComponent, RecaptchaModule } from 'ng-recaptcha';
 
 @Component({
   selector: 'app-sign-up',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RecaptchaModule],
   templateUrl: './sign-up.component.html',
   styleUrl: './sign-up.component.css'
 })
@@ -42,6 +43,7 @@ export class SignUpComponent {
   isLoading = false; // Initialize loading state
 
   IsConfimPassEmpty = false
+  @ViewChild(RecaptchaComponent) captchaRef!: RecaptchaComponent;
 
   constructor(private router: Router, public accountService: AccountService, public ParentServ: ParentService , public ApiServ: ApiService) { }
   ngOnInit() {
@@ -62,6 +64,15 @@ export class SignUpComponent {
     this.ConfirmPasswordError = ""
     this.somthingError = ""
     this.IsConfimPassEmpty = false
+  }
+
+  onCaptchaResolved(token: string | null): void {
+    if (token) {
+      this.parentInfo.recaptchaToken = token;
+      this.validationErrors['recaptchaToken'] = ''
+    } else { 
+      this.parentInfo.recaptchaToken = '';
+    }
   }
 
   SignUp() {
@@ -140,8 +151,12 @@ export class SignUpComponent {
             this.router.navigateByUrl("/Parent") 
           }
         );
-      }, (error) => {
-        this.isLoading = false; // Stop loading on error
+      }, (error) => { 
+        this.parentInfo.recaptchaToken = ''; 
+        this.isLoading = false; 
+        if (this.captchaRef) {
+          this.captchaRef.reset();
+        }
         Swal.fire({
           icon: 'error',
           title: 'Oops...',
@@ -189,6 +204,13 @@ export class SignUpComponent {
             isValid = false;
           }
         }
+      }
+
+      if(this.parentInfo.recaptchaToken == ""){ 
+        this.validationErrors['recaptchaToken'] = 'You Need To Confirm That You are not a Robot';
+        isValid = false;
+      } else{
+        this.validationErrors['recaptchaToken'] = '';
       }
     }
     const emailPattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;

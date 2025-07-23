@@ -28,5 +28,8 @@ namespace LMS_CMS_BL.DTO
         [Required(ErrorMessage = "Email is required")]
         [EmailAddress]
         public string Email { get; set; }
+
+        // For I am Not a Robot
+        public string RecaptchaToken { get; set; }
     }
 }
