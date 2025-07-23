@@ -111,6 +111,7 @@ export class StoreBalanceReportComponent implements OnInit {
     this.isLoading = true;
     this.storesService.Get(this.storesService.ApiServ.GetHeader()).subscribe({
       next: (stores) => {
+        console.log('Stores loaded:', stores);
         this.stores = stores;
         this.isLoading = false;
       },
@@ -232,8 +233,6 @@ export class StoreBalanceReportComponent implements OnInit {
     );
   }
 
-  // ... (keep the existing DownloadAsPDF, Print, exportExcel methods)
-
   getInfoRows(): any[] {
     const selectedStore = this.stores.find(
       (s) => s.id === this.selectedStoreId
@@ -275,5 +274,73 @@ export class StoreBalanceReportComponent implements OnInit {
 
   showExtraColumns(): boolean {
     return this.reportType !== 'QuantityOnly';
+  }
+
+  DownloadAsPDF() {
+    if (!this.reportForExport.length) {
+      Swal.fire('Warning', 'No data to export!', 'warning');
+      return;
+    }
+    this.showPDF = true;
+    setTimeout(() => {
+      this.pdfPrintComponent.downloadPDF();
+      setTimeout(() => (this.showPDF = false), 2000);
+    }, 500);
+  }
+
+  Print() {
+    if (!this.reportForExport.length) {
+      Swal.fire('Warning', 'No data to print!', 'warning');
+      return;
+    }
+    this.showPDF = true;
+    setTimeout(() => {
+      const printContents = document.getElementById('Data')?.innerHTML;
+      if (!printContents) {
+        console.error('Element not found!');
+        return;
+      }
+      const printStyle = `
+        <style>
+          @page { size: auto; margin: 0mm; }
+          body { margin: 0; }
+          @media print {
+            body > *:not(#print-container) { display: none !important; }
+            #print-container {
+              display: block !important;
+              position: static !important;
+              width: 100% !important;
+              height: auto !important;
+              background: white !important;
+              margin: 0 !important;
+            }
+          }
+        </style>
+      `;
+      const printContainer = document.createElement('div');
+      printContainer.id = 'print-container';
+      printContainer.innerHTML = printStyle + printContents;
+      document.body.appendChild(printContainer);
+      window.print();
+      setTimeout(() => {
+        document.body.removeChild(printContainer);
+        this.showPDF = false;
+      }, 100);
+    }, 500);
+  }
+
+  exportExcel() {
+    if (!this.reportForExport.length) {
+      Swal.fire('Warning', 'No data to export!', 'warning');
+      return;
+    }
+    const worksheet = XLSX.utils.json_to_sheet(this.reportForExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Report');
+    const dateStr = new Date().toISOString().slice(0, 10);
+    XLSX.writeFile(
+      workbook,
+      `${this.pageTitle.replace(/\s+/g, '_')}_${dateStr}.xlsx`
+    );
   }
 }
