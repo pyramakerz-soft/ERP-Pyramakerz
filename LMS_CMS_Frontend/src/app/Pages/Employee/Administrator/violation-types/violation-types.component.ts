@@ -44,7 +44,7 @@ export class ViolationTypesComponent {
   DomainName: string = '';
   UserID: number = 0;
   path: string = '';
- isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   Data: Violation[] = [];
   violation: ViolationAdd = new ViolationAdd();
@@ -132,15 +132,16 @@ export class ViolationTypesComponent {
   }
   Edit(row: Violation): void {
     this.mode = 'Edit';
-    this.violation.violationId = row.id;
-    this.violation.violationName =
-      this.Data.find((v) => v.id === row.id)?.name ?? '';
-    this.empTypesSelected =
-      this.Data.find((v) => v.id === row.id)?.employeeTypes ?? [];
-    this.violation.employeeTypeID =
-      this.Data.find((v) => v.id === row.id)?.employeeTypes.map(
-        (empType) => empType.id
-      ) ?? [];
+    this.violationServ.GetViolationByID(row.id, this.DomainName).subscribe(
+      data=>{ 
+        this.violation.violationId = data.id;
+        this.violation.violationName = data.name  
+        const empTypeSelected = data.employeeTypes 
+        this.empTypesSelected = empTypeSelected  
+        const employeeTypeIds = this.Data.find((v) => v.id === data.id)?.employeeTypes.map( (empType) => empType.id ) ?? [];
+        this.violation.employeeTypeID = employeeTypeIds
+      }
+    )
     this.openModal();
     this.dropdownOpen = false;
   }

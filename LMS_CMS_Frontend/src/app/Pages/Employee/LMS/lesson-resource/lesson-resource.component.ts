@@ -262,7 +262,8 @@ export class LessonResourceComponent {
 
   onFileSelected(event: any) {
     const file: File = event.target.files[0];
-    
+    const input = event.target as HTMLInputElement;
+
     if (file) {
       if (file.size > 25 * 1024 * 1024) {
         this.validationErrors['attachmentFile'] = 'The file size exceeds the maximum limit of 25 MB.';
@@ -279,6 +280,7 @@ export class LessonResourceComponent {
       }
     }
     event.target.value = '';
+    input.value = '';
   }
 
   onInputValueChange(event: { field: keyof LessonResource; value: any }) {

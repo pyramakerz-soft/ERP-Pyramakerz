@@ -107,43 +107,54 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
 
             if (tests == null || tests.Count == 0)
             {
-                return NotFound();
-            }
-
-            List<TestGetDTO> testDTO = mapper.Map<List<TestGetDTO>>(tests);
-            foreach (var item in testDTO)
-            {
-                RegisterationFormTest registerationFormTest =await Unit_Of_Work.registerationFormTest_Repository.FindByIncludesAsync(r => r.RegisterationFormParentID == id && r.TestID == item.ID,
-                    query => query.Include(emp => emp.TestState));
-
-                if (registerationFormTest != null)
+                tests = [];
+                var response = new
                 {
-                    item.RegistrationTestMark = registerationFormTest.Mark;
-                    item.RegistrationTestState=registerationFormTest.TestState.Name;
-                    item.RegistrationTestVisibleToParent = registerationFormTest.VisibleToParent;
-                    item.RegistrationTestID = registerationFormTest.ID;
-                    item.RegistrationTestStateId = registerationFormTest.StateID;
+                    StudentName = registerationFormParent.StudentName,
+                    StudentEnName = registerationFormParent.StudentEnName,
+                    StudentArName = registerationFormParent.StudentArName,
+                    Tests = tests
+                };
+                return Ok(response);
+            }
+            else
+            {
+                List<TestGetDTO> testDTO = mapper.Map<List<TestGetDTO>>(tests);
+                foreach (var item in testDTO)
+                {
+                    RegisterationFormTest registerationFormTest =await Unit_Of_Work.registerationFormTest_Repository.FindByIncludesAsync(r => r.RegisterationFormParentID == id && r.TestID == item.ID,
+                        query => query.Include(emp => emp.TestState));
+
+                    if (registerationFormTest != null)
+                    {
+                        item.RegistrationTestMark = registerationFormTest.Mark;
+                        item.RegistrationTestState=registerationFormTest.TestState.Name;
+                        item.RegistrationTestVisibleToParent = registerationFormTest.VisibleToParent;
+                        item.RegistrationTestID = registerationFormTest.ID;
+                        item.RegistrationTestStateId = registerationFormTest.StateID;
+
+                    }
+                    else
+                    {
+                        item.RegistrationTestMark = null;
+                        item.RegistrationTestState = null;
+                        item.RegistrationTestVisibleToParent = null;
+                        item.RegistrationTestID = null;
+                        item.RegistrationTestStateId = null;
+
+                    }
 
                 }
-                else
+                var response = new
                 {
-                    item.RegistrationTestMark = null;
-                    item.RegistrationTestState = null;
-                    item.RegistrationTestVisibleToParent = null;
-                    item.RegistrationTestID = null;
-                    item.RegistrationTestStateId = null;
-
-                }
-
+                    StudentName = registerationFormParent.StudentName,
+                    StudentEnName = registerationFormParent.StudentEnName,
+                    StudentArName = registerationFormParent.StudentArName,
+                    Tests = testDTO
+                };
+                return Ok(response);
             }
-            var response = new
-            {
-                StudentName = registerationFormParent.StudentName,
-                StudentEnName = registerationFormParent.StudentEnName,
-                StudentArName = registerationFormParent.StudentArName,
-                Tests = testDTO
-            };
-            return Ok(response);
+
         }
 
         //////////////////////////////////////////////////////////////////////////////
@@ -170,48 +181,59 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
 
             if (tests == null || tests.Count == 0)
             {
-                return NotFound();
-            }
-
-            List<TestGetDTO> testDTO = mapper.Map<List<TestGetDTO>>(tests);
-            foreach (var item in testDTO)
-            {
-                RegisterationFormTest registerationFormTest = await Unit_Of_Work.registerationFormTest_Repository.FindByIncludesAsync(r => r.RegisterationFormParentID == id && r.TestID == item.ID,
-                    query => query.Include(emp => emp.TestState));
-
-                if (registerationFormTest != null)
+                tests = [];
+                var response = new
                 {
-                    item.RegistrationTestMark = registerationFormTest.Mark;
-                    item.RegistrationTestState = registerationFormTest.TestState.Name;
-                    item.RegistrationTestVisibleToParent = registerationFormTest.VisibleToParent;
-                    item.RegistrationTestID = registerationFormTest.ID;
-                    item.RegistrationTestStateId = registerationFormTest.StateID;
+                    StudentName = registerationFormParent.StudentName,
+                    StudentEnName = registerationFormParent.StudentEnName,
+                    StudentArName = registerationFormParent.StudentArName,
+                    Tests = tests
+                };
+                return Ok(response);
+            }
+            else
+            {
+                List<TestGetDTO> testDTO = mapper.Map<List<TestGetDTO>>(tests);
+                foreach (var item in testDTO)
+                {
+                    RegisterationFormTest registerationFormTest = await Unit_Of_Work.registerationFormTest_Repository.FindByIncludesAsync(r => r.RegisterationFormParentID == id && r.TestID == item.ID,
+                        query => query.Include(emp => emp.TestState));
+
+                    if (registerationFormTest != null)
+                    {
+                        item.RegistrationTestMark = registerationFormTest.Mark;
+                        item.RegistrationTestState = registerationFormTest.TestState.Name;
+                        item.RegistrationTestVisibleToParent = registerationFormTest.VisibleToParent;
+                        item.RegistrationTestID = registerationFormTest.ID;
+                        item.RegistrationTestStateId = registerationFormTest.StateID;
+
+                    }
+                    else
+                    {
+                        item.RegistrationTestMark = null;
+                        item.RegistrationTestState = null;
+                        item.RegistrationTestVisibleToParent = null;
+                        item.RegistrationTestID = null;
+                        item.RegistrationTestStateId = null;
+
+                    }
 
                 }
-                else
+
+                testDTO = testDTO
+                 .Where(t => (t.RegistrationTestVisibleToParent == true) || (t.RegistrationTestStateId == 1 || t.RegistrationTestStateId == null))
+                 .ToList();
+
+                var response = new
                 {
-                    item.RegistrationTestMark = null;
-                    item.RegistrationTestState = null;
-                    item.RegistrationTestVisibleToParent = null;
-                    item.RegistrationTestID = null;
-                    item.RegistrationTestStateId = null;
-
-                }
-
+                    StudentName = registerationFormParent.StudentName,
+                    StudentEnName = registerationFormParent.StudentEnName,
+                    StudentArName = registerationFormParent.StudentArName,
+                    Tests = testDTO
+                };
+                return Ok(response);
             }
 
-            testDTO = testDTO
-             .Where(t => (t.RegistrationTestVisibleToParent == true) || (t.RegistrationTestStateId == 1 || t.RegistrationTestStateId == null))
-             .ToList();
-
-            var response = new
-            {
-                StudentName = registerationFormParent.StudentName,
-                StudentEnName = registerationFormParent.StudentEnName,
-                StudentArName = registerationFormParent.StudentArName,
-                Tests = testDTO
-            };
-            return Ok(response);
         }
 
         //////////////////////////////////////////////////////////////////////////////

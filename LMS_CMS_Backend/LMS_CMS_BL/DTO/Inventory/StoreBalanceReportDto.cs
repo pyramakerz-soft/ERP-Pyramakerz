@@ -17,7 +17,7 @@ namespace LMS_CMS_BL.DTO.Inventory
         public float? TotalPurchase { get; set; } // إجمالي سعر الشراء
         public float? TotalSales { get; set; } // إجمالي سعر البيع
         public decimal? TotalCost { get; set; } // إجمالي التكلفة
-        public int Limit { get; set; } // الكمية
+        public int Limit { get; set; }
         public string AlertMessage { get; set; }
     }
 }

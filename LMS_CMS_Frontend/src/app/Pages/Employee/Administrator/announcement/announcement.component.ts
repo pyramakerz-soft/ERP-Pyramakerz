@@ -238,7 +238,8 @@ export class AnnouncementComponent {
 
   onImageFileSelected(event: any) {
     const file: File = event.target.files[0];
-    
+    const input = event.target as HTMLInputElement;
+
     if (file) {
       if (file.size > 25 * 1024 * 1024) {
         this.validationErrors['imageFile'] = 'The file size exceeds the maximum limit of 25 MB.';
@@ -257,6 +258,8 @@ export class AnnouncementComponent {
         return; 
       }
     }
+    
+    input.value = '';
   }
 
   Save(){

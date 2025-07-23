@@ -3,6 +3,7 @@ import { ClassroomStudent } from '../../../Models/LMS/classroom-student';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ApiService } from '../../api.service';
 import { StudentClassroomSubject } from '../../../Models/LMS/student-classroom-subject';
+import { ClassStudentForDiscussionRoom } from '../../../Models/LMS/class-student-for-discussion-room';
 
 @Injectable({
   providedIn: 'root'
@@ -25,6 +26,18 @@ export class ClassroomStudentService {
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
     return this.http.get<ClassroomStudent[]>(`${this.baseUrl}/ClassroomStudent/GetByClassroom/${classID}`, { headers });
+  }
+
+  GetClassForActiveAcademicYearWithStudentsIncluded( DomainName: string){
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<ClassStudentForDiscussionRoom[]>(`${this.baseUrl}/ClassroomStudent/GetClassForActiveAcademicYearWithStudentsIncluded`, { headers });
   }
 
   GetById(ID:number, DomainName: string) {

@@ -62,6 +62,35 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         /////////////////
 
+
+        [HttpGet("{id}")]
+        [Authorize_Endpoint_(
+        allowedTypes: new[] { "octa", "employee" }
+        //,
+        //pages: new[] { "Academic Years" }
+        )]
+        public async Task<IActionResult> GetById(long id)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+                return Unauthorized("User ID or Type claim not found.");
+
+           Duty duty = await Unit_Of_Work.duty_Repository.FindByIncludesAsync(d => d.IsDeleted != true && d.ID == id && d.TimeTableSession.TimeTableClassroom.TimeTable.IsFavourite == true && d.TimeTableSession.TimeTableClassroom.TimeTable.IsDeleted != true,
+                    query => query.Include(a => a.Teacher),
+                    query => query.Include(a => a.TimeTableSession.TimeTableClassroom.Classroom.AcademicYear.School),
+                    query => query.Include(a => a.TimeTableSession.TimeTableClassroom.Classroom));
+
+            DutyGetDto DTo = mapper.Map<DutyGetDto>(duty);
+
+            return Ok(DTo);
+        }
+
+        /////////////////
+
         [HttpGet("GetAllTeachersValidForSessionTime")]
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee" }
@@ -160,9 +189,9 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpPost]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" }
-          //,
-          //pages: new[] { "Academic Years" }
-      )]
+              //,
+              //pages: new[] { "Academic Years" }
+          )]
         public async Task<IActionResult> Add(DutyAddDto NewDuty)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -227,6 +256,172 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             Unit_Of_Work.duty_Repository.Add(duty);
             Unit_Of_Work.SaveChanges();
             return Ok(NewDuty);
+        }
+
+        /////////////////
+        
+        [HttpPut]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            allowEdit: 1
+            //,
+            //pages: new[] { "Academic Years" }
+        )]
+        public IActionResult Edit(DutyEditDTO NewDuty)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+            Classroom classroom = Unit_Of_Work.classroom_Repository.First_Or_Default(c => c.ID == NewDuty.ClassID && c.IsDeleted != true);
+            if (classroom == null)
+            {
+                return BadRequest(" No Classroom With This Id");
+            }
+            var dayOfWeek = NewDuty.Date.DayOfWeek; // returns DayOfWeek enum (e.g. Monday, Tuesday...)
+
+            int dayId = dayOfWeek switch
+            {
+                DayOfWeek.Monday => 1,
+                DayOfWeek.Tuesday => 2,
+                DayOfWeek.Wednesday => 3,
+                DayOfWeek.Thursday => 4,
+                DayOfWeek.Friday => 5,
+                DayOfWeek.Saturday => 6,
+                DayOfWeek.Sunday => 7,
+                _ => 0
+            };
+
+            if (dayId == 0)
+                return BadRequest("Invalid day of week.");
+
+            TimeTableSession timeTableSession = Unit_Of_Work.timeTableSession_Repository.First_Or_Default(s => s.TimeTableClassroom.ClassroomID == NewDuty.ClassID && s.TimeTableClassroom.TimeTable.IsFavourite == true && s.TimeTableClassroom.TimeTable.IsDeleted != true && s.PeriodIndex == NewDuty.Period && s.TimeTableClassroom.DayId == dayId);
+            if (timeTableSession == null)
+            {
+                return BadRequest(" No timeTableSession With This Id" + dayId);
+            }
+            Duty duty = Unit_Of_Work.duty_Repository.First_Or_Default(a => a.ID == NewDuty.ID);
+            if (duty == null)
+            {
+                return BadRequest("this duty doesn't exist");
+            }
+
+            //if (userTypeClaim == "employee")
+            //{
+            //    IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Academic Years", roleId, userId, AcademicYear);
+            //    if (accessCheck != null)
+            //    {
+            //        return accessCheck;
+            //    }
+            //}
+
+            mapper.Map(NewDuty, duty);
+            duty.TimeTableSessionID = timeTableSession.ID;
+
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            duty.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            if (userTypeClaim == "octa")
+            {
+                duty.UpdatedByOctaId = userId;
+                if (duty.UpdatedByUserId != null)
+                {
+                    duty.UpdatedByUserId = null;
+                }
+
+            }
+            else if (userTypeClaim == "employee")
+            {
+                duty.UpdatedByUserId = userId;
+                if (duty.UpdatedByOctaId != null)
+                {
+                    duty.UpdatedByOctaId = null;
+                }
+            }
+
+          
+            Unit_Of_Work.duty_Repository.Update(duty);
+            Unit_Of_Work.SaveChanges();
+            return Ok(NewDuty);
+
+        }
+
+        /////////////////
+
+        [HttpDelete("{id}")]
+        [Authorize_Endpoint_(
+             allowedTypes: new[] { "octa", "employee" }
+             //,
+             //allowDelete: 1,
+             //pages: new[] { "Academic Years" }
+         )]
+        public IActionResult Delete(long id)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            if (id == null)
+            {
+                return BadRequest("id cannot be null");
+            }
+            Duty duty = Unit_Of_Work.duty_Repository.Select_By_Id(id);
+
+            if (duty == null || duty.IsDeleted == true)
+            {
+                return NotFound("No Duty with this ID");
+            }
+
+            //if (userTypeClaim == "employee")
+            //{
+            //    IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Academic Years", roleId, userId, academicYear);
+            //    if (accessCheck != null)
+            //    {
+            //        return accessCheck;
+            //    }
+            //}
+
+            duty.IsDeleted = true;
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            duty.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            if (userTypeClaim == "octa")
+            {
+                duty.DeletedByOctaId = userId;
+                if (duty.DeletedByUserId != null)
+                {
+                    duty.DeletedByUserId = null;
+                }
+            }
+            else if (userTypeClaim == "employee")
+            {
+                duty.DeletedByUserId = userId;
+                if (duty.DeletedByOctaId != null)
+                {
+                    duty.DeletedByOctaId = null;
+                }
+            }
+
+            Unit_Of_Work.duty_Repository.Update(duty);
+            Unit_Of_Work.SaveChanges();
+            return Ok();
         }
     }
 }
