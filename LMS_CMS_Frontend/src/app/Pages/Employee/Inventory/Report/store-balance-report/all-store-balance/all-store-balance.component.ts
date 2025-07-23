@@ -118,15 +118,15 @@ export class AllStoresBalanceReportComponent implements OnInit {
   }
 
   viewReport() {
-    if (!this.dateTo) {
-      Swal.fire({
-        title: 'Missing Information',
-        text: 'Please select Date',
-        icon: 'warning',
-        confirmButtonText: 'OK',
-      });
-      return;
-    }
+    // if (!this.dateTo) {
+    //   Swal.fire({
+    //     title: 'Missing Information',
+    //     text: 'Please select Date',
+    //     icon: 'warning',
+    //     confirmButtonText: 'OK',
+    //   });
+    //   return;
+    // }
 
     this.isLoading = true;
     this.showTable = false;

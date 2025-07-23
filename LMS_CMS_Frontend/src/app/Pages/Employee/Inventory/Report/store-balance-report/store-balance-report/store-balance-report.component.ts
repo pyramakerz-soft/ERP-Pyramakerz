@@ -144,15 +144,15 @@ export class StoreBalanceReportComponent implements OnInit {
   }
 
   viewReport() {
-    if (!this.dateTo || !this.selectedStoreId) {
-      Swal.fire({
-        title: 'Missing Information',
-        text: 'Please select both Store and Date',
-        icon: 'warning',
-        confirmButtonText: 'OK',
-      });
-      return;
-    }
+    // if (!this.dateTo || !this.selectedStoreId) {
+    //   Swal.fire({
+    //     title: 'Missing Information',
+    //     text: 'Please select both Store and Date',
+    //     icon: 'warning',
+    //     confirmButtonText: 'OK',
+    //   });
+    //   return;
+    // }
 
     this.isLoading = true;
     this.showTable = false;
