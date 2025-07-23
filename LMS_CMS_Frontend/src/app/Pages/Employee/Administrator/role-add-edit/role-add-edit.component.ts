@@ -317,19 +317,35 @@ export class RoleAddEditComponent {
           },
           error: (error) => { 
             this.isLoading=false
-            if(error.error.errors.Name[0].includes("Role cannot be longer than 100 characters")){
-              Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'Role cannot be longer than 100 characters',
-                confirmButtonText: 'Okay',
-                customClass: { confirmButton: 'secondaryBg' },
-              });
-            }else{ 
+
+            const nameError = error?.error?.errors?.Name?.[0]
+
+            if (error?.error?.status === 401) {
               Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: error.error || 'An unexpected error occurred',
+                confirmButtonColor: '#089B41',
+                text: "You Are Not Allowed To Add",
+              });
+            } else if (
+              typeof nameError === 'string' &&
+              nameError.includes("Role cannot be longer than 100 characters")
+            ) {
+              Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Name cannot be longer than 100 characters',
+                confirmButtonText: 'Okay',
+                customClass: { confirmButton: 'secondaryBg' },
+              });
+            } else { 
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text:
+                  (typeof error?.error === 'string' && error.error) ||
+                  error?.error?.message ||
+                  'An unexpected error occurred',
                 confirmButtonColor: '#089B41',
               });
             } 
@@ -349,31 +365,39 @@ export class RoleAddEditComponent {
             this.router.navigateByUrl("Employee/Role")
           },
           error: (error) => { 
-            if(error.error.status == 401){
+            this.isLoading=false
+
+            const nameError = error?.error?.errors?.Name?.[0]
+
+            if (error?.error?.status === 401) {
               Swal.fire({
                 icon: 'error',
                 title: 'Error',
                 confirmButtonColor: '#089B41',
                 text: "You Are Not Allowed To Edit This",
               });
-            }else{
-              if(error.error.errors.Name[0].includes("Role cannot be longer than 100 characters")){
-                Swal.fire({
-                  icon: 'error',
-                  title: 'Oops...',
-                  text: 'Name cannot be longer than 100 characters',
-                  confirmButtonText: 'Okay',
-                  customClass: { confirmButton: 'secondaryBg' },
-                });
-              }else{ 
-                Swal.fire({
-                  icon: 'error',
-                  title: 'Error',
-                  text: error.error || 'An unexpected error occurred',
-                  confirmButtonColor: '#089B41',
-                });
-              } 
-            }
+            } else if (
+              typeof nameError === 'string' &&
+              nameError.includes("Role cannot be longer than 100 characters")
+            ) {
+              Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Name cannot be longer than 100 characters',
+                confirmButtonText: 'Okay',
+                customClass: { confirmButton: 'secondaryBg' },
+              });
+            } else { 
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text:
+                  (typeof error?.error === 'string' && error.error) ||
+                  error?.error?.message ||
+                  'An unexpected error occurred',
+                confirmButtonColor: '#089B41',
+              });
+            } 
           },
         });
       }
