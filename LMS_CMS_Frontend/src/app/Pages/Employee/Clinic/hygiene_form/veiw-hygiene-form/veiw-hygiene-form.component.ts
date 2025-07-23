@@ -11,12 +11,15 @@ import { HygieneTypes } from '../../../../../Models/Clinic/hygiene-types';
 import { HygieneFormTableComponent } from "../hygiene-form-table/hygiene-form-table.component";
 import { ApiService } from '../../../../../Services/api.service';
 import { DatePipe } from '@angular/common'; 
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-view-hygiene-form',
   templateUrl: './veiw-hygiene-form.component.html',
   styleUrl: './veiw-hygiene-form.component.css',
-  imports: [HygieneFormTableComponent , DatePipe],  standalone: true,
+  imports: [HygieneFormTableComponent , DatePipe, TranslateModule], 
+  standalone: true,
 
 })
 export class ViewHygieneFormComponent implements OnInit {
@@ -27,6 +30,8 @@ this.router.navigateByUrl('Employee/Hygiene Form Medical Report');
   hygieneForm: HygieneForm | null = null;
   school: School | null = null;
   grade: Grade | null = null;
+  isRtl: boolean = false;
+  subscription!: Subscription;  
   classroom: Classroom | null = null;
   students: Student[] = [];
   hygieneTypes: HygieneTypes[] = [];
@@ -36,7 +41,7 @@ this.router.navigateByUrl('Employee/Hygiene Form Medical Report');
     private router: Router,
     private hygieneFormService: HygieneFormService,
     private apiService: ApiService,
-    
+    private languageService: LanguageService
   ) {}
   
 
@@ -45,6 +50,10 @@ ngOnInit(): void {
   if (id) {
     this.loadHygieneForm(Number(id));
   }
+  this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
 }
 
 async loadHygieneForm(id: number) {

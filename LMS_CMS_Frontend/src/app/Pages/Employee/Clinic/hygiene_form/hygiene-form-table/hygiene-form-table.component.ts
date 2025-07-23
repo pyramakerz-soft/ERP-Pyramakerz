@@ -2,11 +2,13 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Student } from '../../../../../Models/student';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-hygiene-form-table',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
   templateUrl: './hygiene-form-table.component.html',
   styleUrls: ['./hygiene-form-table.component.css'],
 })
@@ -16,7 +18,24 @@ export class HygieneFormTableComponent {
   @Input() isViewOnly: boolean = false;
   @Input() showSelectAll: boolean = true;
 
+  @Input() isRtl: boolean = false;
+  @Input() subscription!: Subscription; 
   private previousAttendanceStates: { [key: number]: boolean | null } = {};
+
+
+
+  constructor(
+      private languageService: LanguageService
+  ) {}
+
+  ngOnInit(): void {
+   
+         this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
 
   ngOnChanges() {
     this.students.forEach(student => {

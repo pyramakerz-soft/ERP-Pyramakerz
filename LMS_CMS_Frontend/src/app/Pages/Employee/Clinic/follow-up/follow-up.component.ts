@@ -18,7 +18,9 @@ import { FollowUp } from '../../../../Models/Clinic/FollowUp';
 import { Dose } from '../../../../Models/Clinic/dose';
 import { ModalComponent } from '../../../../Component/modal/modal.component';
 import { Drug } from '../../../../Models/Clinic/drug';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-follow-up',
   standalone: true,
@@ -27,7 +29,8 @@ import { Drug } from '../../../../Models/Clinic/drug';
     CommonModule,
     SearchComponent,
     TableComponent,
-    ModalComponent,
+    ModalComponent, 
+    TranslateModule
   ],
   templateUrl: './follow-up.component.html',
   styleUrls: ['./follow-up.component.css'],
@@ -65,6 +68,8 @@ export class FollowUpComponent implements OnInit {
   diagnoses: any[] = [];
   drugs: any[] = [];
   doses: any[] = [];
+     isRtl: boolean = false;
+    subscription!: Subscription;
   selectedDrugId: number | null = null;
   selectedDoseId: number | null = null;
   drugDoseList: any[] = [];
@@ -100,12 +105,17 @@ export class FollowUpComponent implements OnInit {
     private diagnosisService: DiagnosisService,
     private drugService: DrugService,
     private doseService: DoseService,
-    private apiService: ApiService
+    private apiService: ApiService,
+      private languageService: LanguageService
   ) {}
 
   ngOnInit(): void {
     this.loadFollowUps();
     this.loadDropdownOptions();
+     this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   async onSearchEvent(event: { key: string; value: any }) {

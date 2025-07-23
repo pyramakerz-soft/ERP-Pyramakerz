@@ -45,7 +45,7 @@
               {{ row.name }}
             </td>
             <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-              <div class="flex space-x-4 rtl:flex flex-row-reverse ">
+              <div class="flex space-x-4 rtl:space-x-reverse ">
                 <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)" (click)="Delete(row.id)">
                   <i class="fa-regular fa-trash-can"></i>
                 </button>

@@ -195,13 +195,13 @@ import { TimeTableViewComponent } from './Pages/Employee/LMS/time-table-view/tim
 import { TimeTableReplace } from './Models/LMS/time-table-replace';
 import { TimeTableReplaceComponent } from './Pages/Employee/LMS/time-table-replace/time-table-replace.component';
 import { SignUpEmployeeComponent } from './Pages/Login/sign-up-employee/sign-up-employee.component';
-<<<<<<< HEAD
+// <<<<<<< HEAD
 import { DutyComponent } from './Pages/Employee/LMS/duty/duty.component';
-=======
+// =======
 import { RegisteredEmployeeComponent } from './Pages/Employee/Administrator/registered-employee/registered-employee.component';
 import { RegisteredEmployeeViewComponent } from './Pages/Employee/Administrator/registered-employee-view/registered-employee-view.component';
 import { AnnouncementComponent } from './Pages/Employee/Administrator/announcement/announcement.component';
->>>>>>> 7550a65e628c6ca1efc257d00724e527fd5c630e
+// >>>>>>> 7550a65e628c6ca1efc257d00724e527fd5c630e
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },

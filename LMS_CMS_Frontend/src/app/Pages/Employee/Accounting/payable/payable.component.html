@@ -74,8 +74,8 @@
 </div>
 
 <div class="mt-8 flex justify-between items-center">
-    <div class="flex items-center space-x-4 flex-row rtl:flex-row-reverse">
-        <button class="flex items-center space-x-2 rounded-lg border py-3 px-4 flex-row rtl:flex-row-reverse" (click)="changeCurrentPage(CurrentPage-1)"
+    <div class="flex items-center space-x-4 rtl:space-x-reverse">
+        <button class="flex items-center space-x-2 rounded-lg border py-3 px-4  rtl:space-x-reverse" (click)="changeCurrentPage(CurrentPage-1)"
         [disabled]="CurrentPage === 1 || payableData.length == 0"
         [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === 1 || payableData.length == 0}">
             <i class="fa-solid fa-arrow-left"></i>
@@ -88,7 +88,7 @@
                 <p class="text-center">{{ i + 1 }}</p>
             </div>
         </div>
-        <button class="flex items-center space-x-2 rounded-lg border py-3 px-4 flex-row rtl:flex-row-reverse" (click)="changeCurrentPage(CurrentPage+1)"
+        <button class="flex items-center space-x-2 rounded-lg border py-3 px-4 rtl:space-x-reverse" (click)="changeCurrentPage(CurrentPage+1)"
         [disabled]="CurrentPage === TotalPages || payableData.length == 0"
         [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === TotalPages || payableData.length == 0}">
             <p>{{'Next'| translate }}</p> 

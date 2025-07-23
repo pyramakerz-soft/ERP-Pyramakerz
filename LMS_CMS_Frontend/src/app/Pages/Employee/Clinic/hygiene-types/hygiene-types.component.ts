@@ -9,7 +9,9 @@ import { TableComponent } from '../../../../Component/reuse-table/reuse-table.co
 import { ApiService } from '../../../../Services/api.service';
 import { HygieneTypesService } from '../../../../Services/Employee/Clinic/hygiene-type.service';
 import { HygieneTypes } from '../../../../Models/Clinic/hygiene-types';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-hygiene-types',
   standalone: true,
@@ -19,6 +21,7 @@ import { HygieneTypes } from '../../../../Models/Clinic/hygiene-types';
     SearchComponent,
     ModalComponent,
     TableComponent,
+    TranslateModule
   ],
   templateUrl: './hygiene-types.component.html',
   styleUrls: ['./hygiene-types.component.css'],
@@ -34,15 +37,21 @@ export class HygieneTypesComponent implements OnInit {
   isModalVisible = false;
   hygieneTypes: HygieneTypes[] = [];
   DomainName: string = '';
-
+isRtl: boolean = false;
+    subscription!: Subscription;
   constructor(
     private hygieneTypesService: HygieneTypesService,
-    private apiService: ApiService
+    private apiService: ApiService,
+      private languageService: LanguageService
   ) {}
 
   ngOnInit(): void {
     this.DomainName = this.apiService.GetHeader();
     this.getHygieneTypes();
+      this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   async getHygieneTypes() {
