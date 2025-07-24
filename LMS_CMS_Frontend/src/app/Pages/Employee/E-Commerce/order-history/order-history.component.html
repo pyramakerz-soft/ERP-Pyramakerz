@@ -1,11 +1,11 @@
 <div class="flex justify-between items-center">
-    <h1 class="primaryTxt font-semibold text-2xl leading-9 w-1/2">Order History {{ 'Save' | translate }}</h1> 
+    <h1 class="primaryTxt font-semibold text-2xl leading-9 w-1/2">  {{ 'Order' | translate }} {{ 'History' | translate }}</h1> 
     <div class=" relative flex items-center flex-1">
         <span class="absolute text-[#919191] ltr:ml-2 rtl:mr-2">
             <i class="fa-solid fa-magnifying-glass"></i>
         </span> 
         <input #searchInput type="text" [(ngModel)]="searchTerm" (keyup)="filterOrders()" class="bg-[#FFFFFF0D] ltr:pl-10 rtl:pr-10 ltr:pr-3 rtl:pl-3 py-2 rounded-lg border w-full"
-            placeholder="Search For... {{ 'Save' | translate }}" />
+            placeholder="{{ 'Search For...' | translate }}" />
     </div> 
 </div>
 
@@ -15,7 +15,7 @@
             (click)="getOrders()"
             [ngClass]="{'border-b-[#089B41] text-gray-800 font-semibold': stateID == 0, 'border-b-[#A9A9A952] text-[#6F6F6F] bg-[#EEEEEE3D]': stateID != 0 }"
             class="px-4 py-2 border-b-2">
-                <p>All {{ 'Save' | translate }}</p>
+                <p> {{ 'All' | translate }}</p>
         </div>
     </div>
     <div *ngFor="let row of orderStates; let i = index" class="px-3 py-2">
@@ -29,7 +29,7 @@
 </div>
  
 <div *ngIf="orders.length == 0" class="w-full h-[90%] flex justify-center items-center">
-    <p>No Orders Yet {{ 'Save' | translate }}</p>
+    <p> {{ 'No Orders Yet' | translate }}</p>
 </div>
 
 <div *ngIf="orders.length != 0">
@@ -46,7 +46,7 @@
                     </span>
                     <span class="text-base flex items-center space-x-3">
                         <i class="fa-solid fa-tags"></i> 
-                        <p class="font-semibold text-xl">{{row.totalPrice}} SAR {{ 'Save' | translate }}</p>
+                        <p class="font-semibold text-xl">{{row.totalPrice}}  {{ 'SAR' | translate }}</p>
                     </span>
                 </div>
             </div>
@@ -60,7 +60,7 @@
                 {{row.orderStateName}}
             </div>
             <div *ngIf="row.orderStateID == 1" class="mb-3">
-                <p >State {{ 'Save' | translate }}</p>
+                <p > {{ 'State' | translate }}</p>
                 <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto mt-2" 
                 [(ngModel)]="row.orderStateID"
                     (change)="ChangeOrderState($event, row.id)"> 
