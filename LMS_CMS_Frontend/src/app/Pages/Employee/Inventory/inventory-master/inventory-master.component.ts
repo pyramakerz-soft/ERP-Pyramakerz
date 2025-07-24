@@ -15,11 +15,13 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { InventoryFlag } from '../../../../Models/Inventory/inventory-flag';
 import { InventoryMasterService } from '../../../../Services/Employee/Inventory/inventory-master.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-inventory-master',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './inventory-master.component.html',
   styleUrl: './inventory-master.component.css'
 })
@@ -32,7 +34,8 @@ export class InventoryMasterComponent {
   AllowDeleteForOthers: boolean = false;
 
   TableData: InventoryMaster[] = [];
-
+ isRtl: boolean = false;
+  subscription!: Subscription;
   DomainName: string = '';
   UserID: number = 0;
 
@@ -63,7 +66,8 @@ export class InventoryMasterComponent {
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
-    public salesServ: InventoryMasterService
+    public salesServ: InventoryMasterService,
+    private languageService: LanguageService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -84,6 +88,10 @@ export class InventoryMasterComponent {
     });
 
     this.GetAllData(this.CurrentPage, this.PageSize)
+      this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';    
   }
   Create() {
     this.mode = 'Create';

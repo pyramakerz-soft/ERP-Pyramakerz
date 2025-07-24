@@ -59,6 +59,22 @@
     "Click to":"Click to",
     "Upload":"Upload",
     "Icons":"Icons",
+    "Eta Inserte Date":"Eta Inserte Date",
+    "Other Image":"Other Image",
+    "Main Image":"Main Image",
+    "Generate":"Generate",
+    "Available IN Shop":"Available IN Shop",
+    "options":"options",
+    "Size":"Size",
+    "Colors":"Colors",
+    "limit":"limit",
+    "Genders":"Genders",
+    "Sub":"Sub",
+    "Vat for Foreign":"Vat for Foreign",
+    "Vat":"Vat",
+    "Arabic":"Arabic",
+    "English":"English",
+    "Shop":"Shop",   
     "(Max. File size: 25 MB)":"(Max. File size: 25 MB)",
     "Sub_Categories":"Sub_Categories",
     "Items":"Items",
@@ -192,6 +208,28 @@
     "Enter Key Word": "Enter Keyword...",
     "Schools": "Schools",
     "ID": "ID",
+    "Search by Barcode":"Search by Barcode",
+    "Search Student":"Search Student",
+    "Shop Items":"Shop Items",
+    "BarCode":"BarCode",
+    "VAT For Foreign":"VAT For Foreign",
+    "Limit":"Limit",
+    "Available In Shop":"Available In Shop",
+    "Gender":"Gender",
+    "Inventory Sub Categories":"Inventory Sub Categories",
+    "Code":"Code",
+    "Unit":"Unit",
+
+
+
+
+
+
+
+
+
+
+
     "School Name": "School Name",
     "Address": "Address",
     "School type": "School type",

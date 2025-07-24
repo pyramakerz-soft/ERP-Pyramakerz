@@ -1,11 +1,11 @@
 <div class="">
   <div class="flex justify-between items-center">
-    <h1 class="primaryTxt font-semibold text-2xl leading-9">Shop Items</h1>
+    <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Shop Items' | translate }}</h1>
     <div class="flex justify-between items-center">
       <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
       <button (click)="Create()"
         class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
-        Create Shop Items
+       {{ 'Create' | translate }} {{ 'Shop Items' | translate }}
       </button>
     </div>
   </div>
@@ -16,54 +16,56 @@
         <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
           <tr>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-              ID
+              {{ 'ID' | translate }}
             </th>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-              BarCode
+               {{ 'BarCode' | translate }}
             </th>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-              English Name
+               {{ 'English Name' | translate }}
             </th>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-              Arabic Name
+               {{ 'Arabic Name' | translate }}
             </th>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-              Purchase Price
+               {{ 'Purchase' | translate }} {{ 'Price' | translate }}
             </th>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-              Sales Price
+               {{ 'Sales' | translate }} {{ 'Price' | translate }}
             </th>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-              VAT For Foreign
+               {{ 'VAT For Foreign' | translate }}
             </th>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-              Limit
+               {{ 'Limit' | translate }}
             </th>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-              Available In Shop
+               {{ 'Available In Shop' | translate }}
             </th>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-              Gender
+               {{ 'Gender' | translate }}
             </th>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-              Grade
+               {{ 'Grade' | translate }}
             </th>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-              School
+               {{ 'School' | translate }}
             </th>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-              Inventory Sub Categories
+               {{ 'Inventory Sub Categories' | translate }}
             </th>
 
 
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-              Item Code</th>
+               {{ 'Item' | translate }} {{ 'Code' | translate }}
+            </th>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-              Unit Type</th>
+                {{ 'Unit' | translate }} {{ 'Type' | translate }}
+            </th>
 
 
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-              Actions
+               {{ 'Actions' | translate }}
             </th>
           </tr>
         </thead>
@@ -71,7 +73,7 @@
           <tr *ngIf="TableData.length === 0">
             <td colspan="16"
               class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-              No Data Found
+               {{ 'No Data Found' | translate }}
             </td>
           </tr>
 

@@ -20,11 +20,14 @@ import { InventoryCategoryService } from '../../../../Services/Employee/Inventor
 import { GenderService } from '../../../../Services/Employee/Inventory/gender.service';
 import { ShopItemService } from '../../../../Services/Employee/Inventory/shop-item.service';
 import Swal from 'sweetalert2';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-shop-items-add-edit',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule , TranslateModule],
   templateUrl: './shop-items-add-edit.component.html',
   styleUrl: './shop-items-add-edit.component.css'
 })
@@ -56,7 +59,8 @@ export class ShopItemsAddEditComponent {
 
   inputValueSize: string = '';
   Sizes: string[] = [];
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   Grades: Grade[] = []
   Gender: Gender[] = []
   SchoolId: number = 0;
@@ -79,7 +83,8 @@ export class ShopItemsAddEditComponent {
     public inventorySubCategoriesService: InventorySubCategoriesService,
     public inventoryCategoryService: InventoryCategoryService,
     public genderService: GenderService,
-    public shopItemService: ShopItemService
+    public shopItemService: ShopItemService,
+    private languageService: LanguageService
   ) { }
 
   ngOnInit() {
@@ -98,6 +103,10 @@ export class ShopItemsAddEditComponent {
     this.GetAllSchools(); 
     this.GetAllCategories();
     this.GetAllGenders();
+     this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl'; 
   }
 
   GetShopItemData() {
