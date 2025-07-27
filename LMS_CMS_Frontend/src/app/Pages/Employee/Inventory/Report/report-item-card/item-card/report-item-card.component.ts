@@ -192,9 +192,11 @@ export class ReportItemCardComponent implements OnInit {
       summaryRow.totalPrice = '-';
       summaryRow.averageCost = '-';
     }
+// int x =0;
 
     // Process transactions
     const transactionRows = transactions.map((t) => {
+      // x += (t.quantity *(t.itemInOut ===1 ? 1 : -1));
       const row: any = {
         isSummary: false,
         date: t.date || '-',
@@ -203,7 +205,7 @@ export class ReportItemCardComponent implements OnInit {
         authority: t.supplierName || t.studentName || t.storeToName || '-',
         income: t.itemInOut === 1 ? t.quantity ?? '-' : '-',
         outcome: t.itemInOut === -1 ? t.quantity ?? '-' : '-',
-        balance: t.balance ?? '-',
+        balance: t.quantitybalance ?? '-',
       };
 
       if (this.showAverageColumn) {
