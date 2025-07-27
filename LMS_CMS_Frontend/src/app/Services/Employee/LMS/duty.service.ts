@@ -9,7 +9,7 @@ import { ApiService } from '../../api.service';
 })
 export class DutyService {
 
- baseUrl = ""
+  baseUrl = ""
   header = ""
 
   constructor(public http: HttpClient, public ApiServ: ApiService) {
@@ -28,7 +28,19 @@ export class DutyService {
     return this.http.get<Duty[]>(`${this.baseUrl}/Duty?date=${date}`, { headers })
   }
 
-  GetAllTeachersValidForSessionTime(date: string, period : number , DomainName: string) {
+  GetById(id: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<Duty>(`${this.baseUrl}/Duty/${id}`, { headers })
+  }
+
+  GetAllTeachersValidForSessionTime(date: string, period: number, DomainName: string) {
     if (DomainName != null) {
       this.header = DomainName
     }
@@ -55,4 +67,43 @@ export class DutyService {
       responseType: 'text' as 'json'
     });
   }
+
+  Edit(duty: Duty, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.put(`${this.baseUrl}/Duty`, duty, { headers });
+  }
+
+  GetNumberOfPeriods(date: string, ClassId: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    console.log(`${this.baseUrl}/Duty?date=${date}&ClassId=${ClassId}`)
+    return this.http.get<any>(`${this.baseUrl}/Duty/GetPeriods?date=${date}&ClassId=${ClassId}`, { headers })
+  }
+
+  Delete(id: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.delete(`${this.baseUrl}/Duty/${id}`, { headers })
+  }
+
 }
+
