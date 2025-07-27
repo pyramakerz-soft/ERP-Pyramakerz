@@ -45,6 +45,20 @@ export class TimeTableService {
     return this.http.get<any>(`${this.baseUrl}/TimeTable/${id}`, { headers });
   }
 
+
+  GetDutyByDate(id: number,date :string, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName;
+    }
+    const token = localStorage.getItem('current_token');
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<any>(`${this.baseUrl}/TimeTable/${id}/${date}`, { headers });
+  }
+
+
   GetAllTeachersinThisTimetable(id: number, DomainName: string) {
     if (DomainName != null) {
       this.header = DomainName;

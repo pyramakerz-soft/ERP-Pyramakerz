@@ -105,11 +105,7 @@ export class DutyComponent {
   }
 
   IsAllowDelete(InsertedByID: number) {
-    const IsAllow = this.EditDeleteServ.IsAllowDelete(
-      InsertedByID,
-      this.UserID,
-      this.AllowDeleteForOthers
-    );
+    const IsAllow = this.EditDeleteServ.IsAllowDelete(InsertedByID,this.UserID,this.AllowDeleteForOthers);
     return IsAllow;
   }
 
@@ -171,14 +167,26 @@ export class DutyComponent {
           this.isLoading = false
         },
           err => {
-            this.isLoading = false
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: 'Try Again Later!',
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' },
-            });
+            this.isLoading = false;
+            console.log(err);
+            const errorMsg = err?.error ?? ''; // extract error message
+            if (errorMsg.includes("This Day doesn`t exist in current time table")) {
+              Swal.fire({
+                icon: 'warning',
+                title: 'Invalid Day!',
+                text: 'This day is not part of the current timetable.',
+                confirmButtonText: 'Okay',
+                customClass: { confirmButton: 'secondaryBg' },
+              });
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Try Again Later!',
+                confirmButtonText: 'Okay',
+                customClass: { confirmButton: 'secondaryBg' },
+              });
+            }
           })
       } else if (this.mode == "Edit") {
         this.DutyServ.Edit(this.duty, this.DomainName).subscribe((d) => {
