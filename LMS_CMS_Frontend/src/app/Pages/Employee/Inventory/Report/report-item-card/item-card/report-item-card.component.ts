@@ -203,9 +203,11 @@ export class ReportItemCardComponent implements OnInit {
         transactionType: t.flagName || '-',
         invoiceNumber: t.invoiceNumber || '-',
         authority: t.supplierName || t.studentName || t.storeToName || '-',
-        income: t.itemInOut === 1 ? t.quantity ?? '-' : '-',
-        outcome: t.itemInOut === -1 ? t.quantity ?? '-' : '-',
-        balance: t.quantitybalance ?? '-',
+        income: t.inQuantity || '-',
+        outcome: t.outQuantity || '-',
+        // income: t.itemInOut === 1 ? t.quantity ?? '-' : '-',
+        // outcome: t.itemInOut === -1 ? t.quantity ?? '-' : '-',
+        balance: t.balance ?? '-',
       };
 
       if (this.showAverageColumn) {

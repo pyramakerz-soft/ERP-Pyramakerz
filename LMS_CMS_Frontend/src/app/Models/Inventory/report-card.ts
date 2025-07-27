@@ -20,11 +20,13 @@ export interface InventoryNetTransaction {
   storeToName: string | null;
   totalIn: number;
   totalOut: number;
-  quantitybalance: number;
+  balance: number;
   averageCost: number | null;
   price: number;
   totalPrice: number;
   itemInOut: number;
+  inQuantity: number;
+  outQuantity: number;
 }
 
 export interface CombinedReportData {
