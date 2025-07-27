@@ -184,7 +184,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             // ===== 3. بناء DTO مع تحديث الرصيد المتغير =====
             var runningBalance = previousBalance;
             var transactions = new List<InventoryNetTransactionDTO>();
-
+           
             foreach (var d in transactionData)
             {
                 var itemInOut = d.InventoryMaster.InventoryFlags.ItemInOut;
@@ -199,6 +199,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                     InvoiceNumber = d.InventoryMaster.InvoiceNumber,
                     Notes = d.InventoryMaster.Notes,
                     Quantity = d.Quantity,
+                    inQuantity = d.Quantity * (itemInOut== 1? 1 : 0 ),
+                    outQuantity = d.Quantity * (itemInOut== -1? -1: 0 ),
+                    Balance = runningBalance,
                     Price = d.Price,
                     TotalPrice = d.TotalPrice,
                     AverageCost = d.AverageCost,
@@ -312,16 +315,14 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
             return totalWeightedCost / totalQuantity;
         }
-        ///// /////////////////////////////////////////////////////////////////////////////////////-777
-       
-        // ///////////////////////////////////////////////////////////////////////-777
-
+        //////////////////////////////////////////////////////////////////////////////////////////-777
+   
         [HttpGet("StoreBalance")]
         [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Inventory" })]
         public async Task<IActionResult> GetStoreBalanceAsync(
         long storeId, DateTime toDate, int ReportFlagType, int categoryId = 0, int typeId = 0,
         bool hasBalance = false, bool overdrawnBalance = false, bool zeroBalances = false)
-        {
+        {  
             if (storeId == 0)
                 return BadRequest("StoreId is required");
 
@@ -334,7 +335,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                           id.InventoryMaster.Date <= parsedToDate &&
                           id.IsDeleted != true &&
                           id.InventoryMaster.IsDeleted != true,
-                    q => q.Include(id => id.InventoryMaster).ThenInclude(im => im.InventoryFlags),
+                    q => q.Include(id => id.InventoryMaster)
+                          .ThenInclude(im => im.InventoryFlags),
                     q => q.Include(id => id.ShopItem)
                           .ThenInclude(si => si.InventorySubCategories)
                           .ThenInclude(sub => sub.InventoryCategories));
@@ -353,7 +355,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 (typeId == 0 || id.ShopItem.InventorySubCategoriesID == typeId) &&
                 // إذا كان typeId != 0 (تم تحديد فئة فرعية)، لا تشترط وجودها في StoreCategories
                 (typeId != 0 || storeCategories.Select(sc => sc.InventoryCategoriesID)
-                                              .Contains(id.ShopItem.InventorySubCategories.InventoryCategoriesID)) &&
+                .Contains(id.ShopItem.InventorySubCategories.InventoryCategoriesID)) &&
                 (id.InventoryMaster.InventoryFlags.ItemInOut == 1 || id.InventoryMaster.InventoryFlags.ItemInOut == -1));
 
             var groupedData = filtered
@@ -366,7 +368,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                     id.ShopItem.Limit
                 })
                 .Select(g =>
-                {
+                { 
                     var quantity = g.Sum(id => id.Quantity * id.InventoryMaster.InventoryFlags.ItemInOut);
                     var totalCost = g.Sum(id => id.AverageCost * id.InventoryMaster.InventoryFlags.ItemInOut);
                     var averageCost = quantity != 0 ? totalCost / quantity : (decimal?)null;
@@ -396,13 +398,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 )
                 .ToList();
 
-            object result;
-            switch (ReportFlagType)
-            {
+                object result;
+                switch (ReportFlagType)
+                {
                 case 1:
                     result = new
                     {
-                        ReportType = "QuantityOnly",
+                        ReportType = "Quantity Only",
                         Data = groupedData.Select(x => new { x.ItemCode, x.ItemName, x.Quantity })
                     };
                     break;
@@ -410,7 +412,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 case 2:
                     result = new
                     {
-                        ReportType = "PurchasePrice",
+                        ReportType = "Purchase Price",
                         Data = groupedData
                             .Where(x => x.PurchasePrice.HasValue)
                             .Select(x => new { x.ItemCode, x.ItemName, x.Quantity, x.PurchasePrice, x.TotalPurchase })
@@ -420,7 +422,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 case 3:
                     result = new
                     {
-                        ReportType = "SalesPrice",
+                        ReportType = "Sales Price",
                         Data = groupedData
                             .Where(x => x.SalesPrice.HasValue)
                             .Select(x => new { x.ItemCode, x.ItemName, x.Quantity, x.SalesPrice, x.TotalSales })
@@ -443,17 +445,17 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
                     result = new
                     {
-                        ReportType = "ItemsUnderLimit",
+                        ReportType = "Items Under Limit",
                         Data = underLimitItems
                     };
                     break;
 
                 default:
                     return BadRequest("Invalid ReportFlagType value.");
-            }
+                }
 
-            return Ok(result);
-        }
+                return Ok(result);
+         }
 
        /////////////////////////////////////////////////////////////////////////////////////-777
         
@@ -462,14 +464,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         public async Task<IActionResult> GetAllStoresBalanceAsync(
         DateTime toDate, int reportType = 1, int categoryId = 0, int typeId = 0,
         bool hasBalance = false, bool overdrawnBalance = false, bool zeroBalances = false)
-            {
+        {
             if (toDate == default)
                 return BadRequest("ToDate is required");
 
             var parsedToDate = toDate.Date.AddDays(1).AddTicks(-1);
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            // جلب البيانات مع العلاقات
             var data = await Unit_Of_Work.inventoryDetails_Repository
                 .Select_All_With_IncludesById<InventoryDetails>(
                     id => id.InventoryMaster.Date <= parsedToDate &&
@@ -483,17 +484,15 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                           .ThenInclude(si => si.InventorySubCategories)
                           .ThenInclude(sub => sub.InventoryCategories));
               
-
-            if (data == null || data.Count == 0)
+             if (data == null || data.Count == 0)
                 return NotFound("No inventory items found.");
-
             // جلب جميع StoreCategories مرة واحدة
-            var storeCategories = Unit_Of_Work.storeCategories_Repository
+             var storeCategories = Unit_Of_Work.storeCategories_Repository
                 .Select_All()
                 .Where(sc => sc.IsDeleted != true)
                 .ToList();
 
-            var filtered = data.Where(id =>
+             var filtered = data.Where(id =>
                 (categoryId == 0 || id.ShopItem.InventorySubCategories.InventoryCategoriesID == categoryId) &&
                 (typeId == 0 || id.ShopItem.InventorySubCategoriesID == typeId) &&
                 (typeId != 0 || storeCategories
@@ -502,7 +501,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                     .Contains(id.ShopItem.InventorySubCategories.InventoryCategoriesID)) &&
                 (id.InventoryMaster.InventoryFlags.ItemInOut == 1 || id.InventoryMaster.InventoryFlags.ItemInOut == -1));
 
-            var groupedData = filtered
+             var groupedData = filtered
                 .GroupBy(id => new
                 {
                     id.ShopItem.ID,
@@ -511,44 +510,43 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                     id.ShopItem.PurchasePrice,
                     id.ShopItem.SalesPrice
                 })
-                .Select(g =>
-                {
-                 var quantity = g.Sum(id => id.Quantity * id.InventoryMaster.InventoryFlags.ItemInOut);
-                        var totalCost = g.Sum(id => id.AverageCost * id.InventoryMaster.InventoryFlags.ItemInOut);
-                        var averageCost = quantity != 0 ? totalCost / quantity : (decimal?)null;
+                .Select(g => {
+                    var quantity = g.Sum(id => id.Quantity * id.InventoryMaster.InventoryFlags.ItemInOut);
+                    var totalCost = g.Sum(id => id.AverageCost * id.InventoryMaster.InventoryFlags.ItemInOut);
+                    var averageCost = quantity != 0 ? totalCost / quantity : (decimal?)null;
 
-                        var totalPurchaseValue = (decimal?)(quantity * g.Key.PurchasePrice);
-                        var totalSalesValue = (decimal?)(quantity * g.Key.SalesPrice);
+                    var totalPurchaseValue = (decimal?)(quantity * g.Key.PurchasePrice);
+                    var totalSalesValue = (decimal?)(quantity * g.Key.SalesPrice);
 
-                        return new AllStoresBalanceReportDto
-                        {
-                            ItemCode = g.Key.ID,
-                            ItemName = g.Key.EnName,
-                            StoreName = g.Key.StoreName,
-                            Quantity = quantity,
-                            PurchasePrice =  g.Key.PurchasePrice ,
-                            TotalPurchaseValue = totalPurchaseValue,
-                            SalesPrice =  g.Key.SalesPrice ,
-                            TotalSalesValue = totalSalesValue,
-                            AverageCost = averageCost,
-                            TotalCost = totalCost
-                        };
+                    return new AllStoresBalanceReportDto
+                    {
+                        ItemCode = g.Key.ID,
+                        ItemName = g.Key.EnName,
+                        StoreName = g.Key.StoreName,
+                        Quantity = quantity,
+                        PurchasePrice =  g.Key.PurchasePrice ,
+                        TotalPurchaseValue = totalPurchaseValue,
+                        SalesPrice =  g.Key.SalesPrice ,
+                        TotalSalesValue = totalSalesValue,
+                        AverageCost = averageCost,
+                        TotalCost = totalCost
+                    };
                 })
                 .Where(x =>
                     (hasBalance && x.Quantity > 0) ||
                     (overdrawnBalance && x.Quantity < 0) ||
                     (zeroBalances && x.Quantity == 0))
                 .ToList();
+                 
+                var totalQuantity = groupedData.Sum(x => x.Quantity);
+                var totalPurchaseValue = groupedData.Sum(x => x.TotalPurchaseValue ?? 0);
+                var totalSalesValue = groupedData.Sum(x => x.TotalSalesValue ?? 0);
+                var totalCostValue = groupedData.Sum(x => x.TotalCost);
 
-            var totalQuantity = groupedData.Sum(x => x.Quantity);
-            var totalPurchaseValue = groupedData.Sum(x => x.TotalPurchaseValue ?? 0);
-            var totalSalesValue = groupedData.Sum(x => x.TotalSalesValue ?? 0);
-            var totalCostValue = groupedData.Sum(x => x.TotalCost);
-
-            object result;
-            switch (reportType)
-            {
-                case 1:
+                object result;
+                switch (reportType)
+                {
+                    case 1:
                     result = new
                     {
                         ReportType = "QuantityOnly",
@@ -556,7 +554,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                         TotalQuantity = totalQuantity
                     };
                     break;
-
                 case 2:
                     result = new
                     {
@@ -580,23 +577,20 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                         TotalQuantity = totalQuantity
                     };
                     break;
-
                 case 4:
                     result = new
-                    {
+                    {      
                         ReportType = "CostValue",
                         Data = groupedData.Select(x => new { x.ItemCode, x.ItemName, x.StoreName, x.Quantity, x.AverageCost, x.TotalCost }),
                         TotalCostValue = totalCostValue,
                         TotalQuantity = totalQuantity
                     };
                     break;
-
                 default:
                     return BadRequest("Invalid report type.");
+                }
+                return Ok(result);
             }
-
-            return Ok(result);
-        }
 
         /////////////////////////////////////////////////////////////////////////////////////-777
 
