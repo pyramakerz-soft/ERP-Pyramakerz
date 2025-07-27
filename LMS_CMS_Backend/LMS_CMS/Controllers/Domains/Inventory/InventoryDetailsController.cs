@@ -96,25 +96,19 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             var quantityBalance = inQuantity - outQuantity;
 
             // ✅ حساب التكلفة
-            var inCost = filteredData
-                .Where(d => d.InventoryMaster.InventoryFlags.ItemInOut == 1)
-                .Sum(d => d.Quantity * (d.AverageCost ?? 0));
-
-            var outCost = filteredData
-                .Where(d => d.InventoryMaster.InventoryFlags.ItemInOut == -1)
-                .Sum(d => d.Quantity * (d.AverageCost ?? 0));
-
-            var costBalance = inCost - outCost;
+            var costBalance = filteredData
+                
+                .Sum(d => d.AverageCost * d.InventoryMaster.InventoryFlags.ItemInOut );
 
             // ✅ حفظ CostBalance و QuantityBalance في قاعدة البيانات
-            foreach (var detail in filteredData)
-            {
-                detail.QuantityBalance = quantityBalance;
-                detail.CostBalance = costBalance;
-                Unit_Of_Work.inventoryDetails_Repository.Update(detail);
-            }
+            //foreach (var detail in filteredData)
+            //{
+            //    detail.QuantityBalance = quantityBalance;
+            //    detail.CostBalance = costBalance;
+            //    Unit_Of_Work.inventoryDetails_Repository.Update(detail);
+            //}
 
-            await Unit_Of_Work.SaveChangesAsync(); 
+            //await Unit_Of_Work.SaveChangesAsync(); 
 
             var dto = new InventoryNetSummaryDTO
             {
@@ -123,7 +117,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 ToDate = toDate.AddDays(-1),
                 InQuantity = quantityBalance > 0 ? quantityBalance  : 0,
                 outQuantity = quantityBalance < 0 ? - quantityBalance  : 0,
-               // outQuantity = outQuantity,
+               
                 Quantitybalance = quantityBalance,
                 CostBalance = costBalance
             };
