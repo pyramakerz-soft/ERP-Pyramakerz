@@ -194,7 +194,7 @@ export class InventoryDetailsService {
       .set('Content-Type', 'application/json');
 
     return this.http.get<StoreBalanceReport>(
-      `${this.baseUrl}/InventoryDetails/StoreBalance?storeId=${storeId}&toDate=${toDate}&ReportFlagTypr=${reportFlagType}&categoryId=${categoryId}&typeId=${typeId}&hasBalance=${hasBalance}&overdrawnBalance=${overdrawnBalance}&zeroBalances=${zeroBalances}`,
+      `${this.baseUrl}/InventoryDetails/StoreBalance?storeId=${storeId}&toDate=${toDate}&ReportFlagType=${reportFlagType}&categoryId=${categoryId}&typeId=${typeId}&hasBalance=${hasBalance}&overdrawnBalance=${overdrawnBalance}&zeroBalances=${zeroBalances}`,
       { headers }
     );
   }
@@ -212,6 +212,7 @@ export class InventoryDetailsService {
     if (DomainName != null) {
       this.header = DomainName;
     }
+    console.log('getAllStoresBalance called with reportflagtype:', reportFlagType);
     const token = localStorage.getItem('current_token');
     const headers = new HttpHeaders()
       .set('domain-name', this.header)
@@ -219,7 +220,7 @@ export class InventoryDetailsService {
       .set('Content-Type', 'application/json');
 
     return this.http.get<StoreBalanceReport>(
-      `${this.baseUrl}/InventoryDetails/AllStoresBalance?toDate=${toDate}&ReportFlagType=${reportFlagType}&categoryId=${categoryId}&typeId=${typeId}&hasBalance=${hasBalance}&overdrawnBalance=${overdrawnBalance}&zeroBalances=${zeroBalances}`,
+      `${this.baseUrl}/InventoryDetails/AllStoresBalance?toDate=${toDate}&reportType=${reportFlagType}&categoryId=${categoryId}&typeId=${typeId}&hasBalance=${hasBalance}&overdrawnBalance=${overdrawnBalance}&zeroBalances=${zeroBalances}`,
       { headers }
     );
   }

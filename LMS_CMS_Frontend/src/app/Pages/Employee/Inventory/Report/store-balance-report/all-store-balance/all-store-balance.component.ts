@@ -56,6 +56,7 @@ export class AllStoresBalanceReportComponent implements OnInit {
 
   ngOnInit() {
     this.route.data.subscribe((data) => {
+      console.log('Route data:', data); // Add this line
       this.reportType = data['reportType'];
       this.setPageTitle();
       this.loadCategories();
@@ -118,6 +119,9 @@ export class AllStoresBalanceReportComponent implements OnInit {
   }
 
   viewReport() {
+    const flag = this.getReportFlagType();
+    console.log('Sending flag:', flag, 'for reportType:', this.reportType);
+
     // if (!this.dateTo) {
     //   Swal.fire({
     //     title: 'Missing Information',
@@ -144,6 +148,7 @@ export class AllStoresBalanceReportComponent implements OnInit {
       )
       .subscribe({
         next: (response) => {
+          console.log('Report data loaded:', response);
           this.reportData = response;
           this.prepareExportData();
           this.showTable = true;
@@ -174,13 +179,13 @@ export class AllStoresBalanceReportComponent implements OnInit {
             return {
               ...baseData,
               'Purchase Price': item.purchasePrice,
-              'Total Purchase': item.totalPurchase,
+              'Total Purchase': item.totalPurchaseValue,
             };
           case 'SalesPrice':
             return {
               ...baseData,
               'Sales Price': item.salesPrice,
-              'Total Sales': item.totalSales,
+              'Total Sales': item.totalSalesValue,
             };
           case 'Cost':
             return {
@@ -228,31 +233,31 @@ export class AllStoresBalanceReportComponent implements OnInit {
     }
   }
 
-    DownloadAsPDF() {
-      if (!this.reportForExport.length) {
-        Swal.fire('Warning', 'No data to export!', 'warning');
-        return;
-      }
-      this.showPDF = true;
-      setTimeout(() => {
-        this.pdfPrintComponent.downloadPDF();
-        setTimeout(() => (this.showPDF = false), 2000);
-      }, 500);
+  DownloadAsPDF() {
+    if (!this.reportForExport.length) {
+      Swal.fire('Warning', 'No data to export!', 'warning');
+      return;
     }
-  
-    Print() {
-      if (!this.reportForExport.length) {
-        Swal.fire('Warning', 'No data to print!', 'warning');
+    this.showPDF = true;
+    setTimeout(() => {
+      this.pdfPrintComponent.downloadPDF();
+      setTimeout(() => (this.showPDF = false), 2000);
+    }, 500);
+  }
+
+  Print() {
+    if (!this.reportForExport.length) {
+      Swal.fire('Warning', 'No data to print!', 'warning');
+      return;
+    }
+    this.showPDF = true;
+    setTimeout(() => {
+      const printContents = document.getElementById('Data')?.innerHTML;
+      if (!printContents) {
+        console.error('Element not found!');
         return;
       }
-      this.showPDF = true;
-      setTimeout(() => {
-        const printContents = document.getElementById('Data')?.innerHTML;
-        if (!printContents) {
-          console.error('Element not found!');
-          return;
-        }
-        const printStyle = `
+      const printStyle = `
           <style>
             @page { size: auto; margin: 0mm; }
             body { margin: 0; }
@@ -269,30 +274,30 @@ export class AllStoresBalanceReportComponent implements OnInit {
             }
           </style>
         `;
-        const printContainer = document.createElement('div');
-        printContainer.id = 'print-container';
-        printContainer.innerHTML = printStyle + printContents;
-        document.body.appendChild(printContainer);
-        window.print();
-        setTimeout(() => {
-          document.body.removeChild(printContainer);
-          this.showPDF = false;
-        }, 100);
-      }, 500);
+      const printContainer = document.createElement('div');
+      printContainer.id = 'print-container';
+      printContainer.innerHTML = printStyle + printContents;
+      document.body.appendChild(printContainer);
+      window.print();
+      setTimeout(() => {
+        document.body.removeChild(printContainer);
+        this.showPDF = false;
+      }, 100);
+    }, 500);
+  }
+
+  exportExcel() {
+    if (!this.reportForExport.length) {
+      Swal.fire('Warning', 'No data to export!', 'warning');
+      return;
     }
-  
-    exportExcel() {
-      if (!this.reportForExport.length) {
-        Swal.fire('Warning', 'No data to export!', 'warning');
-        return;
-      }
-      const worksheet = XLSX.utils.json_to_sheet(this.reportForExport);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, 'Report');
-      const dateStr = new Date().toISOString().slice(0, 10);
-      XLSX.writeFile(
-        workbook,
-        `${this.pageTitle.replace(/\s+/g, '_')}_${dateStr}.xlsx`
-      );
-    }
+    const worksheet = XLSX.utils.json_to_sheet(this.reportForExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Report');
+    const dateStr = new Date().toISOString().slice(0, 10);
+    XLSX.writeFile(
+      workbook,
+      `${this.pageTitle.replace(/\s+/g, '_')}_${dateStr}.xlsx`
+    );
+  }
 }

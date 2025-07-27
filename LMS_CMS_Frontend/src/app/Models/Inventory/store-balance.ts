@@ -14,8 +14,10 @@ export interface StoreBalanceItem {
   quantity: number;
   purchasePrice?: number;
   totalPurchase?: number;
+  totalPurchaseValue?: number;
   salesPrice?: number;
   totalSales?: number;
+  totalSalesValue?: number;
   averageCost?: number;
   totalCost?: number;
   limit?: number;

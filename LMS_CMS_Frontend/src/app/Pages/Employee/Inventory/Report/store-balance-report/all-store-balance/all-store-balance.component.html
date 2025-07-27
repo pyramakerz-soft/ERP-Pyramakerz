@@ -130,13 +130,13 @@
                 </td>
                 <td *ngIf="reportType === 'PurchasePrice'"
                     class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ item.totalPurchase | number:'1.2-2' }}
+                    {{ item.totalPurchaseValue | number:'1.2-2' }}
                 </td>
                 <td *ngIf="reportType === 'SalesPrice'" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     {{ item.salesPrice | number:'1.2-2' }}
                 </td>
                 <td *ngIf="reportType === 'SalesPrice'" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ item.totalSales | number:'1.2-2' }}
+                    {{ item.totalSalesValue | number:'1.2-2' }}
                 </td>
                 <td *ngIf="reportType === 'Cost'" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     {{ item.averageCost | number:'1.2-2' }}

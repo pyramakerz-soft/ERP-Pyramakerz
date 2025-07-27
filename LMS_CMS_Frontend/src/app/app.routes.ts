@@ -449,7 +449,7 @@ export const routes: Routes = [
             { path: "All Stores Item Balance", component: AllStoresBalanceReportComponent, title: "All Stores Quantity Report", canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'QuantityOnly' } },
             { path: "All Stores Item Balance with Purchase", component: AllStoresBalanceReportComponent, title: "All Stores Purchase Price Report", canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'PurchasePrice' } },
             { path: "All Stores Item Balance with Sales", component: AllStoresBalanceReportComponent, title: "All Stores Sales Price Report", canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'SalesPrice' }},
-            { path: "AllStoresCostReport", component: AllStoresBalanceReportComponent, title: "All Stores Cost Report", canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'Cost' } },
+            { path: "All Stores Item Balance with Average Cost", component: AllStoresBalanceReportComponent, title: "All Stores Cost Report", canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'Cost' } },
             { path: 'Discussion Room', component: DiscussionRoomComponent, title: 'Discussion Room', canActivate: [noNavigateWithoutLoginGuard], },
         ]
     },
