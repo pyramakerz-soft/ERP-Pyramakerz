@@ -385,12 +385,12 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                         AlertMessage = alertMessage
                     };
                 })
-                .Where(x =>
+               .Where(x =>
                     (hasBalance && x.Quantity > 0) ||
                     (overdrawnBalance && x.Quantity < 0) ||
-                    (zeroBalances && x.Quantity == 0) ||
-                    ReportFlagType == 5
+                    (zeroBalances && x.Quantity == 0)
                 )
+
                 .ToList();
 
                 object result;
