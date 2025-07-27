@@ -57,6 +57,7 @@ export class TimeTableViewComponent {
   SelectedGrade: number = 0;
   grades: Grade[] = [];
   days: Day[] = [];
+  date: any = '';
 
   constructor(
     private router: Router,
@@ -68,7 +69,7 @@ export class TimeTableViewComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public timetableServ: TimeTableService
-  ) {}
+  ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
@@ -83,8 +84,9 @@ export class TimeTableViewComponent {
   GetTimeTable() {
     this.TimeTable = [];
     this.OriginTimeTable = [];
-    this.SelectedDay=0
-    this.SelectedGrade=0
+    this.SelectedDay = 0
+    this.SelectedGrade = 0
+    this.date = ""
     this.timetableServ
       .GetByID(this.TimeTableId, this.DomainName)
       .subscribe((d) => {
@@ -180,5 +182,20 @@ export class TimeTableViewComponent {
     this.router.navigateByUrl(
       `Employee/Time Table Replace/` + this.TimeTableId
     );
+  }
+
+  GetDutyByDate() {
+    this.TimeTable = [];
+    this.OriginTimeTable = [];
+    this.SelectedDay = 0
+    this.SelectedGrade = 0
+    this.timetableServ.GetDutyByDate(this.TimeTableId,this.date, this.DomainName).subscribe((d) => {
+      this.TimeTable = d.data;
+      this.OriginTimeTable = d.data;
+      this.TimeTableName = d.timeTableName;
+      this.MaxPeriods = d.maxPeriods;
+      this.ExtractDaysAndGrades();
+      console.log(d);
+    });
   }
 }
