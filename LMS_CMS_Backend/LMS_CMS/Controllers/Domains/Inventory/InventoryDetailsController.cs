@@ -121,8 +121,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 ShopItemId = shopItemId,
                 StoreId = storeId,
                 ToDate = summaryDate,
-                InQuantity = inQuantity,
-                outQuantity = outQuantity,
+                InQuantity = quantityBalance > 0 ? quantityBalance  : 0,
+                outQuantity = quantityBalance < 0 ? - quantityBalance  : 0,
+               // outQuantity = outQuantity,
                 Quantitybalance = quantityBalance,
                 CostBalance = costBalance
             };
