@@ -1,4 +1,5 @@
 ﻿using LMS_CMS_DAL.Models.Domains.Administration;
+using LMS_CMS_DAL.Models.Domains.Communication;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -17,5 +18,6 @@ namespace LMS_CMS_DAL.Models.Domains
         public string Title { get; set; }
     
         public ICollection<AnnouncementSharedTo> AnnouncementSharedTos { get; set; } = new List<AnnouncementSharedTo>();
+        public ICollection<NotificationSharedTo> NotificationSharedTos { get; set; } = new List<NotificationSharedTo>();
     }
 }

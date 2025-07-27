@@ -4,6 +4,7 @@ using LMS_CMS_DAL.Models.Domains.AccountingModule;
 using LMS_CMS_DAL.Models.Domains.Administration;
 using LMS_CMS_DAL.Models.Domains.BusModule;
 using LMS_CMS_DAL.Models.Domains.ClinicModule;
+using LMS_CMS_DAL.Models.Domains.Communication;
 using LMS_CMS_DAL.Models.Domains.ECommerce;
 using LMS_CMS_DAL.Models.Domains.ETA;
 using LMS_CMS_DAL.Models.Domains.Inventory;
@@ -212,6 +213,8 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<DiscussionRoom> DiscussionRoom_Repository;
         GenericRepo<DiscussionRoomStudentClassroom> DiscussionRoomStudentClassroom_Repository;
         GenericRepo<Duty> Duty_Repository;
+        GenericRepo<Notification> Notification_Repository;
+        GenericRepo<NotificationSharedTo> NotificationSharedTo_Repository;
 
 
         public UOW(Octa_DbContext octa_Db)
@@ -2411,6 +2414,30 @@ namespace LMS_CMS_BL.UOW
                     DiscussionRoomStudentClassroom_Repository = new GenericRepo<DiscussionRoomStudentClassroom>(db);
                 }
                 return DiscussionRoomStudentClassroom_Repository;
+            }
+        }
+        
+        public GenericRepo<Notification> notification_Repository
+        {
+            get
+            {
+                if (Notification_Repository == null)
+                {
+                    Notification_Repository = new GenericRepo<Notification>(db);
+                }
+                return Notification_Repository;
+            }
+        }
+        
+        public GenericRepo<NotificationSharedTo> notificationSharedTo_Repository
+        {
+            get
+            {
+                if (NotificationSharedTo_Repository == null)
+                {
+                    NotificationSharedTo_Repository = new GenericRepo<NotificationSharedTo>(db);
+                }
+                return NotificationSharedTo_Repository;
             }
         }
 
