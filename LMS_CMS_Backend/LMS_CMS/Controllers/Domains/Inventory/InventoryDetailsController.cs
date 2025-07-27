@@ -61,7 +61,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
           pages: new[] { "Inventory" })]
         public async Task<IActionResult> GetInventoryNetSummaryAsync(long storeId, long shopItemId, DateTime toDate)
         {
-            var summaryDate = toDate.Date.AddDays(-1).AddTicks(9999999); // آخر لحظة من البارحة
+           // var summaryDate = toDate.Date.AddDays(-1).AddTicks(9999999); // آخر لحظة من البارحة
             var Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
             var flagsToExclude = new long[] { 13 };
 
@@ -78,7 +78,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
             var filteredData = data
                 .Where(d =>
-                    d.InventoryMaster.Date <= summaryDate &&
+                    d.InventoryMaster.Date < toDate &&
                     !flagsToExclude.Contains(d.InventoryMaster.FlagId) &&
                     d.InventoryMaster.InventoryFlags != null &&
                     d.InventoryMaster.InventoryFlags.ItemInOut != 0)
@@ -120,7 +120,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             {
                 ShopItemId = shopItemId,
                 StoreId = storeId,
-                ToDate = summaryDate,
+                ToDate = toDate.AddDays(-1),
                 InQuantity = quantityBalance > 0 ? quantityBalance  : 0,
                 outQuantity = quantityBalance < 0 ? - quantityBalance  : 0,
                // outQuantity = outQuantity,
