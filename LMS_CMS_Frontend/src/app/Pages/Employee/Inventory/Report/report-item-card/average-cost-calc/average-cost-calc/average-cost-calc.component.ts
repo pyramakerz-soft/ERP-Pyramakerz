@@ -4,11 +4,13 @@ import { Router } from '@angular/router';
 import { InventoryDetailsService } from '../../../../../../../Services/Employee/Inventory/inventory-details.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-average-cost-calc',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule , TranslateModule],
   templateUrl: './average-cost-calc.component.html',
   styleUrl: './average-cost-calc.component.css',
 })
@@ -19,13 +21,25 @@ export class AverageCostCalcComponent {
   progress: number = 0;
   calculationComplete: boolean = false;
   message: string = '';
+  isRtl: boolean = false;
+  subscription!: Subscription;  
   errorMessage: string = '';
   successMessage: string = '';
 
   constructor(
     private inventoryDetailsService: InventoryDetailsService,
-    private router: Router
+    private router: Router,
+    private languageService: LanguageService
   ) {}
+
+
+  
+  ngOnInit() {
+      this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+  }
 
   validateDateRange(): boolean {
     if (!this.dateFrom || !this.dateTo) {

@@ -10,5 +10,6 @@ namespace LMS_CMS_BL.DTO.ECommerce
     {
         public long ID { get; set; }
         public string Name { get; set; }
+        public string? ArabicName { get; set; }
     }
 }

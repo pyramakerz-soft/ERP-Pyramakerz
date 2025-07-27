@@ -15,6 +15,7 @@ namespace LMS_CMS_DAL.Models.Domains.ECommerce
         [Required(ErrorMessage = "Name is required")]
         [StringLength(100, ErrorMessage = "Name cannot be longer than 100 characters.")]
         public string Name { get; set; }
+        public string? ArabicName { get; set; }
 
         public ICollection<Cart> Carts { get; set; } = new HashSet<Cart>();
         public ICollection<Order> Orders { get; set; } = new HashSet<Order>();

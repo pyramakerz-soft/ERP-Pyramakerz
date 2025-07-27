@@ -18,11 +18,14 @@ import { StoresService } from '../../../../Services/Employee/Inventory/stores.se
 import { InventoryCategoryService } from '../../../../Services/Employee/Inventory/inventory-category.service';
 import { StoreAdd } from '../../../../Models/Inventory/store-add';
 import { firstValueFrom } from 'rxjs';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-stores',
   standalone: true,
-  imports: [CommonModule, FormsModule, SearchComponent],
+  imports: [CommonModule, FormsModule, SearchComponent , TranslateModule],
   templateUrl: './stores.component.html',
   styleUrl: './stores.component.css'
 })
@@ -54,7 +57,8 @@ export class StoresComponent {
 
   dropdownOpen = false;
   CategoriesSelected: Category[] = [];
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
   AllowEditForOthers: boolean = false;
@@ -77,7 +81,8 @@ export class StoresComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     private router: Router,
     public StoresServ: StoresService,
-    public CategoryServ: InventoryCategoryService
+    public CategoryServ: InventoryCategoryService,
+    private languageService: LanguageService
   ) { }
 
   ngOnInit() {
@@ -98,6 +103,10 @@ export class StoresComponent {
         this.AllowEditForOthers = settingsPage.allow_Edit_For_Others
       }
     });
+      this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';    
   }
 
   GetAllData() {

@@ -16,11 +16,14 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { InventoryCategoryService } from '../../../../Services/Employee/Inventory/inventory-category.service';
 import { InventorySubCategoriesService } from '../../../../Services/Employee/Inventory/inventory-sub-categories.service';
 import { firstValueFrom } from 'rxjs';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-sub-category',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent , TranslateModule],
   templateUrl: './sub-category.component.html',
   styleUrl: './sub-category.component.css'
 })
@@ -47,7 +50,8 @@ export class SubCategoryComponent {
 
   DomainName: string = '';
   UserID: number = 0;
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   isModalVisible: boolean = false;
   mode: string = '';
 
@@ -72,7 +76,8 @@ export class SubCategoryComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public CategoryServ: InventoryCategoryService,
-    public InventorySubCategoryServ: InventorySubCategoriesService
+    public InventorySubCategoryServ: InventorySubCategoriesService,
+      private languageService: LanguageService
   ) { }
 
   ngOnInit() {
@@ -96,6 +101,10 @@ export class SubCategoryComponent {
 
     this.GetAllData();
     this.GetCategoryInfo();
+     this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl'; 
   }
 
   GetAllData() {

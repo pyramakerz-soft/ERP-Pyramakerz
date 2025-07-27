@@ -28,11 +28,13 @@ import html2pdf from 'html2pdf.js';
 import { ReportsService } from '../../../../Services/shared/reports.service';
 import { PdfPrintComponent } from '../../../../Component/pdf-print/pdf-print.component';
 import { SearchDropdownComponent } from '../../../../Component/search-dropdown/search-dropdown.component';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-stocking-details',
   standalone: true,
-  imports: [FormsModule, CommonModule, PdfPrintComponent],
+  imports: [FormsModule, CommonModule, PdfPrintComponent , TranslateModule],
   templateUrl: './stocking-details.component.html',
   styleUrl: './stocking-details.component.css',
 })
@@ -68,7 +70,8 @@ export class StockingDetailsComponent {
   Stores: Store[] = [];
   Categories: Category[] = [];
   subCategories: SubCategory[] = [];
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   SelectedCategoryId: number | null = null;
   SelectedSubCategoryId: number | null = null;
   SelectedSopItem: ShopItem | null = null;
@@ -124,7 +127,8 @@ export class StockingDetailsComponent {
     public StockingDetailsServ: StockingDetailsService,
     public InventoryMastrServ: InventoryMasterService,
     private cdr: ChangeDetectorRef,
-    public printservice: ReportsService
+    public printservice: ReportsService,
+      private languageService: LanguageService
   ) { }
   async ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -159,6 +163,11 @@ export class StockingDetailsComponent {
     this.shopitemServ.Get(this.DomainName).subscribe((d) => {
       this.AllShopItems = d;
     });
+
+     this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';       
   }
 
   moveToMaster() {
