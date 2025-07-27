@@ -430,6 +430,138 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         /////////////////
 
+        [HttpGet("{id}/{date}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" }
+        )]
+        public async Task<IActionResult> GetByIdAsync(long id, DateOnly date)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+                return Unauthorized("User ID or Type claim not found.");
+
+            int dayId = date.DayOfWeek switch
+            {
+                DayOfWeek.Monday => 1,
+                DayOfWeek.Tuesday => 2,
+                DayOfWeek.Wednesday => 3,
+                DayOfWeek.Thursday => 4,
+                DayOfWeek.Friday => 5,
+                DayOfWeek.Saturday => 6,
+                DayOfWeek.Sunday => 7,
+                _ => 0
+            };
+
+            if (dayId == 0)
+                return BadRequest("Invalid day of week.");
+
+            // Get Duty list for the selected timetable and date
+            List<Duty> duty = await Unit_Of_Work.duty_Repository.Select_All_With_IncludesById<Duty>(
+                d => d.IsDeleted != true &&
+                        d.Date == date &&
+                        d.TimeTableSession.TimeTableClassroom.TimeTable.ID == id &&
+                        d.TimeTableSession.TimeTableClassroom.TimeTable.IsDeleted != true,
+                query => query.Include(d => d.Teacher),
+                query => query.Include(d => d.TimeTableSession)
+            );
+
+            // Get timetable with all related entities
+            TimeTable timeTable = await Unit_Of_Work.timeTable_Repository.FindByIncludesAsync(
+                t => t.ID == id && t.IsDeleted != true,
+                query => query
+                    .Include(tt => tt.TimeTableClassrooms)
+                        .ThenInclude(tc => tc.TimeTableSessions)
+                            .ThenInclude(ts => ts.TimeTableSubjects)
+                                .ThenInclude(tss => tss.Subject)
+                    .Include(tt => tt.TimeTableClassrooms)
+                        .ThenInclude(tc => tc.TimeTableSessions)
+                            .ThenInclude(ts => ts.TimeTableSubjects)
+                                .ThenInclude(tss => tss.Teacher)
+                    .Include(tt => tt.TimeTableClassrooms)
+                        .ThenInclude(tc => tc.Classroom)
+                    .Include(tt => tt.TimeTableClassrooms)
+                        .ThenInclude(tc => tc.Day)
+                    .Include(tt => tt.TimeTableClassrooms)
+                        .ThenInclude(tc => tc.Classroom.Grade)
+                    .Include(tt => tt.AcademicYear)
+            );
+
+            if (timeTable == null)
+                return BadRequest("No timetable with this ID");
+
+            // Get the school
+            School school = Unit_Of_Work.school_Repository.First_Or_Default(s => s.ID == timeTable.AcademicYear.SchoolID && s.IsDeleted != true);
+            if (school == null)
+                return BadRequest("No school with this ID");
+
+            // Map to DTO
+            TimeTableGetDTO Dto = mapper.Map<TimeTableGetDTO>(timeTable);
+
+            // Filter classrooms to only those on the requested day
+            Dto.TimeTableClassrooms = Dto.TimeTableClassrooms
+                .Where(tc => tc.DayId == dayId)
+                .ToList();
+
+            // Grouping the result by Day, Grade, Classroom, and Sessions
+            var groupedResult = Dto.TimeTableClassrooms
+                .GroupBy(tc => new { tc.DayId, tc.DayName })
+                .Select(dayGroup => new TimeTableDayGroupDTO
+                {
+                    DayId = dayGroup.Key.DayId,
+                    DayName = dayGroup.Key.DayName,
+                    Grades = dayGroup
+                        .GroupBy(tc => new { tc.GradeId, tc.GradeName })
+                        .Select(gradeGroup => new GradeGroupDTO
+                        {
+                            GradeId = gradeGroup.Key.GradeId,
+                            GradeName = gradeGroup.Key.GradeName,
+                            Classrooms = gradeGroup
+                                .GroupBy(tc => new { tc.ClassroomID, tc.ClassroomName })
+                                .Select(classGroup => new ClassroomGroupDTO
+                                {
+                                    ClassroomId = classGroup.Key.ClassroomID,
+                                    ClassroomName = classGroup.Key.ClassroomName,
+                                    Sessions = classGroup
+                                        .SelectMany(c => c.TimeTableSessions)
+                                        .Select(session =>
+                                        {
+                                            var dutyForSession = duty.FirstOrDefault(d => d.TimeTableSessionID == session.ID);
+                                            return new SessionGroupDTO
+                                            {
+                                                SessionId = session.ID,
+                                                DutyTeacherId = dutyForSession?.TeacherID,
+                                                DutyTeacherName = dutyForSession?.Teacher?.en_name,
+                                                Subjects = session.TimeTableSubjects.Select(s =>
+                                                {
+                                                    var isDuty = dutyForSession != null;
+                                                    return new SubjectTeacherDTO
+                                                    {
+                                                        SubjectId = s.SubjectID,
+                                                        SubjectName = s.SubjectName,
+                                                        TeacherId = isDuty ? dutyForSession.TeacherID : s.TeacherID,
+                                                        TeacherName = isDuty ? dutyForSession.Teacher.en_name : s.TeacherName
+                                                    };
+                                                }).ToList()
+                                            };
+                                        }).ToList()
+                                }).ToList()
+                        }).ToList()
+                }).ToList();
+
+            return Ok(new
+            {
+                Data = groupedResult,
+                TimeTableName = timeTable.Name,
+                MaxPeriods = school.MaximumPeriodCountTimeTable
+            });
+        }
+
+        /////////////////
+
         [HttpGet("GetAllClassesinThisTimetable/{Tid}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" }
@@ -875,75 +1007,75 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         }
 
-    /////////////////
+        /////////////////
 
-    [HttpDelete("{id}")]
-    [Authorize_Endpoint_(
-           allowedTypes: new[] { "octa", "employee" }
-           //,
-           //allowDelete: 1,
-           //pages: new[] { "Academic Years" }
-       )]
-        public IActionResult Delete(long id)
-        {
-            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-
-            var userClaims = HttpContext.User.Claims;
-            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-            long.TryParse(userIdClaim, out long userId);
-            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
-            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
-            long.TryParse(userRoleClaim, out long roleId);
-
-            if (userIdClaim == null || userTypeClaim == null)
+        [HttpDelete("{id}")]
+        [Authorize_Endpoint_(
+               allowedTypes: new[] { "octa", "employee" }
+               //,
+               //allowDelete: 1,
+               //pages: new[] { "Academic Years" }
+           )]
+            public IActionResult Delete(long id)
             {
-                return Unauthorized("User ID or Type claim not found.");
-            }
+                UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            if (id == null)
-            {
-                return BadRequest("id cannot be null");
-            }
-            TimeTable timeTable = Unit_Of_Work.timeTable_Repository.Select_By_Id(id);
+                var userClaims = HttpContext.User.Claims;
+                var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+                long.TryParse(userIdClaim, out long userId);
+                var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+                var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+                long.TryParse(userRoleClaim, out long roleId);
 
-            if (timeTable == null || timeTable.IsDeleted == true)
-            {
-                return NotFound("No TimeTable with this ID");
-            }
-
-            //if (userTypeClaim == "employee")
-            //{
-            //    IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Academic Years", roleId, userId, academicYear);
-            //    if (accessCheck != null)
-            //    {
-            //        return accessCheck;
-            //    }
-            //}
-
-            timeTable.IsDeleted = true;
-            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-            timeTable.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
-            if (userTypeClaim == "octa")
-            {
-                timeTable.DeletedByOctaId = userId;
-                if (timeTable.DeletedByUserId != null)
+                if (userIdClaim == null || userTypeClaim == null)
                 {
-                    timeTable.DeletedByUserId = null;
+                    return Unauthorized("User ID or Type claim not found.");
                 }
-            }
-            else if (userTypeClaim == "employee")
-            {
-                timeTable.DeletedByUserId = userId;
-                if (timeTable.DeletedByOctaId != null)
-                {
-                    timeTable.DeletedByOctaId = null;
-                }
-            }
 
-            Unit_Of_Work.timeTable_Repository.Update(timeTable);
-            Unit_Of_Work.SaveChanges();
-            return Ok();
-        }
+                if (id == null)
+                {
+                    return BadRequest("id cannot be null");
+                }
+                TimeTable timeTable = Unit_Of_Work.timeTable_Repository.Select_By_Id(id);
+
+                if (timeTable == null || timeTable.IsDeleted == true)
+                {
+                    return NotFound("No TimeTable with this ID");
+                }
+
+                //if (userTypeClaim == "employee")
+                //{
+                //    IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Academic Years", roleId, userId, academicYear);
+                //    if (accessCheck != null)
+                //    {
+                //        return accessCheck;
+                //    }
+                //}
+
+                timeTable.IsDeleted = true;
+                TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+                timeTable.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                if (userTypeClaim == "octa")
+                {
+                    timeTable.DeletedByOctaId = userId;
+                    if (timeTable.DeletedByUserId != null)
+                    {
+                        timeTable.DeletedByUserId = null;
+                    }
+                }
+                else if (userTypeClaim == "employee")
+                {
+                    timeTable.DeletedByUserId = userId;
+                    if (timeTable.DeletedByOctaId != null)
+                    {
+                        timeTable.DeletedByOctaId = null;
+                    }
+                }
+
+                Unit_Of_Work.timeTable_Repository.Update(timeTable);
+                Unit_Of_Work.SaveChanges();
+                return Ok();
+            }
     }
 }
 

@@ -13,6 +13,8 @@ namespace LMS_CMS_BL.DTO.LMS
         public DateOnly Date { get; set; }
         public long ClassID { get; set; }
         public string ClassName { get; set; }
+        public long SchoolID { get; set; }
+        public string SchoolName { get; set; }
         public int Period { get; set; }
         public long TeacherID { get; set; }
         public string TeacherName { get; set; }
