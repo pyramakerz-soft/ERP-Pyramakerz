@@ -200,7 +200,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                     Notes = d.InventoryMaster.Notes,
                     Quantity = d.Quantity,
                     inQuantity = d.Quantity * (itemInOut== 1? 1 : 0 ),
-                    outQuantity = d.Quantity * (itemInOut== -1? -1: 0 ),
+                    outQuantity = d.Quantity * (itemInOut== -1? 1: 0 ),
                     Balance = runningBalance,
                     Price = d.Price,
                     TotalPrice = d.TotalPrice,
@@ -373,7 +373,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                     var totalCost = g.Sum(id => id.AverageCost * id.InventoryMaster.InventoryFlags.ItemInOut);
                     var averageCost = quantity != 0 ? totalCost / quantity : (decimal?)null;
                     var limit = g.Key.Limit;
-                    var alertMessage = (quantity <= limit) ? "⚠️ The quantity is below the permissible limit" : null;
+                    var alertMessage = (quantity <= limit) ? " The quantity is below the permissible limit" : null;
 
                     return new StoreBalanceReportDto
                     {
