@@ -122,13 +122,12 @@ export class ReportItemCardComponent implements OnInit {
     this.combinedData = [];
 
     try {
-
       // Get summary data
       const summaryResponse = await this.inventoryDetailsService
         .getInventoryNetSummary(
           this.selectedStoreId!,
           this.selectedItemId!,
-      this.dateFrom,
+          this.dateFrom,
           this.inventoryDetailsService.ApiServ.GetHeader()
         )
         .toPromise();
@@ -184,15 +183,15 @@ export class ReportItemCardComponent implements OnInit {
       income: summary.inQuantity ?? '-',
       outcome: summary.outQuantity ?? '-',
       balance: summary.quantitybalance ?? '-',
-      costBalance: summary.costBalance ?? '-',
+      averageCost: summary.costBalance ?? '-',
     };
 
     if (this.showAverageColumn) {
       summaryRow.price = '-';
       summaryRow.totalPrice = '-';
-      summaryRow.averageCost = '-';
+      // summaryRow.averageCost = '-';
     }
-// int x =0;
+    // int x =0;
 
     // Process transactions
     const transactionRows = transactions.map((t) => {
@@ -224,18 +223,18 @@ export class ReportItemCardComponent implements OnInit {
     this.prepareExportData();
   }
 
-  private formatDateForAPI(dateString: string): string {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) {
-      console.error('Invalid date:', dateString);
-      return '';
-    }
-    const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const day = date.getDate().toString().padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  }
+  // private formatDateForAPI(dateString: string): string {
+  //   if (!dateString) return '';
+  //   const date = new Date(dateString);
+  //   if (isNaN(date.getTime())) {
+  //     console.error('Invalid date:', dateString);
+  //     return '';
+  //   }
+  //   const year = date.getFullYear();
+  //   const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  //   const day = date.getDate().toString().padStart(2, '0');
+  //   return `${year}-${month}-${day}`;
+  // }
 
   private formatDisplayDate(dateString: string): string {
     try {
@@ -320,17 +319,38 @@ export class ReportItemCardComponent implements OnInit {
 
       const printStyle = `
         <style>
-          @page { size: auto; margin: 0mm; }
-          body { margin: 0; }
+          @page {
+            size: landscape; /* Force landscape mode */
+            margin: 5mm; /* Reduce margins */
+          }
+          body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+          }
+          #print-container {
+            width: 100%;
+            overflow: hidden; /* Prevent overflow */
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed; /* Prevent column resizing */
+          }
+          th, td {
+            padding: 6px;
+            border: 1px solid #ddd;
+            white-space: nowrap; /* Prevent line breaks */
+            font-size: 12px; /* Reduce font size if needed */
+          }
           @media print {
-            body > *:not(#print-container) { display: none !important; }
+            body > *:not(#print-container) {
+              display: none !important;
+            }
             #print-container {
               display: block !important;
-              position: static !important;
               width: 100% !important;
-              height: auto !important;
-              background: white !important;
-              margin: 0 !important;
+              transform: scale(0.9); /* Slightly scale down if needed */
+              transform-origin: 0 0;
             }
           }
         </style>
@@ -411,7 +431,10 @@ export class ReportItemCardComponent implements OnInit {
     if (this.showAverageColumn) {
       headers.push(
         // 'Cost Balance',
-         'Price', 'Total Price', 'Average Cost');
+        'Price',
+        'Total Price',
+        'Average Cost'
+      );
     }
     excelData.push(
       headers.map((h) => ({
@@ -466,10 +489,10 @@ export class ReportItemCardComponent implements OnInit {
       ];
       if (this.showAverageColumn) {
         rowData.push(
-          {
-            v: getVal(row.costBalance),
-            s: { fill: { fgColor: { rgb: fillColor } } },
-          },
+          // {
+          //   v: getVal(row.costBalance),
+          //   s: { fill: { fgColor: { rgb: fillColor } } },
+          // },
           {
             v: getVal(row.price),
             s: { fill: { fgColor: { rgb: fillColor } } },
@@ -557,7 +580,10 @@ export class ReportItemCardComponent implements OnInit {
     if (this.showAverageColumn) {
       headers.push(
         // 'Cost Balance',
-         'Price', 'Total Price', 'Average Cost');
+        'Price',
+        'Total Price',
+        'Average Cost'
+      );
     }
 
     return headers;

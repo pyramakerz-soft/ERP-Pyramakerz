@@ -6,7 +6,10 @@ import { ActivatedRoute } from '@angular/router';
 import * as XLSX from 'xlsx';
 import Swal from 'sweetalert2';
 import { PdfPrintComponent } from '../../../../../../Component/pdf-print/pdf-print.component';
-import { StoreBalanceItem, StoreBalanceReport } from '../../../../../../Models/Inventory/store-balance';
+import {
+  StoreBalanceItem,
+  StoreBalanceReport,
+} from '../../../../../../Models/Inventory/store-balance';
 import { InventoryDetailsService } from '../../../../../../Services/Employee/Inventory/inventory-details.service';
 import { StoresService } from '../../../../../../Services/Employee/Inventory/stores.service';
 import { InventoryCategoryService } from '../../../../../../Services/Employee/Inventory/inventory-category.service';
@@ -141,6 +144,11 @@ export class StoreBalanceReportComponent implements OnInit {
   onFilterChange() {
     this.showTable = false;
     this.reportData = null;
+    console.log('Checkbox values:', {
+      hasBalance: this.hasBalance,
+      overdrawnBalance: this.overdrawnBalance,
+      zeroBalances: this.zeroBalances,
+    });
   }
 
   viewReport() {
