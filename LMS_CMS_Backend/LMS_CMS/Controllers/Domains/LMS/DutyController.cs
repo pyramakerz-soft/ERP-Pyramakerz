@@ -215,7 +215,6 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             {
                 return BadRequest(" No Classroom With This Id");
             }
-             
             var dayOfWeek = NewDuty.Date.DayOfWeek; // returns DayOfWeek enum (e.g. Monday, Tuesday...)
 
             int dayId = dayOfWeek switch
@@ -239,7 +238,16 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return BadRequest("This Day doesn`t exist in current time table");
             }
 
-            Duty duty = mapper.Map<Duty>(NewDuty);
+            Duty duty = Unit_Of_Work.duty_Repository.First_Or_Default(s => s.TimeTableSessionID == timeTableSession.ID && s.Date == NewDuty.Date && s.IsDeleted != true);
+            if(duty != null)
+            {
+                duty.TeacherID = NewDuty.TeacherID;
+                Unit_Of_Work.duty_Repository.Update(duty);
+                Unit_Of_Work.SaveChanges();
+                return Ok(NewDuty);
+            }
+            duty =new Duty();
+            duty = mapper.Map<Duty>(NewDuty);
             duty.TimeTableSessionID = timeTableSession.ID;
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
@@ -252,8 +260,6 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             {
                 duty.InsertedByUserId = userId;
             }
-
-         
             Unit_Of_Work.duty_Repository.Add(duty);
             Unit_Of_Work.SaveChanges();
             return Ok(NewDuty);
