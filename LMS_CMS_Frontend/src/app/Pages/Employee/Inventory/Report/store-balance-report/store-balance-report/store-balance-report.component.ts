@@ -179,6 +179,7 @@ export class StoreBalanceReportComponent implements OnInit {
       )
       .subscribe({
         next: (response) => {
+          console.log('Report data loaded:', response);
           this.reportData = response;
           this.prepareExportData();
           this.showTable = true;

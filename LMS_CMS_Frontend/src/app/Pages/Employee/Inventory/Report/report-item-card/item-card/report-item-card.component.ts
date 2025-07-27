@@ -252,11 +252,11 @@ export class ReportItemCardComponent implements OnInit {
 
   private prepareExportData(): void {
     this.transactionsForExport = this.combinedData.map((t) => {
-      const costBalance = t.isSummary
-        ? typeof t.costBalance === 'number'
-          ? t.costBalance.toFixed(2)
-          : '-'
-        : '-';
+      // const costBalance = t.isSummary
+      //   ? typeof t.costBalance === 'number'
+      //     ? t.costBalance.toFixed(2)
+      //     : '-'
+      //   : '-';
 
       return {
         Date: t.isSummary
@@ -319,38 +319,17 @@ export class ReportItemCardComponent implements OnInit {
 
       const printStyle = `
         <style>
-          @page {
-            size: landscape; /* Force landscape mode */
-            margin: 5mm; /* Reduce margins */
-          }
-          body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-          }
-          #print-container {
-            width: 100%;
-            overflow: hidden; /* Prevent overflow */
-          }
-          table {
-            width: 100%;
-            border-collapse: collapse;
-            table-layout: fixed; /* Prevent column resizing */
-          }
-          th, td {
-            padding: 6px;
-            border: 1px solid #ddd;
-            white-space: nowrap; /* Prevent line breaks */
-            font-size: 12px; /* Reduce font size if needed */
-          }
+          @page { size: auto; margin: 0mm; }
+          body { margin: 0; }
           @media print {
-            body > *:not(#print-container) {
-              display: none !important;
-            }
+            body > *:not(#print-container) { display: none !important; }
             #print-container {
               display: block !important;
+              position: static !important;
               width: 100% !important;
-              transform: scale(0.9); /* Slightly scale down if needed */
-              transform-origin: 0 0;
+              height: auto !important;
+              background: white !important;
+              margin: 0 !important;
             }
           }
         </style>
