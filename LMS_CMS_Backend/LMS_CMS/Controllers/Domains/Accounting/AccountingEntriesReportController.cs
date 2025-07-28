@@ -1,6 +1,5 @@
 ﻿using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.AccountingModule.Reports;
-using LMS_CMS_DAL.Models.Domains.AccountingModule;
 using LMS_CMS_DAL.Models.Domains.AccountingModule.Reports;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
@@ -50,29 +49,40 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 new SqlParameter("@EndRow", endRow)
             ).ToListAsync();
 
-            long? linkFileID = 0;
+            if (results == null || !results.Any())
+            {
+                return NotFound("No accounting entries found for the specified date range.");
+            }
+
+            dynamic grouped;
+            long? linkFileID = results.FirstOrDefault()?.LinkFileID;
             var isCreditBalance = linkFileID == 2 || linkFileID == 4 || linkFileID == 7;
             decimal? runningBalance = 0;
-            TotalResult fullTotals = null;
             TotalResult calcFirstPeriod = null;
-            var dateToValue = fromDate.Value.AddDays(-1);
+            TotalResult fullTotals = null;
             decimal? firstPeriodBalance = 0;
+
+            decimal? fullDebit = 0;
+            decimal? fullCredit = 0;
+            decimal? fullDifference = 0;
+
+            int totalRecords = (await context.Set<CountResult>()
+                .FromSqlInterpolated($@"
+                    SELECT dbo.GetEntriesCount({fromDate}, {toDate}) AS TotalCount")
+                .ToListAsync())
+                .FirstOrDefault()?.TotalCount ?? 0;
+
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
 
             if (AccountNumber > 0 || SubAccountNumber > 0)
             {
-                linkFileID = results.FirstOrDefault()?.LinkFileID;
-                fullTotals = (await context.Set<TotalResult>()
-                .FromSqlRaw(
-                    "EXEC dbo.GetAccountingTotals @DateFrom, @DateTo, @MainAccNo, @SubAccNo, @LinkFileID",
-                    new SqlParameter("@DateFrom", fromDate ?? (object)DBNull.Value),
-                    new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
-                    new SqlParameter("@MainAccNo", AccountNumber),
-                    new SqlParameter("@SubAccNo", SubAccountNumber),
-                    new SqlParameter("@LinkFileID", linkFileID ?? (object)DBNull.Value)
-                )
-                .AsNoTracking()
-                .ToListAsync())
-                .FirstOrDefault();
+                var dateToValue = fromDate.Value.AddDays(-1);
 
                 calcFirstPeriod = (await context.Set<TotalResult>()
                 .FromSqlRaw(
@@ -116,37 +126,40 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                     runningBalance += balance;
                     item.Balance = runningBalance;
                 }
-            }
 
-            if (results == null || !results.Any())
-            {
-                return NotFound("No accounting entries found for the specified date range.");
-            }
-
-            decimal fullDebit = 0;
-            decimal fullCredit = 0;
-            decimal fullDifference = 0;
-
-            if (AccountNumber == 0 && SubAccountNumber == 0)
-            {
                 fullTotals = (await context.Set<TotalResult>()
-                .FromSqlRaw("EXEC dbo.GetAccountingTotals @DateFrom, @DateTo, @MainAccNo, @SubAccNo, @LinkFileID",
-                    new SqlParameter("@DateFrom", fromDate ?? (object)DBNull.Value),
+                .FromSqlRaw(
+                    "EXEC dbo.GetAccountingTotals @DateFrom, @DateTo, @MainAccNo, @SubAccNo, @LinkFileID",
+                    new SqlParameter("@DateFrom", "1900-1-1"),
                     new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
                     new SqlParameter("@MainAccNo", AccountNumber),
                     new SqlParameter("@SubAccNo", SubAccountNumber),
-                    new SqlParameter("@LinkFileID", linkFileID)
-                    )
+                    new SqlParameter("@LinkFileID", linkFileID ?? (object)DBNull.Value)
+                )
                 .AsNoTracking()
                 .ToListAsync())
                 .FirstOrDefault();
+
+                fullDebit = fullTotals?.TotalDebit ?? 0;
+                fullCredit = fullTotals?.TotalCredit ?? 0;
+                fullDifference = fullTotals?.Differences ?? 0;
+
+                return Ok(new
+                {
+                    Data = results,
+                    FirstPeriodBalance = firstPeriodBalance,
+                    FullTotals = new
+                    {
+                        Debit = fullDebit,
+                        Credit = fullCredit,
+                        Difference = fullDifference
+                    },
+                    Pagination = paginationMetadata
+                });
             }
-
-            fullDebit = fullTotals?.TotalDebit ?? 0;
-            fullCredit = fullTotals?.TotalCredit ?? 0;
-            fullDifference = fullTotals?.Differences ?? 0;
-
-            var grouped = results
+            else
+            {
+                grouped = results
                 .GroupBy(x => x.Date.Value.Date)
                 .Select((g, index) =>
                 {
@@ -169,34 +182,38 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                             Difference = difference
                         }
                     };
-                });
-
-            int totalRecords = (await context.Set<CountResult>()
-                .FromSqlInterpolated($@"
-                    SELECT dbo.GetEntriesCount({fromDate}, {toDate}) AS TotalCount")
+                }); 
+                
+                fullTotals = (await context.Set<TotalResult>()
+                .FromSqlRaw(
+                    "EXEC dbo.GetAccountingTotals @DateFrom, @DateTo, @MainAccNo, @SubAccNo, @LinkFileID",
+                    new SqlParameter("@DateFrom", fromDate ?? (object)DBNull.Value),
+                    new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
+                    new SqlParameter("@MainAccNo", AccountNumber),
+                    new SqlParameter("@SubAccNo", SubAccountNumber),
+                    new SqlParameter("@LinkFileID", linkFileID ?? (object)DBNull.Value)
+                )
+                .AsNoTracking()
                 .ToListAsync())
-                .FirstOrDefault()?.TotalCount ?? 0;
+                .FirstOrDefault();
 
-            var paginationMetadata = new
-            {
-                TotalRecords = totalRecords,
-                PageSize = pageSize,
-                CurrentPage = pageNumber,
-                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
-            };
+                fullDebit = fullTotals?.TotalDebit ?? 0;
+                fullCredit = fullTotals?.TotalCredit ?? 0;
+                fullDifference = fullTotals?.Differences ?? 0;
 
-            return Ok(new
-            {
-                Data = grouped,
-                FirstPeriodBalance = firstPeriodBalance,
-                FullTotals = new
+                return Ok(new
                 {
-                    Debit = fullDebit,
-                    Credit = fullCredit,
-                    Difference = fullDifference
-                },
-                Pagination = paginationMetadata
-            });
+                    Data = grouped,
+                    FirstPeriodBalance = firstPeriodBalance,
+                    FullTotals = new
+                    {
+                        Debit = fullDebit,
+                        Credit = fullCredit,
+                        Difference = fullDifference
+                    },
+                    Pagination = paginationMetadata
+                });
+            }
         }
         #endregion
     }
