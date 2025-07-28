@@ -31,7 +31,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         )]
         public async Task<IActionResult> GetAccountingEntriesAsync(DateTime? fromDate, DateTime? toDate, long? AccountNumber = 0, long? SubAccountNumber = 0, int pageNumber = 1, int pageSize = 10)
         {
-            if (toDate < fromDate)
+            if (fromDate.HasValue && toDate.HasValue && toDate < fromDate)
                 return BadRequest("Start date must be equal or greater than End date");
 
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -50,16 +50,17 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 new SqlParameter("@EndRow", endRow)
             ).ToListAsync();
 
-            long? linkFileID = results.FirstOrDefault()?.LinkFileID;
+            long? linkFileID = 0;
             var isCreditBalance = linkFileID == 2 || linkFileID == 4 || linkFileID == 7;
             decimal? runningBalance = 0;
-            dynamic fullTotals = 0;
-            dynamic calcFirstPeriod = 0;
+            TotalResult fullTotals = null;
+            TotalResult calcFirstPeriod = null;
             var dateToValue = fromDate.Value.AddDays(-1);
             decimal? firstPeriodBalance = 0;
 
             if (AccountNumber > 0 || SubAccountNumber > 0)
             {
+                linkFileID = results.FirstOrDefault()?.LinkFileID;
                 fullTotals = (await context.Set<TotalResult>()
                 .FromSqlRaw(
                     "EXEC dbo.GetAccountingTotals @DateFrom, @DateTo, @MainAccNo, @SubAccNo, @LinkFileID",
@@ -67,7 +68,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                     new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
                     new SqlParameter("@MainAccNo", AccountNumber),
                     new SqlParameter("@SubAccNo", SubAccountNumber),
-                    new SqlParameter("@LinkFileID", linkFileID)
+                    new SqlParameter("@LinkFileID", linkFileID ?? (object)DBNull.Value)
                 )
                 .AsNoTracking()
                 .ToListAsync())
@@ -80,7 +81,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                     new SqlParameter("@DateTo", (object)dateToValue ?? DBNull.Value),
                     new SqlParameter("@MainAccNo", AccountNumber),
                     new SqlParameter("@SubAccNo", SubAccountNumber),
-                    new SqlParameter("@LinkFileID", linkFileID)
+                    new SqlParameter("@LinkFileID", linkFileID ?? (object)DBNull.Value)
                 )
                 .AsNoTracking()
                 .ToListAsync())
@@ -96,22 +97,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                     MainAccount = "",
                     SubAccountNo = 0,
                     SubAccount = "",
-                    Debit = 0,
-                    Credit = 0,
+                    Debit = calcFirstPeriod?.TotalDebit ?? 0,
+                    Credit = calcFirstPeriod?.TotalCredit ?? 0,
                     Date = dateToValue, 
-                    Balance = isCreditBalance ? calcFirstPeriod?.TotalCredit : calcFirstPeriod?.TotalDebit,
+                    Balance = calcFirstPeriod?.Differences ?? 0,
                     LinkFileID = 0,
                     Notes = ""
                 });
-
-                //foreach (var item in results)
-                //{
-                //    decimal? balance = isCreditBalance ? item.Credit - item.Debit :
-                //        item.Debit - item.Credit;
-
-                //    runningBalance += balance;
-                //    item.Balance = runningBalance;
-                //}
 
                 for (int i = 0; i < results.Count; i++)
                 {
@@ -122,15 +114,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                         : item.Debit - item.Credit;
 
                     runningBalance += balance;
-
-                    if (i > 0)
-                        item.Balance = runningBalance;
-
-                    if (i == 1)
-                    {
-                        firstPeriodBalance = calcFirstPeriod?.TotalDebit - calcFirstPeriod?.TotalCredit;
-                        item.Balance = firstPeriodBalance;
-                    }
+                    item.Balance = runningBalance;
                 }
             }
 
@@ -156,10 +140,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 .AsNoTracking()
                 .ToListAsync())
                 .FirstOrDefault();
-            }
-            else
-            {
-                
             }
 
             fullDebit = fullTotals?.TotalDebit ?? 0;
