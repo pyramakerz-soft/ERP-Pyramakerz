@@ -119,10 +119,23 @@
                     (ngModelChange)="onInputValueChange({ field: 'title', value: $event })" />
                 <span *ngIf="validationErrors['title']" class="text-red-500  font-normal text-xs md:text-sm">{{ validationErrors['title'] }}</span>
             </div>
+
+            <div class="flex flex-col mb-4 w-full">
+                <label class="mb-2 primaryTxt" for="Subject">School</label>
+                <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="School"
+                    (change)="getStudentClassData()" [(ngModel)]="discussionRoom.schoolID"
+                    (ngModelChange)="onInputValueChange({ field: 'schoolID', value: $event })">
+                    <option [value]="0" disabled selected hidden>Choose School</option>
+                    <option *ngFor="let c of schools" [value]="c.id">{{ c.name }}</option>
+                    <option *ngIf="schools.length === 0" disabled selected>No Data Found</option>
+                </select>
+                <span *ngIf="validationErrors['schoolID']" class="text-red-500 ml-3 font-normal">{{ validationErrors['schoolID'] }}</span>
+            </div>
+
             <div class="flex flex-col mb-4 w-full">
                 <label class="mb-2 primaryTxt">Classes ({{choosedStudentsClass.length}})</label>
 
-                <div class="border border-gray-300 rounded-lg px-4 py-3 flex items-center justify-between cursor-pointer mb-4"
+                <div class="border border-gray-300 rounded-lg px-4 py-3 flex items-center justify-between cursor-pointer mb-4"   [ngClass]="{ 'pointer-events-none opacity-50': !discussionRoom.schoolID }"
                     (click)="toggleClassesToChooseStudents()">
                     <div class="flex flex-wrap gap-2">
                         <span *ngIf="choosedStudentsClass.length == 0" class="text-gray-400 font-normal">

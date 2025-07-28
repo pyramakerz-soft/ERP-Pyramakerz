@@ -276,7 +276,7 @@ export class StockingDetailsComponent {
   }
 
   GetItems() {
-    
+
     if (this.SelectedSubCategoryId)
       this.StockingDetailsServ.GetCurrentStockForAllItemsBySub(
         this.Data.storeID,
@@ -284,9 +284,9 @@ export class StockingDetailsComponent {
         this.Data.date,
         this.DomainName
       ).subscribe((d) => {
-        
+
         this.ShopItems = d;
-        console.log( this.ShopItems)
+        console.log(this.ShopItems)
         if (this.AllItems) {
           this.FilteredDetails = this.ShopItems.map((item) => ({
             id: Date.now() + Math.floor(Math.random() * 1000),
@@ -383,7 +383,7 @@ export class StockingDetailsComponent {
 
   SearchOnBarCode() {
     if (!this.BarCode) return;
-    this.shopitemServ.GetByBarcode(this.Data.storeID ,this.BarCode, this.DomainName).subscribe(
+    this.shopitemServ.GetByBarcode(this.Data.storeID, this.BarCode, this.DomainName).subscribe(
       (d) => {
         const detail: StockingDetails = {
           id: Date.now() + Math.floor(Math.random() * 1000),
@@ -1048,22 +1048,42 @@ export class StockingDetailsComponent {
     }, 500);
   }
 
-  validateNumber(event: any, field: keyof StockingDetails , row:StockingDetails): void {
+  validateNumber(event: any, field: keyof StockingDetails, row: StockingDetails): void {
     const value = event.target.value;
     if (isNaN(value) || value === '') {
-      event.target.value = ''; 
+      event.target.value = '';
       if (typeof row[field] === 'string') {
-        row[field] = '' as never;  
+        row[field] = '' as never;
       }
     }
     if (field == 'actualStock') {
       const integerRegex = /^\d+$/;
       if (!integerRegex.test(value)) {
-        event.target.value = 0 ;
-        row[field] = '' as never;  
+        event.target.value = 0;
+        row[field] = '' as never;
       }
     }
   }
+
+  validateNumberRow(event: any, field: keyof StockingDetails, row: StockingDetails): void {
+    const value = event.target.value;
+    const numValue = Number(value);
+    if (field === 'actualStock') {
+      const integerRegex = /^\d+$/;
+
+      if (!integerRegex.test(value) || numValue <= 0) {
+        // Invalid input (decimal, letters, negative, etc.)
+        row[field] = '';
+        event.target.value = 0;
+      } else {
+        // Valid integer value
+        row[field] = numValue;
+      }
+      this.onStockChangeWhenEditRow(row);
+      return;
+    }
+  }
+
 }
 
 

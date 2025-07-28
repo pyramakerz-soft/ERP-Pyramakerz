@@ -1133,23 +1133,51 @@ export class InventoryDetailsComponent {
     this.SaleId = 0
   }
 
+  validateNumberRow(event: any, field: keyof InventoryDetails, row: InventoryDetails): void {
+    const value = event.target.value;
+    const numValue = Number(value);
+    if (field === 'quantity' || field === 'price') {
+      const integerRegex = /^\d+$/;
+
+      if (!integerRegex.test(value) || numValue <= 0) {
+        // Invalid input (decimal, letters, negative, etc.)
+        row[field] = 0;
+        event.target.value = 0;
+      } else {
+        // Valid integer value
+        row[field] = numValue;
+      }
+      this.CalculateTotalPrice(row);
+      return;
+    }
+    if (isNaN(numValue) || value === '') {
+      event.target.value = '';
+      if (typeof row[field] === 'string') {
+        row[field] = '' as never;
+      }
+      row.totalPrice = 0;
+    }
+  }
+
+
   validateNumber(event: any, field: keyof InventoryDetails): void {
     const value = event.target.value;
     if (isNaN(value) || value === '') {
       event.target.value = '';
       if (typeof this.Item[field] === 'string') {
         this.Item[field] = '' as never;
-        this.Item.totalPrice = 0 ; 
+        this.Item.totalPrice = 0;
       }
     }
     if (field == 'quantity') {
       const integerRegex = /^\d+$/;
       if (!integerRegex.test(value)) {
         event.target.value = '';
-        this.Item.quantity = 0 ; 
-        this.Item.totalPrice = 0 ; 
+        this.Item.quantity = 0;
+        this.Item.totalPrice = 0;
       }
     }
   }
+
 }
 

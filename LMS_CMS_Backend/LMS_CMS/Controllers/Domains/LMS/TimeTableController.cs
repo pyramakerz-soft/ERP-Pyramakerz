@@ -52,7 +52,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return BadRequest("No school with this ID");
             }
 
-            AcademicYear academicYear = Unit_Of_Work.academicYear_Repository.First_Or_Default(a=>a.SchoolID==SchoolId & a.IsDeleted != true && a.IsActive==true);
+            AcademicYear academicYear = Unit_Of_Work.academicYear_Repository.First_Or_Default(a=>a.SchoolID==SchoolId & a.IsDeleted != true && a.IsActive==true );
             if (academicYear == null)
             {
                 return BadRequest("No active academic year in this school");
