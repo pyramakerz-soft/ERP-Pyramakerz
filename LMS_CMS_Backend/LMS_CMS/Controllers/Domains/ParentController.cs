@@ -17,14 +17,15 @@ namespace LMS_CMS_PL.Controllers.Domains
     public class ParentController : ControllerBase
     {
         private readonly DbContextFactoryService _dbContextFactory;
-        IMapper mapper; 
+        IMapper mapper;
+        private readonly IamNotRobot _iamNotRobotService;
 
-        public ParentController(DbContextFactoryService dbContextFactory, IMapper mapper)
+        public ParentController(DbContextFactoryService dbContextFactory, IMapper mapper, IamNotRobot iamNotRobotService)
         {
             _dbContextFactory = dbContextFactory;
-            this.mapper = mapper; 
+            this.mapper = mapper;
+            _iamNotRobotService = iamNotRobotService;
         }
-
 
         [HttpGet("{Id}")]
         [Authorize]
@@ -53,6 +54,11 @@ namespace LMS_CMS_PL.Controllers.Domains
             if (UserInfo == null)
             {
                 return BadRequest("Data Can't be null");
+            }
+            bool isValidCaptcha = await _iamNotRobotService.VerifyRecaptcha(UserInfo.RecaptchaToken);
+            if (!isValidCaptcha)
+            {
+                return BadRequest("You must confirm you are not a robot.");
             }
             if (UserInfo.Email == null)
             {

@@ -14,7 +14,10 @@ namespace LMS_CMS_BL.DTO.Inventory
         public string InvoiceNumber { get; set; }      
         public string Notes { get; set; }              
 
+        public decimal inQuantity { get; set; }          
+        public decimal outQuantity { get; set; }          
         public decimal Quantity { get; set; }          
+        public decimal Balance { get; set; }          
         public decimal Price { get; set; }             
         public decimal TotalPrice { get; set; }        
         public decimal? AverageCost { get; set; }      

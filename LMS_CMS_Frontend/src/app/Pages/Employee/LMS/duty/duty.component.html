@@ -1,10 +1,10 @@
 <div class="flex justify-between items-center">
-<input type="date" [(ngModel)]="date" (change)="GetByDate()" class="border p-2 rounded mb-4" />
+    <input type="date" [(ngModel)]="date" (change)="GetByDate()" class="border p-2 rounded mb-4" />
     <div class="flex justify-between items-center space-x-4">
         <!-- <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search> -->
-        
+
         <button (click)="openModal()"
-        class="secondaryBorder secondaryTxt rounded-lg px-4 py-3 flex items-center justify-center gap-2">
+            class="secondaryBorder secondaryTxt rounded-lg px-4 py-3 flex items-center justify-center gap-2">
             Create Duty
         </button>
     </div>
@@ -37,7 +37,8 @@
         <tbody>
             <!-- No Data Row -->
             <tr *ngIf="TableData.length === 0">
-                <td colspan="6" class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                <td colspan="6"
+                    class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
                     No Data Found
                 </td>
             </tr>
@@ -54,15 +55,14 @@
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.teacherName }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     <div class="flex space-x-4">
-                        <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)"
-                           >
+                        <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)" (click)="Delete(row.id)">
                             <i class="fa-regular fa-trash-can"></i>
                         </button>
-                        <button *ngIf="AllowEdit && IsAllowEdit(row.insertedByUserId)" >
+                        <button *ngIf="AllowEdit && IsAllowEdit(row.insertedByUserId)" (click)="openModal(row.id)">
                             <i class="fa-solid fa-pencil"></i>
                         </button>
                     </div>
-                </td> 
+                </td>
             </tr>
         </tbody>
     </table>
@@ -71,7 +71,7 @@
 
 
 <!-- Modal -->
-<!-- <div id="default-modal" tabindex="-1" aria-hidden="true" [ngClass]="{ hidden: !isModalVisible }"
+<div id="default-modal" tabindex="-1" aria-hidden="true" [ngClass]="{ hidden: !isModalVisible }"
     class="fixed top-0 left-0 right-0 z-50 flex justify-center items-center w-full h-full bg-black/50">
     <div class="bg-white rounded-2xl p-12 w-1/2 max-h-[95%] overflow-y-auto">
         <div class="flex justify-between items-center">
@@ -81,48 +81,59 @@
                 class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
         </div>
         <div class="mt-6 mb-4 rounded-3xl flex justify-between flex-wrap">
-             <div class="flex flex-col w-full mb-4">
+            <div class="flex flex-col w-full mb-4">
                 <label for="Class" class="block mb-2 text-sm font-medium text-gray-900">School</label>
-                <select id="Class"
-                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
-                    [(ngModel)]="SelectedClassId" (change)="GetClassBySchool()">
+                <select id="Class" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+                    [(ngModel)]="duty.schoolID" (change)="GetClassBySchool()" (ngModelChange)="onInputValueChange({ field: 'schoolID', value: $event })">
                     <option value="0" disabled selected hidden> Select a School</option>
                     <option *ngFor="let a of schools" [value]="a.id">
                         {{ a.name }}
                     </option>
+                    <option *ngIf="schools.length === 0" disabled selected>No Data Found</option>
                 </select>
+                <span *ngIf="validationErrors['schoolID']" class="text-red-500 ml-3 font-normal">{{ validationErrors['schoolID'] }}</span>
             </div>
             <div class="flex flex-col w-full mb-4">
-                <label for="Class" class="block mb-2 text-sm font-medium text-gray-900">  {{ 'Classroom' | translate }}</label>
+                <label for="Class" class="block mb-2 text-sm font-medium text-gray-900">Class</label>
                 <select id="Class"
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
-                    [(ngModel)]="SelectedClassId" (change)="GetSubjectByClassroom()">
-                    <option value="0" disabled selected hidden>  {{ 'Select a class' | translate }}</option>
-                    <option *ngFor="let ac of Classrooms" [value]="ac.id">
+                    [(ngModel)]="duty.classID"  [disabled]="!duty.schoolID" (change)="GetNumberOfPeriod()" (ngModelChange)="onInputValueChange({ field: 'classID', value: $event })">
+                    <option value="0" disabled selected hidden> Select a class </option>
+                    <option *ngFor="let ac of class" [value]="ac.id">
                         {{ ac.name }}
                     </option>
+                    <option *ngIf="class.length === 0" disabled selected>No Data Found</option>
                 </select>
-                <span *ngIf="IsSelectedClassId" class="text-red-500 ml-3 font-normal">{{
-                    IsSelectedClassId}}</span>
+                <span *ngIf="validationErrors['classID']" class="text-red-500 ml-3 font-normal">{{ validationErrors['classID'] }}</span>
             </div>
             <div class="flex flex-col w-full mb-4">
-                <label for="Class" class="block mb-2 text-sm font-medium text-gray-900">  {{ 'Classroom' | translate }}</label>
-                <select id="Class"
-                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
-                    [(ngModel)]="SelectedClassId" (change)="GetSubjectByClassroom()">
-                    <option value="0" disabled selected hidden>  {{ 'Select a class' | translate }}</option>
-                    <option *ngFor="let ac of Classrooms" [value]="ac.id">
-                        {{ ac.name }}
+                <label for="Date" class="block mb-2 text-sm font-medium text-gray-900"> Date</label>
+                <input type="date" [(ngModel)]="duty.date" (change)="GetNumberOfPeriod()" class="border p-2 rounded mb-4"  (ngModelChange)="onInputValueChange({ field: 'date', value: $event })"/>
+                <span *ngIf="validationErrors['date']" class="text-red-500 ml-3 font-normal">{{ validationErrors['date'] }}</span>
+            </div>
+            <div class="flex flex-col w-full mb-4">
+                <label for="Period" class="block mb-2 text-sm font-medium text-gray-900">Period</label>
+                <select id="Period" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+                    [(ngModel)]="duty.period" [disabled]="duty.date=='' || !duty.classID " (change)="GetTeachers()" (ngModelChange)="onInputValueChange({ field: 'period', value: $event })">
+                    <option value="0" disabled selected hidden> Select a Period </option>
+                    <option *ngFor="let ac of periods" [value]="ac">
+                        {{ ac }}
                     </option>
+                   <option *ngIf="periods.length === 0" disabled selected>No Data Found</option>
                 </select>
-                <span *ngIf="IsSelectedClassId" class="text-red-500 ml-3 font-normal">{{
-                    IsSelectedClassId}}</span>
+                <span *ngIf="validationErrors['period']" class="text-red-500 ml-3 font-normal">{{ validationErrors['period'] }}</span>
             </div>
             <div class="flex flex-col w-full mb-4">
-                <label for="Class" class="block mb-2 text-sm font-medium text-gray-900">  {{ 'Classroom' | translate }}</label>
-               <input type="date" [(ngModel)]="date" (change)="GetByDate()" class="border p-2 rounded mb-4" />
-                <span *ngIf="IsSelectedClassId" class="text-red-500 ml-3 font-normal">{{
-                    IsSelectedClassId}}</span>
+                <label for="Teacher" class="block mb-2 text-sm font-medium text-gray-900">Teacher</label>
+                <select id="Teacher" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+                    [(ngModel)]="duty.teacherID"  [disabled]="duty.date=='' || duty.period==0 " (ngModelChange)="onInputValueChange({ field: 'teacherID', value: $event })">
+                    <option value="0" disabled selected hidden> Select a Teacher </option>
+                    <option *ngFor="let ac of teachers" [value]="ac.id">
+                        {{ ac.en_name }}
+                    </option>
+                   <option *ngIf="teachers.length === 0" disabled selected>No Data Found</option>
+                </select>
+                <span *ngIf="validationErrors['teacherID']" class="text-red-500 ml-3 font-normal">{{ validationErrors['teacherID'] }}</span>
             </div>
         </div>
         <div class="flex justify-end">
@@ -133,4 +144,4 @@
             </button>
         </div>
     </div>
-</div> -->
+</div>

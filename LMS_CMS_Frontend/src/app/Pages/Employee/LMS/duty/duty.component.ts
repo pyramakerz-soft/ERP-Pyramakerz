@@ -15,6 +15,7 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { DutyService } from '../../../../Services/Employee/LMS/duty.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-duty',
@@ -49,20 +50,18 @@ export class DutyComponent {
   class: Classroom[] = [];
   date: string = '';
   periods: number[] = [];
-  SelectedPeriod: number = 0;
   teachers: Employee[] = [];
 
-  SelectedSchoolId: number = 0;
   SelectedYearId: number = 0;
   SelectedGradeId: number = 0;
-  SelectedClassId: number = 0;
   SelectedSubjectId: number = 0;
   isModalVisible: boolean = false;
-  mode: string = '';
+  mode: string = 'Create';
 
   TableData: Duty[] = [];
   validationErrors: { [key in keyof Duty]?: string } = {};
   duty: Duty = new Duty();
+  isLoading: boolean = false;
 
   constructor(
     public activeRoute: ActivatedRoute,
@@ -74,7 +73,7 @@ export class DutyComponent {
     private SchoolServ: SchoolService,
     private DutyServ: DutyService,
     private ClassroomServ: ClassroomService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -95,21 +94,18 @@ export class DutyComponent {
     const today = new Date();
     this.date = today.toISOString().split('T')[0];  // format as 'YYYY-MM-DD'
     this.GetByDate()
+    this.GetSchools()
   }
 
-  GetByDate(){
-    this.TableData=[]
-    this.DutyServ.GetByDate(this.date,this.DomainName).subscribe((d)=>{
-      this.TableData=d
+  GetByDate() {
+    this.TableData = []
+    this.DutyServ.GetByDate(this.date, this.DomainName).subscribe((d) => {
+      this.TableData = d
     })
   }
 
   IsAllowDelete(InsertedByID: number) {
-    const IsAllow = this.EditDeleteServ.IsAllowDelete(
-      InsertedByID,
-      this.UserID,
-      this.AllowDeleteForOthers
-    );
+    const IsAllow = this.EditDeleteServ.IsAllowDelete(InsertedByID,this.UserID,this.AllowDeleteForOthers);
     return IsAllow;
   }
 
@@ -126,9 +122,25 @@ export class DutyComponent {
     this.isModalVisible = false;
   }
 
-  openModal() {
+  openModal(id?: number) {
     this.validationErrors = {};
     this.isModalVisible = true;
+    this.duty = new Duty();
+    if (id) {
+      this.mode = 'Edit'
+      this.DutyServ.GetById(id, this.DomainName).subscribe((d) => {
+        this.duty = d
+        this.ClassroomServ.GetBySchoolId(this.duty.schoolID, this.DomainName).subscribe((d) => {
+          this.class = d
+        })
+        this.DutyServ.GetNumberOfPeriods(this.duty.date, this.duty.classID, this.DomainName).subscribe((d) => {
+          this.periods = Array.from({ length: d }, (_, i) => i + 1);
+        });
+        this.DutyServ.GetAllTeachersValidForSessionTime(this.duty.date, this.duty.period, this.DomainName).subscribe((d) => {
+          this.teachers = d
+        })
+      })
+    }
   }
 
   capitalizeField(field: keyof Duty): string {
@@ -143,19 +155,141 @@ export class DutyComponent {
     }
   }
 
-  CreateOREdit(){
-
+  CreateOREdit() {
+    if (this.isFormValid()) {
+      this.isLoading = true
+      if (this.mode == "Create") {
+        console.log(this.duty)
+        this.DutyServ.Add(this.duty, this.DomainName).subscribe((d) => {
+          this.date = this.duty.date
+          this.GetByDate()
+          this.closeModal()
+          this.isLoading = false
+        },
+          err => {
+            this.isLoading = false;
+            console.log(err);
+            const errorMsg = err?.error ?? ''; // extract error message
+            if (errorMsg.includes("This Day doesn`t exist in current time table")) {
+              Swal.fire({
+                icon: 'warning',
+                title: 'Invalid Day!',
+                text: 'This day is not part of the current timetable.',
+                confirmButtonText: 'Okay',
+                customClass: { confirmButton: 'secondaryBg' },
+              });
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Try Again Later!',
+                confirmButtonText: 'Okay',
+                customClass: { confirmButton: 'secondaryBg' },
+              });
+            }
+          })
+      } else if (this.mode == "Edit") {
+        this.DutyServ.Edit(this.duty, this.DomainName).subscribe((d) => {
+          this.date = this.duty.date
+          this.GetByDate()
+          this.closeModal()
+          this.isLoading = false
+        },
+          err => {
+            this.isLoading = false
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'Try Again Later!',
+              confirmButtonText: 'Okay',
+              customClass: { confirmButton: 'secondaryBg' },
+            });
+          })
+      }
+    }
   }
 
-  GetClassBySchool(){
-    this.ClassroomServ.GetBySchoolId(this.SelectedSchoolId,this.DomainName).subscribe((d)=>{
-      this.class=d
+  GetClassBySchool() {
+    this.class = []
+    this.periods = []
+    this.teachers = []
+    this.duty.classID = 0
+    this.duty.period = 0
+    this.duty.teacherID = 0
+    this.ClassroomServ.GetBySchoolId(this.duty.schoolID, this.DomainName).subscribe((d) => {
+      this.class = d
     })
   }
 
-  GetTeachers(){
-    this.DutyServ.GetAllTeachersValidForSessionTime(this.date,this.SelectedPeriod,this.DomainName).subscribe((d)=>{
-      this.teachers=d
+  GetSchools() {
+    this.schools = []
+    this.class = []
+    this.periods = []
+    this.teachers = []
+    this.duty.classID = 0
+    this.duty.period = 0
+    this.duty.teacherID = 0
+    this.duty.schoolID = 0
+    this.SchoolServ.Get(this.DomainName).subscribe((d) => {
+      this.schools = d
     })
   }
+
+  GetTeachers() {
+    this.teachers = [];
+    this.duty.teacherID = 0
+    this.DutyServ.GetAllTeachersValidForSessionTime(this.duty.date, this.duty.period, this.DomainName).subscribe((d) => {
+      this.teachers = d
+    })
+  }
+
+  GetNumberOfPeriod() {
+    this.periods = [];
+    this.teachers = [];
+    this.duty.period = 0
+    this.duty.teacherID = 0
+    if (this.duty.date != '' && this.duty.classID != 0) {
+      this.DutyServ.GetNumberOfPeriods(this.duty.date, this.duty.classID, this.DomainName).subscribe((d) => {
+        this.periods = Array.from({ length: d }, (_, i) => i + 1);
+      });
+    }
+  }
+
+  Delete(id: number) {
+    Swal.fire({
+      title: 'Are you sure you want to delete this Duty?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#089B41',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'Cancel',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.DutyServ.Delete(id, this.DomainName).subscribe((data: any) => {
+          this.GetByDate();
+        });
+      }
+    });
+  }
+
+  isFormValid(): boolean {
+    let isValid = true;
+    for (const key in this.duty) {
+      if (this.duty.hasOwnProperty(key)) {
+        const field = key as keyof Duty;
+        if (!this.duty[field]) {
+          if (field == 'date' || field == 'schoolID' || field == 'classID' || field == 'teacherID' || field == 'period') {
+            this.validationErrors[field] = `*${this.capitalizeField(
+              field
+            )} is required`;
+            isValid = false;
+          }
+        }
+      }
+    }
+    return isValid;
+  }
+
+
 }

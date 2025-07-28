@@ -15,7 +15,6 @@ export class FeesActivation {
         public academicYearName: string ="",
         public insertedByUserId :number =0,
         public insertedAt :number =0,
-        // public studentAcademicYearID: number = 0,
         public schoolName: string = '',
         public schoolID: number = 0,
         public className: string = '',

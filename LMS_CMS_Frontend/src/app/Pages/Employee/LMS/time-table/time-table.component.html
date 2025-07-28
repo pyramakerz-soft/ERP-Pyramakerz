@@ -71,13 +71,13 @@
                 </td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 ">
                     <div class="flex space-x-3">
-                        <button (click)="delete(row.id)">
+                        <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)" (click)="delete(row.id)">
                             <i class="fa-regular fa-trash-can"></i>
                         </button>
-                        <button (click)="View(row.id)">
+                        <button *ngIf="AllowEdit && IsAllowEdit(row.insertedByUserId)" (click)="View(row.id)">
                             <i class="fa-solid fa-eye"></i>
                         </button>
-                        <button (click)="openPrintModal(row.id)">
+                        <button  (click)="openPrintModal(row.id)">
                             <img class="w-4 cursor-pointer" src="Icons/Print.png" title="Print">
                         </button>
                     </div>

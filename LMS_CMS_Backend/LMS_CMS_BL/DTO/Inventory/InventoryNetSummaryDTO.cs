@@ -14,6 +14,6 @@ namespace LMS_CMS_BL.DTO.Inventory
         public decimal InQuantity { get; set; }
         public decimal outQuantity { get; set; }
         public decimal Quantitybalance { get; set; }
-        public decimal CostBalance { get; set; }
+        public decimal? CostBalance { get; set; }
     }
 }
