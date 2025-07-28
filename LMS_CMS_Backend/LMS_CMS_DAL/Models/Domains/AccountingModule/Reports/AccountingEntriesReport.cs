@@ -15,5 +15,6 @@
         public DateTime? Date { get; set; }
         public decimal? Balance { get; set; }
         public long? LinkFileID { get; set; }
+        public string? Notes { get; set; }
     }
 }

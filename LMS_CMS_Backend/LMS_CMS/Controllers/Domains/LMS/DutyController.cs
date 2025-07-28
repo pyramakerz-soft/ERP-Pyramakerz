@@ -13,6 +13,7 @@ using LMS_CMS_BL.DTO;
 using LMS_CMS_BL.DTO.LMS;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using Microsoft.EntityFrameworkCore;
+using LMS_CMS_DAL.Migrations.Domains;
 
 namespace LMS_CMS_PL.Controllers.Domains.LMS
 {
@@ -37,9 +38,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet]
         [Authorize_Endpoint_(
-        allowedTypes: new[] { "octa", "employee" }
-        //,
-        //pages: new[] { "Academic Years" }
+        allowedTypes: new[] { "octa", "employee" },
+        pages: new[] { "Duty Table" }
         )]
         public async Task<IActionResult> Get(DateOnly date)
         {
@@ -65,9 +65,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
-        allowedTypes: new[] { "octa", "employee" }
-        //,
-        //pages: new[] { "Academic Years" }
+        allowedTypes: new[] { "octa", "employee" } ,
+        pages: new[] { "Duty Table" }
         )]
         public async Task<IActionResult> GetById(long id)
         {
@@ -93,10 +92,9 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("GetAllTeachersValidForSessionTime")]
         [Authorize_Endpoint_(
-           allowedTypes: new[] { "octa", "employee" }
-           //,
-           //pages: new[] { "Academic Years" }
-       )]
+               allowedTypes: new[] { "octa", "employee" },
+               pages: new[] { "Duty Table" }
+           )]
         public IActionResult Get(DateOnly date , int period)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -127,8 +125,12 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             List<TimeTableSubject> timeTableSubjects = Unit_Of_Work.timeTableSubject_Repository.FindBy(s => s.TimeTableSession.PeriodIndex == period && s.TimeTableSession.TimeTableClassroom.DayId == dayId && s.IsDeleted!= true && s.TimeTableSession.TimeTableClassroom.TimeTable.IsFavourite==true);
             List<long?> teachersNotValid = timeTableSubjects.Where(s => s.TeacherID != null).Select(s => s.TeacherID).Distinct().ToList();
 
+            List<Duty> duties = Unit_Of_Work.duty_Repository.FindBy(s => s.TimeTableSession.PeriodIndex == period && s.TimeTableSession.TimeTableClassroom.DayId == dayId && s.IsDeleted != true && s.TimeTableSession.TimeTableClassroom.TimeTable.IsFavourite == true && s.Date == date);
+            List<long> dutiesteachersNotValid = duties.Select(s => s.TeacherID).Distinct().ToList();
+
             // Get all employees (teachers) excluding the ones already assigned
             List<Employee> validTeachers = Unit_Of_Work.employee_Repository.FindBy( e => e.IsDeleted != true
+                    && (dutiesteachersNotValid == null || !dutiesteachersNotValid.Contains(e.ID))
                     && (teachersNotValid == null || !teachersNotValid.Contains(e.ID)));
 
             List<Employee_GetDTO> EmployeesDTO = mapper.Map<List<Employee_GetDTO>>(validTeachers);
@@ -140,9 +142,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("GetPeriods")]
         [Authorize_Endpoint_(
-           allowedTypes: new[] { "octa", "employee" }
-           //,
-           //pages: new[] { "Academic Years" }
+           allowedTypes: new[] { "octa", "employee" },
+           pages: new[] { "Duty Table" }
        )]
         public IActionResult GetPeriods(DateOnly date, long ClassId)
         {
@@ -188,9 +189,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpPost]
         [Authorize_Endpoint_(
-          allowedTypes: new[] { "octa", "employee" }
-              //,
-              //pages: new[] { "Academic Years" }
+          allowedTypes: new[] { "octa", "employee" },
+          pages: new[] { "Duty Table" }
           )]
         public async Task<IActionResult> Add(DutyAddDto NewDuty)
         {
@@ -235,10 +235,19 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             TimeTableSession timeTableSession = Unit_Of_Work.timeTableSession_Repository.First_Or_Default(s => s.TimeTableClassroom.ClassroomID == NewDuty.ClassID && s.TimeTableClassroom.TimeTable.IsFavourite == true && s.TimeTableClassroom.TimeTable.IsDeleted != true && s.PeriodIndex == NewDuty.Period && s.TimeTableClassroom.DayId == dayId);
             if (timeTableSession == null)
             {
-                return BadRequest(" No timeTableSession With This Id"+dayId);
+                return BadRequest("This Day doesn`t exist in current time table");
             }
 
-            Duty duty = mapper.Map<Duty>(NewDuty);
+            Duty duty = Unit_Of_Work.duty_Repository.First_Or_Default(s => s.TimeTableSessionID == timeTableSession.ID && s.Date == NewDuty.Date && s.IsDeleted != true);
+            if(duty != null)
+            {
+                duty.TeacherID = NewDuty.TeacherID;
+                Unit_Of_Work.duty_Repository.Update(duty);
+                Unit_Of_Work.SaveChanges();
+                return Ok(NewDuty);
+            }
+            duty =new Duty();
+            duty = mapper.Map<Duty>(NewDuty);
             duty.TimeTableSessionID = timeTableSession.ID;
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
@@ -251,8 +260,6 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             {
                 duty.InsertedByUserId = userId;
             }
-
-         
             Unit_Of_Work.duty_Repository.Add(duty);
             Unit_Of_Work.SaveChanges();
             return Ok(NewDuty);
@@ -263,9 +270,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpPut]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            allowEdit: 1
-            //,
-            //pages: new[] { "Academic Years" }
+            allowEdit: 1,
+        pages: new[] { "Duty Table" }
         )]
         public IActionResult Edit(DutyEditDTO NewDuty)
         {
@@ -315,14 +321,14 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return BadRequest("this duty doesn't exist");
             }
 
-            //if (userTypeClaim == "employee")
-            //{
-            //    IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Academic Years", roleId, userId, AcademicYear);
-            //    if (accessCheck != null)
-            //    {
-            //        return accessCheck;
-            //    }
-            //}
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Duty Table", roleId, userId, duty);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
+            }
 
             mapper.Map(NewDuty, duty);
             duty.TimeTableSessionID = timeTableSession.ID;
@@ -358,10 +364,9 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpDelete("{id}")]
         [Authorize_Endpoint_(
-             allowedTypes: new[] { "octa", "employee" }
-             //,
-             //allowDelete: 1,
-             //pages: new[] { "Academic Years" }
+             allowedTypes: new[] { "octa", "employee" } ,
+             allowDelete: 1,
+             pages: new[] { "Duty Table" }
          )]
         public IActionResult Delete(long id)
         {
@@ -390,14 +395,14 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return NotFound("No Duty with this ID");
             }
 
-            //if (userTypeClaim == "employee")
-            //{
-            //    IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Academic Years", roleId, userId, academicYear);
-            //    if (accessCheck != null)
-            //    {
-            //        return accessCheck;
-            //    }
-            //}
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Duty Table", roleId, userId, duty);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
+            }
 
             duty.IsDeleted = true;
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");

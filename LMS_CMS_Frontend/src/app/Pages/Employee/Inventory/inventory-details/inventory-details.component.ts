@@ -204,7 +204,6 @@ export class InventoryDetailsComponent {
     }
 
     if (
-      this.FlagId == 8 ||
       this.FlagId == 9 ||
       this.FlagId == 10 ||
       this.FlagId == 11 ||
@@ -285,6 +284,10 @@ export class InventoryDetailsComponent {
   GetAllStores() {
     this.storeServ.Get(this.DomainName).subscribe((d) => {
       this.Stores = d;
+      if (this.FlagId == 8 && this.mode == 'Edit') {
+        this.StoresForTitle = []
+        this.StoresForTitle = this.Stores.filter(s => s.id != this.Data.storeID);
+      }
     });
   }
 
@@ -337,8 +340,8 @@ export class InventoryDetailsComponent {
     this.ShopItems = []; // Clear items when category changes
     this.SelectedCategoryId = null;
     this.SelectedSubCategoryId = null;
-    this.Data.remaining=0
-    this.Data.total=0
+    this.Data.remaining = 0
+    this.Data.total = 0
     if (this.FlagId == 8) {
       this.Data.storeToTransformId = 0
       this.StoresForTitle = []
@@ -485,6 +488,7 @@ export class InventoryDetailsComponent {
       }
       if (this.mode == 'Edit') {
         this.Data.inventoryDetails = this.TableData;
+        console.log(this.Data.inventoryDetails)
         this.salesItemServ.Edit(this.Data.inventoryDetails, this.DomainName).subscribe((d) => { }, (error) => { console.log(error) });
         this.salesItemServ.Add(this.NewDetailsWhenEdit, this.DomainName).subscribe((d) => { }, (error) => { });
         this.salesServ.Edit(this.Data, this.DomainName).subscribe((d) => { this.router.navigateByUrl(`Employee/${this.InventoryFlag.enName}`); },
@@ -681,9 +685,9 @@ export class InventoryDetailsComponent {
       if (!this.Data.NewAttachments) {
         this.Data.NewAttachments = [];
       }
-      console.log(1,this.Data.NewAttachments)
+      console.log(1, this.Data.NewAttachments)
       Array.from(files).forEach((file) => this.Data.NewAttachments.push(file));
-      console.log(2,this.Data.NewAttachments)
+      console.log(2, this.Data.NewAttachments)
     }
     input.value = '';
   }
@@ -826,7 +830,7 @@ export class InventoryDetailsComponent {
             text: 'Each item must have a valid quantity.',
             confirmButtonColor: '#089B41',
           });
-        //  this.validationErrors['inventoryDetails'] = 'quantity must have a valid Number';
+          //  this.validationErrors['inventoryDetails'] = 'quantity must have a valid Number';
           return false;
         }
       }
@@ -977,6 +981,17 @@ export class InventoryDetailsComponent {
     });
   }
 
+
+  validateCashVisaNumber(event: any, field: keyof InventoryMaster): void {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+      if (typeof this.Data[field] === 'string') {
+        this.Data[field] = '' as never;
+      }
+    }
+  }
+
   ////////////////////////////// search
   SearchToggle() {
     this.IsSearchOpen = true;
@@ -1124,6 +1139,15 @@ export class InventoryDetailsComponent {
       event.target.value = '';
       if (typeof this.Item[field] === 'string') {
         this.Item[field] = '' as never;
+        this.Item.totalPrice = 0 ; 
+      }
+    }
+    if (field == 'quantity') {
+      const integerRegex = /^\d+$/;
+      if (!integerRegex.test(value)) {
+        event.target.value = '';
+        this.Item.quantity = 0 ; 
+        this.Item.totalPrice = 0 ; 
       }
     }
   }

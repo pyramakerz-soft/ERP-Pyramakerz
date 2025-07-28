@@ -51,50 +51,145 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 new SqlParameter("@EndRow", endRow)
             ).ToListAsync();
 
+            long? linkFileID = results.FirstOrDefault()?.LinkFileID;
+            var isCreditBalance = linkFileID == 2 || linkFileID == 4 || linkFileID == 7;
             decimal? runningBalance = 0;
-            if (AccountNumber > 0 && SubAccountNumber > 0)
-                foreach (var item in results)
-                {
-                    decimal? change = item.LinkFileID switch
-                    {
-                        2 or 4 or 7 => item.Credit - item.Debit,
-                        1 or 3 or 5 or 6 or 8 or 9 or 13 => item.Debit - item.Credit,
-                        _ => 0
-                    };
+            dynamic fullTotals = 0;
+            dynamic calcFirstPeriod = 0;
+            var dateToValue = fromDate.Value.AddDays(-1);
+            decimal? firstPeriodBalance = 0;
 
-                    runningBalance += change;
-                    item.Balance = runningBalance;
+            if (AccountNumber > 0 || SubAccountNumber > 0)
+            {
+                fullTotals = (await context.Set<TotalResult>()
+                .FromSqlRaw(
+                    "EXEC dbo.GetAccountingTotals @DateFrom, @DateTo, @MainAccNo, @SubAccNo, @LinkFileID",
+                    new SqlParameter("@DateFrom", fromDate ?? (object)DBNull.Value),
+                    new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
+                    new SqlParameter("@MainAccNo", AccountNumber),
+                    new SqlParameter("@SubAccNo", SubAccountNumber),
+                    new SqlParameter("@LinkFileID", linkFileID)
+                )
+                .AsNoTracking()
+                .ToListAsync())
+                .FirstOrDefault();
+
+                calcFirstPeriod = (await context.Set<TotalResult>()
+                .FromSqlRaw(
+                    "EXEC dbo.GetAccountingTotals @DateFrom, @DateTo, @MainAccNo, @SubAccNo, @LinkFileID",
+                    new SqlParameter("@DateFrom", "1900-1-1"),
+                    new SqlParameter("@DateTo", (object)dateToValue ?? DBNull.Value),
+                    new SqlParameter("@MainAccNo", AccountNumber),
+                    new SqlParameter("@SubAccNo", SubAccountNumber),
+                    new SqlParameter("@LinkFileID", linkFileID)
+                )
+                .AsNoTracking()
+                .ToListAsync())
+                .FirstOrDefault();
+
+                results.Insert(0, new AccountingEntriesReport
+                {
+                    MasterID = 0,
+                    DetailsID = 0,
+                    Account = "Opening Balance",
+                    Serial = 0,
+                    MainAccountNo = 0,
+                    MainAccount = "",
+                    SubAccountNo = 0,
+                    SubAccount = "",
+                    Debit = 0,
+                    Credit = 0,
+                    Date = dateToValue, 
+                    Balance = isCreditBalance ? calcFirstPeriod?.TotalCredit : calcFirstPeriod?.TotalDebit,
+                    LinkFileID = 0,
+                    Notes = ""
+                });
+
+                //foreach (var item in results)
+                //{
+                //    decimal? balance = isCreditBalance ? item.Credit - item.Debit :
+                //        item.Debit - item.Credit;
+
+                //    runningBalance += balance;
+                //    item.Balance = runningBalance;
+                //}
+
+                for (int i = 0; i < results.Count; i++)
+                {
+                    var item = results[i];
+
+                    decimal? balance = isCreditBalance
+                        ? item.Credit - item.Debit
+                        : item.Debit - item.Credit;
+
+                    runningBalance += balance;
+
+                    if (i > 0)
+                        item.Balance = runningBalance;
+
+                    if (i == 1)
+                    {
+                        firstPeriodBalance = calcFirstPeriod?.TotalDebit - calcFirstPeriod?.TotalCredit;
+                        item.Balance = firstPeriodBalance;
+                    }
                 }
+            }
 
             if (results == null || !results.Any())
             {
                 return NotFound("No accounting entries found for the specified date range.");
             }
 
-            var fullTotals = (await context.Set<TotalResult>()
-            .FromSqlRaw("EXEC dbo.GetAccountingTotals @DateFrom, @DateTo",
-                new SqlParameter("@DateFrom", fromDate ?? (object)DBNull.Value),
-                new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value))
-            .ToListAsync())
-            .FirstOrDefault();
+            decimal fullDebit = 0;
+            decimal fullCredit = 0;
+            decimal fullDifference = 0;
 
+            if (AccountNumber == 0 && SubAccountNumber == 0)
+            {
+                fullTotals = (await context.Set<TotalResult>()
+                .FromSqlRaw("EXEC dbo.GetAccountingTotals @DateFrom, @DateTo, @MainAccNo, @SubAccNo, @LinkFileID",
+                    new SqlParameter("@DateFrom", fromDate ?? (object)DBNull.Value),
+                    new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
+                    new SqlParameter("@MainAccNo", AccountNumber),
+                    new SqlParameter("@SubAccNo", SubAccountNumber),
+                    new SqlParameter("@LinkFileID", linkFileID)
+                    )
+                .AsNoTracking()
+                .ToListAsync())
+                .FirstOrDefault();
+            }
+            else
+            {
+                
+            }
 
-            decimal fullDebit = fullTotals?.TotalDebit ?? 0;
-            decimal fullCredit = fullTotals?.TotalCredit ?? 0;
-            decimal fullDifference = fullTotals?.Differences ?? 0;
+            fullDebit = fullTotals?.TotalDebit ?? 0;
+            fullCredit = fullTotals?.TotalCredit ?? 0;
+            fullDifference = fullTotals?.Differences ?? 0;
 
             var grouped = results
                 .GroupBy(x => x.Date.Value.Date)
-                .Select(g => new
+                .Select((g, index) =>
                 {
-                    Date = g.Key,
-                    Entries = g.ToList(),
-                    Totals = new
+                    var entries = g.ToList();
+
+                    var totalDebit = entries.Sum(x => x.Debit ?? 0);
+                    var totalCredit = entries.Sum(x => x.Credit ?? 0);
+                    var difference = isCreditBalance
+                        ? totalCredit - totalDebit
+                        : totalDebit - totalCredit;
+
+                    return new
                     {
-                        Debit = g.Sum(x => x.Debit ?? 0),
-                        Credit = g.Sum(x => x.Credit ?? 0),
-                        Difference = g.Sum(x => x.Debit ?? 0) - g.Sum(x => x.Credit ?? 0)
-                    }
+                        Date = g.Key,
+                        Entries = entries,
+                        Totals = new
+                        {
+                            Debit = totalDebit,
+                            Credit = totalCredit,
+                            Difference = difference
+                        }
+                    };
                 });
 
             int totalRecords = (await context.Set<CountResult>()
@@ -114,6 +209,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             return Ok(new
             {
                 Data = grouped,
+                FirstPeriodBalance = firstPeriodBalance,
                 FullTotals = new
                 {
                     Debit = fullDebit,

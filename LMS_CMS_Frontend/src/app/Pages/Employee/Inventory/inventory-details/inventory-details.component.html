@@ -95,8 +95,7 @@
   <div *ngIf="FlagId == 8 " class="flex flex-col w-[24%] mb-4">
     <label class="mb-2" for="storeToTransform">Store</label>
     <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="storeToTransform"
-      (ngModelChange)="
-        onInputValueChange({ field: 'storeToTransformId', value: $event })" [(ngModel)]="Data.storeToTransformId"
+      (ngModelChange)=" onInputValueChange({ field: 'storeToTransformId', value: $event })" [(ngModel)]="Data.storeToTransformId"
       [disabled]="Data.storeID == 0">
       <option [value]="0" disabled selected hidden>Choose Store</option>
       <option *ngFor="let stu of StoresForTitle" [value]="stu.id">
@@ -106,8 +105,7 @@
         No Data Found
       </option>
     </select>
-    <span *ngIf="validationErrors['storeToTransformId']" class="text-red-500 ml-3 font-normal">{{
-      validationErrors["storeToTransformId"] }}</span>
+    <span *ngIf="validationErrors['storeToTransformId']" class="text-red-500 ml-3 font-normal">{{validationErrors["storeToTransformId"] }}</span>
   </div>
 
   <div *ngIf="FlagId == 11 || FlagId == 12" class="flex flex-col w-[24%] mb-4 relative">
@@ -132,7 +130,7 @@
     </div>
     <div *ngIf="Data.isCash" class="flex flex-col mb-4 w-[15%]">
       <input id="cashAmount" type="number" [(ngModel)]="Data.cashAmount"
-        class="rounded-lg border border-solid border-gray-300 px-4 py-3" (ngModelChange)="TotalandRemainingCalculate()"
+        class="rounded-lg border border-solid border-gray-300 px-4 py-3" (ngModelChange)="TotalandRemainingCalculate()" (input)="validateCashVisaNumber($event, 'cashAmount')"
         placeholder="Enter Amount" />
     </div>
     <div *ngIf="Data.isCash" class="flex flex-col w-[23%] mb-4">
@@ -157,7 +155,7 @@
     </div>
     <div *ngIf="Data.isVisa" class="flex flex-col mb-4 w-[15%]">
       <input id="visaAmount" type="number" [(ngModel)]="Data.visaAmount"
-        class="rounded-lg border border-solid border-gray-300 px-4 py-3" (ngModelChange)="TotalandRemainingCalculate()"
+        class="rounded-lg border border-solid border-gray-300 px-4 py-3" (ngModelChange)="TotalandRemainingCalculate()" (input)="validateCashVisaNumber($event, 'visaAmount')"
         placeholder="Enter Amount" />
     </div>
     <div *ngIf="Data.isVisa" class="flex flex-col w-[23%] mb-4">

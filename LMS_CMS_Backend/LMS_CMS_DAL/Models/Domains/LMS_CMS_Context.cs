@@ -4,6 +4,7 @@ using LMS_CMS_DAL.Models.Domains.AccountingModule.Reports;
 using LMS_CMS_DAL.Models.Domains.Administration;
 using LMS_CMS_DAL.Models.Domains.BusModule;
 using LMS_CMS_DAL.Models.Domains.ClinicModule;
+using LMS_CMS_DAL.Models.Domains.Communication;
 using LMS_CMS_DAL.Models.Domains.ECommerce;
 using LMS_CMS_DAL.Models.Domains.ETA;
 using LMS_CMS_DAL.Models.Domains.Inventory;
@@ -199,6 +200,8 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<DiscussionRoom> DiscussionRoom { get; set; }
         public DbSet<DiscussionRoomStudentClassroom> DiscussionRoomStudentClassroom { get; set; }
         public DbSet<Duty> Duty { get; set; }
+        public DbSet<Notification> Notification { get; set; }
+        public DbSet<NotificationSharedTo> NotificationSharedTo { get; set; }
 
 
 
@@ -1787,6 +1790,18 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasOne(p => p.Teacher)
                 .WithMany(p => p.Duties)
                 .HasForeignKey(p => p.TeacherID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<NotificationSharedTo>()
+                .HasOne(p => p.UserType)
+                .WithMany(p => p.NotificationSharedTos)
+                .HasForeignKey(p => p.UserTypeID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<NotificationSharedTo>()
+                .HasOne(p => p.Notification)
+                .WithMany(p => p.NotificationSharedTos)
+                .HasForeignKey(p => p.NotificationID)
                 .OnDelete(DeleteBehavior.Restrict);
 
             ///////////////////////// Exception: /////////////////////////
