@@ -54,6 +54,7 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public ICollection<Building> Buildings { get; set; } = new HashSet<Building>();
         public ICollection<ShopItem> ShopItem { get; set; } = new HashSet<ShopItem>();
         public ICollection<SchoolPCs>? SchoolPCs { get; set; } = new HashSet<SchoolPCs>();
+        public ICollection<DiscussionRoom> DiscussionRooms { get; set; } = new HashSet<DiscussionRoom>();
 
     }
 }

@@ -23,7 +23,11 @@ namespace LMS_CMS_BL.DTO.LMS
         public string? LinkFile { get; set; } 
         public long SubjectID { get; set; }  
         public string SubjectEnglishName { get; set; }  
-        public string SubjectArabicName { get; set; }  
+        public string SubjectArabicName { get; set; }
+        public long SchoolID { get; set; }
+        public string SchoolName { get; set; }
+        public long GradeID { get; set; }
+        public string GradeName { get; set; }
         public long AssignmentTypeID { get; set; }
         public string AssignmentTypeEnglishName { get; set; }  
         public string AssignmentTypeArabicName { get; set; }

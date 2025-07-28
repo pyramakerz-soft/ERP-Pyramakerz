@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,7 +22,10 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public DateOnly StartDate { get; set; }
         public DateOnly EndDate { get; set; }
         public string Time { get; set; }
-    
+
+        [ForeignKey("School")]
+        public long SchoolID { get; set; }
+        public School School { get; set; }
         public ICollection<DiscussionRoomStudentClassroom> DiscussionRoomStudentClassrooms { get; set; } = new List<DiscussionRoomStudentClassroom>();
     }
 }

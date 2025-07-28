@@ -28,9 +28,11 @@
         </select>
     </div>
     <div class="w-[49%]">
-        <label for="Year" class="block mb-2 text-sm font-medium" [ngClass]="{'text-gray-500': !SelectedSchoolIdForFilteration, 'text-gray-900' : SelectedSchoolIdForFilteration}" >Year</label>
+        <label for="Year" class="block mb-2 text-sm font-medium"
+            [ngClass]="{'text-gray-500': !SelectedSchoolIdForFilteration, 'text-gray-900' : SelectedSchoolIdForFilteration}">Year</label>
         <select id="Year" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
-            [(ngModel)]="activeAcademicYearID" (change)="getClassroomDataByYearID()" [disabled]="!SelectedSchoolIdForFilteration">
+            [(ngModel)]="activeAcademicYearID" 
+            [disabled]="!SelectedSchoolIdForFilteration" (change)="AcademicYearIsChanged()">
             <option value=0 disabled selected hidden>Select a Year</option>
             <option *ngFor="let ac of AcademicYearsForFilteration" [value]="ac.id">
                 {{ ac.name }}
@@ -38,12 +40,15 @@
             <option *ngIf="AcademicYearsForFilteration.length == 0">No Data Found</option>
         </select>
     </div>
-    <div class="rounded-full p-2 border-4 cursor-pointer" (click)="ResetFilter()">
-        <i class="fa-solid fa-rotate-left secondaryTxt text-2xl w-8 h-8 text-center hover:cursor-pointer rounded-full"></i>
+    <div class="mt-7 ml-2">
+        <button class="p-3 font-medium text-xl rounded-lg"
+            [disabled]="!activeAcademicYearID || !SelectedSchoolIdForFilteration " (click)="getClassroomDataByYearID()"
+            [ngClass]="{ 'bg-gray-100 text-gray-300': !activeAcademicYearID || !SelectedSchoolIdForFilteration , 'secondaryBg text-white': SelectedSchoolIdForFilteration && activeAcademicYearID  }">Apply
+        </button>
     </div>
 </div>
 
-<div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD] max-w-full">
+<div *ngIf="IsViewTable" class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD] max-w-full">
     <table class="overflow-auto w-full bg-[#EBEBEB] text-left text-[#6F6F6F]">
         <thead class="bg-[##EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
             <tr>
@@ -99,8 +104,8 @@
                         <button *ngIf="AllowEdit && IsAllowEdit(row.insertedByUserId)" (click)="openModal(row.id)">
                             <i class="fa-solid fa-pencil"></i>
                         </button>
-                        <button (click)="ViewClass(row.id)" >
-                            <i class="fa-solid fa-eye"></i> 
+                        <button (click)="ViewClass(row.id)">
+                            <i class="fa-solid fa-eye"></i>
                         </button>
                     </div>
                 </td>
@@ -141,7 +146,7 @@
             <div class="flex flex-col w-[49%] mb-4">
                 <label class="mb-2 primaryTxt" for="school">Choose School</label>
                 <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="school"
-                    [(ngModel)]="selectedSchool" (change)="onSchoolChange($event)"  >
+                    [(ngModel)]="selectedSchool" (change)="onSchoolChange($event)">
                     <option [value]="null" disabled selected hidden>Choose School</option>
                     <option *ngFor="let school of Schools" [value]="school.id">{{ school.name }}</option>
                     <option *ngIf="Schools.length === 0" disabled selected>No Data Found</option>
@@ -168,8 +173,7 @@
                     [ngClass]="{ 'text-gray-400': !selectedSchool, 'primaryTxt': selectedSchool }">Choose
                     Section</label>
                 <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="section"
-                    [(ngModel)]="selectedSection" (change)="onSectionChange($event)"
-                    [disabled]="!selectedSchool"
+                    [(ngModel)]="selectedSection" (change)="onSectionChange($event)" [disabled]="!selectedSchool"
                     [ngClass]="{ 'bg-[#EBEBEB]': !selectedSchool }">
                     <option [value]="null" disabled selected hidden>Choose Section</option>
                     <option *ngFor="let section of Sections" [value]="section.id">{{ section.name }}</option>
@@ -196,8 +200,7 @@
                     [ngClass]="{ 'text-gray-400': !selectedSchool, 'primaryTxt': selectedSchool }">Choose
                     Building</label>
                 <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="building"
-                    [(ngModel)]="selectedBuilding" (change)="onBuildingChange($event)"
-                    [disabled]="!selectedSchool"
+                    [(ngModel)]="selectedBuilding" (change)="onBuildingChange($event)" [disabled]="!selectedSchool"
                     [ngClass]="{ 'bg-[#EBEBEB]': !selectedSchool }">
                     <option [value]="null" disabled selected hidden>Choose Building</option>
                     <option *ngFor="let building of Buildings" [value]="building.id">{{ building.name }}</option>

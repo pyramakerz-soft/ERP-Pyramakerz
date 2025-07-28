@@ -15,6 +15,8 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { ClassroomStudent } from '../../../../Models/LMS/classroom-student';
 import { ClassroomStudentService } from '../../../../Services/Employee/LMS/classroom-student.service';
 import { ClassStudentForDiscussionRoom } from '../../../../Models/LMS/class-student-for-discussion-room';
+import { School } from '../../../../Models/school';
+import { SchoolService } from '../../../../Services/Employee/school.service';
 
 @Component({
   selector: 'app-discussion-room',
@@ -24,8 +26,8 @@ import { ClassStudentForDiscussionRoom } from '../../../../Models/LMS/class-stud
   styleUrl: './discussion-room.component.css'
 })
 export class DiscussionRoomComponent {
-  TableData:DiscussionRoom[] = []
-  discussionRoom:DiscussionRoom = new DiscussionRoom()
+  TableData: DiscussionRoom[] = []
+  discussionRoom: DiscussionRoom = new DiscussionRoom()
   isLoading = false;
 
   validationErrors: { [key in keyof DiscussionRoom]?: string } = {};
@@ -43,22 +45,25 @@ export class DiscussionRoomComponent {
   UserID: number = 0;
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
-  studentsClass: ClassStudentForDiscussionRoom[] = []; 
-  choosedClasss: ClassStudentForDiscussionRoom[] = []; 
-  choosedStudentsClass: number[] = []; 
-  studentClassWhenSelectClass: ClassStudentForDiscussionRoom = new ClassStudentForDiscussionRoom(); 
+  studentsClass: ClassStudentForDiscussionRoom[] = [];
+  schools: School[] = [];
+  choosedClasss: ClassStudentForDiscussionRoom[] = [];
+  choosedStudentsClass: number[] = [];
+  studentClassWhenSelectClass: ClassStudentForDiscussionRoom = new ClassStudentForDiscussionRoom();
   viewClassStudents: boolean = false;
-  viewStudents: boolean = false; 
+  viewStudents: boolean = false;
+  mode: string = 'Create';
 
   constructor(
     public account: AccountService,
     public ApiServ: ApiService,
     public EditDeleteServ: DeleteEditPermissionService,
-    private menuService: MenuService, 
-    public activeRoute: ActivatedRoute,  
+    private menuService: MenuService,
+    public activeRoute: ActivatedRoute,
     public router: Router,
     public discussionRoomService: DiscussionRoomService,
-    public classroomStudentService: ClassroomStudentService
+    public classroomStudentService: ClassroomStudentService,
+    public SchoolService: SchoolService
   ) { }
 
   ngOnInit() {
@@ -69,7 +74,7 @@ export class DiscussionRoomComponent {
 
     this.activeRoute.url.subscribe((url) => {
       this.path = url[0].path;
-    }); 
+    });
 
     this.menuService.menuItemsForEmployee$.subscribe((items) => {
       const settingsPage = this.menuService.findByPageName(this.path, items);
@@ -80,10 +85,10 @@ export class DiscussionRoomComponent {
         this.AllowEditForOthers = settingsPage.allow_Edit_For_Others;
       }
     });
-    this.getAllData() 
+    this.getAllData()
   }
 
-  getAllData(){
+  getAllData() {
     this.TableData = []
     this.discussionRoomService.Get(this.DomainName).subscribe(
       data => {
@@ -92,38 +97,46 @@ export class DiscussionRoomComponent {
     )
   }
 
-  getStudentClassData(discussionRoomID?:number){
+  getStudentClassData(discussionRoomID?: number) {
     this.studentsClass = []
-    this.classroomStudentService.GetClassForActiveAcademicYearWithStudentsIncluded(this.DomainName).subscribe(
+    this.choosedClasss=[]
+    this.choosedStudentsClass=[]
+    this.classroomStudentService.GetClassForActiveAcademicYearWithStudentsIncluded(this.discussionRoom.schoolID, this.DomainName).subscribe(
       data => {
-        this.studentsClass = data 
+        this.studentsClass = data
         if (discussionRoomID) {
           this.getDiscussionRoomById(discussionRoomID);
-        } 
+        }
       }
     )
   }
 
-  getDiscussionRoomById(id: number){
+  GetSchoolsData() {
+    this.SchoolService.Get(this.DomainName).subscribe((d) => {
+      this.schools = d
+    })
+  }
+
+  getDiscussionRoomById(id: number) {
     this.discussionRoom = new DiscussionRoom()
     this.choosedClasss = [];
     this.choosedStudentsClass = [];
     this.discussionRoomService.GetById(id, this.DomainName).subscribe(
       data => {
-        this.discussionRoom = data   
-        const selectedStudentClassroomIds = data.discussionRoomStudentClassrooms.map(x => x.studentClassroomID);  
-        this.studentsClass.forEach(classroom => { 
+        this.discussionRoom = data
+        const selectedStudentClassroomIds = data.discussionRoomStudentClassrooms.map(x => x.studentClassroomID);
+        this.studentsClass.forEach(classroom => {
           const selectedStudentsInClass = classroom.students.filter(student =>
             selectedStudentClassroomIds.includes(student.id)
-          ); 
+          );
 
-          if (selectedStudentsInClass.length > 0) { 
+          if (selectedStudentsInClass.length > 0) {
             selectedStudentsInClass.forEach(student => {
               if (!this.choosedStudentsClass.includes(student.id)) {
                 this.choosedStudentsClass.push(student.id);
               }
             });
- 
+
             if (!this.choosedClasss.some(c => c.classroomId === classroom.classroomId)) {
               this.choosedClasss.push(classroom);
             }
@@ -134,23 +147,23 @@ export class DiscussionRoomComponent {
   }
 
   openModal(Id?: number) {
-    this.discussionRoom= new DiscussionRoom();
-    if(Id){
-      this.getStudentClassData(Id) 
-    }else{
-      this.getStudentClassData() 
-    }
+    this.discussionRoom = new DiscussionRoom();
     document.getElementById('Add_Modal')?.classList.remove('hidden');
     document.getElementById('Add_Modal')?.classList.add('flex');
+    this.GetSchoolsData()
+    if (Id) {
+      this.getStudentClassData(Id)
+      this.mode = "Edit"
+    }
   }
 
   closeModal() {
     document.getElementById('Add_Modal')?.classList.remove('flex');
     document.getElementById('Add_Modal')?.classList.add('hidden');
-    this.validationErrors = {};  
-    
-    this.discussionRoom= new DiscussionRoom();
-    this.isLoading = false 
+    this.validationErrors = {};
+
+    this.discussionRoom = new DiscussionRoom();
+    this.isLoading = false
     this.studentsClass = []
     this.choosedClasss = []
     this.choosedStudentsClass = []
@@ -159,15 +172,15 @@ export class DiscussionRoomComponent {
   }
 
   toggleClassesToChooseStudents() {
-    this.viewStudents = false  
+    this.viewStudents = false
     if (this.viewClassStudents == false) {
       this.viewClassStudents = true
     } else {
       this.viewClassStudents = false
-    } 
-  } 
-  
-  isClassSelected(classroomID: number): boolean { 
+    }
+  }
+
+  isClassSelected(classroomID: number): boolean {
     return this.choosedClasss.some(item => item.classroomId == classroomID)
   }
 
@@ -192,7 +205,7 @@ export class DiscussionRoomComponent {
           this.choosedStudentsClass.push(student.id);
         }
       });
-    } else { 
+    } else {
       const classroom: ClassStudentForDiscussionRoom | undefined = this.studentsClass.find(c => c.classroomId === classroomID);
       if (!classroom) return;
       const deselectedStudentIds = classroom.students.map(s => s.id);
@@ -200,7 +213,7 @@ export class DiscussionRoomComponent {
     }
 
     const indexForClasss = this.choosedClasss.findIndex(item => item.classroomId === classroomID);
-    if (indexForClasss === -1) { 
+    if (indexForClasss === -1) {
       let found: ClassStudentForDiscussionRoom | undefined = this.studentsClass.find((element) => element.classroomId == classroomID);
       if (found) {
         this.choosedClasss.push(found);
@@ -222,7 +235,7 @@ export class DiscussionRoomComponent {
 
     const index = this.choosedClasss.findIndex(item => item.classroomId === classroom.classroomId);
     if (index !== -1) {
-      this.choosedClasss.splice(index, 1); 
+      this.choosedClasss.splice(index, 1);
       const deselectedStudentIds = classroom.students.map(s => s.id);
       this.choosedStudentsClass = this.choosedStudentsClass.filter(id => !deselectedStudentIds.includes(id));
     } else {
@@ -230,10 +243,10 @@ export class DiscussionRoomComponent {
       classroom.students.forEach(element => {
         if (!this.choosedStudentsClass.includes(element.id)) {
           this.choosedStudentsClass.push(element.id);
-        } 
+        }
       });
     }
-  } 
+  }
 
   onStudentSelectChange(studentClass: ClassroomStudent) {
     this.validationErrors['studentClassrooms'] = '';
@@ -245,13 +258,13 @@ export class DiscussionRoomComponent {
       this.choosedStudentsClass.push(studentClass.id);
     }
 
-    const indexForClasss = this.choosedClasss.findIndex(item => item.classroomId === studentClass.classID); 
-    if (indexForClasss === -1) { 
+    const indexForClasss = this.choosedClasss.findIndex(item => item.classroomId === studentClass.classID);
+    if (indexForClasss === -1) {
       let found: ClassStudentForDiscussionRoom | undefined = this.studentsClass.find((element) => element.classroomId == studentClass.classID);
       if (found) {
         this.choosedClasss.push(found);
       }
-    } else { 
+    } else {
       const relatedClass = this.studentsClass.find(c => c.classroomId === studentClass.classID);
       const hasStudentInClass = relatedClass?.students.some(student =>
         this.choosedStudentsClass.includes(student.id)
@@ -260,8 +273,8 @@ export class DiscussionRoomComponent {
       if (!hasStudentInClass) {
         this.choosedClasss.splice(indexForClasss, 1);
       }
-    } 
-  } 
+    }
+  }
 
   getStudentCount(classroomID: number): number {
     const classroom = this.choosedClasss.find(c => c.classroomId === classroomID);
@@ -270,16 +283,16 @@ export class DiscussionRoomComponent {
     return classroom.students.filter(student =>
       this.choosedStudentsClass.includes(student.id)
     ).length;
-  } 
+  }
 
   removeStudentFromClass(classroomId: number, event: MouseEvent) {
     event.stopPropagation(); // Prevent the click event from bubbling up
- 
-    const removedClass = this.choosedClasss.find(item => item.classroomId === classroomId); 
+
+    const removedClass = this.choosedClasss.find(item => item.classroomId === classroomId);
     this.choosedClasss = this.choosedClasss.filter(item => item.classroomId !== classroomId);
 
     if (removedClass) {
-      const removedStudentIds = removedClass.students.map(student => student.id); 
+      const removedStudentIds = removedClass.students.map(student => student.id);
       this.choosedStudentsClass = this.choosedStudentsClass.filter(
         id => !removedStudentIds.includes(id)
       );
@@ -290,7 +303,7 @@ export class DiscussionRoomComponent {
     this.viewStudents = true
     this.studentClassWhenSelectClass = classroom
   }
-  
+
   returnToClases() {
     this.viewStudents = false
     this.studentClassWhenSelectClass = new ClassStudentForDiscussionRoom()
@@ -324,15 +337,15 @@ export class DiscussionRoomComponent {
       if (this.discussionRoom.hasOwnProperty(key)) {
         const field = key as keyof DiscussionRoom;
         if (!this.discussionRoom[field]) {
-          if(field == "title" || field == "startDate" || field == "endDate" || field == "time" || field == "meetingLink" || (this.discussionRoom.id == 0 && field == 'imageFile')){
+          if (field == "title" || field == "startDate" || field == "endDate" || field == "time" || field == "meetingLink" || (this.discussionRoom.id == 0 && field == 'imageFile')) {
             this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
             isValid = false;
-          } 
-        } else { 
+          }
+        } else {
           this.validationErrors[field] = '';
         }
       }
-    } 
+    }
 
     if (this.discussionRoom.startDate && this.discussionRoom.endDate) {
       const start = new Date(this.discussionRoom.startDate);
@@ -344,9 +357,9 @@ export class DiscussionRoomComponent {
       }
     }
 
-    if(this.choosedStudentsClass.length == 0){
+    if (this.choosedStudentsClass.length == 0) {
       this.validationErrors['studentClassrooms'] = '*Students are required'
-    }else{
+    } else {
       this.validationErrors['studentClassrooms'] = ''
     }
 
@@ -363,42 +376,42 @@ export class DiscussionRoomComponent {
 
   onIsRepeatedWeeklyChange(event: Event) {
     const isChecked = (event.target as HTMLInputElement).checked;
-    this.discussionRoom.isRepeatedWeekly = isChecked 
+    this.discussionRoom.isRepeatedWeekly = isChecked
   }
 
   onImageFileSelected(event: any) {
     const file: File = event.target.files[0];
     const input = event.target as HTMLInputElement;
-    
+
     if (file) {
       if (file.size > 25 * 1024 * 1024) {
         this.validationErrors['imageFile'] = 'The file size exceeds the maximum limit of 25 MB.';
         this.discussionRoom.imageFile = null;
-        return; 
+        return;
       }
       if (file.type === 'image/jpeg' || file.type === 'image/png') {
-        this.discussionRoom.imageFile = file; 
-        this.validationErrors['imageFile'] = ''; 
+        this.discussionRoom.imageFile = file;
+        this.validationErrors['imageFile'] = '';
 
         const reader = new FileReader();
         reader.readAsDataURL(file);
       } else {
         this.validationErrors['imageFile'] = 'Invalid file type. Only JPEG, JPG and PNG are allowed.';
         this.discussionRoom.imageFile = null;
-        return; 
+        return;
       }
     }
 
     input.value = '';
   }
 
-  Save(){
+  Save() {
     this.discussionRoom.studentClassrooms = []
     this.discussionRoom.studentClassrooms.push(...this.choosedStudentsClass)
- 
-    if(this.isFormValid()){ 
+
+    if (this.isFormValid()) {
       this.isLoading = true;
-      if(this.discussionRoom.id == 0){    
+      if (this.discussionRoom.id == 0) {
         this.discussionRoomService.Add(this.discussionRoom, this.DomainName).subscribe(
           (result: any) => {
             this.closeModal();
@@ -408,7 +421,7 @@ export class DiscussionRoomComponent {
             this.isLoading = false;
           }
         );
-      } else{ 
+      } else {
         this.discussionRoomService.Edit(this.discussionRoom, this.DomainName).subscribe(
           (result: any) => {
             this.closeModal()
@@ -418,9 +431,9 @@ export class DiscussionRoomComponent {
             this.isLoading = false;
           }
         );
-      } 
+      }
     }
-  } 
+  }
 
   Delete(id: number) {
     Swal.fire({
@@ -437,10 +450,10 @@ export class DiscussionRoomComponent {
           this.getAllData()
         });
       }
-    });  
+    });
   }
-  
-  async onSearchEvent(event: { key: string; value: any }) { 
+
+  async onSearchEvent(event: { key: string; value: any }) {
     this.key = event.key;
     this.value = event.value;
     try {
