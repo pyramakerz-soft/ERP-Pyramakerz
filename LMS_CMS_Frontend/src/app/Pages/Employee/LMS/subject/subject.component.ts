@@ -26,19 +26,19 @@ import { firstValueFrom } from 'rxjs';
 @Component({
   selector: 'app-subject',
   standalone: true,
-  imports: [FormsModule,CommonModule,SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent],
   templateUrl: './subject.component.html',
   styleUrl: './subject.component.css'
 })
 export class SubjectComponent {
-  keysArray: string[] = ['id', 'en_name','ar_name','gradeName','orderInCertificate','creditHours','subjectCode','passByDegree','totalMark','subjectCategoryName','numberOfSessionPerWeek' ];
-  key: string= "id";
+  keysArray: string[] = ['id', 'en_name', 'ar_name', 'gradeName', 'orderInCertificate', 'creditHours', 'subjectCode', 'passByDegree', 'totalMark', 'subjectCategoryName', 'numberOfSessionPerWeek'];
+  key: string = "id";
   value: any = "";
 
-  subjectData:Subject[] = []
-  subjectCategories:SubjectCategory[] = []
-  subject:Subject = new Subject()
-  editSubject:boolean = false
+  subjectData: Subject[] = []
+  subjectCategories: SubjectCategory[] = []
+  subject: Subject = new Subject()
+  editSubject: boolean = false
   validationErrors: { [key in keyof Subject]?: string } = {};
 
   AllowEdit: boolean = false;
@@ -53,17 +53,21 @@ export class SubjectComponent {
 
   selectedSchool: number | null = null;
   Schools: School[] = []
-  
+
   selectedSection: number | null = null;
   Sections: Section[] = []
-  
-  Grades: Grade[] = []
-  
-  constructor(public account: AccountService, public router:Router, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService, 
-    public activeRoute: ActivatedRoute, private menuService: MenuService, public subjectService: SubjectService, public subjectCategoryService: SubjectCategoryService,
-    public schoolService: SchoolService, public sectionService:SectionService, public gradeService:GradeService, public dialog: MatDialog) {}
 
-  ngOnInit(){
+  SelectedSchoolId: number = 0;
+  SelectedGradeId: number = 0;
+  schools: School[] = []
+  grades: Grade[] = []
+  IsView: boolean = false;
+
+  constructor(public account: AccountService, public router: Router, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService,
+    public activeRoute: ActivatedRoute, private menuService: MenuService, public subjectService: SubjectService, public subjectCategoryService: SubjectCategoryService,
+    public schoolService: SchoolService, public sectionService: SectionService, public gradeService: GradeService, public dialog: MatDialog) { }
+
+  ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
 
@@ -74,6 +78,7 @@ export class SubjectComponent {
     });
 
     this.getSubjectData()
+    this.getSchools()
 
     this.menuService.menuItemsForEmployee$.subscribe((items) => {
       const settingsPage = this.menuService.findByPageName(this.path, items);
@@ -86,7 +91,7 @@ export class SubjectComponent {
     });
   }
 
-  getSubjectData(){
+  getSubjectData() {
     this.subjectService.Get(this.DomainName).subscribe(
       (data) => {
         this.subjectData = data;
@@ -94,18 +99,33 @@ export class SubjectComponent {
     )
   }
 
-  MoveToSubjectView(SubId:number){
+  GetDate() {
+    this.IsView = true
+    this.subjectService.GetByGradeId(this.SelectedGradeId, this.DomainName).subscribe((d) => {
+      this.subjectData = d;
+    })
+  }
+
+  getAllGradesBySchoolId() {
+    this.grades = []
+    this.SelectedGradeId=0
+    this.gradeService.GetBySchoolId(this.SelectedSchoolId, this.DomainName).subscribe((d) => {
+      this.grades = d
+    })
+  }
+
+  MoveToSubjectView(SubId: number) {
     this.router.navigateByUrl('Employee/Subject/' + this.DomainName + '/' + SubId);
   }
-  
+
   openModal(subjectId?: number) {
     if (subjectId) {
       this.editSubject = true;
-      this.openDialog(subjectId, this.editSubject); 
-    } else{
-      this.openDialog(); 
+      this.openDialog(subjectId, this.editSubject);
+    } else {
+      this.openDialog();
     }
-     
+
   }
 
   openDialog(subjectId?: number, editSubject?: boolean): void {
@@ -124,17 +144,17 @@ export class SubjectComponent {
       this.getSubjectData()
     });
   }
-  
+
   async onSearchEvent(event: { key: string, value: any }) {
     this.key = event.key;
     this.value = event.value;
     try {
-      const data: Subject[] = await firstValueFrom(this.subjectService.Get(this.DomainName));  
+      const data: Subject[] = await firstValueFrom(this.subjectService.Get(this.DomainName));
       this.subjectData = data || [];
-  
+
       if (this.value !== "") {
         const numericValue = isNaN(Number(this.value)) ? this.value : parseInt(this.value, 10);
-  
+
         this.subjectData = this.subjectData.filter(t => {
           const fieldValue = t[this.key as keyof typeof t];
           if (typeof fieldValue === 'string') {
@@ -149,7 +169,7 @@ export class SubjectComponent {
     } catch (error) {
       this.subjectData = [];
     }
-  } 
+  }
 
   IsAllowDelete(InsertedByID: number) {
     const IsAllow = this.EditDeleteServ.IsAllowDelete(InsertedByID, this.UserID, this.AllowDeleteForOthers);
@@ -160,8 +180,14 @@ export class SubjectComponent {
     const IsAllow = this.EditDeleteServ.IsAllowEdit(InsertedByID, this.UserID, this.AllowEditForOthers);
     return IsAllow;
   }
-  
-  deleteSubject(id:number){
+
+  getSchools() {
+    this.schoolService.Get(this.DomainName).subscribe((d) => {
+      this.schools = d
+    })
+  }
+
+  deleteSubject(id: number) {
     Swal.fire({
       title: 'Are you sure you want to delete this Subject?',
       icon: 'warning',
@@ -174,7 +200,7 @@ export class SubjectComponent {
       if (result.isConfirmed) {
         this.subjectService.Delete(id, this.DomainName).subscribe(
           (data: any) => {
-            this.subjectData=[]
+            this.subjectData = []
             this.getSubjectData()
           }
         );

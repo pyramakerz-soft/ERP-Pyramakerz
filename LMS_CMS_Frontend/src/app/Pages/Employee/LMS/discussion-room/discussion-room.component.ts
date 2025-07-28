@@ -99,16 +99,26 @@ export class DiscussionRoomComponent {
 
   getStudentClassData(discussionRoomID?: number) {
     this.studentsClass = []
-    this.choosedClasss=[]
-    this.choosedStudentsClass=[]
-    this.classroomStudentService.GetClassForActiveAcademicYearWithStudentsIncluded(this.discussionRoom.schoolID, this.DomainName).subscribe(
-      data => {
-        this.studentsClass = data
-        if (discussionRoomID) {
-          this.getDiscussionRoomById(discussionRoomID);
+    this.choosedClasss = []
+    this.choosedStudentsClass = []
+    if (discussionRoomID) {
+      this.discussionRoomService.GetByIdWithoutInclude(discussionRoomID, this.DomainName).subscribe((d) => {
+        this.discussionRoom=d
+        this.classroomStudentService.GetClassForActiveAcademicYearWithStudentsIncluded(this.discussionRoom.schoolID, this.DomainName).subscribe(
+          data => {
+            this.studentsClass = data
+            this.getDiscussionRoomById(discussionRoomID);
+          }
+        )
+      })
+    } else {
+      this.classroomStudentService.GetClassForActiveAcademicYearWithStudentsIncluded(this.discussionRoom.schoolID, this.DomainName).subscribe(
+        data => {
+          this.studentsClass = data
+          console.log(this.studentsClass)
         }
-      }
-    )
+      )
+    }
   }
 
   GetSchoolsData() {
