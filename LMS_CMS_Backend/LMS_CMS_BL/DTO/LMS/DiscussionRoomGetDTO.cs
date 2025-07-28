@@ -12,6 +12,8 @@ namespace LMS_CMS_BL.DTO.LMS
     {
         public long ID { get; set; } 
         public string Title { get; set; }
+        public long SchoolID { get; set; }
+        public string SchoolName { get; set; }
         public string MeetingLink { get; set; }
         public string? RecordLink { get; set; }
         public string? ImageLink { get; set; }

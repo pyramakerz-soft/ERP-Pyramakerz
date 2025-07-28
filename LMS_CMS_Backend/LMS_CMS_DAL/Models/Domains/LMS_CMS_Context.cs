@@ -1810,6 +1810,12 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasForeignKey(p => p.NotificationID)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<DiscussionRoom>()
+                .HasOne(p => p.School)
+                .WithMany(p => p.DiscussionRooms)
+                .HasForeignKey(p => p.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+
             ///////////////////////// Exception: /////////////////////////
             modelBuilder.Entity<Bus>()
                 .HasOne(b => b.DeletedByEmployee)
