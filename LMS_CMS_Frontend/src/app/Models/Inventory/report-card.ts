@@ -1,4 +1,3 @@
-
 export interface InventoryNetSummary {
   shopItemId: number;
   storeId: number;
@@ -38,4 +37,37 @@ export interface CombinedReportData {
   income: number | string;
   outcome: number | string;
   quantitybalance: number;
+}
+
+export interface InventoryNetCombinedResponse {
+  summary: {
+    shopItemId: number;
+    storeId: number;
+    toDate: string;
+    inQuantity: number;
+    outQuantity: number;
+    quantitybalance: number;
+    costBalance: number;
+  };
+  transactions: InventoryNetCombinedTransaction[];
+}
+
+export interface InventoryNetCombinedTransaction {
+  date: string;
+  flagId: number;
+  flagName: string;
+  invoiceNumber: string;
+  notes: string | null;
+  inQuantity: number;
+  outQuantity: number;
+  quantity: number;
+  balance: number;
+  price: number;
+  totalPrice: number;
+  averageCost: number;
+  itemInOut: number;
+  supplierName: string | null;
+  studentName: string | null;
+  storeName: string | null;
+  storeToName: string | null;
 }

@@ -5,14 +5,12 @@ import {
   HygieneForm,
   StudentHygieneType,
 } from '../../../../../Models/Clinic/HygieneForm';
-import { School } from '../../../../../Models/school';
-import { Grade } from '../../../../../Models/LMS/grade';
-import { Classroom } from '../../../../../Models/LMS/classroom';
-import { Student } from '../../../../../Models/student';
-import { HygieneTypes } from '../../../../../Models/Clinic/hygiene-types';
-import { HygieneFormTableComponent } from '../hygiene-form-table/hygiene-form-table.component';
 import { ApiService } from '../../../../../Services/api.service';
+import { HygieneFormTableComponent } from '../hygiene-form-table/hygiene-form-table.component';
 import { DatePipe } from '@angular/common';
+import { HygieneTypesService } from '../../../../../Services/Employee/Clinic/hygiene-type.service';
+import { HygieneTypes } from '../../../../../Models/Clinic/hygiene-types';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-view-hygiene-form',
@@ -27,49 +25,45 @@ export class ViewHygieneFormComponent implements OnInit {
   }
 
   hygieneForm: HygieneForm | null = null;
-  school: School | null = null;
-  grade: Grade | null = null;
-  classroom: Classroom | null = null;
-  students: StudentHygieneType[] = [];
+  students: any[] = [];
   hygieneTypes: HygieneTypes[] = [];
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private hygieneFormService: HygieneFormService,
-    private apiService: ApiService
+    private apiService: ApiService,
+    private hygieneTypesService: HygieneTypesService
   ) {}
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
+      await this.loadHygieneTypes();
       this.loadHygieneForm(Number(id));
     }
   }
 
-  async loadHygieneForm(id: number) {
+  async loadHygieneTypes() {
+    try {
+      const domainName = this.apiService.GetHeader();
+      const data = await firstValueFrom(
+        this.hygieneTypesService.Get(domainName)
+      );
+      this.hygieneTypes = data;
+    } catch (error) {
+      console.error('Error loading hygiene types:', error);
+    }
+  }
+
+  loadHygieneForm(id: number) {
     try {
       const domainName = this.apiService.GetHeader();
       this.hygieneFormService.GetById(id, domainName).subscribe({
         next: (hygieneForm) => {
-          console.log('Hygiene Form:', hygieneForm);
+          console.log('Hygiene Form Data:', hygieneForm);
           this.hygieneForm = hygieneForm;
-          this.students = hygieneForm.studentHygieneTypes ?? [];
-
-          // Extract all unique hygiene types from all students
-          const allHygieneTypes = this.students.flatMap((student) =>
-            student.hygieneTypes.map((ht) => ({
-              id: ht.id,
-              type: ht.type,
-              insertedAt: null,
-              insertedByUserId: ht.insertedByUserId,
-            }))
-          );
-
-          // Remove duplicates
-          this.hygieneTypes = Array.from(
-            new Map(allHygieneTypes.map((item) => [item.id, item])).values()
-          );
+          this.prepareStudentData(hygieneForm);
         },
         error: (error) => {
           console.error('Error loading hygiene form:', error);
@@ -78,5 +72,33 @@ export class ViewHygieneFormComponent implements OnInit {
     } catch (error) {
       console.error('Error in loadHygieneForm:', error);
     }
+  }
+
+  private prepareStudentData(hygieneForm: HygieneForm) {
+    this.students = hygieneForm.studentHygieneTypes.map(
+      (studentHygieneType) => {
+        const studentData: any = {
+          id: studentHygieneType.studentId,
+          en_name: studentHygieneType.student,
+          attendance: studentHygieneType.attendance,
+          comment: studentHygieneType.comment,
+          actionTaken: studentHygieneType.actionTaken,
+        };
+
+        // Initialize all hygiene types as false
+        this.hygieneTypes.forEach((hygieneType) => {
+          studentData[`hygieneType_${hygieneType.id}`] = false;
+        });
+
+        // Set to true only the hygiene types that exist in the student's data
+        if (studentHygieneType.hygieneTypes && studentHygieneType.attendance) {
+          studentHygieneType.hygieneTypes.forEach((hygieneType) => {
+            studentData[`hygieneType_${hygieneType.id}`] = true;
+          });
+        }
+
+        return studentData;
+      }
+    );
   }
 }

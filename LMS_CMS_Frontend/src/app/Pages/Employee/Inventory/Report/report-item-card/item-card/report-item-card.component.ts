@@ -11,6 +11,8 @@ import { StoresService } from '../../../../../../Services/Employee/Inventory/sto
 import { ShopItemService } from '../../../../../../Services/Employee/Inventory/shop-item.service';
 import {
   CombinedReportData,
+  InventoryNetCombinedResponse,
+  InventoryNetCombinedTransaction,
   InventoryNetSummary,
   InventoryNetTransaction,
 } from '../../../../../../Models/Inventory/report-card';
@@ -122,25 +124,8 @@ export class ReportItemCardComponent implements OnInit {
     this.combinedData = [];
 
     try {
-      // Get summary data
-      const summaryResponse = await this.inventoryDetailsService
-        .getInventoryNetSummary(
-          this.selectedStoreId!,
-          this.selectedItemId!,
-          this.dateFrom,
-          this.inventoryDetailsService.ApiServ.GetHeader()
-        )
-        .toPromise();
-
-      console.log('Summary Response:', summaryResponse); // <-- log summary
-
-      if (!summaryResponse) {
-        throw new Error('No summary data received');
-      }
-
-      // Get transaction data
-      const transactionsResponse = await this.inventoryDetailsService
-        .getInventoryNetTransactions(
+      const response = await this.inventoryDetailsService
+        .getInventoryNetCombined(
           this.selectedStoreId!,
           this.selectedItemId!,
           this.dateFrom,
@@ -149,30 +134,24 @@ export class ReportItemCardComponent implements OnInit {
         )
         .toPromise();
 
-      console.log('Transactions Response:', transactionsResponse); // <-- log transactions
+      if (!response) {
+        throw new Error('No data received');
+      }
 
-      // Process and combine data
-      this.processReportData(summaryResponse, transactionsResponse || []);
-
+      this.processReportData(response.summary, response.transactions || []);
       this.showTable = true;
     } catch (error) {
       console.error('Error loading report:', error);
       this.combinedData = [];
       this.showTable = true;
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Failed to load report data',
-        confirmButtonText: 'OK',
-      });
     } finally {
       this.isLoading = false;
     }
   }
 
   private processReportData(
-    summary: InventoryNetSummary,
-    transactions: InventoryNetTransaction[]
+    summary: InventoryNetCombinedResponse['summary'],
+    transactions: InventoryNetCombinedTransaction[]
   ) {
     const summaryRow: any = {
       isSummary: true,

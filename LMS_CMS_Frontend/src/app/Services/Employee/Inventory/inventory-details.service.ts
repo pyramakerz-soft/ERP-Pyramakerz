@@ -2,7 +2,11 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { InventoryDetails } from '../../../Models/Inventory/InventoryDetails';
-import { InventoryNetSummary, InventoryNetTransaction } from '../../../Models/Inventory/report-card';
+import {
+  InventoryNetCombinedResponse,
+  InventoryNetSummary,
+  InventoryNetTransaction,
+} from '../../../Models/Inventory/report-card';
 import { Store } from '../../../Models/Inventory/store';
 import { ApiService } from '../../api.service';
 import { StoreBalanceReport } from '../../../Models/Inventory/store-balance';
@@ -72,7 +76,10 @@ export class InventoryDetailsService {
     );
   }
 
-  Edit(Detail: InventoryDetails[], DomainName: string): Observable<InventoryDetails[]> {
+  Edit(
+    Detail: InventoryDetails[],
+    DomainName: string
+  ): Observable<InventoryDetails[]> {
     if (DomainName != null) {
       this.header = DomainName;
     }
@@ -82,7 +89,11 @@ export class InventoryDetailsService {
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
 
-    return this.http.put<InventoryDetails[]>(`${this.baseUrl}/InventoryDetails`, Detail, { headers });
+    return this.http.put<InventoryDetails[]>(
+      `${this.baseUrl}/InventoryDetails`,
+      Detail,
+      { headers }
+    );
   }
 
   Delete(id: number, DomainName: string) {
@@ -205,7 +216,10 @@ export class InventoryDetailsService {
     if (DomainName != null) {
       this.header = DomainName;
     }
-    console.log('getAllStoresBalance called with reportflagtype:', reportFlagType);
+    console.log(
+      'getAllStoresBalance called with reportflagtype:',
+      reportFlagType
+    );
     const token = localStorage.getItem('current_token');
     const headers = new HttpHeaders()
       .set('domain-name', this.header)
@@ -214,6 +228,28 @@ export class InventoryDetailsService {
 
     return this.http.get<StoreBalanceReport>(
       `${this.baseUrl}/InventoryDetails/AllStoresBalance?toDate=${toDate}&reportType=${reportFlagType}&categoryId=${categoryId}&typeId=${typeId}&hasBalance=${hasBalance}&overdrawnBalance=${overdrawnBalance}&zeroBalances=${zeroBalances}`,
+      { headers }
+    );
+  }
+
+  getInventoryNetCombined(
+    storeId: number,
+    itemId: number,
+    fromDate: string,
+    toDate: string,
+    DomainName: string
+  ): Observable<InventoryNetCombinedResponse> {
+    if (DomainName != null) {
+      this.header = DomainName;
+    }
+    const token = localStorage.getItem('current_token');
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+
+    return this.http.get<InventoryNetCombinedResponse>(
+      `${this.baseUrl}/InventoryDetails/inventory-net-combined?storeId=${storeId}&shopItemId=${itemId}&fromDate=${fromDate}&toDate=${toDate}`,
       { headers }
     );
   }
