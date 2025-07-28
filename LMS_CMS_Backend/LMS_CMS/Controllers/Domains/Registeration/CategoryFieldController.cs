@@ -167,6 +167,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                 return BadRequest("Building cannot be null");
             }
 
+            if (newField.ID >= 1 && newField.ID <= 28)
+            {
+                return BadRequest("You can't edit this Category Field");
+            }
+
             if (newField.FieldTypeID == 5)
             {
                 if (newField.Options.Count == 0)
@@ -286,6 +291,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
             if (id == 0)
             {
                 return BadRequest("Enter Category ID");
+            }
+            
+            if (id >= 1 && id <= 28)
+            {
+                return BadRequest("You can't delete this Category Field");
             }
 
             CategoryField field = Unit_Of_Work.categoryField_Repository.First_Or_Default(t => t.IsDeleted != true && t.ID == id);

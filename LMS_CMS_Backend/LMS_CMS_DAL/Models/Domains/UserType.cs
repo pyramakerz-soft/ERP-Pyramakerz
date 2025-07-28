@@ -19,5 +19,6 @@ namespace LMS_CMS_DAL.Models.Domains
     
         public ICollection<AnnouncementSharedTo> AnnouncementSharedTos { get; set; } = new List<AnnouncementSharedTo>();
         public ICollection<NotificationSharedTo> NotificationSharedTos { get; set; } = new List<NotificationSharedTo>();
+        public ICollection<Notification> Notifications { get; set; } = new List<Notification>();
     }
 }
