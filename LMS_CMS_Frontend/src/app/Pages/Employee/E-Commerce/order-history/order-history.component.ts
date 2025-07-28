@@ -84,6 +84,7 @@ export class OrderHistoryComponent {
     this.orderrStateService.Get(this.DomainName).subscribe(
       data => {
         this.orderStates = data
+       
       }
     ) 
   } 

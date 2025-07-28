@@ -200,4 +200,21 @@ async onSearchEvent(event: { key: string; value: any }) {
         });
     }
 }
+
+GetTableHeaders(){
+   
+if(!this.isRtl){
+  return ['ID', 'Diagnosis Name', 'Date', 'Actions']
+}else{
+  return [
+  "المعرف",
+  "اسم التشخيص",
+  "التاريخ",
+  "الإجراءات"
+]
 }
+}
+
+
+}
+

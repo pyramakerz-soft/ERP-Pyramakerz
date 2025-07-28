@@ -23,7 +23,7 @@
         (click)="getOrders(row.id)"
         [ngClass]="{'border-b-[#089B41] text-gray-800 font-semibold': row.id == stateID, 'border-b-[#A9A9A952] text-[#6F6F6F] bg-[#EEEEEE3D]': row.id != stateID }"
         class="px-4 py-2 border-b-2">
-            <p>{{ row.name }}</p>
+            <p>{{ isRtl?row.arabicName: row.name }}</p>
         </div>
     </div>
 </div>

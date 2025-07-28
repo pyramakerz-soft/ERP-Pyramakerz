@@ -10,7 +10,7 @@
     </div>
   </div>
 
-  <app-table [headers]="['ID', 'Diagnosis Name', 'Date', 'Actions']" [data]="diagnoses"
+  <app-table [headers]="GetTableHeaders()" [data]="diagnoses"
     [keys]="['id', 'name', 'insertedAt']" (delete)="deleteDiagnosis($event)" (edit)="openModal($event.id)">
   </app-table>
 
