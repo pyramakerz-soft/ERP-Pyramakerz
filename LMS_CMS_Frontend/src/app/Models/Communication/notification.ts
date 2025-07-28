@@ -10,7 +10,6 @@ export class Notification {
         public isAllowDismiss: boolean = false,
         public userTypeID :number =0,
         public insertedByUserId :number =0,
-        public notificationSharedTos : NotificationSharedTo[]=[],
         public notificationSharedTos : NotificationSharedTo[]=[]
     ) {}
 } 
