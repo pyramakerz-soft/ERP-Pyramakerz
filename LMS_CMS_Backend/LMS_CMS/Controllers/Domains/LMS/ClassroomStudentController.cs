@@ -47,7 +47,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             List<StudentClassroom> studentClassrooms = await Unit_Of_Work.studentClassroom_Repository.Select_All_With_IncludesById<StudentClassroom>(
-                    f => f.IsDeleted != true && f.ClassID == classId,
+                    f => f.IsDeleted != true && f.ClassID == classId && f.Student.IsDeleted != true,
                     query => query.Include(emp => emp.Student),
                     query => query.Include(emp => emp.Classroom));
 
@@ -114,7 +114,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             StudentClassroom studentClassroom = await Unit_Of_Work.studentClassroom_Repository.FindByIncludesAsync(
-                    d => d.IsDeleted != true && d.ID == Id,
+                    d => d.IsDeleted != true && d.ID == Id && d.Student.IsDeleted != true,
                     query => query.Include(emp => emp.Student),
                     query => query.Include(emp => emp.StudentClassroomSubjects.Where(d => d.IsDeleted != true)).ThenInclude(d => d.Subject),
                     query => query.Include(emp => emp.Classroom));

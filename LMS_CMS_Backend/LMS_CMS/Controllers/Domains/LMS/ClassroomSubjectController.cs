@@ -295,7 +295,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             List<ClassroomSubject> classroomSubjects = await Unit_Of_Work.classroomSubject_Repository.Select_All_With_IncludesById<ClassroomSubject>(
-                    f => f.IsDeleted != true && f.ClassroomID == classId,
+                    f => f.IsDeleted != true && f.ClassroomID == classId && f.Classroom.IsDeleted != true && f.Subject.IsDeleted != true,
                     query => query.Include(emp => emp.Subject),
                     query => query.Include(emp => emp.Classroom),
                     query => query.Include(emp => emp.Teacher),
@@ -325,7 +325,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             var classroomSubjects = await Unit_Of_Work.classroomSubject_Repository
                 .Select_All_With_IncludesById<ClassroomSubject>(
-                    f => f.IsDeleted != true && f.TeacherID == EmpId,
+                    f => f.IsDeleted != true && f.TeacherID == EmpId && f.Classroom.IsDeleted != true && f.Subject.IsDeleted != true,
                     q => q.Include(cs => cs.Subject),
                     q => q.Include(cs => cs.Classroom),
                     q => q.Include(cs => cs.Teacher),
@@ -365,7 +365,9 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            List<ClassroomSubjectCoTeacher> classroomSubjectCoTeacher = Unit_Of_Work.classroomSubjectCoTeacher_Repository.FindBy(s => s.CoTeacherID == EmpId && s.IsDeleted != true);
+            List<ClassroomSubjectCoTeacher> classroomSubjectCoTeacher = Unit_Of_Work.classroomSubjectCoTeacher_Repository.FindBy(
+                s => s.CoTeacherID == EmpId && s.IsDeleted != true && s.CoTeacher.IsDeleted != true && s.ClassroomSubject.IsDeleted != true 
+                && s.ClassroomSubject.Classroom.IsDeleted != true && s.ClassroomSubject.Subject.IsDeleted != true);
             List<long> subjectIds = classroomSubjectCoTeacher
                 .Select(v => v.ClassroomSubjectID)
                 .Distinct()
@@ -373,7 +375,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
            var classroomSubjects = await Unit_Of_Work.classroomSubject_Repository
                 .Select_All_With_IncludesById<ClassroomSubject>(
-                    f => f.IsDeleted != true && subjectIds.Contains( f.ID) ,
+                    f => f.IsDeleted != true && f.Classroom.IsDeleted != true && f.Subject.IsDeleted != true && subjectIds.Contains( f.ID) ,
                     q => q.Include(cs => cs.Subject),
                     q => q.Include(cs => cs.Classroom)
                 );
@@ -413,7 +415,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             ClassroomSubject classroomSubject = await Unit_Of_Work.classroomSubject_Repository.FindByIncludesAsync(
-                    f => f.IsDeleted != true && f.ID == id,
+                    f => f.IsDeleted != true && f.ID == id && f.Classroom.IsDeleted != true && f.Subject.IsDeleted != true,
                     query => query.Include(emp => emp.Subject),
                     query => query.Include(emp => emp.Classroom),
                     query => query.Include(emp => emp.Teacher),
@@ -444,7 +446,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             List<ClassroomSubject> classroomSubjects = await Unit_Of_Work.classroomSubject_Repository
                 .Select_All_With_IncludesById<ClassroomSubject>(
                     f => f.IsDeleted != true && f.SubjectID == SubId && f.Classroom.IsDeleted != true && f.Hide != true && f.Subject.IsDeleted != true,
-                    query => query.Include(cs => cs.Classroom).ThenInclude(c => c.StudentClassrooms).ThenInclude(sc => sc.StudentClassroomSubjects),
+                    query => query.Include(cs => cs.Classroom).ThenInclude(c => c.StudentClassrooms).ThenInclude(sc => sc.StudentClassroomSubjects.Where(d => d.IsDeleted != true)),
                     query => query.Include(cs => cs.Classroom).ThenInclude(c => c.StudentClassrooms).ThenInclude(sc => sc.Student)
                 );
 

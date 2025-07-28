@@ -1,4 +1,5 @@
-﻿using LMS_CMS_DAL.Models.Domains.Communication;
+﻿using LMS_CMS_BL.DTO.Administration;
+using LMS_CMS_DAL.Models.Domains.Communication;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -14,6 +15,10 @@ namespace LMS_CMS_BL.DTO.Communication
         public string? ImageLink { get; set; }
         public string? Text { get; set; }
         public string? Link { get; set; }
-        public bool IsAllowDismiss { get; set; } 
+        public bool IsAllowDismiss { get; set; }
+        public long UserTypeID { get; set; }
+        public List<NotificationSharedToGetDTO> NotificationSharedTos { get; set; } = new List<NotificationSharedToGetDTO>();
+
+        public long? InsertedByUserId { get; set; }
     }
 }

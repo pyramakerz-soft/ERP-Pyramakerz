@@ -1123,6 +1123,13 @@ namespace LMS_CMS_BL.Config
 
             CreateMap<Notification, NotificationGetDTO>();
             CreateMap<NotificationAddDTO, Notification>();
+
+            CreateMap<NotificationSharedTo, NotificationSharedToGetDTO>()
+                .ForMember(dest => dest.ImageLink, opt => opt.MapFrom(src => src.Notification.ImageLink))
+                .ForMember(dest => dest.Text, opt => opt.MapFrom(src => src.Notification.Text))
+                .ForMember(dest => dest.Link, opt => opt.MapFrom(src => src.Notification.Link))
+                .ForMember(dest => dest.IsAllowDismiss, opt => opt.MapFrom(src => src.Notification.IsAllowDismiss));
+
         }
     } 
 }
