@@ -105,7 +105,8 @@
          {{'No Data Found'| translate }}
       </option>
     </select>
-    <span *ngIf="validationErrors['storeToTransformId']" class="text-red-500 ml-3 font-normal">{{validationErrors["storeToTransformId"] }}</span>
+    <span *ngIf="validationErrors['storeToTransformId']"
+      class="text-red-500 ml-3 font-normal">{{validationErrors["storeToTransformId"] }}</span>
   </div>
 
   <div *ngIf="FlagId == 11 || FlagId == 12" class="flex flex-col w-[24%] mb-4 relative">
@@ -130,8 +131,6 @@
     </div>
     <div *ngIf="Data.isCash" class="flex flex-col mb-4 w-[15%]">
       <input id="cashAmount" type="number" [(ngModel)]="Data.cashAmount"
-
-
         class="rounded-lg border border-solid border-gray-300 px-4 py-3" (ngModelChange)="TotalandRemainingCalculate()" 
         (input)="validateCashVisaNumber($event, 'cashAmount')"
         placeholder="{{'Enter'| translate }} {{'Amount'| translate }}" />
@@ -419,7 +418,7 @@
           </td>
           <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
             <input [(ngModel)]="row.quantity" (ngModelChange)="CalculateTotalPrice(row)"
-              (input)="validateNumber($event, 'quantity')" type="text"
+              (input)="validateNumberRow($event, 'quantity' ,row)" type="text"
               class="w-full border border-gray-300 px-2 py-1 rounded-md" />
           </td>
           <td *ngIf="!IsPriceEditable && mode === 'Create'"
@@ -428,7 +427,7 @@
           </td>
           <td *ngIf="IsPriceEditable || mode === 'Edit'"
             class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-            <input [(ngModel)]="row.price" (ngModelChange)="EditPrice(row)" (input)="validateNumber($event, 'price')"
+            <input [(ngModel)]="row.price" (ngModelChange)="EditPrice(row)" (input)="validateNumberRow($event, 'price' ,row)"
               type="text" class="w-full border border-gray-300 px-2 py-1 rounded-md" />
           </td>
           <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
@@ -508,7 +507,7 @@
           </td>
           <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
             <input [(ngModel)]="row.quantity" (ngModelChange)="CalculateTotalPrice(row)"
-              (input)="validateNumber($event, 'quantity')" type="text"
+              (input)="validateNumberRow($event, 'quantity' ,row)" type="text"
               class="w-full border border-gray-300 px-2 py-1 rounded-md" />
           </td>
           <td *ngIf="!IsPriceEditable && mode === 'Create'"
@@ -517,7 +516,7 @@
           </td>
           <td *ngIf="IsPriceEditable || mode === 'Edit'"
             class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-            <input [(ngModel)]="row.price" (ngModelChange)="EditPrice(row)" (input)="validateNumber($event, 'price')"
+            <input [(ngModel)]="row.price" (ngModelChange)="EditPrice(row)" (input)="validateNumberRow($event, 'price' ,row)"
               type="text" class="w-full border border-gray-300 px-2 py-1 rounded-md" />
           </td>
           <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">

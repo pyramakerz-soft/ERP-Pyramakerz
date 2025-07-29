@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Mvc;
 using LMS_CMS_BL.DTO.Communication;
 using LMS_CMS_DAL.Models.Domains.Administration;
 using LMS_CMS_DAL.Models.Domains.Communication;
+using LMS_CMS_BL.DTO.Administration;
+using Microsoft.EntityFrameworkCore;
 
 namespace LMS_CMS_PL.Controllers.Domains.Communication
 {
@@ -33,6 +35,320 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             _fileImageValidationService = fileImageValidationService;
             _userTreeService = userTreeService;
         }
+
+        [HttpGet]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Notification" }
+        )]
+        public async Task<IActionResult> GetAsync()
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            List<Notification> notifications = await Unit_Of_Work.notification_Repository.Select_All_With_IncludesById<Notification>(
+                    f => f.IsDeleted != true,
+                    query => query.Include(d => d.NotificationSharedTos.Where(d => d.IsDeleted != true))
+                    );
+
+            if (notifications == null || notifications.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<NotificationGetDTO> notificationGetDTO = mapper.Map<List<NotificationGetDTO>>(notifications);
+
+            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+            foreach (var notification in notificationGetDTO)
+            {
+                if (!string.IsNullOrEmpty(notification.ImageLink))
+                {
+                    notification.ImageLink = $"{serverUrl}{notification.ImageLink.Replace("\\", "/")}";
+                }
+            }
+
+            return Ok(notificationGetDTO);
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////////////
+        
+        [HttpGet("{id}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Notification" }
+        )]
+        public async Task<IActionResult> GetByID(long id)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            Notification notification = await Unit_Of_Work.notification_Repository.FindByIncludesAsync(
+                    f => f.IsDeleted != true && f.ID == id,
+                    query => query.Include(d => d.NotificationSharedTos.Where(d => d.IsDeleted != true))
+                    );
+
+            if (notification == null)
+            {
+                return NotFound();
+            }
+
+            NotificationGetDTO notificationGetDTO = mapper.Map<NotificationGetDTO>(notification);
+            if(notificationGetDTO.NotificationSharedTos != null && notificationGetDTO.NotificationSharedTos.Count != 0)
+            {
+                notificationGetDTO.UserTypeID = notificationGetDTO.NotificationSharedTos[0].UserTypeID;
+            }
+            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+            if (!string.IsNullOrEmpty(notification.ImageLink))
+            {
+                notificationGetDTO.ImageLink = $"{serverUrl}{notification.ImageLink.Replace("\\", "/")}";
+            } 
+
+            return Ok(notificationGetDTO);
+        }
+        
+        //////////////////////////////////////////////////////////////////////////////////////////
+        
+        [HttpGet("ByUserID")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee", "parent", "student" }
+        )]
+        public async Task<IActionResult> ByUserID()
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            long userTypeID = 0;
+            if (userTypeClaim == "employee")
+            {
+                userTypeID = 1;
+            }
+            else if (userTypeClaim == "student")
+            {
+                userTypeID = 2;
+            }
+            else if (userTypeClaim == "parent")
+            {
+                userTypeID = 3;
+            }
+
+            List<NotificationSharedTo> notificationSharedTos = await Unit_Of_Work.notificationSharedTo_Repository.Select_All_With_IncludesById<NotificationSharedTo>(
+                    f => f.IsDeleted != true && f.Notification.IsDeleted != true && f.UserID == userId && f.UserTypeID == userTypeID,
+                    query => query.Include(d => d.Notification)
+                    );
+
+            notificationSharedTos = notificationSharedTos
+                .OrderByDescending(d => d.InsertedAt)
+                .ToList();
+
+            if (notificationSharedTos == null || notificationSharedTos.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<NotificationSharedToGetDTO> notificationSharedToGetDTO = mapper.Map<List<NotificationSharedToGetDTO>>(notificationSharedTos);
+
+            foreach (var notificationSharedTo in notificationSharedToGetDTO)
+            {
+                string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+                if (!string.IsNullOrEmpty(notificationSharedTo.ImageLink))
+                {
+                    notificationSharedTo.ImageLink = $"{serverUrl}{notificationSharedTo.ImageLink.Replace("\\", "/")}";
+                }
+            }
+
+            return Ok(notificationSharedToGetDTO);
+        }
+        
+        //////////////////////////////////////////////////////////////////////////////////////////
+        
+        [HttpGet("ByUserIDFirst5")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee", "parent", "student" }
+        )]
+        public async Task<IActionResult> ByUserIDFirst5()
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            long userTypeID = 0;
+            if (userTypeClaim == "employee")
+            {
+                userTypeID = 1;
+            }
+            else if (userTypeClaim == "student")
+            {
+                userTypeID = 2;
+            }
+            else if (userTypeClaim == "parent")
+            {
+                userTypeID = 3;
+            }
+
+            List<NotificationSharedTo> notificationSharedTos = await Unit_Of_Work.notificationSharedTo_Repository.Select_All_With_IncludesById<NotificationSharedTo>(
+                    f => f.IsDeleted != true && f.Notification.IsDeleted != true && f.UserID == userId && f.UserTypeID == userTypeID,
+                    query => query.Include(d => d.Notification)
+                    );
+
+            notificationSharedTos = notificationSharedTos
+                .OrderByDescending(d => d.InsertedAt)
+                .Take(5)
+                .ToList();
+
+            if (notificationSharedTos == null || notificationSharedTos.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<NotificationSharedToGetDTO> notificationSharedToGetDTO = mapper.Map<List<NotificationSharedToGetDTO>>(notificationSharedTos);
+
+            foreach (var notificationSharedTo in notificationSharedToGetDTO)
+            {
+                string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+                if (!string.IsNullOrEmpty(notificationSharedTo.ImageLink))
+                {
+                    notificationSharedTo.ImageLink = $"{serverUrl}{notificationSharedTo.ImageLink.Replace("\\", "/")}";
+                }
+            }
+
+            return Ok(notificationSharedToGetDTO);
+        }
+        
+        //////////////////////////////////////////////////////////////////////////////////////////
+        
+        [HttpGet("ByUserIDAndNotificationSharedByID{notificationSharedID}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee", "parent", "student" }
+        )]
+        public async Task<IActionResult> ByUserIDAndNotificationSharedByID(long notificationSharedID)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            long userTypeID = 0;
+            if (userTypeClaim == "employee")
+            {
+                userTypeID = 1;
+            }
+            else if (userTypeClaim == "student")
+            {
+                userTypeID = 2;
+            }
+            else if (userTypeClaim == "parent")
+            {
+                userTypeID = 3;
+            }
+
+            NotificationSharedTo notificationSharedTo = await Unit_Of_Work.notificationSharedTo_Repository.FindByIncludesAsync(
+                    f => f.IsDeleted != true && f.Notification.IsDeleted != true && f.ID == notificationSharedID,
+                    query => query.Include(d => d.Notification)
+                    );
+
+            if (notificationSharedTo == null)
+            {
+                return NotFound();
+            }
+
+            if(notificationSharedTo.UserID != userId || notificationSharedTo.UserTypeID != userTypeID)
+            {
+                BadRequest();
+            }
+
+            NotificationSharedToGetDTO notificationSharedToGetDTO = mapper.Map<NotificationSharedToGetDTO>(notificationSharedTo);
+
+            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+            if (!string.IsNullOrEmpty(notificationSharedToGetDTO.ImageLink))
+            {
+                notificationSharedToGetDTO.ImageLink = $"{serverUrl}{notificationSharedToGetDTO.ImageLink.Replace("\\", "/")}";
+            }
+             
+            return Ok(notificationSharedToGetDTO);
+        }
+        
+        //////////////////////////////////////////////////////////////////////////////////////////
+        
+        [HttpGet("GetNotNotifiedYetByUserID")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee", "parent", "student" }
+        )]
+        public async Task<IActionResult> GetNotNotifiedYetByUserID()
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            long userTypeID = 0;
+            if (userTypeClaim == "employee")
+            {
+                userTypeID = 1;
+            } 
+            else if(userTypeClaim == "student")
+            {
+                userTypeID= 2;
+            }
+            else if (userTypeClaim == "parent")
+            {
+                userTypeID = 3;
+            }
+
+            List<NotificationSharedTo> notificationSharedTos = await Unit_Of_Work.notificationSharedTo_Repository.Select_All_With_IncludesById<NotificationSharedTo>(
+                    f => f.IsDeleted != true && f.Notification.IsDeleted != true && !f.NotifiedOrNot && f.UserID == userId && f.UserTypeID == userTypeID,
+                    query => query.Include(d => d.Notification)
+                    );
+
+            if (notificationSharedTos == null || notificationSharedTos.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<NotificationSharedToGetDTO> notificationSharedToGetDTO = mapper.Map<List<NotificationSharedToGetDTO>>(notificationSharedTos);
+
+            foreach (var notificationSharedTo in notificationSharedToGetDTO)
+            {
+                string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+                if (!string.IsNullOrEmpty(notificationSharedTo.ImageLink))
+                {
+                    notificationSharedTo.ImageLink = $"{serverUrl}{notificationSharedTo.ImageLink.Replace("\\", "/")}";
+                }
+            }
+
+            foreach (var item in notificationSharedTos)
+            {
+                item.NotifiedOrNot = true;
+                TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+                item.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                //if (userTypeClaim == "octa")
+                //{
+                //    item.UpdatedByOctaId = userId;
+                //    if (item.UpdatedByUserId != null)
+                //    {
+                //        item.UpdatedByUserId = null;
+                //    }
+                //}
+                //else if (userTypeClaim == "employee")
+                //{
+                //    item.UpdatedByUserId = userId;
+                //    if (item.UpdatedByOctaId != null)
+                //    {
+                //        item.UpdatedByOctaId = null;
+                //    }
+                //}
+                Unit_Of_Work.notificationSharedTo_Repository.Update(item);
+            }
+            Unit_Of_Work.SaveChanges();
+
+            return Ok(notificationSharedToGetDTO);
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////////////
 
         [HttpPost]
         [Authorize_Endpoint_(
@@ -143,6 +459,104 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
 
             Unit_Of_Work.SaveChanges();
             return Ok();  
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpDelete("{id}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            allowDelete: 1,
+            pages: new[] { "Notification" }
+        )]
+        public IActionResult Delete(long id)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            if (id == 0)
+            {
+                return BadRequest("Enter Notification ID");
+            }
+
+            Notification notification = Unit_Of_Work.notification_Repository.First_Or_Default(t => t.IsDeleted != true && t.ID == id);
+
+            if (notification == null)
+            {
+                return NotFound();
+            }
+
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Notification", roleId, userId, notification);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
+            }
+
+            notification.IsDeleted = true;
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            notification.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            if (userTypeClaim == "octa")
+            {
+                notification.DeletedByOctaId = userId;
+                if (notification.DeletedByUserId != null)
+                {
+                    notification.DeletedByUserId = null;
+                }
+            }
+            else if (userTypeClaim == "employee")
+            {
+                notification.DeletedByUserId = userId;
+                if (notification.DeletedByOctaId != null)
+                {
+                    notification.DeletedByOctaId = null;
+                }
+            }
+
+            Unit_Of_Work.notification_Repository.Update(notification);
+
+            List<NotificationSharedTo> notificationSharedTos = Unit_Of_Work.notificationSharedTo_Repository.FindBy(d => d.NotificationID == id && d.IsDeleted != true);
+            if (notificationSharedTos != null && notificationSharedTos.Count > 0)
+            {
+                foreach (var notificationSharedTo in notificationSharedTos)
+                {
+                    notificationSharedTo.IsDeleted = true;
+                    notificationSharedTo.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                    if (userTypeClaim == "octa")
+                    {
+                        notificationSharedTo.DeletedByOctaId = userId;
+                        if (notificationSharedTo.DeletedByUserId != null)
+                        {
+                            notificationSharedTo.DeletedByUserId = null;
+                        }
+                    }
+                    else if (userTypeClaim == "employee")
+                    {
+                        notificationSharedTo.DeletedByUserId = userId;
+                        if (notificationSharedTo.DeletedByOctaId != null)
+                        {
+                            notificationSharedTo.DeletedByOctaId = null;
+                        }
+                    }
+                    Unit_Of_Work.notificationSharedTo_Repository.Update(notificationSharedTo);
+                }
+            }
+
+            Unit_Of_Work.SaveChanges();
+            return Ok();
         }
     }
 }

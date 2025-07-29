@@ -181,7 +181,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             if(academicYear.IsActive == true)
             {
-                List<AcademicYear> academicYears = Unit_Of_Work.academicYear_Repository.Select_All();
+                List<AcademicYear> academicYears = Unit_Of_Work.academicYear_Repository.FindBy(a=>a.SchoolID== NewAcademicYear.SchoolID);
                 foreach (var year in academicYears)
                 {
                     year.IsActive = false;
@@ -270,7 +270,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             if (AcademicYear.IsActive == true)
             {
-                List<AcademicYear> academicYears = Unit_Of_Work.academicYear_Repository.FindBy(d => d.ID != AcademicYear.ID);
+                List<AcademicYear> academicYears = Unit_Of_Work.academicYear_Repository.FindBy(d => d.ID != AcademicYear.ID && d.SchoolID== newAcademicYear.SchoolID);
                 foreach (var year in academicYears)
                 {
                     year.IsActive = false;

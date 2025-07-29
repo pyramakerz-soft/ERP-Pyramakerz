@@ -148,8 +148,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
           allowEdit: 1,
-         pages: new[] { "Registration Form Field" }
-      )]
+          pages: new[] { "Registration Form Field" }
+        )]
         public IActionResult Edit(RegistrationCategoryEditDTO NewCategory)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -168,6 +168,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
             if (NewCategory == null)
             {
                 return BadRequest("Building cannot be null");
+            }
+            
+            if (NewCategory.ID >= 1 && NewCategory.ID <= 3)
+            {
+                return BadRequest("You can't edit this Category");
             }
 
             RegistrationCategory CategoryExists = Unit_Of_Work.registrationCategory_Repository.First_Or_Default(b => b.ID == NewCategory.ID && b.IsDeleted != true);
@@ -237,6 +242,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
             if (id == 0)
             {
                 return BadRequest("Enter Category ID");
+            }
+
+            if (id >= 1 && id <= 3)
+            {
+                return BadRequest("You can't delete this Category");
             }
 
             RegistrationCategory category = Unit_Of_Work.registrationCategory_Repository.First_Or_Default(t => t.IsDeleted != true && t.ID == id);

@@ -10,7 +10,42 @@
     </div>
 </div>
 
-<div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD] max-w-full">
+<div class="flex justify-start items-center space-x-4">
+    <div class="w-[49%]">
+        <label for="School1" class="block mb-2 text-sm font-medium text-gray-900">School</label>
+        <select id="School1" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [(ngModel)]="SelectedSchoolId" (change)="getAllGradesBySchoolId(); IsView = false">
+            <option value=0 disabled selected hidden>Select a School</option>
+            <option *ngFor="let stu of schools" [value]="stu.id">
+                {{ stu.name }}
+            </option>
+            <option *ngIf="schools.length === 0" disabled selected>No Data Found</option>
+        </select>
+    </div>
+
+    <div class="w-[49%]">
+        <label for="Grade" class="block mb-2 text-sm font-medium text-gray-900">Grade</label>
+        <select id="Grade" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [(ngModel)]="SelectedGradeId" [disabled]="!SelectedSchoolId"
+            (change)="IsView = false">
+            <option value=0 disabled selected hidden>Select a grade</option>
+            <option *ngFor="let ac of grades" [value]="ac.id">
+                {{ ac.name }}
+            </option>
+            <option *ngIf="grades.length === 0" disabled selected>No Data Found</option>
+        </select>
+    </div>
+
+    <div class="mt-7 ml-2">
+        <button class="p-3 font-medium text-xl rounded-lg"
+            [disabled]="!SelectedSchoolId || !SelectedGradeId "
+            (click)="GetDate()"
+            [ngClass]="{ 'bg-gray-100 text-gray-300': !SelectedSchoolId || !SelectedGradeId , 'secondaryBg text-white': SelectedSchoolId && SelectedGradeId }">View
+        </button>
+    </div>
+</div>
+
+<div *ngIf="IsView" class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD] max-w-full">
     <table class="overflow-auto w-full bg-[#EBEBEB] text-left text-[#6F6F6F]">
         <thead class="bg-[##EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
             <tr>

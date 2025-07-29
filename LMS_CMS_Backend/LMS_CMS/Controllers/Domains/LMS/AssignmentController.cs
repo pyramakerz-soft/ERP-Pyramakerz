@@ -214,6 +214,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     sem => sem.IsDeleted != true && sem.ID == id,
                     query => query.Include(d => d.AssignmentType),
                     query => query.Include(d => d.Subject),
+                    query => query.Include(d => d.Subject.Grade),
+                    query => query.Include(d => d.Subject.Grade.Section.school),
                     query => query.Include(d => d.SubjectWeightType.WeightType),
                     query => query.Include(d => d.AssignmentStudentIsSpecifics
                         .Where(e => e.IsDeleted != true && e.StudentClassroom.Student.IsDeleted != true && e.StudentClassroom.Classroom.IsDeleted != true))
@@ -275,9 +277,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
              
             // Get StudentClassID According to current academic year
-            StudentClassroom studentClassroom = Unit_Of_Work.studentClassroom_Repository.First_Or_Default(
-                d => d.IsDeleted != true && d.StudentID == studID && d.Classroom.IsDeleted != true && d.Classroom.AcademicYear.IsActive == true
-                );
+            StudentClassroom studentClassroom = Unit_Of_Work.studentClassroom_Repository.First_Or_Default(d => d.IsDeleted != true && d.StudentID == studID && d.Classroom.IsDeleted != true && d.Classroom.AcademicYear.IsActive == true);
 
             if (studentClassroom == null)
             {

@@ -99,6 +99,36 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             return Ok(discussionRoomGetDTO);
         }
 
+
+        //////////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpGet("ByIdWithoutInclude/{id}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Discussion Room" }
+        )]
+        public async Task<IActionResult> GetByIdWithoutInclude(long id)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            DiscussionRoom discussionRoom = Unit_Of_Work.discussionRoom_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == id);
+
+            if (discussionRoom == null)
+            {
+                return NotFound();
+            }
+
+            DiscussionRoomGetDTO discussionRoomGetDTO = mapper.Map<DiscussionRoomGetDTO>(discussionRoom);
+
+            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+            if (!string.IsNullOrEmpty(discussionRoom.ImageLink))
+            {
+                discussionRoomGetDTO.ImageLink = $"{serverUrl}{discussionRoomGetDTO.ImageLink.Replace("\\", "/")}";
+            }
+
+            return Ok(discussionRoomGetDTO);
+        }
+
         //////////////////////////////////////////////////////////////////////////////////////////
 
         [HttpPost]

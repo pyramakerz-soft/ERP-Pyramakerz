@@ -1798,10 +1798,22 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasForeignKey(p => p.UserTypeID)
                 .OnDelete(DeleteBehavior.Restrict);
             
+            modelBuilder.Entity<Notification>()
+                .HasOne(p => p.UserType)
+                .WithMany(p => p.Notifications)
+                .HasForeignKey(p => p.UserTypeID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
             modelBuilder.Entity<NotificationSharedTo>()
                 .HasOne(p => p.Notification)
                 .WithMany(p => p.NotificationSharedTos)
                 .HasForeignKey(p => p.NotificationID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<DiscussionRoom>()
+                .HasOne(p => p.School)
+                .WithMany(p => p.DiscussionRooms)
+                .HasForeignKey(p => p.SchoolID)
                 .OnDelete(DeleteBehavior.Restrict);
 
             ///////////////////////// Exception: /////////////////////////

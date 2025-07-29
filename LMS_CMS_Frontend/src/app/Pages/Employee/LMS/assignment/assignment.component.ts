@@ -77,6 +77,7 @@ export class AssignmentComponent {
   schools: School[] = []
   students: Student[] = []
   Grades: Grade[] = []
+  GradesForCreate: Grade[] = []
   IsView: boolean = false
 
   isLoading = false;
@@ -132,7 +133,7 @@ export class AssignmentComponent {
 
   getAllSubject() {
     this.subjects = []
-    this.IsView=false
+    this.IsView = false
     this.subjectID = 0
     this.subjectService.GetByGradeId(this.SelectedGradeId, this.DomainName).subscribe((d) => {
       this.subjects = d
@@ -140,7 +141,7 @@ export class AssignmentComponent {
   }
 
   getAllGradesBySchoolId() {
-    this.IsView=false
+    this.IsView = false
     this.Grades = []
     this.SelectedGradeId = 0
     this.subjects = []
@@ -150,22 +151,22 @@ export class AssignmentComponent {
     })
   }
 
-  SubjectChanged(){
-    this.IsView=false
+  SubjectChanged() {
+    this.IsView = false
   }
 
   GetAllData(pageNumber: number, pageSize: number) {
     this.assignmentData = []
-    this.IsView=true 
+    this.IsView = true
     this.CurrentPage = 1
     this.TotalPages = 1
     this.TotalRecords = 0
     if (this.subjectID != 0) {
       this.assignmentService.GetBySubjectID(this.subjectID, this.DomainName, pageNumber, pageSize).subscribe(
-        (data) => { 
+        (data) => {
           this.CurrentPage = data.pagination.currentPage
           this.PageSize = data.pagination.pageSize
-          this.TotalPages = data.pagination.totalPages 
+          this.TotalPages = data.pagination.totalPages
           this.TotalRecords = data.pagination.totalRecords
           this.assignmentData = data.data
         },
@@ -215,9 +216,9 @@ export class AssignmentComponent {
     }
   }
 
-  changeCurrentPage(currentPage: number) { 
+  changeCurrentPage(currentPage: number) {
     this.CurrentPage = currentPage
-    this.GetAllData(this.CurrentPage, this.PageSize) 
+    this.GetAllData(this.CurrentPage, this.PageSize)
   }
 
   validatePageSize(event: any) {
@@ -240,8 +241,8 @@ export class AssignmentComponent {
     if (Id) {
       this.getAssignmentById(Id);
     }
-     
-    this.assignment= new Assignment();
+
+    this.assignment = new Assignment();
     this.getSubjectData();
     this.getAssignmentTypeData();
 
@@ -275,6 +276,10 @@ export class AssignmentComponent {
     this.assignmentService.GetByID(Id, this.DomainName).subscribe(
       data => {
         this.assignment = data
+        console.log(this.assignment)
+        this.GradeServ.GetBySchoolId(this.assignment.schoolID, this.DomainName).subscribe((d) => {
+          this.GradesForCreate = d
+        })
         this.getSubjectWeightData()
         this.getClassesData()
       }
@@ -374,6 +379,39 @@ export class AssignmentComponent {
       this.validationErrors['dueDate'] = ''
       this.validationErrors['cutOfDate'] = ''
     }
+  }
+
+
+  onSchoolModalChange() {
+    this.assignment.subjectWeightTypeID = 0
+    this.choosedClass = []
+    this.choosedStudentsClass = []
+    this.viewStudents = false
+    this.viewClassStudents = false
+    this.studentClassWhenSelectClass = new StudentClassWhenSubject()
+    this.studentClassWhenSubject = []
+    this.GradesForCreate = []
+    this.subjects = []
+    this.assignment.gradeID = 0
+    this.assignment.subjectID = 0
+    this.GradeServ.GetBySchoolId(this.assignment.schoolID, this.DomainName).subscribe((d) => {
+      this.GradesForCreate = d
+    })
+  }
+
+  onGradeModalChange() {
+    this.assignment.subjectWeightTypeID = 0
+    this.choosedClass = []
+    this.choosedStudentsClass = []
+    this.viewStudents = false
+    this.viewClassStudents = false
+    this.studentClassWhenSelectClass = new StudentClassWhenSubject()
+    this.studentClassWhenSubject = []
+    this.subjects = []
+    this.assignment.subjectID = 0
+    this.subjectService.GetByGradeId(this.assignment.gradeID, this.DomainName).subscribe((d) => {
+      this.subjects = d
+    })
   }
 
   onSubjectModalChange() {
@@ -659,7 +697,7 @@ export class AssignmentComponent {
     });
   }
 
-  async onSearchEvent(event: { key: string; value: any }) { 
+  async onSearchEvent(event: { key: string; value: any }) {
     this.PageSize = this.TotalRecords
     this.key = event.key;
     this.value = event.value;

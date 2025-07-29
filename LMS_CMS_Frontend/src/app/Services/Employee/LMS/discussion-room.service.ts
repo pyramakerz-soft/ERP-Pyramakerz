@@ -13,7 +13,7 @@ export class DiscussionRoomService {
   constructor(public http: HttpClient, public ApiServ: ApiService) {
     this.baseUrl = ApiServ.BaseUrl
   }
- 
+
   Get(DomainName: string) {
     if (DomainName != null) {
       this.header = DomainName
@@ -25,8 +25,8 @@ export class DiscussionRoomService {
       .set('Content-Type', 'application/json');
     return this.http.get<DiscussionRoom[]>(`${this.baseUrl}/DiscussionRoom`, { headers })
   }
-  
-  GetById(id:number ,DomainName: string) {
+
+  GetById(id: number, DomainName: string) {
     if (DomainName != null) {
       this.header = DomainName
     }
@@ -36,6 +36,18 @@ export class DiscussionRoomService {
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
     return this.http.get<DiscussionRoom>(`${this.baseUrl}/DiscussionRoom/${id}`, { headers })
+  }
+
+  GetByIdWithoutInclude(id: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<DiscussionRoom>(`${this.baseUrl}/DiscussionRoom/ByIdWithoutInclude/${id}`, { headers })
   }
 
   Add(DiscussionRoom: DiscussionRoom, DomainName: string) {
@@ -49,16 +61,17 @@ export class DiscussionRoomService {
       .set('Authorization', `Bearer ${token}`);
 
     const formData = new FormData();
-    formData.append('title', DiscussionRoom.title ?? '');  
-    formData.append('meetingLink', DiscussionRoom.meetingLink ?? '');  
-    formData.append('recordLink', DiscussionRoom.recordLink ?? '');  
-    formData.append('startDate', DiscussionRoom.startDate ?? '');  
-    formData.append('endDate', DiscussionRoom.endDate ?? '');  
-    formData.append('time', DiscussionRoom.time ?? '');  
-    formData.append('isRepeatedWeekly', DiscussionRoom.isRepeatedWeekly.toString() ?? 'false');  
+    formData.append('title', DiscussionRoom.title ?? '');
+    formData.append('meetingLink', DiscussionRoom.meetingLink ?? '');
+    formData.append('recordLink', DiscussionRoom.recordLink ?? '');
+    formData.append('startDate', DiscussionRoom.startDate ?? '');
+    formData.append('endDate', DiscussionRoom.endDate ?? '');
+    formData.append('schoolID', DiscussionRoom.schoolID.toString());
+    formData.append('time', DiscussionRoom.time ?? '');
+    formData.append('isRepeatedWeekly', DiscussionRoom.isRepeatedWeekly.toString() ?? 'false');
     DiscussionRoom.studentClassrooms.forEach(item => {
       formData.append('studentClassrooms', item.toString());
-    }); 
+    });
 
     if (DiscussionRoom.imageFile) {
       formData.append('imageFile', DiscussionRoom.imageFile, DiscussionRoom.imageFile.name);
@@ -79,16 +92,16 @@ export class DiscussionRoomService {
 
     const formData = new FormData();
     formData.append('id', DiscussionRoom.id.toString() ?? '');
-    formData.append('title', DiscussionRoom.title.toString() ?? ''); 
-    formData.append('meetingLink', DiscussionRoom.meetingLink ?? '');  
-    formData.append('recordLink', DiscussionRoom.recordLink ?? '');  
-    formData.append('startDate', DiscussionRoom.startDate ?? '');  
-    formData.append('endDate', DiscussionRoom.endDate ?? '');  
-    formData.append('time', DiscussionRoom.time ?? '');  
-    formData.append('isRepeatedWeekly', DiscussionRoom.isRepeatedWeekly.toString() ?? 'false');  
+    formData.append('title', DiscussionRoom.title.toString() ?? '');
+    formData.append('meetingLink', DiscussionRoom.meetingLink ?? '');
+    formData.append('recordLink', DiscussionRoom.recordLink ?? '');
+    formData.append('startDate', DiscussionRoom.startDate ?? '');
+    formData.append('endDate', DiscussionRoom.endDate ?? '');
+    formData.append('time', DiscussionRoom.time ?? '');
+    formData.append('isRepeatedWeekly', DiscussionRoom.isRepeatedWeekly.toString() ?? 'false');
     DiscussionRoom.studentClassrooms.forEach(item => {
       formData.append('studentClassrooms', item.toString());
-    }); 
+    });
     formData.append('imageLink', DiscussionRoom.imageLink?.toString() ?? '');
 
     if (DiscussionRoom.imageFile) {

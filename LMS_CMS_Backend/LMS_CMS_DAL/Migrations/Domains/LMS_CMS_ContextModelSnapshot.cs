@@ -69,6 +69,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<long?>("MasterID")
                         .HasColumnType("bigint");
 
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<long?>("Serial")
                         .HasColumnType("bigint");
 
@@ -3397,6 +3400,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<long?>("UpdatedByUserId")
                         .HasColumnType("bigint");
 
+                    b.Property<long?>("UserTypeID")
+                        .HasColumnType("bigint");
+
                     b.HasKey("ID");
 
                     b.HasIndex("DeletedByUserId");
@@ -3404,6 +3410,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.HasIndex("InsertedByUserId");
 
                     b.HasIndex("UpdatedByUserId");
+
+                    b.HasIndex("UserTypeID");
 
                     b.ToTable("Notification");
                 });
@@ -6297,6 +6305,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<string>("RecordLink")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<long>("SchoolID")
+                        .HasColumnType("bigint");
+
                     b.Property<DateOnly>("StartDate")
                         .HasColumnType("date");
 
@@ -6323,6 +6334,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.HasIndex("DeletedByUserId");
 
                     b.HasIndex("InsertedByUserId");
+
+                    b.HasIndex("SchoolID");
 
                     b.HasIndex("UpdatedByUserId");
 
@@ -12782,11 +12795,18 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .WithMany()
                         .HasForeignKey("UpdatedByUserId");
 
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.UserType", "UserType")
+                        .WithMany("Notifications")
+                        .HasForeignKey("UserTypeID")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("DeletedByEmployee");
 
                     b.Navigation("InsertedByEmployee");
 
                     b.Navigation("UpdatedByEmployee");
+
+                    b.Navigation("UserType");
                 });
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.Communication.NotificationSharedTo", b =>
@@ -14179,6 +14199,12 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .WithMany()
                         .HasForeignKey("InsertedByUserId");
 
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.LMS.School", "School")
+                        .WithMany("DiscussionRooms")
+                        .HasForeignKey("SchoolID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "UpdatedByEmployee")
                         .WithMany()
                         .HasForeignKey("UpdatedByUserId");
@@ -14186,6 +14212,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Navigation("DeletedByEmployee");
 
                     b.Navigation("InsertedByEmployee");
+
+                    b.Navigation("School");
 
                     b.Navigation("UpdatedByEmployee");
                 });
@@ -17064,6 +17092,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.Navigation("Buildings");
 
+                    b.Navigation("DiscussionRooms");
+
                     b.Navigation("SchoolPCs");
 
                     b.Navigation("Sections");
@@ -17326,6 +17356,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Navigation("AnnouncementSharedTos");
 
                     b.Navigation("NotificationSharedTos");
+
+                    b.Navigation("Notifications");
                 });
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.ViolationModule.Violation", b =>
