@@ -251,17 +251,9 @@
     "Inventory Sub Categories":"Inventory Sub Categories",
     "Code":"Code",
     "Unit":"Unit",
-
-
-
-
-
-
-
-
-
-
-
+    "Doses":"Doses",
+    "Dose":"Dose",
+    "Times":"Times",
     "School Name": "School Name",
     "Address": "Address",
     "School type": "School type",
@@ -707,6 +699,25 @@
     "Master ID":"Master ID",
     "View Report":"View Report",
     "Start Date":"Start Date",
-    "Accounting Constraints Report":"Accounting Constraints Report"
+    "Accounting Constraints Report":"Accounting Constraints Report",
+    "Drugs":"Drugs",
+    "Drug":"Drug",
+    "Follow Up":"Follow Up",
+    "Send SMS to Parent":"Send SMS to Parent",
+    "Recommendation":"Recommendation",
+    "Complaints":"Complaints",
+    "Hygiene Form":"Hygiene Form",
+    "Hygiene Forms":"Hygiene Forms",  
+    "Comment":"Comment",
+    "Taken":"Taken",
+    "Action":"Action",
+    "Class":"Class",
+    "Hygiene Types":"Hygiene Types",
+    "Hygiene Type":"Hygiene Type",
+
+    "Medical History":"Medical History",
+    "Details":"Details",
+    "Permanent":"Permanent"
+    
     
 }

@@ -207,4 +207,14 @@ export class DrugsComponent implements OnInit {
       });
     }
   }
+GetTableHeaders(){
+   
+if(!this.isRtl){
+  return ['ID', 'Drug Name', 'Date', 'Actions']
+}else{
+  return ['المعرف', 'اسم الدواء', 'التاريخ', 'الإجراءات']
+}
+}
+
+
 }

@@ -14,8 +14,8 @@
     [keys]="['id', 'name', 'insertedAt']" (delete)="deleteDiagnosis($event)" (edit)="openModal($event.id)">
   </app-table>
 
-<app-modal [title]="editDiagnosis ? 'Diagnosis' : 'Create Diagnosis'" [isEditMode]="editDiagnosis"
-  [buttonText]="'Save'" (save)="saveDiagnosis()" (close)="closeModal()"
+<app-modal [title]="editDiagnosis ? (isRtl? 'التشخيص':'Diagnosis') : (isRtl? 'إنشاء تشخيص':'Create Diagnosis') " [isEditMode]="editDiagnosis"
+  buttonText="{{'Save'| translate }}" (save)="saveDiagnosis()" (close)="closeModal()"
   [isLoading]="isSaving" [ngClass]="{ hidden: !isModalVisible }">
     <div class="flex flex-col w-full mb-4">
       <label class="mb-2 primaryTxt" for="name"> {{ 'Diagnosis Name' | translate }}</label>

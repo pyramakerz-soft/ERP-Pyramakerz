@@ -224,4 +224,15 @@ isRtl: boolean = false;
       });
     }
   }
+
+
+
+  GetTableHeaders(){
+   
+if(!this.isRtl){
+  return ['ID', 'Hygiene Type', 'Date', 'Actions']
+}else{
+  return ['المعرف', 'نوع النظافة', 'التاريخ', 'الإجراءات']
+}
+}
 }

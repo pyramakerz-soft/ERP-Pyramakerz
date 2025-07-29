@@ -554,4 +554,20 @@ export class FollowUpComponent implements OnInit {
       }
     });
   }
+
+
+
+GetTableHeaders(){
+   
+if(!this.isRtl){
+  return ['ID', 'School', 'Grade', 'Class', 'Student', 'Diagnosis', 'Recommendation', 'Actions']
+}else{
+  return ['المعرف', 'المدرسة', 'الصف', 'الفصل', 'الطالب', 'التشخيص', 'التوصية', 'الإجراءات']
+}
+}
+
+
+
+
+
 }

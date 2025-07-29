@@ -19,14 +19,14 @@ export class ApiService {
     // const hostname = window.location.hostname;
     // var Header = hostname.split('.')[0]
 
-// <<<<<<< HEAD
 
     var Header = 'try'; 
 
 
-// =======
+
 //     var Header = 'Domain_One'; 
-// >>>>>>> dd35a396394403a52c7061486e8016986c2d5767
+
+
 
     return Header;
   }

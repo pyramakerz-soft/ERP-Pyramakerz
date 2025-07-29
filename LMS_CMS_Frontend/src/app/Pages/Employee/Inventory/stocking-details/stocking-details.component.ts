@@ -1057,6 +1057,22 @@ export class StockingDetailsComponent {
     }, 500);
   }
 
+  validateNumber(event: any, field: keyof StockingDetails , row:StockingDetails): void {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = ''; 
+      if (typeof row[field] === 'string') {
+        row[field] = '' as never;  
+      }
+    }
+    if (field == 'actualStock') {
+      const integerRegex = /^\d+$/;
+      if (!integerRegex.test(value)) {
+        event.target.value = 0 ;
+        row[field] = '' as never;  
+      }
+    }
+  }
 }
 
 

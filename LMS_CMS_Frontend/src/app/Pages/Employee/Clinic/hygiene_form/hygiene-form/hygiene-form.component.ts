@@ -195,4 +195,17 @@ deleteHygieneForm(row: any) {
   onView(row: any) {
     this.router.navigate(['/Employee/view hygiene form', row.id]);
   }
+
+
+
+
+
+  GetTableHeaders(){
+   
+if(!this.isRtl){
+  return ['ID' , 'School' , 'Grade', 'Classes', 'Date', 'Actions']
+}else{
+  return ['المعرف', 'المدرسة', 'الصف الدراسي', 'الفصول', 'التاريخ', 'الإجراءات']
+}
+}
 }

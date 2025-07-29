@@ -178,4 +178,24 @@ saveDose() {
     console.error(message, error);
     // Swal.fire('Error!', 'An error occurred. Please try again.', 'error');
   }
+
+
+GetTableHeaders(){
+   
+if(!this.isRtl){
+  return ['ID', 'Doses', 'Date', 'Actions']
+}else{
+  return[
+  "المعرف",
+  "الجرعات",
+  "التاريخ",
+  "الإجراءات"
+]
+}
+}
+
+
+
+
+
 }

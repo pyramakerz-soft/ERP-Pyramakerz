@@ -19,10 +19,12 @@ import { ClassroomService } from '../../../../../Services/Employee/LMS/classroom
 import { StudentService } from '../../../../../Services/student.service';
 import { MedicalHistoryService } from '../../../../../Services/Employee/Clinic/medical-history.service';
 import { ApiService } from '../../../../../Services/api.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-medical-history-modal',
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, TranslateModule],
   standalone: true,
   templateUrl: './medical-history-modal.component.html',
   styleUrls: ['./medical-history-modal.component.css'],
@@ -53,7 +55,8 @@ export class MedicalHistoryModalComponent implements OnInit, OnChanges {
   firstReportPreview: File | null = null;
   secReportPreview: File | null = null;
   validationErrors: { [key: string]: string } = {};
-
+isRtl: boolean = false;
+  subscription!: Subscription;
   schools: any[] = [];
   grades: any[] = [];
   classes: any[] = [];
@@ -65,11 +68,16 @@ export class MedicalHistoryModalComponent implements OnInit, OnChanges {
     private classroomService: ClassroomService,
     private studentService: StudentService,
     private medicalHistoryService: MedicalHistoryService,
-    private apiService: ApiService
+    private apiService: ApiService,
+      private languageService: LanguageService
   ) {}
 
   async ngOnInit() {
     await this.loadSchools();
+          this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   async ngOnChanges(changes: SimpleChanges) {

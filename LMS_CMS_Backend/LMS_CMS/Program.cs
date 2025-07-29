@@ -123,6 +123,7 @@ namespace LMS_CMS
             builder.Services.AddSingleton<IAmazonS3, AmazonS3Client>();
             builder.Services.AddScoped<DomainService>();
             builder.Services.AddScoped<IamNotRobot>();
+            builder.Services.AddScoped<UserTreeService>();
 
             builder.Services.AddAWSService<IAmazonSecretsManager>(new Amazon.Extensions.NETCore.Setup.AWSOptions
             {
