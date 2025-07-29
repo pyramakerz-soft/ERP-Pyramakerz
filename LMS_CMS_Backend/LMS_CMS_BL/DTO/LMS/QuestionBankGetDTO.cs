@@ -23,6 +23,10 @@ namespace LMS_CMS_BL.DTO.LMS
         public string LessonName { get; set; }
         public long SubjectID { get; set; }
         public string SubjectName { get; set; }
+        public long SchoolID { get; set; }
+        public string SchoolName { get; set; }
+        public long GradeID { get; set; }
+        public string GradeName { get; set; }
         public long BloomLevelID { get; set; }
         public string BloomLevelName { get; set; }
         public long DokLevelID { get; set; }

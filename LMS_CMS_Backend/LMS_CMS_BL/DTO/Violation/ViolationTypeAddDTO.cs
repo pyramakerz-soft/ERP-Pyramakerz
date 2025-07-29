@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LMS_CMS_DAL.Models.Domains.ViolationModule;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -7,12 +8,12 @@ using System.Threading.Tasks;
 
 namespace LMS_CMS_BL.DTO.Violation
 {
-    public class EmployeeTypeViolationAddDTO
+    public class ViolationTypeAddDTO
     {
         [Required(ErrorMessage = "Name is required")]
         [StringLength(100, ErrorMessage = "Name cannot be longer than 100 characters.")]
-        public String Name { get; set; }
-        public List<long> EmployeeTypeID { get; set; }
+        public string Name { get; set; }
+        public ICollection<long> EmployeeTypeIds { get; set; }
 
     }
 }
