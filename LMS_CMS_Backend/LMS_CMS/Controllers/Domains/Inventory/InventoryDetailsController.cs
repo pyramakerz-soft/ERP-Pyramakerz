@@ -274,7 +274,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             {
                 ShopItemId = shopItemId,
                 StoreId = storeId,
-                ToDate = toDate.AddDays(-1), 
+                FromDate = fromDate.AddDays(-1), 
                 InQuantity = quantityBalance > 0 ? quantityBalance : 0,
                 outQuantity = quantityBalance < 0 ? -quantityBalance : 0,
                 Quantitybalance = quantityBalance,
