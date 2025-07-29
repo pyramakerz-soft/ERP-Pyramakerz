@@ -12,6 +12,7 @@ namespace LMS_CMS_BL.DTO.Communication
     {
         public long ID { get; set; }
         public long UserID { get; set; }
+        public string UserName { get; set; }
         public bool NotifiedOrNot { get; set; }
         public long NotificationID { get; set; }
         public long UserTypeID { get; set; }

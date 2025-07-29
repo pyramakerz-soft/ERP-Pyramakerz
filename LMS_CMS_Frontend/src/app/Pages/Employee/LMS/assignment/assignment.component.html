@@ -27,7 +27,7 @@
         <label for="School1" class="block mb-2 text-sm font-medium text-gray-900">School</label>
         <select id="School1" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             [(ngModel)]="SelectedSchoolId" (change)="getAllGradesBySchoolId();">
-            <option value=0 disabled selected hidden>Select a School</option>
+            <option [value]="0" disabled selected hidden>Select a School</option>
             <option *ngFor="let stu of schools" [value]="stu.id">
                 {{ stu.name }}
             </option>
@@ -39,7 +39,7 @@
         <label for="Grade" class="block mb-2 text-sm font-medium text-gray-900">Grade</label>
         <select id="Grade" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             [(ngModel)]="SelectedGradeId" [disabled]="!SelectedSchoolId" (change)="getAllSubject();">
-            <option value=0 disabled selected hidden>Select a grade</option>
+            <option [value]="0" disabled selected hidden>Select a grade</option>
             <option *ngFor="let ac of Grades" [value]="ac.id">
                 {{ ac.name }}
             </option>
@@ -51,11 +51,11 @@
         <label for="subject" class="block mb-2 text-sm font-medium text-gray-900">Subjects</label>
         <select id="subject" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             [(ngModel)]="subjectID" [disabled]="!SelectedGradeId" (change)="SubjectChanged();">
-            <option value=0 disabled selected hidden>Select a subject</option>
+            <option [value]="0" disabled selected hidden>Select a subject</option>
             <option *ngFor="let ac of subjects" [value]="ac.id">
                 {{ ac.en_name }}
             </option>
-            <option *ngIf="subjects.length === 0" disabled selected>No Data Found</option>
+            <option *ngIf="subjects.length === 0 && SelectedGradeId" disabled selected>No Data Found</option>
         </select>
     </div>
 
