@@ -1,31 +1,47 @@
 <div class="">
   <div class="flex justify-between items-center">
-    <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Violation' | translate }}</h1>
+    <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Violation Types' | translate }}</h1>
     <div class="flex justify-between items-center">
       <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
 
       <button (click)="Create()"
         class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
-         {{ 'Create Violation' | translate }}
+        {{ 'Create Violation Type' | translate }}
       </button>
     </div>
   </div>
 
-  <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD] max-w-full">
+
+  <div class="flex justify-start items-center space-x-4 mt-3">
+    <div class="w-[98%]">
+      <label for="SelectedEmployeeType" class="block mb-2 text-sm font-medium text-gray-900">Employee Type</label>
+      <select id="SelectedEmployeeType" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+        [(ngModel)]="SelectedEmployeeType" (change)="GetViolation();">
+        <option value=0 disabled selected hidden>Select a Employee Type</option>
+        <option *ngFor="let stu of empTypes" [value]="stu.id">
+          {{ stu.name }}
+        </option>
+        <option *ngIf="empTypes.length === 0" disabled selected>No Data Found</option>
+      </select>
+    </div>
+  </div>
+
+
+  <div *ngIf="SelectedEmployeeType!=0" class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD] max-w-full">
     <table class="overflow-auto w-full bg-[#EBEBEB] text-left text-[#6F6F6F]">
       <thead class="bg-[##EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
         <tr>
           <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-             {{ 'ID' | translate }}
+            {{ 'ID' | translate }}
           </th>
           <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
             {{ 'Name' | translate }}
           </th>
           <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-             {{ 'Employee Types' | translate }}
+            {{ 'Employee Types' | translate }}
           </th>
           <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-           {{ 'Actions' | translate }}
+            {{ 'Actions' | translate }}
           </th>
         </tr>
       </thead>
@@ -82,17 +98,17 @@
     </button>
 
     <h1 *ngIf="mode == 'Create'" class="font-semibold text-2xl leading-9">
-       {{ 'Create Violation' | translate }}
+      {{ 'Create Violation Type' | translate }}
     </h1>
     <h1 *ngIf="mode == 'Edit'" class="font-semibold text-2xl leading-9">
-       {{ 'Edit Violation' | translate }}
+      {{ 'Edit Violation Type' | translate }}
     </h1>
     <div class="mt-4 bg-[#F7F7F7] w-[573px] h-auto rounded-[24px] p-[16px_24px] gap-[20px]">
-      <h6 class="font-medium text-base leading-6 mb-3"> {{ 'Violation Name' | translate }}</h6>
+      <h6 class="font-medium text-base leading-6 mb-3"> {{ 'Violation Type Name' | translate }}</h6>
       <div class="flex justify-start mt-2 gap-2 items-start">
         <div class="flex flex-col">
           <input type="text" class="w-[500px] h-[45px] rounded-lg border border-solid border-gray-300 px-2"
-            [(ngModel)]="violation.violationName" placeholder=" {{ 'Enter new Violation' | translate }}" />
+            [(ngModel)]="violationType.name" placeholder=" {{ 'Enter new Violation Type' | translate }}" />
           <div class="mt-4">
             <div class="flex flex-col mb-1">
               <label class="mb-3" for="ac"> {{ 'Employee Type' | translate }}</label>

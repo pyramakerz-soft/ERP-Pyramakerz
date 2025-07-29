@@ -1,25 +1,20 @@
-﻿using LMS_CMS_DAL.Models.Domains.ViolationModule;
-using LMS_CMS_DAL.Models.Domains;
+﻿using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace LMS_CMS_BL.DTO.Violation
 {
-    public class ViolationGetDTO
+    public class ViolationEditDTO 
     {
         public long ID { get; set; }
         public string? Details { get; set; }
-        public string? Attach { get; set; }
+        public IFormFile? AttachFile { get; set; }
         public DateOnly Date { get; set; }
         public long ViolationTypeID { get; set; }
-        public string ViolationTypeName { get; set; }
         public long EmployeeID { get; set; }
-        public string EmployeeEnglishName { get; set; }
-        public string EmployeeArabicName { get; set; }
 
     }
 }

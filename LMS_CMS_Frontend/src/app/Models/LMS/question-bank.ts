@@ -5,14 +5,18 @@ import { SubBankQuestion } from "./sub-bank-question";
 export class QuestionBank {
   constructor(
     public id: number = 0,
-    public description: string="",
+    public description: string = "",
     public image?: string,
-    public imageForm: File|null = null,
+    public imageForm: File | null = null,
     public difficultyLevel: number = 0,
-    public mark: number|null = null,
+    public mark: number | null = null,
     public essayAnswer?: string,
     public lessonID: number = 0,
     public lessonName: string = '',
+    public schoolID: number = 0,
+    public schoolName: string = '',
+    public gradeID: number = 0,
+    public gradeName: string = '',
     public subjectID: number = 0,
     public subjectName: string = '',
     public bloomLevelID: number = 0,
@@ -22,7 +26,7 @@ export class QuestionBank {
     public questionTypeID: number = 0,
     public questionTypeName: string = '',
     public correctAnswerName: string = '',
-    public correctAnswerID: number= 0,
+    public correctAnswerID: number = 0,
     public insertedByUserId: number = 0,
     public questionBankTagsDTO: number[] = [],
     public questionBankOptionsDTO: QuestionBankOption[] = [],
@@ -35,5 +39,5 @@ export class QuestionBank {
     public newSubBankQuestionsDTO: SubBankQuestion[] = [],
     public editedQuestionBankOptionsDTO: QuestionBankOption[] = [],
     public editedSubBankQuestionsDTO: SubBankQuestion[] = [],
-  ) {}
+  ) { }
 }

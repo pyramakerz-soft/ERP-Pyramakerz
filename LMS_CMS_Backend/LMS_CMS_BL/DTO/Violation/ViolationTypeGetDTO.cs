@@ -7,12 +7,14 @@ using System.Threading.Tasks;
 
 namespace LMS_CMS_BL.DTO.Violation
 {
-    public class EmployeeTypeViolationAddDTO
+    public class ViolationTypeGetDTO
     {
+        public long ID { get; set; }
         [Required(ErrorMessage = "Name is required")]
         [StringLength(100, ErrorMessage = "Name cannot be longer than 100 characters.")]
-        public String Name { get; set; }
-        public List<long> EmployeeTypeID { get; set; }
+        public string Name { get; set; }
+        public List<EmployeeTypeGetDTO> employeeTypes { get; set; }
+        public long? InsertedByUserId { get; set; }
 
     }
 }

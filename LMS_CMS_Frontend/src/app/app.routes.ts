@@ -37,7 +37,7 @@ import { EmployeeViewComponent } from './Pages/Employee/Administrator/employee-v
 import { BuildingComponent } from './Pages/Employee/LMS/building/building.component';
 import { FloorComponent } from './Pages/Employee/LMS/floor/floor.component';
 import { ClassroomComponent } from './Pages/Employee/LMS/classroom/classroom.component';
-import { ViolationTypesComponent } from './Pages/Employee/Administrator/violation-types/violation-types.component';
+import { ViolationTypesComponent } from './Pages/Employee/Violation/violation-types/violation-types.component';
 import { SectionComponent } from './Pages/Employee/LMS/section/section.component';
 import { GradeComponent } from './Pages/Employee/LMS/grade/grade.component';
 import { AcademicYearComponent } from './Pages/Employee/LMS/academic-year/academic-year.component';
