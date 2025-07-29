@@ -1,10 +1,11 @@
 <div class="flex justify-between">
-    <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Fees Activation' | translate }}</h1> 
+    <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Fees Activation' | translate }}</h1>
 </div>
 
-<div class="flex justify-start mt-5 flex-wrap p-3">
+<div class="flex justify-start  items-center mt-5 flex-wrap p-3">
     <div class="w-[31%] mr-5 mb-3">
-        <label for="Schools" class=" mb-2 text-sm font-medium text-gray-900"> {{ 'School' | translate }}<span class="text-red-500 text-sm">*</span></label>
+        <label for="Schools" class=" mb-2 text-sm font-medium text-gray-900"> {{ 'School' | translate }}<span
+                class="text-red-500 text-sm">*</span></label>
         <select id="Schools" [(ngModel)]="SchoolId" (change)="SchoolIsChanged($event)"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5">
             <option [value]="0" disabled hidden> {{ 'Select a School' | translate }}</option>
@@ -13,9 +14,11 @@
     </div>
 
     <div class="w-[31%] mr-5 mb-3">
-        <label for="AcYear" class=" mb-2 text-sm font-medium" [ngClass]="{ 'text-gray-400': SchoolId == 0, 'text-gray-900': SchoolId }"> {{ 'Academic Year' | translate }}<span class="text-red-500 text-sm">*</span></label>
+        <label for="AcYear" class=" mb-2 text-sm font-medium"
+            [ngClass]="{ 'text-gray-400': SchoolId == 0, 'text-gray-900': SchoolId }"> {{ 'Academic Year' | translate
+            }}<span class="text-red-500 text-sm">*</span></label>
         <select id="AcYear" [(ngModel)]="YearId" [disabled]="SchoolId == 0" (change)="YearIsChanged($event)"
-        [ngClass]="{ 'bg-[#EBEBEB]': SchoolId == 0 }"
+            [ngClass]="{ 'bg-[#EBEBEB]': SchoolId == 0 }"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5">
             <option [value]="0" disabled hidden> {{ 'Select a Year' | translate }}</option>
             <option *ngFor="let S of AcademicYears" [value]="S.id">{{ S.name }}</option>
@@ -23,9 +26,11 @@
     </div>
 
     <div class="w-[31%] mr-5 mb-3">
-        <label for="Sections" class=" mb-2 text-sm font-medium" [ngClass]="{ 'text-gray-400': SchoolId == 0, 'text-gray-900': SchoolId }"> {{ 'Section' | translate }} <span class="text-red-500 text-sm">*</span></label>
+        <label for="Sections" class=" mb-2 text-sm font-medium"
+            [ngClass]="{ 'text-gray-400': SchoolId == 0, 'text-gray-900': SchoolId }"> {{ 'Section' | translate }} <span
+                class="text-red-500 text-sm">*</span></label>
         <select id="Sections" [(ngModel)]="SectionId" [disabled]="SchoolId == 0" (change)="SectionIsChanged($event)"
-        [ngClass]="{ 'bg-[#EBEBEB]': SchoolId == 0 }"
+            [ngClass]="{ 'bg-[#EBEBEB]': SchoolId == 0 }"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5">
             <option [value]="0" disabled hidden> {{ 'Select a Section' | translate }}</option>
             <option *ngFor="let S of Sections" [value]="S.id">{{ S.name }}</option>
@@ -33,7 +38,9 @@
     </div>
 
     <div class="w-[31%] mr-5 mb-3">
-        <label for="Grades" class=" mb-2 text-sm font-medium" [ngClass]="{ 'text-gray-400': SectionId == 0, 'text-gray-900': SectionId }"> {{ 'Grade' | translate }}<span class="text-red-500 text-sm">*</span></label>
+        <label for="Grades" class=" mb-2 text-sm font-medium"
+            [ngClass]="{ 'text-gray-400': SectionId == 0, 'text-gray-900': SectionId }"> {{ 'Grade' | translate }}<span
+                class="text-red-500 text-sm">*</span></label>
         <select id="Grades" [(ngModel)]="GradeId" [disabled]="SectionId == 0" (change)="GradeIsChanged($event)"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5">
             <option [value]="0" disabled hidden> {{ 'Select a Grade' | translate }}</option>
@@ -42,8 +49,11 @@
     </div>
 
     <div class="w-[42%] mr-5 mb-3">
-        <label for="ClassRooms" class=" mb-2 text-sm font-medium " [ngClass]="{ 'text-gray-400': GradeId == 0 || YearId == 0, 'text-gray-900': YearId != 0 && GradeId != 0 }"> {{ 'Classroom' | translate }}</label>
-        <select id="ClassRooms" [(ngModel)]="ClassRoomId" (change)="ClassRoomIsChanged($event)" [disabled]="GradeId == 0 || YearId == 0"
+        <label for="ClassRooms" class=" mb-2 text-sm font-medium "
+            [ngClass]="{ 'text-gray-400': GradeId == 0 || YearId == 0, 'text-gray-900': YearId != 0 && GradeId != 0 }">
+            {{ 'Classroom' | translate }}</label>
+        <select id="ClassRooms" [(ngModel)]="ClassRoomId" (change)="ClassRoomIsChanged($event)"
+            [disabled]="GradeId == 0 || YearId == 0"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5">
             <option [value]="0" disabled hidden> {{ 'Select a Classroom' | translate }}</option>
             <option *ngFor="let S of ClassRooms" [value]="S.id">{{ S.name }}</option>
@@ -51,7 +61,9 @@
     </div>
 
     <div class="w-[42%] mr-5 mb-3">
-        <label for="Students" class=" mb-2 text-sm font-medium" [ngClass]="{ 'text-gray-400': ClassRoomId == 0, 'text-gray-900': ClassRoomId }"> {{ 'Students' | translate }}</label>
+        <label for="Students" class=" mb-2 text-sm font-medium"
+            [ngClass]="{ 'text-gray-400': ClassRoomId == 0, 'text-gray-900': ClassRoomId }"> {{ 'Students' | translate
+            }}</label>
         <select id="Students" [(ngModel)]="StudentId" (change)="StudentChanged($event)" [disabled]="ClassRoomId == 0"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5">
             <option [value]="0" disabled hidden> {{ 'Select a Student' | translate }}</option>
@@ -60,12 +72,16 @@
     </div>
 
     <div class="w-[10%] mr-5 mb-3 flex items-center">
-        <button  (click)="Search()" 
-        class="font-medium text-white px-5 py-3 rounded-lg mt-4" 
-        [ngClass]="{'bg-gray-300': (SchoolId == 0 || SectionId == 0 || GradeId == 0 || YearId == 0), 'secondaryBg':(SchoolId != 0 && SectionId != 0 && GradeId != 0 && YearId != 0)}"
-        [disabled]="SchoolId == 0 || SectionId == 0 || GradeId == 0 || YearId == 0">
-             {{ 'Search' | translate }}
+        <button (click)="Search()" class="font-medium text-white px-5 py-3 rounded-lg mt-4"
+            [ngClass]="{'bg-gray-300': (SchoolId == 0 || SectionId == 0 || GradeId == 0 || YearId == 0), 'secondaryBg':(SchoolId != 0 && SectionId != 0 && GradeId != 0 && YearId != 0)}"
+            [disabled]="SchoolId == 0 || SectionId == 0 || GradeId == 0 || YearId == 0">
+            <span *ngIf="!isSearchLoading"> {{ 'Search' | translate }}</span>
+            <i *ngIf="isSearchLoading" class="fas fa-spinner fa-spin"></i>
         </button>
+    </div>
+
+    <div *ngIf="SchoolId != 0 || SectionId != 0 || GradeId != 0 || YearId != 0" class="rounded-full p-2 border-4" (click)="clearFilter()">
+        <i class="fa-solid fa-rotate-left secondaryTxt text-2xl w-8 h-8 text-center hover:cursor-pointer rounded-full"></i>
     </div>
 
 </div>
@@ -79,12 +95,14 @@
             <option [value]="0" disabled hidden> {{ 'Select a Type' | translate }}</option>
             <option *ngFor="let S of FeesTypes" [value]="S.id">{{ S.name }}</option>
         </select>
-        <span *ngIf="validationErrors['feeTypeID']" class="text-red-500 ml-3 font-normal">{{ validationErrors["feeTypeID"]}}</span>
+        <span *ngIf="validationErrors['feeTypeID']" class="text-red-500 ml-3 font-normal">{{
+            validationErrors["feeTypeID"]}}</span>
     </div>
 
     <div class="w-[22%] mr-5 mb-3">
-        <label for="FeesDiscountType" class=" mb-2 text-sm font-medium text-gray-900"> {{ 'Fees Discount Type' | translate }}</label>
-        <select [(ngModel)]="Fees.feeDiscountTypeID" [disabled]="SchoolId == 0"  
+        <label for="FeesDiscountType" class=" mb-2 text-sm font-medium text-gray-900"> {{ 'Fees Discount Type' |
+            translate }}</label>
+        <select [(ngModel)]="Fees.feeDiscountTypeID" [disabled]="SchoolId == 0"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5">
             <option [value]="0" disabled hidden> {{ 'Select a Type' | translate }}</option>
             <option *ngFor="let S of FeesDiscountType" [value]="S.id">{{ S.name }}</option>
@@ -93,49 +111,51 @@
 
     <div class="w-[22%] mr-5 mb-3">
         <label for="Grades" class=" mb-2 text-sm font-medium text-gray-900"> {{ 'Date' | translate }}</label>
-        <input type="date" [(ngModel)]="Fees.date" (ngModelChange)="onInputValueChange({ field: 'date', value: $event })"
-            class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2" 
-             placeholder="{{ 'Enter date' | translate }}"
->
-        <span *ngIf="validationErrors['date']" class="text-red-500 ml-3 font-normal">{{ validationErrors["date"]}}</span>
-    </div> 
+        <input type="date" [(ngModel)]="Fees.date"
+            (ngModelChange)="onInputValueChange({ field: 'date', value: $event })"
+            class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2"
+            placeholder="{{ 'Enter date' | translate }}">
+        <span *ngIf="validationErrors['date']" class="text-red-500 ml-3 font-normal">{{
+            validationErrors["date"]}}</span>
+    </div>
 
     <div class="w-[20%] mr-5 mb-3">
         <label class="mb-2 text-sm font-medium text-gray-900"> {{ 'Amount' | translate }}</label>
-        <input  (input)="validateNumber($event, 'amount')" [(ngModel)]="Fees.amount" (input)="CalculateNet()" (ngModelChange)="onInputValueChange({ field: 'amount', value: $event })"
-            class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2" 
-              placeholder="{{ 'Enter Amount' | translate }}"
->
-        <span *ngIf="validationErrors['amount']" class="text-red-500 ml-3 font-normal">{{ validationErrors["amount"]}}</span>
+        <input (input)="validateNumber($event, 'amount')" [(ngModel)]="Fees.amount" (input)="CalculateNet()"
+            (ngModelChange)="onInputValueChange({ field: 'amount', value: $event })"
+            class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2"
+            placeholder="{{ 'Enter Amount' | translate }}">
+        <span *ngIf="validationErrors['amount']" class="text-red-500 ml-3 font-normal">{{
+            validationErrors["amount"]}}</span>
     </div>
 
     <div class="w-[20%] mr-5 mb-3">
         <label class="mb-2 text-sm font-medium text-gray-900"> {{ 'Discount Percentage' | translate }}</label>
-        <input  (input)="validateNumberForDiscount($event)" [(ngModel)]="DiscountPercentage" (input)="CalculateDiscountFromPercentage()"
+        <input (input)="validateNumberForDiscount($event)" [(ngModel)]="DiscountPercentage"
+            (input)="CalculateDiscountFromPercentage()"
             class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2"
-             placeholder="{{ 'Enter Percentage' | translate }}">
+            placeholder="{{ 'Enter Percentage' | translate }}">
     </div>
 
     <div class="w-[20%] mr-5 mb-3">
         <label class="mb-2 text-sm font-medium text-gray-900"> {{ 'Discount' | translate }}</label>
-        <input  (input)="validateNumber($event, 'discount')" [(ngModel)]="Fees.discount" (input)="CalculatePercentageFromDiscount()"
+        <input (input)="validateNumber($event, 'discount')" [(ngModel)]="Fees.discount"
+            (input)="CalculatePercentageFromDiscount()"
             class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2"
-             placeholder="{{ 'Enter Discount' | translate }}"
->
+            placeholder="{{ 'Enter Discount' | translate }}">
     </div>
 
     <div class="w-[20%] mr-5 mb-3">
         <label class="mb-2 text-sm font-medium text-gray-900"> {{ 'Net' | translate }}</label>
-        <input  (input)="validateNumber($event, 'net')" [(ngModel)]="Fees.net" disabled
-            class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2" 
-             placeholder="{{ 'Enter Net' | translate }}"
-
-            readonly>
+        <input (input)="validateNumber($event, 'net')" [(ngModel)]="Fees.net" disabled
+            class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2"
+            placeholder="{{ 'Enter Net' | translate }}" readonly>
     </div>
 
     <div class="w-[10%] mr-5 mb-3 flex items-center">
         <button (click)="Activate()" class="secondaryBg text-white font-medium px-5 py-3 rounded-lg mt-4">
-             {{ 'Activation' | translate }}
+            <span *ngIf="!isLoading">{{ 'Activation' | translate }}</span>
+            <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
         </button>
     </div>
 
@@ -147,7 +167,7 @@
             <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
                 <tr>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                         {{ 'ID' | translate }}
+                        {{ 'ID' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         {{ 'Student Name' | translate }}
@@ -169,7 +189,7 @@
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         {{ 'Date' | translate }}
-                    </th> 
+                    </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         {{ 'Actions' | translate }}
                     </th>
@@ -189,14 +209,15 @@
                     [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
                     class="border-t border-gray-300 text-xs md:text-sm">
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ row.studentID }}
+                        {{ row.feeActivationID }}
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ row.studentName}}
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         <ng-container *ngIf="editingRowId === row.feeActivationID; else textModeFeesTypes">
-                            <select [(ngModel)]="row.feeTypeID" class="w-full border border-gray-300 px-2 py-1 rounded-md">
+                            <select [(ngModel)]="row.feeTypeID"
+                                class="w-full border border-gray-300 px-2 py-1 rounded-md">
                                 <option *ngFor="let S of FeesTypes" [value]="S.id">{{ S.name }}</option>
                             </select>
                         </ng-container>
@@ -204,7 +225,8 @@
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         <ng-container *ngIf="editingRowId === row.feeActivationID; else textModeFeesDiscountType">
-                            <select [(ngModel)]="row.feeDiscountTypeID" class="w-full border border-gray-300 px-2 py-1 rounded-md">
+                            <select [(ngModel)]="row.feeDiscountTypeID"
+                                class="w-full border border-gray-300 px-2 py-1 rounded-md">
                                 <option *ngFor="let S of FeesDiscountType" [value]="S.id">{{ S.name }}</option>
                             </select>
                         </ng-container>
@@ -212,31 +234,37 @@
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         <ng-container *ngIf="editingRowId === row.feeActivationID; else textMode">
-                            <input [(ngModel)]="row.amount"  (input)="CalculateNetForEdit(row)" class="w-full border border-gray-300 px-2 py-1 rounded-md">
+                            <input [(ngModel)]="row.amount" (input)="CalculateNetForEdit(row)"
+                                class="w-full border border-gray-300 px-2 py-1 rounded-md">
                         </ng-container>
                         <ng-template #textMode>{{ row.amount }}</ng-template>
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         <ng-container *ngIf="editingRowId === row.feeActivationID; else textModeDiscount">
-                            <input [(ngModel)]="row.discount" (input)="CalculateNetForEdit(row)" class="w-full border border-gray-300 px-2 py-1 rounded-md">
+                            <input [(ngModel)]="row.discount" (input)="CalculateNetForEdit(row)"
+                                class="w-full border border-gray-300 px-2 py-1 rounded-md">
                         </ng-container>
                         <ng-template #textModeDiscount>{{ row.discount }}</ng-template>
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         <ng-container *ngIf="editingRowId === row.feeActivationID; else textModeNet">
-                            <input [(ngModel)]="row.net" class="w-full border border-gray-300 px-2 py-1 rounded-md" readonly>
+                            <input [(ngModel)]="row.net" class="w-full border border-gray-300 px-2 py-1 rounded-md"
+                                readonly>
                         </ng-container>
                         <ng-template #textModeNet>{{ row.net }}</ng-template>
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         <ng-container *ngIf="editingRowId === row.feeActivationID; else textModeDate">
-                            <input type="date" [(ngModel)]="row.date" class="w-full border border-gray-300 px-2 py-1 rounded-md">
+                            <input type="date" [(ngModel)]="row.date"
+                                class="w-full border border-gray-300 px-2 py-1 rounded-md">
                         </ng-container>
                         <ng-template #textModeDate>{{ row.date }}</ng-template>
-                    </td> 
-                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0" *ngIf="row.feeActivationID != 0 && row.feeActivationID != null">
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0"
+                        *ngIf="row.feeActivationID != 0 && row.feeActivationID != null">
                         <div class="flex space-x-4">
-                            <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)" (click)="Delete(row.feeActivationID)">
+                            <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)"
+                                (click)="Delete(row.feeActivationID)">
                                 <i class="fa-regular fa-trash-can"></i>
                             </button>
                             <button *ngIf="editingRowId === row.feeActivationID" (click)="Save(row)">

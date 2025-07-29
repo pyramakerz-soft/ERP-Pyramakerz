@@ -71,10 +71,7 @@ export class InventoryDetailsService {
     );
   }
 
-  Edit(
-    Detail: InventoryDetails[],
-    DomainName: string
-  ): Observable<InventoryDetails[]> {
+  Edit(Detail: InventoryDetails[], DomainName: string): Observable<InventoryDetails[]> {
     if (DomainName != null) {
       this.header = DomainName;
     }
@@ -84,11 +81,7 @@ export class InventoryDetailsService {
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
 
-    return this.http.put<InventoryDetails[]>(
-      `${this.baseUrl}/InventoryDetails`,
-      Detail,
-      { headers }
-    );
+    return this.http.put<InventoryDetails[]>(`${this.baseUrl}/InventoryDetails`, Detail, { headers });
   }
 
   Delete(id: number, DomainName: string) {
@@ -104,7 +97,7 @@ export class InventoryDetailsService {
       headers,
     });
   }
-  
+
   getInventoryNetSummary(
     storeId: number,
     itemId: number,

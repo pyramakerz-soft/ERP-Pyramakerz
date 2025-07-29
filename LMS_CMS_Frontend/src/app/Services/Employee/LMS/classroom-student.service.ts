@@ -28,7 +28,7 @@ export class ClassroomStudentService {
     return this.http.get<ClassroomStudent[]>(`${this.baseUrl}/ClassroomStudent/GetByClassroom/${classID}`, { headers });
   }
 
-  GetClassForActiveAcademicYearWithStudentsIncluded( DomainName: string){
+  GetClassForActiveAcademicYearWithStudentsIncluded( SchoolId :number ,DomainName: string){
     if (DomainName != null) {
       this.header = DomainName
     }
@@ -37,7 +37,7 @@ export class ClassroomStudentService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.get<ClassStudentForDiscussionRoom[]>(`${this.baseUrl}/ClassroomStudent/GetClassForActiveAcademicYearWithStudentsIncluded`, { headers });
+    return this.http.get<ClassStudentForDiscussionRoom[]>(`${this.baseUrl}/ClassroomStudent/GetClassForActiveAcademicYearWithStudentsIncluded/${SchoolId}`, { headers });
   }
 
   GetById(ID:number, DomainName: string) {

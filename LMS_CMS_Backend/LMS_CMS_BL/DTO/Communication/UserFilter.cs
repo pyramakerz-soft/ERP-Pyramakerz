@@ -10,6 +10,7 @@ namespace LMS_CMS_BL.DTO.Communication
     {
         // For Employee
         public long? DepartmentID { get; set; } 
+        public bool? NotAssignedToDepartment { get; set; } 
         public long? EmployeeID { get; set; } 
         
         // For Student

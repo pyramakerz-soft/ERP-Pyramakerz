@@ -3,6 +3,7 @@ import { DiscussionRoomStudentClassroom } from "./discussion-room-student-classr
 export class DiscussionRoom {
     constructor(
         public id: number = 0,
+        public schoolID: number = 0,
         public title: string = '',
         public imageLink: string = '',
         public meetingLink: string = '',

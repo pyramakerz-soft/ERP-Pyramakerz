@@ -203,7 +203,7 @@
             <!-- Show actual stock when NOT hiding for blank print -->
             <td *ngIf="!IsActualStockHiddenForBlankPrint"
               class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-              <input [(ngModel)]="row.actualStock" type="number" (ngModelChange)="onStockChangeWhenEditRow(row)"
+              <input [(ngModel)]="row.actualStock" type="number" (input)="validateNumberRow($event, 'actualStock' , row)" (ngModelChange)="onStockChangeWhenEditRow(row)"  
                 class="w-full border border-gray-300 px-2 py-1 rounded-md" />
             </td>
             <!-- Show empty input when hiding actual stock (e.g., Blank Print) -->

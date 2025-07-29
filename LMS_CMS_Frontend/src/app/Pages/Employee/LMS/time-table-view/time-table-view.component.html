@@ -5,10 +5,13 @@
             {{TimeTableName}}
         </h1>
     </div>
-    <button (click)="Replace()"
-        class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
-        Replace
-    </button>
+    <div class="flex justify-between items-center space-x-5">
+        <input type="date" [(ngModel)]="date" (change)="GetDutyByDate()" class="border p-2 rounded " />
+        <button (click)="Replace()"
+            class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
+            Replace
+        </button>
+    </div>
 </div>
 
 <div class="flex justify-start items-center space-x-4 mb-4">
@@ -23,7 +26,7 @@
             <option *ngIf="days.length === 0" disabled selected>No Data Found</option>
         </select>
     </div>
-     <div class="w-[48%]">
+    <div class="w-[48%]">
         <label for="grade" class="block mb-2 text-sm font-medium text-gray-900">Grades</label>
         <select id="grade" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             [(ngModel)]="SelectedGrade" (change)="FilterTimeTable();">
@@ -34,7 +37,7 @@
             <option *ngIf="grades.length === 0" disabled selected>No Data Found</option>
         </select>
     </div>
-     <div *ngIf="SelectedDay!=0 || SelectedGrade!=0" class="rounded-full p-2 border-4" (click)="GetTimeTable()">
+    <div *ngIf="SelectedDay!=0 || SelectedGrade!=0" class="rounded-full p-2 border-4" (click)="GetTimeTable()">
         <i class="fa-solid fa-rotate-left secondaryTxt text-2xl w-8 h-8 text-center hover:cursor-pointer rounded-full"></i>
     </div>
 </div>
@@ -65,10 +68,20 @@
                         <td class="border p-2 font-medium">
                             {{ classroom.classroomName }}
                         </td>
-                        <td class="border p-2" *ngFor="let session of classroom.sessions">
-                            <div *ngFor="let subject of session.subjects">
-                                <div class="font-semibold text-blue-600">{{ subject.subjectName }}</div>
-                                <div class="text-gray-500 text-xs">{{ subject.teacherName }}</div>
+                        <td class="border p-2 " *ngFor="let session of classroom.sessions">
+                            <div class="rounded-lg border-l-8 border-blue-500 bg-blue-50 px-4 py-2 text-lg font-medium text-gray-800 shadow mb-2">
+                                <div *ngFor="let subject of session.subjects">
+                                    <div class="text-gray-500 text-xs">{{ subject.subjectName }}</div>
+                                    <div class="text-gray-500 text-xs">{{ subject.teacherName }}</div>
+                                </div>
+                                <!-- <div class="font-semibold text-blue-600">{{ subject.subjectName }}</div>
+                                <div class="text-gray-500 text-xs">{{ subject.teacherName }}</div> -->
+                            </div>
+                            <!-- Duty Teacher -->
+                            <div *ngIf="session.dutyTeacherName"
+                                class="rounded-lg border-l-8 border-red-500 bg-red-100 px-4 py-2 text-lg font-medium text-gray-800 shadow">
+                                <div>Duty</div>
+                                <div>{{ session.dutyTeacherName }}</div>
                             </div>
                             <div *ngIf="session.subjects.length === 0" class="text-gray-400">--</div>
                         </td>

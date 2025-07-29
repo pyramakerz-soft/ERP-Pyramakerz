@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+﻿        using AutoMapper;
 using LMS_CMS_BL.DTO.Accounting;
 using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains;
@@ -63,7 +63,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             } 
 
             List<StudentGrade> studentGrades = await Unit_Of_Work.studentGrade_Repository.Select_All_With_IncludesById<StudentGrade>(
-                s => s.IsDeleted != true && s.GradeID == gradeID && s.AcademicYearID == yearID,
+                s => s.IsDeleted != true && s.GradeID == gradeID && s.AcademicYearID == yearID && s.Student.IsDeleted != true,
                 query => query.Include(s => s.Student)
                 );
 

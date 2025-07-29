@@ -33,7 +33,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         
         [HttpGet("BySchoolId/{SchoolId}")]
         [Authorize_Endpoint_(
-           allowedTypes: new[] { "octa", "employee" }
+           allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Time Table" }
        )]
         public IActionResult Get(long SchoolId)
         {
@@ -51,7 +52,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return BadRequest("No school with this ID");
             }
 
-            AcademicYear academicYear = Unit_Of_Work.academicYear_Repository.First_Or_Default(a=>a.SchoolID==SchoolId & a.IsDeleted != true && a.IsActive==true);
+            AcademicYear academicYear = Unit_Of_Work.academicYear_Repository.First_Or_Default(a=>a.SchoolID==SchoolId & a.IsDeleted != true && a.IsActive==true );
             if (academicYear == null)
             {
                 return BadRequest("No active academic year in this school");
@@ -70,7 +71,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         /////////////////
 
         [HttpPost]
-        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" })]
+        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Time Table" })]
         public async Task<IActionResult> GenerateAsync(TimeTableAddDTO timeTableAddDTO)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -343,7 +345,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" }
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Time Table" }
         )]
         public async Task<IActionResult> GetByIdAsync(long id)
         {
@@ -409,9 +412,11 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                                 ClassroomName = classGroup.Key.ClassroomName,
                                 Sessions = classGroup
                                     .SelectMany(c => c.TimeTableSessions)
+                                    .OrderBy(session => session.PeriodIndex) // 👈 order by PeriodIndex here
                                     .Select(session => new SessionGroupDTO
                                     {
                                         SessionId = session.ID,
+                                        PeriodIndex = session.PeriodIndex, // 👈 include PeriodIndex in response
                                         Subjects = session.TimeTableSubjects.Select(s => new SubjectTeacherDTO
                                         {
                                             SubjectId = s.SubjectID,
@@ -432,7 +437,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("{id}/{date}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" }
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Time Table" }
         )]
         public async Task<IActionResult> GetByIdAsync(long id, DateOnly date)
         {
@@ -527,24 +533,22 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                                     ClassroomName = classGroup.Key.ClassroomName,
                                     Sessions = classGroup
                                         .SelectMany(c => c.TimeTableSessions)
+                                        .OrderBy(session => session.PeriodIndex) 
                                         .Select(session =>
                                         {
                                             var dutyForSession = duty.FirstOrDefault(d => d.TimeTableSessionID == session.ID);
                                             return new SessionGroupDTO
                                             {
                                                 SessionId = session.ID,
+                                                PeriodIndex = session.PeriodIndex,
                                                 DutyTeacherId = dutyForSession?.TeacherID,
                                                 DutyTeacherName = dutyForSession?.Teacher?.en_name,
-                                                Subjects = session.TimeTableSubjects.Select(s =>
+                                                Subjects = session.TimeTableSubjects.Select(s => new SubjectTeacherDTO
                                                 {
-                                                    var isDuty = dutyForSession != null;
-                                                    return new SubjectTeacherDTO
-                                                    {
-                                                        SubjectId = s.SubjectID,
-                                                        SubjectName = s.SubjectName,
-                                                        TeacherId = isDuty ? dutyForSession.TeacherID : s.TeacherID,
-                                                        TeacherName = isDuty ? dutyForSession.Teacher.en_name : s.TeacherName
-                                                    };
+                                                    SubjectId = s.SubjectID,
+                                                    SubjectName = s.SubjectName,
+                                                    TeacherId = dutyForSession != null ? dutyForSession.TeacherID : s.TeacherID,
+                                                    TeacherName = dutyForSession != null ? dutyForSession.Teacher.en_name : s.TeacherName
                                                 }).ToList()
                                             };
                                         }).ToList()
@@ -564,7 +568,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("GetAllClassesinThisTimetable/{Tid}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" }
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Time Table" }
         )]
         public async Task<IActionResult> GetAllClassesinThisTimetable(long Tid)
         {
@@ -589,7 +594,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("GetAllTeachersinThisTimetable/{Tid}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" }
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Time Table" }
         )]
         public async Task<IActionResult> GetAllTeachersinThisTimetable(long Tid)
         {
@@ -614,7 +620,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("GetByIdForClassAsync/{Tid}/{ClassId}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" }
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Time Table" }
         )]
         public async Task<IActionResult> GetByIdForClassAsync(long Tid , long ClassId)
         {
@@ -706,7 +713,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("GetByIdForTeacherAsync/{Tid}/{TeacherId}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" }
+            allowedTypes: new[] { "octa", "employee" } ,
+            pages: new[] { "Time Table" }
         )]
         public async Task<IActionResult> GetByIdForTeacherAsync(long Tid, long TeacherId)
         {
@@ -808,10 +816,9 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpPut]
         [Authorize_Endpoint_(
-           allowedTypes: new[] { "octa", "employee" }
-           //,
-           //allowEdit: 1,
-           //pages: new[] { "" }
+           allowedTypes: new[] { "octa", "employee" },
+           allowEdit: 1,
+           pages: new[] { "Time Table" }
        )]
         public IActionResult EditFavourite(long id , bool IsFavourite)
         {
@@ -877,10 +884,9 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpPut("Replace")]
         [Authorize_Endpoint_(
-         allowedTypes: new[] { "octa", "employee" }
-         //,
-         //allowEdit: 1,
-         //pages: new[] { "" }
+         allowedTypes: new[] { "octa", "employee" },
+         allowEdit: 1,
+         pages: new[] { "Time Table" }
          )]
         public async Task<IActionResult> EditAsync(List<TimeTableReplaceEditDTO> SessionReplaced)
         {
@@ -1011,12 +1017,11 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpDelete("{id}")]
         [Authorize_Endpoint_(
-               allowedTypes: new[] { "octa", "employee" }
-               //,
-               //allowDelete: 1,
-               //pages: new[] { "Academic Years" }
+               allowedTypes: new[] { "octa", "employee" },
+               allowDelete: 1,
+               pages: new[] { "Time Table" }
            )]
-            public IActionResult Delete(long id)
+        public IActionResult Delete(long id)
             {
                 UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -1043,16 +1048,16 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     return NotFound("No TimeTable with this ID");
                 }
 
-                //if (userTypeClaim == "employee")
-                //{
-                //    IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Academic Years", roleId, userId, academicYear);
-                //    if (accessCheck != null)
-                //    {
-                //        return accessCheck;
-                //    }
-                //}
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Time Table", roleId, userId, timeTable);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
+            }
 
-                timeTable.IsDeleted = true;
+            timeTable.IsDeleted = true;
                 TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
                 timeTable.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
                 if (userTypeClaim == "octa")

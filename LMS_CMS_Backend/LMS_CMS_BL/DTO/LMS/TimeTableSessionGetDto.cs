@@ -11,6 +11,7 @@ namespace LMS_CMS_BL.DTO.LMS
     {
         public long ID { get; set; }
         public long TimeTableClassroomID { get; set; }
+        public int PeriodIndex { get; set; } // <- important for ordering
         public ICollection<TimeTableSubjectGetDto> TimeTableSubjects { get; set; }
 
     }
