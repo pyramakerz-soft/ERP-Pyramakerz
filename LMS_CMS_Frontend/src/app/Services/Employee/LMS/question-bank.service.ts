@@ -27,6 +27,18 @@ export class QuestionBankService {
     return this.http.get<{ data: QuestionBank[], pagination: any }>(`${this.baseUrl}/QuestionBank?pageNumber=${pageNumber}&pageSize=${pageSize}`, { headers });
   }
 
+  GetBySubjectIdWithPaggination(SubjectId:number ,DomainName: string, pageNumber: number, pageSize: number) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<{ data: QuestionBank[], pagination: any }>(`${this.baseUrl}/QuestionBank/BySubjectIdWithPaggination/${SubjectId}?pageNumber=${pageNumber}&pageSize=${pageSize}`, { headers });
+  }
+
   GetByTags(LessonId: number, TypeId: number, tags: number[], DomainName: string, pageNumber: number, pageSize: number) {
     if (DomainName != null) {
       this.header = DomainName;

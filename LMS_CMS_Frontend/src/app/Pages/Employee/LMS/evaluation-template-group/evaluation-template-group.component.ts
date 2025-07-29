@@ -189,8 +189,7 @@ export class EvaluationTemplateGroupComponent {
            }
          );
        }
-     }
-     this.GetTemplateData();
+     } 
    }
  
    closeModal() {

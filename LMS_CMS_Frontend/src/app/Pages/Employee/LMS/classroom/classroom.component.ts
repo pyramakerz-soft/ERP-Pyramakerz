@@ -70,6 +70,7 @@ export class ClassroomComponent {
   Buildings:Building[] = []
   selectedSection: number | null = null
   selectedBuilding: number | null = null
+  IsViewTable: boolean = false;
 
   isLoading=false
   isLoadingSaveClassroom=false
@@ -92,7 +93,7 @@ export class ClassroomComponent {
       this.path = url[0].path
     });
 
-    this.getClassroomData() 
+    // this.getClassroomData() 
     this.getEmployeeData()
     this.getSchoolData()
 
@@ -208,6 +209,7 @@ export class ClassroomComponent {
   
   getClassroomDataByYearID(){
     this.classroomData=[]
+    this.IsViewTable=true
     this.classroomService.GetByAcYearId(this.activeAcademicYearID, this.DomainName).subscribe(
       (data) => {
         this.classroomData = data;
@@ -216,6 +218,11 @@ export class ClassroomComponent {
         }
       }
     )
+  }
+
+  AcademicYearIsChanged(){
+    this.classroomData=[]
+    this.IsViewTable=false
   }
   
   getAllClassroomData(){
@@ -268,6 +275,7 @@ export class ClassroomComponent {
   onSchoolFilterrationChange(){
     this.classroomData=[]
     this.activeAcademicYearID = 0
+    this.IsViewTable=false
     this.getAllYearsForFilteration()
   }
 

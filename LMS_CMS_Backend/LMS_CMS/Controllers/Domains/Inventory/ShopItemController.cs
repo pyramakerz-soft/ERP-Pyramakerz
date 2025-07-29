@@ -257,9 +257,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             //    d => d.IsDeleted != true && d.StudentID == StudentID && d.Classroom.AcademicYear.IsActive == true
             //    );
 
-            StudentGrade studentGrade = Unit_Of_Work.studentGrade_Repository.First_Or_Default(
-                d => d.IsDeleted != true && d.StudentID == StudentID && d.AcademicYear.IsActive == true
-                );
+            StudentGrade studentGrade = Unit_Of_Work.studentGrade_Repository.First_Or_Default( d => d.IsDeleted != true && d.StudentID == StudentID && d.AcademicYear.IsActive == true);
 
             if(studentGrade != null)
             {

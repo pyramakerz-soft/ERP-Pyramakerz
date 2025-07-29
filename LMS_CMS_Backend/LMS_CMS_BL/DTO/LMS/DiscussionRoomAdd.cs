@@ -14,6 +14,7 @@ namespace LMS_CMS_BL.DTO.LMS
         [Required(ErrorMessage = "Title is required")]
         [StringLength(100, ErrorMessage = "Title cannot be longer than 100 characters.")]
         public string Title { get; set; }
+        public long SchoolID { get; set; }
         public string MeetingLink { get; set; }
         public string? RecordLink { get; set; }
         public IFormFile? ImageFile { get; set; }

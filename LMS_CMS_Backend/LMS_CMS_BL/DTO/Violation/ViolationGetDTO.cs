@@ -1,6 +1,8 @@
-﻿using System;
+﻿using LMS_CMS_DAL.Models.Domains.ViolationModule;
+using LMS_CMS_DAL.Models.Domains;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,11 +12,14 @@ namespace LMS_CMS_BL.DTO.Violation
     public class ViolationGetDTO
     {
         public long ID { get; set; }
-        [Required(ErrorMessage = "Name is required")]
-        [StringLength(100, ErrorMessage = "Name cannot be longer than 100 characters.")]
-        public string Name { get; set; }
-        public List<EmployeeTypeGetDTO> employeeTypes { get; set; }
-        public long? InsertedByUserId { get; set; }
+        public string? Details { get; set; }
+        public string? Attach { get; set; }
+        public DateOnly Date { get; set; }
+        public long ViolationTypeID { get; set; }
+        public string ViolationTypeName { get; set; }
+        public long EmployeeID { get; set; }
+        public string EmployeeEnglishName { get; set; }
+        public string EmployeeArabicName { get; set; }
 
     }
 }

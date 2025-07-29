@@ -188,14 +188,12 @@ namespace LMS_CMS_BL.Config
             CreateMap<SchoolEditZatcaDTO, School>();
             CreateMap<SchoolEditEtaDTO, School>();
 
-            CreateMap<EmployeeTypeViolation, EmployeeTypeViolationGetDTO>()
-                .ForMember(dest => dest.ViolationID, opt => opt.MapFrom(src => src.Violation.ID))
-                .ForMember(dest => dest.ViolationsTypeName, opt => opt.MapFrom(src => src.Violation.Name));
+            CreateMap<EmployeeTypeViolation, EmployeeTypeViolationGetDTO>();
             CreateMap<EmployeeTypeViolation, EmployeeTypeViolationAddDTO>();
             CreateMap<EmployeeTypeViolationAddDTO, EmployeeTypeViolation>();
 
-            CreateMap<EmployeeTypeViolation, ViolationGetDTO>();
-            CreateMap<ViolationGetDTO, EmployeeTypeViolation>();
+            CreateMap<EmployeeTypeViolation, EmployeeTypeGetDTO>();
+            CreateMap<EmployeeTypeGetDTO, EmployeeTypeViolation>();
 
             CreateMap<EmployeeTypeViolation, EmployeeTypeGetDTO>()
                  .ForMember(dest => dest.EmpTypeVId, opt => opt.MapFrom(src => src.ID))
@@ -204,11 +202,15 @@ namespace LMS_CMS_BL.Config
             CreateMap<EmployeeTypeGetDTO, EmployeeTypeViolation>();
 
 
-            CreateMap<Violation, ViolationGetDTO>();
-            CreateMap<ViolationGetDTO, Violation>();
+            CreateMap<ViolationType, ViolationTypeGetDTO>();
+            CreateMap<ViolationTypeGetDTO, ViolationType>();
+            CreateMap<ViolationTypeAddDTO, ViolationType>();
+            CreateMap<ViolationTypeEditDTO, ViolationType>();
 
-            CreateMap<Violation, ViolationAddDTO>();
+            CreateMap<Violation, ViolationGetDTO>();
             CreateMap<ViolationAddDTO, Violation>();
+            CreateMap<ViolationEditDTO, Violation>();
+
 
             CreateMap<Building, BuildingGetDTO>()
                .ForMember(dest => dest.SchoolID, opt => opt.MapFrom(src => src.school.ID))
@@ -916,6 +918,10 @@ namespace LMS_CMS_BL.Config
                  .ForMember(dest => dest.LessonName, opt => opt.MapFrom(src => src.Lesson.EnglishTitle))
                  .ForMember(dest => dest.SubjectID, opt => opt.MapFrom(src => src.Lesson.SubjectID))
                  .ForMember(dest => dest.SubjectName, opt => opt.MapFrom(src => src.Lesson.Subject.en_name))
+                 .ForMember(dest => dest.SchoolID, opt => opt.MapFrom(src => src.Lesson.Subject.Grade.Section.SchoolID))
+                 .ForMember(dest => dest.SchoolName, opt => opt.MapFrom(src => src.Lesson.Subject.Grade.Section.school.Name))
+                 .ForMember(dest => dest.GradeID, opt => opt.MapFrom(src => src.Lesson.Subject.GradeID))
+                 .ForMember(dest => dest.GradeName, opt => opt.MapFrom(src => src.Lesson.Subject.Grade.Name))
                  .ForMember(dest => dest.BloomLevelName, opt => opt.MapFrom(src => src.BloomLevel.EnglishName))
                  .ForMember(dest => dest.DokLevelName, opt => opt.MapFrom(src => src.DokLevel.EnglishName))
                  .ForMember(dest => dest.QuestionBankOptionsDTO, opt => opt.MapFrom(src => src.QuestionBankOptions))
@@ -988,6 +994,10 @@ namespace LMS_CMS_BL.Config
                 .ForMember(dest => dest.SubjectArabicName, opt => opt.MapFrom(src => src.Subject.ar_name));
 
             CreateMap<Assignment, AssignmentGetDTO>()
+               .ForMember(dest => dest.SchoolID, opt => opt.MapFrom(src => src.Subject.Grade.Section.SchoolID))
+               .ForMember(dest => dest.SchoolName, opt => opt.MapFrom(src => src.Subject.Grade.Section.school.Name))
+               .ForMember(dest => dest.GradeID, opt => opt.MapFrom(src => src.Subject.GradeID))
+               .ForMember(dest => dest.GradeName, opt => opt.MapFrom(src => src.Subject.Grade.Name))
                .ForMember(dest => dest.SubjectEnglishName, opt => opt.MapFrom(src => src.Subject.en_name))
                .ForMember(dest => dest.SubjectArabicName, opt => opt.MapFrom(src => src.Subject.ar_name))
                .ForMember(dest => dest.SubjectWeightTypeEnglishName, opt => opt.MapFrom(src => src.SubjectWeightType.WeightType.EnglishName))
@@ -1121,8 +1131,16 @@ namespace LMS_CMS_BL.Config
                 .ForMember(dest => dest.ClassName, opt => opt.MapFrom(src => src.TimeTableSession.TimeTableClassroom.Classroom.Name));
             CreateMap<DutyEditDTO, Duty>();
 
-            CreateMap<Notification, NotificationGetDTO>();
+            CreateMap<Notification, NotificationGetDTO>()
+                .ForMember(dest => dest.UserTypeName, opt => opt.MapFrom(src => src.UserType.Title));
             CreateMap<NotificationAddDTO, Notification>();
+
+            CreateMap<NotificationSharedTo, NotificationSharedToGetDTO>()
+                .ForMember(dest => dest.ImageLink, opt => opt.MapFrom(src => src.Notification.ImageLink))
+                .ForMember(dest => dest.Text, opt => opt.MapFrom(src => src.Notification.Text))
+                .ForMember(dest => dest.Link, opt => opt.MapFrom(src => src.Notification.Link))
+                .ForMember(dest => dest.IsAllowDismiss, opt => opt.MapFrom(src => src.Notification.IsAllowDismiss));
+
         }
     } 
 }

@@ -42,8 +42,9 @@ export class AnnouncementComponent {
   DomainName: string = '';
   UserID: number = 0;
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
-
+  
   isDropdownOpen = false;
+  selectedUserTypeId: number = 0;
 
   constructor(
     public account: AccountService,
@@ -330,6 +331,7 @@ export class AnnouncementComponent {
   }
 
   ResetFilter(){
+    this.selectedUserTypeId = 0
     this.getAllData()
   }
 }

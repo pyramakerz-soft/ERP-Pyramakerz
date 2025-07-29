@@ -215,6 +215,7 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<Duty> Duty_Repository;
         GenericRepo<Notification> Notification_Repository;
         GenericRepo<NotificationSharedTo> NotificationSharedTo_Repository;
+        GenericRepo<ViolationType> ViolationType_Repository;
 
 
         public UOW(Octa_DbContext octa_Db)
@@ -518,6 +519,18 @@ namespace LMS_CMS_BL.UOW
                     Violations_Repository = new GenericRepo<Violation>(db);
                 }
                 return Violations_Repository;
+            }
+        }
+
+        public GenericRepo<ViolationType> violationType_Repository
+        {
+            get
+            {
+                if (ViolationType_Repository == null)
+                {
+                    ViolationType_Repository = new GenericRepo<ViolationType>(db);
+                }
+                return ViolationType_Repository;
             }
         }
 

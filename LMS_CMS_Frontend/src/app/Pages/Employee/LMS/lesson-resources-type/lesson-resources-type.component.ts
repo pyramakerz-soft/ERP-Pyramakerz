@@ -183,8 +183,7 @@ export class LessonResourcesTypeComponent {
           }
         );
       }
-    }
-    this.GetAllData();
+    } 
   }
 
   closeModal() {

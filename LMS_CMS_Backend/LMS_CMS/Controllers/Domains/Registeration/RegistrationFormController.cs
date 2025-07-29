@@ -486,17 +486,17 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                 StudentGetDTO studentDto = await _createStudentService.CreateStudentDtoObj(Unit_Of_Work, registerationFormParent.ID);
                 Student student = await _createStudentService.CreateNewStudent(Unit_Of_Work, studentDto, userTypeClaim, userId, academicYear2.ID);
 
-                /// 2) create StudentClassroom
-                Classroom classroomid = Unit_Of_Work.classroom_Repository.First_Or_Default(s => s.GradeID == GradeId && s.IsDeleted != true && s.AcademicYearID == AccademicYearId);
-                StudentClassroom studentClassroom = new StudentClassroom
-                {
-                    StudentID = student.ID,
-                    ClassID = classroomid.ID,
-                    InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone),
-                    InsertedByOctaId = userTypeClaim == "octa" ? userId : null,
-                    InsertedByUserId = userTypeClaim == "employee" ? userId : null
-                };
-                Unit_Of_Work.studentClassroom_Repository.Add(studentClassroom);
+                ///// 2) create StudentClassroom
+                //Classroom classroomid = Unit_Of_Work.classroom_Repository.First_Or_Default(s => s.GradeID == GradeId && s.IsDeleted != true && s.AcademicYearID == AccademicYearId);
+                //StudentClassroom studentClassroom = new StudentClassroom
+                //{
+                //    StudentID = student.ID,
+                //    ClassID = classroomid.ID,
+                //    InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone),
+                //    InsertedByOctaId = userTypeClaim == "octa" ? userId : null,
+                //    InsertedByUserId = userTypeClaim == "employee" ? userId : null
+                //};
+                //Unit_Of_Work.studentClassroom_Repository.Add(studentClassroom);
 
                 /// 3) create StudentClassroom
                 StudentGrade studentGrade = new StudentGrade
