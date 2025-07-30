@@ -235,6 +235,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                     q => q.Include(d => d.InventoryMaster.StoreToTransform)
                 );
 
+            // ==== حساب الرصيد السابق =====
+
             var previousBalance = allData
                 .Where(d =>
                     d.InventoryMaster.Date < parsedFromDate &&
@@ -242,6 +244,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                     d.InventoryMaster.InventoryFlags.ItemInOut != 0)
                 .Sum(d => d.Quantity * d.InventoryMaster.InventoryFlags.ItemInOut);
 
+            //     ===== جلب الحركات من fromDate إلى toDate =====
             var transactionData = allData
                 .Where(d =>
                     d.InventoryMaster.Date >= parsedFromDate &&
@@ -257,6 +260,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                     d.InventoryMaster.InventoryFlags.ItemInOut != 0)
                 .ToList();
 
+            // ✅   حساب الكميات  
             var inQuantity = summaryData
                 .Where(d => d.InventoryMaster.InventoryFlags.ItemInOut == 1)
                 .Sum(d => d.Quantity);
@@ -266,6 +270,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 .Sum(d => d.Quantity);
 
             var quantityBalance = inQuantity - outQuantity;
+
+            // ✅   حساب التكلفة  
 
             var costBalance = summaryData
                 .Sum(d => d.AverageCost * d.InventoryMaster.InventoryFlags.ItemInOut);

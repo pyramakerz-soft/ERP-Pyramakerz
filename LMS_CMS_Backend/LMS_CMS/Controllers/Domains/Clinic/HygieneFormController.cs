@@ -61,13 +61,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                     if (dd.Student == null)
                         dd.Student = Unit_Of_Work.student_Repository.First_Or_Default(d => d.ID == dd.StudentId && d.IsDeleted != true);
 
-                    StudentHygienes studentHygiene = Unit_Of_Work.studentHygiens_Repository.First_Or_Default(x => x.StudentId == dd.StudentId);
+                    StudentHygienes studentHygiene = Unit_Of_Work.studentHygiens_Repository.First_Or_Default(x => x.StudentId == dd.StudentId && dd.IsDeleted != true);
 
                     HygieneType hygieneType = new();
                     if (studentHygiene is not null)
                     {
 
-                        hygieneType = Unit_Of_Work.hygieneType_Repository.First_Or_Default(h => h.Id == studentHygiene.HygieneTypeId);
+                        hygieneType = Unit_Of_Work.hygieneType_Repository.First_Or_Default(h => h.Id == studentHygiene.HygieneTypeId && h.IsDeleted != true);
                         dd.HygieneTypes?.Add(hygieneType);
                     }
                 }
@@ -110,7 +110,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                     query => query.Include(x => x.Classroom),
                     query => query.Include(x => x.School),
                     query => query.Include(x => x.Grade),
-                    query => query.Include(x => x.StudentHygieneTypes)?.ThenInclude(x => x.HygieneTypes),
+                    query => query.Include(x => x.StudentHygieneTypes)?.ThenInclude(x => x.HygieneTypes.Where(d => d.IsDeleted != true)),
                     query => query.Include(x => x.InsertedByEmployee)
                 );
 
@@ -124,12 +124,12 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                 if (dd.Student == null)
                     dd.Student = Unit_Of_Work.student_Repository.First_Or_Default(d => d.ID == dd.StudentId && d.IsDeleted != true);
 
-                StudentHygienes studentHygiene = Unit_Of_Work.studentHygiens_Repository.First_Or_Default(x => x.StudentId == dd.StudentId);
+                StudentHygienes studentHygiene = Unit_Of_Work.studentHygiens_Repository.First_Or_Default(x => x.StudentId == dd.StudentId && x.IsDeleted != true);
 
                 HygieneType hygieneType = new();
                 if (studentHygiene is not null)
                 {
-                    hygieneType = Unit_Of_Work.hygieneType_Repository.First_Or_Default(h => h.Id == studentHygiene.HygieneTypeId);
+                    hygieneType = Unit_Of_Work.hygieneType_Repository.First_Or_Default(h => h.Id == studentHygiene.HygieneTypeId && h.IsDeleted != true);
                     dd.HygieneTypes?.Add(hygieneType);
                 }
             }
@@ -322,7 +322,30 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                 return NotFound();
             }
             
-            Unit_Of_Work.hygieneForm_Repository.Delete(id);
+            hygieneForm.IsDeleted = true;
+
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            hygieneForm.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+
+            if (userTypeClaim == "octa")
+            {
+                hygieneForm.DeletedByOctaId = userId;
+
+                if (hygieneForm.DeletedByUserId != null)
+                {
+                    hygieneForm.DeletedByUserId = null;
+                }
+            }
+            else if (userTypeClaim == "employee")
+            {
+                hygieneForm.DeletedByUserId = userId;
+                if (hygieneForm.DeletedByOctaId != null)
+                {
+                    hygieneForm.DeletedByOctaId = null;
+                }
+            }
+
+            Unit_Of_Work.hygieneForm_Repository.Update(hygieneForm);
             Unit_Of_Work.SaveChanges();
             
             return Ok("Hygiene Form deleted successfully");

@@ -2,8 +2,8 @@
 {
     public class TotalResult
     {
-        public decimal? TotalDebit { get; set; }
-        public decimal? TotalCredit { get; set; }
-        public decimal? Differences { get; set; }
+        public decimal? TotalDebit { get; set; } = 0;
+        public decimal? TotalCredit { get; set; } = 0;
+        public decimal? Differences { get; set; } = 0;
     }
 }

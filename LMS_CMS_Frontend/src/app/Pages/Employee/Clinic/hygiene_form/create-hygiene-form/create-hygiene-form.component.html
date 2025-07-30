@@ -1,10 +1,11 @@
-<div class="container mx-auto pr-6">
+<div class="">
     <!-- Header Section -->
     <div class="flex justify-between">
-    <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
-        <i class="fa-solid fa-chevron-left cursor-pointer rtl:rotate-180" (click)="moveToHygieneForm()"></i>
-        <h1 class="primaryTxt font-semibold text-2xl leading-9">Hygiene Form</h1>
-    </div>        <div class="flex justify-between items-center">
+        <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
+            <i class="fa-solid fa-chevron-left cursor-pointer rtl:rotate-180" (click)="moveToHygieneForm()"></i>
+            <h1 class="primaryTxt font-semibold text-2xl leading-9">Hygiene Form</h1>
+        </div>
+        <div class="flex justify-between items-center">
             <button (click)="saveHygieneForm()"
                 class="text-white rounded-lg px-4 py-2.5 flex items-center justify-center gap-2"
                 style="background-color: #089B41;">
@@ -64,8 +65,8 @@
         <!-- Date Input -->
         <div class="flex flex-col mb-4 w-[49%]">
             <label class="mb-2 primaryTxt" for="date">Date</label>
-<input type="date" id="date" [(ngModel)]="selectedDate" (change)="onDateChange()"
-    class="rounded-lg border border-solid border-gray-300 px-4 py-3" [disabled]="!selectedClass">
+            <input type="date" id="date" [(ngModel)]="selectedDate" (change)="onDateChange()"
+                class="rounded-lg border border-solid border-gray-300 px-4 py-3" [disabled]="!selectedClass">
             <span *ngIf="validationErrors['date']" class="text-red-500 ml-3 font-normal">{{ validationErrors['date']
                 }}</span>
         </div>

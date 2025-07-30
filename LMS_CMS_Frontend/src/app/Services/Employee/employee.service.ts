@@ -32,18 +32,17 @@ export class EmployeeService {
     return this.http.get<Employee[]>(`${this.baseUrl}/Employee/GetByTypeId/${typeId}`, { headers })
   }
 
-  // GetByID(empID: number,DomainName?:string){
-  //   if(DomainName!=null) {
-  //     this.header=DomainName 
-  //   }
-  //   const token = localStorage.getItem("current_token");
-  //   const headers = new HttpHeaders()
-  //   .set('Authorization', `Bearer ${token}`)
-  //   .set('domain-name', this.header)
-  //   .set('Content-Type', 'application/json');
-  //   return this.http.get<Employee[]>(`${this.baseUrl}/Employee/${empID}`, { headers })
-  // }
-
+  GetByDepartmentId(departmentID: number,DomainName?:string){
+    if(DomainName!=null) {
+      this.header=DomainName 
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+    .set('Authorization', `Bearer ${token}`)
+    .set('domain-name', this.header)
+    .set('Content-Type', 'application/json');
+    return this.http.get<Employee[]>(`${this.baseUrl}/Employee/GetByDepartmentId/${departmentID}`, { headers })
+  }
 
   Add(employee: EmployeeGet, DomainName?: string) {
     if (DomainName != null) {

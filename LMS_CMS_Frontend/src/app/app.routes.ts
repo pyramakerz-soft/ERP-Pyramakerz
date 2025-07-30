@@ -195,14 +195,17 @@ import { TimeTableViewComponent } from './Pages/Employee/LMS/time-table-view/tim
 import { TimeTableReplace } from './Models/LMS/time-table-replace';
 import { TimeTableReplaceComponent } from './Pages/Employee/LMS/time-table-replace/time-table-replace.component';
 import { SignUpEmployeeComponent } from './Pages/Login/sign-up-employee/sign-up-employee.component';
-import { DutyComponent } from './Pages/Employee/LMS/duty/duty.component'; 
+import { DutyComponent } from './Pages/Employee/LMS/duty/duty.component';
 import { RegisteredEmployeeComponent } from './Pages/Employee/Administrator/registered-employee/registered-employee.component';
 import { RegisteredEmployeeViewComponent } from './Pages/Employee/Administrator/registered-employee-view/registered-employee-view.component';
-import { AnnouncementComponent } from './Pages/Employee/Administrator/announcement/announcement.component'; 
-import { DiscussionRoomComponent } from './Pages/Employee/LMS/discussion-room/discussion-room.component';
 import { Violation } from './Models/Violation/violation';
 import { ViolationComponent } from './Pages/Employee/Violation/violation/violation.component';
 import { ViolationViewComponent } from './Pages/Employee/Violation/violation-view/violation-view.component';
+import { AnnouncementComponent } from './Pages/Employee/Administrator/announcement/announcement.component';
+import { StoreBalanceReportComponent } from './Pages/Employee/Inventory/Report/store-balance-report/store-balance-report/store-balance-report.component';
+import { AllStoresBalanceReportComponent } from './Pages/Employee/Inventory/Report/store-balance-report/all-store-balance/all-store-balance.component';
+import { DiscussionRoomComponent } from './Pages/Employee/LMS/discussion-room/discussion-room.component';
+import { NotificationComponent } from './Pages/Employee/Communication/notification/notification.component';
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
     { path: "Octa/login", component: OctaLoginComponent, title: "login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -440,9 +443,19 @@ export const routes: Routes = [
             { path: 'Registered Employee', component: RegisteredEmployeeComponent, title: 'Registered Employee', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Registered Employee/:id', component: RegisteredEmployeeViewComponent, title: 'Registered Employee', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Announcement', component: AnnouncementComponent, title: 'Announcement', canActivate: [noNavigateWithoutLoginGuard], },
+            { path: 'Store Items Balance', component: StoreBalanceReportComponent, data: { reportType: 'QuantityOnly', title: 'Store Balance - Quantity Only' } },
+            { path: 'Store Items Balance with Purchase', component: StoreBalanceReportComponent, data: { reportType: 'PurchasePrice', title: 'Store Balance - Purchase Price' } },
+            { path: 'Store Items Balance with Sales', component: StoreBalanceReportComponent, data: { reportType: 'SalesPrice', title: 'Store Balance - Sales Price' } },
+            { path: 'Store Items Balance with Average Cost', component: StoreBalanceReportComponent, data: { reportType: 'Cost', title: 'Store Balance - Cost' } },
+            { path: 'Store Limited Items', component: StoreBalanceReportComponent, data: { reportType: 'ItemsUnderLimit', title: 'Store Balance - Items Under Limit' } },
+            { path: "All Stores Item Balance", component: AllStoresBalanceReportComponent, title: "All Stores Quantity Report", canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'QuantityOnly' } },
+            { path: "All Stores Item Balance with Purchase", component: AllStoresBalanceReportComponent, title: "All Stores Purchase Price Report", canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'PurchasePrice' } },
+            { path: "All Stores Item Balance with Sales", component: AllStoresBalanceReportComponent, title: "All Stores Sales Price Report", canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'SalesPrice' }},
+            { path: "All Stores Item Balance with Average Cost", component: AllStoresBalanceReportComponent, title: "All Stores Cost Report", canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'Cost' } },
             { path: 'Discussion Room', component: DiscussionRoomComponent, title: 'Discussion Room', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Violation', component: ViolationComponent, title: 'Violation', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Violation/:id', component: ViolationViewComponent, title: 'Violation', canActivate: [noNavigateWithoutLoginGuard], },
+            { path: 'Notification', component: NotificationComponent, title: 'Notification', canActivate: [noNavigateWithoutLoginGuard], },
         ]
     },
     {

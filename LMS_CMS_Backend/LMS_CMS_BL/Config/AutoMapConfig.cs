@@ -1139,7 +1139,8 @@ namespace LMS_CMS_BL.Config
                 .ForMember(dest => dest.ClassName, opt => opt.MapFrom(src => src.TimeTableSession.TimeTableClassroom.Classroom.Name));
             CreateMap<DutyEditDTO, Duty>();
 
-            CreateMap<Notification, NotificationGetDTO>();
+            CreateMap<Notification, NotificationGetDTO>()
+                .ForMember(dest => dest.UserTypeName, opt => opt.MapFrom(src => src.UserType.Title));
             CreateMap<NotificationAddDTO, Notification>();
 
             CreateMap<NotificationSharedTo, NotificationSharedToGetDTO>()

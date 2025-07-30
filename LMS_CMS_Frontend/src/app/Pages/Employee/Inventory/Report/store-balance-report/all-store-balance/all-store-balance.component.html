@@ -1,0 +1,150 @@
+<div class="flex justify-between mb-3">
+    <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ pageTitle }}</h1>
+</div>
+
+<div class="flex flex-wrap md:flex-nowrap items-end space-x-0 md:space-x-6 space-y-4 md:space-y-0 mb-6">
+    <!-- Date To -->
+    <div class="w-full md:w-1/4">
+        <label for="dateTo" class="block mb-2 text-sm font-medium text-gray-900">Date To</label>
+        <input id="dateTo" type="date" [(ngModel)]="dateTo" (ngModelChange)="onFilterChange()" required
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
+    </div>
+
+    <!-- Category Selector -->
+    <div class="w-full md:w-1/4">
+        <label for="category" class="block mb-2 text-sm font-medium text-gray-900">Category</label>
+        <select id="category" [(ngModel)]="selectedCategoryId" (ngModelChange)="onFilterChange()"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
+            <option [ngValue]="null">All Categories</option>
+            <option *ngFor="let category of categories" [ngValue]="category.id">{{ category.name }}</option>
+        </select>
+    </div>
+
+    <!-- Checkboxes -->
+    <div class="w-full md:w-1/3 flex flex-col">
+        <label class="block mb-2 text-sm font-medium text-gray-900">Filters</label>
+        <div class="flex flex-wrap gap-4">
+            <div class="flex items-center">
+                <input type="checkbox" id="hasBalance" [(ngModel)]="hasBalance" class="mr-2 accent-secondaryBg">
+                <label for="hasBalance" class="text-sm text-gray-700">Has Balance</label>
+            </div>
+            <div class="flex items-center">
+                <input type="checkbox" id="overdrawnBalance" [(ngModel)]="overdrawnBalance"
+                    class="mr-2 accent-secondaryBg">
+                <label for="overdrawnBalance" class="text-sm text-gray-700">Overdrawn Balance</label>
+            </div>
+            <div class="flex items-center">
+                <input type="checkbox" id="zeroBalances" [(ngModel)]="zeroBalances" class="mr-2 accent-secondaryBg">
+                <label for="zeroBalances" class="text-sm text-gray-700">Zero Balances</label>
+            </div>
+        </div>
+    </div>
+
+    <div class="w-full md:w-1/6 flex justify-end mt-4 md:mt-0">
+        <button class="p-3 font-medium text-xl rounded-lg" (click)="viewReport()" [disabled]="!dateTo" [ngClass]="{
+                'bg-gray-100 text-gray-300': !dateTo,
+                'secondaryBg text-white': dateTo
+            }">
+            View Report
+        </button>
+    </div>
+</div>
+
+<div *ngIf="showTable" class="mt-5 flex justify-end space-x-4">
+    <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="exportExcel()" title="Export to Excel">
+    <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()" title="Export to PDF">
+    <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()" title="Print Report">
+</div>
+
+<div class="absolute -top-[9999px] -left-[9999px]">
+    <div id="Data" class="hidden">
+        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="pageTitle" [infoRows]="getInfoRows()"
+            [tableHeaders]="getPdfTableHeaders()" [tableData]="reportForExport" #pdfPrintComponent>
+        </app-pdf-print>
+    </div>
+</div>
+
+<div *ngIf="showTable" class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
+    <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
+        <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+            <tr>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    Item Code
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    Item Name
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    Quantity
+                </th>
+                <th *ngIf="reportType === 'PurchasePrice'"
+                    class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    Purchase Price
+                </th>
+                <th *ngIf="reportType === 'PurchasePrice'"
+                    class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    Total Purchase
+                </th>
+                <th *ngIf="reportType === 'SalesPrice'"
+                    class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    Sales Price
+                </th>
+                <th *ngIf="reportType === 'SalesPrice'"
+                    class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    Total Sales
+                </th>
+                <th *ngIf="reportType === 'Cost'"
+                    class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    Average Cost
+                </th>
+                <th *ngIf="reportType === 'Cost'"
+                    class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    Total Cost
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngIf="!reportData?.data || (reportData?.data?.length ?? 0) === 0">
+                <td [attr.colspan]="getPdfTableHeaders().length"
+                    class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                    No Data Found
+                </td>
+            </tr>
+
+            <tr *ngFor="let item of reportData?.data; let i = index" [ngClass]="{ 
+                    'bg-[#F7F7F7]': i % 2 === 1, 
+                    'bg-white': i % 2 !== 1
+                }" class="border-t border-gray-300 text-xs md:text-sm">
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ item.itemCode }}
+                </td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ item.itemName }}
+                </td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ item.quantity }}
+                </td>
+                <td *ngIf="reportType === 'PurchasePrice'"
+                    class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ item.purchasePrice | number:'1.2-2' }}
+                </td>
+                <td *ngIf="reportType === 'PurchasePrice'"
+                    class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ item.totalPurchaseValue | number:'1.2-2' }}
+                </td>
+                <td *ngIf="reportType === 'SalesPrice'" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ item.salesPrice | number:'1.2-2' }}
+                </td>
+                <td *ngIf="reportType === 'SalesPrice'" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ item.totalSalesValue | number:'1.2-2' }}
+                </td>
+                <td *ngIf="reportType === 'Cost'" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ item.averageCost | number:'1.2-2' }}
+                </td>
+                <td *ngIf="reportType === 'Cost'" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ item.totalCost | number:'1.2-2' }}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

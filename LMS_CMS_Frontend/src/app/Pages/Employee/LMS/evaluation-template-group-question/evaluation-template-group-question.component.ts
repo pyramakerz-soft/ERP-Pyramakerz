@@ -188,8 +188,7 @@ export class EvaluationTemplateGroupQuestionComponent {
            }
          );
        }
-     }
-     this.GetGroupData();
+     } 
    }
  
    closeModal() {
@@ -209,7 +208,8 @@ export class EvaluationTemplateGroupQuestionComponent {
          if (!this.question[field]) {
            if (
                 field == 'englishTitle' ||
-                field == 'arabicTitle' 
+                field == 'arabicTitle' || 
+                field == 'mark'
               ) {
              this.validationErrors[field] = `*${this.capitalizeField(
                field
