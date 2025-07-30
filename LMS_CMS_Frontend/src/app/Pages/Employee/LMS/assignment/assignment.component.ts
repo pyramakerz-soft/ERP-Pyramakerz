@@ -633,7 +633,7 @@ export class AssignmentComponent {
     return isValid;
   }
 
-  Save() {
+  Save() { 
     if (this.isFormValid()) {
       this.isLoading = true;
       if (this.assignment.isSpecificStudents == true) {
@@ -646,6 +646,9 @@ export class AssignmentComponent {
       }
 
       if (this.assignment.id == 0) {
+        if(this.assignment.dueDate == ''){
+          this.assignment.dueDate == null
+        }
         this.assignmentService.Add(this.assignment, this.DomainName).subscribe(
           (result: any) => {
             this.closeModal();

@@ -44,7 +44,8 @@ export class NavMenuComponent {
   DomainName: string = "";
 
   notifications: Notification[] = []
-
+  notificationByID:Notification = new Notification()
+  
   constructor(private router: Router, public account: AccountService, public languageService: LanguageService, public ApiServ: ApiService, public octaService:OctaService,
     private translate: TranslateService, private communicationService: NewTokenService, private logOutService: LogOutService, private notificationService: NotificationService) { }
 
@@ -229,7 +230,7 @@ export class NavMenuComponent {
     this.confirmPassword = ""; 
     this.isLoading = false;
     this.editpasss = new EditPass();
-  }
+  } 
 
   onPasswordChange() {
     this.PasswordError = "" 
@@ -378,6 +379,18 @@ export class NavMenuComponent {
   }
 
   viewNotification(notificationShared:Notification){
+    this.notificationByID = new Notification()
+    this.notificationService.ByUserIDAndNotificationSharedByID(notificationShared.id, this.DomainName).subscribe(
+      data => {
+        this.notificationByID = data
+        document.getElementById("NotificationModal")?.classList.remove("hidden");
+        document.getElementById("NotificationModal")?.classList.add("flex");
+      }
+    )
+  } 
 
+  closeNotificationModal() {
+    document.getElementById("NotificationModal")?.classList.remove("flex");
+    document.getElementById("NotificationModal")?.classList.add("hidden"); 
   }
 }
