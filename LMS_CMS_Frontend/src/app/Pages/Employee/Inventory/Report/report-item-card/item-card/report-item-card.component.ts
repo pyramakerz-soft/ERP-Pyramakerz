@@ -61,6 +61,7 @@ export class ReportItemCardComponent implements OnInit {
     this.isLoading = true;
     this.storesService.Get(this.storesService.ApiServ.GetHeader()).subscribe({
       next: (stores) => {
+        console.log('Stores loaded:', stores);
         this.stores = stores;
         this.isLoading = false;
       },
@@ -76,6 +77,7 @@ export class ReportItemCardComponent implements OnInit {
       .Get(this.shopItemService.ApiServ.GetHeader())
       .subscribe({
         next: (items) => {
+          console.log('Items loaded:', items);
           this.items = items;
           this.isLoading = false;
         },
