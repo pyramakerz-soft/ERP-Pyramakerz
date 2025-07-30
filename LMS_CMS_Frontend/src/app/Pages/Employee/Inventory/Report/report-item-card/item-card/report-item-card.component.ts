@@ -2,7 +2,6 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-
 import * as XLSX from 'xlsx-js-style';
 import { PdfPrintComponent } from '../../../../../../Component/pdf-print/pdf-print.component';
 import { Store } from '../../../../../../Models/Inventory/store';
@@ -10,11 +9,8 @@ import { InventoryDetailsService } from '../../../../../../Services/Employee/Inv
 import { StoresService } from '../../../../../../Services/Employee/Inventory/stores.service';
 import { ShopItemService } from '../../../../../../Services/Employee/Inventory/shop-item.service';
 import {
-  CombinedReportData,
   InventoryNetCombinedResponse,
   InventoryNetCombinedTransaction,
-  InventoryNetSummary,
-  InventoryNetTransaction,
 } from '../../../../../../Models/Inventory/report-card';
 import Swal from 'sweetalert2';
 
@@ -68,8 +64,7 @@ export class ReportItemCardComponent implements OnInit {
         this.stores = stores;
         this.isLoading = false;
       },
-      error: (error) => {
-        console.error('Error loading stores:', error);
+      error: () => {
         this.isLoading = false;
       },
     });
@@ -84,8 +79,7 @@ export class ReportItemCardComponent implements OnInit {
           this.items = items;
           this.isLoading = false;
         },
-        error: (error) => {
-          console.error('Error loading items:', error);
+        error: () => {
           this.isLoading = false;
         },
       });
@@ -141,7 +135,6 @@ export class ReportItemCardComponent implements OnInit {
       this.processReportData(response.summary, response.transactions || []);
       this.showTable = true;
     } catch (error) {
-      console.error('Error loading report:', error);
       this.combinedData = [];
       this.showTable = true;
     } finally {
@@ -168,23 +161,16 @@ export class ReportItemCardComponent implements OnInit {
     if (this.showAverageColumn) {
       summaryRow.price = '-';
       summaryRow.totalPrice = '-';
-      // summaryRow.averageCost = '-';
     }
-    // int x =0;
 
-    // Process transactions
     const transactionRows = transactions.map((t) => {
-      // x += (t.quantity *(t.itemInOut ===1 ? 1 : -1));
       const row: any = {
-        isSummary: false,
         date: t.date || '-',
         transactionType: t.flagName || '-',
         invoiceNumber: t.invoiceNumber || '-',
         authority: t.supplierName || t.studentName || t.storeToName || '-',
         income: t.inQuantity || '-',
         outcome: t.outQuantity || '-',
-        // income: t.itemInOut === 1 ? t.quantity ?? '-' : '-',
-        // outcome: t.itemInOut === -1 ? t.quantity ?? '-' : '-',
         balance: t.balance ?? '-',
       };
 
@@ -197,63 +183,31 @@ export class ReportItemCardComponent implements OnInit {
       return row;
     });
 
-    // Combine data
     this.combinedData = [summaryRow, ...transactionRows];
     this.prepareExportData();
   }
 
-  // private formatDateForAPI(dateString: string): string {
-  //   if (!dateString) return '';
-  //   const date = new Date(dateString);
-  //   if (isNaN(date.getTime())) {
-  //     console.error('Invalid date:', dateString);
-  //     return '';
-  //   }
-  //   const year = date.getFullYear();
-  //   const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  //   const day = date.getDate().toString().padStart(2, '0');
-  //   return `${year}-${month}-${day}`;
-  // }
-
-  private formatDisplayDate(dateString: string): string {
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('en-US', {
-        month: 'long',
-        day: 'numeric',
-        year: 'numeric',
-      });
-    } catch (e) {
-      console.error('Error formatting date:', dateString, e);
-      return dateString;
-    }
-  }
-
   private prepareExportData(): void {
     this.transactionsForExport = this.combinedData.map((t) => {
-      // const costBalance = t.isSummary
-      //   ? typeof t.costBalance === 'number'
-      //     ? t.costBalance.toFixed(2)
-      //     : '-'
-      //   : '-';
-
+      const formatDate = (date: any) => {
+        if (!date) return '-';
+        if (typeof date === 'string' && date.match(/^\d{4}-\d{2}-\d{2}/))
+          return date.slice(0, 10);
+        const d = new Date(date);
+        return isNaN(d.getTime()) ? '-' : d.toISOString().slice(0, 10);
+      };
       return {
-        Date: t.isSummary
-          ? t.date
-          : t.date
-          ? new Date(t.date).toLocaleDateString()
-          : '-',
-        'Transaction Type': t.transactionType || '-',
-        'Invoice #': t.invoiceNumber || '-',
+        Date: formatDate(t.date),
+        Type: t.transactionType || '-',
+        '#': t.invoiceNumber || '-',
         Authority: t.authority || '-',
         Income: t.income || '-',
         Outcome: t.outcome || '-',
         Balance: t.balance || '-',
         ...(this.showAverageColumn && {
-          // 'Cost Balance': costBalance,
           Price: t.price || '-',
           'Total Price': t.totalPrice || '-',
-          'Average Cost': t.averageCost || '-',
+          Avg: t.averageCost || '-',
         }),
       };
     });
@@ -292,7 +246,6 @@ export class ReportItemCardComponent implements OnInit {
     setTimeout(() => {
       const printContents = document.getElementById('Data')?.innerHTML;
       if (!printContents) {
-        console.error('Element not found!');
         return;
       }
 
@@ -387,12 +340,7 @@ export class ReportItemCardComponent implements OnInit {
       'Balance',
     ];
     if (this.showAverageColumn) {
-      headers.push(
-        // 'Cost Balance',
-        'Price',
-        'Total Price',
-        'Average Cost'
-      );
+      headers.push('Price', 'Total Price', 'Average Cost');
     }
     excelData.push(
       headers.map((h) => ({
@@ -447,10 +395,6 @@ export class ReportItemCardComponent implements OnInit {
       ];
       if (this.showAverageColumn) {
         rowData.push(
-          // {
-          //   v: getVal(row.costBalance),
-          //   s: { fill: { fgColor: { rgb: fillColor } } },
-          // },
           {
             v: getVal(row.price),
             s: { fill: { fgColor: { rgb: fillColor } } },
@@ -480,7 +424,7 @@ export class ReportItemCardComponent implements OnInit {
 
     // Set column widths
     worksheet['!cols'] = [
-      { wch: 22 }, // Date
+      { wch: 12 }, // Date (was 22)
       { wch: 18 }, // Transaction Type
       { wch: 12 }, // Invoice #
       { wch: 20 }, // Authority
@@ -489,7 +433,6 @@ export class ReportItemCardComponent implements OnInit {
       { wch: 12 }, // Balance
       ...(this.showAverageColumn
         ? [
-            { wch: 14 }, // Cost Balance
             { wch: 10 }, // Price
             { wch: 14 }, // Total Price
             { wch: 14 }, // Average Cost
@@ -527,8 +470,8 @@ export class ReportItemCardComponent implements OnInit {
   getPdfTableHeaders(): string[] {
     const headers = [
       'Date',
-      'Transaction Type',
-      'Invoice #',
+      'Type',
+      '#',
       'Authority',
       'Income',
       'Outcome',
@@ -536,12 +479,7 @@ export class ReportItemCardComponent implements OnInit {
     ];
 
     if (this.showAverageColumn) {
-      headers.push(
-        // 'Cost Balance',
-        'Price',
-        'Total Price',
-        'Average Cost'
-      );
+      headers.push('Price', 'Total Price', 'Avg');
     }
 
     return headers;
