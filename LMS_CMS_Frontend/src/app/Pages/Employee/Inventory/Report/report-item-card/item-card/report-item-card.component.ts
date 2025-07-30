@@ -148,7 +148,7 @@ export class ReportItemCardComponent implements OnInit {
   ) {
     const summaryRow: any = {
       isSummary: true,
-      date: summary.toDate,
+      date: summary.fromDate || '-', // Changed from toDate to fromDate
       transactionType: 'Initial Balance',
       invoiceNumber: '0',
       authority: '-',
@@ -165,6 +165,7 @@ export class ReportItemCardComponent implements OnInit {
 
     const transactionRows = transactions.map((t) => {
       const row: any = {
+        isSummary: false, // Added this missing property
         date: t.date || '-',
         transactionType: t.flagName || '-',
         invoiceNumber: t.invoiceNumber || '-',
@@ -191,15 +192,21 @@ export class ReportItemCardComponent implements OnInit {
     this.transactionsForExport = this.combinedData.map((t) => {
       const formatDate = (date: any) => {
         if (!date) return '-';
-        if (typeof date === 'string' && date.match(/^\d{4}-\d{2}-\d{2}/))
+        if (typeof date === 'string' && date.match(/^\d{4}-\d{2}-\d{2}/)) {
           return date.slice(0, 10);
-        const d = new Date(date);
-        return isNaN(d.getTime()) ? '-' : d.toISOString().slice(0, 10);
+        }
+        try {
+          const d = new Date(date);
+          return isNaN(d.getTime()) ? '-' : d.toISOString().slice(0, 10);
+        } catch (e) {
+          return '-';
+        }
       };
+
       return {
         Date: formatDate(t.date),
-        Type: t.transactionType || '-',
-        '#': t.invoiceNumber || '-',
+        'Transaction Type': t.transactionType || '-',
+        'Invoice #': t.invoiceNumber || '-',
         Authority: t.authority || '-',
         Income: t.income || '-',
         Outcome: t.outcome || '-',
@@ -207,7 +214,7 @@ export class ReportItemCardComponent implements OnInit {
         ...(this.showAverageColumn && {
           Price: t.price || '-',
           'Total Price': t.totalPrice || '-',
-          Avg: t.averageCost || '-',
+          'Avg': t.averageCost || '-',
         }),
       };
     });

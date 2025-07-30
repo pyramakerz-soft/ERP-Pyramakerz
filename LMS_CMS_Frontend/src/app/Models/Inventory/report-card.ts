@@ -41,6 +41,7 @@ export interface CombinedReportData {
 
 export interface InventoryNetCombinedResponse {
   summary: {
+    fromDate: string;
     shopItemId: number;
     storeId: number;
     toDate: string;
