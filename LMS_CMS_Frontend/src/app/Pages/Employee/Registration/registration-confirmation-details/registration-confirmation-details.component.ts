@@ -135,7 +135,7 @@ export class RegistrationConfirmationDetailsComponent {
     if(this.path=='Registration Confirmation'){
       this.router.navigateByUrl(`Employee/Registration Confirmation`)
     }
-    else if(this.path=='Student View'){
+    else if(this.path=='Student'){
       this.router.navigateByUrl(`Employee/Student`)
     }
   }

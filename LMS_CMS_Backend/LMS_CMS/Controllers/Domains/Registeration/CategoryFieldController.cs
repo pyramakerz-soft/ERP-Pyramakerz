@@ -27,6 +27,34 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
             this.mapper = mapper;
             _checkPageAccessService = checkPageAccessService;
         }
+        ////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpGet("{id}")]
+        [Authorize_Endpoint_(
+        allowedTypes: new[] { "octa", "employee" },
+        pages: new[] { "Registration Form Field" }
+        )]
+        public async Task<IActionResult> GetByIdAsync(int id)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            CategoryField categorieFields = await Unit_Of_Work.categoryField_Repository.FindByIncludesAsync( b => b.IsDeleted != true && b.ID == id,
+                    query => query.Include(emp => emp.FieldType),
+                    query => query.Include(emp => emp.FieldOptions)
+                );
+
+            if (categorieFields == null )
+            {
+                return NotFound();
+            }
+
+            CategoryFieldGetDTO categorieFieldsDTO = mapper.Map<CategoryFieldGetDTO>(categorieFields);
+
+            return Ok(categorieFieldsDTO);
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////
+
 
         [HttpGet("GetByCategoryId/{id}")]
         [Authorize_Endpoint_(

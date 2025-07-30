@@ -200,6 +200,9 @@ import { RegisteredEmployeeComponent } from './Pages/Employee/Administrator/regi
 import { RegisteredEmployeeViewComponent } from './Pages/Employee/Administrator/registered-employee-view/registered-employee-view.component';
 import { AnnouncementComponent } from './Pages/Employee/Administrator/announcement/announcement.component'; 
 import { DiscussionRoomComponent } from './Pages/Employee/LMS/discussion-room/discussion-room.component';
+import { Violation } from './Models/Violation/violation';
+import { ViolationComponent } from './Pages/Employee/Violation/violation/violation.component';
+import { ViolationViewComponent } from './Pages/Employee/Violation/violation-view/violation-view.component';
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
     { path: "Octa/login", component: OctaLoginComponent, title: "login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -411,11 +414,11 @@ export const routes: Routes = [
             { path: "Student", component: StudentsComponent, title: "Student", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Create Student", component: RegistrationFormComponent, title: "Create Student", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Edit Student/:RegisterationFormParentId/:StudentId", component: RegistrationFormComponent, title: "Edit Student", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Student View/:Id", component: RegistrationConfirmationDetailsComponent, title: "Student View", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
+            { path: "Student/:Id", component: RegistrationConfirmationDetailsComponent, title: "Student", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Enter Daily Performance", component: DailyPerformanceMasterComponent, title: "Daily Performance", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Daily Performance View/:id", component: DailyPerformanceViewComponent, title: "Daily Performance View", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Daily Performance/:id", component: DailyPerformanceViewComponent, title: "Daily Performance View", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Assignment", component: AssignmentComponent, title: "Assignment", canActivate: [noNavigateWithoutLoginGuard , navigateIfHaveSettingPageGuard] },
-            { path: "Assignment View/:id", component: AssignmentEditComponent, title: "Assignment Edit", canActivate: [noNavigateWithoutLoginGuard , navigateIfHaveSettingPageGuard] },
+            { path: "Assignment/:id", component: AssignmentEditComponent, title: "Assignment Edit", canActivate: [noNavigateWithoutLoginGuard , navigateIfHaveSettingPageGuard] },
             { path: "report item card",component: ReportItemCardComponent,title: "Item Card Report",canActivate: [noNavigateWithoutLoginGuard], data: { showAverage: false }},
             { path: "report item card with average",component: ReportItemCardComponent,title: "Item Card Report With Average",canActivate: [noNavigateWithoutLoginGuard],data: { showAverage: true }},
             { path: 'Average Cost Calculation', component: AverageCostCalcComponent, title: 'Average Cost Calculator', canActivate: [noNavigateWithoutLoginGuard], },
@@ -431,13 +434,15 @@ export const routes: Routes = [
             { path: "Accounting Constraints Report", component: AccountigConstraintsComponent, title: "Accounting Constraints Report", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Accounting Configuration", component: AccountigConfigurationComponent, title: "Accounting Configuration", canActivate: [noNavigateWithoutLoginGuard] },
             { path: 'Time Table', component: TimeTableComponent, title: 'Time Table', canActivate: [noNavigateWithoutLoginGuard], },
-            { path: 'Time Table View/:id', component: TimeTableViewComponent, title: 'Time Table View', canActivate: [noNavigateWithoutLoginGuard], },
+            { path: 'Time Table/:id', component: TimeTableViewComponent, title: 'Time Table View', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Time Table Replace/:id', component: TimeTableReplaceComponent, title: 'Time Table Replace', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Duty Table', component: DutyComponent, title: 'Duty Table', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Registered Employee', component: RegisteredEmployeeComponent, title: 'Registered Employee', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Registered Employee/:id', component: RegisteredEmployeeViewComponent, title: 'Registered Employee', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Announcement', component: AnnouncementComponent, title: 'Announcement', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Discussion Room', component: DiscussionRoomComponent, title: 'Discussion Room', canActivate: [noNavigateWithoutLoginGuard], },
+            { path: 'Violation', component: ViolationComponent, title: 'Violation', canActivate: [noNavigateWithoutLoginGuard], },
+            { path: 'Violation/:id', component: ViolationViewComponent, title: 'Violation', canActivate: [noNavigateWithoutLoginGuard], },
         ]
     },
     {

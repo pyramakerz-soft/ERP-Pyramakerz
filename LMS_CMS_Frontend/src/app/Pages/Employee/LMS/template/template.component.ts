@@ -187,7 +187,6 @@ export class TemplateComponent {
         );
       }
     }
-    this.GetAllData();
   }
 
   closeModal() {

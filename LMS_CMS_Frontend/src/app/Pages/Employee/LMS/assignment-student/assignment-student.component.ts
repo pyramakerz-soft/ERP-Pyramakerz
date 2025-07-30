@@ -176,7 +176,7 @@ export class AssignmentStudentComponent {
   }
 
   moveToAssignment() {
-    this.router.navigateByUrl(`Employee/Assignment View/${this.AssignmentId}`)
+    this.router.navigateByUrl(`Employee/Assignment/${this.AssignmentId}`)
   }
 
   classChanged() {
