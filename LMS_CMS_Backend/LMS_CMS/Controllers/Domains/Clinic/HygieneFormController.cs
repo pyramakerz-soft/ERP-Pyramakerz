@@ -322,7 +322,30 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                 return NotFound();
             }
             
-            Unit_Of_Work.hygieneForm_Repository.Delete(id);
+            hygieneForm.IsDeleted = true;
+
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            hygieneForm.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+
+            if (userTypeClaim == "octa")
+            {
+                hygieneForm.DeletedByOctaId = userId;
+
+                if (hygieneForm.DeletedByUserId != null)
+                {
+                    hygieneForm.DeletedByUserId = null;
+                }
+            }
+            else if (userTypeClaim == "employee")
+            {
+                hygieneForm.DeletedByUserId = userId;
+                if (hygieneForm.DeletedByOctaId != null)
+                {
+                    hygieneForm.DeletedByOctaId = null;
+                }
+            }
+
+            Unit_Of_Work.hygieneForm_Repository.Update(hygieneForm);
             Unit_Of_Work.SaveChanges();
             
             return Ok("Hygiene Form deleted successfully");
