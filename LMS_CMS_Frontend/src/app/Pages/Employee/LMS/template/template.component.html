@@ -151,7 +151,7 @@
         </div>
     </div>
     <div class="flex justify-end">
-        <button [disabled]="isLoading"  class="secondaryBg text-white font-medium px-4 py-2 rounded-lg" (click)="CreateOREdit()">
+        <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg" (click)="CreateOREdit()">
             <span *ngIf="!isLoading">Save</span>
             <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
         </button>

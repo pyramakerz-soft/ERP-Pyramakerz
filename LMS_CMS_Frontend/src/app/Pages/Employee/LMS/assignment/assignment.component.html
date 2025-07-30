@@ -27,7 +27,7 @@
         <label for="School1" class="block mb-2 text-sm font-medium text-gray-900">School</label>
         <select id="School1" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             [(ngModel)]="SelectedSchoolId" (change)="getAllGradesBySchoolId();">
-            <option value=0 disabled selected hidden>Select a School</option>
+            <option [value]="0" disabled selected hidden>Select a School</option>
             <option *ngFor="let stu of schools" [value]="stu.id">
                 {{ stu.name }}
             </option>
@@ -39,7 +39,7 @@
         <label for="Grade" class="block mb-2 text-sm font-medium text-gray-900">Grade</label>
         <select id="Grade" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             [(ngModel)]="SelectedGradeId" [disabled]="!SelectedSchoolId" (change)="getAllSubject();">
-            <option value=0 disabled selected hidden>Select a grade</option>
+            <option [value]="0" disabled selected hidden>Select a grade</option>
             <option *ngFor="let ac of Grades" [value]="ac.id">
                 {{ ac.name }}
             </option>
@@ -51,11 +51,11 @@
         <label for="subject" class="block mb-2 text-sm font-medium text-gray-900">Subjects</label>
         <select id="subject" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             [(ngModel)]="subjectID" [disabled]="!SelectedGradeId" (change)="SubjectChanged();">
-            <option value=0 disabled selected hidden>Select a subject</option>
+            <option [value]="0" disabled selected hidden>Select a subject</option>
             <option *ngFor="let ac of subjects" [value]="ac.id">
                 {{ ac.en_name }}
             </option>
-            <option *ngIf="subjects.length === 0" disabled selected>No Data Found</option>
+            <option *ngIf="subjects.length === 0 && SelectedGradeId" disabled selected>No Data Found</option>
         </select>
     </div>
 
@@ -213,8 +213,35 @@
 
         <div class="mt-6 mb-4 flex justify-between flex-wrap">
             <div class="flex flex-col mb-4 w-full">
+                <label class="mb-2 primaryTxt" for="Subject">School</label>
+                <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="School"
+                    [ngClass]="{ 'bg-[#EBEBEB]': assignment.id != 0 }" [disabled]="assignment.id != 0"
+                    (change)="onSchoolModalChange()" [(ngModel)]="assignment.schoolID"
+                    (ngModelChange)="onInputValueChange({ field: 'schoolID', value: $event })">
+                    <option [value]="0" disabled selected hidden>Choose School</option>
+                    <option *ngFor="let c of schools" [value]="c.id">{{ c.name }}</option>
+                    <option *ngIf="schools.length === 0" disabled selected>No Data Found</option>
+                </select>
+                <span *ngIf="validationErrors['schoolID']" class="text-red-500 ml-3 font-normal">{{ validationErrors['schoolID'] }}</span>
+            </div>
+            <div class="flex flex-col mb-4 w-full">
+                <label class="mb-2 primaryTxt" for="Grade">Grade</label>
+                <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Grade"
+                    [disabled]="!assignment.schoolID"
+                    [ngClass]="{ 'bg-[#EBEBEB]': assignment.id != 0 }" [disabled]="assignment.id != 0"
+                    (change)="onGradeModalChange()" [(ngModel)]="assignment.gradeID"
+                    (ngModelChange)="onInputValueChange({ field: 'subjectID', value: $event })">
+                    <option [value]="0" disabled selected hidden>Choose Subject</option>
+                    <option *ngFor="let c of GradesForCreate" [value]="c.id">{{ c.name }}</option>
+                    <option *ngIf="GradesForCreate.length === 0" disabled selected>No Data Found</option>
+                </select>
+                <span *ngIf="validationErrors['subjectID']" class="text-red-500 ml-3 font-normal">{{
+                    validationErrors['subjectID'] }}</span>
+            </div>
+            <div class="flex flex-col mb-4 w-full">
                 <label class="mb-2 primaryTxt" for="Subject">Subject</label>
                 <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Subject"
+                    [disabled]="!assignment.gradeID"
                     [ngClass]="{ 'bg-[#EBEBEB]': assignment.id != 0 }" [disabled]="assignment.id != 0"
                     (change)="onSubjectModalChange()" [(ngModel)]="assignment.subjectID"
                     (ngModelChange)="onInputValueChange({ field: 'subjectID', value: $event })">
@@ -299,7 +326,7 @@
             </div>
             <div class="flex w-full space-x-5 items-center mb-4">
                 <input type="checkbox" id="isVisibleToStudent" class="w-5 h-5"
-                     [(ngModel)]="assignment.isVisibleToStudent">
+                    [(ngModel)]="assignment.isVisibleToStudent">
                 <label for="isVisibleToStudent" class="text-sm">Is Visible To Student?</label>
             </div>
             <div class="flex w-full space-x-5 items-center mb-4">

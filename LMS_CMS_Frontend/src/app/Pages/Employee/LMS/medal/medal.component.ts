@@ -184,8 +184,7 @@ export class MedalComponent {
           }
         );
       }
-    }
-    this.GetAllData();
+    } 
   }
 
   closeModal() {

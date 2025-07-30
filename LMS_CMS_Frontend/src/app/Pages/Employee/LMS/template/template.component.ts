@@ -186,8 +186,7 @@ export class TemplateComponent {
           }
         );
       }
-    }
-    this.GetAllData();
+    } 
   }
 
   closeModal() {
@@ -207,7 +206,9 @@ export class TemplateComponent {
         if (!this.template[field]) {
           if (
             field == 'englishTitle' ||
-            field == 'arabicTitle'
+            field == 'arabicTitle' ||
+            field == 'afterCount' ||
+            field == 'weight'
           ) {
             this.validationErrors[field] = `*${this.capitalizeField(
               field

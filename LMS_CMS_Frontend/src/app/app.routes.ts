@@ -37,7 +37,7 @@ import { EmployeeViewComponent } from './Pages/Employee/Administrator/employee-v
 import { BuildingComponent } from './Pages/Employee/LMS/building/building.component';
 import { FloorComponent } from './Pages/Employee/LMS/floor/floor.component';
 import { ClassroomComponent } from './Pages/Employee/LMS/classroom/classroom.component';
-import { ViolationTypesComponent } from './Pages/Employee/Administrator/violation-types/violation-types.component';
+import { ViolationTypesComponent } from './Pages/Employee/Violation/violation-types/violation-types.component';
 import { SectionComponent } from './Pages/Employee/LMS/section/section.component';
 import { GradeComponent } from './Pages/Employee/LMS/grade/grade.component';
 import { AcademicYearComponent } from './Pages/Employee/LMS/academic-year/academic-year.component';
@@ -201,9 +201,7 @@ import { RegisteredEmployeeViewComponent } from './Pages/Employee/Administrator/
 import { AnnouncementComponent } from './Pages/Employee/Administrator/announcement/announcement.component';
 import { StoreBalanceReportComponent } from './Pages/Employee/Inventory/Report/store-balance-report/store-balance-report/store-balance-report.component';
 import { AllStoresBalanceReportComponent } from './Pages/Employee/Inventory/Report/store-balance-report/all-store-balance/all-store-balance.component';
-import { DiscussionRoomComponent } from './Pages/Employee/LMS/discussion-room/discussion-room.component';
-
-
+import { DiscussionRoomComponent } from './Pages/Employee/LMS/discussion-room/discussion-room.component';import { NotificationComponent } from './Pages/Employee/Communication/notification/notification.component';
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
     { path: "Octa/login", component: OctaLoginComponent, title: "login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -451,6 +449,7 @@ export const routes: Routes = [
             { path: "All Stores Item Balance with Sales", component: AllStoresBalanceReportComponent, title: "All Stores Sales Price Report", canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'SalesPrice' }},
             { path: "All Stores Item Balance with Average Cost", component: AllStoresBalanceReportComponent, title: "All Stores Cost Report", canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'Cost' } },
             { path: 'Discussion Room', component: DiscussionRoomComponent, title: 'Discussion Room', canActivate: [noNavigateWithoutLoginGuard], },
+            { path: 'Notification', component: NotificationComponent, title: 'Notification', canActivate: [noNavigateWithoutLoginGuard], },
         ]
     },
     {

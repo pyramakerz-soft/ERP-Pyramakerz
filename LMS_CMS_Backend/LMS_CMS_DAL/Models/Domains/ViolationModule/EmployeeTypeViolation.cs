@@ -14,10 +14,9 @@ namespace LMS_CMS_DAL.Models.Domains.ViolationModule
         public long ID { get; set; }
         [ForeignKey("EmployeeType")]
         public long? EmployeeTypeID { get; set; }
-        [ForeignKey("Violation")]
-        public long ViolationID { get; set; }
-
+        [ForeignKey("ViolationType")]
+        public long ViolationTypeID { get; set; }
         public EmployeeType EmployeeType { get; set; }
-        public Violation Violation { get; set; }
+        public ViolationType ViolationType { get; set; }
     }
 }
