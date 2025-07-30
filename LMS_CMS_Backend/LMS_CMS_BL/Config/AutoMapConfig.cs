@@ -1139,6 +1139,8 @@ namespace LMS_CMS_BL.Config
                 .ForMember(dest => dest.ImageLink, opt => opt.MapFrom(src => src.Notification.ImageLink))
                 .ForMember(dest => dest.Text, opt => opt.MapFrom(src => src.Notification.Text))
                 .ForMember(dest => dest.Link, opt => opt.MapFrom(src => src.Notification.Link))
+                .ForMember(dest => dest.InsertedAt, opt => opt.MapFrom(src => src.InsertedAt))
+                .ForMember(dest => dest.InsertedByUserName, opt => opt.MapFrom(src => src.InsertedByEmployee.en_name))
                 .ForMember(dest => dest.IsAllowDismiss, opt => opt.MapFrom(src => src.Notification.IsAllowDismiss));
 
         }

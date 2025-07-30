@@ -1,0 +1,20 @@
+div::-webkit-scrollbar {
+  width: 8px; /* Set the width of the scrollbar */
+}
+
+div::-webkit-scrollbar-thumb {
+  background-color: #394B6E; /* Set the color of the thumb */
+  border-radius: 10px; /* Rounded corners */
+  border: 2px solid #f7f7f7; /* Border to make the thumb stand out */
+}
+
+div::-webkit-scrollbar-track {
+  background: #f0f0f0; /* Track color */
+  border-radius: 10px;
+}
+
+/* For Firefox */
+div {
+  scrollbar-width: thin; /* Thinner scrollbar */
+  scrollbar-color: #394B6E #f0f0f0; /* Thumb and track colors */
+}

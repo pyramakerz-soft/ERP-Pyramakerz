@@ -37,6 +37,42 @@ export class NotificationService {
       .set('Content-Type', 'application/json');
     return this.http.get<Notification[]>(`${this.baseUrl}/Notification/GetByUserTypeID/${userTypeID}`, { headers })
   }
+ 
+  ByUserIDFirst5(DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<Notification[]>(`${this.baseUrl}/Notification/ByUserIDFirst5`, { headers })
+  }
+ 
+  ByUserID(DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<Notification[]>(`${this.baseUrl}/Notification/ByUserID`, { headers })
+  }
+ 
+  GetNotNotifiedYetByUserID(DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<Notification[]>(`${this.baseUrl}/Notification/GetNotNotifiedYetByUserID`, { headers })
+  }
   
   GetById(id:number ,DomainName: string) {
     if (DomainName != null) {
@@ -48,6 +84,18 @@ export class NotificationService {
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
     return this.http.get<Notification>(`${this.baseUrl}/Notification/${id}`, { headers })
+  }
+  
+  ByUserIDAndNotificationSharedByID(notificationSharedByID:number ,DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<Notification>(`${this.baseUrl}/Notification/ByUserIDAndNotificationSharedByID/${notificationSharedByID}`, { headers })
   }
 
   Add(notification: Notification, DomainName: string) {
