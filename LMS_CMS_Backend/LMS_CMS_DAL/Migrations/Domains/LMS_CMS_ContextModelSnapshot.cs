@@ -11065,7 +11065,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<long?>("UpdatedByUserId")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("ViolationID")
+                    b.Property<long>("ViolationTypeID")
                         .HasColumnType("bigint");
 
                     b.HasKey("ID");
@@ -11078,12 +11078,80 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.HasIndex("UpdatedByUserId");
 
-                    b.HasIndex("ViolationID");
+                    b.HasIndex("ViolationTypeID");
 
                     b.ToTable("EmployeeTypeViolation");
                 });
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.ViolationModule.Violation", b =>
+                {
+                    b.Property<long>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("ID"));
+
+                    b.Property<string>("Attach")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("DeletedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("DeletedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Details")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("EmployeeID")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("InsertedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("InsertedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("InsertedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool?>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("UpdatedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("UpdatedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("ViolationTypeID")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("DeletedByUserId");
+
+                    b.HasIndex("EmployeeID");
+
+                    b.HasIndex("InsertedByUserId");
+
+                    b.HasIndex("UpdatedByUserId");
+
+                    b.HasIndex("ViolationTypeID");
+
+                    b.ToTable("Violation");
+                });
+
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.ViolationModule.ViolationType", b =>
                 {
                     b.Property<long>("ID")
                         .ValueGeneratedOnAdd()
@@ -11137,7 +11205,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.HasIndex("UpdatedByUserId");
 
-                    b.ToTable("Violation");
+                    b.ToTable("ViolationType");
                 });
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.Zatca.SchoolPCs", b =>
@@ -16456,7 +16524,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.HasOne("LMS_CMS_DAL.Models.Domains.EmployeeType", "EmployeeType")
                         .WithMany("EmployeeTypeViolations")
-                        .HasForeignKey("EmployeeTypeID");
+                        .HasForeignKey("EmployeeTypeID")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "InsertedByEmployee")
                         .WithMany()
@@ -16466,10 +16535,10 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .WithMany()
                         .HasForeignKey("UpdatedByUserId");
 
-                    b.HasOne("LMS_CMS_DAL.Models.Domains.ViolationModule.Violation", "Violation")
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.ViolationModule.ViolationType", "ViolationType")
                         .WithMany("EmployeeTypeViolations")
-                        .HasForeignKey("ViolationID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("ViolationTypeID")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("DeletedByEmployee");
@@ -16480,10 +16549,48 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.Navigation("UpdatedByEmployee");
 
-                    b.Navigation("Violation");
+                    b.Navigation("ViolationType");
                 });
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.ViolationModule.Violation", b =>
+                {
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "DeletedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("DeletedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "Employee")
+                        .WithMany("Violations")
+                        .HasForeignKey("EmployeeID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "InsertedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("InsertedByUserId");
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "UpdatedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("UpdatedByUserId");
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.ViolationModule.ViolationType", "ViolationType")
+                        .WithMany("Violations")
+                        .HasForeignKey("ViolationTypeID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("DeletedByEmployee");
+
+                    b.Navigation("Employee");
+
+                    b.Navigation("InsertedByEmployee");
+
+                    b.Navigation("UpdatedByEmployee");
+
+                    b.Navigation("ViolationType");
+                });
+
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.ViolationModule.ViolationType", b =>
                 {
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "DeletedByEmployee")
                         .WithMany()
@@ -16799,6 +16906,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Navigation("SubjectSupervisors");
 
                     b.Navigation("TimeTableSubjects");
+
+                    b.Navigation("Violations");
                 });
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.EmployeeType", b =>
@@ -17360,9 +17469,11 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Navigation("Notifications");
                 });
 
-            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.ViolationModule.Violation", b =>
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.ViolationModule.ViolationType", b =>
                 {
                     b.Navigation("EmployeeTypeViolations");
+
+                    b.Navigation("Violations");
                 });
 #pragma warning restore 612, 618
         }

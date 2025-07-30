@@ -45,6 +45,7 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<Grade> Grade { get; set; }
         public DbSet<EmployeeAttachment> EmployeeAttachment { get; set; }
         public DbSet<Violation> Violation { get; set; }
+        public DbSet<ViolationType> ViolationType { get; set; }
         public DbSet<EmployeeTypeViolation> EmployeeTypeViolation { get; set; }
         public DbSet<Subject> Subject { get; set; }
         public DbSet<SubjectCategory> SubjectCategory { get; set; }
@@ -239,7 +240,7 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasIndex(p => p.Email)
                 .IsUnique();
 
-            modelBuilder.Entity<Violation>()
+            modelBuilder.Entity<ViolationType>()
                 .HasIndex(p => p.Name)
                 .IsUnique();
 
@@ -1816,6 +1817,31 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasForeignKey(p => p.SchoolID)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<EmployeeTypeViolation>()
+                .HasOne(p => p.ViolationType)
+                .WithMany(p => p.EmployeeTypeViolations)
+                .HasForeignKey(p => p.ViolationTypeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<EmployeeTypeViolation>()
+                .HasOne(p => p.EmployeeType)
+                .WithMany(p => p.EmployeeTypeViolations)
+                .HasForeignKey(p => p.EmployeeTypeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Violation>()
+                .HasOne(p => p.Employee)
+                .WithMany(p => p.Violations)
+                .HasForeignKey(p => p.EmployeeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Violation>()
+                .HasOne(p => p.ViolationType)
+                .WithMany(p => p.Violations)
+                .HasForeignKey(p => p.ViolationTypeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
             ///////////////////////// Exception: /////////////////////////
             modelBuilder.Entity<Bus>()
                 .HasOne(b => b.DeletedByEmployee)
@@ -1902,6 +1928,12 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasForeignKey(f => f.DeletedByUserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<Violation>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany() 
+                .HasForeignKey(v => v.DeletedByUserId) 
+                .OnDelete(DeleteBehavior.Restrict);
+
             ///////////////////////// Optional ID According to other field: /////////////////////////  
             modelBuilder.Entity<ReceivableMaster>()
                 .Ignore(r => r.Bank)
@@ -1963,6 +1995,12 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasNoKey().ToView(null);
 
             modelBuilder.Entity<DailyTotalResult>()
+                .HasNoKey().ToView(null);
+
+            modelBuilder.Entity<AccountBalanceReport>()
+                .HasNoKey().ToView(null);
+
+            modelBuilder.Entity<AccountTotals>()
                 .HasNoKey().ToView(null);
         }
     }

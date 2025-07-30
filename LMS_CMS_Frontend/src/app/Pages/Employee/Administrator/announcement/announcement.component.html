@@ -13,9 +13,9 @@
     <div class="mt-5 flex justify-between items-center">
         <div class="w-[95%]">
             <label for="filter" class="primaryTxt lock mb-2 text-sm font-medium">Filter By</label>
-            <select id="filter" (change)="filterByTypeID($event)"
+            <select id="filter" [(ngModel)]="selectedUserTypeId" (change)="filterByTypeID($event)"
                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5">
-                <option value="" disabled selected hidden>Choose User Type</option>
+                <option value="0" disabled selected hidden>Choose User Type</option>
                 <option *ngFor="let userType of userTypes" [value]="userType.id">
                     {{ userType.title }}
                 </option>

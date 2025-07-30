@@ -47,7 +47,44 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
 
             List<Notification> notifications = await Unit_Of_Work.notification_Repository.Select_All_With_IncludesById<Notification>(
                     f => f.IsDeleted != true,
-                    query => query.Include(d => d.NotificationSharedTos.Where(d => d.IsDeleted != true))
+                    query => query.Include(d => d.NotificationSharedTos.Where(d => d.IsDeleted != true)),
+                    query => query.Include(d => d.UserType)
+                    );
+
+            if (notifications == null || notifications.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<NotificationGetDTO> notificationGetDTO = mapper.Map<List<NotificationGetDTO>>(notifications);
+
+            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+            foreach (var notification in notificationGetDTO)
+            {
+                if (!string.IsNullOrEmpty(notification.ImageLink))
+                {
+                    notification.ImageLink = $"{serverUrl}{notification.ImageLink.Replace("\\", "/")}";
+                }
+            }
+
+            return Ok(notificationGetDTO);
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpGet("GetByUserTypeID/{userTypeID}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Notification" }
+        )]
+        public async Task<IActionResult> GetByUserTypeID(long userTypeID)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            List<Notification> notifications = await Unit_Of_Work.notification_Repository.Select_All_With_IncludesById<Notification>(
+                    f => f.IsDeleted != true && f.UserTypeID == userTypeID,
+                    query => query.Include(d => d.NotificationSharedTos.Where(d => d.IsDeleted != true)),
+                    query => query.Include(d => d.UserType)
                     );
 
             if (notifications == null || notifications.Count == 0)
@@ -82,7 +119,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
 
             Notification notification = await Unit_Of_Work.notification_Repository.FindByIncludesAsync(
                     f => f.IsDeleted != true && f.ID == id,
-                    query => query.Include(d => d.NotificationSharedTos.Where(d => d.IsDeleted != true))
+                    query => query.Include(d => d.NotificationSharedTos.Where(d => d.IsDeleted != true)),
+                    query => query.Include(d => d.UserType)
                     );
 
             if (notification == null)
@@ -91,14 +129,35 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             }
 
             NotificationGetDTO notificationGetDTO = mapper.Map<NotificationGetDTO>(notification);
-            if(notificationGetDTO.NotificationSharedTos != null && notificationGetDTO.NotificationSharedTos.Count != 0)
-            {
-                notificationGetDTO.UserTypeID = notificationGetDTO.NotificationSharedTos[0].UserTypeID;
-            }
+            
             string serverUrl = $"{Request.Scheme}://{Request.Host}/";
             if (!string.IsNullOrEmpty(notification.ImageLink))
             {
                 notificationGetDTO.ImageLink = $"{serverUrl}{notification.ImageLink.Replace("\\", "/")}";
+            } 
+            
+            if (notificationGetDTO.NotificationSharedTos != null && notificationGetDTO.NotificationSharedTos.Count != 0)
+            {
+                foreach (var notificationSharedTo in notificationGetDTO.NotificationSharedTos)
+                {
+                    dynamic user = notificationSharedTo.UserTypeID switch
+                    {
+                        1 => Unit_Of_Work.employee_Repository.First_Or_Default(emp => emp.ID == notificationSharedTo.UserID && emp.IsDeleted != true),
+                        2 => Unit_Of_Work.student_Repository.First_Or_Default(stu => stu.ID == notificationSharedTo.UserID && stu.IsDeleted != true),
+                        3 => Unit_Of_Work.parent_Repository.First_Or_Default(par => par.ID == notificationSharedTo.UserID && par.IsDeleted != true),
+                        _ => null,
+                    };
+
+                    string? userName = user switch
+                    {
+                        Employee e => e.en_name, 
+                        Student s => s.en_name, 
+                        Parent p => p.en_name,  
+                        _ => null
+                    };
+
+                    notificationSharedTo.UserName = userName;
+                }
             } 
 
             return Ok(notificationGetDTO);
