@@ -186,7 +186,7 @@ export class TemplateComponent {
           }
         );
       }
-    } 
+    }
   }
 
   closeModal() {

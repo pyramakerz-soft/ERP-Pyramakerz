@@ -1,0 +1,59 @@
+import { Component } from '@angular/core';
+import { Violation } from '../../../../Models/Violation/violation';
+import { ViolationService } from '../../../../Services/Employee/Violation/violation.service';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { SearchComponent } from '../../../../Component/search/search.component';
+import { TokenData } from '../../../../Models/token-data';
+import { AccountService } from '../../../../Services/account.service';
+import { ApiService } from '../../../../Services/api.service';
+import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
+import { MenuService } from '../../../../Services/shared/menu.service';
+
+@Component({
+  selector: 'app-violation-view',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  templateUrl: './violation-view.component.html',
+  styleUrl: './violation-view.component.css'
+})
+export class ViolationViewComponent {
+  DomainName: string = "";
+  ViolationId: number = 0
+
+  violation: Violation = new Violation()
+  path: string = ""
+  User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
+
+  keysArray: string[] = ['id', 'englishName', "arabicName"];
+  key: string = 'id';
+  value: any = '';
+
+
+  constructor(public account: AccountService, public EditDeleteServ: DeleteEditPermissionService, public ApiServ: ApiService, public activeRoute: ActivatedRoute,
+    public router: Router, private menuService: MenuService, public ViolationServ: ViolationService) { }
+
+  ngOnInit() {
+    this.DomainName = this.ApiServ.GetHeader();
+    this.ViolationId = Number(this.activeRoute.snapshot.paramMap.get('id'))
+    this.User_Data_After_Login = this.account.Get_Data_Form_Token();
+
+    this.GetViolationById(this.ViolationId)
+
+    this.activeRoute.url.subscribe(url => {
+      this.path = url[0].path
+    });
+
+  }
+
+  moveToViolation() {
+    this.router.navigateByUrl('Employee/Violation');
+  }
+
+  GetViolationById(Id: number) {
+    this.ViolationServ.GetByID(Id, this.DomainName).subscribe((data) => {
+      this.violation = data;
+    });
+  }
+}

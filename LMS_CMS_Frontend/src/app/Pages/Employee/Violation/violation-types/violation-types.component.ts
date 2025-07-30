@@ -15,11 +15,11 @@ import { AccountService } from '../../../../Services/account.service';
 import { ApiService } from '../../../../Services/api.service';
 import { EmployeeTypeViolationService } from '../../../../Services/Employee/employee-type-violation.service';
 import { EmployeeTypeService } from '../../../../Services/Employee/employee-type.service';
-import { ViolationService } from '../../../../Services/Employee/violation.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { ViolationType } from '../../../../Models/Violation/violation-type';
+import { ViolationTypeService } from '../../../../Services/Employee/Violation/violation-type.service';
 @Component({
   selector: 'app-violation-types',
   standalone: true,
@@ -73,7 +73,7 @@ export class ViolationTypesComponent {
 
 
   constructor(
-    public violationServ: ViolationService,
+    public violationTypeServ: ViolationTypeService,
     public empTypeVioletionServ: EmployeeTypeViolationService,
     public activeRoute: ActivatedRoute,
     public account: AccountService,
@@ -111,7 +111,7 @@ export class ViolationTypesComponent {
   GetViolation() {
     this.Data = []
     if (this.SelectedEmployeeType != 0) {
-      this.violationServ.GetByEmployeeType(this.SelectedEmployeeType, this.DomainName).subscribe((data) => {
+      this.violationTypeServ.GetByEmployeeType(this.SelectedEmployeeType, this.DomainName).subscribe((data) => {
         this.Data = data;
       });
     }
@@ -137,7 +137,7 @@ export class ViolationTypesComponent {
 
   Edit(row: ViolationType): void {
     this.mode = 'Edit';
-    this.violationServ.GetViolationTypeByID(row.id, this.DomainName).subscribe(
+    this.violationTypeServ.GetViolationTypeByID(row.id, this.DomainName).subscribe(
       data => {
         this.violationType = data;
         const empTypeSelected = data.employeeTypes
@@ -161,7 +161,7 @@ export class ViolationTypesComponent {
       cancelButtonText: 'Cancel',
     }).then((result) => {
       if (result.isConfirmed) {
-        this.violationServ.Delete(id, this.DomainName).subscribe({
+        this.violationTypeServ.Delete(id, this.DomainName).subscribe({
           next: (data) => {
             this.GetViolation();
           },
@@ -188,7 +188,7 @@ export class ViolationTypesComponent {
     if (this.isFormValid()) {
       this.isLoading = true
       if (this.mode == 'Create') {
-        this.violationServ.Add(this.violationType, this.DomainName).subscribe((d) => {
+        this.violationTypeServ.Add(this.violationType, this.DomainName).subscribe((d) => {
           this.GetViolation()
           this.closeModal()
           this.isLoading = false
@@ -198,19 +198,31 @@ export class ViolationTypesComponent {
             text: 'Created Successfully',
             confirmButtonColor: '#089B41',
           });
-        }, err => {
-          console.log(err)
+        }, error => {
+          console.log(error)
           this.isLoading = false
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'An unexpected error occurred',
-            confirmButtonColor: '#089B41',
-          });
+          if (error.error?.toLowerCase().includes('name') && error.status === 400) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'This Name Already Exists',
+              confirmButtonText: 'Okay',
+              customClass: { confirmButton: 'secondaryBg' },
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'Try Again Later!',
+              confirmButtonText: 'Okay',
+              customClass: { confirmButton: 'secondaryBg' }
+            });
+          }
+
         })
       }
       else if (this.mode == 'Edit') {
-        this.violationServ.Edit(this.violationType, this.DomainName).subscribe((d) => {
+        this.violationTypeServ.Edit(this.violationType, this.DomainName).subscribe((d) => {
           this.GetViolation()
           this.closeModal()
           this.isLoading = false
@@ -220,15 +232,26 @@ export class ViolationTypesComponent {
             text: 'Updatedd Successfully',
             confirmButtonColor: '#089B41',
           });
-        }, err => {
-          console.log(err)
+        }, error => {
+          console.log(error)
           this.isLoading = false
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'An unexpected error occurred',
-            confirmButtonColor: '#089B41',
-          });
+          if (error.error?.toLowerCase().includes('name') && error.status === 400) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'This Name Already Exists',
+              confirmButtonText: 'Okay',
+              customClass: { confirmButton: 'secondaryBg' },
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'Try Again Later!',
+              confirmButtonText: 'Okay',
+              customClass: { confirmButton: 'secondaryBg' }
+            });
+          }
         })
       }
     }
@@ -294,23 +317,23 @@ export class ViolationTypesComponent {
     this.key = event.key;
     this.value = event.value;
     try {
-      // const data: Violation[] = await firstValueFrom( this.violationServ.Get_Violations(this.DomainName));  
-      // this.Data = data || [];
+      const data: ViolationType[] = await firstValueFrom( this.violationTypeServ.GetViolationType(this.DomainName));  
+      this.Data = data || [];
 
-      // if (this.value !== "") {
-      //   const numericValue = isNaN(Number(this.value)) ? this.value : parseInt(this.value, 10);
+      if (this.value !== "") {
+        const numericValue = isNaN(Number(this.value)) ? this.value : parseInt(this.value, 10);
 
-      //   this.Data = this.Data.filter(t => {
-      //     const fieldValue = t[this.key as keyof typeof t];
-      //     if (typeof fieldValue === 'string') {
-      //       return fieldValue.toLowerCase().includes(this.value.toLowerCase());
-      //     }
-      //     if (typeof fieldValue === 'number') {
-      //       return fieldValue.toString().includes(numericValue.toString())
-      //     }
-      //     return fieldValue == this.value;
-      //   });
-      // }
+        this.Data = this.Data.filter(t => {
+          const fieldValue = t[this.key as keyof typeof t];
+          if (typeof fieldValue === 'string') {
+            return fieldValue.toLowerCase().includes(this.value.toLowerCase());
+          }
+          if (typeof fieldValue === 'number') {
+            return fieldValue.toString().includes(numericValue.toString())
+          }
+          return fieldValue == this.value;
+        });
+      }
     } catch (error) {
       this.Data = [];
     }

@@ -10,18 +10,6 @@
     </div>
 </div>
 
-<!-- <div class="my-5 flex flex-wrap justify-between items-center">
-    <div class="flex flex-col w-full">
-        <label class="primaryTxt mb-2 font-medium" for="subjects">Subject</label>
-        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="subjects"
-            [(ngModel)]="subjectID" (change)="onSubjectChange()">
-            <option [value]="0" disabled selected hidden>Choose Subject</option>
-            <option *ngFor="let c of subjects" [value]="c.id">{{ c.en_name }}</option>
-            <option *ngIf="subjects.length === 0" disabled selected>No Data Found</option>
-        </select>
-    </div>
-</div> -->
-
 <div class="flex justify-start items-center space-x-4">
     <div class="w-[49%]">
         <label for="School1" class="block mb-2 text-sm font-medium text-gray-900">School</label>
@@ -39,11 +27,13 @@
         <label for="Grade" class="block mb-2 text-sm font-medium text-gray-900">Grade</label>
         <select id="Grade" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             [(ngModel)]="SelectedGradeId" [disabled]="!SelectedSchoolId" (change)="getAllSubject();">
-            <option [value]="0" disabled selected hidden>Select a grade</option>
-            <option *ngFor="let ac of Grades" [value]="ac.id">
-                {{ ac.name }}
-            </option>
-            <option *ngIf="Grades.length === 0" disabled selected>No Data Found</option>
+            <option [ngValue]="0" disabled hidden [selected]="SelectedGradeId == 0">Select a Grade</option>
+            <ng-container *ngIf="Grades.length > 0; else noDataGrade">
+                <option *ngFor="let ac of Grades" [ngValue]="ac.id">{{ ac.name }}</option>
+            </ng-container>
+            <ng-template #noDataGrade>
+                <option disabled>No Data Found</option>
+            </ng-template>
         </select>
     </div>
 
@@ -51,11 +41,14 @@
         <label for="subject" class="block mb-2 text-sm font-medium text-gray-900">Subjects</label>
         <select id="subject" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             [(ngModel)]="subjectID" [disabled]="!SelectedGradeId" (change)="SubjectChanged();">
-            <option [value]="0" disabled selected hidden>Select a subject</option>
-            <option *ngFor="let ac of subjects" [value]="ac.id">
-                {{ ac.en_name }}
-            </option>
-            <option *ngIf="subjects.length === 0 && SelectedGradeId" disabled selected>No Data Found</option>
+            <option [ngValue]="0" disabled hidden [selected]="subjectID == 0">Select a subject</option>
+            <ng-container *ngIf="subjects.length > 0; else noData">
+                <option *ngFor="let ac of subjects" [ngValue]="ac.id">{{ ac.en_name }}</option>
+            </ng-container>
+            <ng-template #noData>
+                <option disabled>No Data Found</option>
+            </ng-template>
+
         </select>
     </div>
 
@@ -222,18 +215,22 @@
                     <option *ngFor="let c of schools" [value]="c.id">{{ c.name }}</option>
                     <option *ngIf="schools.length === 0" disabled selected>No Data Found</option>
                 </select>
-                <span *ngIf="validationErrors['schoolID']" class="text-red-500 ml-3 font-normal">{{ validationErrors['schoolID'] }}</span>
+                <span *ngIf="validationErrors['schoolID']" class="text-red-500 ml-3 font-normal">{{
+                    validationErrors['schoolID'] }}</span>
             </div>
             <div class="flex flex-col mb-4 w-full">
                 <label class="mb-2 primaryTxt" for="Grade">Grade</label>
                 <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Grade"
-                    [disabled]="!assignment.schoolID"
-                    [ngClass]="{ 'bg-[#EBEBEB]': assignment.id != 0 }" [disabled]="assignment.id != 0"
-                    (change)="onGradeModalChange()" [(ngModel)]="assignment.gradeID"
+                    [disabled]="!assignment.schoolID" [ngClass]="{ 'bg-[#EBEBEB]': assignment.id != 0 }"
+                    [disabled]="assignment.id != 0" (change)="onGradeModalChange()" [(ngModel)]="assignment.gradeID"
                     (ngModelChange)="onInputValueChange({ field: 'subjectID', value: $event })">
-                    <option [value]="0" disabled selected hidden>Choose Subject</option>
-                    <option *ngFor="let c of GradesForCreate" [value]="c.id">{{ c.name }}</option>
-                    <option *ngIf="GradesForCreate.length === 0" disabled selected>No Data Found</option>
+                    <option [ngValue]="0" disabled hidden [selected]="assignment.gradeID == 0">Choose Grade</option>
+                    <ng-container *ngIf="GradesForCreate.length > 0; else noDataGradesForCreate">
+                        <option *ngFor="let ac of GradesForCreate" [ngValue]="ac.id">{{ ac.name }}</option>
+                    </ng-container>
+                    <ng-template #noDataGradesForCreate>
+                        <option disabled>No Data Found</option>
+                    </ng-template>
                 </select>
                 <span *ngIf="validationErrors['subjectID']" class="text-red-500 ml-3 font-normal">{{
                     validationErrors['subjectID'] }}</span>
@@ -241,13 +238,17 @@
             <div class="flex flex-col mb-4 w-full">
                 <label class="mb-2 primaryTxt" for="Subject">Subject</label>
                 <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Subject"
-                    [disabled]="!assignment.gradeID"
-                    [ngClass]="{ 'bg-[#EBEBEB]': assignment.id != 0 }" [disabled]="assignment.id != 0"
-                    (change)="onSubjectModalChange()" [(ngModel)]="assignment.subjectID"
+                    [disabled]="!assignment.gradeID" [ngClass]="{ 'bg-[#EBEBEB]': assignment.id != 0 }"
+                    [disabled]="assignment.id != 0" (change)="onSubjectModalChange()" [(ngModel)]="assignment.subjectID"
                     (ngModelChange)="onInputValueChange({ field: 'subjectID', value: $event })">
-                    <option [value]="0" disabled selected hidden>Choose Subject</option>
-                    <option *ngFor="let c of subjects" [value]="c.id">{{ c.en_name }}</option>
-                    <option *ngIf="subjects.length === 0" disabled selected>No Data Found</option>
+
+                    <option [ngValue]="0" disabled hidden [selected]="assignment.subjectID == 0">Choose Subject</option>
+                    <ng-container *ngIf="subjectsForCreate.length > 0; else noDatasubjectsForCreate">
+                        <option *ngFor="let ac of subjectsForCreate" [ngValue]="ac.id">{{ ac.en_name }}</option>
+                    </ng-container>
+                    <ng-template #noDatasubjectsForCreate>
+                        <option disabled>No Data Found</option>
+                    </ng-template>
                 </select>
                 <span *ngIf="validationErrors['subjectID']" class="text-red-500 ml-3 font-normal">{{
                     validationErrors['subjectID'] }}</span>

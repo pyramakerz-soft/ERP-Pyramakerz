@@ -146,7 +146,7 @@ export class InventoryTransactionReportComponent implements OnInit {
     this.route.data.subscribe((data) => {
       this.reportType = data['reportType'];
       this.currentFlags = this.availableFlags[this.reportType];
-      this.selectedFlagIds = this.getAllFlagsForReportType(); // Default to all flags
+      this.selectedFlagIds = this.getAllFlagsForReportType();
     });
     this.loadStores();
     this.loadCategories();
@@ -161,6 +161,7 @@ export class InventoryTransactionReportComponent implements OnInit {
       .Get(this.categoryService.ApiServ.GetHeader())
       .subscribe({
         next: (categories) => {
+          console.log('Categories loaded:', categories);
           this.categories = categories;
         },
         error: (error) => {
@@ -272,15 +273,12 @@ export class InventoryTransactionReportComponent implements OnInit {
     this.isLoading = true;
     this.showTable = false;
 
-    const formattedDateFrom = this.formatDateForAPI(this.dateFrom);
-    const formattedDateTo = this.formatDateForAPI(this.dateTo);
-
     this.inventoryMasterService
       .searchInvoice(
         this.inventoryMasterService.ApiServ.GetHeader(),
         this.selectedStoreId, // Can be null for "Select All"
-        formattedDateFrom,
-        formattedDateTo,
+        this.dateFrom,
+        this.dateTo,
         this.selectedFlagIds, // Already contains all flags by default
         this.selectedCategoryId,
         this.selectedSubCategoryId,
@@ -290,6 +288,7 @@ export class InventoryTransactionReportComponent implements OnInit {
       )
       .subscribe({
         next: (response: any) => {
+          console.log('Response from searchInvoice:', response);
           if (response?.data) {
             this.transactions = response.data;
             this.totalRecords =
@@ -329,20 +328,20 @@ export class InventoryTransactionReportComponent implements OnInit {
     }));
   }
 
-  private formatDateForAPI(dateString: string): string {
-    if (!dateString) return '';
+  // private formatDateForAPI(dateString: string): string {
+  //   if (!dateString) return '';
 
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) {
-      console.error('Invalid date:', dateString);
-      return '';
-    }
+  //   const date = new Date(dateString);
+  //   if (isNaN(date.getTime())) {
+  //     console.error('Invalid date:', dateString);
+  //     return '';
+  //   }
 
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
-  }
+  //   const day = date.getDate().toString().padStart(2, '0');
+  //   const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  //   const year = date.getFullYear();
+  //   return `${day}/${month}/${year}`;
+  // }
 
   changePage(page: number) {
     this.currentPage = page;

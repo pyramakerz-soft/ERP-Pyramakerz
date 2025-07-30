@@ -1,14 +1,12 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { ApiService } from '../api.service';
-import { Violation } from '../../Models/Violation/violation';
-import { ViolationAdd } from '../../Models/Administrator/violation-add';
-import { ViolationType } from '../../Models/Violation/violation-type';
+import { ViolationType } from '../../../Models/Violation/violation-type';
+import { ApiService } from '../../api.service';
 
 @Injectable({
   providedIn: 'root'
 })
-export class ViolationService {
+export class ViolationTypeService {
 
   baseUrl = ""
   header = ""
