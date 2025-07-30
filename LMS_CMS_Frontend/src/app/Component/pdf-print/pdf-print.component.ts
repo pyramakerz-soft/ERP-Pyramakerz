@@ -17,16 +17,15 @@ interface TableSection {
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './pdf-print.component.html',
-  styleUrl: './pdf-print.component.css'
+  styleUrl: './pdf-print.component.css',
 })
 export class PdfPrintComponent {
-
   @Input() school: any;
   @Input() tableHeaders: string[] | null = null;
   @Input() tableData: any[] | null = null;
   @Input() tableDataWithHeaderArray: TableSection[] | null = null;
-    @Input() tableDataWithHeader: any[] | null = null;
- 
+  @Input() tableDataWithHeader: any[] | null = null;
+
   @Input() fileName: string = 'report';
   @Input() Title: string = '';
   @Input() infoRows: {
@@ -40,22 +39,26 @@ export class PdfPrintComponent {
     ArNote?: string | number | null;
   }[] = [];
   @ViewChild('printContainer') printContainer!: ElementRef;
-  tableChunks: { headers: string[], data: any[] }[] = [];
-  preservedColumns: string = "";
+  tableChunks: { headers: string[]; data: any[] }[] = [];
+  preservedColumns: string = '';
   @Input() autoDownload: boolean = false;
 
+  // Add to the component class
+  @Input() accountingConstraintsData: any[] | null = null;
+  @Input() fullTotals: any | null = null;
+
+  
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['tableHeaders'] || changes['tableData']) {
-      if (this.tableHeaders)
-        this.preservedColumns = this.tableHeaders[0];
+      if (this.tableHeaders) this.preservedColumns = this.tableHeaders[0];
       this.splitTableGenerically();
     }
   }
   print() {
-  const printContents = this.printContainer.nativeElement.innerHTML;
-  
-  // Create a print-specific stylesheet
-  const printStyle = `
+    const printContents = this.printContainer.nativeElement.innerHTML;
+
+    // Create a print-specific stylesheet
+    const printStyle = `
     <style>
       @page { size: auto; margin: 0mm; }
       body { margin: 0;
@@ -78,30 +81,30 @@ export class PdfPrintComponent {
     </style>
   `;
 
-  // Create print overlay
-  const printOverlay = document.createElement('div');
-  printOverlay.className = 'print-overlay';
-  printOverlay.innerHTML = `
+    // Create print overlay
+    const printOverlay = document.createElement('div');
+    printOverlay.className = 'print-overlay';
+    printOverlay.innerHTML = `
     <div class="print-content">
       ${printContents}
     </div>
   `;
 
-  // Add to body
-  document.body.appendChild(printOverlay);
-  document.body.insertAdjacentHTML('beforeend', printStyle);
+    // Add to body
+    document.body.appendChild(printOverlay);
+    document.body.insertAdjacentHTML('beforeend', printStyle);
 
-  // Print and clean up
-  setTimeout(() => {
-    window.print();
-    
+    // Print and clean up
     setTimeout(() => {
-      document.body.removeChild(printOverlay);
-      const styles = document.querySelectorAll('style[data-print-style]');
-      styles.forEach(style => document.body.removeChild(style));
+      window.print();
+
+      setTimeout(() => {
+        document.body.removeChild(printOverlay);
+        const styles = document.querySelectorAll('style[data-print-style]');
+        styles.forEach((style) => document.body.removeChild(style));
+      }, 100);
     }, 100);
-  }, 100);
-}
+  }
 
   // ngAfterViewInit(): void {
   //   if (this.school?.reportImage?.startsWith('http')) {
@@ -133,7 +136,7 @@ export class PdfPrintComponent {
       setTimeout(() => this.printPDF(), 100);
     }
   }
-  
+
   convertImgToBase64URL(url: string): Promise<string> {
     return new Promise((resolve) => {
       const img = new Image();
@@ -160,7 +163,7 @@ export class PdfPrintComponent {
       img.src = url;
     });
   }
-  
+
   estimateHeaderWidth(header: string): number {
     // Rough estimate: 10–12px per character
     return header.length * 10;
@@ -168,23 +171,23 @@ export class PdfPrintComponent {
 
   splitTableGenerically(maxTotalWidth: number = 600) {
     this.tableChunks = [];
-  
+
     if (!this.tableHeaders || !this.tableData) return;
-  
+
     const preserved = this.preservedColumns;
     const headers = [...this.tableHeaders];
     let i = 0;
-  
+
     while (i < headers.length) {
       let widthSum = 0;
       let headersSlice: string[] = [];
-  
+
       while (i < headers.length) {
         const currentHeader = headers[i];
         const headerWidth = this.estimateHeaderWidth(currentHeader);
-  
+
         if (widthSum + headerWidth > maxTotalWidth) break;
-  
+
         headersSlice.push(currentHeader);
         widthSum += headerWidth;
         i++;
@@ -193,29 +196,27 @@ export class PdfPrintComponent {
       const finalHeaders = headersSlice.includes(preserved)
         ? headersSlice
         : [preserved, ...headersSlice];
-  
-      const dataChunk = this.tableData.map(row => {
+
+      const dataChunk = this.tableData.map((row) => {
         const newRow: any = {};
-        finalHeaders.forEach(header => {
+        finalHeaders.forEach((header) => {
           newRow[header] = row[header] ?? '-';
         });
         return newRow;
       });
-  
+
       this.tableChunks.push({ headers: finalHeaders, data: dataChunk });
     }
   }
-  
+
   printPDF() {
     const opt = {
       margin: 0.5,
       filename: `${this.fileName}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2 },
-      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
     };
     html2pdf().from(this.printContainer.nativeElement).set(opt).save();
   }
-
-  
 }
