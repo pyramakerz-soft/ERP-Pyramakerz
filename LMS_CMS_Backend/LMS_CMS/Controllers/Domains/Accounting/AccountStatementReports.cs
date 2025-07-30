@@ -43,15 +43,22 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             if (supplier == null)
                 return NotFound("Supplier not found.");
 
+            AccountingTreeChart? accountingTree = Unit_Of_Work.accountingTreeChart_Repository
+                .First_Or_Default(a => a.ID == supplier.AccountNumberID && a.IsDeleted != true);
+
+            if (accountingTree == null)
+                return NotFound("Account number not found for the specified supplier.");
+
             int startRow = ((pageNumber - 1) * pageSize) + 1;
             int endRow = pageNumber * pageSize;
 
             var results = await context.Set<AccountingEntriesReport>().FromSqlRaw(
-                "EXEC dbo.GetAccountingEntries @DateFrom, @DateTo, @MainAccNo, @SubAccNo, @StartRow, @EndRow",
+                "EXEC dbo.GetAccountingEntries @DateFrom, @DateTo, @MainAccNo, @SubAccNo, @linkFileID, @StartRow, @EndRow",
                 new SqlParameter("@DateFrom", fromDate ?? (object)DBNull.Value),
                 new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
                 new SqlParameter("@MainAccNo", supplier.AccountNumberID),
-                new SqlParameter("@SubAccNo", SubAccountNumber),
+                new SqlParameter("@SubAccNo", supplier.ID),
+                new SqlParameter("@linkFileID", accountingTree.LinkFileID),
                 new SqlParameter("@StartRow", startRow),
                 new SqlParameter("@EndRow", endRow)
             ).ToListAsync();
@@ -59,12 +66,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             if (results == null || !results.Any())
                 return NotFound("No account statements found for the specified date range.");
 
-            dynamic grouped;
-            long? linkFileID = results.FirstOrDefault()?.LinkFileID;
-            var isCreditBalance = linkFileID == 2 || linkFileID == 4 || linkFileID == 7;
             decimal? runningBalance = 0;
-            TotalResult calcFirstPeriod = null;
-            TotalResult fullTotals = null;
+            TotalResult calcFirstPeriod;
+            TotalResult fullTotals;
             decimal? firstPeriodBalance = 0;
 
             decimal? fullDebit = 0;
@@ -79,8 +83,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 new SqlParameter("@DateFrom", "1900-1-1"),
                 new SqlParameter("@DateTo", (object)dateToValue ?? DBNull.Value),
                 new SqlParameter("@MainAccNo", supplier.AccountNumberID),
-                new SqlParameter("@SubAccNo", SubAccountNumber),
-                new SqlParameter("@LinkFileID", linkFileID ?? (object)DBNull.Value)
+                new SqlParameter("@SubAccNo", supplier.ID),
+                new SqlParameter("@LinkFileID", accountingTree.LinkFileID)
             )
             .AsNoTracking()
             .ToListAsync())
@@ -108,9 +112,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             {
                 var item = results[i];
 
-                decimal? balance = isCreditBalance
-                    ? item.Credit - item.Debit
-                    : item.Debit - item.Credit;
+                decimal? balance = item.Credit - item.Debit;
 
                 runningBalance += balance;
                 item.Balance = runningBalance;
@@ -122,8 +124,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 new SqlParameter("@DateFrom", "1900-1-1"),
                 new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
                 new SqlParameter("@MainAccNo", supplier.AccountNumberID),
-                new SqlParameter("@SubAccNo", SubAccountNumber),
-                new SqlParameter("@LinkFileID", linkFileID ?? (object)DBNull.Value)
+                new SqlParameter("@SubAccNo", supplier.ID),
+                new SqlParameter("@LinkFileID", accountingTree.LinkFileID)
             )
             .AsNoTracking()
             .ToListAsync())
@@ -135,7 +137,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
             int totalRecords = (await context.Set<CountResult>()
                 .FromSqlInterpolated($@"
-                    SELECT dbo.GetEntriesCount({fromDate}, {toDate}, {supplier.AccountNumberID}, {SubAccountNumber}) AS TotalCount")
+                    SELECT dbo.GetEntriesCount({fromDate}, {toDate}, {supplier.AccountNumberID}, {supplier.ID}, {accountingTree.LinkFileID}) AS TotalCount")
                 .ToListAsync())
                 .FirstOrDefault()?.TotalCount ?? 0;
 
@@ -184,15 +186,22 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             if (safe == null)
                 return NotFound("Safe not found.");
 
+            AccountingTreeChart? accountingTree = Unit_Of_Work.accountingTreeChart_Repository
+                .First_Or_Default(a => a.ID == safe.AccountNumberID && a.IsDeleted != true);
+
+            if (accountingTree == null)
+                return NotFound("Account number not found for the specified supplier.");
+
             int startRow = ((pageNumber - 1) * pageSize) + 1;
             int endRow = pageNumber * pageSize;
 
             var results = await context.Set<AccountingEntriesReport>().FromSqlRaw(
-                "EXEC dbo.GetAccountingEntries @DateFrom, @DateTo, @MainAccNo, @SubAccNo, @StartRow, @EndRow",
+                "EXEC dbo.GetAccountingEntries @DateFrom, @DateTo, @MainAccNo, @SubAccNo, @linkFileID, @StartRow, @EndRow",
                 new SqlParameter("@DateFrom", fromDate ?? (object)DBNull.Value),
                 new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
                 new SqlParameter("@MainAccNo", safe.AccountNumberID),
-                new SqlParameter("@SubAccNo", SubAccountNumber),
+                new SqlParameter("@SubAccNo", safe.ID),
+                new SqlParameter("@linkFileID", accountingTree.LinkFileID),
                 new SqlParameter("@StartRow", startRow),
                 new SqlParameter("@EndRow", endRow)
             ).ToListAsync();
@@ -200,12 +209,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             if (results == null || !results.Any())
                 return NotFound("No account statements found for the specified date range.");
 
-            dynamic grouped;
-            long? linkFileID = results.FirstOrDefault()?.LinkFileID;
-            var isCreditBalance = linkFileID == 2 || linkFileID == 4 || linkFileID == 7;
             decimal? runningBalance = 0;
-            TotalResult calcFirstPeriod = null;
-            TotalResult fullTotals = null;
+            TotalResult calcFirstPeriod;
+            TotalResult fullTotals;
             decimal? firstPeriodBalance = 0;
 
             decimal? fullDebit = 0;
@@ -220,8 +226,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 new SqlParameter("@DateFrom", "1900-1-1"),
                 new SqlParameter("@DateTo", (object)dateToValue ?? DBNull.Value),
                 new SqlParameter("@MainAccNo", safe.AccountNumberID),
-                new SqlParameter("@SubAccNo", SubAccountNumber),
-                new SqlParameter("@LinkFileID", linkFileID ?? (object)DBNull.Value)
+                new SqlParameter("@SubAccNo", safe.ID),
+                new SqlParameter("@linkFileID", accountingTree.LinkFileID)
             )
             .AsNoTracking()
             .ToListAsync())
@@ -249,9 +255,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             {
                 var item = results[i];
 
-                decimal? balance = isCreditBalance
-                    ? item.Credit - item.Debit
-                    : item.Debit - item.Credit;
+                decimal? balance = item.Debit - item.Credit;
 
                 runningBalance += balance;
                 item.Balance = runningBalance;
@@ -263,8 +267,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 new SqlParameter("@DateFrom", "1900-1-1"),
                 new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
                 new SqlParameter("@MainAccNo", safe.AccountNumberID),
-                new SqlParameter("@SubAccNo", SubAccountNumber),
-                new SqlParameter("@LinkFileID", linkFileID ?? (object)DBNull.Value)
+                new SqlParameter("@SubAccNo", safe.ID),
+                new SqlParameter("@linkFileID", accountingTree.LinkFileID)
             )
             .AsNoTracking()
             .ToListAsync())
@@ -276,7 +280,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
             int totalRecords = (await context.Set<CountResult>()
                 .FromSqlInterpolated($@"
-                    SELECT dbo.GetEntriesCount({fromDate}, {toDate}, {safe.AccountNumberID}, {SubAccountNumber}) AS TotalCount")
+                    SELECT dbo.GetEntriesCount({fromDate}, {toDate}, {safe.AccountNumberID}, {safe.ID}, {accountingTree.LinkFileID}) AS TotalCount")
                 .ToListAsync())
                 .FirstOrDefault()?.TotalCount ?? 0;
 
