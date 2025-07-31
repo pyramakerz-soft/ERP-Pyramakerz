@@ -1,0 +1,94 @@
+<div class="flex justify-between">
+    <h1 class="font-semibold text-2xl leading-9">Remedial Classroom</h1>
+    <div class="flex justify-between items-center">
+        <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
+        <button (click)="openModal()"
+            class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
+            Create Remedial Classroom
+        </button>
+    </div>
+</div>
+
+<div class="flex justify-start items-center space-x-4">
+    <div class="w-full">
+        <label for="School1" class="block mb-2 text-sm font-medium text-gray-900">School</label>
+        <select id="School1" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [(ngModel)]="SelectedSchoolId" (change)="GetAllData();"
+            (ngModelChange)="onInputValueChange({ field: 'schoolID', value: $event })">
+            <option value=0 disabled selected hidden>Select a School</option>
+            <option *ngFor="let stu of schools" [value]="stu.id">
+                {{ stu.name }}
+            </option>
+            <option *ngIf="schools.length === 0" disabled selected>No Data Found</option>
+        </select>
+        <span *ngIf="validationErrors['schoolID']" class="text-red-500 ml-3 font-normal">{{
+            validationErrors['schoolID']}}</span>
+    </div>
+</div>
+
+<div *ngIf="SelectedSchoolId!=0" class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD] max-w-full">
+    <table class="overflow-auto w-full bg-[#EBEBEB] text-left text-[#6F6F6F]">
+        <thead class="bg-[##EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+            <tr>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    Id
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
+                    Name
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
+                    Created Date
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
+                    School Name
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
+                    Grade Name
+                </th>                
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
+                    Subject Name
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
+                    Teacher Name
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    Actions
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngIf="TableData.length === 0">
+                <td colspan="7"
+                    class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                    No Data Found
+                </td>
+            </tr>
+
+            <tr *ngFor="let row of TableData; let i = index"
+                [ngClass]="{'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1}"
+                class="border-t border-gray-300 text-xs md:text-sm">
+
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{ row.id }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.name }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.insertedAt | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.schoolName }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.gradeName }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.subjectName }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.teacherName }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 ">
+                    <div class="flex space-x-3">
+                        <!-- <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)" (click)="delete(row.id)">
+                            <i class="fa-regular fa-trash-can"></i>
+                        </button>
+                        <button *ngIf="AllowEdit && IsAllowEdit(row.insertedByUserId)" (click)="View(row.id)">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                        <button (click)="openPrintModal(row.id)">
+                            <img class="w-4 cursor-pointer" src="Icons/Print.png" title="Print">
+                        </button> -->
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
