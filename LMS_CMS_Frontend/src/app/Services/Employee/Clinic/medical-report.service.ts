@@ -15,8 +15,12 @@ export class MedicalReportService {
     this.baseUrl = ApiServ.BaseUrl;
   }
 
-  // Method to get all MH By Parent data
-  getAllMHByParent(DomainName: string): Observable<any[]> {
+  getAllMHByParent(
+    DomainName: string,
+    schoolId: number,
+    gradeId: number,
+    classId: number
+  ): Observable<any[]> {
     if (DomainName != null) {
       this.header = DomainName;
     }
@@ -25,11 +29,16 @@ export class MedicalReportService {
       .set('Domain-Name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('accept', '*/*');
-    return this.http.get<any[]>(`${this.baseUrl}/MedicalReport/GetAllMHByParent`, { headers });
+    return this.http.get<any[]>(
+      `${this.baseUrl}/MedicalReport/GetAllMHByParent?schoolId=${schoolId}&gradeId=${gradeId}&classId=${classId}`,
+      { headers }
+    );
   }
 
-  // Method to get medical history by parent ID
-  getMHByParentById(id: number, DomainName: string): Observable<MedicalHistoryByParent> {
+  getMHByParentById(
+    id: number,
+    DomainName: string
+  ): Observable<MedicalHistoryByParent> {
     if (DomainName != null) {
       this.header = DomainName;
     }
@@ -39,12 +48,18 @@ export class MedicalReportService {
       .set('Authorization', `Bearer ${token}`)
       .set('accept', '*/*');
 
-    return this.http.get<MedicalHistoryByParent>(`${this.baseUrl}/MedicalHistory/GetByIdByParent/id?id=${id}`, { headers });
+    return this.http.get<MedicalHistoryByParent>(
+      `${this.baseUrl}/MedicalHistory/GetByIdByParent/id?id=${id}`,
+      { headers }
+    );
   }
 
-
-
-    getAllMHByDoctor(DomainName: string): Observable<any[]> {
+  getAllMHByDoctor(
+    DomainName: string,
+    schoolId: number,
+    gradeId: number,
+    classId: number
+  ): Observable<any[]> {
     if (DomainName != null) {
       this.header = DomainName;
     }
@@ -54,21 +69,51 @@ export class MedicalReportService {
       .set('Authorization', `Bearer ${token}`)
       .set('accept', '*/*');
 
-    return this.http.get<any[]>(`${this.baseUrl}/MedicalReport/GetAllMHByDoctor`, { headers });
+    return this.http.get<any[]>(
+      `${this.baseUrl}/MedicalReport/GetAllMHByDoctor?schoolId=${schoolId}&gradeId=${gradeId}&classId=${classId}`,
+      { headers }
+    );
   }
 
+  getAllHygieneForms(
+    DomainName: string,
+    schoolId: number,
+    gradeId: number,
+    classId: number
+  ): Observable<any[]> {
+    if (DomainName != null) {
+      this.header = DomainName;
+    }
+    const token = localStorage.getItem('current_token');
+    const headers = new HttpHeaders()
+      .set('Domain-Name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('accept', '*/*');
 
-    // Method to get all hygiene forms
-getAllHygieneForms(DomainName: string): Observable<any[]> {
-  if (DomainName != null) {
-    this.header = DomainName;
+    return this.http.get<any[]>(
+      `${this.baseUrl}/MedicalReport/GetAllHygienesForms?schoolId=${schoolId}&gradeId=${gradeId}&classId=${classId}`,
+      { headers }
+    );
   }
-  const token = localStorage.getItem('current_token');
-  const headers = new HttpHeaders()
-    .set('Domain-Name', this.header)
-    .set('Authorization', `Bearer ${token}`)
-    .set('accept', '*/*');
 
-  return this.http.get<any[]>(`${this.baseUrl}/MedicalReport/GetAllHygienesForms`, { headers });
-}
+  getAllFollowUps(
+    DomainName: string,
+    schoolId: number,
+    gradeId: number,
+    classId: number
+  ): Observable<any[]> {
+    if (DomainName != null) {
+      this.header = DomainName;
+    }
+    const token = localStorage.getItem('current_token');
+    const headers = new HttpHeaders()
+      .set('Domain-Name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('accept', '*/*');
+
+    return this.http.get<any[]>(
+      `${this.baseUrl}/MedicalReport/GetAllFollowUps?schoolId=${schoolId}&gradeId=${gradeId}&classId=${classId}`,
+      { headers }
+    );
+  }
 }
