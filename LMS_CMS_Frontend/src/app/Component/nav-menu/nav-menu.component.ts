@@ -346,7 +346,7 @@ export class NavMenuComponent {
   }
 
   viewAllNotifications() {
-    this.router.navigateByUrl('Communication/My Notifications')
+    this.router.navigateByUrl('CommunicationModule/My Notifications')
   }
 
   formatInsertedAt(dateString: string | Date): string {
