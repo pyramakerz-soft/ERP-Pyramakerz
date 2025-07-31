@@ -524,7 +524,7 @@ export const routes: Routes = [
         ]
     },
     {
-        path: "Communication",
+        path: "CommunicationModule",
         component: MainLayoutComponent,
         title: "Communication",
         canActivate: [noNavigateWithoutLoginGuard],
