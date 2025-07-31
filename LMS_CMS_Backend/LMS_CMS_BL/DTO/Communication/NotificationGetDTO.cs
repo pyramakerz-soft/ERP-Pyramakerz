@@ -20,6 +20,6 @@ namespace LMS_CMS_BL.DTO.Communication
         public string UserTypeName { get; set; }
         public List<NotificationSharedToGetDTO> NotificationSharedTos { get; set; } = new List<NotificationSharedToGetDTO>();
 
-        public long? InsertedByUserId { get; set; }
+        public long? InsertedByUserId { get; set; } 
     }
 }

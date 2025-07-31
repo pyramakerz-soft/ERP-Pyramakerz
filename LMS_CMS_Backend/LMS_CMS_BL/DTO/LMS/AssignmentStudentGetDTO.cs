@@ -12,6 +12,9 @@ namespace LMS_CMS_BL.DTO.LMS
         public long? ID { get; set; }
         public float? Degree { get; set; }
         public float AssignmentDegree { get; set; }
+        public DateOnly OpenDate { get; set; }
+        public DateOnly DueDate { get; set; }
+        public DateOnly CutOfDate { get; set; }
         public long AssignmentID { get; set; }
         public long AssignmentTypeID { get; set; }
         public long StudentClassroomID { get; set; }

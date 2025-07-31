@@ -265,7 +265,7 @@ export class TimeTableComponent {
   }
 
   View(id: number) {
-    this.router.navigateByUrl(`Employee/Time Table View/${id}`)
+    this.router.navigateByUrl(`Employee/Time Table/${id}`)
   }
 
   EditFavourite(id: number, isFav: boolean) {

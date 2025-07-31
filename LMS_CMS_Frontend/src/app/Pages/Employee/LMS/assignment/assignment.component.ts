@@ -78,6 +78,7 @@ export class AssignmentComponent {
   students: Student[] = []
   Grades: Grade[] = []
   GradesForCreate: Grade[] = []
+  subjectsForCreate: Subject[] = [];
   IsView: boolean = false
 
   isLoading = false;
@@ -229,7 +230,7 @@ export class AssignmentComponent {
   }
 
   View(id: number) {
-    this.router.navigateByUrl(`Employee/Assignment View/${id}`)
+    this.router.navigateByUrl(`Employee/Assignment/${id}`)
   }
 
   validateNumberForPagination(event: any): void {
@@ -279,6 +280,11 @@ export class AssignmentComponent {
         console.log(this.assignment)
         this.GradeServ.GetBySchoolId(this.assignment.schoolID, this.DomainName).subscribe((d) => {
           this.GradesForCreate = d
+          this.subjectsForCreate = []
+          this.subjectService.GetByGradeId(this.assignment.gradeID, this.DomainName).subscribe((d) => {
+            this.subjectsForCreate = d
+          })
+
         })
         this.getSubjectWeightData()
         this.getClassesData()
@@ -391,7 +397,7 @@ export class AssignmentComponent {
     this.studentClassWhenSelectClass = new StudentClassWhenSubject()
     this.studentClassWhenSubject = []
     this.GradesForCreate = []
-    this.subjects = []
+    this.subjectsForCreate = []
     this.assignment.gradeID = 0
     this.assignment.subjectID = 0
     this.GradeServ.GetBySchoolId(this.assignment.schoolID, this.DomainName).subscribe((d) => {
@@ -407,10 +413,10 @@ export class AssignmentComponent {
     this.viewClassStudents = false
     this.studentClassWhenSelectClass = new StudentClassWhenSubject()
     this.studentClassWhenSubject = []
-    this.subjects = []
+    this.subjectsForCreate = []
     this.assignment.subjectID = 0
     this.subjectService.GetByGradeId(this.assignment.gradeID, this.DomainName).subscribe((d) => {
-      this.subjects = d
+      this.subjectsForCreate = d
     })
   }
 
