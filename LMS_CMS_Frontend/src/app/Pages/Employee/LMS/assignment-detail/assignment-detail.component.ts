@@ -77,6 +77,7 @@ export class AssignmentDetailComponent {
   GetAssignment() {
     this.assignmentStudentServ.GetById(this.AssignmentStudentId, this.DomainName).subscribe((d) => {
       this.assignmentStudent = d
+      console.log(this.assignmentStudent)
       for (let row of this.assignmentStudent.assignmentStudentQuestions) {
         this.autoCorrectMark(row);
       }
@@ -128,18 +129,47 @@ export class AssignmentDetailComponent {
 
   save() {
     this.isLoading = true;
-    Swal.fire({
-      title: 'Apply Late Submission Penalty?',
-      text: 'If The student submitted after the due date. Do you want to apply the late submission penalty?',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#089B41',
-      cancelButtonColor: '#17253E',
-      confirmButtonText: 'Apply Penalty',
-      cancelButtonText: 'Forgive Delay',
-    }).then((result) => {
-      this.assignmentStudent.evaluationConsideringTheDelay = result.isConfirmed;
-      console.log(this.assignmentStudent.evaluationConsideringTheDelay)
+    const today = new Date(); // current date
+    const dueDate = new Date(this.assignmentStudent.dueDate); // ensure dueDate is a Date object
+    if (today > dueDate) {
+      Swal.fire({
+        title: 'Apply Late Submission Penalty?',
+        text: 'If The student submitted after the due date. Do you want to apply the late submission penalty?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#089B41',
+        cancelButtonColor: '#17253E',
+        confirmButtonText: 'Apply Penalty',
+        cancelButtonText: 'Forgive Delay',
+      }).then((result) => {
+        this.assignmentStudent.evaluationConsideringTheDelay = result.isConfirmed;
+        console.log(this.assignmentStudent.evaluationConsideringTheDelay)
+        this.assignmentStudentServ.Edit(this.assignmentStudent, this.DomainName)
+          .pipe(finalize(() => this.isLoading = false)) // runs after success or error
+          .subscribe({
+            next: () => {
+              Swal.fire({
+                icon: 'success',
+                title: 'Done',
+                text: 'Updated Successfully',
+                confirmButtonColor: '#089B41',
+              });
+              this.router.navigateByUrl(`Employee/Assignment Student/${this.assignmentStudent.assignmentID}`);
+            },
+            error: (err) => {
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Something went wrong, please try again.',
+                confirmButtonColor: '#d33',
+              });
+              console.error('Edit error:', err);
+            }
+          });
+      });
+    }
+    else {
+      this.assignmentStudent.evaluationConsideringTheDelay = false
       this.assignmentStudentServ.Edit(this.assignmentStudent, this.DomainName)
         .pipe(finalize(() => this.isLoading = false)) // runs after success or error
         .subscribe({
@@ -162,6 +192,6 @@ export class AssignmentDetailComponent {
             console.error('Edit error:', err);
           }
         });
-    });
+    }
   }
 }

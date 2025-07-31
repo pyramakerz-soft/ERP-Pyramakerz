@@ -193,7 +193,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
 
             List<NotificationSharedTo> notificationSharedTos = await Unit_Of_Work.notificationSharedTo_Repository.Select_All_With_IncludesById<NotificationSharedTo>(
                     f => f.IsDeleted != true && f.Notification.IsDeleted != true && f.UserID == userId && f.UserTypeID == userTypeID,
-                    query => query.Include(d => d.Notification)
+                    query => query.Include(d => d.Notification),
+                    query => query.Include(d => d.InsertedByEmployee)
                     );
 
             notificationSharedTos = notificationSharedTos
@@ -249,7 +250,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
 
             List<NotificationSharedTo> notificationSharedTos = await Unit_Of_Work.notificationSharedTo_Repository.Select_All_With_IncludesById<NotificationSharedTo>(
                     f => f.IsDeleted != true && f.Notification.IsDeleted != true && f.UserID == userId && f.UserTypeID == userTypeID,
-                    query => query.Include(d => d.Notification)
+                    query => query.Include(d => d.Notification),
+                    query => query.Include(d => d.InsertedByEmployee)
                     );
 
             notificationSharedTos = notificationSharedTos
@@ -278,7 +280,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
         
         //////////////////////////////////////////////////////////////////////////////////////////
         
-        [HttpGet("ByUserIDAndNotificationSharedByID{notificationSharedID}")]
+        [HttpGet("ByUserIDAndNotificationSharedByID/{notificationSharedID}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee", "parent", "student" }
         )]
@@ -326,6 +328,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             {
                 notificationSharedToGetDTO.ImageLink = $"{serverUrl}{notificationSharedToGetDTO.ImageLink.Replace("\\", "/")}";
             }
+
+            notificationSharedTo.SeenOrNot = true;
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            notificationSharedTo.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone); 
+            Unit_Of_Work.notificationSharedTo_Repository.Update(notificationSharedTo);
+            
+            Unit_Of_Work.SaveChanges();
              
             return Ok(notificationSharedToGetDTO);
         }

@@ -207,7 +207,12 @@ namespace LMS_CMS_BL.Config
             CreateMap<ViolationTypeAddDTO, ViolationType>();
             CreateMap<ViolationTypeEditDTO, ViolationType>();
 
-            CreateMap<Violation, ViolationGetDTO>();
+            CreateMap<Violation, ViolationGetDTO>()
+                 .ForMember(dest => dest.EmployeeTypeId, opt => opt.MapFrom(src => src.Employee.EmployeeTypeID))
+                 .ForMember(dest => dest.EmployeeTypeName, opt => opt.MapFrom(src => src.Employee.EmployeeType.Name))
+                 .ForMember(dest => dest.ViolationTypeName, opt => opt.MapFrom(src => src.ViolationType.Name))
+                 .ForMember(dest => dest.EmployeeEnglishName, opt => opt.MapFrom(src => src.Employee.en_name))
+                 .ForMember(dest => dest.EmployeeArabicName, opt => opt.MapFrom(src => src.Employee.ar_name));
             CreateMap<ViolationAddDTO, Violation>();
             CreateMap<ViolationEditDTO, Violation>();
 
@@ -1010,6 +1015,9 @@ namespace LMS_CMS_BL.Config
             CreateMap<AssignmentPutDTO, Assignment>(); 
 
             CreateMap<AssignmentStudent, AssignmentStudentGetDTO>()
+               .ForMember(dest => dest.OpenDate, opt => opt.MapFrom(src => src.Assignment.OpenDate))
+               .ForMember(dest => dest.CutOfDate, opt => opt.MapFrom(src => src.Assignment.CutOfDate))
+               .ForMember(dest => dest.DueDate, opt => opt.MapFrom(src => src.Assignment.DueDate))
                .ForMember(dest => dest.ClassroomID, opt => opt.MapFrom(src => src.StudentClassroom.ClassID))
                .ForMember(dest => dest.AssignmentDegree, opt => opt.MapFrom(src => src.Assignment.Mark))
                .ForMember(dest => dest.SubjectId, opt => opt.MapFrom(src => src.Assignment.SubjectID))
@@ -1139,6 +1147,8 @@ namespace LMS_CMS_BL.Config
                 .ForMember(dest => dest.ImageLink, opt => opt.MapFrom(src => src.Notification.ImageLink))
                 .ForMember(dest => dest.Text, opt => opt.MapFrom(src => src.Notification.Text))
                 .ForMember(dest => dest.Link, opt => opt.MapFrom(src => src.Notification.Link))
+                .ForMember(dest => dest.InsertedAt, opt => opt.MapFrom(src => src.InsertedAt))
+                .ForMember(dest => dest.InsertedByUserName, opt => opt.MapFrom(src => src.InsertedByEmployee.en_name))
                 .ForMember(dest => dest.IsAllowDismiss, opt => opt.MapFrom(src => src.Notification.IsAllowDismiss));
 
         }

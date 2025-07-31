@@ -36,7 +36,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
         [HttpGet]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Violation" }
+            pages: new[] { "Violation Types" }
         )]
         public async Task<IActionResult> GetAsync()
         {
@@ -54,6 +54,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
 
             List<Violation> violations = await Unit_Of_Work.violations_Repository.Select_All_With_IncludesById<Violation>(sem => sem.IsDeleted != true,
                     query => query.Include(emp => emp.ViolationType),
+                    query => query.Include(emp => emp.Employee.EmployeeType),
                     query => query.Include(emp => emp.Employee));
 
             if (violations == null || violations.Count == 0)
@@ -79,7 +80,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Violation" }
+            pages: new[] { "Violation Types" }
         )]
         public async Task<IActionResult> GetAsyncByID(long id)
         {
@@ -95,8 +96,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            Violation violations = await Unit_Of_Work.violations_Repository.FindByIncludesAsync(sem => sem.IsDeleted != true,
+            Violation violations = await Unit_Of_Work.violations_Repository.FindByIncludesAsync(sem => sem.IsDeleted != true && sem.ID==id,
                     query => query.Include(emp => emp.ViolationType),
+                    query => query.Include(emp => emp.Employee.EmployeeType),
                     query => query.Include(emp => emp.Employee));
 
             if (violations == null)
@@ -120,7 +122,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
         [HttpPost]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Violation" }
+            pages: new[] { "Violation Types" }
         )]
         public async Task<IActionResult> Add([FromForm]ViolationAddDTO Newviolation)
         {
@@ -212,7 +214,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
          allowEdit: 1,
-         pages: new[] { "Violation" }
+         pages: new[] { "Violation Types" }
         )]
         public async Task<IActionResult> EditAsync([FromForm] ViolationEditDTO Newviolation)
         {
@@ -241,7 +243,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
             }
             if (userTypeClaim == "employee")
             {
-                Page page = Unit_Of_Work.page_Repository.First_Or_Default(page => page.en_name == "Violations");
+                Page page = Unit_Of_Work.page_Repository.First_Or_Default(page => page.en_name == "Violation Types");
                 if (page != null)
                 {
                     Role_Detailes roleDetails = Unit_Of_Work.role_Detailes_Repository.First_Or_Default(RD => RD.Page_ID == page.ID && RD.Role_ID == roleId);
@@ -334,7 +336,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             allowDelete: 1,
-            pages: new[] { "Violation" }
+            pages: new[] { "Violation Types" }
         )]
         public IActionResult Delete(long id)
         {
@@ -365,7 +367,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
 
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Violation", roleId, userId, violation);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Violation Types", roleId, userId, violation);
                 if (accessCheck != null)
                 {
                     return accessCheck;

@@ -132,7 +132,7 @@ export class StudentsComponent {
 
 
   View(id: number) {
-    this.router.navigateByUrl(`Employee/Student View/` + id);
+    this.router.navigateByUrl(`Employee/Student/` + id);
   }
 
   Delete(id: number) {

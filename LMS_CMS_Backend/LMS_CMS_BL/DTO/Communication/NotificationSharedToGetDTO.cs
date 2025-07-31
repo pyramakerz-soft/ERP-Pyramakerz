@@ -14,6 +14,7 @@ namespace LMS_CMS_BL.DTO.Communication
         public long UserID { get; set; }
         public string UserName { get; set; }
         public bool NotifiedOrNot { get; set; }
+        public bool SeenOrNot { get; set; }
         public long NotificationID { get; set; }
         public long UserTypeID { get; set; }
 
@@ -21,6 +22,8 @@ namespace LMS_CMS_BL.DTO.Communication
         public string? ImageLink { get; set; }
         public string? Text { get; set; }
         public string? Link { get; set; }
-        public bool IsAllowDismiss { get; set; } 
+        public bool IsAllowDismiss { get; set; }
+        public string? InsertedByUserName { get; set; }
+        public DateTime? InsertedAt { get; set; }
     }
 }

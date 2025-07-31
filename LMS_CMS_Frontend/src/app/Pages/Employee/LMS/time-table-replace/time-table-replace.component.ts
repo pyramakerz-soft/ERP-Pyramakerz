@@ -413,7 +413,7 @@ export class TimeTableReplaceComponent {
         });
         this.isLoading = false;
         this.router.navigateByUrl(
-          `Employee/Time Table View/` + this.TimeTableId
+          `Employee/Time Table/` + this.TimeTableId
         );
       },
       (error) => {

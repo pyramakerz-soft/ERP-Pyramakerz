@@ -56,7 +56,7 @@ export class FieldsService {
     return this.http.delete(`${this.baseUrl}/CategoryField/${id}`, { headers })
   }
 
-  GetByID(id: number,DomainName:string) {
+  GetByCategoryId(id: number,DomainName:string) {
     if(DomainName!=null) {
       this.header=DomainName 
     }
@@ -66,5 +66,17 @@ export class FieldsService {
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
     return this.http.get<Field[]>(`${this.baseUrl}/CategoryField/GetByCategoryId/${id}`, { headers })
+  }
+
+   GetById(id: number,DomainName:string) {
+    if(DomainName!=null) {
+      this.header=DomainName 
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<FieldAddEdit>(`${this.baseUrl}/CategoryField/${id}`, { headers })
   }
 }

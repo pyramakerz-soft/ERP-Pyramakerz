@@ -1489,6 +1489,41 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.ToTable("ReceivableMaster");
                 });
 
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.AccountingModule.Reports.AccountBalanceReport", b =>
+                {
+                    b.Property<decimal?>("Credit")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("Debit")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<long?>("ID")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.ToTable((string)null);
+
+                    b.ToView(null, (string)null);
+                });
+
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.AccountingModule.Reports.AccountTotals", b =>
+                {
+                    b.Property<decimal?>("Differences")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("TotalCredit")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("TotalDebit")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.ToTable((string)null);
+
+                    b.ToView(null, (string)null);
+                });
+
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.AccountingModule.Reports.CountResult", b =>
                 {
                     b.Property<int?>("TotalCount")
@@ -3449,6 +3484,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .HasColumnType("bigint");
 
                     b.Property<bool>("NotifiedOrNot")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("SeenOrNot")
                         .HasColumnType("bit");
 
                     b.Property<DateTime?>("UpdatedAt")
