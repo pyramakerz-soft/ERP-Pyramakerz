@@ -74,7 +74,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
                 bool isCreditBased = entries.Any(x => x.LinkFileID == 2 || x.LinkFileID == 4 || x.LinkFileID == 7);
 
-                var difference = isCreditBased
+                var difference = totalCredit > totalDebit
                     ? totalCredit - totalDebit
                     : totalDebit - totalCredit;
 
@@ -104,7 +104,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
             fullDebit = fullTotals?.TotalDebit ?? 0;
             fullCredit = fullTotals?.TotalCredit ?? 0;
-            fullDifference = fullTotals?.Differences ?? 0;
+            fullDifference = fullCredit > fullDebit ? fullCredit - fullDebit : fullDebit - fullCredit;
 
             int totalRecords = (await context.Set<CountResult>()
                 .FromSqlInterpolated($@"

@@ -203,6 +203,11 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<Duty> Duty { get; set; }
         public DbSet<Notification> Notification { get; set; }
         public DbSet<NotificationSharedTo> NotificationSharedTo { get; set; }
+        public DbSet<RemedialClassroom> RemedialClassroom { get; set; }
+        public DbSet<RemedialClassroomStudent> RemedialClassroomStudent { get; set; }
+        public DbSet<RemedialTimeTable> RemedialTimeTable { get; set; }
+        public DbSet<RemedialTimeTableDay> RemedialTimeTableDay { get; set; }
+        public DbSet<RemedialTimeTableClasses> RemedialTimeTableClasses { get; set; }
 
 
 
@@ -1842,6 +1847,67 @@ namespace LMS_CMS_DAL.Models.Domains
                 .OnDelete(DeleteBehavior.Restrict);
 
 
+
+            modelBuilder.Entity<RemedialClassroom>()
+                .HasOne(p => p.AcademicYear)
+                .WithMany(p => p.RemedialClassrooms)
+                .HasForeignKey(p => p.AcademicYearID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<RemedialClassroom>()
+                .HasOne(p => p.Subject)
+                .WithMany(p => p.RemedialClassrooms)
+                .HasForeignKey(p => p.SubjectID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<RemedialClassroom>()
+                .HasOne(p => p.Teacher)
+                .WithMany(p => p.RemedialClassrooms)
+                .HasForeignKey(p => p.TeacherID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<RemedialClassroomStudent>()
+                .HasOne(p => p.RemedialClassroom)
+                .WithMany(p => p.RemedialClassroomStudents)
+                .HasForeignKey(p => p.RemedialClassroomID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<RemedialClassroomStudent>()
+                .HasOne(p => p.Student)
+                .WithMany(p => p.RemedialClassroomStudents)
+                .HasForeignKey(p => p.StudentID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<RemedialTimeTable>()
+                .HasOne(p => p.AcademicYear)
+                .WithMany(p => p.RemedialTimeTables)
+                .HasForeignKey(p => p.AcademicYearID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<RemedialTimeTableDay>()
+                .HasOne(p => p.RemedialTimeTable)
+                .WithMany(p => p.RemedialTimeTableDays)
+                .HasForeignKey(p => p.RemedialTimeTableID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<RemedialTimeTableDay>()
+                .HasOne(p => p.Day)
+                .WithMany(p => p.RemedialTimeTableDays)
+                .HasForeignKey(p => p.DayId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<RemedialTimeTableClasses>()
+                .HasOne(p => p.RemedialTimeTableDay)
+                .WithMany(p => p.RemedialTimeTableClasses)
+                .HasForeignKey(p => p.RemedialTimeTableDayId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<RemedialTimeTableClasses>()
+                .HasOne(p => p.RemedialClassroom)
+                .WithMany(p => p.RemedialTimeTableClasses)
+                .HasForeignKey(p => p.RemedialClassroomID)
+                .OnDelete(DeleteBehavior.Restrict);
+
             ///////////////////////// Exception: /////////////////////////
             modelBuilder.Entity<Bus>()
                 .HasOne(b => b.DeletedByEmployee)
@@ -1933,6 +1999,13 @@ namespace LMS_CMS_DAL.Models.Domains
                 .WithMany() 
                 .HasForeignKey(v => v.DeletedByUserId) 
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<RemedialClassroom>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
 
             ///////////////////////// Optional ID According to other field: /////////////////////////  
             modelBuilder.Entity<ReceivableMaster>()
