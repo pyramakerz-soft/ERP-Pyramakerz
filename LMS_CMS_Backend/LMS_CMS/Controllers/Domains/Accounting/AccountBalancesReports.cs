@@ -22,12 +22,12 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         }
 
         #region Suppliers Balances
-        [HttpGet("GetSupplierStatement")]
+        [HttpGet("GetSuppliersBalance")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "" }
         )]
-        public async Task<IActionResult> GetSupplierStatement(DateTime? toDate, long? mainAccountID = 0, bool groupedByAccount = false, bool zeroBalance = true, bool positiveBalance = true, bool negativeBalance = true, int pageNumber = 1, int pageSize = 10)
+        public async Task<IActionResult> GetSuppliersBalance(DateTime? toDate, long? mainAccountID = 0, bool groupedByAccount = false, bool zeroBalance = true, bool positiveBalance = true, bool negativeBalance = true, int pageNumber = 1, int pageSize = 10)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
             var context = Unit_Of_Work.DbContext;
@@ -103,18 +103,18 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 if (mainAccount == null)
                     return NotFound($"Main account with ID: {mainAccountID} not found.");
 
-                List<Supplier>? suppliers = await Unit_Of_Work.supplier_Repository.SelectQuery<Supplier>(x => x.AccountNumberID == mainAccountID && x.IsDeleted != true).ToListAsync();
+                //List<Supplier>? suppliers = await Unit_Of_Work.supplier_Repository.SelectQuery<Supplier>(x => x.AccountNumberID == mainAccountID && x.IsDeleted != true).ToListAsync();
 
-                if (suppliers == null || suppliers?.Count == 0)
-                    return NotFound($"No suppliers in account with ID: {mainAccountID}.");
+                //if (suppliers == null || suppliers?.Count == 0)
+                //    return NotFound($"No suppliers in account with ID: {mainAccountID}.");
 
-                foreach (var supplier in suppliers)
-                {
+                //foreach (var supplier in suppliers)
+                //{
                     var temp = await context.Set<AccountBalanceReport>().FromSqlRaw(
                         "EXEC dbo.GetAccountSummary @DateFrom, @DateTo, @MainAccNo, 0, 2, @StartRow, @EndRow, @zeroBalance, @positiveBalance, @negativeBalance",
                         new SqlParameter("@DateFrom", "1900-1-1"),
                         new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
-                        new SqlParameter("@MainAccNo", mainAccountID),
+                        new SqlParameter("@MainAccNo", mainAccount.ID),
                         new SqlParameter("@StartRow", startRow),
                         new SqlParameter("@EndRow", endRow),
                         new SqlParameter("@zeroBalance", zeroBalance),
@@ -151,10 +151,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
                     totalRecords = (await context.Set<CountResult>()
                         .FromSqlInterpolated($@"
-                            SELECT dbo.GetEntriesCount({baseDate}, {toDate}, {mainAccount.ID}, {supplier.ID}, 2) AS TotalCount")
+                            SELECT dbo.GetEntriesCount({baseDate}, {toDate}, {mainAccount.ID}, 0, 2) AS TotalCount")
                         .ToListAsync())
                         .FirstOrDefault()?.TotalCount ?? 0;
-                }
+                //}
 
                 if (suppliersBalances == null || suppliersBalances?.Count == 0)
                     return NotFound($"No suppliers found.");
@@ -178,12 +178,12 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         #endregion
 
         #region Safes Balances
-        [HttpGet("GetSafesStatement")]
+        [HttpGet("GetSafesBalance")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "" }
         )]
-        public async Task<IActionResult> GetSafesStatement(DateTime? toDate, long? mainAccountID = 0, bool groupedByAccount = false, bool hasBalance = true, bool zeroBalance = true, bool negativeBalance = true, int pageNumber = 1, int pageSize = 10)
+        public async Task<IActionResult> GetSafesBalance(DateTime? toDate, long? mainAccountID = 0, bool groupedByAccount = false, bool hasBalance = true, bool zeroBalance = true, bool negativeBalance = true, int pageNumber = 1, int pageSize = 10)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
             var context = Unit_Of_Work.DbContext;
