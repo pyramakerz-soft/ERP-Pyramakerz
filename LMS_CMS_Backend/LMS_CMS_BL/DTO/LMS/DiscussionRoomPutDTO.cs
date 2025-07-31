@@ -17,12 +17,19 @@ namespace LMS_CMS_BL.DTO.LMS
         public string MeetingLink { get; set; }
         public string? RecordLink { get; set; }
         public IFormFile? ImageFile { get; set; }
-        public string ImageLink { get; set; }
+        public string? ImageLink { get; set; }
         public bool IsRepeatedWeekly { get; set; }
         public DateOnly StartDate { get; set; }
         public DateOnly EndDate { get; set; }
         public string Time { get; set; }
 
+        public bool Saturday { get; set; }
+        public bool Sunday { get; set; }
+        public bool Monday { get; set; }
+        public bool Tuesday { get; set; }
+        public bool Wednesday { get; set; }
+        public bool Thursday { get; set; }
+        public bool Friday { get; set; }
         public List<long> StudentClassrooms { get; set; }
     }
 }

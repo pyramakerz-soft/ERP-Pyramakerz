@@ -69,6 +69,13 @@ export class DiscussionRoomService {
     formData.append('schoolID', DiscussionRoom.schoolID.toString());
     formData.append('time', DiscussionRoom.time ?? '');
     formData.append('isRepeatedWeekly', DiscussionRoom.isRepeatedWeekly.toString() ?? 'false');
+    formData.append('saturday', DiscussionRoom.saturday.toString() ?? 'false');
+    formData.append('sunday', DiscussionRoom.sunday.toString() ?? 'false');
+    formData.append('monday', DiscussionRoom.monday.toString() ?? 'false');
+    formData.append('tuesday', DiscussionRoom.tuesday.toString() ?? 'false');
+    formData.append('wednesday', DiscussionRoom.wednesday.toString() ?? 'false');
+    formData.append('thursday', DiscussionRoom.thursday.toString() ?? 'false');
+    formData.append('friday', DiscussionRoom.friday.toString() ?? 'false');
     DiscussionRoom.studentClassrooms.forEach(item => {
       formData.append('studentClassrooms', item.toString());
     });
@@ -99,6 +106,13 @@ export class DiscussionRoomService {
     formData.append('endDate', DiscussionRoom.endDate ?? '');
     formData.append('time', DiscussionRoom.time ?? '');
     formData.append('isRepeatedWeekly', DiscussionRoom.isRepeatedWeekly.toString() ?? 'false');
+    formData.append('saturday', DiscussionRoom.saturday.toString() ?? 'false');
+    formData.append('sunday', DiscussionRoom.sunday.toString() ?? 'false');
+    formData.append('monday', DiscussionRoom.monday.toString() ?? 'false');
+    formData.append('tuesday', DiscussionRoom.tuesday.toString() ?? 'false');
+    formData.append('wednesday', DiscussionRoom.wednesday.toString() ?? 'false');
+    formData.append('thursday', DiscussionRoom.thursday.toString() ?? 'false');
+    formData.append('friday', DiscussionRoom.friday.toString() ?? 'false');
     DiscussionRoom.studentClassrooms.forEach(item => {
       formData.append('studentClassrooms', item.toString());
     });
