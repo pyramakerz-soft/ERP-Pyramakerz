@@ -115,7 +115,7 @@ export class AssignmentEditComponent {
       this.AssignmentId,
       this.DomainName
     ).subscribe((d) => {
-      this.assignment = d;  
+      this.assignment = d;
     });
   }
 
@@ -190,6 +190,30 @@ export class AssignmentEditComponent {
     if (isNaN(value) || value === '') {
       event.target.value = '';
     }
+  }
+
+  get visiblePages(): number[] {
+    const total = this.TotalPages;
+    const current = this.CurrentPage;
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const half = Math.floor(maxVisible / 2);
+    let start = current - half;
+    let end = current + half;
+
+    if (start < 1) {
+      start = 1;
+      end = maxVisible;
+    } else if (end > total) {
+      end = total;
+      start = total - maxVisible + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   }
 
   toggleSelection(QuestionId: number, isChecked?: boolean) {
@@ -333,15 +357,15 @@ export class AssignmentEditComponent {
       if (!allowedExtensions.includes(file.type)) {
         this.validationErrors['file'] = 'Only PDF or Word files are allowed.';
         this.assignment.fileFile = null;
-        return; 
+        return;
       }
 
       if (file.size > 25 * 1024 * 1024) {
         this.validationErrors['file'] = 'The file size exceeds the maximum limit of 25 MB.';
         this.assignment.fileFile = null;
-        return; 
+        return;
       }
-      else{
+      else {
         this.assignment.fileFile = file;
         this.validationErrors['file'] = ``;
         const reader = new FileReader();
@@ -350,8 +374,8 @@ export class AssignmentEditComponent {
     }
 
     event.target.value = '';
-  } 
-  
+  }
+
   addTypeBlock() {
     this.validationErrors['questionAssignmentTypeCountDTO'] = ``;
     this.assignmentQuestion.questionAssignmentTypeCountDTO.push({
@@ -390,12 +414,10 @@ export class AssignmentEditComponent {
     this.assignmentQuestion.lessonId = this.SelectedLessonID;
     this.assignmentQuestion.selectedTagsIds = this.selectedTagsIds;
     if (this.isFormValid()) {
-      this.isLoading = true; 
-      this.AssigmentQuestionServ.Add(
-        this.assignmentQuestion,
-        this.DomainName
-      ).subscribe({
+      this.isLoading = true;
+      this.AssigmentQuestionServ.Add(this.assignmentQuestion, this.DomainName).subscribe({
         next: (d) => {
+          console.log(d)
           Swal.fire({
             icon: 'success',
             title: 'Done',
@@ -415,7 +437,14 @@ export class AssignmentEditComponent {
             Swal.fire({
               icon: 'error',
               title: 'Failed',
-              text: errorMessage, 
+              text: errorMessage,
+              confirmButtonColor: '#d33',
+            });
+          } else if (errorMessage.includes("There Is No Questions in This Lesson")) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Failed',
+              text: errorMessage,
               confirmButtonColor: '#d33',
             });
           } else {
@@ -434,14 +463,14 @@ export class AssignmentEditComponent {
     }
   }
 
-  SaveFile() { 
+  SaveFile() {
     if (this.isFormValid()) {
-      this.isLoading = true; 
+      this.isLoading = true;
       this.assignmentService.FileAssignment(
         this.assignment,
         this.DomainName
       ).subscribe({
-        next: (d) => { 
+        next: (d) => {
           Swal.fire({
             icon: 'success',
             title: 'Done',
@@ -451,7 +480,7 @@ export class AssignmentEditComponent {
           this.closeModal();
           this.getAssignmentData();
         },
-        error: (err) => { 
+        error: (err) => {
           this.isLoading = false;
           this.closeModal();
 
@@ -469,7 +498,7 @@ export class AssignmentEditComponent {
     }
   }
 
-  isFormValid(): boolean { 
+  isFormValid(): boolean {
     let isValid = true;
     if (this.assignment.assignmentTypeID == 1) {
       if (this.assignment.fileFile == null) {

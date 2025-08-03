@@ -1,7 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild, ViewContainerRef } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { IterativeNotificcationService } from './Services/shared/iterative-notificcation.service';
+import { ApiService } from './Services/api.service';
 
 @Component({
   selector: 'app-root',
@@ -12,7 +14,17 @@ import { FormsModule } from '@angular/forms';
 })
 export class AppComponent {
   title = 'ERP_System';
+  DomainName = ''  
+  
+  constructor(private iterativeNotificcationService: IterativeNotificcationService, private ApiServ: ApiService) {}
 
-  constructor() { }
+  ngOnInit() { 
+    this.DomainName = this.ApiServ.GetHeader(); 
 
+    this.iterativeNotificcationService.startInterval(this.DomainName);
+  }
+
+  ngOnDestroy() { 
+    this.iterativeNotificcationService.stopInterval();
+  } 
 }

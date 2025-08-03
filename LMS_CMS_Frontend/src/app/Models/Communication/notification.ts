@@ -10,8 +10,12 @@ export class Notification {
         public link: string = '',
         public userTypeName: string = '',
         public isAllowDismiss: boolean = false,
+        public notifiedOrNot: boolean = false,
+        public seenOrNot: boolean = false,
         public userTypeID :number =0,
         public insertedByUserId :number =0,
+        public insertedByUserName: string = '',
+        public insertedAt: string = '',
         public notificationSharedTos : NotificationSharedTo[]=[],
         public userFilters : UserFilters= new UserFilters()
     ) {}    

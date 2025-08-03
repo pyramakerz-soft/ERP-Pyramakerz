@@ -78,6 +78,7 @@ export class AssignmentComponent {
   students: Student[] = []
   Grades: Grade[] = []
   GradesForCreate: Grade[] = []
+  subjectsForCreate: Subject[] = [];
   IsView: boolean = false
 
   isLoading = false;
@@ -228,13 +229,37 @@ export class AssignmentComponent {
     }
   }
 
-  View(id: number) {
-    this.router.navigateByUrl(`Employee/Assignment View/${id}`)
+  get visiblePages(): number[] {
+    const total = this.TotalPages;
+    const current = this.CurrentPage;
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const half = Math.floor(maxVisible / 2);
+    let start = current - half;
+    let end = current + half;
+
+    if (start < 1) {
+      start = 1;
+      end = maxVisible;
+    } else if (end > total) {
+      end = total;
+      start = total - maxVisible + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   }
 
   validateNumberForPagination(event: any): void {
     const value = event.target.value;
     this.PageSize = 0
+  }
+
+  View(id: number) {
+    this.router.navigateByUrl(`Employee/Assignment/${id}`)
   }
 
   openModal(Id?: number) {
@@ -279,6 +304,11 @@ export class AssignmentComponent {
         console.log(this.assignment)
         this.GradeServ.GetBySchoolId(this.assignment.schoolID, this.DomainName).subscribe((d) => {
           this.GradesForCreate = d
+          this.subjectsForCreate = []
+          this.subjectService.GetByGradeId(this.assignment.gradeID, this.DomainName).subscribe((d) => {
+            this.subjectsForCreate = d
+          })
+
         })
         this.getSubjectWeightData()
         this.getClassesData()
@@ -391,7 +421,7 @@ export class AssignmentComponent {
     this.studentClassWhenSelectClass = new StudentClassWhenSubject()
     this.studentClassWhenSubject = []
     this.GradesForCreate = []
-    this.subjects = []
+    this.subjectsForCreate = []
     this.assignment.gradeID = 0
     this.assignment.subjectID = 0
     this.GradeServ.GetBySchoolId(this.assignment.schoolID, this.DomainName).subscribe((d) => {
@@ -407,10 +437,10 @@ export class AssignmentComponent {
     this.viewClassStudents = false
     this.studentClassWhenSelectClass = new StudentClassWhenSubject()
     this.studentClassWhenSubject = []
-    this.subjects = []
+    this.subjectsForCreate = []
     this.assignment.subjectID = 0
     this.subjectService.GetByGradeId(this.assignment.gradeID, this.DomainName).subscribe((d) => {
-      this.subjects = d
+      this.subjectsForCreate = d
     })
   }
 
@@ -627,7 +657,7 @@ export class AssignmentComponent {
     return isValid;
   }
 
-  Save() {
+  Save() { 
     if (this.isFormValid()) {
       this.isLoading = true;
       if (this.assignment.isSpecificStudents == true) {
@@ -640,6 +670,9 @@ export class AssignmentComponent {
       }
 
       if (this.assignment.id == 0) {
+        if(this.assignment.dueDate == ''){
+          this.assignment.dueDate == null
+        }
         this.assignmentService.Add(this.assignment, this.DomainName).subscribe(
           (result: any) => {
             this.closeModal();
@@ -699,6 +732,8 @@ export class AssignmentComponent {
 
   async onSearchEvent(event: { key: string; value: any }) {
     this.PageSize = this.TotalRecords
+    this.CurrentPage = 1
+    this.TotalPages = 1
     this.key = event.key;
     this.value = event.value;
     try {

@@ -147,7 +147,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
             {
                 return BadRequest("the name cannot be null");
             }
-            ViolationType violationType = mapper.Map<ViolationType>(Newviolation);
+            ViolationType violationType = Unit_Of_Work.violationType_Repository.First_Or_Default(s=>s.Name == Newviolation.Name);   
+            if (violationType != null)
+            {
+                return BadRequest("the name Alreade Exist");
+            }
+            violationType = new ViolationType();
+            violationType = mapper.Map<ViolationType>(Newviolation);
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             violationType.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
@@ -213,6 +219,16 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
             {
                 return NotFound();
             }
+
+            if(Newviolation.Name != violationType.Name)
+            {
+                ViolationType violationTypeCheckOnName = Unit_Of_Work.violationType_Repository.First_Or_Default(s => s.ID != Newviolation.ID && s.Name == Newviolation.Name);
+                if (violationTypeCheckOnName != null)
+                {
+                    return BadRequest("the name Alreade Exist");
+                }
+            }
+
             if (userTypeClaim == "employee")
             {
                 Page page = Unit_Of_Work.page_Repository.First_Or_Default(page => page.en_name == "Violation Types");

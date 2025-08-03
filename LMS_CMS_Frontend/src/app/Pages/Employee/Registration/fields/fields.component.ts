@@ -121,7 +121,7 @@ export class FieldsComponent {
 
   GetAllData() {
     this.Data = []
-    this.fieldServ.GetByID(this.CategoryId, this.DomainName).subscribe((d) => {
+    this.fieldServ.GetByCategoryId(this.CategoryId, this.DomainName).subscribe((d) => {
       this.Data = d;
     });
   }
@@ -166,7 +166,10 @@ export class FieldsComponent {
 
   Edit(row: Field) {
     this.mode = 'Edit';
-    this.field = row as unknown as FieldAddEdit;
+    this.fieldServ.GetById(row.id, this.DomainName).subscribe((d) => {
+      this.field = d
+      console.log(d,this.field)
+    });
     this.options = row.options.map((option) => option.name);
     this.openModal();
   }
@@ -274,7 +277,7 @@ export class FieldsComponent {
     if (value) {
       this.validationErrors[field] = '';
     }
-    if(field == 'fieldTypeID'){
+    if (field == 'fieldTypeID') {
       this.validationErrors['options'] = ''
     }
   }
@@ -305,7 +308,7 @@ export class FieldsComponent {
     this.value = event.value;
     try {
       const data: Field[] = await firstValueFrom(
-        this.fieldServ.GetByID(this.CategoryId, this.DomainName)
+        this.fieldServ.GetByCategoryId(this.CategoryId, this.DomainName)
       );
       this.Data = data || [];
 

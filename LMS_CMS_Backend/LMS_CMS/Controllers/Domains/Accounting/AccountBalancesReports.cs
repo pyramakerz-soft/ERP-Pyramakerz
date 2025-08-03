@@ -22,12 +22,12 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         }
 
         #region Suppliers Balances
-        [HttpGet("GetSupplierStatement")]
+        [HttpGet("GetSuppliersBalance")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "" }
         )]
-        public async Task<IActionResult> GetSupplierStatement(DateTime? toDate, long? supplierID = 0, bool groupedByAccount = false, bool hasBalance = true, bool zeroBalance = true, bool negativeBalance = true, int pageNumber = 1, int pageSize = 10)
+        public async Task<IActionResult> GetSuppliersBalance(DateTime? toDate, long? mainAccountID = 0, bool zeroBalance = true, bool positiveBalance = true, bool negativeBalance = true, int pageNumber = 1, int pageSize = 10)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
             var context = Unit_Of_Work.DbContext;
@@ -38,9 +38,18 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             List<AccountBalanceReport>? suppliersBalances = new();
             AccountTotals totals = new();
             AccountTotals allTotals = new();
+            long totalRecords = 0;
+            DateTime baseDate = new DateTime(1900, 1, 1);
 
-            if (supplierID == 0)
+            if (mainAccountID == 0)
             {
+                List<AccountingTreeChart>? accounts = await Unit_Of_Work.accountingTreeChart_Repository.SelectQuery<AccountingTreeChart>(x => x.IsDeleted != true && x.LinkFileID == 2).ToListAsync();
+
+                if (accounts == null || accounts.Count == 0)
+                {
+                    return NotFound("No accounts found.");
+                }
+
                 List<Supplier> suppliers = await Unit_Of_Work.supplier_Repository.SelectQuery<Supplier>(x => x.IsDeleted != true).ToListAsync();
 
                 if (suppliers == null || suppliers.Count == 0)
@@ -48,97 +57,104 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                     return NotFound("No suppliers found.");
                 }
 
-                foreach (var supplier in suppliers)
+                var temp = await context.Set<AccountBalanceReport>().FromSqlRaw(
+                    "EXEC dbo.GetAccountSummary @DateFrom, @DateTo, 0, 0, 2, @zeroBalance, @positiveBalance, @negativeBalance, @StartRow, @EndRow",
+                    new SqlParameter("@DateFrom", "1900-1-1"),
+                    new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
+                    new SqlParameter("@zeroBalance", zeroBalance),
+                    new SqlParameter("@positiveBalance", positiveBalance),
+                    new SqlParameter("@negativeBalance", negativeBalance),
+                    new SqlParameter("@StartRow", startRow),
+                    new SqlParameter("@EndRow", endRow)
+                )
+                .AsNoTracking()
+                .ToListAsync();
+
+                if (temp != null || temp?.Count > 0)
                 {
-                    var temp = await context.Set<AccountBalanceReport>().FromSqlRaw(
-                        "EXEC dbo.GetSupplierAccountSummary @DateFrom, @DateTo, @MainAccNo, @SubAccNo, @linkFileID, @StartRow, @EndRow",
-                        new SqlParameter("@DateFrom", "1900-1-1"),
-                        new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
-                        new SqlParameter("@MainAccNo", supplier.AccountNumberID),
-                        new SqlParameter("@SubAccNo", supplier.ID),
-                        new SqlParameter("@linkFileID", 2),
-                        new SqlParameter("@StartRow", startRow),
-                        new SqlParameter("@EndRow", endRow)
-                    ).ToListAsync();
-
-                    if (temp != null || temp?.Count > 0)
-                    {
-                        suppliersBalances.AddRange(temp);
-                    }
-
-                    totals = (await context.Set<AccountTotals>().FromSqlRaw(
-                        "EXEC dbo.GetAccountingTotals @DateFrom, @DateTo, @MainAccNo, @SubAccNo, @LinkFileID",
-                        new SqlParameter("@DateFrom", "1900-1-1"),
-                        new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
-                        new SqlParameter("@MainAccNo", supplier.AccountNumberID),
-                        new SqlParameter("@SubAccNo", supplier.ID),
-                        new SqlParameter("@linkFileID", 2)
-                    )
-                    .AsNoTracking()
-                    .ToListAsync())
-                    .FirstOrDefault();
-
-                    if (totals != null)
-                    {
-                        allTotals.TotalDebit += totals.TotalDebit ?? 0;
-                        allTotals.TotalCredit += totals.TotalCredit ?? 0;
-                        allTotals.Differences += totals.Differences ?? 0;
-                    }
+                    suppliersBalances.AddRange(temp);
                 }
+
+                if (suppliersBalances == null || suppliersBalances.Count == 0)
+                    return NotFound($"No suppliers found.");
+
+                allTotals.TotalDebit = suppliersBalances.Sum(x => x.Debit ?? 0);
+                allTotals.TotalCredit = suppliersBalances.Sum(x => x.Credit ?? 0);
+
+                allTotals.Differences = allTotals.TotalCredit - allTotals.TotalDebit;
+
+                totalRecords = (await context.Set<CountResult>()
+                    .FromSqlInterpolated($@"
+                    SELECT ID from Suppliers")
+                    .ToListAsync())
+                    .Count();
+                
             }
             else
             {
-                Supplier supplier = Unit_Of_Work.supplier_Repository.First_Or_Default(s => s.ID == supplierID && s.IsDeleted != true);
+                AccountingTreeChart? mainAccount = Unit_Of_Work.accountingTreeChart_Repository.First_Or_Default(x => x.ID == mainAccountID && x.IsDeleted != true);
 
-                if (supplier == null)
-                    return NotFound($"Supplier with ID: {supplierID} not fount");
+                if (mainAccount == null)
+                    return NotFound($"Main account with ID: {mainAccountID} not found.");
 
-                suppliersBalances = await context.Set<AccountBalanceReport>().FromSqlRaw(
-                    "EXEC dbo.GetSupplierAccountSummary @DateFrom, @DateTo, @MainAccNo, @SubAccNo, @linkFileID, @StartRow, @EndRow",
+                var temp = await context.Set<AccountBalanceReport>().FromSqlRaw(
+                    "EXEC dbo.GetAccountSummary @DateFrom, @DateTo, @MainAccNo, 0, 2, @zeroBalance, @positiveBalance, @negativeBalance, @StartRow, @EndRow",
                     new SqlParameter("@DateFrom", "1900-1-1"),
                     new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
-                    new SqlParameter("@MainAccNo", supplier.AccountNumberID),
-                    new SqlParameter("@SubAccNo", supplierID),
-                    new SqlParameter("@linkFileID", 2),
+                    new SqlParameter("@MainAccNo", mainAccount.ID),
                     new SqlParameter("@StartRow", startRow),
-                    new SqlParameter("@EndRow", endRow)
-                ).ToListAsync();
-
-                totals = (await context.Set<AccountTotals>().FromSqlRaw(
-                    "EXEC dbo.GetAccountingTotals @DateFrom, @DateTo, @MainAccNo, @SubAccNo, @LinkFileID",
-                    new SqlParameter("@DateFrom", "1900-1-1"),
-                    new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
-                    new SqlParameter("@MainAccNo", supplier.AccountNumberID),
-                    new SqlParameter("@SubAccNo", supplierID),
-                    new SqlParameter("@linkFileID", 2)
+                    new SqlParameter("@EndRow", endRow),
+                    new SqlParameter("@zeroBalance", zeroBalance),
+                    new SqlParameter("@positiveBalance", positiveBalance),
+                    new SqlParameter("@negativeBalance", negativeBalance)
                 )
                 .AsNoTracking()
-                .ToListAsync()).
-                FirstOrDefault();
+                .ToListAsync();
 
-                if (totals != null)
+                if (temp != null || temp?.Count > 0)
                 {
-                    allTotals.TotalDebit = totals.TotalDebit ?? 0;
-                    allTotals.TotalCredit = totals.TotalCredit ?? 0;
-                    allTotals.Differences = totals.Differences ?? 0;
+                    suppliersBalances.AddRange(temp);
                 }
+
+                if (suppliersBalances == null || suppliersBalances.Count == 0)
+                    return NotFound($"No suppliers found.");
+
+                totalRecords = (await context.Set<CountResult>()
+                    .FromSqlInterpolated($@"
+                        SELECT ID from Suppliers WHERE AccountNumberID = {mainAccountID}")
+                    .ToListAsync())
+                    .Count();
+
+                allTotals.TotalDebit = suppliersBalances.Sum(x => x.Debit ?? 0);
+                allTotals.TotalCredit = suppliersBalances.Sum(x => x.Credit ?? 0);
+
+                allTotals.Differences = allTotals.TotalCredit - allTotals.TotalDebit;
             }
+
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
 
             return Ok(new
             {
                 Data = suppliersBalances,
-                Totals = allTotals
+                Totals = allTotals,
+                Pagination = paginationMetadata
             });
         }
         #endregion
 
         #region Safes Balances
-        [HttpGet("GetSafesStatement")]
+        [HttpGet("GetSafesBalance")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "" }
         )]
-        public async Task<IActionResult> GetSafesStatement(DateTime? toDate, long? safeID = 0, bool groupedByAccount = false, bool hasBalance = true, bool zeroBalance = true, bool negativeBalance = true, int pageNumber = 1, int pageSize = 10)
+        public async Task<IActionResult> GetSafesBalance(DateTime? toDate, long? mainAccountID = 0, bool zeroBalance = true, bool positiveBalance = true, bool negativeBalance = true, int pageNumber = 1, int pageSize = 10)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
             var context = Unit_Of_Work.DbContext;
@@ -149,8 +165,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             List<AccountBalanceReport>? safesBalances = new();
             AccountTotals totals = new();
             AccountTotals allTotals = new();
+            long totalRecords = 0;
+            DateTime baseDate = new DateTime(1900, 1, 1);
 
-            if (safeID == 0)
+            if (mainAccountID == 0)
             {
                 List<Save> safes = await Unit_Of_Work.save_Repository.SelectQuery<Save>(x => x.IsDeleted != true).ToListAsync();
 
@@ -159,86 +177,92 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                     return NotFound("No safes found.");
                 }
 
-                foreach (var safe in safes)
+                var temp = await context.Set<AccountBalanceReport>().FromSqlRaw(
+                    "EXEC dbo.GetAccountSummary @DateFrom, @DateTo, 0, 0, 5, @zeroBalance, @positiveBalance, @negativeBalance, @StartRow, @EndRow",
+                    new SqlParameter("@DateFrom", "1900-1-1"),
+                    new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
+                    new SqlParameter("@StartRow", startRow),
+                    new SqlParameter("@EndRow", endRow),
+                    new SqlParameter("@zeroBalance", zeroBalance),
+                    new SqlParameter("@positiveBalance", positiveBalance),
+                    new SqlParameter("@negativeBalance", negativeBalance)
+                )
+                .AsNoTracking()
+                .ToListAsync();
+
+                if (temp != null || temp?.Count > 0)
                 {
-                    var temp = await context.Set<AccountBalanceReport>().FromSqlRaw(
-                        "EXEC dbo.GetSupplierAccountSummary @DateFrom, @DateTo, @MainAccNo, @SubAccNo, @linkFileID, @StartRow, @EndRow",
-                        new SqlParameter("@DateFrom", "1900-1-1"),
-                        new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
-                        new SqlParameter("@MainAccNo", safe.AccountNumberID),
-                        new SqlParameter("@SubAccNo", safe.ID),
-                        new SqlParameter("@linkFileID", 5),
-                        new SqlParameter("@StartRow", startRow),
-                        new SqlParameter("@EndRow", endRow)
-                    ).ToListAsync();
-
-                    if (temp != null || temp?.Count > 0)
-                    {
-                        safesBalances.AddRange(temp);
-                    }
-
-                    totals = (await context.Set<AccountTotals>().FromSqlRaw(
-                        "EXEC dbo.GetAccountingTotals @DateFrom, @DateTo, @MainAccNo, @SubAccNo, @LinkFileID",
-                        new SqlParameter("@DateFrom", "1900-1-1"),
-                        new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
-                        new SqlParameter("@MainAccNo", safe.AccountNumberID),
-                        new SqlParameter("@SubAccNo", safe.ID),
-                        new SqlParameter("@linkFileID", 5)
-                    )
-                    .AsNoTracking()
-                    .ToListAsync())
-                    .FirstOrDefault();
-
-                    if (totals != null)
-                    {
-                        allTotals.TotalDebit += totals.TotalDebit ?? 0;
-                        allTotals.TotalCredit += totals.TotalCredit ?? 0;
-                        allTotals.Differences += totals.Differences ?? 0;
-                    }
+                    safesBalances.AddRange(temp);
                 }
+
+                if (safesBalances == null || safesBalances.Count == 0)
+                    return NotFound($"No safes found.");
+
+                allTotals.TotalDebit = safesBalances.Sum(x => x.Debit ?? 0);
+                allTotals.TotalCredit = safesBalances.Sum(x => x.Credit ?? 0);
+
+                allTotals.Differences = allTotals.TotalDebit - allTotals.TotalCredit;
+
+                totalRecords = (await context.Set<CountResult>()
+                    .FromSqlInterpolated($@"
+                        SELECT ID from Saves")
+                    .ToListAsync())
+                    .Count();
             }
             else
             {
-                Save safe = Unit_Of_Work.save_Repository.First_Or_Default(s => s.ID == safeID && s.IsDeleted != true);
+                AccountingTreeChart? mainAccount = Unit_Of_Work.accountingTreeChart_Repository.First_Or_Default(x => x.ID == mainAccountID && x.IsDeleted != true);
 
-                if (safe == null)
-                    return NotFound($"Safe with ID: {safeID} not fount");
+                if (mainAccount == null)
+                    return NotFound($"Main account with ID: {mainAccountID} not found.");
 
-                safesBalances = await context.Set<AccountBalanceReport>().FromSqlRaw(
-                    "EXEC dbo.GetSupplierAccountSummary @DateFrom, @DateTo, @MainAccNo, @SubAccNo, @linkFileID, @StartRow, @EndRow",
+                var temp = await context.Set<AccountBalanceReport>().FromSqlRaw(
+                    "EXEC dbo.GetAccountSummary @DateFrom, @DateTo, @MainAccNo, 0, 5, @zeroBalance, @positiveBalance, @negativeBalance, @StartRow, @EndRow",
                     new SqlParameter("@DateFrom", "1900-1-1"),
                     new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
-                    new SqlParameter("@MainAccNo", safe.AccountNumberID),
-                    new SqlParameter("@SubAccNo", safe.ID),
-                    new SqlParameter("@linkFileID", 5),
+                    new SqlParameter("@MainAccNo", mainAccount.ID),
                     new SqlParameter("@StartRow", startRow),
-                    new SqlParameter("@EndRow", endRow)
-                ).ToListAsync();
-
-                totals = (await context.Set<AccountTotals>().FromSqlRaw(
-                    "EXEC dbo.GetAccountingTotals @DateFrom, @DateTo, @MainAccNo, @SubAccNo, @LinkFileID",
-                    new SqlParameter("@DateFrom", "1900-1-1"),
-                    new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
-                    new SqlParameter("@MainAccNo", safe.AccountNumberID),
-                    new SqlParameter("@SubAccNo", safe.ID),
-                    new SqlParameter("@linkFileID", 5)
+                    new SqlParameter("@EndRow", endRow),
+                    new SqlParameter("@zeroBalance", zeroBalance),
+                    new SqlParameter("@positiveBalance", positiveBalance),
+                    new SqlParameter("@negativeBalance", negativeBalance)
                 )
                 .AsNoTracking()
-                .ToListAsync())
-                .FirstOrDefault();
+                .ToListAsync();
 
-                if (totals != null)
+                if (temp != null || temp?.Count > 0)
                 {
-                    allTotals.TotalDebit = totals.TotalDebit ?? 0;
-                    allTotals.TotalCredit = totals.TotalCredit ?? 0;
-                    allTotals.Differences = totals.Differences ?? 0;
+                    safesBalances.AddRange(temp);
                 }
+
+                if (safesBalances == null || safesBalances.Count == 0)
+                    return NotFound($"No safes found.");
+
+                totalRecords = (await context.Set<CountResult>()
+                    .FromSqlInterpolated($@"
+                        SELECT ID from Saves WHERE AccountNumberID = {mainAccountID}")
+                    .ToListAsync())
+                    .Count();
+
+                allTotals.TotalDebit = safesBalances.Sum(x => x.Debit ?? 0);
+                allTotals.TotalCredit = safesBalances.Sum(x => x.Credit ?? 0);
+
+                allTotals.Differences = allTotals.TotalDebit - allTotals.TotalCredit;
             }
+
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
 
             return Ok(new
             {
                 Data = safesBalances,
-                Totals = allTotals
+                Totals = allTotals,
+                Pagination = paginationMetadata
             });
         }
         #endregion

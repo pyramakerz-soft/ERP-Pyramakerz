@@ -198,10 +198,16 @@ import { SignUpEmployeeComponent } from './Pages/Login/sign-up-employee/sign-up-
 import { DutyComponent } from './Pages/Employee/LMS/duty/duty.component';
 import { RegisteredEmployeeComponent } from './Pages/Employee/Administrator/registered-employee/registered-employee.component';
 import { RegisteredEmployeeViewComponent } from './Pages/Employee/Administrator/registered-employee-view/registered-employee-view.component';
+import { Violation } from './Models/Violation/violation';
+import { ViolationComponent } from './Pages/Employee/Violation/violation/violation.component';
+import { ViolationViewComponent } from './Pages/Employee/Violation/violation-view/violation-view.component';
 import { AnnouncementComponent } from './Pages/Employee/Administrator/announcement/announcement.component';
 import { StoreBalanceReportComponent } from './Pages/Employee/Inventory/Report/store-balance-report/store-balance-report/store-balance-report.component';
 import { AllStoresBalanceReportComponent } from './Pages/Employee/Inventory/Report/store-balance-report/all-store-balance/all-store-balance.component';
-import { DiscussionRoomComponent } from './Pages/Employee/LMS/discussion-room/discussion-room.component';import { NotificationComponent } from './Pages/Employee/Communication/notification/notification.component';
+import { DiscussionRoomComponent } from './Pages/Employee/LMS/discussion-room/discussion-room.component';
+import { NotificationComponent } from './Pages/Employee/Communication/notification/notification.component';
+import { MyNotificationComponent } from './Pages/Communication/my-notification/my-notification.component';
+import { RemedialClassroomComponent } from './Pages/Employee/LMS/remedial-classroom/remedial-classroom.component';
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
     { path: "Octa/login", component: OctaLoginComponent, title: "login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -413,11 +419,11 @@ export const routes: Routes = [
             { path: "Student", component: StudentsComponent, title: "Student", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Create Student", component: RegistrationFormComponent, title: "Create Student", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Edit Student/:RegisterationFormParentId/:StudentId", component: RegistrationFormComponent, title: "Edit Student", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Student View/:Id", component: RegistrationConfirmationDetailsComponent, title: "Student View", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
+            { path: "Student/:Id", component: RegistrationConfirmationDetailsComponent, title: "Student", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Enter Daily Performance", component: DailyPerformanceMasterComponent, title: "Daily Performance", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Daily Performance View/:id", component: DailyPerformanceViewComponent, title: "Daily Performance View", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Daily Performance/:id", component: DailyPerformanceViewComponent, title: "Daily Performance View", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Assignment", component: AssignmentComponent, title: "Assignment", canActivate: [noNavigateWithoutLoginGuard , navigateIfHaveSettingPageGuard] },
-            { path: "Assignment View/:id", component: AssignmentEditComponent, title: "Assignment Edit", canActivate: [noNavigateWithoutLoginGuard , navigateIfHaveSettingPageGuard] },
+            { path: "Assignment/:id", component: AssignmentEditComponent, title: "Assignment Edit", canActivate: [noNavigateWithoutLoginGuard , navigateIfHaveSettingPageGuard] },
             { path: "report item card",component: ReportItemCardComponent,title: "Item Card Report",canActivate: [noNavigateWithoutLoginGuard], data: { showAverage: false }},
             { path: "report item card with average",component: ReportItemCardComponent,title: "Item Card Report With Average",canActivate: [noNavigateWithoutLoginGuard],data: { showAverage: true }},
             { path: 'Average Cost Calculation', component: AverageCostCalcComponent, title: 'Average Cost Calculator', canActivate: [noNavigateWithoutLoginGuard], },
@@ -433,7 +439,7 @@ export const routes: Routes = [
             { path: "Accounting Constraints Report", component: AccountigConstraintsComponent, title: "Accounting Constraints Report", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Accounting Configuration", component: AccountigConfigurationComponent, title: "Accounting Configuration", canActivate: [noNavigateWithoutLoginGuard] },
             { path: 'Time Table', component: TimeTableComponent, title: 'Time Table', canActivate: [noNavigateWithoutLoginGuard], },
-            { path: 'Time Table View/:id', component: TimeTableViewComponent, title: 'Time Table View', canActivate: [noNavigateWithoutLoginGuard], },
+            { path: 'Time Table/:id', component: TimeTableViewComponent, title: 'Time Table View', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Time Table Replace/:id', component: TimeTableReplaceComponent, title: 'Time Table Replace', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Duty Table', component: DutyComponent, title: 'Duty Table', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Registered Employee', component: RegisteredEmployeeComponent, title: 'Registered Employee', canActivate: [noNavigateWithoutLoginGuard], },
@@ -449,7 +455,11 @@ export const routes: Routes = [
             { path: "All Stores Item Balance with Sales", component: AllStoresBalanceReportComponent, title: "All Stores Sales Price Report", canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'SalesPrice' }},
             { path: "All Stores Item Balance with Average Cost", component: AllStoresBalanceReportComponent, title: "All Stores Cost Report", canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'Cost' } },
             { path: 'Discussion Room', component: DiscussionRoomComponent, title: 'Discussion Room', canActivate: [noNavigateWithoutLoginGuard], },
+            { path: 'violation', component: ViolationComponent, title: 'Violation', canActivate: [noNavigateWithoutLoginGuard], },
+            { path: 'Violation/:id', component: ViolationViewComponent, title: 'Violation', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Notification', component: NotificationComponent, title: 'Notification', canActivate: [noNavigateWithoutLoginGuard], },
+            { path: 'Notification', component: NotificationComponent, title: 'Notification', canActivate: [noNavigateWithoutLoginGuard], },  
+            { path: 'RemedialClassroom', component: RemedialClassroomComponent, title: 'RemedialClassroom', canActivate: [noNavigateWithoutLoginGuard], },  
         ]
     },
     {
@@ -462,7 +472,7 @@ export const routes: Routes = [
             { path: "Admission Test", component: AdmissionTestParentComponent, title: "Admission Test" },
             { path: "Test/:registerationFormParentID/:TestId", component: RegistraionTestComponent, title: "Test" },
             { path: "Registration Form", component: RegistrationFormComponent, title: "Registration Form" },
-            { path: "Interview Registration", component: InterviewRegistrationComponentParent, title: "Interview Registration" },
+            { path: "Interview Registration", component: InterviewRegistrationComponentParent, title: "Interview Registration" }, 
         ]
     },
     {
@@ -492,7 +502,7 @@ export const routes: Routes = [
             { path: "SubjectResources/:SubjectId", component: SubjectResourcesComponent, title: "SubjectResources", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "SubjectLive/:SubjectId", component: SubjectLessonLiveComponent, title: "SubjectResources", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "SubjectAssignment/:SubjectId", component: SubjectAssignmentComponent, title: "SubjectAssignment", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "AssignmentView/:AssignmentStudentId", component: StudentAssignmentViewComponent, title: "AssignmentView", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "AssignmentView/:AssignmentStudentId", component: StudentAssignmentViewComponent, title: "AssignmentView", canActivate: [noNavigateWithoutLoginGuard] }, 
         ]
     },
     {
@@ -513,6 +523,15 @@ export const routes: Routes = [
             { path: "School Types", component: SchoolTypeComponent, title: "School Types", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "School", component: SchoolComponentOcta, title: "Schools", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Account", component: AccountComponent, title: "Accounts", canActivate: [noNavigateWithoutLoginGuard] },
+        ]
+    },
+    {
+        path: "CommunicationModule",
+        component: MainLayoutComponent,
+        title: "Communication",
+        canActivate: [noNavigateWithoutLoginGuard],
+        children: [
+            { path: "My Notifications", component: MyNotificationComponent, title: "Notifications", canActivate: [noNavigateWithoutLoginGuard] },
         ]
     },
 

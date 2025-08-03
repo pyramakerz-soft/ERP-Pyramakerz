@@ -116,6 +116,7 @@ namespace LMS_CMS_DAL.Models.Domains
         public ICollection<TimeTableSubject> TimeTableSubjects { get; set; } = new HashSet<TimeTableSubject>();
         public ICollection<Duty> Duties { get; set; } = new HashSet<Duty>();
         public ICollection<Violation> Violations { get; set; } = new HashSet<Violation>();
+        public ICollection<RemedialClassroom> RemedialClassrooms { get; set; } = new HashSet<RemedialClassroom>();
 
     }
 }
