@@ -12,6 +12,9 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
     {
         [Key]
         public long ID { get; set; }
+        [Required(ErrorMessage = "Name is required")]
+        [StringLength(100, ErrorMessage = "Name cannot be longer than 100 characters.")]
+        public string Name { get; set; }
 
         [ForeignKey("Subject")]
         public long SubjectID { get; set; }
