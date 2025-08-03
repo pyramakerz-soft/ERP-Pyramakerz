@@ -1,24 +1,23 @@
 <div class="flex justify-between mb-3">
-    <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{'Accounting Constraints Report'| translate }}</h1>
+    <h1 class="primaryTxt font-semibold text-2xl leading-9">{{'Accounting Constraints Report'| translate }}</h1>
 </div>
 
-<div class="flex justify-start items-center space-x-4 ">
+<div class="flex justify-start items-center space-x-4">
     <div class="w-[30%] px-1">
-        <label for="fromDate" class="block mb-2 text-sm font-medium text-gray-900"> {{'Start Date'| translate }}</label>
+        <label for="fromDate" class="block mb-2 text-sm font-medium text-gray-900">{{'Start Date'| translate }}</label>
         <input id="fromDate" type="date" [(ngModel)]="SelectedStartDate" (change)="DateChange()"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"> 
-    </div> 
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
+    </div>
     <div class="w-[30%] px-1">
         <label for="toDate" class="block mb-2 text-sm font-medium text-gray-900">{{'End Date'| translate }}</label>
         <input id="toDate" type="date" [(ngModel)]="SelectedEndDate" (change)="DateChange()"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"> 
-    </div> 
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
+    </div>
 
     <div class="mt-7 ml-2">
-        <button class="p-3 font-medium text-xl rounded-lg" (click)="ViewReport()"
-            [disabled]="!showViewReportBtn"
+        <button class="p-3 font-medium text-xl rounded-lg" (click)="ViewReport()" [disabled]="!showViewReportBtn"
             [ngClass]="{ 'bg-gray-100 text-gray-300': !showViewReportBtn, 'secondaryBg text-white': showViewReportBtn}">
-             {{'View Report'| translate }}
+            {{'View Report'| translate }}
         </button>
     </div>
 </div>
@@ -29,145 +28,152 @@
     <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()">
 </div>
 
-<div *ngIf="showTable" class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
-    <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
-        <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
-            <tr>  
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                     {{'Master ID'| translate }}
-                </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                     {{'Details ID'| translate }}
-                </th> 
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                     {{'Account'| translate }}
-                </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+<div *ngIf="showTable" class="mt-5">
+    <div *ngIf="!responseData?.data?.length" class="w-full justify-center items-center flex">
+        <span class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+            {{'No Data Found'| translate }}
+        </span>
+    </div>
 
-                     {{'Serial'| translate }}
-                </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    {{'Invoice Number'| translate }}
+    <!-- Date Groups -->
+    <div *ngFor="let dateGroup of responseData?.data" class="border rounded-lg mb-4">
+        <div class="flex rounded-lg justify-between items-center cursor-pointer px-4 py-3 bg-[#394b6e3a]"
+            (click)="toggleDateCollapse(dateGroup.date)">
+            <h3 class="text-lg font-semibold">{{ dateGroup.date | date: 'mediumDate' }}</h3>
+            <i class="fa" [ngClass]="{
+                'fa-chevron-down': collapsedDates.has(dateGroup.date),
+                'fa-chevron-up': !collapsedDates.has(dateGroup.date) }">
+            </i>
+        </div>
 
-                </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                     {{'Main Account ID'| translate }}
-                </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                     {{'Main Account'| translate }}
-                </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                     {{'Sub Account ID'| translate }}
-                </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                     {{'Sub Account'| translate }}
-                </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                     {{'Credit'| translate }}
-                </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                     {{'Debit'| translate }}
-                </th>  
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                     {{'Date'| translate }}
-                </th>  
-            </tr>
-        </thead>
-        <tbody>
-            <tr *ngIf="tableData.length === 0">
-                <td colspan="12"
-                    class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-                     {{'No Data Found'| translate }}
-                </td>
-            </tr>
-            <tr *ngFor="let acc of tableData; let i = index" [ngClass]="{ 'bg-gray-100': i % 2 === 1, 'bg-white': i%2 !=1 }" 
-            class="border-t border-gray-300 text-xs md:text-sm">
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ acc.masterID }}
-                </td>
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ acc.detailsID }}
-                </td> 
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ acc.account }}
-                </td> 
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ acc.serial }}
-                </td> 
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ acc.invoiceNumber }}
-                </td> 
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ acc.mainAccountNo }}
-                </td> 
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ acc.mainAccount }}
-                </td> 
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ acc.subAccountNo }}
-                </td> 
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ acc.subAccount }}
-                </td> 
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ acc.credit }}
-                </td> 
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ acc.debit }}
-                </td> 
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ acc.date | date: 'MMM d, y, h:mm a' }}
-                </td> 
-            </tr>
-        </tbody>
-    </table>
-</div> 
+        <div *ngIf="!collapsedDates.has(dateGroup.date)" class="p-4 bg-white">
+            <!-- Entries Table -->
+            <div class="overflow-x-auto rounded-2xl border border-[#BDBDBD] mb-4">
+                <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
+                    <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+                        <tr>
+                            <!-- <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">{{'Master ID'| translate }}</th> -->
+                            <!-- <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">{{'Details ID'| translate }}</th> -->
+                            <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">{{'Account'| translate }}</th>
+                            <!-- <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">{{'Serial'| translate }}</th> -->
+                            <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">{{'Invoice Number'| translate }}</th>
+                            <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">{{'Main Account ID'| translate }}</th>
+                            <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">{{'Main Account'| translate }}</th>
+                            <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">{{'Sub Account ID'| translate }}</th>
+                            <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">{{'Sub Account'| translate }}</th>
+                            <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">{{'Credit'| translate }}</th>
+                            <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">{{'Debit'| translate }}</th>
+                            <!-- <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">{{'Date'| translate }}</th> -->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngIf="!dateGroup.entries?.length">
+                            <td colspan="12" class="bg-white px-4 py-2 h-[72px] text-center">
+                                {{'No Data Found'| translate }}
+                            </td>
+                        </tr>
+                        <tr *ngFor="let entry of dateGroup.entries; let i = index"
+                            [ngClass]="{ 'bg-gray-100': i % 2 === 1, 'bg-white': i%2 !=1 }">
+                            <!-- <td class="py-5 px-4">{{ entry.masterID }}</td> -->
+                            <!-- <td class="py-5 px-4">{{ entry.detailsID }}</td> -->
+                            <td class="py-5 px-4">{{ entry.account || 'N/A' }}</td>
+                            <!-- <td class="py-5 px-4">{{ entry.serial || 'N/A' }}</td> -->
+                            <td class="py-5 px-4">{{ entry.invoiceNumber || 'N/A' }}</td>
+                            <td class="py-5 px-4">{{ entry.mainAccountNo || 'N/A' }}</td>
+                            <td class="py-5 px-4">{{ entry.mainAccount || 'N/A' }}</td>
+                            <td class="py-5 px-4">{{ entry.subAccountNo || 'N/A' }}</td>
+                            <td class="py-5 px-4">{{ entry.subAccount || 'N/A' }}</td>
+                            <td class="py-5 px-4">{{ entry.credit }}</td>
+                            <td class="py-5 px-4">{{ entry.debit }}</td>
+                            <!-- <td class="py-5 px-4">{{ entry.date | date: 'MMM d, y, h:mm a' }}</td> -->
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
 
+            <!-- Daily Totals -->
+            <div class="flex justify-end space-x-8 p-4 bg-blue-50 rounded-lg">
+                <div>
+                    <span class="font-semibold">{{'Total Debit'| translate }}:</span>
+                    <span class="ml-2">{{ dateGroup.totals.debit }}</span>
+                </div>
+                <div>
+                    <span class="font-semibold">{{'Total Credit'| translate }}:</span>
+                    <span class="ml-2">{{ dateGroup.totals.credit }}</span>
+                </div>
+                <div>
+                    <span class="font-semibold">{{'Difference'| translate }}:</span>
+                    <span class="ml-2" [ngClass]="{ 'text-red-500': dateGroup.totals.difference < 0 }">
+                        {{ dateGroup.totals.difference }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Full Totals -->
+<div *ngIf="responseData?.fullTotals" class="flex justify-end space-x-8 p-4 bg-green-50 rounded-lg mt-4">
+    <div>
+        <span class="font-semibold">{{'Full Total Debit'| translate }}:</span>
+        <span class="ml-2">{{ responseData!.fullTotals.debit }}</span>
+    </div>
+    <div>
+        <span class="font-semibold">{{'Full Total Credit'| translate }}:</span>
+        <span class="ml-2">{{ responseData!.fullTotals.credit }}</span>
+    </div>
+    <div>
+        <span class="font-semibold">{{'Full Difference'| translate }}:</span>
+        <span class="ml-2" [ngClass]="{ 'text-red-500': responseData!.fullTotals.difference < 0 }">
+            {{ responseData!.fullTotals.difference }}
+        </span>
+    </div>
+</div>
+</div>
+
+<!-- Pagination -->
 <div *ngIf="showTable" class="mt-8 flex justify-between items-center">
     <div class="flex items-center space-x-4 flex-row rtl:flex-row-reverse">
         <button class="flex items-center space-x-2 rounded-lg border py-3 px-4 flex-row rtl:flex-row-reverse"
-            (click)="changeCurrentPage(CurrentPage-1)" [disabled]="CurrentPage === 1 || tableData.length == 0"
-            [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === 1 || tableData.length == 0}">
+            (click)="changeCurrentPage(CurrentPage-1)" [disabled]="CurrentPage === 1 || !responseData?.data?.length"
+            [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === 1 || !responseData?.data?.length}">
             <i class="fa-solid fa-arrow-left"></i>
             <p>{{'Previous'| translate }}</p>
         </button>
         <div class="flex">
             <div *ngFor="let page of [].constructor(TotalPages); let i = index" class="rounded-lg py-[10px] w-[40px]"
-                [ngClass]="{'border': i+1 == CurrentPage || tableData.length == 0}" (click)="changeCurrentPage(i+1)">
+                [ngClass]="{'border': i+1 == CurrentPage || !responseData?.data?.length}"
+                (click)="changeCurrentPage(i+1)">
                 <p class="text-center">{{ i + 1 }}</p>
             </div>
         </div>
         <button class="flex items-center space-x-2 rounded-lg border py-3 px-4 flex-row rtl:flex-row-reverse"
-            (click)="changeCurrentPage(CurrentPage+1)" [disabled]="CurrentPage === TotalPages || tableData.length == 0"
-            [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === TotalPages || tableData.length == 0}">
+            (click)="changeCurrentPage(CurrentPage+1)"
+            [disabled]="CurrentPage === TotalPages || !responseData?.data?.length"
+            [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === TotalPages || !responseData?.data?.length}">
             <p>{{'Next'| translate }}</p>
             <i class="fa-solid fa-arrow-right"></i>
         </button>
     </div>
 
     <div class="flex items-center space-x-2">
-        <input (input)="validateNumberForPagination($event)" class="rounded-lg border py-3 px-4 w-[73px]" [(ngModel)]="PageSize"
-            min="1" (input)="validatePageSize($event)" (ngModelChange)="changeCurrentPage(CurrentPage)">
+        <input (input)="validateNumberForPagination($event)" class="rounded-lg border py-3 px-4 w-[73px]"
+            [(ngModel)]="PageSize" min="1" (input)="validatePageSize($event)"
+            (ngModelChange)="changeCurrentPage(CurrentPage)">
         <p>{{'items Per Page'| translate }}</p>
     </div>
 
     <div>
-        <p>{{CurrentPage}} {{'of'| translate }} {{TotalPages}} {{'pages'| translate }} ({{TotalRecords}} {{'Item'| translate }})</p>
+        <p>{{CurrentPage}} {{'of'| translate }} {{TotalPages}} {{'pages'| translate }} ({{TotalRecords}} {{'Item'|
+            translate }})</p>
     </div>
 </div>
- 
+
 <div class="absolute -top-[9999px] -left-[9999px]">
     <div id="Data" class="hidden">
-        <app-pdf-print *ngIf="showPDF" [fileName]="'Accounting Constraints Report'"
-            [infoRows]="[
-                {
-                keyEn: 'Start Date :' + this.SelectedStartDate,
-                },
-                {
-                keyEn: 'End Date : ' + this.SelectedEndDate,
-                }
-            ]"
-            [tableHeaders]="['Master ID', 'Details ID', 'Account', 'Serial', 'Invoice Number', 'Main Account ID' , 'Main Account' , 'Sub Account ID' , 'Sub Account' , 'Credit' , 'Debit' , 'Date']"
-            [tableData]="DataToPrint" #pdfComponentRef></app-pdf-print>
+        <app-pdf-print *ngIf="showPDF" [fileName]="'Accounting Constraints Report'" [infoRows]="[
+                { keyEn: 'Start Date: ' + SelectedStartDate, keyAr: 'تاريخ البدء: ' + SelectedStartDate },
+                { keyEn: 'End Date: ' + SelectedEndDate, keyAr: 'تاريخ الانتهاء: ' + SelectedEndDate }
+            ]" [tableDataWithHeaderArray]="DataToPrint" #pdfComponentRef>
+        </app-pdf-print>
     </div>
-</div> 
+</div>

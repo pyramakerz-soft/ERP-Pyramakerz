@@ -87,6 +87,7 @@ export class CreateHygieneFormComponent implements OnInit {
     if (this.selectedSchool) {
       try {
         const domainName = this.apiService.GetHeader();
+        console.log('Selected School:', this.selectedSchool);
         const data = await firstValueFrom(this.gradeService.GetBySchoolId(this.selectedSchool, domainName));
         this.grades = data;
       } catch (error) {
@@ -97,6 +98,7 @@ export class CreateHygieneFormComponent implements OnInit {
   }
 
   async loadClasses() {
+    console.log('Selected Grade:', this.selectedGrade);
     if (this.selectedGrade) {
       try {
         const domainName = this.apiService.GetHeader();
