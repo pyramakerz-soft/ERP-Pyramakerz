@@ -2,6 +2,6 @@
 {
     public class CountResult
     {
-        public int? TotalCount { get; set; }
+        public long? TotalCount { get; set; }
     }
 }
