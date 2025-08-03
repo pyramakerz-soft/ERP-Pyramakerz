@@ -82,10 +82,11 @@
             <p>{{'Previous'| translate }}</p>
         </button>
         <div class="flex">
-            <div *ngFor="let page of [].constructor(TotalPages); let i = index" class="rounded-lg py-[10px] w-[40px]" 
-            [ngClass]="{'border': i+1 == CurrentPage || receivableData.length == 0}" 
-            (click)="changeCurrentPage(i+1)"> 
-                <p class="text-center">{{ i + 1 }}</p>
+            <div *ngFor="let page of visiblePages"
+                class="rounded-lg py-[10px] w-[40px]"
+                [ngClass]="{ 'border': page === CurrentPage, 'hover:bg-gray-100': page !== CurrentPage }"
+                (click)="changeCurrentPage(page)">
+                <p class="cursor-pointer text-center">{{ page }}</p>
             </div>
         </div>
         <button class="flex items-center space-x-2 rounded-lg border py-3 px-4 flex-row rtl:flex-row-reverse" (click)="changeCurrentPage(CurrentPage+1)"

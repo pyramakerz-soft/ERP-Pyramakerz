@@ -178,6 +178,30 @@ export class POSComponent {
     this.PageSize = 0
   }
 
+  get visiblePages(): number[] {
+    const total = this.TotalPages;
+    const current = this.CurrentPage;
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const half = Math.floor(maxVisible / 2);
+    let start = current - half;
+    let end = current + half;
+
+    if (start < 1) {
+      start = 1;
+      end = maxVisible;
+    } else if (end > total) {
+      end = total;
+      start = total - maxVisible + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
+
   onInputValueChange(event: { field: keyof POS; value: any }) {
     const { field, value } = event;
     (this.pos as any)[field] = value;
@@ -268,6 +292,9 @@ export class POSComponent {
   async onSearchEvent(event: { key: string; value: any }) {
     this.key = event.key;
     this.value = event.value;
+    this.PageSize = this.TotalRecords
+    this.CurrentPage = 1
+    this.TotalPages = 1
     try {
       const data: any = await firstValueFrom(
         this.posService.Get(this.DomainName, this.CurrentPage, this.PageSize)

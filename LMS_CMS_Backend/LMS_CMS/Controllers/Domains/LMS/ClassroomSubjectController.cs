@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using LMS_CMS_BL.DTO;
 using LMS_CMS_BL.DTO.LMS;
 using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains;
@@ -352,6 +353,39 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 .ToList();
 
             return Ok(grouped);
+        }
+
+        /////////////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpGet("GetBySubject/{SubjectId}")]
+        [Authorize_Endpoint_(
+             allowedTypes: new[] { "octa", "employee" },
+             pages: new[] { "Classroom Subject" }
+         )]
+        public async Task<IActionResult> GetBySubject(long SubjectId)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var classroomSubjects = await Unit_Of_Work.classroomSubject_Repository
+                .Select_All_With_IncludesById<ClassroomSubject>(
+                    f => f.IsDeleted != true && f.SubjectID == SubjectId && f.Classroom.IsDeleted != true && f.Subject.IsDeleted != true && f.Teacher.IsDeleted != true,
+                    q => q.Include(cs => cs.Teacher)
+                );
+
+            if (classroomSubjects == null || classroomSubjects.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<long?> classroomSubjectsIds= classroomSubjects.Select(s=>s.TeacherID).Distinct().ToList();
+
+            if (classroomSubjectsIds == null || classroomSubjectsIds.Count == 0)
+            {
+                return NotFound();
+            }
+            List<Employee> employees = Unit_Of_Work.employee_Repository.FindBy(s => classroomSubjectsIds.Contains(s.ID));
+            List<Employee_GetDTO> DTO = mapper.Map<List<Employee_GetDTO>>(employees);
+            return Ok(DTO);
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////////

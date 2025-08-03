@@ -216,6 +216,11 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<Notification> Notification_Repository;
         GenericRepo<NotificationSharedTo> NotificationSharedTo_Repository;
         GenericRepo<ViolationType> ViolationType_Repository;
+        GenericRepo<RemedialClassroom> RemedialClassroom_Repository;
+        GenericRepo<RemedialClassroomStudent> RemedialClassroomStudent_Repository;
+        GenericRepo<RemedialTimeTable> RemedialTimeTable_Repository;
+        GenericRepo<RemedialTimeTableDay> RemedialTimeTableDay_Repository;
+        GenericRepo<RemedialTimeTableClasses> RemedialTimeTableClasses_Repository;
 
 
         public UOW(Octa_DbContext octa_Db)
@@ -2333,6 +2338,65 @@ namespace LMS_CMS_BL.UOW
             }
         }
 
+        public GenericRepo<RemedialClassroom> remedialClassroom_Repository
+        {
+            get
+            {
+                if (RemedialClassroom_Repository == null)
+                {
+                    RemedialClassroom_Repository = new GenericRepo<RemedialClassroom>(db);
+                }
+                return RemedialClassroom_Repository;
+            }
+        }
+
+        public GenericRepo<RemedialClassroomStudent> remedialClassroomStudent_Repository
+        {
+            get
+            {
+                if (RemedialClassroomStudent_Repository == null)
+                {
+                    RemedialClassroomStudent_Repository = new GenericRepo<RemedialClassroomStudent>(db);
+                }
+                return RemedialClassroomStudent_Repository;
+            }
+        }
+
+        public GenericRepo<RemedialTimeTable> remedialTimeTable_Repository
+        {
+            get
+            {
+                if (RemedialTimeTable_Repository == null)
+                {
+                    RemedialTimeTable_Repository = new GenericRepo<RemedialTimeTable>(db);
+                }
+                return RemedialTimeTable_Repository;
+            }
+        }
+
+        public GenericRepo<RemedialTimeTableDay> remedialTimeTableDay_Repository
+        {
+            get
+            {
+                if (RemedialTimeTableDay_Repository == null)
+                {
+                    RemedialTimeTableDay_Repository = new GenericRepo<RemedialTimeTableDay>(db);
+                }
+                return RemedialTimeTableDay_Repository;
+            }
+        }
+
+        public GenericRepo<RemedialTimeTableClasses> remedialTimeTableClasses_Repository
+        {
+            get
+            {
+                if (RemedialTimeTableClasses_Repository == null)
+                {
+                    RemedialTimeTableClasses_Repository = new GenericRepo<RemedialTimeTableClasses>(db);
+                }
+                return RemedialTimeTableClasses_Repository;
+            }
+        }
 
         public GenericRepo<ETAPOS> pos_Repository
         {

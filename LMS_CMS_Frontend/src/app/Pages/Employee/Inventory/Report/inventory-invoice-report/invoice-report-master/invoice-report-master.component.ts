@@ -348,6 +348,30 @@ export class InventoryTransactionReportComponent implements OnInit {
     this.viewReport();
   }
 
+  get visiblePages(): number[] {
+    const total = this.totalPages;
+    const current = this.currentPage;
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const half = Math.floor(maxVisible / 2);
+    let start = current - half;
+    let end = current + half;
+
+    if (start < 1) {
+      start = 1;
+      end = maxVisible;
+    } else if (end > total) {
+      end = total;
+      start = total - maxVisible + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
+
   DownloadAsPDF() {
     if (this.transactionsForExport.length === 0) {
       Swal.fire('Warning', 'No data to export!', 'warning');
