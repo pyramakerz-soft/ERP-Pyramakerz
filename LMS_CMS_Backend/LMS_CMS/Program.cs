@@ -20,6 +20,10 @@ using Amazon.S3;
 using Amazon.SecretsManager;
 using Amazon;
 using System;
+using LMS_CMS_PL.Hubs;
+using LMS_CMS_PL.Services.SignalR;
+using LMS_CMS_BL.Helpers;
+using Microsoft.AspNetCore.SignalR;
 
 namespace LMS_CMS
 {
@@ -124,6 +128,7 @@ namespace LMS_CMS
             builder.Services.AddScoped<DomainService>();
             builder.Services.AddScoped<IamNotRobot>();
             builder.Services.AddScoped<UserTreeService>();
+            builder.Services.AddScoped<NotificationService>();
 
             builder.Services.AddAWSService<IAmazonSecretsManager>(new Amazon.Extensions.NETCore.Setup.AWSOptions
             {
@@ -169,6 +174,9 @@ namespace LMS_CMS
             });
 
 
+            // 1) SignalR 
+            builder.Services.AddSignalR();
+            builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
 
 
             var app = builder.Build();
@@ -200,6 +208,10 @@ namespace LMS_CMS
             {
                 appBuilder.UseMiddleware<GetConnectionStringMiddleware>();
             });
+
+            // 2) SignalR 
+            app.MapHub<NotificationHub>("/notificationHub").RequireAuthorization();
+
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
