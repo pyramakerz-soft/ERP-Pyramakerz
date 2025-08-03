@@ -105,7 +105,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
 
             List<MedicalHistory> medicalHistories = await Unit_Of_Work.medicalHistory_Repository
                 .Select_All_With_IncludesById<MedicalHistory>(m => m.IsDeleted != true,
-                query => query.Include(x => x.InsertedByEmployee));
+                query => query.Include(x => x.InsertedByParent));
 
             if (medicalHistories == null || medicalHistories.Count == 0)
             {
@@ -153,7 +153,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             }
 
             MedicalHistory medicalHistory = await Unit_Of_Work.medicalHistory_Repository.FindByIncludesAsync(
-                    m => m.IsDeleted != true && m.Id == id, 
+                    m => m.IsDeleted != true && 
+                    m.Id == id &&
+                    (m.InsertedByUserId != null || m.InsertedByUserId != 0), 
                     query => query.Include(m => m.School),
                     query => query.Include(m => m.Grade),
                     query => query.Include(m => m.Classroom),
@@ -204,9 +206,15 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            MedicalHistory medicalHistory = await Unit_Of_Work.medicalHistory_Repository
-                .FindByIncludesAsync(x => x.Id == id,
-                query => query.Include(x => x.InsertedByEmployee));
+            MedicalHistory medicalHistory = await Unit_Of_Work.medicalHistory_Repository.FindByIncludesAsync(
+                x => x.Id == id && x.IsDeleted != true &&
+                (x.InsertedByParentID != null || x.InsertedByParentID != 0),
+                query => query.Include(m => m.School),
+                query => query.Include(m => m.Grade),
+                query => query.Include(m => m.Classroom),
+                query => query.Include(m => m.Student),
+                query => query.Include(x => x.InsertedByParent)
+            );
 
             if (medicalHistory == null || medicalHistory.IsDeleted == true)
             {
@@ -398,9 +406,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             {
                 medicalHistory.InsertedByOctaId = userId;
             }
-            else if (userTypeClaim == "employee" || userTypeClaim == "parent")
+            else if ( userTypeClaim == "parent")
             {
-                medicalHistory.InsertedByUserId = userId;
+                medicalHistory.InsertedByParentID = userId;
             }
 
             Unit_Of_Work.medicalHistory_Repository.Add(medicalHistory);

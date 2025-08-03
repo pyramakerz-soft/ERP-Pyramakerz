@@ -755,7 +755,7 @@ namespace LMS_CMS_BL.Config
 
             CreateMap<MedicalHistoryAddByParentDTO, MedicalHistory>();
             CreateMap<MedicalHistory, MedicalHistoryGetByParentDTO>()
-                .ForMember(dest => dest.en_name, opt => opt.MapFrom(src => src.InsertedByEmployee.en_name));
+                .ForMember(dest => dest.en_name, opt => opt.MapFrom(src => src.InsertedByParent.en_name));
             CreateMap<MedicalHistoryPutByParentDTO, MedicalHistory>();
 
             CreateMap<Order, OrderGetDTO>()

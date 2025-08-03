@@ -8,5 +8,6 @@ namespace LMS_CMS_BL.DTO.Clinic
         public string PermanentDrug { get; set; }
         public IFormFile? FirstReport { get; set; }
         public IFormFile? SecReport { get; set; }
+        public long? InsertedByParentID { get; set; }
     }
 }
