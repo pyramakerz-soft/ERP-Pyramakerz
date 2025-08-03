@@ -1,18 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { AllStoresBalanceReportComponent } from './all-store-balance.component';
 
-import { AllStoreBalanceComponent } from './all-store-balance.component';
-
-describe('AllStoreBalanceComponent', () => {
-  let component: AllStoreBalanceComponent;
-  let fixture: ComponentFixture<AllStoreBalanceComponent>;
+describe('AllStoresBalanceReportComponent', () => {
+  let component: AllStoresBalanceReportComponent;
+  let fixture: ComponentFixture<AllStoresBalanceReportComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AllStoreBalanceComponent]
+      imports: [AllStoresBalanceReportComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(AllStoreBalanceComponent);
+    fixture = TestBed.createComponent(AllStoresBalanceReportComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
@@ -21,3 +20,4 @@ describe('AllStoreBalanceComponent', () => {
     expect(component).toBeTruthy();
   });
 });
+
