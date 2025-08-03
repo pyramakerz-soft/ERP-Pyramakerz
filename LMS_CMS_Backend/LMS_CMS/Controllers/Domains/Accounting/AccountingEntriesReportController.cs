@@ -1,5 +1,6 @@
 ﻿using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.AccountingModule.Reports;
+using LMS_CMS_DAL.Models.Domains.AccountingModule;
 using LMS_CMS_DAL.Models.Domains.AccountingModule.Reports;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
@@ -92,21 +93,20 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             });
 
             fullTotals = (await context.Set<TotalResult>()
-                .FromSqlInterpolated($@"EXEC dbo.GetAccountingTotals 
-                    {fromDate ?? (object)DBNull.Value}, 
-                    {toDate ?? (object)DBNull.Value}, 
-                    {0}, 
-                    {0}, 
-                    {0}")
-                .AsNoTracking()
-                .ToListAsync())
-                .FirstOrDefault();
+            .FromSqlRaw(
+                "EXEC dbo.GetAccountingTotals @DateFrom, @DateTo, 0, 0, 0",
+                new SqlParameter("@DateFrom", fromDate ?? (object)DBNull.Value),
+                new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value)
+            )
+            .AsNoTracking()
+            .ToListAsync())
+            .FirstOrDefault();
 
             fullDebit = fullTotals?.TotalDebit ?? 0;
             fullCredit = fullTotals?.TotalCredit ?? 0;
             fullDifference = fullCredit > fullDebit ? fullCredit - fullDebit : fullDebit - fullCredit;
 
-            int totalRecords = (await context.Set<CountResult>()
+            long totalRecords = (await context.Set<CountResult>()
                 .FromSqlInterpolated($@"
                     SELECT dbo.GetEntriesCount({fromDate}, {toDate}, 0, 0, 0) AS TotalCount")
                 .ToListAsync())

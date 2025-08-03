@@ -159,6 +159,12 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return BadRequest("Start date must be before end date.");
             }
 
+            if (NewDiscussionRoom.Saturday == false && NewDiscussionRoom.Sunday == false && NewDiscussionRoom.Monday == false && 
+                NewDiscussionRoom.Tuesday == false && NewDiscussionRoom.Wednesday == false && NewDiscussionRoom.Thursday == false && NewDiscussionRoom.Friday == false)
+            {
+                return BadRequest("You have to choose one day atleast");
+            }
+
             DiscussionRoom discussionRoom = mapper.Map<DiscussionRoom>(NewDiscussionRoom);
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             discussionRoom.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
@@ -268,6 +274,12 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             if (EditDiscussionRoom.StartDate > EditDiscussionRoom.EndDate)
             {
                 return BadRequest("Start date must be before end date.");
+            }
+
+            if (EditDiscussionRoom.Saturday == false && EditDiscussionRoom.Sunday == false && EditDiscussionRoom.Monday == false &&
+                EditDiscussionRoom.Tuesday == false && EditDiscussionRoom.Wednesday == false && EditDiscussionRoom.Thursday == false && EditDiscussionRoom.Friday == false)
+            {
+                return BadRequest("You have to choose one day atleast");
             }
 
             if (EditDiscussionRoom.ImageFile != null)

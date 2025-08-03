@@ -234,11 +234,6 @@
                     (ngModelChange)="onInputValueChange({ field: 'meetingLink', value: $event })" />
                 <span *ngIf="validationErrors['meetingLink']" class="text-red-500  font-normal text-xs md:text-sm">{{ validationErrors['meetingLink'] }}</span>
             </div>   
-            <div class="flex w-full space-x-5 items-center mb-4">
-                <input type="checkbox" id="repeatedWeekly" class="w-5 h-5" (change)="onIsRepeatedWeeklyChange($event)"
-                    [checked]="discussionRoom.isRepeatedWeekly">
-                <label for="repeatedWeekly" class="text-sm">Is Repeated Weekly</label>
-            </div>
             <div class="flex flex-col mb-4 w-[30%]">
                 <label class="mb-2 primaryTxt" for="startDate">Start Date</label>
                 <input id="startDate" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
@@ -260,6 +255,48 @@
                     [(ngModel)]="discussionRoom.time"
                     (ngModelChange)="onInputValueChange({ field: 'time', value: $event })" />
                 <span *ngIf="validationErrors['time']" class="text-red-500 ml-3 font-normal">{{ validationErrors['time'] }}</span>
+            </div> 
+            <div class="flex justify-center flex-wrap">
+                <div class="flex w-[33%] space-x-5 items-center mb-4">
+                    <input type="checkbox" id="saturday" class="w-5 h-5" (change)="onDayChange($event)"
+                        [checked]="discussionRoom.saturday">
+                    <label for="saturday" class="text-sm">Saturday</label>
+                </div>
+                <div class="flex w-[33%] space-x-5 items-center mb-4">
+                    <input type="checkbox" id="sunday" class="w-5 h-5" (change)="onDayChange($event)"
+                        [checked]="discussionRoom.sunday">
+                    <label for="sunday" class="text-sm">Sunday</label>
+                </div>
+                <div class="flex w-[33%] space-x-5 items-center mb-4">
+                    <input type="checkbox" id="monday" class="w-5 h-5" (change)="onDayChange($event)"
+                        [checked]="discussionRoom.monday">
+                    <label for="monday" class="text-sm">Monday</label>
+                </div>
+                <div class="flex w-[33%] space-x-5 items-center mb-4">
+                    <input type="checkbox" id="tuesday" class="w-5 h-5" (change)="onDayChange($event)"
+                        [checked]="discussionRoom.tuesday">
+                    <label for="tuesday" class="text-sm">Tuesday</label>
+                </div>
+                <div class="flex w-[33%] space-x-5 items-center mb-4">
+                    <input type="checkbox" id="wednesday" class="w-5 h-5" (change)="onDayChange($event)"
+                        [checked]="discussionRoom.wednesday">
+                    <label for="wednesday" class="text-sm">Wednesday</label>
+                </div>
+                <div class="flex w-[33%] space-x-5 items-center mb-4">
+                    <input type="checkbox" id="thursday" class="w-5 h-5" (change)="onDayChange($event)"
+                        [checked]="discussionRoom.thursday">
+                    <label for="thursday" class="text-sm">Thursday</label>
+                </div>
+                <div class="flex w-[33%] space-x-5 items-center mb-4">
+                    <input type="checkbox" id="friday" class="w-5 h-5" (change)="onDayChange($event)"
+                        [checked]="discussionRoom.friday">
+                    <label for="friday" class="text-sm">Friday</label>
+                </div>
+            </div>
+            <div class="flex w-full space-x-5 items-center mb-4">
+                <input type="checkbox" id="repeatedWeekly" class="w-5 h-5" (change)="onIsRepeatedWeeklyChange($event)"
+                    [checked]="discussionRoom.isRepeatedWeekly">
+                <label for="repeatedWeekly" class="text-sm">Is Repeated Weekly</label>
             </div>
             <div class="w-full mb-4"> 
                 <div class="bg-[#F6F6F6] flex items-center space-x-4 w-full rounded-md border-dashed border-2">
@@ -273,8 +310,7 @@
                         </label>
                         <input id="file-upload" type="file" class="hidden" (change)="onImageFileSelected($event)" accept="image/jpeg, image/png"  />
                     </div>
-                </div>
-                <span *ngIf="validationErrors['imageFile']" class="text-red-500  font-normal text-xs md:text-sm">{{ validationErrors['imageFile'] }}</span>
+                </div> 
             </div> 
             <div class="flex flex-col mb-4 w-full">
                 <label class="mb-2 primaryTxt" for="recordLink">Record Link</label>
