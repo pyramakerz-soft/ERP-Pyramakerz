@@ -24,6 +24,7 @@ import { SubjectService } from '../../../../Services/Employee/LMS/subject.servic
 import { EmployeeService } from '../../../../Services/Employee/employee.service';
 import { ClassroomSubjectService } from '../../../../Services/Employee/LMS/classroom-subject.service';
 import { SearchStudentComponent } from '../../../../Component/Employee/search-student/search-student.component';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-remedial-classroom',
@@ -69,10 +70,13 @@ export class RemedialClassroomComponent {
   students: Employee[] = [];
   SelectedSchoolId: number = 0;
   SelectedTimeTableId: number = 0;
+  preSelectedClassroom: number | null = null;
   remedialClassroom: RemedialClassroom = new RemedialClassroom();
   validationErrors: { [key in keyof RemedialClassroom]?: string } = {};
   isLoading = false;
   isModalOpen: boolean = false;
+  hiddenInputs: string[] = [];
+  hiddenColumns: string[] = ['Actions'];
 
   constructor(
     private router: Router,
@@ -165,14 +169,78 @@ export class RemedialClassroomComponent {
   }
 
   CreateOREdit() {
+    if (this.isFormValid()) {
+      this.isLoading = true
+      if (this.mode == 'Create') {
+        this.remedialClassroomServ.Add(this.remedialClassroom, this.DomainName).subscribe((d) => {
+          this.GetAllData()
+          this.closeModal()
+          this.isLoading = false
+          Swal.fire({
+            icon: 'success',
+            title: 'Done',
+            text: 'Created Successfully',
+            confirmButtonColor: '#089B41',
+          });
+        }, error => {
+          console.log(error)
+          this.isLoading = false
+          if (error.error?.toLowerCase().includes('name') && error.status === 400) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'This Name Already Exists',
+              confirmButtonText: 'Okay',
+              customClass: { confirmButton: 'secondaryBg' },
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'Try Again Later!',
+              confirmButtonText: 'Okay',
+              customClass: { confirmButton: 'secondaryBg' }
+            });
+          }
 
+        })
+      }
+      else if (this.mode == 'Edit') {
+        this.remedialClassroomServ.Edit(this.remedialClassroom, this.DomainName).subscribe((d) => {
+          this.GetAllData()
+          this.closeModal()
+          this.isLoading = false
+          Swal.fire({
+            icon: 'success',
+            title: 'Done',
+            text: 'Updatedd Successfully',
+            confirmButtonColor: '#089B41',
+          });
+        }, error => {
+          console.log(error)
+          this.isLoading = false
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Try Again Later!',
+            confirmButtonText: 'Okay',
+            customClass: { confirmButton: 'secondaryBg' }
+          });
+        })
+      }
+    }
   }
 
   handleStudentSelected(students: number[]) {
-
-    // students.forEach(student => {
-    //   classroomStudentNew.studentIDs.push(student)
-    // });
+    if (!Array.isArray(this.remedialClassroom.StudentsId)) {
+      this.remedialClassroom.StudentsId = [];
+    }
+    const existingIds = new Set(this.remedialClassroom.StudentsId);
+    for (const id of students) {
+      existingIds.add(id);
+    }
+    this.remedialClassroom.StudentsId = Array.from(existingIds);
+    console.log(this.remedialClassroom.StudentsId);
   }
 
   async onSearchEvent(event: { key: string; value: any }) {
@@ -205,10 +273,44 @@ export class RemedialClassroomComponent {
     // }
   }
 
+  delete(id: number) {
+    Swal.fire({
+      title: 'Are you sure you want to delete this Remedial Classroom?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#089B41',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'Cancel',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.remedialClassroomServ.Delete(id, this.DomainName).subscribe({
+          next: (data) => {
+            this.GetAllData();
+          },
+          error: (error) => {
+            console.error('Error while deleting the Violation:', error);
+            Swal.fire({
+              title: 'Error',
+              text: 'An error occurred while deleting the Remedial Classroom. Please try again later.',
+              icon: 'error',
+              confirmButtonText: 'OK',
+            });
+          },
+        });
+      }
+    });
+  }
+
+  View(id:number){
+    
+  }
+
   openModal() {
     document.getElementById('Add_Modal')?.classList.remove('hidden');
     document.getElementById('Add_Modal')?.classList.add('flex');
     this.remedialClassroom = new RemedialClassroom();
+    this.mode = "Create"
   }
 
   closeModal() {
@@ -231,7 +333,34 @@ export class RemedialClassroomComponent {
     this.isModalOpen = true;
   }
 
-  closeModalStudent(){
-    this.isModalOpen = true;
+  closeModalStudent() {
+    this.isModalOpen = false;
+  }
+
+  capitalizeField(field: keyof RemedialClassroom): string {
+    return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
+  }
+
+  isFormValid(): boolean {
+    let isValid = true;
+    for (const key in this.remedialClassroom) {
+      if (this.remedialClassroom.hasOwnProperty(key)) {
+        const field = key as keyof RemedialClassroom;
+        if (!this.remedialClassroom[field]) {
+          if (
+            field == 'name' ||
+            field == 'gradeID' ||
+            field == 'subjectID' ||
+            field == 'teacherID' ||
+            field == 'academicYearID' ||
+            field == 'schoolID'
+          ) {
+            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`;
+            isValid = false;
+          }
+        }
+      }
+    }
+    return isValid;
   }
 }
