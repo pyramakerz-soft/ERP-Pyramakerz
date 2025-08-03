@@ -788,7 +788,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             if (NewData.QuestionTypeID == 1)
             {
-                if (NewData.CorrectAnswerName != "True" && NewData.CorrectAnswerName != "Fales")
+                if (NewData.CorrectAnswerName != "True" && NewData.CorrectAnswerName != "False") 
                 {
                     return BadRequest("Correct Answer should be True or Fales");
                 }

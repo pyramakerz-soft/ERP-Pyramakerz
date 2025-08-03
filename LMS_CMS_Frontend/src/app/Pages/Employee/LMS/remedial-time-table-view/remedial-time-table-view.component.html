@@ -1,0 +1,43 @@
+<div class="flex justify-between items-center mb-5">
+    <div class="flex justify-between items-center space-x-5">
+        <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToTimeTable()"></i>
+        <h1 class="font-semibold text-2xl leading-9">{{remedialTimeTable.name}}</h1>
+    </div>
+
+    <button (click)="Save()"
+        class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
+        <span *ngIf="!isLoading">Save</span>
+        <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+    </button>
+</div>
+
+<div class="overflow-x-auto">
+  <table class="min-w-full text-sm text-left text-gray-900 border border-gray-300">
+    <!-- Header -->
+    <thead class="bg-gray-400 text-white">
+      <tr>
+        <th class="py-3 px-4 w-[120px]">Classes</th>
+        <th class="py-3 px-4 text-center">Period 1</th>
+        <th class="py-3 px-4 text-center">Period 2</th>
+        <th class="py-3 px-4 text-center">Period 3</th>
+      </tr>
+    </thead>
+
+    <!-- Body -->
+    <tbody>
+      <tr *ngFor="let day of days">
+        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ day.name }}</td>
+        <ng-container *ngFor="let period of [1, 2, 3]">
+          <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+            <div class="flex flex-wrap gap-1">
+              <span *ngFor="let session of getSessions(day.key, period)"
+                    class="bg-gray-100 text-sm px-3 py-1 rounded-full border-l-4 border-blue-500">
+                {{ session }}
+              </span>
+            </div>
+          </td>
+        </ng-container>
+      </tr>
+    </tbody>
+  </table>
+</div>

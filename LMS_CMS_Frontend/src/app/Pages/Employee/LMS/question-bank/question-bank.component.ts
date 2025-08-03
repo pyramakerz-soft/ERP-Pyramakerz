@@ -494,6 +494,7 @@ export class QuestionBankComponent {
   }
   
   CreateOREdit() {
+    console.log(this.questionBank)
     this.questionBank.questionBankTagsDTO = this.TagsSelected.map(s => s.id)
     if (this.isFormValid()) {
       this.isLoading = true;
