@@ -15,12 +15,21 @@ import { DomainService } from '../../../../Services/Employee/domain.service';
 import { SchoolService } from '../../../../Services/Employee/school.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
-import { firstValueFrom } from 'rxjs';
+import { Grade } from '../../../../Models/LMS/grade';
+import { Subject } from '../../../../Models/LMS/subject';
+import { AcadimicYearService } from '../../../../Services/Employee/LMS/academic-year.service';
+import { AcademicYear } from '../../../../Models/LMS/academic-year';
+import { GradeService } from '../../../../Services/Employee/LMS/grade.service';
+import { SubjectService } from '../../../../Services/Employee/LMS/subject.service';
+import { EmployeeService } from '../../../../Services/Employee/employee.service';
+import { ClassroomSubjectService } from '../../../../Services/Employee/LMS/classroom-subject.service';
+import { SearchStudentComponent } from '../../../../Component/Employee/search-student/search-student.component';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-remedial-classroom',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, SearchStudentComponent],
   templateUrl: './remedial-classroom.component.html',
   styleUrl: './remedial-classroom.component.css'
 })
@@ -53,13 +62,21 @@ export class RemedialClassroomComponent {
 
   TableData: RemedialClassroom[] = [];
   schools: School[] = [];
+  SchoolsForCreate: School[] = [];
+  academicYears: AcademicYear[] = [];
+  grades: Grade[] = [];
+  subjects: Subject[] = [];
   Teachers: Employee[] = [];
-  classes: Classroom[] = [];
+  students: Employee[] = [];
   SelectedSchoolId: number = 0;
   SelectedTimeTableId: number = 0;
+  preSelectedClassroom: number | null = null;
   remedialClassroom: RemedialClassroom = new RemedialClassroom();
   validationErrors: { [key in keyof RemedialClassroom]?: string } = {};
   isLoading = false;
+  isModalOpen: boolean = false;
+  hiddenInputs: string[] = [];
+  hiddenColumns: string[] = ['Actions'];
 
   constructor(
     private router: Router,
@@ -71,6 +88,11 @@ export class RemedialClassroomComponent {
     public ApiServ: ApiService,
     public SchoolServ: SchoolService,
     public remedialClassroomServ: RemedialClassroomService,
+    public AcademicYearServ: AcadimicYearService,
+    public GradeServ: GradeService,
+    public SubjectServ: SubjectService,
+    public EmployeeServ: EmployeeService,
+    public ClassroomSubjectServ: ClassroomSubjectService,
     private cdRef: ChangeDetectorRef
   ) { }
   ngOnInit() {
@@ -97,17 +119,128 @@ export class RemedialClassroomComponent {
     this.TableData = [];
     this.SchoolServ.Get(this.DomainName).subscribe((d) => {
       this.schools = d;
+      this.SchoolsForCreate = d;
     });
   }
 
   GetAllData() {
     this.TableData = [];
-    // this.TimeTableServ.GetBySchoolId(
-    //   this.SelectedSchoolId,
-    //   this.DomainName
-    // ).subscribe((d) => {
-    //   this.TableData = d;
-    // });
+    this.remedialClassroomServ.GetBySchoolId(this.SelectedSchoolId, this.DomainName).subscribe((d) => {
+      this.TableData = d;
+      console.log(this.TableData)
+    });
+  }
+
+  GetAllAcademicYearBySchool() {
+    this.academicYears = [];
+    this.remedialClassroom.academicYearID = 0;
+    this.AcademicYearServ.GetBySchoolId(this.remedialClassroom.schoolID, this.DomainName).subscribe((d) => {
+      this.academicYears = d;
+    });
+  }
+
+  GetAllGrades() {
+    this.grades = [];
+    this.subjects = [];
+    this.Teachers = [];
+    this.remedialClassroom.subjectID = 0
+    this.remedialClassroom.gradeID = 0
+    this.remedialClassroom.teacherID = 0
+    this.GradeServ.GetBySchoolId(this.remedialClassroom.schoolID, this.DomainName).subscribe((d) => {
+      this.grades = d;
+    });
+  }
+
+  GetAllSubjectGradeId() {
+    this.subjects = [];
+    this.Teachers = [];
+    this.remedialClassroom.teacherID = 0
+    this.remedialClassroom.subjectID = 0
+    this.SubjectServ.GetByGradeId(this.remedialClassroom.gradeID, this.DomainName).subscribe((d) => {
+      this.subjects = d;
+    });
+  }
+
+  GetAllTeachers() {
+    this.Teachers = [];
+    this.ClassroomSubjectServ.GetBySubjectId(this.remedialClassroom.subjectID, this.DomainName).subscribe((d) => {
+      this.Teachers = d;
+    });
+  }
+
+  CreateOREdit() {
+    if (this.isFormValid()) {
+      this.isLoading = true
+      if (this.mode == 'Create') {
+        this.remedialClassroomServ.Add(this.remedialClassroom, this.DomainName).subscribe((d) => {
+          this.GetAllData()
+          this.closeModal()
+          this.isLoading = false
+          Swal.fire({
+            icon: 'success',
+            title: 'Done',
+            text: 'Created Successfully',
+            confirmButtonColor: '#089B41',
+          });
+        }, error => {
+          console.log(error)
+          this.isLoading = false
+          if (error.error?.toLowerCase().includes('name') && error.status === 400) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'This Name Already Exists',
+              confirmButtonText: 'Okay',
+              customClass: { confirmButton: 'secondaryBg' },
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'Try Again Later!',
+              confirmButtonText: 'Okay',
+              customClass: { confirmButton: 'secondaryBg' }
+            });
+          }
+
+        })
+      }
+      else if (this.mode == 'Edit') {
+        this.remedialClassroomServ.Edit(this.remedialClassroom, this.DomainName).subscribe((d) => {
+          this.GetAllData()
+          this.closeModal()
+          this.isLoading = false
+          Swal.fire({
+            icon: 'success',
+            title: 'Done',
+            text: 'Updatedd Successfully',
+            confirmButtonColor: '#089B41',
+          });
+        }, error => {
+          console.log(error)
+          this.isLoading = false
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Try Again Later!',
+            confirmButtonText: 'Okay',
+            customClass: { confirmButton: 'secondaryBg' }
+          });
+        })
+      }
+    }
+  }
+
+  handleStudentSelected(students: number[]) {
+    if (!Array.isArray(this.remedialClassroom.StudentsId)) {
+      this.remedialClassroom.StudentsId = [];
+    }
+    const existingIds = new Set(this.remedialClassroom.StudentsId);
+    for (const id of students) {
+      existingIds.add(id);
+    }
+    this.remedialClassroom.StudentsId = Array.from(existingIds);
+    console.log(this.remedialClassroom.StudentsId);
   }
 
   async onSearchEvent(event: { key: string; value: any }) {
@@ -140,19 +273,50 @@ export class RemedialClassroomComponent {
     // }
   }
 
+  delete(id: number) {
+    Swal.fire({
+      title: 'Are you sure you want to delete this Remedial Classroom?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#089B41',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'Cancel',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.remedialClassroomServ.Delete(id, this.DomainName).subscribe({
+          next: (data) => {
+            this.GetAllData();
+          },
+          error: (error) => {
+            console.error('Error while deleting the Violation:', error);
+            Swal.fire({
+              title: 'Error',
+              text: 'An error occurred while deleting the Remedial Classroom. Please try again later.',
+              icon: 'error',
+              confirmButtonText: 'OK',
+            });
+          },
+        });
+      }
+    });
+  }
+
+  View(id:number){
+    
+  }
+
   openModal() {
-    if (this.SelectedSchoolId == 0) {
-      this.validationErrors["schoolID"] = "School is required"
-    } else {
-      document.getElementById('Add_Modal')?.classList.remove('hidden');
-      document.getElementById('Add_Modal')?.classList.add('flex');
-      this.remedialClassroom = new RemedialClassroom();
-    }
+    document.getElementById('Add_Modal')?.classList.remove('hidden');
+    document.getElementById('Add_Modal')?.classList.add('flex');
+    this.remedialClassroom = new RemedialClassroom();
+    this.mode = "Create"
   }
 
   closeModal() {
     document.getElementById('Add_Modal')?.classList.remove('flex');
     document.getElementById('Add_Modal')?.classList.add('hidden');
+    this.isModalOpen = false;
   }
 
   onInputValueChange(event: { field: keyof RemedialClassroom; value: any }) {
@@ -163,5 +327,40 @@ export class RemedialClassroomComponent {
         this.validationErrors[field] = '';
       }
     }
+  }
+
+  SerachOnStudents() {
+    this.isModalOpen = true;
+  }
+
+  closeModalStudent() {
+    this.isModalOpen = false;
+  }
+
+  capitalizeField(field: keyof RemedialClassroom): string {
+    return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
+  }
+
+  isFormValid(): boolean {
+    let isValid = true;
+    for (const key in this.remedialClassroom) {
+      if (this.remedialClassroom.hasOwnProperty(key)) {
+        const field = key as keyof RemedialClassroom;
+        if (!this.remedialClassroom[field]) {
+          if (
+            field == 'name' ||
+            field == 'gradeID' ||
+            field == 'subjectID' ||
+            field == 'teacherID' ||
+            field == 'academicYearID' ||
+            field == 'schoolID'
+          ) {
+            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`;
+            isValid = false;
+          }
+        }
+      }
+    }
+    return isValid;
   }
 }

@@ -4,6 +4,7 @@ using LMS_CMS_DAL.Models.Domains;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LMS_CMS_DAL.Migrations.Domains
 {
     [DbContext(typeof(LMS_CMS_Context))]
-    partial class LMS_CMS_ContextModelSnapshot : ModelSnapshot
+    [Migration("20250803074502_NameInRemedialClassroom")]
+    partial class NameInRemedialClassroom
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1526,8 +1529,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.AccountingModule.Reports.CountResult", b =>
                 {
-                    b.Property<long?>("TotalCount")
-                        .HasColumnType("bigint");
+                    b.Property<int?>("TotalCount")
+                        .HasColumnType("int");
 
                     b.ToTable((string)null);
 
@@ -3216,9 +3219,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<long?>("InsertedByOctaId")
                         .HasColumnType("bigint");
 
-                    b.Property<long?>("InsertedByParentID")
-                        .HasColumnType("bigint");
-
                     b.Property<long?>("InsertedByUserId")
                         .HasColumnType("bigint");
 
@@ -3253,8 +3253,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.HasIndex("DeletedByUserId");
 
                     b.HasIndex("GradeId");
-
-                    b.HasIndex("InsertedByParentID");
 
                     b.HasIndex("InsertedByUserId");
 
@@ -13135,10 +13133,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .WithMany()
                         .HasForeignKey("GradeId");
 
-                    b.HasOne("LMS_CMS_DAL.Models.Domains.Parent", "InsertedByParent")
-                        .WithMany()
-                        .HasForeignKey("InsertedByParentID");
-
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "InsertedByEmployee")
                         .WithMany()
                         .HasForeignKey("InsertedByUserId");
@@ -13162,8 +13156,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Navigation("Grade");
 
                     b.Navigation("InsertedByEmployee");
-
-                    b.Navigation("InsertedByParent");
 
                     b.Navigation("School");
 

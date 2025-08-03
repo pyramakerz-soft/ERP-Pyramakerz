@@ -14,6 +14,7 @@ namespace LMS_CMS_BL.DTO.LMS
     {
         [Key]
         public long ID { get; set; }
+        public string Name { get; set; }
         public long SubjectID { get; set; }
         public string SubjectEnglishName { get; set; }
         public string SubjectArabicName { get; set; }
@@ -25,5 +26,7 @@ namespace LMS_CMS_BL.DTO.LMS
         public string GradeName { get; set; }
         public long TeacherID { get; set; }
         public string TeacherName { get; set; }
+        public DateTime? InsertedAt { get; set; }
+
     }
 }

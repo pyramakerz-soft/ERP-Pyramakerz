@@ -39,5 +39,9 @@ namespace LMS_CMS_DAL.Models.Domains.ClinicModule
         public string? PermanentDrug { get; set; }
 
         public DateTime? Date { get; set; }
+
+        [ForeignKey("InsertedByParent")]
+        public long? InsertedByParentID { get; set; }
+        public Parent? InsertedByParent { get; set; }
     }
 }

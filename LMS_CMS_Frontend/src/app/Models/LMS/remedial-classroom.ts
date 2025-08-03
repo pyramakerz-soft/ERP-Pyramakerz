@@ -9,10 +9,10 @@ export class RemedialClassroom {
         public teacherID: number = 0,
         public teacherName: string = '',
         public subjectID: number = 0,
-        public subjectName: string = '',
+        public subjectArabicName: string = '',
+        public subjectEnglishName: string = '',
         public gradeID: number = 0,
         public gradeName: string = '',
-
         public StudentsId: number[] = [],
         public insertedAt: string = '',
         public insertedByUserId: number = 0,

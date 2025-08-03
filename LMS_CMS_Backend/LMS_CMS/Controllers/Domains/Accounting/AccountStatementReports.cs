@@ -80,7 +80,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             calcFirstPeriod = (await context.Set<TotalResult>()
             .FromSqlRaw(
                 "EXEC dbo.GetAccountingTotals @DateFrom, @DateTo, @MainAccNo, @SubAccNo, @LinkFileID",
-                new SqlParameter("@DateFrom", "1900-1-1"),
+                new SqlParameter("@DateFrom", DBNull.Value),
                 new SqlParameter("@DateTo", (object)dateToValue ?? DBNull.Value),
                 new SqlParameter("@MainAccNo", supplier.AccountNumberID),
                 new SqlParameter("@SubAccNo", supplier.ID),
@@ -100,8 +100,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 MainAccount = "",
                 SubAccountNo = 0,
                 SubAccount = "",
-                Debit = calcFirstPeriod?.TotalDebit ?? 0,
-                Credit = calcFirstPeriod?.TotalCredit ?? 0,
+                Debit = 0,
+                Credit = 0,
                 Date = dateToValue,
                 Balance = calcFirstPeriod?.Differences ?? 0,
                 LinkFileID = 0,
@@ -135,7 +135,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             fullCredit = fullTotals?.TotalCredit ?? 0;
             fullDifference = fullTotals?.Differences ?? 0;
 
-            int totalRecords = (await context.Set<CountResult>()
+            long totalRecords = (await context.Set<CountResult>()
                 .FromSqlInterpolated($@"
                     SELECT dbo.GetEntriesCount({fromDate}, {toDate}, {supplier.AccountNumberID}, {supplier.ID}, {accountingTree.LinkFileID}) AS TotalCount")
                 .ToListAsync())
@@ -223,7 +223,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             calcFirstPeriod = (await context.Set<TotalResult>()
             .FromSqlRaw(
                 "EXEC dbo.GetAccountingTotals @DateFrom, @DateTo, @MainAccNo, @SubAccNo, @LinkFileID",
-                new SqlParameter("@DateFrom", "1900-1-1"),
+                new SqlParameter("@DateFrom", DBNull.Value),
                 new SqlParameter("@DateTo", (object)dateToValue ?? DBNull.Value),
                 new SqlParameter("@MainAccNo", safe.AccountNumberID),
                 new SqlParameter("@SubAccNo", safe.ID),
@@ -243,8 +243,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 MainAccount = "",
                 SubAccountNo = 0,
                 SubAccount = "",
-                Debit = calcFirstPeriod?.TotalDebit ?? 0,
-                Credit = calcFirstPeriod?.TotalCredit ?? 0,
+                Debit = 0,
+                Credit = 0,
                 Date = dateToValue,
                 Balance = calcFirstPeriod?.Differences ?? 0,
                 LinkFileID = 0,
@@ -278,7 +278,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             fullCredit = fullTotals?.TotalCredit ?? 0;
             fullDifference = fullTotals?.Differences ?? 0;
 
-            int totalRecords = (await context.Set<CountResult>()
+            long totalRecords = (await context.Set<CountResult>()
                 .FromSqlInterpolated($@"
                     SELECT dbo.GetEntriesCount({fromDate}, {toDate}, {safe.AccountNumberID}, {safe.ID}, {accountingTree.LinkFileID}) AS TotalCount")
                 .ToListAsync())

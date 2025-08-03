@@ -207,6 +207,8 @@ import { AllStoresBalanceReportComponent } from './Pages/Employee/Inventory/Repo
 import { DiscussionRoomComponent } from './Pages/Employee/LMS/discussion-room/discussion-room.component';
 import { NotificationComponent } from './Pages/Employee/Communication/notification/notification.component';
 import { MyNotificationComponent } from './Pages/Communication/my-notification/my-notification.component';
+import { RemedialClassroomComponent } from './Pages/Employee/LMS/remedial-classroom/remedial-classroom.component';
+import { RemedialTimeTableComponent } from './Pages/Employee/LMS/remedial-time-table/remedial-time-table.component';
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
     { path: "Octa/login", component: OctaLoginComponent, title: "login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -458,6 +460,8 @@ export const routes: Routes = [
             { path: 'Violation/:id', component: ViolationViewComponent, title: 'Violation', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Notification', component: NotificationComponent, title: 'Notification', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Notification', component: NotificationComponent, title: 'Notification', canActivate: [noNavigateWithoutLoginGuard], },  
+            { path: 'Remedial Classroom', component: RemedialClassroomComponent, title: 'RemedialClassroom', canActivate: [noNavigateWithoutLoginGuard], },  
+            { path: 'Remedial Time Table', component: RemedialTimeTableComponent, title: 'Remedial Time Table', canActivate: [noNavigateWithoutLoginGuard], },  
         ]
     },
     {
