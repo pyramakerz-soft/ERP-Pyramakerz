@@ -245,6 +245,8 @@ export class MedicalHistoryModalComponent implements OnInit, OnChanges {
   }
 
   isSaving: boolean = false;
+
+  
   async saveMedicalHistory() {
     if (this.isFormValid()) {
       try {

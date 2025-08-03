@@ -38,12 +38,25 @@
             </select>
         </div>
 
+        <!-- Student Selector -->
+        <div class="w-full md:w-1/4">
+            <label class="block mb-2 text-sm font-medium text-gray-900" for="student">Student</label>
+            <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="student"
+                [(ngModel)]="selectedStudent" (ngModelChange)="resetTable()"
+                [disabled]="!selectedClass || students.length === 0" required>
+                <option [ngValue]="null" disabled selected hidden>Choose Student</option>
+                <option *ngFor="let student of students" [ngValue]="student.id">
+                    {{ student.name }}
+                </option>
+            </select>
+        </div>
+
         <!-- View Report Button -->
         <div class="w-full md:w-1/6 flex justify-end mt-4 md:mt-0">
             <button class="p-3 font-medium text-xl rounded-lg" (click)="viewReport()"
-                [disabled]="!selectedSchool || !selectedGrade || !selectedClass" [ngClass]="{
-                    'bg-gray-100 text-gray-300': !selectedSchool || !selectedGrade || !selectedClass,
-                    'secondaryBg text-white': selectedSchool && selectedGrade && selectedClass
+                [disabled]="!selectedSchool || !selectedGrade || !selectedClass || !selectedStudent" [ngClass]="{
+                    'bg-gray-100 text-gray-300': !selectedSchool || !selectedGrade || !selectedClass || !selectedStudent,
+                    'secondaryBg text-white': selectedSchool && selectedGrade && selectedClass && selectedStudent
                 }">
                 View Report
             </button>
@@ -70,20 +83,21 @@
     <!-- Table -->
     <div *ngIf="showTable" class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
         <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
-<!-- In your template, replace the table header section with: -->
-<thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
-    <tr>
-        <th *ngFor="let header of getCurrentHeaders()"
-            class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-            {{ header }}
-        </th>
-    </tr>
-</thead>
+            <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+                <tr>
+                    <th *ngFor="let header of getCurrentHeaders()"
+                        class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ header }}
+                    </th>
+                </tr>
+            </thead>
             <tbody>
-                <tr *ngIf="tableData.length === 0">
-                    <td [attr.colspan]="pdfTableHeaders.length"
+                <tr *ngIf="tableData.length === 0 && showTable">
+                    <td [attr.colspan]="getCurrentHeaders().length"
                         class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-                        No Data Found
+                        <div class="flex flex-col items-center justify-center py-4">
+                            <span class="mt-2 text-gray-500">No data available</span>
+                        </div>
                     </td>
                 </tr>
 
@@ -91,7 +105,7 @@
                         'bg-[#F7F7F7]': i % 2 === 1, 
                         'bg-white': i % 2 !== 1
                     }" class="border-t border-gray-300 text-xs md:text-sm">
-                    <td *ngFor="let header of pdfTableHeaders"
+                    <td *ngFor="let header of getCurrentHeaders()"
                         class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ getCellValue(row, header) }}
                     </td>

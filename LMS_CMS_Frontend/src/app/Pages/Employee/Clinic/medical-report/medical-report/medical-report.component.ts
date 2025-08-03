@@ -9,6 +9,7 @@ import { FormsModule } from '@angular/forms';
 import { SchoolService } from '../../../../../Services/Employee/school.service';
 import { GradeService } from '../../../../../Services/Employee/LMS/grade.service';
 import { ClassroomService } from '../../../../../Services/Employee/LMS/classroom.service';
+import { StudentService } from '../../../../../Services/student.service';
 import { MedicalReportService } from '../../../../../Services/Employee/Clinic/medical-report.service';
 import { Router } from '@angular/router';
 import * as XLSX from 'xlsx';
@@ -30,13 +31,13 @@ export class MedicalReportComponent implements OnInit {
   selectedSchool: number | null = null;
   selectedGrade: number | null = null;
   selectedClass: number | null = null;
-  dateFrom: string = '';
-  dateTo: string = '';
+  selectedStudent: number | null = null;
 
   // Data sources
   schools: any[] = [];
   grades: any[] = [];
   classes: any[] = [];
+  students: any[] = [];
 
   // Table data
   tableData: any[] = [];
@@ -67,7 +68,8 @@ export class MedicalReportComponent implements OnInit {
     private medicalReportService: MedicalReportService,
     private schoolService: SchoolService,
     private gradeService: GradeService,
-    private classroomService: ClassroomService
+    private classroomService: ClassroomService,
+    private studentService: StudentService
   ) {}
 
   ngOnInit(): void {
@@ -95,6 +97,8 @@ export class MedicalReportComponent implements OnInit {
         this.selectedGrade = null;
         this.classes = [];
         this.selectedClass = null;
+        this.students = [];
+        this.selectedStudent = null;
       } catch (error) {
         console.error('Error loading grades:', error);
       }
@@ -110,9 +114,32 @@ export class MedicalReportComponent implements OnInit {
         );
         this.classes = data;
         this.selectedClass = null;
+        this.students = [];
+        this.selectedStudent = null;
       } catch (error) {
         console.error('Error loading classes:', error);
       }
+    }
+  }
+
+  async loadStudents() {
+    if (this.selectedClass) {
+      try {
+        const domainName = this.apiService.GetHeader();
+        const data = await firstValueFrom(
+          this.studentService.GetByClassID(this.selectedClass, domainName)
+        );
+        this.students = data.map((student) => ({
+          id: student.id,
+          name: student.en_name || 'Unknown',
+        }));
+        this.selectedStudent = null; // Reset selected student when class changes
+      } catch (error) {
+        console.error('Error loading students:', error);
+      }
+    } else {
+      this.students = [];
+      this.selectedStudent = null;
     }
   }
 
@@ -127,6 +154,7 @@ export class MedicalReportComponent implements OnInit {
   }
 
   onClassChange() {
+    this.loadStudents();
     this.resetTable();
   }
 
@@ -136,22 +164,17 @@ export class MedicalReportComponent implements OnInit {
   }
 
   async viewReport() {
-    if (!this.selectedSchool || !this.selectedGrade || !this.selectedClass) {
+    if (
+      !this.selectedSchool ||
+      !this.selectedGrade ||
+      !this.selectedClass ||
+      !this.selectedStudent
+    ) {
       Swal.fire({
         icon: 'warning',
         title: 'Missing Information',
-        text: 'Please select School, Grade and Class',
+        text: 'Please select School, Grade, Class and Student',
         confirmButtonColor: '#3085d6',
-        confirmButtonText: 'OK',
-      });
-      return;
-    }
-
-    if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
-      Swal.fire({
-        title: 'Invalid Date Range',
-        text: 'Start date cannot be later than end date.',
-        icon: 'warning',
         confirmButtonText: 'OK',
       });
       return;
@@ -166,24 +189,32 @@ export class MedicalReportComponent implements OnInit {
 
       switch (this.selectedTab) {
         case 'MH By Parent':
-        case 'MH By Doctor':
-          const service =
-            this.selectedTab === 'MH By Parent'
-              ? this.medicalReportService.getAllMHByParent
-              : this.medicalHistoryService.GetByDoctor;
-
           data = await firstValueFrom(
-            service.call(
-              this.selectedTab === 'MH By Parent'
-                ? this.medicalReportService
-                : this.medicalHistoryService,
+            this.medicalReportService.getAllMHByParent(
               domainName,
+              this.selectedStudent, // studentId first
+              this.selectedSchool, // schoolId
+              this.selectedGrade, // gradeId
+              this.selectedClass // classId
+            )
+          );
+          this.tableData = data.map((item) => ({
+            date: new Date(item.insertedAt).toLocaleDateString(),
+            details: item.details || 'No details',
+            permanentDrug: item.permanentDrug || 'None',
+          }));
+          break;
+
+        case 'MH By Doctor':
+          data = await firstValueFrom(
+            this.medicalReportService.getAllMHByDoctor(
+              domainName,
+              this.selectedStudent,
               this.selectedSchool,
               this.selectedGrade,
               this.selectedClass
             )
           );
-
           this.tableData = data.map((item) => ({
             date: new Date(item.insertedAt).toLocaleDateString(),
             details: item.details || 'No details',
@@ -195,6 +226,7 @@ export class MedicalReportComponent implements OnInit {
           data = await firstValueFrom(
             this.medicalReportService.getAllHygieneForms(
               domainName,
+              this.selectedStudent,
               this.selectedSchool,
               this.selectedGrade,
               this.selectedClass
@@ -220,6 +252,7 @@ export class MedicalReportComponent implements OnInit {
           data = await firstValueFrom(
             this.medicalReportService.getAllFollowUps(
               domainName,
+              this.selectedStudent,
               this.selectedSchool,
               this.selectedGrade,
               this.selectedClass
@@ -239,12 +272,8 @@ export class MedicalReportComponent implements OnInit {
       this.showTable = true;
     } catch (error) {
       console.error('Error loading report data:', error);
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Failed to load report data',
-        confirmButtonText: 'OK',
-      });
+      this.tableData = [];
+      this.showTable = true;
     } finally {
       this.isLoading = false;
     }
@@ -318,14 +347,62 @@ export class MedicalReportComponent implements OnInit {
     );
     const selectedGrade = this.grades.find((g) => g.id === this.selectedGrade);
     const selectedClass = this.classes.find((c) => c.id === this.selectedClass);
+    const selectedStudent = this.students.find(
+      (s) => s.id === this.selectedStudent
+    );
 
     this.pdfInfoRows = [
       { keyEn: 'Report Type: ' + this.selectedTab },
       { keyEn: 'School: ' + (selectedSchool?.name || 'N/A') },
       { keyEn: 'Grade: ' + (selectedGrade?.name || 'N/A') },
       { keyEn: 'Class: ' + (selectedClass?.name || 'N/A') },
+      { keyEn: 'Student: ' + (selectedStudent?.name || 'N/A') },
       { keyEn: 'Report Date: ' + new Date().toLocaleDateString() },
     ];
+  }
+
+  getCurrentHeaders(): string[] {
+    switch (this.selectedTab) {
+      case 'MH By Parent':
+      case 'MH By Doctor':
+        return ['Date', 'Details', 'Permanent Drug'];
+      case 'Hygiene Form':
+        return ['Date', 'Attendance', 'Type', 'Comment', 'Action Taken'];
+      case 'Follow Up':
+        return ['Date', 'Diagnosis', 'Drug', 'Dose', 'Recommendations'];
+      default:
+        return [];
+    }
+  }
+
+  getCellValue(row: any, header: string): string {
+    const headerKey = header.toLowerCase().replace(/ /g, '');
+    switch (headerKey) {
+      case 'date':
+        return row.date;
+      case 'details':
+        return row.details;
+      case 'permanentdrug':
+        return row.permanentDrug;
+      case 'attendance':
+        return row.attendance;
+      case 'type':
+        return row.types;
+      case 'comment':
+        return row.comment;
+      case 'actiontaken':
+        return row.actionTaken;
+      case 'diagnosis':
+        return row.diagnosis;
+      case 'drug':
+        return row.drug;
+      case 'dose':
+        return row.dose;
+      case 'recommendations':
+        return row.recommendations;
+      default:
+        return row[headerKey] || '';
+    }
   }
 
   exportToExcel() {
@@ -359,6 +436,9 @@ export class MedicalReportComponent implements OnInit {
     );
     const selectedGrade = this.grades.find((g) => g.id === this.selectedGrade);
     const selectedClass = this.classes.find((c) => c.id === this.selectedClass);
+    const selectedStudent = this.students.find(
+      (s) => s.id === this.selectedStudent
+    );
 
     excelData.push([
       { v: 'Report Type:', s: { font: { bold: true } } },
@@ -375,6 +455,10 @@ export class MedicalReportComponent implements OnInit {
     excelData.push([
       { v: 'Class:', s: { font: { bold: true } } },
       { v: selectedClass?.name || 'N/A', s: { font: { bold: true } } },
+    ]);
+    excelData.push([
+      { v: 'Student:', s: { font: { bold: true } } },
+      { v: selectedStudent?.name || 'N/A', s: { font: { bold: true } } },
     ]);
     excelData.push([]);
 
@@ -503,55 +587,5 @@ export class MedicalReportComponent implements OnInit {
         this.showPDF = false;
       }, 100);
     }, 100);
-  }
-
-  getCellValue(row: any, header: string): string {
-    const headerKey = header.toLowerCase().replace(/ /g, '');
-    switch (headerKey) {
-      // MH By Parent and MH By Doctor
-      case 'date':
-        return row.date;
-      case 'details':
-        return row.details;
-      case 'permanentdrug':
-        return row.permanentDrug;
-
-      // Hygiene Form
-      case 'attendance':
-        return row.attendance;
-      case 'type':
-        return row.types;
-      case 'comment':
-        return row.comment;
-      case 'actiontaken':
-        return row.actionTaken;
-
-      // Follow Up
-      case 'diagnosis':
-        return row.diagnosis;
-      case 'drug':
-        return row.drug;
-      case 'dose':
-        return row.dose;
-      case 'recommendations':
-        return row.recommendations;
-
-      default:
-        return row[headerKey] || '';
-    }
-  }
-
-  getCurrentHeaders(): string[] {
-    switch (this.selectedTab) {
-      case 'MH By Parent':
-      case 'MH By Doctor':
-        return ['Date', 'Details', 'Permanent Drug'];
-      case 'Hygiene Form':
-        return ['Date', 'Attendance', 'Type', 'Comment', 'Action Taken'];
-      case 'Follow Up':
-        return ['Date', 'Diagnosis', 'Drug', 'Dose', 'Recommendations'];
-      default:
-        return [];
-    }
   }
 }
