@@ -11,17 +11,25 @@ import { CommonModule } from '@angular/common';
   styleUrl: './notification-pop-up.component.css'
 })
 export class NotificationPopUpComponent {
+  notifications: Notification[] = [];
+
   constructor(
     private dialogRef: MatDialogRef<NotificationPopUpComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { notification: Notification[] }
   ) {}
 
-  ngOnInit() {
-    if (!this.data.notification || this.data.notification.length === 0) { 
+  ngOnInit() { 
+    if (this.data.notification && this.data.notification.length > 0) {
+      this.notifications = [...this.data.notification];
+    } else {
       this.dialogRef.close();
-    } 
+    }
   }
 
+  addNotification(notification: Notification) {
+    this.notifications.push(notification);
+  } 
+  
   close() {
     this.dialogRef.close();
   }

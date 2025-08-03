@@ -68,7 +68,7 @@ export class QuestionBankComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'description', 'lessonName', 'mark', 'difficultyLevel', 'questionTypeName'];
+  keysArray: string[] = ['id', 'lessonName', 'mark', 'difficultyLevel', 'questionTypeName'];
 
   CurrentPage: number = 1
   PageSize: number = 10

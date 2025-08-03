@@ -13,6 +13,7 @@ using LMS_CMS_DAL.Models.Domains.Administration;
 using LMS_CMS_DAL.Models.Domains.Communication;
 using LMS_CMS_BL.DTO.Administration;
 using Microsoft.EntityFrameworkCore;
+using LMS_CMS_PL.Services.SignalR;
 
 namespace LMS_CMS_PL.Controllers.Domains.Communication
 {
@@ -26,14 +27,16 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
         private readonly CheckPageAccessService _checkPageAccessService;
         private readonly FileImageValidationService _fileImageValidationService;
         private readonly UserTreeService _userTreeService;
+        private readonly NotificationService _notificationService;
 
-        public NotificationController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileImageValidationService fileImageValidationService, UserTreeService userTreeService)
+        public NotificationController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileImageValidationService fileImageValidationService, UserTreeService userTreeService, NotificationService notificationService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _checkPageAccessService = checkPageAccessService;
             _fileImageValidationService = fileImageValidationService;
             _userTreeService = userTreeService;
+            _notificationService = notificationService;
         }
 
         [HttpGet]
@@ -393,22 +396,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                 item.NotifiedOrNot = true;
                 TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
                 item.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
-                //if (userTypeClaim == "octa")
-                //{
-                //    item.UpdatedByOctaId = userId;
-                //    if (item.UpdatedByUserId != null)
-                //    {
-                //        item.UpdatedByUserId = null;
-                //    }
-                //}
-                //else if (userTypeClaim == "employee")
-                //{
-                //    item.UpdatedByUserId = userId;
-                //    if (item.UpdatedByOctaId != null)
-                //    {
-                //        item.UpdatedByOctaId = null;
-                //    }
-                //}
                 Unit_Of_Work.notificationSharedTo_Repository.Update(item);
             }
             Unit_Of_Work.SaveChanges();
@@ -450,6 +437,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             if(NewNotification.ImageFile == null && NewNotification.Text == null && NewNotification.Link == null)
             {
                 return BadRequest("You have to choose one element atleast to appear");
+            }
+            if(NewNotification.Link == null || NewNotification.Link == "")
+            {
+                NewNotification.IsAllowDismiss = true;
             }
              
             List<long> targetUserIds;
@@ -522,7 +513,22 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                     notificationSharedTo.InsertedByUserId = userId;
                 }
 
-                Unit_Of_Work.notificationSharedTo_Repository.Add(notificationSharedTo);  
+                Unit_Of_Work.notificationSharedTo_Repository.Add(notificationSharedTo); 
+
+                var notificationDTO = mapper.Map<NotificationSharedToGetDTO>(notificationSharedTo);
+
+                string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+                if (!string.IsNullOrEmpty(notificationDTO.ImageLink))
+                {
+                    notificationDTO.ImageLink = $"{serverUrl}{notificationDTO.ImageLink.Replace("\\", "/")}";
+                }
+
+                notificationSharedTo.NotifiedOrNot = true; 
+                notificationSharedTo.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                Unit_Of_Work.notificationSharedTo_Repository.Update(notificationSharedTo);
+
+                await _notificationService.PushRealTimeNotification(userID, NewNotification.UserTypeID, notificationDTO);
+
             }
 
             Unit_Of_Work.SaveChanges();
