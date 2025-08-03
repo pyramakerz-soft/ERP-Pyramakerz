@@ -1,4 +1,4 @@
-export class MedicalHistory {
+export class MedicalHistory3 {
   [key: string]: any;
 
   constructor(
@@ -19,5 +19,41 @@ export class MedicalHistory {
     public updatedAt?: string,
     public doctorId?: number,
     public doctorName?: string
+  ) {}
+}
+
+export class DoctorMedicalHistory {
+  constructor(
+    public id: number,
+    public schoolId: number,
+    public school: string = '',
+    public gradeId: number,
+    public grade: string = '',
+    public classRoomID: number,
+    public classRoom: string = '',
+    public studentId: number,
+    public student: string = '',
+    public details: string,
+    public attached: any = null,
+    public permanentDrug: string,
+    public firstReport: File | null,
+    public secReport: File | null,
+    public insertedAt: string,
+    public insertedByUserId: number,
+    public en_name: string
+  ) {}
+}
+
+export class ParentMedicalHistory {
+  constructor(
+    public id: number,
+    public details: string,
+    public permanentDrug: string,
+    public firstReport: File | null,
+    public secReport: File | null,
+    public insertedAt: string,
+    public updatedAt: string | null,
+    public insertedByUserId: number,
+    public en_name: string
   ) {}
 }

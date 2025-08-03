@@ -1,8 +1,7 @@
-
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { MedicalHistory } from '../../../Models/Clinic/MedicalHistory';
+import { DoctorMedicalHistory, ParentMedicalHistory } from '../../../Models/Clinic/MedicalHistory';
 import { ApiService } from '../../api.service';
 
 @Injectable({
@@ -17,7 +16,7 @@ export class MedicalHistoryService {
   }
 
   
-  GetByDoctor(DomainName: string): Observable<MedicalHistory[]> {
+  GetByDoctor(DomainName: string): Observable<DoctorMedicalHistory[]> {
     if (DomainName != null) {
       this.header = DomainName;
     }
@@ -26,11 +25,11 @@ export class MedicalHistoryService {
       .set('Domain-Name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('accept', '*/*');
-    return this.http.get<MedicalHistory[]>(`${this.baseUrl}/MedicalHistory/GetByDoctor`, { headers });
+    return this.http.get<DoctorMedicalHistory[]>(`${this.baseUrl}/MedicalHistory/GetByDoctor`, { headers });
   }
 
   
-  AddByDoctor(medicalHistory: MedicalHistory, DomainName: string): Observable<any> {
+  AddByDoctor(medicalHistory: DoctorMedicalHistory, DomainName: string): Observable<any> {
     if (DomainName != null) {
       this.header = DomainName;
     }
@@ -71,7 +70,7 @@ export class MedicalHistoryService {
   }
 
   
-  UpdateByDoctorAsync(medicalHistory: MedicalHistory, DomainName: string): Observable<any> {
+  UpdateByDoctorAsync(medicalHistory: DoctorMedicalHistory, DomainName: string): Observable<any> {
     if (DomainName != null) {
       this.header = DomainName;
     }
@@ -127,7 +126,7 @@ export class MedicalHistoryService {
   }
 
   
-  GetByIdByDoctor(id: number, DomainName: string): Observable<MedicalHistory> {
+  GetByIdByDoctor(id: number, DomainName: string): Observable<DoctorMedicalHistory> {
     if (DomainName != null) {
       this.header = DomainName;
     }
@@ -136,7 +135,7 @@ export class MedicalHistoryService {
       .set('Domain-Name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('accept', '*/*');
-    return this.http.get<MedicalHistory>(`${this.baseUrl}/MedicalHistory/GetByIdByDoctor/id?id=${id}`, { headers });
+    return this.http.get<DoctorMedicalHistory>(`${this.baseUrl}/MedicalHistory/GetByIdByDoctor/id?id=${id}`, { headers });
   }
 
   
@@ -180,7 +179,7 @@ export class MedicalHistoryService {
 //   }
 
   
-  AddByParent(medicalHistory: MedicalHistory, DomainName: string): Observable<any> {
+  AddByParent(medicalHistory: ParentMedicalHistory, DomainName: string): Observable<any> {
     if (DomainName != null) {
       this.header = DomainName;
     }

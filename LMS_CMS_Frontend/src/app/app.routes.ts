@@ -207,6 +207,7 @@ import { AllStoresBalanceReportComponent } from './Pages/Employee/Inventory/Repo
 import { DiscussionRoomComponent } from './Pages/Employee/LMS/discussion-room/discussion-room.component';
 import { NotificationComponent } from './Pages/Employee/Communication/notification/notification.component';
 import { MyNotificationComponent } from './Pages/Communication/my-notification/my-notification.component';
+import { MedicalHistoryTableComponent } from './Pages/Parent/clinic/medical-history/medical-history-table/medical-history-table.component';
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
     { path: "Octa/login", component: OctaLoginComponent, title: "login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -471,6 +472,8 @@ export const routes: Routes = [
             { path: "Test/:registerationFormParentID/:TestId", component: RegistraionTestComponent, title: "Test" },
             { path: "Registration Form", component: RegistrationFormComponent, title: "Registration Form" },
             { path: "Interview Registration", component: InterviewRegistrationComponentParent, title: "Interview Registration" }, 
+            { path: "Medical History", component: MedicalHistoryTableComponent, title: "Medical History" },
+
         ]
     },
     {
