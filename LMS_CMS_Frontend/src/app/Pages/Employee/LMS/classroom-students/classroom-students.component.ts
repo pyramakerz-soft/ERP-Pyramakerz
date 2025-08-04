@@ -144,7 +144,7 @@ export class ClassroomStudentsComponent {
     )
   }
 
-  OpenModal() {
+  openModal() {
     this.isModalOpen = true;
   } 
 

@@ -58,7 +58,7 @@
         </thead>
         <tbody>
             <tr *ngIf="TableData.length === 0">
-                <td colspan="7"
+                <td colspan="8"
                     class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
                     No Data Found
                 </td>
@@ -112,7 +112,7 @@
             <div class="flex flex-col mb-4 w-[49%]">
                 <label class="mb-2 primaryTxt" for="schoolID">School</label>
                 <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
-                    id="schoolID" [(ngModel)]="remedialClassroom.schoolID"
+                    id="schoolID" [(ngModel)]="remedialClassroom.schoolID" [disabled]="mode=='Edit'"
                     (change)="GetAllGrades(); GetAllAcademicYearBySchool();"
                     (ngModelChange)="onInputValueChange({ field: 'schoolID', value: $event })">
                     <option [value]=0 disabled selected hidden>Choose School</option>
@@ -124,7 +124,7 @@
             <div class="flex flex-col mb-4 w-[49%]">
                 <label class="mb-2 primaryTxt" for="academicYearID">Academic Year</label>
                 <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
-                    id="academicYearID" [(ngModel)]="remedialClassroom.academicYearID" [disabled]="!remedialClassroom.schoolID"
+                    id="academicYearID" [(ngModel)]="remedialClassroom.academicYearID" [disabled]="!remedialClassroom.schoolID || mode=='Edit'"
                     (ngModelChange)="onInputValueChange({ field: 'academicYearID', value: $event })">
                     <option [value]=0 disabled selected hidden>Choose Academic Year</option>
                     <option *ngFor="let c of academicYears" [value]="c.id">{{ c.name }}</option>
@@ -135,7 +135,7 @@
             <div class="flex flex-col mb-4 w-[49%]">
                 <label class="mb-2 primaryTxt" for="gradeID">Grades</label>
                 <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
-                    id="gradeID" [(ngModel)]="remedialClassroom.gradeID" [disabled]="!remedialClassroom.schoolID"
+                    id="gradeID" [(ngModel)]="remedialClassroom.gradeID" [disabled]="!remedialClassroom.schoolID || mode=='Edit'"
                     (change)="GetAllSubjectGradeId();"
                     (ngModelChange)="onInputValueChange({ field: 'gradeID', value: $event })">
                     <option [value]=0 disabled selected hidden>Choose Grade</option>
@@ -167,21 +167,6 @@
                 </select>
                 <span *ngIf="validationErrors['teacherID']" class="text-red-500 ml-3 font-normal">{{ validationErrors['teacherID'] }}</span>
             </div>
-            <div class="flex flex-col mb-4 w-full">
-            <label class="mb-2 primaryTxt" for="studentID">Students</label>
-
-            <div class="rounded-lg border border-solid px-4 py-3 bg-white w-full" [ngClass]="{
-                'cursor-pointer': remedialClassroom.gradeID && remedialClassroom.academicYearID,
-                'cursor-not-allowed bg-gray-100 text-gray-400': !remedialClassroom.gradeID || !remedialClassroom.academicYearID
-                }"
-                (click)="(remedialClassroom.gradeID && remedialClassroom.academicYearID) && SerachOnStudents()">
-                <span *ngIf="remedialClassroom.StudentsId.length === 0" class="text-gray-400">Choose Student</span>
-                <span *ngIf="remedialClassroom.StudentsId.length != 0">{{remedialClassroom.StudentsId.length}} Selected Students </span>
-            </div>
-            <span *ngIf="validationErrors['StudentsId']" class="text-red-500 ml-3 font-normal">
-                {{ validationErrors['StudentsId'] }}
-            </span>
-            </div>
         </div>
         <div class="flex justify-end">
             <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
@@ -193,13 +178,3 @@
     </div>
 </div>
 
-<app-search-student
-  *ngIf="isModalOpen"
-  [selectedYear]="remedialClassroom.academicYearID"
-  [selectedGrade]="remedialClassroom.gradeID"
-  [selectedClassroom]="preSelectedClassroom"
-  [hiddenInputs]="hiddenInputs"
-  [hiddenColumns]="hiddenColumns"
-  (closeModal)="closeModalStudent()"
-  (studentSelected)="handleStudentSelected($event)"
-></app-search-student>
