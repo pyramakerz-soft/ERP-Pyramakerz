@@ -104,16 +104,16 @@ export class ReportItemCardComponent implements OnInit {
       return;
     }
 
-    if (!this.selectedStoreId || !this.selectedItemId) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Missing Information',
-        text: 'Please select both Store and Item',
-        confirmButtonColor: '#3085d6',
-        confirmButtonText: 'OK',
-      });
-      return;
-    }
+    // if (!this.selectedStoreId || !this.selectedItemId) {
+    //   Swal.fire({
+    //     icon: 'warning',
+    //     title: 'Missing Information',
+    //     text: 'Please select both Store and Item',
+    //     confirmButtonColor: '#3085d6',
+    //     confirmButtonText: 'OK',
+    //   });
+    //   return;
+    // }
 
     this.isLoading = true;
     this.showTable = false;
@@ -150,13 +150,13 @@ export class ReportItemCardComponent implements OnInit {
   ) {
     const summaryRow: any = {
       isSummary: true,
-      date: summary.fromDate || '-',
+      date: summary.toDate || '-',
       transactionType: 'Initial Balance',
       invoiceNumber: '0',
       authority: '-',
-      income: summary.inQuantity ?? '-',
-      outcome: summary.outQuantity ?? '-',
-      balance: summary.quantitybalance ?? '-',
+      income: summary.inQuantity || '-',
+      outcome: summary.outQuantity || '-',
+      balance: summary.quantitybalance || '-',
       averageCost: summary.costBalance ?? '-',
     };
 
@@ -207,8 +207,8 @@ export class ReportItemCardComponent implements OnInit {
 
       return {
         Date: formatDate(t.date),
-        'Transaction Type': t.transactionType || '-',
-        'Invoice #': t.invoiceNumber || '-',
+        'Type': t.transactionType || '-',
+        '#': t.invoiceNumber || '-',
         Authority: t.authority || '-',
         Income: t.income || '-',
         Outcome: t.outcome || '-',
@@ -223,7 +223,7 @@ export class ReportItemCardComponent implements OnInit {
   }
 
   DownloadAsPDF() {
-    if (this.transactionsForExport.length === 0) {
+    if (this.transactionsForExport.length == 0) {
       Swal.fire({
         icon: 'warning',
         title: 'No Data',
@@ -241,7 +241,7 @@ export class ReportItemCardComponent implements OnInit {
   }
 
   Print() {
-    if (this.transactionsForExport.length === 0) {
+    if (this.transactionsForExport.length == 0) {
       Swal.fire({
         icon: 'warning',
         title: 'No Data',
@@ -251,7 +251,7 @@ export class ReportItemCardComponent implements OnInit {
       return;
     }
 
-    this.showPDF = true;
+    this.showPDF = true;  
     setTimeout(() => {
       const printContents = document.getElementById('Data')?.innerHTML;
       if (!printContents) {
@@ -291,7 +291,7 @@ export class ReportItemCardComponent implements OnInit {
   }
 
   exportExcel() {
-    if (this.combinedData.length === 0) {
+    if (this.combinedData.length == 0) {
       Swal.fire({
         icon: 'warning',
         title: 'No Data',

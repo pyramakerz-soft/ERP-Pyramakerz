@@ -53,7 +53,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             return Ok(DTO);
         }
 
-        /// ///////////////////////////////////////////////////-777
+        /// ///////////////////////////////////////////////////
         [HttpGet("inventory-net-combined")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
@@ -127,7 +127,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 CostBalance = costBalance
             };
         }
-        /////////////////////////////////////////////////////////////////
+
+
         private async Task<List<InventoryNetTransactionDTO>> GetInventoryNetTransactionsInternalAsync(long storeId, long shopItemId, DateTime fromDate, DateTime toDate)
         {
             var parsedFromDate = fromDate.Date;
