@@ -2061,6 +2061,7 @@ namespace LMS_CMS_DAL.Models.Domains
             modelBuilder.Entity<AccountingEntriesReport>()
                 .HasNoKey().ToView(null);
 
+            ///////////// Models without keys and views /////////////
             modelBuilder.Entity<CountResult>()
                 .HasNoKey().ToView(null);
 
@@ -2075,6 +2076,48 @@ namespace LMS_CMS_DAL.Models.Domains
 
             modelBuilder.Entity<AccountTotals>()
                 .HasNoKey().ToView(null);
+
+            ///////////// Adding Indexes /////////////
+            ///
+            modelBuilder.Entity<AccountingEntriesMaster>()
+                .HasIndex(e => e.IsDeleted)
+                .HasDatabaseName("IX_EntriesMaster_IsDeleted");
+
+            modelBuilder.Entity<AccountingEntriesMaster>()
+                .HasIndex(e => e.Date)
+                .HasDatabaseName("IX_EntriesMaster_Date");
+
+            modelBuilder.Entity<AccountingEntriesDetails>()
+                .HasIndex(e => e.IsDeleted)
+                .HasDatabaseName("IX_EntriesDetails_IsDeleted");
+
+            modelBuilder.Entity<InventoryMaster>()
+                .HasIndex(e => e.Date)
+                .HasDatabaseName("IX_InventoryMaster_Date");
+
+            modelBuilder.Entity<InventoryMaster>()
+                .HasIndex(e => e.IsDeleted)
+                .HasDatabaseName("IX_InventoryMaster_IsDeleted");
+
+            modelBuilder.Entity<Supplier>()
+                .HasIndex(e => e.IsDeleted)
+                .HasDatabaseName("IX_Supplier_IsDeleted");
+
+            modelBuilder.Entity<PayableMaster>()
+                .HasIndex(e => e.IsDeleted)
+                .HasDatabaseName("IX_PayableMaster_IsDeleted");
+
+            modelBuilder.Entity<PayableMaster>()
+                .HasIndex(e => e.LinkFileID)
+                .HasDatabaseName("IX_PayableMaster_LinkFileID");
+
+            modelBuilder.Entity<PayableDetails>()
+                .HasIndex(e => e.IsDeleted)
+                .HasDatabaseName("IX_PayableDetails_IsDeleted");
+
+            modelBuilder.Entity<PayableDetails>()
+                .HasIndex(e => e.LinkFileTypeID)
+                .HasDatabaseName("IX_PayableDetails_LinkFileTypeID");
         }
     }
 }
