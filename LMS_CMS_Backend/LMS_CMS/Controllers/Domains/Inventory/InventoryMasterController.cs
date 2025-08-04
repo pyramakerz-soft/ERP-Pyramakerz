@@ -157,7 +157,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             if (obj.FlagIds == null || !obj.FlagIds.Any())
                 return BadRequest("FlagIds cannot be null or empty.");
 
-            // ✅ استخدم DateTime مباشرة بدون TryParse
             var dateFrom = obj.DateFrom.Date;
             var dateTo = obj.DateTo.Date.AddDays(1).AddTicks(-1); // نهاية اليوم
 
@@ -229,11 +228,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             });
         }
 
-        //  /////////////////////////////////////////////////////////////////////////-777
-
-      
-        /////////////////////////////////////////////////////////////////////////////
-
+        /////////////////////////////////////////////////////////////////////////-777
 
         [HttpGet("{id}")]
         [Authorize_Endpoint_(

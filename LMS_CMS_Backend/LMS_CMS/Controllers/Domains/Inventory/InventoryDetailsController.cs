@@ -107,7 +107,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 ToDate = toDate.AddDays(-1),
                 InQuantity = quantityBalance > 0 ? quantityBalance : 0,
                 outQuantity = quantityBalance < 0 ? -quantityBalance : 0,
-
                 Quantitybalance = quantityBalance,
                 CostBalance = costBalance
             };
@@ -198,9 +197,115 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                     StoreToName = (d.InventoryMaster.FlagId == 8) ? d.InventoryMaster.StoreToTransform?.Name : null
                 });
             }
-
             return Ok(transactions);
         }
+        //////////////////////////////////////////////////////////////////////////////////////-777
+        //[HttpGet("inventory-net-combined77")]
+        //[Authorize_Endpoint_(
+        //allowedTypes: new[] { "octa", "employee" },
+        //pages: new[] { "Inventory" })]
+        //public async Task<IActionResult> GetInventoryNetCombinedAsync77( AllDTO obj )
+        //{
+        //    var Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+        //    var flagsToExclude = new long[] { 13 };
+
+        //    var allData = await Unit_Of_Work.inventoryDetails_Repository
+        //        .Select_All_With_IncludesById<InventoryDetails>(
+        //            d => d.InventoryMaster != null &&
+        //                 d.InventoryMaster.IsDeleted != true &&
+        //                 d.IsDeleted != true &&
+        //                 d.ShopItemID == obj.ShopItemId &&
+        //                 (d.InventoryMaster.StoreID == obj.StoreId ||
+        //                    (d.InventoryMaster.FlagId == 8 && d.InventoryMaster.StoreToTransformId == obj.StoreId)),
+        //            q => q.Include(d => d.InventoryMaster).ThenInclude(m => m.InventoryFlags),
+        //            q => q.Include(d => d.InventoryMaster.Supplier),
+        //            q => q.Include(d => d.InventoryMaster.Student),
+        //            q => q.Include(d => d.InventoryMaster.Store),
+        //            q => q.Include(d => d.InventoryMaster.StoreToTransform));
+        //    // ==== حساب الرصيد السابق =====
+        //    var previousBalance = allData                    // Summary 
+        //        .Where(d =>
+        //            d.InventoryMaster.Date <= obj.DateTo &&
+        //            !flagsToExclude.Contains(d.InventoryMaster.FlagId) &&
+        //            d.InventoryMaster.InventoryFlags.ItemInOut != 0)
+        //        .Sum(d => d.Quantity * d.InventoryMaster.InventoryFlags.ItemInOut);
+
+        //    var summaryData = allData
+        //        .Where(d =>
+        //            d.InventoryMaster.Date <= obj.DateTo &&
+        //            !flagsToExclude.Contains(d.InventoryMaster.FlagId) &&
+        //            d.InventoryMaster.InventoryFlags != null &&
+        //            d.InventoryMaster.InventoryFlags.ItemInOut != 0)
+        //        .ToList();
+
+        //    // ✅   حساب الكميات  
+        //    var inQuantity = summaryData
+        //        .Where(d => d.InventoryMaster.InventoryFlags.ItemInOut == 1)
+        //        .Sum(d => d.Quantity);
+
+        //    var outQuantity = summaryData
+        //        .Where(d => d.InventoryMaster.InventoryFlags.ItemInOut == -1)
+        //        .Sum(d => d.Quantity);
+
+        //    var quantityBalance = inQuantity - outQuantity;
+
+        //    // ✅   حساب التكلفة  
+        //    var costBalance = summaryData
+        //        .Sum(d => d.AverageCost * d.InventoryMaster.InventoryFlags.ItemInOut);
+        //    var summaryDto = new AllDTO
+        //    {
+        //        ShopItemId = obj.ShopItemId,
+        //        StoreId = obj.StoreId,
+        //        Date = obj.DateTo.AddDays(-1),
+        //        InQuantity = quantityBalance > 0 ? quantityBalance : 0,
+        //        outQuantity = quantityBalance < 0 ? -quantityBalance : 0,
+        //        Quantitybalance = quantityBalance,
+        //        CostBalance = costBalance
+        //    };
+
+        //    var transactionData = allData
+        //        .Where(d =>
+        //            d.InventoryMaster.Date >= obj.FromDate &&
+        //            d.InventoryMaster.Date <= obj.ToDate)
+        //        .OrderBy(d => d.InventoryMaster.Date)
+        //        .ToList();
+
+        //    var runningBalance = previousBalance;
+        //    var transactions = new List<AllDTO>();
+        //    foreach (var d in transactionData)
+        //    {
+        //        var itemInOut = d.InventoryMaster.InventoryFlags.ItemInOut;
+        //        var signedQty = d.Quantity * itemInOut;
+        //        runningBalance += signedQty;
+        //        transactions.Add(new AllDTO
+        //        {
+        //            Date = d.InventoryMaster.Date,
+        //            FlagId = d.InventoryMaster.FlagId,
+        //            FlagName = d.InventoryMaster.InventoryFlags.arName,
+        //            InvoiceNumber = d.InventoryMaster.InvoiceNumber,
+        //            Notes = d.InventoryMaster.Notes,
+        //            Quantity = d.Quantity,
+        //            inQuantity = d.Quantity * (itemInOut == 1 ? 1 : 0),
+        //            outQuantity = d.Quantity * (itemInOut == -1 ? 1 : 0),
+        //            Balance = runningBalance,
+        //            Price = d.Price,
+        //            TotalPrice = d.TotalPrice,
+        //            AverageCost = d.AverageCost,
+        //            ItemInOut = itemInOut,
+        //            SupplierName = (new long[] { 9, 10, 13 }.Contains(d.InventoryMaster.FlagId)) ? d.InventoryMaster.Supplier?.Name : null,
+        //            StudentName = (new long[] { 11, 12 }.Contains(d.InventoryMaster.FlagId)) ? d.InventoryMaster.Student?.en_name : null,
+        //            StoreName = d.InventoryMaster.Store?.Name,
+        //            StoreToName = (d.InventoryMaster.FlagId == 8) ? d.InventoryMaster.StoreToTransform?.Name : null
+        //        });
+        //    }
+        //    var result = new
+        //    {
+        //        Summary = summaryDto,
+        //        Transactions = transactions
+        //    };
+        //    return Ok(result);
+        //}
+
 
         //////////////////////////////////////////////////////////////////////////////////////-777
         //[HttpGet("inventory-net-combined")]
