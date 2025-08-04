@@ -29,24 +29,13 @@ import Swal from 'sweetalert2';
 @Component({
   selector: 'app-remedial-classroom',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent, SearchStudentComponent],
+  imports: [FormsModule, CommonModule, SearchComponent],
   templateUrl: './remedial-classroom.component.html',
   styleUrl: './remedial-classroom.component.css'
 })
 export class RemedialClassroomComponent {
 
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -232,15 +221,15 @@ export class RemedialClassroomComponent {
   }
 
   handleStudentSelected(students: number[]) {
-    if (!Array.isArray(this.remedialClassroom.StudentsId)) {
-      this.remedialClassroom.StudentsId = [];
+    if (!Array.isArray(this.remedialClassroom.studentIds)) {
+      this.remedialClassroom.studentIds = [];
     }
-    const existingIds = new Set(this.remedialClassroom.StudentsId);
+    const existingIds = new Set(this.remedialClassroom.studentIds);
     for (const id of students) {
       existingIds.add(id);
     }
-    this.remedialClassroom.StudentsId = Array.from(existingIds);
-    console.log(this.remedialClassroom.StudentsId);
+    this.remedialClassroom.studentIds = Array.from(existingIds);
+    console.log(this.remedialClassroom.studentIds);
   }
 
   async onSearchEvent(event: { key: string; value: any }) {
@@ -303,7 +292,7 @@ export class RemedialClassroomComponent {
   }
 
   View(id:number){
-    
+    this.router.navigateByUrl('Employee/Remedial Classes/'+id);
   }
 
   openModal() {

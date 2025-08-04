@@ -33,8 +33,9 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("BySchoolId/{SchoolId}")]
         [Authorize_Endpoint_(
-              allowedTypes: new[] { "octa", "employee" },
-               pages: new[] { "Remedial Classes" }
+              allowedTypes: new[] { "octa", "employee" }
+              //,
+              // pages: new[] { "Remedial Classes" }
           )]
         public async Task<IActionResult> GetAsync(long SchoolId)
         {
@@ -77,8 +78,9 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("ByGradeId/{gradeId}")]
         [Authorize_Endpoint_(
-              allowedTypes: new[] { "octa", "employee" },
-               pages: new[] { "Remedial Classes" }
+              allowedTypes: new[] { "octa", "employee" }
+              //,
+              // pages: new[] { "Remedial Classes" }
           )]
         public async Task<IActionResult> GetByGradeIdAsync(long gradeId)
         {
@@ -116,8 +118,9 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
-             allowedTypes: new[] { "octa", "employee" },
-              pages: new[] { "Remedial Classes" }
+             allowedTypes: new[] { "octa", "employee" }
+             //,
+             // pages: new[] { "Remedial Classes" }
          )]
         public async Task<IActionResult> GetById(long id)
         {
@@ -133,6 +136,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     query => query.Include(x => x.Subject),
                     query => query.Include(x => x.Subject.Grade),
                     query => query.Include(x => x.Teacher),
+                    query => query.Include(x => x.RemedialClassroomStudents).ThenInclude(s => s.Student) ,
                     query => query.Include(x => x.AcademicYear.School),
                     query => query.Include(emp => emp.AcademicYear));
 
@@ -140,6 +144,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             {
                 return NotFound();
             }
+            RemedialClassroom.RemedialClassroomStudents = RemedialClassroom.RemedialClassroomStudents.Where(s => s.IsDeleted != true).ToList();
+
             RemedialClassRoomGetDTO Dto = mapper.Map<RemedialClassRoomGetDTO>(RemedialClassroom);
 
             return Ok(Dto);
@@ -149,8 +155,9 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpPost]
         [Authorize_Endpoint_(
-          allowedTypes: new[] { "octa", "employee" },
-          pages: new[] { "Remedial Classes" }
+          allowedTypes: new[] { "octa", "employee" }
+          //,
+          //pages: new[] { "Remedial Classes" }
          )]
         public async Task<IActionResult> Add(RemedialClassroomAddDTO NewRemedialClass)
         {
@@ -203,30 +210,6 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             Unit_Of_Work.remedialClassroom_Repository.Add(remedialClassroom);
             Unit_Of_Work.SaveChanges();
 
-            // create remedial classrooom student
-
-            foreach (var item in NewRemedialClass.StudentsId)
-            {
-                StudentGrade studentGrade = Unit_Of_Work.studentGrade_Repository.First_Or_Default(s => s.StudentID == item && s.GradeID == subject.GradeID && s.IsDeleted != true);
-                if(studentGrade != null)
-                {
-                    RemedialClassroomStudent remedialClassroomStudent = new RemedialClassroomStudent();
-                    remedialClassroomStudent.StudentID = item;
-                    remedialClassroomStudent.RemedialClassroomID = remedialClassroom.ID;
-                    remedialClassroomStudent.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
-                    if (userTypeClaim == "octa")
-                    {
-                        remedialClassroomStudent.InsertedByOctaId = userId;
-                    }
-                    else if (userTypeClaim == "employee")
-                    {
-                        remedialClassroomStudent.InsertedByUserId = userId;
-                    }
-                    Unit_Of_Work.remedialClassroomStudent_Repository.Add(remedialClassroomStudent);
-
-                }
-
-            }
             return Ok(NewRemedialClass);
         }
 
@@ -234,9 +217,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpPut]
         [Authorize_Endpoint_(
-         allowedTypes: new[] { "octa", "employee" },
-         allowEdit: 1,
-         pages: new[] { "Remedial Classes" }
+         allowedTypes: new[] { "octa", "employee" }
+         //,
+         //allowEdit: 1,
+         //pages: new[] { "Remedial Classes" }
        )]
         public async Task<IActionResult> EditAsync(RemedialClassroomEditDTOcs NewRemedialClass)
         {
@@ -282,14 +266,14 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return NotFound("there is no remedialClassroom with this id");
             }
 
-            if (userTypeClaim == "employee")
-            {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Remedial Classes", roleId, userId, remedialClassroom);
-                if (accessCheck != null)
-                {
-                    return accessCheck;
-                }
-            }
+            //if (userTypeClaim == "employee")
+            //{
+            //    IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Remedial Classes", roleId, userId, remedialClassroom);
+            //    if (accessCheck != null)
+            //    {
+            //        return accessCheck;
+            //    }
+            //}
 
             mapper.Map(NewRemedialClass, remedialClassroom);
 
@@ -358,9 +342,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpDelete("{id}")]
         [Authorize_Endpoint_(
-          allowedTypes: new[] { "octa", "employee" },
-          allowDelete: 1,
-          pages: new[] { "Remedial Classes" }
+          allowedTypes: new[] { "octa", "employee" }
+          //,
+          //allowDelete: 1,
+          //pages: new[] { "Remedial Classes" }
          )]
         public IActionResult Delete(long id)
         {
@@ -389,14 +374,14 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return NotFound("No Remedial Classroom with this ID");
             }
 
-            if (userTypeClaim == "employee")
-            {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Remedial Classes", roleId, userId, remedialClassroom);
-                if (accessCheck != null)
-                {
-                    return accessCheck;
-                }
-            }
+            //if (userTypeClaim == "employee")
+            //{
+            //    IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Remedial Classes", roleId, userId, remedialClassroom);
+            //    if (accessCheck != null)
+            //    {
+            //        return accessCheck;
+            //    }
+            //}
 
             remedialClassroom.IsDeleted = true;
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
