@@ -104,16 +104,16 @@ export class ReportItemCardComponent implements OnInit {
       return;
     }
 
-    if (!this.selectedStoreId || !this.selectedItemId) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Missing Information',
-        text: 'Please select both Store and Item',
-        confirmButtonColor: '#3085d6',
-        confirmButtonText: 'OK',
-      });
-      return;
-    }
+    // if (!this.selectedStoreId || !this.selectedItemId) {
+    //   Swal.fire({
+    //     icon: 'warning',
+    //     title: 'Missing Information',
+    //     text: 'Please select both Store and Item',
+    //     confirmButtonColor: '#3085d6',
+    //     confirmButtonText: 'OK',
+    //   });
+    //   return;
+    // }
 
     this.isLoading = true;
     this.showTable = false;
@@ -154,9 +154,9 @@ export class ReportItemCardComponent implements OnInit {
       transactionType: 'Initial Balance',
       invoiceNumber: '0',
       authority: '-',
-      income: summary.inQuantity ?? '-',
-      outcome: summary.outQuantity ?? '-',
-      balance: summary.quantitybalance ?? '-',
+      income: summary.inQuantity || '-',
+      outcome: summary.outQuantity || '-',
+      balance: summary.quantitybalance || '-',
       averageCost: summary.costBalance ?? '-',
     };
 
