@@ -74,7 +74,7 @@ export class StoreBalanceReportComponent implements OnInit {
   private setPageTitle() {
     switch (this.reportType) {
       case 'QuantityOnly':
-        this.pageTitle = 'Quantity Only Report';
+        this.pageTitle = 'Store Items Balance';
         break;
       case 'PurchasePrice':
         this.pageTitle = 'Purchase Price Report';
