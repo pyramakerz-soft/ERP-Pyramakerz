@@ -150,7 +150,7 @@ export class ReportItemCardComponent implements OnInit {
   ) {
     const summaryRow: any = {
       isSummary: true,
-      date: summary.fromDate || '-',
+      date: summary.toDate || '-',
       transactionType: 'Initial Balance',
       invoiceNumber: '0',
       authority: '-',
@@ -207,8 +207,8 @@ export class ReportItemCardComponent implements OnInit {
 
       return {
         Date: formatDate(t.date),
-        'Transaction Type': t.transactionType || '-',
-        'Invoice #': t.invoiceNumber || '-',
+        'Type': t.transactionType || '-',
+        '#': t.invoiceNumber || '-',
         Authority: t.authority || '-',
         Income: t.income || '-',
         Outcome: t.outcome || '-',
