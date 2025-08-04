@@ -150,7 +150,7 @@ export class ReportItemCardComponent implements OnInit {
   ) {
     const summaryRow: any = {
       isSummary: true,
-      date: summary.fromDate || '-',
+      date: summary.toDate || '-',
       transactionType: 'Initial Balance',
       invoiceNumber: '0',
       authority: '-',
@@ -223,7 +223,7 @@ export class ReportItemCardComponent implements OnInit {
   }
 
   DownloadAsPDF() {
-    if (this.transactionsForExport.length === 0) {
+    if (this.transactionsForExport.length == 0) {
       Swal.fire({
         icon: 'warning',
         title: 'No Data',
@@ -241,7 +241,7 @@ export class ReportItemCardComponent implements OnInit {
   }
 
   Print() {
-    if (this.transactionsForExport.length === 0) {
+    if (this.transactionsForExport.length == 0) {
       Swal.fire({
         icon: 'warning',
         title: 'No Data',
@@ -251,7 +251,7 @@ export class ReportItemCardComponent implements OnInit {
       return;
     }
 
-    this.showPDF = true;
+    this.showPDF = true;  
     setTimeout(() => {
       const printContents = document.getElementById('Data')?.innerHTML;
       if (!printContents) {
@@ -291,7 +291,7 @@ export class ReportItemCardComponent implements OnInit {
   }
 
   exportExcel() {
-    if (this.combinedData.length === 0) {
+    if (this.combinedData.length == 0) {
       Swal.fire({
         icon: 'warning',
         title: 'No Data',
