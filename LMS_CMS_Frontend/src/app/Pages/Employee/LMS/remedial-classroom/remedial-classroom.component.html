@@ -77,15 +77,12 @@
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.teacherName }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 ">
                     <div class="flex space-x-3">
-                        <!-- <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)" (click)="delete(row.id)">
+                        <button (click)="delete(row.id)">
                             <i class="fa-regular fa-trash-can"></i>
                         </button>
-                        <button *ngIf="AllowEdit && IsAllowEdit(row.insertedByUserId)" (click)="View(row.id)">
+                        <button (click)="View(row.id)">
                             <i class="fa-solid fa-eye"></i>
                         </button>
-                        <button (click)="openPrintModal(row.id)">
-                            <img class="w-4 cursor-pointer" src="Icons/Print.png" title="Print">
-                        </button> -->
                     </div>
                 </td>
             </tr>
@@ -172,13 +169,18 @@
             </div>
             <div class="flex flex-col mb-4 w-full">
             <label class="mb-2 primaryTxt" for="studentID">Students</label>
-                <div class="rounded-lg border border-solid border-gray-300 px-4 py-3 cursor-pointer bg-white" (click)="SerachOnStudents()">
-                    <span *ngIf="!remedialClassroom.StudentsId" class="text-gray-400">Choose Student</span>
-                    <span *ngIf="remedialClassroom.StudentsId">a</span>
-                </div>
-                <span *ngIf="validationErrors['StudentsId']" class="text-red-500 ml-3 font-normal">
-                    {{ validationErrors['StudentsId'] }}
-                </span>
+
+            <div class="rounded-lg border border-solid px-4 py-3 bg-white w-full" [ngClass]="{
+                'cursor-pointer': remedialClassroom.gradeID && remedialClassroom.academicYearID,
+                'cursor-not-allowed bg-gray-100 text-gray-400': !remedialClassroom.gradeID || !remedialClassroom.academicYearID
+                }"
+                (click)="(remedialClassroom.gradeID && remedialClassroom.academicYearID) && SerachOnStudents()">
+                <span *ngIf="remedialClassroom.StudentsId.length === 0" class="text-gray-400">Choose Student</span>
+                <span *ngIf="remedialClassroom.StudentsId.length != 0">{{remedialClassroom.StudentsId.length}} Selected Students </span>
+            </div>
+            <span *ngIf="validationErrors['StudentsId']" class="text-red-500 ml-3 font-normal">
+                {{ validationErrors['StudentsId'] }}
+            </span>
             </div>
         </div>
         <div class="flex justify-end">
@@ -195,6 +197,9 @@
   *ngIf="isModalOpen"
   [selectedYear]="remedialClassroom.academicYearID"
   [selectedGrade]="remedialClassroom.gradeID"
+  [selectedClassroom]="preSelectedClassroom"
+  [hiddenInputs]="hiddenInputs"
+  [hiddenColumns]="hiddenColumns"
   (closeModal)="closeModalStudent()"
   (studentSelected)="handleStudentSelected($event)"
 ></app-search-student>

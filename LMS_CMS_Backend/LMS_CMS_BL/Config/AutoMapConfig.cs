@@ -1168,7 +1168,7 @@ namespace LMS_CMS_BL.Config
                 .ForMember(dest => dest.SchoolID, opt => opt.MapFrom(src => src.AcademicYear.SchoolID))
                 .ForMember(dest => dest.SchoolName, opt => opt.MapFrom(src => src.AcademicYear.School.Name))
                 .ForMember(dest => dest.AcademicYearName, opt => opt.MapFrom(src => src.AcademicYear.Name));
-            CreateMap<RemedialTimeTableDay, RemedialTimeTableDay>();
+            CreateMap<RemedialTimeTableDay, RemedialTimeTableDayGetDTO>();
 
         }
     } 

@@ -235,7 +235,7 @@
                         </div>
                     </div> 
                 </div>  
-                <div class="flex w-full space-x-5 items-center mb-4">
+                <div *ngIf="notification.link" class="flex w-full space-x-5 items-center mb-4">
                     <input [disabled]="this.notification.id != 0" type="checkbox" id="allowDismiss" class="w-5 h-5" (change)="onIsAllowDismissChange($event)"
                         [checked]="notification.isAllowDismiss">
                     <label for="allowDismiss" class="text-sm">Is Allow Dismiss</label>
