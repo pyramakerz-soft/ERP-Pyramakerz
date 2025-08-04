@@ -99,7 +99,7 @@ export class ClassroomSubjectsComponent {
 
   getEmployees(){
     this.Employees = []
-    this.employeeService.Get_Employees(this.DomainName).subscribe(
+    this.employeeService.GetWithTypeId(4, this.DomainName).subscribe(
       data =>{
         this.Employees = data
       }

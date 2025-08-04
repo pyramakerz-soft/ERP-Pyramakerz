@@ -93,7 +93,7 @@ export class EvaluationComponent {
  
   getEmployeeData() {
     this.Employees = [];
-    this.employeeService.Get_Employees(this.DomainName).subscribe((data) => {
+    this.employeeService.GetWithTypeId(4, this.DomainName).subscribe((data) => {
       this.Employees = data;
     });
   }

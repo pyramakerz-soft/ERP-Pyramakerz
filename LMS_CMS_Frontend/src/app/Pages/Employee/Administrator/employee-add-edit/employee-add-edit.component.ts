@@ -116,10 +116,8 @@ private languageService: LanguageService
             this.EmpId,
             this.DomainName
           ).subscribe(async (data) => {
-            this.Data = data;
-            console.log(55, data);
-            this.Data.editedFiles = [];
-            console.log(this.Data);
+            this.Data = data; 
+            this.Data.editedFiles = []; 
             if (data.files == null) {
               this.Data.files = [];
             }
