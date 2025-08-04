@@ -14,12 +14,12 @@ import { RealTimeNotificationServiceService } from './Services/shared/real-time-
 })
 export class AppComponent {
   title = 'ERP_System';
-  DomainName = ''  
+  // DomainName = ''  
   
-  constructor(private realTimeService: RealTimeNotificationServiceService, private ApiServ: ApiService) {}
+  // constructor(private realTimeService: RealTimeNotificationServiceService, private ApiServ: ApiService) {}
 
-  ngOnInit() {
-    this.DomainName = this.ApiServ.GetHeader();  
-    this.realTimeService.startConnection();
-  }
+  // ngOnInit() {
+  //   this.DomainName = this.ApiServ.GetHeader();  
+  //   this.realTimeService.startConnection();
+  // }
 }
