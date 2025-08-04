@@ -1,9 +1,9 @@
 import { Component, ViewChild, ViewContainerRef } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { IterativeNotificcationService } from './Services/shared/iterative-notificcation.service';
+import { FormsModule } from '@angular/forms'; 
 import { ApiService } from './Services/api.service';
+import { RealTimeNotificationServiceService } from './Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-root',
@@ -16,15 +16,10 @@ export class AppComponent {
   title = 'ERP_System';
   DomainName = ''  
   
-  constructor(private iterativeNotificcationService: IterativeNotificcationService, private ApiServ: ApiService) {}
+  constructor(private realTimeService: RealTimeNotificationServiceService, private ApiServ: ApiService) {}
 
-  ngOnInit() { 
-    this.DomainName = this.ApiServ.GetHeader(); 
-
-    this.iterativeNotificcationService.startInterval(this.DomainName);
+  ngOnInit() {
+    this.DomainName = this.ApiServ.GetHeader();  
+    this.realTimeService.startConnection();
   }
-
-  ngOnDestroy() { 
-    this.iterativeNotificcationService.stopInterval();
-  } 
 }

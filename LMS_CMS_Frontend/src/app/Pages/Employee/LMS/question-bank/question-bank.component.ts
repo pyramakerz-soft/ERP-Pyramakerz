@@ -68,7 +68,7 @@ export class QuestionBankComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'description', 'lessonName', 'mark', 'difficultyLevel', 'questionTypeName'];
+  keysArray: string[] = ['id', 'lessonName', 'mark', 'difficultyLevel', 'questionTypeName'];
 
   CurrentPage: number = 1
   PageSize: number = 10
@@ -494,6 +494,7 @@ export class QuestionBankComponent {
   }
   
   CreateOREdit() {
+    console.log(this.questionBank)
     this.questionBank.questionBankTagsDTO = this.TagsSelected.map(s => s.id)
     if (this.isFormValid()) {
       this.isLoading = true;

@@ -18,6 +18,7 @@ namespace LMS_CMS_BL.DTO.LMS
         public string AcademicYearName { get; set; }
         public long SchoolID { get; set; }
         public string SchoolName { get; set; }
+        public DateTime? InsertedAt { get; set; }
         public ICollection<RemedialTimeTableDayGetDTO> RemedialTimeTableDays { get; set; } 
 
     }

@@ -46,7 +46,7 @@ export class TimeTableService {
   }
 
 
-  GetDutyByDate(id: number,date :string, DomainName: string) {
+  GetDutyByDate(id: number, date: string, DomainName: string) {
     if (DomainName != null) {
       this.header = DomainName;
     }
