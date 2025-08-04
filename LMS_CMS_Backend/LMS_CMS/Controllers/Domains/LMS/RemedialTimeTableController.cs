@@ -33,7 +33,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet("BySchoolId/{SchoolId}")]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
-           pages: new[] { "Time Table" }
+           pages: new[] { "Remedial TimeTable" }
          )]
         public IActionResult Get(long SchoolId)
         {
@@ -72,7 +72,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
-           pages: new[] { "Time Table" }
+           pages: new[] { "Remedial TimeTable" }
          )]
         public async Task<IActionResult> GetById(long id)
         {
@@ -85,7 +85,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return Unauthorized("User ID or Type claim not found.");
 
             RemedialTimeTable RemedialTimeTable =await Unit_Of_Work.remedialTimeTable_Repository.FindByIncludesAsync(t => t.IsDeleted != true && t.ID == id ,
-                    query => query.Include(x => x.AcademicYear.School),
+                    query => query.Include(x => x.AcademicYear),
                     query => query.Include(x => x.RemedialTimeTableDays),
                     query => query.Include(emp => emp.AcademicYear));
 
@@ -103,7 +103,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpPost]
         [Authorize_Endpoint_(
          allowedTypes: new[] { "octa", "employee" },
-         pages: new[] { "Section" }
+         pages: new[] { "Remedial TimeTable" }
         )]
         public async Task<IActionResult> Add(RemedialTimeTableAddDTO NewRemedialTimeTable)
         {
@@ -211,7 +211,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee" },
            allowEdit: 1,
-           pages: new[] { "Time Table" }
+           pages: new[] { "Remedial TimeTable" }
          )]
         public IActionResult EditFavourite(long id, bool IsFavourite)
         {
@@ -279,7 +279,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
           allowEdit: 1,
-          pages: new[] { "Time Table" }
+          pages: new[] { "Remedial TimeTable" }
         )]
         public IActionResult Edit(List<RemedialTimeTableEditDTO> NewRemedial)
         {

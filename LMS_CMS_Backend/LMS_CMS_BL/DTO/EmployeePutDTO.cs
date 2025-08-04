@@ -32,6 +32,8 @@ namespace LMS_CMS_BL.DTO
         public string? Address { get; set; }
         public bool? CanReceiveRequest { get; set; }
         public bool? CanReceiveMessage { get; set; }
+        public bool? CanReceiveRequestFromParent { get; set; }
+        public bool? CanReceiveMessageFromParent { get; set; }
 
         [Required]
         public long Role_ID { get; set; }

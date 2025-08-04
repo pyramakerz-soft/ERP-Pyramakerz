@@ -12,7 +12,7 @@ import { firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { MedicalHistory } from '../../../../../Models/Clinic/MedicalHistory';
+import { DoctorMedicalHistory } from '../../../../../Models/Clinic/MedicalHistory';
 import { SchoolService } from '../../../../../Services/Employee/school.service';
 import { GradeService } from '../../../../../Services/Employee/LMS/grade.service';
 import { ClassroomService } from '../../../../../Services/Employee/LMS/classroom.service';
@@ -29,12 +29,12 @@ import { ApiService } from '../../../../../Services/api.service';
 })
 export class MedicalHistoryModalComponent implements OnInit, OnChanges {
   @Input() isVisible = false;
-  @Input() medicalHistoryData: MedicalHistory | null = null;
+  @Input() medicalHistoryData: DoctorMedicalHistory | null = null;
   @Output() isVisibleChange = new EventEmitter<boolean>();
   @Output() onSave = new EventEmitter<void>();
 
   editMode = false;
-  medicalHistory: MedicalHistory = new MedicalHistory(
+  medicalHistory: DoctorMedicalHistory = new DoctorMedicalHistory(
     0,
     0,
     '',
@@ -45,10 +45,13 @@ export class MedicalHistoryModalComponent implements OnInit, OnChanges {
     0,
     '',
     '',
-    '',
-    new Date().toISOString(),
     null,
-    null
+    '',
+    null,
+    null,
+    new Date().toISOString(),
+    0,
+    ''
   );
   firstReportPreview: File | null = null;
   secReportPreview: File | null = null;
@@ -88,7 +91,7 @@ export class MedicalHistoryModalComponent implements OnInit, OnChanges {
         this.secReportPreview = this.medicalHistory.secReport;
       } else {
         this.editMode = false;
-        this.medicalHistory = new MedicalHistory(
+        this.medicalHistory = new DoctorMedicalHistory(
           0,
           0,
           '',
@@ -99,10 +102,13 @@ export class MedicalHistoryModalComponent implements OnInit, OnChanges {
           0,
           '',
           '',
-          '',
-          new Date().toISOString(),
           null,
-          null
+          '',
+          null,
+          null,
+          new Date().toISOString(),
+          0,
+          ''
         );
         this.firstReportPreview = null;
         this.secReportPreview = null;
@@ -245,6 +251,8 @@ export class MedicalHistoryModalComponent implements OnInit, OnChanges {
   }
 
   isSaving: boolean = false;
+
+  
   async saveMedicalHistory() {
     if (this.isFormValid()) {
       try {
@@ -306,7 +314,7 @@ export class MedicalHistoryModalComponent implements OnInit, OnChanges {
 
     // Reset form data and validation errors when closing
     this.editMode = false;
-    this.medicalHistory = new MedicalHistory(
+    this.medicalHistory = new DoctorMedicalHistory(
       0,
       0,
       '',
@@ -317,10 +325,13 @@ export class MedicalHistoryModalComponent implements OnInit, OnChanges {
       0,
       '',
       '',
-      '',
-      new Date().toISOString(),
       null,
-      null
+      '',
+      null,
+      null,
+      new Date().toISOString(),
+      0,
+      ''
     );
     this.firstReportPreview = null;
     this.secReportPreview = null;

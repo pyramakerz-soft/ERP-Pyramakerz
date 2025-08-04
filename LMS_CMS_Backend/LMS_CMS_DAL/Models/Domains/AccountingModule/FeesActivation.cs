@@ -16,7 +16,7 @@ namespace LMS_CMS_DAL.Models.Domains.AccountingModule
         public decimal Amount { get; set; }
         public float Discount { get; set; }
         public decimal Net { get; set; }
-        public string Date { get; set; }
+        public DateOnly Date { get; set; }
         [ForeignKey("TuitionFeesType")]
         public long FeeTypeID { get; set; }
         [ForeignKey("TuitionDiscountType")]

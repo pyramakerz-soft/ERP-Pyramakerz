@@ -185,6 +185,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.HasIndex("InsertedByUserId");
 
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_EntriesDetails_IsDeleted");
+
                     b.HasIndex("UpdatedByUserId");
 
                     b.ToTable("AccountingEntriesDetails");
@@ -255,9 +258,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<long>("AccountingEntriesDocTypeID")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("Date")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
@@ -299,9 +301,15 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.HasIndex("AccountingEntriesDocTypeID");
 
+                    b.HasIndex("Date")
+                        .HasDatabaseName("IX_EntriesMaster_Date");
+
                     b.HasIndex("DeletedByUserId");
 
                     b.HasIndex("InsertedByUserId");
+
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_EntriesMaster_IsDeleted");
 
                     b.HasIndex("UpdatedByUserId");
 
@@ -735,9 +743,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("Date")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
@@ -936,9 +943,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("ID"));
 
-                    b.Property<string>("Date")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
@@ -1160,7 +1166,13 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.HasIndex("InsertedByUserId");
 
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_PayableDetails_IsDeleted");
+
                     b.HasIndex("LinkFileID");
+
+                    b.HasIndex("LinkFileTypeID")
+                        .HasDatabaseName("IX_PayableDetails_LinkFileTypeID");
 
                     b.HasIndex("PayableMasterID");
 
@@ -1234,9 +1246,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<long>("BankOrSaveID")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("Date")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
@@ -1286,7 +1297,11 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.HasIndex("InsertedByUserId");
 
-                    b.HasIndex("LinkFileID");
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_PayableMaster_IsDeleted");
+
+                    b.HasIndex("LinkFileID")
+                        .HasDatabaseName("IX_PayableMaster_LinkFileID");
 
                     b.HasIndex("PayableDocTypeID");
 
@@ -1428,9 +1443,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<long>("BankOrSaveID")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("Date")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
@@ -1732,6 +1746,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.HasIndex("DeletedByUserId");
 
                     b.HasIndex("InsertedByUserId");
+
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_Supplier_IsDeleted");
 
                     b.HasIndex("UpdatedByUserId");
 
@@ -4068,7 +4085,13 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<bool?>("CanReceiveMessage")
                         .HasColumnType("bit");
 
+                    b.Property<bool?>("CanReceiveMessageFromParent")
+                        .HasColumnType("bit");
+
                     b.Property<bool?>("CanReceiveRequest")
+                        .HasColumnType("bit");
+
+                    b.Property<bool?>("CanReceiveRequestFromParent")
                         .HasColumnType("bit");
 
                     b.Property<int?>("CasualLeavesBalance")
@@ -4695,6 +4718,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.HasIndex("BankID");
 
+                    b.HasIndex("Date")
+                        .HasDatabaseName("IX_InventoryMaster_Date");
+
                     b.HasIndex("DeletedByUserId");
 
                     b.HasIndex("ETAPOSID");
@@ -4702,6 +4728,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.HasIndex("FlagId");
 
                     b.HasIndex("InsertedByUserId");
+
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_InventoryMaster_IsDeleted");
 
                     b.HasIndex("IssuerId");
 

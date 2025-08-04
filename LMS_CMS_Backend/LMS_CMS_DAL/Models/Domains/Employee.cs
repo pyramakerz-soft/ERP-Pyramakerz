@@ -57,7 +57,8 @@ namespace LMS_CMS_DAL.Models.Domains
         public string? Note { get; set; }
         public bool? CanReceiveRequest { get; set; }
         public bool? CanReceiveMessage { get; set; }
-
+        public bool? CanReceiveRequestFromParent { get; set; }
+        public bool? CanReceiveMessageFromParent { get; set; }
 
         [ForeignKey("Role")]
         [Required]
