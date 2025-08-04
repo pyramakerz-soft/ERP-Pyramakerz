@@ -11,31 +11,33 @@ import { HttpClient } from '@angular/common/http';
   providedIn: 'root'
 })
 export class RealTimeNotificationServiceService {
-  private hubConnection!: signalR.HubConnection; 
+  private hubConnection: signalR.HubConnection| null = null; 
   BaseUrlOcta=""
   header = ""
   DomainName = ""
   private dialogRef: MatDialogRef<NotificationPopUpComponent> | null = null;
+  public notificationReceived = new signalR.Subject<Notification>();
  
   constructor(
     private dialog: MatDialog,
     public http: HttpClient,
-    public ApiServ: ApiService, public notificatonService:NotificationService
+    public ApiServ: ApiService, public notificationService:NotificationService
   ) {
     this.BaseUrlOcta=ApiServ.BaseUrlOcta
     this.header = ApiServ.GetHeader()
     this.DomainName = this.ApiServ.GetHeader();
   }
 
-  startConnection(): void {
+  startConnection(): void { 
     this.hubConnection = new signalR.HubConnectionBuilder()
       .withUrl(`http://localhost:5094/notificationHub`, {
         accessTokenFactory: () => localStorage.getItem("current_token")!,
         headers: {
           "Domain-Name": this.DomainName
-        },
+        }, 
         withCredentials: true  
       })
+      .configureLogging(signalR.LogLevel.Information)
       .withAutomaticReconnect()
       .build(); 
 
@@ -51,8 +53,23 @@ export class RealTimeNotificationServiceService {
     });
   }
 
+  stopConnection(): void {
+    if (this.hubConnection) {
+      this.hubConnection.stop()
+        .then(() => {
+          console.log('SignalR Disconnected');
+          this.hubConnection = null;
+        })
+        .catch(err => console.error('Error stopping SignalR:', err));
+    }
+    if (this.dialogRef) {
+      this.dialogRef.close();
+      this.dialogRef = null;
+    }
+  }
+
   private loadOldNotifications() {
-    this.notificatonService.GetNotNotifiedYetByUserID(this.DomainName).subscribe((data) => {
+    this.notificationService.GetNotNotifiedYetByUserID(this.DomainName).subscribe((data) => {
       if (data && data.length > 0) {
         this.dialogRef = this.dialog.open(NotificationPopUpComponent, {
           data: { notification: data },

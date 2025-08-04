@@ -22,7 +22,6 @@ using Amazon;
 using System;
 using LMS_CMS_PL.Hubs;
 using LMS_CMS_PL.Services.SignalR;
-using LMS_CMS_BL.Helpers;
 using Microsoft.AspNetCore.SignalR;
 
 namespace LMS_CMS
@@ -175,8 +174,7 @@ namespace LMS_CMS
 
 
             // 1) SignalR 
-            builder.Services.AddSignalR();
-            builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
+            builder.Services.AddSignalR(); 
 
 
             var app = builder.Build();
@@ -204,7 +202,9 @@ namespace LMS_CMS
 
 
             //////// Get Connection String
-            app.UseWhen(context => context.Request.Path.StartsWithSegments("/api/with-domain"), appBuilder =>
+            app.UseWhen(context => context.Request.Path.StartsWithSegments("/api/with-domain") ||
+                        context.Request.Path.StartsWithSegments("/notificationHub"), 
+                appBuilder =>
             {
                 appBuilder.UseMiddleware<GetConnectionStringMiddleware>();
             });

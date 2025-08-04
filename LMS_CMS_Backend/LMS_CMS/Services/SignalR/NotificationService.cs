@@ -7,13 +7,15 @@ namespace LMS_CMS_PL.Services.SignalR
     public class NotificationService
     {
         private readonly IHubContext<NotificationHub> _hubContext;
+        private readonly DbContextFactoryService _dbContextFactory;
 
-        public NotificationService(IHubContext<NotificationHub> hubContext)
+        public NotificationService(IHubContext<NotificationHub> hubContext, DbContextFactoryService dbContextFactory)
         {
             _hubContext = hubContext;
-        } 
-        public async Task PushRealTimeNotification(long userId, long userType, object notification)
-        {
+            _dbContextFactory = dbContextFactory; 
+        }
+        public async Task PushRealTimeNotification(long userId, long userType, object notification, string domainName)
+        {  
             string userTypeString = userType switch
             {
                 1 => "employee",
@@ -22,11 +24,11 @@ namespace LMS_CMS_PL.Services.SignalR
                 _ => null
             };
 
-            if (userTypeString == null)
-                return; 
+            if (string.IsNullOrEmpty(domainName) || userTypeString == null)
+                throw new Exception("Invalid domain or user type.");
 
-            var uniqueKey = $"{userTypeString}_{userId}";
-            await _hubContext.Clients.User(uniqueKey).SendAsync("ReceiveNotification", notification);
+            var uniqueKey = $"{domainName}_{userType}_{userId}"; 
+            await _hubContext.Clients.Group(uniqueKey).SendAsync("ReceiveNotification", notification);
         }
     }
 }

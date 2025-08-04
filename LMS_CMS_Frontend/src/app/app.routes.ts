@@ -120,8 +120,8 @@ import { StockingDetailsComponent } from './Pages/Employee/Inventory/stocking-de
 import { ViewHygieneFormComponent } from './Pages/Employee/Clinic/hygiene_form/veiw-hygiene-form/veiw-hygiene-form.component';
 import { StudentsNamesInClassComponent } from './Pages/Employee/Registration/Reports/students-names-in-class/students-names-in-class.component';
 import { StudentInformationComponent } from './Pages/Employee/Registration/Reports/student-information/student-information.component';
-import { MedicalHistoryByDoctorComponent } from './Pages/Employee/Clinic/medical-report/medical-history-by-doctor/medical-history-by-doctor.component';
-import { MedicalHistoryByParentComponent } from './Pages/Employee/Clinic/medical-report/medical-history-by-parent/medical-history-by-parent.component';
+// import { MedicalHistoryByDoctorComponent } from './Pages/Employee/Clinic/medical-report/medical-history-by-doctor/medical-history-by-doctor.component';
+// import { MedicalHistoryByParentComponent } from './Pages/Employee/Clinic/medical-report/medical-history-by-parent/medical-history-by-parent.component';
 import { ProofRegistrationAndSuccessFormReportComponent } from './Pages/Employee/Registration/Reports/proof-registration-and-success-form-report/proof-registration-and-success-form-report.component';
 import { ProofRegistrationReportComponent } from './Pages/Employee/Registration/Reports/proof-registration-report/proof-registration-report.component';
 import { StudentsInformationFormReportComponent } from './Pages/Employee/Registration/Reports/students-information-form-report/students-information-form-report.component';
@@ -207,6 +207,7 @@ import { AllStoresBalanceReportComponent } from './Pages/Employee/Inventory/Repo
 import { DiscussionRoomComponent } from './Pages/Employee/LMS/discussion-room/discussion-room.component';
 import { NotificationComponent } from './Pages/Employee/Communication/notification/notification.component';
 import { MyNotificationComponent } from './Pages/Communication/my-notification/my-notification.component';
+import { MedicalHistoryTableComponent } from './Pages/Parent/clinic/medical-history/medical-history-table/medical-history-table.component';
 import { RemedialClassroomComponent } from './Pages/Employee/LMS/remedial-classroom/remedial-classroom.component';
 import { RemedialTimeTableComponent } from './Pages/Employee/LMS/remedial-time-table/remedial-time-table.component';
 import { RemedialTimeTableViewComponent } from './Pages/Employee/LMS/remedial-time-table-view/remedial-time-table-view.component';
@@ -229,8 +230,8 @@ export const routes: Routes = [
             { path: "Hygiene Form Medical Report", component: HygieneFormComponent, title: "Hygiene Form" },
             { path: "Create Hygiene Form", component: CreateHygieneFormComponent, title: "Create Hygiene Form" },
             { path: 'view hygiene form/:id', component: ViewHygieneFormComponent },
-            { path: 'mh by parent/:id', component: MedicalHistoryByParentComponent },
-            { path: 'mh by doctor/:id', component: MedicalHistoryByDoctorComponent },
+            // { path: 'mh by parent/:id', component: MedicalHistoryByParentComponent },
+            // { path: 'mh by doctor/:id', component: MedicalHistoryByDoctorComponent },
             { path: "Follow Up", component: FollowUpComponent, title: "Follow Up" },
             { path: "Medical History", component: MedicalHistoryComponent, title: "Medical History" },
             { path: "Medical Report", component: MedicalReportComponent, title: "Medical Report" },
@@ -479,6 +480,8 @@ export const routes: Routes = [
             { path: "Test/:registerationFormParentID/:TestId", component: RegistraionTestComponent, title: "Test" },
             { path: "Registration Form", component: RegistrationFormComponent, title: "Registration Form" },
             { path: "Interview Registration", component: InterviewRegistrationComponentParent, title: "Interview Registration" }, 
+            { path: "Medical History", component: MedicalHistoryTableComponent, title: "Medical History" },
+
         ]
     },
     {

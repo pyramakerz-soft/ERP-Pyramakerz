@@ -61,6 +61,7 @@ export class ReportItemCardComponent implements OnInit {
     this.isLoading = true;
     this.storesService.Get(this.storesService.ApiServ.GetHeader()).subscribe({
       next: (stores) => {
+        console.log('Stores loaded:', stores);
         this.stores = stores;
         this.isLoading = false;
       },
@@ -76,6 +77,7 @@ export class ReportItemCardComponent implements OnInit {
       .Get(this.shopItemService.ApiServ.GetHeader())
       .subscribe({
         next: (items) => {
+          console.log('Items loaded:', items);
           this.items = items;
           this.isLoading = false;
         },
@@ -102,16 +104,16 @@ export class ReportItemCardComponent implements OnInit {
       return;
     }
 
-    if (!this.selectedStoreId || !this.selectedItemId) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Missing Information',
-        text: 'Please select both Store and Item',
-        confirmButtonColor: '#3085d6',
-        confirmButtonText: 'OK',
-      });
-      return;
-    }
+    // if (!this.selectedStoreId || !this.selectedItemId) {
+    //   Swal.fire({
+    //     icon: 'warning',
+    //     title: 'Missing Information',
+    //     text: 'Please select both Store and Item',
+    //     confirmButtonColor: '#3085d6',
+    //     confirmButtonText: 'OK',
+    //   });
+    //   return;
+    // }
 
     this.isLoading = true;
     this.showTable = false;
@@ -148,13 +150,13 @@ export class ReportItemCardComponent implements OnInit {
   ) {
     const summaryRow: any = {
       isSummary: true,
-      date: summary.fromDate || '-', // Changed from toDate to fromDate
+      date: summary.toDate || '-',
       transactionType: 'Initial Balance',
       invoiceNumber: '0',
       authority: '-',
-      income: summary.inQuantity ?? '-',
-      outcome: summary.outQuantity ?? '-',
-      balance: summary.quantitybalance ?? '-',
+      income: summary.inQuantity || '-',
+      outcome: summary.outQuantity || '-',
+      balance: summary.quantitybalance || '-',
       averageCost: summary.costBalance ?? '-',
     };
 
@@ -165,7 +167,7 @@ export class ReportItemCardComponent implements OnInit {
 
     const transactionRows = transactions.map((t) => {
       const row: any = {
-        isSummary: false, // Added this missing property
+        isSummary: false,
         date: t.date || '-',
         transactionType: t.flagName || '-',
         invoiceNumber: t.invoiceNumber || '-',
@@ -205,8 +207,8 @@ export class ReportItemCardComponent implements OnInit {
 
       return {
         Date: formatDate(t.date),
-        'Transaction Type': t.transactionType || '-',
-        'Invoice #': t.invoiceNumber || '-',
+        'Type': t.transactionType || '-',
+        '#': t.invoiceNumber || '-',
         Authority: t.authority || '-',
         Income: t.income || '-',
         Outcome: t.outcome || '-',
@@ -221,7 +223,7 @@ export class ReportItemCardComponent implements OnInit {
   }
 
   DownloadAsPDF() {
-    if (this.transactionsForExport.length === 0) {
+    if (this.transactionsForExport.length == 0) {
       Swal.fire({
         icon: 'warning',
         title: 'No Data',
@@ -239,7 +241,7 @@ export class ReportItemCardComponent implements OnInit {
   }
 
   Print() {
-    if (this.transactionsForExport.length === 0) {
+    if (this.transactionsForExport.length == 0) {
       Swal.fire({
         icon: 'warning',
         title: 'No Data',
@@ -249,7 +251,7 @@ export class ReportItemCardComponent implements OnInit {
       return;
     }
 
-    this.showPDF = true;
+    this.showPDF = true;  
     setTimeout(() => {
       const printContents = document.getElementById('Data')?.innerHTML;
       if (!printContents) {
@@ -289,7 +291,7 @@ export class ReportItemCardComponent implements OnInit {
   }
 
   exportExcel() {
-    if (this.combinedData.length === 0) {
+    if (this.combinedData.length == 0) {
       Swal.fire({
         icon: 'warning',
         title: 'No Data',
@@ -301,7 +303,7 @@ export class ReportItemCardComponent implements OnInit {
 
     const excelData: any[] = [];
 
-    // Add report title
+    
     excelData.push([
       {
         v: `${this.school.reportHeaderOneEn} - ${this.school.reportHeaderTwoEn}`,
@@ -311,9 +313,9 @@ export class ReportItemCardComponent implements OnInit {
         },
       },
     ]);
-    excelData.push([]); // empty row
+    excelData.push([]); 
 
-    // Add filter information
+    
     excelData.push([
       { v: 'From Date:', s: { font: { bold: true } } },
       { v: this.dateFrom, s: { font: { bold: true } } },
@@ -334,9 +336,9 @@ export class ReportItemCardComponent implements OnInit {
       { v: 'Item:', s: { font: { bold: true } } },
       { v: selectedItem?.enName || 'N/A', s: { font: { bold: true } } },
     ]);
-    excelData.push([]); // empty row
+    excelData.push([]); 
 
-    // Table headers
+    
     const headers = [
       'Date',
       'Transaction Type',
@@ -366,7 +368,7 @@ export class ReportItemCardComponent implements OnInit {
       }))
     );
 
-    // Table rows
+    
     this.combinedData.forEach((row, idx) => {
       const isEven = idx % 2 === 0;
       const fillColor = isEven ? 'E9E9E9' : 'FFFFFF';
@@ -419,35 +421,35 @@ export class ReportItemCardComponent implements OnInit {
       excelData.push(rowData);
     });
 
-    // Create worksheet
+    
     const worksheet = XLSX.utils.aoa_to_sheet(excelData);
 
-    // Merge title row
+    
     if (!worksheet['!merges']) worksheet['!merges'] = [];
     worksheet['!merges'].push({
       s: { r: 0, c: 0 },
       e: { r: 0, c: headers.length - 1 },
     });
 
-    // Set column widths
+    
     worksheet['!cols'] = [
-      { wch: 12 }, // Date (was 22)
-      { wch: 18 }, // Transaction Type
-      { wch: 12 }, // Invoice #
-      { wch: 20 }, // Authority
-      { wch: 10 }, // Income
-      { wch: 10 }, // Outcome
-      { wch: 12 }, // Balance
+      { wch: 12 }, 
+      { wch: 18 }, 
+      { wch: 12 }, 
+      { wch: 20 }, 
+      { wch: 10 }, 
+      { wch: 10 }, 
+      { wch: 12 }, 
       ...(this.showAverageColumn
         ? [
-            { wch: 10 }, // Price
-            { wch: 14 }, // Total Price
-            { wch: 14 }, // Average Cost
+            { wch: 10 }, 
+            { wch: 14 }, 
+            { wch: 14 }, 
           ]
         : []),
     ];
 
-    // Create workbook and save
+    
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Item Card Report');
 
