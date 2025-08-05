@@ -39,7 +39,7 @@ export class RemedialClassroomService {
     return this.http.get<RemedialClassroom[]>(`${this.baseUrl}/RemedialClassroom/ByGradeId/${GradeId}`, { headers });
   }
 
-  ById(id: number, DomainName: string) {
+  GetById(id: number, DomainName: string) {
     if (DomainName != null) {
       this.header = DomainName;
     }

@@ -1,3 +1,5 @@
+import { RemedialClassroomStudent } from "./remedial-classroom-student";
+
 export class RemedialClassroom {
     constructor(
         public id: number = 0,
@@ -13,7 +15,8 @@ export class RemedialClassroom {
         public subjectEnglishName: string = '',
         public gradeID: number = 0,
         public gradeName: string = '',
-        public StudentsId: number[] = [],
+        public studentIds: number[] = [],
+        public remedialClassroomStudents: RemedialClassroomStudent[] = [],
         public insertedAt: string = '',
         public insertedByUserId: number = 0,
     ) { }

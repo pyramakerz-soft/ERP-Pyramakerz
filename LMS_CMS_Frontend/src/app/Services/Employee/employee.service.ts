@@ -70,6 +70,8 @@ export class EmployeeService {
     formData.append('employeeTypeID', employee.employeeTypeID?.toString() ?? '');
     formData.append('canReceiveMessage', employee.canReceiveMessage?.toString() ?? 'false');
     formData.append('canReceiveRequest', employee.canReceiveRequest?.toString() ?? 'false');
+    formData.append('canReceiveMessageFromParent', employee.canReceiveMessageFromParent?.toString() ?? 'false');
+    formData.append('canReceiveRequestFromParent', employee.canReceiveRequestFromParent?.toString() ?? 'false');
 
     if (employee.files && employee.files.length > 0) {
       employee.files.forEach((file, index) => {
@@ -125,6 +127,8 @@ export class EmployeeService {
     formData.append('employeeTypeID', employee.employeeTypeID?.toString() ?? '');
     formData.append('canReceiveMessage', employee.canReceiveMessage?.toString() ?? 'false');
     formData.append('canReceiveRequest', employee.canReceiveRequest?.toString() ?? 'false');
+    formData.append('canReceiveMessageFromParent', employee.canReceiveMessageFromParent?.toString() ?? 'false');
+    formData.append('canReceiveRequestFromParent', employee.canReceiveRequestFromParent?.toString() ?? 'false');
 
     if (employee.files && employee.files.length > 0) {
       let uploadIndex = 0;

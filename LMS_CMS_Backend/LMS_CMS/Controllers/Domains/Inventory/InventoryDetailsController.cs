@@ -53,15 +53,34 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             return Ok(DTO);
         }
 
-        /// ///////////////////////////////////////////////////-777
-
-        [HttpGet("inventory-net-summary")]
+        /// ///////////////////////////////////////////////////
+        [HttpGet("inventory-net-combined")]
         [Authorize_Endpoint_(
-          allowedTypes: new[] { "octa", "employee" },
-          pages: new[] { "Inventory" })]
-        public async Task<IActionResult> GetInventoryNetSummaryAsync(long storeId, long shopItemId, DateTime toDate)
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Inventory" })]
+        public async Task<IActionResult> GetInventoryNetCombinedAsync(long storeId, long shopItemId, DateTime fromDate, DateTime toDate)
         {
+            try
+            {
+                var summaryResult = await GetInventoryNetSummaryInternalAsync(storeId, shopItemId, fromDate);
+                var transactionsResult = await GetInventoryNetTransactionsInternalAsync(storeId, shopItemId, fromDate, toDate);
 
+                var result = new
+                {
+                    Summary = summaryResult,
+                    Transactions = transactionsResult
+                };
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
+
+        private async Task<InventoryNetSummaryDTO> GetInventoryNetSummaryInternalAsync(long storeId, long shopItemId, DateTime toDate)
+        {
             var Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
             var flagsToExclude = new long[] { 13 };
 
@@ -84,7 +103,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                     d.InventoryMaster.InventoryFlags.ItemInOut != 0)
                 .ToList();
 
-            // ✅ حساب الكميات
             var inQuantity = filteredData
                 .Where(d => d.InventoryMaster.InventoryFlags.ItemInOut == 1)
                 .Sum(d => d.Quantity);
@@ -95,12 +113,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
             var quantityBalance = inQuantity - outQuantity;
 
-            // ✅ حساب التكلفة
             var costBalance = filteredData
-
                 .Sum(d => d.AverageCost * d.InventoryMaster.InventoryFlags.ItemInOut);
 
-            var dto = new InventoryNetSummaryDTO
+            return new InventoryNetSummaryDTO
             {
                 ShopItemId = shopItemId,
                 StoreId = storeId,
@@ -110,47 +126,34 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 Quantitybalance = quantityBalance,
                 CostBalance = costBalance
             };
-
-            return Ok(dto);
         }
-        // /////////////////////////////////////////////////////////////////////-77
 
-        [HttpGet("inventory-net-transactions")]
-        [Authorize_Endpoint_(
-        allowedTypes: new[] { "octa", "employee" },
-        pages: new[] { "Inventory" })]
-        public async Task<IActionResult> GetInventoryNetTransactionsAsync(long storeId, long shopItemId,
-            DateTime fromDate, DateTime toDate)
+
+        private async Task<List<InventoryNetTransactionDTO>> GetInventoryNetTransactionsInternalAsync(long storeId, long shopItemId, DateTime fromDate, DateTime toDate)
         {
             var parsedFromDate = fromDate.Date;
             var parsedToDate = toDate.Date.AddDays(1).AddTicks(-1);
 
             if (parsedFromDate > parsedToDate)
-                return BadRequest("The start date cannot be after the end date.");
+                throw new ArgumentException("The start date cannot be after the end date.");
 
             var Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-
             var flagsToExclude = new long[] { 13 };
 
-            // ===== جلب البيانات مع Include =====
             var allData = await Unit_Of_Work.inventoryDetails_Repository
                 .Select_All_With_IncludesById<InventoryDetails>(
                     d => d.InventoryMaster != null &&
                          d.InventoryMaster.IsDeleted != true &&
                          d.IsDeleted != true &&
                          d.ShopItemID == shopItemId &&
-                         (
-                            d.InventoryMaster.StoreID == storeId ||
-                            (d.InventoryMaster.FlagId == 8 && d.InventoryMaster.StoreToTransformId == storeId)
-                         ),
+                         (d.InventoryMaster.StoreID == storeId ||
+                          (d.InventoryMaster.FlagId == 8 && d.InventoryMaster.StoreToTransformId == storeId)),
                     q => q.Include(d => d.InventoryMaster).ThenInclude(m => m.InventoryFlags),
                     q => q.Include(d => d.InventoryMaster.Supplier),
                     q => q.Include(d => d.InventoryMaster.Student),
                     q => q.Include(d => d.InventoryMaster.Store),
-                    q => q.Include(d => d.InventoryMaster.StoreToTransform)
-                );
+                    q => q.Include(d => d.InventoryMaster.StoreToTransform));
 
-            // ===== 1. حساب الرصيد السابق (قبل fromDate) =====
             var previousBalance = allData
                 .Where(d =>
                     d.InventoryMaster.Date < parsedFromDate &&
@@ -158,7 +161,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                     d.InventoryMaster.InventoryFlags.ItemInOut != 0)
                 .Sum(d => d.Quantity * d.InventoryMaster.InventoryFlags.ItemInOut);
 
-            // ===== 2. جلب الحركات من fromDate إلى toDate =====
             var transactionData = allData
                 .Where(d =>
                     d.InventoryMaster.Date >= parsedFromDate &&
@@ -166,7 +168,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 .OrderBy(d => d.InventoryMaster.Date)
                 .ToList();
 
-            // ===== 3. بناء DTO مع تحديث الرصيد المتغير =====
             var runningBalance = previousBalance;
             var transactions = new List<InventoryNetTransactionDTO>();
 
@@ -197,6 +198,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                     StoreToName = (d.InventoryMaster.FlagId == 8) ? d.InventoryMaster.StoreToTransform?.Name : null
                 });
             }
+<<<<<<< HEAD
             return Ok(transactions);
         }
         //////////////////////////////////////////////////////////////////////////////////////-777
@@ -433,6 +435,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         /////// /////////////////////////////////////////////////////////////////////////////////////-777
 
 
+=======
+
+            return transactions;
+        }
+>>>>>>> 9548dc507011efb455dfbe1c7f6db3145ab22be0
         /////// /////////////////////////////////////////////////////////////////////////////////////-777
         [HttpGet("AverageCost")]
         [Authorize_Endpoint_(
@@ -450,15 +457,14 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             var Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             // ✅ تحميل جميع الحركات مرة واحدة
-            var allInventoryData = await Unit_Of_Work.inventoryMaster_Repository
-                .Select_All_With_IncludesById<InventoryMaster>(
-                    im => im.IsDeleted != true &&
-                    im.Date >= parsedFromDate && im.Date <= parsedToDate,
-                    query => query
-                        .Include(im => im.InventoryDetails)
-                        .Include(im => im.InventoryFlags)
-                );
-
+var allInventoryData = await Unit_Of_Work.inventoryMaster_Repository
+    .Select_All_With_IncludesById<InventoryMaster>(
+        im => im.IsDeleted != true &&
+        im.Date >= parsedFromDate && im.Date <= parsedToDate,
+        query => query
+            .Include(im => im.InventoryDetails)
+            .Include(im => im.InventoryFlags)
+    );
             // ========== المرحلة 1: تصفير AverageCost ==========
             foreach (var item in allInventoryData.SelectMany(im => im.InventoryDetails))
             {
@@ -1085,5 +1091,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             Unit_Of_Work.SaveChanges();
             return Ok();
         }
+
+
     }
 }

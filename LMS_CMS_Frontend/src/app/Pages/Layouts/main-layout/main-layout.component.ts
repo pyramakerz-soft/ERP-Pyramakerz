@@ -10,6 +10,7 @@ import { PagesWithRoleId } from '../../../Models/pages-with-role-id';
 import { MenuService } from '../../../Services/shared/menu.service';
 import { NewTokenService } from '../../../Services/shared/new-token.service';
 import { routes } from '../../../app.routes';
+import { RealTimeNotificationServiceService } from '../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-main-layout',
@@ -24,14 +25,20 @@ export class MainLayoutComponent {
 
   User_Data_After_Login = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
 
-  constructor(public accountService: AccountService, public roleDetailsService: RoleDetailsService ,private menuService: MenuService ,private communicationService: NewTokenService) { }
+  constructor(public accountService: AccountService, public roleDetailsService: RoleDetailsService, private menuService: MenuService, 
+    private communicationService: NewTokenService, private realTimeService: RealTimeNotificationServiceService) { }
 
   async ngOnInit() {
    await this.GetInfo();
     this.communicationService.action$.subscribe(async (state) => {
       await this.GetInfo();
 
-    });
+    }); 
+    this.realTimeService.startConnection();
+  }
+
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection(); 
   }
 
   async GetInfo(){
@@ -96,20 +103,7 @@ export class MainLayoutComponent {
               label: 'Discussion Room', route: 'Discussion Room'
             }
           ], icon: 'Virtual Meetings'
-        },
-        {
-          label: 'Communication', subItems: [
-            {
-              label: 'Request', route: 'Request'
-            },
-            {
-              label: 'Chat', route: 'Chat'
-            },
-            {
-              label: 'Notification', route: 'Notification'
-            }
-          ], icon: 'Communication'
-        },
+        }, 
         {
           label: 'Clinic', subItems: [
             {

@@ -22,8 +22,8 @@
     </div>
 
     <div class="flex flex-col mb-4 w-[49%]">
-        <label class="mb-2 primaryTxt" for="name">  {{ 'English Name' | translate }}</label>
-        <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+        <label class="mb-2 primaryTxt" for="enName">  {{ 'English Name' | translate }}</label>
+        <input id="enName" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
             (ngModelChange)="onInputValueChange({ field: 'en_name', value: $event })"  
             
             
@@ -34,8 +34,8 @@
     </div>
 
     <div class="flex flex-col mb-4 w-[49%]">
-        <label class="mb-2 primaryTxt" for="name">  {{ 'Arabic Name' | translate }}</label>
-        <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+        <label class="mb-2 primaryTxt" for="ArName">  {{ 'Arabic Name' | translate }}</label>
+        <input id="ArName" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
             (ngModelChange)="onInputValueChange({ field: 'ar_name', value: $event })"  
          placeholder="{{ 'Enter Arabic Name' | translate }}"
              [(ngModel)]="Data.ar_name" />
@@ -44,8 +44,8 @@
     </div>
 
     <div *ngIf="mode == 'Create'" class="flex flex-col mb-4 w-[49%]">
-        <label class="mb-2 primaryTxt" for="name">  {{ 'Password' | translate }}</label>
-        <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+        <label class="mb-2 primaryTxt" for="pass">  {{ 'Password' | translate }}</label>
+        <input id="pass" type="password" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
             (ngModelChange)="onInputValueChange({ field: 'password', value: $event })" 
               placeholder="{{ 'Enter Password' | translate }}"
             [(ngModel)]="Data.password" />
@@ -54,8 +54,8 @@
     </div>
 
     <div class="flex flex-col mb-4 w-[49%]">
-        <label class="mb-2 primaryTxt" for="name">  {{ 'Mobile' | translate }}</label>
-        <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+        <label class="mb-2 primaryTxt" for="mobile">  {{ 'Mobile' | translate }}</label>
+        <input id="mobile" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
             (ngModelChange)="onInputValueChange({ field: 'mobile', value: $event })"
             (input)="validateNumber($event, 'mobile')" 
             
@@ -66,8 +66,8 @@
     </div>
 
     <div class="flex flex-col mb-4 w-[49%]">
-        <label class="mb-2 primaryTxt" for="name">  {{ 'Phone' | translate }}</label>
-        <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+        <label class="mb-2 primaryTxt" for="phone">  {{ 'Phone' | translate }}</label>
+        <input id="phone" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
             (ngModelChange)="onInputValueChange({ field: 'phone', value: $event })"
             (input)="validateNumber($event, 'phone')" 
             
@@ -79,8 +79,8 @@
 
 
     <div class="flex flex-col mb-4 w-[49%]">
-        <label class="mb-2 primaryTxt" for="name">  {{ 'Email' | translate }}</label>
-        <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+        <label class="mb-2 primaryTxt" for="email">  {{ 'Email' | translate }}</label>
+        <input id="email" type="email" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
             (ngModelChange)="onInputValueChange({ field: 'email', value: $event })"    placeholder="{{ 'Enter Email' | translate }}"
             [(ngModel)]="Data.email" />
         <span *ngIf="validationErrors['email']" class="text-red-500 ml-3 font-normal">{{
@@ -88,8 +88,8 @@
     </div>
 
     <div class="flex flex-col mb-4 w-[49%]">
-        <label class="mb-2 primaryTxt" for="name"> {{ 'Address' | translate }}</label>
-        <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+        <label class="mb-2 primaryTxt" for="address"> {{ 'Address' | translate }}</label>
+        <input id="address" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
   placeholder="{{ 'Enter Address' | translate }}" [(ngModel)]="Data.address" />
     </div>
 
@@ -119,8 +119,8 @@
     </div>
 
     <div *ngIf="Data.employeeTypeID == 2" class="flex flex-col mb-4 w-[49%]">
-        <label class="mb-2 primaryTxt" for="name">  {{ 'License Number' | translate }}</label>
-        <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+        <label class="mb-2 primaryTxt" for="License">  {{ 'License Number' | translate }}</label>
+        <input id="License" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
             (ngModelChange)="onInputValueChange({ field: 'licenseNumber', value: $event })"
             (input)="validateNumber($event, 'licenseNumber')" 
               placeholder="{{ 'Enter License Number' | translate }}"
@@ -160,6 +160,16 @@
     <div class="flex align-middle space-x-2 mb-4 w-full">
         <input type="checkbox" id="canReceiveMessage" class="w-5 h-5" [(ngModel)]="Data.canReceiveMessage">
         <label class="mb-2" for="canReceiveMessage">  {{ 'Can Receive Messages' | translate }}</label>
+    </div>
+
+    <div class="flex align-middle space-x-2 mb-4 w-full">
+        <input type="checkbox" id="canReceiveRequestFromParent" class="w-5 h-5" [(ngModel)]="Data.canReceiveRequestFromParent">
+        <label class="mb-2" for="canReceiveRequestFromParent">  {{ 'Can Receive Request From Parent Or Student' | translate }}</label>
+    </div>
+
+    <div class="flex align-middle space-x-2 mb-4 w-full">
+        <input type="checkbox" id="canReceiveMessageFromParent" class="w-5 h-5" [(ngModel)]="Data.canReceiveMessageFromParent">
+        <label class="mb-2" for="canReceiveMessageFromParent">  {{ 'Can Receive Messages From Parent Or Student' | translate }}</label>
     </div>
 
     <div class="flex align-middle space-x-2 mb-4 w-full items-center justify-between">

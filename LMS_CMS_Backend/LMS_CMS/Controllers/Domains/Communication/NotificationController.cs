@@ -413,6 +413,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
         public async Task<IActionResult> AddAsync(NotificationAddDTO NewNotification)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+            var domainName = HttpContext.Request.Headers["Domain-Name"].FirstOrDefault();
 
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
             long.TryParse(userIdClaim, out long userId);
@@ -526,9 +527,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                 notificationSharedTo.NotifiedOrNot = true; 
                 notificationSharedTo.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
                 Unit_Of_Work.notificationSharedTo_Repository.Update(notificationSharedTo);
-
-                await _notificationService.PushRealTimeNotification(userID, NewNotification.UserTypeID, notificationDTO);
-
+                 
+                await _notificationService.PushRealTimeNotification(userID, NewNotification.UserTypeID, notificationDTO, domainName); 
             }
 
             Unit_Of_Work.SaveChanges();
