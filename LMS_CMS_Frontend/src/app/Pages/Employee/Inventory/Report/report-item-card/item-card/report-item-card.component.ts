@@ -207,7 +207,7 @@ export class ReportItemCardComponent implements OnInit {
 
       return {
         Date: formatDate(t.date),
-        'Type': t.transactionType || '-',
+        Type: t.transactionType || '-',
         '#': t.invoiceNumber || '-',
         Authority: t.authority || '-',
         Income: t.income || '-',
@@ -216,7 +216,7 @@ export class ReportItemCardComponent implements OnInit {
         ...(this.showAverageColumn && {
           Price: t.price || '-',
           'Total Price': t.totalPrice || '-',
-          'Avg': t.averageCost || '-',
+          Avg: t.averageCost || '-',
         }),
       };
     });
@@ -235,7 +235,7 @@ export class ReportItemCardComponent implements OnInit {
 
     this.showPDF = true;
     setTimeout(() => {
-      this.pdfPrintComponent.downloadPDF();
+      this.pdfPrintComponent.downloadPDF(); // Call manual download
       setTimeout(() => (this.showPDF = false), 2000);
     }, 500);
   }
@@ -251,38 +251,51 @@ export class ReportItemCardComponent implements OnInit {
       return;
     }
 
-    this.showPDF = true;  
+    this.showPDF = true;
     setTimeout(() => {
       const printContents = document.getElementById('Data')?.innerHTML;
       if (!printContents) {
+        console.error('Element not found!');
         return;
       }
 
+      // Create a print-specific stylesheet
       const printStyle = `
         <style>
           @page { size: auto; margin: 0mm; }
-          body { margin: 0; }
+          body { 
+            margin: 0; 
+          }
+
           @media print {
-            body > *:not(#print-container) { display: none !important; }
+            body > *:not(#print-container) {
+              display: none !important;
+            }
             #print-container {
               display: block !important;
               position: static !important;
+              top: auto !important;
+              left: auto !important;
               width: 100% !important;
               height: auto !important;
               background: white !important;
+              box-shadow: none !important;
               margin: 0 !important;
             }
           }
         </style>
       `;
 
+      // Create a container for printing
       const printContainer = document.createElement('div');
       printContainer.id = 'print-container';
       printContainer.innerHTML = printStyle + printContents;
 
+      // Add to body and print
       document.body.appendChild(printContainer);
       window.print();
 
+      // Clean up
       setTimeout(() => {
         document.body.removeChild(printContainer);
         this.showPDF = false;
@@ -303,7 +316,6 @@ export class ReportItemCardComponent implements OnInit {
 
     const excelData: any[] = [];
 
-    
     excelData.push([
       {
         v: `${this.school.reportHeaderOneEn} - ${this.school.reportHeaderTwoEn}`,
@@ -313,9 +325,8 @@ export class ReportItemCardComponent implements OnInit {
         },
       },
     ]);
-    excelData.push([]); 
+    excelData.push([]);
 
-    
     excelData.push([
       { v: 'From Date:', s: { font: { bold: true } } },
       { v: this.dateFrom, s: { font: { bold: true } } },
@@ -336,9 +347,8 @@ export class ReportItemCardComponent implements OnInit {
       { v: 'Item:', s: { font: { bold: true } } },
       { v: selectedItem?.enName || 'N/A', s: { font: { bold: true } } },
     ]);
-    excelData.push([]); 
+    excelData.push([]);
 
-    
     const headers = [
       'Date',
       'Transaction Type',
@@ -368,7 +378,6 @@ export class ReportItemCardComponent implements OnInit {
       }))
     );
 
-    
     this.combinedData.forEach((row, idx) => {
       const isEven = idx % 2 === 0;
       const fillColor = isEven ? 'E9E9E9' : 'FFFFFF';
@@ -421,35 +430,27 @@ export class ReportItemCardComponent implements OnInit {
       excelData.push(rowData);
     });
 
-    
     const worksheet = XLSX.utils.aoa_to_sheet(excelData);
 
-    
     if (!worksheet['!merges']) worksheet['!merges'] = [];
     worksheet['!merges'].push({
       s: { r: 0, c: 0 },
       e: { r: 0, c: headers.length - 1 },
     });
 
-    
     worksheet['!cols'] = [
-      { wch: 12 }, 
-      { wch: 18 }, 
-      { wch: 12 }, 
-      { wch: 20 }, 
-      { wch: 10 }, 
-      { wch: 10 }, 
-      { wch: 12 }, 
+      { wch: 12 },
+      { wch: 18 },
+      { wch: 12 },
+      { wch: 20 },
+      { wch: 10 },
+      { wch: 10 },
+      { wch: 12 },
       ...(this.showAverageColumn
-        ? [
-            { wch: 10 }, 
-            { wch: 14 }, 
-            { wch: 14 }, 
-          ]
+        ? [{ wch: 10 }, { wch: 14 }, { wch: 14 }]
         : []),
     ];
 
-    
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Item Card Report');
 

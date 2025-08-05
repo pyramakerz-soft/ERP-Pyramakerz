@@ -377,10 +377,9 @@ export class InventoryTransactionReportComponent implements OnInit {
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;
     }
-
     this.showPDF = true;
     setTimeout(() => {
-      this.pdfComponentRef.downloadPDF();
+      this.pdfComponentRef.downloadPDF(); // Call manual download
       setTimeout(() => (this.showPDF = false), 2000);
     }, 500);
   }
@@ -390,7 +389,6 @@ export class InventoryTransactionReportComponent implements OnInit {
       Swal.fire('Warning', 'No data to print!', 'warning');
       return;
     }
-
     this.showPDF = true;
     setTimeout(() => {
       const printContents = document.getElementById('Data')?.innerHTML;
@@ -398,32 +396,39 @@ export class InventoryTransactionReportComponent implements OnInit {
         console.error('Element not found!');
         return;
       }
-
+      // Create a print-specific stylesheet
       const printStyle = `
-      <style>
-        @page { size: auto; margin: 0mm; }
-        body { margin: 0; }
-        @media print {
-          body > *:not(#print-container) { display: none !important; }
-          #print-container {
-            display: block !important;
-            position: static !important;
-            width: 100% !important;
-            height: auto !important;
-            background: white !important;
-            margin: 0 !important;
+        <style>
+          @page { size: auto; margin: 0mm; }
+          body { 
+            margin: 0; 
           }
-        }
-      </style>
-    `;
-
+          @media print {
+            body > *:not(#print-container) {
+              display: none !important;
+            }
+            #print-container {
+              display: block !important;
+              position: static !important;
+              top: auto !important;
+              left: auto !important;
+              width: 100% !important;
+              height: auto !important;
+              background: white !important;
+              box-shadow: none !important;
+              margin: 0 !important;
+            }
+          }
+        </style>
+      `;
+      // Create a container for printing
       const printContainer = document.createElement('div');
       printContainer.id = 'print-container';
       printContainer.innerHTML = printStyle + printContents;
-
+      // Add to body and print
       document.body.appendChild(printContainer);
       window.print();
-
+      // Clean up
       setTimeout(() => {
         document.body.removeChild(printContainer);
         this.showPDF = false;
