@@ -21,19 +21,19 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
         private readonly DbContextFactoryService _dbContextFactory;
         IMapper mapper;
         private readonly CheckPageAccessService _checkPageAccessService;
-        private readonly FileImageValidationService _fileImageValidationService;
-        private readonly FileWordPdfValidationService _fileWordPdfValidationService;
-        private readonly UserTreeService _userTreeService; 
+        private readonly FileValidationService _fileValidationService;
+        private readonly UserTreeService _userTreeService;
 
-        public ChatController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileImageValidationService fileImageValidationService, UserTreeService userTreeService, FileWordPdfValidationService fileWordPdfValidationService)
+        public ChatController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileValidationService fileValidationService, UserTreeService userTreeService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _checkPageAccessService = checkPageAccessService;
-            _fileImageValidationService = fileImageValidationService;
-            _userTreeService = userTreeService; 
-            _fileWordPdfValidationService = fileWordPdfValidationService;
+            _fileValidationService = fileValidationService;
+            _userTreeService = userTreeService;
         }
+
+        //////////////////////////////////////////////////////////////////////////////////////////
 
         [HttpPost]
         [Authorize_Endpoint_(
@@ -64,21 +64,23 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                 return BadRequest("No User Type For Sender With this ID");
             }
 
-            if(userTypeForSender.ID == 1)
+            if (userTypeForSender.ID == 1)
             {
                 Employee emp = Unit_Of_Work.employee_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == NewMessage.SenderID);
                 if (emp == null)
                 {
                     return BadRequest("No Sender With this ID");
                 }
-            }else if(userTypeForSender.ID == 2)
+            }
+            else if (userTypeForSender.ID == 2)
             {
                 Student stu = Unit_Of_Work.student_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == NewMessage.SenderID);
                 if (stu == null)
                 {
                     return BadRequest("No Sender With this ID");
                 }
-            }else if(userTypeForSender.ID == 3)
+            }
+            else if (userTypeForSender.ID == 3)
             {
                 Parent parent = Unit_Of_Work.parent_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == NewMessage.SenderID);
                 if (parent == null)
@@ -93,10 +95,15 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                 return BadRequest("No User Type For Receiver With this ID");
             }
 
+            if((NewMessage.SenderUserTypeID == 2 || NewMessage.SenderUserTypeID == 3) && NewMessage.ReceiverUserTypeID != 1)
+            {
+                return BadRequest("You Can't send Messages to This user Type");
+            }
+
             if ((NewMessage.Message == null || NewMessage.Message == "") && (NewMessage.ChatMessageAttachmentFiles == null || NewMessage.ChatMessageAttachmentFiles.Count == 0))
             {
                 return BadRequest("You have to choose one element atleast to send (File - Message)");
-            } 
+            }
 
             List<long> targetUserIds;
             try
@@ -108,89 +115,73 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                 return BadRequest(ex.Message);
             }
 
-            if(targetUserIds.Count == 0)
+            if (targetUserIds.Count == 0)
             {
                 return NotFound("No Users To Text");
             }
 
-            //Notification notification = mapper.Map<Notification>(NewNotification);
-            //TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-            //notification.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
-            //if (userTypeClaim == "octa")
-            //{
-            //    notification.InsertedByOctaId = userId;
-            //}
-            //else if (userTypeClaim == "employee")
-            //{
-            //    notification.InsertedByUserId = userId;
-            //}
+            foreach (var file in NewMessage.ChatMessageAttachmentFiles)
+            {
+                string returnFileInput = _fileValidationService.ValidateFile(file);
 
-            //Unit_Of_Work.notification_Repository.Add(notification);
-            //Unit_Of_Work.SaveChanges();
+                if (returnFileInput != null)
+                {
+                    return BadRequest(returnFileInput);
+                }
+            }
 
-            //if (NewNotification.ImageFile != null)
-            //{
-            //    string returnFileInput = _fileImageValidationService.ValidateImageFile(NewNotification.ImageFile);
-            //    if (returnFileInput != null)
-            //    {
-            //        return BadRequest(returnFileInput);
-            //    }
+            ChatMessage chatMessage = mapper.Map<ChatMessage>(NewMessage);
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            chatMessage.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
 
-            //    var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Notification");
-            //    var subjectFolder = Path.Combine(baseFolder, notification.ID.ToString());
-            //    if (!Directory.Exists(subjectFolder))
-            //    {
-            //        Directory.CreateDirectory(subjectFolder);
-            //    }
+            foreach (long userID in targetUserIds)
+            {
+                ChatMessage chat = chatMessage;
+                chat.ReceiverID = userID;
+                Unit_Of_Work.chatMessage_Repository.Add(chat);
+            }
 
-            //    if (NewNotification.ImageFile.Length > 0)
-            //    {
-            //        var filePath = Path.Combine(subjectFolder, NewNotification.ImageFile.FileName);
-            //        using (var stream = new FileStream(filePath, FileMode.Create))
-            //        {
-            //            await NewNotification.ImageFile.CopyToAsync(stream);
-            //        }
-            //    }
+            Unit_Of_Work.SaveChanges();
 
-            //    notification.ImageLink = Path.Combine("Uploads", "Notification", notification.ID.ToString(), NewNotification.ImageFile.FileName);
-            //    Unit_Of_Work.notification_Repository.Update(notification);
-            //}
+            if (NewMessage.ChatMessageAttachmentFiles != null && NewMessage.ChatMessageAttachmentFiles.Count == 0)
+            {
+                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/ChatMessage");
+                var chatFolder = Path.Combine(baseFolder, chatMessage.ID.ToString());
+                if (!Directory.Exists(chatFolder))
+                {
+                    Directory.CreateDirectory(chatFolder);
+                }
+                foreach (var file in NewMessage.ChatMessageAttachmentFiles)
+                {
+                    ChatMessageAttachment chatMessageAttachment = new ChatMessageAttachment();
+                    chatMessageAttachment.ChatMessageID = chatMessage.ID;
 
-            //foreach (long userID in targetUserIds)
-            //{
-            //    NotificationSharedTo notificationSharedTo = new NotificationSharedTo();
-            //    notificationSharedTo.NotificationID = notification.ID;
-            //    notificationSharedTo.UserTypeID = NewNotification.UserTypeID;
-            //    notificationSharedTo.UserID = userID;
-            //    notificationSharedTo.NotifiedOrNot = false;
-            //    notificationSharedTo.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
-            //    if (userTypeClaim == "octa")
-            //    {
-            //        notificationSharedTo.InsertedByOctaId = userId;
-            //    }
-            //    else if (userTypeClaim == "employee")
-            //    {
-            //        notificationSharedTo.InsertedByUserId = userId;
-            //    }
+                    if (file.Length > 0)
+                    {
+                        var filePath = Path.Combine(chatFolder, file.FileName);
+                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await file.CopyToAsync(stream);
+                        }
+                    }
+                    chatMessageAttachment.FileLink = Path.Combine("Uploads", "ChatMessage", chatMessage.ID.ToString(), file.FileName);
+                    Unit_Of_Work.chatMessageAttachment_Repository.Add(chatMessageAttachment);
+                }
+            }
 
-            //    Unit_Of_Work.notificationSharedTo_Repository.Add(notificationSharedTo);
+            Unit_Of_Work.SaveChanges();
 
-            //    var notificationDTO = mapper.Map<NotificationSharedToGetDTO>(notificationSharedTo);
+            return Ok();
+        }
 
-            //    string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-            //    if (!string.IsNullOrEmpty(notificationDTO.ImageLink))
-            //    {
-            //        notificationDTO.ImageLink = $"{serverUrl}{notificationDTO.ImageLink.Replace("\\", "/")}";
-            //    }
+        //////////////////////////////////////////////////////////////////////////////////////////
 
-            //    notificationSharedTo.NotifiedOrNot = true;
-            //    notificationSharedTo.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
-            //    Unit_Of_Work.notificationSharedTo_Repository.Update(notificationSharedTo);
-
-            //    await _notificationService.PushRealTimeNotification(userID, NewNotification.UserTypeID, notificationDTO, domainName);
-            //}
-
-            //Unit_Of_Work.SaveChanges();
+        [HttpPost("Forward")]
+        [Authorize_Endpoint_(
+           allowedTypes: new[] { "octa", "employee", "parent", "student" }
+        )]
+        public async Task<IActionResult> Forward(ChatAddDTO NewMessage)
+        {
             return Ok();
         }
     }
