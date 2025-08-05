@@ -24,18 +24,7 @@ import { TimeTable } from '../../../../Models/LMS/time-table';
   styleUrl: './remedial-time-table.component.css'
 })
 export class RemedialTimeTableComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
   AllowEditForOthers: boolean = false;
@@ -247,6 +236,6 @@ export class RemedialTimeTableComponent {
   }
 
   View(id: number) {
-
+    this.router.navigateByUrl('Employee/Remedial TimeTable/'+id);
   }
 }

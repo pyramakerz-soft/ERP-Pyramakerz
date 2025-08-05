@@ -37,6 +37,9 @@
                     Name
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
+                    Number Of Session
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
                     Created Date
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
@@ -70,6 +73,7 @@
 
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{ row.id }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.name }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.numberOfSession }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.insertedAt | date:'dd/MM/yyyy HH:mm' }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.schoolName }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.gradeName }}</td>
@@ -101,13 +105,20 @@
         </div>
 
         <div class="mt-6 mb-4 rounded-3xl flex justify-between flex-wrap">
-             <div class="flex flex-col mb-4 w-full">
+            <div class="flex flex-col mb-4 w-[49%]">
                 <label class="mb-2 primaryTxt" for="name">Name</label>
                 <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                 placeholder="Enter English Title" [(ngModel)]="remedialClassroom.name"
                 (ngModelChange)="onInputValueChange({ field: 'name', value: $event })" />
                 <span *ngIf="validationErrors['name']" class="text-red-500 ml-3 font-normal">{{
                 validationErrors['name']}}</span>
+            </div>
+            <div class="flex flex-col mb-4 w-[49%]">
+                <label class="mb-2 primaryTxt" for="numberOfSession">Number Of Session</label>
+                <input id="numberOfSession" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                placeholder="Enter English Title" [(ngModel)]="remedialClassroom.numberOfSession"  (input)="validateNumber($event, 'numberOfSession')"
+                (ngModelChange)="onInputValueChange({ field: 'numberOfSession', value: $event })" />
+                <span *ngIf="validationErrors['numberOfSession']" class="text-red-500 ml-3 font-normal">{{validationErrors['numberOfSession']}}</span>
             </div>
             <div class="flex flex-col mb-4 w-[49%]">
                 <label class="mb-2 primaryTxt" for="schoolID">School</label>

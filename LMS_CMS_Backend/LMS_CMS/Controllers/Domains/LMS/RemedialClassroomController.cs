@@ -33,9 +33,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("BySchoolId/{SchoolId}")]
         [Authorize_Endpoint_(
-              allowedTypes: new[] { "octa", "employee" }
-              //,
-              // pages: new[] { "Remedial Classes" }
+              allowedTypes: new[] { "octa", "employee" } ,
+               pages: new[] { "Remedial Classes" }
           )]
         public async Task<IActionResult> GetAsync(long SchoolId)
         {
@@ -78,9 +77,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("ByGradeId/{gradeId}")]
         [Authorize_Endpoint_(
-              allowedTypes: new[] { "octa", "employee" }
-              //,
-              // pages: new[] { "Remedial Classes" }
+              allowedTypes: new[] { "octa", "employee" },
+               pages: new[] { "Remedial Classes" }
           )]
         public async Task<IActionResult> GetByGradeIdAsync(long gradeId)
         {
@@ -118,9 +116,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
-             allowedTypes: new[] { "octa", "employee" }
-             //,
-             // pages: new[] { "Remedial Classes" }
+             allowedTypes: new[] { "octa", "employee" },
+              pages: new[] { "Remedial Classes" }
          )]
         public async Task<IActionResult> GetById(long id)
         {
@@ -155,9 +152,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpPost]
         [Authorize_Endpoint_(
-          allowedTypes: new[] { "octa", "employee" }
-          //,
-          //pages: new[] { "Remedial Classes" }
+          allowedTypes: new[] { "octa", "employee" },
+          pages: new[] { "Remedial Classes" }
          )]
         public async Task<IActionResult> Add(RemedialClassroomAddDTO NewRemedialClass)
         {
@@ -217,10 +213,9 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpPut]
         [Authorize_Endpoint_(
-         allowedTypes: new[] { "octa", "employee" }
-         //,
-         //allowEdit: 1,
-         //pages: new[] { "Remedial Classes" }
+         allowedTypes: new[] { "octa", "employee" },
+         allowEdit: 1,
+         pages: new[] { "Remedial Classes" }
        )]
         public async Task<IActionResult> EditAsync(RemedialClassroomEditDTOcs NewRemedialClass)
         {
@@ -266,14 +261,14 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return NotFound("there is no remedialClassroom with this id");
             }
 
-            //if (userTypeClaim == "employee")
-            //{
-            //    IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Remedial Classes", roleId, userId, remedialClassroom);
-            //    if (accessCheck != null)
-            //    {
-            //        return accessCheck;
-            //    }
-            //}
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Remedial Classes", roleId, userId, remedialClassroom);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
+            }
 
             mapper.Map(NewRemedialClass, remedialClassroom);
 
@@ -342,10 +337,9 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpDelete("{id}")]
         [Authorize_Endpoint_(
-          allowedTypes: new[] { "octa", "employee" }
-          //,
-          //allowDelete: 1,
-          //pages: new[] { "Remedial Classes" }
+          allowedTypes: new[] { "octa", "employee" },
+          allowDelete: 1,
+          pages: new[] { "Remedial Classes" }
          )]
         public IActionResult Delete(long id)
         {
@@ -374,14 +368,14 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return NotFound("No Remedial Classroom with this ID");
             }
 
-            //if (userTypeClaim == "employee")
-            //{
-            //    IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Remedial Classes", roleId, userId, remedialClassroom);
-            //    if (accessCheck != null)
-            //    {
-            //        return accessCheck;
-            //    }
-            //}
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Remedial Classes", roleId, userId, remedialClassroom);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
+            }
 
             remedialClassroom.IsDeleted = true;
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
