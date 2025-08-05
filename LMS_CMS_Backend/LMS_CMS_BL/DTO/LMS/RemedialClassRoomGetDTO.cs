@@ -15,6 +15,7 @@ namespace LMS_CMS_BL.DTO.LMS
         [Key]
         public long ID { get; set; }
         public string Name { get; set; }
+        public int NumberOfSession { get; set; }
         public long SubjectID { get; set; }
         public string SubjectEnglishName { get; set; }
         public string SubjectArabicName { get; set; }

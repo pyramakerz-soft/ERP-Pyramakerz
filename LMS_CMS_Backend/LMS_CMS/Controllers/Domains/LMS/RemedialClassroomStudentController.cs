@@ -35,8 +35,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpPost]
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee" }
-           //,
-           //pages: new[] { "Remedial Classes" }
+           ,
+           pages: new[] { "Remedial Classes" }
           )]
         public async Task<IActionResult> Add(RemedialClassroomStudentAddDTO NewRemedialClass)
         {
@@ -98,9 +98,9 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpDelete("{id}")]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" }
-          //,
-          //allowDelete: 1,
-          //pages: new[] { "Remedial Classes" }
+          ,
+          allowDelete: 1,
+          pages: new[] { "Remedial Classes" }
          )]
         public IActionResult Delete(long id)
         {
@@ -129,14 +129,14 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return NotFound("No Remedial Classroom with this ID");
             }
 
-            //if (userTypeClaim == "employee")
-            //{
-            //    IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Remedial Classes", roleId, userId, remedialClassroom);
-            //    if (accessCheck != null)
-            //    {
-            //        return accessCheck;
-            //    }
-            //}
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Remedial Classes", roleId, userId, remedialClassroom);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
+            }
 
             remedialClassroom.IsDeleted = true;
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");

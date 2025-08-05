@@ -84,16 +84,35 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             if (userIdClaim == null || userTypeClaim == null)
                 return Unauthorized("User ID or Type claim not found.");
 
-            RemedialTimeTable RemedialTimeTable =await Unit_Of_Work.remedialTimeTable_Repository.FindByIncludesAsync(t => t.IsDeleted != true && t.ID == id ,
-                    query => query.Include(x => x.AcademicYear),
-                    query => query.Include(x => x.RemedialTimeTableDays),
+            RemedialTimeTable remedialTimeTable =await Unit_Of_Work.remedialTimeTable_Repository.FindByIncludesAsync(t => t.IsDeleted != true && t.ID == id ,
+                    query => query.Include(x => x.AcademicYear).ThenInclude(a=>a.School),
+                    query => query.Include(x => x.RemedialTimeTableDays).ThenInclude(a=>a.Day),
                     query => query.Include(emp => emp.AcademicYear));
 
-            if (RemedialTimeTable == null)
+            if (remedialTimeTable == null)
             {
                 return NotFound();
             }
-            RemedialTimeTableGetDTO Dto = mapper.Map<RemedialTimeTableGetDTO>(RemedialTimeTable);
+
+            RemedialTimeTableGetDTO Dto = mapper.Map<RemedialTimeTableGetDTO>(remedialTimeTable);
+            var grouped = remedialTimeTable.RemedialTimeTableDays
+                .GroupBy(d => new { d.DayId, d.Day.Name })
+                .Select(g => new GroupRemedialTimeTableDay
+                {
+                    DayId = g.Key.DayId,
+                    DayName = g.Key.Name,
+                    Periods = g.Select(p => new RemedialTimeTableDayGetDTO
+                    {
+                        ID = p.ID,
+                        DayId = p.DayId,
+                        DayName = p.Day.Name,
+                        PeriodIndex = p.PeriodIndex
+                    }).ToList()
+                })
+                .ToList();
+
+            // Set grouped data into DTO
+            Dto.GroupDays = grouped;
 
             return Ok(Dto);
         }

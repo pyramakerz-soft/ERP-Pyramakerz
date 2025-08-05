@@ -12,6 +12,12 @@ import { BusTypeService } from '../../../../Services/Employee/Bus/bus-type.servi
 import { DomainService } from '../../../../Services/Employee/domain.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
+import { GradeService } from '../../../../Services/Employee/LMS/grade.service';
+import { Grade } from '../../../../Models/LMS/grade';
+import { RemedialClassroom } from '../../../../Models/LMS/remedial-classroom';
+import { RemedialClassroomService } from '../../../../Services/Employee/LMS/remedial-classroom.service';
+import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
+import { RemedialTimeTableDay } from '../../../../Models/LMS/remedial-time-table-day';
 
 @Component({
   selector: 'app-remedial-time-table-view',
@@ -21,18 +27,7 @@ import { MenuService } from '../../../../Services/shared/menu.service';
   styleUrl: './remedial-time-table-view.component.css'
 })
 export class RemedialTimeTableViewComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   DomainName: string = '';
   UserID: number = 0;
@@ -45,10 +40,10 @@ export class RemedialTimeTableViewComponent {
   value: any = '';
 
   TimeTableId: number = 0;
-  MaxPeriods: number = 0;
-  TimeTableName: string = '';
+  SelectedGradeId: number = 0;
   remedialTimeTable: RemedialTimeTable = new RemedialTimeTable();
-
+  Grades: Grade[] = []
+  remedialClasses: RemedialClassroom[] = []
   isLoading = false;
 
   constructor(
@@ -60,8 +55,11 @@ export class RemedialTimeTableViewComponent {
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
+    public GradeServ: GradeService,
+    public RemedialClassroomServ: RemedialClassroomService,
     public RemedialTimeTableServ: RemedialTimeTableService
   ) { }
+
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
@@ -73,56 +71,42 @@ export class RemedialTimeTableViewComponent {
     this.GetTimeTable();
   }
 
+  GetAllGradeBySchool() {
+    this.GradeServ.GetBySchoolId(this.remedialTimeTable.schoolID, this.DomainName).subscribe((d) => {
+      this.Grades = d
+    })
+  }
+
+  getAllClassByGradeId() {
+    this.RemedialClassroomServ.GetByGradeId(this.SelectedGradeId, this.DomainName).subscribe((d) => {
+      console.log(d)
+      this.remedialClasses = d
+    })
+  }
+
   GetTimeTable() {
-    this.RemedialTimeTableServ
-      .GetByID(this.TimeTableId, this.DomainName)
-      .subscribe((d) => {
-        console.log(d)
-        this.remedialTimeTable = d.data;
-        this.TimeTableName = d.timeTableName;
-        this.MaxPeriods = d.maxPeriods;
-      });
+    this.RemedialTimeTableServ.GetByID(this.TimeTableId, this.DomainName).subscribe((d) => {
+      console.log(d)
+      this.remedialTimeTable = d;
+      this.GetAllGradeBySchool()
+    });
+  }
+
+  onDrop(event: CdkDragDrop<any[]>, period: RemedialTimeTableDay) {
+    if (event.previousContainer === event.container) return;
+    const draggedItem = event.previousContainer.data[event.previousIndex];
+    const alreadyExists = period.remedialTimeTableClasses.some(c => c.id === draggedItem.id);
+    if (!alreadyExists) {
+      console.log(alreadyExists)
+      period.remedialTimeTableClasses.push(draggedItem);
+    }
   }
 
   moveToTimeTable() {
     this.router.navigateByUrl(`Employee/Remedial TimeTable`);
   }
 
-  days = [
-    { key: 'sat', name: 'Sat' },
-    { key: 'sun', name: 'Sun' },
-    { key: 'mon', name: 'Mon' },
-    { key: 'tues', name: 'Tues' },
-    { key: 'wed', name: 'Wed' }
-  ];
-
-  timetable: { [day: string]: { [period: number]: string[] } } = {
-    sat: {
-      1: ['CL 1 Math', 'CL 1 Arabic', 'CL 1 English'],
-      3: ['CL 1 Math']
-    },
-    sun: {
-      1: ['CL 1 Math', 'CL 1 Arabic'],
-      3: ['CL 1 Math', 'CL 1 Arabic']
-    },
-    mon: {
-      1: ['CL 1 Math'],
-      2: ['CL 1 Math', 'CL 1 Arabic', 'CL 1 English']
-    },
-    tues: {
-      1: ['CL 1 Math', 'CL 1 Arabic', 'CL 1 English'],
-      3: ['CL 1 Math']
-    },
-    wed: {
-      1: ['CL 1 Math', 'CL 1 English']
-    }
-  };
-
-  getSessions(day: string, period: number): string[] {
-    return this.timetable[day]?.[period] || [];
-  }
-
-  Save(){
+  Save() {
 
   }
 }

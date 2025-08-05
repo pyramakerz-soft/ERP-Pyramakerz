@@ -1172,6 +1172,7 @@ namespace LMS_CMS_BL.Config
 
             CreateMap<RemedialTimeTableAddDTO, RemedialTimeTable>();
             CreateMap<RemedialTimeTable, RemedialTimeTableGetDTO>()
+                .ForMember(dest => dest.MaximumPeriodCountRemedials, opt => opt.MapFrom(src => src.AcademicYear.School.MaximumPeriodCountRemedials))
                 .ForMember(dest => dest.SchoolID, opt => opt.MapFrom(src => src.AcademicYear.SchoolID))
                 .ForMember(dest => dest.SchoolName, opt => opt.MapFrom(src => src.AcademicYear.School.Name))
                 .ForMember(dest => dest.AcademicYearName, opt => opt.MapFrom(src => src.AcademicYear.Name));

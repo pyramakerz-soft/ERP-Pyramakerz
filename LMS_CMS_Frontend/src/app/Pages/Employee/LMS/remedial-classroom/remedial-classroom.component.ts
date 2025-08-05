@@ -35,7 +35,7 @@ import Swal from 'sweetalert2';
 })
 export class RemedialClassroomComponent {
 
-  User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -160,6 +160,7 @@ export class RemedialClassroomComponent {
   CreateOREdit() {
     if (this.isFormValid()) {
       this.isLoading = true
+        console.log(this.remedialClassroom)
       if (this.mode == 'Create') {
         this.remedialClassroomServ.Add(this.remedialClassroom, this.DomainName).subscribe((d) => {
           this.GetAllData()
@@ -291,8 +292,8 @@ export class RemedialClassroomComponent {
     });
   }
 
-  View(id:number){
-    this.router.navigateByUrl('Employee/Remedial Classes/'+id);
+  View(id: number) {
+    this.router.navigateByUrl('Employee/Remedial Classes/' + id);
   }
 
   openModal() {
@@ -330,6 +331,16 @@ export class RemedialClassroomComponent {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
 
+  validateNumber(event: any, field: keyof RemedialClassroom): void {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+      if (typeof this.remedialClassroom[field] === 'string') {
+        this.remedialClassroom[field] = '' as never;
+      }
+    }
+  }
+
   isFormValid(): boolean {
     let isValid = true;
     for (const key in this.remedialClassroom) {
@@ -338,6 +349,7 @@ export class RemedialClassroomComponent {
         if (!this.remedialClassroom[field]) {
           if (
             field == 'name' ||
+            field == 'numberOfSession' ||
             field == 'gradeID' ||
             field == 'subjectID' ||
             field == 'teacherID' ||
