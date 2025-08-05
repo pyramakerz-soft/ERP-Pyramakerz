@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace LMS_CMS_DAL.Models.Domains.Communication
 {
-    public class ChatMessage : AuditableEntity
+    public class ChatMessage
     {
         [Key]
         public long ID { get; set; } 
@@ -25,6 +25,8 @@ namespace LMS_CMS_DAL.Models.Domains.Communication
         [ForeignKey("ReceiverUserType")]
         public long ReceiverUserTypeID { get; set; }
         public UserType ReceiverUserType { get; set; }
+
+        public DateTime? InsertedAt { get; set; }
 
         public ICollection<ChatMessageAttachment> ChatMessageAttachments { get; set; } = new List<ChatMessageAttachment>();
     }
