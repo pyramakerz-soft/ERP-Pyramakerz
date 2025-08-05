@@ -8,7 +8,7 @@ namespace LMS_CMS_BL.DTO.LMS
 {
     public class RemedialTimeTableEditDTO
     {
-        public long ID { get; set; }
+        public long RemedialTimeTableDayId { get; set; }
         public ICollection<long> RemedialClassroomIds { get; set; }
 
     }

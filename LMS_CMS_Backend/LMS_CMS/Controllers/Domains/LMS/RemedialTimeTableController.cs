@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace LMS_CMS_PL.Controllers.Domains.LMS
 {
@@ -87,6 +88,11 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             RemedialTimeTable remedialTimeTable =await Unit_Of_Work.remedialTimeTable_Repository.FindByIncludesAsync(t => t.IsDeleted != true && t.ID == id ,
                     query => query.Include(x => x.AcademicYear).ThenInclude(a=>a.School),
                     query => query.Include(x => x.RemedialTimeTableDays).ThenInclude(a=>a.Day),
+                    query => query.Include(x => x.RemedialTimeTableDays)
+                         .ThenInclude(a => a.RemedialTimeTableClasses)
+                             .ThenInclude(b => b.RemedialClassroom)
+                                  .ThenInclude(c=>c.Subject)
+                                      .ThenInclude(c=>c.Grade),
                     query => query.Include(emp => emp.AcademicYear));
 
             if (remedialTimeTable == null)
@@ -106,7 +112,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                         ID = p.ID,
                         DayId = p.DayId,
                         DayName = p.Day.Name,
-                        PeriodIndex = p.PeriodIndex
+                        PeriodIndex = p.PeriodIndex,
+                        RemedialTimeTableClasses = mapper.Map<List<RemedialTimeTableClassesGetDTO>>(p.RemedialTimeTableClasses)
                     }).ToList()
                 })
                 .ToList();
@@ -319,7 +326,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             foreach (var item in NewRemedial)
             {
-                RemedialTimeTableDay remedialTimeTableDay = Unit_Of_Work.remedialTimeTableDay_Repository.First_Or_Default(s=>s.ID== item.ID && s.IsDeleted != true);
+                RemedialTimeTableDay remedialTimeTableDay = Unit_Of_Work.remedialTimeTableDay_Repository.First_Or_Default(s=>s.ID== item.RemedialTimeTableDayId && s.IsDeleted != true);
                 if(remedialTimeTableDay == null)
                 {
                     return BadRequest("this remedial TimeTable Session doesn't exist");
@@ -336,7 +343,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     }
                     remedialTimeTableClasses.Add(new RemedialTimeTableClasses
                     {
-                        RemedialTimeTableDayId = item.ID,
+                        RemedialTimeTableDayId = item.RemedialTimeTableDayId,
                         RemedialClassroomID = item1,
                         InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone),
                         InsertedByOctaId = userTypeClaim == "octa" ? userId : null,

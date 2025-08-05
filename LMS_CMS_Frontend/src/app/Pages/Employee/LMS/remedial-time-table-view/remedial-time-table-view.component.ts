@@ -18,11 +18,12 @@ import { RemedialClassroom } from '../../../../Models/LMS/remedial-classroom';
 import { RemedialClassroomService } from '../../../../Services/Employee/LMS/remedial-classroom.service';
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { RemedialTimeTableDay } from '../../../../Models/LMS/remedial-time-table-day';
+import { RemedialTimeTableClasses } from '../../../../Models/LMS/remedial-time-table-classes';
 
 @Component({
   selector: 'app-remedial-time-table-view',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, DragDropModule],
   templateUrl: './remedial-time-table-view.component.html',
   styleUrl: './remedial-time-table-view.component.css'
 })
@@ -44,6 +45,9 @@ export class RemedialTimeTableViewComponent {
   remedialTimeTable: RemedialTimeTable = new RemedialTimeTable();
   Grades: Grade[] = []
   remedialClasses: RemedialClassroom[] = []
+  OriginremedialClassesForCard: RemedialClassroom[] = []
+  remedialTimeTableClasses: RemedialTimeTableClasses[] = []
+  connectedDropLists: string[] = [];
   isLoading = false;
 
   constructor(
@@ -78,10 +82,24 @@ export class RemedialTimeTableViewComponent {
   }
 
   getAllClassByGradeId() {
-    this.RemedialClassroomServ.GetByGradeId(this.SelectedGradeId, this.DomainName).subscribe((d) => {
-      console.log(d)
-      this.remedialClasses = d
-    })
+    this.RemedialClassroomServ.GetByGradeId(this.SelectedGradeId, this.DomainName).subscribe((classes) => {
+      console.log(classes);
+      this.OriginremedialClassesForCard = classes;
+      this.remedialClasses = classes.map(cl => ({ ...cl })); 
+      const classUsageCount: { [id: number]: number } = {};
+      this.remedialTimeTable.groupDays.forEach(day => {
+        day.periods.forEach(period => {
+          period.remedialTimeTableClasses.forEach(remedialClass => {
+            const id = remedialClass.remedialClassroomID;
+            classUsageCount[id] = (classUsageCount[id] || 0) + 1;
+          });
+        });
+      });
+      this.remedialClasses.forEach(cl => {
+        const used = classUsageCount[cl.id] || 0;
+        cl.numberOfSession -= used;
+      });
+    });
   }
 
   GetTimeTable() {
@@ -89,16 +107,42 @@ export class RemedialTimeTableViewComponent {
       console.log(d)
       this.remedialTimeTable = d;
       this.GetAllGradeBySchool()
+      this.connectedDropLists = [];
+      this.remedialTimeTable.groupDays.forEach(day => {
+        day.periods.forEach(period => {
+          this.connectedDropLists.push(`dropList-${day.dayId}-${period.periodIndex}`);
+        });
+      });
     });
   }
 
   onDrop(event: CdkDragDrop<any[]>, period: RemedialTimeTableDay) {
     if (event.previousContainer === event.container) return;
+
     const draggedItem = event.previousContainer.data[event.previousIndex];
-    const alreadyExists = period.remedialTimeTableClasses.some(c => c.id === draggedItem.id);
-    if (!alreadyExists) {
-      console.log(alreadyExists)
-      period.remedialTimeTableClasses.push(draggedItem);
+
+    console.log('Period:', period);
+    console.log('Dragged Item:', draggedItem);
+
+    // ✅ Ensure the array is initialized
+    if (!period.remedialTimeTableClasses) {
+      period.remedialTimeTableClasses = [];
+    }
+    if (!this.remedialTimeTableClasses) {
+      this.remedialTimeTableClasses = [];
+    }
+    const newClass = new RemedialTimeTableClasses();
+    newClass.remedialClassroomID = draggedItem.id;
+    newClass.remedialClassroomName = draggedItem.name;
+    newClass.remedialTimeTableDayId = period.id;
+    period.remedialTimeTableClasses.push(newClass);
+
+
+    const droppedClass = this.remedialClasses.find(s => s.id === draggedItem.id);
+    if (droppedClass && droppedClass.numberOfSession > 0) {
+      droppedClass.numberOfSession--;
+    } else if (droppedClass && droppedClass.numberOfSession == 0) {
+      this.remedialClasses = this.remedialClasses.filter(s => s.id != draggedItem.id);
     }
   }
 
