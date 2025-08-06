@@ -18,7 +18,7 @@ import { SearchStudentComponent } from '../../../../Component/Employee/search-st
 @Component({
   selector: 'app-remedial-classroom-student',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent ,SearchStudentComponent],
+  imports: [FormsModule, CommonModule ,SearchStudentComponent],
   templateUrl: './remedial-classroom-student.component.html',
   styleUrl: './remedial-classroom-student.component.css',
 })

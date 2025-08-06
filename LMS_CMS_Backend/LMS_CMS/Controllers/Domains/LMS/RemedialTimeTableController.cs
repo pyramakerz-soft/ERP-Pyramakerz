@@ -271,11 +271,12 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             if (IsFavourite == true)
             {
-                List<TimeTable> timetables = Unit_Of_Work.timeTable_Repository.FindBy(d => d.IsFavourite == true && d.AcademicYearID == remedialTimeTable.AcademicYearID);
+                List<RemedialTimeTable> timetables = Unit_Of_Work.remedialTimeTable_Repository.FindBy(d => d.IsFavourite == true && d.AcademicYearID == remedialTimeTable.AcademicYearID);
                 foreach (var t in timetables)
                 {
                     t.IsFavourite = false;
-                    Unit_Of_Work.timeTable_Repository.Update(t);
+                    Unit_Of_Work.remedialTimeTable_Repository.Update(t);
+                    Unit_Of_Work.SaveChanges();
                 }
             }
 
@@ -340,6 +341,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 {
                     return BadRequest("this remedial TimeTable Session doesn't exist");
                 }
+
                 List<RemedialTimeTableClasses> remedialTimeTableClasses = new List<RemedialTimeTableClasses>();
 
                 foreach (var item1 in item.RemedialClassroomIds)
@@ -350,6 +352,14 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     {
                         return BadRequest("this Remedial Classroom doesn't exist");
                     }
+                    List<RemedialTimeTableClasses> ExistedRemedialTimeTableClasses = await Unit_Of_Work.remedialTimeTableClasses_Repository.Select_All_With_IncludesById<RemedialTimeTableClasses>(s => s.RemedialTimeTableDayId == item.RemedialTimeTableDayId && s.IsDeleted != true && s.RemedialClassroom.TeacherID == remedialClassroom.TeacherID,
+                               query => query.Include(x => x.RemedialClassroom));
+
+                    if (ExistedRemedialTimeTableClasses.Count != 0 )
+                    {
+                        return BadRequest("Dragged session teachers conflict with other sessions in the target session day/period");
+                    }
+
                     remedialTimeTableClasses.Add(new RemedialTimeTableClasses
                     {
                         RemedialTimeTableDayId = item.RemedialTimeTableDayId,
@@ -370,13 +380,13 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         /////////////////
 
-        [HttpDelete()]
+        [HttpDelete("{id}")]
         [Authorize_Endpoint_(
-           allowedTypes: new[] { "octa", "employee" },
-           allowDelete: 1,
-           pages: new[] { "Remedial TimeTable" }
-       )]
-        public IActionResult Delete(List<long> ids)
+            allowedTypes: new[] { "octa", "employee" },
+            allowDelete: 1,
+            pages: new[] { "Remedial TimeTable" }
+        )]
+        public IActionResult Delete(long id)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -391,47 +401,49 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             {
                 return Unauthorized("User ID or Type claim not found.");
             }
-            foreach (var id in ids)
+
+            if (id == null)
             {
-                RemedialTimeTableClasses remedialTimeTableClass = Unit_Of_Work.remedialTimeTableClasses_Repository.Select_By_Id(id);
-
-                if (remedialTimeTableClass != null || remedialTimeTableClass.IsDeleted != true)
-                {
-
-                    if (userTypeClaim == "employee")
-                    {
-                        IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Remedial TimeTable", roleId, userId, remedialTimeTableClass);
-                        if (accessCheck != null)
-                        {
-                            return accessCheck;
-                        }
-                    }
-
-                    remedialTimeTableClass.IsDeleted = true;
-                    TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-                    remedialTimeTableClass.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
-                    if (userTypeClaim == "octa")
-                    {
-                        remedialTimeTableClass.DeletedByOctaId = userId;
-                        if (remedialTimeTableClass.DeletedByUserId != null)
-                        {
-                            remedialTimeTableClass.DeletedByUserId = null;
-                        }
-                    }
-                    else if (userTypeClaim == "employee")
-                    {
-                        remedialTimeTableClass.DeletedByUserId = userId;
-                        if (remedialTimeTableClass.DeletedByOctaId != null)
-                        {
-                            remedialTimeTableClass.DeletedByOctaId = null;
-                        }
-                    }
-
-                    Unit_Of_Work.remedialTimeTableClasses_Repository.Update(remedialTimeTableClass);
-                    Unit_Of_Work.SaveChanges();
-                }
-
+                return BadRequest("id cannot be null");
             }
+            RemedialTimeTable remedialTimeTable = Unit_Of_Work.remedialTimeTable_Repository.Select_By_Id(id);
+
+            if (remedialTimeTable == null || remedialTimeTable.IsDeleted == true)
+            {
+                return NotFound("No remedialTimeTable with this ID");
+            }
+
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Remedial TimeTable", roleId, userId, remedialTimeTable);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
+            }
+
+            remedialTimeTable.IsDeleted = true;
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            remedialTimeTable.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            if (userTypeClaim == "octa")
+            {
+                remedialTimeTable.DeletedByOctaId = userId;
+                if (remedialTimeTable.DeletedByUserId != null)
+                {
+                    remedialTimeTable.DeletedByUserId = null;
+                }
+            }
+            else if (userTypeClaim == "employee")
+            {
+                remedialTimeTable.DeletedByUserId = userId;
+                if (remedialTimeTable.DeletedByOctaId != null)
+                {
+                    remedialTimeTable.DeletedByOctaId = null;
+                }
+            }
+
+            Unit_Of_Work.remedialTimeTable_Repository.Update(remedialTimeTable);
+            Unit_Of_Work.SaveChanges();
             return Ok();
         }
     }

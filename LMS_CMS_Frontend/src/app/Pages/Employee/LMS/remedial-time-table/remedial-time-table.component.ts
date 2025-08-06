@@ -15,6 +15,7 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import Swal from 'sweetalert2';
 import { TimeTable } from '../../../../Models/LMS/time-table';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-remedial-time-table',
@@ -24,7 +25,7 @@ import { TimeTable } from '../../../../Models/LMS/time-table';
   styleUrl: './remedial-time-table.component.css'
 })
 export class RemedialTimeTableComponent {
-  User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
   AllowEditForOthers: boolean = false;
@@ -109,33 +110,33 @@ export class RemedialTimeTableComponent {
   }
 
   async onSearchEvent(event: { key: string; value: any }) {
-    // this.key = event.key;
-    // this.value = event.value;
-    // try {
-    //   const data: TimeTable[] = await firstValueFrom(
-    //     this.TimeTableServ.GetBySchoolId(this.SelectedSchoolId, this.DomainName)
-    //   );
-    //   this.TableData = data || [];
+    this.key = event.key;
+    this.value = event.value;
+    try {
+      const data: RemedialTimeTable[] = await firstValueFrom(
+        this.RemedialTimeTableServ.GetBySchoolId(this.SelectedSchoolId, this.DomainName)
+      );
+      this.TableData = data || [];
 
-    //   if (this.value !== '') {
-    //     const numericValue = isNaN(Number(this.value))
-    //       ? this.value
-    //       : parseInt(this.value, 10);
+      if (this.value !== '') {
+        const numericValue = isNaN(Number(this.value))
+          ? this.value
+          : parseInt(this.value, 10);
 
-    //     this.TableData = this.TableData.filter((t) => {
-    //       const fieldValue = t[this.key as keyof typeof t];
-    //       if (typeof fieldValue === 'string') {
-    //         return fieldValue.toLowerCase().includes(this.value.toLowerCase());
-    //       }
-    //       if (typeof fieldValue === 'number') {
-    //         return fieldValue.toString().includes(numericValue.toString());
-    //       }
-    //       return fieldValue == this.value;
-    //     });
-    //   }
-    // } catch (error) {
-    //   this.TableData = [];
-    // }
+        this.TableData = this.TableData.filter((t) => {
+          const fieldValue = t[this.key as keyof typeof t];
+          if (typeof fieldValue === 'string') {
+            return fieldValue.toLowerCase().includes(this.value.toLowerCase());
+          }
+          if (typeof fieldValue === 'number') {
+            return fieldValue.toString().includes(numericValue.toString());
+          }
+          return fieldValue == this.value;
+        });
+      }
+    } catch (error) {
+      this.TableData = [];
+    }
   }
 
   openModal() {
@@ -215,6 +216,7 @@ export class RemedialTimeTableComponent {
           confirmButtonColor: '#089B41',
         });
         this.closeModal();
+        this.GetAllData();
         this.isLoading = false
       }, error => {
         Swal.fire({
@@ -229,10 +231,24 @@ export class RemedialTimeTableComponent {
   }
 
   delete(id: number) {
-
+    Swal.fire({
+      title: 'Are you sure you want to delete this Remedial TimeTable?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#089B41',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'Cancel',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.RemedialTimeTableServ.Delete(id, this.DomainName).subscribe((d) => {
+          this.GetAllData();
+        });
+      }
+    });
   }
 
   View(id: number) {
-    this.router.navigateByUrl('Employee/Remedial TimeTable/'+id);
+    this.router.navigateByUrl('Employee/Remedial TimeTable/' + id);
   }
 }

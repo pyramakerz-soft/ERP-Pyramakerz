@@ -14,6 +14,5 @@ namespace LMS_CMS_BL.DTO.LMS
         public long SubjectID { get; set; }
         public long AcademicYearID { get; set; }
         public long TeacherID { get; set; }
-        public List<long> StudentsId { get; set; }
     }
 }

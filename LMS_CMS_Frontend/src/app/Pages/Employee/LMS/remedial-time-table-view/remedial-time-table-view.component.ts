@@ -20,6 +20,7 @@ import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { RemedialTimeTableDay } from '../../../../Models/LMS/remedial-time-table-day';
 import { RemedialTimeTableClasses } from '../../../../Models/LMS/remedial-time-table-classes';
 import Swal from 'sweetalert2';
+import { RemedialTimeTableClassesService } from '../../../../Services/Employee/LMS/remedial-time-table-classes.service';
 
 @Component({
   selector: 'app-remedial-time-table-view',
@@ -63,7 +64,8 @@ export class RemedialTimeTableViewComponent {
     public ApiServ: ApiService,
     public GradeServ: GradeService,
     public RemedialClassroomServ: RemedialClassroomService,
-    public RemedialTimeTableServ: RemedialTimeTableService
+    public RemedialTimeTableServ: RemedialTimeTableService,
+    public RemedialTimeTableClassesServ: RemedialTimeTableClassesService,
   ) { }
 
   ngOnInit() {
@@ -121,16 +123,26 @@ export class RemedialTimeTableViewComponent {
 
   onDrop(event: CdkDragDrop<any[]>, period: RemedialTimeTableDay) {
     if (event.previousContainer === event.container) return;
-
     const draggedItem = event.previousContainer.data[event.previousIndex];
 
     // ✅ Ensure the array is initialized
     if (!period.remedialTimeTableClasses) {
       period.remedialTimeTableClasses = [];
     }
+    const IsThisTeacherBeasy = period.remedialTimeTableClasses.find(s => s.teacherID == draggedItem.teacherID)
+    if (IsThisTeacherBeasy != null) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: ' Dragged session teachers conflict with other sessions in the target session day/period',
+        confirmButtonColor: '#089B41',
+      });
+      return;
+    }
     const newClass = new RemedialTimeTableClasses();
     newClass.remedialClassroomID = draggedItem.id;
     newClass.remedialClassroomName = draggedItem.name;
+    newClass.teacherID = draggedItem.teacherID;
     newClass.teacherEnName = draggedItem.teacherEnName;
     newClass.teacherArName = draggedItem.teacherArName;
     newClass.remedialTimeTableDayId = period.id;
@@ -168,7 +180,7 @@ export class RemedialTimeTableViewComponent {
       const newRemedial = this.NewremedialTimeTableClasses.find(r => r.remedialTimeTableDayId == period.id)
       if (newRemedial?.remedialClassroomIds) {
         newRemedial.remedialClassroomIds = newRemedial.remedialClassroomIds.filter(a => a != classItem.remedialClassroomID);
-      } 
+      }
       this.getAllClassByGradeId()
     } else {
       if (!this.DeletedRemedialTimeTableClasses) {  // for Existed Remedial Classes
@@ -182,7 +194,7 @@ export class RemedialTimeTableViewComponent {
 
   Save() {
     if (this.DeletedRemedialTimeTableClasses.length > 0) {
-      this.RemedialTimeTableServ.Delete(this.DeletedRemedialTimeTableClasses, this.DomainName).subscribe((d) => {
+      this.RemedialTimeTableClassesServ.Delete(this.DeletedRemedialTimeTableClasses, this.DomainName).subscribe((d) => {
       })
     }
     this.RemedialTimeTableServ.Edit(this.NewremedialTimeTableClasses, this.DomainName).subscribe((d) => {
@@ -203,7 +215,7 @@ export class RemedialTimeTableViewComponent {
       });
       this.isLoading = false
     })
-    this.NewremedialTimeTableClasses=[]
-    this.DeletedRemedialTimeTableClasses=[]
+    this.NewremedialTimeTableClasses = []
+    this.DeletedRemedialTimeTableClasses = []
   }
 }

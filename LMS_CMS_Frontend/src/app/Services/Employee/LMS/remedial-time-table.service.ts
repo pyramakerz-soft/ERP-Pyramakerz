@@ -49,7 +49,7 @@ export class RemedialTimeTableService {
       .set('Domain-Name', this.header) // Correct casing as in your backend
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.put(`${this.baseUrl}/RemedialTimeTable?id=${Id}&IsFavourite=${IsFav}`, {}, { headers });
+    return this.http.put(`${this.baseUrl}/RemedialTimeTable/IsFavourite?id=${Id}&IsFavourite=${IsFav}`, {}, { headers });
   }
 
   Edit(Remedial: RemedialTimeTableClasses[], DomainName: string) {
@@ -63,7 +63,6 @@ export class RemedialTimeTableService {
       .set('Content-Type', 'application/json');
     return this.http.put(`${this.baseUrl}/RemedialTimeTable`, Remedial, { headers });
   }
-
 
   Add(RemedialTimeTable: RemedialTimeTable, DomainName: string) {
     if (DomainName != null) {
@@ -81,16 +80,15 @@ export class RemedialTimeTableService {
     });
   }
 
-  Delete(ids: number[], DomainName: string) {
-    if (DomainName != null) {
-      this.header = DomainName;
+  Delete(id: number,DomainName:string) {
+    if(DomainName!=null) {
+      this.header=DomainName 
     }
-    const token = localStorage.getItem('current_token');
+    const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    // 👇 pass body inside options
-    return this.http.delete(`${this.baseUrl}/RemedialTimeTable`, { headers, body: ids });
+    return this.http.delete(`${this.baseUrl}/RemedialTimeTable/${id}`, { headers })
   }
 }

@@ -78,12 +78,21 @@ export class RemedialClassroomService {
     if (DomainName != null) {
       this.header = DomainName;
     }
+    const payload = {
+      id: RemedialClassroom.id,
+      name: RemedialClassroom.name,
+      numberOfSession: Number(RemedialClassroom.numberOfSession), // Convert to number
+      subjectID: Number(RemedialClassroom.subjectID),
+      academicYearID: Number(RemedialClassroom.academicYearID),
+      teacherID: Number(RemedialClassroom.teacherID),
+    };
+    console.log(payload)
     const token = localStorage.getItem('current_token');
     const headers = new HttpHeaders()
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.put(`${this.baseUrl}/RemedialClassroom`, RemedialClassroom, { headers });
+    return this.http.put(`${this.baseUrl}/RemedialClassroom`, payload, { headers });
   }
 
   Delete(id: number, DomainName: string) {

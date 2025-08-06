@@ -86,16 +86,25 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return Unauthorized("User ID or Type claim not found.");
 
             var data = await Unit_Of_Work.dailyPerformanceMaster_Repository
-                .FindByIncludesAsync(
-                    f => f.IsDeleted != true && f.ID == id,
-                    query => query.Include(m => m.Subject).ThenInclude(s => s.Grade),
-                    query => query.Include(m => m.Classroom),
-                    query => query.Include(m => m.DailyPerformances).ThenInclude(dp => dp.Student),
-                    query => query.Include(m => m.DailyPerformances).ThenInclude(dp => dp.StudentPerformance).ThenInclude(sp => sp.PerformanceType)
-                );
+                 .FindByIncludesAsync(
+                     f => f.IsDeleted != true && f.ID == id,
+                     query => query
+                         .Include(m => m.Subject).ThenInclude(s => s.Grade)
+                         .Include(m => m.Classroom)
+                         .Include(m => m.DailyPerformances)
+                             .ThenInclude(dp => dp.Student)
+                         .Include(m => m.DailyPerformances)
+                             .ThenInclude(dp => dp.StudentPerformance)
+                                 .ThenInclude(sp => sp.PerformanceType)
+                 );
 
-            if (data == null)
+             if (data == null)
                 return NotFound();
+
+            // filter out deleted students
+            data.DailyPerformances = data.DailyPerformances
+                .Where(dp => dp.Student?.IsDeleted != true)
+                .ToList();
 
             var dto = mapper.Map<DailyPerformanceMasterGetDTO>(data);
 
