@@ -130,7 +130,7 @@ export class RealTimeNotificationServiceService {
 
   stopConnection(): void {
     if (this.hubConnection) {
-      this.hubConnection.stop()
+      this.hubConnection.stop() 
         .then(() => { 
           this.hubConnection = null;
         }) 

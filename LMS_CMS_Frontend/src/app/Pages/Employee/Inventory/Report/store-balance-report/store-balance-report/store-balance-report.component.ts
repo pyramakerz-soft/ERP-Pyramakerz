@@ -114,7 +114,6 @@ export class StoreBalanceReportComponent implements OnInit {
     this.isLoading = true;
     this.storesService.Get(this.storesService.ApiServ.GetHeader()).subscribe({
       next: (stores) => {
-        console.log('Stores loaded:', stores);
         this.stores = stores;
         this.isLoading = false;
       },
@@ -144,11 +143,6 @@ export class StoreBalanceReportComponent implements OnInit {
   onFilterChange() {
     this.showTable = false;
     this.reportData = null;
-    console.log('Checkbox values:', {
-      hasBalance: this.hasBalance,
-      overdrawnBalance: this.overdrawnBalance,
-      zeroBalances: this.zeroBalances,
-    });
   }
 
   viewReport() {
@@ -179,14 +173,12 @@ export class StoreBalanceReportComponent implements OnInit {
       )
       .subscribe({
         next: (response) => {
-          console.log('Report data loaded:', response);
           this.reportData = response;
           this.prepareExportData();
           this.showTable = true;
           this.isLoading = false;
         },
         error: (error) => {
-          console.error('Error loading report:', error);
           this.reportData = null;
           this.showTable = true;
           this.isLoading = false;

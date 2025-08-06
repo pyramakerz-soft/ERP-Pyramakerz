@@ -244,7 +244,6 @@ export class TimeTableReplaceComponent {
         targetSession.sessionId
       )
     );
-    console.log(this.SessionReplaced);
     const targetSessionCopy = JSON.parse(JSON.stringify(targetSession));
     this.swapSubjects(targetSession, this.draggedSession);
     if (this.dragFromcard == true) {

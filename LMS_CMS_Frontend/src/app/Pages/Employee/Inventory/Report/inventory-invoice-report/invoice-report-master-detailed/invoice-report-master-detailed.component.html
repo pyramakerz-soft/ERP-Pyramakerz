@@ -90,13 +90,7 @@
     <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()" title="Print Report">
 </div>
 
-<div class="absolute -top-[9999px] -left-[9999px]">
-    <div id="Data" class="hidden">
-        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'Inventory Transactions Detailed Report'"
-            [infoRows]="getInfoRows()" [tableDataWithHeaderArray]="getTableDataWithHeader()" #pdfComponentRef>
-        </app-pdf-print>
-    </div>
-</div>
+
 
 <div *ngIf="showTable" class="mb-8">
     <div class="p-2 rounded-top mb-2 bg-primary-100">
@@ -148,7 +142,6 @@
                         <th class="p-2">Invoice #</th>
                         <th class="p-2">Date</th>
                         <th class="p-2">Store</th>
-                        <!-- Conditionally show Student or Supplier column -->
                         <th *ngIf="reportType === 'sales'" class="p-2">Student</th>
                         <th *ngIf="reportType === 'purchase'" class="p-2">Supplier</th>
                         <th class="p-2">Transaction Type</th>
@@ -166,6 +159,33 @@
     </ng-template>
 </div>
 
+<div class="absolute -top-[9999px] -left-[9999px]">
+    <div id="Data" class="hidden">
+        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'Inventory Transactions Detailed Report'"
+            [tableDataWithHeaderArray]="getTableDataWithHeader()" #pdfComponentRef>
+        </app-pdf-print>
+    </div>
+</div>
+
+            <!-- [infoRows]="getInfoRows()" -->
+
+<!-- <div class="absolute -top-[9999px] -left-[9999px]">
+    <div id="Data" class="hidden">
+        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'List of students names in class'" [infoRows]="[
+                { keyEn: 'Class : ' + this.class.name},
+                { keyEn: 'Number of Students : ' + this.studentsCount.toString()},
+                { keyEn: 'Date : ' + this.date },
+                { keyEn: 'School : ' +  this.school.name },
+                { keyEn: 'Year : ' +this.AcademicYearName },
+                { keyEn: 'Grade : ' +this.GradeName }
+            ]" [tableHeaders]="['id', 'en_name', 'mobile', 'nationalityName', 'genderName']" [tableData]="StudentData"
+            #pdfComponentRef>
+        </app-pdf-print>
+    </div>
+</div> -->
+
+
+<!-- 
 <div *ngIf="showTable" class="mt-8 flex justify-between items-center">
     <div class="flex items-center space-x-4">
         <button class="flex items-center space-x-2 rounded-lg border py-3 px-4" (click)="changePage(currentPage-1)"
@@ -193,4 +213,4 @@
     <div>
         <p>{{currentPage}} of {{totalPages}} pages ({{totalRecords}} Items)</p>
     </div>
-</div>
+</div> -->

@@ -294,42 +294,6 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             Unit_Of_Work.remedialClassroom_Repository.Update(remedialClassroom);
             Unit_Of_Work.SaveChanges();
 
-            // edit students 
-
-            List<RemedialClassroomStudent> remedialClassroomStudents = await Unit_Of_Work.remedialClassroomStudent_Repository
-              .Select_All_With_IncludesById<RemedialClassroomStudent>(e => e.RemedialClassroomID == NewRemedialClass.ID && e.IsDeleted != true,
-              query => query.Include(emp => emp.Student));
-
-            List<long> existedStudentIds = remedialClassroomStudents.Select(d => d.StudentID).Where(id => id > 0).ToList();
-            List<long> updatedStudentIds = NewRemedialClass.StudentsId?.ToList() ?? new();
-
-            var deletedStudentIds = existedStudentIds.Except(updatedStudentIds).ToList();
-            var newStudentIds = updatedStudentIds.Except(existedStudentIds).ToList();
-
-            // Delete removed employee type relations
-            foreach (var deletedId in deletedStudentIds)
-            {
-                var relation = remedialClassroomStudents.FirstOrDefault(r => r.StudentID == deletedId);
-                if (relation != null)
-                {
-                    relation.IsDeleted = true;
-                    Unit_Of_Work.remedialClassroomStudent_Repository.Update(relation);
-                }
-            }
-
-            // Add new employee type relations
-            foreach (var newId in newStudentIds)
-            {
-                RemedialClassroomStudent newRelation = new()
-                {
-                    RemedialClassroomID = remedialClassroom.ID,
-                    StudentID = newId
-                };
-                Unit_Of_Work.remedialClassroomStudent_Repository.Add(newRelation);
-            }
-
-            await Unit_Of_Work.SaveChangesAsync();
-
             return Ok(NewRemedialClass);
 
         }
