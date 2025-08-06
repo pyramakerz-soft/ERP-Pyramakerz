@@ -160,7 +160,6 @@ export class InventoryTransactionReportComponent implements OnInit {
       .Get(this.categoryService.ApiServ.GetHeader())
       .subscribe({
         next: (categories) => {
-          console.log('Categories loaded:', categories);
           this.categories = categories;
         },
         error: (error) => {
@@ -287,7 +286,6 @@ export class InventoryTransactionReportComponent implements OnInit {
       )
       .subscribe({
         next: (response: any) => {
-          console.log('Response from searchInvoice:', response);
           if (response?.data) {
             this.transactions = response.data;
             this.totalRecords =

@@ -159,7 +159,6 @@ export class DutyComponent {
     if (this.isFormValid()) {
       this.isLoading = true
       if (this.mode == "Create") {
-        console.log(this.duty)
         this.DutyServ.Add(this.duty, this.DomainName).subscribe((d) => {
           this.date = this.duty.date
           this.GetByDate()
@@ -168,7 +167,6 @@ export class DutyComponent {
         },
           err => {
             this.isLoading = false;
-            console.log(err);
             const errorMsg = err?.error ?? ''; // extract error message
             if (errorMsg.includes("This Day doesn`t exist in current time table")) {
               Swal.fire({

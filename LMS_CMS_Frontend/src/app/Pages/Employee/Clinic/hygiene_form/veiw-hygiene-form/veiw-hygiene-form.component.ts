@@ -61,7 +61,6 @@ export class ViewHygieneFormComponent implements OnInit {
       const domainName = this.apiService.GetHeader();
       this.hygieneFormService.GetById(id, domainName).subscribe({
         next: (hygieneForm) => {
-          console.log('Hygiene Form Data:', hygieneForm);
           this.hygieneForm = hygieneForm;
           this.prepareStudentData(hygieneForm);
         },

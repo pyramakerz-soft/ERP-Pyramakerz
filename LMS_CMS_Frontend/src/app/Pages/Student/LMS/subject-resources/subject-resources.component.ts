@@ -44,7 +44,6 @@ export class SubjectResourcesComponent {
   GetSubjectResourceData() {
     this.SubjectResourceServ.GetBySubjectId(this.SubjectID, this.DomainName).subscribe((d) => {
       this.SubjectResourcesData = d
-      console.log(this.SubjectResourcesData)
     })
   }
 

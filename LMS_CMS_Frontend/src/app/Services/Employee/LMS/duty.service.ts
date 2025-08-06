@@ -89,7 +89,6 @@ export class DutyService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    console.log(`${this.baseUrl}/Duty?date=${date}&ClassId=${ClassId}`)
     return this.http.get<any>(`${this.baseUrl}/Duty/GetPeriods?date=${date}&ClassId=${ClassId}`, { headers })
   }
 

@@ -57,7 +57,6 @@ export class RealTimeNotificationServiceService {
     if (this.hubConnection) {
       this.hubConnection.stop()
         .then(() => {
-          console.log('SignalR Disconnected');
           this.hubConnection = null;
         })
         .catch(err => console.error('Error stopping SignalR:', err));

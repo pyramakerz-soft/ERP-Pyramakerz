@@ -301,7 +301,6 @@ export class AssignmentComponent {
     this.assignmentService.GetByID(Id, this.DomainName).subscribe(
       data => {
         this.assignment = data
-        console.log(this.assignment)
         this.GradeServ.GetBySchoolId(this.assignment.schoolID, this.DomainName).subscribe((d) => {
           this.GradesForCreate = d
           this.subjectsForCreate = []

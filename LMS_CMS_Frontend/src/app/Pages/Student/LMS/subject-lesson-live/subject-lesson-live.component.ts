@@ -45,7 +45,6 @@ export class SubjectLessonLiveComponent {
   GetSubjectLessonLiveData() {
     this.LessonLiveServ.GetBySubjectID(this.SubjectID, this.DomainName).subscribe((d) => {
       this.LessonLivesData = d
-      console.log(this.LessonLivesData)
     })
   }
 

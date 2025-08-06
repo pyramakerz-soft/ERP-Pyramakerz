@@ -1158,7 +1158,8 @@ namespace LMS_CMS_BL.Config
 
             CreateMap<RemedialClassroomAddDTO, RemedialClassroom>();
             CreateMap<RemedialClassroom, RemedialClassRoomGetDTO>()
-                .ForMember(dest => dest.TeacherName, opt => opt.MapFrom(src => src.Teacher.en_name))
+                .ForMember(dest => dest.TeacherArName, opt => opt.MapFrom(src => src.Teacher.ar_name))
+                .ForMember(dest => dest.TeacherEnName, opt => opt.MapFrom(src => src.Teacher.en_name))
                 .ForMember(dest => dest.SchoolID, opt => opt.MapFrom(src => src.AcademicYear.SchoolID))
                 .ForMember(dest => dest.SchoolName, opt => opt.MapFrom(src => src.AcademicYear.School.Name))
                 .ForMember(dest => dest.GradeID, opt => opt.MapFrom(src => src.Subject.GradeID))

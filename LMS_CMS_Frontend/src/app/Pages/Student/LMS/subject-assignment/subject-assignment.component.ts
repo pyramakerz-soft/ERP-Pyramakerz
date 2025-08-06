@@ -45,7 +45,6 @@ export class SubjectAssignmentComponent {
 
   GetAssignments() {
     this.AssignmentServ.GetByStudentID(this.UserID, this.SubjectID, this.DomainName).subscribe((d) => {
-      console.log(d)
       this.SolvedAssignment = d.solvedAssignments
       this.UnSolvedAssignment = d.unsolvedAssignments
     })

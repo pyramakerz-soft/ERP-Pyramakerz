@@ -98,10 +98,9 @@
             {{ reportType | titlecase }} Transaction Report Detailed
         </h5>
     </div>
-<!-- *ngIf="transactions.length > 0; else noDataTemplate" -->
-    <div >
-        <!--  -->
-        <div *ngFor="let section of getTableDataWithHeader()"  class="mb-8">
+
+    <div *ngIf="transactions.length > 0; else noDataTemplate">
+        <div *ngFor="let section of getTableDataWithHeader()" class="mb-8">
             <div class="p-2 rounded-top mb-2 bg-primary-100">
                 <h5 class="primaryTxt font-semibold text-xl leading-9">{{ section.header }}</h5>
             </div>
@@ -135,7 +134,7 @@
         </div>
     </div>
 
-    <!-- <ng-template #noDataTemplate>
+    <ng-template #noDataTemplate>
         <div class="mt-4 overflow-x-auto rounded-xl border border-[#BDBDBD]">
             <table class="w-full inset-0 rounded-xl text-left text-[#6F6F6F]">
                 <thead>
@@ -157,7 +156,7 @@
                 </tbody>
             </table>
         </div>
-    </ng-template> -->
+    </ng-template>
 </div>
 
 <div class="absolute -top-[9999px] -left-[9999px]">

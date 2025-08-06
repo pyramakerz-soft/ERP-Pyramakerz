@@ -242,7 +242,6 @@ export class AccountingEmployeeEditComponent {
   }
 
   Save() {
-    console.log(this.Data) 
     Object.keys(this.Data).forEach(key => {
       if ((this.Data as any)[key] === '') {
         (this.Data as any)[key] = null;

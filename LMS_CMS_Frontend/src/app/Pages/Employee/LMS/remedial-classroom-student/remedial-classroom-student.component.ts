@@ -95,12 +95,9 @@ export class RemedialClassroomStudentComponent {
   }
 
   GetRemedialClassroom() {
-    console.log(this.DomainName)
     this.RemedialClassroomServ.GetById(this.RemedialClassroomID,this.DomainName).subscribe((d) => {
       this.remedialClassroom = d;
-      console.log(d)
     },err=>{
-      console.log(err)
     });
   }
 
@@ -131,7 +128,6 @@ export class RemedialClassroomStudentComponent {
             confirmButtonColor: '#089B41',
           });
       },err=>{
-        console.log(err)
         this.closeModal()
         Swal.fire({
           icon: 'error',

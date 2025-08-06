@@ -186,10 +186,8 @@ export class ViolationComponent {
 
   Edit(id: number) {
     this.mode = 'Edit';
-    console.log(id)
     this.violationServ.GetByID(id, this.DomainName).subscribe((d) => {
       this.violation = d;
-      console.log(this.violation)
       this.empTypes = [];
       this.EmployeeTypeServ.Get(this.DomainName).subscribe((d) => {
         this.empTypes = d;

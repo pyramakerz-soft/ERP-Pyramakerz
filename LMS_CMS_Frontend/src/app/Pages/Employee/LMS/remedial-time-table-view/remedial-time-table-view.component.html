@@ -65,8 +65,14 @@
             (cdkDropListDropped)="onDrop($event, period)">
             <div class="flex flex-wrap gap-1">
               <span *ngFor="let class of period.remedialTimeTableClasses"
-                class="bg-gray-100 text-sm px-3 py-1 rounded-full border-l-4 border-blue-500">
-                {{ class.remedialClassroomName }}
+                class="relative bg-gray-100 text-sm px-3 py-1 rounded-full border-l-4 border-blue-500 pr-6 inline-flex items-center">
+                {{ class.remedialClassroomName }} / {{ class.teacherEnName }}
+
+                <!-- X icon -->
+                <button type="button" class="absolute right-1 top-1 text-gray-500 hover:text-red-600 text-l font-bold"
+                  (click)="deleteRemedialClassroom(class,period)">
+                  &times;
+                </button>
               </span>
             </div>
           </td>
