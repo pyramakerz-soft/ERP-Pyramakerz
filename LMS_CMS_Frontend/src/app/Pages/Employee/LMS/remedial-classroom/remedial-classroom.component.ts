@@ -116,7 +116,6 @@ export class RemedialClassroomComponent {
     this.TableData = [];
     this.remedialClassroomServ.GetBySchoolId(this.SelectedSchoolId, this.DomainName).subscribe((d) => {
       this.TableData = d;
-      console.log(this.TableData)
     });
   }
 
@@ -160,7 +159,6 @@ export class RemedialClassroomComponent {
   CreateOREdit() {
     if (this.isFormValid()) {
       this.isLoading = true
-        console.log(this.remedialClassroom)
       if (this.mode == 'Create') {
         this.remedialClassroomServ.Add(this.remedialClassroom, this.DomainName).subscribe((d) => {
           this.GetAllData()
@@ -173,7 +171,6 @@ export class RemedialClassroomComponent {
             confirmButtonColor: '#089B41',
           });
         }, error => {
-          console.log(error)
           this.isLoading = false
           if (error.error?.toLowerCase().includes('name') && error.status === 400) {
             Swal.fire({
@@ -207,7 +204,6 @@ export class RemedialClassroomComponent {
             confirmButtonColor: '#089B41',
           });
         }, error => {
-          console.log(error)
           this.isLoading = false
           Swal.fire({
             icon: 'error',
@@ -230,7 +226,6 @@ export class RemedialClassroomComponent {
       existingIds.add(id);
     }
     this.remedialClassroom.studentIds = Array.from(existingIds);
-    console.log(this.remedialClassroom.studentIds);
   }
 
   async onSearchEvent(event: { key: string; value: any }) {

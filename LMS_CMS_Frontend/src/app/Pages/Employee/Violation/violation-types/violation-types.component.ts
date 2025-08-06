@@ -184,7 +184,6 @@ export class ViolationTypesComponent {
   }
 
   CreateOREdit() {
-    console.log(this.violationType)
     if (this.isFormValid()) {
       this.isLoading = true
       if (this.mode == 'Create') {
@@ -199,7 +198,6 @@ export class ViolationTypesComponent {
             confirmButtonColor: '#089B41',
           });
         }, error => {
-          console.log(error)
           this.isLoading = false
           if (error.error?.toLowerCase().includes('name') && error.status === 400) {
             Swal.fire({
@@ -233,7 +231,6 @@ export class ViolationTypesComponent {
             confirmButtonColor: '#089B41',
           });
         }, error => {
-          console.log(error)
           this.isLoading = false
           if (error.error?.toLowerCase().includes('name') && error.status === 400) {
             Swal.fire({

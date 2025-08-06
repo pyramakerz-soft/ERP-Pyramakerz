@@ -234,7 +234,6 @@ export class InterviewRegistrationComponent {
       this.calendarMonths.push({ month, year });
       currentMonth = new Date(year, month + 1, 1);
     }
-    console.log(this.calendarMonths)
     this.currentMonth = this.calendarMonths[0].month
     this.currentYear = this.calendarMonths[0].year 
   }

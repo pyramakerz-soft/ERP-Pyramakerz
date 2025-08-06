@@ -139,7 +139,6 @@ export class TimeTableService {
     if (DomainName != null) {
       this.header = DomainName;
     }
-    console.log(DomainName);
     const token = localStorage.getItem('current_token');
     const headers = new HttpHeaders()
       .set('Domain-Name', this.header) // Correct casing as in your backend
@@ -156,7 +155,6 @@ export class TimeTableService {
     if (DomainName != null) {
       this.header = DomainName;
     }
-    console.log(DomainName);
     const token = localStorage.getItem('current_token');
     const headers = new HttpHeaders()
       .set('Domain-Name', this.header) // Correct casing as in your backend

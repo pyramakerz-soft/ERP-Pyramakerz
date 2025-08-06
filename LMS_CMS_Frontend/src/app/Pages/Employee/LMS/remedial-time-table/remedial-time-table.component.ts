@@ -154,7 +154,6 @@ export class RemedialTimeTableComponent {
   }
 
   EditFavourite(id: number, isFav: boolean) {
-    console.log(id, isFav)
     this.RemedialTimeTableServ.EditIsFavourite(id, isFav, this.DomainName).subscribe((d) => {
       this.GetAllData()
     })
@@ -208,7 +207,6 @@ export class RemedialTimeTableComponent {
     this.remedialTimeTable.schoolID = this.SelectedSchoolId;
     if (this.isFormValid()) {
       this.isLoading = true
-      console.log(this.remedialTimeTable)
       this.RemedialTimeTableServ.Add(this.remedialTimeTable, this.DomainName).subscribe((d) => {
         Swal.fire({
           icon: 'success',
@@ -219,7 +217,6 @@ export class RemedialTimeTableComponent {
         this.closeModal();
         this.isLoading = false
       }, error => {
-        console.log(error)
         Swal.fire({
           icon: 'error',
           title: 'Error',

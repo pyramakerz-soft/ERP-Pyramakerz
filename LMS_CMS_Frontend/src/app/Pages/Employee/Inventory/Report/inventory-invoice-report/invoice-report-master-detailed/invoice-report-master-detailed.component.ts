@@ -111,7 +111,6 @@ export class InvoiceReportMasterDetailedComponent implements OnInit {
       .subscribe({
         next: (categories) => {
           this.categories = categories;
-          console.log(this.categories);
         },
         error: (error) => {
           console.error('Error loading categories:', error);
@@ -227,7 +226,6 @@ export class InvoiceReportMasterDetailedComponent implements OnInit {
       )
       .subscribe({
         next: (response: any) => {
-          console.log(response);
           if (Array.isArray(response)) {
             this.transactions = response;
             this.totalRecords = response.length;

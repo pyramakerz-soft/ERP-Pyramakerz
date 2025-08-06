@@ -180,7 +180,6 @@ export class AssignmentStudentComponent {
 
   Submit() {
     if (!this.isFormValid()) return;
-    console.log(this.assignmentStudent)
     this.isLoading = true;
     const isTextbook = this.assignment.assignmentTypeID === 1;
     const submitObservable = isTextbook
