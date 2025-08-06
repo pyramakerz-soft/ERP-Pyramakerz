@@ -243,6 +243,9 @@ export class InterviewRegistrationComponent {
     const totalDays = new Date(year, month + 1, 0).getDate();
     let plainDays: DayWithInterviews[] = [];
     
+    if(!plainDays){
+      plainDays = []
+    }
     
     for (let day = 1; day <= totalDays; day++) {
       const date = new Date(year, month, day);

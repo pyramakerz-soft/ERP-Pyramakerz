@@ -147,6 +147,7 @@ export class NotificationComponent {
   openModal(Id?: number) {
     this.notification= new Notification();
     this.isStudentHovered = true;
+    this.notification.userTypeID = 2
     this.getSchool() 
 
     if (Id) {

@@ -130,6 +130,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                 }
             }
 
+            // If Student Or Parent ==> Make Sure To Send Message To Employees that Receives Messages Or The Student Teachers - CoTeachers
+            // Note ==> if Parent make sure that atleast the teacher is one for his student Or In the remedial
+
+            // If Employee ==> can Send To any student and parent
+
             ChatMessage chatMessage = mapper.Map<ChatMessage>(NewMessage);
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             chatMessage.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
@@ -180,7 +185,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee", "parent", "student" }
         )]
-        public async Task<IActionResult> Forward(ChatAddDTO NewMessage)
+        public async Task<IActionResult> Forward(ChatForwardDTO ForwardedMessage)
         {
             return Ok();
         }
