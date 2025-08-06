@@ -77,8 +77,7 @@ export class InventoryTransactionReportComponent implements OnInit {
     reportHeaderOneEn: 'Inventory Report',
     reportHeaderTwoEn: 'Transaction Summary',
     reportHeaderOneAr: 'تقرير المخزون',
-    reportHeaderTwoAr: 'ملخص المعاملات',
-    reportImage: 'assets/images/logo.png',
+    reportHeaderTwoAr: 'ملخص المعاملات'
   };
 
   @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;
@@ -371,10 +370,11 @@ export class InventoryTransactionReportComponent implements OnInit {
   }
 
   DownloadAsPDF() {
-    if (this.transactionsForExport.length === 0) {
-      Swal.fire('Warning', 'No data to export!', 'warning');
-      return;
-    }
+    console.log('Downloading PDF with transactions:', this.transactionsForExport);
+    // if (this.transactionsForExport.length === 0) {
+    //   Swal.fire('Warning', 'No data to export!', 'warning');
+    //   return;
+    // }
 
     this.showPDF = true;
     setTimeout(() => {
