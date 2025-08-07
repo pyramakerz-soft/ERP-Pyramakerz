@@ -12,11 +12,13 @@ import { EmployeeTypeGet } from '../../../../Models/Administrator/employee-type-
 import { Role } from '../../../../Models/Administrator/role';
 import Swal from 'sweetalert2';
 import { FormsModule } from '@angular/forms';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-registered-employee-view',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
   templateUrl: './registered-employee-view.component.html',
   styleUrl: './registered-employee-view.component.css'
 })
@@ -25,6 +27,8 @@ export class RegisteredEmployeeViewComponent {
   DomainName: string = '';
   path: string = '';  
   registereEmployeeID: number = 0;  
+   isRtl: boolean = false;
+  subscription!: Subscription;
   employeeTypes:EmployeeTypeGet[] = []
   roles:Role[] = []
   
@@ -35,7 +39,8 @@ export class RegisteredEmployeeViewComponent {
     public ApiServ: ApiService, 
     public registeredEmployeeService: RegisteredEmployeeService,
     public employeeTypeService: EmployeeTypeService,
-    public roleService: RoleService
+    public roleService: RoleService,
+    private languageService: LanguageService
   ) {}
 
   ngOnInit() { 
@@ -48,6 +53,10 @@ export class RegisteredEmployeeViewComponent {
     this.GetRegisteredEmployee();  
     this.GetEmployeeTypes();  
     this.GetRoles(); 
+            this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetRegisteredEmployee(){

@@ -23,11 +23,13 @@ import { AcademicYear } from '../../../../Models/LMS/academic-year';
 import { School } from '../../../../Models/school';
 import { AcadimicYearService } from '../../../../Services/Employee/LMS/academic-year.service';
 import { SchoolService } from '../../../../Services/Employee/school.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-lesson-live',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './lesson-live.component.html',
   styleUrl: './lesson-live.component.css'
 })
@@ -43,7 +45,8 @@ export class LessonLiveComponent {
   subject: Subject[] = [];
   days: Day[] = [];
   classrooms: Classroom[] = [];
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   SelectedGradeId: number = 0;
   SelectedClassId: number = 0;
   SelectedSubjectId: number = 0;
@@ -86,7 +89,8 @@ export class LessonLiveComponent {
     public weekdaysServ: DaysService,
     public acadimicYearService: AcadimicYearService,
     public schoolService: SchoolService,
-    public SubjectServ: SubjectService
+    public SubjectServ: SubjectService,
+    private languageService: LanguageService
   ) { }
 
   ngOnInit() {
@@ -108,6 +112,10 @@ export class LessonLiveComponent {
     });
 
     this.GetAllSchools();
+    this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   onSchoolChange() {

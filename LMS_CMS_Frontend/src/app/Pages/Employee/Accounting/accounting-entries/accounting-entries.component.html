@@ -51,7 +51,7 @@
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.accountingEntriesDocTypeName }}</td> 
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.notes }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    <div class="flex space-x-4">
+                    <div class="flex space-x-4 rtl:space-x-reverse">
                         <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)"
                             (click)="Delete(row.id)">
                             <i class="fa-regular fa-trash-can"></i>
@@ -92,7 +92,7 @@
         </button>
     </div>
 
-    <div class="flex items-center space-x-2">
+    <div class="flex items-center space-x-2 rtl:space-x-reverse">
         <input  (input)="validateNumber($event)" class="rounded-lg border py-3 px-4 w-[73px]" [(ngModel)]="PageSize" min="1" (input)="validatePageSize($event)" (ngModelChange)="changeCurrentPage(CurrentPage)">
         <p> {{'items Per Page'| translate }}</p>
     </div>

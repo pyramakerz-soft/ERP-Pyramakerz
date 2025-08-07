@@ -17,11 +17,13 @@ import { ClassroomStudentService } from '../../../../Services/Employee/LMS/class
 import { ClassStudentForDiscussionRoom } from '../../../../Models/LMS/class-student-for-discussion-room';
 import { School } from '../../../../Models/school';
 import { SchoolService } from '../../../../Services/Employee/school.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-discussion-room',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './discussion-room.component.html',
   styleUrl: './discussion-room.component.css'
 })
@@ -44,7 +46,8 @@ export class DiscussionRoomComponent {
   DomainName: string = '';
   UserID: number = 0;
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   studentsClass: ClassStudentForDiscussionRoom[] = [];
   schools: School[] = [];
   choosedClasss: ClassStudentForDiscussionRoom[] = [];
@@ -63,7 +66,8 @@ export class DiscussionRoomComponent {
     public router: Router,
     public discussionRoomService: DiscussionRoomService,
     public classroomStudentService: ClassroomStudentService,
-    public SchoolService: SchoolService
+    public SchoolService: SchoolService,
+    private languageService: LanguageService
   ) { }
 
   ngOnInit() {
@@ -86,6 +90,10 @@ export class DiscussionRoomComponent {
       }
     });
     this.getAllData()
+        this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   getAllData() {

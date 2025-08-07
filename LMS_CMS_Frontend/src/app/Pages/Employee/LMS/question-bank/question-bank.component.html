@@ -1,40 +1,40 @@
 <div class="">
   <div class="flex justify-between items-center">
-    <h1 class="primaryTxt font-semibold text-2xl leading-9">Question Bank</h1>
+    <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Question Bank' | translate }}</h1>
     <div class="flex justify-between items-center">
       <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
       <button (click)="Create()"
         class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
-        Create Question Bank
+          {{ 'Create' | translate }}  {{ 'Question Bank' | translate }}
       </button>
     </div>
   </div>
 
   <div>
     <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
-      <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
+      <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
         <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
           <tr>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-              ID
+              {{ 'ID' | translate }}
             </th>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-              Description
+                {{ 'Description' | translate }}
             </th>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-              Lesson
+                {{ 'Lesson' | translate }}
             </th>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-              Mark
+                {{ 'Mark' | translate }}
             </th>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-              Difficulty Level
+                {{ 'Difficulty Level' | translate }}
             </th>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-              QuestionType
+                {{ 'Question Type' | translate }}
             </th>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-              Actions
+                {{ 'Actions' | translate }}
             </th>
           </tr>
         </thead>
@@ -42,7 +42,7 @@
           <!-- No Data Row -->
           <tr *ngIf="TableData.length === 0">
             <td colspan="7" class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-              No Data Found
+                {{ 'No Data Found' | translate }}
             </td>
           </tr>
 
@@ -69,7 +69,7 @@
               {{ row.questionTypeName }}
             </td>
             <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-              <div class="flex space-x-4">
+              <div class="flex space-x-4 rtl:space-x-reverse">
                 <button (click)="Delete(row.id)" *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)">
                   <i class="fa-regular fa-trash-can"></i>
                 </button>
@@ -87,12 +87,12 @@
 
 
 <div class="mt-8 flex justify-between items-center">
-  <div class="flex items-center space-x-4">
-    <button class="flex items-center space-x-2 rounded-lg border py-3 px-4" (click)="changeCurrentPage(CurrentPage-1)"
+  <div class="flex items-center space-x-4 rtl:space-x-reverse">
+    <button class="flex items-center space-x-2 rtl:space-x-reverse rounded-lg border py-3 px-4" (click)="changeCurrentPage(CurrentPage-1)"
       [disabled]="CurrentPage === 1 || TableData.length == 0"
       [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === 1 || TableData.length == 0}">
       <i class="fa-solid fa-arrow-left"></i>
-      <p>Previous</p>
+      <p>  {{ 'Previous' | translate }}</p>
     </button>
     <div class="flex">
       <div *ngFor="let page of [].constructor(TotalPages); let i = index" class="rounded-lg py-[10px] w-[40px]"
@@ -100,21 +100,21 @@
         <p class="text-center">{{ i + 1 }}</p>
       </div>
     </div>
-    <button class="flex items-center space-x-2 rounded-lg border py-3 px-4" (click)="changeCurrentPage(CurrentPage+1)"
+    <button class="flex items-center space-x-2 rtl:space-x-reverse rounded-lg border py-3 px-4" (click)="changeCurrentPage(CurrentPage+1)"
       [disabled]="CurrentPage === TotalPages || TableData.length == 0"
       [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === TotalPages || TableData.length == 0}">
-      <p>Next</p>
+      <p>  {{ 'Next' | translate }}</p>
       <i class="fa-solid fa-arrow-right"></i>
     </button>
   </div>
 
-  <div class="flex items-center space-x-2">
+  <div class="flex items-center space-x-2 rtl:space-x-reverse">
     <input (input)="validatePageNumber($event)" class="rounded-lg border py-3 px-4 w-[73px]" [(ngModel)]="PageSize"
       min="1" (input)="validatePageSize($event)" (ngModelChange)="changeCurrentPage(CurrentPage)">
-    <p>items Per Page</p>
+    <p>  {{ 'items Per Page' | translate }}</p>
   </div>
   <div>
-    <p>{{CurrentPage}} of {{TotalPages}} pages ({{TotalRecords}} Item)</p>
+    <p>{{CurrentPage}} {{ 'of' | translate }} {{TotalPages}}  {{ 'pages' | translate }} ({{TotalRecords}} {{ 'Item' | translate }})</p>
   </div>
 </div>
 
@@ -123,42 +123,43 @@
   class="fixed top-0 left-0 right-0 z-50 flex justify-center items-center w-full h-full bg-black/50">
   <div class="bg-white rounded-2xl p-12 w-1/2 max-h-[95%] overflow-y-auto">
     <div class="flex justify-between items-center">
-      <h1 *ngIf="mode == 'Create'" class="font-semibold text-2xl leading-9">Create Question Bank</h1>
-      <h1 *ngIf="mode == 'Edit'" class="font-semibold text-2xl leading-9">Edit Question Bank</h1>
+      <h1 *ngIf="mode == 'Create'" class="font-semibold text-2xl leading-9"> {{ 'Create' | translate }} {{ 'Question Bank' | translate }}</h1>
+      <h1 *ngIf="mode == 'Edit'" class="font-semibold text-2xl leading-9"> {{ 'Edit' | translate }} {{ 'Question Bank' | translate }}</h1>
       <button (click)="closeModal()" type="button"
         class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
     </div>
 
     <div class="mt-6 mb-4 rounded-3xl flex justify-between flex-wrap">
       <div class="flex flex-col mb-4 w-[49%]">
-        <label class="mb-2 primaryTxt" for="questionBank.subjectID">Subject</label>
+        <label class="mb-2 primaryTxt" for="questionBank.subjectID"> {{ 'Subject' | translate }}</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
           id="questionBank.subjectID" (change)="onSubjectChange();" [(ngModel)]="questionBank.subjectID"
           (ngModelChange)="onInputValueChange({ field: 'subjectID', value: $event })">
-          <option [value]="0" disabled selected hidden>Choose Subject</option>
+          <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Subject' | translate }}</option>
           <option *ngFor="let c of subject" [value]="c.id">{{ c.en_name }}</option>
-          <option *ngIf="subject.length === 0" disabled selected>No Data Found</option>
+          <option *ngIf="subject.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
         </select>
         <span *ngIf="validationErrors['subjectID']"
           class="text-red-500 ml-3 font-normal">{{validationErrors['subjectID'] }}</span>
       </div>
 
       <div class="flex flex-col mb-4 w-[49%]">
-        <label class="mb-2" [ngClass]="{ 'text-gray-400': !questionBank.subjectID, 'primaryTxt': questionBank.subjectID }" for="lessonID">Lesson</label>
+        <label class="mb-2" [ngClass]="{ 'text-gray-400': !questionBank.subjectID, 'primaryTxt': questionBank.subjectID }" for="lessonID">
+          {{ 'Lesson' | translate }}</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="lessonID"
         [ngClass]="{ 'bg-[#EBEBEB]': !questionBank.subjectID }"
           [disabled]="!questionBank.subjectID" [(ngModel)]="questionBank.lessonID"
           (ngModelChange)="onInputValueChange({ field: 'lessonID', value: $event })">
-          <option [value]="0" disabled selected hidden>Choose Lesson</option>
+          <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }}  {{ 'Lesson' | translate }}</option>
           <option *ngFor="let c of lesson" [value]="c.id">{{ c.englishTitle }}</option>
-          <option *ngIf="lesson.length === 0" disabled selected>No Data Found</option>
+          <option *ngIf="lesson.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
         </select>
         <span *ngIf="validationErrors['lessonID']" class="text-red-500 ml-3 font-normal">{{validationErrors['lessonID']
           }}</span>
       </div>
 
       <div class="flex flex-col mb-4 w-[49%]" #dropdownContainer>
-        <label class="mb-2 primaryTxt" for="ac">Tags</label>
+        <label class="mb-2 primaryTxt" for="ac"> {{ 'Tags' | translate }}</label>
         <div class="relative">
           <div class="border border-gray-300 rounded-lg px-4 py-3 cursor-pointer min-h-[48px]"
             (click)="toggleDropdown()" tabindex="0">
@@ -174,7 +175,7 @@
               </div>
             </ng-container>
             <ng-template #placeholder>
-              <span class="text-gray-400">Choose Tag</span>
+              <span class="text-gray-400"> {{ 'Choose' | translate }}  {{ 'Tag' | translate }}</span>
             </ng-template>
           </div>
           <div class="absolute bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10"
@@ -190,11 +191,11 @@
       </div>
 
       <div class="flex flex-col mb-4 w-[49%]">
-        <label class="mb-2 primaryTxt" for="difficultyLevel">Difficulty Level</label>
+        <label class="mb-2 primaryTxt" for="difficultyLevel"> {{ 'Difficulty Level' | translate }}</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="difficultyLevel"
           [(ngModel)]="questionBank.difficultyLevel"
           (ngModelChange)="onInputValueChange({ field: 'difficultyLevel', value: $event })">
-          <option [value]="0" disabled selected hidden>Choose Difficulty Level</option>
+          <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Difficulty Level' | translate }}</option>
           <option *ngFor="let level of [1, 2, 3, 4, 5, 6]" [value]="level">
             {{ level }}
           </option>
@@ -202,43 +203,43 @@
       </div>
 
       <div class="flex flex-col mb-4 w-[49%]">
-        <label class="mb-2 primaryTxt" for="bloomLevelID">Bloom Level</label>
+        <label class="mb-2 primaryTxt" for="bloomLevelID"> {{ 'Bloom Level' | translate }}</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="bloomLevelID"
           [(ngModel)]="questionBank.bloomLevelID"
           (ngModelChange)="onInputValueChange({ field: 'bloomLevelID', value: $event })">
-          <option [value]="0" disabled selected hidden>Choose Bloom Level</option>
+          <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Bloom Level' | translate }}</option>
           <option *ngFor="let c of bloomLevel" [value]="c.id">{{ c.englishName }}</option>
-          <option *ngIf="bloomLevel.length === 0" disabled selected>No Data Found</option>
+          <option *ngIf="bloomLevel.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
         </select>
       </div>
 
       <div class="flex flex-col mb-4 w-[49%]">
-        <label class="mb-2 primaryTxt" for="dokLevelID">Dok Level</label>
+        <label class="mb-2 primaryTxt" for="dokLevelID">{{ 'Dok Level' | translate }}</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="dokLevelID"
           [(ngModel)]="questionBank.dokLevelID"
           (ngModelChange)="onInputValueChange({ field: 'dokLevelID', value: $event })">
-          <option [value]="0" disabled selected hidden>Choose Dok Level</option>
+          <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Dok Level' | translate }}</option>
           <option *ngFor="let c of dokLevel" [value]="c.id">{{ c.englishName }}</option>
-          <option *ngIf="dokLevel.length === 0" disabled selected>No Data Found</option>
+          <option *ngIf="dokLevel.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
         </select>
       </div>
 
       <div class="flex flex-col mb-4 w-[49%]">
-        <label class="mb-2 primaryTxt" for="mark">Mark</label>
+        <label class="mb-2 primaryTxt" for="mark"> {{ 'Mark' | translate }}</label>
         <input id="mark" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-          (input)="validateNumber($event,'mark')" placeholder="Enter English Name" [(ngModel)]="questionBank.mark"
+          (input)="validateNumber($event,'mark')" placeholder="{{ 'Enter' | translate }} {{ 'English Name' | translate }}" [(ngModel)]="questionBank.mark"
           (ngModelChange)="onInputValueChange({ field: 'mark', value: $event })" />
         <span *ngIf="validationErrors['mark']" class="text-red-500 ml-3 font-normal">{{validationErrors['mark']}}</span>
       </div>
 
       <div class="flex flex-col mb-4 w-full">
-        <label class="mb-2 primaryTxt" for="questionTypeID">Question Type</label>
+        <label class="mb-2 primaryTxt" for="questionTypeID"> {{ 'Question Type' | translate }}</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="questionTypeID"
           [(ngModel)]="questionBank.questionTypeID" (ngModelChange)="checkOnType()"
           (ngModelChange)="onInputValueChange({ field: 'questionTypeID', value: $event })">
-          <option [value]="0" disabled selected hidden>Choose Question Type</option>
+          <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }}  {{ 'Question Type' | translate }}</option>
           <option *ngFor="let c of questionBankType" [value]="c.id">{{ c.name }}</option>
-          <option *ngIf="questionBankType.length === 0" disabled selected>No Data Found</option>
+          <option *ngIf="questionBankType.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
         </select>
         <span *ngIf="validationErrors['questionTypeID']"
           class="text-red-500 ml-3 font-normal">{{validationErrors['questionTypeID']}}</span>
@@ -247,11 +248,11 @@
       <div>
         <div class="flex flex-col mb-4 w-full"
           *ngIf="questionBank.questionTypeID!=4 &&questionBank.questionTypeID!=5 &&questionBank.questionTypeID!=0">
-          <label class="mb-2 primaryTxt">description</label>
+          <label class="mb-2 primaryTxt"> {{ 'description' | translate }}</label>
           <quill-editor #quillEditor (onEditorCreated)="onEditorCreated($event)"
             (ngModelChange)="onInputValueChange({ field: 'description', value: $event })"
             [(ngModel)]="questionBank.description" [modules]="editorModules" theme="snow" class="quill-editor-wrapper"
-            placeholder="Enter description">
+            placeholder="{{ 'Enter' | translate }} {{ 'description' | translate }}">
           </quill-editor>
           <span *ngIf="validationErrors['description']"
             class="text-red-500 ml-3 font-normal">{{validationErrors['description']}}</span>
@@ -265,10 +266,10 @@
                 <thead class="bg-[##EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
                   <tr>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                      Correct
+                       {{ 'Correct' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                      Option
+                       {{ 'Option' | translate }}
                     </th>
                   </tr>
                 </thead>
@@ -292,16 +293,16 @@
         </div>
 
         <div *ngIf="questionBank.questionTypeID == 2"> <!-- Msq -->
-          <h6 class="font-medium text-base leading-6 mb-2 mt-3">Options</h6>
+          <h6 class="font-medium text-base leading-6 mb-2 mt-3"> {{ 'Options' | translate }}</h6>
           <div class="flex justify-start gap-2 items-center">
             <div class="flex flex-col">
               <input type="text" [(ngModel)]="NewOption"
                 class="w-[450px] h-[45px] rounded-lg border border-solid border-gray-300 px-2"
                 (ngModelChange)="onInputValueChange({ field: 'questionBankOptionsDTO', value: $event })"
-                placeholder="Enter Option" />
+                placeholder="{{ 'Enter' | translate }} {{ 'Option' | translate }}" />
             </div>
             <button class="secondaryBg text-white font-medium px-5 py-2 rounded-lg" (click)="AddOption()">
-              Add
+               {{ 'Add' | translate }}
             </button>
           </div>
           <div class="w-full">
@@ -309,9 +310,9 @@
               <table class="overflow-auto w-full bg-[#EBEBEB] ltr:text-left rtl:text-right text-[#6F6F6F]">
                 <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
                   <tr>
-                    <th class="py-3 px-4 min-w-[100px] border border-[#EAECF0] border-t-0 border-l-0">Correct</th>
-                    <th class="py-3 px-4 min-w-[250px] border border-[#EAECF0] border-t-0 border-l-0">Option</th>
-                    <th class="py-3 px-4 min-w-[80px] border border-[#EAECF0] border-t-0 border-l-0">Actions</th>
+                    <th class="py-3 px-4 min-w-[100px] border border-[#EAECF0] border-t-0 border-l-0"> {{ 'Correct' | translate }}</th>
+                    <th class="py-3 px-4 min-w-[250px] border border-[#EAECF0] border-t-0 border-l-0"> {{ 'Option' | translate }}</th>
+                    <th class="py-3 px-4 min-w-[80px] border border-[#EAECF0] border-t-0 border-l-0"> {{ 'Actions' | translate }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -346,17 +347,17 @@
 
         <div *ngIf="questionBank.questionTypeID == 3"> <!-- fill in blank-->
           <div>
-            <h6 class="font-medium text-base leading-6 mb-2 mt-3">Answer</h6>
+            <h6 class="font-medium text-base leading-6 mb-2 mt-3"> {{ 'Answer' | translate }}</h6>
             <div class="flex justify-start gap-2 items-center">
               <div class="flex flex-col">
                 <input type="text" [(ngModel)]="NewOption"
                   class="w-[450px] h-[45px] rounded-lg border border-solid border-gray-300 px-2"
                   (ngModelChange)="onInputValueChange({ field: 'questionBankOptionsDTO', value: $event })"
-                  placeholder="Enter Option" />
+                  placeholder="{{ 'Enter' | translate }} {{ 'Option' | translate }}" />
 
               </div>
               <button class="secondaryBg text-white font-medium px-5 py-2 rounded-lg" (click)="AddOption()">
-                Add
+                 {{ 'Add' | translate }}
               </button>
             </div>
           </div>
@@ -365,8 +366,8 @@
               <table class="w-full bg-[#EBEBEB] ltr:text-left rtl:text-right text-[#6F6F6F]">
                 <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
                   <tr>
-                    <th class="py-3 px-4 min-w-[120px] border border-[#EAECF0] border-t-0 border-l-0">Answer</th>
-                    <th class="py-3 px-4 min-w-[80px] border border-[#EAECF0] border-t-0 border-l-0">Actions</th>
+                    <th class="py-3 px-4 min-w-[120px] border border-[#EAECF0] border-t-0 border-l-0"> {{ 'Answer' | translate }}</th>
+                    <th class="py-3 px-4 min-w-[80px] border border-[#EAECF0] border-t-0 border-l-0"> {{ 'Actions' | translate }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -395,16 +396,16 @@
           <div *ngFor="let subQuestion of questionBank.subBankQuestionsDTO; let i = index"
             class="flex justify-center gap-6 mb-4 items-start">
             <div class="flex flex-col w-[45%]">
-              <label class="mb-2 primaryTxt">Question {{ i + 1 }}</label>
+              <label class="mb-2 primaryTxt"> {{ 'Question' | translate }} {{ i + 1 }}</label>
               <input type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                placeholder="Enter Question" [(ngModel)]="subQuestion.description"
+                placeholder="{{ 'Enter' | translate }} {{ 'Question' | translate }}" [(ngModel)]="subQuestion.description"
                 (ngModelChange)="onsubQuestionEdit(subQuestion)"
                 (ngModelChange)="onInputValueChange({ field: 'subBankQuestionsDTO', value: $event })" />
             </div>
             <div class="flex flex-col w-[45%]">
-              <label class="mb-2 primaryTxt">Answer</label>
+              <label class="mb-2 primaryTxt"> {{ 'Answer' | translate }}</label>
               <input type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                placeholder="Enter Answer" [(ngModel)]="subQuestion.answer"
+                placeholder="{{ 'Enter' | translate }} {{ 'Answer' | translate }}" [(ngModel)]="subQuestion.answer"
                 (ngModelChange)="onsubQuestionEdit(subQuestion)"
                 (ngModelChange)="onInputValueChange({ field: 'subBankQuestionsDTO', value: $event })" />
             </div>
@@ -417,9 +418,9 @@
           <span *ngIf="validationErrors['subBankQuestionsDTO']" class="text-red-500 font-normal text-xs md:text-sm">
             {{ validationErrors['subBankQuestionsDTO'] }}
           </span>
-          <div class="flex justify-start items-center space-x-2 my-3 cursor-pointer" (click)="addSubQuestion()">
+          <div class="flex justify-start items-center space-x-2 rtl:space-x-reverse my-3 cursor-pointer" (click)="addSubQuestion()">
             <i class="fa-regular fa-square-plus"></i>
-            <p class="primaryTxt">Add Question</p>
+            <p class="primaryTxt"> {{ 'Add' | translate }} {{ 'Question' | translate }}</p>
           </div>
         </div>
 
@@ -427,15 +428,15 @@
           <div *ngFor="let option of questionBank.questionBankOptionsDTO; let i = index"
             class="flex justify-center gap-6 mb-4 items-start">
             <div class="flex flex-col w-[45%]">
-              <label class="mb-2 primaryTxt">Option {{ i + 1 }}</label>
+              <label class="mb-2 primaryTxt"> {{ 'Option' | translate }} {{ i + 1 }}</label>
               <input type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                [(ngModel)]="option.option" placeholder="Enter Option" (ngModelChange)="onOptionEdit(option)"
+                [(ngModel)]="option.option" placeholder="{{ 'Enter' | translate }} {{ 'Option' | translate }}" (ngModelChange)="onOptionEdit(option)"
                 (ngModelChange)="onInputValueChange({ field: 'questionBankOptionsDTO', value: $event })" />
             </div>
             <div class="flex flex-col w-[45%]">
-              <label class="mb-2 primaryTxt">Order</label>
+              <label class="mb-2 primaryTxt"> {{ 'Order' | translate }}</label>
               <input type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                [(ngModel)]="option.order" placeholder="Enter Order" (ngModelChange)="onOptionEdit(option)"
+                [(ngModel)]="option.order" placeholder="{{ 'Enter' | translate }} {{ 'Order' | translate }}" (ngModelChange)="onOptionEdit(option)"
                 (ngModelChange)="onInputValueChange({ field: 'questionBankOptionsDTO', value: $event })"
                 (input)="validateQuestionBankOptionNumber($event,'order', option)" />
             </div>
@@ -447,23 +448,24 @@
           </div>
           <span *ngIf="validationErrors['questionBankOptionsDTO']" class="text-red-500 ml-3 font-normal">{{
             validationErrors['questionBankOptionsDTO'] }}</span>
-          <div class="flex justify-start items-center space-x-2 my-3 cursor-pointer" (click)="addOptionOrder()">
+          <div class="flex justify-start items-center space-x-2 rtl:space-x-reverse my-3 cursor-pointer" (click)="addOptionOrder()">
             <i class="fa-regular fa-square-plus"></i>
-            <p class="primaryTxt">Add Option</p>
+            <p class="primaryTxt"> {{ 'Add' | translate }} {{ 'Option' | translate }}</p>
           </div>
         </div>
       </div>
 
       <div class="w-full mb-4">
-        <div class="bg-[#F6F6F6] flex items-center space-x-4 w-full rounded-md border-dashed border-2">
+        <div class="bg-[#F6F6F6] flex items-center space-x-4 rtl:space-x-reverse w-full rounded-md border-dashed border-2">
           <div class="flex justify-center w-full">
             <label for="file-upload" class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
               <img *ngIf="!questionBank.image && !questionBank.imageForm" src="Images/Icon frame.png" class="w-1/4">
               <img *ngIf="!questionBank.image && questionBank.imageForm" src="Images/FileAttached.png" class="w-1/4">
               <img *ngIf="questionBank.image" [src]="questionBank.image" class="w-1/3 object-cover">
-              <p class="font-normal text-xs md:text-sm text-[#8E8E93] mt-3"><span class="secondaryTxt">Click to Upload
+              <p class="font-normal text-xs md:text-sm text-[#8E8E93] mt-3"><span class="secondaryTxt">
+                  {{ 'Click to' | translate }}  {{ 'Upload' | translate }}
                 </span></p>
-              <p class="font-normal text-xs md:text-sm text-[#8E8E93]"> (Max. File size: 25 MB)</p>
+              <p class="font-normal text-xs md:text-sm text-[#8E8E93]"> {{ '(Max. File size: 25 MB)' | translate }}</p>
             </label>
             <input id="file-upload" type="file" class="hidden" (change)="onImageFileSelected($event)"
               accept="image/jpeg, image/png" />
@@ -477,7 +479,7 @@
     <div class="w-full flex justify-end">
       <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
         (click)="CreateOREdit()">
-        <span *ngIf="!isLoading">Save</span>
+        <span *ngIf="!isLoading"> {{ 'Save' | translate }}</span>
         <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
       </button>
     </div>

@@ -13,11 +13,13 @@ import { ApiService } from '../../../../Services/api.service';
 import { DomainService } from '../../../../Services/Employee/domain.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-book-correction',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './book-correction.component.html',
   styleUrl: './book-correction.component.css'
 })
@@ -30,7 +32,8 @@ export class BookCorrectionComponent {
   AllowDeleteForOthers: boolean = false;
 
   TableData: EvaluationBookCorrection[] = [];
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   DomainName: string = '';
   UserID: number = 0;
 
@@ -50,12 +53,13 @@ export class BookCorrectionComponent {
   constructor(
     private router: Router,
     private menuService: MenuService,
+    private languageService: LanguageService,
     public activeRoute: ActivatedRoute,
     public account: AccountService,
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
-    public BookCorrectionServ: EvaluationBookCorrectionService
+    public BookCorrectionServ: EvaluationBookCorrectionService,
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -76,6 +80,11 @@ export class BookCorrectionComponent {
     });
 
     this.GetAllData();
+    
+    this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetAllData() {

@@ -55,7 +55,7 @@ export class MedicalHistoryModalComponent implements OnInit, OnChanges {
   firstReportPreview: File | null = null;
   secReportPreview: File | null = null;
   validationErrors: { [key: string]: string } = {};
-isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   schools: any[] = [];
   grades: any[] = [];

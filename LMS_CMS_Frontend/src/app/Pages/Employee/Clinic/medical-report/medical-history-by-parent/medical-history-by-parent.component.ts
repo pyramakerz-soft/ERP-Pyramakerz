@@ -5,22 +5,26 @@ import { CommonModule } from '@angular/common';
 import { MedicalHistoryByParent } from '../../../../../Models/Clinic/mh-by-parent';
 import { MedicalReportService } from '../../../../../Services/Employee/Clinic/medical-report.service';
 import { ApiService } from '../../../../../Services/api.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-medical-history-by-parent',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
   templateUrl: './medical-history-by-parent.component.html',
   styleUrl: './medical-history-by-parent.component.css'
 })
 export class MedicalHistoryByParentComponent implements OnInit {
   medicalHistory: MedicalHistoryByParent | null = null; 
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private medicalReportService: MedicalReportService, 
-    private apiService: ApiService
+    private apiService: ApiService,
+    private languageService: LanguageService
   ) {}
 
   ngOnInit() {
@@ -28,6 +32,10 @@ export class MedicalHistoryByParentComponent implements OnInit {
     if (id) {
       this.loadMedicalHistory(Number(id));
     }
+      this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   async loadMedicalHistory(id: number) {

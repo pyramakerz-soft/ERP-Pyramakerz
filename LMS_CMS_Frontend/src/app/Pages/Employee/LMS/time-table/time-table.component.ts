@@ -18,11 +18,13 @@ import Swal from 'sweetalert2';
 import { Classroom } from '../../../../Models/LMS/classroom';
 import { Employee } from '../../../../Models/Employee/employee';
 import { TimeTableDayGroupDTO } from '../../../../Models/LMS/time-table-day-group-dto';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-time-table',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './time-table.component.html',
   styleUrl: './time-table.component.css',
 })
@@ -50,7 +52,8 @@ export class TimeTableComponent {
   key: string = 'id';
   value: any = '';
   keysArray: string[] = ['id', 'name'];
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   TableData: TimeTable[] = [];
   schools: School[] = [];
   Teachers: Employee[] = [];
@@ -81,7 +84,8 @@ export class TimeTableComponent {
     public ApiServ: ApiService,
     public SchoolServ: SchoolService,
     public TimeTableServ: TimeTableService ,
-    private cdRef: ChangeDetectorRef
+    private cdRef: ChangeDetectorRef,
+    private languageService: LanguageService,
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -101,6 +105,10 @@ export class TimeTableComponent {
       }
     });
     this.GetAllSchools();
+        this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetAllSchools() {

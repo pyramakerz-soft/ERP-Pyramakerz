@@ -1,6 +1,6 @@
 <div id="DataToDownload">
     <div class="no-print flex justify-between items-center">
-        <div class="flex justify-between items-center space-x-5">
+        <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
             <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToAccountingEntries()"></i>
             <h1 *ngIf="isCreate" class="primaryTxt font-semibold text-2xl leading-9">  {{ 'Create Accounting Entries' | translate }}</h1>
             <h1 *ngIf="isEdit" class="primaryTxt font-semibold text-2xl leading-9">  {{ 'Edit Accounting Entries' | translate }}</h1>
@@ -72,8 +72,8 @@
     </div>
 
 
-    <div class="no-print flex justify-end mt-5 space-x-4 items-center">
-        <div class="flex space-x-4" *ngIf="!isCreate">
+    <div class="no-print flex justify-end mt-5 space-x-4 rtl:space-x-reverse items-center">
+        <div class="flex space-x-4 rtl:space-x-reverse" *ngIf="!isCreate">
             <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="DownloadAsExcel()" title="Export to Excel">
             <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()" title="Download as PDF">
             <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()" title="Print">
@@ -89,7 +89,7 @@
 
 <div class="mt-6" *ngIf="!isCreate">
     <div class="no-print flex justify-end" *ngIf="!isView">
-        <button class="secondaryTxt secondaryBorder px-4 py-2 rounded-lg flex items-center space-x-2"
+        <button class="secondaryTxt secondaryBorder px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse"
             (click)="AddAccountingEntriesDetails()">
             <div class="secondaryBorder rounded-full flex items-center p-1"><i class="fa-solid fa-plus"></i></div>
             <p> {{ 'Add Row' | translate }}</p>
@@ -97,7 +97,7 @@
     </div>
 
     <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD] max-w-full">
-        <table class="overflow-auto w-full bg-[#EBEBEB] text-left text-[#6F6F6F]">
+        <table class="overflow-auto w-full bg-[#EBEBEB] text-left rtl:text-right  text-[#6F6F6F]">
             <thead class="bg-[##EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
                 <tr>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
@@ -178,7 +178,7 @@
                         </textarea>
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        <div class="flex space-x-4">
+                        <div class="flex space-x-4 rtl:space-x-reverse">
                             <button [disabled]="!isDetailsValid || isLoading"
                                 [ngClass]="{'cursor-not-allowed opacity-50' : !isDetailsValid}">
                                 <i (click)="SaveNewDetails()" *ngIf="!isLoading"
@@ -240,7 +240,7 @@
                                 [(ngModel)]="editedRowData.note"></textarea>
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            <div class="flex space-x-4">
+                            <div class="flex space-x-4 rtl:space-x-reverse">
                                 <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)"
                                     (click)="DeleteDetail(row.id)">
                                     <i class="fa-regular fa-trash-can"></i>
@@ -267,7 +267,7 @@
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.note }}</td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            <div class="flex space-x-4" *ngIf="!isView">
+                            <div class="flex space-x-4 rtl:space-x-reverse" *ngIf="!isView">
                                 <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)"
                                     (click)="DeleteDetail(row.id)">
                                     <i class="fa-regular fa-trash-can"></i>

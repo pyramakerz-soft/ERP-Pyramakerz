@@ -1,11 +1,11 @@
 <div class="">
     <div class="flex justify-between items-center">
-        <h1 class="primaryTxt font-semibold text-2xl leading-9">Weight Types</h1>
+        <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Weight Types' | translate }}</h1>
         <div class="flex justify-between items-center">
             <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
             <button (click)="OpenModal()"
                 class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
-                Create Weight Type
+                   {{ 'Create' | translate }}  {{ 'Weight Type' | translate }}
             </button>
         </div>
     </div>
@@ -17,19 +17,19 @@
                     <tr>
                         <th
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            ID
+                             {{ 'ID' | translate }}
                         </th>
                         <th
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            English Name
+                            {{ 'English Name' | translate }}
                         </th>
                         <th
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            Arabic Name
+                            {{ 'Arabic Name' | translate }}
                         </th> 
                         <th
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            Actions
+                             {{ 'Actions' | translate }}
                         </th>
                     </tr>
                 </thead>
@@ -38,7 +38,7 @@
                     <tr *ngIf="TableData.length === 0">
                         <td colspan="4"
                             class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-                            No Data Found
+                             {{ 'No Data Found' | translate }}
                         </td>
                     </tr>
 
@@ -77,23 +77,23 @@
 <div id="Add_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
     <div class="bg-white rounded-2xl p-12 w-[669px]">
         <div class="flex justify-between items-center">
-            <h1 *ngIf="!editWeight" class="font-semibold text-2xl leading-9">Create Weight Type</h1>
-            <h1 *ngIf="editWeight" class="font-semibold text-2xl leading-9">Edit Weight Type</h1>
+            <h1 *ngIf="!editWeight" class="font-semibold text-2xl leading-9"> {{ 'Create' | translate }}{{ 'Weight Type' | translate }} </h1>
+            <h1 *ngIf="editWeight" class="font-semibold text-2xl leading-9">{{ 'Edit' | translate }} {{ 'Weight Type' | translate }} </h1>
             <button (click)="closeModal()" type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
         </div>
 
         <div class="flex flex-col mt-6 mb-4 bg-[#F7F7F7] rounded-3xl p-4"> 
             <div class="flex w-full flex-col mb-4">
-                <label class="mb-2 primaryTxt" for="englishName">English Name</label>
+                <label class="mb-2 primaryTxt" for="englishName">{{ 'English Name' | translate }}</label>
                 <input id="englishName" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                    placeholder="Enter English Name" [(ngModel)]="weightType.englishName"
+                    placeholder="{{ 'Enter' | translate }} {{ 'English Name' | translate }}" [(ngModel)]="weightType.englishName"
                     (ngModelChange)="onInputValueChange({ field: 'englishName', value: $event })" />
                 <span *ngIf="validationErrors['englishName']" class="text-red-500 ml-3 font-normal">{{ validationErrors['englishName'] }}</span>
             </div>   
             <div class="flex w-full flex-col mb-4">
-                <label class="mb-2 primaryTxt" for="arabicName">Arabic Name</label>
+                <label class="mb-2 primaryTxt" for="arabicName">{{ 'Arabic Name' | translate }}</label>
                 <input id="arabicName" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                    placeholder="Enter Arabic Name" [(ngModel)]="weightType.arabicName"
+                    placeholder=" {{ 'Enter' | translate }} {{ 'Arabic Name' | translate }}" [(ngModel)]="weightType.arabicName"
                     (ngModelChange)="onInputValueChange({ field: 'arabicName', value: $event })" />
                 <span *ngIf="validationErrors['arabicName']" class="text-red-500 ml-3 font-normal">{{ validationErrors['arabicName'] }}</span>
             </div>   
@@ -102,7 +102,7 @@
         <div class="flex justify-end">
             <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
                 (click)="Save()">
-                <span *ngIf="!isLoading">Save</span>
+                <span *ngIf="!isLoading"> {{ 'Save' | translate }}</span>
                 <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
             </button>
         </div>

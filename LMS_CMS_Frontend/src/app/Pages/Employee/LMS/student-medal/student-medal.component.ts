@@ -23,11 +23,14 @@ import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
 import { MedalService } from '../../../../Services/Employee/LMS/medal.service';
 import { Medal } from '../../../../Models/LMS/medal';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-student-medal',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, TranslateModule],
   templateUrl: './student-medal.component.html',
   styleUrl: './student-medal.component.css'
 })
@@ -38,7 +41,8 @@ export class StudentMedalComponent {
   DomainName: string = '';
   UserID: number = 0;
   path: string = '';
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
   AllowEditForOthers: boolean = false;
@@ -88,7 +92,8 @@ export class StudentMedalComponent {
     private GradeServ: GradeService,
     private ClassroomServ: ClassroomService,
     public studentMedalServ : StudentMedalService ,
-    public MedalServ : MedalService
+    public MedalServ : MedalService,
+    private languageService: LanguageService,
   ) { }
 
   ngOnInit() {
@@ -108,6 +113,10 @@ export class StudentMedalComponent {
       }
     });
     this.getAllSchools()
+    this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   getAllSchools() {

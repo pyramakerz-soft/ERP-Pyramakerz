@@ -16,11 +16,14 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { DutyService } from '../../../../Services/Employee/LMS/duty.service';
 import Swal from 'sweetalert2';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-duty',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent , TranslateModule],
   templateUrl: './duty.component.html',
   styleUrl: './duty.component.css',
 })
@@ -51,7 +54,8 @@ export class DutyComponent {
   date: string = '';
   periods: number[] = [];
   teachers: Employee[] = [];
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   SelectedYearId: number = 0;
   SelectedGradeId: number = 0;
   SelectedSubjectId: number = 0;
@@ -70,6 +74,7 @@ export class DutyComponent {
     private menuService: MenuService,
     public EditDeleteServ: DeleteEditPermissionService,
     private router: Router,
+    private languageService: LanguageService,
     private SchoolServ: SchoolService,
     private DutyServ: DutyService,
     private ClassroomServ: ClassroomService
@@ -95,6 +100,11 @@ export class DutyComponent {
     this.date = today.toISOString().split('T')[0];  // format as 'YYYY-MM-DD'
     this.GetByDate()
     this.GetSchools()
+        
+    this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetByDate() {

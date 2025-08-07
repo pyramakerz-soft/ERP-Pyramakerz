@@ -14,11 +14,13 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-announcement',
   standalone: true,
-  imports: [CommonModule, FormsModule, SearchComponent],
+  imports: [CommonModule, FormsModule, SearchComponent, TranslateModule],
   templateUrl: './announcement.component.html',
   styleUrl: './announcement.component.css'
 })
@@ -38,7 +40,8 @@ export class AnnouncementComponent {
   AllowEditForOthers: boolean = false;
   AllowDeleteForOthers: boolean = false;
   path: string = '';
-
+ isRtl: boolean = false;
+  subscription!: Subscription;
   DomainName: string = '';
   UserID: number = 0;
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -53,7 +56,8 @@ export class AnnouncementComponent {
     public activeRoute: ActivatedRoute,  
     public router: Router,
     public announcementService: AnnouncementService,
-    public userTypeService: UserTypeService
+    public userTypeService: UserTypeService,
+    private languageService: LanguageService
   ) { }
 
   ngOnInit() {
@@ -77,6 +81,10 @@ export class AnnouncementComponent {
     });
     this.getAllData()
     this.getUserTypeData(); 
+        this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   getAllData(){

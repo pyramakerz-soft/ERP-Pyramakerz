@@ -29,11 +29,13 @@ import Swal from 'sweetalert2';
 import { StudentPerformance } from '../../../../Models/LMS/student-performance';
 import { StudentMedal } from '../../../../Models/LMS/student-medal';
 import { DailyPerformanceMaster } from '../../../../Models/LMS/daily-performance-master';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-daily-performance',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, TranslateModule],
   templateUrl: './daily-performance.component.html',
   styleUrl: './daily-performance.component.css'
 })
@@ -44,7 +46,8 @@ export class DailyPerformanceComponent {
   DomainName: string = '';
   UserID: number = 0;
   path: string = '';
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
   AllowEditForOthers: boolean = false;
@@ -102,7 +105,8 @@ export class DailyPerformanceComponent {
     public MedalServ: MedalService,
     public subjectServ: SubjectService,
     public PerformanceTypeServ: PerformanceTypeService,
-    public StudentPerformanceServ: DailyPerformanceService
+    public StudentPerformanceServ: DailyPerformanceService,
+    private languageService: LanguageService
   ) { }
 
   ngOnInit() {
@@ -122,6 +126,10 @@ export class DailyPerformanceComponent {
       }
     });
     this.getAllSchools()
+    this.subscription = this.languageService.language$.subscribe(direction => {
+     this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   getAllSchools() {

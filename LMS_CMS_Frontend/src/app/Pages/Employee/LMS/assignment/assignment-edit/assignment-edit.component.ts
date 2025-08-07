@@ -23,11 +23,13 @@ import { QuestionBankType } from '../../../../../Models/LMS/question-bank-type';
 import { QuestionBank } from '../../../../../Models/LMS/question-bank';
 import Swal from 'sweetalert2';
 import { AssignmentService } from '../../../../../Services/Employee/LMS/assignment.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-assignment-edit',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule ,TranslateModule],
   templateUrl: './assignment-edit.component.html',
   styleUrls: ['./assignment-edit.component.css'],
 })
@@ -66,6 +68,8 @@ export class AssignmentEditComponent {
   SelectedTagsIDs: number[] = [];
   Lessons: Lesson[] = [];
   tags: Tag[] = [];
+   isRtl: boolean = false;
+    subscription!: Subscription;
   selectedTagsIds: number[] = []; // Array to store selected type IDs
   dropdownOpen = false;
   tagsSelected: Tag[] = [];
@@ -94,7 +98,8 @@ export class AssignmentEditComponent {
     public LessonServ: LessonService,
     public tagServ: TagsService,
     public QuestionBankServ: QuestionBankService,
-    public QuestionBankTypeServ: QuestionBankTypeService
+    public QuestionBankTypeServ: QuestionBankTypeService,
+    private languageService: LanguageService
   ) { }
 
   ngOnInit() {
@@ -108,6 +113,10 @@ export class AssignmentEditComponent {
     this.getAssignmentData();
     this.getLessons();
     this.getTypes();
+        this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   getAssignmentData() {

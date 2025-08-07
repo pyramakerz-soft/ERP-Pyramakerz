@@ -1,7 +1,7 @@
 <div id="DataToDownload">
     <div>
         <div class="no-print flex justify-between items-center">
-            <div class="flex justify-between items-center space-x-5">
+            <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
                 <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToPayable()"></i>
                 <h1 *ngIf="isCreate" class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Create Payable' |
                     translate }}</h1>
@@ -47,7 +47,7 @@
                 </div>
                 <div class="flex flex-col w-[30%]">
                     <div class="mb-2 flex justify-evenly">
-                        <div class="flex space-x-2 items-center">
+                        <div class="flex space-x-2 rtl:space-x-reverse items-center">
                             <input type="radio" [disabled]="isView" id="save" class="square-radio" name="linkFile"
                                 [(ngModel)]="payable.linkFileID"
                                 (ngModelChange)="getSaveData(); onInputValueChange({ field: 'linkFileID', value: $event })"
@@ -55,7 +55,7 @@
                             <label for="save" class="ml-2 font-medium"> {{ 'Safe ID' | translate }}</label>
                         </div>
 
-                        <div class="flex space-x-2 items-center">
+                        <div class="flex space-x-2 rtl:space-x-reverse items-center">
                             <input type="radio" [disabled]="isView" id="bank" class="square-radio" name="linkFile"
                                 [(ngModel)]="payable.linkFileID"
                                 (ngModelChange)="getBankData(); onInputValueChange({ field: 'linkFileID', value: $event })"
@@ -109,8 +109,8 @@
         </div>
 
 
-        <div class="no-print flex justify-end mt-5 space-x-4 items-center">
-            <div class="flex space-x-4" *ngIf="!isCreate">
+        <div class="no-print flex justify-end mt-5 space-x-4 rtl:space-x-reverse items-center">
+            <div class="flex space-x-4 rtl:space-x-reverse" *ngIf="!isCreate">
                 <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="DownloadAsExcel()"
                     title="Export to Excel">
                 <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()" title="Download as PDF">
@@ -128,7 +128,7 @@
 
     <div class="mt-6" *ngIf="!isCreate">
         <div class="no-print flex justify-end" *ngIf="!isView">
-            <button class="secondaryTxt secondaryBorder px-4 py-2 rounded-lg flex items-center space-x-2"
+            <button class="secondaryTxt secondaryBorder px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse"
                 (click)="AddPayableDetails()">
                 <div class="secondaryBorder rounded-full flex items-center p-1"><i class="fa-solid fa-plus"></i></div>
                 <p> {{ 'Add Row' | translate }}</p>
@@ -136,7 +136,7 @@
         </div>
 
         <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD] max-w-full">
-            <table class="overflow-auto w-full bg-[#EBEBEB] text-left text-[#6F6F6F]">
+            <table class="overflow-auto w-full bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
                 <thead class="bg-[##EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
                     <tr>
                         <th
@@ -226,7 +226,7 @@
                             </textarea>
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            <div class="flex space-x-4">
+                            <div class="flex space-x-4 rtl:space-x-reverse">
                                 <button>
                                     <i (click)="SaveNewDetails()" *ngIf="!isLoading"
                                         class="fa-solid fa-check secondaryTxt secondaryBorder rounded-full p-1"></i>
@@ -293,7 +293,7 @@
                                     [(ngModel)]="editedRowData.notes"></textarea>
                             </td>
                             <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                                <div class="flex space-x-4">
+                                <div class="flex space-x-4 rtl:space-x-reverse">
                                     <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)"
                                         (click)="DeleteDetail(row.id)">
                                         <i class="fa-regular fa-trash-can"></i>
@@ -317,7 +317,7 @@
                             <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.notes }}</td>
                             <td class="no-print py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0"
                                 *ngIf="!isView">
-                                <div class="flex space-x-4">
+                                <div class="flex space-x-4 rtl:space-x-reverse">
                                     <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)"
                                         (click)="DeleteDetail(row.id)">
                                         <i class="fa-regular fa-trash-can"></i>

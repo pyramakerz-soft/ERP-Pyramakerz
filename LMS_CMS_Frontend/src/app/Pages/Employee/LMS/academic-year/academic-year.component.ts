@@ -14,11 +14,13 @@ import { School } from '../../../../Models/school';
 import { AcadimicYearService } from '../../../../Services/Employee/LMS/academic-year.service';
 import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-academic-year',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './academic-year.component.html',
   styleUrl: './academic-year.component.css',
 })
@@ -44,7 +46,8 @@ export class AcademicYearComponent {
   AllowEditForOthers: boolean = false;
   AllowDeleteForOthers: boolean = false;
   path: string = '';
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   DomainName: string = '';
   UserID: number = 0;
   User_Data_After_Login: TokenData = new TokenData(
@@ -71,7 +74,8 @@ export class AcademicYearComponent {
     public activeRoute: ActivatedRoute,
     public schoolService: SchoolService,
     public router: Router,
-    public acadimicYearServicea: AcadimicYearService
+    public acadimicYearServicea: AcadimicYearService,
+    private languageService: LanguageService
   ) {}
 
   ngOnInit() {
@@ -95,6 +99,11 @@ export class AcademicYearComponent {
         this.AllowEditForOthers = settingsPage.allow_Edit_For_Others;
       }
     });
+
+        this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   openModal(Id?: number) {

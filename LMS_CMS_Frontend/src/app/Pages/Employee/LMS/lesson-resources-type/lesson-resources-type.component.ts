@@ -13,11 +13,14 @@ import { DomainService } from '../../../../Services/Employee/domain.service';
 import { LessonResourceTypeService } from '../../../../Services/Employee/LMS/lesson-resource-type.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-lesson-resources-type',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './lesson-resources-type.component.html',
   styleUrl: './lesson-resources-type.component.css'
 })
@@ -30,7 +33,8 @@ export class LessonResourcesTypeComponent {
   AllowDeleteForOthers: boolean = false;
 
   TableData: LessonResourceType[] = [];
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   DomainName: string = '';
   UserID: number = 0;
 
@@ -55,7 +59,8 @@ export class LessonResourcesTypeComponent {
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
-    public TypeServ: LessonResourceTypeService
+    public TypeServ: LessonResourceTypeService,
+    private languageService: LanguageService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -76,6 +81,10 @@ export class LessonResourcesTypeComponent {
     });
 
     this.GetAllData();
+    this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetAllData() {

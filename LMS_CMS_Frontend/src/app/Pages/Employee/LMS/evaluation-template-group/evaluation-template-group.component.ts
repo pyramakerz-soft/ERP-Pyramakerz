@@ -15,11 +15,14 @@ import { FormsModule } from '@angular/forms';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { EvaluationTemplateGroups } from '../../../../Models/LMS/evaluation-template-groups';
 import { EvaluationTemplateGroupService } from '../../../../Services/Employee/LMS/evaluation-template-group.service';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-evaluation-template-group',
   standalone: true,
-  imports: [CommonModule , FormsModule,SearchComponent],
+  imports: [CommonModule , FormsModule,SearchComponent , TranslateModule],
   templateUrl: './evaluation-template-group.component.html',
   styleUrl: './evaluation-template-group.component.css'
 })
@@ -36,7 +39,8 @@ export class EvaluationTemplateGroupComponent {
  
    isModalVisible: boolean = false;
    mode: string = '';
- 
+   isRtl: boolean = false;
+  subscription!: Subscription;
    path: string = '';
    key: string = 'id';
    value: any = '';
@@ -60,6 +64,7 @@ export class EvaluationTemplateGroupComponent {
      public ApiServ: ApiService,
      public templateServ: EvaluationTemplateService ,
      public GroupServ: EvaluationTemplateGroupService ,
+     private languageService: LanguageService
    ) {}
    ngOnInit() {
      this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -80,6 +85,11 @@ export class EvaluationTemplateGroupComponent {
      });
      this.TemplateID = Number(this.activeRoute.snapshot.paramMap.get('id'));
      this.GetTemplateData();
+
+    this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
    }
  
    GetTemplateData() {

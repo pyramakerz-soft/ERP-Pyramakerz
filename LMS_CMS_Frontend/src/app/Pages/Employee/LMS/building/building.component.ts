@@ -14,11 +14,13 @@ import { SearchComponent } from '../../../../Component/search/search.component';
 import { School } from '../../../../Models/school';
 import { SchoolService } from '../../../../Services/Employee/school.service';
 import { firstValueFrom } from 'rxjs';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-building',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent , TranslateModule],
   templateUrl: './building.component.html',
   styleUrl: './building.component.css',
 })
@@ -31,7 +33,8 @@ export class BuildingComponent {
   building: Building = new Building();
   editBuilding: boolean = false;
   validationErrors: { [key in keyof Building]?: string } = {};
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
   AllowEditForOthers: boolean = false;
@@ -64,7 +67,8 @@ export class BuildingComponent {
     private menuService: MenuService,
     public activeRoute: ActivatedRoute,
     public schoolService: SchoolService,
-    public router: Router
+    public router: Router,
+    private languageService: LanguageService
   ) {}
 
   ngOnInit() {
@@ -88,6 +92,11 @@ export class BuildingComponent {
         this.AllowEditForOthers = settingsPage.allow_Edit_For_Others;
       }
     });
+
+    this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   getBuildingData() {

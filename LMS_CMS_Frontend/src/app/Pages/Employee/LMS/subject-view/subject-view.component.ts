@@ -17,11 +17,13 @@ import { SubjectResourceService } from '../../../../Services/Employee/LMS/subjec
 import Swal from 'sweetalert2';
 import { FormsModule } from '@angular/forms';
 import { WeightTypeService } from '../../../../Services/Employee/LMS/weight-type.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-subject-view',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
   templateUrl: './subject-view.component.html',
   styleUrl: './subject-view.component.css'
 })
@@ -33,7 +35,8 @@ export class SubjectViewComponent {
   AllowDelete: boolean = false;
   AllowEditForOthers: boolean = false;
   AllowDeleteForOthers: boolean = false;
-  
+  isRtl: boolean = false;
+  subscription!: Subscription;
   UserID: number = 0;
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   path: string = ""
@@ -50,7 +53,7 @@ export class SubjectViewComponent {
   isLoading = false;
   isWeightPart:boolean = true
 
-  constructor(public subjectService: SubjectService, public activeRoute:ActivatedRoute, public router:Router, public EditDeleteServ: DeleteEditPermissionService, 
+  constructor(private languageService: LanguageService,public subjectService: SubjectService, public activeRoute:ActivatedRoute, public router:Router, public EditDeleteServ: DeleteEditPermissionService, 
     public account: AccountService, private menuService: MenuService, public dialog: MatDialog, public subjectWeightService:SubjectWeightService, 
     public subjectResourceService:SubjectResourceService, public weightTypeService:WeightTypeService){}
 
@@ -78,6 +81,11 @@ export class SubjectViewComponent {
         this.AllowEditForOthers = settingsPage.allow_Edit_For_Others;
       }
     });
+
+    this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetSubjectById() {

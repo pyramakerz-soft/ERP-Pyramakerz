@@ -24,11 +24,13 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { StudentService } from '../../../../Services/student.service';
 import { Subject } from '../../../../Models/LMS/subject';
 import { DailyPerformanceMaster } from '../../../../Models/LMS/daily-performance-master';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-daily-performance-master',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, TranslateModule],
   templateUrl: './daily-performance-master.component.html',
   styleUrl: './daily-performance-master.component.css'
 })
@@ -40,7 +42,8 @@ export class DailyPerformanceMasterComponent {
   DomainName: string = '';
   UserID: number = 0;
   path: string = '';
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
   AllowEditForOthers: boolean = false;
@@ -79,7 +82,8 @@ export class DailyPerformanceMasterComponent {
     public MedalServ: MedalService,
     public subjectServ: SubjectService,
     public PerformanceTypeServ: PerformanceTypeService,
-    public DailyPerformanceServ: DailyPerformanceService
+    public DailyPerformanceServ: DailyPerformanceService,
+    private languageService: LanguageService
   ) { }
 
   ngOnInit() {
@@ -98,7 +102,13 @@ export class DailyPerformanceMasterComponent {
         this.AllowEditForOthers = settingsPage.allow_Edit_For_Others;
       }
     });
+
+    this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
     this.getAllSchools()
+
   }
 
   getAllSchools() {

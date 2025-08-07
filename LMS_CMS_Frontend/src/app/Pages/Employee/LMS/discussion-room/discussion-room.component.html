@@ -1,11 +1,11 @@
 <div class="">
     <div class="flex justify-between">
-        <h1 class="primaryTxt font-semibold text-2xl leading-9">Discussion Room</h1>
+        <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ 'Discussion Room' | translate }}</h1>
         <div class="flex justify-between items-center">
             <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
             <button (click)="openModal()"
                 class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
-                Create Discussion Room
+                 {{ 'Create' | translate }}  {{ 'Discussion Room' | translate }}
             </button>
         </div>
     </div> 
@@ -16,31 +16,31 @@
                 <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
                     <tr>
                         <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            ID
+                            {{ 'ID' | translate }}
                         </th>
                         <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            Title
+                            {{ 'Title' | translate }}
                         </th>
                         <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            Is Repeated Weekly
+                            {{ 'Is Repeated Weekly' | translate }} 
                         </th>
                         <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            Start Date
+                              {{ 'Start Date' | translate }}
                         </th>
                         <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            End Date
+                              {{ 'End Date' | translate }}
                         </th>
                         <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            Time
+                              {{ 'Time' | translate }}
                         </th>
                         <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            Meeting Link
+                             {{ 'Meeting' | translate }}  {{ 'Link' | translate }}     
                         </th>
                         <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            Record Link
+                              {{ 'Record' | translate }}  {{ 'Link' | translate }}
                         </th>
                         <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            Actions
+                              {{ 'Actions' | translate }}
                         </th>
                     </tr>
                 </thead>
@@ -49,7 +49,7 @@
                     <tr *ngIf="TableData.length === 0">
                         <td colspan="9"
                             class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-                            No Data Found
+                              {{ 'No Data Found' | translate }}
                         </td>
                     </tr>
 
@@ -83,7 +83,7 @@
                             {{ row.recordLink }}
                         </td>  
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            <div class="flex space-x-4">
+                            <div class="flex space-x-4 rtl:space-x-reverse">
                                 <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)"
                                     (click)="Delete(row.id)">
                                     <i class="fa-regular fa-trash-can"></i>
@@ -105,41 +105,41 @@
 <div id="Add_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
     <div class="bg-white rounded-2xl p-12 w-[669px] max-h-[90%] overflow-y-auto">
         <div class="flex justify-between items-center">
-            <h1 *ngIf="discussionRoom.id == 0" class="font-semibold text-2xl leading-9">Create Discussion Room</h1>
-            <h1 *ngIf="discussionRoom.id != 0" class="font-semibold text-2xl leading-9">Edit Discussion Room</h1>
+            <h1 *ngIf="discussionRoom.id == 0" class="font-semibold text-2xl leading-9">   {{ 'Create' | translate }}  {{ 'Discussion Room' | translate }}</h1>
+            <h1 *ngIf="discussionRoom.id != 0" class="font-semibold text-2xl leading-9"> {{ 'Edit' | translate }}  {{ 'Discussion Room' | translate }}</h1>
             <button (click)="closeModal()" type="button"
                 class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
         </div>
 
         <div class="mt-6 mb-4 flex justify-between flex-wrap">
             <div class="flex flex-col mb-4 w-full">
-                <label class="mb-2 primaryTxt" for="title">Title</label>
+                <label class="mb-2 primaryTxt" for="title">{{ 'Title' | translate }}</label>
                 <input id="title" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                    placeholder="Enter Title" [(ngModel)]="discussionRoom.title"
+                    placeholder=" {{ 'Enter' | translate }} {{ 'Title' | translate }}" [(ngModel)]="discussionRoom.title"
                     (ngModelChange)="onInputValueChange({ field: 'title', value: $event })" />
                 <span *ngIf="validationErrors['title']" class="text-red-500  font-normal text-xs md:text-sm">{{ validationErrors['title'] }}</span>
             </div>
 
             <div class="flex flex-col mb-4 w-full">
-                <label class="mb-2 primaryTxt" for="Subject">School</label>
+                <label class="mb-2 primaryTxt" for="Subject">{{ 'School' | translate }}</label>
                 <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="School"
                     (change)="getStudentClassData()" [(ngModel)]="discussionRoom.schoolID"
                     (ngModelChange)="onInputValueChange({ field: 'schoolID', value: $event })">
-                    <option [value]="0" disabled selected hidden>Choose School</option>
+                    <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }}  {{ 'School' | translate }} </option>
                     <option *ngFor="let c of schools" [value]="c.id">{{ c.name }}</option>
-                    <option *ngIf="schools.length === 0" disabled selected>No Data Found</option>
+                    <option *ngIf="schools.length === 0" disabled selected>  {{ 'No Data Found' | translate }}</option>
                 </select>
                 <span *ngIf="validationErrors['schoolID']" class="text-red-500 ml-3 font-normal">{{ validationErrors['schoolID'] }}</span>
             </div>
 
             <div class="flex flex-col mb-4 w-full">
-                <label class="mb-2 primaryTxt">Classes ({{choosedStudentsClass.length}})</label>
+                <label class="mb-2 primaryTxt">  {{ 'Classes' | translate }} ({{choosedStudentsClass.length}})</label>
 
                 <div class="border border-gray-300 rounded-lg px-4 py-3 flex items-center justify-between cursor-pointer mb-4"   [ngClass]="{ 'pointer-events-none opacity-50': !discussionRoom.schoolID }"
                     (click)="toggleClassesToChooseStudents()">
                     <div class="flex flex-wrap gap-2">
                         <span *ngIf="choosedStudentsClass.length == 0" class="text-gray-400 font-normal">
-                            Click To Choose Students
+                            {{ 'Click to' | translate }}  {{ 'Choose' | translate }}  {{ 'Students' | translate }}
                         </span>
 
                         <span *ngFor="let classroom of choosedClasss; let i = index"
@@ -162,7 +162,7 @@
                             <div *ngFor="let studentClass of studentsClass; let i = index">
                                 <div class="flex justify-between w-full items-center"
                                     [ngClass]="{ 'mb-4': i != (studentsClass.length - 1)}">
-                                    <div class="flex space-x-5 items-center">
+                                    <div class="flex space-x-5 rtl:space-x-reverse items-center">
                                         <input type="checkbox" [id]="studentClass.classroomId" class="w-5 h-5"
                                             (change)="onClassSelectChange(studentClass)"
                                             [checked]="isClassSelected(studentClass.classroomId)">
@@ -187,26 +187,26 @@
                             </div>
                             <div *ngIf="studentClassWhenSelectClass.students.length != 0" class="mb-6">
                                 <div class="flex justify-between w-full items-center">
-                                    <div class="flex space-x-5 items-center">
+                                    <div class="flex space-x-5 rtl:space-x-reverse items-center">
                                         <input type="checkbox" [id]="studentClassWhenSelectClass.classroomId"
                                             class="w-5 h-5"
                                             [checked]="isSelectAllChecked(studentClassWhenSelectClass.classroomId)"
                                             (change)="onSelectAllChange(studentClassWhenSelectClass.classroomId, $event)">
-                                        <label [for]="studentClassWhenSelectClass.classroomId" class="text-sm">Select All</label>
+                                        <label [for]="studentClassWhenSelectClass.classroomId" class="text-sm">  {{ 'Select' | translate }}  {{ 'All' | translate }}</label>
                                     </div>
                                 </div>
                                 <hr class="my-2 border">
                             </div>
                             <div *ngIf="studentClassWhenSelectClass.students.length == 0" class="border">
                                 <p class="text-center primaryTxt text-xs">
-                                    No Data Found
+                                  {{ 'No Data Found' | translate }}
                                 </p>
                             </div>
                             <div
                                 *ngFor="let studentClass of studentClassWhenSelectClass.students; let i = index">
                                 <div class="flex justify-between w-full items-center"
                                     [ngClass]="{ 'mb-4': i != (studentClassWhenSelectClass.students.length - 1)}">
-                                    <div class="flex space-x-5 items-center">
+                                    <div class="flex space-x-5 rtl:space-x-reverse items-center">
                                         <input type="checkbox" [id]="studentClass.id" class="w-5 h-5"
                                             (change)="onStudentSelectChange(studentClass)"
                                             [checked]="isStudentSelected(studentClass.id)">
@@ -221,26 +221,26 @@
                     </div>
                     <div *ngIf="studentsClass.length == 0" class="rounded-lg border">
                         <p class="text-center primaryTxt text-xs">
-                            No Data Found
+                              {{ 'No Data Found' | translate }}
                         </p>
                     </div>
                 </div> 
             </div>   
             
             <div class="flex flex-col mb-4 w-full">
-                <label class="mb-2 primaryTxt" for="meetingLink">Meetnig Link</label>
+                <label class="mb-2 primaryTxt" for="meetingLink">{{ 'Meeting' | translate }}  {{ 'Link' | translate }}</label>
                 <input id="meetingLink" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                    placeholder="Enter Meeting Link" [(ngModel)]="discussionRoom.meetingLink"
+                    placeholder="{{ 'Enter' | translate }}  {{ 'Meeting' | translate }}  {{ 'Link' | translate }}" [(ngModel)]="discussionRoom.meetingLink"
                     (ngModelChange)="onInputValueChange({ field: 'meetingLink', value: $event })" />
                 <span *ngIf="validationErrors['meetingLink']" class="text-red-500  font-normal text-xs md:text-sm">{{ validationErrors['meetingLink'] }}</span>
             </div>   
-            <div class="flex w-full space-x-5 items-center mb-4">
+            <div class="flex w-full space-x-5 rtl:space-x-reverse items-center mb-4">
                 <input type="checkbox" id="repeatedWeekly" class="w-5 h-5" (change)="onIsRepeatedWeeklyChange($event)"
                     [checked]="discussionRoom.isRepeatedWeekly">
-                <label for="repeatedWeekly" class="text-sm">Is Repeated Weekly</label>
+                <label for="repeatedWeekly" class="text-sm">  {{ 'Is Repeated Weekly' | translate }}</label>
             </div>
             <div class="flex flex-col mb-4 w-[30%]">
-                <label class="mb-2 primaryTxt" for="startDate">Start Date</label>
+                <label class="mb-2 primaryTxt" for="startDate">  {{ 'Start Date' | translate }}</label>
                 <input id="startDate" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                     [(ngModel)]="discussionRoom.startDate"
                     (ngModelChange)="onInputValueChange({ field: 'startDate', value: $event })" />
@@ -248,28 +248,28 @@
                     validationErrors['startDate'] }}</span>
             </div> 
             <div class="flex flex-col mb-4 w-[30%]">
-                <label class="mb-2 primaryTxt" for="endDate">End Date</label>
+                <label class="mb-2 primaryTxt" for="endDate">{{ 'End Date' | translate }}</label>
                 <input id="endDate" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                     [(ngModel)]="discussionRoom.endDate"
                     (ngModelChange)="onInputValueChange({ field: 'endDate', value: $event })" />
                 <span *ngIf="validationErrors['endDate']" class="text-red-500 ml-3 font-normal">{{ validationErrors['endDate'] }}</span>
             </div>
             <div class="flex flex-col mb-4 w-[30%]">
-                <label class="mb-2 primaryTxt" for="time">Time</label>
+                <label class="mb-2 primaryTxt" for="time">  {{ 'Time' | translate }}</label>
                 <input id="time" type="time" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                     [(ngModel)]="discussionRoom.time"
                     (ngModelChange)="onInputValueChange({ field: 'time', value: $event })" />
                 <span *ngIf="validationErrors['time']" class="text-red-500 ml-3 font-normal">{{ validationErrors['time'] }}</span>
             </div>
             <div class="w-full mb-4"> 
-                <div class="bg-[#F6F6F6] flex items-center space-x-4 w-full rounded-md border-dashed border-2">
+                <div class="bg-[#F6F6F6] flex items-center space-x-4 rtl:space-x-reverse w-full rounded-md border-dashed border-2">
                     <div class="flex justify-center w-full">
                         <label for="file-upload" class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
                             <img *ngIf="!discussionRoom.imageLink && !discussionRoom.imageFile" src="Images/Icon frame.png" class="w-1/4">
                             <img *ngIf="discussionRoom.imageFile" src="Images/FileAttached.png" class="w-1/4">
                             <img *ngIf="discussionRoom.imageLink && !discussionRoom.imageFile" [src]="discussionRoom.imageLink" class="w-1/3 object-cover">
-                            <p class="font-normal text-xs md:text-sm text-[#8E8E93] mt-3"><span class="secondaryTxt">Click to Upload </span></p>
-                            <p class="font-normal text-xs md:text-sm text-[#8E8E93]"> (Max. File size: 25 MB)</p>
+                            <p class="font-normal text-xs md:text-sm text-[#8E8E93] mt-3"><span class="secondaryTxt">{{ 'Click to' | translate }}  {{ 'Upload' | translate }}</span></p>
+                            <p class="font-normal text-xs md:text-sm text-[#8E8E93]"> {{ '(Max. File size: 25 MB)' | translate }}</p>
                         </label>
                         <input id="file-upload" type="file" class="hidden" (change)="onImageFileSelected($event)" accept="image/jpeg, image/png"  />
                     </div>
@@ -277,9 +277,9 @@
                 <span *ngIf="validationErrors['imageFile']" class="text-red-500  font-normal text-xs md:text-sm">{{ validationErrors['imageFile'] }}</span>
             </div> 
             <div class="flex flex-col mb-4 w-full">
-                <label class="mb-2 primaryTxt" for="recordLink">Record Link</label>
+                <label class="mb-2 primaryTxt" for="recordLink">  {{ 'Record' | translate }}  {{ 'Link' | translate }}</label>
                 <input id="recordLink" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                    placeholder="Enter Record Link" [(ngModel)]="discussionRoom.recordLink"
+                    placeholder="{{ 'Enter' | translate }}  {{ 'Record' | translate }}  {{ 'Link' | translate }}" [(ngModel)]="discussionRoom.recordLink"
                     (ngModelChange)="onInputValueChange({ field: 'recordLink', value: $event })" />
                 <span *ngIf="validationErrors['recordLink']" class="text-red-500  font-normal text-xs md:text-sm">{{ validationErrors['recordLink'] }}</span>
             </div>   
@@ -288,7 +288,7 @@
         <div class="flex justify-end">
             <button [disabled]="isLoading"
                 class="secondaryBg text-white font-medium px-4 py-2 rounded-lg cursor-pointer" (click)="Save()">
-                <span *ngIf="!isLoading">Save</span>
+                <span *ngIf="!isLoading">  {{ 'Save' | translate }}</span>
                 <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
             </button>
         </div>

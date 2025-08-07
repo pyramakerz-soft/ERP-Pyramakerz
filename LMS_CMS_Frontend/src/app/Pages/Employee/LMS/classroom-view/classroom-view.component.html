@@ -1,16 +1,16 @@
 <div class="flex justify-between items-center">
-    <div class="flex justify-between items-center space-x-5">
+    <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
         <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToClass()"></i>
-        <h1 class="primaryTxt font-semibold text-2xl leading-9">Classrooms</h1>
+        <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Classrooms' | translate }}</h1>
     </div>
-    <div class="flex justify-between items-center space-x-5">
+    <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
         <button (click)="GoToSubject()"
         class="secondaryBorder secondaryTxt rounded-lg px-4 py-3">
-            Subject
+             {{ 'Subject' | translate }}
         </button>
         <button (click)="GoToStudent()"
         class="secondaryBorder secondaryTxt rounded-lg px-4 py-3">
-            Students
+           {{ 'Students' | translate }}
         </button>
     </div>
 </div>
@@ -18,39 +18,39 @@
 
 <div class="flex flex-wrap justify-between mt-5">
     <div class="bg-[#EBEBEB] p-3 w-[30%] mb-4">
-        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Classroom Name</p>
+        <p class="font-semibold text-sm text-[#6F6F6F] mb-3"> {{ 'Classroom Name' | translate }}</p>
         <p class="font-medium text-base text-[#1E1E1E]">{{ classroom.name }}</p>
     </div>
     <div class="bg-[#EBEBEB] p-3 w-[30%] mb-4">
-        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Classroom Number</p>
+        <p class="font-semibold text-sm text-[#6F6F6F] mb-3"> {{ 'Classroom Number' | translate }}</p>
         <p class="font-medium text-base text-[#1E1E1E]">{{ classroom.number }}</p>
     </div>
     <div class="bg-[#EBEBEB] p-3 w-[30%] mb-4">
-        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">School Name</p>
+        <p class="font-semibold text-sm text-[#6F6F6F] mb-3"> {{ 'School Name' | translate }}</p>
         <p class="font-medium text-base text-[#1E1E1E]">{{ classroom.schoolName }}</p>
     </div>
     <div class="bg-[#EBEBEB] p-3 w-[30%] mb-4">
-        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Academic Year</p>
+        <p class="font-semibold text-sm text-[#6F6F6F] mb-3"> {{ 'Academic Year' | translate }}</p>
         <p class="font-medium text-base text-[#1E1E1E]">{{ classroom.academicYearName }}</p>
     </div>
     <div class="bg-[#EBEBEB] p-3 w-[30%] mb-4">
-        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Section</p>
+        <p class="font-semibold text-sm text-[#6F6F6F] mb-3"> {{ 'Section' | translate }}</p>
         <p class="font-medium text-base text-[#1E1E1E]">{{ classroom.sectionName }}</p>
     </div>
     <div class="bg-[#EBEBEB] p-3 w-[30%] mb-4">
-        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Grade</p>
+        <p class="font-semibold text-sm text-[#6F6F6F] mb-3"> {{ 'Grade' | translate }}</p>
         <p class="font-medium text-base text-[#1E1E1E]">{{ classroom.gradeName }}</p>
     </div>
     <div class="bg-[#EBEBEB] p-3 w-[30%] mb-4">
-        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Building</p>
+        <p class="font-semibold text-sm text-[#6F6F6F] mb-3"> {{ 'Building' | translate }}</p>
         <p class="font-medium text-base text-[#1E1E1E]">{{ classroom.buildingName }}</p>
     </div>
     <div class="bg-[#EBEBEB] p-3 w-[30%] mb-4">
-        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Floor</p>
+        <p class="font-semibold text-sm text-[#6F6F6F] mb-3"> {{ 'Floor' | translate }}</p>
         <p class="font-medium text-base text-[#1E1E1E]">{{ classroom.floorName }}</p>
     </div>
     <div class="bg-[#EBEBEB] p-3 w-[30%] mb-4">
-        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Homeroom Teacher</p>
+        <p class="font-semibold text-sm text-[#6F6F6F] mb-3"> {{ 'Homeroom Teacher' | translate }}</p>
         <p class="font-medium text-base text-[#1E1E1E]">{{ classroom.homeroomTeacherName }}</p>
     </div>
 </div>

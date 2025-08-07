@@ -12,11 +12,13 @@ import { ActivatedRoute } from '@angular/router';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { firstValueFrom } from 'rxjs';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-subject-category',
   standalone: true,
-  imports: [FormsModule,CommonModule,SearchComponent],
+  imports: [FormsModule,CommonModule,SearchComponent, TranslateModule],
   templateUrl: './subject-category.component.html',
   styleUrl: './subject-category.component.css'
 })
@@ -35,13 +37,14 @@ export class SubjectCategoryComponent {
   AllowEditForOthers: boolean = false;
   AllowDeleteForOthers: boolean = false;
   path: string = ""
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   DomainName: string = "";
   UserID: number = 0;
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   isLoading = false;
   
-  constructor(public account: AccountService, public subjectCategoryService: SubjectCategoryService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService, public activeRoute: ActivatedRoute, private menuService: MenuService){}
+  constructor( private languageService: LanguageService,public account: AccountService, public subjectCategoryService: SubjectCategoryService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService, public activeRoute: ActivatedRoute, private menuService: MenuService){}
   
   ngOnInit(){
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -64,6 +67,11 @@ export class SubjectCategoryComponent {
         this.AllowEditForOthers = settingsPage.allow_Edit_For_Others
       }
     });
+
+        this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   getSubjectCategoryData(){

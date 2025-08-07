@@ -4,22 +4,26 @@ import { MedicalHistoryService } from '../../../../../Services/Employee/Clinic/m
 import { ApiService } from '../../../../../Services/api.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-medical-history-by-doctor',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
   templateUrl: './medical-history-by-doctor.component.html',
   styleUrls: ['./medical-history-by-doctor.component.css']
 })
 export class MedicalHistoryByDoctorComponent implements OnInit {
   medicalHistory: any = null;
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private medicalHistoryService: MedicalHistoryService,
-    private apiService: ApiService
+    private apiService: ApiService,
+    private languageService: LanguageService
   ) {}
 
   ngOnInit() {
@@ -27,6 +31,10 @@ export class MedicalHistoryByDoctorComponent implements OnInit {
     if (id) {
       this.loadMedicalHistory(Number(id));
     }
+      this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   async loadMedicalHistory(id: number) {
@@ -43,6 +51,7 @@ export class MedicalHistoryByDoctorComponent implements OnInit {
     } catch (error) {
       console.error('Error in loadMedicalHistory:', error);
     }
+
   }
 
   hasValidFile(fileUrl: string | null): boolean {

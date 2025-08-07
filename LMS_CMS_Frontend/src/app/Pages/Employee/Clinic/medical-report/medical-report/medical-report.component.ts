@@ -19,12 +19,14 @@ import { MedicalHistoryService } from '../../../../../Services/Employee/Clinic/m
 import { SearchComponent } from "../../../../../Component/search/search.component";
 import { MedicalHistoryModalComponent } from "../../medical-history/medical-history-modal/medical-history-modal.component";
 import { PdfPrintComponent } from "../../../../../Component/pdf-print/pdf-print.component";
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-medical-report',
   templateUrl: './medical-report.component.html',
   styleUrls: ['./medical-report.component.css'],
-  imports: [TableComponent, CommonModule, FormsModule, HygieneFormTableComponent, MedicalHistoryModalComponent, SearchComponent, PdfPrintComponent],
+  imports: [TableComponent, CommonModule, FormsModule, HygieneFormTableComponent, MedicalHistoryModalComponent, SearchComponent, PdfPrintComponent, TranslateModule],
   standalone: true
 })
 export class MedicalReportComponent implements OnInit {
@@ -52,7 +54,8 @@ onView(row: any) {
   searchKey: string = 'id';
   searchValue: any = '';
   searchKeysArray: string[] = ['id'];
-  
+  isRtl: boolean = false;
+  subscription!: Subscription;  
   schools: any[] = [];
   grades: any[] = [];
   classes: any[] = [];
@@ -104,7 +107,8 @@ getPrintValue(item: any, header: string): string {
     private schoolService: SchoolService,
     private gradeService: GradeService,
     private classroomService: ClassroomService,
-    private studentService: StudentService
+    private studentService: StudentService,
+    private languageService: LanguageService
   ) {}
 
   ngOnInit(): void {
@@ -114,6 +118,10 @@ getPrintValue(item: any, header: string): string {
     this.loadSchools();
     this.loadAllHygieneForms();
     this.loadMHByDoctorData();
+      this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   
@@ -814,6 +822,51 @@ printTable() {
         Recommendation: item.recommendation
       }));
       break;
+          case 'السجل الطبي من ولي الأمر':
+      this.pdfTableHeaders = ['Date', 'Description', 'Insert Date', 'Last Modified'];
+      this.pdfTableData = this.mhByParentData.map(item => ({
+        Date: item.date,
+        Description: item.description,
+        'Insert Date': item.insertDate,
+        'Last Modified': item.lastModified
+      }));
+      break;
+          case 'السجل الطبي من الطبيب':
+      this.pdfTableHeaders = ['Date', 'Description', 'Insert Date', 'Last Modified', 'School', 'Grade', 'Class', 'Student'];
+      this.pdfTableData = this.filteredMHByDoctorData.map(item => ({
+        Date: item.date,
+        Description: item.description,
+        'Insert Date': item.insertDate,
+        'Last Modified': item.lastModified,
+        School: item.schoolName,
+        Grade: item.gradeName,
+        Class: item.className,
+        Student: item.studentName
+      }));
+      break;
+          case 'نموذج النظافة':
+      this.pdfTableHeaders = ['Student', 'Attendance', 'Comment', 'Action Taken', 'Hygiene Type'];
+      this.pdfTableData = this.students.map(item => ({
+        Student: item.en_name,
+        Attendance: item.attendance,
+        Comment: item.comment,
+        'Action Taken': item.actionTaken,
+        'Hygiene Type': item.hygieneType_1 ? 'Type 1' : item.hygieneType_2 ? 'Type 2' : 'N/A'
+      }));
+      break;
+          case 'متابعة':
+      this.pdfTableHeaders = ['ID', 'School', 'Grade', 'Class', 'Student', 'Complaints', 'Diagnosis', 'Recommendation'];
+      this.pdfTableData = this.filteredFollowUps.map(item => ({
+        ID: item.id,
+        School: item.schoolName,
+        Grade: item.gradeName,
+        Class: item.className,
+        Student: item.studentName,
+        Complaints: item.complaints,
+        Diagnosis: item.diagnosisName,
+        Recommendation: item.recommendation
+      }));
+      break;
     default:
       Swal.fire('Error', 'No data available for printing.', 'error');
       this.showPrintView = false;
@@ -928,4 +981,40 @@ inlineAllStyles(source: HTMLElement, target: HTMLElement) {
   }
 }
 IsPrint = false;
+
+
+
+
+
+GetTableHeadersparent(){
+   
+if(!this.isRtl){
+  return ['Date', 'Description', 'Insert Date', 'Last Modified', 'Actions']
+}else{
+  return ['التاريخ', 'الوصف', 'تاريخ الإدخال', 'آخر تعديل', 'الإجراءات']
+}
+}
+
+
+
+GetTableHeadersdoctor() {
+   
+if(!this.isRtl){
+  return ['Date', 'Description', 'Insert Date', 'Last Modified', 'Actions']
+}else{
+  return ['التاريخ', 'الوصف', 'تاريخ الإدخال', 'آخر تعديل', 'الإجراءات']
+}
+}
+
+
+
+GetTableHeadersfollow(){
+   
+if(!this.isRtl){
+  return ['ID', 'School', 'Grade', 'Class', 'Student', 'Complaints', 'Diagnosis', 'Recommendation', 'Actions']
+}else{
+  return ['المعرف', 'المدرسة', 'الصف', 'الفصل', 'الطالب', 'الشكاوى', 'التشخيص', 'التوصيات', 'الإجراءات']
+}
+}
+
 }

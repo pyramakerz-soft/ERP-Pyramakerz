@@ -14,11 +14,13 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { TimeTableReplace } from '../../../../Models/LMS/time-table-replace';
 import Swal from 'sweetalert2';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-time-table-replace',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, TranslateModule],
   templateUrl: './time-table-replace.component.html',
   styleUrl: './time-table-replace.component.css',
 })
@@ -45,7 +47,8 @@ export class TimeTableReplaceComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   TimeTableId: number = 0;
   MaxPeriods: number = 0;
   TimeTableName: string = '';
@@ -69,7 +72,8 @@ export class TimeTableReplaceComponent {
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
-    public timetableServ: TimeTableService
+    public timetableServ: TimeTableService,
+    private languageService: LanguageService,
   ) {}
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -80,6 +84,11 @@ export class TimeTableReplaceComponent {
     });
     this.TimeTableId = Number(this.activeRoute.snapshot.paramMap.get('id'));
     this.GetTimeTable();
+
+        this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetTimeTable() {
