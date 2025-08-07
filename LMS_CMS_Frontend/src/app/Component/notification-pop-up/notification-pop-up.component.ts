@@ -1,7 +1,8 @@
-import { Component, Inject, Input } from '@angular/core';
+import { ChangeDetectorRef, Component, Inject, Input } from '@angular/core';
 import { Notification } from '../../Models/Communication/notification';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { CommonModule } from '@angular/common';
+import { Subject } from 'rxjs';
 
 @Component({
   selector: 'app-notification-pop-up',
@@ -12,10 +13,12 @@ import { CommonModule } from '@angular/common';
 })
 export class NotificationPopUpComponent {
   notifications: Notification[] = [];
+  private destroy$ = new Subject<void>();
 
   constructor(
     private dialogRef: MatDialogRef<NotificationPopUpComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { notification: Notification[] }
+    @Inject(MAT_DIALOG_DATA) public data: { notification: Notification[] },
+    private changeDetector: ChangeDetectorRef 
   ) {}
 
   ngOnInit() { 
@@ -27,10 +30,17 @@ export class NotificationPopUpComponent {
   }
 
   addNotification(notification: Notification) {
-    this.notifications.push(notification);
+    // Add new notification at the top of the list
+    this.notifications.unshift(notification);
+    this.changeDetector.detectChanges();
   } 
   
   close() {
     this.dialogRef.close();
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

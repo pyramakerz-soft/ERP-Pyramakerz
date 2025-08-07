@@ -328,7 +328,6 @@ export class InventoryDetailsComponent {
   GetMasterInfo() {
     this.salesServ.GetById(this.MasterId, this.DomainName).subscribe((d) => {
       this.Data = d;
-      console.log(this.Data, d)
       this.GetCategories();
     });
   }
@@ -421,7 +420,6 @@ export class InventoryDetailsComponent {
       this.salesItemServ.GetBySalesId(this.MasterId, this.DomainName).subscribe(
         (d) => {
           this.TableData = d;
-          console.log(this.TableData)
           this.Data.inventoryDetails = d;
           resolve();
         },
@@ -458,7 +456,6 @@ export class InventoryDetailsComponent {
       if (this.mode == 'Create') {
         this.salesServ.Add(this.Data, this.DomainName).subscribe(
           (d) => {
-            console.log(d)
             this.MasterId = d;
             if (this.EditedShopItems.length > 0) {
               this.EditedShopItems.forEach((element) => {
@@ -488,7 +485,6 @@ export class InventoryDetailsComponent {
       }
       if (this.mode == 'Edit') {
         this.Data.inventoryDetails = this.TableData;
-        console.log(this.Data.inventoryDetails)
         this.salesItemServ.Edit(this.Data.inventoryDetails, this.DomainName).subscribe((d) => { }, (error) => { console.log(error) });
         this.salesItemServ.Add(this.NewDetailsWhenEdit, this.DomainName).subscribe((d) => { }, (error) => { });
         this.salesServ.Edit(this.Data, this.DomainName).subscribe((d) => { this.router.navigateByUrl(`Employee/${this.InventoryFlag.enName}`); },
@@ -601,12 +597,10 @@ export class InventoryDetailsComponent {
 
   DeleteWhenCreate(img: File) {
     this.Data.attachment = this.Data.attachment.filter((i) => i != img);
-    console.log(this.Data.attachment)
   }
 
   DeleteWhenEdit(img: File) {
     this.Data.NewAttachments = this.Data.NewAttachments.filter((i) => i != img);
-    console.log(this.Data.attachment)
   }
 
   DeleteExistedImg(img: string) {
@@ -685,9 +679,7 @@ export class InventoryDetailsComponent {
       if (!this.Data.NewAttachments) {
         this.Data.NewAttachments = [];
       }
-      console.log(1, this.Data.NewAttachments)
       Array.from(files).forEach((file) => this.Data.NewAttachments.push(file));
-      console.log(2, this.Data.NewAttachments)
     }
     input.value = '';
   }
@@ -820,7 +812,6 @@ export class InventoryDetailsComponent {
       this.validationErrors['bankID'] = 'Bank Is Required';
       return false;
     }
-    console.log(this.Data.inventoryDetails)
     if (this.mode === 'Create') {
       for (const item of this.Data.inventoryDetails) {
         if (!item.quantity || !item.quantity || isNaN(Number(item.quantity))) {
@@ -1069,7 +1060,6 @@ export class InventoryDetailsComponent {
   }
 
   openModal() {
-    console.log("fd")
     this.isModalVisible = true;
   }
 
@@ -1080,7 +1070,6 @@ export class InventoryDetailsComponent {
         this.openModal();
       },
         (error) => {
-          console.log(error)
           this.isLoading = false;
           Swal.fire({
             icon: 'error',
@@ -1098,7 +1087,6 @@ export class InventoryDetailsComponent {
           this.openModal();
         },
           (error) => {
-            console.log(error)
             this.isLoading = false;
             Swal.fire({
               icon: 'error',

@@ -27,7 +27,7 @@ export class RemedialClassroomService {
     return this.http.get<RemedialClassroom[]>(`${this.baseUrl}/RemedialClassroom/BySchoolId/${SchoolId}`, { headers });
   }
 
-  ByGradeId(GradeId: number, DomainName: string) {
+  GetByGradeId(GradeId: number, DomainName: string) {
     if (DomainName != null) {
       this.header = DomainName;
     }
@@ -52,42 +52,58 @@ export class RemedialClassroomService {
   }
 
   Add(RemedialClassroom: RemedialClassroom, DomainName: string) {
-      if (DomainName != null) {
-        this.header = DomainName;
-      }
-      const token = localStorage.getItem('current_token');
-      const headers = new HttpHeaders()
-        .set('domain-name', this.header)
-        .set('Authorization', `Bearer ${token}`)
-        .set('Content-Type', 'application/json');
-  
-      return this.http.post(`${this.baseUrl}/RemedialClassroom`, RemedialClassroom, {
-        headers: headers,
-        responseType: 'text' as 'json',
-      });
+    if (DomainName != null) {
+      this.header = DomainName;
     }
-  
-    Edit(RemedialClassroom: RemedialClassroom, DomainName: string) {
-      if (DomainName != null) {
-        this.header = DomainName;
-      }
-      const token = localStorage.getItem('current_token');
-      const headers = new HttpHeaders()
-        .set('domain-name', this.header)
-        .set('Authorization', `Bearer ${token}`)
-        .set('Content-Type', 'application/json');
-      return this.http.put(`${this.baseUrl}/RemedialClassroom`, RemedialClassroom, { headers });
+    const payload = {
+      name: RemedialClassroom.name,
+      numberOfSession: Number(RemedialClassroom.numberOfSession), // Convert to number
+      subjectID: Number(RemedialClassroom.subjectID),
+      academicYearID: Number(RemedialClassroom.academicYearID),
+      teacherID: Number(RemedialClassroom.teacherID),
+    };
+    const token = localStorage.getItem('current_token');
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+
+    return this.http.post(`${this.baseUrl}/RemedialClassroom`, payload, {
+      headers: headers,
+      responseType: 'text' as 'json',
+    });
+  }
+
+  Edit(RemedialClassroom: RemedialClassroom, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName;
     }
-  
-    Delete(id: number, DomainName: string) {
-      if (DomainName != null) {
-        this.header = DomainName;
-      }
-      const token = localStorage.getItem('current_token');
-      const headers = new HttpHeaders()
-        .set('domain-name', this.header)
-        .set('Authorization', `Bearer ${token}`)
-        .set('Content-Type', 'application/json');
-      return this.http.delete(`${this.baseUrl}/RemedialClassroom/${id}`, { headers });
+    const payload = {
+      id: RemedialClassroom.id,
+      name: RemedialClassroom.name,
+      numberOfSession: Number(RemedialClassroom.numberOfSession), // Convert to number
+      subjectID: Number(RemedialClassroom.subjectID),
+      academicYearID: Number(RemedialClassroom.academicYearID),
+      teacherID: Number(RemedialClassroom.teacherID),
+    };
+    console.log(payload)
+    const token = localStorage.getItem('current_token');
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.put(`${this.baseUrl}/RemedialClassroom`, payload, { headers });
+  }
+
+  Delete(id: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName;
     }
+    const token = localStorage.getItem('current_token');
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.delete(`${this.baseUrl}/RemedialClassroom/${id}`, { headers });
+  }
 }

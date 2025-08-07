@@ -221,6 +221,9 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<RemedialTimeTable> RemedialTimeTable_Repository;
         GenericRepo<RemedialTimeTableDay> RemedialTimeTableDay_Repository;
         GenericRepo<RemedialTimeTableClasses> RemedialTimeTableClasses_Repository;
+        GenericRepo<ChatMessage> ChatMessage_Repository;
+        GenericRepo<ChatMessageAttachment> ChatMessageAttachment_Repository;
+        GenericRepo<Request> Request_Repository;
 
 
         public UOW(Octa_DbContext octa_Db)
@@ -2515,6 +2518,42 @@ namespace LMS_CMS_BL.UOW
                     NotificationSharedTo_Repository = new GenericRepo<NotificationSharedTo>(db);
                 }
                 return NotificationSharedTo_Repository;
+            }
+        }
+        
+        public GenericRepo<ChatMessage> chatMessage_Repository
+        {
+            get
+            {
+                if (ChatMessage_Repository == null)
+                {
+                    ChatMessage_Repository = new GenericRepo<ChatMessage>(db);
+                }
+                return ChatMessage_Repository;
+            }
+        }
+        
+        public GenericRepo<ChatMessageAttachment> chatMessageAttachment_Repository
+        {
+            get
+            {
+                if (ChatMessageAttachment_Repository == null)
+                {
+                    ChatMessageAttachment_Repository = new GenericRepo<ChatMessageAttachment>(db);
+                }
+                return ChatMessageAttachment_Repository;
+            }
+        }
+        
+        public GenericRepo<Request> request_Repository
+        {
+            get
+            {
+                if (Request_Repository == null)
+                {
+                    Request_Repository = new GenericRepo<Request>(db);
+                }
+                return Request_Repository;
             }
         }
 

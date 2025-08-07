@@ -3415,28 +3415,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("ID"));
 
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<long?>("DeletedByOctaId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("DeletedByUserId")
-                        .HasColumnType("bigint");
-
                     b.Property<bool>("ForwardedOrNot")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("InsertedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<long?>("InsertedByOctaId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("InsertedByUserId")
-                        .HasColumnType("bigint");
-
-                    b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<string>("Message")
@@ -3457,26 +3436,11 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<long>("SenderUserTypeID")
                         .HasColumnType("bigint");
 
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<long?>("UpdatedByOctaId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("UpdatedByUserId")
-                        .HasColumnType("bigint");
-
                     b.HasKey("ID");
-
-                    b.HasIndex("DeletedByUserId");
-
-                    b.HasIndex("InsertedByUserId");
 
                     b.HasIndex("ReceiverUserTypeID");
 
                     b.HasIndex("SenderUserTypeID");
-
-                    b.HasIndex("UpdatedByUserId");
 
                     b.ToTable("ChatMessage");
                 });
@@ -8362,6 +8326,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("NumberOfSession")
+                        .HasColumnType("int");
 
                     b.Property<long>("SubjectID")
                         .HasColumnType("bigint");
@@ -13443,14 +13410,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.Communication.ChatMessage", b =>
                 {
-                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "DeletedByEmployee")
-                        .WithMany()
-                        .HasForeignKey("DeletedByUserId");
-
-                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "InsertedByEmployee")
-                        .WithMany()
-                        .HasForeignKey("InsertedByUserId");
-
                     b.HasOne("LMS_CMS_DAL.Models.Domains.UserType", "ReceiverUserType")
                         .WithMany("ReceiverChatMessages")
                         .HasForeignKey("ReceiverUserTypeID")
@@ -13463,19 +13422,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "UpdatedByEmployee")
-                        .WithMany()
-                        .HasForeignKey("UpdatedByUserId");
-
-                    b.Navigation("DeletedByEmployee");
-
-                    b.Navigation("InsertedByEmployee");
-
                     b.Navigation("ReceiverUserType");
 
                     b.Navigation("SenderUserType");
-
-                    b.Navigation("UpdatedByEmployee");
                 });
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.Communication.ChatMessageAttachment", b =>

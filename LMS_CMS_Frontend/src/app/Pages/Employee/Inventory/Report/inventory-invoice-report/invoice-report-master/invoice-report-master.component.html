@@ -90,16 +90,6 @@
     <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()" title="Print Report">
 </div>
 
-<div class="absolute -top-[9999px] -left-[9999px]">
-    <div id="Data" class="hidden">
-        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'Inventory Transactions Report'"
-            [infoRows]="getInfoRows()"
-            [tableHeaders]="['Invoice #', 'Date', 'Store', 'Total Amount', 'Transaction Type']"
-            [tableData]="transactionsForExport" #pdfComponentRef>
-        </app-pdf-print>
-    </div>
-</div>
-
 <div *ngIf="showTable" class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
     <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
         <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
@@ -165,7 +155,7 @@
         </tbody>
     </table>
 </div>
-
+<!-- 
 <div *ngIf="showTable" class="mt-8 flex justify-between items-center">
     <div class="flex items-center space-x-4">
         <button class="flex items-center space-x-2 rounded-lg border py-3 px-4" (click)="changePage(currentPage-1)"
@@ -192,4 +182,36 @@
     <div>
         <p>{{currentPage}} of {{totalPages}} pages ({{totalRecords}} Items)</p>
     </div>
+</div> -->
+
+
+<div class="absolute  -top-[9999px] -left-[9999px]">
+    <div id="Data" class="hidden">
+        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'Inventory Transactions Report'"
+        [infoRows]="[
+      { keyEn: 'From Date: ' + this.dateFrom },
+      { keyEn: 'To Date: ' + this.dateTo },
+      { keyEn: 'Store: ' + this.getStoreName() },
+            ]"
+        [tableHeaders]="['Invoice #', 'Date', 'Store', 'Total Amount', 'Transaction Type']"
+        [tableData]="transactionsForExport" #pdfComponentRef>
+    </app-pdf-print>
 </div>
+</div>
+
+<!-- [infoRows]="getInfoRows()" -->
+
+<!-- <div class="absolute -top-[9999px] -left-[9999px]">
+    <div id="Data" class="hidden">
+        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'List of students names in class'" [infoRows]="[
+                { keyEn: 'Class : ' + this.class.name},
+                { keyEn: 'Number of Students : ' + this.studentsCount.toString()},
+                { keyEn: 'Date : ' + this.date },
+                { keyEn: 'School : ' +  this.school.name },
+                { keyEn: 'Year : ' +this.AcademicYearName },
+                { keyEn: 'Grade : ' +this.GradeName }
+            ]" [tableHeaders]="['id', 'en_name', 'mobile', 'nationalityName', 'genderName']" [tableData]="StudentData"
+            #pdfComponentRef>
+        </app-pdf-print>
+    </div>
+</div> -->

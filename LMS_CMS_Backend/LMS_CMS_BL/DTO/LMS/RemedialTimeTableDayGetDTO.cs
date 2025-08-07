@@ -1,4 +1,5 @@
 ﻿using LMS_CMS_DAL.Models.Domains;
+using LMS_CMS_DAL.Models.Domains.LMS;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -14,6 +15,6 @@ namespace LMS_CMS_BL.DTO.LMS
         public int PeriodIndex { get; set; }
         public long DayId { get; set; }
         public string DayName { get; set; }
-
+        public ICollection<RemedialTimeTableClassesGetDTO> RemedialTimeTableClasses { get; set; }
     }
 }

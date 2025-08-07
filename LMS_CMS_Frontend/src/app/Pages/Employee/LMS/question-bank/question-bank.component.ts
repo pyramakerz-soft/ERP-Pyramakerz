@@ -494,7 +494,6 @@ export class QuestionBankComponent {
   }
   
   CreateOREdit() {
-    console.log(this.questionBank)
     this.questionBank.questionBankTagsDTO = this.TagsSelected.map(s => s.id)
     if (this.isFormValid()) {
       this.isLoading = true;
@@ -509,7 +508,6 @@ export class QuestionBankComponent {
             this.closeModal();
           },
           (error) => {
-            console.log(error)
             this.isLoading = false; // Hide spinner
             Swal.fire({
               icon: 'error',
@@ -538,7 +536,6 @@ export class QuestionBankComponent {
             this.closeModal();
           },
           (error) => {
-            console.log(error)
             this.isLoading = false; // Hide spinner
             Swal.fire({
               icon: 'error',
@@ -717,7 +714,6 @@ export class QuestionBankComponent {
 
     this.QuestionBankServ.GetById(row.id, this.DomainName).subscribe((d) => {
       this.questionBank = d;
-      console.log(d, this.questionBank)
       this.GetAllLesson();
       if (this.questionBank.questionTypeID == 1) {
         this.questionBank.questionBankOptionsDTO = []

@@ -21,5 +21,9 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public long RemedialClassroomID { get; set; }
         public RemedialClassroom RemedialClassroom { get; set; }
 
+        public static implicit operator List<object>(RemedialTimeTableClasses v)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

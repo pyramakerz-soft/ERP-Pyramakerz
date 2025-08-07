@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { RemedialTimeTable } from '../../../Models/LMS/remedial-time-table';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ApiService } from '../../api.service';
+import { RemedialTimeTableClasses } from '../../../Models/LMS/remedial-time-table-classes';
 
 @Injectable({
   providedIn: 'root'
@@ -43,17 +44,24 @@ export class RemedialTimeTableService {
     if (DomainName != null) {
       this.header = DomainName;
     }
-    console.log(DomainName);
     const token = localStorage.getItem('current_token');
     const headers = new HttpHeaders()
       .set('Domain-Name', this.header) // Correct casing as in your backend
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.put(
-      `${this.baseUrl}/RemedialTimeTable?id=${Id}&IsFavourite=${IsFav}`,
-      {},
-      { headers }
-    );
+    return this.http.put(`${this.baseUrl}/RemedialTimeTable/IsFavourite?id=${Id}&IsFavourite=${IsFav}`, {}, { headers });
+  }
+
+  Edit(Remedial: RemedialTimeTableClasses[], DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName;
+    }
+    const token = localStorage.getItem('current_token');
+    const headers = new HttpHeaders()
+      .set('Domain-Name', this.header) // Correct casing as in your backend
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.put(`${this.baseUrl}/RemedialTimeTable`, Remedial, { headers });
   }
 
   Add(RemedialTimeTable: RemedialTimeTable, DomainName: string) {
@@ -72,16 +80,15 @@ export class RemedialTimeTableService {
     });
   }
 
-
-  Delete(id: number, DomainName: string) {
-    if (DomainName != null) {
-      this.header = DomainName;
+  Delete(id: number,DomainName:string) {
+    if(DomainName!=null) {
+      this.header=DomainName 
     }
-    const token = localStorage.getItem('current_token');
+    const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.delete(`${this.baseUrl}/RemedialTimeTable/${id}`, { headers });
+    return this.http.delete(`${this.baseUrl}/RemedialTimeTable/${id}`, { headers })
   }
 }

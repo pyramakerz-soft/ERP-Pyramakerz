@@ -115,7 +115,6 @@ export class DiscussionRoomComponent {
       this.classroomStudentService.GetClassForActiveAcademicYearWithStudentsIncluded(this.discussionRoom.schoolID, this.DomainName).subscribe(
         data => {
           this.studentsClass = data
-          console.log(this.studentsClass)
         }
       )
     }

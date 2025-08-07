@@ -56,7 +56,6 @@ export class AllStoresBalanceReportComponent implements OnInit {
 
   ngOnInit() {
     this.route.data.subscribe((data) => {
-      console.log('Route data:', data); // Add this line
       this.reportType = data['reportType'];
       this.setPageTitle();
       this.loadCategories();
@@ -120,7 +119,6 @@ export class AllStoresBalanceReportComponent implements OnInit {
 
   viewReport() {
     const flag = this.getReportFlagType();
-    console.log('Sending flag:', flag, 'for reportType:', this.reportType);
 
     // if (!this.dateTo) {
     //   Swal.fire({
@@ -148,7 +146,6 @@ export class AllStoresBalanceReportComponent implements OnInit {
       )
       .subscribe({
         next: (response) => {
-          console.log('Report data loaded:', response);
           this.reportData = response;
           this.prepareExportData();
           this.showTable = true;
