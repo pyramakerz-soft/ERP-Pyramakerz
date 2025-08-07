@@ -38,10 +38,16 @@
         </select>
     </div>
     <div *ngIf="SelectedDay!=0 || SelectedGrade!=0" class="rounded-full p-2 border-4" (click)="GetTimeTable()">
-        <i class="fa-solid fa-rotate-left secondaryTxt text-2xl w-8 h-8 text-center hover:cursor-pointer rounded-full"></i>
+        <i
+            class="fa-solid fa-rotate-left secondaryTxt text-2xl w-8 h-8 text-center hover:cursor-pointer rounded-full"></i>
     </div>
 </div>
 
+<div class="my-5 flex justify-end space-x-4">
+    <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="DownloadAsExcel()">
+    <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()">
+    <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="openPrintModal()">
+</div>
 
 <div class="overflow-x-auto">
     <div *ngFor="let day of TimeTable" class="mb-10 border rounded shadow">
@@ -69,7 +75,8 @@
                             {{ classroom.classroomName }}
                         </td>
                         <td class="border p-2 " *ngFor="let session of classroom.sessions">
-                            <div class="rounded-lg border-l-8 border-blue-500 bg-blue-50 px-4 py-2 text-lg font-medium text-gray-800 shadow mb-2">
+                            <div
+                                class="rounded-lg border-l-8 border-blue-500 bg-blue-50 px-4 py-2 text-lg font-medium text-gray-800 shadow mb-2">
                                 <div *ngFor="let subject of session.subjects">
                                     <div class="text-gray-500 text-xs">{{ subject.subjectName }}</div>
                                     <div class="text-gray-500 text-xs">{{ subject.teacherName }}</div>
@@ -88,6 +95,184 @@
                     </tr>
                 </tbody>
             </table>
+        </div>
+    </div>
+</div>
+
+
+<div id="Print_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
+    <div class="bg-white rounded-2xl p-12 w-[669px]">
+        <div class="flex justify-between items-center">
+            <h1 class="font-semibold text-2xl leading-9">Print Time Table</h1>
+            <button (click)="closePrintModal()" type="button"
+                class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
+        </div>
+
+        <div class="p-[16px_24px] mt-6 mb-4 bg-[#F7F7F7] rounded-3xl">
+            <div class="flex flex-col mb-4">
+                <label class="mb-2 primaryTxt" for="Type">Type</label>
+                <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Type"
+                    [(ngModel)]="PrintType" (click)="GetTypes()">
+                    <option *ngFor="let type of types" [value]="type">
+                        {{ type | titlecase }}
+                    </option>
+                </select>
+            </div>
+
+            <div class="flex flex-col mb-4" *ngIf="PrintType=='Class'">
+                <label class="mb-2 primaryTxt" for="Class">Class</label>
+                <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Class"
+                    [(ngModel)]="SelectedClassId">
+                    <option [value]="0" disabled selected hidden>Choose Class</option>
+                    <option *ngFor="let class of classes" [value]="class.id">{{ class.name }}</option>
+                    <option *ngIf="classes.length === 0" disabled selected>No Data Found</option>
+                </select>
+            </div>
+
+            <div class="flex flex-col mb-4" *ngIf="PrintType=='Teacher'">
+                <label class="mb-2 primaryTxt" for="Teacher">Teacher</label>
+                <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Teacher"
+                    [(ngModel)]="SelectedTeacherId">
+                    <option [value]="0" disabled selected hidden>Choose Teacher</option>
+                    <option *ngFor="let t of Teachers" [value]="t.id">{{ t.en_name }}</option>
+                    <option *ngIf="Teachers.length === 0" disabled selected>No Data Found</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="flex justify-end">
+            <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
+                (click)="Print()">
+                <span *ngIf="!isLoading">Print</span>
+                <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+
+<div class="absolute -top-[9999px] -left-[9999px]">
+    <div id="Data" class="hidden">
+        <div class="overflow-x-auto">
+            <div class="bg-gray-300 text-center text-xl font-bold py-4 mb-4 print:mb-8 print:pb-4">
+                {{ ClassName }}
+            </div>
+
+            <table class="table-auto w-full text-sm text-left border-collapse border border-gray-300">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="border p-2">Day</th>
+                        <th class="border p-2" *ngFor="let i of [].constructor(MaxPeriods); let period = index">
+                            Session {{ period + 1 }}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let day of TimeTablePrint">
+                        <td class="border p-2 font-medium">{{ day.dayName }}</td>
+
+                        <td class="border p-2" *ngFor="let i of [].constructor(MaxPeriods); let period = index">
+                            <ng-container *ngFor="let grade of day.grades">
+                                <ng-container *ngFor="let classroom of grade.classrooms">
+                                    <ng-container *ngIf="classroom.classroomName === ClassName">
+                                        <ng-container *ngIf="classroom.sessions[period] as session">
+                                            <div *ngFor="let subject of session.subjects">
+                                                <div class="font-semibold text-blue-600">{{ subject.subjectName }}</div>
+                                                <div class="text-gray-500 text-xs">
+                                                    {{ subject.teacherName || 'No Teacher' }}
+                                                </div>
+                                            </div>
+                                        </ng-container>
+                                        <div *ngIf="!classroom.sessions[period]" class="text-gray-400">--</div>
+                                    </ng-container>
+                                </ng-container>
+                            </ng-container>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="absolute -top-[9999px] -left-[9999px]">
+    <div id="DataTeacher" class="hidden">
+        <div class="bg-gray-300 text-center text-xl font-bold py-4 mb-4 print:mb-8 print:pb-4">
+            {{ TeacherName }}
+        </div>
+        <div class="overflow-x-auto">
+            <div class="p-2">
+                <table class="table-auto w-full text-sm text-left border-collapse border border-gray-300">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="border p-2">Day</th>
+                            <th class="border p-2" *ngFor="let i of [].constructor(MaxPeriods); let period = index">
+                                Session {{ period + 1 }}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let day of TimeTablePrint">
+                            <td class="border p-2 font-medium">
+                                {{ day.dayName }}
+                            </td>
+                            <td class="border p-2" *ngFor="let i of [].constructor(MaxPeriods); let period = index">
+                                <ng-container *ngIf="day.sessions[period] as session">
+                                    <div *ngFor="let subject of session.subjects">
+                                        <div class="font-semibold text-blue-600">{{ subject.subjectName }}</div>
+                                        <div class="text-gray-500 text-xs" *ngFor="let classroom of session.classes">
+                                            {{ classroom.gradeName }} / {{ classroom.classroomName }}
+                                        </div>
+                                    </div>
+                                </ng-container>
+                                <div *ngIf="!day.sessions[period]" class="text-gray-400">--</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="absolute -top-[9999px] -left-[9999px]">
+    <div id="All" class="hidden">
+        <div class="overflow-x-auto">
+            <div *ngFor="let day of TimeTable2" class="mb-10 border rounded shadow">
+                <div class="bg-gray-300 text-center font-bold py-2">
+                    {{ day.dayName }}
+                </div>
+                <div *ngFor="let grade of day.grades" class="p-2">
+                    <div class="text-md font-semibold mb-1">
+                        Grade: {{ grade.gradeName }}
+                    </div>
+                    <table class="table-auto w-full text-sm text-left border-collapse border border-gray-300">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="border p-2">Class Name</th>
+                                <th class="border p-2" *ngFor="let i of [].constructor(MaxPeriods); let period = index">
+                                    Session {{ period + 1 }}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let classroom of grade.classrooms">
+                                <td class="border p-2 font-medium">
+                                    {{ classroom.classroomName }}
+                                </td>
+                                <td class="border p-2" *ngFor="let session of classroom.sessions">
+                                    <div *ngFor="let subject of session.subjects">
+                                        <div class="font-semibold text-blue-600">{{ subject.subjectName }}</div>
+                                        <div class="text-gray-500 text-xs">{{ subject.teacherName }}</div>
+                                    </div>
+                                    <div *ngIf="session.subjects.length === 0" class="text-gray-400">--</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </div>

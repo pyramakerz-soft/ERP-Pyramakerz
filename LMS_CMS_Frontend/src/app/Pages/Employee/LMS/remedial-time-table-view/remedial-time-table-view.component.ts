@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { RemedialTimeTableService } from '../../../../Services/Employee/LMS/remedial-time-table.service';
@@ -21,11 +21,16 @@ import { RemedialTimeTableDay } from '../../../../Models/LMS/remedial-time-table
 import { RemedialTimeTableClasses } from '../../../../Models/LMS/remedial-time-table-classes';
 import Swal from 'sweetalert2';
 import { RemedialTimeTableClassesService } from '../../../../Services/Employee/LMS/remedial-time-table-classes.service';
+import { ReportsService } from '../../../../Services/shared/reports.service';
+import { PdfPrintComponent } from '../../../../Component/pdf-print/pdf-print.component';
+import { Employee } from '../../../../Models/Employee/employee';
+import { Day } from '../../../../Models/day';
+import { TimeTableDayGroupDTO } from '../../../../Models/LMS/time-table-day-group-dto';
 
 @Component({
   selector: 'app-remedial-time-table-view',
   standalone: true,
-  imports: [FormsModule, CommonModule, DragDropModule],
+  imports: [FormsModule, CommonModule, DragDropModule, PdfPrintComponent],
   templateUrl: './remedial-time-table-view.component.html',
   styleUrl: './remedial-time-table-view.component.css'
 })
@@ -42,9 +47,10 @@ export class RemedialTimeTableViewComponent {
   key: string = 'id';
   value: any = '';
 
-  TimeTableId: number = 0;
+  RTimeTableId: number = 0;
   SelectedGradeId: number = 0;
   remedialTimeTable: RemedialTimeTable = new RemedialTimeTable();
+  remedialTimeTableForPrint: RemedialTimeTable = new RemedialTimeTable();
   Grades: Grade[] = []
   remedialClasses: RemedialClassroom[] = []
   OriginremedialClassesForCard: RemedialClassroom[] = []
@@ -52,6 +58,19 @@ export class RemedialTimeTableViewComponent {
   DeletedRemedialTimeTableClasses: number[] = []
   connectedDropLists: string[] = [];
   isLoading = false;
+  @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;
+  showPDF = false;
+  tableHeadersForPDF: any[] = [];
+  tableDataForPDF: any[] = [];
+  types = ['All', 'Teacher', 'Grade', 'Day'];
+  PrintType = 'All'; // default value
+
+  SelectedTeacherForPrintId: number = 0;
+  SelectedGradeForPrintId: number = 0;
+  SelectedDayForPrintId: number = 0;
+  Teachers: Employee[] = []
+  Grade: Grade[] = []
+  day: Day[] = []
 
   constructor(
     private router: Router,
@@ -63,6 +82,8 @@ export class RemedialTimeTableViewComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public GradeServ: GradeService,
+    private cdr: ChangeDetectorRef,
+    public reportsService: ReportsService,
     public RemedialClassroomServ: RemedialClassroomService,
     public RemedialTimeTableServ: RemedialTimeTableService,
     public RemedialTimeTableClassesServ: RemedialTimeTableClassesService,
@@ -75,7 +96,7 @@ export class RemedialTimeTableViewComponent {
     this.activeRoute.url.subscribe((url) => {
       this.path = url[0].path;
     });
-    this.TimeTableId = Number(this.activeRoute.snapshot.paramMap.get('id'));
+    this.RTimeTableId = Number(this.activeRoute.snapshot.paramMap.get('id'));
     this.GetTimeTable();
   }
 
@@ -109,8 +130,15 @@ export class RemedialTimeTableViewComponent {
   }
 
   GetTimeTable() {
-    this.RemedialTimeTableServ.GetByID(this.TimeTableId, this.DomainName).subscribe((d) => {
+    this.RemedialTimeTableServ.GetByID(this.RTimeTableId, this.DomainName).subscribe((d) => {
       this.remedialTimeTable = d;
+      console.log(this.remedialTimeTable)
+
+      this.day = this.remedialTimeTable.groupDays.map((d: any) => ({
+        id: d.dayId,
+        name: d.dayName
+      }));
+
       this.GetAllGradeBySchool()
       this.connectedDropLists = [];
       this.remedialTimeTable.groupDays.forEach(day => {
@@ -217,5 +245,216 @@ export class RemedialTimeTableViewComponent {
     })
     this.NewremedialTimeTableClasses = []
     this.DeletedRemedialTimeTableClasses = []
+  }
+
+ Print() {
+  this.remedialTimeTableForPrint = JSON.parse(JSON.stringify(this.remedialTimeTable)); // ✅ deep clone
+
+  if (this.PrintType === "Day") {
+    this.remedialTimeTableForPrint.groupDays = this.remedialTimeTableForPrint.groupDays
+      .filter(d => d.dayId == this.SelectedDayForPrintId);
+    this.triggerPrint();
+
+  } else if (this.PrintType === "Teacher") {
+    this.remedialTimeTableForPrint.groupDays = this.remedialTimeTableForPrint.groupDays.map(day => ({
+      ...day,
+      periods: day.periods.map(period => ({
+        ...period,
+        remedialTimeTableClasses: period.remedialTimeTableClasses
+          .filter(cls => cls.teacherID == this.SelectedTeacherForPrintId)
+      }))
+    })).filter(day =>
+      day.periods.some(period =>
+        period.remedialTimeTableClasses.length > 0
+      )
+    );
+    this.triggerPrint();
+
+  } else if (this.PrintType === "Grade") {
+    this.remedialTimeTableForPrint.groupDays = this.remedialTimeTableForPrint.groupDays.map(day => ({
+      ...day,
+      periods: day.periods.map(period => ({
+        ...period,
+        remedialTimeTableClasses: period.remedialTimeTableClasses
+          .filter(cls => cls.gradeID == this.SelectedGradeForPrintId)
+      }))
+    })).filter(day =>
+      day.periods.some(period =>
+        period.remedialTimeTableClasses.length > 0
+      )
+    );
+    this.triggerPrint();
+
+  } else if (this.PrintType === "All") {
+    this.remedialTimeTableForPrint = JSON.parse(JSON.stringify(this.remedialTimeTable));
+    this.triggerPrint();
+  }
+}
+
+
+  async triggerPrint() {
+    setTimeout(() => {
+      const printContents = document.getElementById("Print")?.innerHTML;
+      if (!printContents) {
+        console.error("Element not found!");
+        return;
+      }
+      // Create a print-specific stylesheet
+      const printStyle = `
+        <style>
+          @page { size: auto; margin: 0mm; }
+          body { 
+            margin: 0; 
+          }
+
+          @media print {
+            body > *:not(#print-container) {
+              display: none !important;
+            }
+            #print-container {
+              display: block !important;
+              position: static !important;
+              top: auto !important;
+              left: auto !important;
+              width: 100% !important;
+              height: auto !important;
+              background: white !important;
+              box-shadow: none !important;
+              margin: 0 !important;
+            }
+          }
+        </style>
+      `;
+
+      // Create a container for printing
+      const printContainer = document.createElement('div');
+      printContainer.id = 'print-container';
+      printContainer.innerHTML = printStyle + printContents;
+
+      // Add to body and print
+      document.body.appendChild(printContainer);
+      window.print();
+
+      // Clean up
+      setTimeout(() => {
+        document.body.removeChild(printContainer);
+      }, 100);
+    }, 500);
+  }
+
+  generateTimeTablePDFData() {
+    const headers = ['Day'];
+    for (let i = 0; i < this.remedialTimeTable.maximumPeriodCountRemedials; i++) {
+      headers.push(`Session ${i + 1}`);
+    }
+
+    const data = this.remedialTimeTable.groupDays.map((day: any) => {
+      const row: any = { Day: day.dayName };
+      for (let i = 0; i < this.remedialTimeTable.maximumPeriodCountRemedials; i++) {
+        const period = day.periods.find((p: any) => p.periodIndex === i);
+        const classes = period?.remedialTimeTableClasses || [];
+
+        // Join multiple classes in same period
+        row[`Session ${i + 1}`] = classes.map((c: any) =>
+          `${c.remedialClassroomName} / ${c.teacherEnName}`
+        ).join(', ');
+      }
+      return row;
+    });
+
+    this.tableHeadersForPDF = headers;
+    this.tableDataForPDF = data;
+  }
+
+  openPrintModal() {
+    document.getElementById('Print_Modal')?.classList.remove('hidden');
+    document.getElementById('Print_Modal')?.classList.add('flex');
+    this.PrintType = 'All'
+    this.SelectedDayForPrintId=0
+    this.SelectedGradeForPrintId=0
+    this.SelectedTeacherForPrintId=0
+    this.remedialTimeTableForPrint= new RemedialTimeTable()
+  }
+
+  closePrintModal() {
+    document.getElementById('Print_Modal')?.classList.remove('flex');
+    document.getElementById('Print_Modal')?.classList.add('hidden');
+  }
+
+  DownloadAsPDF() {
+    this.generateTimeTablePDFData();
+    this.showPDF = true;
+    setTimeout(() => {
+      if (this.pdfComponentRef) {
+        this.pdfComponentRef.downloadPDF();
+      } else {
+        console.error('PDF Component not found');
+      }
+    }, 500); // Wait for *ngIf to render
+  }
+
+  GetTypes() {
+    if (this.PrintType == "Teacher") {
+      this.RemedialTimeTableServ.GetAllTeachersinThisTimetable(this.RTimeTableId, this.DomainName).subscribe((d) => {
+        this.Teachers = d
+      })
+    }
+  }
+
+  async DownloadAsExcel() {
+    if (!this.remedialTimeTable?.groupDays || this.remedialTimeTable.groupDays.length === 0) {
+      alert("No timetable data to export.");
+      return;
+    }
+
+    const maxSessions = this.remedialTimeTable.maximumPeriodCountRemedials;
+
+    const headerKeyMap = [
+      { header: 'Day', key: 'day' },
+      ...Array.from({ length: maxSessions }, (_, i) => ({
+        header: `Session ${i + 1}`,
+        key: `session${i + 1}`
+      }))
+    ];
+
+    const dataRows = this.remedialTimeTable.groupDays.map(day => {
+      const row: any = { day: day.dayName };
+
+      for (let i = 0; i < maxSessions; i++) {
+        const period = day.periods?.[i];
+
+        if (period?.remedialTimeTableClasses?.length > 0) {
+          row[`session${i + 1}`] = period.remedialTimeTableClasses
+            .map(cls => `${cls.remedialClassroomName} / ${cls.teacherEnName}`)
+            .join(', ');
+        } else {
+          row[`session${i + 1}`] = '';
+        }
+      }
+
+      return row;
+    });
+
+    console.log("Header Map:", headerKeyMap);
+    console.log("Data Rows:", dataRows); // <- See the real output
+
+    const dataMatrix = dataRows.map(rowObj =>
+      headerKeyMap.map(header => rowObj[header.key] ?? '')
+    );
+
+    await this.reportsService.generateExcelReport({
+      infoRows: [
+        { key: 'Name', value: this.remedialTimeTable?.name ?? '' },
+        { key: 'Created At', value: this.remedialTimeTable?.insertedAt ?? '' },
+      ],
+      filename: `${this.remedialTimeTable?.name ?? 'RemedialTimeTable'}.xlsx`,
+      tables: [
+        {
+          title: this.remedialTimeTable?.name ?? 'Remedial Time Table',
+          headers: headerKeyMap.map(h => h.header),
+          data: dataMatrix   // ✅ array of arrays
+        }
+      ]
+    });
   }
 }

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { TimeTable } from '../../../../Models/LMS/time-table';
 import { TimeTableService } from '../../../../Services/Employee/LMS/time-table.service';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -15,6 +15,12 @@ import { FormsModule } from '@angular/forms';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { Day } from '../../../../Models/day';
 import { Grade } from '../../../../Models/LMS/grade';
+import { Employee } from '../../../../Models/Employee/employee';
+import { Classroom } from '../../../../Models/LMS/classroom';
+import * as XLSX from 'xlsx';
+import * as FileSaver from 'file-saver';
+import { ReportsService } from '../../../../Services/shared/reports.service';
+import { PdfPrintComponent } from '../../../../Component/pdf-print/pdf-print.component';
 
 @Component({
   selector: 'app-time-table-view',
@@ -59,6 +65,21 @@ export class TimeTableViewComponent {
   days: Day[] = [];
   date: any = '';
 
+  TimeTable2: TimeTableDayGroupDTO[] = []
+  TimeTablePrint: any = []
+  types = ['All', 'Class', 'Teacher'];
+  PrintType = 'All'; // default value
+  SelectedClassId: number = 0
+  SelectedTeacherId: number = 0
+  TeacherName: string = '';
+  ClassName: string = '';
+  isLoading = false;
+  Teachers: Employee[] = [];
+  classes: Classroom[] = [];
+  SelectedSchoolId: number = 0;
+  @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;
+  showPDF = false;
+
   constructor(
     private router: Router,
     private menuService: MenuService,
@@ -67,7 +88,9 @@ export class TimeTableViewComponent {
     public BusTypeServ: BusTypeService,
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
+    public TimeTableServ: TimeTableService,
     public ApiServ: ApiService,
+    public reportsService: ReportsService,
     public timetableServ: TimeTableService
   ) { }
   ngOnInit() {
@@ -183,7 +206,7 @@ export class TimeTableViewComponent {
     this.OriginTimeTable = [];
     this.SelectedDay = 0
     this.SelectedGrade = 0
-    this.timetableServ.GetDutyByDate(this.TimeTableId,this.date, this.DomainName).subscribe((d) => {
+    this.timetableServ.GetDutyByDate(this.TimeTableId, this.date, this.DomainName).subscribe((d) => {
       this.TimeTable = d.data;
       this.OriginTimeTable = d.data;
       this.TimeTableName = d.timeTableName;
@@ -191,4 +214,173 @@ export class TimeTableViewComponent {
       this.ExtractDaysAndGrades();
     });
   }
+
+  async DownloadAsExcel() {
+    const tables: any[] = [];
+
+    this.TimeTable.forEach(day => {
+      const data: any[] = [];
+
+      day.grades.forEach(grade => {
+        grade.classrooms.forEach(classroom => {
+          const row: any[] = [];
+
+          row.push(grade.gradeName);         // Column 1: Grade
+          row.push(classroom.classroomName); // Column 2: Class
+
+          for (let i = 0; i < this.MaxPeriods; i++) {
+            const session = classroom.sessions[i];
+
+            let sessionText = '';
+
+            if (session?.subjects?.length) {
+              sessionText += session.subjects.map(sub => `${sub.subjectName} (${sub.teacherName})`).join('\n');
+            }
+
+            if (session?.dutyTeacherName) {
+              sessionText += `\nDuty: ${session.dutyTeacherName}`;
+            }
+
+            row.push(sessionText || '--');
+          }
+
+          data.push(row);
+        });
+      });
+
+      tables.push({
+        title: day.dayName,
+        headers: ["Grade", "Class", ...Array.from({ length: this.MaxPeriods }, (_, i) => `Session ${i + 1}`)],
+        data: data
+      });
+    });
+
+    await this.reportsService.generateExcelReport({
+      infoRows: [
+        { key: 'Name', value: this.TimeTableName },
+      ],
+      filename: "TimeTable.xlsx",
+      tables: tables
+    });
+  }
+
+  DownloadAsPDF() {
+    this.showPDF = true;
+    setTimeout(() => {
+      this.pdfComponentRef.downloadPDF(); // Call manual download
+      setTimeout(() => (this.showPDF = false), 2000);
+    }, 500);
+  }
+
+  async triggerPrint() {
+    setTimeout(() => {
+      let printContents: string | undefined;
+      if (this.PrintType == "Teacher") {
+        printContents = document.getElementById("DataTeacher")?.innerHTML;
+      } else if (this.PrintType == "Class") {
+        printContents = document.getElementById("Data")?.innerHTML;
+      } else {
+        printContents = document.getElementById("All")?.innerHTML;
+      }
+      if (!printContents) {
+        console.error("Element not found!");
+        return;
+      }
+      // Create a print-specific stylesheet
+      const printStyle = `
+        <style>
+          @page { size: auto; margin: 0mm; }
+          body { 
+            margin: 0; 
+          }
+  
+          @media print {
+            body > *:not(#print-container) {
+              display: none !important;
+            }
+            #print-container {
+              display: block !important;
+              position: static !important;
+              top: auto !important;
+              left: auto !important;
+              width: 100% !important;
+              height: auto !important;
+              background: white !important;
+              box-shadow: none !important;
+              margin: 0 !important;
+            }
+          }
+        </style>
+      `;
+
+      // Create a container for printing
+      const printContainer = document.createElement('div');
+      printContainer.id = 'print-container';
+      printContainer.innerHTML = printStyle + printContents;
+
+      // Add to body and print
+      document.body.appendChild(printContainer);
+      window.print();
+
+      // Clean up
+      setTimeout(() => {
+        document.body.removeChild(printContainer);
+        this.closePrintModal()
+        this.isLoading = false;
+      }, 100);
+    }, 500);
+  }
+
+  closePrintModal() {
+    document.getElementById('Print_Modal')?.classList.remove('flex');
+    document.getElementById('Print_Modal')?.classList.add('hidden');
+  }
+
+  openPrintModal() {
+    document.getElementById('Print_Modal')?.classList.remove('hidden');
+    document.getElementById('Print_Modal')?.classList.add('flex');
+    this.PrintType = 'All'
+  }
+
+  GetTypes() {
+    if (this.PrintType == "Class") {
+      console.log("class")
+      this.TimeTableServ.GetAllClassesinThisTimetable(this.TimeTableId, this.DomainName).subscribe((d) => {
+        this.classes = d
+      })
+    } else if (this.PrintType == "Teacher") {
+      this.TimeTableServ.GetAllTeachersinThisTimetable(this.TimeTableId, this.DomainName).subscribe((d) => {
+        this.Teachers = d
+      })
+    }
+  }
+
+  Print() {
+    this.isLoading = true;
+    if (this.PrintType === "Class") {
+      this.TimeTableServ.GetByIdForClassAsync(this.TimeTableId, this.SelectedClassId, this.DomainName).subscribe((d) => {
+        this.TimeTablePrint = d.data;
+        this.TimeTableName = d.timeTableName;
+        this.MaxPeriods = d.maxPeriods;
+        this.ClassName = d.className
+        this.triggerPrint();
+      });
+    } else if (this.PrintType === "Teacher") {
+      this.TimeTableServ.GetByIdForTeacherAsync(this.TimeTableId, this.SelectedTeacherId, this.DomainName).subscribe((d) => {
+        this.TimeTablePrint = d.data;
+        this.TimeTableName = d.timeTableName;
+        this.MaxPeriods = d.maxPeriods;
+        this.TeacherName = d.teacherName
+        this.triggerPrint();
+      });
+    } else if (this.PrintType === "All") {
+      this.TimeTableServ.GetByID(this.TimeTableId, this.DomainName).subscribe((d) => {
+        this.TimeTable2 = d.data;
+        this.TimeTableName = d.timeTableName;
+        this.MaxPeriods = d.maxPeriods;
+        this.triggerPrint();
+      });
+    }
+  }
+
 }
