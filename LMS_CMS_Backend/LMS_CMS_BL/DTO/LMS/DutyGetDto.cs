@@ -17,6 +17,7 @@ namespace LMS_CMS_BL.DTO.LMS
         public string SchoolName { get; set; }
         public int Period { get; set; }
         public long TeacherID { get; set; }
-        public string TeacherName { get; set; }
+        public string TeacherEnName { get; set; }
+        public string TeacherArName { get; set; }
     }
 }

@@ -20,7 +20,7 @@ import Swal from 'sweetalert2';
 @Component({
   selector: 'app-duty',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule],
   templateUrl: './duty.component.html',
   styleUrl: './duty.component.css',
 })
@@ -130,6 +130,7 @@ export class DutyComponent {
       this.mode = 'Edit'
       this.DutyServ.GetById(id, this.DomainName).subscribe((d) => {
         this.duty = d
+        console.log(d,this.duty)
         this.ClassroomServ.GetBySchoolId(this.duty.schoolID, this.DomainName).subscribe((d) => {
           this.class = d
         })
@@ -138,6 +139,11 @@ export class DutyComponent {
         });
         this.DutyServ.GetAllTeachersValidForSessionTime(this.duty.date, this.duty.period, this.DomainName).subscribe((d) => {
           this.teachers = d
+          const emp = new Employee()
+          emp.id=this.duty.teacherID
+          emp.en_name=this.duty.teacherEnName
+          emp.ar_name=this.duty.teacherArName
+          this.teachers.push(emp)
         })
       })
     }

@@ -1131,7 +1131,8 @@ namespace LMS_CMS_BL.Config
 
             CreateMap<DutyAddDto, Duty>();
             CreateMap<Duty, DutyGetDto>()
-                .ForMember(dest => dest.TeacherName, opt => opt.MapFrom(src => src.Teacher.en_name))
+                .ForMember(dest => dest.TeacherEnName, opt => opt.MapFrom(src => src.Teacher.en_name))
+                .ForMember(dest => dest.TeacherArName, opt => opt.MapFrom(src => src.Teacher.ar_name))
                 .ForMember(dest => dest.Period, opt => opt.MapFrom(src => src.TimeTableSession.PeriodIndex))
                 .ForMember(dest => dest.ClassID, opt => opt.MapFrom(src => src.TimeTableSession.TimeTableClassroom.Classroom.ID))
                 .ForMember(dest => dest.SchoolID, opt => opt.MapFrom(src => src.TimeTableSession.TimeTableClassroom.Classroom.AcademicYear.SchoolID))

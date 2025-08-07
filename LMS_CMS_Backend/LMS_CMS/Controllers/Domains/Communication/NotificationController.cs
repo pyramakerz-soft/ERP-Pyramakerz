@@ -375,6 +375,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                     query => query.Include(d => d.Notification)
                     );
 
+            notificationSharedTos = notificationSharedTos
+                .OrderByDescending(d => d.InsertedAt) 
+                .ToList();
+
             if (notificationSharedTos == null || notificationSharedTos.Count == 0)
             {
                 return NotFound();
@@ -514,22 +518,27 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                     notificationSharedTo.InsertedByUserId = userId;
                 }
 
-                Unit_Of_Work.notificationSharedTo_Repository.Add(notificationSharedTo); 
-
-                var notificationDTO = mapper.Map<NotificationSharedToGetDTO>(notificationSharedTo);
-
-                string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-                if (!string.IsNullOrEmpty(notificationDTO.ImageLink))
-                {
-                    notificationDTO.ImageLink = $"{serverUrl}{notificationDTO.ImageLink.Replace("\\", "/")}";
-                }
-
-                notificationSharedTo.NotifiedOrNot = true; 
-                notificationSharedTo.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
-                Unit_Of_Work.notificationSharedTo_Repository.Update(notificationSharedTo);
-                 
-                await _notificationService.PushRealTimeNotification(userID, NewNotification.UserTypeID, notificationDTO, domainName); 
+                Unit_Of_Work.notificationSharedTo_Repository.Add(notificationSharedTo);
             }
+            Unit_Of_Work.SaveChanges();
+
+            foreach (var userID in targetUserIds)
+            {
+                var sharedTo = Unit_Of_Work.notificationSharedTo_Repository.First_Or_Default(n => n.NotificationID == notification.ID && n.UserID == userID);
+
+                if (sharedTo != null)
+                {
+                    var notificationDTO = mapper.Map<NotificationSharedToGetDTO>(sharedTo);
+
+                    string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+                    if (!string.IsNullOrEmpty(notificationDTO.ImageLink))
+                    {
+                        notificationDTO.ImageLink = $"{serverUrl}{notificationDTO.ImageLink.Replace("\\", "/")}";
+                    }
+                     
+                    await _notificationService.PushRealTimeNotification(userID, NewNotification.UserTypeID, notificationDTO, domainName); 
+                }
+            } 
 
             Unit_Of_Work.SaveChanges();
             return Ok();  

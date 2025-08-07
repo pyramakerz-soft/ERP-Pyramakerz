@@ -181,6 +181,7 @@ export class ViolationTypesComponent {
 
   closeModal() {
     this.isModalVisible = false;
+    this.validationErrors={}
   }
 
   CreateOREdit() {
@@ -259,6 +260,8 @@ export class ViolationTypesComponent {
   }
 
   selectEmployeeType(employeeType: EmployeeTypeGet): void {
+    this.validationErrors["employeeTypeIds"] = ``;
+
     if (!this.empTypesSelected.some((e) => e.id === employeeType.id)) {
       this.empTypesSelected.push(employeeType);
     }
@@ -301,6 +304,10 @@ export class ViolationTypesComponent {
             isValid = false;
           }
         }
+        if (this.violationType.employeeTypeIds.length == 0) {
+          this.validationErrors["employeeTypeIds"] = `employee Type is required`;
+          isValid = false;
+        }
       }
     }
     return isValid;
@@ -310,11 +317,19 @@ export class ViolationTypesComponent {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
 
+  onInputValueChange(event: { field: keyof ViolationType; value: any }) {
+    const { field, value } = event;
+    (this.violationType as any)[field] = value;
+    if (value) {
+      this.validationErrors[field] = '';
+    }
+  }
+
   async onSearchEvent(event: { key: string, value: any }) {
     this.key = event.key;
     this.value = event.value;
     try {
-      const data: ViolationType[] = await firstValueFrom( this.violationTypeServ.GetViolationType(this.DomainName));  
+      const data: ViolationType[] = await firstValueFrom(this.violationTypeServ.GetViolationType(this.DomainName));
       this.Data = data || [];
 
       if (this.value !== "") {

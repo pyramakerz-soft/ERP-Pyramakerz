@@ -34,6 +34,7 @@ export class MainLayoutComponent {
       await this.GetInfo();
 
     }); 
+    console.log(this.User_Data_After_Login)
     this.realTimeService.startConnection();
   }
 
