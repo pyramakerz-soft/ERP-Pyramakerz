@@ -21,11 +21,12 @@ import * as XLSX from 'xlsx';
 import * as FileSaver from 'file-saver';
 import { ReportsService } from '../../../../Services/shared/reports.service';
 import { PdfPrintComponent } from '../../../../Component/pdf-print/pdf-print.component';
+import { Observable, of } from 'rxjs';
 
 @Component({
   selector: 'app-time-table-view',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, PdfPrintComponent],
   templateUrl: './time-table-view.component.html',
   styleUrl: './time-table-view.component.css',
 })
@@ -79,6 +80,7 @@ export class TimeTableViewComponent {
   SelectedSchoolId: number = 0;
   @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;
   showPDF = false;
+  DataToPrint: any = null;
 
   constructor(
     private router: Router,
@@ -114,6 +116,7 @@ export class TimeTableViewComponent {
       .GetByID(this.TimeTableId, this.DomainName)
       .subscribe((d) => {
         this.TimeTable = d.data;
+        console.log(21, this.TimeTable)
         this.OriginTimeTable = d.data;
         this.TimeTableName = d.timeTableName;
         this.MaxPeriods = d.maxPeriods;
@@ -265,11 +268,66 @@ export class TimeTableViewComponent {
   }
 
   DownloadAsPDF() {
-    this.showPDF = true;
-    setTimeout(() => {
-      this.pdfComponentRef.downloadPDF(); // Call manual download
-      setTimeout(() => (this.showPDF = false), 2000);
-    }, 500);
+    this.DataToPrint = [];
+
+    this.GetDataForPrint().subscribe((result) => {
+      if (!result || result.length === 0) {
+        alert('No data available to print.');
+        return;
+      }
+
+      this.DataToPrint = result;
+
+      this.showPDF = true;
+
+      setTimeout(() => {
+        this.pdfComponentRef?.downloadPDF();
+        setTimeout(() => (this.showPDF = false), 2000);
+      }, 500);
+    });
+  }
+
+  GetDataForPrint(): Observable<any[]> {
+    const groupedByDay: any[] = [];
+
+    this.TimeTable.forEach(day => {
+      const tableHeaders = ['Grade', 'Class', ...Array.from({ length: this.MaxPeriods }, (_, i) => `Session ${i + 1}`)];
+      const tableData: any[] = [];
+
+      day.grades.forEach(grade => {
+        grade.classrooms.forEach(classroom => {
+          const row: any = {};
+          row['Grade'] = grade.gradeName;
+          row['Class'] = classroom.classroomName;
+
+          for (let i = 0; i < this.MaxPeriods; i++) {
+            const session = classroom.sessions[i];
+            let sessionText = '';
+
+            if (session?.subjects?.length) {
+              sessionText += session.subjects.map(sub => `${sub.subjectName} (${sub.teacherName || 'N/A'})`).join(', ');
+            }
+
+            if (session?.dutyTeacherName) {
+              sessionText += ` | Duty: ${session.dutyTeacherName}`;
+            }
+
+            row[`Session ${i + 1}`] = sessionText || '--';
+          }
+
+          tableData.push(row);
+        });
+      });
+
+      groupedByDay.push({
+        header: day.dayName,
+        data: [], // optional summary (e.g., grade totals)
+        tableHeaders,
+        tableData
+      });
+    });
+
+    return of(groupedByDay); // ✅ Must import: import { of } from 'rxjs';
   }
 
   async triggerPrint() {
