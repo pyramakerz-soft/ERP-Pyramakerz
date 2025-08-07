@@ -330,6 +330,7 @@ export class RegistrationFormComponent {
 
   FillData(event: Event, fieldId: number, fieldTypeId: number) {
     const selectedValue = (event.target as HTMLSelectElement).value;
+    console.log(selectedValue)
 
     let answer: string | null = null;
     let option: number | null = null;

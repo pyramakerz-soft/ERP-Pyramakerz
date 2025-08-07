@@ -23,7 +23,7 @@ import { ViolationTypeService } from '../../../../Services/Employee/Violation/vi
 @Component({
   selector: 'app-violation-types',
   standalone: true,
-  imports: [CommonModule, FormsModule, SearchComponent, TranslateModule],
+  imports: [CommonModule, FormsModule,TranslateModule],
   templateUrl: './violation-types.component.html',
   styleUrl: './violation-types.component.css',
 })

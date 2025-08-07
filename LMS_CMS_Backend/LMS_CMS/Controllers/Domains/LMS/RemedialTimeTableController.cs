@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using LMS_CMS_BL.DTO;
 using LMS_CMS_BL.DTO.LMS;
 using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains;
@@ -69,6 +70,35 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         }
 
         /////////////////
+
+        [HttpGet("GetAllTeachersinThisTimetable/{Tid}")]
+        [Authorize_Endpoint_(
+           allowedTypes: new[] { "octa", "employee" },
+           pages: new[] { "Remedial TimeTable" }
+       )]
+        public async Task<IActionResult> GetAllTeachersinThisTimetable(long Tid)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+                return Unauthorized("User ID or Type claim not found.");
+
+            List<RemedialTimeTableClasses> remedialTimeTableClasses =await Unit_Of_Work.remedialTimeTableClasses_Repository.Select_All_With_IncludesById<RemedialTimeTableClasses>(s => s.RemedialTimeTableDay.RemedialTimeTableID == Tid && s.IsDeleted != true,
+                    query => query.Include(x => x.RemedialClassroom));
+
+            List<long> TeacherIDs = remedialTimeTableClasses.Select(s => s.RemedialClassroom.TeacherID).Distinct().ToList();
+
+            List<Employee> employee = Unit_Of_Work.employee_Repository.FindBy(s => TeacherIDs.Contains(s.ID) && s.IsDeleted != true);
+            List<Employee_GetDTO> employeesDTO = mapper.Map<List<Employee_GetDTO>>(employee);
+
+            return Ok(employeesDTO);
+        }
+
+        /////////////////
+
 
         [HttpGet("{id}")]
         [Authorize_Endpoint_(

@@ -3,6 +3,7 @@ import { RemedialTimeTable } from '../../../Models/LMS/remedial-time-table';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ApiService } from '../../api.service';
 import { RemedialTimeTableClasses } from '../../../Models/LMS/remedial-time-table-classes';
+import { Employee } from '../../../Models/Employee/employee';
 
 @Injectable({
   providedIn: 'root'
@@ -64,6 +65,21 @@ export class RemedialTimeTableService {
     return this.http.put(`${this.baseUrl}/RemedialTimeTable`, Remedial, { headers });
   }
 
+  GetAllTeachersinThisTimetable(Tid: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName;
+    }
+    const token = localStorage.getItem('current_token');
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<Employee[]>(
+      `${this.baseUrl}/RemedialTimeTable/GetAllTeachersinThisTimetable/${Tid}`,
+      { headers }
+    );
+  }
+
   Add(RemedialTimeTable: RemedialTimeTable, DomainName: string) {
     if (DomainName != null) {
       this.header = DomainName;
@@ -80,9 +96,9 @@ export class RemedialTimeTableService {
     });
   }
 
-  Delete(id: number,DomainName:string) {
-    if(DomainName!=null) {
-      this.header=DomainName 
+  Delete(id: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
     }
     const token = localStorage.getItem("current_token");
     const headers = new HttpHeaders()
