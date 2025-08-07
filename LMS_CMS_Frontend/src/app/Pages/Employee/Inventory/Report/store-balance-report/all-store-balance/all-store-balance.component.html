@@ -24,19 +24,18 @@
     <div class="w-full md:w-1/3 flex flex-col">
         <label class="block mb-2 text-sm font-medium text-gray-900">Filters</label>
         <div class="flex flex-wrap gap-4">
-            <div class="flex items-center">
-                <input type="checkbox" id="hasBalance" [(ngModel)]="hasBalance" class="mr-2 accent-secondaryBg">
-                <label for="hasBalance" class="text-sm text-gray-700">Has Balance</label>
-            </div>
-            <div class="flex items-center">
-                <input type="checkbox" id="overdrawnBalance" [(ngModel)]="overdrawnBalance"
-                    class="mr-2 accent-secondaryBg">
-                <label for="overdrawnBalance" class="text-sm text-gray-700">Overdrawn Balance</label>
-            </div>
-            <div class="flex items-center">
-                <input type="checkbox" id="zeroBalances" [(ngModel)]="zeroBalances" class="mr-2 accent-secondaryBg">
-                <label for="zeroBalances" class="text-sm text-gray-700">Zero Balances</label>
-            </div>
+        <div class="flex items-center">
+            <input type="checkbox" id="hasBalance" [(ngModel)]="hasBalance" (ngModelChange)="onFilterChange()" class="mr-2 accent-secondaryBg">
+            <label for="hasBalance" class="text-sm text-gray-700">Has Balance</label>
+        </div>
+        <div class="flex items-center">
+            <input type="checkbox" id="overdrawnBalance" [(ngModel)]="overdrawnBalance" (ngModelChange)="onFilterChange()" class="mr-2 accent-secondaryBg">
+            <label for="overdrawnBalance" class="text-sm text-gray-700">Overdrawn Balance</label>
+        </div>
+        <div class="flex items-center">
+            <input type="checkbox" id="zeroBalances" [(ngModel)]="zeroBalances" (ngModelChange)="onFilterChange()" class="mr-2 accent-secondaryBg">
+            <label for="zeroBalances" class="text-sm text-gray-700">Zero Balances</label>
+        </div>
         </div>
     </div>
 
