@@ -301,179 +301,179 @@ export class ReportItemCardComponent implements OnInit {
     }, 500);
   }
 
-  exportExcel() {
-    if (this.combinedData.length == 0) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'No Data',
-        text: 'No data to export!',
-        confirmButtonText: 'OK',
-      });
-      return;
-    }
+  // exportExcel() {
+  //   if (this.combinedData.length == 0) {
+  //     Swal.fire({
+  //       icon: 'warning',
+  //       title: 'No Data',
+  //       text: 'No data to export!',
+  //       confirmButtonText: 'OK',
+  //     });
+  //     return;
+  //   }
 
-    const excelData: any[] = [];
+  //   const excelData: any[] = [];
 
-    excelData.push([
-      {
-        v: `${this.school.reportHeaderOneEn} - ${this.school.reportHeaderTwoEn}`,
-        s: {
-          font: { bold: true, sz: 16 },
-          alignment: { horizontal: 'center' },
-        },
-      },
-    ]);
-    excelData.push([]);
+  //   excelData.push([
+  //     {
+  //       v: `${this.school.reportHeaderOneEn} - ${this.school.reportHeaderTwoEn}`,
+  //       s: {
+  //         font: { bold: true, sz: 16 },
+  //         alignment: { horizontal: 'center' },
+  //       },
+  //     },
+  //   ]);
+  //   excelData.push([]);
 
-    excelData.push([
-      { v: 'From Date:', s: { font: { bold: true } } },
-      { v: this.dateFrom, s: { font: { bold: true } } },
-    ]);
-    excelData.push([
-      { v: 'To Date:', s: { font: { bold: true } } },
-      { v: this.dateTo, s: { font: { bold: true } } },
-    ]);
-    const selectedStore = this.stores.find(
-      (s) => s.id === this.selectedStoreId
-    );
-    excelData.push([
-      { v: 'Store:', s: { font: { bold: true } } },
-      { v: selectedStore?.name || 'N/A', s: { font: { bold: true } } },
-    ]);
-    const selectedItem = this.items.find((i) => i.id === this.selectedItemId);
-    excelData.push([
-      { v: 'Item:', s: { font: { bold: true } } },
-      { v: selectedItem?.enName || 'N/A', s: { font: { bold: true } } },
-    ]);
-    excelData.push([]);
+  //   excelData.push([
+  //     { v: 'From Date:', s: { font: { bold: true } } },
+  //     { v: this.dateFrom, s: { font: { bold: true } } },
+  //   ]);
+  //   excelData.push([
+  //     { v: 'To Date:', s: { font: { bold: true } } },
+  //     { v: this.dateTo, s: { font: { bold: true } } },
+  //   ]);
+  //   const selectedStore = this.stores.find(
+  //     (s) => s.id === this.selectedStoreId
+  //   );
+  //   excelData.push([
+  //     { v: 'Store:', s: { font: { bold: true } } },
+  //     { v: selectedStore?.name || 'N/A', s: { font: { bold: true } } },
+  //   ]);
+  //   const selectedItem = this.items.find((i) => i.id === this.selectedItemId);
+  //   excelData.push([
+  //     { v: 'Item:', s: { font: { bold: true } } },
+  //     { v: selectedItem?.enName || 'N/A', s: { font: { bold: true } } },
+  //   ]);
+  //   excelData.push([]);
 
-    const headers = [
-      'Date',
-      'Transaction Type',
-      'Invoice #',
-      'Authority',
-      'Income',
-      'Outcome',
-      'Balance',
-    ];
-    if (this.showAverageColumn) {
-      headers.push('Price', 'Total Price', 'Average Cost');
-    }
-    excelData.push(
-      headers.map((h) => ({
-        v: h,
-        s: {
-          font: { bold: true, color: { rgb: 'FFFFFF' } },
-          fill: { fgColor: { rgb: '4472C4' } },
-          alignment: { horizontal: 'center' },
-          border: {
-            top: { style: 'thin' },
-            bottom: { style: 'thin' },
-            left: { style: 'thin' },
-            right: { style: 'thin' },
-          },
-        },
-      }))
-    );
+  //   const headers = [
+  //     'Date',
+  //     'Transaction Type',
+  //     'Invoice #',
+  //     'Authority',
+  //     'Income',
+  //     'Outcome',
+  //     'Balance',
+  //   ];
+  //   if (this.showAverageColumn) {
+  //     headers.push('Price', 'Total Price', 'Average Cost');
+  //   }
+  //   excelData.push(
+  //     headers.map((h) => ({
+  //       v: h,
+  //       s: {
+  //         font: { bold: true, color: { rgb: 'FFFFFF' } },
+  //         fill: { fgColor: { rgb: '4472C4' } },
+  //         alignment: { horizontal: 'center' },
+  //         border: {
+  //           top: { style: 'thin' },
+  //           bottom: { style: 'thin' },
+  //           left: { style: 'thin' },
+  //           right: { style: 'thin' },
+  //         },
+  //       },
+  //     }))
+  //   );
 
-    this.combinedData.forEach((row, idx) => {
-      const isEven = idx % 2 === 0;
-      const fillColor = isEven ? 'E9E9E9' : 'FFFFFF';
-      const getVal = (val: any) =>
-        val === null || val === undefined || val === '' ? '-' : val;
+  //   this.combinedData.forEach((row, idx) => {
+  //     const isEven = idx % 2 === 0;
+  //     const fillColor = isEven ? 'E9E9E9' : 'FFFFFF';
+  //     const getVal = (val: any) =>
+  //       val === null || val === undefined || val === '' ? '-' : val;
 
-      const rowData = [
-        {
-          v: row.date ? new Date(row.date).toLocaleString() : '-',
-          s: { fill: { fgColor: { rgb: fillColor } } },
-        },
-        {
-          v: getVal(row.transactionType),
-          s: { fill: { fgColor: { rgb: fillColor } } },
-        },
-        {
-          v: getVal(row.invoiceNumber),
-          s: { fill: { fgColor: { rgb: fillColor } } },
-        },
-        {
-          v: getVal(row.authority),
-          s: { fill: { fgColor: { rgb: fillColor } } },
-        },
-        { v: getVal(row.income), s: { fill: { fgColor: { rgb: fillColor } } } },
-        {
-          v: getVal(row.outcome),
-          s: { fill: { fgColor: { rgb: fillColor } } },
-        },
-        {
-          v: getVal(row.balance),
-          s: { fill: { fgColor: { rgb: fillColor } } },
-        },
-      ];
-      if (this.showAverageColumn) {
-        rowData.push(
-          {
-            v: getVal(row.price),
-            s: { fill: { fgColor: { rgb: fillColor } } },
-          },
-          {
-            v: getVal(row.totalPrice),
-            s: { fill: { fgColor: { rgb: fillColor } } },
-          },
-          {
-            v: getVal(row.averageCost),
-            s: { fill: { fgColor: { rgb: fillColor } } },
-          }
-        );
-      }
-      excelData.push(rowData);
-    });
+  //     const rowData = [
+  //       {
+  //         v: row.date ? new Date(row.date).toLocaleString() : '-',
+  //         s: { fill: { fgColor: { rgb: fillColor } } },
+  //       },
+  //       {
+  //         v: getVal(row.transactionType),
+  //         s: { fill: { fgColor: { rgb: fillColor } } },
+  //       },
+  //       {
+  //         v: getVal(row.invoiceNumber),
+  //         s: { fill: { fgColor: { rgb: fillColor } } },
+  //       },
+  //       {
+  //         v: getVal(row.authority),
+  //         s: { fill: { fgColor: { rgb: fillColor } } },
+  //       },
+  //       { v: getVal(row.income), s: { fill: { fgColor: { rgb: fillColor } } } },
+  //       {
+  //         v: getVal(row.outcome),
+  //         s: { fill: { fgColor: { rgb: fillColor } } },
+  //       },
+  //       {
+  //         v: getVal(row.balance),
+  //         s: { fill: { fgColor: { rgb: fillColor } } },
+  //       },
+  //     ];
+  //     if (this.showAverageColumn) {
+  //       rowData.push(
+  //         {
+  //           v: getVal(row.price),
+  //           s: { fill: { fgColor: { rgb: fillColor } } },
+  //         },
+  //         {
+  //           v: getVal(row.totalPrice),
+  //           s: { fill: { fgColor: { rgb: fillColor } } },
+  //         },
+  //         {
+  //           v: getVal(row.averageCost),
+  //           s: { fill: { fgColor: { rgb: fillColor } } },
+  //         }
+  //       );
+  //     }
+  //     excelData.push(rowData);
+  //   });
 
-    const worksheet = XLSX.utils.aoa_to_sheet(excelData);
+  //   const worksheet = XLSX.utils.aoa_to_sheet(excelData);
 
-    if (!worksheet['!merges']) worksheet['!merges'] = [];
-    worksheet['!merges'].push({
-      s: { r: 0, c: 0 },
-      e: { r: 0, c: headers.length - 1 },
-    });
+  //   if (!worksheet['!merges']) worksheet['!merges'] = [];
+  //   worksheet['!merges'].push({
+  //     s: { r: 0, c: 0 },
+  //     e: { r: 0, c: headers.length - 1 },
+  //   });
 
-    worksheet['!cols'] = [
-      { wch: 12 },
-      { wch: 18 },
-      { wch: 12 },
-      { wch: 20 },
-      { wch: 10 },
-      { wch: 10 },
-      { wch: 12 },
-      ...(this.showAverageColumn
-        ? [{ wch: 10 }, { wch: 14 }, { wch: 14 }]
-        : []),
-    ];
+  //   worksheet['!cols'] = [
+  //     { wch: 12 },
+  //     { wch: 18 },
+  //     { wch: 12 },
+  //     { wch: 20 },
+  //     { wch: 10 },
+  //     { wch: 10 },
+  //     { wch: 12 },
+  //     ...(this.showAverageColumn
+  //       ? [{ wch: 10 }, { wch: 14 }, { wch: 14 }]
+  //       : []),
+  //   ];
 
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Item Card Report');
+  //   const workbook = XLSX.utils.book_new();
+  //   XLSX.utils.book_append_sheet(workbook, worksheet, 'Item Card Report');
 
-    const dateStr = new Date().toISOString().slice(0, 10);
-    XLSX.writeFile(workbook, `Item_Card_Report_${dateStr}.xlsx`);
-  }
+  //   const dateStr = new Date().toISOString().slice(0, 10);
+  //   XLSX.writeFile(workbook, `Item_Card_Report_${dateStr}.xlsx`);
+  // }
 
-  getInfoRows(): any[] {
-    const selectedItem = this.items.find(
-      (item) => item.id === this.selectedItemId
-    );
-    const selectedStore = this.stores.find(
-      (store) => store.id === this.selectedStoreId
-    );
+  // getInfoRows(): any[] {
+  //   const selectedItem = this.items.find(
+  //     (item) => item.id === this.selectedItemId
+  //   );
+  //   const selectedStore = this.stores.find(
+  //     (store) => store.id === this.selectedStoreId
+  //   );
 
-    return [
-      { keyEn: 'From Date: ' + this.dateFrom },
-      { keyEn: 'To Date: ' + this.dateTo },
-      { keyEn: 'Store: ' + (selectedStore?.name || 'N/A') },
-      { keyEn: 'Item: ' + (selectedItem?.enName || 'N/A') },
-      ...(this.showAverageColumn
-        ? [{ keyEn: 'Includes Cost Information' }]
-        : []),
-    ];
-  }
+  //   return [
+  //     { keyEn: 'From Date: ' + this.dateFrom },
+  //     { keyEn: 'To Date: ' + this.dateTo },
+  //     { keyEn: 'Store: ' + (selectedStore?.name || 'N/A') },
+  //     { keyEn: 'Item: ' + (selectedItem?.enName || 'N/A') },
+  //     ...(this.showAverageColumn
+  //       ? [{ keyEn: 'Includes Cost Information' }]
+  //       : []),
+  //   ];
+  // }
 
   getPdfTableHeaders(): string[] {
     const headers = [
@@ -492,4 +492,30 @@ export class ReportItemCardComponent implements OnInit {
 
     return headers;
   }
+
+  getStoreName(): string {
+  if (!this.selectedStoreId) return 'N/A';
+  const store = this.stores.find(s => s.id === this.selectedStoreId);
+  return store?.name || 'N/A';
+}
+
+getItemName(): string {
+  if (!this.selectedItemId) return 'N/A';
+  const item = this.items.find(i => i.id === this.selectedItemId);
+  return item?.enName || 'N/A';
+}
+
+hasAverageInfo(): boolean {
+  return this.showAverageColumn;
+}
+getInfoRows(): any[] {
+  return [
+    { keyEn: 'From Date: ' + this.dateFrom },
+    { keyEn: 'To Date: ' + this.dateTo },
+    { keyEn: 'Store: ' + this.getStoreName() },
+    { keyEn: 'Item: ' + this.getItemName() },
+    ...(this.hasAverageInfo() ? [{ keyEn: 'Includes Cost Information' }] : [])
+  ];
+}
+  
 }
