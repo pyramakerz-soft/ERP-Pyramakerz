@@ -32,52 +32,7 @@ export class RealTimeNotificationServiceService {
     this.BaseUrlOcta=ApiServ.BaseUrlOcta
     this.header = ApiServ.GetHeader()
     this.DomainName = this.ApiServ.GetHeader(); 
-  } 
-
-  // startConnection(): void {
-  //   this.hubConnection = new signalR.HubConnectionBuilder()
-  //     .withUrl(`http://localhost:5094/notificationHub`, {
-  //       skipNegotiation: true,
-  //       transport: signalR.HttpTransportType.WebSockets,
-  //       accessTokenFactory: () => localStorage.getItem("current_token") || '',
-  //       headers: {
-  //         "Domain-Name": this.DomainName
-  //       }
-  //     })
-  //     .configureLogging(signalR.LogLevel.Debug)
-  //     .withAutomaticReconnect()
-  //     .build();
-
-  //   this.hubConnection.start()
-  //     .then(() => {
-  //       console.log('SignalR Connected.'); 
-
-  //       var userTypeString = 0
-
-  //       switch(this.User_Data_After_Login.type){
-  //         case "employee":
-  //           userTypeString = 1
-  //           break
-  //         case "student":
-  //           userTypeString = 2
-  //           break
-  //         case "parent":
-  //           userTypeString = 3
-  //           break
-  //       }
-  //       const groupName = `${this.DomainName}_${userTypeString}_${this.User_Data_After_Login.id}`;
-  //       this.hubConnection?.invoke('JoinGroup', groupName)
-  //         .then(() => console.log('Joined notification group'))
-  //         .catch(err => console.error('Error joining group:', err));
-          
-  //       this.loadOldNotifications();
-  //     })
-  //     .catch(err => console.error('SignalR Connection Error:', err));
-
-  //   this.hubConnection.on('ReceiveNotification', (data: any) => {
-  //     this.showNotificationModal(data);
-  //   });
-  // }
+  }  
 
   startConnection(): void {
     if (this.isConnected && this.hubConnection) return;
@@ -85,7 +40,7 @@ export class RealTimeNotificationServiceService {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token()  
 
     this.hubConnection = new signalR.HubConnectionBuilder()
-      .withUrl(`http://localhost:5094/notificationHub`, {
+      .withUrl(`${this.ApiServ.BaseUrlSignalR}notificationHub`, {
         skipNegotiation: true,
         transport: signalR.HttpTransportType.WebSockets,
         accessTokenFactory: () => localStorage.getItem("current_token") || '',
@@ -151,22 +106,9 @@ export class RealTimeNotificationServiceService {
         });
       }
     });
-  } 
+  }  
 
-  // private showNotificationModal(newNotification: Notification) {
-  //   if (this.dialogRef) {
-  //     const instance = this.dialogRef.componentInstance;
-  //     instance.addNotification(newNotification);
-  //   } else {
-  //     this.dialogRef = this.dialog.open(NotificationPopUpComponent, {
-  //       data: { notification: [newNotification] },
-  //       disableClose: true,
-  //       panelClass: 'fullscreen-notification-modal',
-  //     });
-  //   }
-  // }
-
-   private joinNotificationGroup() {
+  private joinNotificationGroup() {
     const userTypeString = this.getUserTypeNumber(this.User_Data_After_Login.type);
     const groupName = `${this.DomainName}_${userTypeString}_${this.User_Data_After_Login.id}`;
     

@@ -405,6 +405,13 @@ export class NavMenuComponent {
     )
   } 
 
+  LinkOpened(notificationSharedID:number){ 
+    this.notificationService.LinkOpened(notificationSharedID, this.DomainName).subscribe(
+      data => { 
+      }
+    )
+  } 
+
   closeNotificationModal() {
     document.getElementById("NotificationModal")?.classList.remove("flex");
     document.getElementById("NotificationModal")?.classList.add("hidden"); 

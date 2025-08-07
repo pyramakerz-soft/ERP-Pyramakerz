@@ -81,4 +81,12 @@ export class MyNotificationComponent {
       }
     ) 
   }
+
+  
+  LinkOpened(notificationSharedID:number){ 
+    this.notificationService.LinkOpened(notificationSharedID, this.DomainName).subscribe(
+      data => { 
+      }
+    )
+  } 
 }
