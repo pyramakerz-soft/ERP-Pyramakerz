@@ -34,7 +34,7 @@ import { StudentService } from '../../../../Services/student.service';
 @Component({
   selector: 'app-notification',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, TranslateModule],
   templateUrl: './notification.component.html',
   styleUrl: './notification.component.css'
 })
@@ -45,7 +45,8 @@ export class NotificationComponent {
   isLoading = false;
 
   validationErrors: { [key in keyof Notification]?: string } = {}; 
- 
+   isRtl: boolean = false;
+  subscription!: Subscription;
   AllowDelete: boolean = false; 
   AllowDeleteForOthers: boolean = false;
   path: string = '';
@@ -74,6 +75,7 @@ export class NotificationComponent {
     public ApiServ: ApiService,
     public EditDeleteServ: DeleteEditPermissionService,
     private menuService: MenuService,
+    private languageService: LanguageService,
     public activeRoute: ActivatedRoute,
     public router: Router,
     public notificationService: NotificationService,
@@ -106,6 +108,10 @@ export class NotificationComponent {
     });
     this.getAllData()
     this.getUserTypeData()
+    this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   getAllData(){

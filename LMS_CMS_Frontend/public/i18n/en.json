@@ -903,7 +903,16 @@
     "No Session replaced":"No Session replaced",
 
     "Replace":"Replace",
-    "Weight Types":"Weight Types"
+    "Weight Types":"Weight Types",
+
+
+    "No data available":"No data available",
+    "First Report":"First Report",
+    "Second Report":"Second Report",
+    "No User Notified":"No User Notified",
+    "User Notified":"User Notified",
+    "Is Allow Dismiss":"Is Allow Dismiss",
+    "Notification":"Notification"
 
     
 

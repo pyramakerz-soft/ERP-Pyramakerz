@@ -886,5 +886,12 @@
     "Card Replace": "استبدال البطاقة",
   "No Session replaced": "لم يتم استبدال أي حصة",
     "Replace": "استبدال",
-      "Weight Types": "أنواع الأوزان"
+      "Weight Types": "أنواع الأوزان",
+        "No data available": "لا توجد بيانات متاحة",
+  "First Report": "التقرير الأول",
+  "Second Report": "التقرير الثاني",
+  "No User Notified": "لم يتم إشعار أي مستخدم",
+  "User Notified": "تم إشعار المستخدم",
+  "Is Allow Dismiss": "السماح بالإلغاء",
+  "Notification": "إشعار"
 }

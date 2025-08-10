@@ -17,7 +17,7 @@
         public string BuildConnectionString(string domainName)
 
         {  
-            var dataSource = "."; 
+            var dataSource = "DESKTOP-531QG4Q"; 
 
             var initialCatalog = domainName;
 
