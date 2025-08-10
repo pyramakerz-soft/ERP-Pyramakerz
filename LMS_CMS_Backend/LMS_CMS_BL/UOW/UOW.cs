@@ -10,6 +10,7 @@ using LMS_CMS_DAL.Models.Domains.ETA;
 using LMS_CMS_DAL.Models.Domains.Inventory;
 using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_DAL.Models.Domains.RegisterationModule;
+using LMS_CMS_DAL.Models.Domains.SocialWorker;
 using LMS_CMS_DAL.Models.Domains.ViolationModule;
 using LMS_CMS_DAL.Models.Domains.Zatca;
 using LMS_CMS_DAL.Models.Octa;
@@ -224,6 +225,13 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<ChatMessage> ChatMessage_Repository;
         GenericRepo<ChatMessageAttachment> ChatMessageAttachment_Repository;
         GenericRepo<Request> Request_Repository;
+        GenericRepo<ConductLevel> ConductLevel_Repository;
+        GenericRepo<ConductType> ConductType_Repository;
+        GenericRepo<ConductTypeSection> ConductTypeSection_Repository;
+        GenericRepo<ProcedureType> ProcedureType_Repository;
+        GenericRepo<Conduct> Conduct_Repository;
+        GenericRepo<Attendance> Attendance_Repository;
+        GenericRepo<AttendanceStudent> AttendanceStudent_Repository;
 
 
         public UOW(Octa_DbContext octa_Db)
@@ -2557,6 +2565,90 @@ namespace LMS_CMS_BL.UOW
             }
         }
 
+
+        public GenericRepo<ConductLevel> conductLevel_Repository
+        {
+            get
+            {
+                if (ConductLevel_Repository == null)
+                {
+                    ConductLevel_Repository = new GenericRepo<ConductLevel>(db);
+                }
+                return ConductLevel_Repository;
+            }
+        }
+
+        public GenericRepo<ConductType> conductType_Repository
+        {
+            get
+            {
+                if (ConductType_Repository == null)
+                {
+                    ConductType_Repository = new GenericRepo<ConductType>(db);
+                }
+                return ConductType_Repository;
+            }
+        }
+
+        public GenericRepo<ConductTypeSection> conductTypeSection_Repository
+        {
+            get
+            {
+                if (ConductTypeSection_Repository == null)
+                {
+                    ConductTypeSection_Repository = new GenericRepo<ConductTypeSection>(db);
+                }
+                return ConductTypeSection_Repository;
+            }
+        }
+
+        public GenericRepo<ProcedureType> procedureType_Repository
+        {
+            get
+            {
+                if (ProcedureType_Repository == null)
+                {
+                    ProcedureType_Repository = new GenericRepo<ProcedureType>(db);
+                }
+                return ProcedureType_Repository;
+            }
+        }
+
+        public GenericRepo<Conduct> conduct_Repository
+        {
+            get
+            {
+                if (Conduct_Repository == null)
+                {
+                    Conduct_Repository = new GenericRepo<Conduct>(db);
+                }
+                return Conduct_Repository;
+            }
+        }
+
+        public GenericRepo<Attendance> attendance_Repository
+        {
+            get
+            {
+                if (Attendance_Repository == null)
+                {
+                    Attendance_Repository = new GenericRepo<Attendance>(db);
+                }
+                return Attendance_Repository;
+            }
+        }
+
+        public GenericRepo<AttendanceStudent> attendanceStudent_Repository
+        {
+            get
+            {
+                if (AttendanceStudent_Repository == null)
+                {
+                    AttendanceStudent_Repository = new GenericRepo<AttendanceStudent>(db);
+                }
+                return AttendanceStudent_Repository;
+            }
+        }
 
         public void SaveChanges()
         {

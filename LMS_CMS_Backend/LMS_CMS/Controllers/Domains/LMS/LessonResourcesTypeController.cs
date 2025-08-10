@@ -102,8 +102,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpPost]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
-        pages: new[] { "Lesson Resources Types" }
-      )]
+          pages: new[] { "Lesson Resources Types" }
+        )]
         public async Task<IActionResult> Add(LessonResourceTypeAddDTO newType)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);

@@ -12,6 +12,7 @@ using LMS_CMS_BL.DTO.Inventory;
 using LMS_CMS_BL.DTO.LMS;
 using LMS_CMS_BL.DTO.Octa;
 using LMS_CMS_BL.DTO.Registration;
+using LMS_CMS_BL.DTO.SocialWorker;
 using LMS_CMS_BL.DTO.Violation;
 using LMS_CMS_BL.DTO.Zatca;
 using LMS_CMS_DAL.Models.Domains;
@@ -25,6 +26,7 @@ using LMS_CMS_DAL.Models.Domains.ETA;
 using LMS_CMS_DAL.Models.Domains.Inventory;
 using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_DAL.Models.Domains.RegisterationModule;
+using LMS_CMS_DAL.Models.Domains.SocialWorker;
 using LMS_CMS_DAL.Models.Domains.ViolationModule;
 using LMS_CMS_DAL.Models.Domains.Zatca;
 using LMS_CMS_DAL.Models.Octa;
@@ -1191,6 +1193,26 @@ namespace LMS_CMS_BL.Config
                 .ForMember(dest => dest.SchoolName, opt => opt.MapFrom(src => src.AcademicYear.School.Name))
                 .ForMember(dest => dest.AcademicYearName, opt => opt.MapFrom(src => src.AcademicYear.Name));
             CreateMap<RemedialTimeTableDay, RemedialTimeTableDayGetDTO>();
+
+            CreateMap<ConductLevel, GonductLevelGetDTO>();
+            CreateMap<ConductLevelAddDTO, ConductLevel>();
+
+            CreateMap<Conduct, ConductGetDTO>()
+                .ForMember(dest => dest.ConductTypeEnName, opt => opt.MapFrom(src => src.ConductType.en_name))
+                .ForMember(dest => dest.ConductTypeArName, opt => opt.MapFrom(src => src.ConductType.ar_name))
+                .ForMember(dest => dest.ProcedureTypeName, opt => opt.MapFrom(src => src.ProcedureType.Name))
+                .ForMember(dest => dest.StudentArName, opt => opt.MapFrom(src => src.Student.ar_name))
+                .ForMember(dest => dest.StudentEnName, opt => opt.MapFrom(src => src.Student.en_name));
+
+            CreateMap<ConductAddDTO, Conduct>();
+            CreateMap<ConductEditDTO, Conduct>();
+
+            CreateMap<ConductType, ConductTypeGetDTO>();
+            CreateMap<ConductTypeAddDTO, ConductType>();
+            CreateMap<ConductTypeEditDTO, ConductType>();
+
+            CreateMap<ProcedureType, ProcedureTypeGetDTO>();
+            CreateMap<ProcedureTypeAddDTO, ProcedureType>();
 
         }
     } 

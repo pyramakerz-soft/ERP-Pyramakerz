@@ -24,7 +24,7 @@ export class DosesComponent implements OnInit {
   dose: Dose = new Dose(0, '', '');
   editDose = false;
   validationErrors: { [key: string]: string } = {};
-  keysArray: string[] = ['id', 'doseTimes', 'insertedAt'];
+  keysArray: string[] = ['id', 'doseTimes'];
   key: string = 'id';
   value: any = '';
   isModalVisible = false;

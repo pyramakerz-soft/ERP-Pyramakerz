@@ -180,6 +180,7 @@ export class SubCategoryComponent {
       this.SubCategory.inventoryCategoriesID = this.CategoryId
       if (this.mode == 'Create') {
         this.InventorySubCategoryServ.Add(this.SubCategory, this.DomainName).subscribe((d) => {
+          this.GetAllData();
           this.closeModal();
           this.isLoading = false
         },
@@ -197,6 +198,7 @@ export class SubCategoryComponent {
       
       if (this.mode == 'Edit') {  
         this.InventorySubCategoryServ.Edit(this.SubCategory, this.DomainName).subscribe((d) => {
+          this.GetAllData(); 
           this.closeModal();
           this.isLoading = false
         },
@@ -216,7 +218,6 @@ export class SubCategoryComponent {
 
   closeModal() {
     this.isModalVisible = false;
-    this.GetAllData();
   }
 
   openModal() {

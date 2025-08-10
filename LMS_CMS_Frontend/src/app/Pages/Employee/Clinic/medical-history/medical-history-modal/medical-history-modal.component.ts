@@ -83,46 +83,60 @@ export class MedicalHistoryModalComponent implements OnInit, OnChanges {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  async ngOnChanges(changes: SimpleChanges) {
-    if (changes['medicalHistoryData']) {
-      if (this.medicalHistoryData) {
-        this.editMode = true;
-        this.medicalHistory = { ...this.medicalHistoryData };
-        await this.loadSchools();
-        if (this.medicalHistory.schoolId) {
-          await this.loadGrades(this.medicalHistory.schoolId);
-          if (this.medicalHistory.gradeId) {
-            await this.loadClasses(this.medicalHistory.gradeId);
+async ngOnChanges(changes: SimpleChanges) {
+  if (changes['medicalHistoryData']) {
+    if (this.medicalHistoryData) {
+      this.editMode = true;
+      this.medicalHistory = { ...this.medicalHistoryData };
+      await this.loadSchools();
+      if (this.medicalHistory.schoolId) {
+        await this.loadGrades(this.medicalHistory.schoolId);
+        if (this.medicalHistory.gradeId) {
+          await this.loadClasses(this.medicalHistory.gradeId);
+          if (this.medicalHistory.classRoomID) {
+            await this.loadStudents(this.medicalHistory.classRoomID); // Load students
+            // Give time for async operations to complete
+            setTimeout(() => {
+              this.medicalHistory.studentId = this.medicalHistoryData?.studentId || 0;
+            }, 100);
           }
         }
-        this.firstReportPreview = this.medicalHistory.firstReport;
-        this.secReportPreview = this.medicalHistory.secReport;
-      } else {
-        this.editMode = false;
-        this.medicalHistory = new DoctorMedicalHistory(
-          0,
-          0,
-          '',
-          0,
-          '',
-          0,
-          '',
-          0,
-          '',
-          '',
-          null,
-          '',
-          null,
-          null,
-          new Date().toISOString(),
-          0,
-          ''
-        );
-        this.firstReportPreview = null;
-        this.secReportPreview = null;
       }
+      this.firstReportPreview = this.medicalHistory.firstReport;
+      this.secReportPreview = this.medicalHistory.secReport;
+    } else {
+      this.resetForm();
     }
   }
+}
+
+private resetForm() {
+  this.editMode = false;
+  this.medicalHistory = new DoctorMedicalHistory(
+    0,
+    0,
+    '',
+    0,
+    '',
+    0,
+    '',
+    0,
+    '',
+    '',
+    null,
+    '',
+    null,
+    null,
+    new Date().toISOString(),
+    0,
+    ''
+  );
+  this.firstReportPreview = null;
+  this.secReportPreview = null;
+  this.grades = [];
+  this.classes = [];
+  this.students = [];
+}
 
   async loadSchools() {
     try {
@@ -206,57 +220,71 @@ export class MedicalHistoryModalComponent implements OnInit, OnChanges {
     }
   }
 
-  onFileUpload(event: Event, field: 'firstReport' | 'secReport') {
+onFileUpload(event: Event, field: 'firstReport' | 'secReport') {
     const input = event.target as HTMLInputElement;
+    this.validationErrors[field] = '';
+    
     if (input.files && input.files[0]) {
-      const file = input.files[0];
-      const fileType = file.type;
-      if (fileType.startsWith('image/') || fileType.startsWith('video/')) {
+        const file = input.files[0]; // Fixed: Changed from 'file[0]' to 'input.files[0]'
+        const fileType = file.type;
+        const maxSize = 25 * 1024 * 1024; // 25MB
+
+        // Clear previous file
+        this.medicalHistory[field] = null;
+        
+        // Validate file type
+        if (!fileType.startsWith('image/') && !fileType.startsWith('video/')) {
+            this.validationErrors[field] = 'Invalid file type. Please upload an image or video.';
+            return;
+        }
+
+        // Validate file size
+        if (file.size > maxSize) {
+            this.validationErrors[field] = 'File size exceeds maximum limit of 25MB.';
+            return;
+        }
+
+        // Process valid file
         this.medicalHistory[field] = file;
         const reader = new FileReader();
         reader.onload = (e: any) => {
-          if (field === 'firstReport') {
-            this.firstReportPreview = e.target.result;
-          } else {
-            this.secReportPreview = e.target.result;
-          }
+            if (field === 'firstReport') {
+                this.firstReportPreview = e.target.result;
+            } else {
+                this.secReportPreview = e.target.result;
+            }
         };
         reader.readAsDataURL(file);
-      } else {
-        alert('Invalid file type. Please upload an image or video.');
-      }
     }
-  }
+}
 
-  isFormValid(): boolean {
+isFormValid(): boolean {
     this.validationErrors = {};
     let isValid = true;
 
+    // Existing validation checks...
     if (!this.medicalHistory.schoolId || this.medicalHistory.schoolId === 0) {
-      this.validationErrors['schoolId'] = '*School is required';
-      isValid = false;
+        this.validationErrors['schoolId'] = '*School is required';
+        isValid = false;
     }
 
     if (!this.medicalHistory.gradeId || this.medicalHistory.gradeId === 0) {
-      this.validationErrors['gradeId'] = '*Grade is required';
-      isValid = false;
+        this.validationErrors['gradeId'] = '*Grade is required';
+        isValid = false;
     }
 
-    if (
-      !this.medicalHistory.classRoomID ||
-      this.medicalHistory.classRoomID === 0
-    ) {
-      this.validationErrors['classRoomID'] = '*Class is required';
-      isValid = false;
+    if (!this.medicalHistory.classRoomID || this.medicalHistory.classRoomID === 0) {
+        this.validationErrors['classRoomID'] = '*Class is required';
+        isValid = false;
     }
 
     if (!this.medicalHistory.studentId || this.medicalHistory.studentId === 0) {
-      this.validationErrors['studentId'] = '*Student is required';
-      isValid = false;
+        this.validationErrors['studentId'] = '*Student is required';
+        isValid = false;
     }
 
     return isValid;
-  }
+}
 
   isSaving: boolean = false;
 
@@ -316,36 +344,10 @@ export class MedicalHistoryModalComponent implements OnInit, OnChanges {
     }
   }
 
-  closeModal() {
-    this.isVisible = false;
-    this.isVisibleChange.emit(false);
-
-    // Reset form data and validation errors when closing
-    this.editMode = false;
-    this.medicalHistory = new DoctorMedicalHistory(
-      0,
-      0,
-      '',
-      0,
-      '',
-      0,
-      '',
-      0,
-      '',
-      '',
-      null,
-      '',
-      null,
-      null,
-      new Date().toISOString(),
-      0,
-      ''
-    );
-    this.firstReportPreview = null;
-    this.secReportPreview = null;
-    this.validationErrors = {};
-    this.grades = [];
-    this.classes = [];
-    this.students = [];
-  }
+closeModal() {
+  this.isVisible = false;
+  this.isVisibleChange.emit(false);
+  this.resetForm();
+  this.validationErrors = {};
+}
 }

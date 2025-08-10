@@ -97,15 +97,17 @@
                 </td>
 
                 <!-- Comment -->
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    <input type="text" [(ngModel)]="student['comment']" [disabled]="isViewOnly"
-                        class="w-full rounded-md border-gray-300 p-1.5 shadow-sm" />
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 whitespace-normal min-w-[200px] max-w-[300px]">
+                    <textarea [(ngModel)]="student['comment']" [disabled]="isViewOnly"
+                        class="w-full rounded-md border-gray-300 p-1.5 shadow-sm resize-none h-auto min-h-[40px]"
+                        rows="1"></textarea>
                 </td>
 
                 <!-- Action Taken -->
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    <input type="text" [(ngModel)]="student['actionTaken']" [disabled]="isViewOnly"
-                        class="w-full rounded-md border-gray-300 p-1.5 shadow-sm" />
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 whitespace-normal min-w-[200px] max-w-[300px]">
+                    <textarea [(ngModel)]="student['actionTaken']" [disabled]="isViewOnly"
+                        class="w-full rounded-md border-gray-300 p-1.5 shadow-sm resize-none h-auto min-h-[40px]"
+                        rows="1"></textarea>
                 </td>
             </tr>
         </tbody>

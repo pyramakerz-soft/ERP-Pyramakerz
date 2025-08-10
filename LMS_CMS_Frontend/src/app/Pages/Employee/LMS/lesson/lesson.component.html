@@ -143,8 +143,8 @@
                         <button *ngIf="AllowEdit && IsAllowEdit(row.insertedByUserId)" (click)="openModal(row.id)">
                             <i class="fa-solid fa-pencil"></i>
                         </button>
-                        <img src="Icons/LessonActivity.png" (click)="MoveToLessonActivity(row.id)">
-                        <img src="Icons/LessonResource.png" (click)="MoveToLessonResource(row.id)"> 
+                        <img src="Icons/LessonActivity.png" (click)="MoveToLessonActivity(row.id)" title="Lesson Activity">
+                        <img src="Icons/LessonResource.png" (click)="MoveToLessonResource(row.id)" title="Lesson Resource"> 
                     </div>
                 </td>
             </tr>

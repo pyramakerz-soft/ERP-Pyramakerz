@@ -87,6 +87,13 @@ export class MedicalHistoryComponent implements OnInit {
       console.error('Error loading medical histories:', error);
     }
   }
+  
+  onModalVisibilityChange(visible: boolean) {
+  this.isModalVisible = visible;
+  if (!visible) {
+    this.selectedMedicalHistory = null;
+  }
+}
 
    selectedMedicalHistory: DoctorMedicalHistory | null = null;
   @ViewChild(MedicalHistoryModalComponent) medicalHistoryModal!: MedicalHistoryModalComponent;

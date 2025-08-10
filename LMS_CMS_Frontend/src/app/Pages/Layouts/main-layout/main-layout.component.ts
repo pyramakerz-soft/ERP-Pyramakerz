@@ -33,8 +33,7 @@ export class MainLayoutComponent {
     this.communicationService.action$.subscribe(async (state) => {
       await this.GetInfo();
 
-    }); 
-    console.log(this.User_Data_After_Login)
+    });  
     this.realTimeService.startConnection();
   }
 

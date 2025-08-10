@@ -15,6 +15,7 @@ namespace LMS_CMS_DAL.Models.Domains.Communication
         public long UserID { get; set; }
         public bool NotifiedOrNot { get; set; }
         public bool SeenOrNot { get; set; }
+        public bool IsLinkOpened { get; set; }
 
         [ForeignKey("Notification")]
         public long NotificationID { get; set; }

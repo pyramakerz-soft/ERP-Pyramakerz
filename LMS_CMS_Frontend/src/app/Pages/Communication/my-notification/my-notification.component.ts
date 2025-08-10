@@ -33,6 +33,10 @@ export class MyNotificationComponent {
     this.DomainName = this.ApiServ.GetHeader();
  
     this.getAllData() 
+
+    this.notificationService.notificationOpened$.subscribe(() => {
+      this.getAllData();
+    });
   }
 
   getAllData(){
@@ -74,11 +78,22 @@ export class MyNotificationComponent {
   }
 
   viewNotification(notificationShared:Notification){
-    notificationShared.seenOrNot = true
     this.notificationService.ByUserIDAndNotificationSharedByID(notificationShared.id, this.DomainName).subscribe(
       data => {
+        notificationShared.seenOrNot = true
         this.notification = data
+        this.notificationService.notifyNotificationOpened(); 
       }
     ) 
   }
+
+  
+  LinkOpened(notificationShared:Notification){  
+    this.notificationService.LinkOpened(notificationShared.id, this.DomainName).subscribe(
+      data => { 
+        notificationShared.seenOrNot = true
+        this.notificationService.notifyNotificationOpened(); 
+      }
+    )
+  } 
 }

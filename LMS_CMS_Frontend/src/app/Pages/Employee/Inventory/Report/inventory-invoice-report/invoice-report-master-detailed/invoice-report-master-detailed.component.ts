@@ -259,7 +259,7 @@ export class InvoiceReportMasterDetailedComponent implements OnInit {
           this.prepareExportData();
           console.log('prep');
           this.showTable = true;
-          console.log('show table removed');
+          console.log('show table true');
           this.isLoading = false;
         },
         error: (error) => {
@@ -271,6 +271,7 @@ export class InvoiceReportMasterDetailedComponent implements OnInit {
       });
   }
 
+  cachedTableDataForPDF: any[] = [];
   private prepareExportData(): void {
     this.transactionsForExport = this.transactions.map((t) => ({
       header: `Invoice #${t.invoiceNumber}`,
@@ -310,8 +311,8 @@ export class InvoiceReportMasterDetailedComponent implements OnInit {
           })) || [],
       },
     }));
-  }
-
+  this.cachedTableDataForPDF = this.getTableDataWithHeader();
+}
   getTableDataWithHeader(): any[] {
     return this.transactionsForExport.map((item) => ({
       header: item.header,
@@ -320,6 +321,28 @@ export class InvoiceReportMasterDetailedComponent implements OnInit {
       tableData: item.table.data,
     }));
   }
+
+  trackByInvoice(index: number, item: any): string {
+    return item.header; // Use invoice number as unique identifier
+}
+
+trackBySummaryItem(index: number, item: any): string {
+    return item.key; // Use summary key as unique identifier
+}
+
+trackByTableRow(index: number, item: any): number {
+    return item.ID || index; // Use item ID or index as fallback
+}
+
+//hereeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+  // getsection(): any[] {
+  //   return this.transactionsForExport.map((item) => ({
+  //     header: item.header,
+  //     summary: item.summary,
+  //     tableHeaders: item.table.headers,
+  //     tableData: item.table.data,
+  //   }));
+  // }
 
   // getInfoRows(): any[] {
   //   const rows = [
@@ -583,4 +606,5 @@ exportExcel() {
   const dateStr = new Date().toISOString().slice(0, 10);
   XLSX.writeFile(workbook, `${this.reportType}_Transactions_${dateStr}.xlsx`);
 }
+
 }

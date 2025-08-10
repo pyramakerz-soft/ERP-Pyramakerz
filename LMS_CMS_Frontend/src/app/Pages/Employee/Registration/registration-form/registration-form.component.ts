@@ -205,9 +205,9 @@ export class RegistrationFormComponent {
       (e) => e.categoryFieldID === fieldId
     );
 
-    if(this.User_Data_After_Login.type == "parent" && fieldId == 21){
+    if (this.User_Data_After_Login.type == "parent" && fieldId == 21) {
       return entry?.textAnswer ?? this.parent.email;
-    }else{
+    } else {
       return entry?.textAnswer ?? "";
     }
   }
@@ -352,6 +352,7 @@ export class RegistrationFormComponent {
     } else if (fieldTypeId == 5 || fieldTypeId == 7) {
       option = parseInt(selectedValue);
       answer = null;
+      console.log(option)
     }
 
     const existingElement =
@@ -570,10 +571,10 @@ export class RegistrationFormComponent {
       if (element.categoryFieldID == 4) {
         ageDate = element.textAnswer ? element.textAnswer : '';
       }
-      if (element.categoryFieldID == 9 && this.mode=='Edit') {
+      if (element.categoryFieldID == 9 && this.mode == 'Edit') {
         choosedGradeID = element.selectedFieldOptionID ? element.selectedFieldOptionID : 0;
       }
-       if (element.categoryFieldID == 9 && this.mode=='Create') {
+      if (element.categoryFieldID == 9 && this.mode == 'Create') {
         choosedGradeID = element.textAnswer ? element.textAnswer : 0;
       }
     });
@@ -721,7 +722,7 @@ export class RegistrationFormComponent {
     this.isSuccess = true;
   }
 
-  moveToStudents(){
-      this.router.navigateByUrl(`Employee/Student`)
+  moveToStudents() {
+    this.router.navigateByUrl(`Employee/Student`)
   }
 }

@@ -45,6 +45,9 @@ export class InterviewRegistrationComponent {
   currentYear = 0;
   isLoading = false
 
+  private interviewMap = new Map<string, InterviewTimeTable[]>();
+  currentMonthDays: DayWithInterviews[] = [];
+
   constructor(public account: AccountService, public ApiServ: ApiService, public registerationFormParentService:RegisterationFormParentService, 
     public interviewTimeTableService:InterviewTimeTableService, public registrationFormInterview: RegistrationFormInterviewService){}
 
@@ -120,7 +123,7 @@ export class InterviewRegistrationComponent {
     this.closeModalcalender()
   }
 
-  openModalcalender() {
+  openModalcalender() { 
     document.getElementById("Calender_Modal")?.classList.remove("hidden");
     document.getElementById("Calender_Modal")?.classList.add("flex"); 
   }
@@ -197,27 +200,93 @@ export class InterviewRegistrationComponent {
     }
   }  
 
+  // filterFutureDates() {
+  //   const now = new Date();
+
+  //   this.interviewTimeTable = this.interviewTimeTable.filter((interviewTime) => {
+  //     const [month, day, year] = interviewTime.date.split('/').map(Number);
+
+  //     // Parse fromTime
+  //     const [fromTimeStr, fromMeridian] = interviewTime.fromTime.split(' ');
+  //     let [fromHours, fromMinutes] = fromTimeStr.split(':').map(Number);
+  //     if (fromMeridian === 'PM' && fromHours !== 12) fromHours += 12;
+  //     if (fromMeridian === 'AM' && fromHours === 12) fromHours = 0;
+
+  //     // Parse toTime
+  //     const [toTimeStr, toMeridian] = interviewTime.toTime.split(' ');
+  //     let [toHours, toMinutes] = toTimeStr.split(':').map(Number);
+  //     if (toMeridian === 'PM' && toHours !== 12) toHours += 12;
+  //     if (toMeridian === 'AM' && toHours === 12) toHours = 0;
+
+  //     const interviewEnd = new Date(year, month - 1, day, toHours, toMinutes);
+  //     return interviewEnd >= now; // include if interview is ongoing or in the future
+  //   }); 
+  // }
+
+
+
+
   filterFutureDates() {
     const now = new Date();
-
+    
+    // Clear and rebuild the interview map
+    this.interviewMap.clear();
+    
     this.interviewTimeTable = this.interviewTimeTable.filter((interviewTime) => {
       const [month, day, year] = interviewTime.date.split('/').map(Number);
+      const dateStr = new Date(year, month - 1, day).toDateString();
+      
+      // Add to interview map
+      if (!this.interviewMap.has(dateStr)) {
+        this.interviewMap.set(dateStr, []);
+      }
+      this.interviewMap.get(dateStr)?.push(interviewTime);
 
-      // Parse fromTime
+      // Parse times (keep your existing time parsing logic)
       const [fromTimeStr, fromMeridian] = interviewTime.fromTime.split(' ');
       let [fromHours, fromMinutes] = fromTimeStr.split(':').map(Number);
       if (fromMeridian === 'PM' && fromHours !== 12) fromHours += 12;
       if (fromMeridian === 'AM' && fromHours === 12) fromHours = 0;
 
-      // Parse toTime
       const [toTimeStr, toMeridian] = interviewTime.toTime.split(' ');
       let [toHours, toMinutes] = toTimeStr.split(':').map(Number);
       if (toMeridian === 'PM' && toHours !== 12) toHours += 12;
       if (toMeridian === 'AM' && toHours === 12) toHours = 0;
 
       const interviewEnd = new Date(year, month - 1, day, toHours, toMinutes);
-      return interviewEnd >= now; // include if interview is ongoing or in the future
-    }); 
+      return interviewEnd >= now;
+    });
+    
+    // Update the calendar days
+    this.updateCurrentMonthDays();
+  }
+ 
+  private updateCurrentMonthDays() {
+    if (this.calendarMonths.length > 0) {
+      this.currentMonthDays = this.calculateDaysInMonth(this.currentMonth, this.currentYear);
+    }
+  }
+
+
+
+
+  private calculateDaysInMonth(month: number, year: number): DayWithInterviews[] {
+    const totalDays = new Date(year, month + 1, 0).getDate();
+    const plainDays: DayWithInterviews[] = [];
+
+    for (let day = 1; day <= totalDays; day++) {
+      const date = new Date(year, month, day);
+      const dateStr = date.toDateString();
+      
+      const dayObj: DayWithInterviews = {
+        day: date.getDate(),
+        interviews: this.interviewMap.get(dateStr) || []
+      };
+
+      plainDays.push(dayObj);
+    }
+
+    return plainDays;
   }
 
   generateCalendar() {
@@ -236,35 +305,38 @@ export class InterviewRegistrationComponent {
     }
     this.currentMonth = this.calendarMonths[0].month
     this.currentYear = this.calendarMonths[0].year 
+
+    // To Initialize the days
+    this.updateCurrentMonthDays();
   }
 
-  getDaysInMonth(month: number, year: number): DayWithInterviews[] { 
-    const totalDays = new Date(year, month + 1, 0).getDate();
-    let plainDays: DayWithInterviews[] = [];
+  // getDaysInMonth(month: number, year: number): DayWithInterviews[] { 
+  //   const totalDays = new Date(year, month + 1, 0).getDate();
+  //   let plainDays: DayWithInterviews[] = [];
     
-    if(!plainDays){
-      plainDays = []
-    }
+  //   if(!plainDays){
+  //     plainDays = []
+  //   }
     
-    for (let day = 1; day <= totalDays; day++) {
-      const date = new Date(year, month, day);
+  //   for (let day = 1; day <= totalDays; day++) {
+  //     const date = new Date(year, month, day);
       
-      const dayObj: DayWithInterviews = {
-        day: date.getDate(),
-        interviews: []
-      };
+  //     const dayObj: DayWithInterviews = {
+  //       day: date.getDate(),
+  //       interviews: []
+  //     };
 
-      this.interviewTimeTable.forEach(element => {
-        if(new Date(element.date).toDateString() === date.toDateString()){
-          dayObj.interviews.push(element);
-        }
-      });
+  //     this.interviewTimeTable.forEach(element => {
+  //       if(new Date(element.date).toDateString() === date.toDateString()){
+  //         dayObj.interviews.push(element);
+  //       }
+  //     });
 
-      plainDays.push(dayObj); 
-    } 
+  //     plainDays.push(dayObj); 
+  //   } 
 
-    return plainDays;
-  }
+  //   return plainDays;
+  // }
 
   getMonthDate(month: number, year: number): Date {
     return new Date(year, month, 1); 
@@ -281,7 +353,10 @@ export class InterviewRegistrationComponent {
     } else {
       this.currentMonth -= 1;
     }
+
+    this.updateCurrentMonthDays();
   }
+
   nextMonth(){
     if (this.currentMonth == 11) {
       this.currentMonth = 0;
@@ -289,6 +364,8 @@ export class InterviewRegistrationComponent {
     } else {
       this.currentMonth += 1;
     }
+
+    this.updateCurrentMonthDays();
   }
 
   isGreen(day: DayWithInterviews): boolean {
