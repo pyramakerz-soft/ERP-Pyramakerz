@@ -1197,6 +1197,23 @@ namespace LMS_CMS_BL.Config
             CreateMap<ConductLevel, GonductLevelGetDTO>();
             CreateMap<ConductLevelAddDTO, ConductLevel>();
 
+            CreateMap<Conduct, ConductGetDTO>()
+                .ForMember(dest => dest.ConductTypeEnName, opt => opt.MapFrom(src => src.ConductType.en_name))
+                .ForMember(dest => dest.ConductTypeArName, opt => opt.MapFrom(src => src.ConductType.ar_name))
+                .ForMember(dest => dest.ProcedureTypeName, opt => opt.MapFrom(src => src.ProcedureType.Name))
+                .ForMember(dest => dest.StudentArName, opt => opt.MapFrom(src => src.Student.ar_name))
+                .ForMember(dest => dest.StudentEnName, opt => opt.MapFrom(src => src.Student.en_name));
+
+            CreateMap<ConductAddDTO, Conduct>();
+            CreateMap<ConductEditDTO, Conduct>();
+
+            CreateMap<ConductType, ConductTypeGetDTO>();
+            CreateMap<ConductTypeAddDTO, ConductType>();
+            CreateMap<ConductTypeEditDTO, ConductType>();
+
+            CreateMap<ProcedureType, ProcedureTypeGetDTO>();
+            CreateMap<ProcedureTypeAddDTO, ProcedureType>();
+
         }
     } 
 }

@@ -1,8 +1,6 @@
 ﻿using AutoMapper;
-using LMS_CMS_BL.DTO.LMS;
 using LMS_CMS_BL.DTO.SocialWorker;
 using LMS_CMS_BL.UOW;
-using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_DAL.Models.Domains.SocialWorker;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
@@ -15,13 +13,13 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
     [Route("api/with-domain/[controller]")]
     [ApiController]
     [Authorize]
-    public class ConductLevelController : ControllerBase
+    public class ProcedureTypeController : ControllerBase
     {
         private readonly DbContextFactoryService _dbContextFactory;
         IMapper mapper;
         private readonly CheckPageAccessService _checkPageAccessService;
 
-        public ConductLevelController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService)
+        public ProcedureTypeController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
@@ -29,7 +27,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         }
 
         ////////////////////////////////
-        
+
         [HttpGet]
         [Authorize_Endpoint_(
         allowedTypes: new[] { "octa", "employee" },
@@ -49,14 +47,14 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            List<ConductLevel> ConductLevels = Unit_Of_Work.conductLevel_Repository.FindBy(t => t.IsDeleted != true);
+            List<ProcedureType> procedureTypes = Unit_Of_Work.procedureType_Repository.FindBy(t => t.IsDeleted != true);
 
-            if (ConductLevels == null || ConductLevels.Count == 0)
+            if (procedureTypes == null || procedureTypes.Count == 0)
             {
                 return NotFound();
             }
 
-            List<GonductLevelGetDTO> Dto = mapper.Map<List<GonductLevelGetDTO>>(ConductLevels);
+            List<ProcedureTypeGetDTO> Dto = mapper.Map<List<ProcedureTypeGetDTO>>(procedureTypes);
 
             return Ok(Dto);
         }
@@ -82,14 +80,14 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            ConductLevel conductLevel = Unit_Of_Work.conductLevel_Repository.First_Or_Default(sem => sem.IsDeleted != true && sem.ID == id);
+            ProcedureType procedureType = Unit_Of_Work.procedureType_Repository.First_Or_Default(sem => sem.IsDeleted != true && sem.ID == id);
 
-            if (conductLevel == null)
+            if (procedureType == null)
             {
                 return NotFound();
             }
 
-            GonductLevelGetDTO Dto = mapper.Map<GonductLevelGetDTO>(conductLevel);
+            ProcedureTypeGetDTO Dto = mapper.Map<ProcedureTypeGetDTO>(procedureType);
 
             return Ok(Dto);
         }
@@ -101,7 +99,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
           allowedTypes: new[] { "octa", "employee" },
           pages: new[] { "Lesson Resources Types" }
         )]
-        public async Task<IActionResult> Add(ConductLevelAddDTO NewConduct)
+        public async Task<IActionResult> Add(ProcedureTypeAddDTO NewProcedureType)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -114,29 +112,30 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             {
                 return Unauthorized("User ID or Type claim not found.");
             }
-            if (NewConduct == null)
+            if (NewProcedureType == null)
             {
                 return BadRequest("Conduct is empty");
             }
 
-            ConductLevel conduct = mapper.Map<ConductLevel>(NewConduct);
+            ProcedureType procedureType = mapper.Map<ProcedureType>(NewProcedureType);
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-            conduct.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            procedureType.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
             if (userTypeClaim == "octa")
             {
-                conduct.InsertedByOctaId = userId;
+                procedureType.InsertedByOctaId = userId;
             }
             else if (userTypeClaim == "employee")
             {
-                conduct.InsertedByUserId = userId;
+                procedureType.InsertedByUserId = userId;
             }
-            Unit_Of_Work.conductLevel_Repository.Add(conduct);
+            Unit_Of_Work.procedureType_Repository.Add(procedureType);
             Unit_Of_Work.SaveChanges();
-            return Ok(NewConduct);
+            return Ok(NewProcedureType);
         }
 
         ////////////////////////////////
+
 
         [HttpPut]
         [Authorize_Endpoint_(
@@ -144,7 +143,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
            allowEdit: 1,
            pages: new[] { "Lesson Resources Types" }
        )]
-        public async Task<IActionResult> EditAsync(ConductLevelAddDTO NewConduct)
+        public async Task<IActionResult> EditAsync(ProcedureTypeAddDTO newProcedureType)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -160,52 +159,52 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            if (NewConduct == null)
+            if (newProcedureType == null)
             {
-                return BadRequest("Conduct cannot be null");
+                return BadRequest("Procedure Type cannot be null");
             }
-            if (NewConduct.ID == null)
+            if (newProcedureType.ID == null)
             {
                 return BadRequest("id can not be null");
             }
 
-            ConductLevel conductLevel = Unit_Of_Work.conductLevel_Repository.First_Or_Default(s => s.ID == NewConduct.ID && s.IsDeleted != true);
-            if (conductLevel == null)
+            ProcedureType procedureType = Unit_Of_Work.procedureType_Repository.First_Or_Default(s => s.ID == newProcedureType.ID && s.IsDeleted != true);
+            if (procedureType == null)
             {
-                return BadRequest("conduct Level not exist");
+                return BadRequest("Procedure Type not exist");
             }
 
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Lesson Resources Types", roleId, userId, conductLevel);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Lesson Resources Types", roleId, userId, procedureType);
                 if (accessCheck != null)
                 {
                     return accessCheck;
                 }
             }
 
-            mapper.Map(NewConduct, conductLevel);
+            mapper.Map(newProcedureType, procedureType);
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-            conductLevel.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            procedureType.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
             if (userTypeClaim == "octa")
             {
-                conductLevel.UpdatedByOctaId = userId;
-                if (conductLevel.UpdatedByUserId != null)
+                procedureType.UpdatedByOctaId = userId;
+                if (procedureType.UpdatedByUserId != null)
                 {
-                    conductLevel.UpdatedByUserId = null;
+                    procedureType.UpdatedByUserId = null;
                 }
             }
             else if (userTypeClaim == "employee")
             {
-                conductLevel.UpdatedByUserId = userId;
-                if (conductLevel.UpdatedByOctaId != null)
+                procedureType.UpdatedByUserId = userId;
+                if (procedureType.UpdatedByOctaId != null)
                 {
-                    conductLevel.UpdatedByOctaId = null;
+                    procedureType.UpdatedByOctaId = null;
                 }
             }
-            Unit_Of_Work.conductLevel_Repository.Update(conductLevel);
+            Unit_Of_Work.procedureType_Repository.Update(procedureType);
             Unit_Of_Work.SaveChanges();
-            return Ok(NewConduct);
+            return Ok(newProcedureType);
         }
 
         ////////////////////////////////
@@ -236,14 +235,14 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             {
                 return BadRequest("id cannot be null");
             }
-            ConductLevel conductLevel = Unit_Of_Work.conductLevel_Repository.First_Or_Default(s => s.ID == id && s.IsDeleted != true);
-            if (conductLevel == null)
+            ProcedureType procedureType = Unit_Of_Work.procedureType_Repository.First_Or_Default(s => s.ID == id && s.IsDeleted != true);
+            if (procedureType == null)
             {
                 return BadRequest("Type not exist");
             }
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Lesson Resources Types", roleId, userId, conductLevel);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Lesson Resources Types", roleId, userId, procedureType);
                 if (accessCheck != null)
                 {
                     return accessCheck;
@@ -251,27 +250,27 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             }
 
 
-            conductLevel.IsDeleted = true;
+            procedureType.IsDeleted = true;
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-            conductLevel.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            procedureType.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
             if (userTypeClaim == "octa")
             {
-                conductLevel.DeletedByOctaId = userId;
-                if (conductLevel.DeletedByUserId != null)
+                procedureType.DeletedByOctaId = userId;
+                if (procedureType.DeletedByUserId != null)
                 {
-                    conductLevel.DeletedByUserId = null;
+                    procedureType.DeletedByUserId = null;
                 }
             }
             else if (userTypeClaim == "employee")
             {
-                conductLevel.DeletedByUserId = userId;
-                if (conductLevel.DeletedByOctaId != null)
+                procedureType.DeletedByUserId = userId;
+                if (procedureType.DeletedByOctaId != null)
                 {
-                    conductLevel.DeletedByOctaId = null;
+                    procedureType.DeletedByOctaId = null;
                 }
             }
 
-            Unit_Of_Work.conductLevel_Repository.Update(conductLevel);
+            Unit_Of_Work.procedureType_Repository.Update(procedureType);
             Unit_Of_Work.SaveChanges();
             return Ok();
         }

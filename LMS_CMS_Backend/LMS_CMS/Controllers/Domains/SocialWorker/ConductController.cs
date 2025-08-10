@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using LMS_CMS_BL.DTO.LMS;
 using LMS_CMS_BL.DTO.SocialWorker;
 using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains.LMS;
@@ -15,13 +14,13 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
     [Route("api/with-domain/[controller]")]
     [ApiController]
     [Authorize]
-    public class ConductLevelController : ControllerBase
+    public class ConductController : ControllerBase
     {
         private readonly DbContextFactoryService _dbContextFactory;
         IMapper mapper;
         private readonly CheckPageAccessService _checkPageAccessService;
 
-        public ConductLevelController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService)
+        public ConductController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
@@ -29,11 +28,11 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         }
 
         ////////////////////////////////
-        
+
         [HttpGet]
         [Authorize_Endpoint_(
-        allowedTypes: new[] { "octa", "employee" },
-        pages: new[] { "Lesson Resources Types" }
+          allowedTypes: new[] { "octa", "employee" },
+          pages: new[] { "Lesson Resources Types" }
         )]
         public IActionResult Get()
         {
@@ -49,25 +48,25 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            List<ConductLevel> ConductLevels = Unit_Of_Work.conductLevel_Repository.FindBy(t => t.IsDeleted != true);
+            List<Conduct> conducts = Unit_Of_Work.conduct_Repository.FindBy(t => t.IsDeleted != true);
 
-            if (ConductLevels == null || ConductLevels.Count == 0)
+            if (conducts == null || conducts.Count == 0)
             {
                 return NotFound();
             }
 
-            List<GonductLevelGetDTO> Dto = mapper.Map<List<GonductLevelGetDTO>>(ConductLevels);
+            List<ConductGetDTO> Dto = mapper.Map<List<ConductGetDTO>>(conducts);
 
             return Ok(Dto);
         }
 
-        ////////////////////////////////
+        ////////////////////////////////     
 
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
-          allowedTypes: new[] { "octa", "employee" },
-          pages: new[] { "Lesson Resources Types" }
-        )]
+        allowedTypes: new[] { "octa", "employee" },
+        pages: new[] { "Lesson Resources Types" }
+      )]
         public async Task<IActionResult> GetById(long id)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -82,26 +81,26 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            ConductLevel conductLevel = Unit_Of_Work.conductLevel_Repository.First_Or_Default(sem => sem.IsDeleted != true && sem.ID == id);
+            Conduct conduct = Unit_Of_Work.conduct_Repository.First_Or_Default(sem => sem.IsDeleted != true && sem.ID == id);
 
-            if (conductLevel == null)
+            if (conduct == null)
             {
                 return NotFound();
             }
 
-            GonductLevelGetDTO Dto = mapper.Map<GonductLevelGetDTO>(conductLevel);
+            ConductGetDTO Dto = mapper.Map<ConductGetDTO>(conduct);
 
             return Ok(Dto);
         }
 
-        ////////////////////////////////
+        ////////////////////////////////     
 
         [HttpPost]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
           pages: new[] { "Lesson Resources Types" }
         )]
-        public async Task<IActionResult> Add(ConductLevelAddDTO NewConduct)
+        public async Task<IActionResult> Add([FromForm]ConductAddDTO NewConduct)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -119,7 +118,25 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
                 return BadRequest("Conduct is empty");
             }
 
-            ConductLevel conduct = mapper.Map<ConductLevel>(NewConduct);
+            ConductType conductType = Unit_Of_Work.conductType_Repository.First_Or_Default(s => s.ID == NewConduct.ConductTypeID && s.IsDeleted != true);
+            if (conductType == null)
+            {
+                return BadRequest("There is no conductType with this Id");
+            }
+
+            Student student = Unit_Of_Work.student_Repository.First_Or_Default(s => s.ID == NewConduct.StudentID && s.IsDeleted != true);
+            if (student == null)
+            {
+                return BadRequest("There is no Student with this Id");
+            }
+
+            ProcedureType procedureType = Unit_Of_Work.procedureType_Repository.First_Or_Default(s => s.ID == NewConduct.ProcedureTypeID && s.IsDeleted != true);
+            if (procedureType == null)
+            {
+                return BadRequest("There is no procedureType with this Id");
+            }
+
+            Conduct conduct = mapper.Map<Conduct>(NewConduct);
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             conduct.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
@@ -131,20 +148,44 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             {
                 conduct.InsertedByUserId = userId;
             }
-            Unit_Of_Work.conductLevel_Repository.Add(conduct);
+
+            Unit_Of_Work.conduct_Repository.Add(conduct);
             Unit_Of_Work.SaveChanges();
+
+            var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Conduct");
+            var ConductFolder = Path.Combine(baseFolder, conduct.ID.ToString());
+            if (!Directory.Exists(ConductFolder))
+            {
+                Directory.CreateDirectory(ConductFolder);
+            }
+
+            if (NewConduct.NewFile != null)
+            {
+                if (NewConduct.NewFile.Length > 0)
+                {
+                    var filePath = Path.Combine(ConductFolder, NewConduct.NewFile.FileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await NewConduct.NewFile.CopyToAsync(stream);
+                    }
+                }
+                conduct.File = Path.Combine("Uploads", "Conduct", conduct.ID.ToString(), NewConduct.NewFile.FileName);
+                Unit_Of_Work.conduct_Repository.Update(conduct);
+                Unit_Of_Work.SaveChanges();
+            }
+
             return Ok(NewConduct);
         }
 
-        ////////////////////////////////
+        ////////////////////////////////     
 
         [HttpPut]
         [Authorize_Endpoint_(
-           allowedTypes: new[] { "octa", "employee" },
-           allowEdit: 1,
-           pages: new[] { "Lesson Resources Types" }
-       )]
-        public async Task<IActionResult> EditAsync(ConductLevelAddDTO NewConduct)
+            allowedTypes: new[] { "octa", "employee" },
+            allowEdit: 1,
+            pages: new[] { "Lesson Resources Types" }
+        )]
+        public async Task<IActionResult> EditAsync([FromForm] ConductEditDTO NewConduct)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -169,47 +210,86 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
                 return BadRequest("id can not be null");
             }
 
-            ConductLevel conductLevel = Unit_Of_Work.conductLevel_Repository.First_Or_Default(s => s.ID == NewConduct.ID && s.IsDeleted != true);
-            if (conductLevel == null)
+            ConductType conductType = Unit_Of_Work.conductType_Repository.First_Or_Default(s => s.ID == NewConduct.ConductTypeID && s.IsDeleted != true);
+            if (conductType == null)
             {
-                return BadRequest("conduct Level not exist");
+                return BadRequest("There is no conductType with this Id");
+            }
+
+            Student student = Unit_Of_Work.student_Repository.First_Or_Default(s => s.ID == NewConduct.StudentID && s.IsDeleted != true);
+            if (student == null)
+            {
+                return BadRequest("There is no Student with this Id");
+            }
+
+            ProcedureType procedureType = Unit_Of_Work.procedureType_Repository.First_Or_Default(s => s.ID == NewConduct.ProcedureTypeID && s.IsDeleted != true);
+            if (procedureType == null)
+            {
+                return BadRequest("There is no procedureType with this Id");
+            }
+
+            Conduct conduct = Unit_Of_Work.conduct_Repository.First_Or_Default(s => s.ID == NewConduct.ID && s.IsDeleted != true);
+            if (conduct == null)
+            {
+                return BadRequest("conduct not exist");
             }
 
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Lesson Resources Types", roleId, userId, conductLevel);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Lesson Resources Types", roleId, userId, conduct);
                 if (accessCheck != null)
                 {
                     return accessCheck;
                 }
             }
 
-            mapper.Map(NewConduct, conductLevel);
+            mapper.Map(NewConduct, conduct);
+
+            if (NewConduct.NewFile != null)
+            {
+                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Conduct");
+                var ConductFolder = Path.Combine(baseFolder, conduct.ID.ToString());
+                if (!Directory.Exists(ConductFolder))
+                {
+                    Directory.CreateDirectory(ConductFolder);
+                }
+                if (NewConduct.NewFile.Length > 0)
+                {
+                    var filePath = Path.Combine(ConductFolder, NewConduct.NewFile.FileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await NewConduct.NewFile.CopyToAsync(stream);
+                    }
+                }
+                conduct.File = Path.Combine("Uploads", "Conduct", conduct.ID.ToString(), NewConduct.NewFile.FileName);
+            }
+
+
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-            conductLevel.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            conduct.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
             if (userTypeClaim == "octa")
             {
-                conductLevel.UpdatedByOctaId = userId;
-                if (conductLevel.UpdatedByUserId != null)
+                conduct.UpdatedByOctaId = userId;
+                if (conduct.UpdatedByUserId != null)
                 {
-                    conductLevel.UpdatedByUserId = null;
+                    conduct.UpdatedByUserId = null;
                 }
             }
             else if (userTypeClaim == "employee")
             {
-                conductLevel.UpdatedByUserId = userId;
-                if (conductLevel.UpdatedByOctaId != null)
+                conduct.UpdatedByUserId = userId;
+                if (conduct.UpdatedByOctaId != null)
                 {
-                    conductLevel.UpdatedByOctaId = null;
+                    conduct.UpdatedByOctaId = null;
                 }
             }
-            Unit_Of_Work.conductLevel_Repository.Update(conductLevel);
+            Unit_Of_Work.conduct_Repository.Update(conduct);
             Unit_Of_Work.SaveChanges();
             return Ok(NewConduct);
         }
 
-        ////////////////////////////////
-
+        ////////////////////////////////     
+        
         [HttpDelete("{id}")]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
@@ -236,14 +316,16 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             {
                 return BadRequest("id cannot be null");
             }
-            ConductLevel conductLevel = Unit_Of_Work.conductLevel_Repository.First_Or_Default(s => s.ID == id && s.IsDeleted != true);
-            if (conductLevel == null)
+
+            Conduct conduct = Unit_Of_Work.conduct_Repository.First_Or_Default(s => s.ID == id && s.IsDeleted != true);
+            if (conduct == null)
             {
-                return BadRequest("Type not exist");
+                return BadRequest("conduct not exist");
             }
+
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Lesson Resources Types", roleId, userId, conductLevel);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Lesson Resources Types", roleId, userId, conduct);
                 if (accessCheck != null)
                 {
                     return accessCheck;
@@ -251,27 +333,27 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             }
 
 
-            conductLevel.IsDeleted = true;
+            conduct.IsDeleted = true;
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-            conductLevel.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            conduct.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
             if (userTypeClaim == "octa")
             {
-                conductLevel.DeletedByOctaId = userId;
-                if (conductLevel.DeletedByUserId != null)
+                conduct.DeletedByOctaId = userId;
+                if (conduct.DeletedByUserId != null)
                 {
-                    conductLevel.DeletedByUserId = null;
+                    conduct.DeletedByUserId = null;
                 }
             }
             else if (userTypeClaim == "employee")
             {
-                conductLevel.DeletedByUserId = userId;
-                if (conductLevel.DeletedByOctaId != null)
+                conduct.DeletedByUserId = userId;
+                if (conduct.DeletedByOctaId != null)
                 {
-                    conductLevel.DeletedByOctaId = null;
+                    conduct.DeletedByOctaId = null;
                 }
             }
 
-            Unit_Of_Work.conductLevel_Repository.Update(conductLevel);
+            Unit_Of_Work.conduct_Repository.Update(conduct);
             Unit_Of_Work.SaveChanges();
             return Ok();
         }
