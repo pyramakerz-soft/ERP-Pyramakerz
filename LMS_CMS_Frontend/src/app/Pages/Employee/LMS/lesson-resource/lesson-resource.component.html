@@ -2,14 +2,8 @@
     <div class="flex space-x-2 rtl:space-x-reverse items-center">
         <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToLesson()"></i>
         <h1 class="primaryTxt font-bold text-2xl leading-9">{{lesson.englishTitle}}</h1>
-    </div>
-    <div class="flex justify-between items-center space-x-3 rtl:space-x-reverse">
-        <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search> 
-        <button (click)="openModal()"
-            class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center">
-             {{ 'Add' | translate }} {{ 'Resource' | translate }}
-        </button>
-    </div>
+    </div> 
+
 </div>
 
 <div class="flex flex-wrap mt-5">
@@ -55,6 +49,15 @@
     </div>
 </div>
 
+<div class="flex justify-end"> 
+    <div class="flex justify-between items-center space-x-3 rtl:space-x-reverse">
+        <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search> 
+        <button (click)="openModal()"
+            class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center">
+            {{ 'Add' | translate }} {{ 'Resource' | translate }}
+        </button>
+    </div>
+</div>
 
 <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD] max-w-full">
     <table class="overflow-auto w-full bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">

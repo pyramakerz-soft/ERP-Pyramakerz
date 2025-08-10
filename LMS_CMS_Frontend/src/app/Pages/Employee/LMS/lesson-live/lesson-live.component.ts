@@ -209,9 +209,9 @@ export class LessonLiveComponent {
   Edit(row: LessonLive) {
     this.mode = 'Edit';
     this.LessonLiveServ.GetByID(row.id, this.DomainName).subscribe((d) => {
-      this.live = d; 
-      this.selectedYearForModal = this.live.academicYearID; 
-      this.getAllClass() 
+      this.live = d;
+      this.selectedYearForModal = this.live.academicYearID;
+      this.getAllClass()
     });
     this.openModal();
   }
@@ -286,8 +286,8 @@ export class LessonLiveComponent {
 
   getAllSubject() {
     this.subject = []
-    this.SelectedSubjectId = 0
-    this.SubjectServ.GetByGradeId(this.SelectedGradeId, this.DomainName).subscribe((d) => {
+    this.live.subjectID = 0
+    this.SubjectServ.GetByClassroom(this.live.classroomID, this.DomainName).subscribe((d) => {
       this.subject = d
     })
   }
@@ -300,16 +300,6 @@ export class LessonLiveComponent {
     })
   }
 
-  selectClass() { 
-    const classs: Classroom | undefined = this.classrooms.find(
-      s => s.id === Number(this.live.classroomID)
-    );
-    if (classs) {
-      this.SelectedGradeId = classs.gradeID;
-      this.getAllSubject();
-    }
-  }
-
   getAllClass() {
     this.SelectedClassId = 0
     this.classrooms = []
@@ -317,8 +307,10 @@ export class LessonLiveComponent {
     this.subject = []
     this.ClassroomServ.GetByAcYearId(this.selectedYearForModal, this.DomainName).subscribe((d) => {
       this.classrooms = d
-      if(this.live.id){
-        this.selectClass()
+      if (this.live.id) {
+        this.SubjectServ.GetByClassroom(this.live.classroomID, this.DomainName).subscribe((d) => {
+          this.subject = d
+        })
       }
     })
   }
@@ -331,7 +323,7 @@ export class LessonLiveComponent {
     this.live = new LessonLive();
   }
 
-  openModal() { 
+  openModal() {
     this.getAllDays();
     this.GetAllYears();
     this.isModalVisible = true;

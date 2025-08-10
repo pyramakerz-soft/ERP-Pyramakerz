@@ -45,6 +45,7 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<Grade> Grade { get; set; }
         public DbSet<EmployeeAttachment> EmployeeAttachment { get; set; }
         public DbSet<Violation> Violation { get; set; }
+        public DbSet<ViolationType> ViolationType { get; set; }
         public DbSet<EmployeeTypeViolation> EmployeeTypeViolation { get; set; }
         public DbSet<Subject> Subject { get; set; }
         public DbSet<SubjectCategory> SubjectCategory { get; set; }
@@ -202,6 +203,14 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<Duty> Duty { get; set; }
         public DbSet<Notification> Notification { get; set; }
         public DbSet<NotificationSharedTo> NotificationSharedTo { get; set; }
+        public DbSet<RemedialClassroom> RemedialClassroom { get; set; }
+        public DbSet<RemedialClassroomStudent> RemedialClassroomStudent { get; set; }
+        public DbSet<RemedialTimeTable> RemedialTimeTable { get; set; }
+        public DbSet<RemedialTimeTableDay> RemedialTimeTableDay { get; set; }
+        public DbSet<RemedialTimeTableClasses> RemedialTimeTableClasses { get; set; }
+        public DbSet<ChatMessage> ChatMessage { get; set; }
+        public DbSet<ChatMessageAttachment> ChatMessageAttachment { get; set; }
+        public DbSet<Request> Request { get; set; }
 
 
 
@@ -239,7 +248,7 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasIndex(p => p.Email)
                 .IsUnique();
 
-            modelBuilder.Entity<Violation>()
+            modelBuilder.Entity<ViolationType>()
                 .HasIndex(p => p.Name)
                 .IsUnique();
 
@@ -1816,6 +1825,123 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasForeignKey(p => p.SchoolID)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<EmployeeTypeViolation>()
+                .HasOne(p => p.ViolationType)
+                .WithMany(p => p.EmployeeTypeViolations)
+                .HasForeignKey(p => p.ViolationTypeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<EmployeeTypeViolation>()
+                .HasOne(p => p.EmployeeType)
+                .WithMany(p => p.EmployeeTypeViolations)
+                .HasForeignKey(p => p.EmployeeTypeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Violation>()
+                .HasOne(p => p.Employee)
+                .WithMany(p => p.Violations)
+                .HasForeignKey(p => p.EmployeeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Violation>()
+                .HasOne(p => p.ViolationType)
+                .WithMany(p => p.Violations)
+                .HasForeignKey(p => p.ViolationTypeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
+
+            modelBuilder.Entity<RemedialClassroom>()
+                .HasOne(p => p.AcademicYear)
+                .WithMany(p => p.RemedialClassrooms)
+                .HasForeignKey(p => p.AcademicYearID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<RemedialClassroom>()
+                .HasOne(p => p.Subject)
+                .WithMany(p => p.RemedialClassrooms)
+                .HasForeignKey(p => p.SubjectID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<RemedialClassroom>()
+                .HasOne(p => p.Teacher)
+                .WithMany(p => p.RemedialClassrooms)
+                .HasForeignKey(p => p.TeacherID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<RemedialClassroomStudent>()
+                .HasOne(p => p.RemedialClassroom)
+                .WithMany(p => p.RemedialClassroomStudents)
+                .HasForeignKey(p => p.RemedialClassroomID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<RemedialClassroomStudent>()
+                .HasOne(p => p.Student)
+                .WithMany(p => p.RemedialClassroomStudents)
+                .HasForeignKey(p => p.StudentID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<RemedialTimeTable>()
+                .HasOne(p => p.AcademicYear)
+                .WithMany(p => p.RemedialTimeTables)
+                .HasForeignKey(p => p.AcademicYearID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<RemedialTimeTableDay>()
+                .HasOne(p => p.RemedialTimeTable)
+                .WithMany(p => p.RemedialTimeTableDays)
+                .HasForeignKey(p => p.RemedialTimeTableID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<RemedialTimeTableDay>()
+                .HasOne(p => p.Day)
+                .WithMany(p => p.RemedialTimeTableDays)
+                .HasForeignKey(p => p.DayId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<RemedialTimeTableClasses>()
+                .HasOne(p => p.RemedialTimeTableDay)
+                .WithMany(p => p.RemedialTimeTableClasses)
+                .HasForeignKey(p => p.RemedialTimeTableDayId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<RemedialTimeTableClasses>()
+                .HasOne(p => p.RemedialClassroom)
+                .WithMany(p => p.RemedialTimeTableClasses)
+                .HasForeignKey(p => p.RemedialClassroomID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<ChatMessageAttachment>()
+                .HasOne(p => p.ChatMessage)
+                .WithMany(p => p.ChatMessageAttachments)
+                .HasForeignKey(p => p.ChatMessageID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<ChatMessage>()
+                .HasOne(p => p.ReceiverUserType)
+                .WithMany(p => p.ReceiverChatMessages)
+                .HasForeignKey(p => p.ReceiverUserTypeID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<ChatMessage>()
+                .HasOne(p => p.SenderUserType)
+                .WithMany(p => p.SenderChatMessages)
+                .HasForeignKey(p => p.SenderUserTypeID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<Request>()
+                .HasOne(p => p.ReceiverUserType)
+                .WithMany(p => p.ReceiverRequests)
+                .HasForeignKey(p => p.ReceiverUserTypeID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<Request>()
+                .HasOne(p => p.SenderUserType)
+                .WithMany(p => p.SenderRequests)
+                .HasForeignKey(p => p.SenderUserTypeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
             ///////////////////////// Exception: /////////////////////////
             modelBuilder.Entity<Bus>()
                 .HasOne(b => b.DeletedByEmployee)
@@ -1902,6 +2028,19 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasForeignKey(f => f.DeletedByUserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<Violation>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany() 
+                .HasForeignKey(v => v.DeletedByUserId) 
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<RemedialClassroom>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
             ///////////////////////// Optional ID According to other field: /////////////////////////  
             modelBuilder.Entity<ReceivableMaster>()
                 .Ignore(r => r.Bank)
@@ -1956,6 +2095,7 @@ namespace LMS_CMS_DAL.Models.Domains
             modelBuilder.Entity<AccountingEntriesReport>()
                 .HasNoKey().ToView(null);
 
+            ///////////// Models without keys and views /////////////
             modelBuilder.Entity<CountResult>()
                 .HasNoKey().ToView(null);
 
@@ -1964,6 +2104,54 @@ namespace LMS_CMS_DAL.Models.Domains
 
             modelBuilder.Entity<DailyTotalResult>()
                 .HasNoKey().ToView(null);
+
+            modelBuilder.Entity<AccountBalanceReport>()
+                .HasNoKey().ToView(null);
+
+            modelBuilder.Entity<AccountTotals>()
+                .HasNoKey().ToView(null);
+
+            ///////////// Adding Indexes /////////////
+            ///
+            modelBuilder.Entity<AccountingEntriesMaster>()
+                .HasIndex(e => e.IsDeleted)
+                .HasDatabaseName("IX_EntriesMaster_IsDeleted");
+
+            modelBuilder.Entity<AccountingEntriesMaster>()
+                .HasIndex(e => e.Date)
+                .HasDatabaseName("IX_EntriesMaster_Date");
+
+            modelBuilder.Entity<AccountingEntriesDetails>()
+                .HasIndex(e => e.IsDeleted)
+                .HasDatabaseName("IX_EntriesDetails_IsDeleted");
+
+            modelBuilder.Entity<InventoryMaster>()
+                .HasIndex(e => e.Date)
+                .HasDatabaseName("IX_InventoryMaster_Date");
+
+            modelBuilder.Entity<InventoryMaster>()
+                .HasIndex(e => e.IsDeleted)
+                .HasDatabaseName("IX_InventoryMaster_IsDeleted");
+
+            modelBuilder.Entity<Supplier>()
+                .HasIndex(e => e.IsDeleted)
+                .HasDatabaseName("IX_Supplier_IsDeleted");
+
+            modelBuilder.Entity<PayableMaster>()
+                .HasIndex(e => e.IsDeleted)
+                .HasDatabaseName("IX_PayableMaster_IsDeleted");
+
+            modelBuilder.Entity<PayableMaster>()
+                .HasIndex(e => e.LinkFileID)
+                .HasDatabaseName("IX_PayableMaster_LinkFileID");
+
+            modelBuilder.Entity<PayableDetails>()
+                .HasIndex(e => e.IsDeleted)
+                .HasDatabaseName("IX_PayableDetails_IsDeleted");
+
+            modelBuilder.Entity<PayableDetails>()
+                .HasIndex(e => e.LinkFileTypeID)
+                .HasDatabaseName("IX_PayableDetails_LinkFileTypeID");
         }
     }
 }

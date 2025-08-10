@@ -73,6 +73,15 @@
   <input type="checkbox" id="canReceiveMessage" class="w-5 h-5" [checked]="Data.canReceiveMessage" disabled>
   <label class="mb-2" for="canReceiveMessage">   {{ 'Can Receive Messages' | translate }}</label>
 </div>
+<div class="flex align-middle space-x-2 mb-4 w-full">
+  <input type="checkbox" id="canReceiveRequestFromParentOrStudent" class="w-5 h-5" [checked]="Data.canReceiveRequestFromParent" disabled>
+  <label class="mb-2" for="canReceiveRequestFromParentOrStudent">   {{ 'Can Receive Request From Parent Or Student' | translate }}</label>
+</div>
+
+<div class="flex align-middle space-x-2 mb-4 w-full">
+  <input type="checkbox" id="canReceiveMessageFromParentOrStudent" class="w-5 h-5" [checked]="Data.canReceiveMessageFromParent" disabled>
+  <label class="mb-2" for="canReceiveMessageFromParentOrStudent">   {{ 'Can Receive Messages From Parent Or Student' | translate }}</label>
+</div>
 
 <div class="flex align-middle space-x-2 rtl:space-x-reverse mb-4 w-full items-center justify-between">
     <div class="flex align-middle w-[49%] space-x-2 rtl:space-x-reverse">

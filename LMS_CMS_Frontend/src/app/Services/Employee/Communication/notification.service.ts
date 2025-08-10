@@ -1,6 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ApiService } from '../../api.service';
+import { Notification } from '../../../Models/Communication/notification';
 
 @Injectable({
   providedIn: 'root'
@@ -24,88 +25,137 @@ export class NotificationService {
       .set('Content-Type', 'application/json');
     return this.http.get<Notification[]>(`${this.baseUrl}/Notification`, { headers })
   }
+ 
+  GetByUserTypeID(userTypeID:number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<Notification[]>(`${this.baseUrl}/Notification/GetByUserTypeID/${userTypeID}`, { headers })
+  }
+ 
+  ByUserIDFirst5(DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<Notification[]>(`${this.baseUrl}/Notification/ByUserIDFirst5`, { headers })
+  }
+ 
+  ByUserID(DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<Notification[]>(`${this.baseUrl}/Notification/ByUserID`, { headers })
+  }
+ 
+  GetNotNotifiedYetByUserID(DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<Notification[]>(`${this.baseUrl}/Notification/GetNotNotifiedYetByUserID`, { headers })
+  }
   
-  // GetById(id:number ,DomainName: string) {
-  //   if (DomainName != null) {
-  //     this.header = DomainName
-  //   }
-  //   const token = localStorage.getItem("current_token");
-  //   const headers = new HttpHeaders()
-  //     .set('domain-name', this.header)
-  //     .set('Authorization', `Bearer ${token}`)
-  //     .set('Content-Type', 'application/json');
-  //   return this.http.get<DiscussionRoom>(`${this.baseUrl}/DiscussionRoom/${id}`, { headers })
-  // }
+  GetById(id:number ,DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<Notification>(`${this.baseUrl}/Notification/${id}`, { headers })
+  }
+  
+  ByUserIDAndNotificationSharedByID(notificationSharedByID:number ,DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<Notification>(`${this.baseUrl}/Notification/ByUserIDAndNotificationSharedByID/${notificationSharedByID}`, { headers })
+  }
 
-  // Add(DiscussionRoom: DiscussionRoom, DomainName: string) {
-  //   if (DomainName != null) {
-  //     this.header = DomainName;
-  //   }
+  Add(notification: Notification, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName;
+    }
 
-  //   const token = localStorage.getItem("current_token");
-  //   const headers = new HttpHeaders()
-  //     .set('domain-name', this.header)
-  //     .set('Authorization', `Bearer ${token}`);
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`);
 
-  //   const formData = new FormData();
-  //   formData.append('title', DiscussionRoom.title ?? '');  
-  //   formData.append('meetingLink', DiscussionRoom.meetingLink ?? '');  
-  //   formData.append('recordLink', DiscussionRoom.recordLink ?? '');  
-  //   formData.append('startDate', DiscussionRoom.startDate ?? '');  
-  //   formData.append('endDate', DiscussionRoom.endDate ?? '');  
-  //   formData.append('time', DiscussionRoom.time ?? '');  
-  //   formData.append('isRepeatedWeekly', DiscussionRoom.isRepeatedWeekly.toString() ?? 'false');  
-  //   DiscussionRoom.studentClassrooms.forEach(item => {
-  //     formData.append('studentClassrooms', item.toString());
-  //   }); 
+    const formData = new FormData(); ;  
+    formData.append('text', notification.text ?? '');  
+    formData.append('link', notification.link ?? '');  
+    formData.append('userTypeID', notification.userTypeID.toString() ?? '');  
+    formData.append('isAllowDismiss', notification.isAllowDismiss.toString() ?? 'false');   
 
-  //   if (DiscussionRoom.imageFile) {
-  //     formData.append('imageFile', DiscussionRoom.imageFile, DiscussionRoom.imageFile.name);
-  //   }
+    if (notification.userFilters) {
+      const uf = notification.userFilters;
 
-  //   return this.http.post(`${this.baseUrl}/DiscussionRoom`, formData, { headers });
-  // }
+      if (uf.departmentID !== null) {
+        formData.append('userFilters.departmentID', uf.departmentID.toString());
+      }
+      if (uf.employeeID !== null) {
+        formData.append('userFilters.employeeID', uf.employeeID.toString());
+      }
+      if (uf.schoolID !== null) {
+        formData.append('userFilters.schoolID', uf.schoolID.toString());
+      }
+      if (uf.sectionID !== null) {
+        formData.append('userFilters.sectionID', uf.sectionID.toString());
+      }
+      if (uf.gradeID !== null) {
+        formData.append('userFilters.gradeID', uf.gradeID.toString());
+      }
+      if (uf.classroomID !== null) {
+        formData.append('userFilters.classroomID', uf.classroomID.toString());
+      }
+      if (uf.studentID !== null) {
+        formData.append('userFilters.studentID', uf.studentID.toString());
+      }
+    }
 
-  // Edit(DiscussionRoom: DiscussionRoom, DomainName: string) {
-  //   if (DomainName != null) {
-  //     this.header = DomainName;
-  //   }
+    if (notification.imageFile) {
+      formData.append('imageFile', notification.imageFile, notification.imageFile.name);
+    }
 
-  //   const token = localStorage.getItem("current_token");
-  //   const headers = new HttpHeaders()
-  //     .set('domain-name', this.header)
-  //     .set('Authorization', `Bearer ${token}`);
+    return this.http.post(`${this.baseUrl}/Notification`, formData, { headers });
+  } 
 
-  //   const formData = new FormData();
-  //   formData.append('id', DiscussionRoom.id.toString() ?? '');
-  //   formData.append('title', DiscussionRoom.title.toString() ?? ''); 
-  //   formData.append('meetingLink', DiscussionRoom.meetingLink ?? '');  
-  //   formData.append('recordLink', DiscussionRoom.recordLink ?? '');  
-  //   formData.append('startDate', DiscussionRoom.startDate ?? '');  
-  //   formData.append('endDate', DiscussionRoom.endDate ?? '');  
-  //   formData.append('time', DiscussionRoom.time ?? '');  
-  //   formData.append('isRepeatedWeekly', DiscussionRoom.isRepeatedWeekly.toString() ?? 'false');  
-  //   DiscussionRoom.studentClassrooms.forEach(item => {
-  //     formData.append('studentClassrooms', item.toString());
-  //   }); 
-  //   formData.append('imageLink', DiscussionRoom.imageLink?.toString() ?? '');
-
-  //   if (DiscussionRoom.imageFile) {
-  //     formData.append('imageFile', DiscussionRoom.imageFile, DiscussionRoom.imageFile.name);
-  //   }
-
-  //   return this.http.put(`${this.baseUrl}/DiscussionRoom`, formData, { headers });
-  // }
-
-  // Delete(id: number, DomainName: string) {
-  //   if (DomainName != null) {
-  //     this.header = DomainName
-  //   }
-  //   const token = localStorage.getItem("current_token");
-  //   const headers = new HttpHeaders()
-  //     .set('domain-name', this.header)
-  //     .set('Authorization', `Bearer ${token}`)
-  //     .set('Content-Type', 'application/json');
-  //   return this.http.delete(`${this.baseUrl}/DiscussionRoom/${id}`, { headers })
-  // }
+  Delete(id: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.delete(`${this.baseUrl}/Notification/${id}`, { headers })
+  }
 }

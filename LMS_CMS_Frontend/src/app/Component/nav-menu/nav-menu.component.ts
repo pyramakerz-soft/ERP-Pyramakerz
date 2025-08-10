@@ -8,13 +8,16 @@ import { jwtDecode } from 'jwt-decode';
 import { Router } from '@angular/router';
 import { NewTokenService } from '../../Services/shared/new-token.service';
 import { LogOutService } from '../../Services/shared/log-out.service';
-import { Subscription } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import { LanguageService } from '../../Services/shared/language.service';
 import { EditPass } from '../../Models/Employee/edit-pass';
 import Swal from 'sweetalert2';
 import { EmployeeService } from '../../Services/Employee/employee.service';
 import { ApiService } from '../../Services/api.service';
 import { OctaService } from '../../Services/Octa/octa.service';
+import { NotificationService } from '../../Services/Employee/Communication/notification.service';
+import { Notification } from '../../Models/Communication/notification';
+import { RealTimeNotificationServiceService } from '../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-nav-menu',
@@ -24,12 +27,12 @@ import { OctaService } from '../../Services/Octa/octa.service';
   styleUrl: './nav-menu.component.css'
 })
 export class NavMenuComponent {
-
   dropdownOpen: boolean = false;
   selectedLanguage: string = "English";
   User_Type: string = "";
   userName: string = "";
   isPopupOpen = false;
+  isNotificationPopupOpen = false;
   allTokens: { id: number, key: string; KeyInLocal: string; value: string; UserType: string }[] = [];
   User_Data_After_Login = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   subscription: Subscription | undefined;
@@ -41,8 +44,14 @@ export class NavMenuComponent {
   editpasss:EditPass=new EditPass();
   DomainName: string = "";
 
+  notifications: Notification[] = []
+  notificationByID:Notification = new Notification()
+  
+  private destroy$ = new Subject<void>();
+  
   constructor(private router: Router, public account: AccountService, public languageService: LanguageService, public ApiServ: ApiService, public octaService:OctaService,
-    private translate: TranslateService, private communicationService: NewTokenService, private logOutService: LogOutService) { }
+    private translate: TranslateService, private communicationService: NewTokenService, private logOutService: LogOutService, 
+    private notificationService: NotificationService, private realTimeService: RealTimeNotificationServiceService) { }
 
   ngOnInit() {
     this.GetUserInfo();
@@ -109,21 +118,44 @@ export class NavMenuComponent {
   togglePopup(): void {
     this.getAllTokens();
     this.isPopupOpen = !this.isPopupOpen;
+    this.isNotificationPopupOpen = false;
+  }
+  
+  toggleNotificationPopup(){
+    this.notifications = []
+    this.isPopupOpen = false;
+    this.isNotificationPopupOpen = !this.isNotificationPopupOpen;
+    this.notificationService.ByUserIDFirst5(this.DomainName).subscribe(
+      data => {
+        this.notifications = data
+      }
+    )
   }
 
   @HostListener('document:click', ['$event'])
-  onDocumentClick(event: MouseEvent) {
+  onDocumentClick(event: MouseEvent) { 
     const target = event.target as HTMLElement;
-    const dropdown = document.querySelector('.dropdown-container') as HTMLElement;
+    const dropdowns = document.querySelectorAll('.dropdown-container');
 
-    if (dropdown && !dropdown.contains(target)) {
+    let clickedInsideAny = false;
+    dropdowns.forEach(dropdown => {
+      if (dropdown.contains(target)) {
+        clickedInsideAny = true;
+      }
+    });
+
+    if (!clickedInsideAny) {
       this.isPopupOpen = false;
+      this.isNotificationPopupOpen = false;
     }
   }
 
   // Cleanup event listener
   ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
     document.removeEventListener('click', this.onDocumentClick);
+    this.realTimeService.stopConnection();
   } 
 
   ChangeAccount(id: number): void {
@@ -131,10 +163,19 @@ export class NavMenuComponent {
     const token = localStorage.getItem("current_token")
     this.togglePopup();
     if (tokenObject && token != tokenObject.value) {
+      // First stop any existing SignalR connection
+      this.realTimeService.stopConnection();
+
       localStorage.removeItem("current_token");
       localStorage.setItem("current_token", tokenObject.value);
       this.User_Data_After_Login = jwtDecode(tokenObject.value)
       this.userName = this.User_Data_After_Login.user_Name
+
+      // Restart SignalR connection for the new account
+      setTimeout(() => {
+        this.realTimeService.startConnection();
+      }, 100);
+      
       this.communicationService.sendAction(true);
       this.router.navigateByUrl("")
     }
@@ -205,7 +246,7 @@ export class NavMenuComponent {
     this.confirmPassword = ""; 
     this.isLoading = false;
     this.editpasss = new EditPass();
-  }
+  } 
 
   onPasswordChange() {
     this.PasswordError = "" 
@@ -318,5 +359,54 @@ export class NavMenuComponent {
         }
       }
     }
+  }
+
+  viewAllNotifications() {
+    this.router.navigateByUrl('CommunicationModule/My Notifications')
+  }
+
+  formatInsertedAt(dateString: string | Date): string {
+    if (!dateString) return '';
+
+    const date = new Date(dateString);
+    const now = new Date();
+
+    const isToday = date.toDateString() === now.toDateString();
+
+    const yesterday = new Date();
+    yesterday.setDate(now.getDate() - 1);
+    const isYesterday = date.toDateString() === yesterday.toDateString();
+
+    const time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    if (isToday) { 
+      return `Today, ${time}`; 
+    } else if (isYesterday) {
+      return `Yesterday, ${time}`; 
+    } else {
+      const dateStr = date.toLocaleDateString();
+      return `${dateStr}, ${time}`;
+    }
+  }
+
+  getImageName(imageLink: string): string {
+    const parts = imageLink.split('/');
+    return parts[parts.length - 1];
+  }
+
+  viewNotification(notificationShared:Notification){
+    this.notificationByID = new Notification()
+    this.notificationService.ByUserIDAndNotificationSharedByID(notificationShared.id, this.DomainName).subscribe(
+      data => {
+        this.notificationByID = data
+        document.getElementById("NotificationModal")?.classList.remove("hidden");
+        document.getElementById("NotificationModal")?.classList.add("flex");
+      }
+    )
+  } 
+
+  closeNotificationModal() {
+    document.getElementById("NotificationModal")?.classList.remove("flex");
+    document.getElementById("NotificationModal")?.classList.add("hidden"); 
   }
 }

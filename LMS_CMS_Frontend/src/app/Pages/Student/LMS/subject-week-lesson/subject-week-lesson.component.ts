@@ -56,7 +56,6 @@ export class SubjectWeekLessonComponent {
     this.mode = "Activity";
     this.LessonActivityServ.GetByWeekIDGroupByType(this.SubjectID, this.WeekId, this.DomainName).subscribe((d) => {
       this.LessonActivityTypeData = d.data
-      console.log(this.LessonActivityTypeData)
       this.SubjectName = d.subjectName
       this.WeekName = d.weekName
     })

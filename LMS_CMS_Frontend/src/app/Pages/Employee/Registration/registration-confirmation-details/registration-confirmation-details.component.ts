@@ -99,7 +99,6 @@ export class RegistrationConfirmationDetailsComponent {
         this.RegistrationFormData.categories.forEach(element => {
           element.fields.sort((a, b) => a.orderInForm - b.orderInForm)
         });
-        console.log(this.RegistrationFormData)
       }
     )
   }
@@ -108,7 +107,6 @@ export class RegistrationConfirmationDetailsComponent {
     this.registrationFormSubmissionService.GetByRegistrationParentID(this.registrationParentID, this.DomainName).subscribe(
       (data) => {
         this.registrationFormSubmissionConfirmationData = data; 
-        console.log( this.registrationFormSubmissionConfirmationData)
       }
     )
   }
@@ -125,7 +123,6 @@ export class RegistrationConfirmationDetailsComponent {
     this.registrationFormParentService.GetById(this.registrationParentID, this.DomainName).subscribe(
       (data) => {
         this.RegisterationFormParentData = data;
-        console.log(1,this.RegisterationFormParentData)
         this.selectedState = this.RegisterationFormParentData.registerationFormStateID
       }
     )
@@ -135,7 +132,7 @@ export class RegistrationConfirmationDetailsComponent {
     if(this.path=='Registration Confirmation'){
       this.router.navigateByUrl(`Employee/Registration Confirmation`)
     }
-    else if(this.path=='Student View'){
+    else if(this.path=='Student'){
       this.router.navigateByUrl(`Employee/Student`)
     }
   }

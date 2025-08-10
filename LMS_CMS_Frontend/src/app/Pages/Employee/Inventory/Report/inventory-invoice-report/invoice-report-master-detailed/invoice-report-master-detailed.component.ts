@@ -55,7 +55,6 @@ export class InvoiceReportMasterDetailedComponent implements OnInit {
     reportHeaderTwoEn: 'Transaction Details',
     reportHeaderOneAr: 'تقرير المخزون',
     reportHeaderTwoAr: 'تفاصيل المعاملة',
-    reportImage: 'assets/images/logo.png',
   };
 
   availableFlags: { [key: string]: FlagOption[] } = {
@@ -212,20 +211,22 @@ export class InvoiceReportMasterDetailedComponent implements OnInit {
   }
 
   viewReport() {
+    console.log('Viewing report with filters');
     if (!this.validateFilters()) return;
+    console.log('2');
 
     this.isLoading = true;
-    this.showTable = false;
+        console.log('3');
 
-    const formattedDateFrom = this.formatDateForAPI(this.dateFrom);
-    const formattedDateTo = this.formatDateForAPI(this.dateTo);
+    this.showTable = false;
+        console.log('nooooooooooo');
 
     this.inventoryMasterService
       .search(
         this.inventoryMasterService.ApiServ.GetHeader(),
         this.selectedStoreId,
-        formattedDateFrom,
-        formattedDateTo,
+        this.dateFrom,
+        this.dateTo,
         this.selectedFlagIds,
         this.selectedCategoryId,
         this.selectedSubCategoryId,
@@ -237,22 +238,28 @@ export class InvoiceReportMasterDetailedComponent implements OnInit {
         next: (response: any) => {
           console.log(response);
           if (Array.isArray(response)) {
+            console.log('Response is an array');
             this.transactions = response;
             this.totalRecords = response.length;
             this.totalPages = Math.ceil(response.length / this.pageSize);
           } else if (response?.data) {
+            console.log('Response contains data property');
             this.transactions = response.data;
+            console.log('Transactions loaded:');
             this.totalRecords =
               response.pagination?.totalRecords || response.data.length;
             this.totalPages =
               response.pagination?.totalPages ||
               Math.ceil(response.data.length / this.pageSize);
           } else {
+            console.warn('Unexpected response format:');
             this.transactions = [];
           }
 
           this.prepareExportData();
+          console.log('prep');
           this.showTable = true;
+          console.log('show table removed');
           this.isLoading = false;
         },
         error: (error) => {
@@ -314,35 +321,35 @@ export class InvoiceReportMasterDetailedComponent implements OnInit {
     }));
   }
 
-  getInfoRows(): any[] {
-    const rows = [
-      { keyEn: 'From Date: ' + this.dateFrom, valueEn: '' },
-      { keyEn: 'To Date: ' + this.dateTo, valueEn: '' },
-      { keyEn: 'Store: ' + this.getStoreName(), valueEn: '' },
-    ];
+  // getInfoRows(): any[] {
+  //   const rows = [
+  //     { keyEn: 'From Date: ' + this.dateFrom, valueEn: '' },
+  //     { keyEn: 'To Date: ' + this.dateTo, valueEn: '' },
+  //     { keyEn: 'Store: ' + this.getStoreName(), valueEn: '' },
+  //   ];
 
-    // Add student/supplier info if available
-    if (
-      this.reportType === 'sales' &&
-      this.transactions.some((t) => t.studentName)
-    ) {
-      rows.push({
-        keyEn: 'Student: ' + (this.transactions[0]?.studentName || 'N/A'),
-        valueEn: '',
-      });
-    }
-    if (
-      this.reportType === 'purchase' &&
-      this.transactions.some((t) => t.supplierName)
-    ) {
-      rows.push({
-        keyEn: 'Supplier: ' + (this.transactions[0]?.supplierName || 'N/A'),
-        valueEn: '',
-      });
-    }
+  //   // Add student/supplier info if available
+  //   if (
+  //     this.reportType === 'sales' &&
+  //     this.transactions.some((t) => t.studentName)
+  //   ) {
+  //     rows.push({
+  //       keyEn: 'Student: ' + (this.transactions[0]?.studentName || 'N/A'),
+  //       valueEn: '',
+  //     });
+  //   }
+  //   if (
+  //     this.reportType === 'purchase' &&
+  //     this.transactions.some((t) => t.supplierName)
+  //   ) {
+  //     rows.push({
+  //       keyEn: 'Supplier: ' + (this.transactions[0]?.supplierName || 'N/A'),
+  //       valueEn: '',
+  //     });
+  //   }
 
-    return rows;
-  }
+  //   return rows;
+  // }
 
   getStoreName(): string {
     return (
@@ -351,21 +358,21 @@ export class InvoiceReportMasterDetailedComponent implements OnInit {
     );
   }
 
-  private formatDateForAPI(dateString: string): string {
-    if (!dateString) return '';
+  // private formatDateForAPI(dateString: string): string {
+  //   if (!dateString) return '';
 
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) {
-      console.error('Invalid date:', dateString);
-      return '';
-    }
+  //   const date = new Date(dateString);
+  //   if (isNaN(date.getTime())) {
+  //     console.error('Invalid date:', dateString);
+  //     return '';
+  //   }
 
-    // Format as DD/MM/YYYY (what backend expects)
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
-  }
+  //   // Format as DD/MM/YYYY (what backend expects)
+  //   const day = date.getDate().toString().padStart(2, '0');
+  //   const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  //   const year = date.getFullYear();
+  //   return `${day}/${month}/${year}`;
+  // }
 
   private validateFilters(): boolean {
     return !!this.dateFrom && !!this.dateTo && this.selectedFlagIds.length > 0;
@@ -373,6 +380,30 @@ export class InvoiceReportMasterDetailedComponent implements OnInit {
   changePage(page: number) {
     this.currentPage = page;
     this.viewReport();
+  }
+
+  get visiblePages(): number[] {
+    const total = this.totalPages;
+    const current = this.currentPage;
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const half = Math.floor(maxVisible / 2);
+    let start = current - half;
+    let end = current + half;
+
+    if (start < 1) {
+      start = 1;
+      end = maxVisible;
+    } else if (end > total) {
+      end = total;
+      start = total - maxVisible + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   }
 
   DownloadAsPDF() {

@@ -5,6 +5,7 @@ import { ClassroomSubject } from '../../../Models/LMS/classroom-subject';
 import { ClassroomSubjectGroupBy } from '../../../Models/LMS/classroom-subject-group-by';
 import { ClassroomSubjectCoTeacher } from '../../../Models/LMS/classroom-subject-co-teacher';
 import { StudentClassWhenSubject } from '../../../Models/LMS/student-class-when-subject';
+import { Employee } from '../../../Models/Employee/employee';
 
 @Injectable({
   providedIn: 'root'
@@ -51,6 +52,18 @@ export class ClassroomSubjectService {
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
     return this.http.get<ClassroomSubjectGroupBy[]>(`${this.baseUrl}/ClassroomSubject/GetByEmployee/${EmpId}`, { headers });
+  }
+
+  GetBySubjectId(SubjectId: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<Employee[]>(`${this.baseUrl}/ClassroomSubject/GetBySubject/${SubjectId}`, { headers });
   }
 
   GetByEmpCoTeacherId(EmpId: number, DomainName: string) {

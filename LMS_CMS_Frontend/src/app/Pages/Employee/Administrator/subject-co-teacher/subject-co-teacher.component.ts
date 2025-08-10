@@ -92,7 +92,6 @@ export class SubjectCoTeacherComponent {
   GetData() {
     this.ClassroomSubjectServ.GetByEmpCoTeacherId(this.SupjectCoTeacher.coTeacherID, this.DomainName).subscribe((d) => {
       this.SupjectTeacherData = d
-      console.log(this.SupjectTeacherData)
     })
   }
 
@@ -124,8 +123,6 @@ export class SubjectCoTeacherComponent {
           assigned.classroomID === sub.classroomID
         )
       );
-
-      console.log('Filtered subjects:', this.subject); // ✅ Only subjects NOT assigned to this teacher
     });
   }
 
@@ -151,7 +148,6 @@ export class SubjectCoTeacherComponent {
           this.closeModal();
         },
         error: (err) => {
-          console.log(err)
           Swal.fire({
             icon: 'error',
             title: 'Error',

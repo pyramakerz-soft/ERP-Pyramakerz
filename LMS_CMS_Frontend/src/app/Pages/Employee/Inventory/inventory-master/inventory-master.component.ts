@@ -140,6 +140,8 @@ export class InventoryMasterComponent {
 
   async onSearchEvent(event: { key: string; value: any }) {
     this.PageSize = this.TotalRecords
+    this.CurrentPage = 1
+    this.TotalPages = 1
     this.key = event.key;
     this.value = event.value;
     try {
@@ -154,7 +156,6 @@ export class InventoryMasterComponent {
           : parseInt(this.value, 10);
         if (this.key === 'date') {
           const searchDate = this.value.slice(0, 10); // 'YYYY-MM-DD'
-          console.log("searchDate",searchDate)
           this.TableData = this.TableData.filter((t) => {
             const fieldValue = t[this.key as keyof typeof t];
             if (typeof fieldValue === 'string') {
@@ -222,6 +223,30 @@ export class InventoryMasterComponent {
     if (isNaN(value) || value === '') {
       event.target.value = '';
     }
+  }
+
+  get visiblePages(): number[] {
+    const total = this.TotalPages;
+    const current = this.CurrentPage;
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const half = Math.floor(maxVisible / 2);
+    let start = current - half;
+    let end = current + half;
+
+    if (start < 1) {
+      start = 1;
+      end = maxVisible;
+    } else if (end > total) {
+      end = total;
+      start = total - maxVisible + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   }
 
   View(id: number) {

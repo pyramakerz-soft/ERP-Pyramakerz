@@ -254,7 +254,7 @@ export class DailyPerformanceComponent {
         updatedIds.add(studentId);
       }
     }
-    if (this.selectedStudentIds.length > 0) {
+    if (this.selectedStudentIds.length > 0 && this.selectedStudentIds.includes(studentId)) {
       this.selectedStudentIds.forEach(id => {
         if (updatedIds.has(id)) return;
         const daily = this.RatedStudent.find(e => e.studentID === id);

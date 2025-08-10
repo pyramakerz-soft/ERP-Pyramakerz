@@ -85,8 +85,7 @@ export class InventoryTransactionReportComponent implements OnInit {
     reportHeaderOneEn: 'Inventory Report',
     reportHeaderTwoEn: 'Transaction Summary',
     reportHeaderOneAr: 'تقرير المخزون',
-    reportHeaderTwoAr: 'ملخص المعاملات',
-    reportImage: 'assets/images/logo.png',
+    reportHeaderTwoAr: 'ملخص المعاملات'
   };
 
   @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;
@@ -155,7 +154,7 @@ export class InventoryTransactionReportComponent implements OnInit {
     this.route.data.subscribe((data) => {
       this.reportType = data['reportType'];
       this.currentFlags = this.availableFlags[this.reportType];
-      this.selectedFlagIds = this.getAllFlagsForReportType(); // Default to all flags
+      this.selectedFlagIds = this.getAllFlagsForReportType();
     });
     this.loadStores();
     this.loadCategories();
@@ -286,15 +285,12 @@ export class InventoryTransactionReportComponent implements OnInit {
     this.isLoading = true;
     this.showTable = false;
 
-    const formattedDateFrom = this.formatDateForAPI(this.dateFrom);
-    const formattedDateTo = this.formatDateForAPI(this.dateTo);
-
     this.inventoryMasterService
       .searchInvoice(
         this.inventoryMasterService.ApiServ.GetHeader(),
         this.selectedStoreId, // Can be null for "Select All"
-        formattedDateFrom,
-        formattedDateTo,
+        this.dateFrom,
+        this.dateTo,
         this.selectedFlagIds, // Already contains all flags by default
         this.selectedCategoryId,
         this.selectedSubCategoryId,
@@ -343,31 +339,56 @@ export class InventoryTransactionReportComponent implements OnInit {
     }));
   }
 
-  private formatDateForAPI(dateString: string): string {
-    if (!dateString) return '';
+  // private formatDateForAPI(dateString: string): string {
+  //   if (!dateString) return '';
 
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) {
-      console.error('Invalid date:', dateString);
-      return '';
-    }
+  //   const date = new Date(dateString);
+  //   if (isNaN(date.getTime())) {
+  //     console.error('Invalid date:', dateString);
+  //     return '';
+  //   }
 
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
-  }
+  //   const day = date.getDate().toString().padStart(2, '0');
+  //   const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  //   const year = date.getFullYear();
+  //   return `${day}/${month}/${year}`;
+  // }
 
   changePage(page: number) {
     this.currentPage = page;
     this.viewReport();
   }
 
-  DownloadAsPDF() {
-    if (this.transactionsForExport.length === 0) {
-      Swal.fire('Warning', 'No data to export!', 'warning');
-      return;
+  get visiblePages(): number[] {
+    const total = this.totalPages;
+    const current = this.currentPage;
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
     }
+
+    const half = Math.floor(maxVisible / 2);
+    let start = current - half;
+    let end = current + half;
+
+    if (start < 1) {
+      start = 1;
+      end = maxVisible;
+    } else if (end > total) {
+      end = total;
+      start = total - maxVisible + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
+
+  DownloadAsPDF() {
+    console.log('Downloading PDF with transactions:', this.transactionsForExport);
+    // if (this.transactionsForExport.length === 0) {
+    //   Swal.fire('Warning', 'No data to export!', 'warning');
+    //   return;
+    // }
 
     this.showPDF = true;
     setTimeout(() => {

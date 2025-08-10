@@ -253,6 +253,30 @@ export class SearchStudentComponent {
     }
   }
 
+  get visiblePages(): number[] {
+    const total = this.TotalPages;
+    const current = this.CurrentPage;
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const half = Math.floor(maxVisible / 2);
+    let start = current - half;
+    let end = current + half;
+
+    if (start < 1) {
+      start = 1;
+      end = maxVisible;
+    } else if (end > total) {
+      end = total;
+      start = total - maxVisible + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
+  
   toggleSelection(studentId: number, isChecked?: boolean) {
     if (isChecked) {
       if (!this.selectedStudents.includes(studentId)) {
@@ -295,7 +319,7 @@ export class SearchStudentComponent {
   
   
     View(id: number) {
-      this.router.navigateByUrl(`Employee/Student View/` + id);
+      this.router.navigateByUrl(`Employee/Student/` + id);
     }
   
     Delete(id: number) {

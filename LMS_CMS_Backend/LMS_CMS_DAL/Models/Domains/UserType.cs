@@ -20,5 +20,10 @@ namespace LMS_CMS_DAL.Models.Domains
         public ICollection<AnnouncementSharedTo> AnnouncementSharedTos { get; set; } = new List<AnnouncementSharedTo>();
         public ICollection<NotificationSharedTo> NotificationSharedTos { get; set; } = new List<NotificationSharedTo>();
         public ICollection<Notification> Notifications { get; set; } = new List<Notification>();
+        public ICollection<ChatMessage> SenderChatMessages { get; set; } = new List<ChatMessage>();
+        public ICollection<ChatMessage> ReceiverChatMessages { get; set; } = new List<ChatMessage>();
+        public ICollection<Request> SenderRequests { get; set; } = new List<Request>();
+        public ICollection<Request> ReceiverRequests { get; set; } = new List<Request>();
+
     }
 }

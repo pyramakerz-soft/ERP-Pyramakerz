@@ -20,6 +20,9 @@ using Amazon.S3;
 using Amazon.SecretsManager;
 using Amazon;
 using System;
+using LMS_CMS_PL.Hubs;
+using LMS_CMS_PL.Services.SignalR;
+using Microsoft.AspNetCore.SignalR;
 
 namespace LMS_CMS
 {
@@ -94,6 +97,24 @@ namespace LMS_CMS
                         ValidAudience = builder.Configuration["JWT:Audience"],
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]))
                     };
+
+                    // Add these for SignalR
+                    option.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            var accessToken = context.Request.Query["access_token"];
+
+                            // If the request is for our hub...
+                            var path = context.HttpContext.Request.Path;
+                            if (!string.IsNullOrEmpty(accessToken) &&
+                                path.StartsWithSegments("/notificationHub"))
+                            { 
+                                context.Token = accessToken;
+                            }
+                            return Task.CompletedTask;
+                        }
+                    };
                 });
 
 
@@ -124,6 +145,7 @@ namespace LMS_CMS
             builder.Services.AddScoped<DomainService>();
             builder.Services.AddScoped<IamNotRobot>();
             builder.Services.AddScoped<UserTreeService>();
+            builder.Services.AddScoped<NotificationService>();
 
             builder.Services.AddAWSService<IAmazonSecretsManager>(new Amazon.Extensions.NETCore.Setup.AWSOptions
             {
@@ -135,13 +157,14 @@ namespace LMS_CMS
             {
                 option.AddPolicy(txt, builder =>
                 {
-                    builder.AllowAnyOrigin()
+                    builder.WithOrigins("http://localhost:4200")
                            .AllowAnyMethod()
                            .AllowAnyHeader()
                            .WithHeaders("content-type", "Domain-Name")
-                           .WithExposedHeaders("Content-Disposition");
+                           .WithExposedHeaders("Content-Disposition")
+                           .AllowCredentials();
                 });
-            });
+            }); 
 
             /// For generic repo:
             builder.Services.AddScoped<UOW>();
@@ -169,7 +192,13 @@ namespace LMS_CMS
             });
 
 
-
+            // 1) SignalR 
+            //builder.Services.AddSignalR();
+            builder.Services.AddSignalR(hubOptions =>
+            {
+                hubOptions.EnableDetailedErrors = true;
+                hubOptions.KeepAliveInterval = TimeSpan.FromMinutes(1);
+            });
 
             var app = builder.Build();
 
@@ -196,10 +225,16 @@ namespace LMS_CMS
 
 
             //////// Get Connection String
-            app.UseWhen(context => context.Request.Path.StartsWithSegments("/api/with-domain"), appBuilder =>
+            app.UseWhen(context => context.Request.Path.StartsWithSegments("/api/with-domain"),
+                appBuilder =>
             {
                 appBuilder.UseMiddleware<GetConnectionStringMiddleware>();
             });
+            //app.UseWhen(context => context.Request.Path.StartsWithSegments("/api/with-domain"), 
+            //    appBuilder =>
+            //{
+            //    appBuilder.UseMiddleware<GetConnectionStringMiddleware>();
+            //}); 
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -216,6 +251,11 @@ namespace LMS_CMS
             app.UseMiddleware<Endpoint_Authorization_Middleware>();
              
             app.UseAuthorization();
+
+
+            // 2) SignalR
+            app.MapHub<NotificationHub>("/notificationHub").RequireAuthorization();
+
 
             //app.Urls.Add("http://0.0.0.0:5000");
             //app.UseCors(builder =>

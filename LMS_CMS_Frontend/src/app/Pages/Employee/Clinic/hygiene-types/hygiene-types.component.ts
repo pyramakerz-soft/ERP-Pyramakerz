@@ -61,11 +61,6 @@ isRtl: boolean = false;
       );
       this.hygieneTypes = data.map((item) => {
         const insertedAtDate = new Date(item.insertedAt);
-
-        // Log the raw and parsed date for debugging
-        console.log('Raw insertedAt:', item.insertedAt);
-        console.log('Parsed Date:', insertedAtDate);
-
         const options: Intl.DateTimeFormatOptions = {
           year: 'numeric',
           month: 'long',

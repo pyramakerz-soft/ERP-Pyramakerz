@@ -253,7 +253,6 @@ export class TimeTableReplaceComponent {
         targetSession.sessionId
       )
     );
-    console.log(this.SessionReplaced);
     const targetSessionCopy = JSON.parse(JSON.stringify(targetSession));
     this.swapSubjects(targetSession, this.draggedSession);
     if (this.dragFromcard == true) {
@@ -422,7 +421,7 @@ export class TimeTableReplaceComponent {
         });
         this.isLoading = false;
         this.router.navigateByUrl(
-          `Employee/Time Table View/` + this.TimeTableId
+          `Employee/Time Table/` + this.TimeTableId
         );
       },
       (error) => {

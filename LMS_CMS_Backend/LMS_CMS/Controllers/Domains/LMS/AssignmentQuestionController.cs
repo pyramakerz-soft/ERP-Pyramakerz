@@ -107,7 +107,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             {
                 return BadRequest("Assignment Question cannot be null");
             }
-
+            var count = 0;
             Assignment assignment = Unit_Of_Work.assignment_Repository.First_Or_Default(a => a.ID == newData.AssignmentID && a.IsDeleted != true);
             if (assignment == null)
             {
@@ -238,7 +238,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
                                 Unit_Of_Work.assignmentQuestion_Repository.Update(softDeletedAssignment);
                                 Unit_Of_Work.SaveChanges();
-
+                                count++;
                                 activeQuestionIds.Add(q.ID); // track restored
                                 continue;
                             }
@@ -254,12 +254,17 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                             };
 
                             Unit_Of_Work.assignmentQuestion_Repository.Add(assignmentQuestion);
+                            count++;
                             Unit_Of_Work.SaveChanges();
 
                             activeQuestionIds.Add(q.ID);
                         }
                     }
                 }
+            }
+            if(assignment.AssignmentTypeID == 3 && count == 0)
+            {
+                return BadRequest("There Is No Questions in This Lesson");
             }
             return Ok();
         }

@@ -138,6 +138,8 @@ export class InstallmentDeductionMasterComponent {
 
   async onSearchEvent(event: { key: string; value: any }) {
     this.PageSize = this.TotalRecords
+    this.CurrentPage = 1
+    this.TotalPages = 1
     this.key = event.key;
     this.value = event.value;
     try {
@@ -207,6 +209,30 @@ export class InstallmentDeductionMasterComponent {
     }
   }
 
+  get visiblePages(): number[] {
+    const total = this.TotalPages;
+    const current = this.CurrentPage;
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const half = Math.floor(maxVisible / 2);
+    let start = current - half;
+    let end = current + half;
+
+    if (start < 1) {
+      start = 1;
+      end = maxVisible;
+    } else if (end > total) {
+      end = total;
+      start = total - maxVisible + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
+  
   View(id:number){
     this.router.navigateByUrl(`Employee/Installment Deduction Details/View/${id}`)
   }

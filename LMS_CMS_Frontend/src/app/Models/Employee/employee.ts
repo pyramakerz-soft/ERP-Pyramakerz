@@ -10,5 +10,7 @@ export class Employee {
         public employeeTypeID: number = 0,
         public canReceiveRequest: boolean = false,
         public canReceiveMessage: boolean = false,
+        public canReceiveRequestFromParent: boolean = false,
+        public canReceiveMessageFromParent: boolean = false,
     ) {}
 }

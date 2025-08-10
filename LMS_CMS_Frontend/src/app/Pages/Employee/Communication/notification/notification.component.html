@@ -1,1 +1,294 @@
-<p>  {{ 'notification works!' | translate }}</p>
+
+<div class="">
+    <div class="flex justify-between">
+        <h1 class="primaryTxt font-semibold text-2xl leading-9">Notification</h1>
+        <div class="flex justify-between items-center"> 
+            <button (click)="openModal()"
+                class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
+                Create Notification
+            </button>
+        </div>
+    </div> 
+
+    <div class="mt-5 flex justify-between items-center">
+        <div class="w-[95%]">
+            <label for="filter" class="primaryTxt lock mb-2 text-sm font-medium">Filter By</label>
+            <select id="filter" [(ngModel)]="selectedUserTypeId" (change)="filterByTypeID($event)"
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5">
+                <option value="0" disabled selected hidden>Choose User Type</option>
+                <option *ngFor="let userType of userTypes" [value]="userType.id">
+                    {{ userType.title }}
+                </option>
+            </select> 
+        </div>
+        <div class="rounded-full p-2 border-4 cursor-pointer" (click)="ResetFilter()">
+            <i class="fa-solid fa-rotate-left secondaryTxt text-2xl w-8 h-8 text-center hover:cursor-pointer rounded-full"></i>
+        </div>
+    </div>
+
+    <div>
+        <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
+            <table class="w-full table inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
+                <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+                    <tr>
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            ID
+                        </th>
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            Text
+                        </th>
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            Link
+                        </th>
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            Image
+                        </th>
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            Is Allow Dismiss
+                        </th>
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            User Type
+                        </th> 
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            Actions
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- No Data Row -->
+                    <tr *ngIf="TableData.length === 0">
+                        <td colspan="7"
+                            class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                            No Data Found
+                        </td>
+                    </tr>
+
+                    <!-- Data Rows -->
+                    <tr *ngFor="let row of TableData; let i = index"
+                        [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
+                        class="border-t border-gray-300 text-xs md:text-sm">
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ row.id }}
+                        </td>
+                        <td class="truncate-cell py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0" [title]="row.text">
+                            {{ row.text }}
+                        </td>
+                        <td class="truncate-cell py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0" [title]="row.link">
+                            {{ row.link }}
+                        </td>
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            <img *ngIf="row.imageLink" [src]="row.imageLink" class="w-[200px] object-cover">
+                        </td>
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0"> 
+                            <i *ngIf="row.isAllowDismiss" class="secondaryTxt text-2xl fa-regular fa-square-check"></i>
+                            <i *ngIf="!row.isAllowDismiss" class="text-[#BDBDBD] text-2xl fa-regular fa-square"></i> 
+                        </td>   
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ row.userTypeName }}
+                        </td>
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            <div class="flex space-x-4">
+                                <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)"
+                                    (click)="Delete(row.id)">
+                                    <i class="fa-regular fa-trash-can"></i>
+                                </button> 
+                                <button (click)="openModal(row.id)">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+ 
+
+
+<div id="Add_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
+    <div class="bg-white rounded-2xl p-12 w-[669px] max-h-[90%] overflow-y-auto">
+        <div class="flex justify-between items-center">
+            <h1 *ngIf="notification.id == 0" class="font-semibold text-2xl leading-9">Create Notification</h1>
+            <h1 *ngIf="notification.id != 0" class="font-semibold text-2xl leading-9">Notification</h1>
+            <button (click)="closeModal()" type="button"
+                class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
+        </div>
+
+        <div class="mt-6 mb-4 flex justify-between flex-wrap"> 
+            <div class="w-full m-auto">
+                <div class="mb-7 flex justify-center">
+                    <img src="Images/LogoInLogin3.png" alt="Avatar">
+                </div>
+    
+                <div class="flex justify-center items-center space-x-2 mb-4 m-auto">
+                    <div>
+                        <img [src]="isStudentHovered ? 'Images/Student_Hover.png' : 'Images/student.png'" alt="Student"
+                        (click)="notification.id == 0 && selectType(2)" [class.cursor-pointer]="notification.id == 0">
+                    </div>
+                    <div>
+                        <img [src]="isParentHovered ? 'Images/parent_hover.png' : 'Images/parent.png'" alt="Parent"
+                        (click)="notification.id == 0 && selectType(3)" [class.cursor-pointer]="notification.id == 0">
+                    </div>
+                    <div>
+                        <img [src]="isEmployeeHovered ? 'Images/employee_hover.png' : 'Images/employee.png'" alt="Employee"
+                        (click)="notification.id == 0 && selectType(1)" [class.cursor-pointer]="notification.id == 0">
+                    </div>
+                </div> 
+            </div>
+
+            <div *ngIf="notification.id == 0" class="w-full">
+                <div *ngIf="isEmployeeHovered" class="w-full">
+                    <div class="flex flex-col w-full mb-4">
+                        <label class="primaryTxt mb-2" for="Department">Department</label>
+                        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Department" 
+                        [(ngModel)]="notification.userFilters.departmentID" (change)="onDepartmentChange($event)">
+                            <option [value]="0" disabled selected hidden>Choose Department</option>
+                            <option *ngFor="let department of departments" [value]="department.id">{{ department.name }}</option>
+                            <option *ngIf="departments.length === 0" disabled selected>No Data Found</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col w-full mb-4">
+                        <label class="mb-2" for="employee" [ngClass]="{ 'text-gray-400': !notification.userFilters.departmentID, 'primaryTxt': notification.userFilters.departmentID }">Choose Employee</label>
+                        <select
+                        class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="employee" [(ngModel)]="notification.userFilters.employeeID"
+                        [disabled]="!notification.userFilters.departmentID" [ngClass]="{ 'bg-[#EBEBEB]': !notification.userFilters.departmentID }">
+                            <option [value]="0" disabled selected hidden>Choose Employee</option>
+                            <option *ngFor="let employee of employees" [value]="employee.id">{{ employee.en_name }}</option>
+                            <option *ngIf="employees.length === 0" disabled selected>No Data Found</option>
+                        </select>
+                    </div>
+                </div>
+    
+                <div *ngIf="!isEmployeeHovered" class="w-full">
+                    <div class="flex flex-col w-full mb-4">
+                        <label class="primaryTxt mb-2" for="School">School</label>
+                        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="School" 
+                        [(ngModel)]="notification.userFilters.schoolID" (change)="onSchoolChange($event)">
+                            <option [value]="0" disabled selected hidden>Choose School</option>
+                            <option *ngFor="let school of schools" [value]="school.id">{{ school.name }}</option>
+                            <option *ngIf="schools.length === 0" disabled selected>No Data Found</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col w-full mb-4">
+                        <label class="mb-2" for="Section" [ngClass]="{ 'text-gray-400': !notification.userFilters.schoolID, 'primaryTxt': notification.userFilters.schoolID }">Choose Section</label>
+                        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Section" 
+                        [(ngModel)]="notification.userFilters.sectionID" (change)="onSectionChange($event)"
+                        [disabled]="!notification.userFilters.schoolID" [ngClass]="{ 'bg-[#EBEBEB]': !notification.userFilters.schoolID }">
+                            <option [value]="0" disabled selected hidden>Choose Section</option>
+                            <option *ngFor="let section of sections" [value]="section.id">{{ section.name }}</option>
+                            <option *ngIf="sections.length === 0" disabled selected>No Data Found</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col w-full mb-4">
+                        <label class="mb-2" for="grade" [ngClass]="{ 'text-gray-400': !notification.userFilters.sectionID, 'primaryTxt': notification.userFilters.sectionID }">Choose Grade</label>
+                        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="grade" 
+                        [(ngModel)]="notification.userFilters.gradeID" (change)="onGradeChange($event)"
+                        [disabled]="!notification.userFilters.sectionID" [ngClass]="{ 'bg-[#EBEBEB]': !notification.userFilters.sectionID }">
+                            <option [value]="0" disabled selected hidden>Choose Grade</option>
+                            <option *ngFor="let grade of grades" [value]="grade.id">{{ grade.name }}</option>
+                            <option *ngIf="grades.length === 0" disabled selected>No Data Found</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col w-full mb-4">
+                        <label class="mb-2" for="classroom" [ngClass]="{ 'text-gray-400': !notification.userFilters.gradeID, 'primaryTxt': notification.userFilters.gradeID }">Choose Classroom</label>
+                        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="classroom" 
+                        [(ngModel)]="notification.userFilters.classroomID" (change)="onClassroomChange($event)"
+                        [disabled]="!notification.userFilters.gradeID" [ngClass]="{ 'bg-[#EBEBEB]': !notification.userFilters.gradeID }">
+                            <option [value]="0" disabled selected hidden>Choose Classroom</option>
+                            <option *ngFor="let classroom of classrooms" [value]="classroom.id">{{ classroom.name }}</option>
+                            <option *ngIf="classrooms.length === 0" disabled selected>No Data Found</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col w-full mb-4">
+                        <label class="mb-2" for="student" [ngClass]="{ 'text-gray-400': !notification.userFilters.classroomID, 'primaryTxt': notification.userFilters.classroomID }">Choose Student</label>
+                        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="student" 
+                        [(ngModel)]="notification.userFilters.studentID"
+                        [disabled]="!notification.userFilters.classroomID" [ngClass]="{ 'bg-[#EBEBEB]': !notification.userFilters.classroomID }">
+                            <option [value]="0" disabled selected hidden>Choose Student</option>
+                            <option *ngFor="let student of students" [value]="student.id">{{ student.en_name }}</option>
+                            <option *ngIf="students.length === 0" disabled selected>No Data Found</option>
+                        </select>
+                    </div>
+                </div> 
+    
+                <div class="flex flex-col mb-4 w-full">
+                    <label class="mb-2 primaryTxt" for="text">Text</label>
+                    <input id="text" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                        placeholder="Enter Text" [(ngModel)]="notification.text" /> 
+                </div> 
+                <div class="flex flex-col mb-4 w-full">
+                    <label class="mb-2 primaryTxt" for="link">Link</label>
+                    <input id="link" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                        placeholder="Enter Link" [(ngModel)]="notification.link" /> 
+                </div> 
+                <div class="w-full mb-4"> 
+                    <div class="bg-[#F6F6F6] flex items-center space-x-4 w-full rounded-md border-dashed border-2">
+                        <div class="flex justify-center w-full">
+                            <label for="file-upload" class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
+                                <img *ngIf="!notification.imageLink && !notification.imageFile" src="Images/Icon frame.png" class="w-1/4">
+                                <img *ngIf="notification.imageFile" src="Images/FileAttached.png" class="w-1/4">
+                                <img *ngIf="notification.imageLink && !notification.imageFile" [src]="notification.imageLink" class="w-1/3 object-cover">
+                                <p class="font-normal text-xs md:text-sm text-[#8E8E93] mt-3"><span class="secondaryTxt">Click to Upload </span></p>
+                                <p class="font-normal text-xs md:text-sm text-[#8E8E93]"> (Max. File size: 25 MB)</p>
+                            </label>
+                            <input [disabled]="this.notification.id != 0" id="file-upload" type="file" class="hidden" (change)="onImageFileSelected($event)" accept="image/jpeg, image/png"  />
+                        </div>
+                    </div> 
+                </div>  
+                <div *ngIf="notification.link" class="flex w-full space-x-5 items-center mb-4">
+                    <input [disabled]="this.notification.id != 0" type="checkbox" id="allowDismiss" class="w-5 h-5" (change)="onIsAllowDismissChange($event)"
+                        [checked]="notification.isAllowDismiss">
+                    <label for="allowDismiss" class="text-sm">Is Allow Dismiss</label>
+                </div> 
+            </div>
+
+            <div *ngIf="notification.id != 0" class="w-full">
+                <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
+                    <table class="w-full table inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
+                        <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+                            <tr>
+                                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                    Name
+                                </th>
+                                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                    User Notified
+                                </th> 
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- No Data Row -->
+                            <tr *ngIf="notification.notificationSharedTos.length === 0">
+                                <td colspan="2"
+                                    class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                                    No User Notified
+                                </td>
+                            </tr>
+
+                            <!-- Data Rows -->
+                            <tr *ngFor="let row of notification.notificationSharedTos; let i = index"
+                                [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
+                                class="border-t border-gray-300 text-xs md:text-sm">
+                                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                    {{ row.userName }}
+                                </td>
+                                <td class="truncate-cell py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0"> 
+                                    <i *ngIf="row.notifiedOrNot" class="secondaryTxt text-2xl fa-solid fa-check-double"></i> 
+                                </td> 
+                            </tr>
+                        </tbody>
+                    </table>
+                </div> 
+            </div>
+        </div>
+
+        <div *ngIf='this.notification.id == 0' class="flex justify-end">
+            <button [disabled]="isLoading"
+                class="secondaryBg text-white font-medium px-4 py-2 rounded-lg cursor-pointer" (click)="Save()">
+                <span *ngIf="!isLoading">Save</span>
+                <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+            </button>
+        </div>
+    </div>
+</div>
+>>>>>>> 6b5030e5a7b907d67107b5f463271c9066a34681

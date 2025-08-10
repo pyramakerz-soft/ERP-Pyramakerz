@@ -844,7 +844,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
           
             if(IsFavourite == true)
             {
-                List<TimeTable> timetables = Unit_Of_Work.timeTable_Repository.FindBy(d => d.IsFavourite == true);
+                List<TimeTable> timetables = Unit_Of_Work.timeTable_Repository.FindBy(d => d.IsFavourite == true && d.AcademicYearID== timeTable.AcademicYearID);
                 foreach (var t in timetables)
                 {
                     t.IsFavourite = false;

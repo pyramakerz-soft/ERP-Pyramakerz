@@ -184,7 +184,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             List<Classroom> classrooms = await Unit_Of_Work.classroom_Repository.Select_All_With_IncludesById<Classroom>(
-                    f => f.IsDeleted != true && f.GradeID==id,
+                    f => f.IsDeleted != true && f.GradeID==id && f.AcademicYear.IsActive==true,
                     query => query.Include(emp => emp.Grade),
                     query => query.Include(emp => emp.HomeroomTeacher),
                     query => query.Include(emp => emp.AcademicYear),
@@ -382,15 +382,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             if (EditedClassroom.Name == null)
             {
                 return BadRequest("the name cannot be null");
-            }
-            if (EditedClassroom.GradeID != 0)
-            {
-                Grade Grade = Unit_Of_Work.grade_Repository.First_Or_Default(g => g.ID == EditedClassroom.GradeID && g.IsDeleted != true);
-                if (Grade == null)
-                {
-                    return BadRequest("No Grade with this ID");
-                }
-            }
+            } 
 
             if (EditedClassroom.FloorID != 0)
             {
@@ -415,7 +407,15 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             {
                 return NotFound("No Classroom with this ID");
             }
- 
+
+            if (EditedClassroom.GradeID != 0)
+            { 
+                if (EditedClassroom.GradeID != ClassroomExists.GradeID)
+                {
+                    return BadRequest("You Can't change the Grade of the Classroom");
+                }
+            }
+
             if (userTypeClaim == "employee")
             {
                 IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Classroom", roleId, userId, ClassroomExists);

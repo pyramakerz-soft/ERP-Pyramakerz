@@ -192,8 +192,7 @@ export class PerformanceTypeComponent {
           }
         );
       }
-    }
-    this.GetAllData();
+    } 
   }
 
   closeModal() {

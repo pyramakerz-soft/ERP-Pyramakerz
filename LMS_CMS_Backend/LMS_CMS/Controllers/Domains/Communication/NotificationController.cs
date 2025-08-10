@@ -13,6 +13,7 @@ using LMS_CMS_DAL.Models.Domains.Administration;
 using LMS_CMS_DAL.Models.Domains.Communication;
 using LMS_CMS_BL.DTO.Administration;
 using Microsoft.EntityFrameworkCore;
+using LMS_CMS_PL.Services.SignalR;
 
 namespace LMS_CMS_PL.Controllers.Domains.Communication
 {
@@ -26,14 +27,16 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
         private readonly CheckPageAccessService _checkPageAccessService;
         private readonly FileImageValidationService _fileImageValidationService;
         private readonly UserTreeService _userTreeService;
+        private readonly NotificationService _notificationService;
 
-        public NotificationController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileImageValidationService fileImageValidationService, UserTreeService userTreeService)
+        public NotificationController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileImageValidationService fileImageValidationService, UserTreeService userTreeService, NotificationService notificationService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _checkPageAccessService = checkPageAccessService;
             _fileImageValidationService = fileImageValidationService;
             _userTreeService = userTreeService;
+            _notificationService = notificationService;
         }
 
         [HttpGet]
@@ -47,7 +50,44 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
 
             List<Notification> notifications = await Unit_Of_Work.notification_Repository.Select_All_With_IncludesById<Notification>(
                     f => f.IsDeleted != true,
-                    query => query.Include(d => d.NotificationSharedTos.Where(d => d.IsDeleted != true))
+                    query => query.Include(d => d.NotificationSharedTos.Where(d => d.IsDeleted != true)),
+                    query => query.Include(d => d.UserType)
+                    );
+
+            if (notifications == null || notifications.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<NotificationGetDTO> notificationGetDTO = mapper.Map<List<NotificationGetDTO>>(notifications);
+
+            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+            foreach (var notification in notificationGetDTO)
+            {
+                if (!string.IsNullOrEmpty(notification.ImageLink))
+                {
+                    notification.ImageLink = $"{serverUrl}{notification.ImageLink.Replace("\\", "/")}";
+                }
+            }
+
+            return Ok(notificationGetDTO);
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpGet("GetByUserTypeID/{userTypeID}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Notification" }
+        )]
+        public async Task<IActionResult> GetByUserTypeID(long userTypeID)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            List<Notification> notifications = await Unit_Of_Work.notification_Repository.Select_All_With_IncludesById<Notification>(
+                    f => f.IsDeleted != true && f.UserTypeID == userTypeID,
+                    query => query.Include(d => d.NotificationSharedTos.Where(d => d.IsDeleted != true)),
+                    query => query.Include(d => d.UserType)
                     );
 
             if (notifications == null || notifications.Count == 0)
@@ -82,7 +122,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
 
             Notification notification = await Unit_Of_Work.notification_Repository.FindByIncludesAsync(
                     f => f.IsDeleted != true && f.ID == id,
-                    query => query.Include(d => d.NotificationSharedTos.Where(d => d.IsDeleted != true))
+                    query => query.Include(d => d.NotificationSharedTos.Where(d => d.IsDeleted != true)),
+                    query => query.Include(d => d.UserType)
                     );
 
             if (notification == null)
@@ -91,14 +132,35 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             }
 
             NotificationGetDTO notificationGetDTO = mapper.Map<NotificationGetDTO>(notification);
-            if(notificationGetDTO.NotificationSharedTos != null && notificationGetDTO.NotificationSharedTos.Count != 0)
-            {
-                notificationGetDTO.UserTypeID = notificationGetDTO.NotificationSharedTos[0].UserTypeID;
-            }
+            
             string serverUrl = $"{Request.Scheme}://{Request.Host}/";
             if (!string.IsNullOrEmpty(notification.ImageLink))
             {
                 notificationGetDTO.ImageLink = $"{serverUrl}{notification.ImageLink.Replace("\\", "/")}";
+            } 
+            
+            if (notificationGetDTO.NotificationSharedTos != null && notificationGetDTO.NotificationSharedTos.Count != 0)
+            {
+                foreach (var notificationSharedTo in notificationGetDTO.NotificationSharedTos)
+                {
+                    dynamic user = notificationSharedTo.UserTypeID switch
+                    {
+                        1 => Unit_Of_Work.employee_Repository.First_Or_Default(emp => emp.ID == notificationSharedTo.UserID && emp.IsDeleted != true),
+                        2 => Unit_Of_Work.student_Repository.First_Or_Default(stu => stu.ID == notificationSharedTo.UserID && stu.IsDeleted != true),
+                        3 => Unit_Of_Work.parent_Repository.First_Or_Default(par => par.ID == notificationSharedTo.UserID && par.IsDeleted != true),
+                        _ => null,
+                    };
+
+                    string? userName = user switch
+                    {
+                        Employee e => e.en_name, 
+                        Student s => s.en_name, 
+                        Parent p => p.en_name,  
+                        _ => null
+                    };
+
+                    notificationSharedTo.UserName = userName;
+                }
             } 
 
             return Ok(notificationGetDTO);
@@ -134,7 +196,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
 
             List<NotificationSharedTo> notificationSharedTos = await Unit_Of_Work.notificationSharedTo_Repository.Select_All_With_IncludesById<NotificationSharedTo>(
                     f => f.IsDeleted != true && f.Notification.IsDeleted != true && f.UserID == userId && f.UserTypeID == userTypeID,
-                    query => query.Include(d => d.Notification)
+                    query => query.Include(d => d.Notification),
+                    query => query.Include(d => d.InsertedByEmployee)
                     );
 
             notificationSharedTos = notificationSharedTos
@@ -190,7 +253,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
 
             List<NotificationSharedTo> notificationSharedTos = await Unit_Of_Work.notificationSharedTo_Repository.Select_All_With_IncludesById<NotificationSharedTo>(
                     f => f.IsDeleted != true && f.Notification.IsDeleted != true && f.UserID == userId && f.UserTypeID == userTypeID,
-                    query => query.Include(d => d.Notification)
+                    query => query.Include(d => d.Notification),
+                    query => query.Include(d => d.InsertedByEmployee)
                     );
 
             notificationSharedTos = notificationSharedTos
@@ -219,7 +283,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
         
         //////////////////////////////////////////////////////////////////////////////////////////
         
-        [HttpGet("ByUserIDAndNotificationSharedByID{notificationSharedID}")]
+        [HttpGet("ByUserIDAndNotificationSharedByID/{notificationSharedID}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee", "parent", "student" }
         )]
@@ -267,6 +331,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             {
                 notificationSharedToGetDTO.ImageLink = $"{serverUrl}{notificationSharedToGetDTO.ImageLink.Replace("\\", "/")}";
             }
+
+            notificationSharedTo.SeenOrNot = true;
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            notificationSharedTo.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone); 
+            Unit_Of_Work.notificationSharedTo_Repository.Update(notificationSharedTo);
+            
+            Unit_Of_Work.SaveChanges();
              
             return Ok(notificationSharedToGetDTO);
         }
@@ -304,6 +375,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                     query => query.Include(d => d.Notification)
                     );
 
+            notificationSharedTos = notificationSharedTos
+                .OrderByDescending(d => d.InsertedAt) 
+                .ToList();
+
             if (notificationSharedTos == null || notificationSharedTos.Count == 0)
             {
                 return NotFound();
@@ -325,22 +400,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                 item.NotifiedOrNot = true;
                 TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
                 item.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
-                //if (userTypeClaim == "octa")
-                //{
-                //    item.UpdatedByOctaId = userId;
-                //    if (item.UpdatedByUserId != null)
-                //    {
-                //        item.UpdatedByUserId = null;
-                //    }
-                //}
-                //else if (userTypeClaim == "employee")
-                //{
-                //    item.UpdatedByUserId = userId;
-                //    if (item.UpdatedByOctaId != null)
-                //    {
-                //        item.UpdatedByOctaId = null;
-                //    }
-                //}
                 Unit_Of_Work.notificationSharedTo_Repository.Update(item);
             }
             Unit_Of_Work.SaveChanges();
@@ -358,6 +417,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
         public async Task<IActionResult> AddAsync(NotificationAddDTO NewNotification)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+            var domainName = HttpContext.Request.Headers["Domain-Name"].FirstOrDefault();
 
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
             long.TryParse(userIdClaim, out long userId);
@@ -382,6 +442,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             if(NewNotification.ImageFile == null && NewNotification.Text == null && NewNotification.Link == null)
             {
                 return BadRequest("You have to choose one element atleast to appear");
+            }
+            if(NewNotification.Link == null || NewNotification.Link == "")
+            {
+                NewNotification.IsAllowDismiss = true;
             }
              
             List<long> targetUserIds;
@@ -454,8 +518,27 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                     notificationSharedTo.InsertedByUserId = userId;
                 }
 
-                Unit_Of_Work.notificationSharedTo_Repository.Add(notificationSharedTo);  
+                Unit_Of_Work.notificationSharedTo_Repository.Add(notificationSharedTo);
             }
+            Unit_Of_Work.SaveChanges();
+
+            foreach (var userID in targetUserIds)
+            {
+                var sharedTo = Unit_Of_Work.notificationSharedTo_Repository.First_Or_Default(n => n.NotificationID == notification.ID && n.UserID == userID);
+
+                if (sharedTo != null)
+                {
+                    var notificationDTO = mapper.Map<NotificationSharedToGetDTO>(sharedTo);
+
+                    string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+                    if (!string.IsNullOrEmpty(notificationDTO.ImageLink))
+                    {
+                        notificationDTO.ImageLink = $"{serverUrl}{notificationDTO.ImageLink.Replace("\\", "/")}";
+                    }
+                     
+                    await _notificationService.PushRealTimeNotification(userID, NewNotification.UserTypeID, notificationDTO, domainName); 
+                }
+            } 
 
             Unit_Of_Work.SaveChanges();
             return Ok();  

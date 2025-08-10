@@ -191,8 +191,7 @@ export class LessonActivityTypeComponent {
           }
         );
       }
-    }
-    this.GetAllData();
+    } 
   }
 
   closeModal() {

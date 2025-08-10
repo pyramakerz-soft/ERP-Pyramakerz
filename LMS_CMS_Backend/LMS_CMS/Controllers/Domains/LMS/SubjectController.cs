@@ -68,8 +68,51 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             return Ok(subjectsDTO);
         }
 
+        /////////////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpGet("GetByClassroom/{classId}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Classroom Subject" }
+        )]
+        public async Task<IActionResult> GetAsync(long classId)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            List<ClassroomSubject> classroomSubjects = await Unit_Of_Work.classroomSubject_Repository.Select_All_With_IncludesById<ClassroomSubject>(
+                    f => f.IsDeleted != true && f.ClassroomID == classId && f.Classroom.IsDeleted != true && f.Subject.IsDeleted != true,
+                    query => query.Include(emp => emp.Subject),
+                    query => query.Include(emp => emp.Classroom),
+                    query => query.Include(emp => emp.Teacher),
+                    query => query.Include(emp => emp.ClassroomSubjectCoTeachers.Where(c => c.IsDeleted != true)).ThenInclude(c => c.CoTeacher)
+                    );
+
+            if (classroomSubjects == null || classroomSubjects.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<long> classroomSubjectids = classroomSubjects.Select(s=>s.SubjectID).Distinct().ToList();
+            List<Subject> subjects = await Unit_Of_Work.subject_Repository.Select_All_With_IncludesById<Subject>(
+                  f => f.IsDeleted != true && classroomSubjectids.Contains(f.ID),
+                  query => query.Include(emp => emp.Grade),
+                  query => query.Include(emp => emp.Grade.Section),
+                  query => query.Include(emp => emp.Grade.Section.school),
+                  query => query.Include(emp => emp.SubjectCategory)
+                  );
+
+            if (subjects == null || subjects.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<SubjectGetDTO> subjectsDTO = mapper.Map<List<SubjectGetDTO>>(subjects);
+
+            return Ok(subjectsDTO);
+        }
+
         ////////////////////////////////////////////////////////////////////////////////
-        
+
         [HttpGet("GetByGrade/{gradeId}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },

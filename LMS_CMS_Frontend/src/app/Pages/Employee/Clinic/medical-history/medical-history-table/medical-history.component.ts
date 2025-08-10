@@ -10,7 +10,7 @@ import { SchoolService } from '../../../../../Services/Employee/school.service';
 import { GradeService } from '../../../../../Services/Employee/LMS/grade.service';
 import { ClassroomService } from '../../../../../Services/Employee/LMS/classroom.service';
 import { StudentService } from '../../../../../Services/student.service';
-import { MedicalHistory } from '../../../../../Models/Clinic/MedicalHistory';
+import { DoctorMedicalHistory } from '../../../../../Models/Clinic/MedicalHistory';
 import { SearchComponent } from '../../../../../Component/search/search.component';
 import { MedicalHistoryModalComponent } from "../medical-history-modal/medical-history-modal.component";
 import { TranslateModule } from '@ngx-translate/core';
@@ -29,7 +29,7 @@ export class MedicalHistoryComponent implements OnInit {
 
   keys: string[] = ['id', 'school', 'grade', 'classRoom', 'student', 'details', 'permanentDrug', 'insertedAt'];
   keysArray: string[] = ['id', 'school', 'grade', 'classRoom', 'student', 'details', 'permanentDrug'];
-  medicalHistories: any[] = [];
+  medicalHistories: DoctorMedicalHistory[] = [];
   isModalVisible = false;
   isRtl: boolean = false;
     subscription!: Subscription;
@@ -88,10 +88,10 @@ export class MedicalHistoryComponent implements OnInit {
     }
   }
 
-   selectedMedicalHistory: MedicalHistory | null = null;
+   selectedMedicalHistory: DoctorMedicalHistory | null = null;
   @ViewChild(MedicalHistoryModalComponent) medicalHistoryModal!: MedicalHistoryModalComponent;
 
-  openModal(row?: any) {
+  openModal(row?: DoctorMedicalHistory) {
     this.isModalVisible = true;
     if (row) {
       this.selectedMedicalHistory = row;

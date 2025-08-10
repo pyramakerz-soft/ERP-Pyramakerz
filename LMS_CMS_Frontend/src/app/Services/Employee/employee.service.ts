@@ -32,18 +32,17 @@ export class EmployeeService {
     return this.http.get<Employee[]>(`${this.baseUrl}/Employee/GetByTypeId/${typeId}`, { headers })
   }
 
-  // GetByID(empID: number,DomainName?:string){
-  //   if(DomainName!=null) {
-  //     this.header=DomainName 
-  //   }
-  //   const token = localStorage.getItem("current_token");
-  //   const headers = new HttpHeaders()
-  //   .set('Authorization', `Bearer ${token}`)
-  //   .set('domain-name', this.header)
-  //   .set('Content-Type', 'application/json');
-  //   return this.http.get<Employee[]>(`${this.baseUrl}/Employee/${empID}`, { headers })
-  // }
-
+  GetByDepartmentId(departmentID: number,DomainName?:string){
+    if(DomainName!=null) {
+      this.header=DomainName 
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+    .set('Authorization', `Bearer ${token}`)
+    .set('domain-name', this.header)
+    .set('Content-Type', 'application/json');
+    return this.http.get<Employee[]>(`${this.baseUrl}/Employee/GetByDepartmentId/${departmentID}`, { headers })
+  }
 
   Add(employee: EmployeeGet, DomainName?: string) {
     if (DomainName != null) {
@@ -71,6 +70,8 @@ export class EmployeeService {
     formData.append('employeeTypeID', employee.employeeTypeID?.toString() ?? '');
     formData.append('canReceiveMessage', employee.canReceiveMessage?.toString() ?? 'false');
     formData.append('canReceiveRequest', employee.canReceiveRequest?.toString() ?? 'false');
+    formData.append('canReceiveMessageFromParent', employee.canReceiveMessageFromParent?.toString() ?? 'false');
+    formData.append('canReceiveRequestFromParent', employee.canReceiveRequestFromParent?.toString() ?? 'false');
 
     if (employee.files && employee.files.length > 0) {
       employee.files.forEach((file, index) => {
@@ -126,6 +127,8 @@ export class EmployeeService {
     formData.append('employeeTypeID', employee.employeeTypeID?.toString() ?? '');
     formData.append('canReceiveMessage', employee.canReceiveMessage?.toString() ?? 'false');
     formData.append('canReceiveRequest', employee.canReceiveRequest?.toString() ?? 'false');
+    formData.append('canReceiveMessageFromParent', employee.canReceiveMessageFromParent?.toString() ?? 'false');
+    formData.append('canReceiveRequestFromParent', employee.canReceiveRequestFromParent?.toString() ?? 'false');
 
     if (employee.files && employee.files.length > 0) {
       let uploadIndex = 0;

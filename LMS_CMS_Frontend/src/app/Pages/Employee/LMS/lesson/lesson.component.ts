@@ -883,7 +883,7 @@ export class LessonComponent {
     this.value = event.value;
     try {
       const data: Lesson[] = await firstValueFrom(
-        this.lessonService.Get(this.DomainName)
+        this.lessonService.GetBySubjectIDAndSemester(this.SemesterId, this.SubjectId, this.DomainName)
       );
       this.TableData = data || [];
 

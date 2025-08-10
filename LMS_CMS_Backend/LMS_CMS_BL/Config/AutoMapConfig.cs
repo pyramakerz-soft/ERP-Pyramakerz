@@ -188,14 +188,12 @@ namespace LMS_CMS_BL.Config
             CreateMap<SchoolEditZatcaDTO, School>();
             CreateMap<SchoolEditEtaDTO, School>();
 
-            CreateMap<EmployeeTypeViolation, EmployeeTypeViolationGetDTO>()
-                .ForMember(dest => dest.ViolationID, opt => opt.MapFrom(src => src.Violation.ID))
-                .ForMember(dest => dest.ViolationsTypeName, opt => opt.MapFrom(src => src.Violation.Name));
+            CreateMap<EmployeeTypeViolation, EmployeeTypeViolationGetDTO>();
             CreateMap<EmployeeTypeViolation, EmployeeTypeViolationAddDTO>();
             CreateMap<EmployeeTypeViolationAddDTO, EmployeeTypeViolation>();
 
-            CreateMap<EmployeeTypeViolation, ViolationGetDTO>();
-            CreateMap<ViolationGetDTO, EmployeeTypeViolation>();
+            CreateMap<EmployeeTypeViolation, EmployeeTypeGetDTO>();
+            CreateMap<EmployeeTypeGetDTO, EmployeeTypeViolation>();
 
             CreateMap<EmployeeTypeViolation, EmployeeTypeGetDTO>()
                  .ForMember(dest => dest.EmpTypeVId, opt => opt.MapFrom(src => src.ID))
@@ -204,11 +202,20 @@ namespace LMS_CMS_BL.Config
             CreateMap<EmployeeTypeGetDTO, EmployeeTypeViolation>();
 
 
-            CreateMap<Violation, ViolationGetDTO>();
-            CreateMap<ViolationGetDTO, Violation>();
+            CreateMap<ViolationType, ViolationTypeGetDTO>();
+            CreateMap<ViolationTypeGetDTO, ViolationType>();
+            CreateMap<ViolationTypeAddDTO, ViolationType>();
+            CreateMap<ViolationTypeEditDTO, ViolationType>();
 
-            CreateMap<Violation, ViolationAddDTO>();
+            CreateMap<Violation, ViolationGetDTO>()
+                 .ForMember(dest => dest.EmployeeTypeId, opt => opt.MapFrom(src => src.Employee.EmployeeTypeID))
+                 .ForMember(dest => dest.EmployeeTypeName, opt => opt.MapFrom(src => src.Employee.EmployeeType.Name))
+                 .ForMember(dest => dest.ViolationTypeName, opt => opt.MapFrom(src => src.ViolationType.Name))
+                 .ForMember(dest => dest.EmployeeEnglishName, opt => opt.MapFrom(src => src.Employee.en_name))
+                 .ForMember(dest => dest.EmployeeArabicName, opt => opt.MapFrom(src => src.Employee.ar_name));
             CreateMap<ViolationAddDTO, Violation>();
+            CreateMap<ViolationEditDTO, Violation>();
+
 
             CreateMap<Building, BuildingGetDTO>()
                .ForMember(dest => dest.SchoolID, opt => opt.MapFrom(src => src.school.ID))
@@ -748,7 +755,7 @@ namespace LMS_CMS_BL.Config
 
             CreateMap<MedicalHistoryAddByParentDTO, MedicalHistory>();
             CreateMap<MedicalHistory, MedicalHistoryGetByParentDTO>()
-                .ForMember(dest => dest.en_name, opt => opt.MapFrom(src => src.InsertedByEmployee.en_name));
+                .ForMember(dest => dest.en_name, opt => opt.MapFrom(src => src.InsertedByParent.en_name));
             CreateMap<MedicalHistoryPutByParentDTO, MedicalHistory>();
 
             CreateMap<Order, OrderGetDTO>()
@@ -916,6 +923,10 @@ namespace LMS_CMS_BL.Config
                  .ForMember(dest => dest.LessonName, opt => opt.MapFrom(src => src.Lesson.EnglishTitle))
                  .ForMember(dest => dest.SubjectID, opt => opt.MapFrom(src => src.Lesson.SubjectID))
                  .ForMember(dest => dest.SubjectName, opt => opt.MapFrom(src => src.Lesson.Subject.en_name))
+                 .ForMember(dest => dest.SchoolID, opt => opt.MapFrom(src => src.Lesson.Subject.Grade.Section.SchoolID))
+                 .ForMember(dest => dest.SchoolName, opt => opt.MapFrom(src => src.Lesson.Subject.Grade.Section.school.Name))
+                 .ForMember(dest => dest.GradeID, opt => opt.MapFrom(src => src.Lesson.Subject.GradeID))
+                 .ForMember(dest => dest.GradeName, opt => opt.MapFrom(src => src.Lesson.Subject.Grade.Name))
                  .ForMember(dest => dest.BloomLevelName, opt => opt.MapFrom(src => src.BloomLevel.EnglishName))
                  .ForMember(dest => dest.DokLevelName, opt => opt.MapFrom(src => src.DokLevel.EnglishName))
                  .ForMember(dest => dest.QuestionBankOptionsDTO, opt => opt.MapFrom(src => src.QuestionBankOptions))
@@ -1004,6 +1015,9 @@ namespace LMS_CMS_BL.Config
             CreateMap<AssignmentPutDTO, Assignment>(); 
 
             CreateMap<AssignmentStudent, AssignmentStudentGetDTO>()
+               .ForMember(dest => dest.OpenDate, opt => opt.MapFrom(src => src.Assignment.OpenDate))
+               .ForMember(dest => dest.CutOfDate, opt => opt.MapFrom(src => src.Assignment.CutOfDate))
+               .ForMember(dest => dest.DueDate, opt => opt.MapFrom(src => src.Assignment.DueDate))
                .ForMember(dest => dest.ClassroomID, opt => opt.MapFrom(src => src.StudentClassroom.ClassID))
                .ForMember(dest => dest.AssignmentDegree, opt => opt.MapFrom(src => src.Assignment.Mark))
                .ForMember(dest => dest.SubjectId, opt => opt.MapFrom(src => src.Assignment.SubjectID))
@@ -1117,7 +1131,8 @@ namespace LMS_CMS_BL.Config
 
             CreateMap<DutyAddDto, Duty>();
             CreateMap<Duty, DutyGetDto>()
-                .ForMember(dest => dest.TeacherName, opt => opt.MapFrom(src => src.Teacher.en_name))
+                .ForMember(dest => dest.TeacherEnName, opt => opt.MapFrom(src => src.Teacher.en_name))
+                .ForMember(dest => dest.TeacherArName, opt => opt.MapFrom(src => src.Teacher.ar_name))
                 .ForMember(dest => dest.Period, opt => opt.MapFrom(src => src.TimeTableSession.PeriodIndex))
                 .ForMember(dest => dest.ClassID, opt => opt.MapFrom(src => src.TimeTableSession.TimeTableClassroom.Classroom.ID))
                 .ForMember(dest => dest.SchoolID, opt => opt.MapFrom(src => src.TimeTableSession.TimeTableClassroom.Classroom.AcademicYear.SchoolID))
@@ -1125,14 +1140,57 @@ namespace LMS_CMS_BL.Config
                 .ForMember(dest => dest.ClassName, opt => opt.MapFrom(src => src.TimeTableSession.TimeTableClassroom.Classroom.Name));
             CreateMap<DutyEditDTO, Duty>();
 
-            CreateMap<Notification, NotificationGetDTO>();
+            CreateMap<Notification, NotificationGetDTO>()
+                .ForMember(dest => dest.UserTypeName, opt => opt.MapFrom(src => src.UserType.Title));
             CreateMap<NotificationAddDTO, Notification>();
 
             CreateMap<NotificationSharedTo, NotificationSharedToGetDTO>()
                 .ForMember(dest => dest.ImageLink, opt => opt.MapFrom(src => src.Notification.ImageLink))
                 .ForMember(dest => dest.Text, opt => opt.MapFrom(src => src.Notification.Text))
                 .ForMember(dest => dest.Link, opt => opt.MapFrom(src => src.Notification.Link))
+                .ForMember(dest => dest.InsertedAt, opt => opt.MapFrom(src => src.InsertedAt))
+                .ForMember(dest => dest.InsertedByUserName, opt => opt.MapFrom(src => src.InsertedByEmployee.en_name))
                 .ForMember(dest => dest.IsAllowDismiss, opt => opt.MapFrom(src => src.Notification.IsAllowDismiss));
+
+            CreateMap<RemedialClassroomStudent, RemedialClassroomStudentGetDTO>()
+                .ForMember(dest => dest.RemedialClassroomName, opt => opt.MapFrom(src => src.RemedialClassroom.Name))
+                .ForMember(dest => dest.StudentEnName, opt => opt.MapFrom(src => src.Student.en_name))
+                .ForMember(dest => dest.StudentArName, opt => opt.MapFrom(src => src.Student.ar_name));
+
+            CreateMap<RemedialClassroomAddDTO, RemedialClassroom>();
+            CreateMap<RemedialClassroom, RemedialClassRoomGetDTO>()
+                .ForMember(dest => dest.TeacherArName, opt => opt.MapFrom(src => src.Teacher.ar_name))
+                .ForMember(dest => dest.TeacherEnName, opt => opt.MapFrom(src => src.Teacher.en_name))
+                .ForMember(dest => dest.SchoolID, opt => opt.MapFrom(src => src.AcademicYear.SchoolID))
+                .ForMember(dest => dest.SchoolName, opt => opt.MapFrom(src => src.AcademicYear.School.Name))
+                .ForMember(dest => dest.GradeID, opt => opt.MapFrom(src => src.Subject.GradeID))
+                .ForMember(dest => dest.GradeName, opt => opt.MapFrom(src => src.Subject.Grade.Name))
+                .ForMember(dest => dest.RemedialClassroomStudents, opt =>opt.MapFrom(src => src.RemedialClassroomStudents.Where(s => s.IsDeleted != true)))
+                .ForMember(dest => dest.AcademicYearName, opt => opt.MapFrom(src => src.AcademicYear.Name))
+                .ForMember(dest => dest.SubjectEnglishName, opt => opt.MapFrom(src => src.Subject.en_name))
+                .ForMember(dest => dest.SubjectArabicName, opt => opt.MapFrom(src => src.Subject.ar_name));
+            CreateMap<RemedialClassroomEditDTOcs, RemedialClassroom>();
+
+            CreateMap<RemedialTimeTableClasses, RemedialTimeTableClassesGetDTO>()
+                .ForMember(dest => dest.RemedialClassroomName, opt => opt.MapFrom(src => src.RemedialClassroom.Name))
+                .ForMember(dest => dest.NumberOfSession, opt => opt.MapFrom(src => src.RemedialClassroom.NumberOfSession))
+                .ForMember(dest => dest.SubjecEntName, opt => opt.MapFrom(src => src.RemedialClassroom.Subject.en_name))
+                .ForMember(dest => dest.SubjectArName, opt => opt.MapFrom(src => src.RemedialClassroom.Subject.ar_name))
+                .ForMember(dest => dest.TeacherEnName, opt => opt.MapFrom(src => src.RemedialClassroom.Teacher.en_name))
+                .ForMember(dest => dest.TeacherArName, opt => opt.MapFrom(src => src.RemedialClassroom.Teacher.ar_name))
+                .ForMember(dest => dest.SubjectID, opt => opt.MapFrom(src => src.RemedialClassroom.SubjectID))
+                .ForMember(dest => dest.TeacherID, opt => opt.MapFrom(src => src.RemedialClassroom.TeacherID))
+                .ForMember(dest => dest.GradeName, opt => opt.MapFrom(src => src.RemedialClassroom.Subject.Grade.Name))
+                .ForMember(dest => dest.GradeID, opt => opt.MapFrom(src => src.RemedialClassroom.Subject.GradeID))
+                .ForMember(dest => dest.AcademicYearName, opt => opt.MapFrom(src => src.RemedialClassroom.AcademicYear.Name));
+
+            CreateMap<RemedialTimeTableAddDTO, RemedialTimeTable>();
+            CreateMap<RemedialTimeTable, RemedialTimeTableGetDTO>()
+                .ForMember(dest => dest.MaximumPeriodCountRemedials, opt => opt.MapFrom(src => src.AcademicYear.School.MaximumPeriodCountRemedials))
+                .ForMember(dest => dest.SchoolID, opt => opt.MapFrom(src => src.AcademicYear.SchoolID))
+                .ForMember(dest => dest.SchoolName, opt => opt.MapFrom(src => src.AcademicYear.School.Name))
+                .ForMember(dest => dest.AcademicYearName, opt => opt.MapFrom(src => src.AcademicYear.Name));
+            CreateMap<RemedialTimeTableDay, RemedialTimeTableDayGetDTO>();
 
         }
     } 

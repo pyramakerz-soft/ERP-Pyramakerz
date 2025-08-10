@@ -1,5 +1,7 @@
-<div class="flex justify-between items-center">
-    <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Hygiene Forms' | translate }}</h1>
+
+<div class="flex justify-between">
+    <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ 'Hygiene Forms' | translate }}</h1>
+
     <div class="flex justify-between items-center">
         <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
         <button (click)="navigateToCreateHygieneForm()"
@@ -10,8 +12,9 @@
 </div>
 
 <!-- Reusable Table Component -->
-    <app-table [headers]="GetTableHeaders()" [data]="hygieneForms"
-        [keys]="['id','school', 'grade', 'classRoom', 'date']"
-            [showViewAction]="true" [showEditAction]="false"
- (delete)="deleteHygieneForm($event)" (edit)="openModal($event.id)" (view)="onView($event)">
-    </app-table>
+
+<app-table [headers]="GetTableHeaders()" [data]="hygieneForms"
+    [keys]="['id','school', 'grade', 'classRoom', 'date']" [showViewAction]="true" [showEditAction]="false"
+    (delete)="deleteHygieneForm($event)" (edit)="openModal($event.id)" (view)="onView($event)">
+</app-table> 
+

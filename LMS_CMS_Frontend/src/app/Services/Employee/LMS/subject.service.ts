@@ -38,6 +38,18 @@ export class SubjectService {
     return this.http.get<Subject[]>(`${this.baseUrl}/Subject/GetByGrade/${GradeId}`, { headers })
   }
 
+  GetByClassroom(classroomID: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<Subject[]>(`${this.baseUrl}/Subject/GetByClassroom/${classroomID}`, { headers })
+  }
+
   GetByStudentId(StudentId: number, DomainName: string) {
     if (DomainName != null) {
       this.header = DomainName

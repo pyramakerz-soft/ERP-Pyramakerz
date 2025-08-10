@@ -244,7 +244,6 @@ export class GradeComponent {
       this.grade.sectionID = this.sectionId
       this.checkFromToDate()
       if(this.checkFromToDate()){
-        console.log(this.grade)
         if(this.editGrade == false){
           this.gradeService.Add(this.grade, this.DomainName).subscribe(
             (result: any) => {

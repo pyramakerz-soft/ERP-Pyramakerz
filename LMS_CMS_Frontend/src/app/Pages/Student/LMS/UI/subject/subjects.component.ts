@@ -12,7 +12,7 @@ import { Router } from '@angular/router';
 })
 export class SubjectsComponent {
 Test() {
-console.log('garab yad ybn el')}
+}
   subjects = [
   { name: 'Arabic', icon: 'Images/254b3604a2d3ab135a3c4f2c673d8b308f0cf735.jpg' },
     { name: 'Mathematics', icon: 'Images/254b3604a2d3ab135a3c4f2c673d8b308f0cf735.jpg' },

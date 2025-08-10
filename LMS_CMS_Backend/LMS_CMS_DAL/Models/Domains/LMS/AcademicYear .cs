@@ -30,6 +30,8 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public ICollection<InterviewTime> InterviewTimes { get; set; } = new HashSet<InterviewTime>();
         public ICollection<StudentGrade> StudentGrades { get; set; } = new HashSet<StudentGrade>();
         public ICollection<TimeTable> TimeTables { get; set; } = new HashSet<TimeTable>();
+        public ICollection<RemedialTimeTable> RemedialTimeTables { get; set; } = new HashSet<RemedialTimeTable>();
+        public ICollection<RemedialClassroom> RemedialClassrooms { get; set; } = new HashSet<RemedialClassroom>();
 
     }
 }

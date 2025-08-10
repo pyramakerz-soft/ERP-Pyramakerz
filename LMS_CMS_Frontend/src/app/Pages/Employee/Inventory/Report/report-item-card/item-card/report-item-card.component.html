@@ -4,11 +4,12 @@
     </h1>
 </div>
 
-<div class="my-5 flex flex-wrap justify-between items-center">
+<div class="my-5 flex flex-wrap md:flex-nowrap items-end space-x-0 md:space-x-6 space-y-4 md:space-y-0 mb-6">
     <!-- Store Selector -->
-    <div class="flex flex-col w-[24%] mb-4">
-        <label class="mb-2 font-medium" for="store">{{'Store'| translate }}</label>
-        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="store"
+
+    <div class="w-full md:w-1/4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="store">{{'Store'| translate }}</label>
+        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="store"
             [(ngModel)]="selectedStoreId" (ngModelChange)="onFilterChange()" required>
             <option [ngValue]="null" disabled selected hidden> {{'Choose'| translate }} {{'Store'| translate }}</option>
             <option *ngFor="let store of stores" [ngValue]="store.id">{{ store.name }}</option>
@@ -16,34 +17,39 @@
     </div>
 
     <!-- Item Selector -->
-    <div class="flex flex-col w-[24%] mb-4">
-        <label class="mb-2 font-medium" for="item"> {{'Item'| translate }}</label>
-        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="item" [(ngModel)]="selectedItemId"
-            (ngModelChange)="onFilterChange()" required>
+
+    <div class="w-full md:w-1/4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="item">{{'Item'| translate }}</label>
+        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="item"
+            [(ngModel)]="selectedItemId" (ngModelChange)="onFilterChange()" required>
             <option [ngValue]="null" disabled selected hidden>{{'Choose'| translate }} {{'Item'| translate }}</option>
             <option *ngFor="let item of items" [ngValue]="item.id">{{ item.enName }}</option>
         </select>
     </div>
 
-    <div class="flex flex-col w-[24%] mb-4">
-        <label class="mb-2 font-medium" for="dateFrom">{{'Date From'| translate }}</label>
-        <input type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="dateFrom"
-            [(ngModel)]="dateFrom" (ngModelChange)="onFilterChange()" required>
+
+    <!-- Date From -->
+    <div class="w-full md:w-1/4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="dateFrom">{{'Date From'| translate }}</label>
+        <input type="date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            id="dateFrom" [(ngModel)]="dateFrom" (ngModelChange)="onFilterChange()" required>
     </div>
 
-    <div class="flex flex-col w-[24%] mb-4">
-        <label class="mb-2 font-medium" for="dateTo">{{'Date To'| translate }}</label>
-        <input type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="dateTo"
-            [(ngModel)]="dateTo" (ngModelChange)="onFilterChange()" required>
+    <!-- Date To -->
+    <div class="w-full md:w-1/4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="dateTo">{{'Date To'| translate }}</label>
+        <input type="date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            id="dateTo" [(ngModel)]="dateTo" (ngModelChange)="onFilterChange()" required>
     </div>
 
-    <div class="w-[99%] flex justify-end">
-        <button class="p-4 font-medium text-xl rounded-lg" (click)="viewReport()"
-            [disabled]="!dateFrom || !dateTo || !selectedStoreId || !selectedItemId" [ngClass]="{ 
-            'bg-gray-100 text-gray-300': !dateFrom || !dateTo || !selectedStoreId || !selectedItemId, 
-            'secondaryBg text-white': dateFrom && dateTo && selectedStoreId && selectedItemId
-        }">
+    <div class="w-full md:w-1/6 flex justify-end mt-4 md:mt-0">
+        <button class="p-3 font-medium text-xl rounded-lg" (click)="viewReport()"
+            [disabled]="!dateFrom || !dateTo || !selectedStoreId || !selectedItemId" [ngClass]="{
+                'bg-gray-100 text-gray-300': !dateFrom || !dateTo || !selectedStoreId || !selectedItemId,
+                'secondaryBg text-white': dateFrom && dateTo && selectedStoreId && selectedItemId
+            }">
             {{'View Report'| translate }}
+
         </button>
     </div>
 </div>
@@ -54,14 +60,7 @@
     <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()" title="Print Report">
 </div>
 
-<div class="absolute -top-[9999px] -left-[9999px]">
-    <div id="Data" class="hidden">
-        <!-- Change this line in the PDF print component -->
-        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'Item Card Report'" [infoRows]="getInfoRows()"
-            [tableHeaders]="getPdfTableHeaders()" [tableData]="transactionsForExport" #pdfPrintComponent>
-        </app-pdf-print>
-    </div>
-</div>
+
 <div *ngIf="showTable" class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
     <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
         <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
@@ -119,7 +118,7 @@
                     'font-bold': row.isSummary
                 }" class="border-t border-gray-300 text-xs md:text-sm">
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ row.date ? (row.date | date:'MMMM d, yyyy') : '-' }}
+                    {{ row.date ? (row.date | date:'yyyy-MM-dd') : '-' }}
                 </td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     {{ row.transactionType }}
@@ -154,4 +153,12 @@
             </tr>
         </tbody>
     </table>
+</div>
+
+<div class="absolute -top-[9999px] -left-[9999px]">
+    <div id="Data" class="hidden">
+        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'Item Card Report'" [infoRows]="getInfoRows()"
+            [tableHeaders]="getPdfTableHeaders()" [tableData]="transactionsForExport" #pdfPrintComponent>
+        </app-pdf-print>
+    </div>
 </div>

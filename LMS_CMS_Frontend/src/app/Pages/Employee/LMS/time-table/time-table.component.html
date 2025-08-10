@@ -87,7 +87,6 @@
     </table>
 </div>
 
-
 <!-- Add-Edit School Type Modal -->
 <div id="Add_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
     <div class="bg-white rounded-2xl p-12 w-[669px]">
@@ -99,7 +98,8 @@
 
         <div class="p-[16px_24px] mt-6 mb-4 bg-[#F7F7F7] rounded-3xl">
             <div class="flex flex-col mb-4">
-                <label class="mb-2 primaryTxt" for="name"> {{ 'Time Table' | translate }}</label>
+                <label class="mb-2 primaryTxt" for="name">{{ 'Title' | translate }}</label>
+
                 <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                     placeholder=" {{ 'Enter' | translate }} {{ 'Time Table' | translate }}" [(ngModel)]="timetable.name"
                     (ngModelChange)="onInputValueChange({ field: 'name', value: $event })" />

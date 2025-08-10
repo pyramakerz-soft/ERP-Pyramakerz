@@ -95,6 +95,68 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         ///////////////////////////////////////////////////////////////////////////////////
 
+        [HttpGet("BySubjectIdWithPaggination/{SubjectId}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Question Bank" }
+        )]
+        public async Task<IActionResult> BySubjectIdWithPaggination(long SubjectId ,[FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            // Get total record count
+            int totalRecords = await Unit_Of_Work.questionBank_Repository
+                .CountAsync(f => f.IsDeleted != true && f.Lesson.SubjectID== SubjectId);
+
+            List<LMS_CMS_DAL.Models.Domains.LMS.QuestionBank> Questions;
+
+
+            Questions = await Unit_Of_Work.questionBank_Repository.Select_All_With_IncludesById_Pagination<LMS_CMS_DAL.Models.Domains.LMS.QuestionBank>(
+                    f => f.IsDeleted != true && f.Lesson.SubjectID== SubjectId,
+                    query => query.Include(emp => emp.BloomLevel),
+                    query => query.Include(emp => emp.DokLevel),
+                    query => query.Include(emp => emp.QuestionType),
+                    query => query.Include(emp => emp.QuestionBankOption),
+                    query => query.Include(emp => emp.Lesson.Subject),
+                    query => query.Include(emp => emp.Lesson.Subject.Grade),
+                    query => query.Include(emp => emp.Lesson.Subject.Grade.Section.school),
+                    query => query.Include(emp => emp.Lesson))
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+            if (Questions == null || Questions.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<QuestionBankGetDTO> Dto = mapper.Map<List<QuestionBankGetDTO>>(Questions);
+
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+            return Ok(new { Data = Dto, Pagination = paginationMetadata });
+
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+
         [HttpPost("GetByLessonTagType/{LessonId}/{TypeID}")]
         [Authorize_Endpoint_(
              allowedTypes: new[] { "octa", "employee" },
@@ -217,6 +279,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     query => query.Include(emp => emp.QuestionType),
                     query => query.Include(emp => emp.QuestionBankOption),
                     query => query.Include(emp => emp.Lesson.Subject),
+                    query => query.Include(emp => emp.Lesson.Subject.Grade),
+                    query => query.Include(emp => emp.Lesson.Subject.Grade.Section.school),
                     query => query.Include(emp => emp.Lesson)
                     );
             QuestionBankGetDTO Dto = mapper.Map<QuestionBankGetDTO>(Question);
@@ -724,7 +788,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             if (NewData.QuestionTypeID == 1)
             {
-                if (NewData.CorrectAnswerName != "True" && NewData.CorrectAnswerName != "Fales")
+                if (NewData.CorrectAnswerName != "True" && NewData.CorrectAnswerName != "False") 
                 {
                     return BadRequest("Correct Answer should be True or Fales");
                 }

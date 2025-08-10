@@ -103,7 +103,7 @@ export class LessonResourcesTypeComponent {
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Lesson Activity Type?',
+      title: 'Are you sure you want to delete this Lesson Resource Type?',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
@@ -192,8 +192,7 @@ export class LessonResourcesTypeComponent {
           }
         );
       }
-    }
-    this.GetAllData();
+    } 
   }
 
   closeModal() {

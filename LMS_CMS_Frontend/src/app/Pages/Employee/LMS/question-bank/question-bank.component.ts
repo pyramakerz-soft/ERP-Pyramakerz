@@ -32,6 +32,11 @@ import { SubBankQuestion } from '../../../../Models/LMS/sub-bank-question';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { School } from '../../../../Models/school';
+import { Grade } from '../../../../Models/LMS/grade';
+import { GradeService } from '../../../../Services/Employee/LMS/grade.service';
+import { SchoolService } from '../../../../Services/Employee/school.service';
+
 @Component({
   selector: 'app-question-bank',
   standalone: true,
@@ -51,7 +56,6 @@ export class QuestionBankComponent {
 
   TableData: QuestionBank[] = [];
   Data: QuestionBank[] = [];
-  subject: Subject[] = [];
   lesson: Lesson[] = [];
   tag: Tag[] = [];
   bloomLevel: BloomLevel[] = [];
@@ -68,7 +72,7 @@ export class QuestionBankComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'description', 'lessonName', 'mark', 'difficultyLevel', 'questionTypeName'];
+  keysArray: string[] = ['id', 'lessonName', 'mark', 'difficultyLevel', 'questionTypeName'];
 
   CurrentPage: number = 1
   PageSize: number = 10
@@ -82,12 +86,24 @@ export class QuestionBankComponent {
   NewOption: string = ""
   TagsSelected: Tag[] = [];
   dropdownOpen = false;
-  
+
+  SelectedSchoolId: number = 0;
+  SelectedGradeId: number = 0;
+  SelectedSubjectId: number = 0;
+  schools: School[] = []
+  Grades: Grade[] = []
+  subjects: Subject[] = [];
+  IsView: boolean = false
+
+  schoolsForCreate: School[] = []
+  GradesForCreate: Grade[] = []
+  subjectsForCreate: Subject[] = [];
+
   @ViewChild('quillEditor') quillEditorComponent!: QuillEditorComponent;
   quillInstance: any;
- 
+
   editorModules = {
-     toolbar: {
+    toolbar: {
       container: [
         ['bold', 'italic', 'underline', 'strike'],
         ['blockquote', 'code-block'],
@@ -110,7 +126,7 @@ export class QuestionBankComponent {
       }
     }
   };
-  
+
   constructor(
     private menuService: MenuService,
     public activeRoute: ActivatedRoute,
@@ -123,6 +139,8 @@ export class QuestionBankComponent {
     public SubjectServ: SubjectService,
     public LessonServ: LessonService,
     public TagServ: TagsService,
+    private SchoolServ: SchoolService,
+    private GradeServ: GradeService,
     public BloomLevelServ: BloomLevelService,
     public DokLevelServ: DokLevelService,
     public QuestionBankTypeServ: QuestionBankTypeService,
@@ -147,18 +165,53 @@ export class QuestionBankComponent {
       }
     });
 
-    this.GetAllData(this.CurrentPage, this.PageSize)
+    this.getAllSchools()
     this.GetAllDokLevel()
     this.GetAllQuestionBankType()
     this.GetAllBloomLevel()
-    this.GetAllSubject()
-    this.GetAllTag() 
-
+    this.GetAllTag()
     this.subscription = this.languageService.language$.subscribe(direction => {
     this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
-  } 
+  }
+
+  getAllGradesBySchoolId() {
+    this.IsView = false
+    this.Grades = []
+    this.SelectedGradeId = 0
+    this.subjects = []
+    this.SelectedSubjectId = 0
+    this.GradeServ.GetBySchoolId(this.SelectedSchoolId, this.DomainName).subscribe((d) => {
+      this.Grades = d
+    })
+  }
+
+  getAllSchools() {
+    this.schools = []
+    this.SchoolServ.Get(this.DomainName).subscribe((d) => {
+      this.schools = d
+    })
+  }
+
+  getAllSubject() {
+    this.subjects = []
+    this.IsView = false
+    this.SelectedSubjectId = 0
+    this.SubjectServ.GetByGradeId(this.SelectedGradeId, this.DomainName).subscribe((d) => {
+      this.subjects = d
+    })
+  }
+
+  SubjectChanged() {
+    this.IsView = false
+  }
+
+  viewTable() {
+    this.IsView = true
+    this.GetAllData(this.CurrentPage, this.PageSize)
+  }
+
 
   onEditorCreated(quill: any) {
     this.quillInstance = quill;
@@ -203,7 +256,7 @@ export class QuestionBankComponent {
                 lastImg.setAttribute('width', formValues.width + '');
                 lastImg.setAttribute('height', formValues.height + '');
                 lastImg.setAttribute('style', `width:${formValues.width}px; height:${formValues.height}px`);
-                
+
                 // Optional: update the model directly if needed
                 this.questionBank.description = this.quillInstance.root.innerHTML;
               }
@@ -214,7 +267,7 @@ export class QuestionBankComponent {
       }
     };
   }
- 
+
   customVideoHandler() {
     Swal.fire({
       title: 'Enter video URL',
@@ -285,7 +338,7 @@ export class QuestionBankComponent {
 
   GetAllSubject() {
     this.SubjectServ.Get(this.DomainName).subscribe((d) => {
-      this.subject = d
+      this.subjectsForCreate = d
     })
   }
 
@@ -296,13 +349,13 @@ export class QuestionBankComponent {
   }
 
   GetAllLesson() {
-    this.lesson = [] 
+    this.lesson = []
     this.LessonServ.GetBySubjectID(this.questionBank.subjectID, this.DomainName).subscribe((d) => {
       this.lesson = d
     })
   }
 
-  onSubjectChange(){
+  onSubjectChange() {
     this.questionBank.lessonID = 0
     this.GetAllLesson()
   }
@@ -344,6 +397,8 @@ export class QuestionBankComponent {
 
   async onSearchEvent(event: { key: string; value: any }) {
     this.PageSize = this.TotalRecords
+    this.CurrentPage = 1
+    this.TotalPages = 1
     this.key = event.key;
     this.value = event.value;
     try {
@@ -375,11 +430,11 @@ export class QuestionBankComponent {
 
   GetAllData(pageNumber: number, pageSize: number) {
     this.TableData = []
-    this.CurrentPage  = 1
-    this.PageSize  = 10
-    this.TotalPages  = 1
-    this.TotalRecords  = 0
-    this.QuestionBankServ.Get(this.DomainName, pageNumber, pageSize).subscribe(
+    this.CurrentPage = 1
+    this.PageSize = 10
+    this.TotalPages = 1
+    this.TotalRecords = 0
+    this.QuestionBankServ.GetBySubjectIdWithPaggination(this.SelectedSubjectId, this.DomainName, pageNumber, pageSize).subscribe(
       (data) => {
         this.CurrentPage = data.pagination.currentPage
         this.PageSize = data.pagination.pageSize
@@ -423,6 +478,30 @@ export class QuestionBankComponent {
     this.PageSize = 0
   }
 
+  get visiblePages(): number[] {
+    const total = this.TotalPages;
+    const current = this.CurrentPage;
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const half = Math.floor(maxVisible / 2);
+    let start = current - half;
+    let end = current + half;
+
+    if (start < 1) {
+      start = 1;
+      end = maxVisible;
+    } else if (end > total) {
+      end = total;
+      start = total - maxVisible + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
+  
   CreateOREdit() {
     this.questionBank.questionBankTagsDTO = this.TagsSelected.map(s => s.id)
     if (this.isFormValid()) {
@@ -438,7 +517,6 @@ export class QuestionBankComponent {
             this.closeModal();
           },
           (error) => {
-            console.log(error)
             this.isLoading = false; // Hide spinner
             Swal.fire({
               icon: 'error',
@@ -467,7 +545,6 @@ export class QuestionBankComponent {
             this.closeModal();
           },
           (error) => {
-            console.log(error)
             this.isLoading = false; // Hide spinner
             Swal.fire({
               icon: 'error',
@@ -479,7 +556,7 @@ export class QuestionBankComponent {
           }
         );
       }
-    } 
+    }
   }
 
   capitalizeField(field: keyof QuestionBank): string {
@@ -493,6 +570,8 @@ export class QuestionBankComponent {
         const field = key as keyof QuestionBank;
         if (!this.questionBank[field]) {
           if (
+            field == 'gradeID' ||
+            field == 'schoolID' ||
             field == 'subjectID' ||
             field == 'lessonID' ||
             field == 'questionTypeID'
@@ -615,9 +694,11 @@ export class QuestionBankComponent {
   }
 
   onInputValueChange(event: { field: keyof QuestionBank; value: any }) {
-    const { field, value } = event; 
+    const { field, value } = event;
     if (
       field == 'lessonID' ||
+      field == 'gradeID' ||
+      field == 'schoolID' ||
       field == 'subjectID' ||
       field == 'description' ||
       field == 'questionTypeID' ||
@@ -656,7 +737,18 @@ export class QuestionBankComponent {
         opt.questionBankID = 0
         this.questionBank.questionBankOptionsDTO.push(opt);
       }
-
+      this.schoolsForCreate = []
+      this.SchoolServ.Get(this.DomainName).subscribe((d) => {
+        this.schoolsForCreate = d
+        this.GradesForCreate = []
+        this.GradeServ.GetBySchoolId(this.questionBank.schoolID, this.DomainName).subscribe((d) => {
+          this.GradesForCreate = d
+          this.subjectsForCreate = []
+          this.SubjectServ.GetByGradeId(this.questionBank.gradeID, this.DomainName).subscribe((d) => {
+            this.subjectsForCreate = d
+          })
+        })
+      })
       this.TagsSelected = this.tag.filter(s => this.questionBank.questionBankTagsDTO.includes(s.id));
     });
 
@@ -669,7 +761,32 @@ export class QuestionBankComponent {
     this.questionBank = new QuestionBank();
     this.validationErrors = {};
     this.TagsSelected = []
+    this.SchoolServ.Get(this.DomainName).subscribe((d) => {
+      this.schoolsForCreate = d
+    })
     this.openModal();
+  }
+
+  getAllGradesForCreateBySchoolId() {
+    this.lesson = []
+    this.GradesForCreate = []
+    this.questionBank.gradeID = 0
+    this.subjectsForCreate = []
+    this.questionBank.subjectID = 0
+    this.questionBank.lessonID = 0
+    this.GradeServ.GetBySchoolId(this.questionBank.schoolID, this.DomainName).subscribe((d) => {
+      this.GradesForCreate = d
+    })
+  }
+
+  getAllSubjectForCreateByGradeId() {
+    this.lesson = []
+    this.subjectsForCreate = []
+    this.questionBank.lessonID = 0
+    this.questionBank.subjectID = 0
+    this.SubjectServ.GetByGradeId(this.questionBank.gradeID, this.DomainName).subscribe((d) => {
+      this.subjectsForCreate = d
+    })
   }
 
   closeModal() {

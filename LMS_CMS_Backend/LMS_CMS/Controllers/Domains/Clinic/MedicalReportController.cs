@@ -2,6 +2,7 @@
 using LMS_CMS_BL.DTO.Clinic;
 using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains.ClinicModule;
+using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -30,7 +31,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Medical Report" }
         )]
-        public async Task<IActionResult> GetAllMHByParent()
+        public async Task<IActionResult> GetAllMHByParent(long studentId, long schoolId, long gradeId, long classId)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
             var userClaims = HttpContext.User.Claims;
@@ -45,7 +46,17 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             }
             
             List<MedicalHistory> medicalHistory = await Unit_Of_Work.medicalHistory_Repository
-                .Select_All_With_IncludesById<MedicalHistory>(t => t.IsDeleted != true && t.InsertedByUserId != null,
+                .Select_All_With_IncludesById<MedicalHistory>(
+                t => t.IsDeleted != true && 
+                t.StudentId == studentId &&
+                t.InsertedByUserId != null &&
+                t.SchoolId == schoolId &&
+                t.GradeId == gradeId &&
+                t.ClassRoomID == classId,
+                query => query.Include(x => x.Student),
+                query => query.Include(x => x.School),
+                query => query.Include(x => x.Grade),
+                query => query.Include(x => x.Classroom),
                 query => query.Include(x => x.InsertedByEmployee));
             
             if (medicalHistory == null || medicalHistory.Count == 0)
@@ -65,7 +76,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Medical Report" }
         )]
-        public async Task<IActionResult> GetAllMHByDoctor()
+        public async Task<IActionResult> GetAllMHByDoctor(long studentId, long schoolId, long gradeId, long classId)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
             var userClaims = HttpContext.User.Claims;
@@ -79,8 +90,34 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                 return Unauthorized("User ID or Type claim not found.");
             }
 
+            Student? student = Unit_Of_Work.student_Repository.First_Or_Default(s => s.ID == studentId && s.IsDeleted != true);
+            if (student == null)
+                return NotFound("Student not found.");
+
+            School? school = Unit_Of_Work.school_Repository.First_Or_Default(s => s.ID == schoolId && s.IsDeleted != true);
+            if (school == null)
+                return NotFound("School not found.");
+
+            Grade? grade = Unit_Of_Work.grade_Repository.First_Or_Default(g => g.ID == gradeId && g.IsDeleted != true);
+            if (grade == null)
+                return NotFound("Grade not found.");
+
+            Classroom? classroom = Unit_Of_Work.classroom_Repository.First_Or_Default(c => c.ID == classId && c.IsDeleted != true);
+            if (classroom == null)
+                return NotFound("Classroom not found.");
+
             List<MedicalHistory> medicalHistory = await Unit_Of_Work.medicalHistory_Repository
-                .Select_All_With_IncludesById<MedicalHistory>(t => t.IsDeleted != true && t.InsertedByUserId == null,
+                .Select_All_With_IncludesById<MedicalHistory>(
+                t => t.IsDeleted != true && 
+                t.InsertedByUserId == null &&
+                t.StudentId == studentId &&
+                t.SchoolId == schoolId &&
+                t.GradeId == gradeId &&
+                t.ClassRoomID == classId,
+                query => query.Include(x => x.Student),
+                query => query.Include(x => x.School),
+                query => query.Include(x => x.Grade),
+                query => query.Include(x => x.Classroom),
                 query => query.Include(x => x.InsertedByEmployee));
 
             if (medicalHistory == null || medicalHistory.Count == 0)
@@ -99,7 +136,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Medical Report" }
         )]
-        public async Task<IActionResult> GetAllHygienesForms()
+        public async Task<IActionResult> GetAllHygienesForms(long studentId, long schoolId, long gradeId, long classId)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
             var userClaims = HttpContext.User.Claims;
@@ -113,10 +150,29 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             {
                 return Unauthorized("User ID or Type claim not found.");
             }
-            
+
+            Student? student = Unit_Of_Work.student_Repository.First_Or_Default(s => s.ID == studentId && s.IsDeleted != true);
+            if (student == null)
+                return NotFound("Student not found.");
+
+            School? school = Unit_Of_Work.school_Repository.First_Or_Default(s => s.ID == schoolId && s.IsDeleted != true);
+            if (school == null)
+                return NotFound("School not found.");
+
+            Grade? grade = Unit_Of_Work.grade_Repository.First_Or_Default(g => g.ID == gradeId && g.IsDeleted != true);
+            if (grade == null)
+                return NotFound("Grade not found.");
+
+            Classroom? classroom = Unit_Of_Work.classroom_Repository.First_Or_Default(c => c.ID == classId && c.IsDeleted != true);
+            if (classroom == null)
+                return NotFound("Classroom not found.");
+
             List<HygieneForm> hygieneForms = await Unit_Of_Work.hygieneForm_Repository
                 .Select_All_With_IncludesById<HygieneForm>(
-                    d => d.IsDeleted != true,
+                    d => d.IsDeleted != true &&
+                    d.SchoolId == schoolId &&
+                    d.GradeId == gradeId &&
+                    d.ClassRoomID == classId,
                     query => query.Include(h => h.Classroom),
                     query => query.Include(h => h.School),
                     query => query.Include(h => h.Grade),
@@ -155,7 +211,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Medical Report" }
         )]
-        public async Task<IActionResult> GetAllFollowUps()
+        public async Task<IActionResult> GetAllFollowUps(long studentId, long schoolId, long gradeId, long classId)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
             var userClaims = HttpContext.User.Claims;
@@ -170,10 +226,31 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                 return Unauthorized("User ID or Type claim not found.");
             }
 
+            Student? student = Unit_Of_Work.student_Repository.First_Or_Default(s => s.ID == studentId && s.IsDeleted != true);
+            if (student == null)
+                return NotFound("Student not found.");
+
+            School? school = Unit_Of_Work.school_Repository.First_Or_Default(s => s.ID == schoolId && s.IsDeleted != true);
+            if (school == null)
+                return NotFound("School not found.");
+
+            Grade? grade = Unit_Of_Work.grade_Repository.First_Or_Default(g => g.ID == gradeId && g.IsDeleted != true);
+            if (grade == null)
+                return NotFound("Grade not found.");
+
+            Classroom? classroom = Unit_Of_Work.classroom_Repository.First_Or_Default(c => c.ID == classId && c.IsDeleted != true);
+            if (classroom == null)
+                return NotFound("Classroom not found.");
+
             List<FollowUp> followUps = await Unit_Of_Work.followUp_Repository
                 .Select_All_With_IncludesById<FollowUp>(
-                    d => d.IsDeleted != true,
+                    d => d.IsDeleted != true &&
+                    d.StudentId == studentId &&
+                    d.SchoolId == schoolId &&
+                    d.GradeId == gradeId &&
+                    d.ClassroomId == classId,
                     query => query.Include(h => h.Classroom),
+                    query => query.Include(h => h.Student),
                     query => query.Include(h => h.School),
                     query => query.Include(h => h.Grade),
                     query => query.Include(h => h.FollowUpDrugs),

@@ -175,8 +175,8 @@
                 <select id="Class" (ngModelChange)="onInputValueChange({ field: 'classroomID', value: $event })" [disabled]="!selectedYearForModal"
                     [ngClass]="{ 'bg-[#EBEBEB]': !selectedYearForModal }"
                     class="border border-gray-300 primaryTxt rounded-lg px-4 py-3 w-full"
-                    [(ngModel)]="live.classroomID" (change)="selectClass()">
-                    <option value=0 disabled selected hidden>{{ 'Select' | translate }} {{ 'Class' | translate }}</option>
+                    [(ngModel)]="live.classroomID" (change)="getAllSubject()">
+                    <option [value]=0 disabled selected hidden>{{ 'Select' | translate }} {{ 'Class' | translate }}</option>
                     <option *ngFor="let ac of classrooms" [value]="ac.id">
                         {{ ac.name }}
                     </option>

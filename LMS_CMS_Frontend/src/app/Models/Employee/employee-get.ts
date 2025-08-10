@@ -24,6 +24,8 @@ export class EmployeeGet {
         public insertedByUserId :number =0,
         public canReceiveRequest: boolean = false,
         public canReceiveMessage: boolean = false,
+        public canReceiveRequestFromParent: boolean = false,
+        public canReceiveMessageFromParent: boolean = false,
         public floorsSelected :number []=[],
         public newFloorsSelected :number []=[],
         public deletedFloorsSelected :number []=[],

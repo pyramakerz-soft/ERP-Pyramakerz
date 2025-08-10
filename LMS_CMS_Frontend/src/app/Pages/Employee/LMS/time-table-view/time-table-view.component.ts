@@ -103,7 +103,6 @@ export class TimeTableViewComponent {
         this.TimeTableName = d.timeTableName;
         this.MaxPeriods = d.maxPeriods;
         this.ExtractDaysAndGrades();
-        console.log(d);
       });
   }
 
@@ -146,10 +145,6 @@ export class TimeTableViewComponent {
   }
 
   FilterTimeTable() {
-    console.log('origin TimeTable:', this.OriginTimeTable);
-    console.log('selected day:', this.SelectedDay);
-    console.log('selected grade:', this.SelectedGrade);
-
     this.TimeTable = [...this.OriginTimeTable];
 
     if (this.SelectedDay != 0 && this.SelectedGrade != 0) {
@@ -179,7 +174,6 @@ export class TimeTableViewComponent {
       })).filter((day) => day.grades.length > 0);
     }
 
-    console.log('Filtered TimeTable:', this.TimeTable);
   }
 
   moveToTimeTable() {
@@ -203,7 +197,6 @@ export class TimeTableViewComponent {
       this.TimeTableName = d.timeTableName;
       this.MaxPeriods = d.maxPeriods;
       this.ExtractDaysAndGrades();
-      console.log(d);
     });
   }
 }

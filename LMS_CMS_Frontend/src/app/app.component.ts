@@ -1,7 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild, ViewContainerRef } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule } from '@angular/forms'; 
+import { ApiService } from './Services/api.service';
+import { RealTimeNotificationServiceService } from './Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-root',
@@ -11,8 +13,5 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './app.component.css'
 })
 export class AppComponent {
-  title = 'ERP_System';
-
-  constructor() { }
-
+  title = 'ERP_System'; 
 }

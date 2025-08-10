@@ -123,7 +123,6 @@ export class DiscussionRoomComponent {
       this.classroomStudentService.GetClassForActiveAcademicYearWithStudentsIncluded(this.discussionRoom.schoolID, this.DomainName).subscribe(
         data => {
           this.studentsClass = data
-          console.log(this.studentsClass)
         }
       )
     }
@@ -355,7 +354,7 @@ export class DiscussionRoomComponent {
       if (this.discussionRoom.hasOwnProperty(key)) {
         const field = key as keyof DiscussionRoom;
         if (!this.discussionRoom[field]) {
-          if (field == "title" || field == "startDate" || field == "endDate" || field == "time" || field == "meetingLink" || (this.discussionRoom.id == 0 && field == 'imageFile')) {
+          if (field == "title" || field == "startDate" || field == "endDate" || field == "time" || field == "meetingLink") {
             this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
             isValid = false;
           }
@@ -397,6 +396,44 @@ export class DiscussionRoomComponent {
     this.discussionRoom.isRepeatedWeekly = isChecked
   }
 
+  onDayChange(event: Event) {
+    const valueID = (event.target as HTMLInputElement).id
+    const isChecked = (event.target as HTMLInputElement).checked;
+
+    switch (valueID) {
+      case 'saturday':
+        this.discussionRoom.saturday = isChecked
+        break;
+    
+      case 'sunday':
+        this.discussionRoom.sunday = isChecked
+        break;
+    
+      case 'monday':
+        this.discussionRoom.monday = isChecked
+        break;
+    
+      case 'tuesday':
+        this.discussionRoom.tuesday = isChecked
+        break;
+    
+      case 'wednesday':
+        this.discussionRoom.wednesday = isChecked
+        break;
+    
+      case 'thursday':
+        this.discussionRoom.thursday = isChecked
+        break;
+    
+      case 'friday':
+        this.discussionRoom.friday = isChecked
+        break;
+    
+      default:
+        break;
+    } 
+  }
+
   onImageFileSelected(event: any) {
     const file: File = event.target.files[0];
     const input = event.target as HTMLInputElement;
@@ -428,27 +465,37 @@ export class DiscussionRoomComponent {
     this.discussionRoom.studentClassrooms.push(...this.choosedStudentsClass)
 
     if (this.isFormValid()) {
-      this.isLoading = true;
-      if (this.discussionRoom.id == 0) {
-        this.discussionRoomService.Add(this.discussionRoom, this.DomainName).subscribe(
-          (result: any) => {
-            this.closeModal();
-            this.getAllData()
-          },
-          error => {
-            this.isLoading = false;
-          }
-        );
-      } else {
-        this.discussionRoomService.Edit(this.discussionRoom, this.DomainName).subscribe(
-          (result: any) => {
-            this.closeModal()
-            this.getAllData()
-          },
-          error => {
-            this.isLoading = false;
-          }
-        );
+      if(this.discussionRoom.saturday == false && this.discussionRoom.sunday == false && this.discussionRoom.monday == false
+        && this.discussionRoom.tuesday == false && this.discussionRoom.wednesday == false && this.discussionRoom.thursday == false && this.discussionRoom.friday == false
+      ){
+        Swal.fire({
+          title: 'You have to choose atleast one day',
+          icon: 'warning', 
+          confirmButtonColor: '#089B41', 
+        })
+      }else{
+        this.isLoading = true;
+        if (this.discussionRoom.id == 0) {
+          this.discussionRoomService.Add(this.discussionRoom, this.DomainName).subscribe(
+            (result: any) => {
+              this.closeModal();
+              this.getAllData()
+            },
+            error => {
+              this.isLoading = false;
+            }
+          );
+        } else {
+          this.discussionRoomService.Edit(this.discussionRoom, this.DomainName).subscribe(
+            (result: any) => {
+              this.closeModal()
+              this.getAllData()
+            },
+            error => {
+              this.isLoading = false;
+            }
+          );
+        }
       }
     }
   }

@@ -273,11 +273,10 @@ export class TimeTableComponent {
   }
 
   View(id: number) {
-    this.router.navigateByUrl(`Employee/Time Table View/${id}`)
+    this.router.navigateByUrl(`Employee/Time Table/${id}`)
   }
 
   EditFavourite(id: number, isFav: boolean) {
-    console.log(id, isFav)
     this.TimeTableServ.EditIsFavourite(id, isFav, this.DomainName).subscribe((d) => {
       this.GetAllData()
     })
@@ -290,7 +289,6 @@ export class TimeTableComponent {
         printContents = document.getElementById("DataTeacher")?.innerHTML;
       } else if (this.PrintType == "Class") {
         printContents = document.getElementById("Data")?.innerHTML;
-        console.log(printContents)
       } else {
         printContents = document.getElementById("All")?.innerHTML;
       }
@@ -355,7 +353,6 @@ export class TimeTableComponent {
       });
     } else if (this.PrintType === "Teacher") {
       this.TimeTableServ.GetByIdForTeacherAsync(this.SelectedTimeTableId, this.SelectedTeacherId, this.DomainName).subscribe((d) => {
-        console.log(this.TimeTable)
         this.TimeTable = d.data;
         this.TimeTableName = d.timeTableName;
         this.MaxPeriods = d.maxPeriods;
@@ -365,7 +362,6 @@ export class TimeTableComponent {
     } else if (this.PrintType === "All") {
       this.TimeTableServ.GetByID(this.SelectedTimeTableId, this.DomainName).subscribe((d) => {
         this.TimeTable2 = d.data;
-        console.log(this.TimeTable)
         this.TimeTableName = d.timeTableName;
         this.MaxPeriods = d.maxPeriods;
         this.triggerPrint();

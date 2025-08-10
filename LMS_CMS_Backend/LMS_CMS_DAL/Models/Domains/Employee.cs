@@ -9,6 +9,7 @@ using LMS_CMS_DAL.Models.Domains.AccountingModule;
 using LMS_CMS_DAL.Models.Domains.Administration;
 using LMS_CMS_DAL.Models.Domains.BusModule;
 using LMS_CMS_DAL.Models.Domains.LMS;
+using LMS_CMS_DAL.Models.Domains.ViolationModule;
 
 namespace LMS_CMS_DAL.Models.Domains
 {
@@ -56,7 +57,8 @@ namespace LMS_CMS_DAL.Models.Domains
         public string? Note { get; set; }
         public bool? CanReceiveRequest { get; set; }
         public bool? CanReceiveMessage { get; set; }
-
+        public bool? CanReceiveRequestFromParent { get; set; }
+        public bool? CanReceiveMessageFromParent { get; set; }
 
         [ForeignKey("Role")]
         [Required]
@@ -114,6 +116,8 @@ namespace LMS_CMS_DAL.Models.Domains
         public ICollection<GradeSupervisor> GradeSupervisors { get; set; } = new HashSet<GradeSupervisor>();
         public ICollection<TimeTableSubject> TimeTableSubjects { get; set; } = new HashSet<TimeTableSubject>();
         public ICollection<Duty> Duties { get; set; } = new HashSet<Duty>();
+        public ICollection<Violation> Violations { get; set; } = new HashSet<Violation>();
+        public ICollection<RemedialClassroom> RemedialClassrooms { get; set; } = new HashSet<RemedialClassroom>();
 
     }
 }

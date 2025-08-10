@@ -11,7 +11,6 @@ import { TokenData } from '../../../../Models/token-data';
 import { AccountService } from '../../../../Services/account.service';
 import { ApiService } from '../../../../Services/api.service';
 import { EmployeeTypeViolationService } from '../../../../Services/Employee/employee-type-violation.service';
-import { ViolationService } from '../../../../Services/Employee/violation.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { StoresService } from '../../../../Services/Employee/Inventory/stores.service';
@@ -72,7 +71,6 @@ export class StoresComponent {
   isLoading = false
 
   constructor(
-    public violationServ: ViolationService,
     public empTypeVioletionServ: EmployeeTypeViolationService,
     public activeRoute: ActivatedRoute,
     public account: AccountService,

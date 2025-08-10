@@ -1,0 +1,46 @@
+<div class="flex justify-between items-center">
+    <div class="flex justify-between items-center space-x-5">
+        <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToViolation()"></i>
+        <h1 class="primaryTxt font-semibold text-2xl leading-9">Violation</h1>
+    </div>
+</div>
+
+<div class="flex flex-wrap  mt-5">
+    <div class="p-3 w-[30%]">
+        <div class="bg-[#EBEBEB] p-3  mb-4">
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Employee Type</p>
+            <p class="font-medium text-base text-[#1E1E1E]">{{ violation.employeeTypeName }}</p>
+        </div>
+    </div>
+    <div class="p-3 w-[30%]">
+        <div class="bg-[#EBEBEB] p-3 mb-4">
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Violation Type</p>
+            <p class="font-medium text-base text-[#1E1E1E]">{{ violation.violationTypeName }}</p>
+        </div>
+    </div>
+    <div class="p-3 w-[30%]">
+        <div class="bg-[#EBEBEB] p-3 mb-4">
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Employee</p>
+            <p class="font-medium text-base text-[#1E1E1E]">{{ violation.employeeEnglishName }}</p>
+        </div>
+    </div>
+    <div class="p-3 w-[30%]">
+        <div class="bg-[#EBEBEB] p-3 mb-4">
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Date</p>
+            <p class="font-medium text-base text-[#1E1E1E]">{{ violation.date }}</p>
+        </div>
+    </div>
+    <div class="w-full p-3">
+        <div class="bg-[#EBEBEB] p-3 mb-4">
+            <p class="font-semibold text-sm text-[#6F6F6F]">Details</p>
+            <p class="font-medium text-base text-[#1E1E1E] break-words whitespace-pre-wrap">
+                {{ violation.details }}
+            </p>
+        </div>
+    </div>
+</div>
+
+<div *ngIf="violation.attach" class=" w-[30%] px-6 py-3 lg:py-5">
+    <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Attach</p>
+    <img *ngIf="violation.attach" [src]="violation.attach" class="object-cover w-1/2">
+</div>
