@@ -1,5 +1,6 @@
 ﻿using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_DAL.Models.Domains.RegisterationModule;
+using LMS_CMS_DAL.Models.Domains.SocialWorker;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -32,6 +33,7 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public ICollection<TimeTable> TimeTables { get; set; } = new HashSet<TimeTable>();
         public ICollection<RemedialTimeTable> RemedialTimeTables { get; set; } = new HashSet<RemedialTimeTable>();
         public ICollection<RemedialClassroom> RemedialClassrooms { get; set; } = new HashSet<RemedialClassroom>();
+        public ICollection<Attendance> Attendances { get; set; } = new HashSet<Attendance>();
 
     }
 }

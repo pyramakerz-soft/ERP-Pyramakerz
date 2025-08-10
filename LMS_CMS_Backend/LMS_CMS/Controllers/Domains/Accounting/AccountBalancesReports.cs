@@ -266,5 +266,124 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             });
         }
         #endregion
+
+        #region Banks Balances
+        [HttpGet("GetBanksBalance")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "" }
+        )]
+        public async Task<IActionResult> GetBanksBalance(DateTime? toDate, long? mainAccountID = 0, bool zeroBalance = true, bool positiveBalance = true, bool negativeBalance = true, int pageNumber = 1, int pageSize = 10)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+            var context = Unit_Of_Work.DbContext;
+
+            int startRow = ((pageNumber - 1) * pageSize) + 1;
+            int endRow = pageNumber * pageSize;
+
+            List<AccountBalanceReport>? banksBalances = new();
+            AccountTotals totals = new();
+            AccountTotals allTotals = new();
+            long totalRecords = 0;
+            DateTime baseDate = new DateTime(1900, 1, 1);
+
+            if (mainAccountID == 0)
+            {
+                List<Bank> banks = await Unit_Of_Work.bank_Repository.SelectQuery<Bank>(x => x.IsDeleted != true).ToListAsync();
+
+                if (banks == null || banks.Count == 0)
+                {
+                    return NotFound("No banks found.");
+                }
+
+                var temp = await context.Set<AccountBalanceReport>().FromSqlRaw(
+                    "EXEC dbo.GetAccountSummary @DateFrom, @DateTo, 0, 0, 6, @zeroBalance, @positiveBalance, @negativeBalance, @StartRow, @EndRow",
+                    new SqlParameter("@DateFrom", "1900-1-1"),
+                    new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
+                    new SqlParameter("@StartRow", startRow),
+                    new SqlParameter("@EndRow", endRow),
+                    new SqlParameter("@zeroBalance", zeroBalance),
+                    new SqlParameter("@positiveBalance", positiveBalance),
+                    new SqlParameter("@negativeBalance", negativeBalance)
+                )
+                .AsNoTracking()
+                .ToListAsync();
+
+                if (temp != null || temp?.Count > 0)
+                {
+                    banksBalances.AddRange(temp);
+                }
+
+                if (banksBalances == null || banksBalances.Count == 0)
+                    return NotFound($"No banks found.");
+
+                allTotals.TotalDebit = banksBalances.Sum(x => x.Debit ?? 0);
+                allTotals.TotalCredit = banksBalances.Sum(x => x.Credit ?? 0);
+
+                allTotals.Differences = allTotals.TotalDebit - allTotals.TotalCredit;
+
+                totalRecords = (await context.Set<CountResult>()
+                    .FromSqlInterpolated($@"
+                        SELECT ID from Banks")
+                    .ToListAsync())
+                    .Count();
+            }
+            else
+            {
+                AccountingTreeChart? mainAccount = Unit_Of_Work.accountingTreeChart_Repository.First_Or_Default(x => x.ID == mainAccountID && x.IsDeleted != true);
+
+                if (mainAccount == null)
+                    return NotFound($"Main account with ID: {mainAccountID} not found.");
+
+                var temp = await context.Set<AccountBalanceReport>().FromSqlRaw(
+                    "EXEC dbo.GetAccountSummary @DateFrom, @DateTo, @MainAccNo, 0, 6, @zeroBalance, @positiveBalance, @negativeBalance, @StartRow, @EndRow",
+                    new SqlParameter("@DateFrom", "1900-1-1"),
+                    new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
+                    new SqlParameter("@MainAccNo", mainAccount.ID),
+                    new SqlParameter("@StartRow", startRow),
+                    new SqlParameter("@EndRow", endRow),
+                    new SqlParameter("@zeroBalance", zeroBalance),
+                    new SqlParameter("@positiveBalance", positiveBalance),
+                    new SqlParameter("@negativeBalance", negativeBalance)
+                )
+                .AsNoTracking()
+                .ToListAsync();
+
+                if (temp != null || temp?.Count > 0)
+                {
+                    banksBalances.AddRange(temp);
+                }
+
+                if (banksBalances == null || banksBalances.Count == 0)
+                    return NotFound($"No banks found.");
+
+                totalRecords = (await context.Set<CountResult>()
+                    .FromSqlInterpolated($@"
+                        SELECT ID from Banks WHERE AccountNumberID = {mainAccountID}")
+                    .ToListAsync())
+                    .Count();
+
+                allTotals.TotalDebit = banksBalances.Sum(x => x.Debit ?? 0);
+                allTotals.TotalCredit = banksBalances.Sum(x => x.Credit ?? 0);
+
+                allTotals.Differences = allTotals.TotalDebit - allTotals.TotalCredit;
+            }
+
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new
+            {
+                Data = banksBalances,
+                Totals = allTotals,
+                Pagination = paginationMetadata
+            });
+        }
+        #endregion
     }
 }

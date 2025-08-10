@@ -116,7 +116,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             StudentClassroom studentClassroom = await Unit_Of_Work.studentClassroom_Repository.FindByIncludesAsync(
                     d => d.IsDeleted != true && d.ID == Id && d.Student.IsDeleted != true,
                     query => query.Include(emp => emp.Student),
-                    query => query.Include(emp => emp.StudentClassroomSubjects.Where(d => d.IsDeleted != true)).ThenInclude(d => d.Subject),
+                    query => query.Include(emp => emp.StudentClassroomSubjects.Where(d => d.IsDeleted != true && d.Subject.IsDeleted != true)).ThenInclude(d => d.Subject),
                     query => query.Include(emp => emp.Classroom));
             if(studentClassroom == null)
             {

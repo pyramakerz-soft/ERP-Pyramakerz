@@ -44,7 +44,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 t => t.IsDeleted != true &&
                     t.Date >= startDate &&
                     t.Date <= endDate,
-                q => q.Include(m => m.PayableDetails).ThenInclude(pd => pd.LinkFile)
+                q => q.Include(m => m.PayableDetails
+                .Where(x => x.IsDeleted != true)).ThenInclude(pd => pd.LinkFile)
                       .Include(m => m.LinkFile)
                       .Include(m => m.PayableDocType)
             )
@@ -54,13 +55,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
             if (query == null || query.ToList().Count == 0)
                 return NotFound("No payables found for the specified date range.");
-
-            foreach (var master in query)
-            {
-                master.PayableDetails = master.PayableDetails
-                    .Where(detail => detail.IsDeleted != true)
-                    .ToList();
-            }
 
             int totalRecords = await Unit_Of_Work.payableMaster_Repository.CountAsync(t => t.Date >= startDate && t.Date <= endDate);
 
@@ -160,7 +154,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 t => t.IsDeleted != true &&
                 t.Date >= startDate &&
                 t.Date <= endDate,
-                q => q.Include(m => m.ReceivableDetails).ThenInclude(pd => pd.LinkFile)
+                q => q.Include(m => m.ReceivableDetails
+                .Where(x => x.IsDeleted != true)).ThenInclude(pd => pd.LinkFile)
                       .Include(m => m.LinkFile)
                       .Include(m => m.ReceivableDocType)
             )
@@ -170,13 +165,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
             if (query == null || query.ToList().Count == 0)
                 return NotFound("No receivables found for the specified date range.");
-
-            foreach (var master in query)
-            {
-                master.ReceivableDetails = master.ReceivableDetails
-                    .Where(detail => detail.IsDeleted != true)
-                    .ToList();
-            }
 
             int totalRecords = await Unit_Of_Work.receivableMaster_Repository.CountAsync(t => t.Date >= startDate && t.Date <= endDate); ;
 
@@ -275,7 +263,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                    f => f.IsDeleted != true &&
                    f.Date >= startDate &&
                    f.Date <= endDate,
-                   query => query.Include(d => d.InstallmentDeductionDetails)
+                   query => query.Include(d => d.InstallmentDeductionDetails
+                   .Where(x => x.IsDeleted != true))
                    .ThenInclude(x => x.TuitionFeesType),
                    query => query.Include(d => d.Student),
                    query => query.Include(d => d.Employee)
@@ -286,13 +275,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
             if (query == null || query.Count == 0)
                 return NotFound("No installment masters found for the specified date range.");
-
-            foreach (var master in query)
-            {
-                master.InstallmentDeductionDetails = master.InstallmentDeductionDetails
-                    .Where(detail => detail.IsDeleted != true)
-                    .ToList();
-            }
 
             int totalRecords = await Unit_Of_Work.installmentDeductionMaster_Repository.CountAsync(t => t.Date >= startDate && t.Date <= endDate);
 
@@ -325,7 +307,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                     t.Date >= startDate && 
                     t.Date <= endDate,
                     query => query.Include(x => x.AccountingEntriesDocType),
-                    query => query.Include(Master => Master.AccountingEntriesDetails)
+                    query => query.Include(Master => Master.AccountingEntriesDetails
+                    .Where(x => x.IsDeleted != true))
                     .ThenInclude(x => x.AccountingTreeChart)
             )
                 .Skip((pageNumber - 1) * pageSize)
@@ -334,13 +317,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
             if (query == null || query.Count == 0)
                 return NotFound("No accounting entries found for the specified date range.");
-
-            foreach (var master in query)
-            {
-                master.AccountingEntriesDetails = master.AccountingEntriesDetails
-                    .Where(detail => detail.IsDeleted != true)
-                    .ToList();
-            }
 
             int totalRecords = await Unit_Of_Work.accountingEntriesMaster_Repository.CountAsync(t => t.Date >= startDate && t.Date <= endDate);
 

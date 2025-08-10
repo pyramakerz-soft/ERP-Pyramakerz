@@ -12,6 +12,7 @@ using LMS_CMS_BL.DTO.Inventory;
 using LMS_CMS_BL.DTO.LMS;
 using LMS_CMS_BL.DTO.Octa;
 using LMS_CMS_BL.DTO.Registration;
+using LMS_CMS_BL.DTO.SocialWorker;
 using LMS_CMS_BL.DTO.Violation;
 using LMS_CMS_BL.DTO.Zatca;
 using LMS_CMS_DAL.Models.Domains;
@@ -25,6 +26,7 @@ using LMS_CMS_DAL.Models.Domains.ETA;
 using LMS_CMS_DAL.Models.Domains.Inventory;
 using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_DAL.Models.Domains.RegisterationModule;
+using LMS_CMS_DAL.Models.Domains.SocialWorker;
 using LMS_CMS_DAL.Models.Domains.ViolationModule;
 using LMS_CMS_DAL.Models.Domains.Zatca;
 using LMS_CMS_DAL.Models.Octa;
@@ -1191,6 +1193,9 @@ namespace LMS_CMS_BL.Config
                 .ForMember(dest => dest.SchoolName, opt => opt.MapFrom(src => src.AcademicYear.School.Name))
                 .ForMember(dest => dest.AcademicYearName, opt => opt.MapFrom(src => src.AcademicYear.Name));
             CreateMap<RemedialTimeTableDay, RemedialTimeTableDayGetDTO>();
+
+            CreateMap<ConductLevel, GonductLevelGetDTO>();
+            CreateMap<ConductLevelAddDTO, ConductLevel>();
 
         }
     } 

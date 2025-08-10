@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using LMS_CMS_DAL.Models.Domains.SocialWorker;
 
 namespace LMS_CMS_DAL.Models.Domains.LMS
 {
@@ -45,6 +46,7 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public ICollection<LessonLive> LessonLives { get; set; } = new HashSet<LessonLive>();
         public ICollection<ClassroomSubject> ClassroomSubjects { get; set; } = new HashSet<ClassroomSubject>();
         public ICollection<TimeTableClassroom> TimeTableClassrooms { get; set; } = new HashSet<TimeTableClassroom>();
+        public ICollection<Attendance> Attendances { get; set; } = new HashSet<Attendance>();
 
     }
 }

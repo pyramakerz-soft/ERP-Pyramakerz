@@ -160,75 +160,67 @@ export class AllStoresBalanceReportComponent implements OnInit {
       });
   }
 
-  private prepareExportData(): void {
-    if (!this.reportData) return;
+private prepareExportData(): void {
+    if (!this.reportData?.data) return;
 
-    this.reportForExport = this.reportData.data.map(
-      (item: StoreBalanceItem) => {
-        const baseData = {
-          'Item Code': item.itemCode,
-          'Item Name': item.itemName,
-          Quantity: item.quantity,
+    this.reportForExport = this.reportData.data.map((item: StoreBalanceItem) => {
+        const baseData: any = {
+            'Item Code': item.itemCode,
+            'Item Name': item.itemName
         };
 
-        switch (this.reportType) {
-          case 'PurchasePrice':
-            return {
-              ...baseData,
-              'Purchase Price': item.purchasePrice,
-              'Total Purchase': item.totalPurchaseValue,
-            };
-          case 'SalesPrice':
-            return {
-              ...baseData,
-              'Sales Price': item.salesPrice,
-              'Total Sales': item.totalSalesValue,
-            };
-          case 'Cost':
-            return {
-              ...baseData,
-              'Average Cost': item.averageCost,
-              'Total Cost': item.totalCost,
-            };
-          default:
-            return baseData;
-        }
-      }
-    );
-  }
+        // Add store quantities
+        (item.stores || []).forEach(store => {
+            baseData[store.storeName] = store.quantity;
+        });
 
-  getInfoRows(): any[] {
-    return [
-      { keyEn: 'Report Type: ' + this.pageTitle },
-      { keyEn: 'To Date: ' + this.dateTo },
-      {
-        keyEn:
-          'Category: ' +
-          (this.selectedCategoryId
-            ? this.categories.find((c) => c.id === this.selectedCategoryId)
-                ?.name
-            : 'All'),
-      },
-      { keyEn: 'Has Balance: ' + (this.hasBalance ? 'Yes' : 'No') },
-      { keyEn: 'Overdrawn Balance: ' + (this.overdrawnBalance ? 'Yes' : 'No') },
-      { keyEn: 'Zero Balances: ' + (this.zeroBalances ? 'Yes' : 'No') },
-    ];
-  }
+        return baseData;
+    });
+}
 
-  getPdfTableHeaders(): string[] {
-    const baseHeaders = ['Item Code', 'Item Name', 'Quantity'];
-
-    switch (this.reportType) {
-      case 'PurchasePrice':
-        return [...baseHeaders, 'Purchase Price', 'Total Purchase'];
-      case 'SalesPrice':
-        return [...baseHeaders, 'Sales Price', 'Total Sales'];
-      case 'Cost':
-        return [...baseHeaders, 'Average Cost', 'Total Cost'];
-      default:
-        return baseHeaders;
+getPdfTableHeaders(): string[] {
+    const baseHeaders = ['Item Code', 'Item Name'];
+    
+    if (this.reportData?.data?.[0]?.stores) {
+        this.reportData.data[0].stores.forEach(store => {
+            baseHeaders.push(store.storeName);
+        });
     }
-  }
+    
+    return baseHeaders;
+}
+
+getInfoRows(): any[] {
+    return [
+        { keyEn: 'Report Type: ' + this.pageTitle },
+        { keyEn: 'To Date: ' + this.dateTo },
+        {
+            keyEn: 'Category: ' + 
+                (this.selectedCategoryId ? 
+                    this.categories.find(c => c.id === this.selectedCategoryId)?.name : 
+                    'All'
+                )
+        },
+        { keyEn: 'Has Balance: ' + (this.hasBalance ? 'Yes' : 'No') },
+        { keyEn: 'Overdrawn Balance: ' + (this.overdrawnBalance ? 'Yes' : 'No') },
+        { keyEn: 'Zero Balances: ' + (this.zeroBalances ? 'Yes' : 'No') }
+    ];
+}
+
+  // getPdfTableHeaders(): string[] {
+  //   const baseHeaders = ['Item Code', 'Item Name', 'Quantity'];
+
+  //   switch (this.reportType) {
+  //     case 'PurchasePrice':
+  //       return [...baseHeaders, 'Purchase Price', 'Total Purchase'];
+  //     case 'SalesPrice':
+  //       return [...baseHeaders, 'Sales Price', 'Total Sales'];
+  //     case 'Cost':
+  //       return [...baseHeaders, 'Average Cost', 'Total Cost'];
+  //     default:
+  //       return baseHeaders;
+  //   }
+  // }
 
   DownloadAsPDF() {
     if (!this.reportForExport.length) {

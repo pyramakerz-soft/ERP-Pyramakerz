@@ -12,6 +12,7 @@ using LMS_CMS_DAL.Models.Domains.ECommerce;
 using LMS_CMS_DAL.Models.Domains.ETA;
 using LMS_CMS_DAL.Models.Domains.Inventory;
 using LMS_CMS_DAL.Models.Domains.RegisterationModule;
+using LMS_CMS_DAL.Models.Domains.SocialWorker;
 
 namespace LMS_CMS_DAL.Models.Domains.LMS
 {
@@ -122,6 +123,8 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public ICollection<StudentPerformance> StudentPerformances { get; set; } = new HashSet<StudentPerformance>();
         public ICollection<DailyPerformance> DailyPerformance { get; set; } = new HashSet<DailyPerformance>();
         public ICollection<RemedialClassroomStudent> RemedialClassroomStudents { get; set; } = new HashSet<RemedialClassroomStudent>();
+        public ICollection<Conduct> Conduct { get; set; } = new HashSet<Conduct>();
+        public ICollection<AttendanceStudent> AttendanceStudents { get; set; } = new HashSet<AttendanceStudent>();
 
     }
 }

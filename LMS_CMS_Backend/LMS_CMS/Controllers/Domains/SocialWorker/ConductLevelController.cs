@@ -1,44 +1,44 @@
 ﻿using AutoMapper;
 using LMS_CMS_BL.DTO.LMS;
+using LMS_CMS_BL.DTO.SocialWorker;
 using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains.LMS;
+using LMS_CMS_DAL.Models.Domains.SocialWorker;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace LMS_CMS_PL.Controllers.Domains.LMS
+namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
 {
     [Route("api/with-domain/[controller]")]
     [ApiController]
     [Authorize]
-    public class LessonResourcesTypeController : ControllerBase
+    public class ConductLevelController : ControllerBase
     {
         private readonly DbContextFactoryService _dbContextFactory;
         IMapper mapper;
         private readonly CheckPageAccessService _checkPageAccessService;
 
-        public LessonResourcesTypeController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService)
+        public ConductLevelController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _checkPageAccessService = checkPageAccessService;
         }
 
-        ///////////////////////////////////////////////////////////////////////////////////
-
+        ////////////////////////////////
+        
         [HttpGet]
         [Authorize_Endpoint_(
         allowedTypes: new[] { "octa", "employee" },
         pages: new[] { "Lesson Resources Types" }
-    )]
+        )]
         public IActionResult Get()
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            List<LessonResourceType> types;
-
             var userClaims = HttpContext.User.Claims;
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
             long.TryParse(userIdClaim, out long userId);
@@ -49,31 +49,29 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            types = Unit_Of_Work.lessonResourceType_Repository.FindBy(t => t.IsDeleted != true);
+            List<ConductLevel> ConductLevels = Unit_Of_Work.conductLevel_Repository.FindBy(t => t.IsDeleted != true);
 
-            if (types == null || types.Count == 0)
+            if (ConductLevels == null || ConductLevels.Count == 0)
             {
                 return NotFound();
             }
 
-            List<LessonResourceTypeGetDTo> Dto = mapper.Map<List<LessonResourceTypeGetDTo>>(types);
+            List<GonductLevelGetDTO> Dto = mapper.Map<List<GonductLevelGetDTO>>(ConductLevels);
 
             return Ok(Dto);
         }
 
-        ///////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////
 
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
-           allowedTypes: new[] { "octa", "employee" },
-        pages: new[] { "Lesson Resources Types" }
-       )]
+          allowedTypes: new[] { "octa", "employee" },
+          pages: new[] { "Lesson Resources Types" }
+        )]
         public async Task<IActionResult> GetById(long id)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            LessonResourceType type;
-
             var userClaims = HttpContext.User.Claims;
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
             long.TryParse(userIdClaim, out long userId);
@@ -84,27 +82,26 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            type = Unit_Of_Work.lessonResourceType_Repository.First_Or_Default(
-            sem => sem.IsDeleted != true && sem.ID == id);
+            ConductLevel conductLevel = Unit_Of_Work.conductLevel_Repository.First_Or_Default(sem => sem.IsDeleted != true && sem.ID == id);
 
-            if (type == null)
+            if (conductLevel == null)
             {
                 return NotFound();
             }
 
-            LessonResourceTypeGetDTo Dto = mapper.Map<LessonResourceTypeGetDTo>(type);
+            ConductLevel Dto = mapper.Map<ConductLevel>(conductLevel);
 
             return Ok(Dto);
         }
 
-        ///////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////
 
         [HttpPost]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
           pages: new[] { "Lesson Resources Types" }
         )]
-        public async Task<IActionResult> Add(LessonResourceTypeAddDTO newType)
+        public async Task<IActionResult> Add(ConductLevelAddDTO NewConduct)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -117,37 +114,37 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             {
                 return Unauthorized("User ID or Type claim not found.");
             }
-            if (newType == null)
+            if (NewConduct == null)
             {
-                return BadRequest("Type is empty");
+                return BadRequest("Conduct is empty");
             }
 
-            LessonResourceType Type = mapper.Map<LessonResourceType>(newType);
+            ConductLevel conduct = mapper.Map<ConductLevel>(NewConduct);
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-            Type.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            conduct.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
             if (userTypeClaim == "octa")
             {
-                Type.InsertedByOctaId = userId;
+                conduct.InsertedByOctaId = userId;
             }
             else if (userTypeClaim == "employee")
             {
-                Type.InsertedByUserId = userId;
+                conduct.InsertedByUserId = userId;
             }
-            Unit_Of_Work.lessonResourceType_Repository.Add(Type);
+            Unit_Of_Work.conductLevel_Repository.Add(conduct);
             Unit_Of_Work.SaveChanges();
-            return Ok(newType);
+            return Ok(NewConduct);
         }
 
-        ////////////////////////////////////////////////////
+        ////////////////////////////////
 
         [HttpPut]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
-            allowEdit: 1,
-            pages: new[] { "Lesson Resources Types" }
-        )]
-        public async Task<IActionResult> EditAsync(LessonResourceTypeEditDTO newData)
+           allowedTypes: new[] { "octa", "employee" },
+           allowEdit: 1,
+           pages: new[] { "Lesson Resources Types" }
+       )]
+        public async Task<IActionResult> EditAsync(ConductLevelAddDTO NewConduct)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -163,61 +160,61 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            if (newData == null)
+            if (NewConduct == null)
             {
-                return BadRequest("Type cannot be null");
+                return BadRequest("Conduct cannot be null");
             }
-            if (newData.ID == null)
+            if (NewConduct.ID == null)
             {
-                return BadRequest("Type id can not be null");
+                return BadRequest("id can not be null");
             }
 
-            LessonResourceType type = Unit_Of_Work.lessonResourceType_Repository.First_Or_Default(s => s.ID == newData.ID && s.IsDeleted != true);
-            if (type == null)
+            ConductLevel conductLevel = Unit_Of_Work.conductLevel_Repository.First_Or_Default(s => s.ID == NewConduct.ID && s.IsDeleted != true);
+            if (conductLevel == null)
             {
-                return BadRequest("Type not exist");
+                return BadRequest("conduct Level not exist");
             }
 
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Lesson Resources Types", roleId, userId, type);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Lesson Resources Types", roleId, userId, conductLevel);
                 if (accessCheck != null)
                 {
                     return accessCheck;
                 }
             }
 
-            mapper.Map(newData, type);
+            mapper.Map(NewConduct, conductLevel);
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-            type.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            conductLevel.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
             if (userTypeClaim == "octa")
             {
-                type.UpdatedByOctaId = userId;
-                if (type.UpdatedByUserId != null)
+                conductLevel.UpdatedByOctaId = userId;
+                if (conductLevel.UpdatedByUserId != null)
                 {
-                    type.UpdatedByUserId = null;
+                    conductLevel.UpdatedByUserId = null;
                 }
             }
             else if (userTypeClaim == "employee")
             {
-                type.UpdatedByUserId = userId;
-                if (type.UpdatedByOctaId != null)
+                conductLevel.UpdatedByUserId = userId;
+                if (conductLevel.UpdatedByOctaId != null)
                 {
-                    type.UpdatedByOctaId = null;
+                    conductLevel.UpdatedByOctaId = null;
                 }
             }
-            Unit_Of_Work.lessonResourceType_Repository.Update(type);
+            Unit_Of_Work.conductLevel_Repository.Update(conductLevel);
             Unit_Of_Work.SaveChanges();
-            return Ok(newData);
+            return Ok(NewConduct);
         }
-        ////////////////////////////////////////////////////
 
+        ////////////////////////////////
 
         [HttpDelete("{id}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
-            allowDelete: 1,
-            pages: new[] { "Lesson Resources Types" }
+          allowedTypes: new[] { "octa", "employee" },
+          allowDelete: 1,
+          pages: new[] { "Lesson Resources Types" }
         )]
         public IActionResult Delete(long id)
         {
@@ -239,14 +236,14 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             {
                 return BadRequest("id cannot be null");
             }
-            LessonResourceType type = Unit_Of_Work.lessonResourceType_Repository.First_Or_Default(s => s.ID == id&& s.IsDeleted != true);
-            if (type == null)
+            ConductLevel conductLevel = Unit_Of_Work.conductLevel_Repository.First_Or_Default(s => s.ID == id && s.IsDeleted != true);
+            if (conductLevel == null)
             {
                 return BadRequest("Type not exist");
             }
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Lesson Resources Types", roleId, userId, type);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Lesson Resources Types", roleId, userId, conductLevel);
                 if (accessCheck != null)
                 {
                     return accessCheck;
@@ -254,27 +251,27 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
 
-            type.IsDeleted = true;
+            conductLevel.IsDeleted = true;
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-            type.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            conductLevel.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
             if (userTypeClaim == "octa")
             {
-                type.DeletedByOctaId = userId;
-                if (type.DeletedByUserId != null)
+                conductLevel.DeletedByOctaId = userId;
+                if (conductLevel.DeletedByUserId != null)
                 {
-                    type.DeletedByUserId = null;
+                    conductLevel.DeletedByUserId = null;
                 }
             }
             else if (userTypeClaim == "employee")
             {
-                type.DeletedByUserId = userId;
-                if (type.DeletedByOctaId != null)
+                conductLevel.DeletedByUserId = userId;
+                if (conductLevel.DeletedByOctaId != null)
                 {
-                    type.DeletedByOctaId = null;
+                    conductLevel.DeletedByOctaId = null;
                 }
             }
 
-            Unit_Of_Work.lessonResourceType_Repository.Update(type);
+            Unit_Of_Work.conductLevel_Repository.Update(conductLevel);
             Unit_Of_Work.SaveChanges();
             return Ok();
         }

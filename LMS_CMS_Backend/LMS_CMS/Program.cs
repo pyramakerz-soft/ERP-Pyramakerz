@@ -1,28 +1,31 @@
-using Microsoft.EntityFrameworkCore;
-using LMS_CMS_BL.UOW;
-using LMS_CMS_BL.Config;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-using System.Text;
-using LMS_CMS_PL.Middleware;
-using LMS_CMS_DAL.Models.Domains;
-using LMS_CMS_DAL.Models.Octa;
-using LMS_CMS_PL.Services;
-using LMS_CMS_DAL.Models;
-using Microsoft.Extensions.Options;
-using Microsoft.Extensions.FileProviders;
-using System.Text.Json.Serialization;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
-using Zatca.EInvoice.SDK.Contracts;
-using Zatca.EInvoice.SDK;
+using Amazon;
 using Amazon.S3;
 using Amazon.SecretsManager;
-using Amazon;
-using System;
+using LMS_CMS_BL.Config;
+using LMS_CMS_BL.UOW;
+using LMS_CMS_DAL.Models;
+using LMS_CMS_DAL.Models.Domains;
+using LMS_CMS_DAL.Models.Octa;
 using LMS_CMS_PL.Hubs;
+using LMS_CMS_PL.Middleware;
+using LMS_CMS_PL.Services;
 using LMS_CMS_PL.Services.SignalR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using System;
+using System.Reflection;
+using System.Text;
+using System.Text.Json.Serialization;
+using Zatca.EInvoice.SDK;
+using Zatca.EInvoice.SDK.Contracts;
+using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace LMS_CMS
 {
@@ -206,7 +209,7 @@ namespace LMS_CMS
             //app.UseMiddleware<DbConnection_Check_Middleware>(); 
 
             /// 3)
-            app.UseCors(txt); 
+            app.UseCors(txt);
 
             ///////// send files
             app.UseStaticFiles();
