@@ -58,6 +58,21 @@ BEGIN
         WHERE (@AccountId = 0 OR ATC.ID = @AccountId)
         GROUP BY Sv.ID, Sv.Name;
     END
+    ELSE IF @LinkFileID = 6
+    BEGIN
+        INSERT INTO #LedgerData (ID, Name, Debit, Credit, RowNum)
+        SELECT 
+            B.ID,
+            B.BankName,
+            SUM(ISNULL(E.Debit, 0)),
+            SUM(ISNULL(E.Credit, 0)),
+            ROW_NUMBER() OVER (ORDER BY B.BankName)
+        FROM Banks B
+        INNER JOIN AccountingTreeCharts ATC ON B.AccountNumberID = ATC.ID
+        LEFT JOIN #AllEntries E ON E.SubAccountNo = B.ID
+        WHERE (@AccountId = 0 OR ATC.ID = @AccountId)
+        GROUP BY B.ID, B.BankName;
+    END
 
     -- Paged result
     SELECT 
