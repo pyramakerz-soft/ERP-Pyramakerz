@@ -170,15 +170,15 @@
                                         {{ getMonthDate(month.month, month.year) | date: 'MMM' }} {{ month.year }}
                                     </h2>
                                     <div class="flex space-x-3 text-3xl">
-                                        <p *ngIf="currentMonth!=calendarMonths[0].month || currentYear!=calendarMonths[0].year" (click)="lastMonth(); showTime()">
+                                        <p class="cursor-pointer" *ngIf="currentMonth!=calendarMonths[0].month || currentYear!=calendarMonths[0].year" (click)="lastMonth(); showTime()">
                                             &lt;</p>
-                                        <p *ngIf="currentMonth!=calendarMonths[calendarMonths.length-1].month || currentYear!=calendarMonths[calendarMonths.length-1].year"
+                                        <p class="cursor-pointer" *ngIf="currentMonth!=calendarMonths[calendarMonths.length-1].month || currentYear!=calendarMonths[calendarMonths.length-1].year"
                                             (click)="nextMonth(); showTime()">&gt;</p>
                                     </div>
                                 </div>
     
                                 <div class="grid grid-cols-7 gap-2">
-                                    <div *ngFor="let day of getDaysInMonth(month.month, month.year)">
+                                    <div *ngFor="let day of currentMonthDays">
                                         <div (click)="showTime(day)" *ngIf="isGreen(day) && (day.interviews.length != 0)"
                                         [ngClass]="getDayClass(day)" 
                                         class="text-center py-1 px-[5px] rounded-lg bg-[#96C68D] cursor-pointer">
@@ -194,6 +194,22 @@
                                             {{ day.day }}
                                         </div>
                                     </div>
+                                    <!-- <div *ngFor="let day of getDaysInMonth(month.month, month.year)">
+                                        <div (click)="showTime(day)" *ngIf="isGreen(day) && (day.interviews.length != 0)"
+                                        [ngClass]="getDayClass(day)" 
+                                        class="text-center py-1 px-[5px] rounded-lg bg-[#96C68D] cursor-pointer">
+                                            {{ day.day }}
+                                        </div>
+                                        <div (click)="showTime()" *ngIf="!isGreen(day) && (day.interviews.length != 0)"
+                                        [ngClass]="getDayClass(day)" 
+                                            class="text-center py-1 px-[5px] rounded-lg bg-[#EA3A3D80]">
+                                            {{ day.day }}
+                                        </div>
+                                        <div (click)="showTime()" class="text-center py-1 px-[5px] rounded-lg"
+                                            *ngIf="day.interviews.length == 0">
+                                            {{ day.day }}
+                                        </div>
+                                    </div> -->
                                 </div>
     
                                 <div id="timePart" class="w-full mt-3 hidden">

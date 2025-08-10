@@ -52,7 +52,6 @@ export class InvoiceReportMasterDetailedComponent implements OnInit {
     reportHeaderTwoEn: 'Transaction Details',
     reportHeaderOneAr: 'تقرير المخزون',
     reportHeaderTwoAr: 'تفاصيل المعاملة',
-    reportImage: 'assets/images/logo.png',
   };
 
   availableFlags: { [key: string]: FlagOption[] } = {
@@ -204,13 +203,15 @@ export class InvoiceReportMasterDetailedComponent implements OnInit {
   }
 
   viewReport() {
+    console.log('Viewing report with filters');
     if (!this.validateFilters()) return;
+    console.log('2');
 
     this.isLoading = true;
+        console.log('3');
+
     this.showTable = false;
-
-
-
+        console.log('nooooooooooo');
 
     this.inventoryMasterService
       .search(
@@ -229,22 +230,28 @@ export class InvoiceReportMasterDetailedComponent implements OnInit {
         next: (response: any) => {
           console.log(response);
           if (Array.isArray(response)) {
+            console.log('Response is an array');
             this.transactions = response;
             this.totalRecords = response.length;
             this.totalPages = Math.ceil(response.length / this.pageSize);
           } else if (response?.data) {
+            console.log('Response contains data property');
             this.transactions = response.data;
+            console.log('Transactions loaded:');
             this.totalRecords =
               response.pagination?.totalRecords || response.data.length;
             this.totalPages =
               response.pagination?.totalPages ||
               Math.ceil(response.data.length / this.pageSize);
           } else {
+            console.warn('Unexpected response format:');
             this.transactions = [];
           }
 
           this.prepareExportData();
+          console.log('prep');
           this.showTable = true;
+          console.log('show table true');
           this.isLoading = false;
         },
         error: (error) => {
@@ -256,6 +263,7 @@ export class InvoiceReportMasterDetailedComponent implements OnInit {
       });
   }
 
+  cachedTableDataForPDF: any[] = [];
   private prepareExportData(): void {
     this.transactionsForExport = this.transactions.map((t) => ({
       header: `Invoice #${t.invoiceNumber}`,
@@ -295,8 +303,8 @@ export class InvoiceReportMasterDetailedComponent implements OnInit {
           })) || [],
       },
     }));
-  }
-
+  this.cachedTableDataForPDF = this.getTableDataWithHeader();
+}
   getTableDataWithHeader(): any[] {
     return this.transactionsForExport.map((item) => ({
       header: item.header,
@@ -306,35 +314,57 @@ export class InvoiceReportMasterDetailedComponent implements OnInit {
     }));
   }
 
-  getInfoRows(): any[] {
-    const rows = [
-      { keyEn: 'From Date: ' + this.dateFrom, valueEn: '' },
-      { keyEn: 'To Date: ' + this.dateTo, valueEn: '' },
-      { keyEn: 'Store: ' + this.getStoreName(), valueEn: '' },
-    ];
+  trackByInvoice(index: number, item: any): string {
+    return item.header; // Use invoice number as unique identifier
+}
 
-    // Add student/supplier info if available
-    if (
-      this.reportType === 'sales' &&
-      this.transactions.some((t) => t.studentName)
-    ) {
-      rows.push({
-        keyEn: 'Student: ' + (this.transactions[0]?.studentName || 'N/A'),
-        valueEn: '',
-      });
-    }
-    if (
-      this.reportType === 'purchase' &&
-      this.transactions.some((t) => t.supplierName)
-    ) {
-      rows.push({
-        keyEn: 'Supplier: ' + (this.transactions[0]?.supplierName || 'N/A'),
-        valueEn: '',
-      });
-    }
+trackBySummaryItem(index: number, item: any): string {
+    return item.key; // Use summary key as unique identifier
+}
 
-    return rows;
-  }
+trackByTableRow(index: number, item: any): number {
+    return item.ID || index; // Use item ID or index as fallback
+}
+
+//hereeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+  // getsection(): any[] {
+  //   return this.transactionsForExport.map((item) => ({
+  //     header: item.header,
+  //     summary: item.summary,
+  //     tableHeaders: item.table.headers,
+  //     tableData: item.table.data,
+  //   }));
+  // }
+
+  // getInfoRows(): any[] {
+  //   const rows = [
+  //     { keyEn: 'From Date: ' + this.dateFrom, valueEn: '' },
+  //     { keyEn: 'To Date: ' + this.dateTo, valueEn: '' },
+  //     { keyEn: 'Store: ' + this.getStoreName(), valueEn: '' },
+  //   ];
+
+  //   // Add student/supplier info if available
+  //   if (
+  //     this.reportType === 'sales' &&
+  //     this.transactions.some((t) => t.studentName)
+  //   ) {
+  //     rows.push({
+  //       keyEn: 'Student: ' + (this.transactions[0]?.studentName || 'N/A'),
+  //       valueEn: '',
+  //     });
+  //   }
+  //   if (
+  //     this.reportType === 'purchase' &&
+  //     this.transactions.some((t) => t.supplierName)
+  //   ) {
+  //     rows.push({
+  //       keyEn: 'Supplier: ' + (this.transactions[0]?.supplierName || 'N/A'),
+  //       valueEn: '',
+  //     });
+  //   }
+
+  //   return rows;
+  // }
 
   getStoreName(): string {
     return (
@@ -568,4 +598,5 @@ exportExcel() {
   const dateStr = new Date().toISOString().slice(0, 10);
   XLSX.writeFile(workbook, `${this.reportType}_Transactions_${dateStr}.xlsx`);
 }
+
 }

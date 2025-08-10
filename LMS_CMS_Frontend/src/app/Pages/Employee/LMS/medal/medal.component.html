@@ -97,7 +97,7 @@
                 <input id="englishName" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                     placeholder="Enter English Name" [(ngModel)]="medal.englishName"
                     (ngModelChange)="onInputValueChange({ field: 'englishName', value: $event })" />
-                <span *ngIf="validationErrors['englishName']" class="text-red-500 ml-3 font-normal">{{
+                <span *ngIf="validationErrors['englishName']" class="text-red-500  font-normal text-xs md:text-sm">{{
                     validationErrors['englishName']}}</span>
             </div>
             <div class="flex flex-col mb-4 w-[49%]">
@@ -106,7 +106,7 @@
                     placeholder="Enter Arabic Name" [(ngModel)]="medal.arabicName"
                     (ngModelChange)="onInputValueChange({ field: 'arabicName', value: $event })" />
                 <span *ngIf="validationErrors['arabicName']"
-                    class="text-red-500 ml-3 font-normal">{{validationErrors['arabicName'] }}</span>
+                    class="text-red-500  font-normal text-xs md:text-sm">{{validationErrors['arabicName'] }}</span>
             </div>
             <div class="w-full mb-4">
                 <div class="bg-[#F6F6F6] flex items-center space-x-4 w-full rounded-md border-dashed border-2">

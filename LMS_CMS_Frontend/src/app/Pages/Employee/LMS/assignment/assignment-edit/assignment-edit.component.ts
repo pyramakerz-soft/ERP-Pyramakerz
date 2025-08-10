@@ -143,7 +143,6 @@ export class AssignmentEditComponent {
   GetQuestionBank(pageNumber: number, pageSize: number): void {
     this.selectedTagsIds = this.tagsSelected.map((s) => s.id);
     if (this.SelectedLessonID && this.SelectedTypeID) {
-      console.log(21);
       this.Questions = [];
       this.QuestionBankServ.GetByTags(
         this.SelectedLessonID,
@@ -154,12 +153,10 @@ export class AssignmentEditComponent {
         pageSize
       ).subscribe({
         next: (data) => {
-          console.log('✅ Full response from backend:', data);
           this.PageSize = data.pagination.pageSize;
           this.TotalPages = data.pagination.totalPages;
           this.TotalRecords = data.pagination.totalRecords;
           this.Questions = data.data;
-          console.log('d', data, this.Questions);
         },
         error: (err) => {
           console.error('❌ Error loading questions:', err);
@@ -266,7 +263,6 @@ export class AssignmentEditComponent {
     this.validationErrors['questionIds'] = ``;
     const isChecked = (event.target as HTMLInputElement).checked;
     const typeName = this.QuestionBankType.find(t => t.id == this.SelectedTypeID)?.name;
-    console.log(typeName, this.QuestionBankType, this.SelectedTypeID)
     if (!typeName) return;
 
     const questionsOfCurrentType = this.Questions.map(q => q.id);
@@ -417,7 +413,6 @@ export class AssignmentEditComponent {
       this.isLoading = true;
       this.AssigmentQuestionServ.Add(this.assignmentQuestion, this.DomainName).subscribe({
         next: (d) => {
-          console.log(d)
           Swal.fire({
             icon: 'success',
             title: 'Done',
@@ -543,7 +538,6 @@ export class AssignmentEditComponent {
 
   onInputValueChange(event: { field: string; value: any }) {
     const { field, value } = event;
-    console.log(field);
     this.validationErrors[field] = '';
   }
 

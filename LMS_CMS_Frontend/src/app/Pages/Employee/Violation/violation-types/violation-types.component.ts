@@ -23,7 +23,7 @@ import { ViolationTypeService } from '../../../../Services/Employee/Violation/vi
 @Component({
   selector: 'app-violation-types',
   standalone: true,
-  imports: [CommonModule, FormsModule, SearchComponent, TranslateModule],
+  imports: [CommonModule, FormsModule,TranslateModule],
   templateUrl: './violation-types.component.html',
   styleUrl: './violation-types.component.css',
 })
@@ -181,10 +181,10 @@ export class ViolationTypesComponent {
 
   closeModal() {
     this.isModalVisible = false;
+    this.validationErrors={}
   }
 
   CreateOREdit() {
-    console.log(this.violationType)
     if (this.isFormValid()) {
       this.isLoading = true
       if (this.mode == 'Create') {
@@ -199,7 +199,6 @@ export class ViolationTypesComponent {
             confirmButtonColor: '#089B41',
           });
         }, error => {
-          console.log(error)
           this.isLoading = false
           if (error.error?.toLowerCase().includes('name') && error.status === 400) {
             Swal.fire({
@@ -233,7 +232,6 @@ export class ViolationTypesComponent {
             confirmButtonColor: '#089B41',
           });
         }, error => {
-          console.log(error)
           this.isLoading = false
           if (error.error?.toLowerCase().includes('name') && error.status === 400) {
             Swal.fire({
@@ -262,6 +260,8 @@ export class ViolationTypesComponent {
   }
 
   selectEmployeeType(employeeType: EmployeeTypeGet): void {
+    this.validationErrors["employeeTypeIds"] = ``;
+
     if (!this.empTypesSelected.some((e) => e.id === employeeType.id)) {
       this.empTypesSelected.push(employeeType);
     }
@@ -304,6 +304,10 @@ export class ViolationTypesComponent {
             isValid = false;
           }
         }
+        if (this.violationType.employeeTypeIds.length == 0) {
+          this.validationErrors["employeeTypeIds"] = `employee Type is required`;
+          isValid = false;
+        }
       }
     }
     return isValid;
@@ -313,11 +317,19 @@ export class ViolationTypesComponent {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
 
+  onInputValueChange(event: { field: keyof ViolationType; value: any }) {
+    const { field, value } = event;
+    (this.violationType as any)[field] = value;
+    if (value) {
+      this.validationErrors[field] = '';
+    }
+  }
+
   async onSearchEvent(event: { key: string, value: any }) {
     this.key = event.key;
     this.value = event.value;
     try {
-      const data: ViolationType[] = await firstValueFrom( this.violationTypeServ.GetViolationType(this.DomainName));  
+      const data: ViolationType[] = await firstValueFrom(this.violationTypeServ.GetViolationType(this.DomainName));
       this.Data = data || [];
 
       if (this.value !== "") {

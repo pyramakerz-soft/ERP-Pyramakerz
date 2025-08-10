@@ -94,7 +94,6 @@ export class AssignmentStudentComponent {
   GetAssignment() {
     this.assignmentServ.GetByID(this.AssignmentId, this.DomainName).subscribe((d) => {
       this.assignment = d
-      console.log(this.assignment)
     })
   }
 

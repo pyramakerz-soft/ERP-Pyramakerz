@@ -55,7 +55,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr *ngIf="section.tableData.length === 0">
+                            <tr *ngIf="section.tableData?.length === 0">
                                 <td [attr.colspan]="section.tableHeaders.length" class="text-center p-4">No Data Found</td>
                             </tr>
                             <tr *ngFor="let row of section.tableData; let i = index"

@@ -33,7 +33,7 @@ export class MainLayoutComponent {
     this.communicationService.action$.subscribe(async (state) => {
       await this.GetInfo();
 
-    }); 
+    });  
     this.realTimeService.startConnection();
   }
 
@@ -103,17 +103,7 @@ export class MainLayoutComponent {
               label: 'Discussion Room', route: 'Discussion Room'
             }
           ], icon: 'Virtual Meetings'
-        },
-        {
-          label: 'Communication', subItems: [
-            {
-              label: 'Request', route: 'Request'
-            },
-            {
-              label: 'Chat', route: 'Chat'
-            }
-          ], icon: 'Communication'
-        },
+        }, 
         {
           label: 'Clinic', subItems: [
             {

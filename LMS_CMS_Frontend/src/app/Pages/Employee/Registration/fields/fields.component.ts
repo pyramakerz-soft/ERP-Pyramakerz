@@ -168,7 +168,6 @@ export class FieldsComponent {
     this.mode = 'Edit';
     this.fieldServ.GetById(row.id, this.DomainName).subscribe((d) => {
       this.field = d
-      console.log(d,this.field)
     });
     this.options = row.options.map((option) => option.name);
     this.openModal();

@@ -658,6 +658,8 @@ namespace LMS_CMS_PL.Controllers.Octa
                         }
                     }
 
+                    Unit_Of_Work.SaveChanges();
+
                     foreach (var octaPage in pagesInOcta)
                     {
                         var domainPage = Unit_Of_Work.page_Repository.Select_By_Id(octaPage.ID);
@@ -683,11 +685,11 @@ namespace LMS_CMS_PL.Controllers.Octa
                                 needsUpdate = true;
                             }
 
-                            if (domainPage.Page_ID != octaPage.Page_ID)
-                            {
-                                domainPage.Page_ID = octaPage.Page_ID;
-                                needsUpdate = true;
-                            }
+                            //if (domainPage.Page_ID != octaPage.Page_ID)
+                            //{
+                            //    domainPage.Page_ID = octaPage.Page_ID;
+                            //    needsUpdate = true;
+                            //}
 
                             if (domainPage.arDisplayName_name != octaPage.arDisplayName_name)
                             {
@@ -710,6 +712,25 @@ namespace LMS_CMS_PL.Controllers.Octa
                             if (needsUpdate)
                             {
                                 Unit_Of_Work.page_Repository.Update(domainPage);  
+                            }
+                        }
+                    }
+                    Unit_Of_Work.SaveChanges();
+
+                    // Second pass: now update Page_ID safely
+                    foreach (var octaPage in pagesInOcta)
+                    {
+                        var domainPage = Unit_Of_Work.page_Repository.Select_By_Id(octaPage.ID);
+                        if (domainPage != null && domainPage.Page_ID != octaPage.Page_ID)
+                        {
+                            if (octaPage.Page_ID == null || Unit_Of_Work.page_Repository.Select_By_Id((long)octaPage.Page_ID) != null)
+                            {
+                                domainPage.Page_ID = octaPage.Page_ID;
+                                Unit_Of_Work.page_Repository.Update(domainPage);
+                            }
+                            else
+                            {
+                                Console.WriteLine($"Second-pass skipped: Page_ID {octaPage.Page_ID} not found for Page ID: {domainPage.ID}");
                             }
                         }
                     }

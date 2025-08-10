@@ -148,7 +148,6 @@ export class InventoryMasterComponent {
           : parseInt(this.value, 10);
         if (this.key === 'date') {
           const searchDate = this.value.slice(0, 10); // 'YYYY-MM-DD'
-          console.log("searchDate",searchDate)
           this.TableData = this.TableData.filter((t) => {
             const fieldValue = t[this.key as keyof typeof t];
             if (typeof fieldValue === 'string') {

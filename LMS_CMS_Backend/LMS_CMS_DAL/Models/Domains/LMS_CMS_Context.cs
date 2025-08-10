@@ -208,6 +208,9 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<RemedialTimeTable> RemedialTimeTable { get; set; }
         public DbSet<RemedialTimeTableDay> RemedialTimeTableDay { get; set; }
         public DbSet<RemedialTimeTableClasses> RemedialTimeTableClasses { get; set; }
+        public DbSet<ChatMessage> ChatMessage { get; set; }
+        public DbSet<ChatMessageAttachment> ChatMessageAttachment { get; set; }
+        public DbSet<Request> Request { get; set; }
 
 
 
@@ -1907,6 +1910,37 @@ namespace LMS_CMS_DAL.Models.Domains
                 .WithMany(p => p.RemedialTimeTableClasses)
                 .HasForeignKey(p => p.RemedialClassroomID)
                 .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<ChatMessageAttachment>()
+                .HasOne(p => p.ChatMessage)
+                .WithMany(p => p.ChatMessageAttachments)
+                .HasForeignKey(p => p.ChatMessageID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<ChatMessage>()
+                .HasOne(p => p.ReceiverUserType)
+                .WithMany(p => p.ReceiverChatMessages)
+                .HasForeignKey(p => p.ReceiverUserTypeID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<ChatMessage>()
+                .HasOne(p => p.SenderUserType)
+                .WithMany(p => p.SenderChatMessages)
+                .HasForeignKey(p => p.SenderUserTypeID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<Request>()
+                .HasOne(p => p.ReceiverUserType)
+                .WithMany(p => p.ReceiverRequests)
+                .HasForeignKey(p => p.ReceiverUserTypeID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<Request>()
+                .HasOne(p => p.SenderUserType)
+                .WithMany(p => p.SenderRequests)
+                .HasForeignKey(p => p.SenderUserTypeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
 
             ///////////////////////// Exception: /////////////////////////
             modelBuilder.Entity<Bus>()

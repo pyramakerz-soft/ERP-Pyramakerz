@@ -116,10 +116,8 @@ private languageService: LanguageService
             this.EmpId,
             this.DomainName
           ).subscribe(async (data) => {
-            this.Data = data;
-            console.log(55, data);
-            this.Data.editedFiles = [];
-            console.log(this.Data);
+            this.Data = data; 
+            this.Data.editedFiles = []; 
             if (data.files == null) {
               this.Data.files = [];
             }
@@ -347,7 +345,6 @@ private languageService: LanguageService
         this.Data.files.push(this.SelectedFiles[i]);
       }
       if (this.mode == 'Create') {
-        console.log(this.Data);
         return this.EmpServ.Add(this.Data, this.DomainName)
           .toPromise()
           .then(
@@ -412,7 +409,6 @@ private languageService: LanguageService
             await this.EmpServ.DeleteFile(id, this.DomainName).toPromise();
           }
         }
-        console.log(this.Data);
         return this.EmpServ.Edit(this.Data, this.DomainName)
           .toPromise()
           .then(
@@ -486,7 +482,6 @@ private languageService: LanguageService
     if (!selectedFile) return;
 
     selectedFile.name = newName;
-    console.log(selectedFile);
 
     const isExistingFile =
       !(selectedFile.file instanceof File) && selectedFile.link !== '';
@@ -498,7 +493,6 @@ private languageService: LanguageService
       this.Data.editedFiles.push(selectedFile);
     }
 
-    console.log('editedFiles:', this.Data.editedFiles);
   }
 
   //////////////////////////////////////////////////// floor

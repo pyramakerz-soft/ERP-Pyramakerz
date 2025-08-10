@@ -92,10 +92,8 @@ export class SubjectTeacherComponent {
   }
 
   GetData() {
-    console.log(this.SupjectTeacher.teacherID)
     this.ClassroomSubjectServ.GetByEmpId(this.SupjectTeacher.teacherID, this.DomainName).subscribe((d) => {
       this.SupjectTeacherData = d
-      console.log(this.SupjectTeacherData)
     })
   }
 
@@ -123,7 +121,6 @@ export class SubjectTeacherComponent {
           assigned.classroomID === sub.classroomID
         )
       );
-      console.log('Filtered subjects:', this.subject); // ✅ Only subjects NOT assigned to this teacher
     });
   }
 

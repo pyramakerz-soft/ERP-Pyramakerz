@@ -1,7 +1,7 @@
 <div class="flex justify-between">
     <h1 class="font-semibold text-2xl leading-9">Remedial Time Table</h1>
     <div class="flex justify-between items-center">
-        <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
+        <app-search *ngIf="SelectedSchoolId!=0" [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
         <button (click)="openModal()"
             class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
             Create Remedial Time Table

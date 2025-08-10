@@ -287,7 +287,7 @@ export class ClassroomComponent {
   }
 
   getEmployeeData(){
-    this.employeeServ.GetWithTypeId(1,this.DomainName).subscribe(
+    this.employeeServ.GetWithTypeId(4,this.DomainName).subscribe(
       (data) => {
         this.Employees = data;
       }

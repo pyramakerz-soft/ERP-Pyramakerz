@@ -8,7 +8,7 @@ import { jwtDecode } from 'jwt-decode';
 import { Router } from '@angular/router';
 import { NewTokenService } from '../../Services/shared/new-token.service';
 import { LogOutService } from '../../Services/shared/log-out.service';
-import { Subscription } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import { LanguageService } from '../../Services/shared/language.service';
 import { EditPass } from '../../Models/Employee/edit-pass';
 import Swal from 'sweetalert2';
@@ -17,6 +17,7 @@ import { ApiService } from '../../Services/api.service';
 import { OctaService } from '../../Services/Octa/octa.service';
 import { NotificationService } from '../../Services/Employee/Communication/notification.service';
 import { Notification } from '../../Models/Communication/notification';
+import { RealTimeNotificationServiceService } from '../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-nav-menu',
@@ -46,8 +47,11 @@ export class NavMenuComponent {
   notifications: Notification[] = []
   notificationByID:Notification = new Notification()
   
+  private destroy$ = new Subject<void>();
+  
   constructor(private router: Router, public account: AccountService, public languageService: LanguageService, public ApiServ: ApiService, public octaService:OctaService,
-    private translate: TranslateService, private communicationService: NewTokenService, private logOutService: LogOutService, private notificationService: NotificationService) { }
+    private translate: TranslateService, private communicationService: NewTokenService, private logOutService: LogOutService, 
+    private notificationService: NotificationService, private realTimeService: RealTimeNotificationServiceService) { }
 
   ngOnInit() {
     this.GetUserInfo();
@@ -148,7 +152,10 @@ export class NavMenuComponent {
 
   // Cleanup event listener
   ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
     document.removeEventListener('click', this.onDocumentClick);
+    this.realTimeService.stopConnection();
   } 
 
   ChangeAccount(id: number): void {
@@ -156,10 +163,19 @@ export class NavMenuComponent {
     const token = localStorage.getItem("current_token")
     this.togglePopup();
     if (tokenObject && token != tokenObject.value) {
+      // First stop any existing SignalR connection
+      this.realTimeService.stopConnection();
+
       localStorage.removeItem("current_token");
       localStorage.setItem("current_token", tokenObject.value);
       this.User_Data_After_Login = jwtDecode(tokenObject.value)
       this.userName = this.User_Data_After_Login.user_Name
+
+      // Restart SignalR connection for the new account
+      setTimeout(() => {
+        this.realTimeService.startConnection();
+      }, 100);
+      
       this.communicationService.sendAction(true);
       this.router.navigateByUrl("")
     }
@@ -385,6 +401,13 @@ export class NavMenuComponent {
         this.notificationByID = data
         document.getElementById("NotificationModal")?.classList.remove("hidden");
         document.getElementById("NotificationModal")?.classList.add("flex");
+      }
+    )
+  } 
+
+  LinkOpened(notificationSharedID:number){ 
+    this.notificationService.LinkOpened(notificationSharedID, this.DomainName).subscribe(
+      data => { 
       }
     )
   } 

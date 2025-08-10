@@ -2,69 +2,51 @@
 using LMS_CMS_PL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using System.Collections.Concurrent;
 
 namespace LMS_CMS_PL.Hubs
 {
     [Authorize]
     public class NotificationHub : Hub
     {
-        private readonly DbContextFactoryService _dbContextFactory;
-        private readonly ILogger<NotificationHub> _logger;
-
-        public NotificationHub(DbContextFactoryService dbContextFactory, ILogger<NotificationHub> logger)
-        {
-            _dbContextFactory = dbContextFactory;
-            _logger = logger;
-        }
+        private static readonly ConcurrentDictionary<string, string> _connectionGroups = new();
 
         public override async Task OnConnectedAsync()
         {
-            var httpContext = Context.GetHttpContext();
-            var domainName = httpContext?.Request.Headers["Domain-Name"].FirstOrDefault();
-            var userId = Context.User?.FindFirst("id")?.Value;
-            var userType = Context.User?.FindFirst("type")?.Value;
-
-            if (string.IsNullOrEmpty(domainName) || string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(userType))
+            // Clean up any existing group for this connection
+            if (_connectionGroups.TryRemove(Context.ConnectionId, out var oldGroup))
             {
-                _logger.LogError("Missing domain name, user ID, or user type during connection. Domain: {Domain}, UserId: {UserId}, UserType: {UserType}", domainName, userId, userType);
-                throw new HubException("Missing domain name, user ID, or user type.");
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, oldGroup); 
             }
 
-            // Get the connection string from the context
-            var connectionString = httpContext?.Items["ConnectionString"]?.ToString();
-            if (string.IsNullOrEmpty(connectionString))
-            {
-                _logger.LogError("Connection string missing for domain: {Domain}", domainName);
-                throw new HubException("Connection string is missing.");
-            }
-
-            var groupName = $"{domainName}_{userType}_{userId}";
-            await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
-            _logger.LogInformation("User connected: {GroupName}, ConnectionId: {ConnectionId}", groupName, Context.ConnectionId);
-
-            await base.OnConnectedAsync();
+            await base.OnConnectedAsync(); 
         }
 
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            var httpContext = Context.GetHttpContext();
-            var domainName = httpContext?.Request.Headers["Domain-Name"].FirstOrDefault();
-            var userId = Context.User?.FindFirst("id")?.Value;
-            var userType = Context.User?.FindFirst("type")?.Value;
-
-            if (!string.IsNullOrEmpty(domainName) && !string.IsNullOrEmpty(userId) && !string.IsNullOrEmpty(userType))
+            // Clean up when client disconnects
+            if (_connectionGroups.TryRemove(Context.ConnectionId, out var oldGroup))
             {
-                var groupName = $"{domainName}_{userType}_{userId}";
-                await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupName);
-                _logger.LogInformation("User disconnected: {GroupName}, ConnectionId: {ConnectionId}", groupName, Context.ConnectionId);
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, oldGroup); 
             }
 
-            if (exception != null)
+            await base.OnDisconnectedAsync(exception); 
+        }
+
+        public async Task JoinGroup(string groupName)
+        {
+            // Remove from previous group if any
+            if (_connectionGroups.TryGetValue(Context.ConnectionId, out var currentGroup))
             {
-                _logger.LogError(exception, "Error during disconnection for ConnectionId: {ConnectionId}", Context.ConnectionId);
+                if (currentGroup != groupName)
+                {
+                    await Groups.RemoveFromGroupAsync(Context.ConnectionId, currentGroup); 
+                }
             }
 
-            await base.OnDisconnectedAsync(exception);
+            // Add to new group
+            await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
+            _connectionGroups[Context.ConnectionId] = groupName; 
         }
     }
 }

@@ -12,6 +12,7 @@ export class Notification {
         public isAllowDismiss: boolean = false,
         public notifiedOrNot: boolean = false,
         public seenOrNot: boolean = false,
+        public isLinkOpened: boolean = false,
         public userTypeID :number =0,
         public insertedByUserId :number =0,
         public insertedByUserName: string = '',

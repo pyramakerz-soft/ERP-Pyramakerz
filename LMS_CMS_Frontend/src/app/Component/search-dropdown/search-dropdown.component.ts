@@ -38,11 +38,6 @@ export class SearchDropdownComponent {
     }
 
     // Optional: log to confirm it works
-    console.log("SearchDropdown initialized with:", {
-      selectedId: this.selectedValue,
-      selectedName: this.selectedName,
-      searchTerm: this.searchTerm
-    });
   }
 
    ngOnChanges(changes: SimpleChanges): void {
