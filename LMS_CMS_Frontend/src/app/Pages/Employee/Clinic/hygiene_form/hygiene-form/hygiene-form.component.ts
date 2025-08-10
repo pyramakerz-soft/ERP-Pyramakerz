@@ -30,7 +30,7 @@ export class HygieneFormComponent implements OnInit {
   DomainName: string = '';
   key: string = 'id'; 
   value: any = ''; 
-  keysArray: string[] = ['id', 'school', 'grade', 'classRoom', 'date']; 
+  keysArray: string[] = ['id', 'school', 'grade', 'classRoom']; 
 
   constructor(
     private router: Router,

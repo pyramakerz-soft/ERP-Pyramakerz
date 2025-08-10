@@ -152,20 +152,23 @@
 </div>
 
 
-<div class="absolute -top-[9999px] -left-[9999px]">
-    <div id="Data" class="hidden">
-        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'Item Card Report'" 
-            [tableHeaders]="getPdfTableHeaders()"
-            [infoRows]="[
-                { keyEn: 'From Date: ' + dateFrom },
-                { keyEn: 'To Date: ' + dateTo },
-                { keyEn: 'Store: ' + getStoreName() },
-                { keyEn: 'Item: ' + getItemName() },
-            ]"
-            [tableData]="transactionsForExport" #pdfPrintComponent>
-        </app-pdf-print>
-    </div>
+<div id="Data" class="hidden">
+    <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'Item Card Report'" 
+        [tableHeaders]="showAverageColumn 
+            ? ['Date', 'Type', '#', 'Authority', 'Income', 'Outcome', 'Balance', 'Price', 'Total Price', 'Avg']
+            : ['Date', 'Type', '#', 'Authority', 'Income', 'Outcome', 'Balance']"
+        [infoRows]="[
+            { keyEn: 'From Date: ' + dateFrom },
+            { keyEn: 'To Date: ' + dateTo },
+            { keyEn: 'Store: ' + getStoreName() },
+            { keyEn: 'Item: ' + getItemName() },
+        ]"
+        [tableData]="transactionsForExport" #pdfPrintComponent>
+    </app-pdf-print>
 </div>
+
+<!--         [tableHeaders]="['Invoice #', 'Date', 'Store', 'Total Amount', 'Transaction Type']"
+ -->
 
 <!-- <div class="absolute  -top-[9999px] -left-[9999px]">
     <div id="Data" class="hidden">

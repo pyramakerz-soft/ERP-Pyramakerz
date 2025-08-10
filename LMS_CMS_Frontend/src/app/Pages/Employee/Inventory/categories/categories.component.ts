@@ -154,6 +154,7 @@ export class CategoriesComponent {
       this.isLoading = true
       if (this.mode == 'Create') {
         this.InventoryCategoryServ.Add(this.category, this.DomainName).subscribe((d) => {
+          this.GetAllData();
           this.closeModal();
           this.isLoading = false
         },
@@ -170,6 +171,7 @@ export class CategoriesComponent {
       }
       if (this.mode == 'Edit') {
         this.InventoryCategoryServ.Edit(this.category, this.DomainName).subscribe((d) => {
+          this.GetAllData();
           this.closeModal();
           this.isLoading = false
         },
@@ -189,7 +191,6 @@ export class CategoriesComponent {
 
   closeModal() {
     this.isModalVisible = false;
-    this.GetAllData();
   }
 
   openModal() {
