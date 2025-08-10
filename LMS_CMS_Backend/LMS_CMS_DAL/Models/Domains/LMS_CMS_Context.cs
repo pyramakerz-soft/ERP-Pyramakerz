@@ -10,6 +10,7 @@ using LMS_CMS_DAL.Models.Domains.ETA;
 using LMS_CMS_DAL.Models.Domains.Inventory;
 using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_DAL.Models.Domains.RegisterationModule;
+using LMS_CMS_DAL.Models.Domains.SocialWorker;
 using LMS_CMS_DAL.Models.Domains.ViolationModule;
 using LMS_CMS_DAL.Models.Domains.Zatca;
 using Microsoft.EntityFrameworkCore;
@@ -211,6 +212,13 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<ChatMessage> ChatMessage { get; set; }
         public DbSet<ChatMessageAttachment> ChatMessageAttachment { get; set; }
         public DbSet<Request> Request { get; set; }
+        public DbSet<ConductLevel> ConductLevel { get; set; }
+        public DbSet<ConductType> ConductType { get; set; }
+        public DbSet<ConductTypeSection> ConductTypeSection { get; set; }
+        public DbSet<ProcedureType> ProcedureType { get; set; }
+        public DbSet<Conduct> Conduct { get; set; }
+        public DbSet<Attendance> Attendance { get; set; }
+        public DbSet<AttendanceStudent> AttendanceStudent { get; set; }
 
 
 
@@ -1939,6 +1947,66 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasOne(p => p.SenderUserType)
                 .WithMany(p => p.SenderRequests)
                 .HasForeignKey(p => p.SenderUserTypeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Attendance>()
+                .HasOne(p => p.AcademicYear)
+                .WithMany(p => p.Attendances)
+                .HasForeignKey(p => p.AcademicYearID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Attendance>()
+                .HasOne(p => p.Classroom)
+                .WithMany(p => p.Attendances)
+                .HasForeignKey(p => p.ClassroomID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AttendanceStudent>()
+                .HasOne(p => p.Student)
+                .WithMany(p => p.AttendanceStudents)
+                .HasForeignKey(p => p.StudentID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AttendanceStudent>()
+                .HasOne(p => p.Attendance)
+                .WithMany(p => p.AttendanceStudents)
+                .HasForeignKey(p => p.AttendanceID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Conduct>()
+                .HasOne(p => p.Student)
+                .WithMany(p => p.Conduct)
+                .HasForeignKey(p => p.StudentID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Conduct>()
+                .HasOne(p => p.ConductType)
+                .WithMany(p => p.Conduct)
+                .HasForeignKey(p => p.ConductTypeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Conduct>()
+                .HasOne(p => p.ProcedureType)
+                .WithMany(p => p.Conduct)
+                .HasForeignKey(p => p.ProcedureTypeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ConductType>()
+                .HasOne(p => p.ConductLevel)
+                .WithMany(p => p.ConductTypes)
+                .HasForeignKey(p => p.ConductLevelID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ConductTypeSection>()
+                .HasOne(p => p.ConductType)
+                .WithMany(p => p.ConductTypeSections)
+                .HasForeignKey(p => p.ConductTypeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ConductTypeSection>()
+                .HasOne(p => p.Section)
+                .WithMany(p => p.ConductTypeSections)
+                .HasForeignKey(p => p.SectionID)
                 .OnDelete(DeleteBehavior.Restrict);
 
 

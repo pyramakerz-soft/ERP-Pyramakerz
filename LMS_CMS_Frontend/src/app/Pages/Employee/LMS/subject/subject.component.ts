@@ -77,7 +77,7 @@ export class SubjectComponent {
       this.path = url[0].path
     });
 
-    this.getSubjectData()
+    // this.getSubjectData()
     this.getSchools()
 
     this.menuService.menuItemsForEmployee$.subscribe((items) => {
@@ -91,13 +91,13 @@ export class SubjectComponent {
     });
   }
 
-  getSubjectData() {
-    this.subjectService.Get(this.DomainName).subscribe(
-      (data) => {
-        this.subjectData = data;
-      }
-    )
-  }
+  // getSubjectData() {
+  //   this.subjectService.Get(this.DomainName).subscribe(
+  //     (data) => {
+  //       this.subjectData = data;
+  //     }
+  //   )
+  // }
 
   GetDate() {
     this.IsView = true
@@ -141,7 +141,7 @@ export class SubjectComponent {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      this.getSubjectData()
+      this.GetDate()
     });
   }
 
@@ -201,7 +201,7 @@ export class SubjectComponent {
         this.subjectService.Delete(id, this.DomainName).subscribe(
           (data: any) => {
             this.subjectData = []
-            this.getSubjectData()
+            this.GetDate()
           }
         );
       }
