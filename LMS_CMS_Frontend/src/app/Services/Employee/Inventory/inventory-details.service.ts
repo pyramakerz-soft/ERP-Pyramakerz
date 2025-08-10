@@ -223,7 +223,8 @@ export class InventoryDetailsService {
       .set('Content-Type', 'application/json');
 
     return this.http.get<StoreBalanceReport>(
-      `${this.baseUrl}/InventoryDetails/AllStoresBalance?toDate=${toDate}&reportType=${reportFlagType}&categoryId=${categoryId}&typeId=${typeId}&hasBalance=${hasBalance}&overdrawnBalance=${overdrawnBalance}&zeroBalances=${zeroBalances}`,
+      `${this.baseUrl}/InventoryDetails/AllStoresBalanceHorizontal?toDate=${toDate}&reportType=${reportFlagType}&categoryId=${categoryId}&typeId=${typeId}&hasBalance=${hasBalance}&overdrawnBalance=${overdrawnBalance}&zeroBalances=${zeroBalances}`,
+      //https://localhost:7205/api/with-domain/InventoryDetails/AllStoresBalanceHorizontal?toDate=2025-10-08&reportType=1&categoryId=0&typeId=0&hasBalance=true&overdrawnBalance=true&zeroBalances=true
       { headers }
     );
   }
