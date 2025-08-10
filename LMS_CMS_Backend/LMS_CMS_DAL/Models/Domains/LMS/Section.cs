@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using LMS_CMS_DAL.Models.Domains.SocialWorker;
 
 namespace LMS_CMS_DAL.Models.Domains.LMS
 {
@@ -20,6 +21,7 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public long SchoolID { get; set; }
         public School school { get; set; }
         public ICollection<Grade> Grades { get; set; } = new HashSet<Grade>();
+        public ICollection<ConductTypeSection> ConductTypeSections { get; set; } = new HashSet<ConductTypeSection>();
 
     }
 }
