@@ -32,8 +32,10 @@ export class AllStoresBalanceReportComponent implements OnInit {
   zeroBalances: boolean = true;
 
   categories: any[] = [];
-  reportData: StoreBalanceReport | null = null;
-  showTable: boolean = false;
+reportData: StoreBalanceReport | null = {
+  reportType: 'QuantityOnly',
+  data: []
+};  showTable: boolean = false;
   isLoading: boolean = false;
 
   @ViewChild(PdfPrintComponent) pdfPrintComponent!: PdfPrintComponent;
@@ -181,7 +183,7 @@ private prepareExportData(): void {
 getPdfTableHeaders(): string[] {
     const baseHeaders = ['Item Code', 'Item Name'];
     
-    if (this.reportData?.data?.[0]?.stores) {
+    if (this.reportData?.data?.length && this.reportData.data[0]?.stores) {
         this.reportData.data[0].stores.forEach(store => {
             baseHeaders.push(store.storeName);
         });
@@ -189,7 +191,6 @@ getPdfTableHeaders(): string[] {
     
     return baseHeaders;
 }
-
 getInfoRows(): any[] {
     return [
         { keyEn: 'Report Type: ' + this.pageTitle },
