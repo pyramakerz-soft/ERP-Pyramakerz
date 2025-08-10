@@ -399,21 +399,43 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                 {
                     notificationSharedTo.ImageLink = $"{serverUrl}{notificationSharedTo.ImageLink.Replace("\\", "/")}";
                 }
-            }
-
-            foreach (var item in notificationSharedTos)
-            {
-                if(item.Notification.IsAllowDismiss == true || (item.Notification.IsAllowDismiss == false && item.IsLinkOpened == true))
-                {
-                    item.NotifiedOrNot = true;
-                    TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-                    item.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
-                    Unit_Of_Work.notificationSharedTo_Repository.Update(item);
-                }
-            }
-            Unit_Of_Work.SaveChanges();
+            } 
 
             return Ok(notificationSharedToGetDTO);
+        }
+        
+        //////////////////////////////////////////////////////////////////////////////////////////
+        
+        [HttpGet("UnSeenNotificationCount")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee", "parent", "student" }
+        )]
+        public IActionResult UnSeenNotificationCount()
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            long userTypeID = 0;
+            if (userTypeClaim == "employee")
+            {
+                userTypeID = 1;
+            } 
+            else if(userTypeClaim == "student")
+            {
+                userTypeID= 2;
+            }
+            else if (userTypeClaim == "parent")
+            {
+                userTypeID = 3;
+            }
+
+            List<NotificationSharedTo> notificationSharedTos = Unit_Of_Work.notificationSharedTo_Repository.FindBy(
+                    f => f.IsDeleted != true && f.Notification.IsDeleted != true && !f.SeenOrNot && f.UserID == userId && f.UserTypeID == userTypeID);
+
+            return Ok(notificationSharedTos.Count);
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////
@@ -458,6 +480,104 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             notificationSharedTo.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
             Unit_Of_Work.notificationSharedTo_Repository.Update(notificationSharedTo);
+            Unit_Of_Work.SaveChanges();
+
+            return Ok();
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpPut("DismissAll")]
+        [Authorize_Endpoint_(
+           allowedTypes: new[] { "octa", "employee", "parent", "student" }
+        )]
+        public async Task<IActionResult> DismissAllAsync()
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            long userTypeID = 0;
+            if (userTypeClaim == "employee")
+            {
+                userTypeID = 1;
+            }
+            else if (userTypeClaim == "student")
+            {
+                userTypeID = 2;
+            }
+            else if (userTypeClaim == "parent")
+            {
+                userTypeID = 3;
+            }
+
+            List<NotificationSharedTo> notificationSharedTos = await Unit_Of_Work.notificationSharedTo_Repository.Select_All_With_IncludesById<NotificationSharedTo>(
+                     f => f.IsDeleted != true && f.Notification.IsDeleted != true && f.UserID == userId && f.UserTypeID == userTypeID,
+                     query => query.Include(d => d.Notification));
+
+            if (notificationSharedTos == null || notificationSharedTos.Count == 0)
+            {
+                return NotFound();
+            }
+
+            foreach (var item in notificationSharedTos)
+            {
+                if (item.Notification.IsAllowDismiss == true || (item.Notification.IsAllowDismiss == false && item.IsLinkOpened == true))
+                {
+                    item.NotifiedOrNot = true;
+                    TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+                    item.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                    Unit_Of_Work.notificationSharedTo_Repository.Update(item);
+                }
+            }
+            Unit_Of_Work.SaveChanges();
+
+            return Ok();
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpPut("DismissOne/{notificationSharedToId}")]
+        [Authorize_Endpoint_(
+           allowedTypes: new[] { "octa", "employee", "parent", "student" }
+        )]
+        public IActionResult DismissOne(long notificationSharedToId)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            long userTypeID = 0;
+            if (userTypeClaim == "employee")
+            {
+                userTypeID = 1;
+            }
+            else if (userTypeClaim == "student")
+            {
+                userTypeID = 2;
+            }
+            else if (userTypeClaim == "parent")
+            {
+                userTypeID = 3;
+            }
+
+            NotificationSharedTo notificationSharedTo = Unit_Of_Work.notificationSharedTo_Repository.First_Or_Default(
+                     f => f.IsDeleted != true && f.Notification.IsDeleted != true && f.UserID == userId && f.UserTypeID == userTypeID && f.ID == notificationSharedToId);
+
+            if (notificationSharedTo == null)
+            {
+                return NotFound();
+            }
+
+            notificationSharedTo.NotifiedOrNot = true;
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            notificationSharedTo.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            Unit_Of_Work.notificationSharedTo_Repository.Update(notificationSharedTo); 
+            
             Unit_Of_Work.SaveChanges();
 
             return Ok();
