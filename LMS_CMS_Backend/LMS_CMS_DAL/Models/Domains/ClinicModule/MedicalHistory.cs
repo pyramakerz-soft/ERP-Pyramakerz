@@ -43,5 +43,13 @@ namespace LMS_CMS_DAL.Models.Domains.ClinicModule
         [ForeignKey("InsertedByParent")]
         public long? InsertedByParentID { get; set; }
         public Parent? InsertedByParent { get; set; }
+
+        [ForeignKey("UpdatedByParent")]
+        public long? UpdatedByParentID { get; set; }
+        public Parent? UpdatedByParent { get; set; }
+
+        [ForeignKey("DeletedByParent")]
+        public long? DeletedByParentID { get; set; }
+        public Parent? DeletedByParent { get; set; }
     }
 }
