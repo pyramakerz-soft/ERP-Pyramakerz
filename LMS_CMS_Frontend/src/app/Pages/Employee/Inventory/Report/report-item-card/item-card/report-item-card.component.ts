@@ -13,11 +13,14 @@ import {
   InventoryNetCombinedTransaction,
 } from '../../../../../../Models/Inventory/report-card';
 import Swal from 'sweetalert2';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-report-item-card',
   standalone: true,
-  imports: [CommonModule, FormsModule, PdfPrintComponent],
+  imports: [CommonModule, FormsModule, PdfPrintComponent, TranslateModule],
   templateUrl: './report-item-card.component.html',
 })
 export class ReportItemCardComponent implements OnInit {
@@ -27,6 +30,8 @@ export class ReportItemCardComponent implements OnInit {
   selectedItemId: number | null = null;
   stores: Store[] = [];
   items: any[] = [];
+  isRtl: boolean = false;
+  subscription!: Subscription;  
   combinedData: any[] = [];
   showTable: boolean = false;
   isLoading: boolean = false;
@@ -41,20 +46,25 @@ export class ReportItemCardComponent implements OnInit {
     reportHeaderTwoEn: 'Item Transactions',
     reportHeaderOneAr: 'تقرير بطاقة الصنف',
     reportHeaderTwoAr: 'معاملات الصنف',
-    reportImage: 'assets/images/logo.png',
+    // reportImage: 'assets/images/logo.png',
   };
 
   constructor(
     private inventoryDetailsService: InventoryDetailsService,
     private storesService: StoresService,
     private shopItemService: ShopItemService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private languageService: LanguageService
   ) {}
 
   ngOnInit() {
     this.showAverageColumn = this.route.snapshot.data['showAverage'] || false;
     this.loadStores();
     this.loadItems();
+          this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   loadStores() {

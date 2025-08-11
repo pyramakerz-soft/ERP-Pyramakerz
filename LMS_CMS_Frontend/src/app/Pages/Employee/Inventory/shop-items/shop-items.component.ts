@@ -15,11 +15,14 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { ShopItemService } from '../../../../Services/Employee/Inventory/shop-item.service';
 import { firstValueFrom } from 'rxjs';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-shop-items',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './shop-items.component.html',
   styleUrl: './shop-items.component.css'
 })
@@ -49,7 +52,8 @@ User_Data_After_Login: TokenData = new TokenData(
 
   isModalVisible: boolean = false;
   mode: string = '';
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   path: string = '';
   key: string = 'id';
   value: any = '';
@@ -66,7 +70,8 @@ User_Data_After_Login: TokenData = new TokenData(
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
-    public shopItemService:ShopItemService
+    public shopItemService:ShopItemService,
+    private languageService: LanguageService
   ) {}
   
   ngOnInit() {
@@ -88,6 +93,10 @@ User_Data_After_Login: TokenData = new TokenData(
     });
 
     this.GetAllData();
+         this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetAllData() {

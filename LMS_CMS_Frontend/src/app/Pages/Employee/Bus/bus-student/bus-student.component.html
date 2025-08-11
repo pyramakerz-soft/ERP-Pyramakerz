@@ -1,5 +1,5 @@
 <div>
-    <div class="flex items-center space-x-5 mb-5">
+    <div class="flex items-center space-x-5 rtl:space-x-reverse mb-5">
         <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToBus()"></i> 
         <h1 class="primaryTxt font-semibold text-2xl">{{ bus.name }}</h1>
     </div>
@@ -48,7 +48,7 @@
             <p class="font-semibold text-sm text-[#6F6F6F] mb-3">   {{ 'Two Ways Price' | translate }}</p>
             <p class="font-medium text-base text-[#1E1E1E]">{{ bus.twoWaysPrice }}</p>
         </div>
-        <div class="flex space-x-5 items-center w-[30%] mb-4">
+        <div class="flex space-x-5 rtl:space-x-reverse items-center w-[30%] mb-4">
             <i *ngIf="bus.isCapacityRestricted" class="secondaryTxt text-2xl fa-regular fa-square-check"></i>
             <i *ngIf="!bus.isCapacityRestricted" class="text-[#BDBDBD] text-2xl fa-regular fa-square"></i>
             <label for="Restricted" class="text-sm">   {{ 'Restricted Capacity' | translate }}</label>
@@ -60,7 +60,7 @@
 <div>
     <div class="flex justify-between my-8">
         <h1 class="primaryTxt font-semibold text-2xl leading-9 mb-5">   {{ 'Students' | translate }}</h1>
-        <div class="flex items-center space-x-3">
+        <div class="flex items-center space-x-3 rtl:space-x-reverse">
             <app-search [key]="key" [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search> 
             <button class="secondaryBg rounded-lg py-3 px-4 text-white" (click)="OpenModal()">{{ 'Add Student' | translate }}</button>
         </div>
@@ -79,7 +79,7 @@
 
 
     <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD] max-w-full">
-        <table class="overflow-auto w-full bg-[#EBEBEB] text-left text-[#6F6F6F]">
+        <table class="overflow-auto w-full bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
             <thead class="bg-[##EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
                 <tr>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
@@ -199,7 +199,7 @@
                         </ng-template>
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        <div class="flex space-x-4">
+                        <div class="flex space-x-4 rtl:space-x-reverse">
                             <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)" >
                                 <i class="fa-regular fa-trash-can" (click)="deleteBusStudent(row.id)"></i>
                             </button>
@@ -295,7 +295,7 @@
                 </select>
                 <span *ngIf="validationErrors['semseterID']" class="text-red-500 ml-3 font-normal">{{ validationErrors['semseterID'] }}</span>
             </div>
-            <div class="flex w-full space-x-5 items-center mb-4">
+            <div class="flex w-full space-x-5 rtl:space-x-reverse items-center mb-4">
                 <input type="checkbox" id="exception" class="w-5 h-5" [checked]="exception"
                 (change)="onIsExceptionChange($event)">
                 <label for="exception" class="text-sm"> {{ 'Exception' | translate }}</label>

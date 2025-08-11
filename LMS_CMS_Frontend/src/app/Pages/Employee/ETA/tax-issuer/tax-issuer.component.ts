@@ -11,11 +11,13 @@ import { CountryService } from '../../../../Services/Octa/country.service';
 import { Country } from '../../../../Models/Accounting/country';
 import { TaxType } from '../../../../Models/ETA/tax-type';
 import { TaxTypeService } from '../../../../Services/Employee/ETA/tax-type.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-tax-issuer',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
   templateUrl: './tax-issuer.component.html',
   styleUrl: './tax-issuer.component.css'
 })
@@ -24,7 +26,8 @@ export class TaxIssuerComponent {
   taxDataToEdit:TaxIssuer = new TaxIssuer()
   countries:Country[] = [] 
   taxTypes:TaxType[] = [] 
- 
+  isRtl: boolean = false;
+  subscription!: Subscription;
   DomainName: string = '';
   UserID: number = 0;
   User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
@@ -36,7 +39,8 @@ export class TaxIssuerComponent {
     public ApiServ: ApiService,     
     public countryService: CountryService,     
     public taxTypeService: TaxTypeService,     
-    public taxIssuerService: TaxIssuerService
+    public taxIssuerService: TaxIssuerService,
+     private languageService: LanguageService
   ) {}
 
   ngOnInit() {
@@ -48,6 +52,10 @@ export class TaxIssuerComponent {
     this.GetById()  
     this.Getcountries()  
     this.GetType()  
+      this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetById(){

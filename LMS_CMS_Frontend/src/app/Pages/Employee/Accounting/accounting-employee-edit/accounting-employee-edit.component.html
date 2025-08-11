@@ -1,5 +1,5 @@
 <div class="flex justify-between items-center">
-  <div class="flex justify-between items-center space-x-5">
+  <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
     <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToEmployee()"></i>
     <h1 class="font-semibold text-2xl leading-9">
       {{Data.en_name}}
@@ -86,8 +86,8 @@ placeholder="{{ 'Enter User mobile' | translate }}"
  placeholder="{{ 'Enter Date' | translate }}" [(ngModel)]="Data.dateOfAppointment" />
   </div>
 
-  <div class="flex w-full space-x-5 items-center mb-4">
-    <div class="flex w-[20%] space-x-5 items-center mb-4">
+  <div class="flex w-full space-x-5 rtl:space-x-reverse items-center mb-4">
+    <div class="flex w-[20%] space-x-5 rtl:space-x-reverse items-center mb-4">
       <input type="checkbox" class="w-5 h-5" id="End" (change)="onIsActiveChange($event)" [checked]="EndDate">
       <label for="End" class="text-sm"> {{ 'End Date' | translate }}</label>
     </div>
@@ -109,7 +109,7 @@ placeholder="{{ 'Enter User mobile' | translate }}"
     </div>
   </div>
 
-  <div class="flex w-full space-x-5 items-center mb-4">
+  <div class="flex w-full space-x-5 rtl:space-x-reverse items-center mb-4">
     <div class="flex flex-col w-[73%]">
       <label class="mb-2 primaryTxt" for="monthSalary"> {{ 'Month Salary' | translate }}</label>
       <input id="monthSalary" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
@@ -117,7 +117,7 @@ placeholder="{{ 'Enter User mobile' | translate }}"
  placeholder="{{ 'Enter monthSalary' | translate }}" [(ngModel)]="Data.monthSalary" />
     </div>
 
-    <div class="flex w-[23%] space-x-5 items-center mt-5">
+    <div class="flex w-[23%] space-x-5 rtl:space-x-reverse items-center mt-5">
       <input type="checkbox" class="w-5 h-5" id="Attendance" (change)="onHasAttendanceChange($event)"
         [checked]="Data.hasAttendance">
       <label for="Attendance" class="text-sm"> {{ 'Has Attendance' | translate }}</label>
@@ -339,7 +339,7 @@ placeholder="{{ 'Enter User mobile' | translate }}"
               {{ row.studentName }}
             </td>
             <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-              <div class="flex space-x-4">
+              <div class="flex space-x-4 rtl:space-x-reverse">
                 <button (click)="DeleteChild(row.id)">
                   <i class="fa-regular fa-trash-can"></i>
                 </button>
@@ -368,7 +368,7 @@ placeholder="{{ 'Enter User mobile' | translate }}"
     <div class="mt-4 bg-[#F7F7F7] w-[573px] h-auto rounded-[24px] p-[16px_24px] gap-[20px]">
       <div class="flex flex-col mt-2 gap-2 items-start">
 
-        <h6 class="font-medium text-base leading-6 mb-1 mt-3"> {{ 'National ID' | translate }}</h6>
+        <h6 class="font-medium text-base leading-6 mb-1 mt-3"> {{ 'National Id' | translate }}</h6>
         <input type="text" class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"
           [(ngModel)]="NationalID" (ngModelChange)="SelectChild(NationalID)"  placeholder="{{ 'Enter National Id' | translate }}" />
 

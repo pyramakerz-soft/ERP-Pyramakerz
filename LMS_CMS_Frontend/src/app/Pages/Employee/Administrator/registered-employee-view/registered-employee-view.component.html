@@ -1,50 +1,50 @@
 <div class="flex justify-between items-center">
-    <div class="flex justify-between items-center space-x-5">
+    <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
         <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToRegisteredEmployee()"></i>
-        <h1 class="primaryTxt font-semibold text-2xl leading-9">Registered Employee</h1>
+        <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ 'Registered Employee' | translate }}</h1>
     </div>
 </div>
 
 <div class="flex flex-wrap mt-5">
     <div class="p-3 w-[30%]">
         <div class="bg-[#EBEBEB] p-3  mb-4">
-            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Username</p>
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">{{ 'Username' | translate }}</p>
             <p class="font-medium text-base text-[#1E1E1E]">{{ employee.user_Name }}</p>
         </div>
     </div>
     <div class="p-3 w-[30%]">
         <div class="bg-[#EBEBEB] p-3 mb-4">
-            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">English Name</p>
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">{{ 'English Name' | translate }}</p>
             <p class="font-medium text-base text-[#1E1E1E]">{{ employee.en_name }}</p>
         </div>
     </div>
     <div class="p-3 w-[30%]">
         <div class="bg-[#EBEBEB] p-3 mb-4">
-            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Arabic Name</p>
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-3"> {{ 'Arabic Name' | translate }}</p>
             <p class="font-medium text-base text-[#1E1E1E]">{{ employee.ar_name }}</p>
         </div>
     </div>
     <div class="p-3 w-[30%]">
         <div class="bg-[#EBEBEB] p-3 mb-4">
-            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Email</p>
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">{{ 'Email' | translate }}</p>
             <p class="font-medium text-base text-[#1E1E1E]">{{ employee.email }}</p>
         </div>
     </div>
     <div class="p-3 w-[30%]">
         <div class="bg-[#EBEBEB] p-3 mb-4">
-            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Mobile</p>
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-3"> {{ 'Mobile' | translate }}</p>
             <p class="font-medium text-base text-[#1E1E1E]">{{ employee.mobile }}</p>
         </div>
     </div>
     <div class="p-3 w-[30%]">
         <div class="bg-[#EBEBEB] p-3 mb-4">
-            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Phone</p>
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-3"> {{ 'Phone' | translate }}</p>
             <p class="font-medium text-base text-[#1E1E1E]">{{ employee.phone }}</p>
         </div>
     </div>
     <div class="p-3 w-[30%]">
         <div class="bg-[#EBEBEB] p-3 mb-4">
-            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Address</p>
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">{{ 'Address' | translate }}</p>
             <p class="font-medium text-base text-[#1E1E1E]">{{ employee.address }}</p>
         </div>
     </div> 
@@ -55,41 +55,41 @@
 <div class="mt-5">
     <div class="flex justify-between items-center">
         <div>
-            <h1 class="primaryTxt font-semibold text-2xl leading-9">Registration Form Action</h1>
+            <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Registration Form Action' | translate }}</h1>
         </div>
         
         <div> 
             <button (click)="reject()"
                 class="border border-red-500 text-red-500 rounded-lg px-4 py-3 flex items-center justify-center gap-2">
-                Reject
+                 {{ 'Reject' | translate }}
             </button>
         </div>
     </div>
 
     <div class="flex justify-between items-center mt-3">
         <div class="flex flex-col w-[45%] mb-4">
-            <label class="mb-2" for="role">Role</label>
+            <label class="mb-2" for="role"> {{ 'Role' | translate }}</label>
             <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="role"
                 [(ngModel)]="employee.roleID">
-                <option [value]="0" disabled selected hidden>Choose Role</option>
+                <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Role' | translate }}</option>
                 <option *ngFor="let role of roles" [value]="role.id">{{ role.name }}</option>
-                <option *ngIf="roles.length === 0" disabled selected>No Data Found</option>
+                <option *ngIf="roles.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
             </select> 
         </div>
     
         <div class="flex flex-col w-[45%] mb-4">
-            <label class="mb-2" for="employeeType">Employee Type</label>
+            <label class="mb-2" for="employeeType"> {{ 'Employee Type' | translate }}</label>
             <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="employeeType"
                 [(ngModel)]="employee.employeeTypeID">
-                <option [value]="0" disabled selected hidden>Choose Employee Type</option>
+                <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Employee Type' | translate }}</option>
                 <option *ngFor="let employeeType of employeeTypes" [value]="employeeType.id">{{ employeeType.name }}</option>
-                <option *ngIf="employeeTypes.length === 0" disabled selected>No Data Found</option>
+                <option *ngIf="employeeTypes.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
             </select> 
         </div>
         
         <button (click)="accept()"
             class="secondaryBg text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2">
-            Accept
+             {{ 'Accept' | translate }}
         </button>
     </div>
 </div>

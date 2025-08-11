@@ -1,5 +1,5 @@
 <div class="flex justify-between items-center">
-    <div class="flex justify-between items-center space-x-5">
+    <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
         <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToMaster()"></i>
         <h1 *ngIf="mode=='Create'" class="primaryTxt font-semibold text-2xl leading-9">
             {{ 'Create Installment Deduction' | translate }}
@@ -77,7 +77,7 @@ placeholder="{{ 'Enter Date' | translate }}" [(ngModel)]="Data.date" (ngModelCha
 </div>
 
 <div *ngIf="mode=='Edit'" class="flex justify-end">
-    <button class="secondaryTxt secondaryBorder px-1 py-2 rounded-lg flex items-center space-x-1"
+    <button class="secondaryTxt secondaryBorder px-1 py-2 rounded-lg flex items-center space-x-1 rtl:space-x-reverse"
         (click)="AddDetail()">
         <div class="secondaryBorder rounded-full flex items-center p-1"><i class="fa-solid fa-plus"></i></div>
         <p> {{ 'Add' | translate }}</p>
@@ -86,7 +86,7 @@ placeholder="{{ 'Enter Date' | translate }}" [(ngModel)]="Data.date" (ngModelCha
 
 <div *ngIf="mode!='Create'">
     <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
-        <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
+        <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
             <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
                 <tr>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
@@ -149,7 +149,7 @@ placeholder="{{ 'Enter Date' | translate }}" [(ngModel)]="Data.date" (ngModelCha
                         <ng-template #textModeDate>{{ row.date }}</ng-template>
                     </td>
                     <td *ngIf="mode=='Edit'" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        <div class="flex space-x-4">
+                        <div class="flex space-x-4 rtl:space-x-reverse">
                             <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)" (click)="Delete(row.id)">
                                 <i class="fa-regular fa-trash-can"></i>
                             </button>
@@ -183,7 +183,7 @@ placeholder="{{ 'Enter Date' | translate }}" [(ngModel)]="Data.date" (ngModelCha
                         <input type="date" [(ngModel)]="Detail.date" class="w-full border border-gray-300 px-2 py-1 rounded-md">
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        <div class="flex space-x-4">
+                        <div class="flex space-x-4 rtl:space-x-reverse">
                             <button (click)="CancelAdd()">
                                 <i class="fa-regular fa-trash-can"></i>
                             </button>

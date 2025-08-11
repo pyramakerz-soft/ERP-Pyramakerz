@@ -19,11 +19,14 @@ import { FormsModule } from '@angular/forms';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { Classroom } from '../../../../Models/LMS/classroom';
 import { ClassroomService } from '../../../../Services/Employee/LMS/classroom.service';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-lesson-resource',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './lesson-resource.component.html',
   styleUrl: './lesson-resource.component.css'
 })
@@ -37,7 +40,8 @@ export class LessonResourceComponent {
   lesson: Lesson = new Lesson();
   editLessonResource: boolean = false;
   validationErrors: { [key in keyof LessonResource]?: string } = {};
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
   AllowEditForOthers: boolean = false;
@@ -72,7 +76,8 @@ export class LessonResourceComponent {
     public lessonService:LessonService,
     private sanitizer: DomSanitizer,
     private classroomService: ClassroomService,
-    public lessonResourceTypeService:LessonResourceTypeService
+    public lessonResourceTypeService:LessonResourceTypeService,
+    private languageService: LanguageService
   ) {}
 
   ngOnInit() {
@@ -99,6 +104,11 @@ export class LessonResourceComponent {
         this.AllowEditForOthers = settingsPage.allow_Edit_For_Others;
       }
     }); 
+
+    this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   IsAllowDelete(InsertedByID: number) {

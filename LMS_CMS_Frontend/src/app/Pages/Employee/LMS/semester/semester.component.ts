@@ -19,11 +19,13 @@ import { firstValueFrom } from 'rxjs';
 import { WeekDay } from '../../../../Models/week-day';
 import { DaysService } from '../../../../Services/Octa/days.service';
 import { Day } from '../../../../Models/day';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-semester',
   standalone: true,
-  imports: [FormsModule,CommonModule,SearchComponent],
+  imports: [FormsModule,CommonModule,SearchComponent, TranslateModule],
   templateUrl: './semester.component.html',
   styleUrl: './semester.component.css'
 })
@@ -37,7 +39,8 @@ export class SemesterComponent {
   academicYear:AcademicYear = new AcademicYear()
   editSemester:boolean = false
   validationErrors: { [key in keyof Semester]?: string } = {};
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
   AllowEditForOthers: boolean = false;
@@ -51,7 +54,8 @@ export class SemesterComponent {
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   isLoading = false; 
     
-  constructor(public account: AccountService, public semesterService: SemesterService, public acadimicYearService: AcadimicYearService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService, 
+  constructor(public account: AccountService,
+    private languageService: LanguageService, public semesterService: SemesterService, public acadimicYearService: AcadimicYearService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService, 
     private menuService: MenuService, public activeRoute: ActivatedRoute, public router:Router, public DaysServ: DaysService){}
   
   ngOnInit(){
@@ -79,6 +83,12 @@ export class SemesterComponent {
         this.AllowEditForOthers = settingsPage.allow_Edit_For_Others
       }
     });
+
+
+        this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetAllDays() {

@@ -15,12 +15,14 @@ import { Router } from '@angular/router';
 import * as XLSX from 'xlsx';
 import { MedicalHistoryService } from '../../../../../Services/Employee/Clinic/medical-history.service';
 import { PdfPrintComponent } from '../../../../../Component/pdf-print/pdf-print.component';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-medical-report',
   templateUrl: './medical-report.component.html',
   styleUrls: ['./medical-report.component.css'],
-  imports: [CommonModule, FormsModule, PdfPrintComponent],
+  imports: [CommonModule, FormsModule, PdfPrintComponent , TranslateModule],
   standalone: true,
 })
 export class MedicalReportComponent implements OnInit {
@@ -38,7 +40,8 @@ export class MedicalReportComponent implements OnInit {
   grades: any[] = [];
   classes: any[] = [];
   students: any[] = [];
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   // Table data
   tableData: any[] = [];
   showTable = false;
@@ -62,6 +65,7 @@ export class MedicalReportComponent implements OnInit {
   constructor(
     private router: Router,
     private hygieneFormService: HygieneFormService,
+    private languageService: LanguageService,
     private medicalHistoryService: MedicalHistoryService,
     private followUpService: FollowUpService,
     private apiService: ApiService,
@@ -74,6 +78,10 @@ export class MedicalReportComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadSchools();
+      this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   async loadSchools() {

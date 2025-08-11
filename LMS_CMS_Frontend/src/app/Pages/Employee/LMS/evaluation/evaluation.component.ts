@@ -24,11 +24,13 @@ import { Student } from '../../../../Models/student';
 import { StudentService } from '../../../../Services/student.service';
 import Swal from 'sweetalert2';
 import { Router } from '@angular/router';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-evaluation',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, TranslateModule],
   templateUrl: './evaluation.component.html',
   styleUrl: './evaluation.component.css'
 })
@@ -47,7 +49,8 @@ export class EvaluationComponent {
   DomainName: string = '';
   UserID: number = 0;
   User_Data_After_Login: TokenData = new TokenData( '', 0, 0, 0, 0, '', '', '', '', '' );
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   isNarrationOpen = true
   isCorrectionOpen = true
   IsViewTemplate = false
@@ -69,7 +72,8 @@ export class EvaluationComponent {
     public evaluationTemplateGroupService: EvaluationTemplateGroupService,
     public evaluationBookCorrectionService: EvaluationBookCorrectionService,
     public studentService: StudentService,
-    public evaluationEmployeeService: EvaluationEmployeeService 
+    public evaluationEmployeeService: EvaluationEmployeeService,
+        private languageService: LanguageService 
   ) {}
 
   ngOnInit() {
@@ -82,6 +86,10 @@ export class EvaluationComponent {
     this.getEmployeeData()
     this.getTemplateData()
     this.getCorrectionBookData()
+    this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+      });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
  
   getClassData() {

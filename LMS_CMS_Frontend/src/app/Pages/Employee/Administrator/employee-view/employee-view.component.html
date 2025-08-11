@@ -1,9 +1,9 @@
 <div class="flex justify-between items-center">
-    <div class="flex justify-between items-center space-x-5">
+    <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
         <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToEmployee()"></i>
         <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ Data.user_Name }}</h1>
     </div>
-    <div class="flex justify-between items-center space-x-5">
+    <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
         <button class="underline text-[#1E1E1E] cursor-pointer" (click)="SubjectTeacher()">
                {{ 'Subject Teacher' | translate }}
         </button>
@@ -64,12 +64,12 @@
     </div>
 </div>
 
-<div class="flex align-middle space-x-2 mb-4 w-full">
+<div class="flex align-middle space-x-2 rtl:space-x-reverse mb-4 w-full">
   <input type="checkbox" id="canReceiveRequest" class="w-5 h-5" [checked]="Data.canReceiveRequest" disabled>
   <label class="mb-2" for="canReceiveRequest">   {{ 'Can Receive Request' | translate }}</label>
 </div>
 
-<div class="flex align-middle space-x-2 mb-4 w-full">
+<div class="flex align-middle space-x-2 rtl:space-x-reverse mb-4 w-full">
   <input type="checkbox" id="canReceiveMessage" class="w-5 h-5" [checked]="Data.canReceiveMessage" disabled>
   <label class="mb-2" for="canReceiveMessage">   {{ 'Can Receive Messages' | translate }}</label>
 </div>
@@ -83,8 +83,8 @@
   <label class="mb-2" for="canReceiveMessageFromParentOrStudent">   {{ 'Can Receive Messages From Parent Or Student' | translate }}</label>
 </div>
 
-<div class="flex align-middle space-x-2 mb-4 w-full items-center justify-between">
-    <div class="flex align-middle w-[49%] space-x-2">
+<div class="flex align-middle space-x-2 rtl:space-x-reverse mb-4 w-full items-center justify-between">
+    <div class="flex align-middle w-[49%] space-x-2 rtl:space-x-reverse">
         <input type="checkbox" id="isFloorMonitor" class="w-5 h-5" [(ngModel)]="isFloorMonitor" disabled>
         <label class="mb-2" for="isFloorMonitor">   {{ 'Floor Monitor' | translate }}</label>
     </div>
@@ -109,8 +109,8 @@
     </div>
 </div>
 
-<div class="flex align-middle space-x-2 mb-4 w-full items-center justify-between">
-    <div class="flex align-middle w-[49%] space-x-2">
+<div class="flex align-middle space-x-2 rtl:space-x-reverse mb-4 w-full items-center justify-between">
+    <div class="flex align-middle w-[49%] space-x-2 rtl:space-x-reverse">
         <input type="checkbox" id="isGradeSupervisor" class="w-5 h-5" [(ngModel)]="isGradeSupervisor" disabled>
         <label class="mb-2" for="isGradeSupervisor">   {{ 'Grade Supervisor' | translate }}</label>
     </div>
@@ -135,8 +135,8 @@
     </div>
 </div>
 
-<div class="flex align-middle space-x-2 mb-4 w-full items-center justify-between">
-    <div class="flex align-middle w-[49%] space-x-2">
+<div class="flex align-middle space-x-2 rtl:space-x-reverse mb-4 w-full items-center justify-between">
+    <div class="flex align-middle w-[49%] space-x-2 rtl:space-x-reverse">
         <input type="checkbox" id="isSubjectSupervisor" class="w-5 h-5" [(ngModel)]="isSubjectSupervisor" disabled> 
         <label class="mb-2" for="isSubjectSupervisor">   {{ 'Subject Supervisor' | translate }}</label>
     </div>
@@ -195,7 +195,7 @@
                 <p class="text-sm font-medium text-gray-700 mb-4">{{ file.name }}</p>
                 <div class="border border-cacaca rounded-lg p-6">
                     <div class="flex justify-between items-center">
-                        <div class="flex items-center space-x-2">
+                        <div class="flex items-center space-x-2 rtl:space-x-reverse">
                             <i class="fa-solid fa-file"></i>
                             <p class="text-sm font-medium text-gray-700 truncate max-w-[150px]">{{ file.name }}</p>
                         </div>

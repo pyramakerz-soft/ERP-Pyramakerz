@@ -27,11 +27,13 @@ import { SemesterWorkingWeekService } from '../../../../Services/Employee/LMS/se
 import { QuillEditorComponent, QuillModule } from 'ngx-quill';
 import { Tag } from '../../../../Models/LMS/tag';
 import { SemesterWorkingWeek } from '../../../../Models/LMS/semester-working-week';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-lesson',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent, QuillModule],
+  imports: [FormsModule, CommonModule, SearchComponent, QuillModule , TranslateModule],
   templateUrl: './lesson.component.html',
   styleUrl: './lesson.component.css'
 })
@@ -47,7 +49,8 @@ export class LessonComponent {
 
   DomainName: string = '';
   UserID: number = 0;
-  
+   isRtl: boolean = false;
+  subscription!: Subscription; 
   path: string = '';
   key: string = 'id';
   value: any = '';
@@ -144,7 +147,8 @@ export class LessonComponent {
     public SubjectServ: SubjectService,
     public SemesterServ: SemesterService,
     public SemesterWorkingWeekServ: SemesterWorkingWeekService,
-    public acadimicYearService: AcadimicYearService
+    public acadimicYearService: AcadimicYearService,
+        private languageService: LanguageService
   ) { }
 
   ngOnInit() {
@@ -166,6 +170,10 @@ export class LessonComponent {
     });
 
     this.getSchool()
+        this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   } 
 
   onEditorCreated(quill: any) {

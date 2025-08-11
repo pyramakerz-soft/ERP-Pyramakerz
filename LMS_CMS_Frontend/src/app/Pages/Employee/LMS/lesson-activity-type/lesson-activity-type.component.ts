@@ -13,11 +13,13 @@ import { ApiService } from '../../../../Services/api.service';
 import { DomainService } from '../../../../Services/Employee/domain.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-lesson-activity-type',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './lesson-activity-type.component.html',
   styleUrl: './lesson-activity-type.component.css'
 })
@@ -28,7 +30,8 @@ export class LessonActivityTypeComponent {
   AllowDelete: boolean = false;
   AllowEditForOthers: boolean = false;
   AllowDeleteForOthers: boolean = false;
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   TableData: LessonActivityType[] = [];
 
   DomainName: string = '';
@@ -55,7 +58,8 @@ export class LessonActivityTypeComponent {
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
-    public TypeServ: LessonActivityTypeService
+    public TypeServ: LessonActivityTypeService,
+    private languageService: LanguageService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -76,6 +80,10 @@ export class LessonActivityTypeComponent {
     });
 
     this.GetAllData();
+        this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   } 
 
   GetAllData() {

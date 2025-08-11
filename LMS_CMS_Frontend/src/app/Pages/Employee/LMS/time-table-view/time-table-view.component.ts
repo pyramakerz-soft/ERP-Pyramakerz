@@ -15,6 +15,9 @@ import { FormsModule } from '@angular/forms';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { Day } from '../../../../Models/day';
 import { Grade } from '../../../../Models/LMS/grade';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 import { Employee } from '../../../../Models/Employee/employee';
 import { Classroom } from '../../../../Models/LMS/classroom';
 import * as XLSX from 'xlsx';
@@ -26,7 +29,7 @@ import { Observable, of } from 'rxjs';
 @Component({
   selector: 'app-time-table-view',
   standalone: true,
-  imports: [FormsModule, CommonModule, PdfPrintComponent],
+  imports: [FormsModule, CommonModule, PdfPrintComponent, TranslateModule],
   templateUrl: './time-table-view.component.html',
   styleUrl: './time-table-view.component.css',
 })
@@ -53,7 +56,8 @@ export class TimeTableViewComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   TimeTableId: number = 0;
   MaxPeriods: number = 0;
   TimeTableName: string = '';
@@ -92,9 +96,10 @@ export class TimeTableViewComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public TimeTableServ: TimeTableService,
     public ApiServ: ApiService,
+    private languageService: LanguageService,
     public reportsService: ReportsService,
     public timetableServ: TimeTableService
-  ) { }
+     ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
@@ -104,6 +109,10 @@ export class TimeTableViewComponent {
     });
     this.TimeTableId = Number(this.activeRoute.snapshot.paramMap.get('id'));
     this.GetTimeTable();
+        this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetTimeTable() {

@@ -70,6 +70,28 @@ BEGIN
             (@NegativeBalance = 1 AND SUM(ISNULL(E.Credit, 0)) > SUM(ISNULL(E.Debit, 0)));
     END
 
+	ELSE IF @linkFileID = 6  -- Banks
+    BEGIN
+        INSERT INTO #AccountSummary
+        SELECT 
+            B.ID,
+            B.BankName,
+            SUM(ISNULL(E.Debit, 0)) AS Debit,
+            SUM(ISNULL(E.Credit, 0)) AS Credit,
+            ROW_NUMBER() OVER (ORDER BY B.ID, B.BankName) AS RowNum
+        FROM Banks B
+        LEFT JOIN dbo.EntriesFun(@DateFrom, @DateTo, @MainAccNo, @SubAccNo, @linkFileID) E
+            ON E.LinkFileID = 6 AND E.SubAccountNo = B.ID
+        WHERE 
+            (@SubAccNo = 0 OR B.ID = @SubAccNo)
+            AND (@MainAccNo = 0 OR B.AccountNumberID = @MainAccNo)
+        GROUP BY B.ID, B.BankName
+        HAVING
+            (@ZeroBalance = 1 AND SUM(ISNULL(E.Credit, 0)) = 0 AND SUM(ISNULL(E.Debit, 0)) = 0) OR
+            (@PositiveBalance = 1 AND SUM(ISNULL(E.Debit, 0)) > SUM(ISNULL(E.Credit, 0))) OR
+            (@NegativeBalance = 1 AND SUM(ISNULL(E.Credit, 0)) > SUM(ISNULL(E.Debit, 0)));
+    END
+
     -- Paged result
     SELECT 
         ID, Name, Debit, Credit

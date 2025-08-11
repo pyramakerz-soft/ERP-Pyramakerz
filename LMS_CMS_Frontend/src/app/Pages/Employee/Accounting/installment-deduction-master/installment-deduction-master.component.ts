@@ -40,7 +40,7 @@ export class InstallmentDeductionMasterComponent {
 
   isModalVisible: boolean = false;
   mode: string = '';
- isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   path: string = '';
   key: string = 'id';

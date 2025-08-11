@@ -22,7 +22,7 @@
                             </div> 
                             <div *ngIf="data.link" class="secondaryTxt text-sm font-semibold">        
                                 <a [href]="data.link" class="border-b border-[#089B41] hover:text-[#089b408c]"
-                                    target="_blank" (click)="$event.stopPropagation(); LinkOpened(notification.id)"
+                                    target="_blank" (click)="$event.stopPropagation(); LinkOpened(data)"
                                     rel="noopener"> <!-- Prevents the new tab from having access to the original page via window.opener -->
                                     View Link
                                 </a>                                    
@@ -32,7 +32,12 @@
                     </div>
                 </div>
             </li>
-        </ul> 
+        </ul>  
+        <div *ngIf="TableData.length == 0"> 
+            <div class="flex justify-center">
+                <p class="text-[#BDBDBD]">No Notifications Yet</p>
+            </div>  
+        </div>
     </div>
     <div *ngIf="notification.id" class="w-[48%] bg-[#F7F7F7] rounded-md h-auto max-h-[75vh] overflow-y-auto overflow-x-hidden">
         <div class="flex p-3 items-start">
@@ -47,7 +52,7 @@
                     </div> 
                     <div *ngIf="notification.link" class="secondaryTxt text-sm font-semibold">        
                         <a [href]="notification.link" class="border-b border-[#089B41] hover:text-[#089b408c]"
-                        target="_blank" (click)="LinkOpened(notification.id)"
+                        target="_blank" (click)="LinkOpened(notification)"
                         rel="noopener"> <!-- Prevents the new tab from having access to the original page via window.opener -->
                         View Link
                         </a>                                    

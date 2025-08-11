@@ -1,111 +1,111 @@
 <div class="flex justify-between items-center">
-    <div class="flex justify-between items-center space-x-5">
+    <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
         <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToSubjects()"></i>
         <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ subject.en_name }}</h1>
     </div>
     <button (click)="editModal()" *ngIf="AllowEdit && IsAllowEdit(subject.insertedByUserId)"
-    class="bg-[#6F6F6F] text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2">
-        Edit
+    class="bg-[rgb(111,111,111)] text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2">
+         {{ 'Edit' | translate }}
     </button>
 </div>
 
 <div class="flex flex-wrap justify-between mt-5">
     <div class="bg-[#EBEBEB] p-3 w-[30%] mb-4">
-        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">English Name</p>
+        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">{{ 'English Name' | translate }}</p>
         <p class="font-medium text-base text-[#1E1E1E]">{{ subject.en_name }}</p>
     </div>
     <div class="bg-[#EBEBEB] p-3 w-[30%] mb-4">
-        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Arabic Name</p>
+        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">{{ 'Arabic Name' | translate }}</p>
         <p class="font-medium text-base text-[#1E1E1E]">{{ subject.ar_name }}</p>
     </div>
     <div class="bg-[#EBEBEB] p-3 w-[30%] mb-4">
-        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">English Name In Certificate</p>
+        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">{{ 'English Name' | translate }} {{ 'In Certificate' | translate }}</p>
         <p class="font-medium text-base text-[#1E1E1E]">{{ subject.subjectEnglishNameInCertificate }}</p>
     </div>
     <div class="bg-[#EBEBEB] p-3 w-[30%] mb-4">
-        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Arabic Name In Certificate</p>
+        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">{{ 'Arabic Name' | translate }}  {{ 'In Certificate' | translate }}</p>
         <p class="font-medium text-base text-[#1E1E1E]">{{ subject.subjectArabicNameInCertificate }}</p>
     </div>
     <div class="bg-[#EBEBEB] p-3 w-[30%] mb-4">
-        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Gradre</p>
+        <p class="font-semibold text-sm text-[#6F6F6F] mb-3"> {{ 'Grade' | translate }}</p>
         <p class="font-medium text-base text-[#1E1E1E]">{{ subject.gradeName }}</p>
     </div>
     <div class="bg-[#EBEBEB] p-3 w-[30%] mb-4">
-        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Order in Certificate </p>
+        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">{{ 'Order' | translate }}  {{ 'In Certificate' | translate }}</p>
         <p class="font-medium text-base text-[#1E1E1E]">{{ subject.orderInCertificate }}</p>
     </div>
     <div class="bg-[#EBEBEB] p-3 w-[30%] mb-4">
-        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Credit Hours</p>
+        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">  {{ 'Credit' | translate }} {{ 'Hours' | translate }}</p>
         <p class="font-medium text-base text-[#1E1E1E]">{{ subject.creditHours }}</p>
     </div>
     <div class="bg-[#EBEBEB] p-3 w-[30%] mb-4">
-        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Subject Code</p>
+        <p class="font-semibold text-sm text-[#6F6F6F] mb-3"> {{ 'Subject Code' | translate }}</p>
         <p class="font-medium text-base text-[#1E1E1E]">{{ subject.subjectCode }}</p>
     </div>
     <div class="bg-[#EBEBEB] p-3 w-[30%] mb-4">
-        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Pass By Degree</p>
+        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">{{ 'Pass By' | translate }}  {{ 'Degree' | translate }}</p>
         <p class="font-medium text-base text-[#1E1E1E]">{{ subject.passByDegree }}</p>
     </div>
     <div class="bg-[#EBEBEB] p-3 w-[30%] mb-4">
-        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Total Marks</p>
+        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">  {{ 'Total' | translate }} {{ 'Marks' | translate }}</p>
         <p class="font-medium text-base text-[#1E1E1E]">{{ subject.totalMark }}</p>
     </div>
     <div class="bg-[#EBEBEB] p-3 w-[30%] mb-4">
-        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Subject Category</p>
+        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">{{ 'Subject' | translate }} {{ 'Category' | translate }}</p>
         <p class="font-medium text-base text-[#1E1E1E]">{{ subject.subjectCategoryName }}</p>
     </div>
     <div class="bg-[#EBEBEB] p-3 w-[30%] mb-4">
-        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Number of session per week</p>
+        <p class="font-semibold text-sm text-[#6F6F6F] mb-3"> {{ 'Number of session per week' | translate }}</p>
         <p class="font-medium text-base text-[#1E1E1E]">{{ subject.numberOfSessionPerWeek }}</p>
     </div>
 </div>
-<div class="flex space-x-5 items-center w-[30%] mb-4">
+<div class="flex space-x-5 rtl:space-x-reverse items-center w-[30%] mb-4">
     <i *ngIf="subject.hideFromGradeReport" class="secondaryTxt text-2xl fa-regular fa-square-check"></i>
     <i *ngIf="!subject.hideFromGradeReport" class="text-[#BDBDBD] text-2xl fa-regular fa-square"></i>
-    <label class="text-sm">Hide From Grade Report</label>
+    <label class="text-sm"> {{ 'Hide From Grade Report' | translate }}</label>
 </div>
 <div class="bg-[#F6F6F6] rounded-md border-dashed border-2 w-[30%] px-6 py-3 lg:py-5">
-    <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Subject Icon</p>
+    <p class="font-semibold text-sm text-[#6F6F6F] mb-3"> {{ 'Subject Icon' | translate }}</p>
     <img *ngIf="subject.iconLink" [src]="subject.iconLink" class="object-cover w-1/2">
 </div>
 
 
 <div class="flex justify-between items-center mt-8">
-    <div class="flex justify-between space-x-10">
-        <h1 [ngClass]="{'primaryTxt font-semibold': isWeightPart, 'text-gray-400 font-medium': !isWeightPart}" class="text-2xl leading-9 cursor-pointer" (click)="isWeightPart = !isWeightPart">Weights</h1>
-        <h1 [ngClass]="{'primaryTxt font-semibold': !isWeightPart, 'text-gray-400 font-medium': isWeightPart}" class="text-2xl leading-9 cursor-pointer" (click)="isWeightPart = !isWeightPart">Resources</h1>
+    <div class="flex justify-between space-x-10 rtl:space-x-reverse">
+        <h1 [ngClass]="{'primaryTxt font-semibold': isWeightPart, 'text-gray-400 font-medium': !isWeightPart}" class="text-2xl leading-9 cursor-pointer" (click)="isWeightPart = !isWeightPart"> {{ 'Weights' | translate }}</h1>
+        <h1 [ngClass]="{'primaryTxt font-semibold': !isWeightPart, 'text-gray-400 font-medium': isWeightPart}" class="text-2xl leading-9 cursor-pointer" (click)="isWeightPart = !isWeightPart"> {{ 'Resources' | translate }}</h1>
     </div>
     <div class="flex justify-between items-center "> 
         <button (click)="subjectWeight()" *ngIf="isWeightPart"
             class="secondaryBg text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2">
-            Add Weight
+              {{ 'Add' | translate }} {{ 'Weight' | translate }}
         </button>
 
         <button (click)="subjectResource()" *ngIf="!isWeightPart"
             class="secondaryBg text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2">
-            Add Resource
+              {{ 'Add' | translate }} {{ 'Resource' | translate }}
         </button>
     </div>
 </div>
 
 <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD] max-w-full" *ngIf="isWeightPart">
-    <table class="overflow-auto w-full bg-[#EBEBEB] text-left text-[#6F6F6F]">
+    <table class="overflow-auto w-full bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
         <thead class="bg-[##EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
             <tr>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    ID
+                    {{ 'ID' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
-                    Weight Type English Name
+                    {{ 'Weight Type' | translate }} {{ 'English Name' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
-                    Weight Type Arabic Name
+                      {{ 'Weight Type' | translate }}  {{ 'Arabic Name' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
-                    Value
+                      {{ 'Value' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Actions
+                    {{ 'Actions' | translate }}
                 </th>
             </tr>
         </thead>
@@ -113,7 +113,7 @@
             <tr *ngIf="SubjectWeights.length === 0">
                 <td colspan="5"
                     class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-                    No Data Found
+                     {{ 'No Data Found' | translate }}
                 </td>
             </tr>
 
@@ -126,7 +126,7 @@
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{ row.weightTypeArabicName }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{ row.value }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    <div class="flex space-x-4">
+                    <div class="flex space-x-4 rtl:space-x-reverse">
                         <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)"
                             (click)="DeleteSubjectWeight(row.id)">
                             <i class="fa-regular fa-trash-can"></i>
@@ -143,23 +143,23 @@
 
 
 <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD] max-w-full" *ngIf="!isWeightPart">
-    <table class="overflow-auto w-full bg-[#EBEBEB] text-left text-[#6F6F6F]">
+    <table class="overflow-auto w-full bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
         <thead class="bg-[##EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
             <tr>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    ID
+                     {{ 'ID' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
-                    English Name
+                    {{ 'English Name' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
-                    Arabic Name
+                    {{ 'Arabic Name' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
-                    Link
+                      {{ 'Link' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Actions
+                     {{ 'Actions' | translate }}
                 </th>
             </tr>
         </thead>
@@ -167,7 +167,7 @@
             <tr *ngIf="SubjectResources.length === 0">
                 <td colspan="5"
                     class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-                    No Data Found
+                    {{ 'No Data Found' | translate }}
                 </td>
             </tr>
 
@@ -179,10 +179,10 @@
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{ row.englishName }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{ row.arabicName }}</td> 
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">
-                    <button (click)="downloadFile(row.fileLink)" class="font-semibold">Click to Download</button>
+                    <button (click)="downloadFile(row.fileLink)" class="font-semibold">{{ 'Click to' | translate }} {{ 'Download' | translate }}</button>
                 </td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    <div class="flex space-x-4">
+                    <div class="flex space-x-4 rtl:space-x-reverse">
                         <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)"
                             (click)="DeleteSubjecResource(row.id)">
                             <i class="fa-regular fa-trash-can"></i>
@@ -198,27 +198,27 @@
 <div id="Weight_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
     <div class="bg-white rounded-2xl p-12 w-[669px]">
         <div class="flex justify-between items-center">
-            <h1 *ngIf="!editSubjectWeight" class="font-semibold text-2xl leading-9">Add Subject Weight</h1>
-            <h1 *ngIf="editSubjectWeight" class="font-semibold text-2xl leading-9">Edit Subject Weight</h1>
+            <h1 *ngIf="!editSubjectWeight" class="font-semibold text-2xl leading-9"> {{ 'Add' | translate }} {{ 'Subject' | translate }} {{ 'Weight' | translate }}</h1>
+            <h1 *ngIf="editSubjectWeight" class="font-semibold text-2xl leading-9"> {{ 'Edit' | translate }} {{ 'Subject' | translate }} {{ 'Weight' | translate }}</h1>
             <button (click)="closeSubjectWeight()" type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
         </div>
 
         <div class="flex flex-col mt-6 mb-4 bg-[#F7F7F7] rounded-3xl p-4">   
             <div class="flex flex-col mb-4">
-                <label class="mb-2 primaryTxt" for="WeightType">Weight Type</label>
+                <label class="mb-2 primaryTxt" for="WeightType"> {{ 'Weight Type' | translate }}</label>
                 <select (ngModelChange)="onInputValueChangeForSubjectWeight({ field: 'weightTypeID', value: $event })"
                     class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="WeightType" [(ngModel)]="subjectWeightElement.weightTypeID">
-                    <option [value]="0" disabled selected hidden>Choose Weight Type</option>
+                    <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Weight Type' | translate }}</option>
                     <option *ngFor="let WeightType of WeightTypes" [value]="WeightType.id">{{ WeightType.englishName }}</option>
-                    <option *ngIf="WeightTypes.length === 0" disabled selected>No Data Found</option>
+                    <option *ngIf="WeightTypes.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
                 </select>
                 <span *ngIf="validationErrorsForWeights['weightTypeID']" class="text-red-500 ml-3 font-normal">{{ validationErrorsForWeights['weightTypeID'] }}</span>
             </div>
             <div class="flex w-full flex-col mb-4">
-                <label class="mb-2 primaryTxt" for="Value">Value</label>
+                <label class="mb-2 primaryTxt" for="Value">{{ 'Value' | translate }}</label>
                 <input id="Value" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                     (input)="validateNumber($event, 'value')"
-                    placeholder="Enter Value" [(ngModel)]="subjectWeightElement.value"
+                    placeholder="{{ 'Enter' | translate }} {{ 'Value' | translate }}" [(ngModel)]="subjectWeightElement.value"
                     (ngModelChange)="onInputValueChangeForSubjectWeight({ field: 'value', value: $event })" />
                 <span *ngIf="validationErrorsForWeights['value']" class="text-red-500 ml-3 font-normal">{{ validationErrorsForWeights['value'] }}</span>
             </div>   
@@ -227,7 +227,7 @@
         <div class="flex justify-end">
             <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
                 (click)="SaveSubjectWeight()">
-                <span *ngIf="!isLoading">Save</span>
+                <span *ngIf="!isLoading"> {{ 'Save' | translate }}</span>
                 <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
             </button>
         </div>
@@ -238,34 +238,34 @@
 <div id="Resource_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
     <div class="bg-white rounded-2xl p-12 w-[669px]">
         <div class="flex justify-between items-center">
-            <h1 class="font-semibold text-2xl leading-9">Add Subject Resource</h1> 
+            <h1 class="font-semibold text-2xl leading-9"> {{ 'Add' | translate }}  {{ 'Subject Resource' | translate }}</h1> 
             <button (click)="closeSubjectResource()" type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
         </div>
 
         <div class="flex flex-col mt-6 mb-4 bg-[#F7F7F7] rounded-3xl p-4">  
             <div class="flex w-full flex-col mb-4">
-                <label class="mb-2 primaryTxt" for="EnglishName">English Name</label>
+                <label class="mb-2 primaryTxt" for="EnglishName">{{ 'English Name' | translate }}</label>
                 <input id="EnglishName" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                    placeholder="Enter English Name" [(ngModel)]="SubjectResourceElement.englishName"
+                    placeholder="{{ 'Enter' | translate }} {{ 'English Name' | translate }}" [(ngModel)]="SubjectResourceElement.englishName"
                     (ngModelChange)="onInputValueChangeForSubjectResource({ field: 'englishName', value: $event })" />
                 <span *ngIf="validationErrorsForResources['englishName']" class="text-red-500 ml-3 font-normal">{{ validationErrorsForResources['englishName'] }}</span>
             </div>     
             <div class="flex w-full flex-col mb-4">
-                <label class="mb-2 primaryTxt" for="ArabicName">Arabic Name</label>
+                <label class="mb-2 primaryTxt" for="ArabicName"> {{ 'Arabic Name' | translate }}</label>
                 <input id="ArabicName" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                    placeholder="Enter Arabic Name" [(ngModel)]="SubjectResourceElement.arabicName"
+                    placeholder="{{ 'Enter' | translate }} {{ 'Arabic Name' | translate }}" [(ngModel)]="SubjectResourceElement.arabicName"
                     (ngModelChange)="onInputValueChangeForSubjectResource({ field: 'arabicName', value: $event })" />
                 <span *ngIf="validationErrorsForResources['arabicName']" class="text-red-500 ml-3 font-normal">{{ validationErrorsForResources['arabicName'] }}</span>
             </div>  
             <div class="w-full mb-4">
-                <label class="mb-2 primaryTxt" for="totalMark">File</label>
-                <div class="bg-white flex items-center space-x-4 w-full rounded-md border-dashed border-2">
+                <label class="mb-2 primaryTxt" for="totalMark"> {{ 'File' | translate }}</label>
+                <div class="bg-white flex items-center space-x-4 rtl:space-x-reverse w-full rounded-md border-dashed border-2">
                     <div class="flex justify-center w-full">
                         <label for="file-upload" class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
                             <img *ngIf="!SubjectResourceElement.file" src="Images/Icon frame.png" class="w-1/4">
                             <img *ngIf="SubjectResourceElement.file" src="Images/FileAttached.png" class="w-1/4"> 
-                            <p class="font-normal text-xs md:text-sm text-[#8E8E93] mt-3"><span class="secondaryTxt">Click to Upload </span></p>
-                            <p class="font-normal text-xs md:text-sm text-[#8E8E93]"> (Max. File size: 25 MB)</p>
+                            <p class="font-normal text-xs md:text-sm text-[#8E8E93] mt-3"><span class="secondaryTxt">  {{ 'Click to' | translate }} {{ 'Upload' | translate }} </span></p>
+                            <p class="font-normal text-xs md:text-sm text-[#8E8E93]">  {{ '(Max. File size: 25 MB)' | translate }}</p>
                         </label>
                         <input id="file-upload" type="file" class="hidden" (change)="onFileSelected($event)"/>
                     </div>
@@ -277,7 +277,7 @@
         <div class="flex justify-end">
             <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
                 (click)="SaveSubjectResource()">
-                <span *ngIf="!isLoading">Save</span>
+                <span *ngIf="!isLoading"> {{ 'Save' | translate }}</span>
                 <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
             </button>
         </div>

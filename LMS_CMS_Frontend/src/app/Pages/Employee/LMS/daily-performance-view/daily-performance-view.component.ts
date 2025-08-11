@@ -11,11 +11,13 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { PerformanceType } from '../../../../Models/LMS/performance-type';
 import { DailyPerformance } from '../../../../Models/LMS/daily-performance';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-daily-performance-view',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, TranslateModule],
   templateUrl: './daily-performance-view.component.html',
   styleUrl: './daily-performance-view.component.css'
 })
@@ -26,7 +28,8 @@ export class DailyPerformanceViewComponent {
   DomainName: string = '';
   UserID: number = 0;
   path: string = '';
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   dailyPerformanceMaster: DailyPerformanceMaster = new DailyPerformanceMaster();
   dailyPerformanceMasterId: number = 0
   isModalVisible: boolean = false;
@@ -39,7 +42,8 @@ export class DailyPerformanceViewComponent {
     private menuService: MenuService,
     public EditDeleteServ: DeleteEditPermissionService,
     private router: Router,
-    public DailyPerformanceServ: DailyPerformanceService
+    public DailyPerformanceServ: DailyPerformanceService,
+        private languageService: LanguageService
   ) { }
 
   ngOnInit() {
@@ -48,6 +52,11 @@ export class DailyPerformanceViewComponent {
     this.DomainName = this.ApiServ.GetHeader();
     this.dailyPerformanceMasterId = Number(this.activeRoute.snapshot.paramMap.get('id'));
     this.getData()
+     this.subscription = this.languageService.language$.subscribe(direction => {
+          this.isRtl = direction === 'rtl';
+        });
+        this.isRtl = document.documentElement.dir === 'rtl';
+      
   }
 
   moveToBack() {

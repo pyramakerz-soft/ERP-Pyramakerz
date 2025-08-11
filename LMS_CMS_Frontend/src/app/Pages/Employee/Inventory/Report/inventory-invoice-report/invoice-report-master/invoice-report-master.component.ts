@@ -12,6 +12,9 @@ import { InventoryCategoryService } from '../../../../../../Services/Employee/In
 import { InventorySubCategoriesService } from '../../../../../../Services/Employee/Inventory/inventory-sub-categories.service';
 import { ShopItemService } from '../../../../../../Services/Employee/Inventory/shop-item.service';
 import Swal from 'sweetalert2';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 
 interface FlagOption {
   id: number;
@@ -21,7 +24,7 @@ interface FlagOption {
 @Component({
   selector: 'app-inventory-transaction-report',
   standalone: true,
-  imports: [CommonModule, FormsModule, PdfPrintComponent],
+  imports: [CommonModule, FormsModule, PdfPrintComponent , TranslateModule],
   templateUrl: './invoice-report-master.component.html',
   styleUrl: './invoice-report-master.component.css',
 })
@@ -59,6 +62,8 @@ export class InventoryTransactionReportComponent implements OnInit {
 
   dateFrom: string = '';
   dateTo: string = '';
+  isRtl: boolean = false;
+  subscription!: Subscription;  
   selectedStoreId: number | null = null;
   stores: Store[] = [];
   transactions: InventoryMaster[] = [];
@@ -68,6 +73,9 @@ export class InventoryTransactionReportComponent implements OnInit {
   reportType: string = '';
   selectedFlagId: number = -1;
   selectedFlagIds: number[] = [];
+
+
+  
 
   @ViewChild(PdfPrintComponent) pdfPrintComponent!: PdfPrintComponent;
 
@@ -138,7 +146,8 @@ export class InventoryTransactionReportComponent implements OnInit {
     private storesService: StoresService,
     private categoryService: InventoryCategoryService,
     private subCategoryService: InventorySubCategoriesService,
-    private shopItemService: ShopItemService
+    private shopItemService: ShopItemService,
+    private languageService: LanguageService
   ) {}
 
   ngOnInit() {
@@ -153,6 +162,11 @@ export class InventoryTransactionReportComponent implements OnInit {
     this.selectedCategoryId = null;
     this.selectedSubCategoryId = null;
     this.selectedItemId = null;
+
+      this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   loadCategories() {

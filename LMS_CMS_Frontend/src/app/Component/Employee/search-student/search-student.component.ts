@@ -12,11 +12,13 @@ import { ApiService } from '../../../Services/api.service';
 import { StudentService } from '../../../Services/student.service';
 import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-search-student',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
   templateUrl: './search-student.component.html',
   styleUrl: './search-student.component.css'
 })
@@ -40,7 +42,8 @@ export class SearchStudentComponent {
   id: number | null = null;
   name: string | null = null;
   nationalID: number | null = null; 
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   students:Student[] = []
   selectedStudents:number[] = []
   AcademicYears:AcademicYear[] = []
@@ -55,7 +58,7 @@ export class SearchStudentComponent {
   TotalRecords:number = 0
 
 
-  constructor(public acadimicYearService:AcadimicYearService, public gradeservice:GradeService, public StudentService: StudentService , public classroomService:ClassroomService, public studentService:StudentService, public ApiServ: ApiService , public router: Router){}
+  constructor(public acadimicYearService:AcadimicYearService,private languageService: LanguageService, public gradeservice:GradeService, public StudentService: StudentService , public classroomService:ClassroomService, public studentService:StudentService, public ApiServ: ApiService , public router: Router){}
 
   ngOnInit(){ 
     this.DomainName = this.ApiServ.GetHeader(); 
@@ -68,6 +71,11 @@ export class SearchStudentComponent {
     if (this.selectedYear || this.selectedGrade) {
       this.getClassrooms();
     } 
+
+        this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   } 
 
   isInputHidden(input: string): boolean {

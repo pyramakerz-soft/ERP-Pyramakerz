@@ -27,11 +27,14 @@ import { Grade } from '../../../../Models/LMS/grade';
 import { firstValueFrom } from 'rxjs';
 import { Employee } from '../../../../Models/Employee/employee';
 import { EmployeeService } from '../../../../Services/Employee/employee.service';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-classroom',
   standalone: true,
-  imports: [FormsModule,CommonModule,SearchComponent],
+  imports: [FormsModule,CommonModule,SearchComponent, TranslateModule],
   templateUrl: './classroom.component.html',
   styleUrl: './classroom.component.css'
 })
@@ -51,7 +54,8 @@ export class ClassroomComponent {
   AllowEditForOthers: boolean = false;
   AllowDeleteForOthers: boolean = false;
   path: string = ""
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   DomainName: string = "";
   UserID: number = 0;
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
@@ -79,7 +83,7 @@ export class ClassroomComponent {
 
   activeAcademicYearID = 0
 
-  constructor(public account: AccountService, public buildingService: BuildingService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService, 
+  constructor(public account: AccountService,private languageService: LanguageService, public buildingService: BuildingService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService, 
       private menuService: MenuService, public activeRoute: ActivatedRoute, public schoolService: SchoolService, public classroomService: ClassroomService, public employeeServ : EmployeeService ,
       public sectionService:SectionService, public gradeService:GradeService, public acadimicYearService:AcadimicYearService, public floorService: FloorService, public router:Router){}
       
@@ -106,6 +110,12 @@ export class ClassroomComponent {
         this.AllowEditForOthers = settingsPage.allow_Edit_For_Others
       }
     });
+    
+    this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+
   } 
 
   openModal(classroomId?: number) {

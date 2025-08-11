@@ -17,11 +17,14 @@ import Swal from 'sweetalert2';
 import { finalize } from 'rxjs';
 import { SubBankQuestion } from '../../../../Models/LMS/sub-bank-question';
 import { AssignmentStudentQuestion } from '../../../../Models/LMS/assignment-student-question';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-assignment-detail',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule , TranslateModule],
   templateUrl: './assignment-detail.component.html',
   styleUrl: './assignment-detail.component.css'
 })
@@ -29,7 +32,8 @@ export class AssignmentDetailComponent {
 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
   TableData: AssignmentStudent[] = [];
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   DomainName: string = '';
   UserID: number = 0;
 
@@ -61,7 +65,8 @@ export class AssignmentDetailComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public assignmentStudentServ: AssignmentStudentService,
-    public assignmentServ: AssignmentService
+    public assignmentServ: AssignmentService,
+    private languageService: LanguageService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -72,6 +77,10 @@ export class AssignmentDetailComponent {
     });
     this.AssignmentStudentId = Number(this.activeRoute.snapshot.paramMap.get('id'));
     this.GetAssignment()
+      this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetAssignment() {

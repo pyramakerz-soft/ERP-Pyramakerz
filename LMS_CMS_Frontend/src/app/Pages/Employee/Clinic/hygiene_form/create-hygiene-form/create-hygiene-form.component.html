@@ -1,15 +1,17 @@
 <div class="">
     <!-- Header Section -->
     <div class="flex justify-between">
+
         <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
             <i class="fa-solid fa-chevron-left cursor-pointer rtl:rotate-180" (click)="moveToHygieneForm()"></i>
-            <h1 class="primaryTxt font-semibold text-2xl leading-9">Hygiene Form</h1>
+            <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ 'Hygiene Form' | translate }}</h1>
         </div>
         <div class="flex justify-between items-center">
+
             <button (click)="saveHygieneForm()"
                 class="text-white rounded-lg px-4 py-2.5 flex items-center justify-center gap-2"
                 style="background-color: #089B41;">
-                Save
+                 {{ 'Save' | translate }}
             </button>
         </div>
     </div>
@@ -23,12 +25,12 @@
     <div class="mt-6 mb-4 rounded-3xl flex justify-between flex-wrap">
         <!-- School Select -->
         <div class="flex flex-col mb-4 w-[49%]">
-            <label class="mb-2 primaryTxt" for="school">School</label>
+            <label class="mb-2 primaryTxt" for="school">{{ 'School' | translate }}</label>
             <select id="school" [(ngModel)]="selectedSchool" (change)="onSchoolChange()"
                 class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto">
-                <option [value]="null" disabled selected hidden>Choose School</option>
+                <option [value]="null" disabled selected hidden>{{ 'Choose' | translate }} {{ 'School' | translate }}</option>
                 <option *ngFor="let school of schools" [value]="school.id">{{ school.name }}</option>
-                <option *ngIf="schools.length === 0" disabled selected>No Data Found</option>
+                <option *ngIf="schools.length === 0" disabled selected> </option>
             </select>
             <span *ngIf="validationErrors['school']" class="text-red-500 ml-3 font-normal">{{ validationErrors['school']
                 }}</span>
@@ -36,13 +38,13 @@
 
         <!-- Grade Select -->
         <div class="flex flex-col mb-4 w-[49%]">
-            <label class="mb-2 primaryTxt" for="grade">Grade</label>
+            <label class="mb-2 primaryTxt" for="grade">{{ 'Grade' | translate }}</label>
             <select id="grade" [(ngModel)]="selectedGrade" (change)="onGradeChange()"
                 class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
                 [disabled]="!selectedSchool">
-                <option [value]="null" disabled selected hidden>Choose Grade</option>
+                <option [value]="null" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Grade' | translate }}</option>
                 <option *ngFor="let grade of grades" [value]="grade.id">{{ grade.name }}</option>
-                <option *ngIf="grades.length === 0" disabled selected>No Data Found</option>
+                <option *ngIf="grades.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
             </select>
             <span *ngIf="validationErrors['grade']" class="text-red-500 ml-3 font-normal">{{ validationErrors['grade']
                 }}</span>
@@ -50,13 +52,13 @@
 
         <!-- Class Select -->
         <div class="flex flex-col mb-4 w-[49%]">
-            <label class="mb-2 primaryTxt" for="class">Class</label>
+            <label class="mb-2 primaryTxt" for="class">{{ 'Class' | translate }}</label>
             <select id="class" [(ngModel)]="selectedClass" (change)="onClassChange()"
                 class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
                 [disabled]="!selectedGrade">
-                <option [value]="null" disabled selected hidden>Choose Class</option>
+                <option [value]="null" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Class' | translate }}</option>
                 <option *ngFor="let class of classes" [value]="class.id">{{ class.name }}</option>
-                <option *ngIf="classes.length === 0" disabled selected>No Data Found</option>
+                <option *ngIf="classes.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
             </select>
             <span *ngIf="validationErrors['class']" class="text-red-500 ml-3 font-normal">{{ validationErrors['class']
                 }}</span>
@@ -64,7 +66,8 @@
 
         <!-- Date Input -->
         <div class="flex flex-col mb-4 w-[49%]">
-            <label class="mb-2 primaryTxt" for="date">Date</label>
+
+            <label class="mb-2 primaryTxt" for="date">{{ 'Date' | translate }}</label>
             <input type="date" id="date" [(ngModel)]="selectedDate" (change)="onDateChange()"
                 class="rounded-lg border border-solid border-gray-300 px-4 py-3" [disabled]="!selectedClass">
             <span *ngIf="validationErrors['date']" class="text-red-500 ml-3 font-normal">{{ validationErrors['date']

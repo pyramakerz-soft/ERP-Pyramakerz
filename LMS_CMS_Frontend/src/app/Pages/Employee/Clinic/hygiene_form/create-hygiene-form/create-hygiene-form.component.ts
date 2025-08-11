@@ -17,11 +17,14 @@ import { Student } from '../../../../../Models/student';
 import { SchoolService } from '../../../../../Services/Employee/school.service';
 import { StudentService } from '../../../../../Services/student.service';
 import { firstValueFrom } from 'rxjs';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-create-hygiene-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, HygieneFormTableComponent],
+  imports: [CommonModule, FormsModule, HygieneFormTableComponent, 
+    TranslateModule],
   templateUrl: './create-hygiene-form.component.html',
   styleUrls: ['./create-hygiene-form.component.css'],
 })
@@ -32,7 +35,8 @@ export class CreateHygieneFormComponent implements OnInit {
   students: Student[] = [];
   hygieneTypes: HygieneTypes[] = [];
   errorMessage: string | null = null;
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   selectedSchool: number | null = null;
   selectedGrade: number | null = null;
   selectedClass: number | null = null;
@@ -49,12 +53,17 @@ export class CreateHygieneFormComponent implements OnInit {
     private schoolService: SchoolService,
     private gradeService: GradeService,
     private classroomService: ClassroomService,
-    private studentService: StudentService
+    private studentService: StudentService,
+      private languageService: LanguageService
   ) {}
 
   ngOnInit(): void {
     this.loadHygieneTypes();
     this.loadSchools();
+         this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
    
   moveToHygieneForm() {
@@ -139,10 +148,8 @@ onSchoolChange() {
   this.classes = [];
   this.students = [];
   delete this.validationErrors['school'];
+  this.errorMessage = null; // Always clear error message
   this.loadGrades();
-  if (this.checkFormValidity()) {
-    this.errorMessage = null;
-  }
 }
 
 onGradeChange() {
@@ -150,25 +157,20 @@ onGradeChange() {
   this.classes = [];
   this.students = [];
   delete this.validationErrors['grade'];
+  this.errorMessage = null; // Always clear error message
   this.loadClasses();
-  if (this.checkFormValidity()) {
-    this.errorMessage = null;
-  }
 }
 
 onClassChange() {
   this.students = [];
   delete this.validationErrors['class'];
+  this.errorMessage = null; // Always clear error message
   this.loadStudents();
-  if (this.checkFormValidity()) {
-    this.errorMessage = null;
-  }
 }
+
 onDateChange() {
   delete this.validationErrors['date'];
-  if (this.checkFormValidity()) {
-    this.errorMessage = null;
-  }
+  this.errorMessage = null; // Always clear error message
 }
 
 // Add this method to check form validity
@@ -211,6 +213,30 @@ validateForm(): boolean {
 
 saveHygieneForm() {
   if (this.validateForm()) {
+    // Additional validation for hygiene types when attendance is true
+    let hasHygieneTypeErrors = false;
+    const hygieneTypeErrors: string[] = [];
+
+    this.students.forEach((student, index) => {
+      if (student['attendance'] === true) {
+        const missingHygieneTypes = this.hygieneTypes
+          .filter(ht => student[`hygieneType_${ht.id}`] === null || student[`hygieneType_${ht.id}`] === undefined)
+          .map(ht => ht.type);
+
+        if (missingHygieneTypes.length > 0) {
+          hasHygieneTypeErrors = true;
+          hygieneTypeErrors.push(
+            `Student ${student.en_name} (${index + 1}) needs selections for: ${missingHygieneTypes.join(', ')}`
+          );
+        }
+      }
+    });
+
+    if (hasHygieneTypeErrors) {
+      this.errorMessage = hygieneTypeErrors.join('; ');
+      return;
+    }
+
     const domainName = this.apiService.GetHeader();
     const token = localStorage.getItem('current_token');
 
@@ -254,7 +280,6 @@ saveHygieneForm() {
     });
   }
 }
-
   onView(row: any) {
     this.router.navigate(['/view hygiene form', row.id]);
   }

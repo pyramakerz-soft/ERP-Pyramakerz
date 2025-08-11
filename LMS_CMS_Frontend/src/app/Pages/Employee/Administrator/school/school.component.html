@@ -51,7 +51,7 @@
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.city }}</td> 
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.streetName }}</td> 
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    <div class="flex space-x-4"> 
+                    <div class="flex space-x-4 rtl:space-x-reverse"> 
                         <button *ngIf="AllowEdit" (click)="openModal(row.id)">
                             <i class="fa-solid fa-pencil"></i>
                         </button> 
@@ -106,7 +106,7 @@
             </div> 
             <div class="w-full mb-4">
                 <label class="mb-2 primaryTxt" for="PostalZone">{{ 'School Logo' | translate }}</label>
-                <div class="bg-[#F6F6F6] flex items-center space-x-4 w-full rounded-md border-dashed border-2">
+                <div class="bg-[#F6F6F6] flex items-center space-x-4 rtl:space-x-reverse w-full rounded-md border-dashed border-2">
                     <div class="flex justify-center w-full">
                         <label for="file-upload" class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
                             <img *ngIf="!school.reportImage && !school.reportImageFile" src="Images/Icon frame.png" class="w-1/4">

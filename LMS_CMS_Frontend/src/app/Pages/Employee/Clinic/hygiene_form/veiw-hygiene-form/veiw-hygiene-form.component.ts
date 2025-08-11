@@ -5,19 +5,25 @@ import {
   HygieneForm,
   StudentHygieneType,
 } from '../../../../../Models/Clinic/HygieneForm';
-import { ApiService } from '../../../../../Services/api.service';
+import { ApiService } from '../../../../../Services/api.service'; 
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
+
 import { HygieneFormTableComponent } from '../hygiene-form-table/hygiene-form-table.component';
 import { DatePipe } from '@angular/common';
 import { HygieneTypesService } from '../../../../../Services/Employee/Clinic/hygiene-type.service';
 import { HygieneTypes } from '../../../../../Models/Clinic/hygiene-types';
 import { firstValueFrom } from 'rxjs';
 
+
 @Component({
   selector: 'app-view-hygiene-form',
   templateUrl: './veiw-hygiene-form.component.html',
   styleUrl: './veiw-hygiene-form.component.css',
-  imports: [HygieneFormTableComponent, DatePipe],
+  imports: [HygieneFormTableComponent, DatePipe,TranslateModule],
   standalone: true,
+
 })
 export class ViewHygieneFormComponent implements OnInit {
   moveToHygieneForm() {
@@ -25,7 +31,11 @@ export class ViewHygieneFormComponent implements OnInit {
   }
 
   hygieneForm: HygieneForm | null = null;
+  isRtl: boolean = false;
+  subscription!: Subscription;  
+
   students: any[] = [];
+
   hygieneTypes: HygieneTypes[] = [];
 
   constructor(
@@ -33,7 +43,9 @@ export class ViewHygieneFormComponent implements OnInit {
     private router: Router,
     private hygieneFormService: HygieneFormService,
     private apiService: ApiService,
+   private languageService: LanguageService,
     private hygieneTypesService: HygieneTypesService
+
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -42,7 +54,15 @@ export class ViewHygieneFormComponent implements OnInit {
       await this.loadHygieneTypes();
       this.loadHygieneForm(Number(id));
     }
+      this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+
+
+
 
   async loadHygieneTypes() {
     try {
