@@ -24,7 +24,7 @@ namespace LMS_CMS_BL.DTO.Communication
         public string? Text { get; set; }
         public string? Link { get; set; }
         public bool IsAllowDismiss { get; set; }
-        public string? InsertedByUserName { get; set; }
+        public string InsertedByUserName { get; set; }
         public DateTime? InsertedAt { get; set; }
     }
 }
