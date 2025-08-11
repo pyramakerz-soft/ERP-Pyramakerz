@@ -330,11 +330,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 .Where(sc => sc.StoreID == storeId && sc.IsDeleted != true)
                 .ToList();
 
-            // تصفية البيانات بناءً على الفئة الرئيسية (categoryId) والفئة الفرعية (typeId)
             var filtered = data.Where(id =>
                 (categoryId == 0 || id.ShopItem.InventorySubCategories.InventoryCategoriesID == categoryId) &&
                 (typeId == 0 || id.ShopItem.InventorySubCategoriesID == typeId) &&
-                // إذا كان typeId != 0 (تم تحديد فئة فرعية)، لا تشترط وجودها في StoreCategories
+          
                 (typeId != 0 || storeCategories.Select(sc => sc.InventoryCategoriesID)
                 .Contains(id.ShopItem.InventorySubCategories.InventoryCategoriesID)) &&
                 (id.InventoryMaster.InventoryFlags.ItemInOut == 1 || id.InventoryMaster.InventoryFlags.ItemInOut == -1));
