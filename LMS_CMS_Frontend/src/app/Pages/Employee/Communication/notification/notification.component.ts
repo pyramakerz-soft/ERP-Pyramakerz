@@ -1,5 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 import { FormsModule } from '@angular/forms'; 
 import { NotificationService } from '../../../../Services/Employee/Communication/notification.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -31,17 +34,19 @@ import { StudentService } from '../../../../Services/student.service';
 @Component({
   selector: 'app-notification',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, TranslateModule],
   templateUrl: './notification.component.html',
   styleUrl: './notification.component.css'
 })
 export class NotificationComponent {
+
   TableData:Notification[] = []
   notification: Notification = new Notification()
   isLoading = false;
 
   validationErrors: { [key in keyof Notification]?: string } = {}; 
- 
+   isRtl: boolean = false;
+  subscription!: Subscription;
   AllowDelete: boolean = false; 
   AllowDeleteForOthers: boolean = false;
   path: string = '';
@@ -70,6 +75,7 @@ export class NotificationComponent {
     public ApiServ: ApiService,
     public EditDeleteServ: DeleteEditPermissionService,
     private menuService: MenuService,
+    private languageService: LanguageService,
     public activeRoute: ActivatedRoute,
     public router: Router,
     public notificationService: NotificationService,
@@ -102,6 +108,10 @@ export class NotificationComponent {
     });
     this.getAllData()
     this.getUserTypeData()
+    this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   getAllData(){
@@ -412,5 +422,6 @@ export class NotificationComponent {
   ResetFilter(){
     this.selectedUserTypeId = 0
     this.getAllData()
+
   }
 }

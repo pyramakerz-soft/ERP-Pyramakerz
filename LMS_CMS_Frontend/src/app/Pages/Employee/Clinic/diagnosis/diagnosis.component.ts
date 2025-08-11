@@ -9,11 +9,13 @@ import { TableComponent } from '../../../../Component/reuse-table/reuse-table.co
 import { ApiService } from '../../../../Services/api.service';
 import { DiagnosisService } from '../../../../Services/Employee/Clinic/diagnosis.service';
 import { Diagnosis } from '../../../../Models/Clinic/diagnosis';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-diagnosis',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent, ModalComponent, TableComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, ModalComponent, TableComponent, TranslateModule],
   templateUrl: './diagnosis.component.html',
   styleUrls: ['./diagnosis.component.css'],
 })
@@ -27,15 +29,22 @@ export class DiagnosisComponent implements OnInit {
   isModalVisible = false;
   diagnoses: Diagnosis[] = [];
   DomainName: string = '';
-
+isRtl: boolean = false;
+  subscription!: Subscription;
   constructor(
     private diagnosisService: DiagnosisService,
-    private apiService: ApiService
+    private apiService: ApiService,
+      private languageService: LanguageService
   ) {}
 
   ngOnInit(): void {
     this.DomainName = this.apiService.GetHeader(); 
     this.getDiagnoses();
+
+      this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
  
@@ -191,4 +200,21 @@ async onSearchEvent(event: { key: string; value: any }) {
         });
     }
 }
+
+GetTableHeaders(){
+   
+if(!this.isRtl){
+  return ['ID', 'Diagnosis Name', 'Date', 'Actions']
+}else{
+  return [
+  "المعرف",
+  "اسم التشخيص",
+  "التاريخ",
+  "الإجراءات"
+]
 }
+}
+
+
+}
+

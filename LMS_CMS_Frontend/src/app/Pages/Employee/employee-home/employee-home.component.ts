@@ -10,7 +10,9 @@ import { ApiService } from '../../../Services/api.service';
 import { Employee } from '../../../Models/Employee/employee';
 import { CommonModule } from '@angular/common';
 import { RevenueChartSalesComponent } from '../../../Component/Employee/Home/revenue-chart-sales/revenue-chart-sales.component';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-employee-home',
   standalone: true,
@@ -20,7 +22,7 @@ import { RevenueChartSalesComponent } from '../../../Component/Employee/Home/rev
     RevenueChartSalesComponent,
     SalesAnalyticsComponent,
     FilterHeaderComponent,
-    CommonModule
+    CommonModule , TranslateModule
   ],
   templateUrl: './employee-home.component.html',
   styleUrl: './employee-home.component.css',
@@ -29,14 +31,23 @@ export class EmployeeHomeComponent {
   tab: 'Week' | 'Month' | 'Year' | 'Custom' = 'Month';
   User_Data_After_Login :TokenData =new TokenData("", 0, 0, 0, 0, "", "", "", "", "") 
   DomainName: string = "";
+    isRtl: boolean = false;
+    subscription!: Subscription;
   employee:Employee = new Employee()
 
-  constructor(public account:AccountService, public employeeService:EmployeeService, public ApiServ:ApiService){}
+  constructor(public account:AccountService, 
+    public employeeService:EmployeeService, 
+    public ApiServ:ApiService,private languageService: LanguageService){}
 
   ngOnInit(){
     this.User_Data_After_Login = this.account.Get_Data_Form_Token(); 
     this.DomainName=this.ApiServ.GetHeader();
     this.getEmployeeByID()
+
+         this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   getEmployeeByID(){

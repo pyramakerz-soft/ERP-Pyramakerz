@@ -1,61 +1,61 @@
 <div class="flex justify-between items-center">
-    <div class="flex justify-between items-center space-x-5">
+    <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
         <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToTemplate()"></i>
-        <h1 class="primaryTxt font-semibold text-2xl leading-9">Template</h1>
+        <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Template' | translate }}</h1>
     </div>
 </div>
 
-<div class="flex justify-start space-x-2 mt-5">
+<div class="flex justify-start space-x-2 rtl:space-x-reverse mt-5">
     <div class="bg-[#EBEBEB] p-3 w-[49%] mb-4">
-        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">English Title</p>
+        <p class="font-semibold text-sm text-[#6F6F6F] mb-3"> {{ 'English Title' | translate }}</p>
         <p class="font-medium text-base text-[#1E1E1E]">{{ template.englishTitle }}</p>
     </div>
     <div class="bg-[#EBEBEB] p-3 w-[49%] mb-4">
-        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Arabic Title</p>
+        <p class="font-semibold text-sm text-[#6F6F6F] mb-3"> {{ 'Arabic Title' | translate }}</p>
         <p class="font-medium text-base text-[#1E1E1E]">{{ template.arabicTitle }}</p>
     </div>
     <div class="bg-[#EBEBEB] p-3 w-[49%] mb-4">
-        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Weight</p>
+        <p class="font-semibold text-sm text-[#6F6F6F] mb-3"> {{ 'Weight' | translate }}</p>
         <p class="font-medium text-base text-[#1E1E1E]"> {{ template.weight }}</p>
     </div>
     <div class="bg-[#EBEBEB] p-3 w-[49%] mb-4">
-        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">After Count</p>
+        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">  {{ 'After' | translate }} {{ 'Count' | translate }}</p>
         <p class="font-medium text-base text-[#1E1E1E]">{{ template.afterCount }}</p>
     </div>
 </div>
 
 <div class="">
     <div class="flex justify-between">
-        <h1 class="font-semibold text-2xl leading-9">Evaluation Template Group</h1>
+        <h1 class="font-semibold text-2xl leading-9">  {{ 'Evaluation' | translate }} {{ 'Template Group' | translate }} </h1>
         <div class="flex justify-between items-center">
             <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
             <button (click)="Create()"
                 class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
-                Create Group
+                  {{ 'Create' | translate }} {{ 'Group' | translate }}
             </button>
         </div>
     </div>
 
     <div>
         <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
-            <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
+            <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
                 <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
                     <tr>
                         <th
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            ID
+                             {{ 'ID' | translate }}
                         </th>
                         <th
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            English Title
+                             {{ 'English Title' | translate }}
                         </th>
                         <th
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            Arabic Title
+                             {{ 'Arabic Title' | translate }}
                         </th>
                         <th
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            Actions
+                             {{ 'Actions' | translate }}
                         </th>
                     </tr>
                 </thead>
@@ -64,7 +64,7 @@
                     <tr *ngIf="template.evaluationTemplateGroups.length === 0">
                         <td colspan="4"
                             class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-                            No Data Found
+                             {{ 'No Data Found' | translate }}
                         </td>
                     </tr>
 
@@ -82,7 +82,7 @@
                             {{ row.arabicTitle }}
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            <div class="flex space-x-4">
+                            <div class="flex space-x-4 rtl:space-x-reverse">
                                 <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)"
                                     (click)="Delete(row.id)">
                                     <i class="fa-regular fa-trash-can"></i>
@@ -107,25 +107,25 @@
     class="fixed top-0 left-0 right-0 z-50 flex justify-center items-center w-full h-full bg-black/50">
     <div class="bg-white rounded-2xl p-12 w-1/2 max-h-[95%] overflow-y-auto">
         <div class="flex justify-between items-center">
-            <h1 *ngIf="mode == 'Create'" class="font-semibold text-2xl leading-9">Create Template Group</h1>
-            <h1 *ngIf="mode == 'Edit'" class="font-semibold text-2xl leading-9">Edit Template Group</h1>
+            <h1 *ngIf="mode == 'Create'" class="font-semibold text-2xl leading-9">{{ 'Create' | translate }} {{ 'Template Group' | translate }}</h1>
+            <h1 *ngIf="mode == 'Edit'" class="font-semibold text-2xl leading-9"> {{ 'Edit' | translate }} {{ 'Template Group' | translate }}</h1>
             <button (click)="closeModal()" type="button"
                 class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
         </div>
 
         <div class="mt-6 mb-4 rounded-3xl flex justify-between flex-wrap">
             <div class="flex flex-col mb-4 w-[49%]">
-                <label class="mb-2 primaryTxt" for="englishTitle">English Title</label>
+                <label class="mb-2 primaryTxt" for="englishTitle"> {{ 'English Title' | translate }}</label>
                 <input id="englishTitle" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                    placeholder="Enter English Title" [(ngModel)]="group.englishTitle"
+                    placeholder="{{ 'Enter' | translate }} {{ 'English Title' | translate }}" [(ngModel)]="group.englishTitle"
                     (ngModelChange)="onInputValueChange({ field: 'englishTitle', value: $event })" />
                 <span *ngIf="validationErrors['englishTitle']" class="text-red-500 ml-3 font-normal">{{
                     validationErrors['englishTitle']}}</span>
             </div>
             <div class="flex flex-col mb-4 w-[49%]">
-                <label class="mb-2 primaryTxt" for="arabicTitle">Arabic Title</label>
+                <label class="mb-2 primaryTxt" for="arabicTitle"> {{ 'Arabic Title' | translate }}</label>
                 <input id="arabicTitle" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                    placeholder="Enter Arabic Title" [(ngModel)]="group.arabicTitle"
+                    placeholder="{{ 'Enter' | translate }} {{ 'Arabic Title' | translate }}" [(ngModel)]="group.arabicTitle"
                     (ngModelChange)="onInputValueChange({ field: 'arabicTitle', value: $event })" />
                 <span *ngIf="validationErrors['arabicTitle']"
                     class="text-red-500 ml-3 font-normal">{{validationErrors['arabicTitle'] }}</span>
@@ -134,7 +134,7 @@
         <div class="flex justify-end">
             <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
                 (click)="CreateOREdit()">
-                <span *ngIf="!isLoading">Save</span>
+                <span *ngIf="!isLoading"> {{ 'Save' | translate }}</span>
                 <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
             </button>
         </div>

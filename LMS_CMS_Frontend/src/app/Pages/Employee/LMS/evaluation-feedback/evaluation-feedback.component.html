@@ -1,6 +1,6 @@
 <div class="">
     <div class="flex justify-between">
-        <h1 class="primaryTxt font-semibold text-2xl leading-9" >{{this.path}}</h1>
+        <h1 class="primaryTxt font-semibold text-2xl leading-9" >{{this.path|translate}}</h1>
         <div class="primaryTxt flex justify-between items-center">
             <app-search [keysArray]="keysArrayEvaluator" *ngIf="mode =='Evaluated' " (searchEvent)="onSearchEvent($event)"></app-search>
             <app-search [keysArray]="keysArrayEvaluated" *ngIf="mode =='Evaluator' " (searchEvent)="onSearchEvent($event)"></app-search>
@@ -9,32 +9,32 @@
 
     <div>
         <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
-            <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
+            <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
                 <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
                     <tr>
                         <th
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            ID
+                             {{ 'ID' | translate }}
                         </th>
                         <th *ngIf="mode =='Evaluated' "
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            Evaluator
+                              {{ 'Evaluator' | translate }}
                         </th>
                         <th *ngIf="mode =='Evaluator' "
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            Evaluated
+                              {{ 'Evaluated' | translate }}
                         </th>
                         <th
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            Date
+                              {{ 'Date' | translate }}
                         </th>
                         <th
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            Name Of Evaluation
+                              {{ 'Name Of Evaluation' | translate }}
                         </th>
                         <th
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            Actions
+                              {{ 'Actions' | translate }}
                         </th>
                     </tr>
                 </thead>
@@ -43,7 +43,7 @@
                     <tr *ngIf="TableData.length === 0">
                         <td colspan="6"
                             class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-                            No Data Found
+                              {{ 'No Data Found' | translate }}
                         </td>
                     </tr>
 
@@ -67,7 +67,7 @@
                             {{ row.evaluationTemplateEnglishTitle }}
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            <div class="flex space-x-4">
+                            <div class="flex space-x-4 rtl:space-x-reverse">
                                 <button>
                                     <i class="fa-regular fa-eye" (click)="moveEvaluation(row.id)"></i>
                                 </button>

@@ -16,11 +16,13 @@ import Swal from 'sweetalert2';
 import { Classroom } from '../../../../Models/LMS/classroom';
 import { SearchStudentComponent } from '../../../../Component/Employee/search-student/search-student.component';
 import { Student } from '../../../../Models/student';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-classroom-students',
   standalone: true,
-  imports: [CommonModule, FormsModule, SearchComponent, SearchStudentComponent],
+  imports: [CommonModule, FormsModule, SearchComponent, SearchStudentComponent, TranslateModule],
   templateUrl: './classroom-students.component.html',
   styleUrl: './classroom-students.component.css'
 })
@@ -34,7 +36,8 @@ export class ClassroomStudentsComponent {
   key: string = 'id';
   value: any = '';
   keysArray: string[] = ['id', 'studentEnglishName', 'studentArabicName'];
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
   AllowEditForOthers: boolean = false;
@@ -64,7 +67,8 @@ export class ClassroomStudentsComponent {
     public activeRoute: ActivatedRoute,
     private menuService: MenuService,
     private classroomStudentService: ClassroomStudentService, 
-    public router: Router
+    public router: Router,
+    private languageService: LanguageService
   ) {}
 
   ngOnInit() {
@@ -91,6 +95,11 @@ export class ClassroomStudentsComponent {
 
     this.getStudentsByClassID()
     this.getClassByID()
+
+    this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GoToClass() {

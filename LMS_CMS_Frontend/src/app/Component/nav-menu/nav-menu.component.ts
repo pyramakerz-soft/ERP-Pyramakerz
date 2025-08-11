@@ -49,6 +49,7 @@ export class NavMenuComponent {
   
   private destroy$ = new Subject<void>();
   
+  notificationsUnSeenCount = 0
   constructor(private router: Router, public account: AccountService, public languageService: LanguageService, public ApiServ: ApiService, public octaService:OctaService,
     private translate: TranslateService, private communicationService: NewTokenService, private logOutService: LogOutService, 
     private notificationService: NotificationService, private realTimeService: RealTimeNotificationServiceService) { }
@@ -62,6 +63,18 @@ export class NavMenuComponent {
       this.GetUserInfo();
     });
     this.DomainName = this.ApiServ.GetHeader();
+    
+    this.loadUnseenNotifications()
+    // Subscribe to notification opened events
+    this.notificationService.notificationOpened$.subscribe(() => {
+      this.loadUnseenNotifications();
+    });
+  }
+
+  loadUnseenNotifications() {
+    this.notificationService.UnSeenNotificationCount(this.DomainName).subscribe(
+      data => this.notificationsUnSeenCount = data
+    );
   }
 
   getAllTokens(): void {
@@ -401,13 +414,19 @@ export class NavMenuComponent {
         this.notificationByID = data
         document.getElementById("NotificationModal")?.classList.remove("hidden");
         document.getElementById("NotificationModal")?.classList.add("flex");
+        // call the subscribe again for the other pages
+        this.notificationService.notifyNotificationOpened(); 
       }
     )
   } 
 
-  LinkOpened(notificationSharedID:number){ 
-    this.notificationService.LinkOpened(notificationSharedID, this.DomainName).subscribe(
+  LinkOpened(notificationShared:Notification){ 
+    this.notificationService.LinkOpened(notificationShared.id, this.DomainName).subscribe(
       data => { 
+        this.loadUnseenNotifications() 
+        // call the subscribe again for the other pages
+        this.notificationService.notifyNotificationOpened(); 
+        notificationShared.seenOrNot = true
       }
     )
   } 

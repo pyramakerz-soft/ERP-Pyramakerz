@@ -1,0 +1,18 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace LMS_CMS_BL.DTO.SocialWorker
+{
+    public class ConductTypeEditDTO
+    {
+        public long ID { get; set; }
+        public string en_name { get; set; }
+        public string ar_name { get; set; }
+        public long ConductLevelID { get; set; }
+        public List<long> Sectiondids { get; set; }
+
+    }
+}

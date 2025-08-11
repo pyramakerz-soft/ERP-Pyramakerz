@@ -11,5 +11,6 @@ namespace LMS_CMS_BL.DTO.SocialWorker
         public string en_name { get; set; }
         public string ar_name { get; set; }
         public long ConductLevelID { get; set; }
+        public List<long> Sectiondids { get; set; }
     }
 }

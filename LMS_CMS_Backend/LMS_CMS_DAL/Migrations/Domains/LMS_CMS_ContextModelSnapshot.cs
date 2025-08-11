@@ -3215,6 +3215,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<long?>("DeletedByOctaId")
                         .HasColumnType("bigint");
 
+                    b.Property<long?>("DeletedByParentID")
+                        .HasColumnType("bigint");
+
                     b.Property<long?>("DeletedByUserId")
                         .HasColumnType("bigint");
 
@@ -3260,12 +3263,17 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<long?>("UpdatedByOctaId")
                         .HasColumnType("bigint");
 
+                    b.Property<long?>("UpdatedByParentID")
+                        .HasColumnType("bigint");
+
                     b.Property<long?>("UpdatedByUserId")
                         .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ClassRoomID");
+
+                    b.HasIndex("DeletedByParentID");
 
                     b.HasIndex("DeletedByUserId");
 
@@ -3278,6 +3286,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.HasIndex("SchoolId");
 
                     b.HasIndex("StudentId");
+
+                    b.HasIndex("UpdatedByParentID");
 
                     b.HasIndex("UpdatedByUserId");
 
@@ -13751,6 +13761,10 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .WithMany()
                         .HasForeignKey("ClassRoomID");
 
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Parent", "DeletedByParent")
+                        .WithMany()
+                        .HasForeignKey("DeletedByParentID");
+
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "DeletedByEmployee")
                         .WithMany()
                         .HasForeignKey("DeletedByUserId");
@@ -13775,6 +13789,10 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .WithMany()
                         .HasForeignKey("StudentId");
 
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Parent", "UpdatedByParent")
+                        .WithMany()
+                        .HasForeignKey("UpdatedByParentID");
+
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "UpdatedByEmployee")
                         .WithMany()
                         .HasForeignKey("UpdatedByUserId");
@@ -13782,6 +13800,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Navigation("Classroom");
 
                     b.Navigation("DeletedByEmployee");
+
+                    b.Navigation("DeletedByParent");
 
                     b.Navigation("Grade");
 
@@ -13794,6 +13814,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Navigation("Student");
 
                     b.Navigation("UpdatedByEmployee");
+
+                    b.Navigation("UpdatedByParent");
                 });
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.ClinicModule.StudentHygieneTypes", b =>

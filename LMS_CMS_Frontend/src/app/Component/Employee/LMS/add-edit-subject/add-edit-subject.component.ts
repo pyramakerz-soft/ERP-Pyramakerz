@@ -14,11 +14,13 @@ import { School } from '../../../../Models/school';
 import { ApiService } from '../../../../Services/api.service';
 import { SubjectCategory } from '../../../../Models/LMS/subject-category';
 import Swal from 'sweetalert2';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-add-edit-subject',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
   templateUrl: './add-edit-subject.component.html',
   styleUrl: './add-edit-subject.component.css'
 })
@@ -35,8 +37,10 @@ export class AddEditSubjectComponent {
   Grades: Grade[] = []
   subjectCategories:SubjectCategory[] = []
   isLoading = false;
+    isRtl: boolean = false;
+    subscription!: Subscription;
 
-  constructor(public subjectService: SubjectService, public subjectCategoryService: SubjectCategoryService, public dialogRef: MatDialogRef<AddEditSubjectComponent>, 
+  constructor( private languageService: LanguageService,public subjectService: SubjectService, public subjectCategoryService: SubjectCategoryService, public dialogRef: MatDialogRef<AddEditSubjectComponent>, 
     public schoolService: SchoolService, public sectionService:SectionService, public gradeService:GradeService, public ApiServ:ApiService,
     @Inject(MAT_DIALOG_DATA) public data: any) {
       this.editSubject = data.editSubject
@@ -52,6 +56,10 @@ export class AddEditSubjectComponent {
     }
     this.getSubjectCategoryData() 
     this.getSchools()
+        this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetSubjectById(subjectId: number) {

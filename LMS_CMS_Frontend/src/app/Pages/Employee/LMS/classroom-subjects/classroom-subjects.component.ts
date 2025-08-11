@@ -15,11 +15,13 @@ import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
 import { Employee } from '../../../../Models/Employee/employee';
 import { EmployeeService } from '../../../../Services/Employee/employee.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-classroom-subjects',
   standalone: true,
-  imports: [SearchComponent, CommonModule, FormsModule],
+  imports: [SearchComponent, CommonModule, FormsModule, TranslateModule],
   templateUrl: './classroom-subjects.component.html',
   styleUrl: './classroom-subjects.component.css'
 })
@@ -36,7 +38,8 @@ export class ClassroomSubjectsComponent {
 
   AllowEdit: boolean = false;
   AllowEditForOthers: boolean = false; 
-  
+  isRtl: boolean = false;
+  subscription!: Subscription;  
   ClassSubjects:ClassroomSubject[] = []
   ClassSubject:ClassroomSubject = new ClassroomSubject()
   Employees:Employee[] = []
@@ -53,7 +56,8 @@ export class ClassroomSubjectsComponent {
     private menuService: MenuService,
     private classroomSubjectService: ClassroomSubjectService,
     private employeeService: EmployeeService,
-    public router: Router
+    public router: Router,
+    private languageService: LanguageService
   ) {}
 
   ngOnInit() {
@@ -77,6 +81,10 @@ export class ClassroomSubjectsComponent {
     this.DomainName = this.ApiServ.GetHeader(); 
 
     this.getSubjectsByClassID()
+        this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GoToClass() {

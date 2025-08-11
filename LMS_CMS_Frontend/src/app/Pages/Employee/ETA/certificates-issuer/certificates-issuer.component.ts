@@ -12,11 +12,13 @@ import { CertificatesIssuer } from '../../../../Models/ETA/certificates-issuer';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SearchComponent } from '../../../../Component/search/search.component';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-certificates-issuer',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent , TranslateModule],
   templateUrl: './certificates-issuer.component.html',
   styleUrl: './certificates-issuer.component.css'
 })
@@ -46,7 +48,8 @@ export class CertificatesIssuerComponent {
   isDeleting:boolean = false;
   viewClassStudents:boolean = false;
   viewStudents:boolean = false;
-
+isRtl: boolean = false;
+  subscription!: Subscription;
   isLoading = false;
 
   constructor(
@@ -56,7 +59,8 @@ export class CertificatesIssuerComponent {
     private menuService: MenuService,  
     public activeRoute: ActivatedRoute, 
     public certificatesIssuerService: CertificatesIssuerService, 
-    public router: Router
+    public router: Router,
+    private languageService: LanguageService
   ) {}
 
   ngOnInit() {
@@ -80,6 +84,11 @@ export class CertificatesIssuerComponent {
         this.AllowEditForOthers = settingsPage.allow_Edit_For_Others;
       }
     });
+
+         this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetAllData(pageNumber:number, pageSize:number){

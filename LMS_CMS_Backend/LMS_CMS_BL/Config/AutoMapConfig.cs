@@ -757,6 +757,10 @@ namespace LMS_CMS_BL.Config
 
             CreateMap<MedicalHistoryAddByParentDTO, MedicalHistory>();
             CreateMap<MedicalHistory, MedicalHistoryGetByParentDTO>()
+                .ForMember(dest => dest.School, opt => opt.MapFrom(src => src.School.Name))
+                .ForMember(dest => dest.Grade, opt => opt.MapFrom(src => src.Grade.Name))
+                .ForMember(dest => dest.ClassRoom, opt => opt.MapFrom(src => src.Classroom.Name))
+                .ForMember(dest => dest.Student, opt => opt.MapFrom(src => src.Student.en_name))
                 .ForMember(dest => dest.en_name, opt => opt.MapFrom(src => src.InsertedByParent.en_name));
             CreateMap<MedicalHistoryPutByParentDTO, MedicalHistory>();
 
@@ -1196,6 +1200,23 @@ namespace LMS_CMS_BL.Config
 
             CreateMap<ConductLevel, GonductLevelGetDTO>();
             CreateMap<ConductLevelAddDTO, ConductLevel>();
+
+            CreateMap<Conduct, ConductGetDTO>()
+                .ForMember(dest => dest.ConductTypeEnName, opt => opt.MapFrom(src => src.ConductType.en_name))
+                .ForMember(dest => dest.ConductTypeArName, opt => opt.MapFrom(src => src.ConductType.ar_name))
+                .ForMember(dest => dest.ProcedureTypeName, opt => opt.MapFrom(src => src.ProcedureType.Name))
+                .ForMember(dest => dest.StudentArName, opt => opt.MapFrom(src => src.Student.ar_name))
+                .ForMember(dest => dest.StudentEnName, opt => opt.MapFrom(src => src.Student.en_name));
+
+            CreateMap<ConductAddDTO, Conduct>();
+            CreateMap<ConductEditDTO, Conduct>();
+
+            CreateMap<ConductType, ConductTypeGetDTO>();
+            CreateMap<ConductTypeAddDTO, ConductType>();
+            CreateMap<ConductTypeEditDTO, ConductType>();
+
+            CreateMap<ProcedureType, ProcedureTypeGetDTO>();
+            CreateMap<ProcedureTypeAddDTO, ProcedureType>();
 
         }
     } 

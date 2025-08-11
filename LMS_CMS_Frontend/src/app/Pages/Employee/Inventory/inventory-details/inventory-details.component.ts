@@ -43,11 +43,13 @@ import { School } from '../../../../Models/school';
 import { SchoolService } from '../../../../Services/Employee/school.service';
 import { SchoolPCs } from '../../../../Models/Inventory/school-pcs';
 import { SchoolPCsService } from '../../../../Services/Employee/Inventory/school-pcs.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-inventory-details',
   standalone: true,
-  imports: [FormsModule, CommonModule, PdfPrintComponent, SearchDropdownComponent],
+  imports: [FormsModule, CommonModule, PdfPrintComponent, SearchDropdownComponent , TranslateModule],
   templateUrl: './inventory-details.component.html',
   styleUrl: './inventory-details.component.css',
 })
@@ -100,7 +102,8 @@ export class InventoryDetailsComponent {
   SelectedCategoryId: number | null = null;
   SelectedSubCategoryId: number | null = null;
   SelectedSopItem: ShopItem | null = null;
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   TableData: InventoryDetails[] = [];
   NewDetailsWhenEdit: InventoryDetails[] = [];
   Item: InventoryDetails = new InventoryDetails();
@@ -167,7 +170,8 @@ export class InventoryDetailsComponent {
     public InventoryFlagServ: InventoryFlagService,
     public reportsService: ReportsService,
     public SchoolServ: SchoolService,
-    public schoolpcsServ: SchoolPCsService
+    public schoolpcsServ: SchoolPCsService,
+      private languageService: LanguageService
   ) { }
   async ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -243,6 +247,11 @@ export class InventoryDetailsComponent {
         this.AllowEditForOthers = settingsPage.allow_Edit_For_Others;
       }
     });
+
+         this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   moveToMaster() {

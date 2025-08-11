@@ -1,19 +1,19 @@
 <div class="flex justify-between items-center mb-5">
-    <div class="flex justify-between items-center space-x-5">
+    <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
         <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToTimeTable()"></i>
         <h1 class="font-semibold text-2xl leading-9">{{TimeTableName}}</h1>
     </div>
 
     <button (click)="Save()"
         class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
-        <span *ngIf="!isLoading">Save</span>
+        <span *ngIf="!isLoading"> {{ 'Save' | translate }}</span>
         <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
     </button>
 </div>
 
 <div>
-    <label class="block mb-2 text-sm font-medium text-gray-900">Card Replace</label>
-    <div class="p-2 border border-dashed border-blue-500 bg-blue-50 rounded min-h-[50px] flex space-x-1"
+    <label class="block mb-2 text-sm font-medium text-gray-900"> {{ 'Card Replace' | translate }}</label>
+    <div class="p-2 border border-dashed border-blue-500 bg-blue-50 rounded min-h-[50px] flex space-x-1 rtl:space-x-reverse"
         (dragover)="onDragOver($event)" (drop)="onDropHolding($event)">
         <div *ngFor="let session of HoldingSessionsSession" draggable="true"
             (dragstart)="onDragStartHolding($event, session)"
@@ -23,7 +23,7 @@
                 <div class="text-gray-500 text-xs">{{ subject.teacherName }}</div>
             </div>
         </div>
-        <div *ngIf="HoldingSessionsSession.length === 0" class="text-gray-500">No Session replaced</div>
+        <div *ngIf="HoldingSessionsSession.length === 0" class="text-gray-500"> {{ 'No Session replaced' | translate }}</div>
     </div>
 </div>
 
@@ -32,14 +32,14 @@
         <div class="bg-gray-300 text-center font-bold py-2">{{ day.dayName }}</div>
 
         <div *ngFor="let grade of day.grades" class="p-2">
-            <div class="text-md font-semibold mb-1">Grade: {{ grade.gradeName }}</div>
+            <div class="text-md font-semibold mb-1">{{ 'Grade' | translate }}: {{ grade.gradeName }}</div>
 
-            <table class="table-auto w-full text-sm text-left border-collapse border border-gray-300">
+            <table class="table-auto w-full text-sm text-left rtl:text-right border-collapse border border-gray-300">
                 <thead class="bg-gray-100">
                     <tr>
-                        <th class="border p-2">Class Name</th>
+                        <th class="border p-2">{{ 'Class Name' | translate }}</th>
                         <th class="border p-2" *ngFor="let i of [].constructor(MaxPeriods); let period = index">
-                            Session {{ period + 1 }}
+                             {{ 'Session' | translate }} {{ period + 1 }}
                         </th>
                     </tr>
                 </thead>

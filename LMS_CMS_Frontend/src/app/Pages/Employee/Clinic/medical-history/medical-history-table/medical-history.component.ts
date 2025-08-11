@@ -13,20 +13,26 @@ import { StudentService } from '../../../../../Services/student.service';
 import { DoctorMedicalHistory } from '../../../../../Models/Clinic/MedicalHistory';
 import { SearchComponent } from '../../../../../Component/search/search.component';
 import { MedicalHistoryModalComponent } from "../medical-history-modal/medical-history-modal.component";
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-medical-history',
   standalone: true,
-  imports: [FormsModule, CommonModule, TableComponent, SearchComponent, MedicalHistoryModalComponent ],
+  imports: [FormsModule, CommonModule, TableComponent, SearchComponent, MedicalHistoryModalComponent, TranslateModule ],
   templateUrl: './medical-history.component.html',
   styleUrls: ['./medical-history.component.css'],
 })
 export class MedicalHistoryComponent implements OnInit {
   headers: string[] = ['ID', 'School', 'Grade', 'Class', 'Student', 'Details', 'Permanent Drug', 'Date', 'Actions'];
+  headersarabic: string[] = ['المعرف', 'المدرسة', 'الصف', 'الفصل', 'الطالب', 'التفاصيل', 'الدواء الدائم', 'التاريخ', 'الإجراءات'];
+
   keys: string[] = ['id', 'school', 'grade', 'classRoom', 'student', 'details', 'permanentDrug', 'insertedAt'];
   keysArray: string[] = ['id', 'school', 'grade', 'classRoom', 'student', 'details', 'permanentDrug'];
   medicalHistories: DoctorMedicalHistory[] = [];
   isModalVisible = false;
+  isRtl: boolean = false;
+    subscription!: Subscription;
     searchKey: string = 'id';
   searchValue: string = '';
   
@@ -36,11 +42,16 @@ export class MedicalHistoryComponent implements OnInit {
     private schoolService: SchoolService,
     private gradeService: GradeService,
     private classroomService: ClassroomService,
-    private studentService: StudentService
+    private studentService: StudentService,
+      private languageService: LanguageService
   ) {}
 
   ngOnInit(): void {
     this.loadMedicalHistories();
+     this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   async onSearchEvent(event: { key: string, value: any }) {
@@ -131,4 +142,18 @@ deleteMedicalHistory(row: any) {
     }
   });
 }
+
+
+GetTableHeaders(){
+   
+if(!this.isRtl){
+  return this.headers
+}else{
+  return this.headersarabic
+}
+}
+
+
+
+
 }

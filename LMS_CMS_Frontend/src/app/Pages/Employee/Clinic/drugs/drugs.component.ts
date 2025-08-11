@@ -9,7 +9,9 @@ import { TableComponent } from '../../../../Component/reuse-table/reuse-table.co
 import { ApiService } from '../../../../Services/api.service';
 import { DrugService } from '../../../../Services/Employee/Clinic/drug.service';
 import { Drug } from '../../../../Models/Clinic/drug';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-drugs',
   standalone: true,
@@ -19,6 +21,7 @@ import { Drug } from '../../../../Models/Clinic/drug';
     SearchComponent,
     ModalComponent,
     TableComponent,
+    TranslateModule
   ],
   templateUrl: './drugs.component.html',
   styleUrls: ['./drugs.component.css'],
@@ -33,15 +36,22 @@ export class DrugsComponent implements OnInit {
   isModalVisible = false;
   drugs: Drug[] = [];
   DomainName: string = '';
-
+ isRtl: boolean = false;
+  subscription!: Subscription;
   constructor(
     private drugService: DrugService,
-    private apiService: ApiService
+    private apiService: ApiService ,
+      private languageService: LanguageService
   ) {}
 
   ngOnInit(): void {
     this.DomainName = this.apiService.GetHeader();
     this.getDrugs();
+
+     this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   async getDrugs() {
@@ -197,4 +207,14 @@ export class DrugsComponent implements OnInit {
       });
     }
   }
+GetTableHeaders(){
+   
+if(!this.isRtl){
+  return ['ID', 'Drug Name', 'Date', 'Actions']
+}else{
+  return ['المعرف', 'اسم الدواء', 'التاريخ', 'الإجراءات']
+}
+}
+
+
 }

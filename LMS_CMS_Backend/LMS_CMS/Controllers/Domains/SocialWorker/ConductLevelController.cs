@@ -89,7 +89,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
                 return NotFound();
             }
 
-            ConductLevel Dto = mapper.Map<ConductLevel>(conductLevel);
+            GonductLevelGetDTO Dto = mapper.Map<GonductLevelGetDTO>(conductLevel);
 
             return Ok(Dto);
         }

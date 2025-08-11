@@ -9,11 +9,13 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { OrderStateService } from '../../../../Services/Employee/E-Commerce/order-state.service';
 import { OrderState } from '../../../../Models/E-Commerce/order-state';  
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-order-history',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
   templateUrl: './order-history.component.html',
   styleUrl: './order-history.component.css'
 })
@@ -22,7 +24,8 @@ export class OrderHistoryComponent {
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   UserID: number = 0; 
   DomainName: string = ""; 
-  
+   isRtl: boolean = false;
+  subscription!: Subscription; 
   orders: Order[] = []
   orderStates: OrderState[] = []
   stateID: number = 0; 
@@ -30,7 +33,12 @@ export class OrderHistoryComponent {
   filteredOrders: Order[] = [] 
   searchTerm: string = '';
 
-  constructor(public account: AccountService, public ApiServ: ApiService, private router: Router, private orderrService: OrderService, private orderrStateService: OrderStateService){}
+  constructor(public account: AccountService, 
+    public ApiServ: ApiService, 
+    private router: Router, 
+    private orderrService: OrderService, 
+    private orderrStateService: OrderStateService,
+      private languageService: LanguageService){}
   
   ngOnInit(){
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -39,7 +47,11 @@ export class OrderHistoryComponent {
     this.DomainName = this.ApiServ.GetHeader();
 
     this.getOrders() 
-    this.getOrderStates() 
+    this.getOrderStates()
+      this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';     
   }
 
   getOrders(stateID?:number) {
@@ -72,6 +84,7 @@ export class OrderHistoryComponent {
     this.orderrStateService.Get(this.DomainName).subscribe(
       data => {
         this.orderStates = data
+       
       }
     ) 
   } 

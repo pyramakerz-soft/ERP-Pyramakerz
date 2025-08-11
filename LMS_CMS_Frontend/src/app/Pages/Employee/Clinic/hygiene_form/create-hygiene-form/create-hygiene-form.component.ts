@@ -17,11 +17,14 @@ import { Student } from '../../../../../Models/student';
 import { SchoolService } from '../../../../../Services/Employee/school.service';
 import { StudentService } from '../../../../../Services/student.service';
 import { firstValueFrom } from 'rxjs';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-create-hygiene-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, HygieneFormTableComponent],
+  imports: [CommonModule, FormsModule, HygieneFormTableComponent, 
+    TranslateModule],
   templateUrl: './create-hygiene-form.component.html',
   styleUrls: ['./create-hygiene-form.component.css'],
 })
@@ -32,7 +35,8 @@ export class CreateHygieneFormComponent implements OnInit {
   students: Student[] = [];
   hygieneTypes: HygieneTypes[] = [];
   errorMessage: string | null = null;
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   selectedSchool: number | null = null;
   selectedGrade: number | null = null;
   selectedClass: number | null = null;
@@ -49,12 +53,17 @@ export class CreateHygieneFormComponent implements OnInit {
     private schoolService: SchoolService,
     private gradeService: GradeService,
     private classroomService: ClassroomService,
-    private studentService: StudentService
+    private studentService: StudentService,
+      private languageService: LanguageService
   ) {}
 
   ngOnInit(): void {
     this.loadHygieneTypes();
     this.loadSchools();
+         this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
    
   moveToHygieneForm() {

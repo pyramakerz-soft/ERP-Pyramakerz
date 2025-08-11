@@ -21,11 +21,13 @@ import { Grade } from '../../../../Models/LMS/grade';
 import { School } from '../../../../Models/school';
 import { GradeService } from '../../../../Services/Employee/LMS/grade.service';
 import { SchoolService } from '../../../../Services/Employee/school.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-assignment-student',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, TranslateModule],
   templateUrl: './assignment-student.component.html',
   styleUrl: './assignment-student.component.css'
 })
@@ -35,7 +37,8 @@ export class AssignmentStudentComponent {
 
   classes: Classroom[] = []
   TableData: AssignmentStudent[] = [];
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   DomainName: string = '';
   UserID: number = 0;
 
@@ -76,7 +79,8 @@ export class AssignmentStudentComponent {
     private SchoolServ: SchoolService,
     private GradeServ: GradeService,
     public classServ: ClassroomService,
-    public assignmentServ: AssignmentService
+    public assignmentServ: AssignmentService,
+    private languageService: LanguageService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -89,6 +93,11 @@ export class AssignmentStudentComponent {
     this.GetAssignment()
     this.GetAllData(this.CurrentPage, this.PageSize)
     this.getAllSchools()
+    
+    this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetAssignment() {

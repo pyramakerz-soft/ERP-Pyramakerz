@@ -15,11 +15,13 @@ import { DomainService } from '../../../../Services/Employee/domain.service';
 import { EvaluationTemplateGroupService } from '../../../../Services/Employee/LMS/evaluation-template-group.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-evaluation-template-group-question',
   standalone: true,
-  imports: [CommonModule , FormsModule,SearchComponent],
+  imports: [CommonModule , FormsModule,SearchComponent , TranslateModule],
   templateUrl: './evaluation-template-group-question.component.html',
   styleUrl: './evaluation-template-group-question.component.css'
 })
@@ -30,7 +32,8 @@ export class EvaluationTemplateGroupQuestionComponent {
    AllowDelete: boolean = false;
    AllowEditForOthers: boolean = false;
    AllowDeleteForOthers: boolean = false;
- 
+  isRtl: boolean = false;
+  subscription!: Subscription; 
    DomainName: string = '';
    UserID: number = 0;
  
@@ -60,6 +63,7 @@ export class EvaluationTemplateGroupQuestionComponent {
      public ApiServ: ApiService,
      public questionsServ: EvaluationTemplateGroupQuestionService ,
      public GroupServ: EvaluationTemplateGroupService ,
+    private languageService: LanguageService
    ) {}
    ngOnInit() {
      this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -80,6 +84,11 @@ export class EvaluationTemplateGroupQuestionComponent {
      });
      this.GroupId = Number(this.activeRoute.snapshot.paramMap.get('id'));
      this.GetGroupData();
+
+    this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
    }
  
    GetGroupData() {
