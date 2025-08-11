@@ -51,6 +51,7 @@
     </div>
 </div>
 
+
 <div *ngIf="showTable" class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
     <table class="w-full table inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
         <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
@@ -71,7 +72,7 @@
                 </ng-container>
                 
                 <th rowspan="2" class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Total
+                    Grand Total
                 </th>
             </tr>
             
@@ -119,19 +120,29 @@
                 <!-- Store Data -->
                 <ng-container *ngFor="let store of getStoreColumns()">
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ getStoreData(item, store).quantity ?? '-' }}
+                        {{ getStoreData(item, store).quantity ?? '0' }}
                     </td>
                     <td *ngIf="showPriceColumn()" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ (getStoreData(item, store).price | number:'1.2-2') ?? '-' }}
+                        {{ (getStoreData(item, store).price | number:'1.2-2') ?? '0' }}
                     </td>
                     <td *ngIf="showPriceColumn()" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ (getStoreData(item, store).value | number:'1.2-2') ?? '-' }}
+                        {{ (getStoreData(item, store).value | number:'1.2-2') ?? '0' }}
                     </td>
                 </ng-container>
 
-                <!-- Grand Total -->
+                <!-- Item Total -->
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 font-medium">
-                    {{ getItemTotal(item) | number:'1.2-2' }}
+                    -
+                </td>
+            </tr>
+
+            <!-- Grand Total Summary Row - Simplified -->
+            <tr *ngIf="reportData?.data?.length && reportData?.grandTotals" class="bg-[#E5E5E5] font-semibold">
+                <td [attr.colspan]="getColumnCount() - 1" class="py-3 px-4 text-right"></td>
+                <td class="py-3 px-4 border border-[#EAECF0] font-bold">
+                    {{ reportType === 'QuantityOnly' ? 
+                       (reportData?.grandTotals?.TotalQuantity | number:'1.0-0') : 
+                       (reportData?.grandTotals?.TotalValue | number:'1.2-2') }}
                 </td>
             </tr>
         </tbody>

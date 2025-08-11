@@ -160,6 +160,24 @@ getColumnCount(): number {
     return Array.from(stores);
   }
 
+getStoreTotalQuantity(storeName: string): number {
+  if (!this.reportData?.data) return 0;
+  
+  return this.reportData.data.reduce((total, item) => {
+    const storeData = this.getStoreData(item, storeName);
+    return total + (storeData.quantity ?? 0);
+  }, 0);
+}
+
+getStoreTotalValue(storeName: string): number {
+  if (!this.reportData?.data) return 0;
+  
+  return this.reportData.data.reduce((total, item) => {
+    const storeData = this.getStoreData(item, storeName);
+    return total + (storeData.value ?? 0);
+  }, 0);
+}
+
 getStoreData(item: StoreBalanceItem, storeName: string): {
   quantity: number | null;
   price: number | null;
