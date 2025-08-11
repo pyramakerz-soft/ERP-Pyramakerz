@@ -51,7 +51,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
 
             List<MedicalHistory> medicalHistories = await Unit_Of_Work.medicalHistory_Repository.Select_All_With_IncludesById<MedicalHistory>(
                     d => d.IsDeleted != true && 
-                    (d.InsertedByUserId != null || d.InsertedByUserId != 0),
+                    (d.InsertedByUserId != null && d.InsertedByUserId != 0) &&
+                    (d.InsertedByParentID == null || d.InsertedByParentID == 0),
                     query => query.Include(h => h.Classroom),
                     query => query.Include(h => h.School),
                     query => query.Include(h => h.Grade),
@@ -106,7 +107,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
 
             List<MedicalHistory> medicalHistories = await Unit_Of_Work.medicalHistory_Repository.Select_All_With_IncludesById<MedicalHistory>(
                 m => m.IsDeleted != true && 
-                (m.InsertedByParentID != null || m.InsertedByParentID != 0),
+                (m.InsertedByParentID != null && m.InsertedByParentID != 0) && 
+                (m.InsertedByUserId == null || m.InsertedByUserId == 0),
                 query => query.Include(x => x.InsertedByParent));
 
             if (medicalHistories == null || medicalHistories.Count == 0)
@@ -156,8 +158,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
 
             MedicalHistory medicalHistory = await Unit_Of_Work.medicalHistory_Repository.FindByIncludesAsync(
                     m => m.IsDeleted != true && 
-                    m.Id == id &&
-                    (m.InsertedByUserId != null || m.InsertedByUserId != 0), 
+                    m.InsertedByUserId == id, 
                     query => query.Include(m => m.School),
                     query => query.Include(m => m.Grade),
                     query => query.Include(m => m.Classroom),
@@ -209,8 +210,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             }
 
             MedicalHistory medicalHistory = await Unit_Of_Work.medicalHistory_Repository.FindByIncludesAsync(
-                x => x.Id == id && x.IsDeleted != true &&
-                (x.InsertedByParentID != null || x.InsertedByParentID != 0),
+                x => x.InsertedByParentID == id && x.IsDeleted != true,
                 query => query.Include(m => m.School),
                 query => query.Include(m => m.Grade),
                 query => query.Include(m => m.Classroom),
@@ -218,7 +218,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                 query => query.Include(x => x.InsertedByParent)
             );
 
-            if (medicalHistory == null || medicalHistory.IsDeleted == true)
+            if (medicalHistory == null)
             {
                 return NotFound("No Medical History With this ID");
             }
@@ -399,16 +399,43 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                 return BadRequest("Medical History cannot be null");
             }
 
+            School school = await Unit_Of_Work.school_Repository.Select_By_IdAsync(historyAddDTO.SchoolId);
+
+            if (school == null || school.IsDeleted == true)
+            {
+                return NotFound("No School With this ID");
+            }
+
+            Grade grade = await Unit_Of_Work.grade_Repository.Select_By_IdAsync(historyAddDTO.GradeId);
+
+            if (grade == null || grade.IsDeleted == true)
+            {
+                return NotFound("No Grade With this ID");
+            }
+
+            Classroom classroom = await Unit_Of_Work.classroom_Repository.Select_By_IdAsync(historyAddDTO.ClassRoomID);
+
+            if (classroom == null || classroom.IsDeleted == true)
+            {
+                return NotFound("No Classroom With this ID");
+            }
+
+            Student student = await Unit_Of_Work.student_Repository.Select_By_IdAsync(historyAddDTO.StudentId);
+
+            if (student == null || student.IsDeleted == true)
+            {
+                return NotFound("No Student With this ID");
+            }
+
             MedicalHistory medicalHistory = _mapper.Map<MedicalHistory>(historyAddDTO);
+
+
+
             string enNameExists = userId.ToString();
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             medicalHistory.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
 
-            if (userTypeClaim == "octa")
-            {
-                medicalHistory.InsertedByOctaId = userId;
-            }
-            else if ( userTypeClaim == "parent")
+            if ( userTypeClaim == "parent")
             {
                 medicalHistory.InsertedByParentID = userId;
             }
@@ -975,7 +1002,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             string mainImageLinkExists = medicalHistory.SecReport;
             string enNameExists = userId.ToString();
 
-            if (userTypeClaim == "employee" || userTypeClaim == "parent")
+            if (userTypeClaim == "parent")
             {
                 IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Medical History", roleId, userId, medicalHistory);
                 if (accessCheck != null)
@@ -1348,21 +1375,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             medicalHistory.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
             
-            if (userTypeClaim == "octa")
+            if (userTypeClaim == "parent")
             {
-                medicalHistory.UpdatedByOctaId = userId;
-                if (medicalHistory.UpdatedByUserId != null)
-                {
-                    medicalHistory.UpdatedByUserId = null;
-                }
-            }
-            else if (userTypeClaim == "employee" || userTypeClaim == "parent")
-            {
-                medicalHistory.UpdatedByUserId = userId;
-                if (medicalHistory.UpdatedByOctaId != null)
-                {
-                    medicalHistory.UpdatedByOctaId = null;
-                }
+                medicalHistory.UpdatedByParentID = userId;
             }
 
             Unit_Of_Work.medicalHistory_Repository.Update(medicalHistory);
@@ -1407,7 +1422,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                     medicalHistory.DeletedByUserId = null;
                 }
             }
-            else if (userTypeClaim == "employee" || userTypeClaim == "parent")
+            else if (userTypeClaim == "employee")
             {
                 medicalHistory.DeletedByUserId = userId;
                 if (medicalHistory.DeletedByOctaId != null)
@@ -1415,8 +1430,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                     medicalHistory.DeletedByOctaId = null;
                 }
             }
-            
-            Unit_Of_Work.medicalHistory_Repository.Update(medicalHistory);
+
+                Unit_Of_Work.medicalHistory_Repository.Update(medicalHistory);
             Unit_Of_Work.SaveChanges();
             
             return Ok("Medical History Deleted Successfully");
