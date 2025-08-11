@@ -17,11 +17,13 @@ import { SearchComponent } from '../../../../Component/search/search.component';
 import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
 import { Employee } from '../../../../Models/Employee/employee';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-floor',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './floor.component.html',
   styleUrl: './floor.component.css',
 })
@@ -29,7 +31,8 @@ export class FloorComponent {
   keysArray: string[] = ['id', 'name', 'floorMonitorName'];
   key: string = 'id';
   value: any = '';
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   monitorrData: Employee[] = [];
   floorData: Floor[] = [];
   floor: Floor = new Floor();
@@ -69,7 +72,8 @@ export class FloorComponent {
     public activeRoute: ActivatedRoute,
     public floorService: FloorService,
     public employeeService: EmployeeService,
-    public router: Router
+    public router: Router,
+    private languageService: LanguageService
   ) {}
 
   ngOnInit() {
@@ -99,6 +103,11 @@ export class FloorComponent {
         this.AllowEditForOthers = settingsPage.allow_Edit_For_Others;
       }
     });
+
+    this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   getBuildingData() {

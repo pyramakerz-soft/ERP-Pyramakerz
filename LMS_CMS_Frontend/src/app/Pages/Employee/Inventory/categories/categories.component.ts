@@ -14,11 +14,13 @@ import { DomainService } from '../../../../Services/Employee/domain.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { InventoryCategoryService } from '../../../../Services/Employee/Inventory/inventory-category.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-categories',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent , TranslateModule],
   templateUrl: './categories.component.html',
   styleUrl: './categories.component.css'
 })
@@ -48,7 +50,8 @@ export class CategoriesComponent {
 
   isModalVisible: boolean = false;
   mode: string = '';
-
+ isRtl: boolean = false;
+  subscription!: Subscription;
   path: string = '';
   key: string = 'id';
   value: any = '';
@@ -67,7 +70,8 @@ export class CategoriesComponent {
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
-    public InventoryCategoryServ: InventoryCategoryService
+    public InventoryCategoryServ: InventoryCategoryService,
+     private languageService: LanguageService
   ) { }
 
   ngOnInit() {
@@ -89,6 +93,10 @@ export class CategoriesComponent {
     });
 
     this.GetAllData();
+      this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';    
   }
 
   GetAllData() {
@@ -154,6 +162,7 @@ export class CategoriesComponent {
       this.isLoading = true
       if (this.mode == 'Create') {
         this.InventoryCategoryServ.Add(this.category, this.DomainName).subscribe((d) => {
+          this.GetAllData();
           this.closeModal();
           this.isLoading = false
         },
@@ -170,6 +179,7 @@ export class CategoriesComponent {
       }
       if (this.mode == 'Edit') {
         this.InventoryCategoryServ.Edit(this.category, this.DomainName).subscribe((d) => {
+          this.GetAllData();
           this.closeModal();
           this.isLoading = false
         },
@@ -189,7 +199,6 @@ export class CategoriesComponent {
 
   closeModal() {
     this.isModalVisible = false;
-    this.GetAllData();
   }
 
   openModal() {

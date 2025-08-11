@@ -1,60 +1,60 @@
 <div class="flex justify-between items-center">
-    <h1 class="primaryTxt font-semibold text-2xl leading-9">Daily Performance</h1>
+    <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ 'Daily Performance' | translate }}</h1>
     <div class="flex justify-between items-center ">
         <button (click)="Create()"
             class="secondaryBg text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2">
-            Create Daily Performance
+           {{ 'Create' | translate }} {{ 'Daily Performance' | translate }}
         </button>
     </div>
 </div>
 
-<div class="flex justify-start items-center space-x-4">
+<div class="flex justify-start items-center space-x-4  rtl:space-x-reverse">
     <div class="w-[49%]">
-        <label for="School1" class="block mb-2 text-sm font-medium text-gray-900">School</label>
+        <label for="School1" class="block mb-2 text-sm font-medium text-gray-900">{{ 'School' | translate }}</label>
         <select id="School1" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             [(ngModel)]="SelectedSchoolId" (change)="getAllGradesBySchoolId(); IsView = false">
-            <option value=0 disabled selected hidden>Select a School</option>
+            <option value=0 disabled selected hidden>{{ 'Select' | translate }}  {{ 'School' | translate }}</option>
             <option *ngFor="let stu of schools" [value]="stu.id">
                 {{ stu.name }}
             </option>
-            <option *ngIf="schools.length === 0" disabled selected>No Data Found</option>
+            <option *ngIf="schools.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
         </select>
     </div>
 
     <div class="w-[49%]">
-        <label for="Grade" class="block mb-2 text-sm font-medium text-gray-900">Grade</label>
+        <label for="Grade" class="block mb-2 text-sm font-medium text-gray-900">{{ 'Grade' | translate }}</label>
         <select id="Grade" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             [(ngModel)]="SelectedGradeId" [disabled]="!SelectedSchoolId"
             (change)="getAllClassByGradeId(); getAllSubject(); IsView = false">
-            <option value=0 disabled selected hidden>Select a grade</option>
+            <option value=0 disabled selected hidden>{{ 'Select' | translate }}  {{ 'Grade' | translate }}</option>
             <option *ngFor="let ac of Grades" [value]="ac.id">
                 {{ ac.name }}
             </option>
-            <option *ngIf="Grades.length === 0" disabled selected>No Data Found</option>
+            <option *ngIf="Grades.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
         </select>
     </div>
 
     <div class="w-[49%]">
-        <label for="Class" class="block mb-2 text-sm font-medium text-gray-900">Class</label>
+        <label for="Class" class="block mb-2 text-sm font-medium text-gray-900">{{ 'Class' | translate }}</label>
         <select id="Class" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             [(ngModel)]="SelectedClassId" [disabled]="!SelectedGradeId">
-            <option value=0 disabled selected hidden>Select a class</option>
+            <option value=0 disabled selected hidden>{{ 'Select' | translate }} {{ 'Class' | translate }}</option>
             <option *ngFor="let ac of class" [value]="ac.id">
                 {{ ac.name }}
             </option>
-            <option *ngIf="class.length === 0" disabled selected>No Data Found</option>
+            <option *ngIf="class.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
         </select>
     </div>
 
     <div class="w-[49%]">
-        <label for="subject" class="block mb-2 text-sm font-medium text-gray-900">Subjects</label>
+        <label for="subject" class="block mb-2 text-sm font-medium text-gray-900">{{ 'Subjects' | translate }}</label>
         <select id="subject" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             [(ngModel)]="SelectedSubjectId" [disabled]="!SelectedGradeId" (change)=" IsView = false">
-            <option value=0 disabled selected hidden>Select a subject</option>
+            <option value=0 disabled selected hidden> {{ 'Select' | translate }} {{ 'Subject' | translate }}</option>
             <option *ngFor="let ac of subjects" [value]="ac.id">
                 {{ ac.en_name }}
             </option>
-            <option *ngIf="subjects.length === 0" disabled selected>No Data Found</option>
+            <option *ngIf="subjects.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
         </select>
     </div>
 
@@ -62,7 +62,8 @@
         <button class="p-3 font-medium text-xl rounded-lg"
             [disabled]="!SelectedSchoolId || !SelectedGradeId || !SelectedSubjectId || !SelectedClassId"
             (click)="Done()"
-            [ngClass]="{ 'bg-gray-100 text-gray-300': !SelectedSchoolId || !SelectedGradeId || !SelectedSubjectId || !SelectedClassId, 'secondaryBg text-white': SelectedSchoolId && SelectedGradeId && SelectedSubjectId && SelectedClassId }">Done
+            [ngClass]="{ 'bg-gray-100 text-gray-300': !SelectedSchoolId || !SelectedGradeId || !SelectedSubjectId || !SelectedClassId, 'secondaryBg text-white': SelectedSchoolId && SelectedGradeId && SelectedSubjectId && SelectedClassId }">
+              {{ 'Done' | translate }}
         </button>
     </div>
 </div>
@@ -70,28 +71,28 @@
 <div class="mt-5" *ngIf="IsView">
     <div>
         <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
-            <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
+            <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
                 <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
                     <tr>
                         <th
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            ID
+                             {{ 'ID' | translate }}
                         </th>
                         <th
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            Grade
+                            {{ 'Grade' | translate }}
                         </th>
                         <th
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            CLass
+                            {{ 'Class' | translate }}
                         </th>
                         <th
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            Subject
+                            {{ 'Subject' | translate }}
                         </th>
                         <th
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            Actions
+                              {{ 'Actions' | translate }}
                         </th>
                     </tr>
                 </thead>
@@ -100,7 +101,7 @@
                     <tr *ngIf="TableData.length === 0">
                         <td colspan="5"
                             class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-                            No Data Found
+                            {{ 'No Data Found' | translate }}
                         </td>
                     </tr>
 

@@ -133,13 +133,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 return NotFound("No records found matching the search criteria.");
 
             var allTotal = filteredData.Sum(item => (item.Total) * (item.InventoryFlags?.FlagValue ?? 0));
-
+          
             var dto = mapper.Map<List<InventoryMasterGetDTO>>(filteredData);
 
             return Ok(new
             {
                 AllTotal = allTotal,
-                Data = dto
+                Data = dto,
             });
         }
 
@@ -389,7 +389,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 newData.SupplierId = null;
             }
 
-            School school = new();
+            School school = new(); 
 
             if (newData.SchoolId != 0 && newData.SchoolId != null)
             {

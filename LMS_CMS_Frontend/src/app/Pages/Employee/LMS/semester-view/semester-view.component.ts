@@ -14,11 +14,13 @@ import { SemesterWorkingWeekService } from '../../../../Services/Employee/LMS/se
 import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
 import { SemesterWorkingWeek } from '../../../../Models/LMS/semester-working-week';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-semester-view',
   standalone: true,
-  imports: [CommonModule,FormsModule ,SearchComponent],
+  imports: [CommonModule,FormsModule ,SearchComponent, TranslateModule],
   templateUrl: './semester-view.component.html',
   styleUrl: './semester-view.component.css'
 })
@@ -29,7 +31,8 @@ export class SemesterViewComponent {
   semester:Semester = new Semester()
   semesterWorkingWeek:SemesterWorkingWeek = new SemesterWorkingWeek()
   WorkingWeeks:SemesterWorkingWeek[]=[]
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
   AllowEditForOthers: boolean = false;
@@ -45,7 +48,7 @@ export class SemesterViewComponent {
   validationErrors: { [key in keyof SemesterWorkingWeek]?: string } = {};
   isLoading = false; 
 
-  constructor(public account: AccountService, public EditDeleteServ: DeleteEditPermissionService, public ApiServ: ApiService, public activeRoute: ActivatedRoute, 
+  constructor(private languageService: LanguageService,public account: AccountService, public EditDeleteServ: DeleteEditPermissionService, public ApiServ: ApiService, public activeRoute: ActivatedRoute, 
     public router:Router, private menuService: MenuService, public semesterService:SemesterService, public semesterWorkingWeekService:SemesterWorkingWeekService){}
 
   ngOnInit(){
@@ -69,6 +72,11 @@ export class SemesterViewComponent {
         this.AllowEditForOthers = settingsPage.allow_Edit_For_Others
       }
     });
+
+    this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   IsAllowDelete(InsertedByID: number) { 

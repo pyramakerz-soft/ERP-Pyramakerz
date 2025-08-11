@@ -1,5 +1,5 @@
 <div class="flex justify-between items-between mb-5">
-    <div class="flex justify-between items-center space-x-5">
+    <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
         <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToEmployee()"></i>
         <h1 class="primaryTxt font-semibold text-2xl leading-9">{{employee.user_Name}} /   {{ 'Supject Co-Teacher' | translate }}</h1>
     </div>
@@ -12,7 +12,7 @@
 <div class="flex items-center justify-between">
     <div class="flex items-center justify-between px-4 py-2 bg-[#f1f1f1] rounded cursor-pointer font-bold"
         (click)="toggleAllClassrooms()">
-        <div class="flex items-center space-x-3">
+        <div class="flex items-center space-x-3 rtl:space-x-reverse">
             <div class="px-3 py-[6px] rounded bg-white secondaryTxt border border-[#394B6E]">
                 <i class="fa-solid" [ngClass]="{
                     'fa-chevron-down': !areAllClassroomsOpen,
@@ -30,7 +30,7 @@
 <div *ngIf="areAllClassroomsOpen">
     <div *ngFor="let item of SupjectTeacherData" class="my-4  mx-14 w-[40%]">
         <!-- Classroom Header -->
-        <div class="flex items-center space-x-2 p-2 rounded cursor-pointer primaryBg text-white"
+        <div class="flex items-center space-x-2 rtl:space-x-reverse p-2 rounded cursor-pointer primaryBg text-white"
             (click)="toggleChildren(item)">
             <div class="px-3 py-[6px] rounded bg-white secondaryTxt">
                 <i class="fa-solid" [ngClass]="{
@@ -39,14 +39,14 @@
           }"></i>
             </div>
 
-            <div class="flex items-center space-x-2">
+            <div class="flex items-center space-x-2 rtl:space-x-reverse">
                 <p>{{ item.classroomName }}</p>
             </div>
         </div>
 
         <!-- Subject Children -->
         <div *ngIf="item.isOpen && item.subjects?.length > 0" class="ml-11 mt-2 space-y-2">
-            <div *ngFor="let subject of item.subjects" class="flex items-center space-x-3 p-2 rounded text-[#333333]">
+            <div *ngFor="let subject of item.subjects" class="flex items-center space-x-3 rtl:space-x-reverse p-2 rounded text-[#333333]">
                 <div class="flex flex-col">
                     <p class="font-semibold">{{ subject.subjectEnglishName }}</p>
                 </div>

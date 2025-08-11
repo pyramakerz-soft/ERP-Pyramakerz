@@ -10,11 +10,13 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-evaluation-employee-answer',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
   templateUrl: './evaluation-employee-answer.component.html',
   styleUrl: './evaluation-employee-answer.component.css'
 })
@@ -27,7 +29,8 @@ export class EvaluationEmployeeAnswerComponent {
   AllowDeleteForOthers: boolean = false;
   Feedback : string = ""
   data: EvaluationEmployee = new EvaluationEmployee();
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   DomainName: string = '';
   UserID: number = 0;
 
@@ -49,7 +52,8 @@ export class EvaluationEmployeeAnswerComponent {
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
-    public EvaluationEmployeeServ: EvaluationEmployeeService
+    public EvaluationEmployeeServ: EvaluationEmployeeService,
+    private languageService: LanguageService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -75,6 +79,11 @@ export class EvaluationEmployeeAnswerComponent {
     }
     this.EvaluationId = Number(this.activeRoute.snapshot.paramMap.get('id'));
     this.GetData()
+
+    this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetData() {

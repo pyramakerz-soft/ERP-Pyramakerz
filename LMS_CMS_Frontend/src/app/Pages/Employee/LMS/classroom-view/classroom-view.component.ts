@@ -5,11 +5,13 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { AccountService } from '../../../../Services/account.service';
 import { ApiService } from '../../../../Services/api.service';
 import { ClassroomService } from '../../../../Services/Employee/LMS/classroom.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-classroom-view',
   standalone: true,
-  imports: [],
+  imports: [TranslateModule],
   templateUrl: './classroom-view.component.html',
   styleUrl: './classroom-view.component.css'
 })
@@ -17,6 +19,8 @@ export class ClassroomViewComponent {
   classroom: Classroom = new Classroom();  
 
   DomainName: string = '';
+  isRtl: boolean = false;
+  subscription!: Subscription;
   UserID: number = 0;
   classId: number = 0;
   User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
@@ -26,7 +30,8 @@ export class ClassroomViewComponent {
     public ApiServ: ApiService, 
     public classroomService: ClassroomService, 
     public activeRoute: ActivatedRoute,
-    public router: Router
+    public router: Router,
+    private languageService: LanguageService
   ) {}
 
   ngOnInit() {
@@ -39,6 +44,10 @@ export class ClassroomViewComponent {
     this.DomainName = this.ApiServ.GetHeader();
 
     this.getClassData();  
+     this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   getClassData(){

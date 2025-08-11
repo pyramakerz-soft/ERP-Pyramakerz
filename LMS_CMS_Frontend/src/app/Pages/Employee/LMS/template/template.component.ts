@@ -15,11 +15,13 @@ import { EvaluationTemplateService } from '../../../../Services/Employee/LMS/eva
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SearchComponent } from '../../../../Component/search/search.component';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-template',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './template.component.html',
   styleUrl: './template.component.css'
 })
@@ -33,7 +35,8 @@ export class TemplateComponent {
   AllowDeleteForOthers: boolean = false;
 
   TableData: Template[] = [];
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   DomainName: string = '';
   UserID: number = 0;
 
@@ -58,7 +61,8 @@ export class TemplateComponent {
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
-    public templateServ: EvaluationTemplateService
+    public templateServ: EvaluationTemplateService,
+    private languageService: LanguageService,
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -79,6 +83,10 @@ export class TemplateComponent {
     });
 
     this.GetAllData();
+        this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetAllData() {

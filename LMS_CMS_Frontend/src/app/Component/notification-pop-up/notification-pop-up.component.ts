@@ -34,7 +34,9 @@ export class NotificationPopUpComponent {
     } else {
       this.dialogRef.close();
     }
-    this.DomainName = this.ApiServ.GetHeader(); 
+    this.DomainName = this.ApiServ.GetHeader();
+    
+    this.notificationService.notifyNotificationOpened();
   }
 
   addNotification(notification: Notification) {
@@ -44,8 +46,11 @@ export class NotificationPopUpComponent {
   } 
   
   DismissAll(){
+    this.notificationService.DismissAll(this.DomainName).subscribe(
+      data =>{}
+    )
     this.notifications = this.notifications.filter(
-      notification => { return notification.isAllowDismiss || !notification.isLinkOpened}
+      notification => notification.isAllowDismiss === false && notification.isLinkOpened === false
     );
     if(this.notifications.length == 0){
       this.dialogRef.close();
@@ -59,11 +64,20 @@ export class NotificationPopUpComponent {
     }
   }
 
-  close(notificationID:number) {  
+  close(notificationID:number) {   
+    // Find the notification being closed
+    const notificationToClose = this.notifications.find(n => n.id === notificationID);
+    
     this.notifications = this.notifications.filter(
-      notification => notification.id !== notificationID || (notification.id === notificationID && notification.isLinkOpened == false)
+      notification => notification.id !== notificationID || (notification.id === notificationID && notification.isLinkOpened == false && notification.isAllowDismiss == false)
     );
     
+    // If the notification was actually removed (not kept due to conditions)
+    if (notificationToClose && 
+        !(notificationToClose.isLinkOpened === false && notificationToClose.isAllowDismiss === false)) {
+        this.notificationService.DismissOne(notificationID, this.DomainName).subscribe(data => {});
+    }
+
     if(this.notifications.length == 0){
       this.dialogRef.close();
     }
@@ -81,6 +95,8 @@ export class NotificationPopUpComponent {
         this.notificationByID = data 
         document.getElementById("NotificationModalForSideNotifications")?.classList.remove("hidden");
         document.getElementById("NotificationModalForSideNotifications")?.classList.add("flex");
+
+        this.notificationService.notifyNotificationOpened(); 
       }
     )
   }  
@@ -132,6 +148,8 @@ export class NotificationPopUpComponent {
         if(this.notificationByID.id != 0){
           this.notificationByID.isLinkOpened = true
         } 
+
+        this.notificationService.notifyNotificationOpened(); 
       }
     )
   } 

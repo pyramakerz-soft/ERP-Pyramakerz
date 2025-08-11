@@ -17,11 +17,13 @@ import { firstValueFrom } from 'rxjs';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { LessonActivityType } from '../../../../Models/LMS/lesson-activity-type';
 import { LessonActivityTypeService } from '../../../../Services/Employee/LMS/lesson-activity-type.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-lesson-activity',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './lesson-activity.component.html',
   styleUrl: './lesson-activity.component.css'
 })
@@ -35,7 +37,8 @@ export class LessonActivityComponent {
   lesson: Lesson = new Lesson();
   editLessonActivity: boolean = false;
   validationErrors: { [key in keyof LessonActivity]?: string } = {};
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
   AllowEditForOthers: boolean = false;
@@ -63,7 +66,8 @@ export class LessonActivityComponent {
     public lessonActivityService:LessonActivityService,
     public lessonService:LessonService,
     private sanitizer: DomSanitizer,
-    public lessonActivityTypeService:LessonActivityTypeService
+    public lessonActivityTypeService:LessonActivityTypeService,
+    private languageService: LanguageService
   ) {}
 
   ngOnInit() {
@@ -90,6 +94,10 @@ export class LessonActivityComponent {
         this.AllowEditForOthers = settingsPage.allow_Edit_For_Others;
       }
     }); 
+    this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
   
   IsAllowDelete(InsertedByID: number) {

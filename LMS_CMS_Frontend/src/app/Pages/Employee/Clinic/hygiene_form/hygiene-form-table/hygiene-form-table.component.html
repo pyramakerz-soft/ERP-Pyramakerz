@@ -1,27 +1,27 @@
 <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
-    <table class="w-full bg-[#EBEBEB] text-left text-[#6F6F6F]">
+    <table class="w-full bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
         <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
             <tr>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Student
+                     {{ 'Student' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Attendance
+                     {{ 'Attendance' | translate }}
                 </th>
                 <!-- Conditionally render the "Select All" column -->
                 <th *ngIf="showSelectAll"
                     class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Select All
+                      {{ 'Select' | translate }} {{ 'All' | translate }}
                 </th>
                 <th *ngFor="let hygieneType of hygieneTypes"
                     class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ hygieneType.type }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Comment
+                     {{ 'Comment' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Action Taken
+                      {{ 'Action' | translate }}  {{ 'Taken' | translate }}
                 </th>
             </tr>
         </thead>
@@ -30,7 +30,7 @@
             <tr *ngIf="students.length === 0">
                 <td [attr.colspan]="hygieneTypes.length + (showSelectAll ? 5 : 4)"
                     class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-                    No Data Found
+                     {{ 'No Data Found' | translate }}
                 </td>
             </tr>
 
@@ -97,15 +97,17 @@
                 </td>
 
                 <!-- Comment -->
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    <input type="text" [(ngModel)]="student['comment']" [disabled]="isViewOnly"
-                        class="w-full rounded-md border-gray-300 p-1.5 shadow-sm" />
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 whitespace-normal min-w-[200px] max-w-[300px]">
+                    <textarea [(ngModel)]="student['comment']" [disabled]="isViewOnly"
+                        class="w-full rounded-md border-gray-300 p-1.5 shadow-sm resize-none h-auto min-h-[40px]"
+                        rows="1"></textarea>
                 </td>
 
                 <!-- Action Taken -->
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    <input type="text" [(ngModel)]="student['actionTaken']" [disabled]="isViewOnly"
-                        class="w-full rounded-md border-gray-300 p-1.5 shadow-sm" />
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 whitespace-normal min-w-[200px] max-w-[300px]">
+                    <textarea [(ngModel)]="student['actionTaken']" [disabled]="isViewOnly"
+                        class="w-full rounded-md border-gray-300 p-1.5 shadow-sm resize-none h-auto min-h-[40px]"
+                        rows="1"></textarea>
                 </td>
             </tr>
         </tbody>

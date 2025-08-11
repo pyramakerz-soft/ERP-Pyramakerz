@@ -1,17 +1,17 @@
 <div class="">
     <div class="flex justify-between">
-        <h1 class="primaryTxt font-semibold text-2xl leading-9 mt-2">Follow Up</h1>
+        <h1 class="primaryTxt font-semibold text-2xl leading-9 mt-2">{{ 'Follow Up' | translate }}</h1>
         <div class="flex justify-between items-center">
             <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
             <button (click)="openModal()"
                 class="primaryTxt rounded-lg secondaryBorder secondaryTxt px-5 py-3 flex items-center justify-center gap-2 font-medium">
-                Follow Up
+                 {{ 'Follow Up' | translate }}
             </button>
         </div>
     </div>
 
     <app-table
-        [headers]="['ID', 'School', 'Grade', 'Class', 'Student', 'Diagnosis', 'Recommendation', 'Actions']"
+        [headers]="GetTableHeaders()"
         [data]="followUps" [showViewAction]="true"
         [keys]="['id', 'schoolName', 'gradeName', 'className', 'studentName', 'diagnosisName', 'recommendation']"
         (delete)="deleteFollowUp($event)" (edit)="openModal($event.id)">
@@ -25,15 +25,15 @@
             <i class="fa-solid fa-xmark text-2xl"></i>
         </button>
 
-        <h1 class="font-semibold text-2xl leading-9 mb-6">{{ followUp.id ? 'Edit Follow Up' : 'Create Follow Up' }}</h1>
+        <h1 class="font-semibold text-2xl leading-9 mb-6">{{ followUp.id ?  (isRtl ? 'تعديل المتابعة' : 'Edit Follow Up') : (isRtl ? 'إنشاء متابعة' : 'Create Follow Up') }}</h1>
 
         <div class="space-y-6">
             <div class="grid grid-cols-2 gap-6">
                 <div class="flex flex-col">
-                    <label class="mb-1 primaryTxt" for="school">School</label>
+                    <label class="mb-1 primaryTxt" for="school">{{ 'School' | translate }}</label>
                     <select id="school" [(ngModel)]="followUp.schoolId" (change)="onSchoolChange($event)"
                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5">
-                        <option [value]="0" disabled selected hidden>Choose School</option>
+                        <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'School' | translate }}</option>
                         <option *ngFor="let school of schools" [value]="school.id">{{ school.name }}</option>
                     </select>
                     <span *ngIf="validationErrors['schoolId']" class="text-red-500 ml-3 font-normal text-sm">
@@ -42,11 +42,11 @@
                 </div>
 
                 <div class="flex flex-col">
-                    <label class="mb-1 primaryTxt" for="grade">Grade</label>
+                    <label class="mb-1 primaryTxt" for="grade"> {{ 'Grade' | translate }}</label>
                     <select id="grade" [(ngModel)]="followUp.gradeId" (change)="onGradeChange($event)"
                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5"
                         [disabled]="!followUp.schoolId">
-                        <option [value]="0" disabled selected hidden>Choose Grade</option>
+                        <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Grade' | translate }}</option>
                         <option *ngFor="let grade of grades" [value]="grade.id">{{ grade.name }}</option>
                     </select>
                     <span *ngIf="validationErrors['gradeId']" class="text-red-500 ml-3 font-normal text-sm">
@@ -57,11 +57,11 @@
 
             <div class="grid grid-cols-2 gap-6">
                 <div class="flex flex-col">
-                    <label class="mb-1 primaryTxt" for="class">Class</label>
+                    <label class="mb-1 primaryTxt" for="class"> {{ 'Class' | translate }}</label>
                     <select id="class" [(ngModel)]="followUp.classroomId" (change)="onClassChange($event)"
                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5"
                         [disabled]="!followUp.gradeId">
-                        <option [value]="0" disabled selected hidden>Choose Class</option>
+                        <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Class' | translate }}</option>
                         <option *ngFor="let class of classes" [value]="class.id">{{ class.name }}</option>
                     </select>
                     <span *ngIf="validationErrors['classroomId']" class="text-red-500 ml-3 font-normal text-sm">
@@ -70,11 +70,11 @@
                 </div>
 
                 <div class="flex flex-col">
-                    <label class="mb-1 primaryTxt" for="student">Student</label>
+                    <label class="mb-1 primaryTxt" for="student"> {{ 'Student' | translate }}</label>
 <select id="student" [(ngModel)]="followUp.studentId" (change)="onStudentChange($event)"
     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5"
     [disabled]="!followUp.classroomId">
-    <option [value]="0" disabled selected hidden>Choose Student</option>
+    <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }}  {{ 'Student' | translate }}</option>
     <option *ngFor="let student of students" [value]="student.id">{{ student.name }}</option>
 </select>
                     <span *ngIf="validationErrors['studentId']" class="text-red-500 ml-3 font-normal text-sm">
@@ -84,17 +84,17 @@
             </div>
 
             <div class="flex flex-col">
-                <label class="mb-1 primaryTxt" for="complaints">Complaints</label>
+                <label class="mb-1 primaryTxt" for="complaints"> {{ 'Complaints' | translate }}</label>
                 <textarea id="complaints" [(ngModel)]="followUp.complains"
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5 h-24 resize-none overflow-auto"
-                    placeholder="Enter Complaints"></textarea>
+                    placeholder="{{ 'Enter' | translate }} {{ 'Complaints' | translate }}"></textarea>
             </div>
 
             <div class="flex flex-col">
-                <label class="mb-1 primaryTxt" for="diagnosis">Diagnosis</label>
+                <label class="mb-1 primaryTxt" for="diagnosis"> {{ 'Diagnosis' | translate }}</label>
 <select id="diagnosis" [(ngModel)]="followUp.diagnosisId" (change)="onDiagnosisChange($event)"
     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5">
-    <option [value]="0" disabled selected hidden>Choose Diagnosis</option>
+    <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }}  {{ 'Diagnosis' | translate }}</option>
     <option *ngFor="let diagnosis of diagnoses" [value]="diagnosis.id">{{ diagnosis.name }}</option>
 </select>
                 <span *ngIf="validationErrors['diagnosisId']" class="text-red-500 ml-3 font-normal text-sm">
@@ -104,11 +104,11 @@
 
             <div class="grid grid-cols-[1fr_1fr_auto] gap-6 items-end">
                 <div class="flex flex-col">
-                    <label class="mb-1 primaryTxt" for="drug">Drug</label>
+                    <label class="mb-1 primaryTxt" for="drug"> {{ 'Drug' | translate }}</label>
                     <div class="flex items-center border border-gray-300 rounded-lg overflow-hidden">
                         <select id="drug" [(ngModel)]="selectedDrugId"
                             class="bg-gray-50 text-gray-900 text-sm w-full p-2.5">
-                            <option [value]="null" selected hidden>Choose Drug</option>
+                            <option [value]="null" selected hidden>{{ 'Choose' | translate }}  {{ 'Drug' | translate }}</option>
                             <option *ngFor="let drug of drugs" [value]="drug.id">{{ drug.name }}</option>
                         </select>
                         <button (click)="openDrugModal()"
@@ -119,11 +119,11 @@
                 </div>
 
                 <div class="flex flex-col">
-                    <label class="mb-1 primaryTxt" for="dose">Dose</label>
+                    <label class="mb-1 primaryTxt" for="dose">{{ 'Dose' | translate }}</label>
                     <div class="flex items-center border border-gray-300 rounded-lg overflow-hidden">
                         <select id="dose" [(ngModel)]="selectedDoseId"
                             class="bg-gray-50 text-gray-900 text-sm rounded-lg w-full p-2.5">
-                            <option [value]="null" disabled selected hidden>Choose Dose</option>
+                            <option [value]="null" disabled selected hidden>{{ 'Choose' | translate }}  {{ 'Dose' | translate }}</option>
                             <option *ngFor="let dose of doses" [value]="dose.id">{{ dose.doseTimes }}</option>
                         </select>
                         <button (click)="openDoseModal()"
@@ -136,26 +136,26 @@
                 <div class="flex flex-col self-end">
                     <button (click)="addDrugAndDose()"
                         class="secondaryBg text-white font-medium rounded-lg w-[64px] h-[40px]">
-                        Add
+                         {{ 'Add' | translate }}
                     </button>
                 </div>
             </div>
 
             <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
-                <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
+                <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
                     <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
                         <tr>
                             <th
                                 class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                                Drug
+                                 {{ 'Drug' | translate }}
                             </th>
                             <th
                                 class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                                Dose
+                                 {{ 'Dose' | translate }}
                             </th>
                             <th
                                 class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                                Actions
+                                 {{ 'Actions' | translate }}
                             </th>
                         </tr>
                     </thead>
@@ -163,7 +163,7 @@
                         <tr *ngIf="drugDoseList.length === 0">
                             <td colspan="3"
                                 class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-                                No Data Found
+                                 {{ 'No Data Found' | translate }}
                             </td>
                         </tr>
 
@@ -183,46 +183,46 @@
             </div>
 
             <div class="flex flex-col">
-                <label class="mb-1 primaryTxt" for="recommendation">Recommendation</label>
+                <label class="mb-1 primaryTxt" for="recommendation"> {{ 'Recommendation' | translate }}</label>
                 <textarea id="recommendation" [(ngModel)]="followUp.recommendation"
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5 h-24"
-                    placeholder="Enter Recommendation"></textarea>
+                    placeholder=" {{ 'Enter' | translate }}  {{ 'Recommendation' | translate }}"></textarea>
             </div>
 
             <div class="flex items-center gap-2">
                 <input type="checkbox" id="sendSms" [(ngModel)]="followUp.sendSMSToParent"
                     class="w-4 h-4 rounded border-gray-300 text-[#089B41] focus:ring-[#089B41]">
-                <label for="sendSms" class="text-sm text-gray-900">Send SMS to Parent</label>
+                <label for="sendSms" class="text-sm text-gray-900"> {{ 'Send SMS to Parent' | translate }}</label>
             </div>
         </div>
 
         <div class="flex justify-end mt-6">
             <button class="secondaryBg text-white font-medium w-full py-2 rounded-lg" [disabled]="isSaving"
                 (click)="saveFollowUp()">
-                {{ isSaving ? 'Saving...' : 'Submit' }}
+                {{ isSaving ?(isRtl ? ' ...جارٍ الحفظ' : 'Saving...') : (isRtl ? 'إرسال' : 'Submit') }}
             </button>
         </div>
     </div>
 </div>
 
-<app-modal [title]="editDrug ? 'Edit Drug' : 'Create Drug'" [isEditMode]="editDrug"
-    [buttonText]="editDrug ? 'Save' : 'Create'" (save)="saveDrug()" (close)="closeDrugModal()"
+<app-modal [title]="editDrug ? (isRtl? 'تعديل دواء':'Edit Drug') : (isRtl? 'إنشاء دواء':'Create Drug')" [isEditMode]="editDrug"
+    [buttonText]="editDrug ? (isRtl? 'حفظ':'Save') :  (isRtl? 'إنشاء':'Create')" (save)="saveDrug()" (close)="closeDrugModal()"
     [ngClass]="{ 'hidden': !isDrugModalVisible }">
     <div class="flex flex-col w-full mb-4">
-        <label class="mb-2 primaryTxt" for="drugName">Drug Name</label>
+        <label class="mb-2 primaryTxt" for="drugName"> {{ 'Drug' | translate }} {{ 'Name' | translate }}</label>
         <input id="drugName" type="text" class="rounded-lg border border-gray-300 px-4 py-3" [(ngModel)]="drug.name"
-            placeholder="Enter Drug Name">
+            placeholder=" {{ 'Enter' | translate }} {{ 'Drug' | translate }} {{ 'Name' | translate }}">
         <span *ngIf="drugValidationErrors['name']" class="text-red-500 ml-3 font-normal text-sm">
             {{ drugValidationErrors['name'] }}
         </span>
     </div>
 </app-modal>
 
-<app-modal [title]="editDose ? 'Edit Dose' : 'Create Dose'" [isEditMode]="editDose"
-    [buttonText]="editDose ? 'Save' : 'Create'" (save)="saveDose()" (close)="closeDoseModal()"
+<app-modal [title]="editDose ?  (isRtl? 'تعديل الجرعة ' : 'Edit Dose') : (isRtl? 'إنشاء جرعة':'Create Dose')" [isEditMode]="editDose"
+    [buttonText]="editDose ? (isRtl? 'حفظ':'Save') :  (isRtl? 'إنشاء':'Create')" (save)="saveDose()" (close)="closeDoseModal()"
     [ngClass]="{ 'hidden': !isDoseModalVisible }">
     <div class="flex flex-col w-full mb-4">
-        <label class="mb-2 primaryTxt" for="doseTimes">Dose Times</label>
+        <label class="mb-2 primaryTxt" for="doseTimes">{{ 'Dose' | translate }} {{ 'Times' | translate }} </label>
         <input id="doseTimes" type="text" class="rounded-lg border border-gray-300 px-4 py-3"
             [(ngModel)]="dose.doseTimes" placeholder="Enter Dose Times">
         <span *ngIf="doseValidationErrors['doseTimes']" class="text-red-500 ml-3 font-normal text-sm">

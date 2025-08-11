@@ -1,37 +1,37 @@
 <div class="flex justify-between items-center">
     <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
         <i class="fa-solid fa-chevron-left cursor-pointer rtl:rotate-180" (click)="moveToBack()"></i>
-        <h1 *ngIf="mode == 'Create'" class="primaryTxt font-semibold text-2xl leading-9">Create Shop Items</h1>
-        <h1 *ngIf="mode == 'Edit'" class="primaryTxt font-semibold text-2xl leading-9">Edit Shop Items</h1>
+        <h1 *ngIf="mode == 'Create'" class="primaryTxt font-semibold text-2xl leading-9">  {{ 'Create' | translate }}{{ 'Shop' | translate }}{{ 'Items' | translate }}</h1>
+        <h1 *ngIf="mode == 'Edit'" class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Edit' | translate }}{{ 'Shop' | translate }}{{ 'Items' | translate }}</h1>
     </div>
 </div>
 
 <div class="mt-6 mb-4 rounded-3xl flex justify-between flex-wrap py-3">
     <div class="flex flex-col mb-4 w-[49%]">
-        <label class="mb-2 primaryTxt font-medium" for="enName">English Name</label>
+        <label class="mb-2 primaryTxt font-medium" for="enName"> {{ 'English Name' | translate }}</label>
         <input id="enName" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-            placeholder="Enter English Name" [(ngModel)]="ShopItem.enName"
+            placeholder="  {{ 'Enter' | translate }} {{ 'English Name' | translate }}" [(ngModel)]="ShopItem.enName"
             (ngModelChange)="onInputValueChange({ field: 'enName', value: $event })" />
         <span *ngIf="validationErrors['enName']" class="text-red-500 ml-3 font-normal">{{ validationErrors['enName']
             }}</span>
     </div>
 
     <div class="flex flex-col mb-4 w-[49%]">
-        <label class="mb-2 primaryTxt font-medium" for="arName">Arabic Name</label>
+        <label class="mb-2 primaryTxt font-medium" for="arName"> {{ 'Arabic Name' | translate }}</label>
         <input id="arName" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-            placeholder="Enter Arabic Name" [(ngModel)]="ShopItem.arName"
+            placeholder=" {{ 'Enter' | translate }}{{ 'Arabic Name' | translate }}" [(ngModel)]="ShopItem.arName"
             (ngModelChange)="onInputValueChange({ field: 'arName', value: $event })" />
         <span *ngIf="validationErrors['arName']" class="text-red-500 ml-3 font-normal">{{ validationErrors['arName']
             }}</span>
     </div>
 
     <div class="flex flex-col mb-4 w-[49%]">
-        <label class="font-medium primaryTxt text-base leading-6 mb-1 mt-3" for="enDes">English Description</label>
+        <label class="font-medium primaryTxt text-base leading-6 mb-1 mt-3" for="enDes"> {{ 'English' | translate }} {{ 'Description' | translate }}</label>
         <div class="flex justify-start gap-2 items-start">
             <div class="flex flex-col w-full">
                 <textarea id="enDes"
                     class="w-full h-[100px] rounded-lg border border-solid border-gray-300 px-4 py-3 mb-3 resize-none"
-                    [(ngModel)]="ShopItem.enDescription" placeholder="Enter Description"
+                    [(ngModel)]="ShopItem.enDescription" placeholder="{{ 'Enter' | translate }}{{ 'Description' | translate }}"
                     (ngModelChange)="onInputValueChange({ field: 'enDescription', value: $event })"></textarea>
             </div>
         </div>
@@ -40,12 +40,12 @@
     </div>
 
     <div class="flex flex-col mb-4 w-[49%]">
-        <label class="font-medium primaryTxt text-base leading-6 mb-1 mt-3" for="arDes">Arabic Description</label>
+        <label class="font-medium primaryTxt text-base leading-6 mb-1 mt-3" for="arDes">{{ 'Arabic' | translate }}{{ 'Description' | translate }}</label>
         <div class="flex justify-start gap-2 items-start">
             <div class="flex flex-col w-full">
                 <textarea id="arDes"
                     class="w-full h-[100px] rounded-lg border border-solid border-gray-300 px-4 py-3 mb-3 resize-none"
-                    [(ngModel)]="ShopItem.arDescription" placeholder="Enter Description"
+                    [(ngModel)]="ShopItem.arDescription" placeholder="  {{ 'Enter' | translate }}{{ 'Description' | translate }}"
                     (ngModelChange)="onInputValueChange({ field: 'arDescription', value: $event })"></textarea>
             </div>
         </div>
@@ -54,9 +54,9 @@
     </div>
 
     <div class="flex flex-col mb-4 w-[33%]">
-        <label class="mb-2 primaryTxt font-medium" for="Purchase">Purchase Price</label>
+        <label class="mb-2 primaryTxt font-medium" for="Purchase">  {{ 'Purchase' | translate }}{{ 'Price' | translate }}</label>
         <input id="Purchase" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-            (input)="validateNumber($event, 'purchasePrice')" placeholder="Enter Price"
+            (input)="validateNumber($event, 'purchasePrice')" placeholder="{{ 'Enter' | translate }}{{ 'Price' | translate }}"
             [(ngModel)]="ShopItem.purchasePrice"
             (ngModelChange)="onInputValueChange({ field: 'purchasePrice', value: $event })" />
         <span *ngIf="validationErrors['purchasePrice']" class="text-red-500 ml-3 font-normal">{{
@@ -64,94 +64,95 @@
     </div>
 
     <div class="flex flex-col mb-4 w-[33%]">
-        <label class="mb-2 primaryTxt font-medium" for="Sales">Sales Price</label>
+        <label class="mb-2 primaryTxt font-medium" for="Sales"> {{ 'Sales' | translate }}{{ 'Price' | translate }}</label>
         <input id="Sales" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-            (input)="validateNumber($event, 'salesPrice')" placeholder="Enter Price" [(ngModel)]="ShopItem.salesPrice"
+            (input)="validateNumber($event, 'salesPrice')" placeholder="  {{ 'Enter' | translate }}{{ 'Price' | translate }}" [(ngModel)]="ShopItem.salesPrice"
             (ngModelChange)="onInputValueChange({ field: 'salesPrice', value: $event })" />
         <span *ngIf="validationErrors['salesPrice']" class="text-red-500 ml-3 font-normal">{{
             validationErrors['salesPrice'] }}</span>
     </div>
 
     <div class="flex flex-col mb-4 w-[33%]">
-        <label class="mb-2 primaryTxt font-medium" for="Vat">Vat for Foreign</label>
+        <label class="mb-2 primaryTxt font-medium" for="Vat"> {{ 'Vat for Foreign' | translate }}</label>
         <input id="Vat" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-            (input)="validateNumber($event, 'vatForForeign')" placeholder="Enter Vat"
+            (input)="validateNumber($event, 'vatForForeign')" placeholder="  {{ 'Enter' | translate }}{{ 'Vat' | translate }}"
             [(ngModel)]="ShopItem.vatForForeign" />
     </div>
 
     <div class="flex flex-col w-[49%] mb-4">
-        <label class="mb-2 font-medium primaryTxt" for="Category">Category</label>
+        <label class="mb-2 font-medium primaryTxt" for="Category">{{ 'Category' | translate }}</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Category"
             [(ngModel)]="CategoryId" (change)="onCategoryChange($event)">
-            <option [value]="0" disabled selected hidden>Choose Category</option>
+            <option [value]="0" disabled selected hidden>  {{ 'Choose' | translate }}{{ 'Category' | translate }}</option>
             <option *ngFor="let c of Categories" [value]="c.id">{{ c.name }}</option>
-            <option *ngIf="Categories.length === 0" disabled selected>No Data Found</option>
+            <option *ngIf="Categories.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
         </select>
     </div>
 
     <div class="flex flex-col w-[49%] mb-4">
         <label class="mb-2 font-medium primaryTxt" for="Sub"
-            [ngClass]="{ 'text-gray-400': !CategoryId, 'primaryTxt': CategoryId }">Sub Category</label>
+            [ngClass]="{ 'text-gray-400': !CategoryId, 'primaryTxt': CategoryId }">{{ 'Sub' | translate }}{{ 'Category' | translate }}</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Sub"
             [(ngModel)]="ShopItem.inventorySubCategoriesID" [disabled]="!CategoryId"
             [ngClass]="{ 'bg-[#EBEBEB]': !CategoryId }"
             (ngModelChange)="onInputValueChange({ field: 'inventorySubCategoriesID', value: $event })">
-            <option [value]="0" disabled selected hidden>Choose Sub Category</option>
+            <option [value]="0" disabled selected hidden>   {{ 'Choose' | translate }}{{ 'Sub' | translate }}{{ 'Category' | translate }}</option>
             <option *ngFor="let inv of InventorySubCategories" [value]="inv.id">{{ inv.name }}</option>
-            <option *ngIf="InventorySubCategories.length === 0" disabled selected>No Data Found</option>
+            <option *ngIf="InventorySubCategories.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
         </select>
         <span *ngIf="validationErrors['inventorySubCategoriesID']" class="text-red-500 ml-3 font-normal">{{
             validationErrors['inventorySubCategoriesID'] }}</span>
     </div>
 
     <div class="flex flex-col w-[49%] mb-4">
-        <label class="mb-2 font-medium primaryTxt" for="School">Schools</label>
+        <label class="mb-2 font-medium primaryTxt" for="School"> {{ 'Schools' | translate }}</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="School"
             [(ngModel)]="ShopItem.schoolID" (change)="onSchoolChange($event)"
             (ngModelChange)="onInputValueChange({ field: 'schoolID', value: $event })">
-            <option [value]="0" disabled selected hidden>Choose School</option>
+            <option [value]="0" disabled selected hidden>  {{ 'Choose' | translate }}{{ 'School' | translate }}</option>
             <option *ngFor="let s of Schools" [value]="s.id">{{ s.name }}</option>
-            <option *ngIf="Schools.length === 0" disabled selected>No Data Found</option>
+            <option *ngIf="Schools.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
         </select>
         <span *ngIf="validationErrors['schoolID']" class="text-red-500 ml-3 font-normal">{{ validationErrors['schoolID']
             }}</span>
     </div>
 
     <div class="flex flex-col w-[49%] mb-4">
-        <label class="mb-2 font-medium" for="Grade" [ngClass]="{ 'text-gray-400': !SchoolId, 'primaryTxt': SchoolId }">Grade
-            Level</label>
+        <label class="mb-2 font-medium" for="Grade" [ngClass]="{ 'text-gray-400': !SchoolId, 'primaryTxt': SchoolId }">
+            {{ 'Grade' | translate }}{{ 'Level' | translate }}
+        </label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Grade"
             [disabled]="!SchoolId" [ngClass]="{ 'bg-[#EBEBEB]': !SchoolId }" [(ngModel)]="ShopItem.gradeID">
-            <option [value]="0 || null" disabled selected hidden>Choose Grade Level</option>
-            <option value="0">All Grades</option>
+            <option [value]="0 || null" disabled selected hidden>  {{ 'Choose' | translate }}{{ 'Grade' | translate }}{{ 'Level' | translate }}</option>
+            <option value="0">  {{ 'All' | translate }} {{ 'Grades' | translate }}</option>
             <option *ngFor="let g of Grades" [value]="g.id">{{ g.name }}</option>
-            <option *ngIf="Grades.length === 0" disabled selected>No Data Found</option>
+            <option *ngIf="Grades.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
         </select>
     </div>
 
     <div class="flex flex-col w-[49%] mb-4">
-        <label class="mb-2 font-medium primaryTxt" for="Gender">Gender</label>
+        <label class="mb-2 font-medium primaryTxt" for="Gender"> {{ 'Gender' | translate }}</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Gender"
             [(ngModel)]="ShopItem.genderID">
-            <option [value]="0 || null" disabled selected hidden>Choose Gender</option>
-            <option value="0">All Genders</option>
+            <option [value]="0 || null" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Gender' | translate }}</option>
+            <option value="0">  {{ 'All' | translate }}{{ 'Genders' | translate }}</option>
             <option *ngFor="let g of gender" [value]="g.id">{{ g.name }}</option>
-            <option *ngIf="gender.length === 0" disabled selected>No Data Found</option>
+            <option *ngIf="gender.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
         </select>
     </div>
 
     <div class="flex flex-col mb-4 w-[49%]">
-        <label class="mb-2 primaryTxt font-medium" for="limit">Limit</label>
+        <label class="mb-2 primaryTxt font-medium" for="limit">{{ 'limit' | translate }}</label>
         <input id="limit" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
             (input)="validateNumber($event, 'limit')"
-            (ngModelChange)="onInputValueChange({ field: 'limit', value: $event })" placeholder="Enter limit"
+            (ngModelChange)="onInputValueChange({ field: 'limit', value: $event })" placeholder="  {{ 'Enter' | translate }} {{ 'limit' | translate }}"
             [(ngModel)]="ShopItem.limit" />
         <span *ngIf="validationErrors['limit']" class="text-red-500 ml-3 font-normal">{{ validationErrors['limit']
             }}</span>
     </div>
 
     <div class="flex flex-col mb-4 w-[49%]">
-        <label class="mb-2 primaryTxt font-medium" for="color">Colors</label>
+        <label class="mb-2 primaryTxt font-medium" for="color"> {{ 'Colors' | translate }}</label>
         <div class="border border-gray-300 rounded-lg px-4 py-3 flex flex-wrap gap-2 mb-4">
             <span *ngFor="let opt of colors; let i = index"
                 class="flex items-center mr-2 mb-1 bg-gray-200 rounded px-3 py-2">
@@ -161,12 +162,12 @@
                 </button>
             </span>
             <input type="text" class="flex-grow outline-none" [(ngModel)]="inputValue" id="color"
-                (keydown.enter)="addColor()" placeholder="Enter options" />
+                (keydown.enter)="addColor()" placeholder="{{ 'Enter' | translate }}{{ 'options' | translate }}" />
         </div>
     </div>
 
     <div class="flex flex-col mb-4 w-[49%]">
-        <label class="mb-2 primaryTxt font-medium" for="size">Size</label>
+        <label class="mb-2 primaryTxt font-medium" for="size"> {{ 'Size' | translate }}</label>
         <div class="border border-gray-300 rounded-lg px-4 py-3 flex flex-wrap gap-2 mb-4">
             <span *ngFor="let opt of Sizes; let i = index"
                 class="flex items-center mr-2 mb-1 bg-gray-200  rounded px-3 py-2">
@@ -176,38 +177,38 @@
                 </button>
             </span>
             <input type="text" class="flex-grow outline-none" [(ngModel)]="inputValueSize" id="size"
-                (keydown.enter)="addSize()" placeholder="Enter options" />
+                (keydown.enter)="addSize()" placeholder="  {{ 'Enter' | translate }}{{ 'options' | translate }}" />
         </div>
     </div>
 
-    <div class="flex w-full space-x-2 items-center mb-6">
+    <div class="flex w-full space-x-2 rtl:space-x-reverse items-center mb-6">
         <input type="checkbox" id="Available" class="w-5 h-5" (change)="onAvailableInShopkChange($event)"
             [checked]="ShopItem.availableInShop">
-        <label for="Available" class="text-sm">Available IN Shop </label>
+        <label for="Available" class="text-sm"> {{ 'Available IN Shop' | translate }} </label>
     </div>
     
     <!-- Add this after the barCode input -->
     <div class="flex flex-col mb-4 w-[49%]">
-        <label class="mb-2 primaryTxt font-medium" for="itemCode">Item Code</label>
+        <label class="mb-2 primaryTxt font-medium" for="itemCode">{{ 'Item' | translate }}{{ 'Code' | translate }}</label>
         <input id="itemCode" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-            placeholder="Enter Item Code" [(ngModel)]="ShopItem.itemCode" />
+            placeholder=" {{ 'Enter' | translate }}{{ 'Item' | translate }}{{ 'Code' | translate }}" [(ngModel)]="ShopItem.itemCode" />
     </div>
     
     <div class="flex flex-col mb-4 w-[49%]">
-        <label class="mb-2 primaryTxt font-medium" for="unitType">Unit Type</label>
+        <label class="mb-2 primaryTxt font-medium" for="unitType">  {{ 'Unit' | translate }}{{ 'Type' | translate }}</label>
         <input id="unitType" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-            placeholder="Enter Unit Type" [(ngModel)]="ShopItem.unitType" />
+            placeholder="{{ 'Enter' | translate }} {{ 'Unit' | translate }}{{ 'Type' | translate }}" [(ngModel)]="ShopItem.unitType" />
     </div>
 
     <div class="flex flex-col mb-4 w-full">
-        <label class="mb-2 primaryTxt font-medium" for="barCode">Generate Bar Code</label>
+        <label class="mb-2 primaryTxt font-medium" for="barCode">{{ 'Generate' | translate }} {{ 'Bar Code' | translate }}</label>
         <input id="barCode" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3 w-[49%]"
-            placeholder="Generate Bar Code" [(ngModel)]="ShopItem.barCode" />
+            placeholder="  {{ 'Generate' | translate }} {{ 'Bar Code' | translate }}" [(ngModel)]="ShopItem.barCode" />
     </div>
 
     <div class="flex flex-col mb-4 w-[49%]">
-        <label class="primaryTxt font-medium text-base leading-6 mb-1 mt-3">Main Image</label>
-        <div class="bg-[#F6F6F6] flex items-center space-x-4 w-full rounded-md border-dashed mb-4 border-2">
+        <label class="primaryTxt font-medium text-base leading-6 mb-1 mt-3"> {{ 'Main Image' | translate }}</label>
+        <div class="bg-[#F6F6F6] flex items-center space-x-4 rtl:space-x-reverse w-full rounded-md border-dashed mb-4 border-2">
             <div class="flex justify-center w-full">
                 <label for="imageMain" class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
                     <img *ngIf="!ShopItem.mainImage && !ShopItem.mainImageFile" src="Images/Icon frame.png"
@@ -217,9 +218,9 @@
                     <img *ngIf="ShopItem.mainImage && !ShopItem.mainImageFile" [src]="ShopItem.mainImage"
                         class="w-1/3 object-cover">
                     <p class="font-normal text-xs md:text-sm text-[#8E8E93] mt-3">
-                        <span class="secondaryTxt">Click to Upload</span> 
+                        <span class="secondaryTxt">  {{ 'Click to' | translate }} {{ 'Upload' | translate }}</span> 
                     </p>
-                    <p class="font-normal text-xs md:text-sm text-[#8E8E93]"> (Max. File size: 25 MB each)</p>
+                    <p class="font-normal text-xs md:text-sm text-[#8E8E93]">  {{ '(Max. File size: 25 MB)' | translate }}</p>
                 </label>
                 <input id="imageMain" type="file" class="hidden" accept="image/jpeg, image/png" multiple
                     (change)="onImageMainFileSelected($event)" />
@@ -230,8 +231,8 @@
     </div>
 
     <div class="flex flex-col mb-4 w-[49%]">
-        <label class="primaryTxt font-medium text-base leading-6 mb-1 mt-3">Other Image</label>
-        <div class="bg-[#F6F6F6] flex items-center space-x-4 w-full rounded-md border-dashed mb-4 border-2">
+        <label class="primaryTxt font-medium text-base leading-6 mb-1 mt-3"> {{ 'Other Image' | translate }}</label>
+        <div class="bg-[#F6F6F6] flex items-center space-x-4 rtl:space-x-reverse w-full rounded-md border-dashed mb-4 border-2">
             <div class="flex justify-center w-full">
                 <label for="otherImage" class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
                     <img *ngIf="!ShopItem.otherImage && !ShopItem.otherImageFile" src="Images/Icon frame.png"
@@ -241,9 +242,9 @@
                     <img *ngIf="ShopItem.otherImage && !ShopItem.otherImageFile" [src]="ShopItem.otherImage"
                         class="w-1/3 object-cover">
                     <p class="font-normal text-xs md:text-sm text-[#8E8E93] mt-3">
-                        <span class="secondaryTxt">Click to Upload</span> 
+                        <span class="secondaryTxt"> {{ 'Click to' | translate }}{{ 'Upload' | translate }}</span> 
                     </p>
-                    <p class="font-normal text-xs md:text-sm text-[#8E8E93]"> (Max. File size: 25 MB each)</p>
+                    <p class="font-normal text-xs md:text-sm text-[#8E8E93]">  {{ '(Max. File size: 25 MB)' | translate }}</p>
                 </label>
                 <input id="otherImage" type="file" class="hidden" accept="image/jpeg, image/png" multiple
                     (change)="onImageOtherFileSelected($event)" />
@@ -256,7 +257,7 @@
     <div class="flex justify-end w-full">
         <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg mt-2"
             (click)="Save()">
-            <span *ngIf="!isLoading">Save</span>
+            <span *ngIf="!isLoading"> {{ 'Save' | translate }}</span>
             <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
         </button>
     </div>

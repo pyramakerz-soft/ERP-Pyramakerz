@@ -13,7 +13,9 @@ import { PdfPrintComponent } from '../../../../../../Component/pdf-print/pdf-pri
 import { InventoryCategoryService } from '../../../../../../Services/Employee/Inventory/inventory-category.service';
 import { InventorySubCategoriesService } from '../../../../../../Services/Employee/Inventory/inventory-sub-categories.service';
 import { ShopItemService } from '../../../../../../Services/Employee/Inventory/shop-item.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 interface FlagOption {
   id: number;
   name: string;
@@ -22,7 +24,7 @@ interface FlagOption {
 @Component({
   selector: 'app-invoice-report-master-detailed',
   standalone: true,
-  imports: [CommonModule, FormsModule, PdfPrintComponent],
+  imports: [CommonModule, FormsModule, PdfPrintComponent , TranslateModule],
   templateUrl: './invoice-report-master-detailed.component.html',
   styleUrls: ['./invoice-report-master-detailed.component.css'],
 })
@@ -37,7 +39,8 @@ export class InvoiceReportMasterDetailedComponent implements OnInit {
   reportType: string = '';
   selectedFlagId: number = -1;
   selectedFlagIds: number[] = [];
-
+  isRtl: boolean = false;
+  subscription!: Subscription; 
   currentPage: number = 1;
   pageSize: number = 10;
   totalPages: number = 1;
@@ -90,7 +93,8 @@ export class InvoiceReportMasterDetailedComponent implements OnInit {
     private storesService: StoresService,
     private categoryService: InventoryCategoryService,
     private subCategoryService: InventorySubCategoriesService,
-    private shopItemService: ShopItemService
+    private shopItemService: ShopItemService,
+    private languageService: LanguageService
   ) {}
 
   ngOnInit() {
@@ -102,6 +106,10 @@ export class InvoiceReportMasterDetailedComponent implements OnInit {
     this.loadStores();
 
     this.loadCategories();
+          this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   loadCategories() {

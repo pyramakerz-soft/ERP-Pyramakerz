@@ -7,29 +7,29 @@
 
 <div class="mt-6">
   <div class="flex justify-between">
-    <h1 class="font-semibold text-2xl leading-9">Sub-Categories</h1>
+    <h1 class="font-semibold text-2xl leading-9"> {{ 'Sub_Categories' | translate }}</h1>
     <div class="flex justify-between items-center">
       <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
       <button (click)="Create()"
         class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
-        Create Sub-Category
+        {{ 'Create' | translate }}  {{ 'Sub-Category' | translate }}
       </button>
     </div>
   </div>
 
   <div>
     <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
-      <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
+      <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
         <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
           <tr>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-              ID
+               {{ 'ID' | translate }}
             </th>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-              Name
+                {{ 'Name' | translate }}
             </th>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-              Actions
+               {{ 'Actions' | translate }}
             </th>
           </tr>
         </thead>
@@ -38,7 +38,7 @@
           <tr *ngIf="TableData.length === 0">
             <td colspan="3"
               class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-              No Data Found
+               {{ 'No Data Found' | translate }}
             </td>
           </tr>
 
@@ -53,7 +53,7 @@
               {{ row.name }}
             </td>
             <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-              <div class="flex space-x-4">
+              <div class="flex space-x-4 rtl:space-x-reverse">
                 <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)" (click)="Delete(row.id)">
                   <i class="fa-regular fa-trash-can"></i>
                 </button>
@@ -81,16 +81,16 @@
     </button>
 
     <h1 *ngIf="mode == 'Create'" class="font-semibold text-2xl leading-9">
-      Create Sub-Category
+      {{ 'Create' | translate }} {{ 'Sub-Category' | translate }} 
     </h1>
     <h1 *ngIf="mode == 'Edit'" class="font-semibold text-2xl leading-9">
-      Edit Sub-Category
+      {{ 'Edit' | translate }} {{ 'Sub-Category' | translate }} 
     </h1>
     <div class="mt-4 bg-[#F7F7F7] w-[573px] h-auto rounded-[24px] p-[16px_24px] gap-[20px]">
       <div class="flex flex-col mt-2 gap-2 items-start">
-        <h6 class="font-medium text-base leading-6">Sub-Category Name</h6>
+        <h6 class="font-medium text-base leading-6">  {{ 'Sub-Category' | translate }} {{ 'Name' | translate }}</h6>
         <input type="text" class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2"
-          [(ngModel)]="SubCategory.name" placeholder="Enter Sub-Category" (ngModelChange)="
+          [(ngModel)]="SubCategory.name" placeholder="{{ 'Enter' | translate }} {{ 'Sub-Category' | translate }}" (ngModelChange)="
                   onInputValueChange({ field: 'name', value: $event })" />
         <span *ngIf="validationErrors['name']" class="text-red-500 ml-3 font-normal">{{
           validationErrors["name"]}}</span>
@@ -98,7 +98,7 @@
       <div class="flex justify-end">
         <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg mt-2"
           (click)="CreateOREdit()">
-          <span *ngIf="!isLoading">Save</span>
+          <span *ngIf="!isLoading"> {{ 'Save' | translate }}</span>
           <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
         </button>
       </div>

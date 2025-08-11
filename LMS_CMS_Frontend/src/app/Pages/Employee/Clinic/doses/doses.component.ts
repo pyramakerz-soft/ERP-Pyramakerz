@@ -9,11 +9,14 @@ import { DoseService } from '../../../../Services/Employee/Clinic/dose.service';
 import { ApiService } from '../../../../Services/api.service';
 import Swal from 'sweetalert2';
 import { Dose } from '../../../../Models/Clinic/dose';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-doses',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent, ModalComponent, TableComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, 
+    ModalComponent, TableComponent , TranslateModule],
   templateUrl: './doses.component.html',
   styleUrls: ['./doses.component.css'],
 })
@@ -21,18 +24,26 @@ export class DosesComponent implements OnInit {
   dose: Dose = new Dose(0, '', '');
   editDose = false;
   validationErrors: { [key: string]: string } = {};
-  keysArray: string[] = ['id', 'doseTimes', 'insertedAt'];
+  keysArray: string[] = ['id', 'doseTimes'];
   key: string = 'id';
   value: any = '';
   isModalVisible = false;
   doses: Dose[] = [];
   DomainName: string = '';
+   isRtl: boolean = false;
+    subscription!: Subscription;
 
-  constructor(private doseService: DoseService, private apiService: ApiService) {}
+  constructor(private doseService: DoseService, 
+    private apiService: ApiService,
+      private languageService: LanguageService) {}
 
   ngOnInit(): void {
     this.DomainName = this.apiService.GetHeader();
     this.getDoses();
+     this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   async getDoses() {
@@ -167,4 +178,24 @@ saveDose() {
     console.error(message, error);
     // Swal.fire('Error!', 'An error occurred. Please try again.', 'error');
   }
+
+
+GetTableHeaders(){
+   
+if(!this.isRtl){
+  return ['ID', 'Doses', 'Date', 'Actions']
+}else{
+  return[
+  "المعرف",
+  "الجرعات",
+  "التاريخ",
+  "الإجراءات"
+]
+}
+}
+
+
+
+
+
 }

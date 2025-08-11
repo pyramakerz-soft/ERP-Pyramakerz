@@ -2,6 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ApiService } from '../../api.service';
 import { Notification } from '../../../Models/Communication/notification';
+import { Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -10,6 +11,14 @@ export class NotificationService {
   baseUrl = ""
   header = ""
 
+  // To make the count of notifications change when open the message
+  private notificationOpenedSource = new Subject<void>();
+  notificationOpened$ = this.notificationOpenedSource.asObservable();
+
+  notifyNotificationOpened() {
+    this.notificationOpenedSource.next();
+  }
+  
   constructor(public http: HttpClient, public ApiServ: ApiService) {
     this.baseUrl = ApiServ.BaseUrl
   }
@@ -97,6 +106,18 @@ export class NotificationService {
       .set('Content-Type', 'application/json');
     return this.http.get<Notification>(`${this.baseUrl}/Notification/ByUserIDAndNotificationSharedByID/${notificationSharedByID}`, { headers })
   }
+  
+  UnSeenNotificationCount(DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<any>(`${this.baseUrl}/Notification/UnSeenNotificationCount`, { headers })
+  }
 
   Add(notification: Notification, DomainName: string) {
     if (DomainName != null) {
@@ -170,5 +191,31 @@ export class NotificationService {
       .set('Content-Type', 'application/json');
 
     return this.http.put(`${this.baseUrl}/Notification/LinkOpened/${notificationSharedToID}`, {} , { headers });
+  }
+
+  DismissAll(DomainName:string) {
+    if(DomainName!=null) {
+      this.header=DomainName 
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+
+    return this.http.put(`${this.baseUrl}/Notification/DismissAll`, {} , { headers });
+  }
+
+  DismissOne(notificationSharedToID:number ,DomainName:string) {
+    if(DomainName!=null) {
+      this.header=DomainName 
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+
+    return this.http.put(`${this.baseUrl}/Notification/DismissOne/${notificationSharedToID}`, {} , { headers });
   }
 }

@@ -12,11 +12,14 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-registered-employee',
   standalone: true,
-  imports: [CommonModule, SearchComponent],
+  imports: [CommonModule, SearchComponent, TranslateModule],
   templateUrl: './registered-employee.component.html',
   styleUrl: './registered-employee.component.css'
 })
@@ -27,13 +30,15 @@ export class RegisteredEmployeeComponent {
   key: string = 'id';
   value: any = '';
   keysArray: string[] = ['id', 'user_Name', 'en_name', 'ar_name', 'email', 'mobile', 'phone', 'address'];
-
+ isRtl: boolean = false;
+  subscription!: Subscription;
   constructor(
     private router: Router, 
     public activeRoute: ActivatedRoute, 
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService, 
-    public registeredEmployeeService: RegisteredEmployeeService
+    public registeredEmployeeService: RegisteredEmployeeService,
+    private languageService: LanguageService
   ) {}
 
   ngOnInit() { 
@@ -43,6 +48,10 @@ export class RegisteredEmployeeComponent {
     }); 
 
     this.GetAllData();  
+        this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetAllData(){

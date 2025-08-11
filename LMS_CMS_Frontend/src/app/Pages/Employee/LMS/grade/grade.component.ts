@@ -14,11 +14,13 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-grade',
   standalone: true,
-  imports: [FormsModule,CommonModule,SearchComponent],
+  imports: [FormsModule,CommonModule,SearchComponent, TranslateModule],
   templateUrl: './grade.component.html',
   styleUrl: './grade.component.css'
 })
@@ -26,7 +28,8 @@ export class GradeComponent {
   keysArray: string[] = ['id', 'name','dateFrom','dateTo'];
   key: string= "id";
   value: any = "";
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   gradeData:Grade[] = []
   grade:Grade = new Grade()
   section:Section = new Section()
@@ -45,7 +48,8 @@ export class GradeComponent {
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   isLoading = false;
     
-  constructor(public account: AccountService, public sectionService: SectionService, public gradeService: GradeService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService, 
+  constructor(public account: AccountService ,
+      private languageService: LanguageService, public sectionService: SectionService, public gradeService: GradeService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService, 
     private menuService: MenuService, public activeRoute: ActivatedRoute, public router:Router){}
   
   ngOnInit(){
@@ -73,6 +77,11 @@ export class GradeComponent {
         this.AllowEditForOthers = settingsPage.allow_Edit_For_Others
       }
     });
+
+    this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   getSectionData(){

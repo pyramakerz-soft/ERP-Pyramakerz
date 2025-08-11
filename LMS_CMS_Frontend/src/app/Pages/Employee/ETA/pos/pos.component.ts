@@ -12,11 +12,13 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { POSService } from '../../../../Services/Employee/ETA/pos.service';
 import Swal from 'sweetalert2';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-pos',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './pos.component.html',
   styleUrl: './pos.component.css'
 })
@@ -25,7 +27,8 @@ export class POSComponent {
   keysArray: string[] = ['id','clientID','clientSecret','clientSecret2','deviceSerialNumber'];
   key: string = 'id';
   value: any = '';
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
   AllowEditForOthers: boolean = false;
@@ -56,7 +59,8 @@ export class POSComponent {
     private menuService: MenuService,  
     public activeRoute: ActivatedRoute, 
     public posService: POSService, 
-    public router: Router
+    public router: Router,
+    private languageService: LanguageService
   ) {}
 
   ngOnInit() {
@@ -80,6 +84,11 @@ export class POSComponent {
         this.AllowEditForOthers = settingsPage.allow_Edit_For_Others;
       }
     });
+
+     this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';    
   }
 
   GetAllData(pageNumber:number, pageSize:number){

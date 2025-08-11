@@ -9,11 +9,13 @@ import { Router } from '@angular/router';
 import { HygieneFormService } from '../../../../../Services/Employee/Clinic/hygiene-form.service';
 import { ApiService } from '../../../../../Services/api.service';
 import { HygieneForm } from '../../../../../Models/Clinic/HygieneForm';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-hygiene-form',
   standalone: true,
-  imports: [FormsModule, CommonModule, TableComponent, SearchComponent],
+  imports: [FormsModule, CommonModule, TableComponent, SearchComponent ,TranslateModule],
   templateUrl: './hygiene-form.component.html',
   styleUrls: ['./hygiene-form.component.css']
 })
@@ -27,20 +29,27 @@ export class HygieneFormComponent implements OnInit {
   editHygieneForm = false;
   validationErrors: { [key: string]: string } = {};
   isModalVisible = false;
+  isRtl: boolean = false;
+  subscription!: Subscription;
   DomainName: string = '';
   key: string = 'id'; 
   value: any = ''; 
-  keysArray: string[] = ['id', 'school', 'grade', 'classRoom', 'date']; 
+  keysArray: string[] = ['id', 'school', 'grade', 'classRoom']; 
 
   constructor(
     private router: Router,
     private hygieneFormService: HygieneFormService,
-    private apiService: ApiService
+    private apiService: ApiService,
+      private languageService: LanguageService
   ) {}
 
   ngOnInit() {
       this.DomainName = this.apiService.GetHeader(); 
     this.loadHygieneForms();
+    this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   async loadHygieneForms() {
@@ -186,4 +195,17 @@ deleteHygieneForm(row: any) {
   onView(row: any) {
     this.router.navigate(['/Employee/view hygiene form', row.id]);
   }
+
+
+
+
+
+  GetTableHeaders(){
+   
+if(!this.isRtl){
+  return ['ID' , 'School' , 'Grade', 'Classes', 'Date', 'Actions']
+}else{
+  return ['المعرف', 'المدرسة', 'الصف الدراسي', 'الفصول', 'التاريخ', 'الإجراءات']
+}
+}
 }

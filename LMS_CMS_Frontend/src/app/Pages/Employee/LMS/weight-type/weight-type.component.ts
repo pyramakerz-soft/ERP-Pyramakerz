@@ -13,11 +13,13 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { WeightTypeService } from '../../../../Services/Employee/LMS/weight-type.service';
 import { firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-weight-type',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './weight-type.component.html',
   styleUrl: './weight-type.component.css'
 })
@@ -33,7 +35,8 @@ export class WeightTypeComponent {
 
   DomainName: string = '';
   UserID: number = 0; 
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   path: string = '';
   key: string = 'id';
   value: any = '';
@@ -54,7 +57,8 @@ export class WeightTypeComponent {
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public weightTypeService: WeightTypeService,
-    public ApiServ: ApiService 
+    public ApiServ: ApiService ,
+    private languageService: LanguageService,
   ) { }
 
   ngOnInit() {
@@ -76,6 +80,10 @@ export class WeightTypeComponent {
     });
 
     this.GetAllData();
+        this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetAllData() {

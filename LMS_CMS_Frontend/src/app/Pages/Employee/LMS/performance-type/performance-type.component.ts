@@ -13,11 +13,13 @@ import { ApiService } from '../../../../Services/api.service';
 import { DomainService } from '../../../../Services/Employee/domain.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-performance-type',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './performance-type.component.html',
   styleUrl: './performance-type.component.css'
 })
@@ -36,7 +38,8 @@ export class PerformanceTypeComponent {
 
   isModalVisible: boolean = false;
   mode: string = '';
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   path: string = '';
   key: string = 'id';
   value: any = '';
@@ -55,7 +58,8 @@ export class PerformanceTypeComponent {
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
-    public TypeServ: PerformanceTypeService
+    public TypeServ: PerformanceTypeService,
+    private languageService: LanguageService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -76,6 +80,11 @@ export class PerformanceTypeComponent {
     });
 
     this.GetAllData();
+
+    this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetAllData() {

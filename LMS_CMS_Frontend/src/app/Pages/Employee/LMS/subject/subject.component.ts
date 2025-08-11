@@ -22,11 +22,13 @@ import { Grade } from '../../../../Models/LMS/grade';
 import { AddEditSubjectComponent } from '../../../../Component/Employee/LMS/add-edit-subject/add-edit-subject.component';
 import { MatDialog } from '@angular/material/dialog';
 import { firstValueFrom } from 'rxjs';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-subject',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './subject.component.html',
   styleUrl: './subject.component.css'
 })
@@ -46,7 +48,8 @@ export class SubjectComponent {
   AllowEditForOthers: boolean = false;
   AllowDeleteForOthers: boolean = false;
   path: string = ""
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   DomainName: string = "";
   UserID: number = 0;
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
@@ -63,7 +66,8 @@ export class SubjectComponent {
   grades: Grade[] = []
   IsView: boolean = false;
 
-  constructor(public account: AccountService, public router: Router, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService,
+  constructor(public account: AccountService,
+    private languageService: LanguageService, public router: Router, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService,
     public activeRoute: ActivatedRoute, private menuService: MenuService, public subjectService: SubjectService, public subjectCategoryService: SubjectCategoryService,
     public schoolService: SchoolService, public sectionService: SectionService, public gradeService: GradeService, public dialog: MatDialog) { }
 
@@ -77,7 +81,7 @@ export class SubjectComponent {
       this.path = url[0].path
     });
 
-    this.getSubjectData()
+    // this.getSubjectData()
     this.getSchools()
 
     this.menuService.menuItemsForEmployee$.subscribe((items) => {
@@ -89,15 +93,20 @@ export class SubjectComponent {
         this.AllowEditForOthers = settingsPage.allow_Edit_For_Others
       }
     });
+
+        this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  getSubjectData() {
-    this.subjectService.Get(this.DomainName).subscribe(
-      (data) => {
-        this.subjectData = data;
-      }
-    )
-  }
+  // getSubjectData() {
+  //   this.subjectService.Get(this.DomainName).subscribe(
+  //     (data) => {
+  //       this.subjectData = data;
+  //     }
+  //   )
+  // }
 
   GetDate() {
     this.IsView = true
@@ -141,7 +150,7 @@ export class SubjectComponent {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      this.getSubjectData()
+      this.GetDate()
     });
   }
 
@@ -201,7 +210,7 @@ export class SubjectComponent {
         this.subjectService.Delete(id, this.DomainName).subscribe(
           (data: any) => {
             this.subjectData = []
-            this.getSubjectData()
+            this.GetDate()
           }
         );
       }

@@ -29,6 +29,9 @@ import { QuillEditorComponent, QuillModule } from 'ngx-quill';
 import { FormsModule } from '@angular/forms';
 import { QuestionBankOption } from '../../../../Models/LMS/question-bank-option';
 import { SubBankQuestion } from '../../../../Models/LMS/sub-bank-question';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 import { School } from '../../../../Models/school';
 import { Grade } from '../../../../Models/LMS/grade';
 import { GradeService } from '../../../../Services/Employee/LMS/grade.service';
@@ -37,7 +40,7 @@ import { SchoolService } from '../../../../Services/Employee/school.service';
 @Component({
   selector: 'app-question-bank',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent, QuillModule],
+  imports: [FormsModule, CommonModule, SearchComponent, QuillModule , TranslateModule],
   templateUrl: './question-bank.component.html',
   styleUrl: './question-bank.component.css'
 })
@@ -61,7 +64,8 @@ export class QuestionBankComponent {
 
   DomainName: string = '';
   UserID: number = 0;
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   isModalVisible: boolean = false;
   mode: string = '';
 
@@ -140,6 +144,7 @@ export class QuestionBankComponent {
     public BloomLevelServ: BloomLevelService,
     public DokLevelServ: DokLevelService,
     public QuestionBankTypeServ: QuestionBankTypeService,
+    private languageService: LanguageService,
   ) { }
 
   ngOnInit() {
@@ -164,8 +169,11 @@ export class QuestionBankComponent {
     this.GetAllDokLevel()
     this.GetAllQuestionBankType()
     this.GetAllBloomLevel()
-    // this.GetAllSubject()
     this.GetAllTag()
+    this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   getAllGradesBySchoolId() {
@@ -203,6 +211,7 @@ export class QuestionBankComponent {
     this.IsView = true
     this.GetAllData(this.CurrentPage, this.PageSize)
   }
+
 
   onEditorCreated(quill: any) {
     this.quillInstance = quill;

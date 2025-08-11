@@ -12,11 +12,13 @@ import { ApiService } from '../../../../Services/api.service';
 import { DomainService } from '../../../../Services/Employee/domain.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-evaluation-feedback',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './evaluation-feedback.component.html',
   styleUrl: './evaluation-feedback.component.css'
 })
@@ -33,7 +35,8 @@ export class EvaluationFeedbackComponent {
 
   DomainName: string = '';
   UserID: number = 0;
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   isModalVisible: boolean = false;
   mode: string = '';
 
@@ -52,7 +55,8 @@ export class EvaluationFeedbackComponent {
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
-    public EvaluationEmployeeServ: EvaluationEmployeeService
+    public EvaluationEmployeeServ: EvaluationEmployeeService,
+    private languageService: LanguageService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -78,6 +82,11 @@ export class EvaluationFeedbackComponent {
       this.mode="Evaluator"
       this.GetAllDataForEvaluator();
     }
+        
+    this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetAllDataForEvaluated() {

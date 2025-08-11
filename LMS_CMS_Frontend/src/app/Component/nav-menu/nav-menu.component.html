@@ -7,19 +7,29 @@
             <input type="text"
                 class="lg:w-[543px] lg:h-[53px] rounded-[8px] border border-gray-300 px-3 lg:px-4 py-2 lg:py-3"
                 placeholder="{{ 'Enter Key Word' | translate }}" />
-        </div>
-        <!-- <div class="relative">
-            <i class="fa-solid fa-bell text-[#089B41] text-2xl"></i>
-            <span
-                class="absolute -top-2 -right-2 bg-black border-2 border-white text-white rounded-full text-[10px] px-1 py-0.25">5</span>
-        </div> -->
-
-        <div class="flex space-x-3 items-center">
-            <img src="Icons/Message.png">
-            <img src="Icons/Request.png">
-            <div class="relative dropdown-container">
-                <div> 
-                    <img src="Icons/Notification.png" (click)="toggleNotificationPopup()">
+        </div> 
+        <div class="flex space-x-4 items-center"> 
+            <div class="relative cursor-pointer hover:opacity-80 hover:scale-110 transition-all" (click)="toggleNotificationPopup()" >
+                <i class="fi fi-rr-comment-alt-dots text-white text-3xl"></i> 
+                <span *ngIf="notificationsUnSeenCount > 0"
+                    class="primaryBg absolute -top-2 -right-2 border-2 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold" >
+                    {{ notificationsUnSeenCount }}
+                </span>
+            </div>
+            <div class="relative cursor-pointer hover:opacity-80 hover:scale-110 transition-all" (click)="toggleNotificationPopup()" > 
+                <i class="fi fi-rs-paper-plane text-white text-3xl"></i> 
+                <span *ngIf="notificationsUnSeenCount > 0"
+                    class="primaryBg absolute -top-2 -right-2 border-2 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold" >
+                    {{ notificationsUnSeenCount }}
+                </span>
+            </div>
+            <div class="relative dropdown-container">  
+                <div class="relative cursor-pointer hover:opacity-80 hover:scale-110 transition-all" (click)="toggleNotificationPopup()" >
+                    <i class="fa-regular fa-bell text-white text-3xl"></i> 
+                    <span *ngIf="notificationsUnSeenCount > 0"
+                        class="primaryBg absolute -top-2 -right-2 border-2 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold" >
+                        {{ notificationsUnSeenCount }}
+                    </span>
                 </div>
                 <div *ngIf="isNotificationPopupOpen" class="absolute ltr:right-0 rtl:left-0 mt-2 w-[440px] bg-white shadow-lg z-50">
                     <div class="flex justify-between space-x-3 rtl:space-x-reverse p-4">
@@ -47,7 +57,7 @@
                                         </div> 
                                         <div *ngIf="notification.link" class="secondaryTxt text-sm font-semibold">        
                                             <a [href]="notification.link" class="border-b border-[#089B41] hover:text-[#089b408c]"
-                                                target="_blank" (click)="$event.stopPropagation(); LinkOpened(notification.id)"
+                                                target="_blank" (click)="$event.stopPropagation(); LinkOpened(notification)"
                                                 rel="noopener"> <!-- Prevents the new tab from having access to the original page via window.opener -->
                                                 View Link
                                             </a>                                    
@@ -56,6 +66,11 @@
                                     <p class="text-[#BDBDBD] text-sm font-semibold mt-2">{{ formatInsertedAt(notification.insertedAt) }}</p>
                                 </div>
                             </div>
+                        </li>
+                        <li *ngIf="notifications.length == 0"> 
+                            <div class="flex justify-center">
+                                <p class="text-[#BDBDBD]">No Notifications Yet</p>
+                            </div>  
                         </li>
                     </ul> 
                 </div>
@@ -176,7 +191,7 @@
                     </div> 
                     <div *ngIf="notificationByID.link" class="secondaryTxt text-sm font-semibold">        
                         <a [href]="notificationByID.link" class="border-b border-[#089B41] hover:text-[#089b408c]"
-                        target="_blank" (click)="LinkOpened(notificationByID.id)"
+                        target="_blank" (click)="LinkOpened(notificationByID)"
                         rel="noopener"> <!-- Prevents the new tab from having access to the original page via window.opener -->
                         View Link
                         </a>                                    

@@ -1,21 +1,21 @@
 <div class="flex justify-between items-center">
-    <div class="flex justify-between items-center space-x-5">
+    <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
         <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveEvaluation()"></i>
         <h1 class="primaryTxt font-semibold text-2xl leading-9">{{data.evaluationTemplateEnglishTitle }}</h1>
     </div>
 </div>
 
-<div class="flex justify-start space-x-2 mt-5">
+<div class="flex justify-start space-x-2 rtl:space-x-reverse mt-5">
     <div class="bg-[#EBEBEB] p-3 w-[49%] mb-4">
-        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Evaluated</p>
+        <p class="font-semibold text-sm text-[#6F6F6F] mb-3"> {{ 'Evaluated' | translate }}</p>
         <p class="font-medium text-base text-[#1E1E1E]">{{ data.evaluatedEnglishName }}</p>
     </div>
     <div class="bg-[#EBEBEB] p-3 w-[49%] mb-4">
-        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Evaluator</p>
+        <p class="font-semibold text-sm text-[#6F6F6F] mb-3"> {{ 'Evaluator' | translate }}</p>
         <p class="font-medium text-base text-[#1E1E1E]">{{ data.evaluatorEnglishName }}</p>
     </div>
     <div class="bg-[#EBEBEB] p-3 w-[49%] mb-4">
-        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Date</p>
+        <p class="font-semibold text-sm text-[#6F6F6F] mb-3">{{ 'Date' | translate }}</p>
         <p class="font-medium text-base text-[#1E1E1E]">{{ data.date }}</p>
     </div>
 </div>
@@ -45,7 +45,7 @@
 <div class="mt-5 ">
     <div>
         <div class="primaryBg p-4 rounded-xl text-white mb-4">
-            Narration
+             {{ 'Narration' | translate }}
         </div>
         <div class="flex justify-between flex-wrap">
             <div class="w-[29%]">
@@ -60,25 +60,25 @@
 <div class="mt-5 ">
     <div>
         <div class="primaryBg p-4 rounded-xl text-white mb-4">
-            Correction
+             {{ 'Correction' | translate }}
         </div>
         <div>
             <p class="primaryTxt font-medium">{{data.evaluationBookCorrectionEnglishName}}</p>
             <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
-                <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
+                <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
                     <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
                         <tr>
                             <th
                                 class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                                Student
+                                 {{ 'Student' | translate }}
                             </th>
                             <th
                                 class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                                Status
+                                 {{ 'Status' | translate }}
                             </th>
                             <th
                                 class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                                Notes
+                                 {{ 'Notes' | translate }}
                             </th>
                         </tr>
                     </thead>
@@ -86,7 +86,7 @@
                         <tr *ngIf="data.evaluationEmployeeStudentBookCorrections.length === 0">
                             <td colspan="3"
                                 class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-                                No Data Found
+                                 {{ 'No Data Found' | translate }}
                             </td>
                         </tr>
                         <tr *ngFor="let row of data.evaluationEmployeeStudentBookCorrections; let i = index"
@@ -117,15 +117,15 @@
     <div class="mt-5 ">
         <div>
             <div class="primaryBg p-4 rounded-xl text-white mb-4">
-                Feedback
+                 {{ 'Feedback' | translate }}
             </div>
             <div class="mt-5 flex flex-col">
-                <label class="mb-2 primaryTxt font-medium" for="notes">Feedback</label>
+                <label class="mb-2 primaryTxt font-medium" for="notes"> {{ 'Feedback' | translate }}</label>
                 <textarea *ngIf="data.feedback=='' && mode=='Evaluated'" id="notes" [(ngModel)]="Feedback"
-                    class="w-full rounded-lg border border-solid border-gray-300 py-3" placeholder="Add Your Feedback">
+                    class="w-full rounded-lg border border-solid border-gray-300 py-3" placeholder=" {{ 'Add Your Feedback' | translate }}">
                 </textarea>
                 <div *ngIf="data.feedback=='' && mode=='Evaluator' " class="bg-[#EBEBEB] p-4 rounded-xl mb-2 border">
-                    <div>No Feed back till now</div>
+                    <div> {{ 'No Feed back till now' | translate }}</div>
                 </div>
     
                 <div *ngIf="data.feedback!='' " class="bg-[#EBEBEB] p-4 rounded-xl mb-2 border">
@@ -138,7 +138,7 @@
     <div class="flex justify-end" *ngIf="data.feedback=='' && mode=='Evaluated'">
         <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
             (click)="SaveFeedback()">
-            <span *ngIf="!isLoading">Save</span>
+            <span *ngIf="!isLoading"> {{ 'Save' | translate }}</span>
             <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
         </button>
     </div>
