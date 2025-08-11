@@ -13,9 +13,9 @@ namespace LMS_CMS_PL.Services.SignalR
         {
             _hubContext = hubContext;
             _dbContextFactory = dbContextFactory; 
-        }
+        } 
         public async Task PushRealTimeNotification(long userId, long userType, object notification, string domainName)
-        {  
+        {
             string userTypeString = userType switch
             {
                 1 => "employee",
@@ -27,7 +27,12 @@ namespace LMS_CMS_PL.Services.SignalR
             if (string.IsNullOrEmpty(domainName) || userTypeString == null)
                 throw new Exception("Invalid domain or user type.");
 
-            var uniqueKey = $"{domainName}_{userType}_{userId}"; 
+            var uniqueKey = $"{domainName}_{userType}_{userId}";
+
+            // Ensure the client is in the group
+            await _hubContext.Groups.AddToGroupAsync(uniqueKey, uniqueKey);
+
+            // Send notification
             await _hubContext.Clients.Group(uniqueKey).SendAsync("ReceiveNotification", notification);
         }
     }

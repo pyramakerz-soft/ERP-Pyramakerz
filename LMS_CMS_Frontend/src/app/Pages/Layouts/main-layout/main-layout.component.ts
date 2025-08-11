@@ -33,7 +33,7 @@ export class MainLayoutComponent {
     this.communicationService.action$.subscribe(async (state) => {
       await this.GetInfo();
 
-    }); 
+    });  
     this.realTimeService.startConnection();
   }
 

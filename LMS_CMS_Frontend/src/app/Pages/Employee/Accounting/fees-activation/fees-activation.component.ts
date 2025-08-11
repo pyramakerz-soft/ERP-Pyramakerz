@@ -143,7 +143,6 @@ export class FeesActivationComponent {
     this.feesActivationServ.Get(this.GradeId, this.YearId, this.ClassRoomId, this.StudentId, this.DomainName).subscribe((d) => {
       this.TableData = d;
       this.isSearchLoading = false
-      console.log(this.TableData)
     },err=>{
      this.isSearchLoading = false
     })

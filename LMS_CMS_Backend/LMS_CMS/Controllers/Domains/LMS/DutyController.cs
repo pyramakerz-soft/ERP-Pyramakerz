@@ -129,7 +129,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             List<long> dutiesteachersNotValid = duties.Select(s => s.TeacherID).Distinct().ToList();
 
             // Get all employees (teachers) excluding the ones already assigned
-            List<Employee> validTeachers = Unit_Of_Work.employee_Repository.FindBy( e => e.IsDeleted != true
+            List<Employee> validTeachers = Unit_Of_Work.employee_Repository.FindBy( e => e.IsDeleted != true && e.EmployeeTypeID == 4
                     && (dutiesteachersNotValid == null || !dutiesteachersNotValid.Contains(e.ID))
                     && (teachersNotValid == null || !teachersNotValid.Contains(e.ID)));
 

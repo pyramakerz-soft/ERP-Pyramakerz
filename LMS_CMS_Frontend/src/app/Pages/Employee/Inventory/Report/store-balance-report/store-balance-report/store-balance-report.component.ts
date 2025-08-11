@@ -52,8 +52,9 @@ export class StoreBalanceReportComponent implements OnInit {
     reportHeaderTwoEn: '',
     reportHeaderOneAr: '',
     reportHeaderTwoAr: '',
-    reportImage: 'assets/images/logo.png',
   };
+
+  baseHeaders = ['Item Code', 'Item Name', 'Quantity'];
 
   constructor(
     private inventoryDetailsService: InventoryDetailsService,
@@ -68,6 +69,7 @@ export class StoreBalanceReportComponent implements OnInit {
       this.setPageTitle();
       this.loadStores();
       this.loadCategories();
+      this.getPdfTableHeaders()
     });
   }
 
@@ -114,7 +116,6 @@ export class StoreBalanceReportComponent implements OnInit {
     this.isLoading = true;
     this.storesService.Get(this.storesService.ApiServ.GetHeader()).subscribe({
       next: (stores) => {
-        console.log('Stores loaded:', stores);
         this.stores = stores;
         this.isLoading = false;
       },
@@ -144,11 +145,6 @@ export class StoreBalanceReportComponent implements OnInit {
   onFilterChange() {
     this.showTable = false;
     this.reportData = null;
-    console.log('Checkbox values:', {
-      hasBalance: this.hasBalance,
-      overdrawnBalance: this.overdrawnBalance,
-      zeroBalances: this.zeroBalances,
-    });
   }
 
   viewReport() {
@@ -179,14 +175,12 @@ export class StoreBalanceReportComponent implements OnInit {
       )
       .subscribe({
         next: (response) => {
-          console.log('Report data loaded:', response);
           this.reportData = response;
           this.prepareExportData();
           this.showTable = true;
           this.isLoading = false;
         },
         error: (error) => {
-          console.error('Error loading report:', error);
           this.reportData = null;
           this.showTable = true;
           this.isLoading = false;
@@ -242,42 +236,73 @@ export class StoreBalanceReportComponent implements OnInit {
     );
   }
 
-  getInfoRows(): any[] {
-    const selectedStore = this.stores.find(
-      (s) => s.id === this.selectedStoreId
-    );
-    return [
-      { keyEn: 'Report Type: ' + this.pageTitle },
-      { keyEn: 'To Date: ' + this.dateTo },
-      { keyEn: 'Store: ' + (selectedStore?.name || 'N/A') },
-      {
-        keyEn:
-          'Category: ' +
-          (this.selectedCategoryId
-            ? this.categories.find((c) => c.id === this.selectedCategoryId)
-                ?.name
-            : 'All'),
-      },
-      { keyEn: 'Has Balance: ' + (this.hasBalance ? 'Yes' : 'No') },
-      { keyEn: 'Overdrawn Balance: ' + (this.overdrawnBalance ? 'Yes' : 'No') },
-      { keyEn: 'Zero Balances: ' + (this.zeroBalances ? 'Yes' : 'No') },
-    ];
-  }
+  // getInfoRows(): any[] {
+  //   const selectedStore = this.stores.find(
+  //     (s) => s.id === this.selectedStoreId
+  //   );
+  //   return [
+  //     { keyEn: 'Report Type: ' + this.pageTitle },
+  //     { keyEn: 'To Date: ' + this.dateTo },
+  //     { keyEn: 'Store: ' + (selectedStore?.name || 'N/A') },
+  //     {
+  //       keyEn:
+  //         'Category: ' +
+  //         (this.selectedCategoryId
+  //           ? this.categories.find((c) => c.id === this.selectedCategoryId)
+  //               ?.name
+  //           : 'All'),
+  //     },
+  //     { keyEn: 'Has Balance: ' + (this.hasBalance ? 'Yes' : 'No') },
+  //     { keyEn: 'Overdrawn Balance: ' + (this.overdrawnBalance ? 'Yes' : 'No') },
+  //     { keyEn: 'Zero Balances: ' + (this.zeroBalances ? 'Yes' : 'No') },
+  //   ];
+  // }
+  
 
-  getPdfTableHeaders(): string[] {
-    const baseHeaders = ['Item Code', 'Item Name', 'Quantity'];
+  getStoreName(): string {
+  if (!this.selectedStoreId) return 'N/A';
+  const store = this.stores.find(s => s.id === this.selectedStoreId);
+  return store?.name || 'N/A';
+}
+
+getCategoryName(): string {
+  if (!this.selectedCategoryId) return 'All Categories';
+  const category = this.categories.find(c => c.id === this.selectedCategoryId);
+  return category?.name || 'N/A';
+}
+
+getDateInfo(): string {
+  return this.dateTo ? new Date(this.dateTo).toLocaleDateString() : 'N/A';
+}
+
+getBalanceFiltersInfo(): string {
+  const filters = [];
+  if (this.hasBalance) filters.push('Has Balance');
+  if (this.overdrawnBalance) filters.push('Overdrawn');
+  if (this.zeroBalances) filters.push('Zero Balances');
+  return filters.length > 0 ? filters.join(', ') : 'No Filters';
+}
+
+
+  getPdfTableHeaders() {
+    this.baseHeaders = ['Item Code', 'Item Name', 'Quantity'];
 
     switch (this.reportType) {
       case 'PurchasePrice':
-        return [...baseHeaders, 'Purchase Price', 'Total Purchase'];
+        this.baseHeaders = [...this.baseHeaders, 'Purchase Price', 'Total Purchase'];
+        break
       case 'SalesPrice':
-        return [...baseHeaders, 'Sales Price', 'Total Sales'];
+          this.baseHeaders = [...this.baseHeaders, 'Sales Price', 'Total Sales'];
+          break
       case 'Cost':
-        return [...baseHeaders, 'Average Cost', 'Total Cost'];
+        this.baseHeaders = [...this.baseHeaders, 'Average Cost', 'Total Cost'];
+        break
       case 'ItemsUnderLimit':
-        return [...baseHeaders, 'Limit'];
+        this.baseHeaders = [...this.baseHeaders, 'Limit'];
+        break;
       default:
-        return baseHeaders;
+        this.baseHeaders;
+        break
     }
   }
 
@@ -285,7 +310,7 @@ export class StoreBalanceReportComponent implements OnInit {
     return this.reportType !== 'QuantityOnly';
   }
 
-  DownloadAsPDF() {
+  DownloadAsPDF() { 
     if (!this.reportForExport.length) {
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;

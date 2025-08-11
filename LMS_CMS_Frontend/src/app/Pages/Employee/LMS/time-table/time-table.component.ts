@@ -183,18 +183,6 @@ export class TimeTableComponent {
     document.getElementById('Add_Modal')?.classList.add('hidden');
   }
 
-  openPrintModal(id: number) {
-    document.getElementById('Print_Modal')?.classList.remove('hidden');
-    document.getElementById('Print_Modal')?.classList.add('flex');
-    this.PrintType = 'All'
-    this.SelectedTimeTableId = id
-  }
-
-  closePrintModal() {
-    document.getElementById('Print_Modal')?.classList.remove('flex');
-    document.getElementById('Print_Modal')?.classList.add('hidden');
-  }
-
   onInputValueChange(event: { field: keyof TimeTable; value: any }) {
     const { field, value } = event;
     if (field == 'name' || field == 'schoolID') {
@@ -269,112 +257,9 @@ export class TimeTableComponent {
   }
 
   EditFavourite(id: number, isFav: boolean) {
-    console.log(id, isFav)
     this.TimeTableServ.EditIsFavourite(id, isFav, this.DomainName).subscribe((d) => {
       this.GetAllData()
     })
-  }
-
-  async triggerPrint() {
-    setTimeout(() => {
-      let printContents: string | undefined;
-      if (this.PrintType == "Teacher") {
-        printContents = document.getElementById("DataTeacher")?.innerHTML;
-      } else if (this.PrintType == "Class") {
-        printContents = document.getElementById("Data")?.innerHTML;
-        console.log(printContents)
-      } else {
-        printContents = document.getElementById("All")?.innerHTML;
-      }
-      if (!printContents) {
-        console.error("Element not found!");
-        return;
-      }
-      // Create a print-specific stylesheet
-      const printStyle = `
-        <style>
-          @page { size: auto; margin: 0mm; }
-          body { 
-            margin: 0; 
-          }
-  
-          @media print {
-            body > *:not(#print-container) {
-              display: none !important;
-            }
-            #print-container {
-              display: block !important;
-              position: static !important;
-              top: auto !important;
-              left: auto !important;
-              width: 100% !important;
-              height: auto !important;
-              background: white !important;
-              box-shadow: none !important;
-              margin: 0 !important;
-            }
-          }
-        </style>
-      `;
-
-      // Create a container for printing
-      const printContainer = document.createElement('div');
-      printContainer.id = 'print-container';
-      printContainer.innerHTML = printStyle + printContents;
-
-      // Add to body and print
-      document.body.appendChild(printContainer);
-      window.print();
-
-      // Clean up
-      setTimeout(() => {
-        document.body.removeChild(printContainer);
-        this.closePrintModal()
-        this.isLoading = false;
-      }, 100);
-    }, 500);
-  }
-
-  Print() {
-    this.isLoading = true;
-    if (this.PrintType === "Class") {
-      this.TimeTableServ.GetByIdForClassAsync(this.SelectedTimeTableId, this.SelectedClassId, this.DomainName).subscribe((d) => {
-        this.TimeTable = d.data;
-        this.TimeTableName = d.timeTableName;
-        this.MaxPeriods = d.maxPeriods;
-        this.ClassName=d.className
-        this.triggerPrint();
-      });
-    } else if (this.PrintType === "Teacher") {
-      this.TimeTableServ.GetByIdForTeacherAsync(this.SelectedTimeTableId, this.SelectedTeacherId, this.DomainName).subscribe((d) => {
-        console.log(this.TimeTable)
-        this.TimeTable = d.data;
-        this.TimeTableName = d.timeTableName;
-        this.MaxPeriods = d.maxPeriods;
-        this.TeacherName=d.teacherName
-        this.triggerPrint();
-      });
-    } else if (this.PrintType === "All") {
-      this.TimeTableServ.GetByID(this.SelectedTimeTableId, this.DomainName).subscribe((d) => {
-        this.TimeTable2 = d.data;
-        console.log(this.TimeTable)
-        this.TimeTableName = d.timeTableName;
-        this.MaxPeriods = d.maxPeriods;
-        this.triggerPrint();
-      });
-    }
-  }
-
-  GetTypes() {
-    if (this.PrintType == "Class") {
-      this.TimeTableServ.GetAllClassesinThisTimetable(this.SelectedTimeTableId, this.DomainName).subscribe((d) => {
-        this.classes = d
-      })
-    } else if (this.PrintType == "Teacher") {
-      this.TimeTableServ.GetAllTeachersinThisTimetable(this.SelectedTimeTableId, this.DomainName).subscribe((d) => {
-        this.Teachers = d
-      })
-    }
   }
 
   delete(id: number) {

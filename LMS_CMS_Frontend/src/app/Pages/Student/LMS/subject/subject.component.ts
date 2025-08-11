@@ -41,7 +41,6 @@ export class SubjectComponent {
     this.subjectService.GetByStudentId(this.UserID, this.DomainName).subscribe(
       (data) => {
         this.subjectData = data;
-        console.log(this.subjectData)
       }
     )
   }

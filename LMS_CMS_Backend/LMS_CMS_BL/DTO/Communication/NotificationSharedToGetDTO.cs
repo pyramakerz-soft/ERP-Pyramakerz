@@ -15,6 +15,7 @@ namespace LMS_CMS_BL.DTO.Communication
         public string UserName { get; set; }
         public bool NotifiedOrNot { get; set; }
         public bool SeenOrNot { get; set; }
+        public bool IsLinkOpened { get; set; }
         public long NotificationID { get; set; }
         public long UserTypeID { get; set; }
 

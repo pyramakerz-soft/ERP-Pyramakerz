@@ -223,7 +223,6 @@ export class StockingDetailsComponent {
       this.DomainName
     ).subscribe((d) => {
       this.ShopItems = d;
-      console.log(this.ShopItems)
       this.FilteredDetails = this.ShopItems.map((item) => ({
         id: Date.now() + Math.floor(Math.random() * 1000),
         insertedAt: '',
@@ -276,7 +275,6 @@ export class StockingDetailsComponent {
   }
 
   GetItems() {
-
     if (this.SelectedSubCategoryId)
       this.StockingDetailsServ.GetCurrentStockForAllItemsBySub(
         this.Data.storeID,
@@ -284,9 +282,7 @@ export class StockingDetailsComponent {
         this.Data.date,
         this.DomainName
       ).subscribe((d) => {
-
         this.ShopItems = d;
-        console.log(this.ShopItems)
         if (this.AllItems) {
           this.FilteredDetails = this.ShopItems.map((item) => ({
             id: Date.now() + Math.floor(Math.random() * 1000),

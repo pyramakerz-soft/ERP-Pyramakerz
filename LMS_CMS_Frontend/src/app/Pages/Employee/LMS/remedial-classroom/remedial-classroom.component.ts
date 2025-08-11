@@ -25,6 +25,7 @@ import { EmployeeService } from '../../../../Services/Employee/employee.service'
 import { ClassroomSubjectService } from '../../../../Services/Employee/LMS/classroom-subject.service';
 import { SearchStudentComponent } from '../../../../Component/Employee/search-student/search-student.component';
 import Swal from 'sweetalert2';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-remedial-classroom',
@@ -43,11 +44,11 @@ export class RemedialClassroomComponent {
   AllowDeleteForOthers: boolean = false;
   DomainName: string = '';
   UserID: number = 0;
-  mode: string = '';
+  mode: string = 'Create';
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'name'];
+  keysArray: string[] = ['id', 'name' ,'numberOfSession' , 'insertedAt' ,'schoolName' ,'gradeName' ,"subjectEnglishName" ,'teacherEnName'];
 
   TableData: RemedialClassroom[] = [];
   schools: School[] = [];
@@ -105,7 +106,7 @@ export class RemedialClassroomComponent {
   }
 
   GetAllSchools() {
-    this.TableData = [];
+    this.schools = [];
     this.SchoolServ.Get(this.DomainName).subscribe((d) => {
       this.schools = d;
       this.SchoolsForCreate = d;
@@ -116,7 +117,6 @@ export class RemedialClassroomComponent {
     this.TableData = [];
     this.remedialClassroomServ.GetBySchoolId(this.SelectedSchoolId, this.DomainName).subscribe((d) => {
       this.TableData = d;
-      console.log(this.TableData)
     });
   }
 
@@ -152,7 +152,7 @@ export class RemedialClassroomComponent {
 
   GetAllTeachers() {
     this.Teachers = [];
-    this.ClassroomSubjectServ.GetBySubjectId(this.remedialClassroom.subjectID, this.DomainName).subscribe((d) => {
+    this.EmployeeServ.GetWithTypeId(4, this.DomainName).subscribe((d) => {
       this.Teachers = d;
     });
   }
@@ -160,7 +160,6 @@ export class RemedialClassroomComponent {
   CreateOREdit() {
     if (this.isFormValid()) {
       this.isLoading = true
-        console.log(this.remedialClassroom)
       if (this.mode == 'Create') {
         this.remedialClassroomServ.Add(this.remedialClassroom, this.DomainName).subscribe((d) => {
           this.GetAllData()
@@ -173,7 +172,6 @@ export class RemedialClassroomComponent {
             confirmButtonColor: '#089B41',
           });
         }, error => {
-          console.log(error)
           this.isLoading = false
           if (error.error?.toLowerCase().includes('name') && error.status === 400) {
             Swal.fire({
@@ -196,6 +194,7 @@ export class RemedialClassroomComponent {
         })
       }
       else if (this.mode == 'Edit') {
+        console.log(this.remedialClassroom)
         this.remedialClassroomServ.Edit(this.remedialClassroom, this.DomainName).subscribe((d) => {
           this.GetAllData()
           this.closeModal()
@@ -230,37 +229,36 @@ export class RemedialClassroomComponent {
       existingIds.add(id);
     }
     this.remedialClassroom.studentIds = Array.from(existingIds);
-    console.log(this.remedialClassroom.studentIds);
   }
 
   async onSearchEvent(event: { key: string; value: any }) {
-    // this.key = event.key;
-    // this.value = event.value;
-    // try {
-    //   const data: RemedialClassroom[] = await firstValueFrom(
-    //     // this.TimeTableServ.GetBySchoolId(this.SelectedSchoolId, this.DomainName)
-    //   );
-    //   this.TableData = data || [];
+    this.key = event.key;
+    this.value = event.value;
+    try {
+      const data: RemedialClassroom[] = await firstValueFrom(
+        this.remedialClassroomServ.GetBySchoolId(this.SelectedSchoolId, this.DomainName)
+      );
+      this.TableData = data || [];
 
-    //   if (this.value !== '') {
-    //     const numericValue = isNaN(Number(this.value))
-    //       ? this.value
-    //       : parseInt(this.value, 10);
+      if (this.value !== '') {
+        const numericValue = isNaN(Number(this.value))
+          ? this.value
+          : parseInt(this.value, 10);
 
-    //     this.TableData = this.TableData.filter((t) => {
-    //       const fieldValue = t[this.key as keyof typeof t];
-    //       if (typeof fieldValue === 'string') {
-    //         return fieldValue.toLowerCase().includes(this.value.toLowerCase());
-    //       }
-    //       if (typeof fieldValue === 'number') {
-    //         return fieldValue.toString().includes(numericValue.toString());
-    //       }
-    //       return fieldValue == this.value;
-    //     });
-    //   }
-    // } catch (error) {
-    //   this.TableData = [];
-    // }
+        this.TableData = this.TableData.filter((t) => {
+          const fieldValue = t[this.key as keyof typeof t];
+          if (typeof fieldValue === 'string') {
+            return fieldValue.toLowerCase().includes(this.value.toLowerCase());
+          }
+          if (typeof fieldValue === 'number') {
+            return fieldValue.toString().includes(numericValue.toString());
+          }
+          return fieldValue == this.value;
+        });
+      }
+    } catch (error) {
+      this.TableData = [];
+    }
   }
 
   delete(id: number) {
@@ -299,11 +297,10 @@ export class RemedialClassroomComponent {
   openModal() {
     document.getElementById('Add_Modal')?.classList.remove('hidden');
     document.getElementById('Add_Modal')?.classList.add('flex');
-    this.remedialClassroom = new RemedialClassroom();
-    this.mode = "Create"
   }
 
   closeModal() {
+    this.remedialClassroom = new RemedialClassroom();
     document.getElementById('Add_Modal')?.classList.remove('flex');
     document.getElementById('Add_Modal')?.classList.add('hidden');
     this.isModalOpen = false;
@@ -341,6 +338,24 @@ export class RemedialClassroomComponent {
     }
   }
 
+  IsAllowDelete(InsertedByID: number) {
+    const IsAllow = this.EditDeleteServ.IsAllowDelete(
+      InsertedByID,
+      this.UserID,
+      this.AllowDeleteForOthers
+    );
+    return IsAllow;
+  }
+
+  IsAllowEdit(InsertedByID: number) {
+    const IsAllow = this.EditDeleteServ.IsAllowEdit(
+      InsertedByID,
+      this.UserID,
+      this.AllowEditForOthers
+    );
+    return IsAllow;
+  }
+
   isFormValid(): boolean {
     let isValid = true;
     for (const key in this.remedialClassroom) {
@@ -363,5 +378,41 @@ export class RemedialClassroomComponent {
       }
     }
     return isValid;
+  }
+
+  Edit(id: number) {
+    this.mode = "Edit"
+    if (this.mode == 'Edit') {
+      this.remedialClassroomServ.GetById(id, this.DomainName).subscribe((d) => {
+        this.remedialClassroom = d
+        this.Teachers = [];
+        this.EmployeeServ.GetWithTypeId(4, this.DomainName).subscribe((d) => {
+          this.Teachers = d;
+        });
+        this.SchoolsForCreate = [];
+        this.SchoolServ.Get(this.DomainName).subscribe((d) => {
+          this.SchoolsForCreate = d;
+          this.academicYears = [];
+          this.AcademicYearServ.GetBySchoolId(this.remedialClassroom.schoolID, this.DomainName).subscribe((d) => {
+            this.academicYears = d;
+          });
+          this.grades = [];
+          this.GradeServ.GetBySchoolId(this.remedialClassroom.schoolID, this.DomainName).subscribe((d) => {
+            this.grades = d;
+            this.subjects = [];
+            this.SubjectServ.GetByGradeId(this.remedialClassroom.gradeID, this.DomainName).subscribe((d) => {
+              this.subjects = d;
+            });
+          });
+        });
+      })
+
+    }
+    this.openModal()
+  }
+
+  Create(){
+    this.mode = "Create"
+    this.openModal()
   }
 }

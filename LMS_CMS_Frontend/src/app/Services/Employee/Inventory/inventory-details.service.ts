@@ -216,10 +216,6 @@ export class InventoryDetailsService {
     if (DomainName != null) {
       this.header = DomainName;
     }
-    console.log(
-      'getAllStoresBalance called with reportflagtype:',
-      reportFlagType
-    );
     const token = localStorage.getItem('current_token');
     const headers = new HttpHeaders()
       .set('domain-name', this.header)

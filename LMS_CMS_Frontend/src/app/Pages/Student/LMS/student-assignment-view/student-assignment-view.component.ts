@@ -64,7 +64,6 @@ export class StudentAssignmentViewComponent {
   GetAssignment() {
     this.assignmentStudentServ.GetById(this.AssignmentStudentId, this.DomainName).subscribe((d) => {
       this.assignmentStudent = d
-      console.log(this.assignmentStudent)
     })
   }
 
@@ -73,7 +72,6 @@ export class StudentAssignmentViewComponent {
   }
 
   getAnswerForSubBankQuestion(row: AssignmentStudentQuestion, subBankQuestionID: number): string {
-    console.log(row)
     const answerObj = row.assignmentStudentQuestionAnswerOption.find(
       (a: any) => a.subBankQuestionID === subBankQuestionID
     );

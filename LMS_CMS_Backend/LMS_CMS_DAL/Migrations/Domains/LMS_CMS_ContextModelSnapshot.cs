@@ -3418,6 +3418,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<bool>("ForwardedOrNot")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime?>("InsertedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Message")
                         .HasColumnType("nvarchar(max)");
 
@@ -3560,6 +3563,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .HasColumnType("bigint");
 
                     b.Property<bool?>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsLinkOpened")
                         .HasColumnType("bit");
 
                     b.Property<long>("NotificationID")

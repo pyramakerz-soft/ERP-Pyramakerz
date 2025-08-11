@@ -100,8 +100,6 @@ export class AverageCostCalcComponent {
       clearInterval(progressInterval);
       this.progress = 100;
 
-      console.log('Average Cost Calculation Response:', response);
-
       if (response && response.length > 0) {
         this.successMessage =
           'Average cost calculation completed successfully!';

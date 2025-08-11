@@ -77,7 +77,6 @@ export class AssignmentDetailComponent {
   GetAssignment() {
     this.assignmentStudentServ.GetById(this.AssignmentStudentId, this.DomainName).subscribe((d) => {
       this.assignmentStudent = d
-      console.log(this.assignmentStudent)
       for (let row of this.assignmentStudent.assignmentStudentQuestions) {
         this.autoCorrectMark(row);
       }
@@ -143,7 +142,6 @@ export class AssignmentDetailComponent {
         cancelButtonText: 'Forgive Delay',
       }).then((result) => {
         this.assignmentStudent.evaluationConsideringTheDelay = result.isConfirmed;
-        console.log(this.assignmentStudent.evaluationConsideringTheDelay)
         this.assignmentStudentServ.Edit(this.assignmentStudent, this.DomainName)
           .pipe(finalize(() => this.isLoading = false)) // runs after success or error
           .subscribe({

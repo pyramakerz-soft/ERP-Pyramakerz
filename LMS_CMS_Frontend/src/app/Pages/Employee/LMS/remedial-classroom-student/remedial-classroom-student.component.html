@@ -1,15 +1,15 @@
 <div class="flex justify-between items-center">
     <div class="flex justify-between items-center space-x-5">
         <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToAcademicYear()"></i>
-        <h1 class="primaryTxt font-semibold text-2xl leading-9"> Remedial Class</h1>
+        <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ remedialClassroom.name }}</h1>
     </div>
 </div>
 
 <div class="flex flex-wrap mt-5">
     <div class="p-3 w-[30%]">
-        <div class="bg-[#EBEBEB] p-3  mb-4">
-            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Name</p>
-            <p class="font-medium text-base text-[#1E1E1E]">{{ remedialClassroom.name }}</p>
+        <div class="bg-[#EBEBEB] p-3 mb-4">
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Number Of Session</p>
+            <p class="font-medium text-base text-[#1E1E1E]">{{ remedialClassroom.numberOfSession }}</p>
         </div>
     </div>
     <div class="p-3 w-[30%]">
@@ -26,14 +26,20 @@
     </div>
     <div class="p-3 w-[30%]">
         <div class="bg-[#EBEBEB] p-3 mb-4">
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Grade</p>
+            <p class="font-medium text-base text-[#1E1E1E]">{{ remedialClassroom.gradeName }}</p>
+        </div>
+    </div>
+    <div class="p-3 w-[30%]">
+        <div class="bg-[#EBEBEB] p-3 mb-4">
             <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Subject</p>
             <p class="font-medium text-base text-[#1E1E1E]">{{ remedialClassroom.subjectEnglishName }}</p>
         </div>
     </div>
-        <div class="p-3 w-[30%]">
+    <div class="p-3 w-[30%]">
         <div class="bg-[#EBEBEB] p-3 mb-4">
-            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Grade</p>
-            <p class="font-medium text-base text-[#1E1E1E]">{{ remedialClassroom.gradeName }}</p>
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Teacher</p>
+            <p class="font-medium text-base text-[#1E1E1E]">{{ remedialClassroom.teacherEnName}}</p>
         </div>
     </div>
 </div>
@@ -56,9 +62,6 @@
             <tr>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     ID
-                </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
-                    Student Id
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     Student Name
@@ -83,12 +86,10 @@
                 class="border-t border-gray-300 text-xs md:text-sm">
 
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{ row.id }}</td>
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.studentID }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.studentEnName }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     <div class="flex space-x-4">
-                        <button 
-                            (click)="dalete(row.id)">
+                        <button (click)="dalete(row.id)">
                             <i class="fa-regular fa-trash-can"></i>
                         </button>
                     </div>
@@ -99,13 +100,7 @@
 </div>
 
 
-<app-search-student
-  *ngIf="isModalOpen"
-  [selectedYear]="remedialClassroom.academicYearID"
-  [selectedGrade]="remedialClassroom.gradeID"
-  [selectedClassroom]="preSelectedClassroom"
-  [hiddenInputs]="hiddenInputs"
-  [hiddenColumns]="hiddenColumns"
-  (closeModal)="closeModal()"
-  (studentSelected)="handleStudentSelected($event)"
-></app-search-student>
+<app-search-student *ngIf="isModalOpen" [selectedYear]="remedialClassroom.academicYearID"
+    [selectedGrade]="remedialClassroom.gradeID" [selectedClassroom]="preSelectedClassroom" [hiddenInputs]="hiddenInputs"
+    [hiddenColumns]="hiddenColumns" (closeModal)="closeModal()"
+    (studentSelected)="handleStudentSelected($event)"></app-search-student>

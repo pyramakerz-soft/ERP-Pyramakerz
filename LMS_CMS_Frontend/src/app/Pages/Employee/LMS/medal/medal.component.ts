@@ -204,7 +204,7 @@ export class MedalComponent {
         if (!this.medal[field]) {
           if (
             field == 'arabicName' ||
-            field == 'englishName'
+            field == 'englishName' || (this.medal.id == 0 && field == "imageForm")
           ) {
             this.validationErrors[field] = `*${this.capitalizeField(
               field

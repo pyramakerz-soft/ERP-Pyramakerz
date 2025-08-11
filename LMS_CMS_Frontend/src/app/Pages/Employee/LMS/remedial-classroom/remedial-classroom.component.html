@@ -1,8 +1,8 @@
 <div class="flex justify-between">
     <h1 class="font-semibold text-2xl leading-9">Remedial Classroom</h1>
     <div class="flex justify-between items-center">
-        <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
-        <button (click)="openModal()"
+        <app-search *ngIf="SelectedSchoolId!=0" [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
+        <button (click)="Create()"
             class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
             Create Remedial Classroom
         </button>
@@ -78,13 +78,16 @@
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.schoolName }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.gradeName }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.subjectEnglishName }}</td>
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.teacherName }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.teacherEnName }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 ">
                     <div class="flex space-x-3">
-                        <button (click)="delete(row.id)">
+                        <button (click)="delete(row.id)" *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)">
                             <i class="fa-regular fa-trash-can"></i>
                         </button>
-                        <button (click)="View(row.id)">
+                        <button  (click)="Edit(row.id)" *ngIf="AllowEdit && IsAllowEdit(row.insertedByUserId)">
+                            <i class="fa-solid fa-pencil"></i>
+                        </button>
+                        <button (click)="View(row.id)" *ngIf="AllowEdit && IsAllowEdit(row.insertedByUserId)">
                             <i class="fa-solid fa-eye"></i>
                         </button>
                     </div>
@@ -159,7 +162,6 @@
                 <label class="mb-2 primaryTxt" for="subjectID">Subject</label>
                 <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
                     id="subjectID" [(ngModel)]="remedialClassroom.subjectID"  [disabled]="!remedialClassroom.gradeID"
-                    (change)="GetAllTeachers();"
                     (ngModelChange)="onInputValueChange({ field: 'subjectID', value: $event })">
                     <option [value]=0 disabled selected hidden>Choose Subject</option>
                     <option *ngFor="let c of subjects" [value]="c.id">{{ c.en_name }}</option>
@@ -170,7 +172,7 @@
             <div class="flex flex-col mb-4 w-full">
                 <label class="mb-2 primaryTxt" for="teacherID">Teachers</label>
                 <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
-                    id="teacherID" [(ngModel)]="remedialClassroom.teacherID" [disabled]="!remedialClassroom.subjectID"
+                    id="teacherID" [(ngModel)]="remedialClassroom.teacherID"
                     (ngModelChange)="onInputValueChange({ field: 'teacherID', value: $event })">
                     <option [value]=0 disabled selected hidden>Choose Teacher</option>
                     <option *ngFor="let c of Teachers" [value]="c.id">{{ c.en_name }}</option>

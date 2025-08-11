@@ -74,7 +74,6 @@ export class ViolationService {
     const headers = new HttpHeaders()
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`);
-    console.log(Violation.id)
     const formData = new FormData();
     formData.append('id', Violation.id.toString() ?? '');
     formData.append('employeeTypeId', Violation.employeeTypeId.toString() ?? '');

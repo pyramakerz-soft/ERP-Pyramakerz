@@ -18,7 +18,7 @@ import { SearchStudentComponent } from '../../../../Component/Employee/search-st
 @Component({
   selector: 'app-remedial-classroom-student',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent ,SearchStudentComponent],
+  imports: [FormsModule, CommonModule ,SearchStudentComponent],
   templateUrl: './remedial-classroom-student.component.html',
   styleUrl: './remedial-classroom-student.component.css',
 })
@@ -95,12 +95,9 @@ export class RemedialClassroomStudentComponent {
   }
 
   GetRemedialClassroom() {
-    console.log(this.DomainName)
     this.RemedialClassroomServ.GetById(this.RemedialClassroomID,this.DomainName).subscribe((d) => {
       this.remedialClassroom = d;
-      console.log(d)
     },err=>{
-      console.log(err)
     });
   }
 
@@ -131,7 +128,6 @@ export class RemedialClassroomStudentComponent {
             confirmButtonColor: '#089B41',
           });
       },err=>{
-        console.log(err)
         this.closeModal()
         Swal.fire({
           icon: 'error',

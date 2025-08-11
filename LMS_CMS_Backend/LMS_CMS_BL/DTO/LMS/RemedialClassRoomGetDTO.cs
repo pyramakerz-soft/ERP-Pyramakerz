@@ -26,7 +26,8 @@ namespace LMS_CMS_BL.DTO.LMS
         public long GradeID { get; set; }
         public string GradeName { get; set; }
         public long TeacherID { get; set; }
-        public string TeacherName { get; set; }
+        public string TeacherEnName { get; set; }
+        public string TeacherArName { get; set; }
         public DateTime? InsertedAt { get; set; }
         public List<RemedialClassroomStudentGetDTO> RemedialClassroomStudents { get; set; }
     }
