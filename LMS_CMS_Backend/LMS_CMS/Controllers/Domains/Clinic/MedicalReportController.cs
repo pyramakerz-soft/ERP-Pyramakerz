@@ -28,7 +28,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
         #region get All Medical History By Parent
         [HttpGet("GetAllMHByParent")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
+            allowedTypes: new[] { "octa", "employee", "parent" },
             pages: new[] { "Medical Report" }
         )]
         public async Task<IActionResult> GetAllMHByParent(long studentId, long schoolId, long gradeId, long classId)
@@ -44,20 +44,37 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             {
                 return Unauthorized("User ID or Type claim not found.");
             }
-            
+
+            Student? student = Unit_Of_Work.student_Repository.First_Or_Default(s => s.ID == studentId && s.IsDeleted != true);
+            if (student == null)
+                return NotFound("Student not found.");
+
+            School? school = Unit_Of_Work.school_Repository.First_Or_Default(s => s.ID == schoolId && s.IsDeleted != true);
+            if (school == null)
+                return NotFound("School not found.");
+
+            Grade? grade = Unit_Of_Work.grade_Repository.First_Or_Default(g => g.ID == gradeId && g.IsDeleted != true);
+            if (grade == null)
+                return NotFound("Grade not found.");
+
+            Classroom? classroom = Unit_Of_Work.classroom_Repository.First_Or_Default(c => c.ID == classId && c.IsDeleted != true);
+            if (classroom == null)
+                return NotFound("Classroom not found.");
+
             List<MedicalHistory> medicalHistory = await Unit_Of_Work.medicalHistory_Repository
                 .Select_All_With_IncludesById<MedicalHistory>(
                 t => t.IsDeleted != true && 
                 t.StudentId == studentId &&
-                t.InsertedByUserId != null &&
                 t.SchoolId == schoolId &&
                 t.GradeId == gradeId &&
-                t.ClassRoomID == classId,
+                t.ClassRoomID == classId &&
+                (t.InsertedByParentID != null && t.InsertedByParentID != 0) &&
+                (t.InsertedByUserId == null || t.InsertedByUserId == 0),
                 query => query.Include(x => x.Student),
                 query => query.Include(x => x.School),
                 query => query.Include(x => x.Grade),
                 query => query.Include(x => x.Classroom),
-                query => query.Include(x => x.InsertedByEmployee));
+                query => query.Include(x => x.InsertedByParent));
             
             if (medicalHistory == null || medicalHistory.Count == 0)
             {
@@ -109,11 +126,12 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             List<MedicalHistory> medicalHistory = await Unit_Of_Work.medicalHistory_Repository
                 .Select_All_With_IncludesById<MedicalHistory>(
                 t => t.IsDeleted != true && 
-                t.InsertedByUserId == null &&
                 t.StudentId == studentId &&
                 t.SchoolId == schoolId &&
                 t.GradeId == gradeId &&
-                t.ClassRoomID == classId,
+                t.ClassRoomID == classId &&
+                (t.InsertedByUserId != null && t.InsertedByUserId != 0) &&
+                (t.InsertedByParentID == null || t.InsertedByParentID == 0),
                 query => query.Include(x => x.Student),
                 query => query.Include(x => x.School),
                 query => query.Include(x => x.Grade),

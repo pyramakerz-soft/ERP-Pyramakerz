@@ -399,7 +399,38 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                 return BadRequest("Medical History cannot be null");
             }
 
+            School school = await Unit_Of_Work.school_Repository.Select_By_IdAsync(historyAddDTO.SchoolId);
+
+            if (school == null || school.IsDeleted == true)
+            {
+                return NotFound("No School With this ID");
+            }
+
+            Grade grade = await Unit_Of_Work.grade_Repository.Select_By_IdAsync(historyAddDTO.GradeId);
+
+            if (grade == null || grade.IsDeleted == true)
+            {
+                return NotFound("No Grade With this ID");
+            }
+
+            Classroom classroom = await Unit_Of_Work.classroom_Repository.Select_By_IdAsync(historyAddDTO.ClassRoomID);
+
+            if (classroom == null || classroom.IsDeleted == true)
+            {
+                return NotFound("No Classroom With this ID");
+            }
+
+            Student student = await Unit_Of_Work.student_Repository.Select_By_IdAsync(historyAddDTO.StudentId);
+
+            if (student == null || student.IsDeleted == true)
+            {
+                return NotFound("No Student With this ID");
+            }
+
             MedicalHistory medicalHistory = _mapper.Map<MedicalHistory>(historyAddDTO);
+
+
+
             string enNameExists = userId.ToString();
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             medicalHistory.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
