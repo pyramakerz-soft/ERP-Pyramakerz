@@ -25,7 +25,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         [HttpGet("GetSuppliersBalance")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "" }
+            pages: new[] { "Suppliers Balances" }
         )]
         public async Task<IActionResult> GetSuppliersBalance(DateTime? toDate, long? mainAccountID = 0, bool zeroBalance = true, bool positiveBalance = true, bool negativeBalance = true, int pageNumber = 1, int pageSize = 10)
         {
@@ -152,7 +152,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         [HttpGet("GetSafesBalance")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "" }
+            pages: new[] { "Safes Balances" }
         )]
         public async Task<IActionResult> GetSafesBalance(DateTime? toDate, long? mainAccountID = 0, bool zeroBalance = true, bool positiveBalance = true, bool negativeBalance = true, int pageNumber = 1, int pageSize = 10)
         {
@@ -271,7 +271,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         [HttpGet("GetBanksBalance")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "" }
+            pages: new[] { "Banks Balances" }
         )]
         public async Task<IActionResult> GetBanksBalance(DateTime? toDate, long? mainAccountID = 0, bool zeroBalance = true, bool positiveBalance = true, bool negativeBalance = true, int pageNumber = 1, int pageSize = 10)
         {

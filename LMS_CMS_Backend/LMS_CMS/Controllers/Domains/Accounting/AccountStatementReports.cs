@@ -25,7 +25,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         [HttpGet("GetSupplierStatement")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "" }
+            pages: new[] { "Supplier Statement" }
         )]
         public async Task<IActionResult> GetSupplierStatement(DateTime? fromDate, DateTime? toDate, long SubAccountNumber, int pageNumber = 1, int pageSize = 10)
         {
@@ -153,7 +153,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         [HttpGet("GetSafeStatement")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "" }
+            pages: new[] { "Safe Statement" }
         )]
         public async Task<IActionResult> GetSafeStatement(DateTime? fromDate, DateTime? toDate, long SubAccountNumber, int pageNumber = 1, int pageSize = 10)
         {
@@ -296,7 +296,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         [HttpGet("GetBankStatement")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "" }
+            pages: new[] { "Bank Statement" }
         )]
         public async Task<IActionResult> GetBankStatement(DateTime? fromDate, DateTime? toDate, long SubAccountNumber, int pageNumber = 1, int pageSize = 10)
         {
