@@ -78,20 +78,24 @@
             
             <!-- Second header row - sub-columns -->
             <tr>
-                <ng-container *ngFor="let store of getStoreColumns()">
-                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Qty
-                    </th>
-                    <th *ngIf="showPriceColumn()" 
-                        class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ getPriceColumnLabel() }}
-                    </th>
-                    <th *ngIf="showPriceColumn()" 
-                        class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Value
-                    </th>
-                </ng-container>
-            </tr>
+                    <ng-container *ngFor="let store of getStoreColumns()">
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0 relative">
+                            Qty
+                            <!-- Left divider for Qty column -->
+                            <div class="absolute left-0 top-0 bottom-0 w-[2px] bg-[#BDBDBD]"></div>
+                        </th>
+                        <th *ngIf="showPriceColumn()" 
+                            class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ getPriceColumnLabel() }}
+                        </th>
+                        <th *ngIf="showPriceColumn()" 
+                            class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0 relative">
+                            Value
+                            <!-- Right divider for Value column -->
+                            <!-- <div class="absolute right-0 top-0 bottom-0 w-[2px] bg-[#BDBDBD]"></div> -->
+                        </th>
+                    </ng-container>
+                </tr>
         </thead>
 
         <tbody>
