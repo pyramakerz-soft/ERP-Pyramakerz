@@ -1,0 +1,196 @@
+<div class="">
+    <div class="flex justify-between items-center">
+        <h1 class="primaryTxt font-semibold text-2xl leading-9">Conduct Type</h1>
+        <div class="flex justify-between items-center">
+            <app-search *ngIf="SelectedSchoolId!=0" [keysArray]="keysArray"
+                (searchEvent)="onSearchEvent($event)"></app-search>
+            <button (click)="Create()"
+                class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
+                Create Conduct Type
+            </button>
+        </div>
+    </div>
+
+    <div class="flex justify-start items-center space-x-4 rtl:space-x-reverse">
+        <div class="w-full">
+            <label for="SelectedSchoolId" class="block mb-2 text-sm font-medium text-gray-900">School</label>
+            <select id="SelectedSchoolId"
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+                [(ngModel)]="SelectedSchoolId" (change)="GetAllData();"
+                (ngModelChange)="onInputValueChange({ field: 'schoolID', value: $event })">
+                <option value=0 disabled selected hidden> Select School</option>
+                <option *ngFor="let stu of schools" [value]="stu.id">
+                    {{ stu.name }}
+                </option>
+                <option *ngIf="schools.length === 0" disabled selected>No Data Found</option>
+            </select>
+        </div>
+    </div>
+
+    <div *ngIf="SelectedSchoolId!=0">
+        <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
+            <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
+                <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+                    <tr>
+                        <th
+                            class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            ID
+                        </th>
+                        <th
+                            class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            English Name
+                        </th>
+                        <th
+                            class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            Arabic Name
+                        </th>
+                        <th
+                            class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            Date
+                        </th>
+                        <th
+                            class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            Actions
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- No Data Row -->
+                    <tr *ngIf="TableData.length === 0">
+                        <td colspan="6"
+                            class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                            No Data Found
+                        </td>
+                    </tr>
+                    <!-- Data Rows -->
+                    <tr *ngFor="let row of TableData; let i = index"
+                        [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
+                        class="border-t border-gray-300 text-xs md:text-sm">
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ row.id }}
+                        </td>
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ row.en_name }}
+                        </td>
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ row.ar_name }}
+                        </td>
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ row.insertedAt | date:'yyyy-MM-dd' }}
+                        </td>
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            <div class="flex space-x-4">
+                                <button (click)="Delete(row.id)">
+                                    <i class="fa-regular fa-trash-can"></i>
+                                </button>
+                                <button (click)="Edit(row.id)">
+                                    <i class="fa-solid fa-pencil"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<!-- Modal -->
+<div id="default-modal" tabindex="-1" aria-hidden="true" [ngClass]="{ hidden: !isModalVisible }"
+    class="fixed top-0 left-0 right-0 z-50 flex justify-center items-center w-full h-full bg-black/50">
+    <div class="bg-white rounded-2xl p-12 w-1/2 max-h-[95%] overflow-y-auto">
+        <div class="flex justify-between items-center">
+            <h1 *ngIf="mode == 'Create'" class="font-semibold text-2xl leading-9">Create Conduct Type</h1>
+            <h1 *ngIf="mode == 'Edit'" class="font-semibold text-2xl leading-9">Edit Conduct Type</h1>
+            <button (click)="closeModal()" type="button"
+                class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
+        </div>
+
+        <div class="mt-6 mb-4 rounded-3xl flex justify-between flex-wrap">
+            <div class="flex flex-col mb-4 w-full">
+                <label class="mb-2 primaryTxt" for="en_name">English Name</label>
+                <input id="en_name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                    placeholder="Enter en_name" [(ngModel)]="conductType.en_name"
+                    (ngModelChange)="onInputValueChange({ field: 'en_name', value: $event })" />
+                <span *ngIf="validationErrors['en_name']"
+                    class="text-red-500 ml-3 font-normal">{{validationErrors['en_name']}}</span>
+            </div>
+            <div class="flex flex-col mb-4 w-full">
+                <label class="mb-2 primaryTxt" for="ar_name">Arabic Name</label>
+                <input id="ar_name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                    placeholder="Enter ar_name" [(ngModel)]="conductType.ar_name"
+                    (ngModelChange)="onInputValueChange({ field: 'ar_name', value: $event })" />
+                <span *ngIf="validationErrors['ar_name']"
+                    class="text-red-500 ml-3 font-normal">{{validationErrors['ar_name']}}</span>
+            </div>
+            <div class="flex flex-col mb-4 w-full">
+                <label class="mb-2 primaryTxt" for="schoolID">School</label>
+                <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="schoolID"
+                    [(ngModel)]="conductType.schoolID" (change)="GetSectionsBySchool()"
+                    (ngModelChange)="onInputValueChange({ field: 'schoolID', value: $event })">
+                    <option [value]="0" disabled selected hidden>Choose School</option>
+                    <option *ngFor="let c of schools" [value]="c.id">{{ c.name }}</option>
+                    <option *ngIf="schools.length === 0" disabled selected>No Data Found</option>
+                </select>
+                <span *ngIf="validationErrors['schoolID']" class="text-red-500 ml-3 font-normal">{{
+                    validationErrors['schoolID'] }}</span>
+            </div>
+            <div class="flex flex-col mb-4 w-full">
+                <div class="flex flex-col mb-1">
+                    <label class="mb-3" for="ac">Sections</label>
+                    <div class="relative">
+                        <div class="border border-gray-300 rounded-lg px-4 py-3 cursor-pointer"
+                            (click)="toggleDropdown()" tabindex="0" [class.opacity-50]="!conductType.schoolID"
+                            [class.pointer-events-none]="!conductType.schoolID">
+                            <div *ngIf="conductType.conductTypeSections.length > 0; else placeholder">
+                                <div class="flex flex-wrap">
+                                    <span class="mr-2 mb-1 bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center"
+                                        *ngFor="let selected of conductType.conductTypeSections">
+                                        {{ selected.sectionName }}
+                                        <span class="ml-2 cursor-pointer text-red-500"
+                                            (click)="removeSelected(selected.sectionID); $event.stopPropagation()">
+                                            &times;
+                                        </span>
+                                    </span>
+                                </div>
+                            </div>
+                            <ng-template #placeholder>
+                                <span class="text-gray-400">Choose Section</span>
+                            </ng-template>
+                        </div>
+                        <div class="absolute bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10"
+                            *ngIf="dropdownOpen">
+                            <ul>
+                                <li *ngFor="let section of sections" class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                                    (click)="selectSection(section)">
+                                    {{ section.name }}
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <span *ngIf="validationErrors['sectiondids']" class="text-red-500 ml-3 font-normal">{{
+                    validationErrors['sectiondids'] }}</span>
+            </div>
+            <div class="flex flex-col mb-4 w-full">
+                <label class="mb-2 primaryTxt" for="conductLevelID">Conduct Level</label>
+                <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
+                    id="conductLevelID" [(ngModel)]="conductType.conductLevelID"
+                    (ngModelChange)="onInputValueChange({ field: 'conductLevelID', value: $event })">
+                    <option [value]="0" disabled selected hidden>Choose Conduct Level</option>
+                    <option *ngFor="let c of conductLevels" [value]="c.id">{{ c.name }}</option>
+                    <option *ngIf="conductLevels.length === 0" disabled selected>No Data Found</option>
+                </select>
+                <span *ngIf="validationErrors['conductLevelID']" class="text-red-500 ml-3 font-normal">{{
+                    validationErrors['conductLevelID'] }}</span>
+            </div>
+
+        </div>
+        <div class="flex justify-end">
+            <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
+                (click)="CreateOREdit()">
+                <span *ngIf="!isLoading">Save</span>
+                <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+            </button>
+        </div>
+    </div>
+</div>

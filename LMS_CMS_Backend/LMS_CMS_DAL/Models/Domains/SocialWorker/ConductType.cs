@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LMS_CMS_DAL.Models.Domains.LMS;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -24,6 +25,11 @@ namespace LMS_CMS_DAL.Models.Domains.SocialWorker
         [ForeignKey("ConductLevel")]
         public long ConductLevelID { get; set; }
         public ConductLevel ConductLevel { get; set; }
+
+        [ForeignKey("School")]
+        public long SchoolID { get; set; }
+        public School School { get; set; }
+
         public ICollection<ConductTypeSection> ConductTypeSections { get; set; } = new HashSet<ConductTypeSection>();
         public ICollection<Conduct> Conduct { get; set; } = new HashSet<Conduct>();
     }
