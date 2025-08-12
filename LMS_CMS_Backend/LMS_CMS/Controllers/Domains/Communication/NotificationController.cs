@@ -634,6 +634,16 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                 return BadRequest(ex.Message);
             }
 
+
+            if (NewNotification.ImageFile != null)
+            {
+                string returnFileInput = _fileImageValidationService.ValidateImageFile(NewNotification.ImageFile);
+                if (returnFileInput != null)
+                {
+                    return BadRequest(returnFileInput);
+                }
+            }
+
             Notification notification = mapper.Map<Notification>(NewNotification);
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             notification.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
@@ -650,13 +660,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             Unit_Of_Work.SaveChanges();
 
             if(NewNotification.ImageFile != null)
-            {
-                string returnFileInput = _fileImageValidationService.ValidateImageFile(NewNotification.ImageFile);
-                if (returnFileInput != null)
-                {
-                    return BadRequest(returnFileInput);
-                }
-
+            { 
                 var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Notification");
                 var subjectFolder = Path.Combine(baseFolder, notification.ID.ToString());
                 if (!Directory.Exists(subjectFolder))
@@ -700,7 +704,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
 
             foreach (var userID in targetUserIds)
             {
-                var sharedTo = Unit_Of_Work.notificationSharedTo_Repository.First_Or_Default(n => n.NotificationID == notification.ID && n.UserID == userID);
+                var sharedTo = await Unit_Of_Work.notificationSharedTo_Repository.FindByIncludesAsync(n => n.NotificationID == notification.ID && n.UserID == userID,
+                    query => query.Include(d => d.Notification),
+                    query => query.Include(d => d.InsertedByEmployee)
+                    );
 
                 if (sharedTo != null)
                 {
