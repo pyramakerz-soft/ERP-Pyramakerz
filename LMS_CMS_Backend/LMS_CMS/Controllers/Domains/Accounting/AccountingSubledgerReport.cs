@@ -26,7 +26,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         [HttpGet("GetSuppliersLedger")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "" }
+            pages: new[] { "Suppliers Subledger" }
         )]
         public async Task<IActionResult> GetSuppliersLedger(DateTime? fromDate, DateTime? toDate, long? accountID = 0, int pageNumber = 1, int pageSize = 10)
         {
@@ -216,7 +216,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         [HttpGet("GetSafesLedger")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "" }
+            pages: new[] { "Safes Subledger" }
         )]
         public async Task<IActionResult> GetSafesLedger(DateTime? fromDate, DateTime? toDate, long? accountID = 0, int pageNumber = 1, int pageSize = 10)
         {
@@ -405,7 +405,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         [HttpGet("GetBanksLedger")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "" }
+            pages: new[] { "Banks Subledger" }
         )]
         public async Task<IActionResult> GetBanksLedger(DateTime? fromDate, DateTime? toDate, long? accountID = 0, int pageNumber = 1, int pageSize = 10)
         {
