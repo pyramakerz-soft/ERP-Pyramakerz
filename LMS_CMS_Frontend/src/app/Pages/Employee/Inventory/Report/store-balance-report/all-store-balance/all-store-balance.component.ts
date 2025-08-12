@@ -1,44 +1,43 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+// all-store-balance.component.ts
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-
-import * as XLSX from 'xlsx';
 import Swal from 'sweetalert2';
 import { PdfPrintComponent } from '../../../../../../Component/pdf-print/pdf-print.component';
-import {
-  StoreBalanceItem,
-  StoreBalanceReport,
-} from '../../../../../../Models/Inventory/store-balance';
+import { StoreBalanceReport, StoreBalanceItem, StoreBalanceDetail } from '../../../../../../Models/Inventory/store-balance';
 import { InventoryDetailsService } from '../../../../../../Services/Employee/Inventory/inventory-details.service';
 import { InventoryCategoryService } from '../../../../../../Services/Employee/Inventory/inventory-category.service';
+
+type ReportType = 'QuantityOnly' | 'PurchasePrice' | 'SalesPrice' | 'Cost';
 
 @Component({
   selector: 'app-all-stores-balance-report',
   standalone: true,
-  imports: [CommonModule, FormsModule, PdfPrintComponent],
+  imports: [CommonModule, FormsModule],
   templateUrl: './all-store-balance.component.html',
-  styleUrl: './all-store-balance.component.css',
+  styleUrls: ['./all-store-balance.component.css'],
 })
 export class AllStoresBalanceReportComponent implements OnInit {
-  reportType: 'QuantityOnly' | 'PurchasePrice' | 'SalesPrice' | 'Cost' =
-    'QuantityOnly';
-  pageTitle: string = 'All Stores Quantity Report';
-  dateTo: string = '';
+getColumnCount(): number {
+    const storesCount = this.getStoreColumns().length;
+    return 2 + // Fixed columns (Item Code, Item Name)
+           (storesCount * (this.showPriceColumn() ? 3 : 1)) + // Store columns
+           1; // Total column
+}
+  reportType: ReportType = 'QuantityOnly';
+  pageTitle = 'All Stores Quantity Report';
+  dateTo = '';
   selectedCategoryId: number | null = null;
   selectedTypeId: number | null = null;
-  hasBalance: boolean = true;
-  overdrawnBalance: boolean = true;
-  zeroBalances: boolean = true;
+  hasBalance = true;
+  overdrawnBalance = true;
+  zeroBalances = true;
 
   categories: any[] = [];
   reportData: StoreBalanceReport | null = null;
-  showTable: boolean = false;
-  isLoading: boolean = false;
-
-  @ViewChild(PdfPrintComponent) pdfPrintComponent!: PdfPrintComponent;
-  showPDF = false;
-  reportForExport: any[] = [];
+  showTable = false;
+  isLoading = false;
 
   school = {
     reportHeaderOneEn: '',
@@ -63,53 +62,39 @@ export class AllStoresBalanceReportComponent implements OnInit {
   }
 
   private setPageTitle() {
-    switch (this.reportType) {
-      case 'QuantityOnly':
-        this.pageTitle = 'All Stores Quantity Report';
-        break;
-      case 'PurchasePrice':
-        this.pageTitle = 'All Stores Purchase Price Report';
-        break;
-      case 'SalesPrice':
-        this.pageTitle = 'All Stores Sales Price Report';
-        break;
-      case 'Cost':
-        this.pageTitle = 'All Stores Cost Report';
-        break;
-    }
+    const titles: Record<ReportType, string> = {
+      'QuantityOnly': 'All Stores Quantity Report',
+      'PurchasePrice': 'All Stores Purchase Price Report',
+      'SalesPrice': 'All Stores Sales Price Report',
+      'Cost': 'All Stores Cost Report'
+    };
+    this.pageTitle = titles[this.reportType];
     this.school.reportHeaderOneEn = this.pageTitle;
     this.school.reportHeaderOneAr = this.pageTitle;
   }
 
   private getReportFlagType(): number {
-    switch (this.reportType) {
-      case 'QuantityOnly':
-        return 1;
-      case 'PurchasePrice':
-        return 2;
-      case 'SalesPrice':
-        return 3;
-      case 'Cost':
-        return 4;
-      default:
-        return 1;
-    }
+    const flags: Record<ReportType, number> = {
+      'QuantityOnly': 1,
+      'PurchasePrice': 2,
+      'SalesPrice': 3,
+      'Cost': 4
+    };
+    return flags[this.reportType];
   }
 
   loadCategories() {
     this.isLoading = true;
-    this.categoryService
-      .Get(this.categoryService.ApiServ.GetHeader())
-      .subscribe({
-        next: (categories) => {
-          this.categories = categories;
-          this.isLoading = false;
-        },
-        error: (error) => {
-          console.error('Error loading categories:', error);
-          this.isLoading = false;
-        },
-      });
+    this.categoryService.Get(this.categoryService.ApiServ.GetHeader()).subscribe({
+      next: (categories) => {
+        this.categories = categories;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading categories:', error);
+        this.isLoading = false;
+      },
+    });
   }
 
   onFilterChange() {
@@ -118,17 +103,15 @@ export class AllStoresBalanceReportComponent implements OnInit {
   }
 
   viewReport() {
-    const flag = this.getReportFlagType();
-
-    // if (!this.dateTo) {
-    //   Swal.fire({
-    //     title: 'Missing Information',
-    //     text: 'Please select Date',
-    //     icon: 'warning',
-    //     confirmButtonText: 'OK',
-    //   });
-    //   return;
-    // }
+    if (!this.dateTo) {
+      Swal.fire({
+        title: 'Missing Information',
+        text: 'Please select Date',
+        icon: 'warning',
+        confirmButtonText: 'OK',
+      });
+      return;
+    }
 
     this.isLoading = true;
     this.showTable = false;
@@ -147,7 +130,6 @@ export class AllStoresBalanceReportComponent implements OnInit {
       .subscribe({
         next: (response) => {
           this.reportData = response;
-          this.prepareExportData();
           this.showTable = true;
           this.isLoading = false;
         },
@@ -156,137 +138,94 @@ export class AllStoresBalanceReportComponent implements OnInit {
           this.reportData = null;
           this.showTable = true;
           this.isLoading = false;
+          Swal.fire({
+            title: 'Error',
+            text: 'Failed to load report data',
+            icon: 'error',
+            confirmButtonText: 'OK',
+          });
         },
       });
   }
 
-private prepareExportData(): void {
-    if (!this.reportData?.data) return;
-
-    this.reportForExport = this.reportData.data.map((item: StoreBalanceItem) => {
-        const baseData: any = {
-            'Item Code': item.itemCode,
-            'Item Name': item.itemName
-        };
-
-        // Add store quantities
-        (item.stores || []).forEach(store => {
-            baseData[store.storeName] = store.quantity;
-        });
-
-        return baseData;
+  getStoreColumns(): string[] {
+    if (!this.reportData?.data?.length) return [];
+    
+    const stores = new Set<string>();
+    this.reportData.data.forEach(item => {
+      item.stores?.forEach(store => {
+        if (store.storeName) stores.add(store.storeName);
+      });
     });
-}
-
-getPdfTableHeaders(): string[] {
-    const baseHeaders = ['Item Code', 'Item Name'];
-    
-    if (this.reportData?.data?.[0]?.stores) {
-        this.reportData.data[0].stores.forEach(store => {
-            baseHeaders.push(store.storeName);
-        });
-    }
-    
-    return baseHeaders;
-}
-
-getInfoRows(): any[] {
-    return [
-        { keyEn: 'Report Type: ' + this.pageTitle },
-        { keyEn: 'To Date: ' + this.dateTo },
-        {
-            keyEn: 'Category: ' + 
-                (this.selectedCategoryId ? 
-                    this.categories.find(c => c.id === this.selectedCategoryId)?.name : 
-                    'All'
-                )
-        },
-        { keyEn: 'Has Balance: ' + (this.hasBalance ? 'Yes' : 'No') },
-        { keyEn: 'Overdrawn Balance: ' + (this.overdrawnBalance ? 'Yes' : 'No') },
-        { keyEn: 'Zero Balances: ' + (this.zeroBalances ? 'Yes' : 'No') }
-    ];
-}
-
-  // getPdfTableHeaders(): string[] {
-  //   const baseHeaders = ['Item Code', 'Item Name', 'Quantity'];
-
-  //   switch (this.reportType) {
-  //     case 'PurchasePrice':
-  //       return [...baseHeaders, 'Purchase Price', 'Total Purchase'];
-  //     case 'SalesPrice':
-  //       return [...baseHeaders, 'Sales Price', 'Total Sales'];
-  //     case 'Cost':
-  //       return [...baseHeaders, 'Average Cost', 'Total Cost'];
-  //     default:
-  //       return baseHeaders;
-  //   }
-  // }
-
-  DownloadAsPDF() {
-    if (!this.reportForExport.length) {
-      Swal.fire('Warning', 'No data to export!', 'warning');
-      return;
-    }
-    this.showPDF = true;
-    setTimeout(() => {
-      this.pdfPrintComponent.downloadPDF();
-      setTimeout(() => (this.showPDF = false), 2000);
-    }, 500);
+    return Array.from(stores);
   }
 
-  Print() {
-    if (!this.reportForExport.length) {
-      Swal.fire('Warning', 'No data to print!', 'warning');
-      return;
-    }
-    this.showPDF = true;
-    setTimeout(() => {
-      const printContents = document.getElementById('Data')?.innerHTML;
-      if (!printContents) {
-        console.error('Element not found!');
-        return;
-      }
-      const printStyle = `
-          <style>
-            @page { size: auto; margin: 0mm; }
-            body { margin: 0; }
-            @media print {
-              body > *:not(#print-container) { display: none !important; }
-              #print-container {
-                display: block !important;
-                position: static !important;
-                width: 100% !important;
-                height: auto !important;
-                background: white !important;
-                margin: 0 !important;
-              }
-            }
-          </style>
-        `;
-      const printContainer = document.createElement('div');
-      printContainer.id = 'print-container';
-      printContainer.innerHTML = printStyle + printContents;
-      document.body.appendChild(printContainer);
-      window.print();
-      setTimeout(() => {
-        document.body.removeChild(printContainer);
-        this.showPDF = false;
-      }, 100);
-    }, 500);
+getStoreTotalQuantity(storeName: string): number {
+  if (!this.reportData?.data) return 0;
+  
+  return this.reportData.data.reduce((total, item) => {
+    const storeData = this.getStoreData(item, storeName);
+    return total + (storeData.quantity ?? 0);
+  }, 0);
+}
+
+getStoreTotalValue(storeName: string): number {
+  if (!this.reportData?.data) return 0;
+  
+  return this.reportData.data.reduce((total, item) => {
+    const storeData = this.getStoreData(item, storeName);
+    return total + (storeData.value ?? 0);
+  }, 0);
+}
+
+getStoreData(item: StoreBalanceItem, storeName: string): {
+  quantity: number | null;
+  price: number | null;
+  value: number | null
+} {
+  const store = item.stores?.find(s => s.storeName === storeName);
+  if (!store) return { quantity: null, price: null, value: null };
+
+  let price: number | null = null;
+  
+  switch(this.reportType) {
+    case 'PurchasePrice':
+      price = store.PurchasePrice ?? null;
+      break;
+    case 'SalesPrice':
+      price = store.SalePrice ?? null;
+      break;
+    case 'Cost':
+      price = store.AverageCost ?? null;
+      break;
   }
 
-  exportExcel() {
-    if (!this.reportForExport.length) {
-      Swal.fire('Warning', 'No data to export!', 'warning');
-      return;
+  return {
+    quantity: store.quantity ?? null,
+    price: price,
+    value: store.value ?? null
+  };
+}
+
+  getItemTotal(item: StoreBalanceItem): number {
+    switch(this.reportType) {
+      case 'PurchasePrice': return item.totalPurchaseValue || 0;
+      case 'SalesPrice': return item.totalSalesValue || 0;
+      case 'Cost': return item.totalCost || 0;
+      default: return item.quantity || 0;
     }
-    const worksheet = XLSX.utils.json_to_sheet(this.reportForExport);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Report');
-    const dateStr = new Date().toISOString().slice(0, 10);
-    XLSX.writeFile(
-      workbook,
-      `${this.pageTitle.replace(/\s+/g, '_')}_${dateStr}.xlsx`
-    );
+  }
+
+  showPriceColumn(): boolean {
+    return this.reportType !== 'QuantityOnly';
+  }
+
+  getPriceColumnLabel(): string {
+    switch(this.reportType) {
+      case 'PurchasePrice': return 'Purchase Price';
+      case 'SalesPrice': return 'Sales Price';
+      case 'Cost': return 'Avg Cost';
+      default: return '';
+    }
   }
 }

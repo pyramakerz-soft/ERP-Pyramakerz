@@ -18,7 +18,6 @@
 
         { 
             var dataSource = "SW-13\\SQLEXPRESS";
- 
             var initialCatalog = domainName;
 
             return $"Data Source={dataSource};Initial Catalog={initialCatalog};Integrated Security = True;TrustServerCertificate=True";
