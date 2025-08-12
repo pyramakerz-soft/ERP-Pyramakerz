@@ -18,6 +18,14 @@ import { School } from '../../../../Models/school';
 import { Grade } from '../../../../Models/LMS/grade';
 import { ConductType } from '../../../../Models/SocialWorker/conduct-type';
 import { ProcedureType } from '../../../../Models/SocialWorker/procedure-type';
+import { SchoolService } from '../../../../Services/Employee/school.service';
+import { GradeService } from '../../../../Services/Employee/LMS/grade.service';
+import { StudentService } from '../../../../Services/student.service';
+import { ConductTypeSection } from '../../../../Models/SocialWorker/conduct-type-section';
+import { ConductTypeService } from '../../../../Services/Employee/SocialWorker/conduct-type.service';
+import { ProcedureTypeService } from '../../../../Services/Employee/SocialWorker/procedure-type.service';
+import { Classroom } from '../../../../Models/LMS/classroom';
+import { ClassroomService } from '../../../../Services/Employee/LMS/classroom.service';
 
 @Component({
   selector: 'app-conduct-add-edit',
@@ -39,6 +47,7 @@ export class ConductAddEditComponent {
   isLoading = false;
   schools: School[] = [];
   grades: Grade[] = [];
+  classes: Classroom[] = [];
   students: Student[] = [];
   conductTypes: ConductType[] = [];
   proceduresType: ProcedureType[] = [];
@@ -53,6 +62,12 @@ export class ConductAddEditComponent {
     private menuService: MenuService,
     public EditDeleteServ: DeleteEditPermissionService,
     private router: Router,
+    private SchoolServ: SchoolService,
+    private GradeServ: GradeService,
+    private ClassroomServ: ClassroomService,
+    private StudentServ: StudentService,
+    private ConductTypeServ: ConductTypeService,
+    private ProcedureTypeServ: ProcedureTypeService,
     private ConductServ: ConductService,
   ) { }
 
@@ -64,9 +79,11 @@ export class ConductAddEditComponent {
       this.activeRoute.url.subscribe((url: { path: string; }[]) => {
         this.path = url[0].path;
 
-        if (this.path == 'Employee Create') {
+        if (this.path == 'Conduct Create') {
           this.mode = 'Create';
-        } else if (this.path == 'Employee Edit') {
+          this.GetAllSchools()
+          this.GetProceduresTypes()
+        } else if (this.path == 'Conduct Edit') {
           this.mode = 'Edit';
           this.ConductID = Number(this.activeRoute.snapshot.paramMap.get('id'));
           this.ConductServ.GetByID(this.ConductID, this.DomainName).subscribe(async (data) => {
@@ -75,6 +92,48 @@ export class ConductAddEditComponent {
         }
       });
     }
+  }
+
+  GetAllSchools() {
+    this.schools = []
+    this.SchoolServ.Get(this.DomainName).subscribe((d) => {
+      this.schools = d
+    })
+  }
+
+  GetGrades() {
+    this.grades = []
+    this.GradeServ.GetBySchoolId(this.Data.SchoolID, this.DomainName).subscribe((d) => {
+      this.grades = d
+    })
+  }
+
+  GetClasses() {
+    this.classes = []
+    this.ClassroomServ.GetByGradeId(this.Data.gradeID, this.DomainName).subscribe((d) => {
+      this.classes = d
+    })
+  }
+
+  GetStudents() {
+    this.students = []
+    this.StudentServ.GetByClassID(this.Data.classroomID, this.DomainName).subscribe((d) => {
+      this.students = d
+    })
+  }
+
+  GetConductTypes() {
+    this.conductTypes = []
+    this.ConductTypeServ.GetBySchool(this.Data.SchoolID, this.DomainName).subscribe((d) => {
+      this.conductTypes = d
+    })
+  }
+
+  GetProceduresTypes() {
+    this.proceduresType = []
+    this.ProcedureTypeServ.Get(this.DomainName).subscribe((d) => {
+      this.proceduresType = d
+    })
   }
 
   moveToConduct() {
@@ -95,6 +154,34 @@ export class ConductAddEditComponent {
     if (value) {
       this.validationErrors[field] = '';
     }
+  }
+
+  onImageFileSelected(event: any) {
+    const file: File = event.target.files[0];
+    const input = event.target as HTMLInputElement;
+
+    if (file) {
+      if (file.size > 25 * 1024 * 1024) {
+        this.validationErrors['file'] = 'The file size exceeds the maximum limit of 25 MB.';
+        this.Data.newFile = null;
+        return;
+      }
+      const allowedTypes = [
+        'application/pdf',
+        'application/msword', // .doc
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document' // .docx
+      ];
+      if (allowedTypes.includes(file.type)) {
+        this.Data.newFile = file;
+        this.validationErrors['file'] = '';
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+      } else {
+        this.validationErrors['file'] = 'Invalid file type. Only Word (.doc, .docx) and PDF (.pdf) files are allowed.';
+        this.Data.newFile = null;
+      }
+    }
+    input.value = '';
   }
 
 }

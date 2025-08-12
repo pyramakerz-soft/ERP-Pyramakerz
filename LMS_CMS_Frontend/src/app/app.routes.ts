@@ -215,6 +215,7 @@ import { ProcedureTypeComponent } from './Pages/Employee/SocialWorker/procedure-
 import { ConductTypeComponent } from './Pages/Employee/SocialWorker/conduct-type/conduct-type.component';
 import { ConductComponent } from './Pages/Employee/SocialWorker/conduct/conduct.component';
 import { SupplierStatementComponent } from './Pages/Employee/Accounting/Report/supplier-statement/supplier-statement/supplier-statement.component';
+import { ConductAddEditComponent } from './Pages/Employee/SocialWorker/conduct-add-edit/conduct-add-edit.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -473,6 +474,8 @@ export const routes: Routes = [
             { path: 'Procedure Type', component: ProcedureTypeComponent, title: 'Procedure Type', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Conduct Type', component: ConductTypeComponent, title: 'Conduct Type', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Conduct', component: ConductComponent, title: 'Conduct', canActivate: [noNavigateWithoutLoginGuard], },
+            { path: "Conduct/:id", component: ConductAddEditComponent, title: "Conduct", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Conduct Create", component: ConductAddEditComponent, title: "Conduct", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "supplier statment", component: SupplierStatementComponent, title: "supplier statment", canActivate: [noNavigateWithoutLoginGuard] },
         ]
     },

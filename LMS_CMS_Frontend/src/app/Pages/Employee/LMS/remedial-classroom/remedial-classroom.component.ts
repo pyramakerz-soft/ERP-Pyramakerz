@@ -413,6 +413,7 @@ export class RemedialClassroomComponent {
 
   Create(){
     this.mode = "Create"
+    this.GetAllTeachers()
     this.openModal()
   }
 }
