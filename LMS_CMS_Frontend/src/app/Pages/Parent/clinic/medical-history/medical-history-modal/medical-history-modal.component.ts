@@ -7,7 +7,6 @@ import {
   SimpleChanges,
   OnInit,
 } from '@angular/core';
-
 import { firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
 import { FormsModule } from '@angular/forms';
@@ -17,33 +16,34 @@ import { MedicalHistoryService } from '../../../../../Services/Employee/Clinic/m
 import { ApiService } from '../../../../../Services/api.service';
 
 @Component({
-  selector: 'app-medical-history-modal',
+  selector: 'app-parent-medical-history-modal',
   imports: [FormsModule, CommonModule],
   standalone: true,
   templateUrl: './medical-history-modal.component.html',
   styleUrls: ['./medical-history-modal.component.css'],
 })
-export class MedicalHistoryModalComponent implements OnInit, OnChanges {
+export class ParentMedicalHistoryModalComponent implements OnInit, OnChanges {
   @Input() isVisible = false;
   @Input() medicalHistoryData: ParentMedicalHistory | null = null;
   @Output() isVisibleChange = new EventEmitter<boolean>();
   @Output() onSave = new EventEmitter<void>();
 
   editMode = false;
-  medicalHistory: ParentMedicalHistory = new ParentMedicalHistory(
-    0,
-    '',
-    '',
-    null,
-    null,
-    new Date().toISOString(),
-    null,
-    0,
-    ''
-  );
-  firstReportPreview: string | null = null;
-  secReportPreview: string | null = null;
+  medicalHistory: ParentMedicalHistory = {
+    id: 0,
+    details: '',
+    permanentDrug: '',
+    firstReport: null,
+    secReport: null,
+    insertedAt: new Date().toISOString(),
+    updatedAt: null,
+    insertedByUserId: 0,
+    en_name: ''
+  };
+  firstReportPreview: File | null = null;
+  secReportPreview: File | null = null;
   validationErrors: { [key: string]: string } = {};
+  isSaving: boolean = false;
 
   constructor(
     private medicalHistoryService: MedicalHistoryService,
@@ -57,50 +57,62 @@ export class MedicalHistoryModalComponent implements OnInit, OnChanges {
       if (this.medicalHistoryData) {
         this.editMode = true;
         this.medicalHistory = { ...this.medicalHistoryData };
-        this.firstReportPreview = this.medicalHistory.firstReport
-          ? this.getFilePreview(this.medicalHistory.firstReport)
-          : null;
-        this.secReportPreview = this.medicalHistory.secReport
-          ? this.getFilePreview(this.medicalHistory.secReport)
-          : null;
+        this.firstReportPreview = this.medicalHistory.firstReport;
+        this.secReportPreview = this.medicalHistory.secReport;
       } else {
-        this.editMode = false;
-        this.medicalHistory = new ParentMedicalHistory(
-          0,
-          '',
-          '',
-          null,
-          null,
-          new Date().toISOString(),
-          null,
-          0,
-          ''
-        );
-        this.firstReportPreview = null;
-        this.secReportPreview = null;
+        this.resetForm();
       }
     }
   }
 
+  private resetForm() {
+    this.editMode = false;
+    this.medicalHistory = {
+      id: 0,
+      details: '',
+      permanentDrug: '',
+      firstReport: null,
+      secReport: null,
+      insertedAt: new Date().toISOString(),
+      updatedAt: null,
+      insertedByUserId: 0,
+      en_name: ''
+    };
+    this.firstReportPreview = null;
+    this.secReportPreview = null;
+  }
+
   onFileUpload(event: Event, field: 'firstReport' | 'secReport') {
     const input = event.target as HTMLInputElement;
+    this.validationErrors[field] = '';
+    
     if (input.files && input.files[0]) {
       const file = input.files[0];
       const fileType = file.type;
-      if (fileType.startsWith('image/') || fileType.startsWith('video/')) {
-        this.medicalHistory[field] = file;
-        const reader = new FileReader();
-        reader.onload = (e: any) => {
-          if (field === 'firstReport') {
-            this.firstReportPreview = e.target.result;
-          } else {
-            this.secReportPreview = e.target.result;
-          }
-        };
-        reader.readAsDataURL(file);
-      } else {
-        alert('Invalid file type. Please upload an image or video.');
+      const maxSize = 25 * 1024 * 1024; // 25MB
+
+      this.medicalHistory[field] = null;
+      
+      if (!fileType.startsWith('image/') && !fileType.startsWith('video/')) {
+        this.validationErrors[field] = 'Invalid file type. Please upload an image or video.';
+        return;
       }
+
+      if (file.size > maxSize) {
+        this.validationErrors[field] = 'File size exceeds maximum limit of 25MB.';
+        return;
+      }
+
+      this.medicalHistory[field] = file;
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        if (field === 'firstReport') {
+          this.firstReportPreview = e.target.result;
+        } else {
+          this.secReportPreview = e.target.result;
+        }
+      };
+      reader.readAsDataURL(file);
     }
   }
 
@@ -108,66 +120,43 @@ export class MedicalHistoryModalComponent implements OnInit, OnChanges {
     this.validationErrors = {};
     let isValid = true;
 
-    if (
-      !this.medicalHistory.details ||
-      this.medicalHistory.details.trim() === ''
-    ) {
+    if (!this.medicalHistory.details || this.medicalHistory.details.trim() === '') {
       this.validationErrors['details'] = '*Details are required';
-      isValid = false;
-    }
-
-    if (
-      !this.medicalHistory.permanentDrug ||
-      this.medicalHistory.permanentDrug.trim() === ''
-    ) {
-      this.validationErrors['permanentDrug'] = '*Permanent Drug is required';
       isValid = false;
     }
 
     return isValid;
   }
 
-  isSaving: boolean = false;
-
   async saveMedicalHistory() {
     if (this.isFormValid()) {
       try {
         this.isSaving = true;
-
         const domainName = this.apiService.GetHeader();
 
         if (this.editMode) {
-          // No edit for parent in your backend, but if needed, add here
+          await firstValueFrom(
+            this.medicalHistoryService.UpdateByParentAsync(this.medicalHistory, domainName)
+          );
+          Swal.fire('Success', 'Medical history updated successfully!', 'success');
         } else {
           await firstValueFrom(
-            this.medicalHistoryService.AddByParent(
-              this.medicalHistory,
-              domainName
-            )
+            this.medicalHistoryService.AddByParent(this.medicalHistory, domainName)
           );
-          Swal.fire(
-            'Success',
-            'Medical history created successfully!',
-            'success'
-          );
+          Swal.fire('Success', 'Medical history created successfully!', 'success');
         }
 
         this.onSave.emit();
         this.closeModal();
       } catch (error) {
         console.error('Error saving medical history:', error);
-        Swal.fire(
-          'Error',
-          'Failed to save medical history. Please try again later.',
-          'error'
-        );
+        Swal.fire('Error', 'Failed to save medical history. Please try again later.', 'error');
       } finally {
         this.isSaving = false;
       }
     }
   }
 
-  // Add this method to clear validation error for a field
   clearValidationError(field: string) {
     if (this.validationErrors[field]) {
       delete this.validationErrors[field];
@@ -177,29 +166,7 @@ export class MedicalHistoryModalComponent implements OnInit, OnChanges {
   closeModal() {
     this.isVisible = false;
     this.isVisibleChange.emit(false);
-
-    // Reset form data and validation errors when closing
-    this.editMode = false;
-    this.medicalHistory = new ParentMedicalHistory(
-      0,
-      '',
-      '',
-      null,
-      null,
-      new Date().toISOString(),
-      null,
-      0,
-      ''
-    );
-    this.firstReportPreview = null;
-    this.secReportPreview = null;
+    this.resetForm();
     this.validationErrors = {};
-  }
-
-  private getFilePreview(file: File | string | null): string | null {
-    if (!file) return null;
-    if (typeof file === 'string') return file;
-    // If file is a File object, create a preview URL
-    return URL.createObjectURL(file);
   }
 }

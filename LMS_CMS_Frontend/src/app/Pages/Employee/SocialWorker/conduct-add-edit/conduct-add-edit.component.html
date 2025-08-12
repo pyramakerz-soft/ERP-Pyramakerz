@@ -1,0 +1,38 @@
+<div class="flex justify-between items-center">
+    <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
+        <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToConduct()"></i>
+        <h1 class="primaryTxt font-semibold text-2xl leading-9">
+            mode === 'Create' ? 'Create Employee': 'Edit Employee'
+        </h1>
+    </div>
+    <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg" (click)="Save()">
+        <span *ngIf="!isLoading"> Save</span>
+        <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+    </button>
+</div>
+
+<div class="mt-6 mb-4 rounded-3xl flex justify-between flex-wrap">
+    <div class="flex flex-col mb-4 w-[49%]">
+        <label class="mb-2 primaryTxt" for="date"> Date</label>
+        <input id="date" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+            placeholder="Enter User date" [(ngModel)]="Data.date"
+            (ngModelChange)="onInputValueChange({ field: 'date', value: $event })" />
+        <span *ngIf="validationErrors['date']" class="text-red-500 ml-3 font-normal">{{
+            validationErrors["date"]}}</span>
+    </div>
+    <!-- <div class="flex flex-col mb-4 w-[49%]">
+        <div class="flex flex-col w-[49%] mb-4">
+            <label class="mb-2" for="studentID">Student</label>
+            <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="studentID"
+                [(ngModel)]="Data.studentID">
+                <option [value]="0" disabled selected hidden> Choose Student</option>
+                <option *ngFor="let bus of BusCompany" [value]="bus.id">{{ bus.name }}</option>
+                <option *ngIf="BusCompany.length === 0" disabled selected> No Data Found</option>
+            </select>
+        </div>
+    </div> -->
+    <div class="flex align-middle space-x-2 rtl:space-x-reverse mb-4 w-full">
+        <input type="checkbox" id="isSendSMSToParent" class="w-5 h-5" [(ngModel)]="Data.isSendSMSToParent">
+        <label class="mb-2" for="isSendSMSToParent"> Is Send SMS To Parent</label>
+    </div>
+</div>

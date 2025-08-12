@@ -28,6 +28,66 @@ export class MedicalHistoryService {
     return this.http.get<DoctorMedicalHistory[]>(`${this.baseUrl}/MedicalHistory/GetByDoctor`, { headers });
   }
 
+// In medical-history.service.ts
+
+GetByParent(DomainName: string): Observable<ParentMedicalHistory[]> {
+    if (DomainName != null) {
+        this.header = DomainName;
+    }
+    const token = localStorage.getItem('current_token');
+    const headers = new HttpHeaders()
+        .set('Domain-Name', this.header)
+        .set('Authorization', `Bearer ${token}`)
+        .set('accept', '*/*');
+    
+    return this.http.get<ParentMedicalHistory[]>(
+        `${this.baseUrl}/MedicalHistory/GetByParent`, 
+        { headers }
+    );
+}
+
+UpdateByParentAsync(
+    medicalHistory: ParentMedicalHistory, 
+    DomainName: string
+): Observable<any> {
+    if (DomainName != null) {
+        this.header = DomainName;
+    }
+
+    const token = localStorage.getItem('current_token');
+    const headers = new HttpHeaders()
+        .set('Domain-Name', this.header)
+        .set('Authorization', `Bearer ${token}`);
+
+    const formData = new FormData();
+    formData.append('Id', medicalHistory.id.toString());
+    formData.append('Details', medicalHistory.details);
+    formData.append('PermanentDrug', medicalHistory.permanentDrug);
+
+    // Handle file uploads
+    if (medicalHistory.firstReport instanceof File) {
+        formData.append('FirstReportFile', medicalHistory.firstReport, medicalHistory.firstReport.name);
+    } else if (medicalHistory.firstReport === null) {
+        formData.append('FirstReport', '');
+    } else {
+        formData.append('FirstReport', medicalHistory.firstReport);
+    }
+
+    if (medicalHistory.secReport instanceof File) {
+        formData.append('SecReportFile', medicalHistory.secReport, medicalHistory.secReport.name);
+    } else if (medicalHistory.secReport === null) {
+        formData.append('SecReport', '');
+    } else {
+        formData.append('SecReport', medicalHistory.secReport);
+    }
+
+    return this.http.put(
+        `${this.baseUrl}/MedicalHistory/UpdateByParentAsync`, 
+        formData, 
+        { headers }
+    );
+}
+
   
   AddByDoctor(medicalHistory: DoctorMedicalHistory, DomainName: string): Observable<any> {
     if (DomainName != null) {
