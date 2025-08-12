@@ -210,6 +210,7 @@ import { RemedialClassroomComponent } from './Pages/Employee/LMS/remedial-classr
 import { RemedialTimeTableComponent } from './Pages/Employee/LMS/remedial-time-table/remedial-time-table.component';
 import { RemedialTimeTableViewComponent } from './Pages/Employee/LMS/remedial-time-table-view/remedial-time-table-view.component';
 import { RemedialClassroomStudentComponent } from './Pages/Employee/LMS/remedial-classroom-student/remedial-classroom-student.component';
+import { SupplierStatementComponent } from './Pages/Employee/Accounting/Report/supplier-statement/supplier-statement/supplier-statement.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -464,6 +465,8 @@ export const routes: Routes = [
             { path: 'Remedial Classes/:id', component: RemedialClassroomStudentComponent, title: 'Remedial Classroom', canActivate: [noNavigateWithoutLoginGuard], },  
             { path: 'Remedial TimeTable', component: RemedialTimeTableComponent, title: 'Remedial Time Table', canActivate: [noNavigateWithoutLoginGuard], },  
             { path: 'Remedial TimeTable/:id', component: RemedialTimeTableViewComponent, title: 'Remedial Time Table', canActivate: [noNavigateWithoutLoginGuard], },  
+{ path: "supplier statment", component: SupplierStatementComponent, title: "supplier statment", canActivate: [noNavigateWithoutLoginGuard] },
+
         ]
     },
     {
