@@ -30,14 +30,23 @@
         </select>
     </div>
     <div class="flex flex-col mb-4 w-[49%]">
-        <label class="mb-2" for="studentID">Grade</label>
-        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="studentID"
-            [(ngModel)]="Data.studentID" [disabled]="!Data.SchoolID" (change)="GetClasses();">
+        <label class="mb-2" for="gradeID">Grade</label>
+        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="gradeID"
+            [(ngModel)]="Data.gradeID" [disabled]="!Data.SchoolID" (change)="GetClasses();">
             <option [value]="0" disabled selected hidden> Choose Grade</option>
             <option *ngFor="let stu of grades" [value]="stu.id">{{ stu.name }}</option>
             <option *ngIf="grades.length === 0" disabled selected> No Data Found</option>
         </select>
     </div>
+    <div class="flex flex-col mb-4 w-[49%]">
+        <label class="mb-2" for="classroomID">Classroom</label>
+        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="classroomID"
+            [(ngModel)]="Data.classroomID" [disabled]="!Data.gradeID" (change)="GetStudents();">
+            <option [value]="0" disabled selected hidden>Choose Classroom</option>
+            <option *ngFor="let class of classes" [value]="class.id">{{ class.name }}</option>
+            <option *ngIf="classes.length === 0" disabled selected> No Data Found</option>
+        </select>
+    </div>    
     <div class="flex flex-col mb-4 w-[49%]">
         <label class="mb-2" for="studentID">Student</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="studentID"

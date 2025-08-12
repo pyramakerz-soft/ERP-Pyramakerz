@@ -129,12 +129,10 @@ export class RemedialClassroomComponent {
   }
 
   GetAllGrades() {
-    this.grades = [];
-    this.subjects = [];
-    this.Teachers = [];
     this.remedialClassroom.subjectID = 0
     this.remedialClassroom.gradeID = 0
-    this.remedialClassroom.teacherID = 0
+    this.grades = [];
+    this.subjects = [];
     this.GradeServ.GetBySchoolId(this.remedialClassroom.schoolID, this.DomainName).subscribe((d) => {
       this.grades = d;
     });
@@ -142,8 +140,6 @@ export class RemedialClassroomComponent {
 
   GetAllSubjectGradeId() {
     this.subjects = [];
-    this.Teachers = [];
-    this.remedialClassroom.teacherID = 0
     this.remedialClassroom.subjectID = 0
     this.SubjectServ.GetByGradeId(this.remedialClassroom.gradeID, this.DomainName).subscribe((d) => {
       this.subjects = d;
@@ -301,6 +297,7 @@ export class RemedialClassroomComponent {
 
   closeModal() {
     this.remedialClassroom = new RemedialClassroom();
+    this.validationErrors={}
     document.getElementById('Add_Modal')?.classList.remove('flex');
     document.getElementById('Add_Modal')?.classList.add('hidden');
     this.isModalOpen = false;
@@ -308,7 +305,7 @@ export class RemedialClassroomComponent {
 
   onInputValueChange(event: { field: keyof RemedialClassroom; value: any }) {
     const { field, value } = event;
-    if (field == 'name' || field == 'schoolID') {
+    if (field == 'name' || field == 'schoolID' || field == 'numberOfSession' || field == 'academicYearID' || field == 'gradeID' || field == 'subjectID' || field == 'teacherID') {
       (this.remedialClassroom as any)[field] = value;
       if (value) {
         this.validationErrors[field] = '';
