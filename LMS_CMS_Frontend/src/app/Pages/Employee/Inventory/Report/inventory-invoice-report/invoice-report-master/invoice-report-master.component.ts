@@ -15,6 +15,7 @@ import Swal from 'sweetalert2';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { ReportsService } from '../../../../../../Services/shared/reports.service';
 
 interface FlagOption {
   id: number;
@@ -28,6 +29,7 @@ interface FlagOption {
   templateUrl: './invoice-report-master.component.html',
   styleUrl: './invoice-report-master.component.css',
 })
+
 export class InventoryTransactionReportComponent implements OnInit {
   getTableDataWithHeader(): any[] {
     return this.transactions.map((transaction) => ({
@@ -147,7 +149,8 @@ export class InventoryTransactionReportComponent implements OnInit {
     private categoryService: InventoryCategoryService,
     private subCategoryService: InventorySubCategoriesService,
     private shopItemService: ShopItemService,
-    private languageService: LanguageService
+    private languageService: LanguageService,
+        private reportsService: ReportsService
   ) {}
 
   ngOnInit() {
@@ -459,26 +462,38 @@ export class InventoryTransactionReportComponent implements OnInit {
       .join(', ');
   }
 
-  exportExcel() {
-    const worksheet = XLSX.utils.json_to_sheet(
-      this.transactions.map((t) => ({
-        'Invoice #': t.invoiceNumber,
-        Date: new Date(t.date).toLocaleDateString(),
-        Store: t.storeName,
-        'Transaction Type': t.flagEnName,
-        'Total Amount': t.total,
-        'Payment Type': t.isCash ? 'Cash' : t.isVisa ? 'Visa' : 'Other',
-        'Cash Amount': t.cashAmount,
-        'Visa Amount': t.visaAmount,
-        'Remaining Amount': t.remaining,
-        Notes: t.notes || 'N/A',
-      }))
-    );
+async exportExcel() {
+  const tableData = this.transactions.map((t) => ({
+    'Invoice #': t.invoiceNumber,
+    Date: new Date(t.date).toLocaleDateString(),
+    Store: t.storeName,
+    'Transaction Type': t.flagEnName,
+    'Total Amount': t.total,
+    'Payment Type': t.isCash ? 'Cash' : t.isVisa ? 'Visa' : 'Other',
+    Notes: t.notes || 'N/A',
+  }));
 
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Transactions');
-
-    const dateStr = new Date().toISOString().slice(0, 10);
-    XLSX.writeFile(workbook, `Inventory_Transactions_${dateStr}.xlsx`);
-  }
+  await this.reportsService.generateExcelReport({
+    mainHeader: {
+      en: 'Inventory Transactions Report',
+      ar: 'تقرير معاملات المخزون'
+    },
+    subHeaders: [
+      { en: 'Transaction Summary', ar: 'ملخص المعاملات' },
+    ],
+    infoRows: [
+      { key: 'From Date', value: this.dateFrom },
+      { key: 'To Date', value: this.dateTo },
+      { key: 'Store', value: this.getStoreName() },
+      { key: 'Transaction Types', value: this.getSelectedFlagNames() }
+    ],
+    reportImage: '', // You can add an image URL if needed
+    filename: `${this.reportType}_Transactions_Report.xlsx`,
+    tables: [{
+      title: 'Transactions',
+      headers: Object.keys(tableData[0] || {}),
+      data: tableData.map(item => Object.values(item))
+    }]
+  });
+}
 }
