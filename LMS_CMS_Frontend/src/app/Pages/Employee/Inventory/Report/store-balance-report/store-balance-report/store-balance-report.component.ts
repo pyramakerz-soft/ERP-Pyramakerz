@@ -90,7 +90,7 @@ export class StoreBalanceReportComponent implements OnInit {
       case 'ItemsUnderLimit':
         this.pageTitle = 'Items Under Limit Report';
         break;
-    }
+    }  
     this.school.reportHeaderOneEn = this.pageTitle;
     this.school.reportHeaderOneAr = this.pageTitle;
   }

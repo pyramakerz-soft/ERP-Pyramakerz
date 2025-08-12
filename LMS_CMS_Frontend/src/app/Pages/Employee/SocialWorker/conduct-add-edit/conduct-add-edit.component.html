@@ -1,0 +1,107 @@
+<div class="flex justify-between items-center">
+    <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
+        <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToConduct()"></i>
+        <h1 class="primaryTxt font-semibold text-2xl leading-9">
+            {{mode === 'Create' ? 'Create Conduct': 'Edit Conduct'}}
+        </h1>
+    </div>
+    <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg" (click)="Save()">
+        <span *ngIf="!isLoading"> Save</span>
+        <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+    </button>
+</div>
+
+<div class="mt-6 mb-4 rounded-3xl flex justify-between flex-wrap">
+    <div class="flex flex-col mb-4 w-[49%]">
+        <label class="mb-2 primaryTxt" for="date">Date</label>
+        <input id="date" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+            placeholder="Enter User date" [(ngModel)]="Data.date"
+            (ngModelChange)="onInputValueChange({ field: 'date', value: $event })" />
+        <span *ngIf="validationErrors['date']" class="text-red-500 ml-3 font-normal">{{
+            validationErrors["date"]}}</span>
+    </div>
+    <div class="flex flex-col mb-4 w-[49%]">
+        <label class="mb-2" for="studentID">School</label>
+        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="studentID"
+            [(ngModel)]="Data.SchoolID"  (change)="GetGrades(); GetConductTypes();">
+            <option [value]="0" disabled selected hidden> Choose School</option>
+            <option *ngFor="let school of schools" [value]="school.id">{{ school.name }}</option>
+            <option *ngIf="schools.length === 0" disabled selected> No Data Found</option>
+        </select>
+    </div>
+    <div class="flex flex-col mb-4 w-[49%]">
+        <label class="mb-2" for="studentID">Grade</label>
+        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="studentID"
+            [(ngModel)]="Data.studentID" [disabled]="!Data.SchoolID" (change)="GetClasses();">
+            <option [value]="0" disabled selected hidden> Choose Grade</option>
+            <option *ngFor="let stu of grades" [value]="stu.id">{{ stu.name }}</option>
+            <option *ngIf="grades.length === 0" disabled selected> No Data Found</option>
+        </select>
+    </div>
+    <div class="flex flex-col mb-4 w-[49%]">
+        <label class="mb-2" for="studentID">Student</label>
+        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="studentID"
+            [(ngModel)]="Data.studentID" [disabled]="!Data.gradeID">
+            <option [value]="0" disabled selected hidden> Choose Student</option>
+            <option *ngFor="let stu of students" [value]="stu.id">{{ stu.en_name }}</option>
+            <option *ngIf="students.length === 0" disabled selected> No Data Found</option>
+        </select>
+    </div>
+    <div class="flex flex-col mb-4 w-[49%]">
+        <label class="mb-2" for="conductTypeID">Conduct Type</label>
+        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="conductTypeID"
+            [(ngModel)]="Data.conductTypeID">
+            <option [value]="0" disabled selected hidden> Choose Conduct Type</option>
+            <option *ngFor="let type of conductTypes" [value]="type.id">{{ type.en_name }}</option>
+            <option *ngIf="conductTypes.length === 0" disabled selected> No Data Found</option>
+        </select>
+    </div>
+    <div class="flex flex-col mb-4 w-[49%]">
+        <label class="mb-2" for="procedureTypeID">Procedure Type</label>
+        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="procedureTypeID"
+            [(ngModel)]="Data.procedureTypeID">
+            <option [value]="0" disabled selected hidden> Choose Procedure Type</option>
+            <option *ngFor="let type of proceduresType" [value]="type.id">{{ type.name }}</option>
+            <option *ngIf="proceduresType.length === 0" disabled selected> No Data Found</option>
+        </select>
+    </div>
+    <div class="flex flex-col mb-4 w-full">
+        <label class="mb-2 primaryTxt" for="Details">Details</label>
+        <textarea id="Details" type="text"
+            class="w-full h-[100px] rounded-lg border border-solid border-gray-300 px-2 py-1 mb-3 resize-none"
+            placeholder="Enter Details" [(ngModel)]="Data.details"
+            (ngModelChange)="onInputValueChange({ field: 'details', value: $event })"></textarea>
+        <span *ngIf="validationErrors['details']" class="text-red-500 ml-3 font-normal">{{validationErrors['details']
+            }}</span>
+    </div>
+
+    <div class="flex align-middle space-x-2 rtl:space-x-reverse mb-4 w-full">
+        <input type="checkbox" id="isSendSMSToParent" class="w-5 h-5" [(ngModel)]="Data.isSendSMSToParent">
+        <label class="mb-2" for="isSendSMSToParent"> Is Send SMS To Parent</label>
+    </div>
+
+    <div class="w-full mb-4">
+        <div
+            class="bg-[#F6F6F6] flex items-center space-x-4 rtl:space-x-reverse w-full rounded-md border-dashed border-2">
+            <div class="flex justify-center w-full">
+                <label for="file-upload" class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
+                    <img *ngIf="!Data.file && !Data.newFile" src="Images/Icon frame.png"
+                        class="w-1/4">
+                    <img *ngIf="!Data.file && Data.newFile" src="Images/FileAttached.png"
+                        class="w-1/4">
+                    <img *ngIf="Data.file" [src]="Data.file" class="w-1/3 object-cover">
+                    <p class="font-normal text-xs md:text-sm text-[#8E8E93] mt-3"><span class="secondaryTxt">
+                            {{ 'Click to' | translate }} {{ 'Upload' | translate }}
+                        </span></p>
+                    <p class="font-normal text-xs md:text-sm text-[#8E8E93]"> {{ '(Max. File size: 25 MB)' | translate
+                        }}</p>
+                </label>
+                <input id="file-upload" type="file" class="hidden" (change)="onImageFileSelected($event)"
+                    accept="image/jpeg, image/png" />
+            </div>
+        </div>
+        <span *ngIf="validationErrors['newFile']" class="text-red-500  font-normal text-xs md:text-sm">{{
+            validationErrors['newFile'] }}</span>
+    </div>
+
+</div>

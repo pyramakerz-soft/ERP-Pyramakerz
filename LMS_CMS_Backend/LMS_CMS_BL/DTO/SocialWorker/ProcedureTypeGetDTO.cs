@@ -11,6 +11,8 @@ namespace LMS_CMS_BL.DTO.SocialWorker
     {
         public long ID { get; set; }
         public string Name { get; set; }
+        public DateTime? InsertedAt { get; set; }
+        public long? InsertedByUserId { get; set; }
 
     }
 }

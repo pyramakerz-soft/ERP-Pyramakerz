@@ -11870,6 +11870,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<long>("SchoolID")
+                        .HasColumnType("bigint");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -11896,6 +11899,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.HasIndex("DeletedByUserId");
 
                     b.HasIndex("InsertedByUserId");
+
+                    b.HasIndex("SchoolID");
 
                     b.HasIndex("UpdatedByUserId");
 
@@ -17952,6 +17957,12 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .WithMany()
                         .HasForeignKey("InsertedByUserId");
 
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.LMS.School", "School")
+                        .WithMany("ConductTypes")
+                        .HasForeignKey("SchoolID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "UpdatedByEmployee")
                         .WithMany()
                         .HasForeignKey("UpdatedByUserId");
@@ -17961,6 +17972,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Navigation("DeletedByEmployee");
 
                     b.Navigation("InsertedByEmployee");
+
+                    b.Navigation("School");
 
                     b.Navigation("UpdatedByEmployee");
                 });
@@ -18741,6 +18754,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Navigation("AcademicYears");
 
                     b.Navigation("Buildings");
+
+                    b.Navigation("ConductTypes");
 
                     b.Navigation("DiscussionRooms");
 

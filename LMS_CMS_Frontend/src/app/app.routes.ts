@@ -183,13 +183,13 @@ import { SubjectResourcesComponent } from './Pages/Student/LMS/subject-resources
 import { SubjectLessonLiveComponent } from './Pages/Student/LMS/subject-lesson-live/subject-lesson-live.component';
 import { AccountigReportsComponent } from './Pages/Employee/Accounting/Report/accountig-reports/accountig-reports.component';
 import { SubjectAssignmentComponent } from './Pages/Student/LMS/subject-assignment/subject-assignment.component';
-import { StudentAssignmentViewComponent } from './Pages/Student/LMS/student-assignment-view/student-assignment-view.component'; 
-import { AccountigConstraintsComponent } from './Pages/Employee/Accounting/Report/accountig-constraints/accountig-constraints.component'; 
-import { AverageCostCalcComponent } from './Pages/Employee/Inventory/Report/report-item-card/average-cost-calc/average-cost-calc/average-cost-calc.component'; 
+import { StudentAssignmentViewComponent } from './Pages/Student/LMS/student-assignment-view/student-assignment-view.component';
+import { AccountigConstraintsComponent } from './Pages/Employee/Accounting/Report/accountig-constraints/accountig-constraints.component';
+import { AverageCostCalcComponent } from './Pages/Employee/Inventory/Report/report-item-card/average-cost-calc/average-cost-calc/average-cost-calc.component';
 import { AccountigConfigurationComponent } from './Pages/Employee/Accounting/accountig-configuration/accountig-configuration.component';
 import { TimeTable } from './Models/LMS/time-table';
 import { TimeTableComponent } from './Pages/Employee/LMS/time-table/time-table.component';
-import { TimeTableViewComponent } from './Pages/Employee/LMS/time-table-view/time-table-view.component'; 
+import { TimeTableViewComponent } from './Pages/Employee/LMS/time-table-view/time-table-view.component';
 import { TimeTableReplace } from './Models/LMS/time-table-replace';
 import { TimeTableReplaceComponent } from './Pages/Employee/LMS/time-table-replace/time-table-replace.component';
 import { SignUpEmployeeComponent } from './Pages/Login/sign-up-employee/sign-up-employee.component';
@@ -205,11 +205,17 @@ import { AllStoresBalanceReportComponent } from './Pages/Employee/Inventory/Repo
 import { DiscussionRoomComponent } from './Pages/Employee/LMS/discussion-room/discussion-room.component';
 import { NotificationComponent } from './Pages/Employee/Communication/notification/notification.component';
 import { MyNotificationComponent } from './Pages/Communication/my-notification/my-notification.component';
-import { MedicalHistoryTableComponent } from './Pages/Parent/clinic/medical-history/medical-history-table/medical-history-table.component';
+import { ParentMedicalHistoryComponent } from './Pages/Parent/clinic/medical-history/medical-history-table/medical-history-table.component';
 import { RemedialClassroomComponent } from './Pages/Employee/LMS/remedial-classroom/remedial-classroom.component';
 import { RemedialTimeTableComponent } from './Pages/Employee/LMS/remedial-time-table/remedial-time-table.component';
 import { RemedialTimeTableViewComponent } from './Pages/Employee/LMS/remedial-time-table-view/remedial-time-table-view.component';
 import { RemedialClassroomStudentComponent } from './Pages/Employee/LMS/remedial-classroom-student/remedial-classroom-student.component';
+import { ConductLevelComponent } from './Pages/Employee/SocialWorker/conduct-level/conduct-level.component';
+import { ProcedureTypeComponent } from './Pages/Employee/SocialWorker/procedure-type/procedure-type.component';
+import { ConductTypeComponent } from './Pages/Employee/SocialWorker/conduct-type/conduct-type.component';
+import { ConductComponent } from './Pages/Employee/SocialWorker/conduct/conduct.component';
+import { SupplierStatementComponent } from './Pages/Employee/Accounting/Report/supplier-statement/supplier-statement/supplier-statement.component';
+import { ConductAddEditComponent } from './Pages/Employee/SocialWorker/conduct-add-edit/conduct-add-edit.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -423,15 +429,15 @@ export const routes: Routes = [
             { path: "Student/:Id", component: RegistrationConfirmationDetailsComponent, title: "Student", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Enter Daily Performance", component: DailyPerformanceMasterComponent, title: "Daily Performance", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Daily Performance/:id", component: DailyPerformanceViewComponent, title: "Daily Performance View", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "Assignment", component: AssignmentComponent, title: "Assignment", canActivate: [noNavigateWithoutLoginGuard , navigateIfHaveSettingPageGuard] },
-            { path: "Assignment/:id", component: AssignmentEditComponent, title: "Assignment Edit", canActivate: [noNavigateWithoutLoginGuard , navigateIfHaveSettingPageGuard] },
-            { path: "report item card",component: ReportItemCardComponent,title: "Item Card Report",canActivate: [noNavigateWithoutLoginGuard], data: { showAverage: false }},
-            { path: "report item card with average",component: ReportItemCardComponent,title: "Item Card Report With Average",canActivate: [noNavigateWithoutLoginGuard],data: { showAverage: true }},
+            { path: "Assignment", component: AssignmentComponent, title: "Assignment", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
+            { path: "Assignment/:id", component: AssignmentEditComponent, title: "Assignment Edit", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
+            { path: "report item card", component: ReportItemCardComponent, title: "Item Card Report", canActivate: [noNavigateWithoutLoginGuard], data: { showAverage: false } },
+            { path: "report item card with average", component: ReportItemCardComponent, title: "Item Card Report With Average", canActivate: [noNavigateWithoutLoginGuard], data: { showAverage: true } },
             { path: 'Average Cost Calculation', component: AverageCostCalcComponent, title: 'Average Cost Calculator', canActivate: [noNavigateWithoutLoginGuard], },
-            { path: "Item Card Report",component: ReportItemCardComponent,title: "Item Card Report",canActivate: [noNavigateWithoutLoginGuard], data: { showAverage: false }},
-            { path: "Item Card Report With Average",component: ReportItemCardComponent,title: "Item Card Report With Average",canActivate: [noNavigateWithoutLoginGuard],data: { showAverage: true }},
+            { path: "Item Card Report", component: ReportItemCardComponent, title: "Item Card Report", canActivate: [noNavigateWithoutLoginGuard], data: { showAverage: false } },
+            { path: "Item Card Report With Average", component: ReportItemCardComponent, title: "Item Card Report With Average", canActivate: [noNavigateWithoutLoginGuard], data: { showAverage: true } },
             { path: "Assignment Student/:id", component: AssignmentStudentComponent, title: "AssignmentStudent", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Assignment Student Answer/:id", component: AssignmentDetailComponent, title: "Assignment Detail", canActivate: [noNavigateWithoutLoginGuard , navigateIfHaveSettingPageGuard] },
+            { path: "Assignment Student Answer/:id", component: AssignmentDetailComponent, title: "Assignment Detail", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Fees Activation Report", component: FeesActivationReportComponent, title: "Fees Activation Report", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Receivable Report", component: AccountigReportsComponent, title: "Receivable Report", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Payable Report", component: AccountigReportsComponent, title: "Payable Report", canActivate: [noNavigateWithoutLoginGuard] },
@@ -453,17 +459,24 @@ export const routes: Routes = [
             { path: 'Store Limited Items', component: StoreBalanceReportComponent, data: { reportType: 'ItemsUnderLimit', title: 'Store Balance - Items Under Limit' } },
             { path: "All Stores Item Balance", component: AllStoresBalanceReportComponent, title: "All Stores Quantity Report", canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'QuantityOnly' } },
             { path: "All Stores Item Balance with Purchase", component: AllStoresBalanceReportComponent, title: "All Stores Purchase Price Report", canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'PurchasePrice' } },
-            { path: "All Stores Item Balance with Sales", component: AllStoresBalanceReportComponent, title: "All Stores Sales Price Report", canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'SalesPrice' }},
+            { path: "All Stores Item Balance with Sales", component: AllStoresBalanceReportComponent, title: "All Stores Sales Price Report", canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'SalesPrice' } },
             { path: "All Stores Item Balance with Average Cost", component: AllStoresBalanceReportComponent, title: "All Stores Cost Report", canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'Cost' } },
             { path: 'Discussion Room', component: DiscussionRoomComponent, title: 'Discussion Room', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'violation', component: ViolationComponent, title: 'Violation', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Violation/:id', component: ViolationViewComponent, title: 'Violation', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Notification', component: NotificationComponent, title: 'Notification', canActivate: [noNavigateWithoutLoginGuard], },
-            { path: 'Notification', component: NotificationComponent, title: 'Notification', canActivate: [noNavigateWithoutLoginGuard], },  
-            { path: 'Remedial Classes', component: RemedialClassroomComponent, title: 'Remedial Classroom', canActivate: [noNavigateWithoutLoginGuard], },  
-            { path: 'Remedial Classes/:id', component: RemedialClassroomStudentComponent, title: 'Remedial Classroom', canActivate: [noNavigateWithoutLoginGuard], },  
-            { path: 'Remedial TimeTable', component: RemedialTimeTableComponent, title: 'Remedial Time Table', canActivate: [noNavigateWithoutLoginGuard], },  
-            { path: 'Remedial TimeTable/:id', component: RemedialTimeTableViewComponent, title: 'Remedial Time Table', canActivate: [noNavigateWithoutLoginGuard], },  
+            { path: 'Notification', component: NotificationComponent, title: 'Notification', canActivate: [noNavigateWithoutLoginGuard], },
+            { path: 'Remedial Classes', component: RemedialClassroomComponent, title: 'Remedial Classroom', canActivate: [noNavigateWithoutLoginGuard], },
+            { path: 'Remedial Classes/:id', component: RemedialClassroomStudentComponent, title: 'Remedial Classroom', canActivate: [noNavigateWithoutLoginGuard], },
+            { path: 'Remedial TimeTable', component: RemedialTimeTableComponent, title: 'Remedial Time Table', canActivate: [noNavigateWithoutLoginGuard], },
+            { path: 'Remedial TimeTable/:id', component: RemedialTimeTableViewComponent, title: 'Remedial Time Table', canActivate: [noNavigateWithoutLoginGuard], },
+            { path: 'Conduct Level', component: ConductLevelComponent, title: 'Conduct Level', canActivate: [noNavigateWithoutLoginGuard], },
+            { path: 'Procedure Type', component: ProcedureTypeComponent, title: 'Procedure Type', canActivate: [noNavigateWithoutLoginGuard], },
+            { path: 'Conduct Type', component: ConductTypeComponent, title: 'Conduct Type', canActivate: [noNavigateWithoutLoginGuard], },
+            { path: 'Conduct', component: ConductComponent, title: 'Conduct', canActivate: [noNavigateWithoutLoginGuard], },
+            { path: "Conduct/:id", component: ConductAddEditComponent, title: "Conduct", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Conduct Create", component: ConductAddEditComponent, title: "Conduct", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "supplier statment", component: SupplierStatementComponent, title: "supplier statment", canActivate: [noNavigateWithoutLoginGuard] },
         ]
     },
     {
@@ -476,8 +489,8 @@ export const routes: Routes = [
             { path: "Admission Test", component: AdmissionTestParentComponent, title: "Admission Test" },
             { path: "Test/:registerationFormParentID/:TestId", component: RegistraionTestComponent, title: "Test" },
             { path: "Registration Form", component: RegistrationFormComponent, title: "Registration Form" },
-            { path: "Interview Registration", component: InterviewRegistrationComponentParent, title: "Interview Registration" }, 
-            { path: "Medical History", component: MedicalHistoryTableComponent, title: "Medical History" },
+            { path: "Interview Registration", component: InterviewRegistrationComponentParent, title: "Interview Registration" },
+            { path: "Medical History", component: ParentMedicalHistoryComponent, title: "Medical History" },
 
         ]
     },
@@ -508,7 +521,7 @@ export const routes: Routes = [
             { path: "SubjectResources/:SubjectId", component: SubjectResourcesComponent, title: "SubjectResources", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "SubjectLive/:SubjectId", component: SubjectLessonLiveComponent, title: "SubjectResources", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "SubjectAssignment/:SubjectId", component: SubjectAssignmentComponent, title: "SubjectAssignment", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "AssignmentView/:AssignmentStudentId", component: StudentAssignmentViewComponent, title: "AssignmentView", canActivate: [noNavigateWithoutLoginGuard] }, 
+            { path: "AssignmentView/:AssignmentStudentId", component: StudentAssignmentViewComponent, title: "AssignmentView", canActivate: [noNavigateWithoutLoginGuard] },
         ]
     },
     {
