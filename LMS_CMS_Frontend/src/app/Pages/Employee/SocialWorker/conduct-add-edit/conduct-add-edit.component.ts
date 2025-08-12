@@ -26,6 +26,7 @@ import { ConductTypeService } from '../../../../Services/Employee/SocialWorker/c
 import { ProcedureTypeService } from '../../../../Services/Employee/SocialWorker/procedure-type.service';
 import { Classroom } from '../../../../Models/LMS/classroom';
 import { ClassroomService } from '../../../../Services/Employee/LMS/classroom.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-conduct-add-edit',
@@ -35,6 +36,7 @@ import { ClassroomService } from '../../../../Services/Employee/LMS/classroom.se
   styleUrl: './conduct-add-edit.component.css'
 })
 export class ConductAddEditComponent {
+
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   DomainName: string = '';
@@ -86,11 +88,31 @@ export class ConductAddEditComponent {
         } else if (this.path == 'Conduct Edit') {
           this.mode = 'Edit';
           this.ConductID = Number(this.activeRoute.snapshot.paramMap.get('id'));
-          this.ConductServ.GetByID(this.ConductID, this.DomainName).subscribe(async (data) => {
+          this.ConductServ.GetByID(this.ConductID, this.DomainName).subscribe((data) => {
             this.Data = data;
+            console.log(this.Data)
           });
         }
       });
+    }
+  }
+
+  openFile(file: any) {
+    if (typeof file === 'string') {
+      window.open(file, '_blank');
+    } else if (file instanceof File) {
+      const fileUrl = URL.createObjectURL(file);
+      window.open(fileUrl, '_blank');
+      setTimeout(() => URL.revokeObjectURL(fileUrl), 10000);
+    } else {
+      console.warn('Unknown file type:', file);
+    }
+  }
+
+  openUrl(link: string) {
+    if (link) {
+      const fullUrl = `${link}`;
+      window.open(fullUrl, '_blank');
     }
   }
 
@@ -137,11 +159,81 @@ export class ConductAddEditComponent {
   }
 
   moveToConduct() {
-
+    this.router.navigateByUrl('Employee/Conduct' );
   }
 
   Save() {
+    if (this.isFormValid()) {
+      this.isLoading = true;
+      if (this.mode == 'Create') {
+        this.ConductServ.Add(this.Data, this.DomainName).subscribe(
+          (d) => {
+            this.moveToConduct();
+            this.isLoading = false;
+            Swal.fire({
+              icon: 'success',
+              title: 'Done',
+              text: 'Created Successfully',
+              confirmButtonColor: '#089B41',
+            });
+          },
+          (error) => {
+            this.isLoading = false; // Hide spinner
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'Try Again Later!',
+              confirmButtonText: 'Okay',
+              customClass: { confirmButton: 'secondaryBg' }
+            });
+          }
+        );
+      }
+      if (this.mode == 'Edit') {
+        this.ConductServ.Edit(this.Data, this.DomainName).subscribe(
+          (d) => {
+            Swal.fire({
+              icon: 'success',
+              title: 'Done',
+              text: 'Updatedd Successfully',
+              confirmButtonColor: '#089B41',
+            });
+            this.moveToConduct();
+            this.isLoading = false;
+          },
+          (error) => {
+            this.isLoading = false; // Hide spinner
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'Try Again Later!',
+              confirmButtonText: 'Okay',
+              customClass: { confirmButton: 'secondaryBg' }
+            });
+          }
+        );
+      }
+    }
+  }
 
+  isFormValid(): boolean {
+    let isValid = true;
+    for (const key in this.Data) {
+      if (this.Data.hasOwnProperty(key)) {
+        const field = key as keyof Conduct;
+        if (!this.Data[field]) {
+          if (
+            field == 'date'
+          ) {
+            this.Data[field] = `*${this.capitalizeField(
+              field
+            )} is required`;
+            isValid = false;
+          }
+        }
+      }
+    }
+    return isValid;
   }
 
   capitalizeField(field: keyof Conduct): string {
@@ -173,11 +265,12 @@ export class ConductAddEditComponent {
       ];
       if (allowedTypes.includes(file.type)) {
         this.Data.newFile = file;
-        this.validationErrors['file'] = '';
+        this.Data.file = "";
+        this.validationErrors['newFile'] = '';
         const reader = new FileReader();
         reader.readAsDataURL(file);
       } else {
-        this.validationErrors['file'] = 'Invalid file type. Only Word (.doc, .docx) and PDF (.pdf) files are allowed.';
+        this.validationErrors['newFile'] = 'Invalid file type. Only Word (.doc, .docx) and PDF (.pdf) files are allowed.';
         this.Data.newFile = null;
       }
     }

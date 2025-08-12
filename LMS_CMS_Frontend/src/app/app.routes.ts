@@ -474,7 +474,7 @@ export const routes: Routes = [
             { path: 'Procedure Type', component: ProcedureTypeComponent, title: 'Procedure Type', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Conduct Type', component: ConductTypeComponent, title: 'Conduct Type', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Conduct', component: ConductComponent, title: 'Conduct', canActivate: [noNavigateWithoutLoginGuard], },
-            { path: "Conduct/:id", component: ConductAddEditComponent, title: "Conduct", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Conduct Edit/:id", component: ConductAddEditComponent, title: "Conduct", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Conduct Create", component: ConductAddEditComponent, title: "Conduct", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "supplier statment", component: SupplierStatementComponent, title: "supplier statment", canActivate: [noNavigateWithoutLoginGuard] },
         ]

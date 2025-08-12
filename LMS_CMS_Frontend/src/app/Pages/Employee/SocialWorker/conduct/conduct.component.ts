@@ -88,6 +88,7 @@ export class ConductComponent {
     this.TableData = [];
     this.ConductServ.GetBySchoolId(this.SelectedSchoolId, this.DomainName).subscribe((d) => {
       this.TableData = d;
+      console.log(d , this.TableData)
     });
   }
 
@@ -99,6 +100,7 @@ export class ConductComponent {
   }
 
   Create() {
+    this.router.navigateByUrl('Employee/Conduct Create');
   }
 
   Delete(id: number) {
@@ -120,7 +122,7 @@ export class ConductComponent {
   }
 
   Edit(id: number) {
-
+    this.router.navigateByUrl('Employee/Conduct Edit/' + id);
   }
 
   IsAllowDelete(InsertedByID: number) {
