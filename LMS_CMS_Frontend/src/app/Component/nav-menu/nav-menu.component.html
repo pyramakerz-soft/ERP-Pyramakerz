@@ -8,20 +8,24 @@
                 class="lg:w-[543px] lg:h-[53px] rounded-[8px] border border-gray-300 px-3 lg:px-4 py-2 lg:py-3"
                 placeholder="{{ 'Enter Key Word' | translate }}" />
         </div> 
-        <div class="flex space-x-4 items-center"> 
-            <div class="relative cursor-pointer hover:opacity-80 hover:scale-110 transition-all" (click)="toggleNotificationPopup()" >
-                <i class="fi fi-rr-comment-alt-dots text-white text-3xl"></i> 
-                <span *ngIf="notificationsUnSeenCount > 0"
-                    class="primaryBg absolute -top-2 -right-2 border-2 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold" >
-                    {{ notificationsUnSeenCount }}
-                </span>
+        <div class="flex space-x-4 rtl:space-x-reverse items-center"> 
+            <div class="relative dropdown-container"> 
+                <div class="relative cursor-pointer hover:opacity-80 hover:scale-110 transition-all" (click)="toggleNotificationPopup()" >
+                    <i class="fi fi-rr-comment-alt-dots text-white text-3xl flex items-center"></i> 
+                    <span *ngIf="notificationsUnSeenCount > 0"
+                        class="primaryBg absolute -top-2 -right-2 border-2 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold" >
+                        {{ notificationsUnSeenCount }}
+                    </span>
+                </div>
             </div>
-            <div class="relative cursor-pointer hover:opacity-80 hover:scale-110 transition-all" (click)="toggleNotificationPopup()" > 
-                <i class="fi fi-rs-paper-plane text-white text-3xl"></i> 
-                <span *ngIf="notificationsUnSeenCount > 0"
-                    class="primaryBg absolute -top-2 -right-2 border-2 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold" >
-                    {{ notificationsUnSeenCount }}
-                </span>
+            <div class="relative dropdown-container"> 
+                <div class="relative cursor-pointer hover:opacity-80 hover:scale-110 transition-all" (click)="toggleNotificationPopup()" > 
+                    <i class="fi fi-rs-paper-plane text-white text-3xl flex items-center"></i> 
+                    <span *ngIf="notificationsUnSeenCount > 0"
+                        class="primaryBg absolute -top-2 -right-2 border-2 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold" >
+                        {{ notificationsUnSeenCount }}
+                    </span>
+                </div>
             </div>
             <div class="relative dropdown-container">  
                 <div class="relative cursor-pointer hover:opacity-80 hover:scale-110 transition-all" (click)="toggleNotificationPopup()" >

@@ -10,6 +10,8 @@ using LMS_CMS_DAL.Models.Domains.Communication;
 using LMS_CMS_DAL.Models.Domains;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_DAL.Models.Domains.LMS;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 
 namespace LMS_CMS_PL.Controllers.Domains.Communication
 {
@@ -72,7 +74,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
         [HttpPost]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee", "parent", "student" }
-       )]
+        )]
         public async Task<IActionResult> AddAsync(RequestAddDTO NewRequest)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -109,7 +111,12 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             {
                 return BadRequest("You have to choose one element atleast to appear");
             }
-             
+
+            if (NewRequest.ReceiverUserTypeID == 2 || NewRequest.ReceiverUserTypeID == 3)
+            {
+                return BadRequest("You Can't Send Requests To This User Type");
+            }
+
             List<long> targetUserIds;
             try
             {
@@ -118,6 +125,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
+            }
+
+            if(userTypeID == 1 && NewRequest.ReceiverUserTypeID == 1)
+            {
+                targetUserIds = targetUserIds.Where(id => id != userId).ToList();
             }
 
             if(targetUserIds.Count == 0)
@@ -131,33 +143,51 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                 if (returnFileInput != null)
                 {
                     return BadRequest(returnFileInput);
+                } 
+            } 
+
+            if (userTypeID == 1 && NewRequest.ReceiverUserTypeID == 1)
+            {
+                List<Employee> employees = Unit_Of_Work.employee_Repository.FindBy(d => d.IsDeleted != true && d.CanReceiveRequest == true);
+                if(employees.Count == 0)
+                {
+                    return NotFound("No eligible employees available to receive requests");
                 }
 
-            }
+                List<long> employeeIDs = employees.Select(y => y.ID).ToList();
 
-            if ((userTypeID == 2 || userTypeID == 3) && (NewRequest.ReceiverUserTypeID == 2 || NewRequest.ReceiverUserTypeID == 3))
-            {
-                return BadRequest("You Can't Send Requests To This User Type");
-            }
-
-            foreach (long receiverID in targetUserIds)
-            {
-                if (userTypeID == 1 && NewRequest.ReceiverUserTypeID == 1)
+                targetUserIds = targetUserIds.Where(id => employeeIDs.Contains(id)).ToList();
+                if (targetUserIds.Count == 0)
                 {
-                    Employee emp = Unit_Of_Work.employee_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == receiverID);
-                    if (emp.CanReceiveRequest != true)
+                    return NotFound("None of the specified users are eligible to receive requests");
+                }
+            }
+            else if ((userTypeID == 2 || userTypeID == 3) && NewRequest.ReceiverUserTypeID == 1)
+            {
+                if(targetUserIds.Count > 1)
+                {
+                    return BadRequest("You can only request from one teacher at a time");
+                }
+                
+                if (userTypeID == 3 && (NewRequest.StudentID == null || NewRequest.StudentID == 0))
+                {
+                    return BadRequest("You must select a student");
+                }
+
+                long studentId = userTypeID == 2 ? userId : NewRequest.StudentID.Value;
+
+                Employee emp = Unit_Of_Work.employee_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == targetUserIds[0]);
+                if (emp?.CanReceiveRequestFromParent != true)
+                {
+                    var teacherIDs = await GetValidTeacherIdsForStudent(studentId, Unit_Of_Work);
+
+                    if (teacherIDs.Count == 0 || !teacherIDs.Contains(targetUserIds[0]))
                     {
-                        return BadRequest("You Can't Request From One Of Your Selected Users");
+                        return BadRequest("You can only send requests to your current teachers");
                     }
-                } else if (userTypeID == 2 && NewRequest.ReceiverUserTypeID == 1)
-                {
-
-                } else if (userTypeID == 3 && NewRequest.ReceiverUserTypeID == 1)
-                {
-
                 }
             }
-            
+
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
 
             foreach (long receiverID in targetUserIds)
@@ -199,9 +229,73 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
 
             Unit_Of_Work.SaveChanges();
 
-            // run the function that counts the number of the Requests not seen  
+            // run the function that tell the user that there are changes and in front end it will change the count and also refresh the requests if i am in the requests page
 
             return Ok();
+        }
+
+        private async Task<List<long>> GetValidTeacherIdsForStudent(long studentId, UOW Unit_Of_Work)
+        { 
+            List<long> teacherIDs = new List<long>();
+
+            // Get student current grade
+            StudentGrade studentGrade = Unit_Of_Work.studentGrade_Repository.First_Or_Default(
+                d => d.IsDeleted != true && d.Grade.IsDeleted != true && d.Grade.Section.IsDeleted != true && d.AcademicYear.IsDeleted != true && d.AcademicYear.School.IsDeleted != true
+                && d.AcademicYear.IsActive == true && d.StudentID == studentId); 
+
+            if (studentGrade != null)
+            {
+                // Get his classroom
+                StudentClassroom studentClassroom = Unit_Of_Work.studentClassroom_Repository.First_Or_Default(
+                    d => d.IsDeleted != true && d.Classroom.IsDeleted != true && d.Classroom.AcademicYear.IsDeleted != true && d.Classroom.AcademicYear.IsActive == true
+                    && d.StudentID == studentId && d.Classroom.GradeID == studentGrade.GradeID); 
+
+                if(studentClassroom != null)
+                {
+                    // Get His subjects
+                    List<StudentClassroomSubject> studentClassroomSubjects = Unit_Of_Work.studentClassroomSubject_Repository.FindBy(
+                        d => d.IsDeleted != true && d.StudentClassroomID == studentClassroom.ID && d.Subject.IsDeleted != true && d.Hide == false);
+
+                    if (studentClassroomSubjects != null && studentClassroomSubjects.Count > 0 )
+                    {
+                        List<long> subjectIDs = studentClassroomSubjects.Select(y => y.SubjectID).ToList(); 
+
+                        // Get his class subjects 
+                        List<ClassroomSubject> classroomSubjects = Unit_Of_Work.classroomSubject_Repository.FindBy(
+                            d => d.ClassroomID == studentClassroom.ClassID && subjectIDs.Contains(d.SubjectID) && d.IsDeleted != true && d.Hide == false && d.TeacherID != null && d.Teacher.IsDeleted != true
+                            );
+
+                        if (classroomSubjects != null && classroomSubjects.Count > 0)
+                        {
+                            teacherIDs = classroomSubjects.Where(cs => cs.TeacherID != null).Select(y => y.TeacherID.Value).ToList();
+                            
+                            foreach (var item in classroomSubjects)
+                            {
+                                List<ClassroomSubjectCoTeacher> classroomSubjectCoTeachers = Unit_Of_Work.classroomSubjectCoTeacher_Repository.FindBy(
+                                d => d.ClassroomSubjectID == item.ID && d.IsDeleted != true && d.CoTeacher.IsDeleted != true
+                                );
+                                if (classroomSubjectCoTeachers != null && classroomSubjectCoTeachers.Count != 0)
+                                {
+                                    teacherIDs.AddRange(classroomSubjectCoTeachers.Select(ct => ct.CoTeacherID));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+             
+            List<RemedialClassroomStudent> remedialClassroomStudents = await Unit_Of_Work.remedialClassroomStudent_Repository.Select_All_With_IncludesById<RemedialClassroomStudent>(
+                d => d.IsDeleted != true && d.RemedialClassroom.IsDeleted != true && d.RemedialClassroom.Subject.IsDeleted != true && d.RemedialClassroom.AcademicYear.IsDeleted != true
+                && d.RemedialClassroom.AcademicYear.School.IsDeleted != true && d.RemedialClassroom.Subject.Grade.IsDeleted != true && d.RemedialClassroom.Subject.Grade.Section.IsDeleted != true
+                && d.RemedialClassroom.AcademicYear.IsActive == true && d.StudentID == studentId,
+                query => query.Include(d => d.RemedialClassroom)
+                );
+            if (remedialClassroomStudents != null && remedialClassroomStudents.Count != 0)
+            {
+                teacherIDs.AddRange(remedialClassroomStudents.Select(ct => ct.RemedialClassroom.TeacherID));
+            }
+
+            return teacherIDs.Distinct().ToList(); 
         }
     }
 }

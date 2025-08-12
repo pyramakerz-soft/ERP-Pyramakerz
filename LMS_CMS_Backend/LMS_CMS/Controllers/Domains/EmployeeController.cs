@@ -216,6 +216,86 @@ namespace LMS_CMS_PL.Controllers.Domains
 
         ///////////////////////////////////////////////////////////////////////////////////////
 
+        [HttpGet("GetWhoCanAcceptRequestsFromEmployeeByDepartmentId/{DepartmentId}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" }
+        )]
+        public IActionResult GetWhoCanAcceptRequestsFromEmployeeByDepartmentId(long DepartmentId)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+            Department department = Unit_Of_Work.department_Repository.Select_By_Id(DepartmentId);
+            if (department == null)
+            {
+                return NotFound("No Department with this Id");
+            }
+            List<Employee> employees = Unit_Of_Work.employee_Repository.FindBy(
+                    sem => sem.IsDeleted != true && sem.DepartmentID == DepartmentId && sem.CanReceiveRequest == true);
+
+            if (employees == null || employees.Count == 0)
+            {
+                return NotFound("There is no employees in this department that can accept requests");
+            }
+
+            List<Employee_GetDTO> employeeDTOs = mapper.Map<List<Employee_GetDTO>>(employees); 
+
+            return Ok(employeeDTOs);
+        }
+        
+        ///////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpGet("GetWhoCanAcceptRequestsFromParentAndStudentByDepartmentId/{DepartmentId}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee", "parent", "student" }
+        )]
+        public IActionResult GetWhoCanAcceptRequestsFromParentAndStudentByDepartmentId(long DepartmentId)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+            Department department = Unit_Of_Work.department_Repository.Select_By_Id(DepartmentId);
+            if (department == null)
+            {
+                return NotFound("No Department with this Id");
+            }
+            List<Employee> employees = Unit_Of_Work.employee_Repository.FindBy(
+                    sem => sem.IsDeleted != true && sem.DepartmentID == DepartmentId && sem.CanReceiveRequestFromParent == true);
+
+            if (employees == null || employees.Count == 0)
+            {
+                return NotFound("There is no employees in this department that can accept requests");
+            }
+
+            List<Employee_GetDTO> employeeDTOs = mapper.Map<List<Employee_GetDTO>>(employees); 
+
+            return Ok(employeeDTOs);
+        }
+        
+        ///////////////////////////////////////////////////////////////////////////////////////
+
+        //[HttpGet("GetTeachersCoTeachersRemedialTeachersBySubjectIdAndStudentId/{SubjectId}/{StudentId}")]
+        //[Authorize_Endpoint_(
+        //    allowedTypes: new[] { "octa", "employee", "parent", "student" }
+        //)]
+        //public IActionResult GetTeachersCoTeachersRemedialTeachersBySubjectIdAndStudentId(long SubjectId, long StudentId)
+        //{
+        //    UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+        //    Subject subject= Unit_Of_Work.subject_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == SubjectId);
+        //    if (subject == null)
+        //    {
+        //        return NotFound("No Subject with this Id");
+        //    }
+        //    List<Employee> employees = Unit_Of_Work.employee_Repository.FindBy(sem => sem.IsDeleted != true);
+
+        //    if (employees == null || employees.Count == 0)
+        //    {
+        //        return NotFound("There is no employees in this department that can accept requests");
+        //    }
+
+        //    List<Employee_GetDTO> employeeDTOs = mapper.Map<List<Employee_GetDTO>>(employees); 
+
+        //    return Ok(employeeDTOs);
+        //}
+
+        ///////////////////////////////////////////////////////////////////////////////////////
+
         [HttpGet("{empId}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" }

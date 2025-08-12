@@ -628,6 +628,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             try
             {
                 targetUserIds = _userTreeService.GetUsersAccordingToTree(Unit_Of_Work, NewNotification.UserTypeID, NewNotification.UserFilters);
+                if(NewNotification.UserTypeID == 1)
+                {
+                    targetUserIds = targetUserIds.Where(id => id != userId).ToList();
+                }
             }
             catch (Exception ex)
             {
