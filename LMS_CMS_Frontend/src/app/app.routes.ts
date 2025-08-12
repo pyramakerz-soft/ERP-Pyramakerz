@@ -210,6 +210,10 @@ import { RemedialClassroomComponent } from './Pages/Employee/LMS/remedial-classr
 import { RemedialTimeTableComponent } from './Pages/Employee/LMS/remedial-time-table/remedial-time-table.component';
 import { RemedialTimeTableViewComponent } from './Pages/Employee/LMS/remedial-time-table-view/remedial-time-table-view.component';
 import { RemedialClassroomStudentComponent } from './Pages/Employee/LMS/remedial-classroom-student/remedial-classroom-student.component';
+import { ConductLevelComponent } from './Pages/Employee/SocialWorker/conduct-level/conduct-level.component';
+import { ProcedureTypeComponent } from './Pages/Employee/SocialWorker/procedure-type/procedure-type.component';
+import { ConductTypeComponent } from './Pages/Employee/SocialWorker/conduct-type/conduct-type.component';
+import { ConductComponent } from './Pages/Employee/SocialWorker/conduct/conduct.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -464,6 +468,12 @@ export const routes: Routes = [
             { path: 'Remedial Classes/:id', component: RemedialClassroomStudentComponent, title: 'Remedial Classroom', canActivate: [noNavigateWithoutLoginGuard], },  
             { path: 'Remedial TimeTable', component: RemedialTimeTableComponent, title: 'Remedial Time Table', canActivate: [noNavigateWithoutLoginGuard], },  
             { path: 'Remedial TimeTable/:id', component: RemedialTimeTableViewComponent, title: 'Remedial Time Table', canActivate: [noNavigateWithoutLoginGuard], },  
+
+            { path: 'Conduct Level', component: ConductLevelComponent, title: 'Conduct Level', canActivate: [noNavigateWithoutLoginGuard], },  
+            { path: 'Procedure Type', component: ProcedureTypeComponent, title: 'Procedure Type', canActivate: [noNavigateWithoutLoginGuard], },  
+            { path: 'Conduct Type', component: ConductTypeComponent, title: 'Conduct Type', canActivate: [noNavigateWithoutLoginGuard], },  
+            { path: 'Conduct', component: ConductComponent, title: 'Conduct', canActivate: [noNavigateWithoutLoginGuard], },  
+
         ]
     },
     {

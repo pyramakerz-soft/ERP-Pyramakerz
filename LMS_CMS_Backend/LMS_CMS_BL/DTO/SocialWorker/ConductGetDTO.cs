@@ -25,6 +25,10 @@ namespace LMS_CMS_BL.DTO.SocialWorker
         public string ConductTypeArName { get; set; }
         public long ProcedureTypeID { get; set; }
         public string ProcedureTypeName { get; set; }
+        public long SchoolID { get; set; }
+        public string SchoolName { get; set; }
+        public DateTime? InsertedAt { get; set; }
+        public long? InsertedByUserId { get; set; }
 
     }
 }
