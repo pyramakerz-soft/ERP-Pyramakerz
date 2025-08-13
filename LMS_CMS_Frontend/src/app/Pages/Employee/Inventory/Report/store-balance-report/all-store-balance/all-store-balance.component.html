@@ -51,104 +51,153 @@
     </div>
 </div>
 
+<div *ngIf="showTable" class="mt-5 overflow-x-auto">
+    <div class="flex space-x-4 pb-2">
+        <!-- Fixed Columns Table (Item Code, Item Name) -->
+            <div  class="flex-shrink-0">
+                <!-- Store Name Header - Styled as section title -->
+                <div class="primaryTxt font-semibold text-2xl leading-9">
+                    {{ '-' }}
+                </div>
 
-<div *ngIf="showTable" class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
-    <table class="w-full table inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
-        <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
-            <!-- First header row - fixed columns -->
-            <tr>
-                <th rowspan="2" class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Item Code
-                </th>
-                <th rowspan="2" class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Item Name
-                </th>
-                
-                <!-- Store group headers -->
-                <ng-container *ngFor="let store of getStoreColumns()">
-                    <th [attr.colspan]="showPriceColumn() ? 3 : 1" class="py-3 px-4 text-center border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ store }}
-                    </th>
-                </ng-container>
-                
-                <th rowspan="2" class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Grand Total
-                </th>
-            </tr>
-            
-            <!-- Second header row - sub-columns -->
-            <tr>
-                    <ng-container *ngFor="let store of getStoreColumns()">
-                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0 relative">
-                            Qty
-                            <!-- Left divider for Qty column -->
-                            <div class="absolute left-0 top-0 bottom-0 w-[2px] bg-[#BDBDBD]"></div>
+        <div class="flex-shrink-0 mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
+            <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
+                <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+                    <tr>
+                        <th rowspan="2" class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            Item Code
                         </th>
-                        <th *ngIf="showPriceColumn()" 
-                            class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            {{ getPriceColumnLabel() }}
+                        <th rowspan="2" class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            Item Name
                         </th>
-                        <th *ngIf="showPriceColumn()" 
-                            class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0 relative">
-                            Value
-                            <!-- Right divider for Value column -->
-                            <!-- <div class="absolute right-0 top-0 bottom-0 w-[2px] bg-[#BDBDBD]"></div> -->
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngIf="!reportData?.data?.length">
+                        <td colspan="2" class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                            No Data Found
+                        </td>
+                    </tr>
+                    <tr *ngFor="let item of reportData?.data; let i = index" 
+                        [ngClass]="{ 
+                            'bg-[#F7F7F7]': i % 2 === 1, 
+                            'bg-white': i % 2 !== 1
+                        }" 
+                        class="border-t border-gray-300 text-xs md:text-sm">
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ item.itemCode }}
+                        </td>
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ item.itemName }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        </div>
+
+        <!-- Store Tables -->
+        <div *ngFor="let store of getStoreColumns()" class="flex-shrink-0">
+            <div class="">
+                <!-- Store Name Header - Styled as section title -->
+                <div class="primaryTxt font-semibold text-2xl leading-9">
+                    {{ store }}
+                </div>
+                
+<div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
+                    <!-- Store Data Table -->
+                <table class="w-full table inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F] rounded-b-lg border border-[#BDBDBD] border-t-0">
+                    <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+                        <tr>
+                            <th class="py-3 px-4 min-w-[80px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0 relative">
+                                Qty
+                            </th>
+                            <th *ngIf="showPriceColumn()" 
+                                class="py-3 px-4 min-w-[100px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ getPriceColumnLabel() }}
+                            </th>
+                            <th *ngIf="showPriceColumn()" 
+                                class="py-3 px-4 min-w-[100px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0 relative">
+                                Value
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngIf="!reportData?.data?.length">
+                            <td [attr.colspan]="showPriceColumn() ? 3 : 1" class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                                No Data Found
+                            </td>
+                        </tr>
+                        <tr *ngFor="let item of reportData?.data; let i = index" 
+                            [ngClass]="{ 
+                                'bg-[#F7F7F7]': i % 2 === 1, 
+                                'bg-white': i % 2 !== 1
+                            }" 
+                            class="border-t border-gray-300 text-xs md:text-sm">
+                            <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ getStoreData(item, store).quantity ?? '0' }}
+                            </td>
+                            <td *ngIf="showPriceColumn()" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ (getStoreData(item, store).price | number:'1.2-2') ?? '0' }}
+                            </td>
+                            <td *ngIf="showPriceColumn()" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                                {{ (getStoreData(item, store).value | number:'1.2-2') ?? '0' }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+</div>
+            </div>
+        </div>
+
+        <!-- Grand Total Table -->
+        <div class="flex-shrink-0">
+
+                <div  class="flex-shrink-0">
+                <!-- Store Name Header - Styled as section title -->
+                <div class="primaryTxt font-semibold text-2xl leading-9">
+                    {{ '-' }}
+                </div>
+        <div class="flex-shrink-0 mt-5 overflow-x-auto rounded-2xl">
+            <table class="w-full table inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F] rounded-lg border border-[#BDBDBD]">
+                <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+                    <tr>
+                        <th rowspan="2" class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            Grand Total
                         </th>
-                    </ng-container>
-                </tr>
-        </thead>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngIf="!reportData?.data?.length">
+                        <td class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                            No Data Found
+                        </td>
+                    </tr>
+                    <tr *ngFor="let item of reportData?.data; let i = index" 
+                        [ngClass]="{ 
+                            'bg-[#F7F7F7]': i % 2 === 1, 
+                            'bg-white': i % 2 !== 1
+                        }" 
+                        class="border-t border-gray-300 text-xs md:text-sm">
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 font-medium">
+                            -
+                        </td>
+                    </tr>
+                    <!-- Grand Total Summary Row -->
+                    <tr *ngIf="reportData?.data?.length && reportData?.grandTotals" class="bg-[#E5E5E5] font-semibold">
+                        <td class="py-3 px-4 border border-[#EAECF0] font-bold">
+                            {{ reportType === 'QuantityOnly' ? 
+                               (reportData?.grandTotals?.TotalQuantity | number:'1.0-0') : 
+                               (reportData?.grandTotals?.TotalValue | number:'1.2-2') }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
-        <tbody>
-            <tr *ngIf="!reportData?.data?.length">
-                <td [attr.colspan]="getColumnCount()" 
-                    class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-                    No Data Found
-                </td>
-            </tr>
+        </div>
 
-            <tr *ngFor="let item of reportData?.data; let i = index" 
-                [ngClass]="{ 
-                    'bg-[#F7F7F7]': i % 2 === 1, 
-                    'bg-white': i % 2 !== 1
-                }" 
-                class="border-t border-gray-300 text-xs md:text-sm">
-                
-                <!-- Fixed Columns -->
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ item.itemCode }}
-                </td>
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ item.itemName }}
-                </td>
-                
-                <!-- Store Data -->
-                <ng-container *ngFor="let store of getStoreColumns()">
-                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ getStoreData(item, store).quantity ?? '0' }}
-                    </td>
-                    <td *ngIf="showPriceColumn()" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ (getStoreData(item, store).price | number:'1.2-2') ?? '0' }}
-                    </td>
-                    <td *ngIf="showPriceColumn()" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ (getStoreData(item, store).value | number:'1.2-2') ?? '0' }}
-                    </td>
-                </ng-container>
-
-                <!-- Item Total -->
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 font-medium">
-                    -
-                </td>
-            </tr>
-
-            <!-- Grand Total Summary Row - Simplified -->
-            <tr *ngIf="reportData?.data?.length && reportData?.grandTotals" class="bg-[#E5E5E5] font-semibold">
-                <td [attr.colspan]="getColumnCount() - 1" class="py-3 px-4 text-right"></td>
-                <td class="py-3 px-4 border border-[#EAECF0] font-bold">
-                    {{ reportType === 'QuantityOnly' ? 
-                       (reportData?.grandTotals?.TotalQuantity | number:'1.0-0') : 
-                       (reportData?.grandTotals?.TotalValue | number:'1.2-2') }}
-                </td>
-            </tr>
-        </tbody>
-    </table>
+        </div>
+        </div>
 </div>
