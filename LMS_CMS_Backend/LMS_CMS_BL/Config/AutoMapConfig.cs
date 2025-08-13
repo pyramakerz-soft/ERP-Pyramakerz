@@ -1227,6 +1227,9 @@ namespace LMS_CMS_BL.Config
             CreateMap<ProcedureType, ProcedureTypeGetDTO>();
             CreateMap<ProcedureTypeAddDTO, ProcedureType>();
 
+            CreateMap<Request, RequestGetDTO>()
+                .ForMember(dest => dest.SenderUserTypeName, opt => opt.MapFrom(src => src.SenderUserType.Title))
+                .ForMember(dest => dest.ReceiverUserTypeName, opt => opt.MapFrom(src => src.ReceiverUserType.Title));
         }
     } 
 }
