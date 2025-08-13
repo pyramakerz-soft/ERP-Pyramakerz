@@ -1991,6 +1991,12 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasForeignKey(p => p.ProcedureTypeID)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<Conduct>()
+                .HasOne(p => p.Classroom)
+                .WithMany(p => p.Conduct)
+                .HasForeignKey(p => p.ClassroomID)
+                .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<ConductType>()
                 .HasOne(p => p.ConductLevel)
                 .WithMany(p => p.ConductTypes)

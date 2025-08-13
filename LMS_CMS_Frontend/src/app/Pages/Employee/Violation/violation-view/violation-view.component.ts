@@ -48,12 +48,20 @@ export class ViolationViewComponent {
   }
 
   moveToViolation() {
-    this.router.navigateByUrl('Employee/Violation');
+    this.router.navigateByUrl('Employee/violation');
   }
 
   GetViolationById(Id: number) {
     this.ViolationServ.GetByID(Id, this.DomainName).subscribe((data) => {
       this.violation = data;
+      console.log(this.violation)
     });
+  }
+
+  openUrl(link: string) {
+    if (link) {
+      const fullUrl = `${link}`;
+      window.open(fullUrl, '_blank');
+    }
   }
 }
