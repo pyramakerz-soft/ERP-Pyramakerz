@@ -35,7 +35,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
                allowedTypes: new[] { "octa", "employee" },
                pages: new[] { "Lesson Resources Types" }
                )]
-        public IActionResult Get()
+        public async Task<IActionResult> Get()
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -49,7 +49,13 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            List<StudentIssue> studentIssue = Unit_Of_Work.studentIssue_Repository.FindBy(t => t.IsDeleted != true && t.Student.IsDeleted != true && t.Classroom.IsDeleted != true && t.Classroom.Grade.IsDeleted != true && t.Classroom.Grade.Section.IsDeleted != true && t.Classroom.Grade.Section.school.IsDeleted != true);
+            List<StudentIssue> studentIssue =await Unit_Of_Work.studentIssue_Repository.Select_All_With_IncludesById<StudentIssue>(t => t.IsDeleted != true && t.Student.IsDeleted != true && t.Classroom.IsDeleted != true && t.Classroom.Grade.IsDeleted != true && t.Classroom.Grade.Section.IsDeleted != true && t.Classroom.Grade.Section.school.IsDeleted != true ,
+                    query => query.Include(emp => emp.Student),
+                    query => query.Include(emp => emp.Classroom)
+                                  .ThenInclude(c => c.Grade)
+                                  .ThenInclude(g => g.Section)
+                                  .ThenInclude(s => s.school),
+                    query => query.Include(emp => emp.IssuesType));
 
             if (studentIssue == null || studentIssue.Count == 0)
             {

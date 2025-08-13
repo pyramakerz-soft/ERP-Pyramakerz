@@ -62,6 +62,14 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             }
 
             List<ConductGetDTO> Dto = mapper.Map<List<ConductGetDTO>>(conducts);
+            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+            foreach (var item in Dto)
+            {
+                if (!string.IsNullOrEmpty(item.File))
+                {
+                    item.File = $"{serverUrl}{item.File.Replace("\\", "/")}";
+                }
+            }
 
             return Ok(Dto);
         }
