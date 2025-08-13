@@ -17,62 +17,67 @@
         <input id="date" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
             placeholder="Enter User date" [(ngModel)]="Data.date"
             (ngModelChange)="onInputValueChange({ field: 'date', value: $event })" />
-        <span *ngIf="validationErrors['date']" class="text-red-500 ml-3 font-normal">{{
-            validationErrors["date"]}}</span>
+        <span *ngIf="validationErrors['date']" class="text-red-500 ml-3 font-normal">{{ validationErrors["date"]}}</span>
     </div>
     <div class="flex flex-col mb-4 w-[49%]">
         <label class="mb-2" for="studentID">School</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="studentID"
-            [(ngModel)]="Data.schoolID" (change)="GetGrades(); GetConductTypes();">
+            [(ngModel)]="Data.schoolID" (change)="GetGrades(); GetConductTypes();" (ngModelChange)="onInputValueChange({ field: 'schoolID', value: $event })">
             <option [value]="0" disabled selected hidden> Choose School</option>
             <option *ngFor="let school of schools" [value]="school.id">{{ school.name }}</option>
             <option *ngIf="schools.length === 0" disabled selected> No Data Found</option>
         </select>
+        <span *ngIf="validationErrors['schoolID']" class="text-red-500 ml-3 font-normal">{{ validationErrors["schoolID"]}}</span>
     </div>
     <div class="flex flex-col mb-4 w-[49%]">
         <label class="mb-2" for="gradeID">Grade</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="gradeID"
-            [(ngModel)]="Data.gradeID" [disabled]="!Data.schoolID" (change)="GetClasses();">
+            [(ngModel)]="Data.gradeID" [disabled]="!Data.schoolID" (change)="GetClasses();" (ngModelChange)="onInputValueChange({ field: 'gradeID', value: $event })">
             <option [value]="0" disabled selected hidden> Choose Grade</option>
             <option *ngFor="let stu of grades" [value]="stu.id">{{ stu.name }}</option>
             <option *ngIf="grades.length === 0" disabled selected> No Data Found</option>
         </select>
+        <span *ngIf="validationErrors['gradeID']" class="text-red-500 ml-3 font-normal">{{ validationErrors["gradeID"]}}</span>
     </div>
     <div class="flex flex-col mb-4 w-[49%]">
         <label class="mb-2" for="classroomID">Classroom</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="classroomID"
-            [(ngModel)]="Data.classroomID" [disabled]="!Data.gradeID" (change)="GetStudents();">
+            [(ngModel)]="Data.classroomID" [disabled]="!Data.gradeID" (change)="GetStudents();" (ngModelChange)="onInputValueChange({ field: 'classroomID', value: $event })">
             <option [value]="0" disabled selected hidden>Choose Classroom</option>
             <option *ngFor="let class of classes" [value]="class.id">{{ class.name }}</option>
             <option *ngIf="classes.length === 0" disabled selected> No Data Found</option>
         </select>
+        <span *ngIf="validationErrors['classroomID']" class="text-red-500 ml-3 font-normal">{{ validationErrors["classroomID"]}}</span>
     </div>
     <div class="flex flex-col mb-4 w-[49%]">
         <label class="mb-2" for="studentID">Student</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="studentID"
-            [(ngModel)]="Data.studentID" [disabled]="!Data.gradeID">
+            [(ngModel)]="Data.studentID" [disabled]="!Data.gradeID" (ngModelChange)="onInputValueChange({ field: 'studentID', value: $event })">
             <option [value]="0" disabled selected hidden> Choose Student</option>
             <option *ngFor="let stu of students" [value]="stu.id">{{ stu.en_name }}</option>
             <option *ngIf="students.length === 0" disabled selected> No Data Found</option>
         </select>
+        <span *ngIf="validationErrors['studentID']" class="text-red-500 ml-3 font-normal">{{ validationErrors["studentID"]}}</span>
     </div>
     <div class="flex flex-col mb-4 w-[49%]">
         <label class="mb-2" for="conductTypeID">Conduct Type</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="conductTypeID"
-            [(ngModel)]="Data.conductTypeID">
+            [(ngModel)]="Data.conductTypeID" (ngModelChange)="onInputValueChange({ field: 'conductTypeID', value: $event })">
             <option [value]="0" disabled selected hidden> Choose Conduct Type</option>
             <option *ngFor="let type of conductTypes" [value]="type.id">{{ type.en_name }}</option>
             <option *ngIf="conductTypes.length === 0" disabled selected> No Data Found</option>
         </select>
+        <span *ngIf="validationErrors['conductTypeID']" class="text-red-500 ml-3 font-normal">{{ validationErrors["conductTypeID"]}}</span>
     </div>
     <div class="flex flex-col mb-4 w-[49%]">
         <label class="mb-2" for="procedureTypeID">Procedure Type</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="procedureTypeID"
-            [(ngModel)]="Data.procedureTypeID">
+            [(ngModel)]="Data.procedureTypeID" (ngModelChange)="onInputValueChange({ field: 'procedureTypeID', value: $event })">
             <option [value]="0" disabled selected hidden> Choose Procedure Type</option>
             <option *ngFor="let type of proceduresType" [value]="type.id">{{ type.name }}</option>
             <option *ngIf="proceduresType.length === 0" disabled selected> No Data Found</option>
         </select>
+        <span *ngIf="validationErrors['procedureTypeID']" class="text-red-500 ml-3 font-normal">{{ validationErrors["procedureTypeID"]}}</span>
     </div>
     <div class="flex flex-col mb-4 w-full">
         <label class="mb-2 primaryTxt" for="Details">Details</label>
@@ -80,14 +85,14 @@
             class="w-full h-[100px] rounded-lg border border-solid border-gray-300 px-2 py-1 mb-3 resize-none"
             placeholder="Enter Details" [(ngModel)]="Data.details"
             (ngModelChange)="onInputValueChange({ field: 'details', value: $event })"></textarea>
-        <span *ngIf="validationErrors['details']" class="text-red-500 ml-3 font-normal">{{validationErrors['details']
-            }}</span>
+        <span *ngIf="validationErrors['details']" class="text-red-500 ml-3 font-normal">{{validationErrors['details']}}</span>
     </div>
 
     <div class="flex align-middle space-x-2 rtl:space-x-reverse mb-4 w-full">
         <input type="checkbox" id="isSendSMSToParent" class="w-5 h-5" [(ngModel)]="Data.isSendSMSToParent">
         <label class="mb-2" for="isSendSMSToParent"> Is Send SMS To Parent</label>
     </div>
+
     <div *ngIf="Data.newFile" class=" rounded-md border-2 w-[30%] px-6 py-3 lg:py-5">
         <div class="flex justify-between items-center">
             <div class="flex items-center space-x-2 rtl:space-x-reverse">
