@@ -42,7 +42,7 @@
           class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block p-2.5 w-full">
           <option [value]=0 disabled selected hidden>{{ 'Choose' | translate }} {{ 'Admission Status' | translate }}</option>
       <option *ngFor="let s of registrationFormStates" [value]="s.id">
-        {{ s.name }}
+        {{ s.name|translate}}
       </option>
       </select>
   </div>

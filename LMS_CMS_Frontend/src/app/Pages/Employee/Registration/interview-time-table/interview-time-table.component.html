@@ -185,7 +185,7 @@
                 <div *ngFor="let option of days" class="flex items-center">
                     <input type="checkbox" id="{{option}}" name="{{option}}" [value]="option"
                         (change)="handleDays($event, option)" />
-                    <label for="{{option}}" class="ml-2">{{ option }}</label>
+                    <label for="{{option}}" class="ml-2">{{ option|translate}}</label>
                 </div>
                 <span *ngIf="validationErrors['days']" class="text-red-500 ml-3 font-normal">{{ validationErrors['days']
                     }}</span>

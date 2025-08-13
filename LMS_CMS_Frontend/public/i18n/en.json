@@ -912,9 +912,50 @@
     "No User Notified":"No User Notified",
     "User Notified":"User Notified",
     "Is Allow Dismiss":"Is Allow Dismiss",
-    "Notification":"Notification"
+    "Notification":"Notification",
 
+
+
+    "Test Title":"Test Title",
+    "Visible To Parent":"Visible To Parent",
+    "Not Solved Yet":"Not Solved Yet",
+    "Is Required":"Is Required",
     
+
+    "Student English Name":"Student English Name",
+    "Student Arabic Name":"Student Arabic Name",
+    "Accepted":"Accepted",
+    "Declined":"Declined",
+    "Pending":"Pending",
+    "Waiting List":"Waiting List",
+
+
+    "Personal Data Of Student":"Personal Data Of Student",
+    "Guardian’s Information":"Guardian’s Information",
+    "Mother’s Information":"Mother’s Information",
+
+
+    "Sunday":"Sunday",
+    "Monday":"Monday",
+    "Tuesday":"Tuesday",
+    "Wednesday":"Wednesday",
+    "Thursday":"Thursday",
+    "Friday":"Friday",
+    "Saturday":"Saturday",
+
+    "Academic Sequential Report":"Academic Sequential Report",
+    "Nationality":"Nationality",
+    "Search by Name":"Search by Name",
+
+
+    "Proof Registration And Success Form Report":"Proof Registration And Success Form Report",
+    "Proof Registration Report":"Proof Registration Report",
+
+    "Statistics On The Number Of Students In the School":"Statistics On The Number Of Students In the School",
+
+
+    "Lists of students names in classes":"Lists of students names in classes",
+    "Transfered From Kindergarten Report":"Transfered From Kindergarten Report"
 
 
 }

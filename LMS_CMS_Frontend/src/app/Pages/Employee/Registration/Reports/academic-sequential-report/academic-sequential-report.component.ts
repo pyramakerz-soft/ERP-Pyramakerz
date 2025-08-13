@@ -15,11 +15,13 @@ import { DeleteEditPermissionService } from '../../../../../Services/shared/dele
 import { MenuService } from '../../../../../Services/shared/menu.service';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
 import { StudentService } from '../../../../../Services/student.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-academic-sequential-report',
   standalone: true,
-  imports: [CommonModule, FormsModule, PdfPrintComponent],
+  imports: [CommonModule, FormsModule, PdfPrintComponent , TranslateModule],
   templateUrl: './academic-sequential-report.component.html',
   styleUrl: './academic-sequential-report.component.css'
 })
@@ -40,7 +42,8 @@ export class AcademicSequentialReportComponent {
   academicYears: AcademicYear[] = []
   Students: Student[] = []
   isLoading: boolean = false
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   SelectedSchoolId: number = 0;
   SelectedStudentId: number = 0;
   SelectedYearId: number = 0;
@@ -64,6 +67,7 @@ export class AcademicSequentialReportComponent {
     public activeRoute: ActivatedRoute,
     public account: AccountService,
     public ApiServ: ApiService,
+     private languageService: LanguageService,
     private menuService: MenuService,
     public EditDeleteServ: DeleteEditPermissionService,
     private router: Router,
@@ -91,6 +95,10 @@ export class AcademicSequentialReportComponent {
       }
     });
     this.getAllSchools()
+        this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   getAllSchools() {

@@ -19,11 +19,13 @@ import { GradeService } from '../../../../../Services/Employee/LMS/grade.service
 import { ClassroomService } from '../../../../../Services/Employee/LMS/classroom.service';
 import { Grade } from '../../../../../Models/LMS/grade';
 import { Classroom } from '../../../../../Models/LMS/classroom';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-students-information-form-report',
   standalone: true,
-  imports: [CommonModule, FormsModule, PdfPrintComponent],
+  imports: [CommonModule, FormsModule, PdfPrintComponent, TranslateModule],
   templateUrl: './students-information-form-report.component.html',
   styleUrl: './students-information-form-report.component.css',
 })
@@ -36,7 +38,8 @@ export class StudentsInformationFormReportComponent {
   academicYears: AcademicYear[] = [];
   Grades: Grade[] = [];
   class: Classroom[] = [];
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   SelectedSchoolId: number = 0;
   SelectedYearId: number = 0;
   SelectedGradeId: number = 0;
@@ -59,6 +62,7 @@ export class StudentsInformationFormReportComponent {
     public ApiServ: ApiService,
     public EditDeleteServ: DeleteEditPermissionService,
     private SchoolServ: SchoolService,
+    private languageService: LanguageService,
     private academicYearServ: AcadimicYearService,
     private studentServ: StudentService,
     private GradeServ: GradeService,
@@ -73,6 +77,11 @@ export class StudentsInformationFormReportComponent {
     this.getAllYears();
     this.showTable = false; // Hide table initially
     this.showViewReportBtn = false; // Disable view report initially
+
+        this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   getAllSchools() {
