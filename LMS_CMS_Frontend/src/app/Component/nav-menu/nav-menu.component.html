@@ -19,11 +19,11 @@
                 </div>
             </div>
             <div class="relative dropdown-container"> 
-                <div class="relative cursor-pointer hover:opacity-80 hover:scale-110 transition-all" (click)="toggleNotificationPopup()" > 
+                <div class="relative cursor-pointer hover:opacity-80 hover:scale-110 transition-all" (click)="toggleRequestPopup()" > 
                     <i class="fi fi-rs-paper-plane text-white text-3xl flex items-center"></i> 
-                    <span *ngIf="notificationsUnSeenCount > 0"
+                    <span *ngIf="requestsUnSeenCount > 0"
                         class="primaryBg absolute -top-2 -right-2 border-2 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold" >
-                        {{ notificationsUnSeenCount }}
+                        {{ requestsUnSeenCount }}
                     </span>
                 </div>
             </div>

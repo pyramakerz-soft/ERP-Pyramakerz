@@ -12,6 +12,7 @@ using LMS_CMS_PL.Attribute;
 using LMS_CMS_DAL.Models.Domains.LMS;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace LMS_CMS_PL.Controllers.Domains.Communication
 {
@@ -109,20 +110,34 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             List<Request> requests = await Unit_Of_Work.request_Repository.Select_All_With_IncludesById<Request>(
                     f => f.IsDeleted != true &&
                     ((f.SenderID == userId && f.SenderUserTypeID == userTypeID) 
-                    || (f.ReceiverID == userId && f.ReceiverUserTypeID == userTypeID) 
-                    || (f.TransfereeID == userId && userTypeID == 1)),
+                    || (f.ReceiverID == userId && f.ReceiverUserTypeID == userTypeID) ),
                     query => query.Include(d => d.SenderUserType),
                     query => query.Include(d => d.ReceiverUserType)
                     );
 
-            if (requests == null || requests.Count == 0)
+            List<Request> requestsForwarded = new List<Request>();
+            if (userTypeID == 1)
+            {
+                requestsForwarded = await Unit_Of_Work.request_Repository.Select_All_With_IncludesById<Request>(
+                        f => f.IsDeleted != true && f.TransfereeID == userId,
+                        query => query.Include(d => d.SenderUserType),
+                        query => query.Include(d => d.ReceiverUserType)
+                        );
+            }
+
+            var combinedRequests = requests
+                .Select(r => new { Request = r, SortDate = r.InsertedAt })
+                .Concat(requestsForwarded.Select(r => new { Request = r, SortDate = r.ForwardedAt ?? r.InsertedAt }))
+                .OrderByDescending(x => x.SortDate)
+                .Select(x => x.Request)
+                .ToList(); 
+
+            if (combinedRequests == null || combinedRequests.Count == 0)
             {
                 return NotFound();
             }
-
-            requests = requests.OrderByDescending(d => d.InsertedAt).ToList();
-
-            List<RequestGetDTO> requestsGetDTO = mapper.Map<List<RequestGetDTO>>(requests);
+             
+            List<RequestGetDTO> requestsGetDTO = mapper.Map<List<RequestGetDTO>>(combinedRequests);
 
             foreach (var request in requestsGetDTO)
             {
@@ -173,16 +188,21 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
 
             List<Request> requests = await Unit_Of_Work.request_Repository.Select_All_With_IncludesById<Request>(
                     f => f.IsDeleted != true &&
-                    ((f.SenderID == userId && f.SenderUserTypeID == userTypeID)
-                    || (f.ReceiverID == userId && f.ReceiverUserTypeID == userTypeID)
+                    ((f.ReceiverID == userId && f.ReceiverUserTypeID == userTypeID)
                     || (f.TransfereeID == userId && userTypeID == 1)),
-                    query => query.Include(d => d.SenderUserType),
                     query => query.Include(d => d.ReceiverUserType)
                     );
 
-            requests = requests
-                .OrderByDescending(d => d.InsertedAt)
+            var recentRequests = requests
+                .Select(r => new {
+                    Request = r, 
+                    LatestActionDate = r.TransfereeID == userId && r.ForwardedAt != null
+                        ? r.ForwardedAt.Value
+                        : r.InsertedAt
+                })
+                .OrderByDescending(x => x.LatestActionDate)
                 .Take(5)
+                .Select(x => x.Request)
                 .ToList();
 
             if (requests == null || requests.Count == 0)
@@ -199,8 +219,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                 {
                     request.FileLink = $"{serverUrl}{request.FileLink.Replace("\\", "/")}";
                 }
-
-                (request.SenderEnglishName, request.SenderArabicName) = GetUserNames(Unit_Of_Work, request.SenderID, request.SenderUserTypeID);
+                 
                 (request.ReceiverEnglishName, request.ReceiverArabicName) = GetUserNames(Unit_Of_Work, request.ReceiverID, request.ReceiverUserTypeID);
                 if (request.TransfereeID != null && request.TransfereeID != 0)
                 {
@@ -209,6 +228,82 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             }
 
             return Ok(requestsGetDTO);
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpGet("ByUserIDAndRequestID/{requestID}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee", "parent", "student" }
+        )]
+        public async Task<IActionResult> ByUserIDAndRequestID(long requestID)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            long userTypeID = 0;
+            if (userTypeClaim == "employee")
+            {
+                userTypeID = 1;
+            }
+            else if (userTypeClaim == "student")
+            {
+                userTypeID = 2;
+            }
+            else if (userTypeClaim == "parent")
+            {
+                userTypeID = 3;
+            }
+
+            Request request = await Unit_Of_Work.request_Repository.FindByIncludesAsync(
+                    f => f.IsDeleted != true && f.ID == requestID &&
+                    ((f.SenderID == userId && f.SenderUserTypeID == userTypeID)
+                    || (f.ReceiverID == userId && f.ReceiverUserTypeID == userTypeID)
+                    || (f.TransfereeID == userId && userTypeID == 1)),
+                    query => query.Include(d => d.SenderUserType),
+                    query => query.Include(d => d.ReceiverUserType)
+                    ); 
+
+            if (request == null)
+            {
+                return NotFound();
+            }
+             
+            RequestGetDTO requestGetDTO = mapper.Map<RequestGetDTO>(request);
+
+            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+            if (!string.IsNullOrEmpty(requestGetDTO.FileLink))
+            {
+                requestGetDTO.FileLink = $"{serverUrl}{requestGetDTO.FileLink.Replace("\\", "/")}";
+            }
+
+            (requestGetDTO.SenderEnglishName, requestGetDTO.SenderArabicName) = GetUserNames(Unit_Of_Work, request.SenderID, requestGetDTO.SenderUserTypeID);
+            (requestGetDTO.ReceiverEnglishName, requestGetDTO.ReceiverArabicName) = GetUserNames(Unit_Of_Work, request.ReceiverID, requestGetDTO.ReceiverUserTypeID);
+            if (requestGetDTO.TransfereeID != null && requestGetDTO.TransfereeID != 0)
+            {
+                (requestGetDTO.TransfereeEnglishName, requestGetDTO.TransfereeArabicName) = GetUserNames(Unit_Of_Work, requestGetDTO.TransfereeID.Value, 1);
+            }
+
+            if (request.ReceiverID == userId && request.ReceiverUserTypeID == userTypeID)
+            {
+                request.SeenOrNot = true;
+            }
+            
+            if (request.TransfereeID == userId && userTypeID == 1)
+            {
+                request.SeenOrNotByTransferee = true;
+            }
+ 
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            request.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            Unit_Of_Work.request_Repository.Update(request);
+
+            Unit_Of_Work.SaveChanges();
+
+            return Ok(requestGetDTO);
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////
@@ -243,6 +338,131 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                     f => f.IsDeleted != true && ((!f.SeenOrNot && f.ReceiverID == userId) || (!f.SeenOrNotByTransferee && userTypeID == 1 && f.TransfereeID == userId)) && f.ReceiverUserTypeID == userTypeID);
 
             return Ok(requests.Count);
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpPut("AcceptOrDecline/{requestID}")]
+        [Authorize_Endpoint_(
+           allowedTypes: new[] { "octa", "employee"}
+        )]
+        public IActionResult AcceptOrDecline(long requestID)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            long userTypeID = 0;
+            if (userTypeClaim == "employee")
+            {
+                userTypeID = 1;
+            }
+            else if (userTypeClaim == "student")
+            {
+                userTypeID = 2;
+            }
+            else if (userTypeClaim == "parent")
+            {
+                userTypeID = 3;
+            }
+
+            Request request = Unit_Of_Work.request_Repository.First_Or_Default(
+                    f => f.IsDeleted != true  && f.ID == requestID 
+                    && ((f.ReceiverID == userId && f.ReceiverUserTypeID == userTypeID) || (f.TransfereeID == userId && userTypeID == 1)));
+
+            if (request == null)
+            {
+                return NotFound();
+            }
+
+            if (request.ReceiverID == userId && request.ReceiverUserTypeID == userTypeID)
+            {
+                request.SeenOrNot = true;
+            }
+
+            if (request.TransfereeID == userId && userTypeID == 1)
+            {
+                request.SeenOrNotByTransferee = true;
+            }
+            request.ApprovedOrNot = true; 
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            request.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            Unit_Of_Work.request_Repository.Update(request);
+            Unit_Of_Work.SaveChanges();
+
+            return Ok();
+        }
+        
+        //////////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpPut("Forward")]
+        [Authorize_Endpoint_(
+           allowedTypes: new[] { "octa", "employee"}
+        )]
+        public IActionResult Forward(ForwardRequestDTO forwardRequestDTO)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            long userTypeID = 0;
+            if (userTypeClaim == "employee")
+            {
+                userTypeID = 1;
+            }
+            else if (userTypeClaim == "student")
+            {
+                userTypeID = 2;
+            }
+            else if (userTypeClaim == "parent")
+            {
+                userTypeID = 3;
+            }
+
+            Employee employeeToForwardTo = Unit_Of_Work.employee_Repository.First_Or_Default(d => d.ID == forwardRequestDTO.ForwardToID && d.IsDeleted != true);
+            if (employeeToForwardTo == null)
+            {
+                return NotFound("No Employee with this ID");
+            }
+
+            Request request = Unit_Of_Work.request_Repository.First_Or_Default(
+                    f => f.IsDeleted != true  && f.ID == forwardRequestDTO.RequestID
+                    && ((f.ReceiverID == userId && f.ReceiverUserTypeID == userTypeID) || (f.TransfereeID == userId && userTypeID == 1))
+                    );
+
+            if (request == null)
+            {
+                return NotFound("You don't have any request with this ID");
+            }
+            
+            if (request.ApprovedOrNot != null)
+            {
+                return BadRequest("You can't forward the request after you approve or decline it");
+            }
+            
+            if (request.ReceiverID == userId && forwardRequestDTO.ForwardToID == userId)
+            {
+                return BadRequest("You can't forward the request to yourself");
+            }
+
+            if (request.TransfereeID == userId && forwardRequestDTO.ForwardToID == request.ReceiverID)
+            {
+                return BadRequest("You can't forward the request back to this user");
+            }
+
+            request.SeenOrNot = true;
+            request.ForwardedOrNot = true; 
+            request.TransfereeID = forwardRequestDTO.ForwardToID; 
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            request.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            Unit_Of_Work.request_Repository.Update(request);
+            Unit_Of_Work.SaveChanges();
+
+            return Ok();
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////

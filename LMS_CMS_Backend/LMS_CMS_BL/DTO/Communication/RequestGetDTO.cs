@@ -31,5 +31,7 @@ namespace LMS_CMS_BL.DTO.Communication
         public string SenderUserTypeName { get; set; }
         public long ReceiverUserTypeID { get; set; }
         public string ReceiverUserTypeName { get; set; }
+        public DateTime? InsertedAt { get; set; }
+        public DateTime? ForwardedAt { get; set; }
     }
 }

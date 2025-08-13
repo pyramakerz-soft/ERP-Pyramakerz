@@ -325,7 +325,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
 
             if(notificationSharedTo.UserID != userId || notificationSharedTo.UserTypeID != userTypeID)
             {
-                BadRequest();
+                return BadRequest();
             }
 
             NotificationSharedToGetDTO notificationSharedToGetDTO = mapper.Map<NotificationSharedToGetDTO>(notificationSharedTo);
