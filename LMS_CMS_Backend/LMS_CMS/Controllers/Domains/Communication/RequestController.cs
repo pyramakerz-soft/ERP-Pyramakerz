@@ -37,6 +37,112 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
 
         //////////////////////////////////////////////////////////////////////////////////////////
 
+        private (string EnglishName, string ArabicName) GetUserNames(UOW unitOfWork, long userId, long userTypeId)
+        {
+            string englishName = string.Empty;
+            string arabicName = string.Empty;
+
+            switch (userTypeId)
+            {
+                case 1: 
+                    Employee employee = unitOfWork.employee_Repository.First_Or_Default(d => d.ID == userId && d.IsDeleted != true);
+                    if (employee != null)
+                    {
+                        englishName = employee.en_name;
+                        arabicName = employee.ar_name;
+                    }
+                    break;
+
+                case 2: 
+                    Student student = unitOfWork.student_Repository.First_Or_Default(d => d.ID == userId && d.IsDeleted != true);
+                    if (student != null)
+                    {
+                        englishName = student.en_name;
+                        arabicName = student.ar_name;
+                    }
+                    break;
+
+                case 3: 
+                    Parent parent = unitOfWork.parent_Repository.First_Or_Default(d => d.ID == userId && d.IsDeleted != true);
+                    if (parent != null)
+                    {
+                        englishName = parent.en_name;
+                        arabicName = parent.ar_name;
+                    }
+                    break; 
+
+                default:
+                    throw new ArgumentException("Invalid user type ID");
+            }
+
+            return (englishName, arabicName);
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpGet("ByUserID")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee", "parent", "student" }
+        )]
+        public IActionResult ByUserID()
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            long userTypeID = 0;
+            if (userTypeClaim == "employee")
+            {
+                userTypeID = 1;
+            }
+            else if (userTypeClaim == "student")
+            {
+                userTypeID = 2;
+            }
+            else if (userTypeClaim == "parent")
+            {
+                userTypeID = 3;
+            }
+
+            List<Request> requests = Unit_Of_Work.request_Repository.FindBy(
+                    f => f.IsDeleted != true &&
+                    ((f.SenderID == userId && f.SenderUserTypeID == userTypeID) 
+                    || (f.ReceiverID == userId && f.ReceiverUserTypeID == userTypeID) 
+                    || (f.TransfereeID == userId && userTypeID == 1))
+                    );
+
+            if (requests == null || requests.Count == 0)
+            {
+                return NotFound();
+            }
+
+            requests = requests.OrderByDescending(d => d.InsertedAt).ToList();
+
+            List<RequestGetDTO> requestsGetDTO = mapper.Map<List<RequestGetDTO>>(requests);
+
+            foreach (var request in requestsGetDTO)
+            {
+                string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+                if (!string.IsNullOrEmpty(request.FileLink))
+                {
+                    request.FileLink = $"{serverUrl}{request.FileLink.Replace("\\", "/")}";
+                }
+
+                (request.SenderEnglishName, request.SenderArabicName) = GetUserNames(Unit_Of_Work, request.SenderID, request.SenderUserTypeID);
+                (request.ReceiverEnglishName, request.ReceiverArabicName) = GetUserNames(Unit_Of_Work, request.ReceiverID, request.ReceiverUserTypeID);
+                if (request.TransfereeID != null && request.TransfereeID != 0)
+                {
+                    (request.TransfereeEnglishName, request.TransfereeArabicName) = GetUserNames(Unit_Of_Work, request.TransfereeID.Value, 1);
+                }
+            }
+
+            return Ok(requestsGetDTO);
+        }
+        
+        //////////////////////////////////////////////////////////////////////////////////////////
+
         [HttpGet("UnSeenRequestCount")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee", "parent", "student" }
