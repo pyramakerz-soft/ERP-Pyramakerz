@@ -4,33 +4,35 @@ export class Request {
     constructor(
         public id: number = 0,  
         public fileLink: string = '',
-        public Link: string = '',
+        public link: string = '',
         public message: string = '',
-        public SeenOrNot: boolean = false,
-        public ForwardedOrNot: boolean = false,
-        public ApprovedOrNot: boolean = false,
-        public SeenOrNotByTransferee: boolean = false,
-        public fileFile : File|null = null, 
+        public seenOrNot: boolean = false,
+        public forwardedOrNot: boolean = false,
+        public approvedOrNot: boolean = false,
+        public seenOrNotByTransferee: boolean = false,
         public insertedAt: string = '', 
+        public forwardedAt: string = '', 
+        public senderID: number = 0,  
+        public senderEnglishName: string = '',
+        public senderArabicName: string = '',
+        public receiverID: number = 0,  
+        public receiverEnglishName: string = '',
+        public receiverArabicName: string = '',
+        public transfereeID: number = 0,  
+        public transfereeEnglishName: string = '',
+        public transfereeArabicName: string = '',
+        public senderUserTypeID: number = 0,  
+        public senderUserTypeName: string = '',
+        public receiverUserTypeID: number = 0,  
+        public receiverUserTypeName: string = '',
+        
         public userFilters : UserFilters= new UserFilters(),
-
+        public fileFile : File|null = null, 
+        public studentID: number = 0,  
+        
         // For Forward
         public requestID: number = 0,  
         public forwardToID: string = '',
     ) {}   
-}
-
- 
-//   public long SenderID { get; set; }
-//   public string SenderEnglishName { get; set; }
-//   public string SenderArabicName { get; set; }
-//   public long ReceiverID { get; set; }
-//   public string ReceiverEnglishName { get; set; }
-//   public string ReceiverArabicName { get; set; }
-//   public long? TransfereeID { get; set; }
-//   public string TransfereeEnglishName { get; set; }
-//   public string TransfereeArabicName { get; set; }
-//   public long SenderUserTypeID { get; set; }
-//   public string SenderUserTypeName { get; set; }
-//   public long ReceiverUserTypeID { get; set; }
-//   public string ReceiverUserTypeName { get; set; }
+} 
+   

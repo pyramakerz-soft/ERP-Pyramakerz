@@ -30,5 +30,6 @@ namespace LMS_CMS_DAL.Models.Domains.Communication
         [ForeignKey("ReceiverUserType")]
         public long ReceiverUserTypeID { get; set; }
         public UserType ReceiverUserType { get; set; }
+        public DateTime? ForwardedAt { get; set; }
     }
 }

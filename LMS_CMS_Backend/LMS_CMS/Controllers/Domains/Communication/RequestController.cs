@@ -12,6 +12,7 @@ using LMS_CMS_PL.Attribute;
 using LMS_CMS_DAL.Models.Domains.LMS;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace LMS_CMS_PL.Controllers.Domains.Communication
 {
@@ -109,20 +110,34 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             List<Request> requests = await Unit_Of_Work.request_Repository.Select_All_With_IncludesById<Request>(
                     f => f.IsDeleted != true &&
                     ((f.SenderID == userId && f.SenderUserTypeID == userTypeID) 
-                    || (f.ReceiverID == userId && f.ReceiverUserTypeID == userTypeID) 
-                    || (f.TransfereeID == userId && userTypeID == 1)),
+                    || (f.ReceiverID == userId && f.ReceiverUserTypeID == userTypeID) ),
                     query => query.Include(d => d.SenderUserType),
                     query => query.Include(d => d.ReceiverUserType)
                     );
 
-            if (requests == null || requests.Count == 0)
+            List<Request> requestsForwarded = new List<Request>();
+            if (userTypeID == 1)
+            {
+                requestsForwarded = await Unit_Of_Work.request_Repository.Select_All_With_IncludesById<Request>(
+                        f => f.IsDeleted != true && f.TransfereeID == userId,
+                        query => query.Include(d => d.SenderUserType),
+                        query => query.Include(d => d.ReceiverUserType)
+                        );
+            }
+
+            var combinedRequests = requests
+                .Select(r => new { Request = r, SortDate = r.InsertedAt })
+                .Concat(requestsForwarded.Select(r => new { Request = r, SortDate = r.ForwardedAt ?? r.InsertedAt }))
+                .OrderByDescending(x => x.SortDate)
+                .Select(x => x.Request)
+                .ToList(); 
+
+            if (combinedRequests == null || combinedRequests.Count == 0)
             {
                 return NotFound();
             }
-
-            requests = requests.OrderByDescending(d => d.InsertedAt).ToList();
-
-            List<RequestGetDTO> requestsGetDTO = mapper.Map<List<RequestGetDTO>>(requests);
+             
+            List<RequestGetDTO> requestsGetDTO = mapper.Map<List<RequestGetDTO>>(combinedRequests);
 
             foreach (var request in requestsGetDTO)
             {
@@ -178,9 +193,16 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                     query => query.Include(d => d.ReceiverUserType)
                     );
 
-            requests = requests
-                .OrderByDescending(d => d.InsertedAt)
+            var recentRequests = requests
+                .Select(r => new {
+                    Request = r, 
+                    LatestActionDate = r.TransfereeID == userId && r.ForwardedAt != null
+                        ? r.ForwardedAt.Value
+                        : r.InsertedAt
+                })
+                .OrderByDescending(x => x.LatestActionDate)
                 .Take(5)
+                .Select(x => x.Request)
                 .ToList();
 
             if (requests == null || requests.Count == 0)

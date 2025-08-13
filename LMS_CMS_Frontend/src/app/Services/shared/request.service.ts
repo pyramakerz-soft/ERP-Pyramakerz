@@ -73,10 +73,10 @@ export class RequestService {
       .set('Authorization', `Bearer ${token}`);
 
     const formData = new FormData(); ;  
-    // formData.append('text', notification.text ?? '');  
-    // formData.append('link', notification.link ?? '');  
-    // formData.append('userTypeID', notification.userTypeID.toString() ?? '');  
-    // formData.append('isAllowDismiss', notification.isAllowDismiss.toString() ?? 'false');   
+    formData.append('message', request.message ?? '');  
+    formData.append('link', request.link ?? '');  
+    formData.append('receiverUserTypeID', request.receiverUserTypeID.toString() ?? '');    
+    formData.append('receiverUserTypeID', request.receiverUserTypeID.toString() ?? '');    
 
     // if (notification.userFilters) {
     //   const uf = notification.userFilters;
