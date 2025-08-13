@@ -56,6 +56,7 @@ export class ConductService {
     formData.append('isSendSMSToParent', Conduct.isSendSMSToParent.toString());
     formData.append('conductTypeID', Conduct.conductTypeID?.toString() ?? '');
     formData.append('studentID', Conduct.studentID?.toString() ?? '');
+    formData.append('classroomID', Conduct.classroomID?.toString() ?? '');
     formData.append('procedureTypeID', Conduct.procedureTypeID?.toString() ?? '');
 
     if (Conduct.newFile) {
@@ -82,6 +83,7 @@ export class ConductService {
     formData.append('isSendSMSToParent', Conduct.isSendSMSToParent.toString());
     formData.append('conductTypeID', Conduct.conductTypeID?.toString() ?? '');
     formData.append('studentID', Conduct.studentID?.toString() ?? '');
+    formData.append('classroomID', Conduct.classroomID?.toString() ?? '');
     formData.append('procedureTypeID', Conduct.procedureTypeID?.toString() ?? '');
     if (Conduct.newFile) {
       formData.append('newFile', Conduct.newFile, Conduct.newFile.name);

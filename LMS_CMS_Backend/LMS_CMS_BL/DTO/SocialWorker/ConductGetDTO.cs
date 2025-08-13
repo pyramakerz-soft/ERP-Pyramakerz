@@ -20,6 +20,8 @@ namespace LMS_CMS_BL.DTO.SocialWorker
         public long StudentID { get; set; }
         public string StudentEnName { get; set; }
         public string? StudentArName { get; set; }
+        public long ClassroomID { get; set; }
+        public string ClassroomName { get; set; }
         public long ConductTypeID { get; set; }
         public string ConductTypeEnName { get; set; }
         public string ConductTypeArName { get; set; }

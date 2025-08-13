@@ -91,6 +91,30 @@ export class ConductAddEditComponent {
           this.ConductServ.GetByID(this.ConductID, this.DomainName).subscribe((data) => {
             this.Data = data;
             console.log(this.Data)
+            this.schools = []
+            this.SchoolServ.Get(this.DomainName).subscribe((d) => {
+              this.schools = d
+              this.conductTypes = []
+              this.ConductTypeServ.GetBySchool(this.Data.schoolID, this.DomainName).subscribe((d) => {
+                this.conductTypes = d
+              })
+              this.proceduresType = []
+              this.ProcedureTypeServ.Get(this.DomainName).subscribe((d) => {
+                this.proceduresType = d
+              })
+              this.grades = []
+              this.GradeServ.GetBySchoolId(this.Data.schoolID, this.DomainName).subscribe((d) => {
+                this.grades = d
+                this.classes = []
+                this.ClassroomServ.GetByGradeId(this.Data.gradeID, this.DomainName).subscribe((d) => {
+                  this.classes = d
+                  this.students = []
+                  this.StudentServ.GetByClassID(this.Data.classroomID, this.DomainName).subscribe((d) => {
+                    this.students = d
+                  })
+                })
+              })
+            })
           });
         }
       });
@@ -125,7 +149,7 @@ export class ConductAddEditComponent {
 
   GetGrades() {
     this.grades = []
-    this.GradeServ.GetBySchoolId(this.Data.SchoolID, this.DomainName).subscribe((d) => {
+    this.GradeServ.GetBySchoolId(this.Data.schoolID, this.DomainName).subscribe((d) => {
       this.grades = d
     })
   }
@@ -146,7 +170,7 @@ export class ConductAddEditComponent {
 
   GetConductTypes() {
     this.conductTypes = []
-    this.ConductTypeServ.GetBySchool(this.Data.SchoolID, this.DomainName).subscribe((d) => {
+    this.ConductTypeServ.GetBySchool(this.Data.schoolID, this.DomainName).subscribe((d) => {
       this.conductTypes = d
     })
   }
@@ -159,7 +183,7 @@ export class ConductAddEditComponent {
   }
 
   moveToConduct() {
-    this.router.navigateByUrl('Employee/Conduct' );
+    this.router.navigateByUrl('Employee/Conduct');
   }
 
   Save() {

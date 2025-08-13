@@ -23,7 +23,7 @@
     <div class="flex flex-col mb-4 w-[49%]">
         <label class="mb-2" for="studentID">School</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="studentID"
-            [(ngModel)]="Data.SchoolID" (change)="GetGrades(); GetConductTypes();">
+            [(ngModel)]="Data.schoolID" (change)="GetGrades(); GetConductTypes();">
             <option [value]="0" disabled selected hidden> Choose School</option>
             <option *ngFor="let school of schools" [value]="school.id">{{ school.name }}</option>
             <option *ngIf="schools.length === 0" disabled selected> No Data Found</option>
@@ -32,7 +32,7 @@
     <div class="flex flex-col mb-4 w-[49%]">
         <label class="mb-2" for="gradeID">Grade</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="gradeID"
-            [(ngModel)]="Data.gradeID" [disabled]="!Data.SchoolID" (change)="GetClasses();">
+            [(ngModel)]="Data.gradeID" [disabled]="!Data.schoolID" (change)="GetClasses();">
             <option [value]="0" disabled selected hidden> Choose Grade</option>
             <option *ngFor="let stu of grades" [value]="stu.id">{{ stu.name }}</option>
             <option *ngIf="grades.length === 0" disabled selected> No Data Found</option>

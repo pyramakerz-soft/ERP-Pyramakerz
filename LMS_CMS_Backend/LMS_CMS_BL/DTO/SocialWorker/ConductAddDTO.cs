@@ -16,5 +16,6 @@ namespace LMS_CMS_BL.DTO.SocialWorker
         public long StudentID { get; set; }
         public long ConductTypeID { get; set; }
         public long ProcedureTypeID { get; set; }
+        public long ClassroomID { get; set; }
     }
 }

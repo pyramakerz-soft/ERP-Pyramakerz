@@ -1207,6 +1207,7 @@ namespace LMS_CMS_BL.Config
                 .ForMember(dest => dest.ConductTypeEnName, opt => opt.MapFrom(src => src.ConductType.en_name))
                 .ForMember(dest => dest.ConductTypeArName, opt => opt.MapFrom(src => src.ConductType.ar_name))
                 .ForMember(dest => dest.ProcedureTypeName, opt => opt.MapFrom(src => src.ProcedureType.Name))
+                .ForMember(dest => dest.ClassroomName, opt => opt.MapFrom(src => src.Classroom.Name))
                 .ForMember(dest => dest.StudentArName, opt => opt.MapFrom(src => src.Student.ar_name))
                 .ForMember(dest => dest.StudentEnName, opt => opt.MapFrom(src => src.Student.en_name));
 
