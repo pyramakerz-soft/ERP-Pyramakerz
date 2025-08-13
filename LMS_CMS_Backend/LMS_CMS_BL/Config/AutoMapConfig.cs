@@ -1246,6 +1246,11 @@ namespace LMS_CMS_BL.Config
             CreateMap<StudentIssueAddDTO, StudentIssue>();
             CreateMap<StudentIssueEditDTO, StudentIssue>();
 
+            CreateMap<SocialWorkerMedal, SocialWorkerMedalGetDTO>();
+            CreateMap<SocialWorkerMedalAddDTO, SocialWorkerMedal>();
+            CreateMap<SocialWorkerMedalEditDTO, SocialWorkerMedal>();
+
+
         }
     } 
 }
