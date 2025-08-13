@@ -1230,6 +1230,22 @@ namespace LMS_CMS_BL.Config
             CreateMap<Request, RequestGetDTO>()
                 .ForMember(dest => dest.SenderUserTypeName, opt => opt.MapFrom(src => src.SenderUserType.Title))
                 .ForMember(dest => dest.ReceiverUserTypeName, opt => opt.MapFrom(src => src.ReceiverUserType.Title));
+
+            CreateMap<IssuesType, IssueTypeGetDTO>();
+            CreateMap<IssueTypeAddDTO, IssuesType>();
+
+
+            CreateMap<StudentIssue, StudentIssueGetDTO>()
+                .ForMember(dest => dest.StudentArName, opt => opt.MapFrom(src => src.Student.ar_name))
+                .ForMember(dest => dest.StudentEnName, opt => opt.MapFrom(src => src.Student.en_name))
+                .ForMember(dest => dest.ClassroomName, opt => opt.MapFrom(src => src.Classroom.Name))
+                .ForMember(dest => dest.GradeName, opt => opt.MapFrom(src => src.Classroom.Grade.Name))
+                .ForMember(dest => dest.GradeID, opt => opt.MapFrom(src => src.Classroom.GradeID))
+                .ForMember(dest => dest.SchoolID, opt => opt.MapFrom(src => src.Classroom.Grade.Section.SchoolID))
+                .ForMember(dest => dest.SchoolName, opt => opt.MapFrom(src => src.Classroom.Grade.Section.school.Name));
+            CreateMap<StudentIssueAddDTO, StudentIssue>();
+            CreateMap<StudentIssueEditDTO, StudentIssue>();
+
         }
     } 
 }
