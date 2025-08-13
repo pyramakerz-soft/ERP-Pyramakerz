@@ -14,7 +14,7 @@ namespace LMS_CMS_DAL.Models.Domains.SocialWorker
         public string Name { get; set; }
         public string File { get; set; }
         public int TopSpace { get; set; }
-        public int LefySpace { get; set; }
+        public int LeftSpace { get; set; }
         public ICollection<CertificateStudent> CertificateStudent { get; set; } = new HashSet<CertificateStudent>();
 
     }

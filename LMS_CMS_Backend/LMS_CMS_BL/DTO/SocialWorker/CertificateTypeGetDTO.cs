@@ -12,6 +12,6 @@ namespace LMS_CMS_BL.DTO.SocialWorker
         public string Name { get; set; }
         public string File { get; set; }
         public int TopSpace { get; set; }
-        public int LefySpace { get; set; }
+        public int LeftSpace { get; set; }
     }
 }
