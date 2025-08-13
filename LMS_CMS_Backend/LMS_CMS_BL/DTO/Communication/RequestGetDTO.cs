@@ -17,6 +17,7 @@ namespace LMS_CMS_BL.DTO.Communication
         public bool SeenOrNot { get; set; }
         public bool ForwardedOrNot { get; set; }
         public bool? ApprovedOrNot { get; set; }
+        public bool SeenOrNotByTransferee { get; set; }
         public long SenderID { get; set; }
         public string SenderEnglishName { get; set; }
         public string SenderArabicName { get; set; }

@@ -16,6 +16,7 @@ namespace LMS_CMS_DAL.Models.Domains.Communication
         public string? Link { get; set; }
         public string? FileLink { get; set; }
         public bool SeenOrNot { get; set; }
+        public bool SeenOrNotByTransferee { get; set; }
         public bool ForwardedOrNot { get; set; }
         public bool? ApprovedOrNot { get; set; }
         public long SenderID { get; set; }

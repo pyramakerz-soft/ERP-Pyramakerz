@@ -203,14 +203,14 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                     query => query.Include(d => d.InsertedByEmployee)
                     );
 
-            notificationSharedTos = notificationSharedTos
-                .OrderByDescending(d => d.InsertedAt)
-                .ToList();
-
             if (notificationSharedTos == null || notificationSharedTos.Count == 0)
             {
                 return NotFound();
             }
+
+            notificationSharedTos = notificationSharedTos
+                .OrderByDescending(d => d.InsertedAt)
+                .ToList();
 
             List<NotificationSharedToGetDTO> notificationSharedToGetDTO = mapper.Map<List<NotificationSharedToGetDTO>>(notificationSharedTos);
 

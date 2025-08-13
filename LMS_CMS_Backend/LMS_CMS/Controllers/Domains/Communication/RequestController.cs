@@ -84,7 +84,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee", "parent", "student" }
         )]
-        public IActionResult ByUserID()
+        public async Task<IActionResult> ByUserIDAsync()
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -106,11 +106,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                 userTypeID = 3;
             }
 
-            List<Request> requests = Unit_Of_Work.request_Repository.FindBy(
+            List<Request> requests = await Unit_Of_Work.request_Repository.Select_All_With_IncludesById<Request>(
                     f => f.IsDeleted != true &&
                     ((f.SenderID == userId && f.SenderUserTypeID == userTypeID) 
                     || (f.ReceiverID == userId && f.ReceiverUserTypeID == userTypeID) 
-                    || (f.TransfereeID == userId && userTypeID == 1))
+                    || (f.TransfereeID == userId && userTypeID == 1)),
+                    query => query.Include(d => d.SenderUserType),
+                    query => query.Include(d => d.ReceiverUserType)
                     );
 
             if (requests == null || requests.Count == 0)
@@ -140,7 +142,75 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
 
             return Ok(requestsGetDTO);
         }
-        
+
+        //////////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpGet("ByUserIDFirst5")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee", "parent", "student" }
+        )]
+        public async Task<IActionResult> ByUserIDFirst5()
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            long userTypeID = 0;
+            if (userTypeClaim == "employee")
+            {
+                userTypeID = 1;
+            }
+            else if (userTypeClaim == "student")
+            {
+                userTypeID = 2;
+            }
+            else if (userTypeClaim == "parent")
+            {
+                userTypeID = 3;
+            }
+
+            List<Request> requests = await Unit_Of_Work.request_Repository.Select_All_With_IncludesById<Request>(
+                    f => f.IsDeleted != true &&
+                    ((f.SenderID == userId && f.SenderUserTypeID == userTypeID)
+                    || (f.ReceiverID == userId && f.ReceiverUserTypeID == userTypeID)
+                    || (f.TransfereeID == userId && userTypeID == 1)),
+                    query => query.Include(d => d.SenderUserType),
+                    query => query.Include(d => d.ReceiverUserType)
+                    );
+
+            requests = requests
+                .OrderByDescending(d => d.InsertedAt)
+                .Take(5)
+                .ToList();
+
+            if (requests == null || requests.Count == 0)
+            {
+                return NotFound();
+            } 
+
+            List<RequestGetDTO> requestsGetDTO = mapper.Map<List<RequestGetDTO>>(requests);
+
+            foreach (var request in requestsGetDTO)
+            {
+                string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+                if (!string.IsNullOrEmpty(request.FileLink))
+                {
+                    request.FileLink = $"{serverUrl}{request.FileLink.Replace("\\", "/")}";
+                }
+
+                (request.SenderEnglishName, request.SenderArabicName) = GetUserNames(Unit_Of_Work, request.SenderID, request.SenderUserTypeID);
+                (request.ReceiverEnglishName, request.ReceiverArabicName) = GetUserNames(Unit_Of_Work, request.ReceiverID, request.ReceiverUserTypeID);
+                if (request.TransfereeID != null && request.TransfereeID != 0)
+                {
+                    (request.TransfereeEnglishName, request.TransfereeArabicName) = GetUserNames(Unit_Of_Work, request.TransfereeID.Value, 1);
+                }
+            }
+
+            return Ok(requestsGetDTO);
+        }
+
         //////////////////////////////////////////////////////////////////////////////////////////
 
         [HttpGet("UnSeenRequestCount")]
@@ -170,7 +240,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             }
 
             List<Request> requests = Unit_Of_Work.request_Repository.FindBy(
-                    f => f.IsDeleted != true && !f.SeenOrNot && f.ReceiverID == userId && f.ReceiverUserTypeID == userTypeID);
+                    f => f.IsDeleted != true && ((!f.SeenOrNot && f.ReceiverID == userId) || (!f.SeenOrNotByTransferee && userTypeID == 1 && f.TransfereeID == userId)) && f.ReceiverUserTypeID == userTypeID);
 
             return Ok(requests.Count);
         }
