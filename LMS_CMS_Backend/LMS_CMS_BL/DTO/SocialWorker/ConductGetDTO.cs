@@ -29,6 +29,8 @@ namespace LMS_CMS_BL.DTO.SocialWorker
         public string ProcedureTypeName { get; set; }
         public long SchoolID { get; set; }
         public string SchoolName { get; set; }
+        public long GradeID { get; set; }
+        public string GradeName { get; set; }
         public DateTime? InsertedAt { get; set; }
         public long? InsertedByUserId { get; set; }
 

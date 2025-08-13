@@ -1204,6 +1204,8 @@ namespace LMS_CMS_BL.Config
             CreateMap<Conduct, ConductGetDTO>()
                 .ForMember(dest => dest.SchoolName, opt => opt.MapFrom(src => src.ConductType.School.Name))
                 .ForMember(dest => dest.SchoolID, opt => opt.MapFrom(src => src.ConductType.School.ID))
+                .ForMember(dest => dest.GradeID, opt => opt.MapFrom(src => src.Classroom.GradeID))
+                .ForMember(dest => dest.GradeName, opt => opt.MapFrom(src => src.Classroom.Grade.Name))
                 .ForMember(dest => dest.ConductTypeEnName, opt => opt.MapFrom(src => src.ConductType.en_name))
                 .ForMember(dest => dest.ConductTypeArName, opt => opt.MapFrom(src => src.ConductType.ar_name))
                 .ForMember(dest => dest.ProcedureTypeName, opt => opt.MapFrom(src => src.ProcedureType.Name))

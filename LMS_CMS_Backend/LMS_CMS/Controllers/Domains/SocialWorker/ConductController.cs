@@ -90,6 +90,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             Conduct conduct =await Unit_Of_Work.conduct_Repository.FindByIncludesAsync(
                     sem => sem.IsDeleted != true && sem.ID == id,
                     query => query.Include(emp => emp.Student),
+                    query => query.Include(emp => emp.Classroom).ThenInclude(a=>a.Grade),
                     query => query.Include(emp => emp.ConductType)
                         .ThenInclude(a => a.School),
                     query => query.Include(emp => emp.ProcedureType));
