@@ -32,7 +32,7 @@ export class Request {
         
         // For Forward
         public requestID: number = 0,  
-        public forwardToID: string = '',
+        public forwardToID: number = 0
     ) {}   
 } 
    

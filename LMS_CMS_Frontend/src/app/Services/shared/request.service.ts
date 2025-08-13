@@ -76,37 +76,37 @@ export class RequestService {
     formData.append('message', request.message ?? '');  
     formData.append('link', request.link ?? '');  
     formData.append('receiverUserTypeID', request.receiverUserTypeID.toString() ?? '');    
-    formData.append('receiverUserTypeID', request.receiverUserTypeID.toString() ?? '');    
+    formData.append('studentID', request.studentID.toString() ?? '');    
 
-    // if (notification.userFilters) {
-    //   const uf = notification.userFilters;
+    if (request.userFilters) {
+      const uf = request.userFilters;
 
-    //   if (uf.departmentID !== null) {
-    //     formData.append('userFilters.departmentID', uf.departmentID.toString());
-    //   }
-    //   if (uf.employeeID !== null) {
-    //     formData.append('userFilters.employeeID', uf.employeeID.toString());
-    //   }
-    //   if (uf.schoolID !== null) {
-    //     formData.append('userFilters.schoolID', uf.schoolID.toString());
-    //   }
-    //   if (uf.sectionID !== null) {
-    //     formData.append('userFilters.sectionID', uf.sectionID.toString());
-    //   }
-    //   if (uf.gradeID !== null) {
-    //     formData.append('userFilters.gradeID', uf.gradeID.toString());
-    //   }
-    //   if (uf.classroomID !== null) {
-    //     formData.append('userFilters.classroomID', uf.classroomID.toString());
-    //   }
-    //   if (uf.studentID !== null) {
-    //     formData.append('userFilters.studentID', uf.studentID.toString());
-    //   }
-    // }
+      if (uf.departmentID !== null) {
+        formData.append('userFilters.departmentID', uf.departmentID.toString());
+      }
+      if (uf.employeeID !== null) {
+        formData.append('userFilters.employeeID', uf.employeeID.toString());
+      }
+      if (uf.schoolID !== null) {
+        formData.append('userFilters.schoolID', uf.schoolID.toString());
+      }
+      if (uf.sectionID !== null) {
+        formData.append('userFilters.sectionID', uf.sectionID.toString());
+      }
+      if (uf.gradeID !== null) {
+        formData.append('userFilters.gradeID', uf.gradeID.toString());
+      }
+      if (uf.classroomID !== null) {
+        formData.append('userFilters.classroomID', uf.classroomID.toString());
+      }
+      if (uf.studentID !== null) {
+        formData.append('userFilters.studentID', uf.studentID.toString());
+      }
+    }
 
-    // if (notification.imageFile) {
-    //   formData.append('imageFile', notification.imageFile, notification.imageFile.name);
-    // }
+    if (request.fileFile) {
+      formData.append('fileFile', request.fileFile, request.fileFile.name);
+    }
 
     return this.http.post(`${this.baseUrl}/Request`, formData, { headers });
   }  

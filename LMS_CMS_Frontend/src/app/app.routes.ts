@@ -216,6 +216,7 @@ import { ConductTypeComponent } from './Pages/Employee/SocialWorker/conduct-type
 import { ConductComponent } from './Pages/Employee/SocialWorker/conduct/conduct.component';
 import { SupplierStatementComponent } from './Pages/Employee/Accounting/Report/supplier-statement/supplier-statement/supplier-statement.component';
 import { ConductAddEditComponent } from './Pages/Employee/SocialWorker/conduct-add-edit/conduct-add-edit.component';
+import { MyRequestsComponent } from './Pages/Communication/my-requests/my-requests.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -551,6 +552,7 @@ export const routes: Routes = [
         canActivate: [noNavigateWithoutLoginGuard],
         children: [
             { path: "My Notifications", component: MyNotificationComponent, title: "Notifications", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "My Requests", component: MyRequestsComponent, title: "Requests", canActivate: [noNavigateWithoutLoginGuard] },
         ]
     },
 
