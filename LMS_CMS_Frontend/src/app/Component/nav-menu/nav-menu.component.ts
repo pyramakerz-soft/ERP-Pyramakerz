@@ -50,6 +50,7 @@ export class NavMenuComponent {
   private destroy$ = new Subject<void>();
   
   notificationsUnSeenCount = 0
+  requestsUnSeenCount = 0
   constructor(private router: Router, public account: AccountService, public languageService: LanguageService, public ApiServ: ApiService, public octaService:OctaService,
     private translate: TranslateService, private communicationService: NewTokenService, private logOutService: LogOutService, 
     private notificationService: NotificationService, private realTimeService: RealTimeNotificationServiceService) { }
@@ -144,6 +145,8 @@ export class NavMenuComponent {
       }
     )
   }
+
+  toggleRequestPopup(){}
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) { 

@@ -219,7 +219,12 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<Conduct> Conduct { get; set; }
         public DbSet<Attendance> Attendance { get; set; }
         public DbSet<AttendanceStudent> AttendanceStudent { get; set; }
-
+        public DbSet<IssuesType> IssuesType { get; set; }
+        public DbSet<StudentIssue> StudentIssue { get; set; }
+        public DbSet<SocialWorkerMedal> SocialWorkerMedal { get; set; }
+        public DbSet<CertificateType> CertificateType { get; set; }
+        public DbSet<SocialWorkerMedalStudent> SocialWorkerMedalStudent { get; set; }
+        public DbSet<CertificateStudent> CertificateStudent { get; set; }
 
 
         public LMS_CMS_Context(DbContextOptions<LMS_CMS_Context> options)
@@ -2019,6 +2024,42 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasOne(p => p.Section)
                 .WithMany(p => p.ConductTypeSections)
                 .HasForeignKey(p => p.SectionID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<StudentIssue>()
+                .HasOne(p => p.Student)
+                .WithMany(p => p.StudentIssues)
+                .HasForeignKey(p => p.StudentID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<StudentIssue>()
+                .HasOne(p => p.Classroom)
+                .WithMany(p => p.StudentIssues)
+                .HasForeignKey(p => p.ClassroomID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<SocialWorkerMedalStudent>()
+                .HasOne(p => p.Student)
+                .WithMany(p => p.SocialWorkerMedalStudent)
+                .HasForeignKey(p => p.StudentID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<SocialWorkerMedalStudent>()
+                .HasOne(p => p.SocialWorkerMedal)
+                .WithMany(p => p.SocialWorkerMedalStudent)
+                .HasForeignKey(p => p.SocialWorkerMedalID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CertificateStudent>()
+                .HasOne(p => p.Student)
+                .WithMany(p => p.CertificateStudent)
+                .HasForeignKey(p => p.StudentID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CertificateStudent>()
+                .HasOne(p => p.CertificateType)
+                .WithMany(p => p.CertificateStudent)
+                .HasForeignKey(p => p.CertificateTypeID)
                 .OnDelete(DeleteBehavior.Restrict);
 
 

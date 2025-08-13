@@ -57,7 +57,7 @@ User_Data_After_Login: TokenData = new TokenData(
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'enName', 'arName', 'purchasePrice', 'salesPrice', 'barCode', 'vatForForeign' ,'limit' ,'availableInShop' ,'schoolName' ,'inventorySubCategoriesName'];
+  keysArray: string[] = ['id', 'enName', 'arName', 'purchasePrice', 'salesPrice', 'barCode', 'vatForForeign' ,'limit' ,'schoolName' ,'inventorySubCategoriesName'];
 
   validationErrors: { [key in keyof ShopItem]?: string } = {};
 

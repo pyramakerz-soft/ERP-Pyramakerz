@@ -45,7 +45,7 @@ export class InventoryMasterComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'storeName', 'invoiceNumber', 'date', 'total'];
+  keysArray: string[] = ['id', 'storeName', 'invoiceNumber', 'total'];
 
   CurrentPage: number = 1
   PageSize: number = 10

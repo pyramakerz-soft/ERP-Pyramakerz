@@ -149,6 +149,11 @@ export class ConductAddEditComponent {
 
   GetGrades() {
     this.grades = []
+    this.classes = []
+    this.students = []
+    this.Data.classroomID = 0
+    this.Data.studentID = 0
+    this.Data.gradeID = 0
     this.GradeServ.GetBySchoolId(this.Data.schoolID, this.DomainName).subscribe((d) => {
       this.grades = d
     })
@@ -156,6 +161,9 @@ export class ConductAddEditComponent {
 
   GetClasses() {
     this.classes = []
+    this.students = []
+    this.Data.classroomID = 0
+    this.Data.studentID = 0
     this.ClassroomServ.GetByGradeId(this.Data.gradeID, this.DomainName).subscribe((d) => {
       this.classes = d
     })
@@ -163,6 +171,7 @@ export class ConductAddEditComponent {
 
   GetStudents() {
     this.students = []
+    this.Data.studentID = 0
     this.StudentServ.GetByClassID(this.Data.classroomID, this.DomainName).subscribe((d) => {
       this.students = d
     })
@@ -170,6 +179,7 @@ export class ConductAddEditComponent {
 
   GetConductTypes() {
     this.conductTypes = []
+    this.Data.conductTypeID = 0
     this.ConductTypeServ.GetBySchool(this.Data.schoolID, this.DomainName).subscribe((d) => {
       this.conductTypes = d
     })
@@ -247,11 +257,15 @@ export class ConductAddEditComponent {
         const field = key as keyof Conduct;
         if (!this.Data[field]) {
           if (
-            field == 'date'
+            field == 'date' ||
+            field == 'conductTypeID' ||
+            field == 'studentID' ||
+            field == 'schoolID' ||
+            field == 'gradeID' ||
+            field == 'classroomID' ||
+            field == 'procedureTypeID'
           ) {
-            this.Data[field] = `*${this.capitalizeField(
-              field
-            )} is required`;
+            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`;
             isValid = false;
           }
         }
