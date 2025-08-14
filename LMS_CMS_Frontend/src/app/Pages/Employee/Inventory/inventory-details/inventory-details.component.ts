@@ -45,11 +45,11 @@ import { SchoolPCs } from '../../../../Models/Inventory/school-pcs';
 import { SchoolPCsService } from '../../../../Services/Employee/Inventory/school-pcs.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-inventory-details',
   standalone: true,
-  imports: [FormsModule, CommonModule, PdfPrintComponent, SearchDropdownComponent , TranslateModule],
+  imports: [FormsModule, CommonModule, PdfPrintComponent, SearchDropdownComponent, TranslateModule],
   templateUrl: './inventory-details.component.html',
   styleUrl: './inventory-details.component.css',
 })
@@ -171,7 +171,7 @@ export class InventoryDetailsComponent {
     public reportsService: ReportsService,
     public SchoolServ: SchoolService,
     public schoolpcsServ: SchoolPCsService,
-      private languageService: LanguageService
+    private languageService: LanguageService
   ) { }
   async ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -199,6 +199,9 @@ export class InventoryDetailsComponent {
       this.mode = 'Edit';
       this.GetTableDataByID();
       this.GetMasterInfo();
+      this.schoolpcsServ.GetBySchoolId(this.Data.schoolId, this.DomainName).subscribe((d) => {
+        this.schoolPCs = d
+      })
       if (this.Data.saveID == null) {
         this.Data.saveID = 0;
       }
@@ -248,7 +251,7 @@ export class InventoryDetailsComponent {
       }
     });
 
-         this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
@@ -286,7 +289,7 @@ export class InventoryDetailsComponent {
       this.schoolPCs = d
       if (this.schoolPCs.length == 1) {
         this.Data.schoolPCId = this.schoolPCs[0].id
-        this.validationErrors['schoolPCId'] =""
+        this.validationErrors['schoolPCId'] = ""
       }
     })
   }
@@ -338,6 +341,9 @@ export class InventoryDetailsComponent {
   GetMasterInfo() {
     this.salesServ.GetById(this.MasterId, this.DomainName).subscribe((d) => {
       this.Data = d;
+      this.schoolpcsServ.GetBySchoolId(this.Data.schoolId, this.DomainName).subscribe((d) => {
+        this.schoolPCs = d
+      })
       this.GetCategories();
     });
   }
