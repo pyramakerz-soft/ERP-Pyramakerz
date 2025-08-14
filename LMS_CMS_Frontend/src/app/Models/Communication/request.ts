@@ -15,9 +15,12 @@ export class Request {
         public receiverID: number = 0,  
         public receiverEnglishName: string = '',
         public receiverArabicName: string = '',
-        public transfereeID: number = 0,  
-        public transfereeEnglishName: string = '',
-        public transfereeArabicName: string = '',
+        public forwardedToID: number = 0,  
+        public forwardedToEnglishName: string = '',
+        public forwardedToArabicName: string = '',
+        public forwardedFromID: number = 0,  
+        public forwardedFromEnglishName: string = '',
+        public forwardedFromArabicName: string = '',
         public senderUserTypeID: number = 0,  
         public senderUserTypeName: string = '',
         public receiverUserTypeID: number = 0,  
@@ -30,5 +33,4 @@ export class Request {
         public requestID: number = 0,  
         public forwardToID: number = 0
     ) {}   
-} 
-   
+}      

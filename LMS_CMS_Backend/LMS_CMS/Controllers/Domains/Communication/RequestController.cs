@@ -606,6 +606,16 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                     f => f.IsDeleted != true  && f.ID == forwardRequestDTO.RequestID
                     && (f.ReceiverID == userId && f.ReceiverUserTypeID == userTypeID)
                     );
+            
+            if(forwardRequestDTO.ForwardToID == request.SenderID && request.SenderUserTypeID == 1)
+            {
+                return BadRequest("You can't send the request back to the employee");
+            }
+
+            if(request.ForwardedOrNot == true)
+            {
+                return BadRequest("You have already forwarded the request");
+            }
 
             if (request == null)
             {
@@ -788,7 +798,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                 if (NewRequest.StudentID != null)
                 {
                     Student student = Unit_Of_Work.student_Repository.First_Or_Default(d => d.ID == NewRequest.StudentID && d.IsDeleted != true && d.Parent_Id== userId);
-                    if (student != null)
+                    if (student == null)
                     {
                         return NotFound("No Student With this ID For this parent");
                     }
