@@ -615,7 +615,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
             if (newShopItem.MainImageFile != null)
             {
-                string returnFileInput = _fileImageValidationService.ValidateImageFile(newShopItem.MainImageFile);
+                string returnFileInput = await _fileImageValidationService.ValidateImageFileAsync(newShopItem.MainImageFile);
                 if (returnFileInput != null)
                 {
                     return BadRequest(returnFileInput);
@@ -623,7 +623,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             }
             if (newShopItem.OtherImageFile != null)
             {
-                string returnFileInput = _fileImageValidationService.ValidateImageFile(newShopItem.OtherImageFile);
+                string returnFileInput = await _fileImageValidationService.ValidateImageFileAsync(newShopItem.OtherImageFile);
                 if (returnFileInput != null)
                 {
                     return BadRequest(returnFileInput);
@@ -857,7 +857,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
             if (newShopItem.MainImageFile != null)
             {
-                string returnFileInput = _fileImageValidationService.ValidateImageFile(newShopItem.MainImageFile);
+                string returnFileInput = await _fileImageValidationService.ValidateImageFileAsync(newShopItem.MainImageFile);
                 if (returnFileInput != null)
                 {
                     return BadRequest(returnFileInput);
@@ -865,7 +865,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             }
             if (newShopItem.OtherImageFile != null)
             {
-                string returnFileInput = _fileImageValidationService.ValidateImageFile(newShopItem.OtherImageFile);
+                string returnFileInput = await _fileImageValidationService.ValidateImageFileAsync(newShopItem.OtherImageFile);
                 if (returnFileInput != null)
                 {
                     return BadRequest(returnFileInput);

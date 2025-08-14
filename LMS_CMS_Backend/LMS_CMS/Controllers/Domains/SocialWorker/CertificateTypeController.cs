@@ -139,7 +139,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             }
             if (NewCertificate.NewFile != null)
             {
-                string returnFileInput = _fileImageValidationService.ValidateImageFile(NewCertificate.NewFile);
+                string returnFileInput = await _fileImageValidationService.ValidateImageFileAsync(NewCertificate.NewFile);
                 if (returnFileInput != null)
                 {
                     return BadRequest(returnFileInput);
@@ -219,7 +219,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
 
             if (NewCertificate.NewFile != null)
             {
-                string returnFileInput = _fileImageValidationService.ValidateImageFile(NewCertificate.NewFile);
+                string returnFileInput = await _fileImageValidationService.ValidateImageFileAsync(NewCertificate.NewFile);
                 if (returnFileInput != null)
                 {
                     return BadRequest(returnFileInput);

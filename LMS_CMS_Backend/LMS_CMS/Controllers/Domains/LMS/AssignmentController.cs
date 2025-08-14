@@ -553,7 +553,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             if (EditAssignment.FileFile != null)
             {
-                string returnFileInput = _fileWordPdfValidationService.ValidateDocumentFile(EditAssignment.FileFile);
+                string returnFileInput = await _fileWordPdfValidationService.ValidateDocumentFileAsync(EditAssignment.FileFile);
                 if (returnFileInput != null)
                 {
                     return BadRequest(returnFileInput);

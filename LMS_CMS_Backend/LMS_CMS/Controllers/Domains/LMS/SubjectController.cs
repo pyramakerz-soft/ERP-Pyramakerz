@@ -239,7 +239,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             if (NewSubject.IconFile != null)
             {
-                string returnFileInput = _fileImageValidationService.ValidateImageFile(NewSubject.IconFile);
+                string returnFileInput = await _fileImageValidationService.ValidateImageFileAsync(NewSubject.IconFile);
                 if (returnFileInput != null)
                 {
                     return BadRequest(returnFileInput);
@@ -336,7 +336,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             if (EditSubject.IconFile != null)
             {
-                string returnFileInput = _fileImageValidationService.ValidateImageFile(EditSubject.IconFile);
+                string returnFileInput = await _fileImageValidationService.ValidateImageFileAsync(EditSubject.IconFile);
                 if (returnFileInput != null)
                 {
                     return BadRequest(returnFileInput);
