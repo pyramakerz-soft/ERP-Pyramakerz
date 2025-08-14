@@ -66,19 +66,21 @@ namespace LMS_CMS_PL.Services
                 }
             } else if (userTypeID == 2) // student
             {
-                AcademicYear activeYear = Unit_Of_Work.academicYear_Repository.First_Or_Default(y => y.IsDeleted != true && y.IsActive == true);
-                if (activeYear == null)
+                List<AcademicYear> activeYears = Unit_Of_Work.academicYear_Repository.FindBy(y => y.IsDeleted != true && y.IsActive == true);
+                if (activeYears == null || activeYears.Count == 0)
                 {
                     throw new Exception("No active academic year found");
                 }
 
+                List<long> activeYearIDs = activeYears.Select(y => y.ID).ToList();
+
                 List<long> gradeStudentIDs = Unit_Of_Work.studentGrade_Repository
-                    .FindBy(gs => gs.IsDeleted != true && gs.AcademicYearID == activeYear.ID && gs.Grade.IsDeleted != true && gs.Student.IsDeleted != true)
+                    .FindBy(gs => gs.IsDeleted != true && activeYearIDs.Contains(gs.AcademicYearID) && gs.Grade.IsDeleted != true && gs.Student.IsDeleted != true)
                     .Select(gs => gs.StudentID)
                     .ToList();
 
                 List<long> classroomStudentIDs = Unit_Of_Work.studentClassroom_Repository
-                    .FindBy(cs => cs.IsDeleted != true && cs.Classroom.AcademicYearID == activeYear.ID && cs.Classroom.IsDeleted != true && cs.Student.IsDeleted != true)
+                    .FindBy(cs => cs.IsDeleted != true && activeYearIDs.Contains(cs.Classroom.AcademicYearID) && cs.Classroom.IsDeleted != true && cs.Student.IsDeleted != true)
                     .Select(cs => cs.StudentID)
                     .ToList();
 
@@ -257,19 +259,21 @@ namespace LMS_CMS_PL.Services
                 }
             } else if (userTypeID == 3) // parent
             {
-                AcademicYear activeYear = Unit_Of_Work.academicYear_Repository.First_Or_Default(y => y.IsDeleted != true && y.IsActive == true);
-                if (activeYear == null)
+                List<AcademicYear> activeYears = Unit_Of_Work.academicYear_Repository.FindBy(y => y.IsDeleted != true && y.IsActive == true);
+                if (activeYears == null || activeYears.Count == 0)
                 {
                     throw new Exception("No active academic year found");
                 }
 
+                List<long> activeYearIDs = activeYears.Select(y => y.ID).ToList();
+
                 List<long> gradeStudentIDs = Unit_Of_Work.studentGrade_Repository
-                    .FindBy(gs => gs.IsDeleted != true && gs.AcademicYearID == activeYear.ID && gs.Grade.IsDeleted != true && gs.Student.IsDeleted != true)
+                    .FindBy(gs => gs.IsDeleted != true && activeYearIDs.Contains(gs.AcademicYearID) && gs.Grade.IsDeleted != true && gs.Student.IsDeleted != true)
                     .Select(gs => gs.StudentID)
                     .ToList();
 
                 List<long> classroomStudentIDs = Unit_Of_Work.studentClassroom_Repository
-                    .FindBy(cs => cs.IsDeleted != true && cs.Classroom.AcademicYearID == activeYear.ID && cs.Classroom.IsDeleted != true && cs.Student.IsDeleted != true)
+                    .FindBy(cs => cs.IsDeleted != true && activeYearIDs.Contains(cs.Classroom.AcademicYearID) && cs.Classroom.IsDeleted != true && cs.Student.IsDeleted != true)
                     .Select(cs => cs.StudentID)
                     .ToList();
 

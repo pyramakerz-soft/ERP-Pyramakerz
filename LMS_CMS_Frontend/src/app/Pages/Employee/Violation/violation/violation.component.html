@@ -1,39 +1,39 @@
 <div class="">
     <div class="flex justify-between items-center">
-        <h1 class="primaryTxt font-semibold text-2xl leading-9">Violation</h1>
+        <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ 'Violation' | translate }}</h1>
         <div class="flex justify-between items-center">
             <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
             <button (click)="Create()"
                 class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
-                Create Violation
+                  {{ 'Create' | translate }}  {{ 'Violation' | translate }}
             </button>
         </div>
     </div>
 
     <div>
         <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
-            <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
+            <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
                 <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
                     <tr>
                         <th
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            ID
+                             {{ 'ID' | translate }}
                         </th>
                         <th
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            Violation Type
+                              {{ 'Violation Type' | translate }}
                         </th>
                         <th
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            Employee
+                              {{ 'Employee' | translate }}
                         </th>
                         <th
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            Date
+                              {{ 'Date' | translate }}
                         </th>
                         <th
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            Actions
+                              {{ 'Actions' | translate }}
                         </th>
                     </tr>
                 </thead>
@@ -42,7 +42,7 @@
                     <tr *ngIf="TableData.length === 0">
                         <td colspan="6"
                             class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-                            No Data Found
+                              {{ 'No Data Found' | translate }}
                         </td>
                     </tr>
 
@@ -63,7 +63,7 @@
                             {{ row.date }}
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            <div class="flex space-x-4">
+                            <div class="flex space-x-4 rtl:space-x-reverse">
                                 <button 
                                     (click)="Delete(row.id)">
                                     <i class="fa-regular fa-trash-can"></i>
@@ -88,68 +88,68 @@
     class="fixed top-0 left-0 right-0 z-50 flex justify-center items-center w-full h-full bg-black/50">
     <div class="bg-white rounded-2xl p-12 w-1/2 max-h-[95%] overflow-y-auto">
         <div class="flex justify-between items-center">
-            <h1 *ngIf="mode == 'Create'" class="font-semibold text-2xl leading-9">Create Violation</h1>
-            <h1 *ngIf="mode == 'Edit'" class="font-semibold text-2xl leading-9">Edit Violation</h1>
+            <h1 *ngIf="mode == 'Create'" class="font-semibold text-2xl leading-9"> {{ 'Create' | translate }} {{ 'Violation' | translate }}</h1>
+            <h1 *ngIf="mode == 'Edit'" class="font-semibold text-2xl leading-9"> {{ 'Edit' | translate }} {{ 'Violation' | translate }}</h1>
             <button (click)="closeModal()" type="button"
                 class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
         </div>
 
         <div class="mt-6 mb-4 rounded-3xl flex justify-between flex-wrap">
             <div class="flex flex-col mb-4 w-full">
-                <label class="mb-2 primaryTxt" for="employeeTypeId">Employee Type</label>
+                <label class="mb-2 primaryTxt" for="employeeTypeId"> {{ 'Employee Type' | translate }}</label>
                 <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
                     id="employeeTypeId" [(ngModel)]="violation.employeeTypeId"
                     (change)="GetAllViolationByType(); GetAllEmployeeByType()"
                     (ngModelChange)="onInputValueChange({ field: 'employeeTypeId', value: $event })">
-                    <option [value]="0" disabled selected hidden>Choose Employee Type</option>
+                    <option [value]="0" disabled selected hidden>  {{ 'Choose' | translate }}  {{ 'Employee Type' | translate }}</option>
                     <option *ngFor="let c of empTypes" [value]="c.id">{{ c.name }}</option>
-                    <option *ngIf="empTypes.length === 0" disabled selected>No Data Found</option>
+                    <option *ngIf="empTypes.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
                 </select>
                 <span *ngIf="validationErrors['employeeTypeId']" class="text-red-500 ml-3 font-normal">{{
                     validationErrors['employeeTypeId'] }}</span>
             </div>
             <div class="flex flex-col mb-4 w-full">
-                <label class="mb-2 primaryTxt" for="violationTypeID">Violation Type</label>
+                <label class="mb-2 primaryTxt" for="violationTypeID">  {{ 'Violation Type' | translate }}</label>
                 <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
                     id="violationTypeID" [(ngModel)]="violation.violationTypeID" [disabled]="!violation.employeeTypeId"
                     (ngModelChange)="onInputValueChange({ field: 'violationTypeID', value: $event })">
-                    <option [value]="0" disabled selected hidden>Choose Violation Type</option>
+                    <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Violation Type' | translate }}</option>
                     <option *ngFor="let c of violationType" [value]="c.id">{{ c.name }}</option>
-                    <option *ngIf="violationType.length === 0" disabled selected>No Data Found</option>
+                    <option *ngIf="violationType.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
                 </select>
                 <span *ngIf="validationErrors['violationTypeID']" class="text-red-500 ml-3 font-normal">{{
                     validationErrors['violationTypeID'] }}</span>
             </div>
             <div class="flex flex-col mb-4 w-full">
-                <label class="mb-2 primaryTxt" for="employeeID">Employees</label>
+                <label class="mb-2 primaryTxt" for="employeeID"> {{ 'Employee' | translate }}</label>
                 <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="employeeID"
                     [(ngModel)]="violation.employeeID" [disabled]="!violation.employeeTypeId"
                     (ngModelChange)="onInputValueChange({ field: 'employeeID', value: $event })">
-                    <option [value]="0" disabled selected hidden>Choose Employee</option>
+                    <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Employee' | translate }}</option>
                     <option *ngFor="let c of employees" [value]="c.id">{{ c.en_name }}</option>
-                    <option *ngIf="employees.length === 0" disabled selected>No Data Found</option>
+                    <option *ngIf="employees.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
                 </select>
                 <span *ngIf="validationErrors['employeeID']" class="text-red-500 ml-3 font-normal">{{
                     validationErrors['employeeID'] }}</span>
             </div>
             <div class="flex flex-col mb-4 w-full">
-                <label class="mb-2 primaryTxt" for="englishTitle">Date</label>
+                <label class="mb-2 primaryTxt" for="englishTitle"> {{ 'Date' | translate }}</label>
                 <input id="englishTitle" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                    placeholder="Enter date" [(ngModel)]="violation.date"
+                    placeholder="{{ 'Enter' | translate }} {{ 'Date' | translate }}" [(ngModel)]="violation.date"
                     (ngModelChange)="onInputValueChange({ field: 'date', value: $event })" />
                 <span *ngIf="validationErrors['date']" class="text-red-500 ml-3 font-normal">{{
                     validationErrors['date']}}</span>
             </div>
             <div class="flex flex-col mb-4 w-full">
-                <label class="mb-2 primaryTxt" for="Details">Details</label>
+                <label class="mb-2 primaryTxt" for="Details"> {{ 'Details' | translate }}</label>
                 <textarea id="Details" type="text" class="w-full h-[100px] rounded-lg border border-solid border-gray-300 px-2 py-1 mb-3 resize-none"
-                    placeholder="Enter Details" [(ngModel)]="violation.details"
+                    placeholder="{{ 'Enter' | translate }} {{ 'Details' | translate }}" [(ngModel)]="violation.details"
                     (ngModelChange)="onInputValueChange({ field: 'details', value: $event })" ></textarea>
                 <span *ngIf="validationErrors['details']"
                     class="text-red-500 ml-3 font-normal">{{validationErrors['details'] }}</span>
             </div>
             <div class="w-full mb-4">
-                <div class="bg-[#F6F6F6] flex items-center space-x-4 w-full rounded-md border-dashed border-2">
+                <div class="bg-[#F6F6F6] flex items-center space-x-4 rtl:space-x-reverse w-full rounded-md border-dashed border-2">
                     <div class="flex justify-center w-full">
                         <label for="file-upload"
                             class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
@@ -159,8 +159,8 @@
                             <img *ngIf="violation.attach && !violation.attachFile" [src]="violation.attach"
                                 class="w-1/3 object-cover">
                             <p class="font-normal text-xs md:text-sm text-[#8E8E93] mt-3"><span
-                                    class="secondaryTxt">Click to Upload </span></p>
-                            <p class="font-normal text-xs md:text-sm text-[#8E8E93]"> (Max. File size: 25 MB)</p>
+                                    class="secondaryTxt"> {{ 'Click to' | translate }} {{ 'Upload' | translate }} </span></p>
+                            <p class="font-normal text-xs md:text-sm text-[#8E8E93]">  {{ '(Max. File size: 25 MB)' | translate }}</p>
                         </label>
                         <input id="file-upload" type="file" class="hidden" (change)="onImageFileSelected($event)"
                             accept=".pdf,.doc,.docx,image/jpeg,image/png" />
@@ -172,7 +172,7 @@
         <div class="flex justify-end">
             <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
                 (click)="CreateOREdit()">
-                <span *ngIf="!isLoading">Save</span>
+                <span *ngIf="!isLoading"> {{ 'Save' | translate }}</span>
                 <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
             </button>
         </div>

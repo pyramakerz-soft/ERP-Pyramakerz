@@ -20,11 +20,19 @@ namespace LMS_CMS_BL.DTO.SocialWorker
         public long StudentID { get; set; }
         public string StudentEnName { get; set; }
         public string? StudentArName { get; set; }
+        public long ClassroomID { get; set; }
+        public string ClassroomName { get; set; }
         public long ConductTypeID { get; set; }
         public string ConductTypeEnName { get; set; }
         public string ConductTypeArName { get; set; }
         public long ProcedureTypeID { get; set; }
         public string ProcedureTypeName { get; set; }
+        public long SchoolID { get; set; }
+        public string SchoolName { get; set; }
+        public long GradeID { get; set; }
+        public string GradeName { get; set; }
+        public DateTime? InsertedAt { get; set; }
+        public long? InsertedByUserId { get; set; }
 
     }
 }

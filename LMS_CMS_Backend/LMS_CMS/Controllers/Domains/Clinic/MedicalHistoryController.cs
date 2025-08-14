@@ -399,37 +399,42 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                 return BadRequest("Medical History cannot be null");
             }
 
-            School school = await Unit_Of_Work.school_Repository.Select_By_IdAsync(historyAddDTO.SchoolId);
+            Student student = await Unit_Of_Work.student_Repository.FindByIncludesAsync(
+                x => x.ID == historyAddDTO.StudentId && 
+                x.IsDeleted != true, 
+                query => query.Include(x => x.StartAcademicYear));
+
+            if (student == null)
+            {
+                return NotFound("No Student Found");
+            }
+
+            StudentGrade grade = Unit_Of_Work.studentGrade_Repository.First_Or_Default(
+                x => x.StudentID == historyAddDTO.StudentId && 
+                x.IsDeleted != true);
+
+            if (grade == null)
+            {
+                return NotFound("No Grade Found");
+            }
+
+            School school = await Unit_Of_Work.school_Repository.Select_By_IdAsync(student.StartAcademicYear.SchoolID);
 
             if (school == null || school.IsDeleted == true)
             {
-                return NotFound("No School With this ID");
+                return NotFound("No School found");
             }
 
-            Grade grade = await Unit_Of_Work.grade_Repository.Select_By_IdAsync(historyAddDTO.GradeId);
+            StudentClassroom classroom = Unit_Of_Work.studentClassroom_Repository.First_Or_Default(
+                x => x.StudentID == historyAddDTO.StudentId && 
+                x.IsDeleted != true);
 
-            if (grade == null || grade.IsDeleted == true)
+            if (classroom == null)
             {
-                return NotFound("No Grade With this ID");
-            }
-
-            Classroom classroom = await Unit_Of_Work.classroom_Repository.Select_By_IdAsync(historyAddDTO.ClassRoomID);
-
-            if (classroom == null || classroom.IsDeleted == true)
-            {
-                return NotFound("No Classroom With this ID");
-            }
-
-            Student student = await Unit_Of_Work.student_Repository.Select_By_IdAsync(historyAddDTO.StudentId);
-
-            if (student == null || student.IsDeleted == true)
-            {
-                return NotFound("No Student With this ID");
+                return NotFound("No Classroom found");
             }
 
             MedicalHistory medicalHistory = _mapper.Map<MedicalHistory>(historyAddDTO);
-
-
 
             string enNameExists = userId.ToString();
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
@@ -440,9 +445,12 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                 medicalHistory.InsertedByParentID = userId;
             }
 
+            medicalHistory.SchoolId = school.ID;
+            medicalHistory.GradeId = grade.GradeID;
+            medicalHistory.ClassRoomID = classroom.ClassID;
+
             Unit_Of_Work.medicalHistory_Repository.Add(medicalHistory);
             Unit_Of_Work.SaveChanges();
-
 
             var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/MedicalHistories");
             var medicalHistoryFolder = Path.Combine(baseFolder, Guid.NewGuid() + "_" + medicalHistory.Id);

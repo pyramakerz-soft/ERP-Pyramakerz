@@ -1,12 +1,14 @@
 ﻿using AutoMapper;
 using LMS_CMS_BL.DTO.SocialWorker;
 using LMS_CMS_BL.UOW;
+using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_DAL.Models.Domains.SocialWorker;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
 {
@@ -28,12 +30,12 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
 
         ////////////////////////////////
         
-        [HttpGet]
+        [HttpGet("BySchool/{SchoolId}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Lesson Resources Types" }
         )]
-        public IActionResult Get()
+        public async Task<IActionResult> GetBySchool(long SchoolId)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -47,7 +49,11 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            List<ConductType> conductTypes = Unit_Of_Work.conductType_Repository.FindBy(t => t.IsDeleted != true);
+            List<ConductType> conductTypes =await Unit_Of_Work.conductType_Repository.Select_All_With_IncludesById<ConductType>(
+                    sem => sem.IsDeleted != true && sem.SchoolID == SchoolId,
+                    query => query.Include(emp => emp.ConductLevel),
+                    query => query.Include(emp => emp.ConductTypeSections),
+                    query => query.Include(emp => emp.School));
 
             if (conductTypes == null || conductTypes.Count == 0)
             {
@@ -58,6 +64,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
 
             return Ok(Dto);
         }
+
 
         ////////////////////////////////
 
@@ -80,7 +87,13 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            ConductType conductType = Unit_Of_Work.conductType_Repository.First_Or_Default(sem => sem.IsDeleted != true && sem.ID == id);
+            ConductType conductType =await Unit_Of_Work.conductType_Repository.FindByIncludesAsync(
+                    sem => sem.IsDeleted != true && sem.ID == id,
+                    query => query.Include(emp => emp.ConductLevel),
+                    query => query.Include(emp => emp.ConductTypeSections
+                        .Where(a => a.IsDeleted != true))
+                        .ThenInclude(a => a.Section),
+                    query => query.Include(emp => emp.School));
 
             if (conductType == null)
             {
@@ -116,10 +129,17 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             {
                 return BadRequest("Conduct is empty");
             }
+
             ConductLevel conductLevel = Unit_Of_Work.conductLevel_Repository.First_Or_Default(s=>s.ID==NewConduct.ConductLevelID && s.IsDeleted != true );
             if(conductLevel == null)
             {
                 return BadRequest("There is no ConductLevel with this Id");
+            }
+
+            School school = Unit_Of_Work.school_Repository.First_Or_Default(s => s.ID == NewConduct.SchoolID && s.IsDeleted != true);
+            if (school == null)
+            {
+                return BadRequest("There is no School with this Id");
             }
 
             ConductType conduct = mapper.Map<ConductType>(NewConduct);
@@ -155,7 +175,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
          allowedTypes: new[] { "octa", "employee" },
          allowEdit: 1,
          pages: new[] { "Lesson Resources Types" }
-     )]
+        )]
         public async Task<IActionResult> EditAsync(ConductTypeEditDTO NewConduct)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -185,6 +205,12 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             if (conductLevel == null)
             {
                 return BadRequest("conduct Level not exist");
+            }
+
+            School school = Unit_Of_Work.school_Repository.First_Or_Default(s => s.ID == NewConduct.SchoolID && s.IsDeleted != true);
+            if (school == null)
+            {
+                return BadRequest("There is no School with this Id");
             }
 
             ConductType conductType = Unit_Of_Work.conductType_Repository.First_Or_Default(s => s.ID == NewConduct.ID && s.IsDeleted != true);

@@ -8,66 +8,66 @@
 
             <div class="flex flex-wrap justify-between w-full overflow-y-auto">
                 <div class="mb-2 w-[49%]">
-                    <label for="user_Name" class="py-6">Username:</label>
+                    <label for="user_Name" class="py-6">{{ 'Username' | translate }}:</label>
                     <input class="w-full h-[56px] rounded-[8px] border px-2 mt-1" id="user_Name" type="text"
-                        placeholder="Enter Username" [(ngModel)]="employee.user_Name" (ngModelChange)="onInputValueChange({ field: 'user_Name', value: $event })" />
+                        placeholder="{{ 'Enter' | translate }} {{ 'Username' | translate }}" [(ngModel)]="employee.user_Name" (ngModelChange)="onInputValueChange({ field: 'user_Name', value: $event })" />
                     <span *ngIf="validationErrors['user_Name']" class="text-red-500 ml-3 font-normal">{{ validationErrors['user_Name'] }}</span>
                 </div>
 
                 <div class="mb-2 w-[49%]">
-                    <label for="email" class="py-6">Email:</label>
+                    <label for="email" class="py-6">{{ 'Email' | translate }}:</label>
                     <input class="w-full h-[56px] rounded-[8px] border px-2 mt-1" id="email" type="email" (ngModelChange)="onInputValueChange({ field: 'email', value: $event })"
-                        placeholder="Enter Email" [(ngModel)]="employee.email" />
+                        placeholder="{{ 'Enter' | translate }} {{ 'Email' | translate }}" [(ngModel)]="employee.email" />
                     <span *ngIf="validationErrors['email']" class="text-red-500 ml-3 font-normal">{{ validationErrors['email'] }}</span>
                 </div>
 
                 <div class="mb-2 w-[49%]">
-                    <label for="en_name" class="py-6">Name In English:</label>
+                    <label for="en_name" class="py-6">{{ 'Name In English' | translate }}:</label>
                     <input class="w-full h-[56px] rounded-[8px] border px-2 mt-1" id="en_name" type="text" (ngModelChange)="onInputValueChange({ field: 'en_name', value: $event })"
-                        placeholder="Enter English Name" [(ngModel)]="employee.en_name" />
+                        placeholder="{{ 'Enter' | translate }} {{ 'English Name' | translate }}" [(ngModel)]="employee.en_name" />
                     <span *ngIf="validationErrors['en_name']" class="text-red-500 ml-3 font-normal">{{ validationErrors['en_name'] }}</span>
                 </div>
 
                 <div class="mb-2 w-[49%]">
-                    <label for="ar_name" class="py-6">Name In Arabic:</label>
+                    <label for="ar_name" class="py-6">{{ 'Name In Arabic' | translate }}:</label>
                     <input class="w-full h-[56px] rounded-[8px] border px-2 mt-1" id="ar_name" type="text" (ngModelChange)="onInputValueChange({ field: 'ar_name', value: $event })"
-                        placeholder="Enter Arabic Name" [(ngModel)]="employee.ar_name" />
+                        placeholder="{{ 'Enter' | translate }} {{ 'Arabic Name' | translate }}" [(ngModel)]="employee.ar_name" />
                     <span *ngIf="validationErrors['ar_name']" class="text-red-500 ml-3 font-normal">{{ validationErrors['ar_name'] }}</span>
                 </div>
 
                 <div class="mb-2 w-[49%]">
-                    <label for="password" class="py-6">Password:</label>
+                    <label for="password" class="py-6">{{ 'Password' | translate }}:</label>
                     <input class="w-full h-[56px] rounded-[8px] border px-2" id="password" type="password" (ngModelChange)="onInputValueChange({ field: 'password', value: $event })"
-                        placeholder="Enter Password" [(ngModel)]="employee.password" />
+                        placeholder="{{ 'Enter' | translate }} {{ 'Password' | translate }}" [(ngModel)]="employee.password" />
                     <span *ngIf="validationErrors['password']" class="text-red-500 ml-3 font-normal">{{ validationErrors['password'] }}</span>
                 </div>
                 
                 <div class="mb-2 w-[49%]">
-                    <label for="confirmPassword" class="py-6">Confirm Password:</label>
+                    <label for="confirmPassword" class="py-6">{{ 'Confirm Password' | translate }}:</label>
                     <input class="w-full h-[56px] rounded-[8px] border px-2" id="confirmPassword" type="password"
-                        placeholder="Enter Password Again" [(ngModel)]="confirmPassword" (input)="onConfirmPasswordChange()" />
-                    <span *ngIf="IsConfimPassEmpty" class="text-red-500 ml-3 font-normal">*Confirm Password required</span>
+                        placeholder="{{ 'Enter' | translate }} {{ 'Password Again' | translate }}" [(ngModel)]="confirmPassword" (input)="onConfirmPasswordChange()" />
+                    <span *ngIf="IsConfimPassEmpty" class="text-red-500 ml-3 font-normal">*{{ 'Confirm Password required' | translate }}</span>
                     <span *ngIf="validationErrors['password'] && !IsConfimPassEmpty" class="text-red-500 ml-3 font-normal">{{ validationErrors['password'] }}</span>
                 </div>
 
                 <div class="mb-2 w-[49%]">
-                    <label for="mobile" class="py-6">Mobile:</label>
+                    <label for="mobile" class="py-6">{{ 'Mobile' | translate }}:</label>
                     <input class="w-full h-[56px] rounded-[8px] border px-2 mt-1" id="mobile" type="text" (ngModelChange)="onInputValueChange({ field: 'mobile', value: $event })"
-                        placeholder="Enter Mobile" [(ngModel)]="employee.mobile" (input)="validateNumber($event, 'mobile')" />
+                        placeholder="{{ 'Enter' | translate }} {{ 'Mobile' | translate }}" [(ngModel)]="employee.mobile" (input)="validateNumber($event, 'mobile')" />
                     <span *ngIf="validationErrors['mobile']" class="text-red-500 ml-3 font-normal">{{ validationErrors['mobile'] }}</span>
                 </div>
 
                 <div class="mb-2 w-[49%]">
-                    <label for="phone" class="py-6">Phone:</label>
+                    <label for="phone" class="py-6">{{ 'Phone' | translate }}:</label>
                     <input class="w-full h-[56px] rounded-[8px] border px-2 mt-1" id="phone" type="text" (ngModelChange)="onInputValueChange({ field: 'phone', value: $event })"
-                        placeholder="Enter Phone" [(ngModel)]="employee.phone" (input)="validateNumber($event, 'phone')" />
+                        placeholder="{{ 'Enter' | translate }} {{ 'Phone' | translate }}" [(ngModel)]="employee.phone" (input)="validateNumber($event, 'phone')" />
                     <span *ngIf="validationErrors['phone']" class="text-red-500 ml-3 font-normal">{{ validationErrors['phone'] }}</span>
                 </div>
                 
                 <div class="mb-2 w-[49%]">
-                    <label for="address" class="py-6">Address:</label>
+                    <label for="address" class="py-6"> {{ 'Address' | translate }}:</label>
                     <input class="w-full h-[56px] rounded-[8px] border px-2 mt-1" id="address" type="text" (ngModelChange)="onInputValueChange({ field: 'address', value: $event })"
-                    placeholder="Enter Address" [(ngModel)]="employee.address" />
+                    placeholder="{{ 'Enter' | translate }} {{ 'Address' | translate }}" [(ngModel)]="employee.address" />
                     <span *ngIf="validationErrors['address']" class="text-red-500 ml-3 font-normal">{{ validationErrors['address'] }}</span>
                 </div>
                 
@@ -79,13 +79,13 @@
  
                 <button (click)="SignUp()" [disabled]="isLoading"
                     class="mb-2 secondaryBg text-white p-2 rounded w-full flex items-center justify-center">
-                    <span *ngIf="!isLoading">Sign Up</span>
+                    <span *ngIf="!isLoading">{{ 'Sign Up' | translate }}</span>
                     <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
                 </button>
                 
                 <div class="flex justify-around mt-2 w-full">
-                    <p class="font-poppins text-base font-normal leading-[21px]">Already have an account? <a
-                            (click)="login()" class="secondaryTxt mr-2 cursor-pointer">login</a>
+                    <p class="font-poppins text-base font-normal leading-[21px]">{{ 'Already have an account?' | translate }}<a
+                            (click)="login()" class="secondaryTxt mr-2 cursor-pointer">{{ 'login' | translate }}</a>
                     </p>
                 </div>
             </div>

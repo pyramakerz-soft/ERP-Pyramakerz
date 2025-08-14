@@ -1,0 +1,216 @@
+<!-- supplier-statement.component.html -->
+<div class="flex justify-between mb-3">
+    <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ type }}</h1>
+</div>
+
+<div class="flex justify-start items-center space-x-4 rtl:space-x-reverse flex-wrap">
+    <div class="w-[30%] min-w-[200px]">
+        <label for="supplierSelect" class="block mb-2 text-sm font-medium text-gray-900">{{'Supplier'| translate }}</label>
+        <select id="supplierSelect" [(ngModel)]="selectedSupplier" (change)="InputChange()"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
+            <option [ngValue]="null" disabled selected>{{'Select Supplier' | translate}}</option>
+                        <option *ngFor="let supplier of suppliers" [value]="supplier.id">
+                {{ supplier.name }} ({{ supplier.id }})
+            </option>
+        </select>
+    </div>
+    <div class="w-[30%] min-w-[200px]">
+        <label for="fromDate" class="block mb-2 text-sm font-medium text-gray-900">{{'Start Date'| translate }}</label>
+        <input id="fromDate" type="date" [(ngModel)]="SelectedStartDate" (change)="InputChange()"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"> 
+    </div> 
+    <div class="w-[30%] min-w-[200px]">
+        <label for="toDate" class="block mb-2 text-sm font-medium text-gray-900">{{'End Date'| translate }}</label>
+        <input id="toDate" type="date" [(ngModel)]="SelectedEndDate" (change)="InputChange()"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"> 
+    </div> 
+
+    <div class="mt-7 ml-2">
+        <button class="p-3 font-medium text-xl rounded-lg" (click)="ViewReport()"
+            [disabled]="!selectedSupplier || !SelectedStartDate || !SelectedEndDate"
+            [ngClass]="{ 
+                'bg-gray-100 text-gray-300': !selectedSupplier || !SelectedStartDate || !SelectedEndDate, 
+                'secondaryBg text-white': selectedSupplier && SelectedStartDate && SelectedEndDate
+            }">
+           {{'View Report'| translate }}
+        </button>
+    </div>
+</div>
+
+<!-- Rest of the template remains the same -->
+  
+<div *ngIf="showTable" class="mt-5 flex justify-end space-x-4 rtl:space-x-reverse">
+    <img class="w-5 cursor-pointer" src="Icons/Excel.png">
+    <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()">
+    <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()">
+</div>
+
+<div *ngIf="showTable" class="mt-5">
+    <div *ngIf="tableData.length == 0" class="w-full justify-center items-center flex">
+        <span class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+             {{'No Data Found'| translate }}
+        </span>
+    </div>
+    
+    <div *ngIf="tableData.length > 0" class="mb-4">
+
+
+        <div class="overflow-x-auto rounded-2xl border border-[#BDBDBD]">
+            <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
+                <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+                    <tr>
+                        <th class="py-3 px-4 min-w-[50px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ 'Serial' | translate }}
+                        </th>
+                        <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ 'Date' | translate }}
+                        </th>
+                        <th class="py-3 px-4 min-w-[150px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ 'Account' | translate }}
+                        </th>
+                        <th class="py-3 px-4 min-w-[150px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ 'Main Account' | translate }}
+                        </th>
+                        <th class="py-3 px-4 min-w-[150px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ 'Sub Account' | translate }}
+                        </th>
+                        <th class="py-3 px-4 min-w-[100px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ 'Debit' | translate }}
+                        </th>
+                        <th class="py-3 px-4 min-w-[100px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ 'Credit' | translate }}
+                        </th>
+                        <th class="py-3 px-4 min-w-[100px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ 'Balance' | translate }}
+                        </th>
+                        <th class="py-3 px-4 min-w-[150px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ 'Notes' | translate }}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngIf="tableData.length === 0">
+                        <td colspan="9"
+                            class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                            {{ 'No Data Found' | translate }}
+                        </td>
+                    </tr>
+                    <tr *ngFor="let item of tableData; let i = index" 
+                        [ngClass]="{ 'bg-gray-100': i % 2 === 1, 'bg-white': i%2 !=1 }" 
+                        class="border-t border-gray-300 text-xs md:text-sm">
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ item.serial }}
+                        </td>
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ item.date | date }}
+                        </td>
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ item.account }}
+                        </td>
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ item.mainAccount || '-'}}
+                        </td>
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ item.subAccount || '-'}}
+                        </td>
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ item.debit }}
+                        </td>
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ item.credit }}
+                        </td>
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ item.balance }}
+                        </td>
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ item.notes || 'N/A' }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+<div *ngIf="tableData.length > 0" class="">
+        <div class="grid grid-cols-2 gap-4 mb-4">
+            <div>
+                <label class="font-bold">{{ 'Opening Balance' | translate }}:</label>
+                <span class="ml-2">{{ firstPeriodBalance }}</span>
+            </div>
+            <div>
+                <label class="font-bold">{{ 'Total Debit' | translate }}:</label>
+                <span class="ml-2">{{ fullTotals.totalDebit }}</span>
+            </div>
+            <div>
+                <label class="font-bold">{{ 'Total Credit' | translate }}:</label>
+                <span class="ml-2">{{ fullTotals.totalCredit }}</span>
+            </div>
+            <div>
+                <label class="font-bold">{{ 'Difference' | translate }}:</label>
+                <span class="ml-2">{{ fullTotals.difference }}</span>
+            </div>
+        </div>
+</div>
+
+<div *ngIf="showTable" class="mt-8 flex justify-between items-center">
+    <div class="flex items-center space-x-4 rtl:space-x-reverse">
+        <button class="flex items-center space-x-2 rounded-lg border py-3 px-4 rtl:space-x-reverse"
+            (click)="changeCurrentPage(CurrentPage-1)" [disabled]="CurrentPage === 1 || tableData.length == 0"
+            [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === 1 || tableData.length == 0}">
+            <i class="fa-solid fa-arrow-left"></i>
+            <p>{{'Previous'| translate }}</p>
+        </button>
+        <div class="flex">
+            <div *ngFor="let page of visiblePages"
+                class="rounded-lg py-[10px] w-[40px]"
+                [ngClass]="{ 'border': page === CurrentPage, 'hover:bg-gray-100': page !== CurrentPage }"
+                (click)="changeCurrentPage(page)">
+                <p class="cursor-pointer text-center">{{ page }}</p>
+            </div>
+        </div>
+        <button class="flex items-center space-x-2 rounded-lg border py-3 px-4 rtl:space-x-reverse"
+            (click)="changeCurrentPage(CurrentPage+1)" [disabled]="CurrentPage === TotalPages || tableData.length == 0"
+            [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === TotalPages || tableData.length == 0}">
+            <p>{{'Next'| translate }}</p>
+            <i class="fa-solid fa-arrow-right"></i>
+        </button>
+    </div>
+
+    <div class="flex items-center space-x-2 rtl:space-x-reverse">
+        <input (input)="validateNumberForPagination($event)" class="rounded-lg border py-3 px-4 w-[73px]" [(ngModel)]="PageSize"
+            min="1" (input)="validatePageSize($event)" (ngModelChange)="changeCurrentPage(CurrentPage)">
+        <p>{{'items Per Page'| translate }}</p>
+    </div>
+
+    <div>
+        <p>{{CurrentPage}} {{'of'| translate }} {{TotalPages}} {{'pages'| translate }} ({{TotalRecords}} {{'Item'| translate }})</p>
+    </div>
+</div>
+
+<div class="absolute -top-[9999px] -left-[9999px]">
+    <div id="Data" class="hidden">
+        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="type"
+            [tableHeaders]="['Serial', 'Date', 'Account', 'Main Account', 'Sub Account', 'Debit', 'Credit', 'Balance', 'Notes']"
+            [tableData]="getTableDataForExport()" #pdfComponentRef>
+        </app-pdf-print>
+    </div>
+</div>
+
+
+<!-- <div class="absolute  -top-[9999px] -left-[9999px]">
+    <div id="Data" class="hidden">
+        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'Inventory Transactions Report'"
+        [infoRows]="[
+      { keyEn: 'From Date: ' + this.dateFrom },
+      { keyEn: 'To Date: ' + this.dateTo },
+      { keyEn: 'Store: ' + this.getStoreName() },
+            ]"
+        [tableHeaders]="['Invoice #', 'Date', 'Store', 'Total Amount', 'Transaction Type']"
+        [tableData]="transactionsForExport" #pdfComponentRef>
+    </app-pdf-print>
+</div>
+</div>
+
+            [infoRows]="getInfoRows()"
+
+ -->

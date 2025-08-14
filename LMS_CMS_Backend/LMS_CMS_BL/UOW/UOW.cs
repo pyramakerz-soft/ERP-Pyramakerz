@@ -232,6 +232,12 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<Conduct> Conduct_Repository;
         GenericRepo<Attendance> Attendance_Repository;
         GenericRepo<AttendanceStudent> AttendanceStudent_Repository;
+        GenericRepo<IssuesType> IssuesType_Repository;
+        GenericRepo<StudentIssue> StudentIssue_Repository;
+        GenericRepo<SocialWorkerMedal> SocialWorkerMedal_Repository;
+        GenericRepo<SocialWorkerMedalStudent> SocialWorkerMedalStudent_Repository;
+        GenericRepo<CertificateType> CertificateType_Repository;
+        GenericRepo<CertificateStudent> CertificateStudent_Repository;
 
 
         public UOW(Octa_DbContext octa_Db)
@@ -2647,6 +2653,78 @@ namespace LMS_CMS_BL.UOW
                     AttendanceStudent_Repository = new GenericRepo<AttendanceStudent>(db);
                 }
                 return AttendanceStudent_Repository;
+            }
+        }
+
+        public GenericRepo<IssuesType> issuesType_Repository
+        {
+            get
+            {
+                if (IssuesType_Repository == null)
+                {
+                    IssuesType_Repository = new GenericRepo<IssuesType>(db);
+                }
+                return IssuesType_Repository;
+            }
+        }
+
+        public GenericRepo<StudentIssue> studentIssue_Repository
+        {
+            get
+            {
+                if (StudentIssue_Repository == null)
+                {
+                    StudentIssue_Repository = new GenericRepo<StudentIssue>(db);
+                }
+                return StudentIssue_Repository;
+            }
+        }
+
+        public GenericRepo<SocialWorkerMedal> socialWorkerMedal_Repository
+        {
+            get
+            {
+                if (SocialWorkerMedal_Repository == null)
+                {
+                    SocialWorkerMedal_Repository = new GenericRepo<SocialWorkerMedal>(db);
+                }
+                return SocialWorkerMedal_Repository;
+            }
+        }
+
+        public GenericRepo<SocialWorkerMedalStudent> socialWorkerMedalStudent_Repository
+        {
+            get
+            {
+                if (SocialWorkerMedalStudent_Repository == null)
+                {
+                    SocialWorkerMedalStudent_Repository = new GenericRepo<SocialWorkerMedalStudent>(db);
+                }
+                return SocialWorkerMedalStudent_Repository;
+            }
+        }
+
+        public GenericRepo<CertificateType> certificateType_Repository
+        {
+            get
+            {
+                if (CertificateType_Repository == null)
+                {
+                    CertificateType_Repository = new GenericRepo<CertificateType>(db);
+                }
+                return CertificateType_Repository;
+            }
+        }
+
+        public GenericRepo<CertificateStudent> certificateStudent_Repository
+        {
+            get
+            {
+                if (CertificateStudent_Repository == null)
+                {
+                    CertificateStudent_Repository = new GenericRepo<CertificateStudent>(db);
+                }
+                return CertificateStudent_Repository;
             }
         }
 

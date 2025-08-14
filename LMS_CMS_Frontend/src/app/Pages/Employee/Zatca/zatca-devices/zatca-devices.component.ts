@@ -16,11 +16,13 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { ApiService } from '../../../../Services/api.service';
 import { ZatcaService } from '../../../../Services/Employee/Zatca/zatca.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-zatca-devices',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent , TranslateModule],
   templateUrl: './zatca-devices.component.html',
   styleUrls: ['./zatca-devices.component.css'],
   providers: [DatePipe]
@@ -37,7 +39,8 @@ export class ZatcaDevicesComponent implements OnInit {
   AllowDelete: boolean = true;
   AllowEditForOthers: boolean = false;
   AllowDeleteForOthers: boolean = false;
-  
+  isRtl: boolean = false;
+  subscription!: Subscription;
   IsChoosenDomain: boolean = false;
   IsEmployee: boolean = true;
   
@@ -57,6 +60,7 @@ export class ZatcaDevicesComponent implements OnInit {
 
   constructor( 
     private menuService: MenuService,
+    private languageService: LanguageService,
     public activeRoute: ActivatedRoute,
     public account: AccountService,
     private schoolPCsService: SchoolPCsService,
@@ -98,6 +102,10 @@ export class ZatcaDevicesComponent implements OnInit {
       this.AllowEdit = true;
       this.AllowDelete = true;
     }
+        this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   async GetTableData() {

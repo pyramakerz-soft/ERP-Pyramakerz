@@ -6,31 +6,31 @@
 
       <button (click)="Create()"
         class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
-        {{ 'Create Violation Type' | translate }}
+        {{ 'Create' | translate }} {{ 'Violation' | translate }}
       </button>
     </div>
   </div>
 
 
 
-  <div class="flex justify-start items-center space-x-4 mt-3">
+  <div class="flex justify-start items-center space-x-4 rtl:space-x-reverse mt-3">
     <div class="w-[98%]">
-      <label for="SelectedEmployeeType" class="block mb-2 text-sm font-medium text-gray-900">Employee Type</label>
+      <label for="SelectedEmployeeType" class="block mb-2 text-sm font-medium text-gray-900">{{ 'Employee Type' | translate }}</label>
       <select id="SelectedEmployeeType"
         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
         [(ngModel)]="SelectedEmployeeType" (change)="GetViolation();">
-        <option value=0 disabled selected hidden>Select a Employee Type</option>
+        <option value=0 disabled selected hidden> {{ 'Select' | translate }} {{ 'Employee Type' | translate }}</option>
         <option *ngFor="let stu of empTypes" [value]="stu.id">
-          {{ stu.name }}
+          {{ stu.name|translate}}
         </option>
-        <option *ngIf="empTypes.length === 0" disabled selected>No Data Found</option>
+        <option *ngIf="empTypes.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
       </select>
     </div>
   </div>
 
 
   <div *ngIf="SelectedEmployeeType!=0" class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD] max-w-full">
-    <table class="overflow-auto w-full bg-[#EBEBEB] text-left text-[#6F6F6F]">
+    <table class="overflow-auto w-full bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
       <thead class="bg-[##EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
         <tr>
           <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
@@ -100,10 +100,10 @@
     </button>
 
     <h1 *ngIf="mode == 'Create'" class="font-semibold text-2xl leading-9">
-      {{ 'Create Violation Type' | translate }}
+     {{ 'Create' | translate }} {{ 'Violation' | translate }}
     </h1>
     <h1 *ngIf="mode == 'Edit'" class="font-semibold text-2xl leading-9">
-      {{ 'Edit Violation Type' | translate }}
+      {{ 'Edit' | translate }} {{ 'Violation' | translate }}
     </h1>
     <div class="mt-4 bg-[#F7F7F7] w-[573px] h-auto rounded-[24px] p-[16px_24px] gap-[20px]">
       <h6 class="font-medium text-base leading-6 mb-3"> {{ 'Violation Type Name' | translate }}</h6>

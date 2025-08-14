@@ -11,11 +11,13 @@ import { ApiService } from '../../../Services/api.service';
 import Swal from 'sweetalert2';
 import { jwtDecode } from 'jwt-decode';
 import { RecaptchaComponent, RecaptchaModule } from 'ng-recaptcha';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-sign-up',
   standalone: true,
-  imports: [CommonModule, FormsModule, RecaptchaModule],
+  imports: [CommonModule, FormsModule, RecaptchaModule , TranslateModule],
   templateUrl: './sign-up.component.html',
   styleUrl: './sign-up.component.css'
 })
@@ -28,7 +30,8 @@ export class SignUpComponent {
   passwordError: string = "";
   ConfirmPasswordError: string = "";
   somthingError: string = "";
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   token1 = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   token2 = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
 
@@ -45,9 +48,13 @@ export class SignUpComponent {
   IsConfimPassEmpty = false
   @ViewChild(RecaptchaComponent) captchaRef!: RecaptchaComponent;
 
-  constructor(private router: Router, public accountService: AccountService, public ParentServ: ParentService , public ApiServ: ApiService) { }
+  constructor(private router: Router,private languageService: LanguageService, public accountService: AccountService, public ParentServ: ParentService , public ApiServ: ApiService) { }
   ngOnInit() {
     this.DomainName = this.ApiServ.GetHeader(); 
+        this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   onUserNameChange() {

@@ -1,18 +1,16 @@
 export interface StoreBalanceReport {
-  reportType: 'QuantityOnly' | 'PurchasePrice' | 'SalesPrice' | 'Cost'     | 'ItemsUnderLimit';
+  reportType: 'QuantityOnly' | 'PurchasePrice' | 'SalesPrice' | 'Cost' | 'ItemsUnderLimit';
   data: StoreBalanceItem[];
   grandTotals?: {
     TotalQuantity: number;
+    TotalValue?: number;
   };
 }
 
 export interface StoreBalanceItem {
   itemCode: number;
   itemName: string;
-  stores: {
-    storeName: string;
-    quantity: number;
-  }[];
+  stores: StoreBalanceDetail[];
   quantity: number;
   purchasePrice?: number;
   totalPurchase?: number;
@@ -25,3 +23,11 @@ export interface StoreBalanceItem {
   limit?: number;
 }
 
+export interface StoreBalanceDetail {
+  storeName: string;
+  quantity: number;
+  PurchasePrice?: number;
+  SalePrice?: number;
+  value?: number;
+  AverageCost?: number;
+}

@@ -8,11 +8,13 @@ import { DomainService } from '../../../Services/Octa/domain.service';
 import Swal from 'sweetalert2';
 import { PagesWithRoleId } from '../../../Models/pages-with-role-id';
 import { RoleDetailsService } from '../../../Services/Employee/role-details.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-domains',
   standalone: true,
-  imports: [FormsModule,CommonModule,SearchComponent],
+  imports: [FormsModule,CommonModule,SearchComponent , TranslateModule],
   templateUrl: './domains.component.html',
   styleUrl: './domains.component.css'
 })
@@ -20,7 +22,8 @@ export class DomainsComponent {
   keysArray: string[] = ['id', 'name' ];
   key: string= "id";
   value: any = "";
-  
+  isRtl: boolean = false;
+  subscription!: Subscription;
   domainData:Domain[] = []
   ModulesData:PagesWithRoleId[] = []
   domain:Domain = new Domain()
@@ -30,10 +33,14 @@ export class DomainsComponent {
   isDropdownOpen = false;
   isSaved = false
 
-  constructor(public domainService:DomainService, public roleDetailsService:RoleDetailsService){}
+  constructor(public domainService:DomainService,private languageService: LanguageService, public roleDetailsService:RoleDetailsService){}
 
   ngOnInit(){ 
     this.getDomainData()
+        this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   getDomainData(){

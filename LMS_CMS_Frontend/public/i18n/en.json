@@ -786,16 +786,13 @@
     "Stars":"Stars",
     "Performance Type is Requiered":"Performance Type is Requiered",
     "Daily Performance":"Daily Performance",
-
     "Discussion Room":"Discussion Room",
     "Is Repeated Weekly":"Is Repeated Weekly",
     "Meeting":"Meeting",
     "Link":"Link",
     "Record":"Record",
-
     "Period":"Period",
     "Duty":"Duty",
-
     "No Data In This Template":"No Data In This Template",
     "Submit":"Submit",
     "Back":"Back",
@@ -803,16 +800,13 @@
     "Narration":"Narration",
     "Template":"Template",
     "Evaluation":"Evaluation",
-
     "Evaluated":"Evaluated",
     "Evaluator":"Evaluator",
     "Feedback":"Feedback",
     "No Feed back till now":"No Feed back till now",
     "Add Your Feedback":"Add Your Feedback",
-
     "Name Of Evaluation":"Name Of Evaluation",
     "Received Evaluations":"Received Evaluations",
-
     "Template Group":"Template Group",
     "Group":"Group",
     "After":"After",
@@ -857,18 +851,14 @@
     "Bloom Level":"Bloom Level",
     "Difficulty Level":"Difficulty Level",
     "Question Bank":"Question Bank",
-
     "Is Current":"Is Current",
     "Semester Name":"Semester Name",
-
     "Working Week":"Working Week",
     "Working weeks":"Working weeks",
-
     "Added By":"Added By",
     "Added At":"Added At",
     "Medal Name":"Medal Name",
     "Student Information":"Student Information",
-
     "Order in Certificate":"Order in Certificate",
     "Credit Hours":"Credit Hours",
     "Subject Code":"Subject Code",
@@ -876,7 +866,6 @@
     "Hide From Grade Report":"Hide From Grade Report",
     "Subject Category":"Subject Category",
     "Number of session per week":"Number of session per week",
-
     "Subject Resource":"Subject Resource",
     "Value":"Value",
     "Weight Type":"Weight Type",
@@ -887,25 +876,18 @@
     "Marks":"Marks",
     "Hours":"Hours",
     "In Certificate":"In Certificate",
-
-
     "Assignment Cut Off Date Percentage":"Assignment Cut Off Date Percentage",
     "Subject Arabic Name":"Subject Arabic Name",
     "Subject English Name":"Subject English Name",
     "Subject Arabic":"Subject Arabic",
     "Subject English":"Subject English",
-
     "Class Name":"Class Name",
     "Time Table":"Time Table",
     "Favorite":"Favorite",
-
     "Card Replace":"Card Replace",
     "No Session replaced":"No Session replaced",
-
     "Replace":"Replace",
     "Weight Types":"Weight Types",
-
-
     "No data available":"No data available",
     "First Report":"First Report",
     "Second Report":"Second Report",
@@ -913,28 +895,19 @@
     "User Notified":"User Notified",
     "Is Allow Dismiss":"Is Allow Dismiss",
     "Notification":"Notification",
-
-
-
     "Test Title":"Test Title",
     "Visible To Parent":"Visible To Parent",
     "Not Solved Yet":"Not Solved Yet",
     "Is Required":"Is Required",
-    
-
     "Student English Name":"Student English Name",
     "Student Arabic Name":"Student Arabic Name",
     "Accepted":"Accepted",
     "Declined":"Declined",
     "Pending":"Pending",
     "Waiting List":"Waiting List",
-
-
     "Personal Data Of Student":"Personal Data Of Student",
     "Guardian’s Information":"Guardian’s Information",
     "Mother’s Information":"Mother’s Information",
-
-
     "Sunday":"Sunday",
     "Monday":"Monday",
     "Tuesday":"Tuesday",
@@ -942,20 +915,57 @@
     "Thursday":"Thursday",
     "Friday":"Friday",
     "Saturday":"Saturday",
-
     "Academic Sequential Report":"Academic Sequential Report",
     "Nationality":"Nationality",
     "Search by Name":"Search by Name",
-
-
     "Proof Registration And Success Form Report":"Proof Registration And Success Form Report",
     "Proof Registration Report":"Proof Registration Report",
-
     "Statistics On The Number Of Students In the School":"Statistics On The Number Of Students In the School",
-
-
     "Lists of students names in classes":"Lists of students names in classes",
-    "Transfered From Kindergarten Report":"Transfered From Kindergarten Report"
+    "Transfered From Kindergarten Report":"Transfered From Kindergarten Report",
+    "Violation Type":"Violation Type",
+    "Violation Type Name":"Violation Type Name",
+    "Enter new Violation Type":"Enter new Violation Type",
+    "Violation Types":"Violation Types",
+    "OTP":"OTP",
+    "Generate Certificate":"Generate Certificate",
+    "Certificate Date":"Certificate Date",
+    "Serial Number":"Serial Number",
+    "PC Name":"PC Name",
+    "ZATCA Device":"ZATCA Device",
+    "Electronic Invoices":"Electronic Invoices",
+    "Invoice Type":"Invoice Type",
+    "Total Value":"Total Value",
+    "Sent":"Sent",
+    "Yes":"Yes",
+    "No":"No",
+    "ZATCA":"ZATCA",
+    "Loading invoice details...":"Loading invoice details...",
+    "Product":"Product",
+    "Invoice Summary":"Invoice Summary",
+    "Sub total":"Sub total",
+    "Taxes & Fees":"Taxes & Fees",
+    "Taxes & Fees Amount":"Taxes & Fees Amount",
+    "Vat Number":"Vat Number",
+    "CRN":"CRN",
+    "Secret Number 1":"Secret Number 1",
+    "Secret Number 2":"Secret Number 2",
+    "Sign Up":"Sign Up",
+    "Don’t have an account?":"Don’t have an account?",
+    "Name In English":"Name In English",
+    "Name In Arabic":"Name In Arabic",
+    "Confirm Password":"Confirm Password",
+    "Confirm Password required":"Confirm Password required",
+    "Already have an account?":"Already have an account?",
+    "login":"login",
+    "Password Again":"Password Again",
+    "Accounts":"Accounts",
+    "Account":"Account",
+    "Modules":"Modules",
+    "Domain Name":"Domain Name",
+    "Domain":"Domain",
+    "School Type":"School Type",
+    "School Types":"School Types"
 
 
 }

@@ -5,6 +5,7 @@ import { Injectable } from '@angular/core';
 })
 export class ApiService {
 
+
   BaseUrl = 'https://localhost:7205/api/with-domain';
   BaseUrlOcta = 'https://localhost:7205/api';
   BaseUrlSignalR = 'https://localhost:7205';
@@ -14,18 +15,26 @@ export class ApiService {
   // BaseUrlSignalR = 'http://localhost:5094/'; 
 
 
+  // BaseUrl = 'https://localhost:7205/api/with-domain';
+  // BaseUrlOcta = 'https://localhost:7205/api';
+  // BaseUrlSignalR = 'https://localhost:7205/';
+
+
   // BaseUrl="http://44.210.155.226:5000/api/with-domain"
   // BaseUrlOcta="http://44.210.155.226:5000/api"
-  // BaseUrlSignalR="http://44.210.155.226:5000"
+  // BaseUrlSignalR="http://44.210.155.226:5000/"
 
   constructor() {}
 
   GetHeader() {
     // const hostname = window.location.hostname;
     // var Header = hostname.split('.')[0]
+
  
     // var Header = 'Domain_One';   
  var Header = 'try';  
+
+
     return Header;
   }
 }
