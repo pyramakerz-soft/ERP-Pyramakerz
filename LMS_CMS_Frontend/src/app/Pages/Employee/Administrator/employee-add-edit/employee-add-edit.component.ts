@@ -394,7 +394,7 @@ private languageService: LanguageService
                   Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: error.error.errors || 'An unexpected error occurred',
+                    text: error.error || 'An unexpected error occurred',
                     confirmButtonColor: '#089B41',
                   });
                   break;
@@ -448,7 +448,7 @@ private languageService: LanguageService
                   Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: error.error.errors || 'An unexpected error occurred',
+                    text: error.error || 'An unexpected error occurred',
                     confirmButtonColor: '#089B41',
                   });
                   break;

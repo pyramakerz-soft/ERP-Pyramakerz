@@ -182,7 +182,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             if(NewDiscussionRoom.ImageFile != null)
             {
-                string returnFileInput = _fileImageValidationService.ValidateImageFile(NewDiscussionRoom.ImageFile);
+                string returnFileInput = await _fileImageValidationService.ValidateImageFileAsync(NewDiscussionRoom.ImageFile);
                 if (returnFileInput != null)
                 {
                     return BadRequest(returnFileInput);
@@ -284,7 +284,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             if (EditDiscussionRoom.ImageFile != null)
             {
-                string returnFileInput = _fileImageValidationService.ValidateImageFile(EditDiscussionRoom.ImageFile);
+                string returnFileInput = await _fileImageValidationService.ValidateImageFileAsync(EditDiscussionRoom.ImageFile);
                 if (returnFileInput != null)
                 {
                     return BadRequest(returnFileInput);

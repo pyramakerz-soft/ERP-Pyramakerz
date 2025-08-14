@@ -142,7 +142,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             }
             if (newMedal.NewFile != null)
             {
-                string returnFileInput = _fileImageValidationService.ValidateImageFile(newMedal.NewFile);
+                string returnFileInput = await _fileImageValidationService.ValidateImageFileAsync(newMedal.NewFile);
                 if (returnFileInput != null)
                 {
                     return BadRequest(returnFileInput);
@@ -222,7 +222,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
 
             if (newModal.NewFile != null)
             {
-                string returnFileInput = _fileImageValidationService.ValidateImageFile(newModal.NewFile);
+                string returnFileInput = await _fileImageValidationService.ValidateImageFileAsync(newModal.NewFile);
                 if (returnFileInput != null)
                 {
                     return BadRequest(returnFileInput);

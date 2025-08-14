@@ -43,8 +43,7 @@ namespace LMS_CMS_BL.DTO.Accounting
         public int? MonthlyLeaveRequestBalance { get; set; }
         public int? GraduationYear { get; set; }
         public string? Note { get; set; }
-        public bool? CanReceiveRequest { get; set; }
-        public bool? CanReceiveMessage { get; set; }
+        public bool? CanReceiveRequest { get; set; } 
         public bool? CanReceiveRequestFromParent { get; set; }
         public bool? CanReceiveMessageFromParent { get; set; }
         public long? ReasonOfLeavingID { get; set; }

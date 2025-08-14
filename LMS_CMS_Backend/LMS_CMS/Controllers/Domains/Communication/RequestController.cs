@@ -13,6 +13,7 @@ using LMS_CMS_DAL.Models.Domains.LMS;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 
 namespace LMS_CMS_PL.Controllers.Domains.Communication
 {
@@ -24,16 +25,14 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
         private readonly DbContextFactoryService _dbContextFactory;
         IMapper mapper;
         private readonly CheckPageAccessService _checkPageAccessService;
-        private readonly FileValidationService _fileValidationService;
-        private readonly UserTreeService _userTreeService; 
+        private readonly FileValidationService _fileValidationService; 
 
-        public RequestController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileValidationService fileValidationService, UserTreeService userTreeService)
+        public RequestController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileValidationService fileValidationService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _checkPageAccessService = checkPageAccessService;
-            _fileValidationService = fileValidationService;
-            _userTreeService = userTreeService; 
+            _fileValidationService = fileValidationService; 
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////
@@ -79,13 +78,77 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             return (englishName, arabicName);
         }
 
+        private async Task<List<long>> GetValidTeacherIdsForStudent(long studentId, UOW Unit_Of_Work)
+        {
+            List<long> teacherIDs = new List<long>();
+
+            // Get student current grade
+            StudentGrade studentGrade = Unit_Of_Work.studentGrade_Repository.First_Or_Default(
+                d => d.IsDeleted != true && d.Grade.IsDeleted != true && d.Grade.Section.IsDeleted != true && d.AcademicYear.IsDeleted != true && d.AcademicYear.School.IsDeleted != true
+                && d.AcademicYear.IsActive == true && d.StudentID == studentId);
+
+            if (studentGrade != null)
+            {
+                // Get his classroom
+                StudentClassroom studentClassroom = Unit_Of_Work.studentClassroom_Repository.First_Or_Default(
+                    d => d.IsDeleted != true && d.Classroom.IsDeleted != true && d.Classroom.AcademicYear.IsDeleted != true && d.Classroom.AcademicYear.IsActive == true
+                    && d.StudentID == studentId && d.Classroom.GradeID == studentGrade.GradeID);
+
+                if (studentClassroom != null)
+                {
+                    // Get His subjects
+                    List<StudentClassroomSubject> studentClassroomSubjects = Unit_Of_Work.studentClassroomSubject_Repository.FindBy(
+                        d => d.IsDeleted != true && d.StudentClassroomID == studentClassroom.ID && d.Subject.IsDeleted != true && d.Hide == false);
+
+                    if (studentClassroomSubjects != null && studentClassroomSubjects.Count > 0)
+                    {
+                        List<long> subjectIDs = studentClassroomSubjects.Select(y => y.SubjectID).ToList();
+
+                        // Get his class subjects 
+                        List<ClassroomSubject> classroomSubjects = Unit_Of_Work.classroomSubject_Repository.FindBy(
+                            d => d.ClassroomID == studentClassroom.ClassID && subjectIDs.Contains(d.SubjectID) && d.IsDeleted != true && d.Hide == false && d.TeacherID != null && d.Teacher.IsDeleted != true
+                            );
+
+                        if (classroomSubjects != null && classroomSubjects.Count > 0)
+                        {
+                            teacherIDs = classroomSubjects.Where(cs => cs.TeacherID != null).Select(y => y.TeacherID.Value).ToList();
+
+                            foreach (var item in classroomSubjects)
+                            {
+                                List<ClassroomSubjectCoTeacher> classroomSubjectCoTeachers = Unit_Of_Work.classroomSubjectCoTeacher_Repository.FindBy(
+                                d => d.ClassroomSubjectID == item.ID && d.IsDeleted != true && d.CoTeacher.IsDeleted != true
+                                );
+                                if (classroomSubjectCoTeachers != null && classroomSubjectCoTeachers.Count != 0)
+                                {
+                                    teacherIDs.AddRange(classroomSubjectCoTeachers.Select(ct => ct.CoTeacherID));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            List<RemedialClassroomStudent> remedialClassroomStudents = await Unit_Of_Work.remedialClassroomStudent_Repository.Select_All_With_IncludesById<RemedialClassroomStudent>(
+                d => d.IsDeleted != true && d.RemedialClassroom.IsDeleted != true && d.RemedialClassroom.Subject.IsDeleted != true && d.RemedialClassroom.AcademicYear.IsDeleted != true
+                && d.RemedialClassroom.AcademicYear.School.IsDeleted != true && d.RemedialClassroom.Subject.Grade.IsDeleted != true && d.RemedialClassroom.Subject.Grade.Section.IsDeleted != true
+                && d.RemedialClassroom.AcademicYear.IsActive == true && d.StudentID == studentId,
+                query => query.Include(d => d.RemedialClassroom)
+                );
+            if (remedialClassroomStudents != null && remedialClassroomStudents.Count != 0)
+            {
+                teacherIDs.AddRange(remedialClassroomStudents.Select(ct => ct.RemedialClassroom.TeacherID));
+            }
+
+            return teacherIDs.Distinct().ToList();
+        }
+
         //////////////////////////////////////////////////////////////////////////////////////////
 
-        [HttpGet("ByUserID")]
+        [HttpGet("GetSentOnesByUserID")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee", "parent", "student" }
         )]
-        public async Task<IActionResult> ByUserIDAsync()
+        public async Task<IActionResult> GetSentOnesByUserID()
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -109,35 +172,21 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
 
             List<Request> requests = await Unit_Of_Work.request_Repository.Select_All_With_IncludesById<Request>(
                     f => f.IsDeleted != true &&
-                    ((f.SenderID == userId && f.SenderUserTypeID == userTypeID) 
-                    || (f.ReceiverID == userId && f.ReceiverUserTypeID == userTypeID) ),
+                    (f.SenderID == userId && f.SenderUserTypeID == userTypeID),
                     query => query.Include(d => d.SenderUserType),
                     query => query.Include(d => d.ReceiverUserType)
                     );
 
-            List<Request> requestsForwarded = new List<Request>();
-            if (userTypeID == 1)
-            {
-                requestsForwarded = await Unit_Of_Work.request_Repository.Select_All_With_IncludesById<Request>(
-                        f => f.IsDeleted != true && f.TransfereeID == userId,
-                        query => query.Include(d => d.SenderUserType),
-                        query => query.Include(d => d.ReceiverUserType)
-                        );
-            }
-
-            var combinedRequests = requests
-                .Select(r => new { Request = r, SortDate = r.InsertedAt })
-                .Concat(requestsForwarded.Select(r => new { Request = r, SortDate = r.ForwardedAt ?? r.InsertedAt }))
-                .OrderByDescending(x => x.SortDate)
-                .Select(x => x.Request)
-                .ToList(); 
-
-            if (combinedRequests == null || combinedRequests.Count == 0)
+            if (requests == null || requests.Count == 0)
             {
                 return NotFound();
             }
-             
-            List<RequestGetDTO> requestsGetDTO = mapper.Map<List<RequestGetDTO>>(combinedRequests);
+
+            requests = requests
+                .OrderByDescending(d => d.InsertedAt)
+                .ToList();
+
+            List<RequestGetDTO> requestsGetDTO = mapper.Map<List<RequestGetDTO>>(requests);
 
             foreach (var request in requestsGetDTO)
             {
@@ -146,19 +195,92 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                 {
                     request.FileLink = $"{serverUrl}{request.FileLink.Replace("\\", "/")}";
                 }
-
+                 
                 (request.SenderEnglishName, request.SenderArabicName) = GetUserNames(Unit_Of_Work, request.SenderID, request.SenderUserTypeID);
                 (request.ReceiverEnglishName, request.ReceiverArabicName) = GetUserNames(Unit_Of_Work, request.ReceiverID, request.ReceiverUserTypeID);
-                if (request.TransfereeID != null && request.TransfereeID != 0)
+                if (request.ForwardedFromID != null && request.ForwardedFromID != 0)
                 {
-                    (request.TransfereeEnglishName, request.TransfereeArabicName) = GetUserNames(Unit_Of_Work, request.TransfereeID.Value, 1);
+                    (request.ForwardedFromEnglishName, request.ForwardedFromArabicName) = GetUserNames(Unit_Of_Work, request.ForwardedFromID.Value, 1);
+                }
+                if (request.ForwardedToID != null && request.ForwardedToID != 0)
+                {
+                    (request.ForwardedToEnglishName, request.ForwardedToArabicName) = GetUserNames(Unit_Of_Work, request.ForwardedToID.Value, 1);
+                }
+            }
+
+            return Ok(requestsGetDTO);
+        }
+        
+        //////////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpGet("GetReceivedOnesByUserID")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee", "parent", "student" }
+        )]
+        public async Task<IActionResult> GetReceivedOnesByUserID()
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            long userTypeID = 0;
+            if (userTypeClaim == "employee")
+            {
+                userTypeID = 1;
+            }
+            else if (userTypeClaim == "student")
+            {
+                userTypeID = 2;
+            }
+            else if (userTypeClaim == "parent")
+            {
+                userTypeID = 3;
+            }
+
+            List<Request> requests = await Unit_Of_Work.request_Repository.Select_All_With_IncludesById<Request>(
+                    f => f.IsDeleted != true &&
+                    (f.ReceiverID == userId && f.ReceiverUserTypeID == userTypeID),
+                    query => query.Include(d => d.SenderUserType),
+                    query => query.Include(d => d.ReceiverUserType)
+                    );
+
+            if (requests == null || requests.Count == 0)
+            {
+                return NotFound();
+            }
+
+            requests = requests
+                .OrderByDescending(d => d.InsertedAt)
+                .ToList();
+
+            List<RequestGetDTO> requestsGetDTO = mapper.Map<List<RequestGetDTO>>(requests);
+
+            foreach (var request in requestsGetDTO)
+            {
+                string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+                if (!string.IsNullOrEmpty(request.FileLink))
+                {
+                    request.FileLink = $"{serverUrl}{request.FileLink.Replace("\\", "/")}";
+                }
+                 
+                (request.SenderEnglishName, request.SenderArabicName) = GetUserNames(Unit_Of_Work, request.SenderID, request.SenderUserTypeID);
+                (request.ReceiverEnglishName, request.ReceiverArabicName) = GetUserNames(Unit_Of_Work, request.ReceiverID, request.ReceiverUserTypeID);
+                if (request.ForwardedFromID != null && request.ForwardedFromID != 0)
+                {
+                    (request.ForwardedFromEnglishName, request.ForwardedFromArabicName) = GetUserNames(Unit_Of_Work, request.ForwardedFromID.Value, 1);
+                }
+                if (request.ForwardedToID != null && request.ForwardedToID != 0)
+                {
+                    (request.ForwardedToEnglishName, request.ForwardedToArabicName) = GetUserNames(Unit_Of_Work, request.ForwardedToID.Value, 1);
                 }
             }
 
             return Ok(requestsGetDTO);
         }
 
-        //////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////
 
         [HttpGet("ByUserIDFirst5")]
         [Authorize_Endpoint_(
@@ -188,27 +310,20 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
 
             List<Request> requests = await Unit_Of_Work.request_Repository.Select_All_With_IncludesById<Request>(
                     f => f.IsDeleted != true &&
-                    ((f.ReceiverID == userId && f.ReceiverUserTypeID == userTypeID)
-                    || (f.TransfereeID == userId && userTypeID == 1)),
+                    (f.ReceiverID == userId && f.ReceiverUserTypeID == userTypeID),
+                    query => query.Include(d => d.SenderUserType),
                     query => query.Include(d => d.ReceiverUserType)
                     );
-
-            var recentRequests = requests
-                .Select(r => new {
-                    Request = r, 
-                    LatestActionDate = r.TransfereeID == userId && r.ForwardedAt != null
-                        ? r.ForwardedAt.Value
-                        : r.InsertedAt
-                })
-                .OrderByDescending(x => x.LatestActionDate)
-                .Take(5)
-                .Select(x => x.Request)
-                .ToList();
 
             if (requests == null || requests.Count == 0)
             {
                 return NotFound();
-            } 
+            }
+
+            requests = requests
+                .OrderByDescending(d => d.InsertedAt)
+                .Take(5)
+                .ToList(); 
 
             List<RequestGetDTO> requestsGetDTO = mapper.Map<List<RequestGetDTO>>(requests);
 
@@ -219,18 +334,23 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                 {
                     request.FileLink = $"{serverUrl}{request.FileLink.Replace("\\", "/")}";
                 }
-                 
+
+                (request.SenderEnglishName, request.SenderArabicName) = GetUserNames(Unit_Of_Work, request.SenderID, request.SenderUserTypeID);
                 (request.ReceiverEnglishName, request.ReceiverArabicName) = GetUserNames(Unit_Of_Work, request.ReceiverID, request.ReceiverUserTypeID);
-                if (request.TransfereeID != null && request.TransfereeID != 0)
+                if (request.ForwardedFromID != null && request.ForwardedFromID != 0)
                 {
-                    (request.TransfereeEnglishName, request.TransfereeArabicName) = GetUserNames(Unit_Of_Work, request.TransfereeID.Value, 1);
+                    (request.ForwardedFromEnglishName, request.ForwardedFromArabicName) = GetUserNames(Unit_Of_Work, request.ForwardedFromID.Value, 1);
+                }
+                if (request.ForwardedToID != null && request.ForwardedToID != 0)
+                {
+                    (request.ForwardedToEnglishName, request.ForwardedToArabicName) = GetUserNames(Unit_Of_Work, request.ForwardedToID.Value, 1);
                 }
             }
 
             return Ok(requestsGetDTO);
         }
 
-        //////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////
 
         [HttpGet("ByUserIDAndRequestID/{requestID}")]
         [Authorize_Endpoint_(
@@ -261,17 +381,16 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             Request request = await Unit_Of_Work.request_Repository.FindByIncludesAsync(
                     f => f.IsDeleted != true && f.ID == requestID &&
                     ((f.SenderID == userId && f.SenderUserTypeID == userTypeID)
-                    || (f.ReceiverID == userId && f.ReceiverUserTypeID == userTypeID)
-                    || (f.TransfereeID == userId && userTypeID == 1)),
+                    || (f.ReceiverID == userId && f.ReceiverUserTypeID == userTypeID)),
                     query => query.Include(d => d.SenderUserType),
                     query => query.Include(d => d.ReceiverUserType)
-                    ); 
+                    );
 
             if (request == null)
             {
                 return NotFound();
             }
-             
+
             RequestGetDTO requestGetDTO = mapper.Map<RequestGetDTO>(request);
 
             string serverUrl = $"{Request.Scheme}://{Request.Host}/";
@@ -280,23 +399,18 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                 requestGetDTO.FileLink = $"{serverUrl}{requestGetDTO.FileLink.Replace("\\", "/")}";
             }
 
-            (requestGetDTO.SenderEnglishName, requestGetDTO.SenderArabicName) = GetUserNames(Unit_Of_Work, request.SenderID, requestGetDTO.SenderUserTypeID);
-            (requestGetDTO.ReceiverEnglishName, requestGetDTO.ReceiverArabicName) = GetUserNames(Unit_Of_Work, request.ReceiverID, requestGetDTO.ReceiverUserTypeID);
-            if (requestGetDTO.TransfereeID != null && requestGetDTO.TransfereeID != 0)
+            (requestGetDTO.SenderEnglishName, requestGetDTO.SenderArabicName) = GetUserNames(Unit_Of_Work, requestGetDTO.SenderID, requestGetDTO.SenderUserTypeID);
+            (requestGetDTO.ReceiverEnglishName, requestGetDTO.ReceiverArabicName) = GetUserNames(Unit_Of_Work, requestGetDTO.ReceiverID, requestGetDTO.ReceiverUserTypeID);
+            if (requestGetDTO.ForwardedFromID != null && requestGetDTO.ForwardedFromID != 0)
             {
-                (requestGetDTO.TransfereeEnglishName, requestGetDTO.TransfereeArabicName) = GetUserNames(Unit_Of_Work, requestGetDTO.TransfereeID.Value, 1);
+                (requestGetDTO.ForwardedFromEnglishName, requestGetDTO.ForwardedFromArabicName) = GetUserNames(Unit_Of_Work, requestGetDTO.ForwardedFromID.Value, 1);
+            }
+            if (requestGetDTO.ForwardedToID != null && requestGetDTO.ForwardedToID != 0)
+            {
+                (requestGetDTO.ForwardedToEnglishName, requestGetDTO.ForwardedToArabicName) = GetUserNames(Unit_Of_Work, requestGetDTO.ForwardedToID.Value, 1);
             }
 
-            if (request.ReceiverID == userId && request.ReceiverUserTypeID == userTypeID)
-            {
-                request.SeenOrNot = true;
-            }
-            
-            if (request.TransfereeID == userId && userTypeID == 1)
-            {
-                request.SeenOrNotByTransferee = true;
-            }
- 
+            request.SeenOrNot = true;
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             request.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
             Unit_Of_Work.request_Repository.Update(request);
@@ -335,18 +449,18 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             }
 
             List<Request> requests = Unit_Of_Work.request_Repository.FindBy(
-                    f => f.IsDeleted != true && ((!f.SeenOrNot && f.ReceiverID == userId) || (!f.SeenOrNotByTransferee && userTypeID == 1 && f.TransfereeID == userId)) && f.ReceiverUserTypeID == userTypeID);
+                    f => f.IsDeleted != true && !f.SeenOrNot && f.ReceiverID == userId && f.ReceiverUserTypeID == userTypeID);
 
             return Ok(requests.Count);
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////
 
-        [HttpPut("AcceptOrDecline/{requestID}")]
+        [HttpPut("Accept/{requestID}")]
         [Authorize_Endpoint_(
-           allowedTypes: new[] { "octa", "employee"}
+           allowedTypes: new[] { "octa", "employee", "parent", "student" }
         )]
-        public IActionResult AcceptOrDecline(long requestID)
+        public IActionResult Accept(long requestID)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -370,23 +484,72 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
 
             Request request = Unit_Of_Work.request_Repository.First_Or_Default(
                     f => f.IsDeleted != true  && f.ID == requestID 
-                    && ((f.ReceiverID == userId && f.ReceiverUserTypeID == userTypeID) || (f.TransfereeID == userId && userTypeID == 1)));
+                    && (f.ReceiverID == userId && f.ReceiverUserTypeID == userTypeID));
 
             if (request == null)
             {
                 return NotFound();
             }
 
-            if (request.ReceiverID == userId && request.ReceiverUserTypeID == userTypeID)
+            if (request.ForwardedOrNot == true)
             {
-                request.SeenOrNot = true;
+                return BadRequest("You can't Accept it after you had forwarded it");
             }
 
-            if (request.TransfereeID == userId && userTypeID == 1)
-            {
-                request.SeenOrNotByTransferee = true;
-            }
+            request.SeenOrNot = true;
             request.ApprovedOrNot = true; 
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            request.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            Unit_Of_Work.request_Repository.Update(request);
+            Unit_Of_Work.SaveChanges();
+
+            return Ok();
+        }
+        
+        //////////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpPut("Decline/{requestID}")]
+        [Authorize_Endpoint_(
+           allowedTypes: new[] { "octa", "employee", "parent", "student" }
+        )]
+        public IActionResult Decline(long requestID)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            long userTypeID = 0;
+            if (userTypeClaim == "employee")
+            {
+                userTypeID = 1;
+            }
+            else if (userTypeClaim == "student")
+            {
+                userTypeID = 2;
+            }
+            else if (userTypeClaim == "parent")
+            {
+                userTypeID = 3;
+            }
+
+            Request request = Unit_Of_Work.request_Repository.First_Or_Default(
+                    f => f.IsDeleted != true  && f.ID == requestID 
+                    && (f.ReceiverID == userId && f.ReceiverUserTypeID == userTypeID));
+
+            if (request == null)
+            {
+                return NotFound();
+            }
+
+            if(request.ForwardedOrNot == true)
+            {
+                return BadRequest("You can't Decline it after you had forwarded it");
+            }
+             
+            request.SeenOrNot = true;
+            request.ApprovedOrNot = false; 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             request.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
             Unit_Of_Work.request_Repository.Update(request);
@@ -423,15 +586,25 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                 userTypeID = 3;
             }
 
+            if(userTypeID != 1)
+            {
+                return BadRequest("You Have no access to forward the request");
+            }
+
             Employee employeeToForwardTo = Unit_Of_Work.employee_Repository.First_Or_Default(d => d.ID == forwardRequestDTO.ForwardToID && d.IsDeleted != true);
             if (employeeToForwardTo == null)
             {
                 return NotFound("No Employee with this ID");
             }
 
+            if(employeeToForwardTo.CanReceiveRequest != true)
+            {
+                return BadRequest("You can't request from this employee");
+            }
+
             Request request = Unit_Of_Work.request_Repository.First_Or_Default(
                     f => f.IsDeleted != true  && f.ID == forwardRequestDTO.RequestID
-                    && ((f.ReceiverID == userId && f.ReceiverUserTypeID == userTypeID) || (f.TransfereeID == userId && userTypeID == 1))
+                    && (f.ReceiverID == userId && f.ReceiverUserTypeID == userTypeID)
                     );
 
             if (request == null)
@@ -447,20 +620,63 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             if (request.ReceiverID == userId && forwardRequestDTO.ForwardToID == userId)
             {
                 return BadRequest("You can't forward the request to yourself");
-            }
-
-            if (request.TransfereeID == userId && forwardRequestDTO.ForwardToID == request.ReceiverID)
-            {
-                return BadRequest("You can't forward the request back to this user");
-            }
+            } 
 
             request.SeenOrNot = true;
             request.ForwardedOrNot = true; 
-            request.TransfereeID = forwardRequestDTO.ForwardToID; 
+            request.ForwardedToID = forwardRequestDTO.ForwardToID; 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-            request.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            request.ForwardedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
             Unit_Of_Work.request_Repository.Update(request);
+
+            Request newRequest = new Request();
+            newRequest.Message = request.Message;
+            newRequest.Link = request.Link;
+            newRequest.SenderID = request.SenderID;
+            newRequest.SenderUserTypeID = request.SenderUserTypeID;
+            newRequest.ReceiverID = forwardRequestDTO.ForwardToID;
+            newRequest.ForwardedFromID = userId;
+            newRequest.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+
+            Unit_Of_Work.request_Repository.Add(newRequest);
             Unit_Of_Work.SaveChanges();
+
+            if (request.FileLink != null)
+            {
+                var normalizedFileLink = request.FileLink.Replace('\\', Path.DirectorySeparatorChar);
+                 
+                var originalFilePath = Path.Combine(Directory.GetCurrentDirectory(), normalizedFileLink);
+
+                if (System.IO.File.Exists(originalFilePath))
+                {
+                    // Create new request folder
+                    var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Request");
+                    var newRequestFolder = Path.Combine(baseFolder, newRequest.ID.ToString());
+
+                    if (!Directory.Exists(newRequestFolder))
+                    {
+                        Directory.CreateDirectory(newRequestFolder);
+                    }
+
+                    // Get the filename from the original path
+                    var fileName = Path.GetFileName(request.FileLink);
+
+                    // Create new file path
+                    var newFilePath = Path.Combine(newRequestFolder, fileName);
+
+                    // Copy the file
+                    System.IO.File.Copy(originalFilePath, newFilePath, overwrite: true);
+                     
+                    newRequest.FileLink = Path.Combine("Uploads", "Request", newRequest.ID.ToString(), fileName);
+                    Unit_Of_Work.request_Repository.Update(newRequest); 
+                }
+                else
+                {
+                    return BadRequest("File doesn't exists in this route");
+                } 
+            }
+
+            Unit_Of_Work.SaveChanges(); 
 
             return Ok();
         }
@@ -503,195 +719,135 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                 return BadRequest("No User Type With this ID");
             }
 
+            switch (NewRequest.ReceiverUserTypeID)
+            {
+                case 1:
+                    Employee employee = Unit_Of_Work.employee_Repository.First_Or_Default(d => d.ID == NewRequest.ReceiverID && d.IsDeleted != true);
+                    if (employee == null)
+                    {
+                        return NotFound("No Employee With this ID");
+                    }
+                    if(userTypeID == 1 && employee.CanReceiveRequest != true)
+                    {
+                        return BadRequest("You Can't Request from this user");
+                    }
+                    break;
+
+                case 2:
+                    Student student = Unit_Of_Work.student_Repository.First_Or_Default(d => d.ID == NewRequest.ReceiverID && d.IsDeleted != true);
+                    if (student == null)
+                    {
+                        return NotFound("No Student With this ID");
+                    }
+                    break;
+
+                case 3:
+                    Parent parent = Unit_Of_Work.parent_Repository.First_Or_Default(d => d.ID == NewRequest.ReceiverID && d.IsDeleted != true);
+                    if (parent == null)
+                    {
+                        return NotFound("No Parent With this ID");
+                    }
+                    break;
+
+                default:
+                    throw new ArgumentException("Invalid user type ID");
+            }
+
+            if (NewRequest.ReceiverID == userId && forwardRequestDTO.ForwardToID == userId)
+            {
+                return BadRequest("You can't send the request to yourself");
+            }
+
             if (NewRequest.FileFile == null && NewRequest.Message == null && NewRequest.Link == null)
             {
                 return BadRequest("You have to choose one element atleast to appear");
             }
 
-            if (NewRequest.ReceiverUserTypeID == 2 || NewRequest.ReceiverUserTypeID == 3)
+            if ((userTypeID == 2 || userTypeID == 3) && (NewRequest.ReceiverUserTypeID == 2 || NewRequest.ReceiverUserTypeID == 3))
             {
                 return BadRequest("You Can't Send Requests To This User Type");
-            }
-
-            List<long> targetUserIds;
-            try
-            {
-                targetUserIds = _userTreeService.GetUsersAccordingToTree(Unit_Of_Work, NewRequest.ReceiverUserTypeID, NewRequest.UserFilters);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-
-            if(userTypeID == 1 && NewRequest.ReceiverUserTypeID == 1)
-            {
-                targetUserIds = targetUserIds.Where(id => id != userId).ToList();
-            }
-
-            if(targetUserIds.Count == 0)
-            {
-                return NotFound("No Users To Request From");
-            }
+            } 
 
             if (NewRequest.FileFile != null)
             {
-                string returnFileInput = _fileValidationService.ValidateFile(NewRequest.FileFile);
+                string returnFileInput = await _fileValidationService.ValidateFileAsync(NewRequest.FileFile);
                 if (returnFileInput != null)
                 {
                     return BadRequest(returnFileInput);
                 } 
             } 
 
-            if (userTypeID == 1 && NewRequest.ReceiverUserTypeID == 1)
-            {
-                List<Employee> employees = Unit_Of_Work.employee_Repository.FindBy(d => d.IsDeleted != true && d.CanReceiveRequest == true);
-                if(employees.Count == 0)
-                {
-                    return NotFound("No eligible employees available to receive requests");
-                }
-
-                List<long> employeeIDs = employees.Select(y => y.ID).ToList();
-
-                targetUserIds = targetUserIds.Where(id => employeeIDs.Contains(id)).ToList();
-                if (targetUserIds.Count == 0)
-                {
-                    return NotFound("None of the specified users are eligible to receive requests");
-                }
-            }
-            else if ((userTypeID == 2 || userTypeID == 3) && NewRequest.ReceiverUserTypeID == 1)
-            {
-                if(targetUserIds.Count > 1)
-                {
-                    return BadRequest("You can only request from one teacher at a time");
-                }
-                
+            if ((userTypeID == 2 || userTypeID == 3) && NewRequest.ReceiverUserTypeID == 1)
+            {  
                 if (userTypeID == 3 && (NewRequest.StudentID == null || NewRequest.StudentID == 0))
                 {
                     return BadRequest("You must select a student");
                 }
 
+                if (NewRequest.StudentID != null)
+                {
+                    Student student = Unit_Of_Work.student_Repository.First_Or_Default(d => d.ID == NewRequest.StudentID && d.IsDeleted != true && d.Parent_Id== userId);
+                    if (student != null)
+                    {
+                        return NotFound("No Student With this ID For this parent");
+                    }
+                }
+                
                 long studentId = userTypeID == 2 ? userId : NewRequest.StudentID.Value;
 
-                Employee emp = Unit_Of_Work.employee_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == targetUserIds[0]);
+                Employee emp = Unit_Of_Work.employee_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == NewRequest.ReceiverID);
                 if (emp?.CanReceiveRequestFromParent != true)
                 {
                     var teacherIDs = await GetValidTeacherIdsForStudent(studentId, Unit_Of_Work);
 
-                    if (teacherIDs.Count == 0 || !teacherIDs.Contains(targetUserIds[0]))
+                    if (teacherIDs.Count == 0 || !teacherIDs.Contains(NewRequest.ReceiverID))
                     {
-                        return BadRequest("You can only send requests to your current teachers");
+                        return BadRequest("You can only send requests to your current teachers or employees that can accept requests from student or parent");
                     }
                 }
             }
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
 
-            foreach (long receiverID in targetUserIds)
-            {  
-                Request request = new Request();
-                request.Message = NewRequest.Message;
-                request.Link = NewRequest.Link;
-                request.SenderID = userId;
-                request.ReceiverID = receiverID;
-                request.SenderUserTypeID = userTypeID;
-                request.ReceiverUserTypeID = NewRequest.ReceiverUserTypeID;
-                request.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            Request request = new Request();
+            request.Message = NewRequest.Message;
+            request.Link = NewRequest.Link;
+            request.SenderID = userId;
+            request.ReceiverID = NewRequest.ReceiverID;
+            request.SenderUserTypeID = userTypeID;
+            request.ReceiverUserTypeID = NewRequest.ReceiverUserTypeID;
+            request.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
 
-                Unit_Of_Work.request_Repository.Add(request);
-                Unit_Of_Work.SaveChanges();
+            Unit_Of_Work.request_Repository.Add(request);
+            Unit_Of_Work.SaveChanges();
 
-                if (NewRequest.FileFile != null)
-                { 
-                    var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Request");
-                    var requestFolder = Path.Combine(baseFolder,request.ID.ToString());
-                    if (!Directory.Exists(requestFolder))
+            if (NewRequest.FileFile != null)
+            { 
+                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Request");
+                var requestFolder = Path.Combine(baseFolder,request.ID.ToString());
+                if (!Directory.Exists(requestFolder))
+                {
+                    Directory.CreateDirectory(requestFolder);
+                }
+
+                if (NewRequest.FileFile.Length > 0)
+                {
+                    var filePath = Path.Combine(requestFolder, NewRequest.FileFile.FileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
                     {
-                        Directory.CreateDirectory(requestFolder);
+                        await NewRequest.FileFile.CopyToAsync(stream);
                     }
+                }
 
-                    if (NewRequest.FileFile.Length > 0)
-                    {
-                        var filePath = Path.Combine(requestFolder, NewRequest.FileFile.FileName);
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await NewRequest.FileFile.CopyToAsync(stream);
-                        }
-                    }
-
-                    request.FileLink = Path.Combine("Uploads", "Request", request.ID.ToString(), NewRequest.FileFile.FileName);
-                    Unit_Of_Work.request_Repository.Update(request);
-                } 
-            }
+                request.FileLink = Path.Combine("Uploads", "Request", request.ID.ToString(), NewRequest.FileFile.FileName);
+                Unit_Of_Work.request_Repository.Update(request);
+            } 
 
             Unit_Of_Work.SaveChanges();
 
             // run the function that tell the user that there are changes and in front end it will change the count and also refresh the requests if i am in the requests page
 
             return Ok();
-        }
-
-        private async Task<List<long>> GetValidTeacherIdsForStudent(long studentId, UOW Unit_Of_Work)
-        { 
-            List<long> teacherIDs = new List<long>();
-
-            // Get student current grade
-            StudentGrade studentGrade = Unit_Of_Work.studentGrade_Repository.First_Or_Default(
-                d => d.IsDeleted != true && d.Grade.IsDeleted != true && d.Grade.Section.IsDeleted != true && d.AcademicYear.IsDeleted != true && d.AcademicYear.School.IsDeleted != true
-                && d.AcademicYear.IsActive == true && d.StudentID == studentId); 
-
-            if (studentGrade != null)
-            {
-                // Get his classroom
-                StudentClassroom studentClassroom = Unit_Of_Work.studentClassroom_Repository.First_Or_Default(
-                    d => d.IsDeleted != true && d.Classroom.IsDeleted != true && d.Classroom.AcademicYear.IsDeleted != true && d.Classroom.AcademicYear.IsActive == true
-                    && d.StudentID == studentId && d.Classroom.GradeID == studentGrade.GradeID); 
-
-                if(studentClassroom != null)
-                {
-                    // Get His subjects
-                    List<StudentClassroomSubject> studentClassroomSubjects = Unit_Of_Work.studentClassroomSubject_Repository.FindBy(
-                        d => d.IsDeleted != true && d.StudentClassroomID == studentClassroom.ID && d.Subject.IsDeleted != true && d.Hide == false);
-
-                    if (studentClassroomSubjects != null && studentClassroomSubjects.Count > 0 )
-                    {
-                        List<long> subjectIDs = studentClassroomSubjects.Select(y => y.SubjectID).ToList(); 
-
-                        // Get his class subjects 
-                        List<ClassroomSubject> classroomSubjects = Unit_Of_Work.classroomSubject_Repository.FindBy(
-                            d => d.ClassroomID == studentClassroom.ClassID && subjectIDs.Contains(d.SubjectID) && d.IsDeleted != true && d.Hide == false && d.TeacherID != null && d.Teacher.IsDeleted != true
-                            );
-
-                        if (classroomSubjects != null && classroomSubjects.Count > 0)
-                        {
-                            teacherIDs = classroomSubjects.Where(cs => cs.TeacherID != null).Select(y => y.TeacherID.Value).ToList();
-                            
-                            foreach (var item in classroomSubjects)
-                            {
-                                List<ClassroomSubjectCoTeacher> classroomSubjectCoTeachers = Unit_Of_Work.classroomSubjectCoTeacher_Repository.FindBy(
-                                d => d.ClassroomSubjectID == item.ID && d.IsDeleted != true && d.CoTeacher.IsDeleted != true
-                                );
-                                if (classroomSubjectCoTeachers != null && classroomSubjectCoTeachers.Count != 0)
-                                {
-                                    teacherIDs.AddRange(classroomSubjectCoTeachers.Select(ct => ct.CoTeacherID));
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-             
-            List<RemedialClassroomStudent> remedialClassroomStudents = await Unit_Of_Work.remedialClassroomStudent_Repository.Select_All_With_IncludesById<RemedialClassroomStudent>(
-                d => d.IsDeleted != true && d.RemedialClassroom.IsDeleted != true && d.RemedialClassroom.Subject.IsDeleted != true && d.RemedialClassroom.AcademicYear.IsDeleted != true
-                && d.RemedialClassroom.AcademicYear.School.IsDeleted != true && d.RemedialClassroom.Subject.Grade.IsDeleted != true && d.RemedialClassroom.Subject.Grade.Section.IsDeleted != true
-                && d.RemedialClassroom.AcademicYear.IsActive == true && d.StudentID == studentId,
-                query => query.Include(d => d.RemedialClassroom)
-                );
-            if (remedialClassroomStudents != null && remedialClassroomStudents.Count != 0)
-            {
-                teacherIDs.AddRange(remedialClassroomStudents.Select(ct => ct.RemedialClassroom.TeacherID));
-            }
-
-            return teacherIDs.Distinct().ToList(); 
-        }
+        } 
     }
 }

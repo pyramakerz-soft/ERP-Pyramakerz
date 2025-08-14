@@ -216,7 +216,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             if (newSchool.ReportImageFile != null)
             {
-                string returnFileInput = _fileImageValidationService.ValidateImageFile(newSchool.ReportImageFile);
+                string returnFileInput = await _fileImageValidationService.ValidateImageFileAsync(newSchool.ReportImageFile);
                 if (returnFileInput != null)
                 {
                     return BadRequest(returnFileInput);
