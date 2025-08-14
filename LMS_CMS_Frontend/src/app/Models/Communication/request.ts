@@ -1,5 +1,3 @@
-import { UserFilters } from "./user-filters";
-
 export class Request {
     constructor(
         public id: number = 0,  
@@ -8,8 +6,7 @@ export class Request {
         public message: string = '',
         public seenOrNot: boolean = false,
         public forwardedOrNot: boolean = false,
-        public approvedOrNot: boolean = false,
-        public seenOrNotByTransferee: boolean = false,
+        public approvedOrNot: boolean = false, 
         public insertedAt: string = '', 
         public forwardedAt: string = '', 
         public senderID: number = 0,  
@@ -25,8 +22,7 @@ export class Request {
         public senderUserTypeName: string = '',
         public receiverUserTypeID: number = 0,  
         public receiverUserTypeName: string = '',
-        
-        public userFilters : UserFilters= new UserFilters(),
+         
         public fileFile : File|null = null, 
         public studentID: number = 0,  
         

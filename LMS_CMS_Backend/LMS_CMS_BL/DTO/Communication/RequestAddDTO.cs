@@ -14,8 +14,8 @@ namespace LMS_CMS_BL.DTO.Communication
         public string? Message { get; set; }
         public string? Link { get; set; }
         public IFormFile? FileFile { get; set; } 
-        public long ReceiverUserTypeID { get; set; }
-        public UserFilter? UserFilters { get; set; }
+        public long ReceiverID { get; set; }
+        public long ReceiverUserTypeID { get; set; } 
 
         // If Parent is Sending request to teacher send for which student
         public long? StudentID { get; set; }
