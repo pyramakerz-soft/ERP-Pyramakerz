@@ -635,6 +635,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             newRequest.SenderID = request.SenderID;
             newRequest.SenderUserTypeID = request.SenderUserTypeID;
             newRequest.ReceiverID = forwardRequestDTO.ForwardToID;
+            newRequest.ReceiverUserTypeID = request.ReceiverUserTypeID;
             newRequest.ForwardedFromID = userId;
             newRequest.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
 
@@ -753,7 +754,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                     throw new ArgumentException("Invalid user type ID");
             }
 
-            if (NewRequest.ReceiverID == userId && forwardRequestDTO.ForwardToID == userId)
+            if (NewRequest.ReceiverID == userId && NewRequest.ReceiverUserTypeID == userTypeID)
             {
                 return BadRequest("You can't send the request to yourself");
             }
