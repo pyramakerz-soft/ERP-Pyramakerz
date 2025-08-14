@@ -54,6 +54,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             List<SocialWorkerMedalStudent> types = await Unit_Of_Work.socialWorkerMedalStudent_Repository.Select_All_With_IncludesById<SocialWorkerMedalStudent>(
                     sem => sem.IsDeleted != true && sem.StudentID == StudentId,
                      query => query.Include(emp => emp.Student),
+                     query => query.Include(emp => emp.InsertedByEmployee),
                     query => query.Include(emp => emp.SocialWorkerMedal));
 
             if (types == null || types.Count == 0)
