@@ -286,6 +286,7 @@ export class InventoryDetailsComponent {
       this.schoolPCs = d
       if (this.schoolPCs.length == 1) {
         this.Data.schoolPCId = this.schoolPCs[0].id
+        this.validationErrors['schoolPCId'] =""
       }
     })
   }
@@ -556,7 +557,7 @@ export class InventoryDetailsComponent {
   Delete(row: InventoryDetails) {
     if (this.mode == 'Edit') {
       Swal.fire({
-        title: 'Are you sure you want to delete this Sales Item?',
+        title: 'Are you sure you want to delete this Item?',
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#089B41',
@@ -582,7 +583,7 @@ export class InventoryDetailsComponent {
       });
     } else if (this.mode == 'Create') {
       Swal.fire({
-        title: 'Are you sure you want to delete this Sales Item?',
+        title: 'Are you sure you want to delete this Item?',
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#089B41',
