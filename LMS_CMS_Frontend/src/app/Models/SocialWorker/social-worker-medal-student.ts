@@ -8,6 +8,7 @@ export class SocialWorkerMedalStudent {
         public socialWorkerMedalName: string = '',
         public socialWorkerMedalFile: string = '',
         public insertedByUserId: number = 0,
+        public insertedByUserName: number = 0,
         public insertedAt: string = '',
     ) { }
 }

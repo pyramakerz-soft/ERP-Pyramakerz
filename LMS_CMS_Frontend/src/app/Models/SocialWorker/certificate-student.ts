@@ -7,7 +7,10 @@ export class CertificateStudent {
         public certificateTypeID: number = 0,
         public certificateTypeName: string = '',
         public certificateTypeFile: string = '',
+        public topSpace: number = 0,
+        public leftSpace: number = 0,
         public insertedByUserId: number = 0,
-        public insertedAt: string = '',
+        public insertedByUserName: number = 0,
+        public insertedAt: string = ""
     ) { }
 }

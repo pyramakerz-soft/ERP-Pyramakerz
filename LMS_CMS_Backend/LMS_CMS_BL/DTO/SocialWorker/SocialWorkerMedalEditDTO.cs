@@ -11,6 +11,6 @@ namespace LMS_CMS_BL.DTO.SocialWorker
     {
         public long ID { get; set; }
         public string Name { get; set; }
-        public IFormFile NewFile { get; set; }
+        public IFormFile? NewFile { get; set; }
     }
 }

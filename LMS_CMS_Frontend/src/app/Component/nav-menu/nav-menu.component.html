@@ -33,37 +33,7 @@
                     </div>
                     <ul>
                         <li *ngFor="let request of requests; let i = index" class="relative" (click)="viewRequest(request)">
-                            <div *ngIf="request.transfereeID == User_Data_After_Login.id && User_Data_After_Login.type == 'employee'">
-                                <div *ngIf="!request.seenOrNotByTransferee"
-                                    class="absolute top-2 left-2 w-2.5 h-2.5 border border-[#4d8db4] bg-[#8ccff8b6] rounded-full z-10">
-                                </div>
-                                <div class="flex hover:bg-gray-100 p-3 items-start" [ngClass]="{'border-b': i != requests.length, 'bg-[#e3ebf0b6]': !request.seenOrNotByTransferee}">
-                                    <div class="flex-shrink-0">
-                                        <img src="Images/person-dummy.jpg" class="cursor-pointer rounded-full w-14" alt="Profile Photo">
-                                    </div>
-                                    <div class="ml-4 text-start w-full"> 
-                                        <!-- <p class="primaryTxt text-sm"><span class="font-semibold">{{ notification.insertedByUserName }}</span> Notifed You</p> -->
-                                        <div class="mt-4 flex flex-col space-y-3">
-                                            <div *ngIf="request.message" class="w-[70%] border-l-4 border-gray-300 pl-4 primaryTxt text-base leading-relaxed truncate overflow-hidden whitespace-nowrap">
-                                                {{request.message}}
-                                            </div> 
-                                            <div *ngIf="request.fileLink" class="flex space-x-2 items-center">
-                                                <img src="Images/Icon frame.png" class="border p-[4px] w-10 rounded-md" alt="Photo">
-                                                <span class="primaryTxt text-sm font-semibold">{{getFileName(request.fileLink)}}</span>
-                                            </div> 
-                                            <div *ngIf="request.link" class="secondaryTxt text-sm font-semibold">        
-                                                <a [href]="request.link" class="border-b border-[#089B41] hover:text-[#089b408c]"
-                                                    target="_blank" (click)="$event.stopPropagation();"
-                                                    rel="noopener"> <!-- Prevents the new tab from having access to the original page via window.opener -->
-                                                    View Link
-                                                </a>                                    
-                                            </div> 
-                                        </div>
-                                        <p class="text-[#BDBDBD] text-sm font-semibold mt-2">{{ formatInsertedAt(request.insertedAt) }}</p>
-                                    </div>
-                                </div>
-                            </div> 
-                            <div *ngIf="request.transfereeID != User_Data_After_Login.id">
+                            <div>
                                 <div *ngIf="!request.seenOrNot"
                                     class="absolute top-2 left-2 w-2.5 h-2.5 border border-[#4d8db4] bg-[#8ccff8b6] rounded-full z-10">
                                 </div>

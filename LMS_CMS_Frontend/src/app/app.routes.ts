@@ -217,6 +217,12 @@ import { ConductComponent } from './Pages/Employee/SocialWorker/conduct/conduct.
 import { SupplierStatementComponent } from './Pages/Employee/Accounting/Report/supplier-statement/supplier-statement/supplier-statement.component';
 import { ConductAddEditComponent } from './Pages/Employee/SocialWorker/conduct-add-edit/conduct-add-edit.component';
 import { MyRequestsComponent } from './Pages/Communication/my-requests/my-requests.component';
+import { IssuesTypeComponent } from './Pages/Employee/SocialWorker/issues-type/issues-type.component';
+import { StudentIssuesComponent } from './Pages/Employee/SocialWorker/student-issues/student-issues.component';
+import { SocialWorkerMedalComponent } from './Pages/Employee/SocialWorker/social-worker-medal/social-worker-medal.component';
+import { CertificateTypeComponent } from './Pages/Employee/SocialWorker/certificate-type/certificate-type.component';
+import { StudentCertificateComponent } from './Pages/Employee/SocialWorker/student-certificate/student-certificate.component';
+import { SocialWorkerMedalStudentComponent } from './Pages/Employee/SocialWorker/social-worker-medal-student/social-worker-medal-student.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -478,6 +484,12 @@ export const routes: Routes = [
             { path: "Conduct Edit/:id", component: ConductAddEditComponent, title: "Conduct", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Conduct Create", component: ConductAddEditComponent, title: "Conduct", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Supplier Statement", component: SupplierStatementComponent, title: "Supplier Statement", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Issue Type", component: IssuesTypeComponent, title: "Issue Type", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Student Issues", component: StudentIssuesComponent, title: "Student Issues", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Social Worker Medal", component: SocialWorkerMedalComponent, title: "Social Worker Medal", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Certificate Type", component: CertificateTypeComponent, title: "Certificate Type", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Student Certificate", component: StudentCertificateComponent, title: "Student Certificate", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Social Worker Student", component: SocialWorkerMedalStudentComponent, title: "Social Worker Student", canActivate: [noNavigateWithoutLoginGuard] },
         ]
     },
     {

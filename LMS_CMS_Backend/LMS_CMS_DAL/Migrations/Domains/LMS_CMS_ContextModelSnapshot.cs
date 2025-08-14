@@ -3643,8 +3643,14 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<DateTime?>("ForwardedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<long?>("ForwardedFromID")
+                        .HasColumnType("bigint");
+
                     b.Property<bool>("ForwardedOrNot")
                         .HasColumnType("bit");
+
+                    b.Property<long?>("ForwardedToID")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTime?>("InsertedAt")
                         .HasColumnType("datetime2");
@@ -3673,16 +3679,10 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<bool>("SeenOrNot")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("SeenOrNotByTransferee")
-                        .HasColumnType("bit");
-
                     b.Property<long>("SenderID")
                         .HasColumnType("bigint");
 
                     b.Property<long>("SenderUserTypeID")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("TransfereeID")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime?>("UpdatedAt")
@@ -4249,9 +4249,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.Property<long?>("BusCompanyID")
                         .HasColumnType("bigint");
-
-                    b.Property<bool?>("CanReceiveMessage")
-                        .HasColumnType("bit");
 
                     b.Property<bool?>("CanReceiveMessageFromParent")
                         .HasColumnType("bit");

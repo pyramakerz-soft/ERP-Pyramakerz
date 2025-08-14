@@ -156,12 +156,13 @@ namespace LMS_CMS
                 Region = RegionEndpoint.USEast1 
             });
 
+            var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
             /// 2)
             builder.Services.AddCors(option =>
             {
                 option.AddPolicy(txt, builder =>
                 {
-                    builder.WithOrigins("http://localhost:4200")
+                    builder.WithOrigins(allowedOrigins)
                            .AllowAnyMethod()
                            .AllowAnyHeader()
                            .WithHeaders("content-type", "Domain-Name")
