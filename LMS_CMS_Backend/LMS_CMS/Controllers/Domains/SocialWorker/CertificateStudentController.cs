@@ -54,6 +54,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             List<CertificateStudent> types = await Unit_Of_Work.certificateStudent_Repository.Select_All_With_IncludesById<CertificateStudent>(
                     sem => sem.IsDeleted != true && sem.StudentID == StudentId,
                      query => query.Include(emp => emp.Student),
+                     query => query.Include(emp => emp.InsertedByEmployee),
                     query => query.Include(emp => emp.CertificateType));
 
             if (types == null || types.Count == 0)

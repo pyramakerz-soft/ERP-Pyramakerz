@@ -20,5 +20,6 @@ namespace LMS_CMS_BL.DTO.SocialWorker
         public string SocialWorkerMedalFile { get; set; }
         public long? InsertedByUserId { get; set; }
         public string InsertedByUserName { get; set; }
+        public DateTime? InsertedAt { get; set; }
     }
 }

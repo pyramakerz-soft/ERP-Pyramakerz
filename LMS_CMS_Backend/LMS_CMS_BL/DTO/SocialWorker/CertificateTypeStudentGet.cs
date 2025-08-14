@@ -15,8 +15,10 @@ namespace LMS_CMS_BL.DTO.SocialWorker
         public long CertificateTypeID { get; set; }
         public string CertificateTypeName { get; set; }
         public string CertificateTypeFile { get; set; }
+        public int TopSpace { get; set; }
+        public int LeftSpace { get; set; }
         public long? InsertedByUserId { get; set; }
         public string InsertedByUserName { get; set; }
-
+        public DateTime? InsertedAt { get; set; }
     }
 }
