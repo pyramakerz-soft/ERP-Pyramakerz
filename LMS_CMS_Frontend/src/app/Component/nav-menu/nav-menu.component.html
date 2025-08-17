@@ -65,23 +65,31 @@
                                                     View Link
                                                 </a>                                    
                                             </div> 
-                                            <div *ngIf="!request.forwardedOrNot" class="flex space-x-2">
-                                                <button (click)="openModal()"
+                                            <div *ngIf="!request.forwardedOrNot && request.approvedOrNot == null" class="flex space-x-2">
+                                                <button (click)="$event.stopPropagation(); Accept(request)"
                                                     class="rounded secondaryBg text-white text-xs py-1 px-2 flex items-center justify-center">
                                                     Accept
                                                 </button>
-                                                <button *ngIf="request.receiverUserTypeID == 1" (click)="openModal()"
+                                                <button *ngIf="request.receiverUserTypeID == 1" (click)="$event.stopPropagation(); Forward(request)"
                                                     class="rounded secondaryBorder secondaryTxt text-xs py-1 px-2 flex items-center justify-center">
                                                     Forward
                                                 </button>
-                                                <button (click)="openModal()"
+                                                <button (click)="$event.stopPropagation(); Decline(request)"
                                                     class="rounded border border-[#6F6F6F] text-[#6F6F6F] text-xs py-1 px-2 flex items-center justify-center">
                                                     Decline
                                                 </button>
                                             </div>
-                                            <div *ngIf="request.forwardedOrNot" class="flex space-x-2">
+                                            <div *ngIf="request.forwardedOrNot">
                                                 <p class="rounded secondaryBorder secondaryTxt text-xs py-1 px-2 flex items-center justify-center">
                                                     Forwarded To {{request.forwardedToEnglishName}}
+                                                </p> 
+                                            </div>
+                                            <div *ngIf="request.approvedOrNot != null" >
+                                                <p *ngIf="request.approvedOrNot == true" class="rounded secondaryBg text-white text-xs py-1 px-2 flex items-center justify-center">
+                                                    Accepted
+                                                </p> 
+                                                <p *ngIf="request.approvedOrNot == false" class="rounded border border-[#6F6F6F] text-[#6F6F6F] text-xs py-1 px-2 flex items-center justify-center">
+                                                    Declined
                                                 </p> 
                                             </div>
                                         </div>
@@ -276,6 +284,73 @@
                             {{notificationByID.text}}
                         </p>
                     </div> 
+                </div>
+                <p class="text-[#BDBDBD] text-sm font-semibold mt-2">{{ formatInsertedAt(notificationByID.insertedAt) }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- RequestModal -->
+<div id="RequestModal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden overflow-x-hide">
+    <div class="bg-white rounded-2xl p-5 w-1/3 max-h-[75vh] overflow-y-auto overflow-x-hide"> 
+        <div class="flex justify-end">  
+            <button (click)="closeRequestModal()" type="button" class="text-gray-500 hover:text-gray-600 font-bold text-xl">X</button>
+        </div>
+ 
+        <div class="flex p-3 items-start max-w-full overflow-y-auto overflow-x-hide">
+            <div class="flex-shrink-0">
+                <img src="Images/person-dummy.jpg" class="cursor-pointer rounded-full w-14" alt="Profile Photo">
+            </div>  
+            <div class="ml-4 text-start"> 
+                <p *ngIf="requestByID.forwardedFromID" class="primaryTxt text-sm"><span class="font-semibold">{{ requestByID.forwardedFromEnglishName }} (Employee)</span> Forwarded You This Request From <span class="font-semibold">{{ requestByID.senderEnglishName }} ({{ requestByID.senderUserTypeName.charAt(0).toUpperCase() + requestByID.senderUserTypeName.slice(1).toLowerCase() }})</span></p>
+                <p *ngIf="!requestByID.forwardedFromID" class="primaryTxt text-sm"><span class="font-semibold">{{ requestByID.senderEnglishName }} ({{ requestByID.senderUserTypeName.charAt(0).toUpperCase() + requestByID.senderUserTypeName.slice(1).toLowerCase() }})</span> Requested From You</p>
+                <div class="mt-4 flex flex-col space-y-3 ">
+                    <div *ngIf="requestByID.fileLink" class="flex space-x-2 items-center">  
+                        <a href={{requestByID.fileLink}} class="secondaryTxt" target="_blank">
+                            Click To Download
+                        </a>
+                    </div> 
+                    <div *ngIf="requestByID.link" class="secondaryTxt text-sm font-semibold">        
+                        <a [href]="notificationByID.link" class="border-b border-[#089B41] hover:text-[#089b408c]"
+                        target="_blank"
+                        rel="noopener"> <!-- Prevents the new tab from having access to the original page via window.opener -->
+                        View Link
+                        </a>                                    
+                    </div> 
+                    <div *ngIf="requestByID.message" class="w-full border-l-4 border-gray-300 pl-4 primaryTxt text-base">
+                        <p class="break-words">
+                            {{requestByID.message}}
+                        </p>
+                    </div> 
+                    <div *ngIf="!requestByID.forwardedOrNot && requestByID.approvedOrNot == null" class="flex space-x-2">
+                        <button (click)="$event.stopPropagation(); Accept(requestByID)"
+                            class="rounded secondaryBg text-white text-xs py-1 px-2 flex items-center justify-center">
+                            Accept
+                        </button>
+                        <button *ngIf="requestByID.receiverUserTypeID == 1" (click)="$event.stopPropagation(); Forward(requestByID)"
+                            class="rounded secondaryBorder secondaryTxt text-xs py-1 px-2 flex items-center justify-center">
+                            Forward
+                        </button>
+                        <button (click)="$event.stopPropagation(); Decline(requestByID)"
+                            class="rounded border border-[#6F6F6F] text-[#6F6F6F] text-xs py-1 px-2 flex items-center justify-center">
+                            Decline
+                        </button>
+                    </div>
+                    <div *ngIf="requestByID.forwardedOrNot">
+                        <p class="rounded secondaryBorder secondaryTxt text-xs py-1 px-2 flex items-center justify-center">
+                            Forwarded To {{requestByID.forwardedToEnglishName}}
+                        </p> 
+                    </div>
+                    <div *ngIf="requestByID.approvedOrNot != null" >
+                        <p *ngIf="requestByID.approvedOrNot == true" class="rounded secondaryBg text-white text-xs py-1 px-2 flex items-center justify-center">
+                            Accepted
+                        </p> 
+                        <p *ngIf="requestByID.approvedOrNot == false" class="rounded border border-[#6F6F6F] text-[#6F6F6F] text-xs py-1 px-2 flex items-center justify-center">
+                            Declined
+                        </p> 
+                    </div>
                 </div>
                 <p class="text-[#BDBDBD] text-sm font-semibold mt-2">{{ formatInsertedAt(notificationByID.insertedAt) }}</p>
             </div>
