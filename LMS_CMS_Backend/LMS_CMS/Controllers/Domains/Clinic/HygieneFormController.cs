@@ -50,28 +50,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                     query => query.Include(h => h.Classroom),
                     query => query.Include(h => h.School),
                     query => query.Include(h => h.Grade),
-                    query => query.Include(h => h.StudentHygieneTypes)?.ThenInclude(x => x.HygieneTypes),
+                    query => query.Include(h => h.StudentHygieneTypes)?.ThenInclude(x => x.HygieneTypes.Where(d => d.IsDeleted != true)),
                     query => query.Include(x => x.InsertedByEmployee)
             );
-
-            //foreach (var ff in hygieneForms)
-            //{
-            //    foreach (var dd in ff.StudentHygieneTypes)
-            //    {
-            //        if (dd.Student == null)
-            //            dd.Student = Unit_Of_Work.student_Repository.First_Or_Default(d => d.ID == dd.StudentId && d.IsDeleted != true);
-
-            //        StudentHygienes studentHygiene = Unit_Of_Work.studentHygiens_Repository.First_Or_Default(x => x.StudentId == dd.StudentId && dd.IsDeleted != true);
-
-            //        HygieneType hygieneType = new();
-            //        if (studentHygiene is not null)
-            //        {
-
-            //            hygieneType = Unit_Of_Work.hygieneType_Repository.First_Or_Default(h => h.Id == studentHygiene.HygieneTypeId && h.IsDeleted != true);
-            //            dd.HygieneTypes?.Add(hygieneType);
-            //        }
-            //    }
-            //}
 
             if (hygieneForms == null || hygieneForms.Count == 0)
             {
@@ -117,21 +98,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             if (hygieneForm == null)
             {
                 return NotFound("HygieneForm not found");
-            }
-
-            foreach (var dd in hygieneForm.StudentHygieneTypes)
-            {
-                if (dd.Student == null)
-                    dd.Student = Unit_Of_Work.student_Repository.First_Or_Default(d => d.ID == dd.StudentId && d.IsDeleted != true);
-
-                StudentHygienes studentHygiene = Unit_Of_Work.studentHygiens_Repository.First_Or_Default(x => x.StudentId == dd.StudentId && x.IsDeleted != true);
-
-                HygieneType hygieneType = new();
-                if (studentHygiene is not null)
-                {
-                    hygieneType = Unit_Of_Work.hygieneType_Repository.First_Or_Default(h => h.Id == studentHygiene.HygieneTypeId && h.IsDeleted != true);
-                    dd.HygieneTypes?.Add(hygieneType);
-                }
             }
 
             HygieneFormGetDTO hygieneFormDto = _mapper.Map<HygieneFormGetDTO>(hygieneForm);
