@@ -59,7 +59,19 @@ export class SubjectService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.get<Subject[]>(`${this.baseUrl}/Subject/GetBySudent/${StudentId}`, { headers })
+    return this.http.get<Subject[]>(`${this.baseUrl}/Subject/GetByStudent/${StudentId}`, { headers })
+  }
+
+  GetClassroomAndRemedialSubjectsByStudent(StudentId: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<Subject[]>(`${this.baseUrl}/Subject/GetClassroomAndRemedialSubjectsByStudent/${StudentId}`, { headers })
   }
 
   Add(Subject: Subject, DomainName: string) {

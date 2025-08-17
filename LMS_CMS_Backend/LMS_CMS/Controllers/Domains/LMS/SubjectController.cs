@@ -149,6 +149,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             return Ok(subjectsDTO);
         }
 
+        ////////////////////////////////////////////////////////////////////////////////
+
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
@@ -188,6 +190,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             return Ok(subjectDTO);
         }
+
+        ////////////////////////////////////////////////////////////////////////////////
 
         [HttpPost] 
         [Authorize_Endpoint_(
@@ -239,7 +243,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             if (NewSubject.IconFile != null)
             {
-                string returnFileInput = _fileImageValidationService.ValidateImageFile(NewSubject.IconFile);
+                string returnFileInput = await _fileImageValidationService.ValidateImageFileAsync(NewSubject.IconFile);
                 if (returnFileInput != null)
                 {
                     return BadRequest(returnFileInput);
@@ -290,6 +294,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             return Ok(NewSubject);
         }
 
+        ////////////////////////////////////////////////////////////////////////////////
+
         [HttpPut]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
@@ -336,7 +342,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             if (EditSubject.IconFile != null)
             {
-                string returnFileInput = _fileImageValidationService.ValidateImageFile(EditSubject.IconFile);
+                string returnFileInput = await _fileImageValidationService.ValidateImageFileAsync(EditSubject.IconFile);
                 if (returnFileInput != null)
                 {
                     return BadRequest(returnFileInput);
@@ -455,6 +461,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             return Ok(EditSubject);
         }
 
+        ////////////////////////////////////////////////////////////////////////////////
+
         [HttpDelete("{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
@@ -524,7 +532,9 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             return Ok();
         }
 
-        [HttpGet("GetBySudent/{StudentId}")]
+        ////////////////////////////////////////////////////////////////////////////////
+
+        [HttpGet("GetByStudent/{StudentId}")]
         [Authorize_Endpoint_(
              allowedTypes: new[] { "octa", "employee", "student" },
              pages: new[] { "Subject" }
@@ -549,7 +559,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             List<StudentClassroomSubject> studentClassroomSubject = await Unit_Of_Work.studentClassroomSubject_Repository
                 .Select_All_With_IncludesById<StudentClassroomSubject>(
-                    f => f.IsDeleted != true && f.StudentClassroomID == studentClassroom.ID
+                    f => f.IsDeleted != true && f.StudentClassroomID == studentClassroom.ID && f.Hide != true
                 );
 
             if (studentClassroomSubject == null || studentClassroomSubject.Count == 0)
@@ -568,6 +578,64 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     subject.IconLink = $"{serverUrl}{subject.IconLink.Replace("\\", "/")}";
                 }
             }
+
+            return Ok(subjectsDTO);
+        }
+        ////////////////////////////////////////////////////////////////////////////////
+
+        [HttpGet("GetClassroomAndRemedialSubjectsByStudent/{StudentId}")]
+        [Authorize_Endpoint_(
+             allowedTypes: new[] { "octa", "employee", "student", "parent" }
+         )]
+        public async Task<IActionResult> GetClassroomAndRemedialSubjectsByStudent(long StudentId)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            Student student = Unit_Of_Work.student_Repository.First_Or_Default(s => s.ID == StudentId && s.IsDeleted != true);
+            if (student == null)
+            {
+                return BadRequest("There is no student with this ID");
+            }
+
+            StudentClassroom studentClassroom = Unit_Of_Work.studentClassroom_Repository
+                .First_Or_Default(s => s.StudentID == StudentId && s.IsDeleted != true && s.Classroom.IsDeleted != true && s.Classroom.Grade.Section.IsDeleted != true
+                && s.Classroom.Grade.IsDeleted != true && s.Classroom.AcademicYear.IsActive == true && s.Classroom.AcademicYear.School.IsDeleted != true);
+
+            if (studentClassroom == null)
+            {
+                return BadRequest("This student is not enrolled in a classroom for the current academic year.");
+            }
+
+            List<StudentClassroomSubject> studentClassroomSubject = Unit_Of_Work.studentClassroomSubject_Repository.FindBy(
+                    f => f.IsDeleted != true && f.StudentClassroomID == studentClassroom.ID && f.Hide != true 
+                );
+            
+            List<RemedialClassroomStudent> remedialClassroomStudents = await Unit_Of_Work.remedialClassroomStudent_Repository.Select_All_With_IncludesById<RemedialClassroomStudent>(
+                    f => f.IsDeleted != true && f.StudentID == StudentId && f.RemedialClassroom.IsDeleted != true && f.RemedialClassroom.Subject.IsDeleted != true && f.RemedialClassroom.Subject.Grade.IsDeleted != true
+                    && f.RemedialClassroom.Subject.Grade.Section.IsDeleted != true && f.RemedialClassroom.AcademicYear.IsDeleted != true && f.RemedialClassroom.AcademicYear.School.IsDeleted != true
+                    && f.RemedialClassroom.AcademicYear.IsActive == true,
+                    query => query.Include(d => d.RemedialClassroom)
+                );
+
+            List<long> subjectIds = new List<long>();
+    
+            if (studentClassroomSubject != null || studentClassroomSubject.Count > 0)
+            {
+                subjectIds.AddRange(studentClassroomSubject.Select(ct => ct.SubjectID).Distinct().ToList()); 
+            }
+
+            if (remedialClassroomStudents != null || remedialClassroomStudents.Count > 0)
+            {
+                subjectIds.AddRange(remedialClassroomStudents.Select(ct => ct.RemedialClassroom.SubjectID).Distinct().ToList()); 
+            }
+
+            if (subjectIds.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<Subject> subjects = Unit_Of_Work.subject_Repository.FindBy(s => subjectIds.Contains(s.ID)).ToList();
+            List<SubjectGetDTO> subjectsDTO = mapper.Map<List<SubjectGetDTO>>(subjects); 
 
             return Ok(subjectsDTO);
         }

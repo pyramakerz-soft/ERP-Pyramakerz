@@ -18,6 +18,8 @@ import { OctaService } from '../../Services/Octa/octa.service';
 import { NotificationService } from '../../Services/Employee/Communication/notification.service';
 import { Notification } from '../../Models/Communication/notification';
 import { RealTimeNotificationServiceService } from '../../Services/shared/real-time-notification-service.service';
+import { RequestService } from '../../Services/shared/request.service';
+import { Request } from '../../Models/Communication/request';
 
 @Component({
   selector: 'app-nav-menu',
@@ -33,6 +35,7 @@ export class NavMenuComponent {
   userName: string = "";
   isPopupOpen = false;
   isNotificationPopupOpen = false;
+  isRequuestPopupOpen = false;
   allTokens: { id: number, key: string; KeyInLocal: string; value: string; UserType: string }[] = [];
   User_Data_After_Login = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   subscription: Subscription | undefined;
@@ -46,6 +49,8 @@ export class NavMenuComponent {
 
   notifications: Notification[] = []
   notificationByID:Notification = new Notification()
+  requests: Request[] = []
+  requestByID:Request = new Request()
   
   private destroy$ = new Subject<void>();
   
@@ -53,7 +58,7 @@ export class NavMenuComponent {
   requestsUnSeenCount = 0
   constructor(private router: Router, public account: AccountService, public languageService: LanguageService, public ApiServ: ApiService, public octaService:OctaService,
     private translate: TranslateService, private communicationService: NewTokenService, private logOutService: LogOutService, 
-    private notificationService: NotificationService, private realTimeService: RealTimeNotificationServiceService) { }
+    private notificationService: NotificationService, private realTimeService: RealTimeNotificationServiceService, public requestService:RequestService) { }
 
   ngOnInit() {
     this.GetUserInfo();
@@ -66,6 +71,8 @@ export class NavMenuComponent {
     this.DomainName = this.ApiServ.GetHeader();
     
     this.loadUnseenNotifications()
+    this.loadUnseenRequests()
+
     // Subscribe to notification opened events
     this.notificationService.notificationOpened$.subscribe(() => {
       this.loadUnseenNotifications();
@@ -75,6 +82,12 @@ export class NavMenuComponent {
   loadUnseenNotifications() {
     this.notificationService.UnSeenNotificationCount(this.DomainName).subscribe(
       data => this.notificationsUnSeenCount = data
+    );
+  }
+
+  loadUnseenRequests() {
+    this.requestService.UnSeenRequestCount(this.DomainName).subscribe(
+      data => this.requestsUnSeenCount = data
     );
   }
 
@@ -133,11 +146,13 @@ export class NavMenuComponent {
     this.getAllTokens();
     this.isPopupOpen = !this.isPopupOpen;
     this.isNotificationPopupOpen = false;
+    this.isRequuestPopupOpen = false;
   }
   
   toggleNotificationPopup(){
     this.notifications = []
     this.isPopupOpen = false;
+    this.isRequuestPopupOpen = false;
     this.isNotificationPopupOpen = !this.isNotificationPopupOpen;
     this.notificationService.ByUserIDFirst5(this.DomainName).subscribe(
       data => {
@@ -146,7 +161,17 @@ export class NavMenuComponent {
     )
   }
 
-  toggleRequestPopup(){}
+  toggleRequestPopup(){
+    this.requests = []
+    this.isPopupOpen = false;
+    this.isNotificationPopupOpen = false;
+    this.isRequuestPopupOpen = !this.isRequuestPopupOpen;
+    this.requestService.ByUserIDFirst5(this.DomainName).subscribe(
+      data => {
+        this.requests = data
+      }
+    )
+  }
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) { 
@@ -163,6 +188,7 @@ export class NavMenuComponent {
     if (!clickedInsideAny) {
       this.isPopupOpen = false;
       this.isNotificationPopupOpen = false;
+      this.isRequuestPopupOpen = false;
     }
   }
 
@@ -381,6 +407,10 @@ export class NavMenuComponent {
     this.router.navigateByUrl('CommunicationModule/My Notifications')
   }
 
+  viewAllRequests() {
+    this.router.navigateByUrl('CommunicationModule/My Requests')
+  }
+
   formatInsertedAt(dateString: string | Date): string {
     if (!dateString) return '';
 
@@ -405,7 +435,7 @@ export class NavMenuComponent {
     }
   }
 
-  getImageName(imageLink: string): string {
+  getFileName(imageLink: string): string {
     const parts = imageLink.split('/');
     return parts[parts.length - 1];
   }
@@ -422,6 +452,17 @@ export class NavMenuComponent {
       }
     )
   } 
+
+  viewRequest(request:Request){
+    this.requestByID = new Request()
+    this.requestService.ByUserIDAndRequestID(request.id, this.DomainName).subscribe(
+      data => {
+        this.requestByID = data
+        document.getElementById("RequestModal")?.classList.remove("hidden");
+        document.getElementById("RequestModal")?.classList.add("flex"); 
+      }
+    )
+  }
 
   LinkOpened(notificationShared:Notification){ 
     this.notificationService.LinkOpened(notificationShared.id, this.DomainName).subscribe(

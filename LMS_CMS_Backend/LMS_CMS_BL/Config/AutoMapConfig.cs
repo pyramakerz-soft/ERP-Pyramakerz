@@ -1250,6 +1250,27 @@ namespace LMS_CMS_BL.Config
             CreateMap<SocialWorkerMedalAddDTO, SocialWorkerMedal>();
             CreateMap<SocialWorkerMedalEditDTO, SocialWorkerMedal>();
 
+            CreateMap<CertificateType, CertificateTypeGetDTO>();
+            CreateMap<CertificateTypeAddDTO, CertificateType>();
+            CreateMap<CertificateTypeEditDTO, CertificateType>();
+
+            CreateMap<SocialWorkerMedalStudent, SocialWorkerMedalStudentGetDTO>()
+                .ForMember(dest => dest.InsertedByUserName, opt => opt.MapFrom(src => src.InsertedByEmployee.en_name))
+                .ForMember(dest => dest.StudentArName, opt => opt.MapFrom(src => src.Student.ar_name))
+                .ForMember(dest => dest.StudentEnName, opt => opt.MapFrom(src => src.Student.en_name))
+                .ForMember(dest => dest.SocialWorkerMedalName, opt => opt.MapFrom(src => src.SocialWorkerMedal.Name))
+                .ForMember(dest => dest.SocialWorkerMedalFile, opt => opt.MapFrom(src => src.SocialWorkerMedal.File));
+            CreateMap<SocialWorkerMedalStudentAddDTO, SocialWorkerMedalStudent>();
+
+            CreateMap<CertificateStudent, CertificateTypeStudentGet>()
+                .ForMember(dest => dest.InsertedByUserName, opt => opt.MapFrom(src => src.InsertedByEmployee.en_name))
+                .ForMember(dest => dest.TopSpace, opt => opt.MapFrom(src => src.CertificateType.TopSpace))
+                .ForMember(dest => dest.LeftSpace, opt => opt.MapFrom(src => src.CertificateType.LeftSpace))
+                .ForMember(dest => dest.StudentArName, opt => opt.MapFrom(src => src.Student.ar_name))
+                .ForMember(dest => dest.StudentEnName, opt => opt.MapFrom(src => src.Student.en_name))
+                .ForMember(dest => dest.CertificateTypeName, opt => opt.MapFrom(src => src.CertificateType.Name))
+                .ForMember(dest => dest.CertificateTypeFile, opt => opt.MapFrom(src => src.CertificateType.File));
+            CreateMap<CertificateTypeStudentAddDTO, CertificateStudent>();
 
         }
     } 

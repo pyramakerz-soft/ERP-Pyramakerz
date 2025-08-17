@@ -126,7 +126,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             if (newMedal.ImageForm != null)
             {
-                string returnFileInput = _fileImageValidationService.ValidateImageFile(newMedal.ImageForm);
+                string returnFileInput = await _fileImageValidationService.ValidateImageFileAsync(newMedal.ImageForm);
                 if (returnFileInput != null)
                 {
                     return BadRequest(returnFileInput);
@@ -207,7 +207,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             if (newModal.ImageForm != null)
             {
-                string returnFileInput = _fileImageValidationService.ValidateImageFile(newModal.ImageForm);
+                string returnFileInput = await _fileImageValidationService.ValidateImageFileAsync(newModal.ImageForm);
                 if (returnFileInput != null)
                 {
                     return BadRequest(returnFileInput);

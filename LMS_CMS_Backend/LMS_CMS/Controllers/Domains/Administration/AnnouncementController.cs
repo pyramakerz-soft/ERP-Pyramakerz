@@ -178,7 +178,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
             Unit_Of_Work.SaveChanges();
 
 
-            string returnFileInput = _fileImageValidationService.ValidateImageFile(NewAnnouncement.ImageFile);
+            string returnFileInput = await _fileImageValidationService.ValidateImageFileAsync(NewAnnouncement.ImageFile);
             if (returnFileInput != null)
             {
                 return BadRequest(returnFileInput);
@@ -270,7 +270,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
 
             if (EditAnnouncement.ImageFile != null)
             {
-                string returnFileInput = _fileImageValidationService.ValidateImageFile(EditAnnouncement.ImageFile);
+                string returnFileInput = await _fileImageValidationService.ValidateImageFileAsync(EditAnnouncement.ImageFile);
                 if (returnFileInput != null)
                 {
                     return BadRequest(returnFileInput);

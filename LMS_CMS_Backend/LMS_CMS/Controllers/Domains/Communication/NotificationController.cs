@@ -641,7 +641,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
 
             if (NewNotification.ImageFile != null)
             {
-                string returnFileInput = _fileImageValidationService.ValidateImageFile(NewNotification.ImageFile);
+                string returnFileInput = await _fileImageValidationService.ValidateImageFileAsync(NewNotification.ImageFile);
                 if (returnFileInput != null)
                 {
                     return BadRequest(returnFileInput);

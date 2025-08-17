@@ -67,8 +67,7 @@ export class EmployeeService {
     formData.append('address', employee.address || '');
     formData.append('role_ID', employee.role_ID?.toString() ?? '');
     formData.append('busCompanyID', employee.busCompanyID?.toString() ?? '');
-    formData.append('employeeTypeID', employee.employeeTypeID?.toString() ?? '');
-    formData.append('canReceiveMessage', employee.canReceiveMessage?.toString() ?? 'false');
+    formData.append('employeeTypeID', employee.employeeTypeID?.toString() ?? ''); 
     formData.append('canReceiveRequest', employee.canReceiveRequest?.toString() ?? 'false');
     formData.append('canReceiveMessageFromParent', employee.canReceiveMessageFromParent?.toString() ?? 'false');
     formData.append('canReceiveRequestFromParent', employee.canReceiveRequestFromParent?.toString() ?? 'false');
@@ -124,8 +123,7 @@ export class EmployeeService {
     formData.append('address', employee.address || '');
     formData.append('role_ID', employee.role_ID?.toString() ?? '');
     formData.append('busCompanyID', employee.busCompanyID?.toString() ?? '');
-    formData.append('employeeTypeID', employee.employeeTypeID?.toString() ?? '');
-    formData.append('canReceiveMessage', employee.canReceiveMessage?.toString() ?? 'false');
+    formData.append('employeeTypeID', employee.employeeTypeID?.toString() ?? ''); 
     formData.append('canReceiveRequest', employee.canReceiveRequest?.toString() ?? 'false');
     formData.append('canReceiveMessageFromParent', employee.canReceiveMessageFromParent?.toString() ?? 'false');
     formData.append('canReceiveRequestFromParent', employee.canReceiveRequestFromParent?.toString() ?? 'false');
@@ -251,8 +249,7 @@ export class EmployeeService {
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
     return this.http.put(`${this.baseUrl}/Employee/EmployeeAccounting`, employee, { headers });
-  }
-
+  } 
 
   GetAcountingEmployee(id: number, DomainName?: string) {
     if (DomainName != null) {
@@ -264,5 +261,42 @@ export class EmployeeService {
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
     return this.http.get<AccountingEmployee>(`${this.baseUrl}/Employee/getByAccountingEmployee/${id}`, { headers });
+  }
+
+  GetWhoCanAcceptRequestsFromEmployeeByDepartmentId(departmentID: number, DomainName?: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<Employee[]>(`${this.baseUrl}/Employee/GetWhoCanAcceptRequestsFromEmployeeByDepartmentId/${departmentID}`, { headers });
+  }
+ 
+
+  GetWhoCanAcceptRequestsFromParentAndStudentByDepartmentId(departmentID: number, DomainName?: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<Employee[]>(`${this.baseUrl}/Employee/GetWhoCanAcceptRequestsFromParentAndStudentByDepartmentId/${departmentID}`, { headers });
+  }
+
+  GetTeachersCoTeachersRemedialTeachersBySubjectIdAndStudentId(SubjectId: number, StudentId: number, DomainName?: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<Employee[]>(`${this.baseUrl}/Employee/GetTeachersCoTeachersRemedialTeachersBySubjectIdAndStudentId/${SubjectId}/${StudentId}`, { headers });
   }
 }

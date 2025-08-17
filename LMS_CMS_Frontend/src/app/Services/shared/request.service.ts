@@ -26,7 +26,7 @@ export class RequestService {
     return this.http.get<Request[]>(`${this.baseUrl}/Request/ByUserIDFirst5`, { headers })
   }
  
-  ByUserID(DomainName: string) {
+  GetReceivedOnesByUserID(DomainName: string) {
     if (DomainName != null) {
       this.header = DomainName
     }
@@ -35,7 +35,19 @@ export class RequestService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.get<Request[]>(`${this.baseUrl}/Request/ByUserID`, { headers })
+    return this.http.get<Request[]>(`${this.baseUrl}/Request/GetReceivedOnesByUserID`, { headers })
+  }
+ 
+  GetSentOnesByUserID(DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<Request[]>(`${this.baseUrl}/Request/GetSentOnesByUserID`, { headers })
   }
   
   ByUserIDAndRequestID(requestID:number ,DomainName: string) {
@@ -76,42 +88,17 @@ export class RequestService {
     formData.append('message', request.message ?? '');  
     formData.append('link', request.link ?? '');  
     formData.append('receiverUserTypeID', request.receiverUserTypeID.toString() ?? '');    
-    formData.append('receiverUserTypeID', request.receiverUserTypeID.toString() ?? '');    
+    formData.append('receiverID', request.receiverID.toString() ?? '');    
+    formData.append('studentID', request.studentID.toString() ?? '');    
 
-    // if (notification.userFilters) {
-    //   const uf = notification.userFilters;
-
-    //   if (uf.departmentID !== null) {
-    //     formData.append('userFilters.departmentID', uf.departmentID.toString());
-    //   }
-    //   if (uf.employeeID !== null) {
-    //     formData.append('userFilters.employeeID', uf.employeeID.toString());
-    //   }
-    //   if (uf.schoolID !== null) {
-    //     formData.append('userFilters.schoolID', uf.schoolID.toString());
-    //   }
-    //   if (uf.sectionID !== null) {
-    //     formData.append('userFilters.sectionID', uf.sectionID.toString());
-    //   }
-    //   if (uf.gradeID !== null) {
-    //     formData.append('userFilters.gradeID', uf.gradeID.toString());
-    //   }
-    //   if (uf.classroomID !== null) {
-    //     formData.append('userFilters.classroomID', uf.classroomID.toString());
-    //   }
-    //   if (uf.studentID !== null) {
-    //     formData.append('userFilters.studentID', uf.studentID.toString());
-    //   }
-    // }
-
-    // if (notification.imageFile) {
-    //   formData.append('imageFile', notification.imageFile, notification.imageFile.name);
-    // }
+    if (request.fileFile) {
+      formData.append('fileFile', request.fileFile, request.fileFile.name);
+    }
 
     return this.http.post(`${this.baseUrl}/Request`, formData, { headers });
   }  
 
-  AcceptOrDecline(requestID:number ,DomainName:string) {
+  Accept(requestID:number ,DomainName:string) {
     if(DomainName!=null) {
       this.header=DomainName 
     }
@@ -121,7 +108,20 @@ export class RequestService {
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
 
-    return this.http.put(`${this.baseUrl}/Request/AcceptOrDecline/${requestID}`, {} , { headers });
+    return this.http.put(`${this.baseUrl}/Request/Accept/${requestID}`, {} , { headers });
+  }
+
+  Decline(requestID:number ,DomainName:string) {
+    if(DomainName!=null) {
+      this.header=DomainName 
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+
+    return this.http.put(`${this.baseUrl}/Request/Decline/${requestID}`, {} , { headers });
   }
 
   Forward(request:Request ,DomainName:string) {
