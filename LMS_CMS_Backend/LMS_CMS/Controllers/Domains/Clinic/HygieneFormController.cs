@@ -54,24 +54,24 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                     query => query.Include(x => x.InsertedByEmployee)
             );
 
-            foreach (var ff in hygieneForms)
-            {
-                foreach (var dd in ff.StudentHygieneTypes)
-                {
-                    if (dd.Student == null)
-                        dd.Student = Unit_Of_Work.student_Repository.First_Or_Default(d => d.ID == dd.StudentId && d.IsDeleted != true);
+            //foreach (var ff in hygieneForms)
+            //{
+            //    foreach (var dd in ff.StudentHygieneTypes)
+            //    {
+            //        if (dd.Student == null)
+            //            dd.Student = Unit_Of_Work.student_Repository.First_Or_Default(d => d.ID == dd.StudentId && d.IsDeleted != true);
 
-                    StudentHygienes studentHygiene = Unit_Of_Work.studentHygiens_Repository.First_Or_Default(x => x.StudentId == dd.StudentId && dd.IsDeleted != true);
+            //        StudentHygienes studentHygiene = Unit_Of_Work.studentHygiens_Repository.First_Or_Default(x => x.StudentId == dd.StudentId && dd.IsDeleted != true);
 
-                    HygieneType hygieneType = new();
-                    if (studentHygiene is not null)
-                    {
+            //        HygieneType hygieneType = new();
+            //        if (studentHygiene is not null)
+            //        {
 
-                        hygieneType = Unit_Of_Work.hygieneType_Repository.First_Or_Default(h => h.Id == studentHygiene.HygieneTypeId && h.IsDeleted != true);
-                        dd.HygieneTypes?.Add(hygieneType);
-                    }
-                }
-            }
+            //            hygieneType = Unit_Of_Work.hygieneType_Repository.First_Or_Default(h => h.Id == studentHygiene.HygieneTypeId && h.IsDeleted != true);
+            //            dd.HygieneTypes?.Add(hygieneType);
+            //        }
+            //    }
+            //}
 
             if (hygieneForms == null || hygieneForms.Count == 0)
             {
@@ -323,6 +323,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             }
             
             hygieneForm.IsDeleted = true;
+
+            StudentHygieneTypes sht = Unit_Of_Work.studentHygieneTypes_Repository.First_Or_Default(x => x.HygieneFormId == hygieneForm.Id && x.IsDeleted != true);
+
+            if (sht.IsDeleted != true)
+                sht.IsDeleted = true;
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             hygieneForm.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
