@@ -2,11 +2,13 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-lesson-resources',
   standalone: true,
-  imports: [CommonModule , FormsModule],
+  imports: [CommonModule , FormsModule , TranslateModule],
   templateUrl: './lesson-resources.component.html',
   styleUrl: './lesson-resources.component.css'
 })
@@ -25,9 +27,11 @@ Sheets: string[] = [
 ];
 
   selectedWeek: string | null = null;
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   constructor(
     private route: ActivatedRoute,
+    private languageService: LanguageService,
     private router: Router
   ) {}
 
@@ -38,6 +42,10 @@ Sheets: string[] = [
         this.subjectName = this.formatSubjectName(subjectId);
       }
     });
+        this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   formatSubjectName(subjectId: string): string {

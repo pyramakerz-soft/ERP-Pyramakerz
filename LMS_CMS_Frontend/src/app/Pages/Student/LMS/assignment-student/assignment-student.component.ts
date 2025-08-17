@@ -17,11 +17,14 @@ import { AssignmentStudentQuestion } from '../../../../Models/LMS/assignment-stu
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { SubBankQuestion } from '../../../../Models/LMS/sub-bank-question';
 import Swal from 'sweetalert2';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-assignment-student',
   standalone: true,
-  imports: [FormsModule, CommonModule, DragDropModule],
+  imports: [FormsModule, CommonModule, DragDropModule, TranslateModule],
   templateUrl: './assignment-student.component.html',
   styleUrl: './assignment-student.component.css'
 })
@@ -38,7 +41,8 @@ export class AssignmentStudentComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   CurrentPage: number = 1
   PageSize: number = 10
   TotalPages: number = 1
@@ -59,6 +63,7 @@ export class AssignmentStudentComponent {
     private menuService: MenuService,
     public activeRoute: ActivatedRoute,
     public account: AccountService,
+    private languageService: LanguageService,
     public BusTypeServ: BusTypeService,
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
@@ -75,6 +80,10 @@ export class AssignmentStudentComponent {
     });
     this.AssignmentId = Number(this.activeRoute.snapshot.paramMap.get('id'));
     this.GetAssignment()
+        this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetAssignment() {

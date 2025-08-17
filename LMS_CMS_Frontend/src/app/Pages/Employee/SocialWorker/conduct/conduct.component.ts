@@ -18,11 +18,15 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
+
 
 @Component({
   selector: 'app-conduct',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './conduct.component.html',
   styleUrl: './conduct.component.css'
 })
@@ -33,7 +37,8 @@ export class ConductComponent {
   AllowDelete: boolean = false;
   AllowEditForOthers: boolean = false;
   AllowDeleteForOthers: boolean = false;
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   SelectedSchoolId: number = 0;
   TableData: Conduct[] = [];
   DomainName: string = '';
@@ -53,6 +58,7 @@ export class ConductComponent {
     private router: Router,
     private menuService: MenuService,
     public activeRoute: ActivatedRoute,
+    private languageService: LanguageService,
     public account: AccountService,
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
@@ -82,6 +88,10 @@ export class ConductComponent {
     });
 
     this.GetSchools();
+        this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetAllData() {

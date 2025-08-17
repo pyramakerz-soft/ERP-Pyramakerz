@@ -13,11 +13,13 @@ import { ApiService } from '../../../../Services/api.service';
 import { DomainService } from '../../../../Services/Employee/domain.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-issues-type',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './issues-type.component.html',
   styleUrl: './issues-type.component.css'
 })
@@ -36,7 +38,8 @@ export class IssuesTypeComponent {
 
   isModalVisible: boolean = false;
   mode: string = '';
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   path: string = '';
   key: string = 'id';
   value: any = '';
@@ -52,6 +55,7 @@ export class IssuesTypeComponent {
     private menuService: MenuService,
     public activeRoute: ActivatedRoute,
     public account: AccountService,
+    private languageService: LanguageService,
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
@@ -76,6 +80,10 @@ export class IssuesTypeComponent {
     });
 
     this.GetAllData();
+        this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetAllData() {

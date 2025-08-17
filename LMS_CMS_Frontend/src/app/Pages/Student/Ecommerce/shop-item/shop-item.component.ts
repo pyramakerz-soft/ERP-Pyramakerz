@@ -12,11 +12,14 @@ import Swal from 'sweetalert2';
 import { EmplyeeStudent } from '../../../../Models/Accounting/emplyee-student';
 import { EmployeeStudentService } from '../../../../Services/Employee/Accounting/employee-student.service';
 import { FormsModule } from '@angular/forms';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-shop-item',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule , TranslateModule],
   templateUrl: './shop-item.component.html',
   styleUrl: './shop-item.component.css'
 })
@@ -31,12 +34,13 @@ export class ShopItemComponent {
 
   shopItem: ShopItem = new ShopItem()
   cartShopItem:CartShopItem = new CartShopItem() 
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   CalculatedVat: number = 0;
   selectedColor: number = 0;
   selectedSize: number = 0;
   
-  constructor(public activeRoute: ActivatedRoute, public account: AccountService, public ApiServ: ApiService, private router: Router, public shopItemService:ShopItemService
+  constructor(public activeRoute: ActivatedRoute,private languageService: LanguageService, public account: AccountService, public ApiServ: ApiService, private router: Router, public shopItemService:ShopItemService
     , private cartShopItemService:CartShopItemService, public employeeStudentService:EmployeeStudentService
   ){}
 
@@ -57,6 +61,10 @@ export class ShopItemComponent {
     this.ShopItemId = Number(this.activeRoute.snapshot.paramMap.get('id'))
 
     this.getShopItem() 
+    this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   getStudents(){

@@ -9,11 +9,14 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { AssignmentService } from '../../../../Services/Employee/LMS/assignment.service';
 import { Assignment } from '../../../../Models/LMS/assignment';
 import { AssignmentStudent } from '../../../../Models/LMS/assignment-student';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-subject-assignment',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, TranslateModule],
   templateUrl: './subject-assignment.component.html',
   styleUrl: './subject-assignment.component.css'
 })
@@ -24,12 +27,14 @@ export class SubjectAssignmentComponent {
   UserID: number = 0;
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   SubjectID: number = 0;
+  isRtl: boolean = false;
+  subscription!: Subscription;
   bgColors: string[] = ['#F7F7F7', '#D7F7FF', '#FFF1D7', '#E8EBFF'];
   mode: string = "solved";
   SolvedAssignment: AssignmentStudent[] = []
   UnSolvedAssignment: Assignment[] = []
 
-  constructor(public account: AccountService, public router: Router, public ApiServ: ApiService, public AssignmentServ: AssignmentService,
+  constructor(public account: AccountService,private languageService: LanguageService, public router: Router, public ApiServ: ApiService, public AssignmentServ: AssignmentService,
     public activeRoute: ActivatedRoute, private menuService: MenuService) { }
 
   ngOnInit() {
@@ -41,6 +46,10 @@ export class SubjectAssignmentComponent {
     });
     this.SubjectID = Number(this.activeRoute.snapshot.paramMap.get('SubjectId'));
     this.GetAssignments()
+    this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetAssignments() {

@@ -10,11 +10,13 @@ import { SubjectResourceService } from '../../../../Services/Employee/LMS/subjec
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { LessonLiveService } from '../../../../Services/Employee/LMS/lesson-live.service';
 import { LessonLive } from '../../../../Models/LMS/lesson-live';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-subject-lesson-live',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, TranslateModule],
   templateUrl: './subject-lesson-live.component.html',
   styleUrl: './subject-lesson-live.component.css'
 })
@@ -23,12 +25,14 @@ export class SubjectLessonLiveComponent {
   path: string = ""
   DomainName: string = "";
   UserID: number = 0;
+  isRtl: boolean = false;
+  subscription!: Subscription;
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   SubjectID: number = 0;
   SubjectName: string = ""
   bgColors: string[] = ['#F7F7F7', '#D7F7FF', '#FFF1D7', '#E8EBFF'];
 
-  constructor(public account: AccountService, public router: Router, public ApiServ: ApiService,
+  constructor(public account: AccountService, private languageService: LanguageService,public router: Router, public ApiServ: ApiService,
     public activeRoute: ActivatedRoute, private menuService: MenuService, public LessonLiveServ: LessonLiveService) { }
 
   ngOnInit() {
@@ -40,6 +44,10 @@ export class SubjectLessonLiveComponent {
     });
     this.SubjectID = Number(this.activeRoute.snapshot.paramMap.get('SubjectId'));
     this.GetSubjectLessonLiveData()
+        this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetSubjectLessonLiveData() {

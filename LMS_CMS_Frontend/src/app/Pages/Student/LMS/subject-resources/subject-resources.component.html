@@ -1,11 +1,11 @@
-<div class="flex justify-start items-center space-x-5">
+<div class="flex justify-start items-center space-x-5 rtl:space-x-reverse">
     <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToBack()"></i>
-    <h1 class="primaryTxt font-semibold text-2xl leading-9">{{SubjectName}} Resources</h1>
+    <h1 class="primaryTxt font-semibold text-2xl leading-9">{{SubjectName}} {{ 'Resources' | translate }}</h1>
 </div>
 
 <div class="flex flex-wrap justify-start mt-6 gap-4 ">
     <div *ngFor="let resource of SubjectResourcesData; let i = index" 
-        class="w-[15%] rounded-2xl shadow text-center flex space-x-2 p-3 items-center cursor-pointer" (click)="openLink(resource.fileLink)"
+        class="w-[15%] rounded-2xl shadow text-center flex space-x-2 rtl:space-x-reverse p-3 items-center cursor-pointer" (click)="openLink(resource.fileLink)"
         [ngStyle]="{ 'background-color': getRandomColor(i) }">
         <img src="Icons/ColoredFile.png" alt="ColoredFile" class="w-[20%]" />
         <h1 class="text-lg font-bold text-[#003366] ">{{ resource.englishName }}</h1>

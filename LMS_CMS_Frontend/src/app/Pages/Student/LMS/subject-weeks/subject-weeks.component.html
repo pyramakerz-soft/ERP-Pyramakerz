@@ -1,30 +1,30 @@
 <div class="flex justify-between items-center">
-    <div class="flex justify-start items-center space-x-5">
+    <div class="flex justify-start items-center space-x-5 rtl:space-x-reverse">
         <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToBack()"></i>
         <h1 class="primaryTxt font-semibold text-2xl leading-9">{{SubjectName}}</h1>
     </div>
-    <div class="flex justify-between items-center space-x-4">
+    <div class="flex justify-between items-center space-x-4 rtl:space-x-reverse">
         <button class="secondaryBorder secondaryTxt rounded-lg px-4 py-3 flex items-center justify-center gap-2"
             (click)="moveToSubjectResources()">
             <img src="Icons/GreenResource.png" />
-            Resources
+             {{ 'Resources' | translate }}
         </button>
         <button class="secondaryBorder secondaryTxt rounded-lg px-4 py-3 flex items-center justify-center gap-2"
             (click)="moveToSubjectAssignments()">
             <img src="Icons/GreenAssignment.png" />
-            Assignments
+             {{ 'Assignments' | translate }}
         </button>
         <button class="secondaryBorder secondaryTxt rounded-lg px-4 py-3 flex items-center justify-center gap-2"
             (click)="moveToSubjectLive()">
             <img src="Icons/GreenLessonLive.png" />
-            Lesson Live
+             {{ 'Lesson Live' | translate }}
         </button>
     </div>
 </div>
 
 <div class="flex flex-wrap justify-start mt-6 gap-4 items-center">
     <div *ngFor="let week of WorkingWeekData; let i = index" (click)="moveToLessons(week.id)"
-        class="w-[15%] rounded-2xl shadow text-center flex space-x-2 p-3 items-center"
+        class="w-[15%] rounded-2xl shadow text-center flex space-x-2 rtl:space-x-reverse p-3 items-center"
         [ngStyle]="{ 'background-color': getRandomColor(i) }">
         <img src="Icons/ColoredFile.png" alt="ColoredFile" class="w-[20%]" />
         <h1 class="text-lg font-bold text-[#003366]">{{ week.englishName }}</h1>

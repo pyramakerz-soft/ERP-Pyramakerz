@@ -16,11 +16,14 @@ import Swal from 'sweetalert2';
 import { EmployeeStudentService } from '../../../../Services/Employee/Accounting/employee-student.service';
 import { EmplyeeStudent } from '../../../../Models/Accounting/emplyee-student';
 import { FormsModule } from '@angular/forms';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-shop',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
   templateUrl: './shop.component.html',
   styleUrl: './shop.component.css'
 })
@@ -36,7 +39,8 @@ export class ShopComponent {
   ShopItem:ShopItem[] = []
   selectedInventoryCategory = 0
   selectedInventorySubCategory = 0
-  
+  isRtl: boolean = false;
+  subscription!: Subscription;
   CurrentPage:number = 1
   PageSize:number = 9
 
@@ -47,7 +51,7 @@ export class ShopComponent {
  
   searchQuery: string = '';
    
-  constructor(public inventoryCategoryService:InventoryCategoryService, public inventorySubCategoryService:InventorySubCategoriesService, public employeeStudentService:EmployeeStudentService,
+  constructor(public inventoryCategoryService:InventoryCategoryService,private languageService: LanguageService, public inventorySubCategoryService:InventorySubCategoriesService, public employeeStudentService:EmployeeStudentService,
     public account: AccountService, public ApiServ: ApiService, public shopItemService:ShopItemService, private router: Router, private cartShopItemService:CartShopItemService){}
 
   ngOnInit(){
@@ -65,6 +69,10 @@ export class ShopComponent {
     }
 
     this.getInventoryCategory() 
+        this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   getStudents(){

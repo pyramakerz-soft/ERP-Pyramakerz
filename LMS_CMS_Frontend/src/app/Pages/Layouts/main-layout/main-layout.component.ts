@@ -11,21 +11,25 @@ import { MenuService } from '../../../Services/shared/menu.service';
 import { NewTokenService } from '../../../Services/shared/new-token.service';
 import { routes } from '../../../app.routes';
 import { RealTimeNotificationServiceService } from '../../../Services/shared/real-time-notification-service.service';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-main-layout',
   standalone: true,
-  imports: [SideMenuComponent, RouterOutlet, NavMenuComponent, CommonModule],
+  imports: [SideMenuComponent, RouterOutlet, NavMenuComponent, CommonModule , TranslateModule],
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.css'
 })
 export class MainLayoutComponent {
   menuItems: { label: string; route?: string; icon?:string; subItems?: { label: string; route: string; icon?:string }[] }[] = [];
   menuItemsForEmployee?: PagesWithRoleId[];
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   User_Data_After_Login = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
 
-  constructor(public accountService: AccountService, public roleDetailsService: RoleDetailsService, private menuService: MenuService, 
+  constructor(public accountService: AccountService,private languageService: LanguageService, public roleDetailsService: RoleDetailsService, private menuService: MenuService, 
     private communicationService: NewTokenService, private realTimeService: RealTimeNotificationServiceService) { }
 
   async ngOnInit() {
@@ -35,6 +39,10 @@ export class MainLayoutComponent {
 
     });  
     this.realTimeService.startConnection();
+        this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   ngOnDestroy(): void {

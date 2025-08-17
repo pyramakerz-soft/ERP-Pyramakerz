@@ -1,8 +1,8 @@
 <div class="mt-5">
-    <label for="Students" class="block mb-2 text-sm font-medium text-gray-900">Students</label>
+    <label for="Students" class="block mb-2 text-sm font-medium text-gray-900"> {{ 'Students' | translate }}</label>
     <select id="Students" (change)="SelectStudent($event)"
         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5">
-        <option value="" disabled selected hidden>Select a Student</option>
+        <option value="" disabled selected hidden> {{ 'Select' | translate }} {{ 'Student' | translate }}</option>
         <option *ngFor="let s of Students" [value]="s.id">
             {{ s.studentEnName }}
         </option>
@@ -11,23 +11,23 @@
 
 
 <div *ngIf="IsStudentSelected" class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD] max-w-full">
-    <table class="overflow-auto w-full bg-[#EBEBEB] text-left text-[#6F6F6F]">
+    <table class="overflow-auto w-full bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
         <thead class="bg-[##EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
             <tr>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Test Title
+                     {{ 'Test Title' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
-                    State
+                     {{ 'State' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Subject
+                     {{ 'Subject' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Mark
+                     {{ 'Mark' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Actions
+                     {{ 'Actions' | translate }}
                 </th>
             </tr>
         </thead>
@@ -36,7 +36,7 @@
             <tr *ngIf="Data.length === 0">
                 <td colspan="5"
                     class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-                    No Data Found
+                     {{ 'No Data Found' | translate }}
                 </td>
             </tr>
 
@@ -52,13 +52,13 @@
                     {{ row.registrationTestState }}
                 </td>
                 <td *ngIf="row.registrationTestState==null" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    Not Solved Yet
+                    {{ 'Not Solved Yet' | translate }}
                 </td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.subjectName }}</td>
                 <td *ngIf="row.registrationTestMark !=null " class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.registrationTestMark }} / {{row.totalMark}}</td>
                 <td *ngIf="row.registrationTestMark ===null " class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">-- / {{row.totalMark}}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    <div class="flex space-x-4">
+                    <div class="flex space-x-4 rtl:space-x-reverse">
                         <button (click)="View(row)">
                             <img src="Images/AddMarkIcon.png" class="w-5" alt="Upload Icon">
                         </button>

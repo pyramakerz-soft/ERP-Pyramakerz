@@ -13,11 +13,13 @@ import { LessonActivityService } from '../../../../Services/Employee/LMS/lesson-
 import { LessonResourceService } from '../../../../Services/Employee/LMS/lesson-resource.service';
 import { LessonResourceType } from '../../../../Models/LMS/lesson-resource-type';
 import { LessonActivityType } from '../../../../Models/LMS/lesson-activity-type';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-subject-week-lesson',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, TranslateModule],
   templateUrl: './subject-week-lesson.component.html',
   styleUrl: './subject-week-lesson.component.css'
 })
@@ -30,6 +32,8 @@ export class SubjectWeekLessonComponent {
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   SubjectID: number = 0;
   WeekId: number = 0;
+  isRtl: boolean = false;
+  subscription!: Subscription;
   SubjectName: string = ""
   WeekName: string = ""
   mode: string = "Activity";
@@ -37,7 +41,7 @@ export class SubjectWeekLessonComponent {
   toggledIndexesActivity: Set<number> = new Set();
   toggledIndexesResource: Set<number> = new Set();
 
-  constructor(public account: AccountService, public router: Router, public ApiServ: ApiService,
+  constructor(public account: AccountService, private languageService: LanguageService, public router: Router, public ApiServ: ApiService,
     public activeRoute: ActivatedRoute, private menuService: MenuService, public LessonActivityServ: LessonActivityService, public LessonResourceServ: LessonResourceService) { }
 
   ngOnInit() {
@@ -50,6 +54,10 @@ export class SubjectWeekLessonComponent {
     this.SubjectID = Number(this.activeRoute.snapshot.paramMap.get('SubjectId'));
     this.WeekId = Number(this.activeRoute.snapshot.paramMap.get('WeekId'));
     this.GetActivityData()
+    this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetActivityData() {

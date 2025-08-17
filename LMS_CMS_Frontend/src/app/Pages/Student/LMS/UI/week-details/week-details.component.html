@@ -9,17 +9,17 @@
 
     <!-- Content Area -->
     <div class="space-y-3">
-        <div class="flex space-x-2">
+        <div class="flex space-x-2 rtl:space-x-reverse">
             <button class="bg-[#089B41] text-white text-xs px-3 py-2 rounded flex items-center"
                 (click)="setActiveTab('lessons-activity')">
                 <i class="fas fa-tasks mr-1 text-xs"></i>
-                Lessons Activity
+                 {{ 'Lessons Activity' | translate }}
             </button>
             <button
                 class="border border-[#089B41] text-[#089B41] text-xs px-3 py-2 rounded hover:bg-green-50 flex items-center"
                 (click)="navigateToLessonRes(subjectName)">
                 <i class="fas fa-book-open mr-1 text-xs"></i>
-                Lesson Resources
+                 {{ 'Lesson Resources' | translate }}
             </button>
         </div>
 
@@ -27,7 +27,7 @@
         <div>
             <div class="flex justify-between items-center border-b border-gray-400 bg-[#F7F7F7] hover:bg-gray-100 text-gray-800 px-4 py-3 rounded shadow-sm cursor-pointer transition"
                 (click)="toggleSection('sheets')">
-                Sheets
+                 {{ 'Sheets' | translate }}
                 <i class="fa-solid fa-chevron-down cursor-pointer rtl:rotate-180 transition-transform duration-200"
                     [class.rotate-180]="expandedSections['sheets']"></i>
             </div>
@@ -47,7 +47,7 @@
         <div>
             <div class="flex justify-between items-center border-b border-gray-400 bg-[#F7F7F7] hover:bg-gray-100 text-gray-800 px-4 py-3 rounded shadow-sm cursor-pointer transition"
                 (click)="toggleSection('videos')">
-                Videos
+                 {{ 'Videos' | translate }}
                 <i class="fa-solid fa-chevron-down cursor-pointer rtl:rotate-180 transition-transform duration-200"
                     [class.rotate-180]="expandedSections['videos']"></i>
             </div>
@@ -67,7 +67,7 @@
         <div>
             <div class="flex justify-between items-center border-b border-gray-400 bg-[#F7F7F7] hover:bg-gray-100 text-gray-800 px-4 py-3 rounded shadow-sm cursor-pointer transition"
                 (click)="toggleSection('links')">
-                Links
+                 {{ 'Links' | translate }}
                 <i class="fa-solid fa-chevron-down cursor-pointer rtl:rotate-180 transition-transform duration-200"
                     [class.rotate-180]="expandedSections['links']"></i>
             </div>

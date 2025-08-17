@@ -1,23 +1,23 @@
-<div class="flex justify-start items-center space-x-5">
+<div class="flex justify-start items-center space-x-5 rtl:space-x-reverse">
     <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToBack()"></i>
-    <h1 class="primaryTxt font-semibold text-2xl leading-9">{{SubjectName}} Lesson Live</h1>
+    <h1 class="primaryTxt font-semibold text-2xl leading-9">{{SubjectName}} {{ 'Lesson Live' | translate }}</h1>
 </div>
 
 <div class="flex flex-wrap justify-start mt-6 gap-6">
     <div *ngFor="let live of LessonLivesData; let i = index"
-        class="w-[33%] rounded-2xl shadow text-center flex flex-col space-x-2 p-3 "
+        class="w-[33%] rounded-2xl shadow text-center flex flex-col space-x-2 rtl:space-x-reverse p-3 "
         [ngStyle]="{ 'background-color': getRandomColor(i) }">
-        <div class="flex justify-start items-center space-x-3 mb-3">
+        <div class="flex justify-start items-center space-x-3 rtl:space-x-reverse mb-3">
             <img src="Icons/Live.png" />
             <h1 class="text-lg font-bold text-[#004279] ">{{live.name}}</h1>
         </div>
-        <div class="flex justify-start items-center space-x-2 text-[#6F6F6F] cursor-pointer" (click)="openLink(live.liveLink)">
+        <div class="flex justify-start items-center space-x-2 rtl:space-x-reverse text-[#6F6F6F] cursor-pointer" (click)="openLink(live.liveLink)">
             <i class="fa-solid fa-link"></i>
-            <p class="text-lg font-bold text-[#6F6F6F] ">Live Link</p>
+            <p class="text-lg font-bold text-[#6F6F6F] "> {{ 'Live Link' | translate }}</p>
         </div>
-        <div class="flex justify-start items-center space-x-2 text-[#6F6F6F] cursor-pointer" (click)="openLink(live.recordLink)">
+        <div class="flex justify-start items-center space-x-2 rtl:space-x-reverse text-[#6F6F6F] cursor-pointer" (click)="openLink(live.recordLink)">
             <i class="fa-solid fa-record-vinyl"></i>
-            <p class="text-lg font-bold text-[#6F6F6F] ">Record Link</p>
+            <p class="text-lg font-bold text-[#6F6F6F] "> {{ 'Record Link' | translate }}</p>
         </div>
     </div>
 </div>
