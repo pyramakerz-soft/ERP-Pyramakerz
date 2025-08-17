@@ -214,8 +214,8 @@ import { ConductLevelComponent } from './Pages/Employee/SocialWorker/conduct-lev
 import { ProcedureTypeComponent } from './Pages/Employee/SocialWorker/procedure-type/procedure-type.component';
 import { ConductTypeComponent } from './Pages/Employee/SocialWorker/conduct-type/conduct-type.component';
 import { ConductComponent } from './Pages/Employee/SocialWorker/conduct/conduct.component';
-import { SupplierStatementComponent } from './Pages/Employee/Accounting/Report/supplier-statement/supplier-statement/supplier-statement.component';
 import { ConductAddEditComponent } from './Pages/Employee/SocialWorker/conduct-add-edit/conduct-add-edit.component';
+import { AccountStatementsComponent } from './Pages/Employee/Accounting/Report/account-statement/account-statements.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -476,7 +476,25 @@ export const routes: Routes = [
             { path: 'Conduct', component: ConductComponent, title: 'Conduct', canActivate: [noNavigateWithoutLoginGuard], },
             { path: "Conduct Edit/:id", component: ConductAddEditComponent, title: "Conduct", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Conduct Create", component: ConductAddEditComponent, title: "Conduct", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "Supplier Statement", component: SupplierStatementComponent, title: "Supplier Statement", canActivate: [noNavigateWithoutLoginGuard] },
+            // { path: "Supplier Statement", component: SupplierStatementComponent, title: "Supplier Statement", canActivate: [noNavigateWithoutLoginGuard] },
+            { 
+  path: "Supplier Statement", 
+  component: AccountStatementsComponent, 
+  title: "Supplier Statement", 
+  canActivate: [noNavigateWithoutLoginGuard] 
+},
+{ 
+  path: "Safe Statement", 
+  component: AccountStatementsComponent, 
+  title: "Safe Statement", 
+  canActivate: [noNavigateWithoutLoginGuard] 
+},
+{ 
+  path: "Bank Statement", 
+  component: AccountStatementsComponent, 
+  title: "Bank Statement", 
+  canActivate: [noNavigateWithoutLoginGuard] 
+}
         ]
     },
     {
