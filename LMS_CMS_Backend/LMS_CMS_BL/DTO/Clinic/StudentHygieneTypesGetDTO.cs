@@ -14,7 +14,5 @@ namespace LMS_CMS_BL.DTO.Clinic
         public bool SelectAll { get; set; }
         public string? Comment { get; set; }
         public string? ActionTaken { get; set; }
-        public long? InsertedByUserId { get; set; }
-        public string? en_name { get; set; }
     }
 }
