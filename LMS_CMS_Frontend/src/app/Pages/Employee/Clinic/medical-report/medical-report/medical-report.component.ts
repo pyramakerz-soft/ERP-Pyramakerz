@@ -64,10 +64,10 @@ export class MedicalReportComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private hygieneFormService: HygieneFormService,
+    // private hygieneFormService: HygieneFormService,
     private languageService: LanguageService,
-    private medicalHistoryService: MedicalHistoryService,
-    private followUpService: FollowUpService,
+    // private medicalHistoryService: MedicalHistoryService,
+    // private followUpService: FollowUpService,
     private apiService: ApiService,
     private medicalReportService: MedicalReportService,
     private schoolService: SchoolService,
@@ -256,27 +256,30 @@ export class MedicalReportComponent implements OnInit {
           );
           break;
 
-        case 'Follow Up':
-          data = await firstValueFrom(
-            this.medicalReportService.getAllFollowUps(
-              domainName,
-              this.selectedStudent,
-              this.selectedSchool,
-              this.selectedGrade,
-              this.selectedClass
-            )
-          );
-          this.tableData = data.map((item) => ({
-            date: new Date(item.date).toLocaleDateString(),
-            diagnosis: item.diagnosis || 'No diagnosis',
-            drug: item.drug || 'None',
-            dose: item.dose || 'None',
-            recommendations: item.recommendation || 'No recommendations',
-          }));
-          break;
+case 'Follow Up':
+  data = await firstValueFrom(
+    this.medicalReportService.getAllFollowUps(
+      domainName,
+      this.selectedStudent,
+      this.selectedSchool,
+      this.selectedGrade,
+      this.selectedClass
+    )
+  );
+  this.tableData = data.map((item: any) => ({
+    date: new Date(item.insertedAt).toLocaleDateString(),
+    diagnosis: item.diagnosis || 'No diagnosis',
+    drug: (item.followUpDrugs as Array<{drug?: {en_name: string}}>)?.map(d => d.drug?.en_name || 'Unknown drug').join(', ') || 'None',
+    dose: (item.followUpDrugs as Array<{dose?: {en_name: string}}>)?.map(d => d.dose?.en_name || 'Unknown dose').join(', ') || 'None',
+    recommendations: item.recommendation || 'No recommendations',
+    complains: item.complains || 'No complains',
+    doctor: item.en_name || 'Unknown'
+  }));
+  break;
       }
 
       this.prepareExportData();
+      console.log('Report data loaded:', this.tableData);
       this.showTable = true;
     } catch (error) {
       console.error('Error loading report data:', error);
