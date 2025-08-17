@@ -29,7 +29,13 @@
                 <div *ngIf="isRequuestPopupOpen" class="absolute ltr:right-0 rtl:left-0 mt-2 w-[440px] bg-white shadow-lg z-50">
                     <div class="flex justify-between space-x-3 rtl:space-x-reverse p-4">
                         <h3 class="primaryTxt font-semibold">Requests</h3>
-                        <button (click)="viewAllRequests()" class="text-gray-500 text-sm hover:text-gray-700 transition">View All <i class="fas fa-arrow-right ml-2"></i></button>
+                        <div class="flex space-x-2">
+                            <button (click)="openModal()"
+                                class="rounded secondaryBorder secondaryTxt text-xs py-1 px-2 flex items-center justify-center">
+                                Send Request
+                            </button>
+                            <button (click)="viewAllRequests()" class="text-gray-500 text-sm hover:text-gray-700 transition">View All <i class="fas fa-arrow-right ml-2"></i></button>
+                        </div>
                     </div>
                     <ul>
                         <li *ngFor="let request of requests; let i = index" class="relative" (click)="viewRequest(request)">
@@ -42,7 +48,8 @@
                                         <img src="Images/person-dummy.jpg" class="cursor-pointer rounded-full w-14" alt="Profile Photo">
                                     </div>
                                     <div class="ml-4 text-start w-full"> 
-                                        <!-- <p class="primaryTxt text-sm"><span class="font-semibold">{{ notification.insertedByUserName }}</span> Notifed You</p> -->
+                                        <p *ngIf="request.forwardedFromID" class="primaryTxt text-sm"><span class="font-semibold">{{ request.forwardedFromEnglishName }} (Employee)</span> Forwarded You This Request From <span class="font-semibold">{{ request.senderEnglishName }} ({{ request.senderUserTypeName.charAt(0).toUpperCase() + request.senderUserTypeName.slice(1).toLowerCase() }})</span></p>
+                                        <p *ngIf="!request.forwardedFromID" class="primaryTxt text-sm"><span class="font-semibold">{{ request.senderEnglishName }} ({{ request.senderUserTypeName.charAt(0).toUpperCase() + request.senderUserTypeName.slice(1).toLowerCase() }})</span> Requested From You</p>
                                         <div class="mt-4 flex flex-col space-y-3">
                                             <div *ngIf="request.message" class="w-[70%] border-l-4 border-gray-300 pl-4 primaryTxt text-base leading-relaxed truncate overflow-hidden whitespace-nowrap">
                                                 {{request.message}}
@@ -58,6 +65,25 @@
                                                     View Link
                                                 </a>                                    
                                             </div> 
+                                            <div *ngIf="!request.forwardedOrNot" class="flex space-x-2">
+                                                <button (click)="openModal()"
+                                                    class="rounded secondaryBg text-white text-xs py-1 px-2 flex items-center justify-center">
+                                                    Accept
+                                                </button>
+                                                <button *ngIf="request.receiverUserTypeID == 1" (click)="openModal()"
+                                                    class="rounded secondaryBorder secondaryTxt text-xs py-1 px-2 flex items-center justify-center">
+                                                    Forward
+                                                </button>
+                                                <button (click)="openModal()"
+                                                    class="rounded border border-[#6F6F6F] text-[#6F6F6F] text-xs py-1 px-2 flex items-center justify-center">
+                                                    Decline
+                                                </button>
+                                            </div>
+                                            <div *ngIf="request.forwardedOrNot" class="flex space-x-2">
+                                                <p class="rounded secondaryBorder secondaryTxt text-xs py-1 px-2 flex items-center justify-center">
+                                                    Forwarded To {{request.forwardedToEnglishName}}
+                                                </p> 
+                                            </div>
                                         </div>
                                         <p class="text-[#BDBDBD] text-sm font-semibold mt-2">{{ formatInsertedAt(request.insertedAt) }}</p>
                                     </div>
