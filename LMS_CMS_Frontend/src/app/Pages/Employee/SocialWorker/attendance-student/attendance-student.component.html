@@ -2,68 +2,79 @@
     <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Attendance' | translate }}</h1>
     <div class="flex justify-between items-center space-x-4 rtl:space-x-reverse">
         <button (click)="Save()" class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
-            {{ 'Save' | translate }}
+            <span *ngIf="!isLoading"> {{ 'Save' | translate }}</span>
+            <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
         </button>
     </div>
 </div>
-
 
 <div class="flex justify-start items-center space-x-4 rtl:space-x-reverse mt-5">
     <div class="w-[33%]">
         <label for="School1" class="block mb-2 text-sm font-medium text-gray-900">{{ 'School' | translate }}</label>
         <select id="School1" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             [(ngModel)]="attendance.schoolID"
-            (change)="GetAllAcademicYearsBySchool(); GetAllGradesBySchool(); IsViewTable=false">
+            (change)="GetAllAcademicYearsBySchool(); GetAllGradesBySchool(); IsViewTable=false"
+            (ngModelChange)="onInputValueChange({ field: 'schoolID', value: $event })">
             <option value=0 disabled selected hidden> {{ 'Select' | translate }} {{ 'School' | translate }}</option>
             <option *ngFor="let school of Schools" [value]="school.id">
                 {{ school.name }}
             </option>
         </select>
+        <span *ngIf="validationErrors['schoolID']" class="text-red-500 ml-3 font-normal">{{ validationErrors["schoolID"]}}</span>
     </div>
-    <div class="w-[33%]">
+    <div class="flex flex-col w-[33%]">
         <label for="attendance.academicYearID" class="block mb-2 text-sm font-medium text-gray-900">{{ 'Academic Year' |
             translate }}</label>
         <select id="attendance.academicYearID"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
-            [(ngModel)]="attendance.academicYearID" (change)="IsViewTable=false" [disabled]="!attendance.schoolID">
+            [(ngModel)]="attendance.academicYearID" (change)="IsViewTable=false" [disabled]="!attendance.schoolID"
+            (ngModelChange)="onInputValueChange({ field: 'academicYearID', value: $event })">
             <option value=0 disabled selected hidden> {{ 'Select' | translate }} {{ 'Academic Year' | translate }}
             </option>
             <option *ngFor="let ac of AcademicYears" [value]="ac.id">
                 {{ ac.name }}
             </option>
         </select>
+        <span *ngIf="validationErrors['academicYearID']" class="text-red-500 ml-3 font-normal">{{
+            validationErrors["academicYearID"]}}</span>
     </div>
-    <div class="w-[33%]">
+    <div class="flex flex-col w-[33%]">
         <label for="attendance.gradeID" class="block mb-2 text-sm font-medium text-gray-900">{{ 'Grade' | translate
             }}</label>
         <select id="attendance.gradeID"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             [(ngModel)]="attendance.gradeID" (change)="GetAllclassesBygrade(); IsViewTable=false"
-            [disabled]="!attendance.schoolID">
+            [disabled]="!attendance.schoolID" (ngModelChange)="onInputValueChange({ field: 'gradeID', value: $event })">
             <option value=0 disabled selected hidden> {{ 'Select' | translate }} {{ 'Grade' | translate }}</option>
             <option *ngFor="let grade of Grades" [value]="grade.id">
                 {{ grade.name }}
             </option>
         </select>
+        <span *ngIf="validationErrors['gradeID']" class="text-red-500 ml-3 font-normal">{{
+            validationErrors["gradeID"]}}</span>
     </div>
-    <div class="w-[33%]">
-        <label for="attendance.classroomID" class="block mb-2 text-sm font-medium text-gray-900">{{ 'Classroom' |  translate}}</label>
+    <div class="flex flex-col w-[33%]">
+        <label for="attendance.classroomID" class="block mb-2 text-sm font-medium text-gray-900">{{ 'Classroom' |
+            translate}}</label>
         <select id="attendance.classroomID"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
-            [(ngModel)]="attendance.classroomID" (change)="IsViewTable=false" [disabled]="!attendance.gradeID" (change)="GetStudentsByClass();">
+            [(ngModel)]="attendance.classroomID" (change)="IsViewTable=false" [disabled]="!attendance.gradeID"
+            (change)="GetStudentsByClass();"
+            (ngModelChange)="onInputValueChange({ field: 'classroomID', value: $event })">
             <option value=0 disabled selected hidden> {{ 'Select' | translate }} {{ 'Classroom' | translate }}</option>
             <option *ngFor="let class of Classes" [value]="class.id">
                 {{ class.name }}
             </option>
         </select>
+        <span *ngIf="validationErrors['classroomID']" class="text-red-500 ml-3 font-normal">{{
+            validationErrors["classroomID"]}}</span>
     </div>
     <div class="flex flex-col w-[33%]">
         <label class="mb-2 primaryTxt" for="name">{{'Date'| translate }}</label>
         <input id="date" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
             (ngModelChange)="onInputValueChange({ field: 'date', value: $event })"
             placeholder=" {{'Enter'| translate }} {{'Date'| translate }}" [(ngModel)]="attendance.date" />
-        <span *ngIf="validationErrors['date']" class="text-red-500 ml-3 font-normal">{{ validationErrors["date"]
-            }}</span>
+        <span *ngIf="validationErrors['date']" class="text-red-500 ml-3 font-normal">{{validationErrors["date"]}}</span>
     </div>
 </div>
 
@@ -76,6 +87,8 @@
                         <th
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0 ">
                             <div class="flex space-x-2 rtl:space-x-reverse items-center">
+                                <input class="rounded bg-[#FFFFFF] border-1 border-[#BDBDBD] w-5 h-5" type="checkbox"
+                                    id="all" name="all" [checked]="allSelected" (change)="toggleSelectAll($event)">
                                 <p> {{ 'Student Name' | translate }}</p>
                             </div>
                         </th>
@@ -105,6 +118,9 @@
                         [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }" class="text-xs md:text-sm">
                         <td class="py-5 px-4 border-r border-[#EAECF0] ">
                             <div class="flex space-x-2 rtl:space-x-reverse items-center">
+                                <input class="rounded bg-[#FFFFFF] border-1 border-[#BDBDBD] w-5 h-5" type="checkbox"
+                                    [id]="'Student-' + row.id" [(ngModel)]="row.isPresent"
+                                    (change)="toggleStudentSelection($event, row)">
                                 <p> {{ row.studentEnName }} </p>
                             </div>
                         </td>
@@ -112,7 +128,7 @@
                             <input type="checkbox" [(ngModel)]="row.isLate" id="isLate" class="w-5 h-5" />
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            <input [(ngModel)]="row.lateTimeInMinutes"
+                            <input [(ngModel)]="row.lateTimeInMinutes" [disabled]="!row.isLate"
                                 (input)="validateNumber($event, 'lateTimeInMinutes' ,row)" type="text"
                                 class="w-full border border-gray-300 px-2 py-1 rounded-md" />
                         </td>

@@ -24,6 +24,7 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { AttendanceService } from '../../../../Services/Employee/SocialWorker/attendance.service';
 import { AttendanceStudent } from '../../../../Models/SocialWorker/attendance-student';
 import { StudentService } from '../../../../Services/student.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-attendance-student',
@@ -58,6 +59,7 @@ export class AttendanceStudentComponent {
 
   IsViewTable: boolean = false;
   AttendanceId: number = 0;
+  allSelected: boolean = false;
 
   isLoading = false
   isLoadingSaveClassroom = false
@@ -94,6 +96,7 @@ export class AttendanceStudentComponent {
   GetAttendance() {
     this.AttendanceServ.GetByID(this.AttendanceId, this.DomainName).subscribe((d) => {
       this.attendance = d
+      this.allSelected = this.attendance.attendanceStudents.every(s => s.isPresent);
       this.gradeService.GetBySchoolId(this.attendance.schoolID, this.DomainName).subscribe((d) => {
         this.Grades = d
         this.classroomService.GetByGradeId(this.attendance.gradeID, this.DomainName).subscribe((d) => {
@@ -108,12 +111,8 @@ export class AttendanceStudentComponent {
 
   toggleSelectAll(event: Event) {
     const isChecked = (event.target as HTMLInputElement).checked;
-
-    // if (isChecked) {
-    //   this.ChoosedCoTeacherIds = this.Employees.map(m => m.id);  
-    // } else {
-    //   this.ChoosedCoTeacherIds = [];  
-    // } 
+    this.allSelected = isChecked;
+    this.attendance.attendanceStudents.forEach(a => a.isPresent = this.allSelected);
   }
 
   validateNumber(event: any, field: keyof AttendanceStudent, row: AttendanceStudent): void {
@@ -127,7 +126,7 @@ export class AttendanceStudentComponent {
   }
 
   GetStudentsByClass() {
-    this.attendance.attendanceStudents=[]
+    this.attendance.attendanceStudents = []
     this.StudentServ.GetByClassID(this.attendance.classroomID, this.DomainName)
       .subscribe(d => {
         this.attendance.attendanceStudents = d.map(stu => ({
@@ -144,6 +143,12 @@ export class AttendanceStudentComponent {
     if (value) {
       this.validationErrors[field] = '';
     }
+  }
+
+  toggleStudentSelection(event: Event, row: AttendanceStudent): void {
+    const isChecked = (event.target as HTMLInputElement).checked;
+    row.isPresent = isChecked;
+    this.allSelected = this.attendance.attendanceStudents.every(s => s.isPresent);
   }
 
   GetAllSchools() {
@@ -186,8 +191,84 @@ export class AttendanceStudentComponent {
     })
   }
 
-  Save() {
+  isFormValid(): boolean {
+    let isValid = true;
+    for (const key in this.attendance) {
+      if (this.attendance.hasOwnProperty(key)) {
+        const field = key as keyof Attendance;
+        if (!this.attendance[field]) {
+          if (
+            field == 'date' ||
+            field == 'gradeID' ||
+            field == 'classroomID' ||
+            field == 'academicYearID' ||
+            field == 'schoolID'
+          ) {
+            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`;
+            isValid = false;
+          }
+        }
+        this.attendance.attendanceStudents.forEach(element => {
+          if (element.isLate == true && element.lateTimeInMinutes == 0) {
 
+          }
+        });
+      }
+    }
+
+    return isValid;
+  }
+
+  capitalizeField(field: keyof Attendance): string {
+    return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
+  }
+
+  Save() {
+    if (this.isFormValid()) {
+      this.isLoading = true
+      if (this.mode == 'Create') {
+        this.AttendanceServ.Add(this.attendance, this.DomainName).subscribe((d) => {
+          this.isLoading = false
+          this.router.navigateByUrl(`Employee/Attendance`);
+          Swal.fire({
+            icon: 'success',
+            title: 'Done',
+            text: 'Created Successfully',
+            confirmButtonColor: '#089B41',
+          });
+        }, error => {
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Try Again Later!',
+            confirmButtonText: 'Okay',
+            customClass: { confirmButton: 'secondaryBg' }
+          });
+        })
+      }
+      else if (this.mode == 'Edit') {
+        this.AttendanceServ.Edit(this.attendance, this.DomainName).subscribe((d) => {
+          this.isLoading = false
+          this.router.navigateByUrl(`Employee/Attendance`);
+          Swal.fire({
+            icon: 'success',
+            title: 'Done',
+            text: 'Updatedd Successfully',
+            confirmButtonColor: '#089B41',
+          });
+        }, error => {
+          console.log(error)
+          this.isLoading = false
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Try Again Later!',
+            confirmButtonText: 'Okay',
+            customClass: { confirmButton: 'secondaryBg' }
+          });
+        })
+      }
+    }
   }
 
 }
