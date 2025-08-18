@@ -91,17 +91,17 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             {
                 MasterID = 0,
                 DetailsID = 0,
-                Account = "Opening Balance",
+                //Account = "Opening Balance",
                 Serial = 0,
-                MainAccountNo = 0,
-                MainAccount = "",
+                //MainAccountNo = 0,
+                //MainAccount = "",
                 SubAccountNo = 0,
-                SubAccount = "",
+                //SubAccount = "",
                 Debit = 0,
                 Credit = 0,
                 Date = dateToValue,
                 Balance = firstPeriodBalance,
-                LinkFileID = 0,
+                //LinkFileID = 0,
                 Notes = ""
             });
 
@@ -222,17 +222,17 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             {
                 MasterID = 0,
                 DetailsID = 0,
-                Account = "Opening Balance",
+                //Account = "Opening Balance",
                 Serial = 0,
-                MainAccountNo = 0,
-                MainAccount = "",
+                //MainAccountNo = 0,
+                //MainAccount = "",
                 SubAccountNo = 0,
-                SubAccount = "",
+                //SubAccount = "",
                 Debit = 0,
                 Credit = 0,
                 Date = dateToValue,
                 Balance = calcFirstPeriod?.Differences ?? 0,
-                LinkFileID = 0,
+                //LinkFileID = 0,
                 Notes = ""
             });
 
@@ -365,17 +365,17 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             {
                 MasterID = 0,
                 DetailsID = 0,
-                Account = "Opening Balance",
+                //Account = "Opening Balance",
                 Serial = 0,
-                MainAccountNo = 0,
-                MainAccount = "",
+                //MainAccountNo = 0,
+                //MainAccount = "",
                 SubAccountNo = 0,
-                SubAccount = "",
+                //SubAccount = "",
                 Debit = 0,
                 Credit = 0,
                 Date = dateToValue,
                 Balance = calcFirstPeriod?.Differences ?? 0,
-                LinkFileID = 0,
+                //LinkFileID = 0,
                 Notes = ""
             });
 
