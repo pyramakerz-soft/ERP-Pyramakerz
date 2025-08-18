@@ -4,16 +4,19 @@ using LMS_CMS_DAL.Models.Domains;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace LMS_CMS_DAL.Migrations.Domains
+namespace LMS_CMS_DAL.Migrations.LMS_CMS_
 {
     [DbContext(typeof(LMS_CMS_Context))]
-    partial class LMS_CMS_ContextModelSnapshot : ModelSnapshot
+    [Migration("20250818082402_updateAccountTypeColumnInLinkFileTable")]
+    partial class updateAccountTypeColumnInLinkFileTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -39,8 +42,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
             modelBuilder.Entity("LMS_CMS_DAL.AccountingModule.Reports.AccountingEntriesReport", b =>
                 {
-                    b.Property<long?>("AccountID")
-                        .HasColumnType("bigint");
+                    b.Property<string>("Account")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal?>("Balance")
                         .HasColumnType("decimal(18,2)");
@@ -55,6 +58,15 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<long?>("DetailsID")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("LinkFileID")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("MainAccount")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long?>("MainAccountNo")
                         .HasColumnType("bigint");
 
                     b.Property<long?>("MasterID")
@@ -999,8 +1011,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<long>("ID")
                         .HasColumnType("bigint");
 
-                    b.Property<bool?>("AccountType")
-                        .HasColumnType("bit");
+                    b.Property<string>("AccountType")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ArName")
                         .IsRequired()
@@ -11660,13 +11672,13 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<long?>("InsertedByUserId")
                         .HasColumnType("bigint");
 
+                    b.Property<bool>("IsAbsent")
+                        .HasColumnType("bit");
+
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsLate")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsPresent")
                         .HasColumnType("bit");
 
                     b.Property<int?>("LateTimeInMinutes")
