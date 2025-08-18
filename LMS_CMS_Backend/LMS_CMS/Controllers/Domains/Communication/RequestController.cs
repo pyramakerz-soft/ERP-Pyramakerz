@@ -606,13 +606,18 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                     f => f.IsDeleted != true  && f.ID == forwardRequestDTO.RequestID
                     && (f.ReceiverID == userId && f.ReceiverUserTypeID == userTypeID)
                     );
-            
-            if(forwardRequestDTO.ForwardToID == request.SenderID && request.SenderUserTypeID == 1)
+
+            if(request == null)
+            {
+                return NotFound("You Don't have a request with this ID");
+            }
+
+            if (forwardRequestDTO.ForwardToID == request.SenderID && request.SenderUserTypeID == 1)
             {
                 return BadRequest("You can't send the request back to the employee");
             }
 
-            if(request.ForwardedOrNot == true)
+            if (request.ForwardedOrNot == true)
             {
                 return BadRequest("You have already forwarded the request");
             }

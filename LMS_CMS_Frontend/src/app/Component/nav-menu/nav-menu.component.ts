@@ -479,4 +479,51 @@ export class NavMenuComponent {
     document.getElementById("NotificationModal")?.classList.remove("flex");
     document.getElementById("NotificationModal")?.classList.add("hidden"); 
   }
+
+  closeRequestModal() {
+    document.getElementById("RequestModal")?.classList.remove("flex");
+    document.getElementById("RequestModal")?.classList.add("hidden"); 
+  }
+
+  Accept(request:Request){
+    Swal.fire({
+      title: 'Are you sure you want to Accept this Request?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#089B41',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: 'Accept',
+      cancelButtonText: 'Cancel',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.requestService.Accept(request.id, this.DomainName).subscribe((d) => {
+          request.approvedOrNot=true
+          request.seenOrNot=true
+        });
+      }
+    });
+  }
+
+  Decline(request:Request){
+    Swal.fire({
+      title: 'Are you sure you want to Decline this Request?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#089B41',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: 'Decline',
+      cancelButtonText: 'Cancel',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.requestService.Decline(request.id, this.DomainName).subscribe((d) => {
+          request.approvedOrNot=false
+          request.seenOrNot=true
+        });
+      }
+    });
+  }
+
+  Forward(request:Request){
+
+  }
 }
