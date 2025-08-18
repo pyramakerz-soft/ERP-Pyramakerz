@@ -35,7 +35,7 @@ export class AccountingEntriesComponent {
   DomainName: string = '';
   UserID: number = 0;
 
-  keysArray: string[] = ['id', 'docNumber' ,"date", "accountingEntriesDocTypeName"];
+  keysArray: string[] = ['id', 'docNumber', "accountingEntriesDocTypeName"];
 
   path: string = '';
   key: string = 'id';

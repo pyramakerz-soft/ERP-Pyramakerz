@@ -111,6 +111,17 @@ export class StudentService {
     return this.http.get<Student[]>(`${this.baseUrl}/Student/Get_By_SchoolID/${id}`, { headers })
   }
 
+  Get_By_ParentID(id:number,DomainName:string){
+    this.header=DomainName 
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+    .set('Authorization', `Bearer ${token}`)
+    .set('domain-name', this.header)
+    .set('Content-Type', 'application/json');
+
+    return this.http.get<Student[]>(`${this.baseUrl}/Student/Get_By_ParentID/${id}`, { headers })
+  }
+
   EditAccountingEmployee(student:Student,DomainName?:string){
     if(DomainName!=null) {
       this.header=DomainName 
