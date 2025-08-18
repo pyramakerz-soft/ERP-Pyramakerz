@@ -78,6 +78,7 @@ export class MyNotificationComponent {
   }
 
   viewNotification(notificationShared:Notification){
+    this.notification = new Notification()
     this.notificationService.ByUserIDAndNotificationSharedByID(notificationShared.id, this.DomainName).subscribe(
       data => {
         notificationShared.seenOrNot = true

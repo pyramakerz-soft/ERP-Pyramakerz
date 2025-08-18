@@ -1,1 +1,344 @@
-<p>my-requests works!</p>
+<div class="flex justify-between space-x-10 items-center">
+    <div class="w-[48%] bg-[#F7F7F7] rounded-md max-h-[75vh] overflow-y-auto overflow-x-hidden">
+        <div class="flex justify-between m-5">
+            <h3 class="primaryTxt font-semibold">Requests</h3>
+            <div class="flex space-x-2">
+                <button (click)="sendRequest()"
+                    class="rounded secondaryBorder secondaryTxt text-xs py-1 px-2 flex items-center justify-center">
+                    Send Request
+                </button>
+            </div>
+        </div> 
+        <div class="flex justify-center items-center space-x-5 rtl:space-x-reverse mb-4 m-auto">
+            <div>
+                <p (click)="loadSentRequests()" [ngClass]="{
+                        'font-bold text-[#089B41] border-b-2 border-[#089B41]': activeTab === 'sent',
+                        'text-gray-500': activeTab !== 'sent' }" class="cursor-pointer pb-1 transition-all"> 
+                    Sent
+                </p>
+            </div>
+            <div>
+                <p (click)="loadReceivedRequests()" [ngClass]="{
+                        'font-bold text-[#089B41] border-b-2 border-[#089B41]': activeTab === 'received',
+                        'text-gray-500': activeTab !== 'received'
+                    }" class="cursor-pointer pb-1 transition-all">
+                    Received
+                </p>
+            </div>
+        </div>
+        <ul>
+            <li *ngFor="let request of requests; let i = index" class="relative" (click)="viewRequest(request)">
+                <div>
+                    <div *ngIf="!request.seenOrNot"
+                        class="absolute top-2 left-2 w-2.5 h-2.5 border border-[#4d8db4] bg-[#8ccff8b6] rounded-full z-10">
+                    </div>
+                    <div class="flex hover:bg-gray-100 p-3 items-start"
+                        [ngClass]="{'border-b': i != requests.length, 'bg-[#e3ebf0b6]': !request.seenOrNot || request.id == requestByID.id}">
+                        <div class="flex-shrink-0">
+                            <img src="Images/person-dummy.jpg" class="cursor-pointer rounded-full w-14"
+                                alt="Profile Photo">
+                        </div>
+                        <div class="ml-4 text-start w-full">
+                            <p *ngIf="request.forwardedFromID" class="primaryTxt text-sm"><span class="font-semibold">{{
+                                    request.forwardedFromEnglishName }} (Employee)</span> Forwarded You This Request
+                                From <span class="font-semibold">{{ request.senderEnglishName }} ({{
+                                    request.senderUserTypeName.charAt(0).toUpperCase() +
+                                    request.senderUserTypeName.slice(1).toLowerCase() }})</span></p>
+                            <p *ngIf="!request.forwardedFromID" class="primaryTxt text-sm"><span
+                                    class="font-semibold">{{ request.senderEnglishName }} ({{
+                                    request.senderUserTypeName.charAt(0).toUpperCase() +
+                                    request.senderUserTypeName.slice(1).toLowerCase() }})</span> Requested From You</p>
+                            <div class="mt-4 flex flex-col space-y-3">
+                                <div *ngIf="request.message"
+                                    class="w-[70%] border-l-4 border-gray-300 pl-4 primaryTxt text-base leading-relaxed truncate overflow-hidden whitespace-nowrap">
+                                    {{request.message}}
+                                </div>
+                                <div *ngIf="request.fileLink" class="flex space-x-2 items-center">
+                                    <img src="Images/Icon frame.png" class="border p-[4px] w-10 rounded-md" alt="Photo">
+                                    <span
+                                        class="primaryTxt text-sm font-semibold">{{getFileName(request.fileLink)}}</span>
+                                </div>
+                                <div *ngIf="request.link" class="secondaryTxt text-sm font-semibold">
+                                    <a [href]="request.link" class="border-b border-[#089B41] hover:text-[#089b408c]"
+                                        target="_blank" (click)="$event.stopPropagation();" rel="noopener">
+                                        <!-- Prevents the new tab from having access to the original page via window.opener -->
+                                        View Link
+                                    </a>
+                                </div>
+                                <div *ngIf="!request.forwardedOrNot && request.approvedOrNot == null"
+                                    class="flex space-x-2">
+                                    <button (click)="$event.stopPropagation(); Accept(request)"
+                                        class="rounded secondaryBg text-white text-xs py-1 px-2 flex items-center justify-center">
+                                        Accept
+                                    </button>
+                                    <button *ngIf="request.receiverUserTypeID == 1"
+                                        (click)="$event.stopPropagation(); Forward(request)"
+                                        class="rounded secondaryBorder secondaryTxt text-xs py-1 px-2 flex items-center justify-center">
+                                        Forward
+                                    </button>
+                                    <button (click)="$event.stopPropagation(); Decline(request)"
+                                        class="rounded border border-[#6F6F6F] text-[#6F6F6F] text-xs py-1 px-2 flex items-center justify-center">
+                                        Decline
+                                    </button>
+                                </div>
+                                <div *ngIf="request.forwardedOrNot">
+                                    <p
+                                        class="w-1/2 rounded secondaryBorder secondaryTxt text-xs py-1 px-2 flex items-center justify-center">
+                                        Forwarded To {{request.forwardedToEnglishName}}
+                                    </p>
+                                </div>
+                                <div *ngIf="request.approvedOrNot != null">
+                                    <p *ngIf="request.approvedOrNot == true"
+                                        class="w-1/2 rounded secondaryBg text-white text-xs py-1 px-2 flex items-center justify-center">
+                                        Accepted
+                                    </p>
+                                    <p *ngIf="request.approvedOrNot == false"
+                                        class="w-1/2 rounded border border-[#6F6F6F] text-[#6F6F6F] text-xs py-1 px-2 flex items-center justify-center">
+                                        Declined
+                                    </p>
+                                </div>
+                            </div>
+                            <p class="text-[#BDBDBD] text-sm font-semibold mt-2">{{ formatInsertedAt(request.insertedAt)
+                                }}</p>
+                        </div>
+                    </div>
+                </div>
+            </li>
+            <li *ngIf="requests.length == 0">
+                <div class="flex justify-center">
+                    <p class="text-[#BDBDBD]">No Requests Yet</p>
+                </div>
+            </li>
+        </ul>
+    </div>
+    <div *ngIf="requestByID.id"
+        class="w-[48%] bg-[#F7F7F7] rounded-md h-auto max-h-[75vh] overflow-y-auto overflow-x-hidden">
+        <div class="flex p-3 items-start">
+            <div class="flex-shrink-0">
+                <img src="Images/person-dummy.jpg" class="cursor-pointer rounded-full w-14" alt="Profile Photo">
+            </div>
+            <div class="ml-4 text-start w-full">
+                <p *ngIf="requestByID.forwardedFromID" class="primaryTxt text-sm"><span class="font-semibold">{{
+                        requestByID.forwardedFromEnglishName }} (Employee)</span> Forwarded You This Request From <span
+                        class="font-semibold">{{ requestByID.senderEnglishName }} ({{
+                        requestByID.senderUserTypeName.charAt(0).toUpperCase() +
+                        requestByID.senderUserTypeName.slice(1).toLowerCase() }})</span></p>
+                <p *ngIf="!requestByID.forwardedFromID" class="primaryTxt text-sm"><span class="font-semibold">{{
+                        requestByID.senderEnglishName }} ({{ requestByID.senderUserTypeName.charAt(0).toUpperCase() +
+                        requestByID.senderUserTypeName.slice(1).toLowerCase() }})</span> Requested From You</p>
+                <div class="mt-4 flex flex-col space-y-3 ">
+                    <div *ngIf="requestByID.fileLink" class="flex space-x-2 items-center">
+                        <a href={{requestByID.fileLink}} class="secondaryTxt" target="_blank">
+                            Click To Download
+                        </a>
+                    </div>
+                    <div *ngIf="requestByID.link" class="secondaryTxt text-sm font-semibold">
+                        <a [href]="requestByID.link" class="border-b border-[#089B41] hover:text-[#089b408c]"
+                            target="_blank" rel="noopener">
+                            <!-- Prevents the new tab from having access to the original page via window.opener -->
+                            View Link
+                        </a>
+                    </div>
+                    <div *ngIf="requestByID.message"
+                        class="w-full border-l-4 border-gray-300 pl-4 primaryTxt text-base">
+                        <p class="break-words">
+                            {{requestByID.message}}
+                        </p>
+                    </div>
+                    <div *ngIf="!requestByID.forwardedOrNot && requestByID.approvedOrNot == null"
+                        class="flex space-x-2">
+                        <button (click)="$event.stopPropagation(); Accept(requestByID)"
+                            class="rounded secondaryBg text-white text-xs py-1 px-2 flex items-center justify-center">
+                            Accept
+                        </button>
+                        <button *ngIf="requestByID.receiverUserTypeID == 1"
+                            (click)="$event.stopPropagation(); Forward(requestByID)"
+                            class="rounded secondaryBorder secondaryTxt text-xs py-1 px-2 flex items-center justify-center">
+                            Forward
+                        </button>
+                        <button (click)="$event.stopPropagation(); Decline(requestByID)"
+                            class="rounded border border-[#6F6F6F] text-[#6F6F6F] text-xs py-1 px-2 flex items-center justify-center">
+                            Decline
+                        </button>
+                    </div>
+                    <div *ngIf="requestByID.forwardedOrNot">
+                        <p
+                            class="w-1/2 rounded secondaryBorder secondaryTxt text-xs py-1 px-2 flex items-center justify-center">
+                            Forwarded To {{requestByID.forwardedToEnglishName}}
+                        </p>
+                    </div>
+                    <div *ngIf="requestByID.approvedOrNot != null">
+                        <p *ngIf="requestByID.approvedOrNot == true"
+                            class="w-1/2 rounded secondaryBg text-white text-xs py-1 px-2 flex items-center justify-center">
+                            Accepted
+                        </p>
+                        <p *ngIf="requestByID.approvedOrNot == false"
+                            class="w-1/2 rounded border border-[#6F6F6F] text-[#6F6F6F] text-xs py-1 px-2 flex items-center justify-center">
+                            Declined
+                        </p>
+                    </div>
+                </div>
+                <p class="text-[#BDBDBD] text-sm font-semibold mt-2">{{ formatInsertedAt(requestByID.insertedAt) }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+<div id="Add_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
+    <div class="bg-white rounded-2xl p-12 w-[669px] max-h-[90%] overflow-y-auto">
+        <div class="flex justify-between items-center">
+            <h1 class="font-semibold text-2xl leading-9">Send Request</h1> 
+            <button (click)="closeModal()" type="button"
+                class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
+        </div>
+
+        <div class="mt-6 mb-4 flex justify-between flex-wrap"> 
+            <div class="w-full m-auto">
+                <div class="mb-7 flex justify-center">
+                    <img src="Images/LogoInLogin3.png" alt="Avatar">
+                </div>
+    
+                <div *ngIf="User_Data_After_Login.type=='employee'" class="flex justify-center items-center space-x-2 rtl:space-x-reverse mb-4 m-auto">
+                    <div>
+                        <img [src]="isStudentHovered ? 'Images/Student_Hover.png' : 'Images/student.png'" alt="Student"
+                        (click)="selectType(2)">
+                    </div>
+                    <div>
+                        <img [src]="isParentHovered ? 'Images/parent_hover.png' : 'Images/parent.png'" alt="Parent"
+                        (click)="selectType(3)">
+                    </div>
+                    <div>
+                        <img [src]="isEmployeeHovered ? 'Images/employee_hover.png' : 'Images/employee.png'" alt="Employee"
+                        (click)="selectType(1)">
+                    </div>
+                </div> 
+            </div>
+
+            <div class="w-full">
+                <div *ngIf="isEmployeeHovered" class="w-full">
+                    <div class="flex flex-col w-full mb-4">
+                        <label class="primaryTxt mb-2" for="Department">Department</label>
+                        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Department" 
+                        [(ngModel)]="departmentID" (change)="onDepartmentChange($event)">
+                            <option [value]="0" disabled selected hidden>Choose Department</option>
+                            <option *ngFor="let department of departments" [value]="department.id">{{ department.name }}</option>
+                            <option *ngIf="departments.length === 0" disabled selected>No Data Found</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col w-full mb-4">
+                        <label class="mb-2" for="employee" [ngClass]="{ 'text-gray-400': !departmentID, 'primaryTxt': departmentID }">
+                           Choose Employee</label>
+                        <select
+                        class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="employee" [(ngModel)]="requestToBeSend.receiverID"
+                        [disabled]="!departmentID" [ngClass]="{ 'bg-[#EBEBEB]': !departmentID }">
+                            <option [value]="0" disabled selected hidden>Choose Employee</option>
+                            <option *ngFor="let employee of employees" [value]="employee.id">{{ employee.en_name }}</option>
+                            <option *ngIf="employees.length === 0" disabled selected>No Data Found</option>
+                        </select>
+                    </div>
+                </div>
+    
+                <!-- <div *ngIf="!isEmployeeHovered" class="w-full">
+                    <div class="flex flex-col w-full mb-4">
+                        <label class="primaryTxt mb-2" for="School"> {{'School'| translate }}</label>
+                        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="School" 
+                        [(ngModel)]="notification.userFilters.schoolID" (change)="onSchoolChange($event)">
+                            <option [value]="0" disabled selected hidden>{{'Choose'| translate }} {{'School'| translate }}</option>
+                            <option *ngFor="let school of schools" [value]="school.id">{{ school.name }}</option>
+                            <option *ngIf="schools.length === 0" disabled selected> {{'No Data Found'| translate }}
+
+                            </option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col w-full mb-4">
+                        <label class="mb-2" for="Section" [ngClass]="{ 'text-gray-400': !notification.userFilters.schoolID, 'primaryTxt': notification.userFilters.schoolID }">
+                             {{'Choose'| translate }} {{'Section'| translate }}</label>
+                        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Section" 
+                        [(ngModel)]="notification.userFilters.sectionID" (change)="onSectionChange($event)"
+                        [disabled]="!notification.userFilters.schoolID" [ngClass]="{ 'bg-[#EBEBEB]': !notification.userFilters.schoolID }">
+                            <option [value]="0" disabled selected hidden> {{'Choose'| translate }} {{'Section'| translate }}</option>
+                            <option *ngFor="let section of sections" [value]="section.id">{{ section.name }}</option>
+                            <option *ngIf="sections.length === 0" disabled selected> {{'No Data Found'| translate }}</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col w-full mb-4">
+                        <label class="mb-2" for="grade" [ngClass]="{ 'text-gray-400': !notification.userFilters.sectionID, 'primaryTxt': notification.userFilters.sectionID }">
+                            {{'Choose'| translate }} {{'Grade'| translate }}</label>
+                        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="grade" 
+                        [(ngModel)]="notification.userFilters.gradeID" (change)="onGradeChange($event)"
+                        [disabled]="!notification.userFilters.sectionID" [ngClass]="{ 'bg-[#EBEBEB]': !notification.userFilters.sectionID }">
+                            <option [value]="0" disabled selected hidden>{{'Choose'| translate }} {{'Grade'| translate }}</option>
+                            <option *ngFor="let grade of grades" [value]="grade.id">{{ grade.name }}</option>
+                            <option *ngIf="grades.length === 0" disabled selected> {{'No Data Found'| translate }}</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col w-full mb-4">
+                        <label class="mb-2" for="classroom" [ngClass]="{ 'text-gray-400': !notification.userFilters.gradeID, 'primaryTxt': notification.userFilters.gradeID }">
+                              {{'Choose'| translate }} {{'Classroom'| translate }}</label>
+                        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="classroom" 
+                        [(ngModel)]="notification.userFilters.classroomID" (change)="onClassroomChange($event)"
+                        [disabled]="!notification.userFilters.gradeID" [ngClass]="{ 'bg-[#EBEBEB]': !notification.userFilters.gradeID }">
+                            <option [value]="0" disabled selected hidden>{{'Choose'| translate }} {{'Classroom'| translate }}</option>
+                            <option *ngFor="let classroom of classrooms" [value]="classroom.id">{{ classroom.name }}</option>
+                            <option *ngIf="classrooms.length === 0" disabled selected> {{'No Data Found'| translate }}</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col w-full mb-4">
+                        <label class="mb-2" for="student" [ngClass]="{ 'text-gray-400': !notification.userFilters.classroomID, 'primaryTxt': notification.userFilters.classroomID }">
+                             {{'Choose'| translate }}  {{'Student'| translate }}</label>
+                        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="student" 
+                        [(ngModel)]="notification.userFilters.studentID"
+                        [disabled]="!notification.userFilters.classroomID" [ngClass]="{ 'bg-[#EBEBEB]': !notification.userFilters.classroomID }">
+                            <option [value]="0" disabled selected hidden>{{'Choose'| translate }}  {{'Student'| translate }}</option>
+                            <option *ngFor="let student of students" [value]="student.id">{{ student.en_name }}</option>
+                            <option *ngIf="students.length === 0" disabled selected> {{'No Data Found'| translate }}</option>
+                        </select>
+                    </div>
+                </div>  -->
+    
+                <div class="flex flex-col mb-4 w-full">
+                    <label class="mb-2 primaryTxt" for="text">Message</label>
+                    <input id="text" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" 
+                    placeholder="Enter Message" [(ngModel)]="requestToBeSend.message" /> 
+                </div> 
+                <div class="flex flex-col mb-4 w-full">
+                    <label class="mb-2 primaryTxt" for="link">Link</label>
+                    <input id="link" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                        placeholder="Enter Link" [(ngModel)]="requestToBeSend.link" /> 
+                </div> 
+                <div class="w-full mb-4"> 
+                    <div class="bg-[#F6F6F6] flex items-center space-x-4 rtl:space-x-reverse w-full rounded-md border-dashed border-2">
+                        <div class="flex justify-center w-full">
+                            <label for="file-upload" class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
+                                <img *ngIf="!requestToBeSend.fileFile" src="Images/Icon frame.png" class="w-1/4">
+                                <img *ngIf="requestToBeSend.fileFile" src="Images/FileAttached.png" class="w-1/4"> 
+                                <p class="font-normal text-xs md:text-sm text-[#8E8E93] mt-3"><span class="secondaryTxt">Click To Upload</span></p>
+                                <p class="font-normal text-xs md:text-sm text-[#8E8E93]">(Max. File size: 25 MB)</p>
+                            </label>
+                            <input id="file-upload" type="file" class="hidden" (change)="onFileSelected($event)" />
+                        </div>
+                    </div> 
+                </div>   
+            </div>
+        </div>
+
+        <div class="flex justify-end">
+            <button [disabled]="isLoading"
+                class="secondaryBg text-white font-medium px-4 py-2 rounded-lg cursor-pointer" (click)="Send()">
+                <span *ngIf="!isLoading">Send</span>
+                <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+            </button>
+        </div>
+    </div>
+</div>

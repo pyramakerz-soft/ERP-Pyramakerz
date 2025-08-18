@@ -6,7 +6,7 @@ export class Request {
         public message: string = '',
         public seenOrNot: boolean = false,
         public forwardedOrNot: boolean = false,
-        public approvedOrNot: boolean = false, 
+        public approvedOrNot: boolean|null = null, 
         public insertedAt: string = '', 
         public forwardedAt: string = '', 
         public senderID: number = 0,  
