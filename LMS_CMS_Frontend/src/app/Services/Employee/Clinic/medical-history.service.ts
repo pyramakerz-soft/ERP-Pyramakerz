@@ -8,6 +8,7 @@ import { ApiService } from '../../api.service';
   providedIn: 'root',
 })
 export class MedicalHistoryService {
+
   baseUrl = '';
   header = '';
 
@@ -28,7 +29,6 @@ export class MedicalHistoryService {
     return this.http.get<DoctorMedicalHistory[]>(`${this.baseUrl}/MedicalHistory/GetByDoctor`, { headers });
   }
 
-// In medical-history.service.ts
 
 GetByParent(DomainName: string): Observable<ParentMedicalHistory[]> {
     if (DomainName != null) {
@@ -197,6 +197,23 @@ UpdateByParentAsync(
       .set('accept', '*/*');
     return this.http.get<DoctorMedicalHistory>(`${this.baseUrl}/MedicalHistory/GetByIdByDoctor/id?id=${id}`, { headers });
   }
+
+
+GetByIdByParent(id: number, DomainName: string): Observable<ParentMedicalHistory> {
+    if (DomainName != null) {
+        this.header = DomainName;
+    }
+    const token = localStorage.getItem('current_token');
+    const headers = new HttpHeaders()
+        .set('Domain-Name', this.header)
+        .set('Authorization', `Bearer ${token}`)
+        .set('accept', '*/*');
+    
+    return this.http.get<ParentMedicalHistory>(
+        `${this.baseUrl}/MedicalHistory/GetByIdByParent/id?id=${id}`, 
+        { headers }
+    );
+}
 
   
 //   Search(key: string, value: string, DomainName: string): Observable<MedicalHistory[]> {

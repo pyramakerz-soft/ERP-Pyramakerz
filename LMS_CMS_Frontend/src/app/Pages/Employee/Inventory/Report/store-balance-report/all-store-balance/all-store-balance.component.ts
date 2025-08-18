@@ -138,12 +138,12 @@ getColumnCount(): number {
           this.reportData = null;
           this.showTable = true;
           this.isLoading = false;
-          Swal.fire({
-            title: 'Error',
-            text: 'Failed to load report data',
-            icon: 'error',
-            confirmButtonText: 'OK',
-          });
+          // Swal.fire({
+          //   title: 'Error',
+          //   text: 'Failed to load report data',
+          //   icon: 'error',
+          //   confirmButtonText: 'OK',
+          // });
         },
       });
   }

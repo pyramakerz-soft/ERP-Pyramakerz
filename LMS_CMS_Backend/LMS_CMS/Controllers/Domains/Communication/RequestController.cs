@@ -410,12 +410,15 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                 (requestGetDTO.ForwardedToEnglishName, requestGetDTO.ForwardedToArabicName) = GetUserNames(Unit_Of_Work, requestGetDTO.ForwardedToID.Value, 1);
             }
 
-            request.SeenOrNot = true;
-            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-            request.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
-            Unit_Of_Work.request_Repository.Update(request);
+            if(userId == request.ReceiverID && userTypeID == request.ReceiverUserTypeID)
+            {
+                request.SeenOrNot = true;
+                TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+                request.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                Unit_Of_Work.request_Repository.Update(request);
 
-            Unit_Of_Work.SaveChanges();
+                Unit_Of_Work.SaveChanges();
+            }
 
             return Ok(requestGetDTO);
         }
@@ -606,13 +609,18 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                     f => f.IsDeleted != true  && f.ID == forwardRequestDTO.RequestID
                     && (f.ReceiverID == userId && f.ReceiverUserTypeID == userTypeID)
                     );
-            
-            if(forwardRequestDTO.ForwardToID == request.SenderID && request.SenderUserTypeID == 1)
+
+            if(request == null)
+            {
+                return NotFound("You Don't have a request with this ID");
+            }
+
+            if (forwardRequestDTO.ForwardToID == request.SenderID && request.SenderUserTypeID == 1)
             {
                 return BadRequest("You can't send the request back to the employee");
             }
 
-            if(request.ForwardedOrNot == true)
+            if (request.ForwardedOrNot == true)
             {
                 return BadRequest("You have already forwarded the request");
             }
@@ -795,7 +803,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                     return BadRequest("You must select a student");
                 }
 
-                if (NewRequest.StudentID != null)
+                if (userTypeID == 3 && NewRequest.StudentID != null)
                 {
                     Student student = Unit_Of_Work.student_Repository.First_Or_Default(d => d.ID == NewRequest.StudentID && d.IsDeleted != true && d.Parent_Id== userId);
                     if (student == null)

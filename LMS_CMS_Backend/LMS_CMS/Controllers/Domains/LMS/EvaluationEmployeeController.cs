@@ -292,8 +292,148 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             return Ok(evaluationEmployeesDTOs);
         }
 
-        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        
+  
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////--77
+        [HttpGet("EvaluationReport")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Evaluation" }
+        )]
+            public async Task<IActionResult> GetEvaluationReport(
+            [FromQuery] long templateId,
+            [FromQuery] DateOnly fromDate,
+            [FromQuery] DateOnly toDate,
+            [FromQuery] long? employeeId = null,
+            [FromQuery] long? schoolId = null,
+            [FromQuery] long? classroomId = null)
+                {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = userClaims.FirstOrDefault(c => c.Type == "id")?.Value;
+            var userTypeClaim = userClaims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+                return Unauthorized("User ID or Type claim not found.");
+
+            if (templateId == 0 || fromDate == default || toDate == default)
+                return BadRequest("Template ID, From Date, and To Date are required.");
+
+            if (fromDate > toDate)
+                return BadRequest("From Date cannot be greater than To Date.");
+
+            // Query evaluations
+            var query = Unit_Of_Work.evaluationEmployee_Repository.Query()
+                .Where(e => e.IsDeleted != true &&
+                            e.EvaluationTemplateID == templateId &&
+                            e.Date >= fromDate &&
+                            e.Date <= toDate);
+
+            if (employeeId.HasValue)
+                query = query.Where(e => e.EvaluatedID == employeeId.Value);
+
+            if (classroomId.HasValue)
+                query = query.Where(e => e.ClassroomID == classroomId.Value);
+
+            if (schoolId.HasValue)
+                query = query.Where(e => e.Classroom.AcademicYear.School.ID == schoolId.Value);
+
+            var filteredEvaluations = await query
+                .Include(e => e.Classroom)
+                .ThenInclude(c => c.AcademicYear)
+                .ThenInclude(a => a.School)
+                .ToListAsync();
+
+            if (!filteredEvaluations.Any())
+                return NotFound("No evaluations found matching the filters.");
+
+            // Load template with groups/questions
+            var template = await Unit_Of_Work.evaluationTemplate_Repository
+                .FindByIncludesAsync(
+                    t => t.ID == templateId && t.IsDeleted != true,
+                    q => q.Include(t => t.EvaluationTemplateGroups)
+                          .ThenInclude(g => g.EvaluationTemplateGroupQuestions)
+                );
+
+            if (template == null)
+                return NotFound("Evaluation template not found.");
+
+            var reports = new List<EvaluationReportDto>();
+
+            // Group evaluations by date
+            var groupedByDate = filteredEvaluations
+                .GroupBy(e => e.Date)
+                .OrderBy(g => g.Key);
+
+            foreach (var group in groupedByDate)
+            {
+                var evalIdsForDay = group.Select(e => e.ID).ToList();
+
+                // Build question groups with averages
+                var questionGroups = template.EvaluationTemplateGroups
+                    .Where(g => g.IsDeleted != true)
+                    .Select(g => new EvaluationGroupDto
+                    {
+                        Id = g.ID,
+                        EnglishTitle = g.EnglishTitle,
+                        ArabicTitle = g.ArabicTitle,
+                        EvaluationEmployeeQuestions = g.EvaluationTemplateGroupQuestions
+                            .Where(q => q.IsDeleted != true)
+                            .Select(q => new EvaluationQuestionDto
+                            {
+                                Id = q.ID,
+                                Mark = q.Mark,
+                                Note = string.Empty,
+                                EvaluationTemplateGroupQuestionID = q.ID,
+                                QuestionEnglishTitle = q.EnglishTitle,
+                                QuestionArabicTitle = q.ArabicTitle,
+                                Average = Unit_Of_Work.evaluationEmployeeQuestion_Repository
+                                    .Query()
+                                    .Where(eq => eq.EvaluationTemplateGroupQuestionID == q.ID &&
+                                                 evalIdsForDay.Contains(eq.EvaluationEmployeeID) &&
+                                                 eq.IsDeleted != true)
+                                    .Average(eq => (decimal?)eq.Mark)?.ToString("F2") ?? "0.00"
+                            }).ToList()
+                    }).ToList();
+
+                // Book corrections for the day
+                var corrections = await Unit_Of_Work.evaluationEmployeeStudentBookCorrection_Repository
+                    .Select_All_With_IncludesById<EvaluationEmployeeStudentBookCorrection>(
+                        c => c.IsDeleted != true && evalIdsForDay.Contains(c.EvaluationEmployeeID),
+                        q => q.Include(c => c.Student),
+                        q => q.Include(c => c.EvaluationBookCorrection)
+                    );
+
+                var bookCorrectionDtos = corrections
+                    .GroupBy(c => new { c.EvaluationBookCorrectionID, c.StudentID })
+                    .Select(grp => new EvaluationBookCorrectionDto
+                    {
+                        Id = grp.Key.StudentID,
+                        State = (int)Math.Round(grp.Average(c => (double)c.State)),
+                        Note = string.Join("; ", grp.Select(c => c.Note).Where(n => !string.IsNullOrEmpty(n)).Distinct()),
+                        StudentID = grp.Key.StudentID,
+                        StudentEnglishName = grp.First().Student?.en_name ?? "",
+                        StudentArabicName = grp.First().Student?.ar_name ?? "",
+                        EvaluationBookCorrectionID = grp.Key.EvaluationBookCorrectionID,
+                        EvaluationBookCorrectionEnglishName = grp.First().EvaluationBookCorrection?.EnglishName ?? "",
+                        EvaluationBookCorrectionArabicName = grp.First().EvaluationBookCorrection?.ArabicName ?? "",
+                        AverageStudent = grp.Average(c => (double)c.State).ToString("F2")
+                    }).ToList();
+
+                // Add report for that date
+                reports.Add(new EvaluationReportDto
+                {
+                    Date = group.Key,
+                    EvaluationEmployeeQuestionGroups = questionGroups,
+                    EvaluationEmployeeStudentBookCorrections = bookCorrectionDtos
+                });
+            }
+
+            return Ok(reports);
+        }
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////--77
+
         [HttpGet("GetEvaluation/{evaluationID}")]
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee" },

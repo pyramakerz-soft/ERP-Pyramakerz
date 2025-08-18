@@ -35,7 +35,7 @@ User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '',
   UserID: number = 0;
  isRtl: boolean = false;
   subscription!: Subscription;
-  keysArray: string[] = ['id', 'docNumber' ,"date", "payableDocTypesName" ,"linkFileName"];
+  keysArray: string[] = ['id', 'docNumber' , "payableDocTypesName" ,"linkFileName"];
 
   path: string = '';
   key: string = 'id';

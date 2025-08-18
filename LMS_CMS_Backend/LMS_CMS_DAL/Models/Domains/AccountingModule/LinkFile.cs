@@ -17,7 +17,7 @@ namespace LMS_CMS_DAL.Models.Domains.AccountingModule
         public string Name { get; set; }
         public string ArName { get; set; }
         public string? TableName { get; set; }
-        public string? AccountType { get; set; }
+        public bool? AccountType { get; set; }
 
         [ForeignKey("MotionType")]
         public long? MotionTypeID { get; set; }

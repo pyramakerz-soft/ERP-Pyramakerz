@@ -39,8 +39,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
             modelBuilder.Entity("LMS_CMS_DAL.AccountingModule.Reports.AccountingEntriesReport", b =>
                 {
-                    b.Property<string>("Account")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<long?>("AccountID")
+                        .HasColumnType("bigint");
 
                     b.Property<decimal?>("Balance")
                         .HasColumnType("decimal(18,2)");
@@ -55,15 +55,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<long?>("DetailsID")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("LinkFileID")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("MainAccount")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<long?>("MainAccountNo")
                         .HasColumnType("bigint");
 
                     b.Property<long?>("MasterID")
@@ -1008,8 +999,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<long>("ID")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("AccountType")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<bool?>("AccountType")
+                        .HasColumnType("bit");
 
                     b.Property<string>("ArName")
                         .IsRequired()
@@ -11669,13 +11660,13 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<long?>("InsertedByUserId")
                         .HasColumnType("bigint");
 
-                    b.Property<bool>("IsAbsent")
-                        .HasColumnType("bit");
-
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsLate")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsPresent")
                         .HasColumnType("bit");
 
                     b.Property<int?>("LateTimeInMinutes")

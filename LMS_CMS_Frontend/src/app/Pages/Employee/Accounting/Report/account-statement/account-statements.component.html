@@ -1,43 +1,44 @@
-<!-- supplier-statement.component.html -->
 <div class="flex justify-between mb-3">
     <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ type }}</h1>
 </div>
 
-<div class="flex justify-start items-center space-x-4 rtl:space-x-reverse flex-wrap">
-    <div class="w-[30%] min-w-[200px]">
+<div class="my-5 flex flex-wrap md:flex-nowrap items-end space-x-0 md:space-x-6 space-y-4 md:space-y-0 mb-6">
+    <!-- Supplier Selector -->
+    <div class="w-full md:w-1/4">
         <label for="supplierSelect" class="block mb-2 text-sm font-medium text-gray-900">{{'Supplier'| translate }}</label>
         <select id="supplierSelect" [(ngModel)]="selectedSupplier" (change)="InputChange()"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
-            <option [ngValue]="null" disabled selected>{{'Select Supplier' | translate}}</option>
-                        <option *ngFor="let supplier of suppliers" [value]="supplier.id">
-                {{ supplier.name }} ({{ supplier.id }})
+            <option [ngValue]="null" disabled selected hidden> {{'Choose'| translate }} {{'Supplier'| translate }}</option>
+            <option *ngFor="let supplier of suppliers" [ngValue]="supplier.id">
+                {{ supplier.name }}
             </option>
         </select>
     </div>
-    <div class="w-[30%] min-w-[200px]">
+
+    <!-- Date From -->
+    <div class="w-full md:w-1/4">
         <label for="fromDate" class="block mb-2 text-sm font-medium text-gray-900">{{'Start Date'| translate }}</label>
         <input id="fromDate" type="date" [(ngModel)]="SelectedStartDate" (change)="InputChange()"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"> 
     </div> 
-    <div class="w-[30%] min-w-[200px]">
+
+    <!-- Date To -->
+    <div class="w-full md:w-1/4">
         <label for="toDate" class="block mb-2 text-sm font-medium text-gray-900">{{'End Date'| translate }}</label>
         <input id="toDate" type="date" [(ngModel)]="SelectedEndDate" (change)="InputChange()"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"> 
     </div> 
 
-    <div class="mt-7 ml-2">
+    <div class="w-full md:w-1/6 flex justify-end mt-4 md:mt-0">
         <button class="p-3 font-medium text-xl rounded-lg" (click)="ViewReport()"
-            [disabled]="!selectedSupplier || !SelectedStartDate || !SelectedEndDate"
-            [ngClass]="{ 
-                'bg-gray-100 text-gray-300': !selectedSupplier || !SelectedStartDate || !SelectedEndDate, 
-                'secondaryBg text-white': selectedSupplier && SelectedStartDate && SelectedEndDate
+            [disabled]="!SelectedStartDate || !SelectedEndDate || !selectedSupplier  " [ngClass]="{
+                'bg-gray-100 text-gray-300': !SelectedStartDate || !SelectedEndDate || !selectedSupplier ,
+                'secondaryBg text-white': SelectedStartDate && SelectedEndDate && selectedSupplier
             }">
            {{'View Report'| translate }}
         </button>
     </div>
 </div>
-
-<!-- Rest of the template remains the same -->
   
 <div *ngIf="showTable" class="mt-5 flex justify-end space-x-4 rtl:space-x-reverse">
     <img class="w-5 cursor-pointer" src="Icons/Excel.png">
@@ -46,15 +47,17 @@
 </div>
 
 <div *ngIf="showTable" class="mt-5">
-    <div *ngIf="tableData.length == 0" class="w-full justify-center items-center flex">
+    <div *ngIf="isLoading" class="w-full justify-center items-center flex py-10">
+        <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary"></div>
+    </div>
+    
+    <div *ngIf="!isLoading && tableData.length == 0" class="w-full justify-center items-center flex">
         <span class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-             {{'No Data Found'| translate }}
+            {{'No Data Found'| translate }}
         </span>
     </div>
     
-    <div *ngIf="tableData.length > 0" class="mb-4">
-
-
+    <div *ngIf="!isLoading && tableData.length > 0" class="mb-4">
         <div class="overflow-x-auto rounded-2xl border border-[#BDBDBD]">
             <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
                 <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
@@ -89,12 +92,6 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr *ngIf="tableData.length === 0">
-                        <td colspan="9"
-                            class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-                            {{ 'No Data Found' | translate }}
-                        </td>
-                    </tr>
                     <tr *ngFor="let item of tableData; let i = index" 
                         [ngClass]="{ 'bg-gray-100': i % 2 === 1, 'bg-white': i%2 !=1 }" 
                         class="border-t border-gray-300 text-xs md:text-sm">
@@ -108,10 +105,10 @@
                             {{ item.account }}
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            {{ item.mainAccount || '-'}}
+                            {{ item.mainAccount || '-' }}
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            {{ item.subAccount || '-'}}
+                            {{ item.subAccount || '-' }}
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             {{ item.debit }}
@@ -131,7 +128,7 @@
         </div>
     </div>
 
-<div *ngIf="tableData.length > 0" class="">
+    <div *ngIf="tableData.length > 0" class="">
         <div class="grid grid-cols-2 gap-4 mb-4">
             <div>
                 <label class="font-bold">{{ 'Opening Balance' | translate }}:</label>
@@ -150,6 +147,7 @@
                 <span class="ml-2">{{ fullTotals.difference }}</span>
             </div>
         </div>
+    </div>
 </div>
 
 <div *ngIf="showTable" class="mt-8 flex justify-between items-center">
@@ -189,28 +187,8 @@
 
 <div class="absolute -top-[9999px] -left-[9999px]">
     <div id="Data" class="hidden">
-        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="type"
-            [tableHeaders]="['Serial', 'Date', 'Account', 'Main Account', 'Sub Account', 'Debit', 'Credit', 'Balance', 'Notes']"
-            [tableData]="getTableDataForExport()" #pdfComponentRef>
+        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="type" [infoRows]="getInfoRows()"
+            [tableDataWithHeaderArray]="getTableDataWithHeader()" #pdfComponentRef>
         </app-pdf-print>
     </div>
 </div>
-
-
-<!-- <div class="absolute  -top-[9999px] -left-[9999px]">
-    <div id="Data" class="hidden">
-        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'Inventory Transactions Report'"
-        [infoRows]="[
-      { keyEn: 'From Date: ' + this.dateFrom },
-      { keyEn: 'To Date: ' + this.dateTo },
-      { keyEn: 'Store: ' + this.getStoreName() },
-            ]"
-        [tableHeaders]="['Invoice #', 'Date', 'Store', 'Total Amount', 'Transaction Type']"
-        [tableData]="transactionsForExport" #pdfComponentRef>
-    </app-pdf-print>
-</div>
-</div>
-
-            [infoRows]="getInfoRows()"
-
- -->

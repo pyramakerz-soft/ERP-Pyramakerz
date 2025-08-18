@@ -437,8 +437,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 return Ok(result);
          }
 
-       /////////////////////////////////////////////////////////////////////////////////////-777
-        
+        /////////////////////////////////////////////////////////////////////////////////////-777
+
         //[HttpGet("AllStoresBalance")]
         //[Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Inventory" })]
         //public async Task<IActionResult> GetAllStoresBalanceAsync(
@@ -463,7 +463,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         //            q => q.Include(id => id.ShopItem)
         //                  .ThenInclude(si => si.InventorySubCategories)
         //                  .ThenInclude(sub => sub.InventoryCategories));
-              
+
         //     if (data == null || data.Count == 0)
         //        return NotFound("No inventory items found.");
         //    // جلب جميع StoreCategories مرة واحدة
@@ -517,7 +517,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         //            (overdrawnBalance && x.Quantity < 0) ||
         //            (zeroBalances && x.Quantity == 0))
         //        .ToList();
-                 
+
         //        var totalQuantity = groupedData.Sum(x => x.Quantity);
         //        var totalPurchaseValue = groupedData.Sum(x => x.TotalPurchaseValue ?? 0);
         //        var totalSalesValue = groupedData.Sum(x => x.TotalSalesValue ?? 0);
@@ -573,10 +573,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         //}
 
         /////////////////////////////////////////////////////////////////////////////////////-777
-       
-    [HttpGet("AllStoresBalanceHorizontal")]
-    [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Inventory" })]
-    public async Task<IActionResult> GetAllStoresBalanceHorizontalAsync(
+
+
+        [HttpGet("AllStoresBalanceHorizontal")]
+        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Inventory" })]
+        public async Task<IActionResult> GetAllStoresBalanceHorizontalAsync(
         DateTime toDate, int reportType = 1, int categoryId = 0, int typeId = 0,
         bool hasBalance = false, bool overdrawnBalance = false, bool zeroBalances = false)
         {
@@ -648,36 +649,37 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                         TotalCost = totalCost
                     };
                 })
-
                 .Where(x =>
                     (hasBalance && x.Quantity > 0) ||
                     (overdrawnBalance && x.Quantity < 0) ||
                     (zeroBalances && x.Quantity == 0))
                 .ToList();
 
-          
             var uniqueStores = storeItems.Select(x => new { x.StoreId, x.StoreName }).Distinct().ToList();
-
             var uniqueItems = storeItems.Select(x => new { x.ItemId, x.ItemName }).Distinct().ToList();
 
             var horizontalReport = new List<object>();
+
             foreach (var item in uniqueItems)
             {
                 var itemStores = storeItems.Where(x => x.ItemId == item.ItemId).ToList();
                 var itemReport = new Dictionary<string, object>
-             {
-                 { "itemCode", item.ItemId },
-                 { "itemName", item.ItemName }
-             };
+                {
+                    { "itemCode", item.ItemId },
+                    { "itemName", item.ItemName}};
+
+
                 var stores = new List<object>();
                 foreach (var store in uniqueStores)
                 {
                     var storeData = itemStores.FirstOrDefault(x => x.StoreId == store.StoreId);
                     var storeEntry = new Dictionary<string, object>
-            {
-                { "storeName", store.StoreName },
-                { "quantity", storeData?.Quantity ?? (decimal)0 } 
-            };
+                {
+                    {"storeName", store.StoreName },
+                    {"quantity", decimal.Round((storeData?.Quantity ?? 0m), 2)}
+
+                };
+
                     if (storeData != null)
                     {
                         switch (reportType)
@@ -685,16 +687,16 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                             case 1: // QuantityOnly
                                 break;
                             case 2: // PurchasePrice
-                                storeEntry["PurchasePrice"] = storeData.PurchasePrice;
-                                storeEntry["value"] = storeData.TotalPurchaseValue ?? (decimal)0;
+                                storeEntry["PurchasePrice"] = Math.Round(storeData.PurchasePrice, 2);
+                                storeEntry["value"] = Math.Round(storeData.TotalPurchaseValue ?? 0, 2);
                                 break;
                             case 3: // SalesPrice
-                                storeEntry["SalesPrice"] = storeData.SalesPrice;
-                                storeEntry["value"] = storeData.TotalSalesValue ?? (decimal)0; 
+                                storeEntry["SalesPrice"] = Math.Round(storeData.SalesPrice, 2);
+                                storeEntry["value"] = Math.Round(storeData.TotalSalesValue ?? 0, 2);
                                 break;
                             case 4: // CostValue
-                                storeEntry["AverageCost"] = storeData.AverageCost ?? (decimal)0; 
-                                storeEntry["value"] = storeData.TotalCost ?? (decimal)0; 
+                                storeEntry["AverageCost"] = Math.Round(storeData.AverageCost ?? 0, 2);
+                                storeEntry["value"] = Math.Round(storeData.TotalCost ?? 0, 2);
                                 break;
                         }
                     }
@@ -702,43 +704,57 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                     {
                         if (reportType != 1)
                         {
-                            storeEntry["price"] = (decimal)0; 
-                            storeEntry["value"] = (decimal)0; 
+                            storeEntry["price"] = 0.00m;
+                            storeEntry["value"] = 0.00m;
                         }
                     }
                     stores.Add(storeEntry);
                 }
+
+                decimal totalQuantityToItem = stores.Sum(s => (decimal)((Dictionary<string, object>)s)["quantity"]);
+                decimal totalValueToItem = 0;
+
+                if (reportType == 1)
+                {
+                    totalValueToItem = totalQuantityToItem;
+                }
+                else
+                {
+                    totalValueToItem = stores.Sum(s => (decimal)((Dictionary<string, object>)s)["value"]);
+                }
+
                 itemReport["stores"] = stores;
+
+                if (reportType != 1)
+                    itemReport["TotalQuantityToItem"] = Math.Round(totalQuantityToItem, 2);
+
+                itemReport["TotalValueToItem"] = Math.Round(totalValueToItem, 2);
+
                 horizontalReport.Add(itemReport);
             }
+
             var grandTotals = new Dictionary<string, object>
-            {{ 
-               "TotalQuantity", horizontalReport.Sum(x => ((List<object>)((Dictionary<string, object>)x)["stores"]).Sum(s => 
-               (decimal)((Dictionary<string, object>)s)["quantity"])) }
-            };
-            if (reportType == 2) // PurchasePrice
-            {
-                grandTotals["TotalValue"] = horizontalReport.Sum(x => ((List<object>)((Dictionary<string, object>)x)["stores"]).Sum(s => 
-                (decimal)((Dictionary<string, object>)s)["value"]));
-            }
-            else if (reportType == 3) // SalesPrice
+                {
+                    { "TotalQuantity", horizontalReport.Sum(x => ((List<object>)((Dictionary<string, object>)x)["stores"]).Sum(s =>
+                        (decimal)((Dictionary<string, object>)s)["quantity"])) }
+                };
+
+            if (reportType != 1)
             {
                 grandTotals["TotalValue"] = horizontalReport.Sum(x => ((List<object>)((Dictionary<string, object>)x)["stores"]).Sum(s =>
-                (decimal)((Dictionary<string, object>)s)["value"]));
+                    (decimal)((Dictionary<string, object>)s)["value"]));
             }
-            else if (reportType == 4) // CostValue
-            {
-                grandTotals["TotalValue"] = horizontalReport.Sum(x => ((List<object>)((Dictionary<string, object>)x)["stores"]).Sum(s => 
-                (decimal)((Dictionary<string, object>)s)["value"]));
-            }
+
             var result = new
             {
                 ReportType = GetReportTypeName(reportType),
                 Data = horizontalReport,
                 GrandTotals = grandTotals
             };
+
             return Ok(result);
         }
+
         private string GetReportTypeName(int reportType)
         {
             return reportType switch
@@ -751,8 +767,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             };
         }
 
-        /////////////////////////////////////////////////////////////////////////////////////-777
-
+        /// //////////////////////////////////////////////////////////////////////////////-777
 
         [HttpGet("BySaleId/{id}")]
         [Authorize_Endpoint_(
@@ -781,7 +796,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         }
 
         /// //////////////////////////////////////////////////////////////////////////////-777
-        
+
 
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
