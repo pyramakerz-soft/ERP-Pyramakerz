@@ -38,6 +38,7 @@ export class SupplierStatementService {
     return this.http.get<any>(
       `${this.baseUrl}/AccountStatementReports/GetSupplierStatement?fromDate=${startDate}&toDate=${endDate}&SubAccountNumber=${subAccountNumber}&pageNumber=${pageNumber}&pageSize=${pageSize}`,
       //https://localhost:7205/api/with-domain/AccountStatementReports/GetSupplierStatement?fromDate=2024-08-12&toDate=2025-08-12&SubAccountNumber=1&pageNumber=1&pageSize=10
+      //localhost:7205/api/with-domain/AccountStatementReports/GetSupplierStatement?fromDate=2025-06-04&toDate=2025-08-13&SubAccountNumber=null&pageNumber=1&pageSize=10
       { headers }
     );
   }

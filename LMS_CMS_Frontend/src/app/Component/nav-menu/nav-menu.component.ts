@@ -18,6 +18,8 @@ import { OctaService } from '../../Services/Octa/octa.service';
 import { NotificationService } from '../../Services/Employee/Communication/notification.service';
 import { Notification } from '../../Models/Communication/notification';
 import { RealTimeNotificationServiceService } from '../../Services/shared/real-time-notification-service.service';
+import { RequestService } from '../../Services/shared/request.service';
+import { Request } from '../../Models/Communication/request';
 
 @Component({
   selector: 'app-nav-menu',
@@ -33,6 +35,7 @@ export class NavMenuComponent {
   userName: string = "";
   isPopupOpen = false;
   isNotificationPopupOpen = false;
+  isRequuestPopupOpen = false;
   allTokens: { id: number, key: string; KeyInLocal: string; value: string; UserType: string }[] = [];
   User_Data_After_Login = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   subscription: Subscription | undefined;
@@ -46,13 +49,16 @@ export class NavMenuComponent {
 
   notifications: Notification[] = []
   notificationByID:Notification = new Notification()
+  requests: Request[] = []
+  requestByID:Request = new Request()
   
   private destroy$ = new Subject<void>();
   
   notificationsUnSeenCount = 0
+  requestsUnSeenCount = 0
   constructor(private router: Router, public account: AccountService, public languageService: LanguageService, public ApiServ: ApiService, public octaService:OctaService,
     private translate: TranslateService, private communicationService: NewTokenService, private logOutService: LogOutService, 
-    private notificationService: NotificationService, private realTimeService: RealTimeNotificationServiceService) { }
+    private notificationService: NotificationService, private realTimeService: RealTimeNotificationServiceService, public requestService:RequestService) { }
 
   ngOnInit() {
     this.GetUserInfo();
@@ -65,6 +71,8 @@ export class NavMenuComponent {
     this.DomainName = this.ApiServ.GetHeader();
     
     this.loadUnseenNotifications()
+    this.loadUnseenRequests()
+
     // Subscribe to notification opened events
     this.notificationService.notificationOpened$.subscribe(() => {
       this.loadUnseenNotifications();
@@ -74,6 +82,12 @@ export class NavMenuComponent {
   loadUnseenNotifications() {
     this.notificationService.UnSeenNotificationCount(this.DomainName).subscribe(
       data => this.notificationsUnSeenCount = data
+    );
+  }
+
+  loadUnseenRequests() {
+    this.requestService.UnSeenRequestCount(this.DomainName).subscribe(
+      data => this.requestsUnSeenCount = data
     );
   }
 
@@ -132,15 +146,29 @@ export class NavMenuComponent {
     this.getAllTokens();
     this.isPopupOpen = !this.isPopupOpen;
     this.isNotificationPopupOpen = false;
+    this.isRequuestPopupOpen = false;
   }
   
   toggleNotificationPopup(){
     this.notifications = []
     this.isPopupOpen = false;
+    this.isRequuestPopupOpen = false;
     this.isNotificationPopupOpen = !this.isNotificationPopupOpen;
     this.notificationService.ByUserIDFirst5(this.DomainName).subscribe(
       data => {
         this.notifications = data
+      }
+    )
+  }
+
+  toggleRequestPopup(){
+    this.requests = []
+    this.isPopupOpen = false;
+    this.isNotificationPopupOpen = false;
+    this.isRequuestPopupOpen = !this.isRequuestPopupOpen;
+    this.requestService.ByUserIDFirst5(this.DomainName).subscribe(
+      data => {
+        this.requests = data
       }
     )
   }
@@ -160,6 +188,7 @@ export class NavMenuComponent {
     if (!clickedInsideAny) {
       this.isPopupOpen = false;
       this.isNotificationPopupOpen = false;
+      this.isRequuestPopupOpen = false;
     }
   }
 
@@ -378,6 +407,10 @@ export class NavMenuComponent {
     this.router.navigateByUrl('CommunicationModule/My Notifications')
   }
 
+  viewAllRequests() {
+    this.router.navigateByUrl('CommunicationModule/My Requests')
+  }
+
   formatInsertedAt(dateString: string | Date): string {
     if (!dateString) return '';
 
@@ -402,7 +435,7 @@ export class NavMenuComponent {
     }
   }
 
-  getImageName(imageLink: string): string {
+  getFileName(imageLink: string): string {
     const parts = imageLink.split('/');
     return parts[parts.length - 1];
   }
@@ -420,6 +453,17 @@ export class NavMenuComponent {
     )
   } 
 
+  viewRequest(request:Request){
+    this.requestByID = new Request()
+    this.requestService.ByUserIDAndRequestID(request.id, this.DomainName).subscribe(
+      data => {
+        this.requestByID = data
+        document.getElementById("RequestModal")?.classList.remove("hidden");
+        document.getElementById("RequestModal")?.classList.add("flex"); 
+      }
+    )
+  }
+
   LinkOpened(notificationShared:Notification){ 
     this.notificationService.LinkOpened(notificationShared.id, this.DomainName).subscribe(
       data => { 
@@ -434,5 +478,52 @@ export class NavMenuComponent {
   closeNotificationModal() {
     document.getElementById("NotificationModal")?.classList.remove("flex");
     document.getElementById("NotificationModal")?.classList.add("hidden"); 
+  }
+
+  closeRequestModal() {
+    document.getElementById("RequestModal")?.classList.remove("flex");
+    document.getElementById("RequestModal")?.classList.add("hidden"); 
+  }
+
+  Accept(request:Request){
+    Swal.fire({
+      title: 'Are you sure you want to Accept this Request?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#089B41',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: 'Accept',
+      cancelButtonText: 'Cancel',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.requestService.Accept(request.id, this.DomainName).subscribe((d) => {
+          request.approvedOrNot=true
+          request.seenOrNot=true
+        });
+      }
+    });
+  }
+
+  Decline(request:Request){
+    Swal.fire({
+      title: 'Are you sure you want to Decline this Request?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#089B41',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: 'Decline',
+      cancelButtonText: 'Cancel',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.requestService.Decline(request.id, this.DomainName).subscribe((d) => {
+          request.approvedOrNot=false
+          request.seenOrNot=true
+        });
+      }
+    });
+  }
+
+  Forward(request:Request){
+
   }
 }

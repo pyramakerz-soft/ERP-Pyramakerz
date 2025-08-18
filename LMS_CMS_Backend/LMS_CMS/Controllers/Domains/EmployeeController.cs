@@ -216,6 +216,152 @@ namespace LMS_CMS_PL.Controllers.Domains
 
         ///////////////////////////////////////////////////////////////////////////////////////
 
+        [HttpGet("GetWhoCanAcceptRequestsFromEmployeeByDepartmentId/{DepartmentId}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" }
+        )]
+        public IActionResult GetWhoCanAcceptRequestsFromEmployeeByDepartmentId(long DepartmentId)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+            Department department = Unit_Of_Work.department_Repository.Select_By_Id(DepartmentId);
+            if (department == null)
+            {
+                return NotFound("No Department with this Id");
+            }
+            List<Employee> employees = Unit_Of_Work.employee_Repository.FindBy(
+                    sem => sem.IsDeleted != true && sem.DepartmentID == DepartmentId && sem.CanReceiveRequest == true);
+
+            if (employees == null || employees.Count == 0)
+            {
+                return NotFound("There is no employees in this department that can accept requests");
+            }
+
+            List<Employee_GetDTO> employeeDTOs = mapper.Map<List<Employee_GetDTO>>(employees); 
+
+            return Ok(employeeDTOs);
+        }
+        
+        ///////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpGet("GetWhoCanAcceptRequestsFromParentAndStudentByDepartmentId/{DepartmentId}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee", "parent", "student" }
+        )]
+        public IActionResult GetWhoCanAcceptRequestsFromParentAndStudentByDepartmentId(long DepartmentId)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+            Department department = Unit_Of_Work.department_Repository.Select_By_Id(DepartmentId);
+            if (department == null)
+            {
+                return NotFound("No Department with this Id");
+            }
+            List<Employee> employees = Unit_Of_Work.employee_Repository.FindBy(
+                    sem => sem.IsDeleted != true && sem.DepartmentID == DepartmentId && sem.CanReceiveRequestFromParent == true);
+
+            if (employees == null || employees.Count == 0)
+            {
+                return NotFound("There is no employees in this department that can accept requests");
+            }
+
+            List<Employee_GetDTO> employeeDTOs = mapper.Map<List<Employee_GetDTO>>(employees); 
+
+            return Ok(employeeDTOs);
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpGet("GetTeachersCoTeachersRemedialTeachersBySubjectIdAndStudentId/{SubjectId}/{StudentId}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee", "parent", "student" }
+        )]
+        public async Task<IActionResult> GetTeachersCoTeachersRemedialTeachersBySubjectIdAndStudentIdAsync(long SubjectId, long StudentId)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+            Subject subject = Unit_Of_Work.subject_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == SubjectId);
+            if (subject == null)
+            {
+                return NotFound("No Subject with this Id");
+            }
+            
+            Student student = Unit_Of_Work.student_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == StudentId);
+            if (student == null)
+            {
+                return NotFound("No student with this Id");
+            } 
+
+            List<long> teacherIDs = new List<long>();
+
+            // Get student current grade
+            StudentGrade studentGrade = Unit_Of_Work.studentGrade_Repository.First_Or_Default(
+                d => d.IsDeleted != true && d.Grade.IsDeleted != true && d.Grade.Section.IsDeleted != true && d.AcademicYear.IsDeleted != true && d.AcademicYear.School.IsDeleted != true
+                && d.AcademicYear.IsActive == true && d.StudentID == StudentId);
+
+            if (studentGrade != null)
+            {
+                // Get his classroom
+                StudentClassroom studentClassroom = Unit_Of_Work.studentClassroom_Repository.First_Or_Default(
+                    d => d.IsDeleted != true && d.Classroom.IsDeleted != true && d.Classroom.AcademicYear.IsDeleted != true && d.Classroom.AcademicYear.IsActive == true
+                    && d.StudentID == StudentId && d.Classroom.GradeID == studentGrade.GradeID);
+
+                if (studentClassroom != null)
+                {
+                    StudentClassroomSubject studentClassroomSubject = Unit_Of_Work.studentClassroomSubject_Repository.First_Or_Default(
+                        d => d.IsDeleted != true && d.StudentClassroomID == studentClassroom.ID && d.Subject.IsDeleted != true && d.Hide == false && d.SubjectID == SubjectId);
+
+                    if (studentClassroomSubject != null)
+                    {
+                        ClassroomSubject classroomSubject = await Unit_Of_Work.classroomSubject_Repository.FindByIncludesAsync(
+                            d => d.IsDeleted != true && d.ClassroomID == studentClassroom.ClassID && d.SubjectID == SubjectId && d.Hide == false,
+                            query => query.Include(d => d.Teacher)
+                            );
+
+                        if (classroomSubject != null)
+                        {
+                            if(classroomSubject.TeacherID != null && classroomSubject.Teacher.IsDeleted != true)
+                            {
+                                teacherIDs.Add(classroomSubject.TeacherID.Value);
+                            }
+                             
+                            List<ClassroomSubjectCoTeacher> classroomSubjectCoTeachers = Unit_Of_Work.classroomSubjectCoTeacher_Repository.FindBy(
+                            d => d.ClassroomSubjectID == classroomSubject.ID && d.IsDeleted != true && d.CoTeacher.IsDeleted != true
+                            );
+                            if (classroomSubjectCoTeachers != null && classroomSubjectCoTeachers.Count != 0)
+                            {
+                                teacherIDs.AddRange(classroomSubjectCoTeachers.Select(ct => ct.CoTeacherID));
+                            }
+                        }
+                    } 
+                }
+            }
+
+            List<RemedialClassroomStudent> remedialClassroomStudents = await Unit_Of_Work.remedialClassroomStudent_Repository.Select_All_With_IncludesById<RemedialClassroomStudent>(
+                d => d.IsDeleted != true && d.RemedialClassroom.IsDeleted != true && d.RemedialClassroom.Subject.IsDeleted != true && d.RemedialClassroom.AcademicYear.IsDeleted != true
+                && d.RemedialClassroom.AcademicYear.School.IsDeleted != true && d.RemedialClassroom.Subject.Grade.IsDeleted != true && d.RemedialClassroom.Subject.Grade.Section.IsDeleted != true
+                && d.RemedialClassroom.AcademicYear.IsActive == true && d.StudentID == StudentId && d.RemedialClassroom.SubjectID == SubjectId,
+                query => query.Include(d => d.RemedialClassroom)
+                );
+
+            if (remedialClassroomStudents != null && remedialClassroomStudents.Count != 0)
+            {
+                teacherIDs.AddRange(remedialClassroomStudents.Select(ct => ct.RemedialClassroom.TeacherID));
+            }
+
+            if (teacherIDs == null || teacherIDs.Count == 0)
+            {
+                return NotFound("There are no teachers for this student and subject");
+            }
+
+            teacherIDs = teacherIDs.Distinct().ToList();
+
+            List<Employee> employees = Unit_Of_Work.employee_Repository.FindBy(d => d.IsDeleted != true && teacherIDs.Contains(d.ID));
+
+            List<Employee_GetDTO> employeeDTOs = mapper.Map<List<Employee_GetDTO>>(employees);
+
+            return Ok(employeeDTOs);
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////////////
+
         [HttpGet("{empId}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" }
@@ -337,9 +483,9 @@ namespace LMS_CMS_PL.Controllers.Domains
             if (NewEmployee.EmployeeTypeID == 2)
             {
                 if (NewEmployee.LicenseNumber == null)
-                    return BadRequest("LicenseNumber Is Required");
+                    return BadRequest("License Number Is Required");
                 if (NewEmployee.ExpireDate == null)
-                    return BadRequest("ExpireDate Is Required");
+                    return BadRequest("Expire Date Is Required");
             }
 
             Employee employee = Unit_Of_Work.employee_Repository.First_Or_Default(e => e.User_Name == NewEmployee.User_Name);
@@ -586,12 +732,12 @@ namespace LMS_CMS_PL.Controllers.Domains
             {
                 if (newEmployee.LicenseNumber == null)
                 {
-                    return BadRequest("LicenseNumber is required.");
+                    return BadRequest("License Number is required.");
                 }
 
                 if (newEmployee.ExpireDate == null)
                 {
-                    return BadRequest("ExpireDate is required.");
+                    return BadRequest("Expire Date is required.");
                 }
             }
             var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Attachments");

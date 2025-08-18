@@ -48,6 +48,15 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             List<MedalGetDTO> DTO = mapper.Map<List<MedalGetDTO>>(medals);
+            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+
+            foreach (var item in DTO)
+            {
+                if (!string.IsNullOrEmpty(item.ImageLink))
+                {
+                    item.ImageLink = $"{serverUrl}{item.ImageLink.Replace("\\", "/")}";
+                }
+            }
 
             return Ok(DTO);
         }
@@ -72,6 +81,12 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             MedalGetDTO DTO = mapper.Map<MedalGetDTO>(medals);
+            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+
+            if (!string.IsNullOrEmpty(DTO.ImageLink))
+            {
+                DTO.ImageLink = $"{serverUrl}{DTO.ImageLink.Replace("\\", "/")}";
+            }
 
             return Ok(DTO);
         }
@@ -111,7 +126,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             if (newMedal.ImageForm != null)
             {
-                string returnFileInput = _fileImageValidationService.ValidateImageFile(newMedal.ImageForm);
+                string returnFileInput = await _fileImageValidationService.ValidateImageFileAsync(newMedal.ImageForm);
                 if (returnFileInput != null)
                 {
                     return BadRequest(returnFileInput);
@@ -152,7 +167,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     await newMedal.ImageForm.CopyToAsync(stream);
                 }
                 //medal.ImageLink = Path.Combine("Uploads", "Medal", medal.ID.ToString(), fileName);
-                medal.ImageLink = $"{Request.Scheme}://{Request.Host}/Uploads/Medal/{medal.ID.ToString()}/{fileName}";
+                medal.ImageLink = $"Uploads/Medal/{medal.ID.ToString()}/{fileName}";
 
             }
 
@@ -192,7 +207,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             if (newModal.ImageForm != null)
             {
-                string returnFileInput = _fileImageValidationService.ValidateImageFile(newModal.ImageForm);
+                string returnFileInput = await _fileImageValidationService.ValidateImageFileAsync(newModal.ImageForm);
                 if (returnFileInput != null)
                 {
                     return BadRequest(returnFileInput);
@@ -245,7 +260,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 {
                     await newModal.ImageForm.CopyToAsync(stream);
                 }
-                medal.ImageLink = $"{Request.Scheme}://{Request.Host}/Uploads/Medal/{medal.ID.ToString()}/{fileName}";
+                medal.ImageLink = $"Uploads/Medal/{medal.ID.ToString()}/{fileName}";
 
             }
 

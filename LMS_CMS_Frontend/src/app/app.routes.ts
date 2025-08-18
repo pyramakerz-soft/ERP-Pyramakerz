@@ -214,7 +214,15 @@ import { ConductLevelComponent } from './Pages/Employee/SocialWorker/conduct-lev
 import { ProcedureTypeComponent } from './Pages/Employee/SocialWorker/procedure-type/procedure-type.component';
 import { ConductTypeComponent } from './Pages/Employee/SocialWorker/conduct-type/conduct-type.component';
 import { ConductComponent } from './Pages/Employee/SocialWorker/conduct/conduct.component';
-import { SupplierStatementComponent } from './Pages/Employee/Accounting/Report/supplier-statement/supplier-statement/supplier-statement.component';
+import { ConductAddEditComponent } from './Pages/Employee/SocialWorker/conduct-add-edit/conduct-add-edit.component';
+import { AccountStatementsComponent } from './Pages/Employee/Accounting/Report/account-statement/account-statements.component';
+import { MyRequestsComponent } from './Pages/Communication/my-requests/my-requests.component';
+import { IssuesTypeComponent } from './Pages/Employee/SocialWorker/issues-type/issues-type.component';
+import { StudentIssuesComponent } from './Pages/Employee/SocialWorker/student-issues/student-issues.component';
+import { SocialWorkerMedalComponent } from './Pages/Employee/SocialWorker/social-worker-medal/social-worker-medal.component';
+import { CertificateTypeComponent } from './Pages/Employee/SocialWorker/certificate-type/certificate-type.component';
+import { StudentCertificateComponent } from './Pages/Employee/SocialWorker/student-certificate/student-certificate.component';
+import { SocialWorkerMedalStudentComponent } from './Pages/Employee/SocialWorker/social-worker-medal-student/social-worker-medal-student.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -473,7 +481,17 @@ export const routes: Routes = [
             { path: 'Procedure Type', component: ProcedureTypeComponent, title: 'Procedure Type', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Conduct Type', component: ConductTypeComponent, title: 'Conduct Type', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Conduct', component: ConductComponent, title: 'Conduct', canActivate: [noNavigateWithoutLoginGuard], },
-            { path: "supplier statment", component: SupplierStatementComponent, title: "supplier statment", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Conduct Edit/:id", component: ConductAddEditComponent, title: "Conduct", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Conduct Create", component: ConductAddEditComponent, title: "Conduct", canActivate: [noNavigateWithoutLoginGuard] },
+            {  path: "Supplier Statement",  component: AccountStatementsComponent,  title: "Supplier Statement",  canActivate: [noNavigateWithoutLoginGuard]  },
+            {  path: "Safe Statement",  component: AccountStatementsComponent,  title: "Safe Statement",  canActivate: [noNavigateWithoutLoginGuard]  },
+            {  path: "Bank Statement",  component: AccountStatementsComponent,  title: "Bank Statement",  canActivate: [noNavigateWithoutLoginGuard]  },
+            { path: "Issue Type", component: IssuesTypeComponent, title: "Issue Type", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Student Issues", component: StudentIssuesComponent, title: "Student Issues", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Social Worker Medal", component: SocialWorkerMedalComponent, title: "Social Worker Medal", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Certificate Type", component: CertificateTypeComponent, title: "Certificate Type", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Student Certificate", component: StudentCertificateComponent, title: "Student Certificate", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Social Worker Student", component: SocialWorkerMedalStudentComponent, title: "Social Worker Student", canActivate: [noNavigateWithoutLoginGuard] },
         ]
     },
     {
@@ -548,6 +566,7 @@ export const routes: Routes = [
         canActivate: [noNavigateWithoutLoginGuard],
         children: [
             { path: "My Notifications", component: MyNotificationComponent, title: "Notifications", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "My Requests", component: MyRequestsComponent, title: "Requests", canActivate: [noNavigateWithoutLoginGuard] },
         ]
     },
 

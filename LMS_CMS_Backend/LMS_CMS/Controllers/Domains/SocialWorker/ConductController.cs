@@ -62,6 +62,14 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             }
 
             List<ConductGetDTO> Dto = mapper.Map<List<ConductGetDTO>>(conducts);
+            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+            foreach (var item in Dto)
+            {
+                if (!string.IsNullOrEmpty(item.File))
+                {
+                    item.File = $"{serverUrl}{item.File.Replace("\\", "/")}";
+                }
+            }
 
             return Ok(Dto);
         }
@@ -87,7 +95,13 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            Conduct conduct = Unit_Of_Work.conduct_Repository.First_Or_Default(sem => sem.IsDeleted != true && sem.ID == id);
+            Conduct conduct =await Unit_Of_Work.conduct_Repository.FindByIncludesAsync(
+                    sem => sem.IsDeleted != true && sem.ID == id,
+                    query => query.Include(emp => emp.Student),
+                    query => query.Include(emp => emp.Classroom).ThenInclude(a=>a.Grade),
+                    query => query.Include(emp => emp.ConductType)
+                        .ThenInclude(a => a.School),
+                    query => query.Include(emp => emp.ProcedureType));
 
             if (conduct == null)
             {
@@ -95,6 +109,13 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             }
 
             ConductGetDTO Dto = mapper.Map<ConductGetDTO>(conduct);
+
+            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+
+            if (!string.IsNullOrEmpty(Dto.File))
+            {
+                Dto.File = $"{serverUrl}{Dto.File.Replace("\\", "/")}";
+            }
 
             return Ok(Dto);
         }

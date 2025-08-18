@@ -194,30 +194,16 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                     query => query.Include(h => h.Classroom),
                     query => query.Include(h => h.School),
                     query => query.Include(h => h.Grade),
-                    query => query.Include(x => x.InsertedByEmployee)
+                    query => query.Include(x => x.InsertedByEmployee),
+                    query => query.Include(h => h.StudentHygieneTypes).ThenInclude(h => h.HygieneTypes)
                 );
 
             if (hygieneForms == null || hygieneForms.Count == 0)
             {
-                return NotFound();
+                return NotFound("No hygiene forms found");
             }
             
             List<HygieneFormGetDTO> hygieneFormsDto = _mapper.Map<List<HygieneFormGetDTO>>(hygieneForms);
-
-            foreach (var item in hygieneFormsDto)
-            {
-                List<StudentHygieneTypes> stuHyTy = await Unit_Of_Work.studentHygieneTypes_Repository.Select_All_With_IncludesById<StudentHygieneTypes>(
-                    d => d.IsDeleted != true,
-                    query => query.Include(h => h.HygieneForm),
-                    query => query.Include(h => h.Student),
-                    query => query.Include(h => h.HygieneTypes)
-                );
-                if (stuHyTy != null)
-                {
-                    List<StudentHygieneTypesGetDTO> stuHyTyDTO = _mapper.Map<List<StudentHygieneTypesGetDTO>>(stuHyTy);
-                    item.StudentHygieneTypes = stuHyTyDTO;
-                }
-            }
 
             return Ok(hygieneFormsDto);
         }
@@ -267,11 +253,15 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                     d.SchoolId == schoolId &&
                     d.GradeId == gradeId &&
                     d.ClassroomId == classId,
-                    query => query.Include(h => h.Classroom),
-                    query => query.Include(h => h.Student),
-                    query => query.Include(h => h.School),
-                    query => query.Include(h => h.Grade),
-                    query => query.Include(h => h.FollowUpDrugs),
+                    query => query.Include(f => f.FollowUpDrugs)
+                        .ThenInclude(x => x.Drug)
+                        .Include(f => f.FollowUpDrugs)
+                        .ThenInclude(x => x.Dose),
+                    query => query.Include(f => f.School),
+                    query => query.Include(f => f.Grade),
+                    query => query.Include(f => f.Classroom),
+                    query => query.Include(f => f.Student),
+                    query => query.Include(f => f.Diagnosis),
                     query => query.Include(x => x.InsertedByEmployee)
                 );
             

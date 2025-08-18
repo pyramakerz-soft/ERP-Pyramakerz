@@ -203,14 +203,14 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                     query => query.Include(d => d.InsertedByEmployee)
                     );
 
-            notificationSharedTos = notificationSharedTos
-                .OrderByDescending(d => d.InsertedAt)
-                .ToList();
-
             if (notificationSharedTos == null || notificationSharedTos.Count == 0)
             {
                 return NotFound();
             }
+
+            notificationSharedTos = notificationSharedTos
+                .OrderByDescending(d => d.InsertedAt)
+                .ToList();
 
             List<NotificationSharedToGetDTO> notificationSharedToGetDTO = mapper.Map<List<NotificationSharedToGetDTO>>(notificationSharedTos);
 
@@ -325,7 +325,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
 
             if(notificationSharedTo.UserID != userId || notificationSharedTo.UserTypeID != userTypeID)
             {
-                BadRequest();
+                return BadRequest();
             }
 
             NotificationSharedToGetDTO notificationSharedToGetDTO = mapper.Map<NotificationSharedToGetDTO>(notificationSharedTo);
@@ -628,6 +628,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             try
             {
                 targetUserIds = _userTreeService.GetUsersAccordingToTree(Unit_Of_Work, NewNotification.UserTypeID, NewNotification.UserFilters);
+                if(NewNotification.UserTypeID == 1)
+                {
+                    targetUserIds = targetUserIds.Where(id => id != userId).ToList();
+                }
             }
             catch (Exception ex)
             {
@@ -637,7 +641,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
 
             if (NewNotification.ImageFile != null)
             {
-                string returnFileInput = _fileImageValidationService.ValidateImageFile(NewNotification.ImageFile);
+                string returnFileInput = await _fileImageValidationService.ValidateImageFileAsync(NewNotification.ImageFile);
                 if (returnFileInput != null)
                 {
                     return BadRequest(returnFileInput);

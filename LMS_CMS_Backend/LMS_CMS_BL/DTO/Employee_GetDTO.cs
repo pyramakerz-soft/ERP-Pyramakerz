@@ -38,8 +38,7 @@ namespace LMS_CMS_BL.DTO
         public string? BusCompanyName { get; set; }
         public long EmployeeTypeID { get; set; }
         public string? EmployeeTypeName { get; set; }
-        public bool? CanReceiveRequest { get; set; }
-        public bool? CanReceiveMessage { get; set; }
+        public bool? CanReceiveRequest { get; set; } 
         public bool? CanReceiveRequestFromParent { get; set; }
         public bool? CanReceiveMessageFromParent { get; set; }
         public List<EmployeeAttachmentDTO>? Files { get; set; }

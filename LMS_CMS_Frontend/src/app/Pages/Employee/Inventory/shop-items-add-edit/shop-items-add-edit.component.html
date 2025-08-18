@@ -124,7 +124,7 @@
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Grade"
             [disabled]="!SchoolId" [ngClass]="{ 'bg-[#EBEBEB]': !SchoolId }" [(ngModel)]="ShopItem.gradeID">
             <option [value]="0 || null" disabled selected hidden>  {{ 'Choose' | translate }}{{ 'Grade' | translate }}{{ 'Level' | translate }}</option>
-            <option value="0">  {{ 'All' | translate }} {{ 'Grades' | translate }}</option>
+            <option *ngIf="Grades.length > 0" value="0">  {{ 'All' | translate }} {{ 'Grades' | translate }}</option>
             <option *ngFor="let g of Grades" [value]="g.id">{{ g.name }}</option>
             <option *ngIf="Grades.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
         </select>
