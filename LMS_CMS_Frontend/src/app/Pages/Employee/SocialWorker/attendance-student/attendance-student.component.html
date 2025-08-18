@@ -1,0 +1,130 @@
+<div class="flex justify-between items-center">
+    <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Attendance' | translate }}</h1>
+    <div class="flex justify-between items-center space-x-4 rtl:space-x-reverse">
+        <button (click)="Save()" class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
+            {{ 'Save' | translate }}
+        </button>
+    </div>
+</div>
+
+
+<div class="flex justify-start items-center space-x-4 rtl:space-x-reverse mt-5">
+    <div class="w-[33%]">
+        <label for="School1" class="block mb-2 text-sm font-medium text-gray-900">{{ 'School' | translate }}</label>
+        <select id="School1" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [(ngModel)]="attendance.schoolID"
+            (change)="GetAllAcademicYearsBySchool(); GetAllGradesBySchool(); IsViewTable=false">
+            <option value=0 disabled selected hidden> {{ 'Select' | translate }} {{ 'School' | translate }}</option>
+            <option *ngFor="let school of Schools" [value]="school.id">
+                {{ school.name }}
+            </option>
+        </select>
+    </div>
+    <div class="w-[33%]">
+        <label for="attendance.academicYearID" class="block mb-2 text-sm font-medium text-gray-900">{{ 'Academic Year' |
+            translate }}</label>
+        <select id="attendance.academicYearID"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [(ngModel)]="attendance.academicYearID" (change)="IsViewTable=false" [disabled]="!attendance.schoolID">
+            <option value=0 disabled selected hidden> {{ 'Select' | translate }} {{ 'Academic Year' | translate }}
+            </option>
+            <option *ngFor="let ac of AcademicYears" [value]="ac.id">
+                {{ ac.name }}
+            </option>
+        </select>
+    </div>
+    <div class="w-[33%]">
+        <label for="attendance.gradeID" class="block mb-2 text-sm font-medium text-gray-900">{{ 'Grade' | translate
+            }}</label>
+        <select id="attendance.gradeID"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [(ngModel)]="attendance.gradeID" (change)="GetAllclassesBygrade(); IsViewTable=false"
+            [disabled]="!attendance.schoolID">
+            <option value=0 disabled selected hidden> {{ 'Select' | translate }} {{ 'Grade' | translate }}</option>
+            <option *ngFor="let grade of Grades" [value]="grade.id">
+                {{ grade.name }}
+            </option>
+        </select>
+    </div>
+    <div class="w-[33%]">
+        <label for="attendance.classroomID" class="block mb-2 text-sm font-medium text-gray-900">{{ 'Classroom' |  translate}}</label>
+        <select id="attendance.classroomID"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [(ngModel)]="attendance.classroomID" (change)="IsViewTable=false" [disabled]="!attendance.gradeID" (change)="GetStudentsByClass();">
+            <option value=0 disabled selected hidden> {{ 'Select' | translate }} {{ 'Classroom' | translate }}</option>
+            <option *ngFor="let class of Classes" [value]="class.id">
+                {{ class.name }}
+            </option>
+        </select>
+    </div>
+    <div class="flex flex-col w-[33%]">
+        <label class="mb-2 primaryTxt" for="name">{{'Date'| translate }}</label>
+        <input id="date" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+            (ngModelChange)="onInputValueChange({ field: 'date', value: $event })"
+            placeholder=" {{'Enter'| translate }} {{'Date'| translate }}" [(ngModel)]="attendance.date" />
+        <span *ngIf="validationErrors['date']" class="text-red-500 ml-3 font-normal">{{ validationErrors["date"]
+            }}</span>
+    </div>
+</div>
+
+<div *ngIf="attendance.schoolID && attendance.academicYearID && attendance.gradeID && attendance.classroomID">
+    <div>
+        <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
+            <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
+                <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+                    <tr>
+                        <th
+                            class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0 ">
+                            <div class="flex space-x-2 rtl:space-x-reverse items-center">
+                                <p> {{ 'Student Name' | translate }}</p>
+                            </div>
+                        </th>
+                        <th
+                            class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ 'Is Late' | translate }}
+                        </th>
+                        <th
+                            class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ 'Late Minutes' | translate }}
+                        </th>
+                        <th
+                            class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ 'Notes' | translate }}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngIf="attendance.attendanceStudents.length === 0">
+                        <td colspan="5"
+                            class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                            {{ 'No Data Found' | translate }}
+                        </td>
+                    </tr>
+
+                    <tr *ngFor="let row of attendance.attendanceStudents; let i = index"
+                        [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }" class="text-xs md:text-sm">
+                        <td class="py-5 px-4 border-r border-[#EAECF0] ">
+                            <div class="flex space-x-2 rtl:space-x-reverse items-center">
+                                <p> {{ row.studentEnName }} </p>
+                            </div>
+                        </td>
+                        <td class="py-5 px-4 border-r border-[#EAECF0]">
+                            <input type="checkbox" [(ngModel)]="row.isLate" id="isLate" class="w-5 h-5" />
+                        </td>
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            <input [(ngModel)]="row.lateTimeInMinutes"
+                                (input)="validateNumber($event, 'lateTimeInMinutes' ,row)" type="text"
+                                class="w-full border border-gray-300 px-2 py-1 rounded-md" />
+                        </td>
+                        <td class="py-5 px-4">
+                            <textarea type="text"
+                                class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto w-full"
+                                placeholder="{{ 'Notes' | translate }}" [(ngModel)]="row.note">
+                            </textarea>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
