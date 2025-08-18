@@ -15,6 +15,7 @@ import { PdfPrintComponent } from '../../../../../Component/pdf-print/pdf-print.
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { StateService } from '../../../../../Services/Employee/Inventory/state.service';
 @Component({
   selector: 'app-medical-report',
   templateUrl: './medical-report.component.html',
@@ -70,7 +71,8 @@ export class MedicalReportComponent implements OnInit {
     private schoolService: SchoolService,
     private gradeService: GradeService,
     private classroomService: ClassroomService,
-    private studentService: StudentService
+    private studentService: StudentService,
+    private stateService: StateService
   ) {}
 
   ngOnInit(): void {
@@ -79,6 +81,7 @@ export class MedicalReportComponent implements OnInit {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+        this.restoreState();
   }
 
   async loadSchools() {
@@ -90,6 +93,53 @@ export class MedicalReportComponent implements OnInit {
       console.error('Error loading schools:', error);
     }
   }
+
+  private saveState() {
+    this.stateService.setMedicalReportState({
+      selectedTab: this.selectedTab,
+      selectedSchool: this.selectedSchool,
+      selectedGrade: this.selectedGrade,
+      selectedClass: this.selectedClass,
+      selectedStudent: this.selectedStudent,
+      tableData: this.tableData,
+      showTable: this.showTable,
+      schools: this.schools,
+      grades: this.grades,
+      classes: this.classes,
+      students: this.students
+    });
+  }
+
+  private restoreState() {
+    const savedState = this.stateService.getMedicalReportState();
+    if (savedState) {
+      this.selectedTab = savedState.selectedTab;
+      this.selectedSchool = savedState.selectedSchool;
+      this.selectedGrade = savedState.selectedGrade;
+      this.selectedClass = savedState.selectedClass;
+      this.selectedStudent = savedState.selectedStudent;
+      this.tableData = savedState.tableData;
+      this.showTable = savedState.showTable;
+      this.schools = savedState.schools || [];
+      this.grades = savedState.grades || [];
+      this.classes = savedState.classes || [];
+      this.students = savedState.students || [];
+      
+      this.prepareExportData();
+      this.stateService.clearMedicalReportState();
+    }
+  }
+
+    viewDetails(id: number) {
+    this.saveState();
+    if (this.selectedTab === 'MH By Parent') {
+      this.router.navigate(['/Employee/medical-history/parent', id]);
+    } else if (this.selectedTab === 'MH By Doctor') {
+      this.router.navigate(['/Employee/medical-history/doctor', id]);
+    }
+  }
+
+
 
   async loadGrades() {
     if (this.selectedSchool) {
@@ -148,20 +198,29 @@ export class MedicalReportComponent implements OnInit {
     }
   }
 
-  onSchoolChange() {
-    this.loadGrades();
-    this.resetTable();
-  }
+onSchoolChange() {
+  this.loadGrades();
+  this.resetTable();
+  this.saveState(); // Add this
+}
 
-  onGradeChange() {
-    this.loadClasses();
-    this.resetTable();
-  }
+onGradeChange() {
+  this.loadClasses();
+  this.resetTable();
+  this.saveState(); // Add this
+}
 
-  onClassChange() {
-    this.loadStudents();
-    this.resetTable();
-  }
+onClassChange() {
+  this.loadStudents();
+  this.resetTable();
+  this.saveState(); // Add this
+}
+
+selectTab(tab: string) {
+  this.selectedTab = tab;
+  this.resetTable();
+  this.saveState(); // Add this
+}
 
   resetTable() {
     this.showTable = false;
@@ -194,38 +253,43 @@ export class MedicalReportComponent implements OnInit {
 
       switch (this.selectedTab) {
         case 'MH By Parent':
-          data = await firstValueFrom(
-            this.medicalReportService.getAllMHByParent(
-              domainName,
-              this.selectedStudent, // studentId first
-              this.selectedSchool, // schoolId
-              this.selectedGrade, // gradeId
-              this.selectedClass // classId
-            )
-          );
-          this.tableData = data.map((item) => ({
-            date: new Date(item.insertedAt).toLocaleDateString(),
-            details: item.details || 'No details',
-            permanentDrug: item.permanentDrug || 'None',
-          }));
-          break;
+  data = await firstValueFrom(
+    this.medicalReportService.getAllMHByParent(
+      domainName,
+      this.selectedStudent,
+      this.selectedSchool,
+      this.selectedGrade,
+      this.selectedClass
+    )
+  );
+  this.tableData = data.map((item) => ({
+    id: item.id,  // Make sure to include this
+    date: new Date(item.insertedAt).toLocaleDateString(),
+    details: item.details || 'No details',
+    permanentDrug: item.permanentDrug || 'None'
+  }));
+  console.log('MH By Parent data with IDs:', this.tableData);  // Debug log
+  break;
 
-        case 'MH By Doctor':
-          data = await firstValueFrom(
-            this.medicalReportService.getAllMHByDoctor(
-              domainName,
-              this.selectedStudent,
-              this.selectedSchool,
-              this.selectedGrade,
-              this.selectedClass
-            )
-          );
-          this.tableData = data.map((item) => ({
-            date: new Date(item.insertedAt).toLocaleDateString(),
-            details: item.details || 'No details',
-            permanentDrug: item.permanentDrug || 'None',
-          }));
-          break;
+case 'MH By Doctor':
+  data = await firstValueFrom(
+    this.medicalReportService.getAllMHByDoctor(
+      domainName,
+      this.selectedStudent,
+      this.selectedSchool,
+      this.selectedGrade,
+      this.selectedClass
+    )
+  );
+  this.tableData = data.map((item) => ({
+    id: item.id,  // Make sure to include this
+    date: new Date(item.insertedAt).toLocaleDateString(),
+    details: item.details || 'No details',
+    permanentDrug: item.permanentDrug || 'None'
+  }));
+  console.log('MH By Doctor data with IDs:', this.tableData);  // Debug log
+  break;
+
 
 case 'Hygiene Form':
   data = await firstValueFrom(
@@ -292,12 +356,7 @@ case 'Follow Up':
       this.isLoading = false;
     }
   }
-
-  selectTab(tab: string) {
-    this.selectedTab = tab;
-    this.resetTable();
-  }
-
+  
 prepareExportData() {
   this.pdfTableData = this.tableData.map((item) => {
     switch (this.selectedTab) {

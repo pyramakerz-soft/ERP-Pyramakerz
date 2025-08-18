@@ -223,6 +223,7 @@ import { SocialWorkerMedalComponent } from './Pages/Employee/SocialWorker/social
 import { CertificateTypeComponent } from './Pages/Employee/SocialWorker/certificate-type/certificate-type.component';
 import { StudentCertificateComponent } from './Pages/Employee/SocialWorker/student-certificate/student-certificate.component';
 import { SocialWorkerMedalStudentComponent } from './Pages/Employee/SocialWorker/social-worker-medal-student/social-worker-medal-student.component';
+import { ViewReportComponent } from './Pages/Employee/Clinic/medical-report/view-report/view-report.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -245,6 +246,18 @@ export const routes: Routes = [
             { path: "Follow Up", component: FollowUpComponent, title: "Follow Up" },
             { path: "Medical History", component: MedicalHistoryComponent, title: "Medical History" },
             { path: "Medical Report", component: MedicalReportComponent, title: "Medical Report" },
+    { 
+        path: 'medical-history/parent/:id', 
+        component: ViewReportComponent, 
+        title: 'Medical History By Parent',
+        data: { reportType: 'parent' } 
+    },
+    { 
+        path: 'medical-history/doctor/:id', 
+        component: ViewReportComponent, 
+        title: 'Medical History By Doctor',
+        data: { reportType: 'doctor' } 
+    },
             { path: "Doses", component: DosesComponent, title: "Doses" },
             { path: "Bus Details", component: BusDetailsComponent, title: "Bus", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Bus Students/:domainName/:busId", component: BusStudentComponent, title: "Bus Students", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
