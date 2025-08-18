@@ -24,7 +24,6 @@ export class ApiService {
   
     var Header = ' ss_two';  
 
-
     return Header;
-  } 
+  }
 }

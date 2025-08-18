@@ -71,7 +71,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 var totalDebit = entries.Sum(x => x.Debit ?? 0);
                 var totalCredit = entries.Sum(x => x.Credit ?? 0);
 
-                bool isCreditBased = entries.Any(x => x.LinkFileID == 2 || x.LinkFileID == 4 || x.LinkFileID == 7);
+                //bool isCreditBased = entries.Any(x => x.LinkFileID == 2 || x.LinkFileID == 4 || x.LinkFileID == 7);
 
                 var difference = totalCredit > totalDebit
                     ? totalCredit - totalDebit
