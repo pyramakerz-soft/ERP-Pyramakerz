@@ -12,7 +12,7 @@ namespace LMS_CMS_BL.DTO.Accounting
         public decimal Amount { get; set; }
         public float Discount { get; set; }
         public decimal Net { get; set; }
-        public string Date { get; set; }
+        public DateOnly Date { get; set; }
         public long FeeTypeID { get; set; }
         public long? FeeDiscountTypeID { get; set; }
         public long StudentID { get; set; }

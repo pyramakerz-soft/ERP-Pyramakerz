@@ -57,7 +57,7 @@ isRtl: boolean = false;
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'name', "iban", "bankName", "bankAccountNumber", "accountClosingDate", "accountOpeningDate", "accountNumberName"];
+  keysArray: string[] = ['id', 'name', "iban", "bankName", "bankAccountNumber", "accountNumberName"];
 
   bank: Bank = new Bank();
 

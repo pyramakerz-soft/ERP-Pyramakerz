@@ -1,4 +1,4 @@
-//state saver 
+// state.service.ts
 import { Injectable } from '@angular/core';
 import { ElectronicInvoice } from '../../../Models/zatca/electronic-invoice';
 
@@ -17,6 +17,21 @@ export class StateService {
     totalRecords: number;
   } | null = null;
 
+  private medicalReportState: {
+    selectedTab: string;
+    selectedSchool: number | null;
+    selectedGrade: number | null;
+    selectedClass: number | null;
+    selectedStudent: number | null;
+    tableData: any[];
+    showTable: boolean;
+    schools: any[];
+    grades: any[];
+    classes: any[];
+    students: any[];
+  } | null = null;
+
+  // Invoice state methods
   setInvoiceState(state: any) {
     this.invoiceState = state;
   }
@@ -27,5 +42,17 @@ export class StateService {
 
   clearInvoiceState() {
     this.invoiceState = null;
+  }
+
+  setMedicalReportState(state: any) {
+    this.medicalReportState = state;
+  }
+
+  getMedicalReportState() {
+    return this.medicalReportState;
+  }
+
+  clearMedicalReportState() {
+    this.medicalReportState = null;
   }
 }

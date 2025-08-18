@@ -9,7 +9,7 @@ namespace LMS_CMS_BL.DTO.Accounting
     public class InstallmentDeductionMasterAddDTO
     {
         public string? DocNumber { get; set; }
-        public string Date { get; set; }
+        public DateOnly Date { get; set; }
         public string? Notes { get; set; }
         public long EmployeeID { get; set; }
         public long StudentID { get; set; }

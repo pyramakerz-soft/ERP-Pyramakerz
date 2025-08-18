@@ -179,7 +179,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                         Net = fee?.Net ?? 0,
                         AcademicYearId = fee?.AcademicYearId ?? 0,
                         AcademicYearName = fee?.AcademicYear?.Name ?? "",
-                        Date = fee?.Date.ToString() ?? "",
+                        Date = fee?.Date ?? DateOnly.FromDateTime(DateTime.Now),
                         FeeTypeID = fee?.FeeTypeID ?? 0,
                         FeeTypeName = fee?.TuitionFeesType?.Name ?? null,
                         FeeDiscountTypeID = fee?.FeeDiscountTypeID ?? 0,

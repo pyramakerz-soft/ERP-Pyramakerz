@@ -22,6 +22,10 @@ import { Classroom } from '../../../Models/LMS/classroom';
 import { Grade } from '../../../Models/LMS/grade';
 import { Student } from '../../../Models/student';
 import { StudentService } from '../../../Services/student.service';
+import { ParentService } from '../../../Services/parent.service';
+import { Parent } from '../../../Models/parent';
+import { SubjectService } from '../../../Services/Employee/LMS/subject.service';
+import { Subject } from '../../../Models/LMS/subject';
 
 @Component({
   selector: 'app-my-requests',
@@ -34,12 +38,14 @@ export class MyRequestsComponent {
   requests: Request[] = []
   requestByID:Request = new Request()
   requestToBeSend:Request = new Request()
+  requestToBeForwarded:Request = new Request()
   DomainName: string = ''; 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');  
   
   activeTab:string = "sent"
   isLoading = false;
   
+  isTeacherHovered = false;
   isEmployeeHovered = false;
   isStudentHovered = false;
   isParentHovered = false;
@@ -51,14 +57,16 @@ export class MyRequestsComponent {
   grades:Grade[] = []
   classrooms:Classroom[] = []
   students:Student[] = []
+  subjects:Subject[] = []
+  parent:Parent = new Parent()
 
   departmentID = 0
   schoolID = 0
   sectionID = 0
   gradeID = 0
   classroomID = 0
-
-  validationErrors: { [key in keyof Request]?: string } = {}; 
+ 
+  subjectID = 0  
 
   constructor(
     public account: AccountService,
@@ -71,6 +79,8 @@ export class MyRequestsComponent {
     public gradeService: GradeService,
     public classroomService: ClassroomService,
     public studentService: StudentService,
+    public parentService: ParentService,
+    public subjectService: SubjectService,
     public requestService: RequestService
   ) { }
 
@@ -79,10 +89,11 @@ export class MyRequestsComponent {
 
     this.DomainName = this.ApiServ.GetHeader();
  
-    this.loadSentRequests()  
+    this.loadSentRequests()   
   }
 
   loadSentRequests(){
+    this.requestByID = new Request()
     this.activeTab = 'sent';
     this.requests = []
     this.requestService.GetSentOnesByUserID(this.DomainName).subscribe(
@@ -93,6 +104,7 @@ export class MyRequestsComponent {
   }
 
   loadReceivedRequests(){
+    this.requestByID = new Request()
     this.activeTab = 'received';
     this.requests = []
     this.requestService.GetReceivedOnesByUserID(this.DomainName).subscribe(
@@ -135,7 +147,9 @@ export class MyRequestsComponent {
     this.requestByID = new Request()
     this.requestService.ByUserIDAndRequestID(request.id, this.DomainName).subscribe(
       data => {
-        request.seenOrNot = true
+        if(request.receiverID == this.User_Data_After_Login.id && request.receiverUserTypeName == this.User_Data_After_Login.type){
+          request.seenOrNot = true
+        }
         this.requestByID = data 
       }
     ) 
@@ -180,13 +194,19 @@ export class MyRequestsComponent {
   }
 
   Forward(request:Request){
-
+    this.requestToBeForwarded.requestID = request.id
+    this.getDepartment()
+    document.getElementById('Forward_Modal')?.classList.remove('hidden');
+    document.getElementById('Forward_Modal')?.classList.add('flex');
   }
 
   sendRequest(){
     if(this.User_Data_After_Login.type=='employee'){
       this.isStudentHovered = true; 
       this.getSchool()
+    } else{
+      this.isEmployeeHovered = true
+      this.getDepartment()
     }
     document.getElementById('Add_Modal')?.classList.remove('hidden');
     document.getElementById('Add_Modal')?.classList.add('flex');
@@ -210,16 +230,33 @@ export class MyRequestsComponent {
     )
   }
 
-  getEmployee(){
+  getWhoCanAcceptRequestsFromEmployeeByDepartmentId(){
     this.employees = [] 
-    this.employeeService.GetByDepartmentId(this.departmentID, this.DomainName).subscribe(
-      data => {
-        this.employees = data
+    this.employeeService.GetWhoCanAcceptRequestsFromEmployeeByDepartmentId(this.departmentID, this.DomainName).subscribe(
+      data => {  
         if(this.User_Data_After_Login.type == 'employee'){
           this.employees = data.filter(
-            (employee) => employee.id !== this.User_Data_After_Login.id
+            (employee) => Number(employee.id) !== Number(this.User_Data_After_Login.id)
           );
         }
+      }
+    )
+  }
+
+  getWhoCanAcceptRequestsFromParentAndStudentByDepartmentId(){
+    this.employees = [] 
+    this.employeeService.GetWhoCanAcceptRequestsFromParentAndStudentByDepartmentId(this.departmentID, this.DomainName).subscribe(
+      data => {  
+        this.employees = data
+      }
+    )
+  }
+
+  GetTeachersCoTeachersRemedialTeachersBySubjectIdAndStudentId(){
+    this.employees = [] 
+    this.employeeService.GetTeachersCoTeachersRemedialTeachersBySubjectIdAndStudentId(this.subjectID, this.requestToBeSend.studentID, this.DomainName).subscribe(
+      data => {  
+        this.employees = data
       }
     )
   }
@@ -259,14 +296,56 @@ export class MyRequestsComponent {
       }
     )
   }
+  
+  getStudentByParentID(){
+    this.students = [] 
+    this.studentService.Get_By_ParentID(this.User_Data_After_Login.id, this.DomainName).subscribe(
+      data => {
+        this.students = data
+      }
+    )
+  }
+  
+  getSubjects(){
+    this.subjects = [] 
+    this.subjectService.GetClassroomAndRemedialSubjectsByStudent(this.requestToBeSend.studentID, this.DomainName).subscribe(
+      data => {
+        this.subjects = data
+      }
+    )
+  }
+  
+  getParent(){
+    this.parent = new Parent()
+    this.parentService.GetByStudentID(this.requestToBeSend.receiverID, this.DomainName).subscribe(
+      data => {
+        this.parent = data
+        this.requestToBeSend.receiverID == this.parent.id
+        this.SendTheRequest()
+      },
+      error => {
+        Swal.fire({
+          title: "This student doesn't have a parent to send the request to",
+          icon: 'warning', 
+          confirmButtonColor: '#089B41', 
+          confirmButtonText: "OK"
+        })
+      }
+    )
+  }
 
   onDepartmentChange(event: Event) {
     this.employees = [] 
     this.requestToBeSend.receiverID = 0
+    this.requestToBeForwarded.forwardToID = 0
     const selectedValue = (event.target as HTMLSelectElement).value;
     this.departmentID = Number(selectedValue)
     if (this.departmentID) {
-      this.getEmployee(); 
+      if(this.User_Data_After_Login.type == "employee"){
+        this.getWhoCanAcceptRequestsFromEmployeeByDepartmentId(); 
+      }else{
+        this.getWhoCanAcceptRequestsFromParentAndStudentByDepartmentId()
+      }
     }
   }
 
@@ -300,42 +379,96 @@ export class MyRequestsComponent {
     }
   }
 
-  // onGradeChange(event: Event) {  
-  //   this.classrooms = [] 
-  //   this.students = []   
-  //   this.notification.userFilters.classroomID = 0
-  //   this.notification.userFilters.studentID = 0
-  //   const selectedValue = (event.target as HTMLSelectElement).value;
-  //   this.notification.userFilters.gradeID = Number(selectedValue)
-  //   if (this.notification.userFilters.gradeID) {
-  //     this.getClassroom(); 
-  //   }
-  // }
+  onGradeChange(event: Event) {  
+    this.classrooms = [] 
+    this.students = []   
+    this.classroomID = 0
+    this.requestToBeSend.receiverID = 0
+    const selectedValue = (event.target as HTMLSelectElement).value;
+    this.gradeID = Number(selectedValue)
+    if (this.gradeID) {
+      this.getClassroom(); 
+    }
+  }
 
-  // onClassroomChange(event: Event) {   
-  //   this.students = []    
-  //   this.notification.userFilters.studentID = 0
-  //   const selectedValue = (event.target as HTMLSelectElement).value;
-  //   this.notification.userFilters.classroomID = Number(selectedValue)
-  //   if (this.notification.userFilters.classroomID) {
-  //     this.getStudent(); 
-  //   }
-  // }
+  onClassroomChange(event: Event) {   
+    this.students = []    
+    this.requestToBeSend.receiverID = 0
+    const selectedValue = (event.target as HTMLSelectElement).value;
+    this.classroomID = Number(selectedValue)
+    if (this.classroomID) {
+      this.getStudent(); 
+    }
+  }
+
+  onStudentChange(event: Event) {   
+    this.subjects = []    
+    this.employees = []    
+    this.requestToBeSend.receiverID = 0
+    const selectedValue = (event.target as HTMLSelectElement).value;
+    this.requestToBeSend.studentID = Number(selectedValue)
+    if (this.requestToBeSend.studentID) {
+      this.getSubjects(); 
+    }
+  }
+
+  onSubjectChange(event: Event) {  
+    this.employees = []    
+    this.requestToBeSend.receiverID = 0
+    const selectedValue = (event.target as HTMLSelectElement).value;
+    this.subjectID = Number(selectedValue)
+    if (this.subjectID) {
+      this.GetTeachersCoTeachersRemedialTeachersBySubjectIdAndStudentId(); 
+    }
+  }
 
   closeModal(){
     document.getElementById('Add_Modal')?.classList.remove('flex');
     document.getElementById('Add_Modal')?.classList.add('hidden');
 
-    this.isLoading = false
-    this.validationErrors = {};  
-    this.departmentID = 0
+    this.isLoading = false 
+    
+    this.departments = []
+    this.employees = []
+    this.schools = []
+    this.sections = []
+    this.grades = []
+    this.classrooms = []
+    this.students = []
+    this.subjects = []
+
+    this.departmentID = 0 
+    this.schoolID = 0
+    this.sectionID = 0
+    this.gradeID = 0
+    this.classroomID = 0
+    this.subjectID = 0
+
+    this.parent = new Parent()
     this.requestToBeSend = new Request()
+
+    this.isTeacherHovered = false;
     this.isEmployeeHovered = false;
     this.isStudentHovered = false;
     this.isParentHovered = false;
   }
+  
+  closeForwardModal(){
+    document.getElementById('Forward_Modal')?.classList.remove('flex');
+    document.getElementById('Forward_Modal')?.classList.add('hidden');
 
-  selectType(userID:number) {  
+    this.isLoading = false
+
+    this.departments = []
+    this.employees = []
+
+    this.departmentID = 0
+    this.requestToBeForwarded = new Request() 
+  }
+
+  selectType(userID:number) {   
+    this.requestToBeSend = new Request()
+
     if (userID == 1) {
       this.isEmployeeHovered = true;
       this.isStudentHovered = false;
@@ -356,6 +489,27 @@ export class MyRequestsComponent {
     } 
   }
 
+  selectTypeForStudentAndParent(userID:number) {   
+    this.requestToBeSend = new Request()
+
+    if (userID == 1) {
+      this.isEmployeeHovered = true;
+      this.isTeacherHovered = false; 
+      this.getDepartment()
+    }
+    else if (userID == 2) { 
+      this.isTeacherHovered = true;
+      this.isEmployeeHovered = false;
+      
+      if(this.User_Data_After_Login.type == "student"){
+        this.requestToBeSend.studentID = this.User_Data_After_Login.id
+        this.getSubjects()
+      }else{
+        this.getStudentByParentID()
+      }
+    } 
+  }
+
   Send(){
     if(this.requestToBeSend.message == '' && this.requestToBeSend.link == '' && this.requestToBeSend.fileFile == null){
       Swal.fire({
@@ -364,14 +518,69 @@ export class MyRequestsComponent {
         confirmButtonColor: '#089B41', 
         confirmButtonText: "OK"
       })
+    } else if(this.requestToBeSend.receiverID == 0 || this.requestToBeSend.receiverID == null){
+      Swal.fire({
+        title: 'You have to choose the user to request from',
+        icon: 'warning', 
+        confirmButtonColor: '#089B41', 
+        confirmButtonText: "OK"
+      })
     } else{
-      this.isLoading = true;
-      this.requestService.Add(this.requestToBeSend, this.DomainName).subscribe(
+      if(this.User_Data_After_Login.type == "employee"){
+        switch (true) {
+          case this.isEmployeeHovered:
+            this.requestToBeSend.receiverUserTypeID = 1;
+            break;
+          case this.isStudentHovered:
+            this.requestToBeSend.receiverUserTypeID = 2;
+            break;
+          case this.isParentHovered:
+            this.requestToBeSend.receiverUserTypeID = 3;
+            break; 
+        }
+      }else{
+        this.requestToBeSend.receiverUserTypeID = 1;
+      }
+
+      if(this.isParentHovered){
+        this.getParent()
+      }else{
+        this.SendTheRequest()
+      }
+    } 
+  }
+
+  SendTheRequest(){
+    this.isLoading = true; 
+    this.requestService.Add(this.requestToBeSend, this.DomainName).subscribe(
+      (result: any) => {
+        this.requestByID = new Request()
+        this.activeTab = "sent"
+        this.closeModal();
+        this.loadSentRequests()
+      },
+      error => {
+        this.isLoading = false;
+      }
+    ); 
+  }
+
+  SendForward(){
+    if(this.requestToBeForwarded.forwardToID == 0 || this.requestToBeForwarded.forwardToID == null){
+      Swal.fire({
+        title: 'You have to select an employee to forward the request to',
+        icon: 'warning', 
+        confirmButtonColor: '#089B41', 
+        confirmButtonText: "OK"
+      })
+    } else{
+      this.isLoading = true; 
+      this.requestService.Forward(this.requestToBeForwarded, this.DomainName).subscribe(
         (result: any) => {
           this.requestByID = new Request()
-          this.activeTab = "sent"
-          this.closeModal();
-          this.loadSentRequests()
+          this.activeTab = "received"
+          this.closeForwardModal();
+          this.loadReceivedRequests()
         },
         error => {
           this.isLoading = false;
@@ -386,7 +595,12 @@ export class MyRequestsComponent {
 
     if (file) {
       if (file.size > 25 * 1024 * 1024) {
-        this.validationErrors['fileFile'] = 'The file size exceeds the maximum limit of 25 MB.';
+        Swal.fire({
+          title: 'The file size exceeds the maximum limit of 25 MB.',
+          icon: 'warning', 
+          confirmButtonColor: '#089B41', 
+          confirmButtonText: "OK"
+        })
         this.requestToBeSend.fileFile = null;
         return; 
       } 

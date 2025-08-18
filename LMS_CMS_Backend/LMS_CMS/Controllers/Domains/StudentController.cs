@@ -326,6 +326,46 @@ namespace LMS_CMS_PL.Controllers.Domains
 
             return Ok(studentDTOs);
         }
+        
+        /////
+
+        [HttpGet("Get_By_ParentID/{Id}")]
+        public IActionResult Get_By_ParentID(long Id)
+        {
+            if (Id == 0)
+            {
+                return BadRequest("ID can't e null");
+            }
+
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            Parent parent = Unit_Of_Work.parent_Repository.First_Or_Default(d => d.ID == Id && d.IsDeleted != true);
+            if (parent == null)
+            {
+                return NotFound("No parent with this Id");
+            } 
+
+            List<Student> students = Unit_Of_Work.student_Repository.FindBy(query => query.IsDeleted != true && query.Parent_Id == Id);
+
+            if (students == null || students.Count == 0)
+            {
+                return NotFound("No students found.");
+            }
+             
+            List<StudentGetDTO> studentDTOs = mapper.Map<List<StudentGetDTO>>(students);
+
+            return Ok(studentDTOs);
+        }
 
         /////
 

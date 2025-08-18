@@ -35,7 +35,7 @@ export class ReceivableComponent {
   DomainName: string = '';
   UserID: number = 0;
 
-  keysArray: string[] = ['id', 'docNumber' ,"date", "receivableDocTypesName" ,"linkFileName"];
+  keysArray: string[] = ['id', 'docNumber' , "receivableDocTypesName" ,"linkFileName"];
  isRtl: boolean = false;
   subscription!: Subscription;
   path: string = '';

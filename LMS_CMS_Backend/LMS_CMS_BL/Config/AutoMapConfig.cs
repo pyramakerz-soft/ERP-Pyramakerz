@@ -1272,6 +1272,23 @@ namespace LMS_CMS_BL.Config
                 .ForMember(dest => dest.CertificateTypeFile, opt => opt.MapFrom(src => src.CertificateType.File));
             CreateMap<CertificateTypeStudentAddDTO, CertificateStudent>();
 
+            CreateMap<AttendanceStudent, AttendanceStudentGetDTO>()
+              .ForMember(dest => dest.StudentArName, opt => opt.MapFrom(src => src.Student.ar_name))
+              .ForMember(dest => dest.StudentEnName, opt => opt.MapFrom(src => src.Student.en_name));
+            CreateMap<AttendanceStudentAddDTO, AttendanceStudent>();
+            CreateMap<AttendanceStudentEditDTO, AttendanceStudent>();
+
+            CreateMap<Attendance, AttendanceGetDTO>()
+                .ForMember(dest => dest.InsertedByUserId, opt => opt.MapFrom(src => src.InsertedByEmployee.en_name))
+                .ForMember(dest => dest.AttendanceStudents, opt => opt.MapFrom(src => src.AttendanceStudents))
+                .ForMember(dest => dest.ClassroomName, opt => opt.MapFrom(src => src.Classroom.Name))
+                .ForMember(dest => dest.GradeID, opt => opt.MapFrom(src => src.Classroom.GradeID))
+                .ForMember(dest => dest.GradeName, opt => opt.MapFrom(src => src.Classroom.Grade.Name))
+                .ForMember(dest => dest.AcademicYearName, opt => opt.MapFrom(src => src.AcademicYear.Name))
+                .ForMember(dest => dest.SchoolID, opt => opt.MapFrom(src => src.AcademicYear.SchoolID))
+                .ForMember(dest => dest.SchoolName, opt => opt.MapFrom(src => src.AcademicYear.School.Name));
+            CreateMap<AttendanceAddDTO, Attendance>();
+            CreateMap<AttendanceEditDTO, Attendance>();
         }
     } 
 }
