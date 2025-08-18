@@ -4,9 +4,9 @@
             <p *ngIf="this.path == 'Registration Form'" class="primaryTxt text-2xl font-semibold">{{ isRtl ? "استمارة التسجيل" : RegistrationFormData.name }}</p>
             <div *ngIf="this.path == 'Edit Student'" class="flex justify-between items-center space-x-5 "> 
                 <i class="fa-solid fa-chevron-left cursor-pointer rtl:rotate-180"(click)="moveToStudents()"></i>
-                <p class="primaryTxt text-2xl font-semibold">Edit Student</p>
+                <p class="primaryTxt text-2xl font-semibold">{{ 'Edit' | translate }} {{ 'Student' | translate }}</p>
             </div>
-            <p *ngIf="this.path == 'Create Student'" class="primaryTxt text-2xl font-semibold">Create Student</p>
+            <p *ngIf="this.path == 'Create Student'" class="primaryTxt text-2xl font-semibold">{{ 'Create' | translate }}  {{ 'Student' | translate }}</p>
             <div class="w-[500px] flec flex-col space-y-2">
                 <p>{{currentCategory}} {{ 'of' | translate }} {{ RegistrationFormData.categories.length }} {{
                     'Completed' | translate }}</p>
@@ -44,7 +44,7 @@
                             <input id="{{cat.enName}}_{{field.enName}}" type="text"
                                 class="rounded-lg border border-solid border-gray-300 px-4 py-3" disabled
                                 [value]="getTextAnswer(field.id)"
-                                placeholder="{{ 'Enterrrrr' | translate }} {{ isRtl ? field.arName : field.enName }}"
+                                placeholder="{{ 'Enter' | translate }} {{ isRtl ? field.arName : field.enName }}"
                                 [class.error-border]="isFieldInvalid(field)" />
                             } @else{
                             <input
@@ -81,13 +81,13 @@
                                     translate }} {{ isRtl ? field.arName : field.enName }}</option>
 
                                 <ng-container *ngIf="field.id == 3">
-                                    <option *ngFor="let gender of Gender" [value]="gender.id">{{ gender.name }}
+                                    <option *ngFor="let gender of Gender" [value]="gender.id">{{ gender.name|translate }}
                                     </option>
                                 </ng-container>
 
                                 <ng-container *ngIf="field.id == 5 ">
                                     <option *ngFor="let nationality of nationalities" [value]="nationality.id">
-                                        {{ nationality.name }}
+                                        {{ nationality.name}}
                                     </option>
                                 </ng-container> 
 
@@ -112,8 +112,8 @@
                                 (change)="onSchoolChange($event); FillData($event, field.id, field.fieldTypeID)"
                                 [(ngModel)]="selectedSchool"
                                 class="rounded-lg border border-solid border-gray-300 px-4 py-3">
-                                <option value="null" style="color: gray;" disabled selected hidden>{{ 'Choose' |
-                                    translate }} {{ 'School' | translate }}</option>
+                                <option value="null" style="color: gray;" disabled selected hidden>
+                                    {{ 'Choose' |translate }} {{ 'School' | translate }}</option>
                                 <option *ngFor="let school of schools" [value]="school.id">
                                     {{ school.name }}
                                 </option>

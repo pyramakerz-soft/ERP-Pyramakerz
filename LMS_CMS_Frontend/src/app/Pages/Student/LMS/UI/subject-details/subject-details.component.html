@@ -4,7 +4,7 @@
 <div class="flex justify-between items-center">
     <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
         <!-- <i class="fa-solid fa-chevron-left cursor-pointer rtl:rotate-180 cursor-pointer" (click)="goBack()"></i> -->
-        <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ subjectName }}</h1>
+        <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ subjectName |translate}}</h1>
     </div>
 </div>        <div class="flex space-x-2 rtl:space-x-reverse">
             <button
@@ -33,7 +33,7 @@
         <div *ngFor="let week of weeks"
             class="border-b border-gray-400 bg-[#F7F7F7] hover:bg-gray-100 text-gray-800 px-4 py-3 rounded shadow-sm cursor-pointer transition"
             (click)="selectWeek(week)">
-            {{ week }}
+            {{ week |translate }}
         </div>
     </div>
 </div>

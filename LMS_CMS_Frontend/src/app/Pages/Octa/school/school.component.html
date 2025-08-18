@@ -103,8 +103,8 @@
                 <label class="mb-2 primaryTxt" for="type"> {{ 'School Type' | translate }}</label>
                 <select [(ngModel)]="school.schoolTypeID" (ngModelChange)="onInputValueChange({ field: 'schoolTypeID', value: $event })"
                 class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="type">
-                    <option *ngIf="!school.schoolTypeID" [value]="0" disabled selected hidden>{{ school.schoolTypeName || 'Select Type' }}</option>
-                    <option *ngFor="let type of schoolType" [value]="type.id">{{ type.name }}</option>
+                    <option *ngIf="!school.schoolTypeID" [value]="0" disabled selected hidden>{{ (school.schoolTypeName|translate) || ('Select Type'|translate) }}</option>
+                    <option *ngFor="let type of schoolType" [value]="type.id">{{ type.name|translate }}</option>
                     <option *ngIf="schoolType.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
                 </select>
                 <span *ngIf="validationErrors['schoolTypeID']" class="text-red-500 ml-3 font-normal">{{ validationErrors['schoolTypeID'] }}</span>

@@ -3,7 +3,7 @@
     <div class="flex justify-between items-center mb-6">
         <div class="flex items-center space-x-5 rtl:space-x-reverse">
             <i class="fa-solid fa-chevron-left cursor-pointer rtl:rotate-180" (click)="goBack()"></i>
-            <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ subjectName }} {{ weekName }}</h1>
+            <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ subjectName |translate}} {{ weekName |translate}}</h1>
         </div>
     </div>
 
@@ -37,7 +37,7 @@
                     class="flex items-center px-4 py-2 border border-gray-200 rounded hover:bg-gray-50 cursor-pointer"
                     [class.bg-blue-50]="sheet.selected" (click)="toggleSelection(sheet, 'sheets')">
                     <i class="fas fa-file-pdf text-red-500 mr-3"></i>
-                    <span class="flex-grow">{{ sheet.name }}</span>
+                    <span class="flex-grow">{{ sheet.name|translate }}</span>
                     <i class="fas fa-check text-green-500" *ngIf="sheet.selected"></i>
                 </div>
             </div>
@@ -57,7 +57,7 @@
                     class="flex items-center px-4 py-2 border border-gray-200 rounded hover:bg-gray-50 cursor-pointer"
                     [class.bg-blue-50]="video.selected" (click)="toggleSelection(video, 'videos')">
                     <i class="fas fa-video text-blue-500 mr-3"></i>
-                    <span class="flex-grow">{{ video.name }}</span>
+                    <span class="flex-grow">{{ video.name|translate }}</span>
                     <i class="fas fa-check text-green-500" *ngIf="video.selected"></i>
                 </div>
             </div>
