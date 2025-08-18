@@ -10,7 +10,7 @@ namespace LMS_CMS_BL.DTO.SocialWorker
     {
         public string? Note { get; set; }
         public bool IsLate { get; set; }
-        public bool IsAbsent { get; set; }
+        public bool IsPresent { get; set; }
         public int? LateTimeInMinutes { get; set; }
         public long StudentID { get; set; }
         public long? AttendanceID { get; set; }

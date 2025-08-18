@@ -14,7 +14,7 @@ namespace LMS_CMS_BL.DTO.SocialWorker
         public long ID { get; set; }
         public string? Note { get; set; }
         public bool IsLate { get; set; }
-        public bool IsAbsent { get; set; }
+        public bool IsPresent { get; set; }
         public int? LateTimeInMinutes { get; set; }
         public long StudentID { get; set; }
         public string StudentEnName { get; set; }
