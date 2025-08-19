@@ -51,7 +51,7 @@ export class MainLayoutComponent {
 
     this.GetInfo(); 
   });
-    // this.isRtl = document.documentElement.dir === 'rtl';
+    this.isRtl = document.documentElement.dir === 'rtl';
     
   }
 
