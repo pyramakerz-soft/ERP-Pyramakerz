@@ -111,7 +111,7 @@ namespace LMS_CMS
                             // If the request is for our hub...
                             var path = context.HttpContext.Request.Path;
                             if (!string.IsNullOrEmpty(accessToken) &&
-                                path.StartsWithSegments("/notificationHub"))
+                                 (path.StartsWithSegments("/notificationHub") || path.StartsWithSegments("/requestHub")))
                             { 
                                 context.Token = accessToken;
                             }
@@ -150,6 +150,9 @@ namespace LMS_CMS
             builder.Services.AddScoped<IamNotRobot>();
             builder.Services.AddScoped<UserTreeService>();
             builder.Services.AddScoped<NotificationService>();
+            builder.Services.AddScoped<SendNotificationService>();
+            builder.Services.AddScoped<RequestService>();
+
 
             builder.Services.AddAWSService<IAmazonSecretsManager>(new Amazon.Extensions.NETCore.Setup.AWSOptions
             {
@@ -235,12 +238,7 @@ namespace LMS_CMS
             {
                 appBuilder.UseMiddleware<GetConnectionStringMiddleware>();
             });
-            //app.UseWhen(context => context.Request.Path.StartsWithSegments("/api/with-domain"), 
-            //    appBuilder =>
-            //{
-            //    appBuilder.UseMiddleware<GetConnectionStringMiddleware>();
-            //}); 
-
+             
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
@@ -260,7 +258,7 @@ namespace LMS_CMS
 
             // 2) SignalR
             app.MapHub<NotificationHub>("/notificationHub").RequireAuthorization();
-
+            app.MapHub<RequestHub>("/requestHub").RequireAuthorization();
 
             //app.Urls.Add("http://0.0.0.0:5000");
             //app.UseCors(builder =>

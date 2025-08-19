@@ -21,11 +21,13 @@ import { SchoolService } from '../../../../Services/Employee/school.service';
 import { SectionService } from '../../../../Services/Employee/LMS/section.service';
 import { ConductLevelService } from '../../../../Services/Employee/SocialWorker/conduct-level.service';
 import { ConductTypeSection } from '../../../../Models/SocialWorker/conduct-type-section';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-conduct-type',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent , TranslateModule],
   templateUrl: './conduct-type.component.html',
   styleUrl: './conduct-type.component.css'
 })
@@ -36,7 +38,8 @@ export class ConductTypeComponent {
   AllowDelete: boolean = false;
   AllowEditForOthers: boolean = false;
   AllowDeleteForOthers: boolean = false;
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   SelectedSchoolId: number = 0;
   TableData: ConductType[] = [];
   DomainName: string = '';
@@ -64,6 +67,7 @@ export class ConductTypeComponent {
     private router: Router,
     private menuService: MenuService,
     public activeRoute: ActivatedRoute,
+    private languageService: LanguageService,
     public account: AccountService,
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
@@ -93,6 +97,10 @@ export class ConductTypeComponent {
 
     // this.GetAllData();
     this.GetSchools();
+        this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetAllData() {

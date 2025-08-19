@@ -13,11 +13,13 @@ import { FormsModule } from '@angular/forms';
 import { TestWithRegistrationForm } from '../../../../Models/Registration/test-with-registration-form';
 import { TestService } from '../../../../Services/Employee/Registration/test.service';
 import { Test } from '../../../../Models/Registration/test';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-registration-confirmation-test-details',
   standalone: true,
-  imports: [CommonModule , FormsModule],
+  imports: [CommonModule , FormsModule , TranslateModule],
   templateUrl: './registration-confirmation-test-details.component.html',
   styleUrl: './registration-confirmation-test-details.component.css'
 })
@@ -39,7 +41,8 @@ export class RegistrationConfirmationTestDetailsComponent {
   DomainName: string = '';
   UserID: number = 0;
   path: string = '';
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
   AllowEditForOthers: boolean = false;
@@ -64,6 +67,7 @@ export class RegistrationConfirmationTestDetailsComponent {
     public activeRoute: ActivatedRoute,
     public account: AccountService,
     public ApiServ: ApiService,
+     private languageService: LanguageService,
     private menuService: MenuService,
     public EditDeleteServ: DeleteEditPermissionService,
     private router: Router,
@@ -91,6 +95,13 @@ export class RegistrationConfirmationTestDetailsComponent {
         this.AllowEditForOthers = settingsPage.allow_Edit_For_Others
       }
     });
+
+
+    this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+
   }
 
   validateNumber(event: any, field: keyof RegisterationFormTest): void {

@@ -68,6 +68,8 @@ export class MyRequestsComponent {
  
   subjectID = 0  
 
+  private isLocalNotification = false;
+
   constructor(
     public account: AccountService,
     public ApiServ: ApiService,  
@@ -89,7 +91,20 @@ export class MyRequestsComponent {
 
     this.DomainName = this.ApiServ.GetHeader();
  
-    this.loadSentRequests()   
+    this.loadSentRequests() 
+    
+    // Subscribe to request opened events 
+    this.requestService.requestOpened$.subscribe(() => {
+      if (this.isLocalNotification) {
+        return; // Skip if the notification came from this component
+      }
+
+      if (this.activeTab == 'sent') {
+        this.loadSentRequests();
+      } else if (this.activeTab == 'received') {
+        this.loadReceivedRequests();
+      }
+    });
   }
 
   loadSentRequests(){
@@ -151,6 +166,11 @@ export class MyRequestsComponent {
           request.seenOrNot = true
         }
         this.requestByID = data 
+
+        // call the subscribe again for the other pages
+        this.isLocalNotification = true;
+        this.requestService.notifyRequestOpened();
+        this.isLocalNotification = false                          
       }
     ) 
   }
@@ -169,6 +189,10 @@ export class MyRequestsComponent {
         this.requestService.Accept(request.id, this.DomainName).subscribe((d) => {
           request.approvedOrNot=true
           request.seenOrNot=true
+          // call the subscribe again for the other pages
+          this.isLocalNotification = true;
+          this.requestService.notifyRequestOpened();
+          this.isLocalNotification = false  
         });
       }
     });
@@ -188,6 +212,10 @@ export class MyRequestsComponent {
         this.requestService.Decline(request.id, this.DomainName).subscribe((d) => {
           request.approvedOrNot=false
           request.seenOrNot=true
+          // call the subscribe again for the other pages
+          this.isLocalNotification = true;
+          this.requestService.notifyRequestOpened();
+          this.isLocalNotification = false  
         });
       }
     });
@@ -558,6 +586,10 @@ export class MyRequestsComponent {
         this.activeTab = "sent"
         this.closeModal();
         this.loadSentRequests()
+        // call the subscribe again for the other pages
+        this.isLocalNotification = true;
+        this.requestService.notifyRequestOpened();
+        this.isLocalNotification = false  
       },
       error => {
         this.isLoading = false;
@@ -581,6 +613,10 @@ export class MyRequestsComponent {
           this.activeTab = "received"
           this.closeForwardModal();
           this.loadReceivedRequests()
+          // call the subscribe again for the other pages
+          this.isLocalNotification = true;
+          this.requestService.notifyRequestOpened();
+          this.isLocalNotification = false  
         },
         error => {
           this.isLoading = false;

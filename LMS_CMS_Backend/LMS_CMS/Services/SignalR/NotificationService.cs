@@ -6,13 +6,11 @@ namespace LMS_CMS_PL.Services.SignalR
 {
     public class NotificationService
     {
-        private readonly IHubContext<NotificationHub> _hubContext;
-        private readonly DbContextFactoryService _dbContextFactory;
+        private readonly IHubContext<NotificationHub> _hubContext; 
 
-        public NotificationService(IHubContext<NotificationHub> hubContext, DbContextFactoryService dbContextFactory)
+        public NotificationService(IHubContext<NotificationHub> hubContext)
         {
-            _hubContext = hubContext;
-            _dbContextFactory = dbContextFactory; 
+            _hubContext = hubContext; 
         } 
         public async Task PushRealTimeNotification(long userId, long userType, object notification, string domainName)
         {

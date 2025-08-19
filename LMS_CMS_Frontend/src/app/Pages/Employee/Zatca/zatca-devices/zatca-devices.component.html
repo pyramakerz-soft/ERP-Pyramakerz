@@ -1,7 +1,7 @@
 <!-- zatca-devices.component.html -->
 <div class="">
     <div class="flex justify-between">
-        <h1 class="primaryTxt font-semibold text-2xl leading-9">ZATCA Devices</h1>
+        <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ 'ZATCA Device' | translate }}</h1>
         <div class="flex justify-between items-center">
             <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
             <button (click)="Create()" [disabled]="!IsChoosenDomain" [ngClass]="{ 
@@ -11,41 +11,41 @@
                     'secondaryBorder': IsChoosenDomain,
                     'secondaryTxt': IsChoosenDomain  
                 }" class="rounded-lg px-4 py-3 flex items-center justify-center gap-2">
-                Create ZATCA Device
+                 {{ 'Create' | translate }} {{ 'ZATCA Device' | translate }}
             </button>
         </div>
     </div>
 
     <div [ngClass]="{'hidden': !IsChoosenDomain}">
         <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
-            <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
+            <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
                 <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
                     <tr>
                         <th
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            ID</th>
+                           {{ 'ID' | translate }}</th>
                         <th
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            PC Name</th>
+                             {{ 'PC Name' | translate }}</th>
                         <th
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            Serial Number</th>
+                             {{ 'Serial Number' | translate }}</th>
                         <th
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            School</th>
+                             {{ 'School' | translate }}</th>
                         <th
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            Certificate Date</th>
+                             {{ 'Certificate Date' | translate }}</th>
                         <th
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            Actions</th>
+                             {{ 'Actions' | translate }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr *ngIf="TableData.length === 0">
                         <td colspan="6"
                             class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-                            No Data Found
+                             {{ 'No Data Found' | translate }}
                         </td>
                     </tr>
                     <tr *ngFor="let row of TableData; let i = index"
@@ -58,7 +58,7 @@
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{
                             formatDate(row.certificateDate)|| 'no certificate' }}</td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            <div class="flex space-x-4">
+                            <div class="flex space-x-4 rtl:space-x-reverse">
                                 <button *ngIf="AllowDelete " (click)="Delete(row.id)">
                                     <i class="fa-regular fa-trash-can"></i>
                                 </button>
@@ -82,46 +82,46 @@
     class="fixed top-0 left-0 right-0 z-50 flex justify-center items-center w-full h-full bg-black/50">
     <div class="bg-white w-[669px] h-auto rounded-2xl p-12 gap-4 shadow-md"> 
         <div class="flex justify-between items-center">
-            <h1 *ngIf="mode === 'add'" class="font-semibold text-2xl leading-9">Create ZATCA Device</h1>
-            <h1 *ngIf="mode === 'edit'" class="font-semibold text-2xl leading-9">Edit ZATCA Device</h1>
+            <h1 *ngIf="mode === 'add'" class="font-semibold text-2xl leading-9"> {{ 'Create' | translate }} {{ 'ZATCA Device' | translate }}</h1>
+            <h1 *ngIf="mode === 'edit'" class="font-semibold text-2xl leading-9"> {{ 'Edit' | translate }} {{ 'ZATCA Device' | translate }}</h1>
             <button (click)="closeModal()" type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
         </div>
         <div class="mt-4 bg-[#F7F7F7] w-full h-auto rounded-[24px] p-[16px_24px] gap-[20px]">
             <div class="flex flex-col mb-4 w-full">
-                <label class="mb-2 primaryTxt" for="name">PC Name</label>
+                <label class="mb-2 primaryTxt" for="name"> {{ 'PC Name' | translate }}</label>
                 <input type="text"  class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="name"
-                    [(ngModel)]="zatcaDevice.pcName" placeholder="Enter PC Name"
+                    [(ngModel)]="zatcaDevice.pcName" placeholder=" {{ 'Enter' | translate }} {{ 'PC Name' | translate }}"
                     (ngModelChange)="onInputValueChange({ field: 'pcName', value: $event })" />
                 <span *ngIf="validationErrors['pcName']" class="text-red-500 ml-3 font-normal">{{ validationErrors['pcName'] }}</span>
             </div>
             <div class="flex flex-col mb-4 w-full">
-                <label class="mb-2 primaryTxt" for="Serial">Serial Number</label>
+                <label class="mb-2 primaryTxt" for="Serial"> {{ 'Serial Number' | translate }}</label>
                 <input type="text"  class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="Serial"
-                    [(ngModel)]="zatcaDevice.serialNumber" placeholder="Enter Serial Number"
+                    [(ngModel)]="zatcaDevice.serialNumber" placeholder="{{ 'Enter' | translate }} {{ 'Serial Number' | translate }}"
                     (ngModelChange)="onInputValueChange({ field: 'serialNumber', value: $event })" />
                 <span *ngIf="validationErrors['serialNumber']" class="text-red-500 ml-3 font-normal">{{ validationErrors['serialNumber'] }}</span>
             </div>
             <div class="flex flex-col mb-4 w-full">
-                <label class="mb-2 primaryTxt" for="School">School</label>
+                <label class="mb-2 primaryTxt" for="School"> {{ 'School' | translate }} </label>
                 <select [(ngModel)]="zatcaDevice.schoolId" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                     (ngModelChange)="onInputValueChange({ field: 'schoolId', value: $event })">
-                    <option [ngValue]="0" disabled selected hidden>Select School</option>
+                    <option [ngValue]="0" disabled selected hidden> {{ 'Select' | translate }} {{ 'School' | translate }}</option>
                     <option *ngFor="let school of schools" [ngValue]="school.id"> {{ school.name }} </option>
-                    <option *ngIf="schools.length === 0" disabled selected>No Data Found</option>
+                    <option *ngIf="schools.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
                 </select> 
                 <span *ngIf="validationErrors['schoolId']" class="text-red-500 ml-3 font-normal">{{ validationErrors['schoolId'] }}</span>
             </div> 
             <div class="flex flex-col mb-4 w-full" *ngIf="mode === 'edit' && zatcaDevice.certificateDate != null">
-                <label class="mb-2 primaryTxt" for="certificateDate">Certificate Date</label>
+                <label class="mb-2 primaryTxt" for="certificateDate"> {{ 'Certificate Date' | translate }}</label>
                 <input type="date"  class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="certificateDate" [disabled]="mode === 'edit'"
-                    [(ngModel)]="zatcaDevice.certificateDate" placeholder="Enter PC Name"/>
+                    [(ngModel)]="zatcaDevice.certificateDate" placeholder="{{ 'Enter' | translate }} {{ 'PC Name' | translate }}"/>
             </div>  
         </div>
         <div class="flex justify-end">
             <button [disabled]="isLoading"
                 class="secondaryBg text-white font-medium px-4 py-2 rounded-lg mt-4 flex items-center justify-center gap-2"
                 (click)="CreateOREdit()">
-                <span *ngIf="!isLoading">Save</span>
+                <span *ngIf="!isLoading">{{ 'Save' | translate }}</span>
                 <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
             </button>
         </div>
@@ -134,21 +134,21 @@
     class="fixed top-0 left-0 right-0 z-50 flex justify-center items-center w-full h-full bg-black/50">
     <div class="bg-white w-[669px] h-auto rounded-2xl p-12 gap-4 shadow-md"> 
         <div class="flex justify-between items-center">
-            <h1 class="font-semibold text-2xl leading-9">Generate Certificate</h1> 
+            <h1 class="font-semibold text-2xl leading-9"> {{ 'Generate Certificate' | translate }}</h1> 
             <button (click)="closeCertificateModal()" type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
         </div>
         <div class="mt-4 bg-[#F7F7F7] w-full h-auto rounded-[24px] p-[16px_24px] gap-[20px]">
             <div class="flex flex-col mb-4 w-full">
-                <label class="mb-2 primaryTxt" for="otp">OTP</label>
+                <label class="mb-2 primaryTxt" for="otp"> {{ 'OTP' | translate }}</label>
                 <input type="text"  class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="otp"
-                    [(ngModel)]="otp" placeholder="Enter OTP" (input)="validateNumber($event)"/> 
+                    [(ngModel)]="otp" placeholder="{{ 'Enter' | translate }} {{ 'OTP' | translate }} " (input)="validateNumber($event)"/> 
             </div> 
         </div>
         <div class="flex justify-end">
             <button [disabled]="isLoading"
                 class="secondaryBg text-white font-medium px-4 py-2 rounded-lg mt-4 flex items-center justify-center gap-2"
                 (click)="generateCertificate()">
-                <span *ngIf="!isLoading">Save</span>
+                <span *ngIf="!isLoading">{{ 'Save' | translate }}</span>
                 <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
             </button>
         </div>

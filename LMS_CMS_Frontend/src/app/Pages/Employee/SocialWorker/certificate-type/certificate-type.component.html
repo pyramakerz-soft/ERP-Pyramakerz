@@ -98,7 +98,7 @@
                 <label class="mb-2 primaryTxt font-medium" for="leftSpace">{{ 'Left Space' |translate }}</label>
                 <input id="leftSpace" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                     (input)="validateNumber($event, 'leftSpace')"
-                    placeholder="{{ 'Enter' | translate }}{{ 'Left Space' | translate }}"
+                    placeholder="{{ 'Enter' | translate }} {{ 'Left Space' | translate }}"
                     [(ngModel)]="certificateType.leftSpace"
                     (ngModelChange)="onInputValueChange({ field: 'leftSpace', value: $event })" />
                 <span *ngIf="validationErrors['leftSpace']"
@@ -108,7 +108,7 @@
                 <label class="mb-2 primaryTxt font-medium" for="topSpace">{{ 'Top Space' |translate }}</label>
                 <input id="topSpace" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                     (input)="validateNumber($event, 'topSpace')"
-                    placeholder="{{ 'Enter' | translate }}{{ 'Top Space' | translate }}"
+                    placeholder="{{ 'Enter' | translate }} {{ 'Top Space' | translate }}"
                     [(ngModel)]="certificateType.topSpace"
                     (ngModelChange)="onInputValueChange({ field: 'topSpace', value: $event })" />
                 <span *ngIf="validationErrors['topSpace']"

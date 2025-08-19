@@ -1,6 +1,6 @@
 <div class="flex justify-between items-center">
     <div class="flex justify-between items-center space-x-5">
-        <h1 class="primaryTxt font-semibold text-2xl leading-9">Subjects</h1>
+        <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ 'Subjects' | translate }}</h1>
     </div>
 </div>
 
@@ -12,15 +12,15 @@
         <div class="flex flex-wrap justify-center gap-3 text-sm text-[#4F4F4F]">
             <div class="flex items-center w-[40%] space-x-1 cursor-pointer" (click)="moveToSubjectAssignments(subject.id)"> 
                 <img src="Icons/Assignments.png" alt="Assignments" />
-                <span>Assignments</span>
+                <span>{{ 'Assignments' | translate }}</span>
             </div>
             <div class="flex items-center w-[40%] space-x-1 cursor-pointer" (click)="moveToSubjectResources(subject.id)">
                 <img src="Icons/Resources.png" alt="Resources" />
-                <span>Resources</span>
+                <span>{{ 'Resources' | translate }}</span>
             </div>
             <div class="flex items-center w-[40%] space-x-1 cursor-pointer" (click)="moveToSubjectLive(subject.id)">
                 <img src="Icons/LessonLive.png" alt="Lesson Live" />
-                <span>Lesson Live</span>
+                <span>{{ 'Lesson Live' | translate }}</span>
             </div>
         </div>
     </div>
