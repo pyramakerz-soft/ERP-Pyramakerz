@@ -25,14 +25,18 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
         private readonly DbContextFactoryService _dbContextFactory;
         IMapper mapper;
         private readonly CheckPageAccessService _checkPageAccessService;
-        private readonly FileValidationService _fileValidationService; 
+        private readonly FileValidationService _fileValidationService;
+        private readonly SendNotificationService _sendNotificationService;
+        private readonly RequestService _requestService;
 
-        public RequestController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileValidationService fileValidationService)
+        public RequestController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileValidationService fileValidationService, SendNotificationService sendNotificationService, RequestService requestService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _checkPageAccessService = checkPageAccessService;
-            _fileValidationService = fileValidationService; 
+            _fileValidationService = fileValidationService;
+            _sendNotificationService = sendNotificationService;
+            _requestService = requestService;
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////
@@ -463,7 +467,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee", "parent", "student" }
         )]
-        public IActionResult Accept(long requestID)
+        public async Task<IActionResult> AcceptAsync(long requestID)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -506,6 +510,16 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             Unit_Of_Work.request_Repository.Update(request);
             Unit_Of_Work.SaveChanges();
 
+            var domainName = HttpContext.Request.Headers["Domain-Name"].FirstOrDefault();
+            var formattedDate = request.InsertedAt?.ToString("MMMM dd, yyyy 'at' hh:mm tt");
+            (var englishUserName, var arabicUserName) = GetUserNames(Unit_Of_Work, request.ReceiverID, request.ReceiverUserTypeID);
+
+            var message = $"Your Request Has Been Accepted by {englishUserName} ({arabicUserName}) (submitted on {formattedDate})";
+
+            await _sendNotificationService.SendNotificationAsync(Unit_Of_Work, message, request.SenderUserTypeID, request.SenderID, domainName);
+            await _requestService.NotifyNewRequest(request.SenderID, request.SenderUserTypeID, domainName);
+            await _requestService.NotifyNewRequest(request.ReceiverID, request.ReceiverUserTypeID, domainName);
+
             return Ok();
         }
         
@@ -515,7 +529,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee", "parent", "student" }
         )]
-        public IActionResult Decline(long requestID)
+        public async Task<IActionResult> DeclineAsync(long requestID)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -556,7 +570,16 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             request.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
             Unit_Of_Work.request_Repository.Update(request);
-            Unit_Of_Work.SaveChanges();
+
+            var domainName = HttpContext.Request.Headers["Domain-Name"].FirstOrDefault();
+            var formattedDate = request.InsertedAt?.ToString("MMMM dd, yyyy 'at' hh:mm tt"); 
+            (var englishUserName, var arabicUserName) = GetUserNames(Unit_Of_Work, request.ReceiverID, request.ReceiverUserTypeID);
+             
+            var message = $"Your Request Has Been Declined by {englishUserName} ({arabicUserName}) (submitted on {formattedDate})";
+
+            await _sendNotificationService.SendNotificationAsync(Unit_Of_Work, message, request.SenderUserTypeID, request.SenderID, domainName);
+            await _requestService.NotifyNewRequest(request.SenderID, request.SenderUserTypeID, domainName);
+            await _requestService.NotifyNewRequest(request.ReceiverID, request.ReceiverUserTypeID, domainName);
 
             return Ok();
         }
@@ -567,7 +590,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee"}
         )]
-        public IActionResult Forward(ForwardRequestDTO forwardRequestDTO)
+        public async Task<IActionResult> ForwardAsync(ForwardRequestDTO forwardRequestDTO)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -695,7 +718,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                 } 
             }
 
-            Unit_Of_Work.SaveChanges(); 
+            Unit_Of_Work.SaveChanges();
+
+            var domainName = HttpContext.Request.Headers["Domain-Name"].FirstOrDefault();
+
+            await _requestService.NotifyNewRequest(newRequest.SenderID, newRequest.SenderUserTypeID, domainName);
+            await _requestService.NotifyNewRequest(newRequest.ReceiverID, newRequest.ReceiverUserTypeID, domainName);
+            await _requestService.NotifyNewRequest(userId, 1, domainName);
 
             return Ok();
         }
@@ -797,33 +826,32 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             } 
 
             if ((userTypeID == 2 || userTypeID == 3) && NewRequest.ReceiverUserTypeID == 1)
-            {  
-                if (userTypeID == 3 && (NewRequest.StudentID == null || NewRequest.StudentID == 0))
-                {
-                    return BadRequest("You must select a student");
-                }
-
-                if (userTypeID == 3 && NewRequest.StudentID != null)
-                {
-                    Student student = Unit_Of_Work.student_Repository.First_Or_Default(d => d.ID == NewRequest.StudentID && d.IsDeleted != true && d.Parent_Id== userId);
-                    if (student == null)
-                    {
-                        return NotFound("No Student With this ID For this parent");
-                    }
-                }
-                
-                long studentId = userTypeID == 2 ? userId : NewRequest.StudentID.Value;
-
+            {
                 Employee emp = Unit_Of_Work.employee_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == NewRequest.ReceiverID);
                 if (emp?.CanReceiveRequestFromParent != true)
                 {
+                    if (userTypeID == 3 && (NewRequest.StudentID == null || NewRequest.StudentID == 0))
+                    {
+                        return BadRequest("You must select a student");
+                    }
+
+                    if (userTypeID == 3 && NewRequest.StudentID != null)
+                    {
+                        Student student = Unit_Of_Work.student_Repository.First_Or_Default(d => d.ID == NewRequest.StudentID && d.IsDeleted != true && d.Parent_Id == userId);
+                        if (student == null)
+                        {
+                            return NotFound("No Student With this ID For this parent");
+                        }
+                    }
+
+                    long studentId = userTypeID == 2 ? userId : NewRequest.StudentID.Value;
                     var teacherIDs = await GetValidTeacherIdsForStudent(studentId, Unit_Of_Work);
 
                     if (teacherIDs.Count == 0 || !teacherIDs.Contains(NewRequest.ReceiverID))
                     {
                         return BadRequest("You can only send requests to your current teachers or employees that can accept requests from student or parent");
                     }
-                }
+                } 
             }
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
@@ -864,7 +892,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
 
             Unit_Of_Work.SaveChanges();
 
-            // run the function that tell the user that there are changes and in front end it will change the count and also refresh the requests if i am in the requests page
+            await _requestService.NotifyNewRequest(request.ReceiverID, request.ReceiverUserTypeID, domainName);
+            await _requestService.NotifyNewRequest(request.SenderID, request.SenderUserTypeID, domainName);
 
             return Ok();
         } 
