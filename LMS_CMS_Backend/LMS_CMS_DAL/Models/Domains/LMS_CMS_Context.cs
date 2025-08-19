@@ -225,6 +225,8 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<CertificateType> CertificateType { get; set; }
         public DbSet<SocialWorkerMedalStudent> SocialWorkerMedalStudent { get; set; }
         public DbSet<CertificateStudent> CertificateStudent { get; set; }
+        public DbSet<HorizontalMeeting> HorizontalMeeting { get; set; }
+        public DbSet<ParentMeeting> ParentMeeting { get; set; }
 
 
         public LMS_CMS_Context(DbContextOptions<LMS_CMS_Context> options)
