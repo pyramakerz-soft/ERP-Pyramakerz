@@ -15,11 +15,13 @@ import { AcadimicYearService } from '../../../../../Services/Employee/LMS/academ
 import { StudentService } from '../../../../../Services/student.service';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
 import { PdfPrintComponent } from '../../../../../Component/pdf-print/pdf-print.component';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-student-information',
   standalone: true,
-  imports: [CommonModule, FormsModule, PdfPrintComponent],
+  imports: [CommonModule, FormsModule, PdfPrintComponent, TranslateModule],
   templateUrl: './student-information.component.html',
   styleUrl: './student-information.component.css',
 })
@@ -52,7 +54,8 @@ export class StudentInformationComponent {
   academicYears: AcademicYear[] = [];
   Students: Student[] = [];
   isLoading: boolean = false;
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   SelectedSchoolId: number = 0;
   SelectedStudentId: number = 0;
   SelectedYearId: number = 0;
@@ -77,6 +80,7 @@ export class StudentInformationComponent {
     private menuService: MenuService,
     public EditDeleteServ: DeleteEditPermissionService,
     private router: Router,
+    private languageService: LanguageService,
     private SchoolServ: SchoolService,
     private academicYearServ: AcadimicYearService,
     private studentServ: StudentService,
@@ -104,6 +108,10 @@ export class StudentInformationComponent {
     });
     this.getAllSchools();
     this.getAllYears();
+        this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   getAllSchools() {

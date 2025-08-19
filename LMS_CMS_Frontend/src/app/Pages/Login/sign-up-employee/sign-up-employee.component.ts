@@ -7,11 +7,14 @@ import { RegisteredEmployeeService } from '../../../Services/Employee/Administra
 import { ApiService } from '../../../Services/api.service';
 import { RecaptchaComponent, RecaptchaModule } from 'ng-recaptcha';
 import Swal from 'sweetalert2';
- 
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
+
 @Component({
   selector: 'app-sign-up-employee',
   standalone: true,
-  imports: [FormsModule, CommonModule, RecaptchaModule],
+  imports: [FormsModule, CommonModule, RecaptchaModule, TranslateModule],
   templateUrl: './sign-up-employee.component.html',
   styleUrl: './sign-up-employee.component.css'
 })
@@ -19,16 +22,22 @@ export class SignUpEmployeeComponent {
   DomainName: string = '';
   employee:RegisteredEmployee = new RegisteredEmployee()
   confirmPassword: string = '';
+    isRtl: boolean = false;
+  subscription!: Subscription;
   validationErrors: { [key in keyof RegisteredEmployee]?: string } = {};
   isLoading = false;  
   IsConfimPassEmpty = false
 
   @ViewChild(RecaptchaComponent) captchaRef!: RecaptchaComponent;
   
-  constructor(private router: Router, public registeredEmployeeService: RegisteredEmployeeService, public ApiServ: ApiService) { }
+  constructor(private router: Router, private languageService: LanguageService, public registeredEmployeeService: RegisteredEmployeeService, public ApiServ: ApiService) { }
   
   ngOnInit() {
     this.DomainName = this.ApiServ.GetHeader(); 
+        this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
  
   onCaptchaResolved(token: string | null): void {

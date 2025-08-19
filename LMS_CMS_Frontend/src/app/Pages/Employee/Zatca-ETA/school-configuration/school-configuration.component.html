@@ -42,7 +42,7 @@
             <!-- No Data Row -->
             <tr *ngIf="schoolData.length === 0">
                 <td [attr.colspan]="ETA_Zatca === 'Zatca' ? 6 : 7" class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-                    No Data Found
+                     {{ 'No Data Found' | translate }}
                 </td>
             </tr>
 
@@ -86,7 +86,7 @@
                 [(ngModel)]="school.name"/> 
             </div>   
             <div class="flex flex-col mb-4 w-[49%]">
-                <label class="mb-2 primaryTxt" for="Address">{{ 'School Address' | translate }}</label>
+                <label class="mb-2 primaryTxt" for="Address">{{ 'School Address' | translate }} </label>
                 <input disabled id="Address" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter' | translate }} {{ 'School Address' | translate }}"
                 [(ngModel)]="school.address"/> 
             </div>   

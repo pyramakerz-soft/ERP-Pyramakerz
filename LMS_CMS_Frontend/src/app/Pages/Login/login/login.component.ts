@@ -7,11 +7,13 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TokenData } from '../../../Models/token-data';
 import Swal from 'sweetalert2';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule , TranslateModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
@@ -23,7 +25,8 @@ export class LoginComponent {
   employeeImage = 'Images/employee.png';
   studentImage = 'Images/student.png';
   parentImage = 'Images/parent.png';
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   isEmployeeHovered = false;
   isStudentHovered = false;
   isParentHovered = false;
@@ -39,7 +42,7 @@ export class LoginComponent {
   User_Data_After_Login2 = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   isLoading: boolean = false
  
-  constructor(private router: Router, public accountService: AccountService) { }
+  constructor(private router: Router, private languageService: LanguageService, public accountService: AccountService) { }
 
   ngOnInit() {
     window.addEventListener('popstate', this.checkLocalStorageOnNavigate);
@@ -49,6 +52,10 @@ export class LoginComponent {
     this.selectType(fromSignup ? 'parent' : fromSignupEmployee ? 'employee' : 'student'); 
     sessionStorage.removeItem('fromSignup');
     sessionStorage.removeItem('fromEmployeeSignup');
+    this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
   
   ngOnDestroy(): void { 

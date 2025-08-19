@@ -1,7 +1,8 @@
 <div class="flex justify-between items-center">
     <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Attendance' | translate }}</h1>
     <div class="flex justify-between items-center space-x-4 rtl:space-x-reverse">
-        <button (click)="Save()" class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
+        <button (click)="Save()"
+            class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
             <span *ngIf="!isLoading"> {{ 'Save' | translate }}</span>
             <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
         </button>
@@ -20,7 +21,8 @@
                 {{ school.name }}
             </option>
         </select>
-        <span *ngIf="validationErrors['schoolID']" class="text-red-500 ml-3 font-normal">{{ validationErrors["schoolID"]}}</span>
+        <span *ngIf="validationErrors['schoolID']" class="text-red-500 ml-3 font-normal">{{
+            validationErrors["schoolID"]}}</span>
     </div>
     <div class="flex flex-col w-[33%]">
         <label for="attendance.academicYearID" class="block mb-2 text-sm font-medium text-gray-900">{{ 'Academic Year' |
@@ -125,12 +127,14 @@
                             </div>
                         </td>
                         <td class="py-5 px-4 border-r border-[#EAECF0]">
-                            <input type="checkbox" [(ngModel)]="row.isLate" id="isLate" class="w-5 h-5" />
+                            <input type="checkbox" [(ngModel)]="row.isLate" [disabled]="!row.isPresent" id="isLate" class="w-5 h-5" />
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             <input [(ngModel)]="row.lateTimeInMinutes" [disabled]="!row.isLate"
-                                (input)="validateNumber($event, 'lateTimeInMinutes' ,row)" type="text"
+                                (input)="validateNumber($event, 'lateTimeInMinutes' ,row)" type="text"  (ngModelChange)="onlateTimeMinuteChange(row.studentID)"
                                 class="w-full border border-gray-300 px-2 py-1 rounded-md" />
+                            <span *ngIf="validationIsLateErrors[row.studentID]" class="text-red-500 ml-3 font-normal">{{validationIsLateErrors[row.studentID]}}</span>
+
                         </td>
                         <td class="py-5 px-4">
                             <textarea type="text"

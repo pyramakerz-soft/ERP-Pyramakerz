@@ -16,11 +16,13 @@ import { MenuService } from '../../../../../Services/shared/menu.service';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
 import { StudentService } from '../../../../../Services/student.service';
 import { SectionService } from '../../../../../Services/Employee/LMS/section.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-statistics-on-the-number-of-students-inthe-school',
   standalone: true,
-  imports: [CommonModule, FormsModule, PdfPrintComponent],
+  imports: [CommonModule, FormsModule, PdfPrintComponent , TranslateModule],
   templateUrl:
     './statistics-on-the-number-of-students-inthe-school.component.html',
   styleUrl: './statistics-on-the-number-of-students-inthe-school.component.css',
@@ -52,7 +54,8 @@ export class StatisticsOnTheNumberOfStudentsIntheSchoolComponent {
   academicYears: AcademicYear[] = [];
   Students: Student[] = [];
   isLoading: boolean = false;
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   SelectedSchoolId: number = 0;
   SelectedStudentId: number = 0;
   SelectedYearId: number = 0;
@@ -75,6 +78,7 @@ export class StatisticsOnTheNumberOfStudentsIntheSchoolComponent {
     public activeRoute: ActivatedRoute,
     public account: AccountService,
     public ApiServ: ApiService,
+    private languageService: LanguageService,
     private menuService: MenuService,
     public EditDeleteServ: DeleteEditPermissionService,
     private router: Router,
@@ -103,6 +107,12 @@ export class StatisticsOnTheNumberOfStudentsIntheSchoolComponent {
     });
     this.getAllSchools();
     this.getAllYears();
+
+        
+    this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   getAllSchools() {

@@ -19,11 +19,14 @@ import { QuestionOption } from '../../../../Models/Registration/question-option'
 import Swal from 'sweetalert2';
 import { TestService } from '../../../../Services/Employee/Registration/test.service';
 import { RegisterationFormParentService } from '../../../../Services/Employee/Registration/registeration-form-parent.service';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-registraion-test',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule , TranslateModule],
   templateUrl: './registraion-test.component.html',
   styleUrl: './registraion-test.component.css',
 })
@@ -44,7 +47,8 @@ export class RegistraionTestComponent {
   DomainName: string = '';
   UserID: number = 0;
   path: string = '';
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   Data: RegisterationFormTestAnswer[] = [];
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -73,6 +77,7 @@ export class RegistraionTestComponent {
     public activeRoute: ActivatedRoute,
     public account: AccountService,
     public ApiServ: ApiService,
+    private languageService: LanguageService,
     private menuService: MenuService,
     public EditDeleteServ: DeleteEditPermissionService,
     private router: Router,
@@ -111,6 +116,10 @@ export class RegistraionTestComponent {
     });
 
     this.GetAllData();
+        this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetAllData() {

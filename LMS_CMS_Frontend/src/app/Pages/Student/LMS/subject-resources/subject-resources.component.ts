@@ -8,11 +8,13 @@ import { TokenData } from '../../../../Models/token-data';
 import { AccountService } from '../../../../Services/account.service';
 import { ApiService } from '../../../../Services/api.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-subject-resources',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, TranslateModule],
   templateUrl: './subject-resources.component.html',
   styleUrl: './subject-resources.component.css'
 })
@@ -21,13 +23,15 @@ export class SubjectResourcesComponent {
   SubjectResourcesData: SubjectResource[] = []
   path: string = ""
   DomainName: string = "";
+  isRtl: boolean = false;
+  subscription!: Subscription;
   UserID: number = 0;
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   SubjectID: number = 0;
   SubjectName: string = ""
   bgColors: string[] = ['#F7F7F7', '#D7F7FF', '#FFF1D7', '#E8EBFF'];
 
-  constructor(public account: AccountService, public router: Router, public ApiServ: ApiService,
+  constructor(public account: AccountService,private languageService: LanguageService, public router: Router, public ApiServ: ApiService,
     public activeRoute: ActivatedRoute, private menuService: MenuService, public SubjectResourceServ: SubjectResourceService) { }
 
   ngOnInit() {
@@ -39,6 +43,11 @@ export class SubjectResourcesComponent {
     });
     this.SubjectID = Number(this.activeRoute.snapshot.paramMap.get('SubjectId'));
     this.GetSubjectResourceData()
+
+        this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetSubjectResourceData() {
