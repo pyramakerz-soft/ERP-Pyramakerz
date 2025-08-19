@@ -227,6 +227,10 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<CertificateStudent> CertificateStudent { get; set; }
         public DbSet<HorizontalMeeting> HorizontalMeeting { get; set; }
         public DbSet<ParentMeeting> ParentMeeting { get; set; }
+        public DbSet<Appointment> Appointment { get; set; }
+        public DbSet<AppointmentStatus> AppointmentStatus { get; set; }
+        public DbSet<AppointmentParent> AppointmentParent { get; set; }
+        public DbSet<AppointmentGrade> AppointmentGrade { get; set; }
 
 
         public LMS_CMS_Context(DbContextOptions<LMS_CMS_Context> options)
@@ -397,6 +401,9 @@ namespace LMS_CMS_DAL.Models.Domains
                 .Property(p => p.ID)
                 .ValueGeneratedNever();
 
+            modelBuilder.Entity<AppointmentStatus>()
+                .Property(p => p.ID)
+                .ValueGeneratedNever();
 
             ///////////////////////// OnDelete: /////////////////////////
             modelBuilder.Entity<Page>()
@@ -2062,6 +2069,36 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasOne(p => p.CertificateType)
                 .WithMany(p => p.CertificateStudent)
                 .HasForeignKey(p => p.CertificateTypeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Appointment>()
+                .HasOne(p => p.School)
+                .WithMany(p => p.Appointments)
+                .HasForeignKey(p => p.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AppointmentParent>()
+                .HasOne(p => p.Parent)
+                .WithMany(p => p.AppointmentParents)
+                .HasForeignKey(p => p.ParentID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AppointmentParent>()
+                .HasOne(p => p.Appointment)
+                .WithMany(p => p.AppointmentParents)
+                .HasForeignKey(p => p.AppointmentID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AppointmentGrade>()
+                .HasOne(p => p.Grade)
+                .WithMany(p => p.AppointmentGrades)
+                .HasForeignKey(p => p.GradeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AppointmentGrade>()
+                .HasOne(p => p.Appointment)
+                .WithMany(p => p.AppointmentGrades)
+                .HasForeignKey(p => p.AppointmentID)
                 .OnDelete(DeleteBehavior.Restrict);
 
 

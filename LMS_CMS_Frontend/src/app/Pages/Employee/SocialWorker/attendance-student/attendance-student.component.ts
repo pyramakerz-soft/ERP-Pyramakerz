@@ -29,7 +29,7 @@ import Swal from 'sweetalert2';
 @Component({
   selector: 'app-attendance-student',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
+  imports: [FormsModule, CommonModule, TranslateModule],
   templateUrl: './attendance-student.component.html',
   styleUrl: './attendance-student.component.css'
 })

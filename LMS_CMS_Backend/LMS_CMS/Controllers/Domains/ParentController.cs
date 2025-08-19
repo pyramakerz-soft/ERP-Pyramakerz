@@ -146,9 +146,9 @@ namespace LMS_CMS_PL.Controllers.Domains
             {
                 foreach (var item in registerationFormParent)
                 {
-                item.ParentID = NewParent.ID;
-                Unit_Of_Work.registerationFormParent_Repository.Update(item);
-                Unit_Of_Work.SaveChanges();
+                    item.ParentID = NewParent.ID;
+                    Unit_Of_Work.registerationFormParent_Repository.Update(item);
+                    Unit_Of_Work.SaveChanges();
                 }
             }
             return Ok(UserInfo);
