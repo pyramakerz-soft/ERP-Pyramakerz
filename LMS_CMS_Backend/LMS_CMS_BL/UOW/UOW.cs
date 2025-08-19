@@ -238,7 +238,8 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<SocialWorkerMedalStudent> SocialWorkerMedalStudent_Repository;
         GenericRepo<CertificateType> CertificateType_Repository;
         GenericRepo<CertificateStudent> CertificateStudent_Repository;
-
+        GenericRepo<HorizontalMeeting> HorizontalMeeting_Repository;
+        GenericRepo<ParentMeeting> ParentMeeting_Repository;
 
         public UOW(Octa_DbContext octa_Db)
         {
@@ -2725,6 +2726,31 @@ namespace LMS_CMS_BL.UOW
                     CertificateStudent_Repository = new GenericRepo<CertificateStudent>(db);
                 }
                 return CertificateStudent_Repository;
+            }
+        }
+
+
+        public GenericRepo<HorizontalMeeting> horizontalMeeting_Repository
+        {
+            get
+            {
+                if (HorizontalMeeting_Repository == null)
+                {
+                    HorizontalMeeting_Repository = new GenericRepo<HorizontalMeeting>(db);
+                }
+                return HorizontalMeeting_Repository;
+            }
+        }
+
+        public GenericRepo<ParentMeeting> parentMeeting_Repository
+        {
+            get
+            {
+                if (ParentMeeting_Repository == null)
+                {
+                    ParentMeeting_Repository = new GenericRepo<ParentMeeting>(db);
+                }
+                return ParentMeeting_Repository;
             }
         }
 
