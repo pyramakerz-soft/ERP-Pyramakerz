@@ -759,7 +759,7 @@ export class NavMenuComponent {
     this.parentService.GetByStudentID(this.requestToBeSend.receiverID, this.DomainName).subscribe(
       data => {
         this.parent = data
-        this.requestToBeSend.receiverID == this.parent.id
+        this.requestToBeSend.receiverID = this.parent.id
         this.SendTheRequest()
       },
       error => {
@@ -952,7 +952,7 @@ export class NavMenuComponent {
       }else{
         this.requestToBeSend.receiverUserTypeID = 1;
       }
-
+ 
       if(this.isParentHovered){
         this.getParent()
       }else{
@@ -962,6 +962,7 @@ export class NavMenuComponent {
   }
 
   SendTheRequest(){
+    console.log(this.requestToBeSend)
     this.isLoading = true; 
     this.requestService.Add(this.requestToBeSend, this.DomainName).subscribe(
       (result: any) => { 
@@ -971,6 +972,12 @@ export class NavMenuComponent {
       },
       error => {
         this.isLoading = false;
+        Swal.fire({
+          title: error.error,
+          icon: 'error', 
+          confirmButtonColor: '#089B41', 
+          confirmButtonText: "OK"
+        })
       }
     ); 
   } 
@@ -989,9 +996,14 @@ export class NavMenuComponent {
         })
         this.requestToBeSend.fileFile = null;
         return; 
-      } 
+      } else{
+        this.requestToBeSend.fileFile = file;  
+
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+      }
     }
     
     input.value = '';
-  }
+  } 
 }

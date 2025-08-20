@@ -348,7 +348,7 @@ export class MyRequestsComponent {
     this.parentService.GetByStudentID(this.requestToBeSend.receiverID, this.DomainName).subscribe(
       data => {
         this.parent = data
-        this.requestToBeSend.receiverID == this.parent.id
+        this.requestToBeSend.receiverID = this.parent.id
         this.SendTheRequest()
       },
       error => {
@@ -620,6 +620,12 @@ export class MyRequestsComponent {
         },
         error => {
           this.isLoading = false;
+          Swal.fire({
+            title: error.error,
+            icon: 'error', 
+            confirmButtonColor: '#089B41', 
+            confirmButtonText: "OK"
+          })
         }
       ); 
     } 
@@ -639,9 +645,14 @@ export class MyRequestsComponent {
         })
         this.requestToBeSend.fileFile = null;
         return; 
-      } 
+      } else{
+        this.requestToBeSend.fileFile = file;  
+
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+      }
     }
     
     input.value = '';
-  }
+  } 
 }

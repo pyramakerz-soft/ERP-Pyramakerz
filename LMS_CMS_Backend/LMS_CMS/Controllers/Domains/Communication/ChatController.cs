@@ -122,7 +122,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
 
             foreach (var file in NewMessage.ChatMessageAttachmentFiles)
             {
-                string returnFileInput = await _fileValidationService.ValidateFileAsync(file);
+                string returnFileInput = await _fileValidationService.ValidateFileWithTimeoutAsync(file);
 
                 if (returnFileInput != null)
                 {
