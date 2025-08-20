@@ -50,15 +50,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 }
 
                 var temp = await context.Set<AccountBalanceReport>().FromSqlRaw(
-                    "EXEC dbo.GetAccountSummary @DateFrom, @DateTo, 0, 0, @linkFileID, @zeroBalance, @positiveBalance, @negativeBalance, @StartRow, @EndRow",
+                    "EXEC dbo.GetAccountSummary @DateFrom, @DateTo, 0, 0, @linkFileID, @zeroBalance, @positiveBalance, @negativeBalance",
                     new SqlParameter("@DateFrom", "1900-1-1"),
                     new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
                     new SqlParameter("@linkFileID", linkFileID),
                     new SqlParameter("@zeroBalance", zeroBalance),
                     new SqlParameter("@positiveBalance", positiveBalance),
-                    new SqlParameter("@negativeBalance", negativeBalance),
-                    new SqlParameter("@StartRow", startRow),
-                    new SqlParameter("@EndRow", endRow)
+                    new SqlParameter("@negativeBalance", negativeBalance)
                 )
                 .AsNoTracking()
                 .ToListAsync();
@@ -107,12 +105,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                     return NotFound($"Main account with ID: {mainAccountID} not found.");
 
                 var temp = await context.Set<AccountBalanceReport>().FromSqlRaw(
-                    "EXEC dbo.GetAccountSummary @DateFrom, @DateTo, @MainAccNo, 0, 2, @zeroBalance, @positiveBalance, @negativeBalance, @StartRow, @EndRow",
+                    "EXEC dbo.GetAccountSummary @DateFrom, @DateTo, @MainAccNo, 0, 2, @zeroBalance, @positiveBalance, @negativeBalance",
                     new SqlParameter("@DateFrom", "1900-1-1"),
                     new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
                     new SqlParameter("@MainAccNo", mainAccount.ID),
-                    new SqlParameter("@StartRow", startRow),
-                    new SqlParameter("@EndRow", endRow),
                     new SqlParameter("@zeroBalance", zeroBalance),
                     new SqlParameter("@positiveBalance", positiveBalance),
                     new SqlParameter("@negativeBalance", negativeBalance)

@@ -2,6 +2,7 @@
 {
     public class MedicalHistoryGetByParentDTO
     {
+        public long Id { get; set; }
         public long SchoolId { get; set; }
         public string School { get; set; }
         public long GradeId { get; set; }

@@ -158,7 +158,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
 
             MedicalHistory medicalHistory = await Unit_Of_Work.medicalHistory_Repository.FindByIncludesAsync(
                     m => m.IsDeleted != true && 
-                    m.InsertedByUserId == id, 
+                    m.Id == id &&
+                    (m.InsertedByUserId != null || m.InsertedByUserId != 0), 
                     query => query.Include(m => m.School),
                     query => query.Include(m => m.Grade),
                     query => query.Include(m => m.Classroom),
@@ -210,7 +211,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             }
 
             MedicalHistory medicalHistory = await Unit_Of_Work.medicalHistory_Repository.FindByIncludesAsync(
-                x => x.InsertedByParentID == id && x.IsDeleted != true,
+                x => x.Id == id &&
+                x.IsDeleted != true &&
+                (x.InsertedByParentID != null || x.InsertedByParentID != 0),
                 query => query.Include(m => m.School),
                 query => query.Include(m => m.Grade),
                 query => query.Include(m => m.Classroom),
