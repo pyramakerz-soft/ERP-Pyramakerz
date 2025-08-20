@@ -123,6 +123,11 @@ export class NavMenuComponent {
     this.notificationService.notificationOpened$.subscribe(() => {
       this.loadUnseenNotifications();
     });
+
+    // Subscribe to request opened events
+    this.requestService.requestOpened$.subscribe(() => {
+      this.loadUnseenRequests();
+    });
   }
 
   loadUnseenNotifications() {
@@ -506,6 +511,8 @@ export class NavMenuComponent {
         this.requestByID = data
         document.getElementById("RequestModal")?.classList.remove("hidden");
         document.getElementById("RequestModal")?.classList.add("flex"); 
+        // call the subscribe again for the other pages
+        this.requestService.notifyRequestOpened(); 
       }
     )
   }
@@ -545,6 +552,8 @@ export class NavMenuComponent {
         this.requestService.Accept(request.id, this.DomainName).subscribe((d) => {
           request.approvedOrNot=true
           request.seenOrNot=true
+          // call the subscribe again for the other pages
+          this.requestService.notifyRequestOpened(); 
         });
       }
     });
@@ -564,6 +573,8 @@ export class NavMenuComponent {
         this.requestService.Decline(request.id, this.DomainName).subscribe((d) => {
           request.approvedOrNot=false
           request.seenOrNot=true
+          // call the subscribe again for the other pages
+          this.requestService.notifyRequestOpened(); 
         });
       }
     });
@@ -613,6 +624,8 @@ export class NavMenuComponent {
       this.requestService.Forward(this.requestToBeForwarded, this.DomainName).subscribe(
         (result: any) => { 
           this.closeForwardModal(); 
+          // call the subscribe again for the other pages
+          this.requestService.notifyRequestOpened(); 
         },
         error => {
           this.isLoading = false;
@@ -953,6 +966,8 @@ export class NavMenuComponent {
     this.requestService.Add(this.requestToBeSend, this.DomainName).subscribe(
       (result: any) => { 
         this.closeSendRequestModal(); 
+        // call the subscribe again for the other pages
+        this.requestService.notifyRequestOpened(); 
       },
       error => {
         this.isLoading = false;

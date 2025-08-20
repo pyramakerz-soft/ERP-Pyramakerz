@@ -226,6 +226,9 @@ import { SocialWorkerMedalStudentComponent } from './Pages/Employee/SocialWorker
 import { AttendanceComponent } from './Pages/Employee/SocialWorker/attendance/attendance.component';
 import { AttendanceStudentComponent } from './Pages/Employee/SocialWorker/attendance-student/attendance-student.component';
 import { ViewReportComponent } from './Pages/Employee/Clinic/medical-report/view-report/view-report.component';
+import { HorizontalMeeting } from './Models/SocialWorker/horizontal-meeting';
+import { HorizontalMeetingComponent } from './Pages/Employee/SocialWorker/horizontal-meeting/horizontal-meeting.component';
+import { ParentMeetingComponent } from './Pages/Employee/SocialWorker/parent-meeting/parent-meeting.component';
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
     { path: "Octa/login", component: OctaLoginComponent, title: "login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -483,7 +486,7 @@ export const routes: Routes = [
             { path: "All Stores Item Balance with Sales", component: AllStoresBalanceReportComponent, title: "All Stores Sales Price Report", canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'SalesPrice' } },
             { path: "All Stores Item Balance with Average Cost", component: AllStoresBalanceReportComponent, title: "All Stores Cost Report", canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'Cost' } },
             { path: 'Discussion Room', component: DiscussionRoomComponent, title: 'Discussion Room', canActivate: [noNavigateWithoutLoginGuard], },
-            { path: 'violation', component: ViolationComponent, title: 'Violation', canActivate: [noNavigateWithoutLoginGuard], },
+            { path: 'Violation', component: ViolationComponent, title: 'Violation', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Violation/:id', component: ViolationViewComponent, title: 'Violation', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Notification', component: NotificationComponent, title: 'Notification', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Notification', component: NotificationComponent, title: 'Notification', canActivate: [noNavigateWithoutLoginGuard], },
@@ -509,6 +512,8 @@ export const routes: Routes = [
             { path: "Attendance", component: AttendanceComponent, title: "Attendance", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Attendance/:id", component: AttendanceStudentComponent, title: "Attendance", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Attendance Create", component: AttendanceStudentComponent, title: "Attendance", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Horizontal Meeting", component: HorizontalMeetingComponent, title: "Horizontal Meeting", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Parent Meeting", component: ParentMeetingComponent, title: "Parent Meeting", canActivate: [noNavigateWithoutLoginGuard] },
         ]
     },
     {

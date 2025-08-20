@@ -23,11 +23,13 @@ import { DomainService } from '../../../../Services/Employee/domain.service';
 import { SchoolService } from '../../../../Services/Employee/school.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-student-issues',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent , TranslateModule],
   templateUrl: './student-issues.component.html',
   styleUrl: './student-issues.component.css'
 })
@@ -53,7 +55,8 @@ export class StudentIssuesComponent {
   keysArray: string[] = ['id', 'name'];
 
   studentIssue: StudentIssue = new StudentIssue();
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   validationErrors: { [key in keyof StudentIssue]?: string } = {};
   isLoading = false;
 
@@ -68,6 +71,7 @@ export class StudentIssuesComponent {
     private menuService: MenuService,
     public activeRoute: ActivatedRoute,
     public account: AccountService,
+    private languageService: LanguageService,
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
@@ -97,6 +101,10 @@ export class StudentIssuesComponent {
     });
 
     this.GetAllData();
+        this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetAllData() {

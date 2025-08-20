@@ -13,11 +13,13 @@ import { ApiService } from '../../../../Services/api.service';
 import { DomainService } from '../../../../Services/Employee/domain.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-procedure-type',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './procedure-type.component.html',
   styleUrl: './procedure-type.component.css'
 })
@@ -29,7 +31,8 @@ export class ProcedureTypeComponent {
   AllowDelete: boolean = false;
   AllowEditForOthers: boolean = false;
   AllowDeleteForOthers: boolean = false;
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   TableData: ProcedureType[] = [];
   DomainName: string = '';
   UserID: number = 0;
@@ -51,6 +54,7 @@ export class ProcedureTypeComponent {
     private router: Router,
     private menuService: MenuService,
     public activeRoute: ActivatedRoute,
+    private languageService: LanguageService,
     public account: AccountService,
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
@@ -76,6 +80,11 @@ export class ProcedureTypeComponent {
     });
 
     this.GetAllData();
+
+        this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetAllData() {

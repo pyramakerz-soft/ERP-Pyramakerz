@@ -238,7 +238,12 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<SocialWorkerMedalStudent> SocialWorkerMedalStudent_Repository;
         GenericRepo<CertificateType> CertificateType_Repository;
         GenericRepo<CertificateStudent> CertificateStudent_Repository;
-
+        GenericRepo<HorizontalMeeting> HorizontalMeeting_Repository;
+        GenericRepo<ParentMeeting> ParentMeeting_Repository;
+        GenericRepo<Appointment> Appointment_Repository;
+        GenericRepo<AppointmentStatus> AppointmentStatus_Repository;
+        GenericRepo<AppointmentParent> AppointmentParent_Repository;
+        GenericRepo<AppointmentGrade> AppointmentGrade_Repository;
 
         public UOW(Octa_DbContext octa_Db)
         {
@@ -2725,6 +2730,79 @@ namespace LMS_CMS_BL.UOW
                     CertificateStudent_Repository = new GenericRepo<CertificateStudent>(db);
                 }
                 return CertificateStudent_Repository;
+            }
+        }
+
+
+        public GenericRepo<HorizontalMeeting> horizontalMeeting_Repository
+        {
+            get
+            {
+                if (HorizontalMeeting_Repository == null)
+                {
+                    HorizontalMeeting_Repository = new GenericRepo<HorizontalMeeting>(db);
+                }
+                return HorizontalMeeting_Repository;
+            }
+        }
+
+        public GenericRepo<ParentMeeting> parentMeeting_Repository
+        {
+            get
+            {
+                if (ParentMeeting_Repository == null)
+                {
+                    ParentMeeting_Repository = new GenericRepo<ParentMeeting>(db);
+                }
+                return ParentMeeting_Repository;
+            }
+        }
+
+        public GenericRepo<Appointment> appointment_Repository
+        {
+            get
+            {
+                if (Appointment_Repository == null)
+                {
+                    Appointment_Repository = new GenericRepo<Appointment>(db);
+                }
+                return Appointment_Repository;
+            }
+        }
+
+        public GenericRepo<AppointmentStatus> appointmentStatus_Repository
+        {
+            get
+            {
+                if (AppointmentStatus_Repository == null)
+                {
+                    AppointmentStatus_Repository = new GenericRepo<AppointmentStatus>(db);
+                }
+                return AppointmentStatus_Repository;
+            }
+        }
+
+        public GenericRepo<AppointmentParent> appointmentParent_Repository
+        {
+            get
+            {
+                if (AppointmentParent_Repository == null)
+                {
+                    AppointmentParent_Repository = new GenericRepo<AppointmentParent>(db);
+                }
+                return AppointmentParent_Repository;
+            }
+        }
+
+        public GenericRepo<AppointmentGrade> appointmentGrade_Repository
+        {
+            get
+            {
+                if (AppointmentGrade_Repository == null)
+                {
+                    AppointmentGrade_Repository = new GenericRepo<AppointmentGrade>(db);
+                }
+                return AppointmentGrade_Repository;
             }
         }
 

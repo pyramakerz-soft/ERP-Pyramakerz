@@ -78,9 +78,9 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
 
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
-        allowedTypes: new[] { "octa", "employee" },
-        pages: new[] { "Lesson Resources Types" }
-      )]
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Lesson Resources Types" }
+          )]
         public async Task<IActionResult> GetById(long id)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);

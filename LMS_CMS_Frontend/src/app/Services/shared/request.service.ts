@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { ApiService } from '../api.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Request } from '../../Models/Communication/request';
+import { Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -9,6 +10,14 @@ import { Request } from '../../Models/Communication/request';
 export class RequestService {
   baseUrl = ""
   header = "" 
+  
+  // To make the count of requests change when open the message
+  private requestOpenedSource = new Subject<void>();
+  requestOpened$ = this.requestOpenedSource.asObservable();
+
+  notifyRequestOpened() {
+    this.requestOpenedSource.next();
+  }
    
   constructor(public http: HttpClient, public ApiServ: ApiService) {
     this.baseUrl = ApiServ.BaseUrl

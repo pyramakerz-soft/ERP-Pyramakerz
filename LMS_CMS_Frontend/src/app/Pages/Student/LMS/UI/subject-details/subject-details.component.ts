@@ -2,10 +2,12 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-subject-details',
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule , TranslateModule],
 standalone:true,
   templateUrl: './subject-details.component.html',
   styleUrls: ['./subject-details.component.css']
@@ -13,6 +15,8 @@ standalone:true,
 export class SubjectDetailsComponent implements OnInit {
 
   subjectName: string = '';
+    isRtl: boolean = false;
+  subscription!: Subscription;
   activeTab: string = 'resources'; // Default active tab
 weeks: string[] = [
   'Week 1',
@@ -30,6 +34,7 @@ weeks: string[] = [
 
   constructor(
     private route: ActivatedRoute,
+     private languageService: LanguageService,
     private router: Router
   ) {}
 
@@ -40,6 +45,11 @@ weeks: string[] = [
         this.subjectName = this.formatSubjectName(subjectId);
       }
     });
+
+    this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   formatSubjectName(subjectId: string): string {

@@ -9,11 +9,13 @@ import { OrderService } from '../../../../Services/Student/order.service';
 import { EmployeeStudentService } from '../../../../Services/Employee/Accounting/employee-student.service';
 import { EmplyeeStudent } from '../../../../Models/Accounting/emplyee-student';
 import { FormsModule } from '@angular/forms';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-order',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
   templateUrl: './order.component.html',
   styleUrl: './order.component.css'
 })
@@ -23,13 +25,14 @@ export class OrderComponent {
   StuID: number = 0;
   emplyeeStudent: EmplyeeStudent[] = [];
   DomainName: string = ""; 
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   orders: Order[] = []
 
   filteredOrders: Order[] = [] 
   searchTerm: string = '';
 
-  constructor(public account: AccountService, public ApiServ: ApiService, private router: Router, public employeeStudentService:EmployeeStudentService, private orderrService: OrderService){}
+  constructor(public account: AccountService,private languageService: LanguageService, public ApiServ: ApiService, private router: Router, public employeeStudentService:EmployeeStudentService, private orderrService: OrderService){}
   
   ngOnInit(){
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -46,6 +49,10 @@ export class OrderComponent {
     }
 
     this.getOrders() 
+        this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   getStudents(){

@@ -13,9 +13,7 @@ import { TokenData } from '../../Models/token-data';
   providedIn: 'root'
 })
 export class RealTimeNotificationServiceService {
-  private hubConnection: signalR.HubConnection| null = null; 
-  BaseUrlOcta=""
-  header = ""
+  private hubConnection: signalR.HubConnection| null = null;  
   DomainName = "" 
   User_Data_After_Login = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   
@@ -28,9 +26,7 @@ export class RealTimeNotificationServiceService {
     private dialog: MatDialog,
     public http: HttpClient,
     public ApiServ: ApiService, public notificationService:NotificationService, public account: AccountService
-  ) {
-    this.BaseUrlOcta=ApiServ.BaseUrlOcta
-    this.header = ApiServ.GetHeader()
+  ) { 
     this.DomainName = this.ApiServ.GetHeader(); 
   }  
 

@@ -45,7 +45,7 @@
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block p-2.5 flex-grow">
             <option value="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'State' | translate }}</option>
             <option *ngFor="let state of StateData" [value]="state.id">
-                {{ state.name }}
+                {{ state.name|translate }}
             </option>
         </select>
 

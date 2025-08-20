@@ -16,11 +16,14 @@ import { RegisterationFormParent } from '../../../../Models/Registration/registe
 import { RegisterationFormTestService } from '../../../../Services/Employee/Registration/registeration-form-test.service';
 import { RegisterationFormTest } from '../../../../Models/Registration/registeration-form-test';
 import { TestWithRegistrationForm } from '../../../../Models/Registration/test-with-registration-form';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-admission-test-parent',
   standalone: true,
-  imports: [CommonModule,FormsModule],
+  imports: [CommonModule,FormsModule, TranslateModule],
   templateUrl: './admission-test-parent.component.html',
   styleUrl: './admission-test-parent.component.css'
 })
@@ -41,7 +44,8 @@ export class AdmissionTestParentComponent {
   DomainName: string = '';
   UserID: number = 0;
   path: string = '';
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   IsStudentSelected: boolean =false;
   Data: TestWithRegistrationForm[] = [];
   AllowEdit: boolean = false;
@@ -65,6 +69,7 @@ export class AdmissionTestParentComponent {
     public activeRoute: ActivatedRoute,
     public account: AccountService,
     public ApiServ: ApiService,
+    private languageService: LanguageService,
     private menuService: MenuService,
     public EditDeleteServ: DeleteEditPermissionService,
     private router: Router,
@@ -93,6 +98,10 @@ export class AdmissionTestParentComponent {
     });
 
     this.GetAllStudents();
+    this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetAllStudents() {

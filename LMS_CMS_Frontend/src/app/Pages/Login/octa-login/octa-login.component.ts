@@ -7,11 +7,13 @@ import { FormsModule } from '@angular/forms';
 import { TokenData } from '../../../Models/token-data';
 import { jwtDecode } from 'jwt-decode';
 import Swal from 'sweetalert2';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-octa-login',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule , TranslateModule],
   templateUrl: './octa-login.component.html',
   styleUrl: './octa-login.component.css'
 })
@@ -24,7 +26,8 @@ export class OctaLoginComponent {
   passwordError: string = "";
   somthingError: string = "";
 
-  
+  isRtl: boolean = false;
+  subscription!: Subscription;
   token1 = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   token2 = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
 
@@ -33,10 +36,14 @@ export class OctaLoginComponent {
 
   isLoading: boolean = false
 
-  constructor(private router: Router, public accountService: AccountService) { }
+  constructor(private router: Router,private languageService: LanguageService, public accountService: AccountService) { }
 
   ngOnInit() {
     window.addEventListener('popstate', this.checkLocalStorageOnNavigate); 
+      this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
   
   ngOnDestroy(): void { 

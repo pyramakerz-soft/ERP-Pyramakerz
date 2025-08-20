@@ -27,7 +27,8 @@ import { ProcedureTypeService } from '../../../../Services/Employee/SocialWorker
 import { Classroom } from '../../../../Models/LMS/classroom';
 import { ClassroomService } from '../../../../Services/Employee/LMS/classroom.service';
 import Swal from 'sweetalert2';
-
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-conduct-add-edit',
   standalone: true,
@@ -41,6 +42,8 @@ export class ConductAddEditComponent {
 
   DomainName: string = '';
   UserID: number = 0;
+  isRtl: boolean = false;
+  subscription!: Subscription;
   path: string = '';
   ConductID: number = 0;
   Data: Conduct = new Conduct();
@@ -61,6 +64,7 @@ export class ConductAddEditComponent {
     public activeRoute: ActivatedRoute,
     public account: AccountService,
     public ApiServ: ApiService,
+    private languageService: LanguageService,
     private menuService: MenuService,
     public EditDeleteServ: DeleteEditPermissionService,
     private router: Router,
@@ -119,6 +123,11 @@ export class ConductAddEditComponent {
         }
       });
     }
+
+        this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   openFile(file: any) {

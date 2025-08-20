@@ -1289,6 +1289,31 @@ namespace LMS_CMS_BL.Config
                 .ForMember(dest => dest.SchoolName, opt => opt.MapFrom(src => src.AcademicYear.School.Name));
             CreateMap<AttendanceAddDTO, Attendance>();
             CreateMap<AttendanceEditDTO, Attendance>();
+
+
+            CreateMap<ParentMeeting, ParentMeetingGetDTO>();
+            CreateMap<ParentMeetingAddDTO, ParentMeeting>();
+
+            CreateMap<HorizontalMeeting, HorizontalMeetingGetDTO>();
+            CreateMap<HorizontalMeetingAddDTO, HorizontalMeeting>();
+
+
+            CreateMap<AppointmentGrade, AppointmentGradeGetDTO>()
+                .ForMember(dest => dest.GradeName, opt => opt.MapFrom(src => src.Grade.Name))
+                .ForMember(dest => dest.AppointmentTitle, opt => opt.MapFrom(src => src.Appointment.Title));
+
+            CreateMap<AppointmentParent, AppointmentParentGetDTO>()
+                .ForMember(dest => dest.ParentEnName, opt => opt.MapFrom(src => src.Parent.en_name))
+                .ForMember(dest => dest.ParentArName, opt => opt.MapFrom(src => src.Parent.ar_name))
+                .ForMember(dest => dest.AppointmentTitle, opt => opt.MapFrom(src => src.Appointment.Title));
+
+            CreateMap<Appointment, AppointmentGetDTO>()
+                .ForMember(dest => dest.AppointmentParents, opt => opt.MapFrom(src => src.AppointmentParents))
+                .ForMember(dest => dest.AppointmentGrades, opt => opt.MapFrom(src => src.AppointmentGrades))
+                .ForMember(dest => dest.SchoolID, opt => opt.MapFrom(src => src.School.ID))
+                .ForMember(dest => dest.SchoolName, opt => opt.MapFrom(src => src.School.Name));
+            CreateMap<AppointmentAddDTO, Appointment>();
+            CreateMap<AppointmentEditDTO, Appointment>();
         }
     } 
 }

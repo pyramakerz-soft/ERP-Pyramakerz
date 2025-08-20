@@ -19,11 +19,13 @@ import { ViolationTypeService } from '../../../../Services/Employee/Violation/vi
 import { Employee } from '../../../../Models/Employee/employee';
 import { ViolationType } from '../../../../Models/Violation/violation-type';
 import { EmployeeService } from '../../../../Services/Employee/employee.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-violation',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent , TranslateModule],
   templateUrl: './violation.component.html',
   styleUrl: './violation.component.css'
 })
@@ -39,7 +41,8 @@ export class ViolationComponent {
   empTypes: EmployeeTypeGet[] = [];
   violationType: ViolationType[] = [];
   employees: Employee[] = [];
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   DomainName: string = '';
   UserID: number = 0;
 
@@ -61,6 +64,7 @@ export class ViolationComponent {
     private menuService: MenuService,
     public activeRoute: ActivatedRoute,
     public account: AccountService,
+    private languageService: LanguageService,
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
@@ -88,6 +92,10 @@ export class ViolationComponent {
     });
 
     this.GetAllData();
+        this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetAllData() {
