@@ -21,13 +21,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             _dbContextFactory = dbContextFactory;
         }
 
-        #region Supplier Account Statement
-        [HttpGet("GetSupplierStatement")]
+        #region Account Statement
+        [HttpGet("GetAccountStatement")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Supplier Statement" }
+            pages: new[] { "Account Statement" }
         )]
-        public async Task<IActionResult> GetSupplierStatement(DateTime? fromDate, DateTime? toDate, long SubAccountNumber, int pageNumber = 1, int pageSize = 10)
+        public async Task<IActionResult> GetAccountStatement(long linkFileID, DateTime? fromDate, DateTime? toDate, long SubAccountNumber, int pageNumber = 1, int pageSize = 10)
         {
             if (fromDate.HasValue && toDate.HasValue && toDate < fromDate)
                 return BadRequest("Start date must be equal or greater than End date");
@@ -38,91 +38,106 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
             var context = Unit_Of_Work.DbContext;
 
-            Supplier supplier = Unit_Of_Work.supplier_Repository.First_Or_Default(s => s.ID == SubAccountNumber && s.IsDeleted != true);
+            long? accountNumberId = linkFileID switch
+            {
+                2 => Unit_Of_Work.supplier_Repository.First_Or_Default(s => s.ID == SubAccountNumber)?.AccountNumberID,
+                3 => Unit_Of_Work.debit_Repository.First_Or_Default(d => d.ID == SubAccountNumber)?.AccountNumberID,
+                4 => Unit_Of_Work.credit_Repository.First_Or_Default(c => c.ID == SubAccountNumber)?.AccountNumberID,
+                5 => Unit_Of_Work.save_Repository.First_Or_Default(s => s.ID == SubAccountNumber)?.AccountNumberID,
+                6 => Unit_Of_Work.bank_Repository.First_Or_Default(b => b.ID == SubAccountNumber)?.AccountNumberID,
+                7 => Unit_Of_Work.income_Repository.First_Or_Default(s => s.ID == SubAccountNumber)?.AccountNumberID,
+                8 => Unit_Of_Work.outcome_Repository.First_Or_Default(s => s.ID == SubAccountNumber)?.AccountNumberID,
+                9 => Unit_Of_Work.asset_Repository.First_Or_Default(s => s.ID == SubAccountNumber)?.AccountNumberID,
+                10 => Unit_Of_Work.employee_Repository.First_Or_Default(s => s.ID == SubAccountNumber)?.AccountNumberID,
+                11 => Unit_Of_Work.tuitionFeesType_Repository.First_Or_Default(s => s.ID == SubAccountNumber)?.AccountNumberID,
+                12 => Unit_Of_Work.tuitionDiscountType_Repository.First_Or_Default(s => s.ID == SubAccountNumber)?.AccountNumberID,
+                13 => Unit_Of_Work.student_Repository.First_Or_Default(s => s.ID == SubAccountNumber)?.AccountNumberID,
+                _ => null
+            };
 
-            if (supplier == null)
-                return NotFound("Supplier not found.");
+            if (accountNumberId == null)
+                return NotFound("Sub account number not found.");
 
-            AccountingTreeChart? accountingTree = Unit_Of_Work.accountingTreeChart_Repository
-                .First_Or_Default(a => a.ID == supplier.AccountNumberID && a.IsDeleted != true);
+            var accountingTree = Unit_Of_Work.accountingTreeChart_Repository
+                .First_Or_Default(a => a.ID == accountNumberId && a.IsDeleted != true);
 
             if (accountingTree == null)
-                return NotFound("Account number not found for the specified supplier.");
+                return NotFound("Main account number not found.");
 
-            int startRow = ((pageNumber - 1) * pageSize) + 1;
-            int endRow = pageNumber * pageSize;
-
-            var results = await context.Set<AccountingEntriesReport>().FromSqlRaw(
-                "EXEC dbo.GetAccountingEntries @DateFrom, @DateTo, @MainAccNo, @SubAccNo, 0, @StartRow, @EndRow",
+            var results = await context.Set<AccountStatementReport>().FromSqlRaw(
+                "EXEC dbo.GetAccountStatement @DateFrom, @DateTo, @MainAccNo, @SubAccNo, @linkFileID",
                 new SqlParameter("@DateFrom", fromDate ?? (object)DBNull.Value),
                 new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
-                new SqlParameter("@MainAccNo", supplier.AccountNumberID),
-                new SqlParameter("@SubAccNo", supplier.ID),
-                new SqlParameter("@StartRow", startRow),
-                new SqlParameter("@EndRow", endRow)
-            ).ToListAsync();
+                new SqlParameter("@MainAccNo", accountingTree.ID),
+                new SqlParameter("@SubAccNo", SubAccountNumber),
+                new SqlParameter("@linkFileID", linkFileID)
+            )
+                .AsNoTracking()
+                .ToListAsync();
 
             if (results == null || !results.Any())
-                return NotFound("No account statements found for the specified date range.");
+                return NotFound("No account statements found.");
 
             decimal? runningBalance = 0;
-            List<AccountingEntriesReport> calcFirstPeriod;
+            List<AccountStatementReport> calcFirstPeriod;
             TotalResult fullTotals = new();
             decimal? firstPeriodBalance = 0;
 
             var dateToValue = fromDate.Value.AddDays(-1);
 
-            calcFirstPeriod = await context.Set<AccountingEntriesReport>().FromSqlRaw(
-                "EXEC dbo.GetAccountingEntries @DateFrom, @DateTo, @MainAccNo, @SubAccNo, 0, @StartRow, @EndRow",
+            calcFirstPeriod = await context.Set<AccountStatementReport>().FromSqlRaw(
+                "EXEC dbo.GetAccountStatement @DateFrom, @DateTo, @MainAccNo, @SubAccNo, @linkFileID",
                 new SqlParameter("@DateFrom", "1900-1-1" ?? (object)DBNull.Value),
                 new SqlParameter("@DateTo", (object)dateToValue ?? DBNull.Value),
-                new SqlParameter("@MainAccNo", supplier.AccountNumberID),
-                new SqlParameter("@SubAccNo", supplier.ID),
-                new SqlParameter("@StartRow", startRow),
-                new SqlParameter("@EndRow", endRow)
-            ).ToListAsync();
+                new SqlParameter("@MainAccNo", accountingTree.ID),
+                new SqlParameter("@SubAccNo", SubAccountNumber),
+                new SqlParameter("@linkFileID", linkFileID)
+            )
+                .AsNoTracking()
+                .ToListAsync();
 
             fullTotals.TotalDebit = calcFirstPeriod.Sum(x => x.Debit ?? 0);
             fullTotals.TotalCredit = calcFirstPeriod.Sum(x => x.Credit ?? 0);
 
             firstPeriodBalance = fullTotals.TotalCredit - fullTotals.TotalDebit;
 
-            results.Insert(0, new AccountingEntriesReport
+            results.Insert(0, new AccountStatementReport
             {
                 MasterID = 0,
                 DetailsID = 0,
-                //Account = "Opening Balance",
+                Account = "Opening Balance",
                 Serial = 0,
-                //MainAccountNo = 0,
-                //MainAccount = "",
                 SubAccountNo = 0,
-                //SubAccount = "",
+                SubAccount = "",
                 Debit = 0,
                 Credit = 0,
                 Date = dateToValue,
                 Balance = firstPeriodBalance,
-                //LinkFileID = 0,
                 Notes = ""
             });
 
-            for (int i = 0; i < results.Count; i++)
+            for (int i = 1; i < results.Count; i++)
             {
                 var item = results[i];
 
                 decimal? balance = item.Credit - item.Debit;
 
-                runningBalance += balance;
+                if (i == 1)
+                    runningBalance += balance + results[0].Balance;
+                else
+                    runningBalance += balance;
+
                 item.Balance = runningBalance;
             }
 
-            fullTotals.TotalDebit = results.Sum(x => x.Debit ?? 0);
-            fullTotals.TotalCredit = results.Sum(x => x.Credit ?? 0);
+            fullTotals.TotalDebit += results.Sum(x => x.Debit ?? 0);
+            fullTotals.TotalCredit += results.Sum(x => x.Credit ?? 0);
 
             fullTotals.Differences = fullTotals.TotalCredit - fullTotals.TotalDebit;
 
             long totalRecords = (await context.Set<CountResult>()
                 .FromSqlInterpolated($@"
-                    SELECT dbo.GetEntriesCount({fromDate}, {toDate}, {supplier.AccountNumberID}, {supplier.ID}, 0) AS TotalCount")
+                    SELECT dbo.GetEntriesCount({fromDate}, {toDate}, {accountingTree.ID}, {SubAccountNumber}, {linkFileID}) AS TotalCount")
                 .ToListAsync())
                 .FirstOrDefault()?.TotalCount ?? 0;
 
@@ -143,292 +158,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                     totalDebit = fullTotals.TotalDebit,
                     totalCredit = fullTotals.TotalCredit,
                     difference = fullTotals.Differences
-                },
-                Pagination = paginationMetadata
-            });
-        }
-        #endregion
-
-        #region Safe Account Statement
-        [HttpGet("GetSafeStatement")]
-        [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Safe Statement" }
-        )]
-        public async Task<IActionResult> GetSafeStatement(DateTime? fromDate, DateTime? toDate, long SubAccountNumber, int pageNumber = 1, int pageSize = 10)
-        {
-            if (fromDate.HasValue && toDate.HasValue && toDate < fromDate)
-                return BadRequest("Start date must be equal or greater than End date");
-
-            if (SubAccountNumber <= 0)
-                return BadRequest("sub-account number can not be 0.");
-
-            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-            var context = Unit_Of_Work.DbContext;
-
-            Save safe = Unit_Of_Work.save_Repository.First_Or_Default(s => s.ID == SubAccountNumber && s.IsDeleted != true);
-
-            if (safe == null)
-                return NotFound("Safe not found.");
-
-            AccountingTreeChart? accountingTree = Unit_Of_Work.accountingTreeChart_Repository
-                .First_Or_Default(a => a.ID == safe.AccountNumberID && a.IsDeleted != true);
-
-            if (accountingTree == null)
-                return NotFound("Account number not found for the specified safe.");
-
-            int startRow = ((pageNumber - 1) * pageSize) + 1;
-            int endRow = pageNumber * pageSize;
-
-            var results = await context.Set<AccountingEntriesReport>().FromSqlRaw(
-                "EXEC dbo.GetAccountingEntries @DateFrom, @DateTo, @MainAccNo, @SubAccNo, @linkFileID, @StartRow, @EndRow",
-                new SqlParameter("@DateFrom", fromDate ?? (object)DBNull.Value),
-                new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
-                new SqlParameter("@MainAccNo", safe.AccountNumberID),
-                new SqlParameter("@SubAccNo", safe.ID),
-                new SqlParameter("@linkFileID", accountingTree.LinkFileID),
-                new SqlParameter("@StartRow", startRow),
-                new SqlParameter("@EndRow", endRow)
-            ).ToListAsync();
-
-            if (results == null || !results.Any())
-                return NotFound("No account statements found for the specified date range.");
-
-            decimal? runningBalance = 0;
-            TotalResult calcFirstPeriod;
-            TotalResult fullTotals;
-            decimal? firstPeriodBalance = 0;
-
-            decimal? fullDebit = 0;
-            decimal? fullCredit = 0;
-            decimal? fullDifference = 0;
-
-            var dateToValue = fromDate.Value.AddDays(-1);
-
-            calcFirstPeriod = (await context.Set<TotalResult>()
-            .FromSqlRaw(
-                "EXEC dbo.GetAccountingTotals @DateFrom, @DateTo, @MainAccNo, @SubAccNo, @LinkFileID",
-                new SqlParameter("@DateFrom", DBNull.Value),
-                new SqlParameter("@DateTo", (object)dateToValue ?? DBNull.Value),
-                new SqlParameter("@MainAccNo", safe.AccountNumberID),
-                new SqlParameter("@SubAccNo", safe.ID),
-                new SqlParameter("@linkFileID", accountingTree.LinkFileID)
-            )
-            .AsNoTracking()
-            .ToListAsync())
-            .FirstOrDefault();
-
-            results.Insert(0, new AccountingEntriesReport
-            {
-                MasterID = 0,
-                DetailsID = 0,
-                //Account = "Opening Balance",
-                Serial = 0,
-                //MainAccountNo = 0,
-                //MainAccount = "",
-                SubAccountNo = 0,
-                //SubAccount = "",
-                Debit = 0,
-                Credit = 0,
-                Date = dateToValue,
-                Balance = calcFirstPeriod?.Differences ?? 0,
-                //LinkFileID = 0,
-                Notes = ""
-            });
-
-            for (int i = 0; i < results.Count; i++)
-            {
-                var item = results[i];
-
-                decimal? balance = item.Debit - item.Credit;
-
-                runningBalance += balance;
-                item.Balance = runningBalance;
-            }
-
-            fullTotals = (await context.Set<TotalResult>()
-            .FromSqlRaw(
-                "EXEC dbo.GetAccountingTotals @DateFrom, @DateTo, @MainAccNo, @SubAccNo, @LinkFileID",
-                new SqlParameter("@DateFrom", "1900-1-1"),
-                new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
-                new SqlParameter("@MainAccNo", safe.AccountNumberID),
-                new SqlParameter("@SubAccNo", safe.ID),
-                new SqlParameter("@linkFileID", accountingTree.LinkFileID)
-            )
-            .AsNoTracking()
-            .ToListAsync())
-            .FirstOrDefault();
-
-            fullDebit = fullTotals?.TotalDebit ?? 0;
-            fullCredit = fullTotals?.TotalCredit ?? 0;
-            fullDifference = fullTotals?.Differences ?? 0;
-
-            long totalRecords = (await context.Set<CountResult>()
-                .FromSqlInterpolated($@"
-                    SELECT dbo.GetEntriesCount({fromDate}, {toDate}, {safe.AccountNumberID}, {safe.ID}, {accountingTree.LinkFileID}) AS TotalCount")
-                .ToListAsync())
-                .FirstOrDefault()?.TotalCount ?? 0;
-
-            var paginationMetadata = new
-            {
-                TotalRecords = totalRecords,
-                PageSize = pageSize,
-                CurrentPage = pageNumber,
-                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
-            };
-
-            return Ok(new
-            {
-                Data = results,
-                FirstPeriodBalance = firstPeriodBalance,
-                FullTotals = new
-                {
-                    Debit = fullDebit,
-                    Credit = fullCredit,
-                    Difference = fullDifference
-                },
-                Pagination = paginationMetadata
-            });
-        }
-        #endregion
-
-        #region Bank Account Statement
-        [HttpGet("GetBankStatement")]
-        [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Bank Statement" }
-        )]
-        public async Task<IActionResult> GetBankStatement(DateTime? fromDate, DateTime? toDate, long SubAccountNumber, int pageNumber = 1, int pageSize = 10)
-        {
-            if (fromDate.HasValue && toDate.HasValue && toDate < fromDate)
-                return BadRequest("Start date must be equal or greater than End date");
-
-            if (SubAccountNumber <= 0)
-                return BadRequest("sub-account number can not be 0.");
-
-            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-            var context = Unit_Of_Work.DbContext;
-
-            Bank bank = Unit_Of_Work.bank_Repository.First_Or_Default(s => s.ID == SubAccountNumber && s.IsDeleted != true);
-
-            if (bank == null)
-                return NotFound("Bank not found.");
-
-            AccountingTreeChart? accountingTree = Unit_Of_Work.accountingTreeChart_Repository
-                .First_Or_Default(a => a.ID == bank.AccountNumberID && a.IsDeleted != true);
-
-            if (accountingTree == null)
-                return NotFound("Account number not found for the specified bank.");
-
-            int startRow = ((pageNumber - 1) * pageSize) + 1;
-            int endRow = pageNumber * pageSize;
-
-            var results = await context.Set<AccountingEntriesReport>().FromSqlRaw(
-                "EXEC dbo.GetAccountingEntries @DateFrom, @DateTo, @MainAccNo, @SubAccNo, @linkFileID, @StartRow, @EndRow",
-                new SqlParameter("@DateFrom", fromDate ?? (object)DBNull.Value),
-                new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
-                new SqlParameter("@MainAccNo", bank.AccountNumberID),
-                new SqlParameter("@SubAccNo", bank.ID),
-                new SqlParameter("@linkFileID", accountingTree.LinkFileID),
-                new SqlParameter("@StartRow", startRow),
-                new SqlParameter("@EndRow", endRow)
-            ).ToListAsync();
-
-            if (results == null || !results.Any())
-                return NotFound("No account statements found for the specified date range.");
-
-            decimal? runningBalance = 0;
-            TotalResult calcFirstPeriod;
-            TotalResult fullTotals;
-            decimal? firstPeriodBalance = 0;
-
-            decimal? fullDebit = 0;
-            decimal? fullCredit = 0;
-            decimal? fullDifference = 0;
-
-            var dateToValue = fromDate.Value.AddDays(-1);
-
-            calcFirstPeriod = (await context.Set<TotalResult>()
-            .FromSqlRaw(
-                "EXEC dbo.GetAccountingTotals @DateFrom, @DateTo, @MainAccNo, @SubAccNo, @LinkFileID",
-                new SqlParameter("@DateFrom", DBNull.Value),
-                new SqlParameter("@DateTo", (object)dateToValue ?? DBNull.Value),
-                new SqlParameter("@MainAccNo", bank.AccountNumberID),
-                new SqlParameter("@SubAccNo", bank.ID),
-                new SqlParameter("@linkFileID", accountingTree.LinkFileID)
-            )
-            .AsNoTracking()
-            .ToListAsync())
-            .FirstOrDefault();
-
-            results.Insert(0, new AccountingEntriesReport
-            {
-                MasterID = 0,
-                DetailsID = 0,
-                //Account = "Opening Balance",
-                Serial = 0,
-                //MainAccountNo = 0,
-                //MainAccount = "",
-                SubAccountNo = 0,
-                //SubAccount = "",
-                Debit = 0,
-                Credit = 0,
-                Date = dateToValue,
-                Balance = calcFirstPeriod?.Differences ?? 0,
-                //LinkFileID = 0,
-                Notes = ""
-            });
-
-            for (int i = 0; i < results.Count; i++)
-            {
-                var item = results[i];
-
-                decimal? balance = item.Debit - item.Credit;
-
-                runningBalance += balance;
-                item.Balance = runningBalance;
-            }
-
-            fullTotals = (await context.Set<TotalResult>()
-            .FromSqlRaw(
-                "EXEC dbo.GetAccountingTotals @DateFrom, @DateTo, @MainAccNo, @SubAccNo, @LinkFileID",
-                new SqlParameter("@DateFrom", "1900-1-1"),
-                new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
-                new SqlParameter("@MainAccNo", bank.AccountNumberID),
-                new SqlParameter("@SubAccNo", bank.ID),
-                new SqlParameter("@linkFileID", accountingTree.LinkFileID)
-            )
-            .AsNoTracking()
-            .ToListAsync())
-            .FirstOrDefault();
-
-            fullDebit = fullTotals?.TotalDebit ?? 0;
-            fullCredit = fullTotals?.TotalCredit ?? 0;
-            fullDifference = fullTotals?.Differences ?? 0;
-
-            long totalRecords = (await context.Set<CountResult>()
-                .FromSqlInterpolated($@"
-                    SELECT dbo.GetEntriesCount({fromDate}, {toDate}, {bank.AccountNumberID}, {bank.ID}, {accountingTree.LinkFileID}) AS TotalCount")
-                .ToListAsync())
-                .FirstOrDefault()?.TotalCount ?? 0;
-
-            var paginationMetadata = new
-            {
-                TotalRecords = totalRecords,
-                PageSize = pageSize,
-                CurrentPage = pageNumber,
-                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
-            };
-
-            return Ok(new
-            {
-                Data = results,
-                FirstPeriodBalance = firstPeriodBalance,
-                FullTotals = new
-                {
-                    Debit = fullDebit,
-                    Credit = fullCredit,
-                    Difference = fullDifference
                 },
                 Pagination = paginationMetadata
             });

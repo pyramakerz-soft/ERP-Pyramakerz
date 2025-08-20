@@ -36,33 +36,22 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
             var context = Unit_Of_Work.DbContext;
 
-            int startRow = ((pageNumber - 1) * pageSize) + 1;
-            int endRow = pageNumber * pageSize;
-
             var results = await context.Set<AccountingEntriesReport>().FromSqlRaw(
-                "EXEC dbo.GetAccountingEntries @DateFrom, @DateTo, 0, 0, 0, @StartRow, @EndRow",
+                "EXEC dbo.GetAccountingEntries @DateFrom, @DateTo",
                 new SqlParameter("@DateFrom", fromDate ?? (object)DBNull.Value),
-                new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
-                new SqlParameter("@StartRow", startRow),
-                new SqlParameter("@EndRow", endRow)
-            ).ToListAsync();
+                new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value)
+            )
+                .AsNoTracking()
+                .ToListAsync();
 
             if (results == null || !results.Any())
             {
                 return NotFound("No accounting entries found for the specified date range.");
             }
 
-            dynamic grouped;
-            decimal? runningBalance = 0;
-            TotalResult calcFirstPeriod = null;
-            TotalResult fullTotals = null;
-            decimal? firstPeriodBalance = 0;
+            TotalResult fullTotals = new();
 
-            decimal? fullDebit = 0;
-            decimal? fullCredit = 0;
-            decimal? fullDifference = 0;
-
-            grouped = results
+            var groupedResults = results
             .GroupBy(x => x.Date.Value.Date)
             .Select((g, index) =>
             {
@@ -70,8 +59,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
                 var totalDebit = entries.Sum(x => x.Debit ?? 0);
                 var totalCredit = entries.Sum(x => x.Credit ?? 0);
-
-                //bool isCreditBased = entries.Any(x => x.LinkFileID == 2 || x.LinkFileID == 4 || x.LinkFileID == 7);
 
                 var difference = totalCredit > totalDebit
                     ? totalCredit - totalDebit
@@ -88,27 +75,18 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                         Difference = difference
                     }
                 };
-            });
+            }).OrderBy(g => g.Date);
 
-            fullTotals = (await context.Set<TotalResult>()
-            .FromSqlRaw(
-                "EXEC dbo.GetAccountingTotals @DateFrom, @DateTo, 0, 0, 0",
-                new SqlParameter("@DateFrom", fromDate ?? (object)DBNull.Value),
-                new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value)
-            )
-            .AsNoTracking()
-            .ToListAsync())
-            .FirstOrDefault();
+            var pagedGroups = groupedResults
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
 
-            fullDebit = fullTotals?.TotalDebit ?? 0;
-            fullCredit = fullTotals?.TotalCredit ?? 0;
-            fullDifference = fullCredit > fullDebit ? fullCredit - fullDebit : fullDebit - fullCredit;
+            decimal? fullDebit = results?.Sum(x => x.Debit) ?? 0;
+            decimal? fullCredit = results?.Sum(x => x.Credit) ?? 0;
+            decimal? fullDifference = fullCredit > fullDebit ? fullCredit - fullDebit : fullDebit - fullCredit;
 
-            long totalRecords = (await context.Set<CountResult>()
-                .FromSqlInterpolated($@"
-                    SELECT dbo.GetEntriesCount({fromDate}, {toDate}, 0, 0, 0) AS TotalCount")
-                .ToListAsync())
-                .FirstOrDefault()?.TotalCount ?? 0;
+            long totalRecords = groupedResults.Count();
 
             var paginationMetadata = new
             {
@@ -120,7 +98,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
             return Ok(new
             {
-                Data = grouped,
+                Data = pagedGroups,
                 FullTotals = new
                 {
                     Debit = fullDebit,
