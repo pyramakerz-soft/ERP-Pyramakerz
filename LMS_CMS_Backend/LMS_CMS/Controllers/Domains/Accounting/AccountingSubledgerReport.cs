@@ -55,7 +55,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                     new SqlParameter("@LinkFileID", 2),
                     new SqlParameter("@StartRow", startRow),
                     new SqlParameter("@EndRow", endRow)
-                ).ToListAsync(); 
+                )
+                    .AsNoTracking()
+                    .ToListAsync(); 
 
                 if (results == null || !results.Any())
                     return NotFound("No data found for the specified date range.");
