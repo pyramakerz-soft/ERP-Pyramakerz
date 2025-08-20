@@ -818,7 +818,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
 
             if (NewRequest.FileFile != null)
             {
-                string returnFileInput = await _fileValidationService.ValidateFileAsync(NewRequest.FileFile);
+                string returnFileInput = await _fileValidationService.ValidateFileWithTimeoutAsync(NewRequest.FileFile);
                 if (returnFileInput != null)
                 {
                     return BadRequest(returnFileInput);
