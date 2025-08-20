@@ -133,9 +133,9 @@ export class MedicalReportComponent implements OnInit {
     viewDetails(id: number) {
     this.saveState();
     if (this.selectedTab === 'MH By Parent') {
-      this.router.navigate(['/Employee/medical-history/parent', id]);
+      this.router.navigateByUrl(`Employee/medical-history/parent/${id}`);
     } else if (this.selectedTab === 'MH By Doctor') {
-      this.router.navigate(['/Employee/medical-history/doctor', id]);
+      this.router.navigateByUrl(`Employee/medical-history/doctor/${id}`);
     }
   }
 

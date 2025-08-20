@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ApiService } from '../../api.service';
 import { EvaluationEmployeeAdd } from '../../../Models/LMS/evaluation-employee-add';
@@ -80,5 +80,31 @@ export class EvaluationEmployeeService {
       `${this.baseUrl}/EvaluationEmployee/AddFeedback`,obj,  { headers }
     );
   }
+
+GetEvaluationReport(params: any, DomainName: string) {
+  if (DomainName != null) {
+    this.header = DomainName;
+  }
+  
+  const token = localStorage.getItem("current_token");
+  const headers = new HttpHeaders()
+    .set('domain-name', this.header)
+    .set('Authorization', `Bearer ${token}`)
+    .set('Content-Type', 'application/json');
+
+  let queryParams = new HttpParams();
+  
+  if (params.templateId) queryParams = queryParams.set('templateId', params.templateId);
+  if (params.fromDate) queryParams = queryParams.set('fromDate', params.fromDate);
+  if (params.toDate) queryParams = queryParams.set('toDate', params.toDate);
+  if (params.employeeId) queryParams = queryParams.set('employeeId', params.employeeId);
+  if (params.schoolId) queryParams = queryParams.set('schoolId', params.schoolId);
+  if (params.classroomId) queryParams = queryParams.set('classroomId', params.classroomId);
+
+  return this.http.get<any[]>(`${this.baseUrl}/EvaluationEmployee/EvaluationReport`, { 
+    headers, 
+    params: queryParams 
+  });
+}
   
 }
