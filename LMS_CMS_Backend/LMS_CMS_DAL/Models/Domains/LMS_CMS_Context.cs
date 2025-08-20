@@ -2268,6 +2268,9 @@ namespace LMS_CMS_DAL.Models.Domains
             modelBuilder.Entity<AccountBalanceReport>()
                 .HasNoKey().ToView(null);
 
+            modelBuilder.Entity<AccountStatementReport>()
+                .HasNoKey().ToView(null);
+
             modelBuilder.Entity<AccountTotals>()
                 .HasNoKey().ToView(null);
 
