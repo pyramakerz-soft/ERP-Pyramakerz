@@ -684,9 +684,17 @@ export class InventoryDetailsComponent {
   }
 
   onImageFileSelected(event: any) {
+    this.validationErrors['NewAttachments'] = ''
     const files: FileList = event.target.files;
     const input = event.target as HTMLInputElement;
-
+    for (const file of Array.from(files)) {
+      if (file.size > 25 * 1024 * 1024) {
+        this.validationErrors['NewAttachments'] =
+          'One or more files exceed the maximum size of 25 MB.';
+        input.value = ''; 
+        return; 
+      }
+    }
     if (this.mode === 'Create') {
       this.Data.attachment = this.Data.attachment || [];
       Array.from(files).forEach((file) => this.Data.attachment.push(file));

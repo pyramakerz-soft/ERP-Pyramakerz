@@ -47,7 +47,7 @@ export class StoresComponent {
   path: string = '';
 
   TableData: Store[] = [];
-  store: StoreAdd = new StoreAdd();
+  store: Store = new Store();
 
   isModalVisible: boolean = false;
   mode: string = 'Create';
@@ -122,7 +122,7 @@ export class StoresComponent {
 
   Create() {
     this.mode = 'Create';
-    this.store = new StoreAdd();
+    this.store = new Store();
     this.dropdownOpen = false;
     this.openModal();
     this.CategoriesSelected = [];
@@ -134,10 +134,12 @@ export class StoresComponent {
 
   Edit(row: Store): void {
     this.mode = 'Edit';
-    this.store.id = row.id;
-    this.store.name = row.name;
-    this.store.categoriesIds = row.storeCategories.map(s => s.id);
-    this.CategoriesSelected = row.storeCategories
+    this.StoresServ.GetById(row.id,this.DomainName).subscribe((d)=>{
+      this.store = d;
+      this.CategoriesSelected = this.store.storeCategories
+      this.store.categoriesIds = this.store.storeCategories.map(s => s.id);
+      console.log(this.store)
+    })
     this.openModal();
     this.dropdownOpen = false;
   }

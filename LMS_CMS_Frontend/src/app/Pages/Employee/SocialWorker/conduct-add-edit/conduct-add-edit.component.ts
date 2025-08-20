@@ -202,7 +202,7 @@ export class ConductAddEditComponent {
   }
 
   moveToConduct() {
-    this.router.navigateByUrl('Employee/Conduct');
+    this.router.navigateByUrl('Employee/Conducts');
   }
 
   Save() {
@@ -296,6 +296,7 @@ export class ConductAddEditComponent {
   }
 
   onImageFileSelected(event: any) {
+    console.log("event",event)
     const file: File = event.target.files[0];
     const input = event.target as HTMLInputElement;
 

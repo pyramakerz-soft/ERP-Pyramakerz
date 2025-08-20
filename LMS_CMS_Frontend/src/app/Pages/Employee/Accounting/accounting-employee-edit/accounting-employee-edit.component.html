@@ -371,6 +371,7 @@ placeholder="{{ 'Enter User mobile' | translate }}"
         <h6 class="font-medium text-base leading-6 mb-1 mt-3"> {{ 'National Id' | translate }}</h6>
         <input type="text" class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"
           [(ngModel)]="NationalID" (ngModelChange)="SelectChild(NationalID)"  placeholder="{{ 'Enter National Id' | translate }}" />
+         <span *ngIf="IsNationalIsEmpty" class="text-red-500 ml-3 font-normal">{{IsNationalIsEmpty}}</span>
 
         <h6 class="font-medium text-base leading-6 mb-1 mt-3"> {{ 'Student' | translate }}</h6>
         <input type="text" class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"

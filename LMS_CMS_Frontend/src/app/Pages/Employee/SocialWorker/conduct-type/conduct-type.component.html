@@ -18,7 +18,7 @@
                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
                 [(ngModel)]="SelectedSchoolId" (change)="GetAllData();"
                 (ngModelChange)="onInputValueChange({ field: 'schoolID', value: $event })">
-                <option value=0 disabled selected hidden>  {{ 'Select' | translate }}{{ 'School' | translate }}</option>
+                <option value=0 disabled selected hidden>  {{ 'Select' | translate }} {{ 'School' | translate }}</option>
                 <option *ngFor="let stu of schools" [value]="stu.id">
                     {{ stu.name }}
                 </option>

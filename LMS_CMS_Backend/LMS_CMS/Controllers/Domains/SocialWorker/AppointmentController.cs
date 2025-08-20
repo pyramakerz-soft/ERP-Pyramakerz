@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using LMS_CMS_BL.DTO.SocialWorker;
 using LMS_CMS_BL.UOW;
+using LMS_CMS_DAL.Models.Domains.AccountingModule;
 using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_DAL.Models.Domains.SocialWorker;
 using LMS_CMS_DAL.Models.Domains.ViolationModule;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Drawing.Printing;
 
 namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
 {
@@ -100,6 +102,89 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
 
             AppointmentGetDTO Dto = mapper.Map<AppointmentGetDTO>(appointment);
             return Ok(Dto);
+        }
+
+        ////////////////////////////////
+
+        [HttpGet("GetByIdWithPaggination/{id}")]
+        [Authorize_Endpoint_(
+          allowedTypes: new[] { "octa", "employee" },
+          pages: new[] { "Lesson Resources Types" }
+       )]
+        public async Task<IActionResult> GetByIdWithPaggination(long id, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            // ✅ Count all parents for this appointment (entire dataset, not paged)
+            int totalRecords = await Unit_Of_Work.appointmentParent_Repository
+                .CountAsync(f => f.IsDeleted != true && f.AppointmentID == id);
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            Appointment appointment = Unit_Of_Work.appointment_Repository.First_Or_Default(
+                sem => sem.IsDeleted != true && sem.ID == id);
+
+            if (appointment == null)
+            {
+                return NotFound();
+            }
+
+            // ✅ Get paginated data
+            List<AppointmentParent> appointmentParents = await Unit_Of_Work.appointmentParent_Repository
+                .Select_All_With_IncludesById_Pagination<AppointmentParent>(
+                    t => t.IsDeleted != true && t.AppointmentID == id,
+                    query => query.Include(Master => Master.Appointment),
+                    query => query.Include(Master => Master.Parent),
+                    query => query.Include(Master => Master.AppointmentStatus)
+                )
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            AppointmentGetDTO app = mapper.Map<AppointmentGetDTO>(appointment);
+
+            List<AppointmentParentGetDTO> Dto = mapper.Map<List<AppointmentParentGetDTO>>(appointmentParents);
+
+            // ✅ Get ALL statuses
+            List<AppointmentStatus> appointmentStatuses = Unit_Of_Work.appointmentStatus_Repository
+                .FindBy(a => a.IsDeleted != true);
+
+            // ✅ Get counts for the ENTIRE dataset (not just the page)
+            var allAppointmentParents = await Unit_Of_Work.appointmentParent_Repository
+                .Select_All_With_IncludesById_Pagination<AppointmentParent>(
+                    t => t.IsDeleted != true && t.AppointmentID == id,
+                    query => query.Include(x => x.AppointmentStatus)
+                )
+                .ToListAsync();
+
+            // ✅ Build counts including statuses with 0
+            var statusCounts = appointmentStatuses
+                .Select(status => new {
+                    StatusID = status.ID,
+                    StatusName = status.Name,
+                    Count = allAppointmentParents.Count(p => p.AppointmentStatusID == status.ID)
+                })
+                .ToList();
+
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Appointment = app, Data = Dto, Pagination = paginationMetadata, StatusCounts = statusCounts });
         }
 
         ////////////////////////////////

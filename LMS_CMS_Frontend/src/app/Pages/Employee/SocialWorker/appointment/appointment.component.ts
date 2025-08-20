@@ -16,11 +16,14 @@ import { DomainService } from '../../../../Services/Employee/domain.service';
 import { SchoolService } from '../../../../Services/Employee/school.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
+import { AppointmentGrade } from '../../../../Models/SocialWorker/appointment-grade';
+import { Grade } from '../../../../Models/LMS/grade';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-appointment',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './appointment.component.html',
   styleUrl: './appointment.component.css'
 })
@@ -39,14 +42,22 @@ export class AppointmentComponent {
   UserID: number = 0;
 
   isModalVisible: boolean = false;
-  mode: string = '';
+  mode: string = 'Create';
 
   path: string = '';
   key: string = 'id';
   value: any = '';
   keysArray: string[] = ['id', 'name'];
   schools: School[] = [];
+  schoolsToCreate: School[] = [];
   isLoading = false;
+
+  appointment: Appointment = new Appointment()
+  grades: Grade[] = [];
+
+  dropdownOpen = false;
+  gradeSelected: AppointmentGrade[] = [];
+  validationErrors: { [key in keyof Appointment]?: string } = {};
 
   constructor(
     private router: Router,
@@ -85,19 +96,42 @@ export class AppointmentComponent {
     this.TableData = [];
     this.AppointmentServ.GetBySchoolId(this.SelectedSchoolId, this.DomainName).subscribe((d) => {
       this.TableData = d;
-      console.log(d , this.TableData)
+      console.log(d, this.TableData)
     });
+  }
+
+  GetAllGrades() {
+    this.grades = []
+    this.gradeSelected = []
+    this.appointment.gradeIds = []
+    this.GradeServ.GetBySchoolId(this.appointment.schoolID, this.DomainName).subscribe((d) => {
+      this.grades = d
+    })
   }
 
   GetSchools() {
     this.schools = []
     this.SchoolServ.Get(this.DomainName).subscribe((d) => {
       this.schools = d
+      this.schoolsToCreate = d
     })
   }
 
   Create() {
-   
+    this.mode = 'Create';
+    this.appointment = new Appointment();
+    this.dropdownOpen = false;
+    this.openModal();
+    this.gradeSelected = [];
+  }
+
+  openModal() {
+    this.isModalVisible = true;
+  }
+
+  closeModal() {
+    this.isModalVisible = false;
+    this.validationErrors = {}
   }
 
   Delete(id: number) {
@@ -118,8 +152,20 @@ export class AppointmentComponent {
     });
   }
 
-  Edit(id: number) {
-    this.router.navigateByUrl('Employee/Conduct Edit/' + id);
+  Edit(row: Appointment): void {
+    this.mode = 'Edit';
+    this.AppointmentServ.GetByID(row.id, this.DomainName).subscribe(
+      data => {
+        this.appointment = data;
+        this.GradeServ.GetBySchoolId(this.appointment.schoolID, this.DomainName).subscribe((d) => {
+          this.grades = d
+        })
+        this.gradeSelected = data.appointmentGrades
+        this.appointment.gradeIds = this.appointment.appointmentGrades.map((grade) => grade.gradeID) ?? [];
+      }
+    )
+    this.openModal();
+    this.dropdownOpen = false;
   }
 
   IsAllowDelete(InsertedByID: number) {
@@ -170,4 +216,124 @@ export class AppointmentComponent {
     }
   }
 
+  CreateOREdit() {
+    if (this.isFormValid()) {
+      this.isLoading = true
+      if (this.mode == 'Create') {
+        this.AppointmentServ.Add(this.appointment, this.DomainName).subscribe((d) => {
+          this.GetAllData()
+          this.closeModal()
+          this.isLoading = false
+          Swal.fire({
+            icon: 'success',
+            title: 'Done',
+            text: 'Created Successfully',
+            confirmButtonColor: '#089B41',
+          });
+        }, error => {
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Try Again Later!',
+            confirmButtonText: 'Okay',
+            customClass: { confirmButton: 'secondaryBg' }
+          });
+        })
+      }
+      else if (this.mode == 'Edit') {
+        this.AppointmentServ.Edit(this.appointment, this.DomainName).subscribe((d) => {
+          this.GetAllData()
+          this.closeModal()
+          this.isLoading = false
+          Swal.fire({
+            icon: 'success',
+            title: 'Done',
+            text: 'Updatedd Successfully',
+            confirmButtonColor: '#089B41',
+          });
+        }, error => {
+          this.isLoading = false
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Try Again Later!',
+            confirmButtonText: 'Okay',
+            customClass: { confirmButton: 'secondaryBg' }
+          });
+        })
+      }
+    }
+  }
+
+  isFormValid(): boolean {
+    let isValid = true;
+    for (const key in this.appointment) {
+      if (this.appointment.hasOwnProperty(key)) {
+        const field = key as keyof Appointment;
+        if (!this.appointment[field]) {
+          if (
+            field == 'gradeIds' ||
+            field == 'schoolID' ||
+            field == 'date' ||
+            field == 'dueDateToParentToAccept' ||
+            field == 'title'
+          ) {
+            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`;
+            isValid = false;
+          }
+        }
+        if (this.appointment.gradeIds.length == 0) {
+          this.validationErrors["gradeIds"] = `Grade is required`;
+          isValid = false;
+        }
+        if (this.appointment.dueDateToParentToAccept > this.appointment.date) {
+          this.validationErrors["dueDateToParentToAccept"] = `Due Date To Parent To Accept Can Not Be After Appointment Date`;
+          isValid = false;
+        }
+      }
+    }
+    return isValid;
+  }
+
+  capitalizeField(field: keyof Appointment): string {
+    return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
+  }
+
+  View(id:number){
+    this.router.navigateByUrl('Employee/Appoinment/'+id);
+  }
+
+  toggleDropdown(): void {
+    this.dropdownOpen = !this.dropdownOpen;
+  }
+
+  selectGrade(grade: Grade): void {
+    this.validationErrors["gradeIds"] = ``;
+
+    if (!this.gradeSelected.some((e) => e.gradeID === grade.id)) {
+      const gradeselect = new AppointmentGrade()
+      gradeselect.gradeID = grade.id
+      gradeselect.gradeName = grade.name
+      this.gradeSelected.push(gradeselect);
+    }
+
+    if (!this.appointment.gradeIds.some((e) => e === grade.id)) {
+      this.appointment.gradeIds.push(grade.id);
+    }
+
+    this.dropdownOpen = false; // Close dropdown after selection
+  }
+
+  removeSelected(id: number): void {
+    this.gradeSelected = this.gradeSelected.filter((e) => e.id !== id);
+    this.appointment.gradeIds = this.appointment.gradeIds.filter((i) => i !== id);
+  }
+
+  onInputValueChange(event: { field: keyof Appointment; value: any }) {
+    const { field, value } = event;
+    (this.appointment as any)[field] = value;
+    if (value) {
+      this.validationErrors[field] = '';
+    }
+  }
 }

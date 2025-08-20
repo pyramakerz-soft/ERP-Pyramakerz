@@ -141,7 +141,7 @@
 
             <div class="bg-[#F6F6F6] flex items-center space-x-4 w-full rounded-md border-dashed mb-4 border-2">
                 <div class="flex justify-center w-full">
-                    <label for="file-upload"
+                    <label for="imageForm"
                         class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
                         <img *ngIf="!question.image && !question.imageFile && !question.video && !question.videoFile"
                             src="Images/Icon frame.png" class="w-1/4">
@@ -159,7 +159,7 @@
                         <p class="font-normal text-xs md:text-sm text-[#8E8E93]"> ({{ 'Max. File size' | translate }}:
                             25 MB)</p>
                     </label>
-                    <input id="file-upload" type="file" class="hidden" accept="image/*,video/*"
+                    <input id="imageForm" type="file" class="hidden" accept="image/*,video/*"
                         (change)="onFileUpload($event)" />
                 </div>
             </div>

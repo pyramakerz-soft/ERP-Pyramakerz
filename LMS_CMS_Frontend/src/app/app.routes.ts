@@ -229,6 +229,8 @@ import { ViewReportComponent } from './Pages/Employee/Clinic/medical-report/view
 import { HorizontalMeeting } from './Models/SocialWorker/horizontal-meeting';
 import { HorizontalMeetingComponent } from './Pages/Employee/SocialWorker/horizontal-meeting/horizontal-meeting.component';
 import { ParentMeetingComponent } from './Pages/Employee/SocialWorker/parent-meeting/parent-meeting.component';
+import { AppointmentComponent } from './Pages/Employee/SocialWorker/appointment/appointment.component';
+import { AppointmentParentComponent } from './Pages/Employee/SocialWorker/appointment-parent/appointment-parent.component';
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
     { path: "Octa/login", component: OctaLoginComponent, title: "login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -486,7 +488,7 @@ export const routes: Routes = [
             { path: "All Stores Item Balance with Sales", component: AllStoresBalanceReportComponent, title: "All Stores Sales Price Report", canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'SalesPrice' } },
             { path: "All Stores Item Balance with Average Cost", component: AllStoresBalanceReportComponent, title: "All Stores Cost Report", canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'Cost' } },
             { path: 'Discussion Room', component: DiscussionRoomComponent, title: 'Discussion Room', canActivate: [noNavigateWithoutLoginGuard], },
-            { path: 'Violation', component: ViolationComponent, title: 'Violation', canActivate: [noNavigateWithoutLoginGuard], },
+            { path: 'violation', component: ViolationComponent, title: 'Violation', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Violation/:id', component: ViolationViewComponent, title: 'Violation', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Notification', component: NotificationComponent, title: 'Notification', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Notification', component: NotificationComponent, title: 'Notification', canActivate: [noNavigateWithoutLoginGuard], },
@@ -495,25 +497,27 @@ export const routes: Routes = [
             { path: 'Remedial TimeTable', component: RemedialTimeTableComponent, title: 'Remedial Time Table', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Remedial TimeTable/:id', component: RemedialTimeTableViewComponent, title: 'Remedial Time Table', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Conduct Level', component: ConductLevelComponent, title: 'Conduct Level', canActivate: [noNavigateWithoutLoginGuard], },
-            { path: 'Procedure Type', component: ProcedureTypeComponent, title: 'Procedure Type', canActivate: [noNavigateWithoutLoginGuard], },
-            { path: 'Conduct Type', component: ConductTypeComponent, title: 'Conduct Type', canActivate: [noNavigateWithoutLoginGuard], },
-            { path: 'Conduct', component: ConductComponent, title: 'Conduct', canActivate: [noNavigateWithoutLoginGuard], },
+            { path: 'Procedure Types', component: ProcedureTypeComponent, title: 'Procedure Type', canActivate: [noNavigateWithoutLoginGuard], },
+            { path: 'Conduct Types', component: ConductTypeComponent, title: 'Conduct Type', canActivate: [noNavigateWithoutLoginGuard], },
+            { path: 'Conducts', component: ConductComponent, title: 'Conduct', canActivate: [noNavigateWithoutLoginGuard], },
             { path: "Conduct Edit/:id", component: ConductAddEditComponent, title: "Conduct", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Conduct Create", component: ConductAddEditComponent, title: "Conduct", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Supplier Statement",  component: AccountStatementsComponent,  title: "Supplier Statement",  canActivate: [noNavigateWithoutLoginGuard]  },
             { path: "Safe Statement",  component: AccountStatementsComponent,  title: "Safe Statement",  canActivate: [noNavigateWithoutLoginGuard]  },
             { path: "Bank Statement",  component: AccountStatementsComponent,  title: "Bank Statement",  canActivate: [noNavigateWithoutLoginGuard]  },
-            { path: "Issue Type", component: IssuesTypeComponent, title: "Issue Type", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Issues Types", component: IssuesTypeComponent, title: "Issue Type", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Student Issues", component: StudentIssuesComponent, title: "Student Issues", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "Social Worker Medal", component: SocialWorkerMedalComponent, title: "Social Worker Medal", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "Certificate Type", component: CertificateTypeComponent, title: "Certificate Type", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "Student Certificate", component: StudentCertificateComponent, title: "Student Certificate", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "Social Worker Student", component: SocialWorkerMedalStudentComponent, title: "Social Worker Student", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Medal Types", component: SocialWorkerMedalComponent, title: "Social Worker Medal", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Certificate Types", component: CertificateTypeComponent, title: "Certificate Type", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Add Certificate To Student", component: StudentCertificateComponent, title: "Student Certificate", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Add Medal To Student", component: SocialWorkerMedalStudentComponent, title: "Social Worker Student", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Attendance", component: AttendanceComponent, title: "Attendance", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Attendance/:id", component: AttendanceStudentComponent, title: "Attendance", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Attendance Create", component: AttendanceStudentComponent, title: "Attendance", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Horizontal Meeting", component: HorizontalMeetingComponent, title: "Horizontal Meeting", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Parent Meeting", component: ParentMeetingComponent, title: "Parent Meeting", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Appoinment", component: AppointmentComponent, title: "Appoinment", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Appoinment/:id", component: AppointmentParentComponent, title: "Appoinment", canActivate: [noNavigateWithoutLoginGuard] },
         ]
     },
     {
