@@ -231,6 +231,7 @@ import { HorizontalMeetingComponent } from './Pages/Employee/SocialWorker/horizo
 import { ParentMeetingComponent } from './Pages/Employee/SocialWorker/parent-meeting/parent-meeting.component';
 import { AppointmentComponent } from './Pages/Employee/SocialWorker/appointment/appointment.component';
 import { AppointmentParentComponent } from './Pages/Employee/SocialWorker/appointment-parent/appointment-parent.component';
+import { EvaluationReportComponent } from './Pages/Employee/LMS/reports/evaluation-report/evaluation-report.component';
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
     { path: "Octa/login", component: OctaLoginComponent, title: "login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -252,18 +253,8 @@ export const routes: Routes = [
             { path: "Follow Up", component: FollowUpComponent, title: "Follow Up" },
             { path: "Medical History", component: MedicalHistoryComponent, title: "Medical History" },
             { path: "Medical Report", component: MedicalReportComponent, title: "Medical Report" },
-    { 
-        path: 'medical-history/parent/:id', 
-        component: ViewReportComponent, 
-        title: 'Medical History By Parent',
-        data: { reportType: 'parent' } 
-    },
-    { 
-        path: 'medical-history/doctor/:id', 
-        component: ViewReportComponent, 
-        title: 'Medical History By Doctor',
-        data: { reportType: 'doctor' } 
-    },
+            { path: 'medical-history/parent/:id', component: ViewReportComponent, title: 'Medical History By Parent',data: { reportType: 'parent' } },
+            { path: 'medical-history/doctor/:id', component: ViewReportComponent, title: 'Medical History By Doctor',data: { reportType: 'doctor' } },
             { path: "Doses", component: DosesComponent, title: "Doses" },
             { path: "Bus Details", component: BusDetailsComponent, title: "Bus", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Bus Students/:domainName/:busId", component: BusStudentComponent, title: "Bus Students", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
@@ -417,6 +408,7 @@ export const routes: Routes = [
             { path: 'Purchase Transaction Detailed Report', component: InvoiceReportMasterDetailedComponent, title: 'Purchase Transaction Report Detailed', canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'purchase' } },
             { path: "Book Correction", component: BookCorrectionComponent, title: "BookCorrectionComponent", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Evaluation", component: EvaluationComponent, title: "Evaluation", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
+            { path: "Evaluation Report", component: EvaluationReportComponent, title: "Evaluation Report", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "EvaluationTemplateGroup/:id", component: EvaluationTemplateGroupComponent, title: "EvaluationTemplateGroup", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "EvaluationTemplateGroupQuestion/:id", component: EvaluationTemplateGroupQuestionComponent, title: "EvaluationTemplateGroup", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Received Evaluations", component: EvaluationFeedbackComponent, title: "Received Evaluations", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
