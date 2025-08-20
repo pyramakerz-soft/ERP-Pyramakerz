@@ -69,7 +69,7 @@
 
             <label class="mb-2 primaryTxt" for="date">{{ 'Date' | translate }}</label>
             <input type="date" id="date" [(ngModel)]="selectedDate" (change)="onDateChange()"
-                class="rounded-lg border border-solid border-gray-300 px-4 py-3" [disabled]="!selectedClass">
+                class="rounded-lg border border-solid border-gray-300 px-4 py-3" >
             <span *ngIf="validationErrors['date']" class="text-red-500 ml-3 font-normal">{{ validationErrors['date']
                 }}</span>
         </div>
