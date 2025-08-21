@@ -37,6 +37,7 @@ import { Classroom } from '../../Models/LMS/classroom';
 import { Student } from '../../Models/student'; 
 import { Subject } from '../../Models/LMS/subject';
 import { Section } from '../../Models/LMS/section';
+import { RealTimeRequestServiceService } from '../../Services/shared/real-time-request-service.service';
 
 @Component({
   selector: 'app-nav-menu',
@@ -101,7 +102,7 @@ export class NavMenuComponent {
 
   constructor(private router: Router, public account: AccountService, public languageService: LanguageService, public ApiServ: ApiService, public octaService:OctaService,
     private translate: TranslateService, private communicationService: NewTokenService, private logOutService: LogOutService, 
-    private notificationService: NotificationService, private realTimeService: RealTimeNotificationServiceService, public requestService:RequestService,
+    private notificationService: NotificationService, private realTimeService: RealTimeNotificationServiceService, private realTimeRequestService: RealTimeRequestServiceService, public requestService:RequestService,
     public departmentService: DepartmentService, public employeeService: EmployeeService, public schoolService: SchoolService, public sectionService: SectionService,
     public gradeService: GradeService, public classroomService: ClassroomService, public studentService: StudentService, public parentService: ParentService, 
     public subjectService: SubjectService, ) { }
@@ -249,6 +250,7 @@ export class NavMenuComponent {
     this.destroy$.complete();
     document.removeEventListener('click', this.onDocumentClick);
     this.realTimeService.stopConnection();
+    this.realTimeRequestService.stopConnection();
   } 
 
   ChangeAccount(id: number): void {
@@ -258,6 +260,7 @@ export class NavMenuComponent {
     if (tokenObject && token != tokenObject.value) {
       // First stop any existing SignalR connection
       this.realTimeService.stopConnection();
+      this.realTimeRequestService.stopConnection();
 
       localStorage.removeItem("current_token");
       localStorage.setItem("current_token", tokenObject.value);
@@ -267,6 +270,7 @@ export class NavMenuComponent {
       // Restart SignalR connection for the new account
       setTimeout(() => {
         this.realTimeService.startConnection();
+        this.realTimeRequestService.startRequestConnection();
       }, 100);
       
       this.communicationService.sendAction(true);

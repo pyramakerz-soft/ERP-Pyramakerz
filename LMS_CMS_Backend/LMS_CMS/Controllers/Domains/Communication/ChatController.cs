@@ -10,6 +10,7 @@ using LMS_CMS_DAL.Models.Domains.Communication;
 using LMS_CMS_DAL.Models.Domains;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_DAL.Models.Domains.LMS;
+using LMS_CMS_PL.Services.FileValidations;
 
 namespace LMS_CMS_PL.Controllers.Domains.Communication
 {
