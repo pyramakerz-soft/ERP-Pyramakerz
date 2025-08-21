@@ -1205,7 +1205,16 @@ namespace LMS_CMS_PL.Controllers.Domains
                 return NotFound("No student with this ID");
             }
 
-            if (newStudent.AccountNumberID != null)
+            if (newStudent.Email != null)
+            {
+                Student studentCheckEnail = Unit_Of_Work.student_Repository.First_Or_Default(s => s.Email == newStudent.Email && s.ID!=newStudent.ID );
+                if (studentCheckEnail != null)
+                {
+                    return NotFound("This Email Already Taken");
+                }
+            }
+
+            if (newStudent.AccountNumberID != null && newStudent.AccountNumberID!=0)
             {
                 AccountingTreeChart account = Unit_Of_Work.accountingTreeChart_Repository.First_Or_Default(t => t.IsDeleted != true && t.ID == newStudent.AccountNumberID);
 
@@ -1225,6 +1234,11 @@ namespace LMS_CMS_PL.Controllers.Domains
                         return BadRequest("Wrong Link File, it should be Asset file link");
                     }
                 }
+            }
+            else
+            {
+                newStudent.AccountNumberID = null;
+
             }
 
 

@@ -21,23 +21,12 @@ import { LanguageService } from '../../../../Services/shared/language.service';
 @Component({
   selector: 'app-accounting-employee',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent , TranslateModule],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './accounting-employee.component.html',
   styleUrl: './accounting-employee.component.css'
 })
 export class AccountingEmployeeComponent {
-User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -55,11 +44,11 @@ User_Data_After_Login: TokenData = new TokenData(
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'user_Name', 'en_name' ,'ar_name','mobile','email','role_Name','employeeTypeName'];
+  keysArray: string[] = ['id', 'user_Name', 'en_name', 'ar_name', 'mobile', 'email', 'role_Name', 'employeeTypeName'];
   isRtl: boolean = false;
   subscription!: Subscription;
-  AccountNumbers:AccountingTreeChart[]=[];
-  
+  AccountNumbers: AccountingTreeChart[] = [];
+
 
   constructor(
     private router: Router,
@@ -69,12 +58,12 @@ User_Data_After_Login: TokenData = new TokenData(
     public BusTypeServ: BusTypeService,
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
-    public ApiServ: ApiService ,
+    public ApiServ: ApiService,
     public EmployeeServ: EmployeeService,
-    public accountServ:AccountingTreeChartService ,
+    public accountServ: AccountingTreeChartService,
     private languageService: LanguageService
 
-  ) {}
+  ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
@@ -94,15 +83,15 @@ User_Data_After_Login: TokenData = new TokenData(
     });
 
     this.GetAllData();
-      this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetAllData() {
-    this.EmployeeServ.Get_Employees(this.DomainName).subscribe((d)=>{
-      this.TableData=d
+    this.EmployeeServ.Get_Employees(this.DomainName).subscribe((d) => {
+      this.TableData = d
     })
   }
 
@@ -140,7 +129,7 @@ User_Data_After_Login: TokenData = new TokenData(
       this.TableData = [];
     }
   }
-  
+
   IsAllowEdit(InsertedByID: number) {
     const IsAllow = this.EditDeleteServ.IsAllowEdit(
       InsertedByID,

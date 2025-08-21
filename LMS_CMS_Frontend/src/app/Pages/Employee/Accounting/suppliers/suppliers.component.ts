@@ -31,18 +31,7 @@ import {  Subscription } from 'rxjs';
   styleUrl: './suppliers.component.css',
 })
 export class SuppliersComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;

@@ -26,18 +26,7 @@ import {  Subscription } from 'rxjs';
   styleUrl: './receivable-doc-type.component.css'
 })
 export class ReceivableDocTypeComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;

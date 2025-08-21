@@ -2,10 +2,11 @@
     <label for="Students" class="block mb-2 text-sm font-medium text-gray-900"> {{ 'Students' | translate }}</label>
     <select id="Students" (change)="SelectStudent($event)"
         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5">
-        <option value="" disabled selected hidden> {{ 'Select' | translate }} {{ 'Student' | translate }}</option>
+        <option value="0" disabled selected hidden> {{ 'Select' | translate }} {{ 'Student' | translate }}</option>
         <option *ngFor="let s of Students" [value]="s.id">
             {{ s.studentEnName }}
         </option>
+        <option *ngIf="Students.length == 0"> {{ 'No Data Found' | translate }}</option>
     </select>
 </div>
 

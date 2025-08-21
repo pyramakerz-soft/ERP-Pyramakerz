@@ -36,7 +36,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [HttpGet]
         [Authorize_Endpoint_(
          allowedTypes: new[] { "octa", "employee" },
-         pages: new[] { "Lesson Resources Types" }
+         pages: new[] { "Medal Types" }
        )]
         public async Task<IActionResult> Get()
         {
@@ -80,7 +80,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
         allowedTypes: new[] { "octa", "employee" },
-        pages: new[] { "Lesson Resources Types" }
+        pages: new[] { "Medal Types" }
       )]
         public async Task<IActionResult> GetById(long id)
         {
@@ -121,7 +121,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [HttpPost]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Medal" }
+            pages: new[] { "Medal Types" }
         )]
         public async Task<IActionResult> Add([FromForm] SocialWorkerMedalAddDTO newMedal)
         {
@@ -197,7 +197,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [Authorize_Endpoint_(
              allowedTypes: new[] { "octa", "employee" },
              allowEdit: 1,
-            pages: new[] { "Medal" }
+            pages: new[] { "Medal Types" }
         )]
         public async Task<IActionResult> Edit([FromForm] SocialWorkerMedalEditDTO newModal)
         {
@@ -239,7 +239,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
 
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Medal", roleId, userId, medal);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Medal Types", roleId, userId, medal);
                 if (accessCheck != null)
                 {
                     return accessCheck;
@@ -310,7 +310,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             allowDelete: 1,
-            pages: new[] { "Medal" }
+            pages: new[] { "Medal Types" }
         )]
         public IActionResult Delete(long id)
         {
@@ -343,7 +343,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
 
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Medal", roleId, userId, medal);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Medal Types", roleId, userId, medal);
                 if (accessCheck != null)
                 {
                     return accessCheck;

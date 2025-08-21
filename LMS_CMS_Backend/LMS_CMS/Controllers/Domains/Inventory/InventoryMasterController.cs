@@ -247,6 +247,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             InventoryMaster Data = await Unit_Of_Work.inventoryMaster_Repository.FindByIncludesAsync(
                     s => s.IsDeleted != true && s.ID == id,
                     query => query.Include(store => store.Store),
+                    query => query.Include(store => store.StoreToTransform),
+                    query => query.Include(store => store.School),
+                    query => query.Include(store => store.SchoolPCs),
                     query => query.Include(store => store.Student),
                     query => query.Include(store => store.Supplier),
                     query => query.Include(store => store.Save),

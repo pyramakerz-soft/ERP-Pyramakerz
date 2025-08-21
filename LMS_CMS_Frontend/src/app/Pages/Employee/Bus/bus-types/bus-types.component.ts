@@ -25,18 +25,8 @@ import { LanguageService } from '../../../../Services/shared/language.service';
   styleUrls: ['./bus-types.component.css'],
 })
 export class BusTypesComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
+
   busType: BusType = new BusType(0, '', 0);
 
   AllowEdit: boolean = false;

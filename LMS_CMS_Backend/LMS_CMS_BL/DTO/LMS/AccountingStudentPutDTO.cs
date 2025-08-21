@@ -13,6 +13,7 @@ namespace LMS_CMS_BL.DTO.LMS
         public string? Phone { get; set; }
         public string? Address { get; set; }
         public string? Note { get; set; }
+        public string? Email { get; set; }
         public long? Nationality { get; set; }
         public string? NationalityName { get; set; }
         public long? AccountNumberID { get; set; }

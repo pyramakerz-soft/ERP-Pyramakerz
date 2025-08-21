@@ -28,18 +28,7 @@ import { TranslateModule } from '@ngx-translate/core';
   styleUrl: './fields.component.css',
 })
 export class FieldsComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   DomainName: string = '';
   UserID: number = 0;
@@ -71,7 +60,6 @@ export class FieldsComponent {
     'arName',
     'enName',
     'orderInForm',
-    'isMandatory',
     'fieldTypeName',
   ];
 

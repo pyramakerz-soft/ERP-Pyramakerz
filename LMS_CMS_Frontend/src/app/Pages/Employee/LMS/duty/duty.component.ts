@@ -28,18 +28,7 @@ import {  Subscription } from 'rxjs';
   styleUrl: './duty.component.css',
 })
 export class DutyComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   DomainName: string = '';
   UserID: number = 0;
