@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 @Injectable({
   providedIn: 'root',
 })
-export class ApiService { 
+export class ApiService {
   BaseUrl = 'https://localhost:7205/api/with-domain';
   BaseUrlOcta = 'https://localhost:7205/api';
   BaseUrlSignalR = 'https://localhost:7205/';
