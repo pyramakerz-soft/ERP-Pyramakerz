@@ -2,7 +2,7 @@
     <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
         <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToEmployee()"></i>
         <h1 class="font-semibold text-2xl leading-9">
-            {{Data.user_Name}}
+            {{Data.en_name}}
         </h1>
     </div>
     <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg" (click)="Save()">
@@ -16,7 +16,7 @@
         <label class="mb-2" for="bus">{{ 'Account Number' | translate }}</label>
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="bus"
             [(ngModel)]="Data.accountNumberID">
-            <option [value]=null disabled selected hidden>  {{ 'Choose Account Number' | translate }}</option>
+            <option [value]=null disabled selected hidden> {{ 'Choose Account Number' | translate }}</option>
             <option *ngFor="let Acc of AccountNumbers" [value]="Acc.id">{{ Acc.name }}</option>
             <option *ngIf="AccountNumbers.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
         </select>
@@ -33,24 +33,31 @@
     </div>
 
     <div class="flex flex-col mb-4 w-[49%]">
+        <label class="mb-2 primaryTxt" for="email"> {{ 'Email' | translate }}</label>
+        <input id="email" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" (ngModelChange)="OnEmailChange() "
+            placeholder="{{ 'Enter Email' | translate }}" [(ngModel)]="Data.email" />
+        <span *ngIf="EmailValidation" class="text-red-500 ml-3 font-normal">{{EmailValidation}}</span>
+    </div>
+
+    <div class="flex flex-col mb-4 w-[49%]">
         <label class="mb-2 primaryTxt" for="name"> {{ 'Address' | translate }}</label>
         <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
- placeholder="{{ 'Enter User Name' | translate }}" [(ngModel)]="Data.address" />
+            placeholder="{{ 'Enter Address' | translate }}" [(ngModel)]="Data.address" />
     </div>
 
 
     <div class="flex flex-col mb-4 w-[49%]">
         <label class="mb-2 primaryTxt" for="mobile"> {{ 'Mobile Number' | translate }}</label>
         <input id="mobile" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-            (input)="validateNumber($event, 'mobile')"
-placeholder="{{ 'Enter User mobile' | translate }}" [(ngModel)]="Data.mobile" />
+            (input)="validateNumber($event, 'mobile')" placeholder="{{ 'Enter User mobile' | translate }}"
+            [(ngModel)]="Data.mobile" />
     </div>
 
     <div class="flex flex-col mb-4 w-full">
         <label class="mb-2 primaryTxt" for="name"> {{ 'Phone' | translate }}</label>
         <input id="phone" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-            (input)="validateNumber($event, 'phone')"
-placeholder="{{ 'Enter User phone' | translate }}" [(ngModel)]="Data.phone" />
+            (input)="validateNumber($event, 'phone')" placeholder="{{ 'Enter User phone' | translate }}"
+            [(ngModel)]="Data.phone" />
     </div>
 
     <div class="flex flex-col mb-4 w-full">
@@ -59,7 +66,7 @@ placeholder="{{ 'Enter User phone' | translate }}" [(ngModel)]="Data.phone" />
             <div class="flex flex-col w-full">
                 <textarea
                     class="w-full h-[100px] rounded-lg border border-solid border-gray-300 px-2 py-1 mb-3 resize-none"
-                    [(ngModel)]="Data.note"  placeholder="{{ 'Add Notes' | translate }}"></textarea>
+                    [(ngModel)]="Data.note" placeholder="{{ 'Add Notes' | translate }}"></textarea>
             </div>
         </div>
     </div>

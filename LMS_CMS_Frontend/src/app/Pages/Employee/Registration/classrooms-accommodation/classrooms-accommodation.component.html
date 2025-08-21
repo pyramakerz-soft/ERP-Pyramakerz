@@ -8,32 +8,35 @@
 <div class="flex justify-between mt-5 items-end space-x-5 rtl:space-x-reverse">
   <div class="w-1/3">
       <label for="Schools" class="primaryTxt block mb-2 text-base font-medium text-[#2E3646]">{{ 'School' | translate }}</label>
-      <select id="Schools"  [(ngModel)]="SelectedSchoolId" (change)="Search()"
+      <select id="Schools"  [(ngModel)]="SelectedSchoolId" (change)="GetAllAcademicYearBySchool(); getAllGrades(); Search();" 
           class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block p-2.5 w-full">
           <option value="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'School' | translate }}</option>
           <option *ngFor="let s of Schools" [value]="s.id">
             {{ s.name }}
           </option>
+          <option *ngIf="Schools.length == 0"> {{ 'No Data Found' | translate }}</option>
       </select>
   </div>
   <div class="w-1/3">
       <label for="Years" class="primaryTxt block mb-2 text-base font-medium text-[#2E3646]">{{ 'Academic Year' | translate }}</label>
-      <select id="Years" [(ngModel)]="SelectedYearId" (change)="Search()"
+      <select id="Years" [(ngModel)]="SelectedYearId" (change)="Search()" [disabled]="!SelectedSchoolId"
           class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block p-2.5 w-full">
           <option [value]=0 disabled selected hidden>{{ 'Choose' | translate }} {{ 'Academic Year' | translate }}</option>
-      <option *ngFor="let s of Years" [value]="s.id">
-        {{ s.name }}
-      </option>
+          <option *ngFor="let s of Years" [value]="s.id">
+            {{ s.name }}
+          </option>
+          <option *ngIf="Years.length == 0"> {{ 'No Data Found' | translate }}</option>
       </select>
   </div>
   <div class="w-1/3">
       <label for="Grades" class="primaryTxt block mb-2 text-base font-medium text-[#2E3646]">{{ 'Grade' | translate }}</label>
-      <select id="Grades" [(ngModel)]="SelectedGradeId" (change)="Search()"
+      <select id="Grades" [(ngModel)]="SelectedGradeId" (change)="Search()" [disabled]="!SelectedSchoolId"
           class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block p-2.5 w-full">
           <option [value]=0 disabled selected hidden>{{ 'Choose' | translate }} {{ 'Grade' | translate }}</option>
-      <option *ngFor="let s of Grades" [value]="s.id">
-        {{ s.name }}
-      </option>
+          <option *ngFor="let s of Grades" [value]="s.id">
+            {{ s.name }}
+          </option>
+          <option *ngIf="Grades.length == 0"> {{ 'No Data Found' | translate }}</option>
       </select>
   </div>
   <div class="w-1/3">
@@ -41,9 +44,9 @@
       <select id="registrationFormStates" [(ngModel)]="SelectedRegistrationFormStateId" (change)="Search()"
           class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block p-2.5 w-full">
           <option [value]=0 disabled selected hidden>{{ 'Choose' | translate }} {{ 'Admission Status' | translate }}</option>
-      <option *ngFor="let s of registrationFormStates" [value]="s.id">
-        {{ s.name|translate}}
-      </option>
+          <option *ngFor="let s of registrationFormStates" [value]="s.id">
+            {{ s.name|translate}}
+          </option>
       </select>
   </div>
 

@@ -45,18 +45,7 @@ import { RegistrationFormSubmissionService } from '../../../../Services/Employee
 export class RegistrationFormComponent {
   DomainName: string = '';
   UserID: number = 0;
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   RegistrationFormData: RegistrationForm = new RegistrationForm();
   registrationForm: RegistrationFormForFormSubmission =

@@ -32,18 +32,7 @@ import { RegistrationFormState } from '../../../../Models/Registration/registrat
   styleUrl: './classrooms-accommodation.component.css',
 })
 export class ClassroomsAccommodationComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   DomainName: string = '';
   UserID: number = 0;
@@ -111,10 +100,8 @@ export class ClassroomsAccommodationComponent {
       }
     });
 
-    this.getAllGrades();
     this.getAllSchools();
     this.getAllRegistrationFormStates();
-    this.getAllYears();
     this.GetAllData();
   }
   GetAllData() {
@@ -127,6 +114,14 @@ export class ClassroomsAccommodationComponent {
         this.Data = data;
         this.OriginalData = data;
       });
+  }
+
+  GetAllAcademicYearBySchool() {
+    this.Years = [];
+    this.SelectedYearId = 0
+    this.YearServ.GetBySchoolId(this.SelectedSchoolId, this.DomainName).subscribe((data) => {
+      this.Years = data;
+    });
   }
 
   Save() {
@@ -181,13 +176,10 @@ export class ClassroomsAccommodationComponent {
     });
   }
   getAllGrades() {
-    this.GradeServ.Get(this.DomainName).subscribe((data) => {
+    this.Grades = [];
+    this.SelectedGradeId=0
+    this.GradeServ.GetBySchoolId(this.SelectedSchoolId ,this.DomainName).subscribe((data) => {
       this.Grades = data;
-    });
-  }
-  getAllYears() {
-    this.YearServ.Get(this.DomainName).subscribe((data) => {
-      this.Years = data;
     });
   }
 
@@ -200,7 +192,7 @@ export class ClassroomsAccommodationComponent {
       const gradeMatch = this.SelectedGradeId == 0 || item.gradeID == this.SelectedGradeId;
       const stateMatch = this.SelectedRegistrationFormStateId == 0 || item.registerationFormStateID == this.SelectedRegistrationFormStateId;
       return schoolMatch && yearMatch && gradeMatch && stateMatch;
-    }); 
+    });
   }
 
   ResetFilter() {
@@ -208,7 +200,7 @@ export class ClassroomsAccommodationComponent {
     this.SelectedGradeId = 0;
     this.SelectedSchoolId = 0;
     this.SelectedYearId = 0;
-    this.SelectedRegistrationFormStateId=0
+    this.SelectedRegistrationFormStateId = 0
     this.Data = this.OriginalData
   }
 

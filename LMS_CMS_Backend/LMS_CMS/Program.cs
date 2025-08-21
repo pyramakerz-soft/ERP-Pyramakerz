@@ -26,6 +26,7 @@ using System.Text.Json.Serialization;
 using Zatca.EInvoice.SDK;
 using Zatca.EInvoice.SDK.Contracts;
 using static Org.BouncyCastle.Math.EC.ECCurve;
+using LMS_CMS_PL.Services.FileValidations;
 
 namespace LMS_CMS
 {
@@ -150,8 +151,9 @@ namespace LMS_CMS
             builder.Services.AddScoped<IamNotRobot>();
             builder.Services.AddScoped<UserTreeService>();
             builder.Services.AddScoped<NotificationService>();
-            builder.Services.AddScoped<SendNotificationService>();
             builder.Services.AddScoped<RequestService>();
+            builder.Services.AddScoped<SendNotificationService>();
+            builder.Services.AddScoped<ValidTeachersForStudentService>();
 
 
             builder.Services.AddAWSService<IAmazonSecretsManager>(new Amazon.Extensions.NETCore.Setup.AWSOptions

@@ -39,8 +39,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
             modelBuilder.Entity("LMS_CMS_DAL.AccountingModule.Reports.AccountingEntriesReport", b =>
                 {
-                    b.Property<long?>("AccountID")
-                        .HasColumnType("bigint");
+                    b.Property<string>("Account")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal?>("Balance")
                         .HasColumnType("decimal(18,2)");
@@ -1290,6 +1290,12 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.HasKey("ID");
 
+                    b.HasIndex("BankOrSaveID")
+                        .HasDatabaseName("IX_PayableMaster_BankOrSaveID");
+
+                    b.HasIndex("Date")
+                        .HasDatabaseName("IX_PayableMaster_Date");
+
                     b.HasIndex("DeletedByUserId");
 
                     b.HasIndex("InsertedByUserId");
@@ -1366,7 +1372,13 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.HasIndex("InsertedByUserId");
 
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_ReceivableDetails_IsDeleted");
+
                     b.HasIndex("LinkFileID");
+
+                    b.HasIndex("LinkFileTypeID")
+                        .HasDatabaseName("IX_ReceivableDetails_LinkFileTypeID");
 
                     b.HasIndex("ReceivableMasterID");
 
@@ -1487,11 +1499,21 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.HasKey("ID");
 
+                    b.HasIndex("BankOrSaveID")
+                        .HasDatabaseName("IX_ReceivableMaster_BankOrSaveID");
+
+                    b.HasIndex("Date")
+                        .HasDatabaseName("IX_ReceivableMaster_Date");
+
                     b.HasIndex("DeletedByUserId");
 
                     b.HasIndex("InsertedByUserId");
 
-                    b.HasIndex("LinkFileID");
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_ReceivableMaster_IsDeleted");
+
+                    b.HasIndex("LinkFileID")
+                        .HasDatabaseName("IX_ReceivableMaster_LinkFileID");
 
                     b.HasIndex("ReceivableDocTypesID");
 
@@ -1513,6 +1535,46 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
+
+                    b.ToTable((string)null);
+
+                    b.ToView(null, (string)null);
+                });
+
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.AccountingModule.Reports.AccountStatementReport", b =>
+                {
+                    b.Property<string>("Account")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal?>("Balance")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("Credit")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime?>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal?>("Debit")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<long?>("DetailsID")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("MasterID")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long?>("Serial")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("SubAccount")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long?>("SubAccountNo")
+                        .HasColumnType("bigint");
 
                     b.ToTable((string)null);
 

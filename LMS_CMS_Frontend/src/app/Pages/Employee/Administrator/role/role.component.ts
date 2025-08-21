@@ -24,18 +24,7 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   styleUrl: './role.component.css',
 })
 export class RoleComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   TableData: Role[] = [];
 

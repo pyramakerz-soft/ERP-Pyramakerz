@@ -149,6 +149,13 @@ namespace LMS_CMS_PL.Controllers.Domains
                     item.ParentID = NewParent.ID;
                     Unit_Of_Work.registerationFormParent_Repository.Update(item);
                     Unit_Of_Work.SaveChanges();
+                    List<Student> students = Unit_Of_Work.student_Repository.FindBy(r => r.RegistrationFormParentID == item.ID);
+                    foreach (var student in students)
+                    {
+                        student.Parent_Id = NewParent.ID;
+                        Unit_Of_Work.student_Repository.Update(student);
+                        Unit_Of_Work.SaveChanges();
+                    }
                 }
             }
             return Ok(UserInfo);

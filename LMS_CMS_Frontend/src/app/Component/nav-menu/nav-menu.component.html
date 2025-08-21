@@ -372,8 +372,8 @@
         <div class="mt-6 mb-4 flex justify-between flex-wrap">  
             <div class="w-full"> 
                 <div class="flex flex-col w-full mb-4">
-                    <label class="primaryTxt mb-2" for="Department">Department</label>
-                    <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Department" 
+                    <label class="primaryTxt mb-2" for="DepartmentToForwardInNav">Department</label>
+                    <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="DepartmentToForwardInNav" 
                     [(ngModel)]="departmentID" (change)="onDepartmentChange($event)">
                         <option [value]="0" disabled selected hidden>Choose Department</option>
                         <option *ngFor="let department of departments" [value]="department.id">{{ department.name }}</option>
@@ -453,8 +453,8 @@
             <div class="w-full">
                 <div *ngIf="isEmployeeHovered" class="w-full">
                     <div class="flex flex-col w-full mb-4">
-                        <label class="primaryTxt mb-2" for="Department">Department</label>
-                        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Department" 
+                        <label class="primaryTxt mb-2" for="DepartmentInNav">Department</label>
+                        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="DepartmentInNav" 
                         [(ngModel)]="departmentID" (change)="onDepartmentChange($event)">
                             <option [value]="0" disabled selected hidden>Choose Department</option>
                             <option *ngFor="let department of departments" [value]="department.id">{{ department.name }}</option>
@@ -558,25 +558,25 @@
                 </div> 
     
                 <div class="flex flex-col mb-4 w-full">
-                    <label class="mb-2 primaryTxt" for="text">Message</label>
-                    <input id="text" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" 
+                    <label class="mb-2 primaryTxt" for="textInNav">Message</label>
+                    <input id="textInNav" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" 
                     placeholder="Enter Message" [(ngModel)]="requestToBeSend.message" /> 
                 </div> 
                 <div class="flex flex-col mb-4 w-full">
-                    <label class="mb-2 primaryTxt" for="link">Link</label>
-                    <input id="link" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                    <label class="mb-2 primaryTxt" for="linkInNav">Link</label>
+                    <input id="linkInNav" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                         placeholder="Enter Link" [(ngModel)]="requestToBeSend.link" /> 
                 </div> 
                 <div class="w-full mb-4"> 
                     <div class="bg-[#F6F6F6] flex items-center space-x-4 rtl:space-x-reverse w-full rounded-md border-dashed border-2">
                         <div class="flex justify-center w-full">
-                            <label for="fileFile" class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
+                            <label for="fileFileInNav" class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
                                 <img *ngIf="!requestToBeSend.fileFile" src="Images/Icon frame.png" class="w-1/4">
                                 <img *ngIf="requestToBeSend.fileFile" src="Images/FileAttached.png" class="w-1/4"> 
                                 <p class="font-normal text-xs md:text-sm text-[#8E8E93] mt-3"><span class="secondaryTxt">Click To Upload</span></p>
                                 <p class="font-normal text-xs md:text-sm text-[#8E8E93]">(Max. File size: 25 MB)</p>
                             </label>
-                            <input id="fileFile" type="file" class="hidden" (change)="onFileSelected($event)" />
+                            <input id="fileFileInNav" type="file" class="hidden" (change)="onFileSelected($event)" />
                         </div>
                     </div> 
                 </div>   

@@ -50,7 +50,7 @@ export class MyRequestsComponent {
   isStudentHovered = false;
   isParentHovered = false;
   
-  departments: Department[] = []
+  departmentsToChooseFrom: Department[] = []
   employees: Employee[] = []
   schools: School[] = []
   sections:Section[] = []
@@ -222,10 +222,10 @@ export class MyRequestsComponent {
   }
 
   Forward(request:Request){
+    this.getDepartment() 
     this.requestToBeForwarded.requestID = request.id
-    this.getDepartment()
-    document.getElementById('Forward_Modal')?.classList.remove('hidden');
-    document.getElementById('Forward_Modal')?.classList.add('flex');
+    document.getElementById('Forward_Modal_InMyRequest')?.classList.remove('hidden');
+    document.getElementById('Forward_Modal_InMyRequest')?.classList.add('flex');
   }
 
   sendRequest(){
@@ -236,15 +236,15 @@ export class MyRequestsComponent {
       this.isEmployeeHovered = true
       this.getDepartment()
     }
-    document.getElementById('Add_Modal')?.classList.remove('hidden');
-    document.getElementById('Add_Modal')?.classList.add('flex');
+    document.getElementById('Add_Modal_InMyRequest')?.classList.remove('hidden');
+    document.getElementById('Add_Modal_InMyRequest')?.classList.add('flex');
   }
 
   getDepartment(){
-    this.departments = [] 
+    this.departmentsToChooseFrom = [] 
     this.departmentService.Get(this.DomainName).subscribe(
       data => {
-        this.departments = data
+        this.departmentsToChooseFrom = data 
       }
     )
   }
@@ -451,12 +451,12 @@ export class MyRequestsComponent {
   }
 
   closeModal(){
-    document.getElementById('Add_Modal')?.classList.remove('flex');
-    document.getElementById('Add_Modal')?.classList.add('hidden');
+    document.getElementById('Add_Modal_InMyRequest')?.classList.remove('flex');
+    document.getElementById('Add_Modal_InMyRequest')?.classList.add('hidden');
 
     this.isLoading = false 
     
-    this.departments = []
+    this.departmentsToChooseFrom = []
     this.employees = []
     this.schools = []
     this.sections = []
@@ -482,12 +482,12 @@ export class MyRequestsComponent {
   }
   
   closeForwardModal(){
-    document.getElementById('Forward_Modal')?.classList.remove('flex');
-    document.getElementById('Forward_Modal')?.classList.add('hidden');
+    document.getElementById('Forward_Modal_InMyRequest')?.classList.remove('flex');
+    document.getElementById('Forward_Modal_InMyRequest')?.classList.add('hidden');
 
     this.isLoading = false
 
-    this.departments = []
+    this.departmentsToChooseFrom = []
     this.employees = []
 
     this.departmentID = 0

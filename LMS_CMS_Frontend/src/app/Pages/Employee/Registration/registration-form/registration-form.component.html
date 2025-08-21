@@ -81,14 +81,15 @@
                                     translate }} {{ isRtl ? field.arName : field.enName }}</option>
 
                                 <ng-container *ngIf="field.id == 3">
-                                    <option *ngFor="let gender of Gender" [value]="gender.id">{{ gender.name|translate }}
-                                    </option>
+                                    <option *ngFor="let gender of Gender" [value]="gender.id">{{ gender.name|translate }}</option>
+                                   <option *ngIf="Gender.length === 0" disabled selected>No Data Found</option>
                                 </ng-container>
 
                                 <ng-container *ngIf="field.id == 5 ">
                                     <option *ngFor="let nationality of nationalities" [value]="nationality.id">
                                         {{ nationality.name}}
                                     </option>
+                                   <option *ngIf="nationalities.length === 0" disabled selected>No Data Found</option>
                                 </ng-container> 
 
                                 <ng-container *ngIf="field.id == 6">
@@ -117,6 +118,7 @@
                                 <option *ngFor="let school of schools" [value]="school.id">
                                     {{ school.name }}
                                 </option>
+                                <option *ngIf="schools.length === 0" disabled selected>No Data Found</option>
                             </select>
 
                             <select *ngIf="field.id == 7 && mode=='Edit'"
@@ -130,6 +132,7 @@
                                 <option *ngFor="let school of schools" [value]="school.id">
                                     {{ school.name }}
                                 </option>
+                                <option *ngIf="schools.length === 0" disabled selected>No Data Found</option>
                             </select>
 
 

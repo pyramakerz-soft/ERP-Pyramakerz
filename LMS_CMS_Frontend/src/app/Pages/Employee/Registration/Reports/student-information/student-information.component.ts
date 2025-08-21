@@ -26,18 +26,7 @@ import {  Subscription } from 'rxjs';
   styleUrl: './student-information.component.css',
 })
 export class StudentInformationComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   showViewReportBtn = false;
 

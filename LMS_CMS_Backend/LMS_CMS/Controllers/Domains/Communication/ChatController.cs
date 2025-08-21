@@ -10,6 +10,8 @@ using LMS_CMS_DAL.Models.Domains.Communication;
 using LMS_CMS_DAL.Models.Domains;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_DAL.Models.Domains.LMS;
+using LMS_CMS_PL.Services.FileValidations;
+using System.Net;
 
 namespace LMS_CMS_PL.Controllers.Domains.Communication
 {
@@ -23,14 +25,16 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
         private readonly CheckPageAccessService _checkPageAccessService;
         private readonly FileValidationService _fileValidationService;
         private readonly UserTreeService _userTreeService;
+        private readonly ValidTeachersForStudentService _validTeachersForStudentService;
 
-        public ChatController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileValidationService fileValidationService, UserTreeService userTreeService)
+        public ChatController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileValidationService fileValidationService, UserTreeService userTreeService, ValidTeachersForStudentService validTeachersForStudentService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _checkPageAccessService = checkPageAccessService;
             _fileValidationService = fileValidationService;
             _userTreeService = userTreeService;
+            _validTeachersForStudentService = validTeachersForStudentService;
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////
@@ -53,41 +57,17 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                 return Unauthorized("User ID or Type claim not found.");
             }
 
+            long userTypeID = userTypeClaim switch
+            {
+                "employee" => 1,
+                "student" => 2,
+                "parent" => 3
+            };
+
             if (NewMessage == null)
             {
                 return BadRequest("Chat Message cannot be null");
-            }
-
-            UserType userTypeForSender = Unit_Of_Work.userType_Repository.First_Or_Default(d => d.ID == NewMessage.SenderUserTypeID);
-            if (userTypeForSender == null)
-            {
-                return BadRequest("No User Type For Sender With this ID");
-            }
-
-            if (userTypeForSender.ID == 1)
-            {
-                Employee emp = Unit_Of_Work.employee_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == NewMessage.SenderID);
-                if (emp == null)
-                {
-                    return BadRequest("No Sender With this ID");
-                }
-            }
-            else if (userTypeForSender.ID == 2)
-            {
-                Student stu = Unit_Of_Work.student_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == NewMessage.SenderID);
-                if (stu == null)
-                {
-                    return BadRequest("No Sender With this ID");
-                }
-            }
-            else if (userTypeForSender.ID == 3)
-            {
-                Parent parent = Unit_Of_Work.parent_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == NewMessage.SenderID);
-                if (parent == null)
-                {
-                    return BadRequest("No Sender With this ID");
-                }
-            }
+            } 
 
             UserType userTypeForReceiver = Unit_Of_Work.userType_Repository.First_Or_Default(d => d.ID == NewMessage.ReceiverUserTypeID);
             if (userTypeForReceiver == null)
@@ -95,7 +75,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                 return BadRequest("No User Type For Receiver With this ID");
             }
 
-            if((NewMessage.SenderUserTypeID == 2 || NewMessage.SenderUserTypeID == 3) && NewMessage.ReceiverUserTypeID != 1)
+            if((userTypeID == 2 || userTypeID == 3) && NewMessage.ReceiverUserTypeID != 1)
             {
                 return BadRequest("You Can't send Messages to This user Type");
             }
@@ -105,6 +85,16 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                 return BadRequest("You have to choose one element atleast to send (File - Message)");
             }
 
+            foreach (var file in NewMessage.ChatMessageAttachmentFiles)
+            {
+                string returnFileInput = await _fileValidationService.ValidateFileWithTimeoutAsync(file);
+
+                if (returnFileInput != null)
+                {
+                    return BadRequest(returnFileInput);
+                }
+            }
+             
             List<long> targetUserIds;
             try
             {
@@ -120,57 +110,113 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                 return NotFound("No Users To Text");
             }
 
-            foreach (var file in NewMessage.ChatMessageAttachmentFiles)
-            {
-                string returnFileInput = await _fileValidationService.ValidateFileWithTimeoutAsync(file);
 
-                if (returnFileInput != null)
+            if (userTypeID == 3 && (NewMessage.StudentID == null || NewMessage.StudentID == 0))
+            {
+                return BadRequest("You must select a student");
+            }
+
+            if (userTypeID == 3 && NewMessage.StudentID != null)
+            {
+                Student student = Unit_Of_Work.student_Repository.First_Or_Default(d => d.ID == NewMessage.StudentID && d.IsDeleted != true && d.Parent_Id == userId);
+                if (student == null)
                 {
-                    return BadRequest(returnFileInput);
+                    return NotFound("No Student With this ID For this parent");
                 }
             }
 
-            // If Student Or Parent ==> Make Sure To Send Message To Employees that Receives Messages Or The Student Teachers - CoTeachers
-            // Note ==> if Parent make sure that atleast the teacher is one for his student Or In the remedial
+            long studentId = 0;
+            var teacherIDs = new List<long>();
 
-            // If Employee ==> can Send To any student and parent
-
-            ChatMessage chatMessage = mapper.Map<ChatMessage>(NewMessage);
-            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-            chatMessage.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
-
-            foreach (long userID in targetUserIds)
+            if(userTypeID == 2 || userTypeID == 3)
             {
-                ChatMessage chat = chatMessage;
-                chat.ReceiverID = userID;
-                Unit_Of_Work.chatMessage_Repository.Add(chat);
+                studentId = userTypeID == 2 ? userId : NewMessage.StudentID.Value;
+                teacherIDs = await _validTeachersForStudentService.GetValidTeacherIdsForStudent(studentId, Unit_Of_Work);
             }
 
-            Unit_Of_Work.SaveChanges();
-
-            if (NewMessage.ChatMessageAttachmentFiles != null && NewMessage.ChatMessageAttachmentFiles.Count == 0)
+            if (NewMessage.ReceiverUserTypeID == 1 && (userTypeID == 2 || userTypeID == 3))
             {
-                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/ChatMessage");
-                var chatFolder = Path.Combine(baseFolder, chatMessage.ID.ToString());
-                if (!Directory.Exists(chatFolder))
-                {
-                    Directory.CreateDirectory(chatFolder);
-                }
-                foreach (var file in NewMessage.ChatMessageAttachmentFiles)
-                {
-                    ChatMessageAttachment chatMessageAttachment = new ChatMessageAttachment();
-                    chatMessageAttachment.ChatMessageID = chatMessage.ID;
+                List<long> idsToRemove = new List<long>();
 
-                    if (file.Length > 0)
-                    {
-                        var filePath = Path.Combine(chatFolder, file.FileName);
-                        using (var stream = new FileStream(filePath, FileMode.Create))
+                foreach (long targetUserID in targetUserIds)
+                {
+                    Employee employee = Unit_Of_Work.employee_Repository.First_Or_Default(d => d.ID == targetUserID && d.IsDeleted != true);
+
+                    // If can't receive message then see if he is his teacher if not then see if there are history between them if not so remove the id from the list
+                    if (employee.CanReceiveMessageFromParent != true)
+                    { 
+                        if (teacherIDs.Count == 0 || !teacherIDs.Contains(targetUserID))
                         {
-                            await file.CopyToAsync(stream);
+                            List<ChatMessage> chatMessages = Unit_Of_Work.chatMessage_Repository.FindBy(
+                                d => (d.SenderID == userId && d.SenderUserTypeID == userTypeID && d.ReceiverID == targetUserID && d.ReceiverUserTypeID == NewMessage.ReceiverUserTypeID)||
+                                     (d.SenderID == targetUserID && d.SenderUserTypeID == NewMessage.ReceiverUserTypeID && d.ReceiverID == userId && d.ReceiverUserTypeID == userTypeID)
+                                );
+                            if(chatMessages == null || chatMessages.Count == 0)
+                            {
+                                idsToRemove.Add(targetUserID);
+                            }
                         }
+                    } 
+                }
+                foreach (long idToRemove in idsToRemove)
+                {
+                    targetUserIds.Remove(idToRemove);
+                }
+            }
+
+            // Don't message myself
+            if (NewMessage.ReceiverUserTypeID == 1 && userTypeID == 1)
+            {
+                if (targetUserIds.Contains(userId))
+                {
+                    targetUserIds.Remove(userId);
+                }
+            }
+            
+            if (targetUserIds.Count == 0)
+            {
+                return NotFound("No Users To Text");
+            }
+
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+
+            foreach (long targetUserID in targetUserIds)
+            {
+                ChatMessage chat = new ChatMessage();
+                chat.Message = NewMessage.Message;
+                chat.SenderID = userId;
+                chat.SenderUserTypeID = userTypeID;
+                chat.ReceiverID = targetUserID;
+                chat.ReceiverUserTypeID = NewMessage.ReceiverUserTypeID;
+                chat.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                Unit_Of_Work.chatMessage_Repository.Add(chat);
+    
+                Unit_Of_Work.SaveChanges();
+           
+                if (NewMessage.ChatMessageAttachmentFiles != null && NewMessage.ChatMessageAttachmentFiles.Count == 0)
+                {
+                    var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/ChatMessage");
+                    var chatFolder = Path.Combine(baseFolder, chat.ID.ToString());
+                    if (!Directory.Exists(chatFolder))
+                    {
+                        Directory.CreateDirectory(chatFolder);
                     }
-                    chatMessageAttachment.FileLink = Path.Combine("Uploads", "ChatMessage", chatMessage.ID.ToString(), file.FileName);
-                    Unit_Of_Work.chatMessageAttachment_Repository.Add(chatMessageAttachment);
+                    foreach (var file in NewMessage.ChatMessageAttachmentFiles)
+                    {
+                        ChatMessageAttachment chatMessageAttachment = new ChatMessageAttachment();
+                        chatMessageAttachment.ChatMessageID = chat.ID;
+
+                        if (file.Length > 0)
+                        {
+                            var filePath = Path.Combine(chatFolder, file.FileName);
+                            using (var stream = new FileStream(filePath, FileMode.Create))
+                            {
+                                await file.CopyToAsync(stream);
+                            }
+                        }
+                        chatMessageAttachment.FileLink = Path.Combine("Uploads", "ChatMessage", chat.ID.ToString(), file.FileName);
+                        Unit_Of_Work.chatMessageAttachment_Repository.Add(chatMessageAttachment);
+                    }
                 }
             }
 

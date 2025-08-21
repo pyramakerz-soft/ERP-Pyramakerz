@@ -26,18 +26,7 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   styleUrl: './reasonsforleavingwork.component.css',
 })
 export class ReasonsforleavingworkComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', ''); 
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;

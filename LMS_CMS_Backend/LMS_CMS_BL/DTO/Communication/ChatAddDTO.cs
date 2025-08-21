@@ -12,11 +12,12 @@ namespace LMS_CMS_BL.DTO.Communication
 {
     public class ChatAddDTO
     {
-        public string? Message { get; set; } 
-        public long SenderUserTypeID { get; set; } 
-        public long SenderID { get; set; }
+        public string? Message { get; set; }  
         public long ReceiverUserTypeID { get; set; }
         public UserFilter? UserFilters { get; set; }
         public List<IFormFile>? ChatMessageAttachmentFiles { get; set; } = new List<IFormFile>();
+
+        // If Parent is Sending request to teacher send for which student
+        public long? StudentID { get; set; }
     }
 } 

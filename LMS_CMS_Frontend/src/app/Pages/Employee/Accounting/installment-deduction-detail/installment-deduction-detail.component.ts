@@ -27,10 +27,11 @@ import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
+
 @Component({
   selector: 'app-installment-deduction-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule , TranslateModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
   templateUrl: './installment-deduction-detail.component.html',
   styleUrl: './installment-deduction-detail.component.css'
 })
@@ -43,7 +44,7 @@ export class InstallmentDeductionDetailComponent {
   AllowDeleteForOthers: boolean = false;
 
   Data: InstallmentDeductionMaster = new InstallmentDeductionMaster();
-isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   DomainName: string = '';
   UserID: number = 0;
@@ -67,6 +68,7 @@ isRtl: boolean = false;
   IsOpenToAdd: boolean = false
   isLoading = false
   validationErrors: { [key in keyof InstallmentDeductionMaster]?: string } = {};
+  validationErrorsInstallmentDeductionDetails: { [key in keyof InstallmentDeductionDetail]?: string } = {};
 
   constructor(
     private router: Router,
@@ -169,7 +171,35 @@ isRtl: boolean = false;
     return isValid;
   }
 
+  isFormValidInstallmentDeductionDetails(row?: InstallmentDeductionDetail): boolean {
+    let isValid = true;
+    if (row) {
+      this.Detail = row
+    }
+    for (const key in this.Detail) {
+      if (this.Detail.hasOwnProperty(key)) {
+        const field = key as keyof InstallmentDeductionDetail;
+        if (!this.Detail[field]) {
+          if (
+            field == 'feeTypeID' ||
+            field == 'date'
+          ) {
+            this.validationErrorsInstallmentDeductionDetails[field] = `*${this.capitalizeFieldDetails(
+              field
+            )} is required`;
+            isValid = false;
+          }
+        }
+      }
+    }
+    return isValid;
+  }
+
   capitalizeField(field: keyof InstallmentDeductionMaster): string {
+    return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
+  }
+
+  capitalizeFieldDetails(field: keyof InstallmentDeductionDetail): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
 
@@ -178,6 +208,14 @@ isRtl: boolean = false;
     (this.Data as any)[field] = value;
     if (value) {
       this.validationErrors[field] = '';
+    }
+  }
+
+  onInputValueChangeDetails(event: { field: keyof InstallmentDeductionDetail; value: any }) {
+    const { field, value } = event;
+    (this.Detail as any)[field] = value;
+    if (value) {
+      this.validationErrorsInstallmentDeductionDetails[field] = '';
     }
   }
 
@@ -263,10 +301,14 @@ isRtl: boolean = false;
   }
 
   AddDetail() {
+    this.Detail = new InstallmentDeductionDetail()
+    this.validationErrorsInstallmentDeductionDetails = {}
     this.IsOpenToAdd = true
   }
 
   Edit(id: number) {
+    this.Detail = new InstallmentDeductionDetail()
+    this.validationErrorsInstallmentDeductionDetails = {}
     this.editingRowId = id
   }
 
@@ -320,11 +362,14 @@ isRtl: boolean = false;
 
   SaveRow() {
     this.Detail.installmentDeductionMasterID = this.MasterId
-    this.installmentDeductionDetailServ.Add(this.Detail, this.DomainName).subscribe((d) => {
-      this.GetTableDataByID();
-    })
-    this.IsOpenToAdd = false
-    this.Detail = new InstallmentDeductionDetail()
+    if (this.isFormValidInstallmentDeductionDetails()) {
+      this.installmentDeductionDetailServ.Add(this.Detail, this.DomainName).subscribe((d) => {
+        this.GetTableDataByID();
+      })
+      this.IsOpenToAdd = false
+      this.Detail = new InstallmentDeductionDetail()
+      this.validationErrorsInstallmentDeductionDetails = {}
+    }
   }
 
   CancelAdd() {
@@ -332,10 +377,14 @@ isRtl: boolean = false;
   }
 
   SaveEdit(row: InstallmentDeductionDetail) {
-    this.editingRowId = null;
-    this.installmentDeductionDetailServ.Edit(row, this.DomainName).subscribe((d) => {
-      this.GetTableDataByID();
-    })
+    if (this.isFormValidInstallmentDeductionDetails(row)) {
+      this.installmentDeductionDetailServ.Edit(row, this.DomainName).subscribe((d) => {
+        this.editingRowId = null;
+        this.GetTableDataByID();
+        this.Detail = new InstallmentDeductionDetail()
+        this.validationErrorsInstallmentDeductionDetails = {}
+      })
+    }
   }
 
   validateNumber(event: any, field: keyof InstallmentDeductionMaster): void {
