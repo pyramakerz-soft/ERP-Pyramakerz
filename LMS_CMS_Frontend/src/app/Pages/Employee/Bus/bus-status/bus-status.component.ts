@@ -18,6 +18,7 @@ import Swal from 'sweetalert2';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-bus-status',
   standalone: true,
@@ -75,7 +76,7 @@ export class BusStatusComponent {
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
-      private languageService: LanguageService
+      private languageService: LanguageService, private realTimeService: RealTimeNotificationServiceService
   ) {}
 
   ngOnInit() {
@@ -112,7 +113,12 @@ export class BusStatusComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-
+            ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+    } 
   Create() {
     this.mode = 'add';
     this.openModal();

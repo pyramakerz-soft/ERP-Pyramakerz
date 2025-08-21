@@ -20,6 +20,7 @@ import { EmployeeService } from '../../../../Services/Employee/employee.service'
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-subject-teacher',
   standalone: true,
@@ -65,7 +66,7 @@ export class SubjectTeacherComponent {
     public classroomServ: ClassroomService,
     public subjectServ: SubjectService ,
     public EmpServ: EmployeeService,
-      private languageService: LanguageService
+      private languageService: LanguageService, private realTimeService: RealTimeNotificationServiceService
   ) { }
 
   ngOnInit() {
@@ -86,6 +87,15 @@ export class SubjectTeacherComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+        ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+    } 
+
+
 
   moveToEmployee() {
     this.router.navigateByUrl(`Employee/Employee Details/${this.SupjectTeacher.teacherID}`)

@@ -12,6 +12,7 @@ import { Drug } from '../../../../Models/Clinic/drug';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-drugs',
   standalone: true,
@@ -41,7 +42,7 @@ export class DrugsComponent implements OnInit {
   constructor(
     private drugService: DrugService,
     private apiService: ApiService ,
-      private languageService: LanguageService
+      private languageService: LanguageService, private realTimeService: RealTimeNotificationServiceService
   ) {}
 
   ngOnInit(): void {
@@ -53,6 +54,13 @@ export class DrugsComponent implements OnInit {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+      ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+    } 
 
   async getDrugs() {
     try {

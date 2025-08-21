@@ -21,7 +21,7 @@ import { LinkFileService } from '../../../../Services/Employee/Accounting/link-f
 import { DataAccordingToLinkFileService } from '../../../../Services/Employee/Accounting/data-according-to-link-file.service';
 import Swal from 'sweetalert2';
 import html2pdf from 'html2pdf.js';
-
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { PdfPrintComponent } from '../../../../Component/pdf-print/pdf-print.component';
 import { ReportsService } from '../../../../Services/shared/reports.service';
 import { TranslateModule } from '@ngx-translate/core';
@@ -82,7 +82,8 @@ export class ReceivableDetailsComponent {
     public bankService: BankService, public saveService: SaveService, public receivableDetailsService: ReceivableDetailsService, public linkFileService: LinkFileService,
 
     public dataAccordingToLinkFileService: DataAccordingToLinkFileService, public reportsService: ReportsService,
-  private languageService: LanguageService
+  private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService
   ) { }
 
   ngOnInit() {
@@ -127,6 +128,14 @@ export class ReceivableDetailsComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+
+      ngOnDestroy(): void {
+    this.realTimeService.stopConnection(); 
+     if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
 
   moveToReceivable() {
     this.router.navigateByUrl("Employee/Receivable")
