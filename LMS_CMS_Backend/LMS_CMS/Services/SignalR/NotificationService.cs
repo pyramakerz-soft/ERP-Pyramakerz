@@ -25,7 +25,7 @@ namespace LMS_CMS_PL.Services.SignalR
             if (string.IsNullOrEmpty(domainName) || userTypeString == null)
                 throw new Exception("Invalid domain or user type.");
 
-            var uniqueKey = $"{domainName}_{userType}_{userId}";
+            var uniqueKey = $"{domainName}_{userTypeString}_{userId}";
 
             // Ensure the client is in the group
             await _hubContext.Groups.AddToGroupAsync(uniqueKey, uniqueKey);

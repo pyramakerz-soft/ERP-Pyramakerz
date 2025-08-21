@@ -324,7 +324,7 @@
 
  
 <!-- SendRequest_Modal -->
-<div id="Add_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
+<div id="Add_Modal_InMyRequest" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
     <div class="bg-white rounded-2xl p-12 w-[669px] max-h-[90%] overflow-y-auto">
         <div class="flex justify-between items-center">
             <h1 class="font-semibold text-2xl leading-9">Send Request</h1> 
@@ -375,8 +375,8 @@
                         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Department" 
                         [(ngModel)]="departmentID" (change)="onDepartmentChange($event)">
                             <option [value]="0" disabled selected hidden>Choose Department</option>
-                            <option *ngFor="let department of departments" [value]="department.id">{{ department.name }}</option>
-                            <option *ngIf="departments.length === 0" disabled selected>No Data Found</option>
+                            <option *ngFor="let department of departmentsToChooseFrom" [value]="department.id">{{ department.name }}</option>
+                            <option *ngIf="departmentsToChooseFrom.length === 0" disabled selected>No Data Found</option>
                         </select>
                     </div>
                     <div class="flex flex-col w-full mb-4">
@@ -513,23 +513,23 @@
 
 
 
-<div id="Forward_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
+<div id="Forward_Modal_InMyRequest" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
     <div class="bg-white rounded-2xl p-12 w-[669px] max-h-[90%] overflow-y-auto">
         <div class="flex justify-between items-center">
             <h1 class="font-semibold text-2xl leading-9">Forward Request</h1> 
             <button (click)="closeForwardModal()" type="button"
                 class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
         </div>
-
+ 
         <div class="mt-6 mb-4 flex justify-between flex-wrap">  
             <div class="w-full"> 
                 <div class="flex flex-col w-full mb-4">
-                    <label class="primaryTxt mb-2" for="Department">Department</label>
-                    <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Department" 
+                    <label class="primaryTxt mb-2" for="DepartmentToForward">Department</label>
+                    <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="DepartmentToForward" 
                     [(ngModel)]="departmentID" (change)="onDepartmentChange($event)">
                         <option [value]="0" disabled selected hidden>Choose Department</option>
-                        <option *ngFor="let department of departments" [value]="department.id">{{ department.name }}</option>
-                        <option *ngIf="departments.length === 0" disabled selected>No Data Found</option>
+                        <option *ngFor="let department of departmentsToChooseFrom" [value]="department.id">{{ department.name }}</option>
+                        <option *ngIf="departmentsToChooseFrom.length === 0" disabled selected>No Data Found</option>
                     </select>
                 </div>
                 <div class="flex flex-col w-full mb-4">

@@ -15,6 +15,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
+import { RealTimeRequestServiceService } from '../../../Services/shared/real-time-request-service.service';
 @Component({
   selector: 'app-main-layout',
   standalone: true,
@@ -31,7 +32,7 @@ export class MainLayoutComponent {
 
   isLanguageInitialized = false
   constructor(public accountService: AccountService,private languageService: LanguageService, public roleDetailsService: RoleDetailsService, private menuService: MenuService, 
-    private communicationService: NewTokenService, private translate: TranslateService , private realTimeService: RealTimeNotificationServiceService) { }
+    private communicationService: NewTokenService, private translate: TranslateService , private realTimeService: RealTimeNotificationServiceService, private realTimeRequestService: RealTimeRequestServiceService) { }
 
   async ngOnInit() {
     const currentDir = document.documentElement.dir === 'rtl' ? 'rtl' : 'ltr';
@@ -43,6 +44,7 @@ export class MainLayoutComponent {
     });  
     
     this.realTimeService.startConnection();
+    this.realTimeRequestService.startRequestConnection();
      
     this.subscription = this.languageService.language$.subscribe(async (direction) => {
       this.isRtl = direction === 'rtl'; 
@@ -54,6 +56,7 @@ export class MainLayoutComponent {
 
   ngOnDestroy(): void {
     this.realTimeService.stopConnection(); 
+    this.realTimeRequestService.stopConnection(); 
      if (this.subscription) {
       this.subscription.unsubscribe();
     }

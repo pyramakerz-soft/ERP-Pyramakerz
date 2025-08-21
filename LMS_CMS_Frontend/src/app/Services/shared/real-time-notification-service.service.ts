@@ -104,24 +104,14 @@ export class RealTimeNotificationServiceService {
     });
   }  
 
-  private joinNotificationGroup() {
-    const userTypeString = this.getUserTypeNumber(this.User_Data_After_Login.type);
-    const groupName = `${this.DomainName}_${userTypeString}_${this.User_Data_After_Login.id}`;
+  private joinNotificationGroup() { 
+    const groupName = `${this.DomainName}_${this.User_Data_After_Login.type}_${this.User_Data_After_Login.id}`;
     
     this.hubConnection?.invoke('JoinGroup', groupName) 
       .catch(err => { 
         setTimeout(() => this.joinNotificationGroup(), 2000);
       });
-  }
-
-  private getUserTypeNumber(type: string): number {
-    switch(type) {
-      case "employee": return 1;
-      case "student": return 2;
-      case "parent": return 3;
-      default: return 0;
-    }
-  }
+  } 
 
   private showNotificationModal(newNotification: Notification) {
     // Check if dialog exists and is open
