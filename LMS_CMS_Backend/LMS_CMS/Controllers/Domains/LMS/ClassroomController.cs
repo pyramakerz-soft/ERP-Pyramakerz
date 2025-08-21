@@ -79,7 +79,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             List<Classroom> classrooms = await Unit_Of_Work.classroom_Repository.Select_All_With_IncludesById<Classroom>(
-                    f => f.IsDeleted != true && f.AcademicYear.SchoolID == schoolID,
+                    f => f.IsDeleted != true && f.AcademicYear.SchoolID == schoolID && f.AcademicYear.IsActive == true,
                     query => query.Include(emp => emp.Grade),
                     query => query.Include(emp => emp.AcademicYear),
                     query => query.Include(emp => emp.HomeroomTeacher),
