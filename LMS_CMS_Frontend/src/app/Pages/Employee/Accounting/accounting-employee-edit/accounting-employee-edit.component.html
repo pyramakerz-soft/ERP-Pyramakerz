@@ -6,7 +6,7 @@
     </h1>
   </div>
   <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg mt-2" (click)="Save()">
-    <span *ngIf="!isLoading">  {{ 'Save' | translate }}</span>
+    <span *ngIf="!isLoading"> {{ 'Save' | translate }}</span>
     <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
   </button>
 </div>
@@ -15,10 +15,11 @@
   <div class="flex flex-col mb-4 w-[49%]">
     <label class="mb-2 primaryTxt" for="name">{{ 'User Name' | translate }}</label>
     <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-    (ngModelChange)=" onInputValueChange({ field: 'user_Name', value: $event })"
-   placeholder="{{ 'Enter User Name' | translate }}" [(ngModel)]="Data.user_Name " />
+      (ngModelChange)=" onInputValueChange({ field: 'user_Name', value: $event })"
+      placeholder="{{ 'Enter User Name' | translate }}" [(ngModel)]="Data.user_Name " />
 
-    <span *ngIf="validationErrors['user_Name']" class="text-red-500 ml-3 font-normal">{{ validationErrors["user_Name"] }}</span>
+    <span *ngIf="validationErrors['user_Name']" class="text-red-500 ml-3 font-normal">{{ validationErrors["user_Name"]
+      }}</span>
   </div>
 
   <div class="flex flex-col mb-4 w-[49%]">
@@ -30,44 +31,41 @@
   <div class="flex flex-col mb-4 w-[49%]">
     <label class="mb-2 primaryTxt" for="Phone"> {{ 'Phone' | translate }}</label>
     <input id="phone" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-    (input)="validateNumber($event,'phone')"
-placeholder="{{ 'Enter User phone' | translate }}"
-    [(ngModel)]="Data.phone" />
+      (input)="validateNumber($event,'phone')" placeholder="{{ 'Enter User phone' | translate }}"
+      [(ngModel)]="Data.phone" />
   </div>
 
   <div class="flex flex-col mb-4 w-[49%]">
     <label class="mb-2 primaryTxt" for="mobile"> {{ 'Mobile Number' | translate }}</label>
     <input id="mobile" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-    (input)="validateNumber($event,'mobile')"
-placeholder="{{ 'Enter User mobile' | translate }}"
-    [(ngModel)]="Data.mobile" />
+      (input)="validateNumber($event,'mobile')" placeholder="{{ 'Enter User mobile' | translate }}"
+      [(ngModel)]="Data.mobile" />
   </div>
 
   <div class="flex flex-col mb-4 w-[49%]">
     <label class="mb-2 primaryTxt" for="National">{{'National Id'| translate }}</label>
     <input id="National" (input)="validateNumber($event,'nationalID')"
-      class="rounded-lg border border-solid border-gray-300 px-4 py-3"  placeholder="{{ 'Enter National Id' | translate }}"
-      [(ngModel)]="Data.nationalID" />
+      class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+      placeholder="{{ 'Enter National Id' | translate }}" [(ngModel)]="Data.nationalID" />
   </div>
 
   <div class="flex flex-col mb-4 w-[49%]">
     <label class="mb-2 primaryTxt" for="passportNumber"> {{ 'Passport Number' | translate }}</label>
-    <input id="passportNumber"
-      class="rounded-lg border border-solid border-gray-300 px-4 py-3"  placeholder="{{ 'Enter User passportNumber' | translate }}"
-      [(ngModel)]="Data.passportNumber" />
+    <input id="passportNumber" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+      placeholder="{{ 'Enter User passportNumber' | translate }}" [(ngModel)]="Data.passportNumber" />
   </div>
 
 
   <div class="flex flex-col mb-4 w-[49%]">
     <label class="mb-2 primaryTxt" for="residenceNumber"> {{ 'Residence number' | translate }}</label>
     <input id="residenceNumber" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
- placeholder="{{ 'Enter User residenceNumber' | translate }}" [(ngModel)]="Data.residenceNumber" />
+      placeholder="{{ 'Enter User residenceNumber' | translate }}" [(ngModel)]="Data.residenceNumber" />
   </div>
 
   <div class="flex flex-col mb-4 w-[49%]">
     <label class="mb-2 primaryTxt" for="birthdayDate"> {{ 'BirthDay Date' | translate }}</label>
     <input id="birthdayDate" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
- placeholder="{{ 'Enter User birthdayDate' | translate }}" [(ngModel)]="Data.birthdayDate" />
+      placeholder="{{ 'Enter User birthdayDate' | translate }}" [(ngModel)]="Data.birthdayDate" />
   </div>
 
   <div class="flex flex-col w-[49%] mb-4">
@@ -83,7 +81,7 @@ placeholder="{{ 'Enter User mobile' | translate }}"
   <div class="flex flex-col mb-4 w-[49%]">
     <label class="mb-2 primaryTxt" for="dateOfAppointment"> {{ 'Date of appointment' | translate }}</label>
     <input id="dateOfAppointment" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
- placeholder="{{ 'Enter Date' | translate }}" [(ngModel)]="Data.dateOfAppointment" />
+      placeholder="{{ 'Enter Date' | translate }}" [(ngModel)]="Data.dateOfAppointment" />
   </div>
 
   <div class="flex w-full space-x-5 rtl:space-x-reverse items-center mb-4">
@@ -95,7 +93,7 @@ placeholder="{{ 'Enter User mobile' | translate }}"
     <div *ngIf="EndDate==true" class="flex flex-col mb-4 w-[33%]">
       <label class="mb-2 primaryTxt" for="dateOfLeavingWork"> {{ 'Date of Leaving Work' | translate }}</label>
       <input id="dateOfLeavingWork" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
- placeholder="{{ 'Enter date Of Leaving Work' | translate }}" [(ngModel)]="Data.dateOfLeavingWork" />
+        placeholder="{{ 'Enter date Of Leaving Work' | translate }}" [(ngModel)]="Data.dateOfLeavingWork" />
     </div>
 
     <div *ngIf="EndDate==true" class="flex flex-col w-[33%] mb-4">
@@ -113,8 +111,8 @@ placeholder="{{ 'Enter User mobile' | translate }}"
     <div class="flex flex-col w-[73%]">
       <label class="mb-2 primaryTxt" for="monthSalary"> {{ 'Month Salary' | translate }}</label>
       <input id="monthSalary" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-      (input)="validateNumber($event,'monthSalary')" 
- placeholder="{{ 'Enter monthSalary' | translate }}" [(ngModel)]="Data.monthSalary" />
+        (input)="validateNumber($event,'monthSalary')" placeholder="{{ 'Enter monthSalary' | translate }}"
+        [(ngModel)]="Data.monthSalary" />
     </div>
 
     <div class="flex w-[23%] space-x-5 rtl:space-x-reverse items-center mt-5">
@@ -129,10 +127,10 @@ placeholder="{{ 'Enter User mobile' | translate }}"
     <div class="flex items-center gap-2">
       <input (ngModelChange)=" onInputValueChange({ field: 'attendanceTime', value: $event })" id="attendanceHours"
         (input)="validateNumber($event)" class="rounded-lg border border-solid border-gray-300 px-4 py-3 w-[30%]"
- placeholder="{{ 'HH' | translate }}" [(ngModel)]="attendanceTime.hours" type="number" min="1" max="12" />
+        placeholder="{{ 'HH' | translate }}" [(ngModel)]="attendanceTime.hours" type="number" min="1" max="12" />
       <input (ngModelChange)=" onInputValueChange({ field: 'attendanceTime', value: $event })" id="attendanceMinutes"
         (input)="validateNumber($event)" class="rounded-lg border border-solid border-gray-300 px-4 py-3 w-[30%]"
- placeholder="{{ 'MM' | translate }}" type="number" [(ngModel)]="attendanceTime.minutes" min="0" max="59" />
+        placeholder="{{ 'MM' | translate }}" type="number" [(ngModel)]="attendanceTime.minutes" min="0" max="59" />
       <select (ngModelChange)=" onInputValueChange({ field: 'attendanceTime', value: $event })" id="attendancePeriod"
         class="rounded-lg border border-solid border-gray-300 px-4 py-3 w-[30%]" [(ngModel)]="attendanceTime.periods">
         <option value="AM"> {{ 'AM' | translate }}</option>
@@ -146,10 +144,10 @@ placeholder="{{ 'Enter User mobile' | translate }}"
     <div class="flex items-center gap-2">
       <input (ngModelChange)=" onInputValueChange({ field: 'departureTime', value: $event })" id="departureHours"
         (input)="validateNumber($event)" class="rounded-lg border border-solid border-gray-300 px-4 py-3 w-[30%]"
- placeholder="{{ 'HH' | translate }}" type="number" [(ngModel)]="departureTime.hour" min="1" max="12" />
+        placeholder="{{ 'HH' | translate }}" type="number" [(ngModel)]="departureTime.hour" min="1" max="12" />
       <input (ngModelChange)=" onInputValueChange({ field: 'departureTime', value: $event })" id="departureMinutes"
         (input)="validateNumber($event)" class="rounded-lg border border-solid border-gray-300 px-4 py-3 w-[30%]"
- placeholder="{{ 'MM' | translate }}" type="number" [(ngModel)]="departureTime.minute" min="0" max="59" />
+        placeholder="{{ 'MM' | translate }}" type="number" [(ngModel)]="departureTime.minute" min="0" max="59" />
       <select (ngModelChange)=" onInputValueChange({ field: 'departureTime', value: $event })" id="departurePeriod"
         class="rounded-lg border border-solid border-gray-300 px-4 py-3 w-[30%]" [(ngModel)]="departureTime.period">
         <option value="AM">{{ 'AM' | translate }}</option>
@@ -165,15 +163,15 @@ placeholder="{{ 'Enter User mobile' | translate }}"
   <div class="flex flex-col mb-4 w-[33%]">
     <label class="mb-2 primaryTxt" for="delayAllowance">{{ 'Delay Allowance' | translate }}</label>
     <input id="delayAllowance" (input)="validateNumber($event, 'delayAllowance')"
-      class="rounded-lg border border-solid border-gray-300 px-4 py-3"  placeholder="{{ 'Enter delayAllowance' | translate }}"
-      [(ngModel)]="Data.delayAllowance" />
+      class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+      placeholder="{{ 'Enter delayAllowance' | translate }}" [(ngModel)]="Data.delayAllowance" />
   </div>
 
   <div class="flex flex-col w-full mb-4">
-    <label class="mb-2" for="Account">  {{ 'Account Number' | translate }}</label>
+    <label class="mb-2" for="Account"> {{ 'Account Number' | translate }}</label>
     <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Account"
       [(ngModel)]="Data.accountNumberID">
-      <option [value]='null' disabled selected hidden>  {{ 'Account Number' | translate }}</option>
+      <option [value]='null' disabled selected hidden> {{ 'Account Number' | translate }}</option>
       <option *ngFor="let Acc of AccountNumbers" [value]="Acc.id">{{ Acc.name }}</option>
       <option *ngIf="AccountNumbers.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
     </select>
@@ -182,20 +180,21 @@ placeholder="{{ 'Enter User mobile' | translate }}"
   <div class="flex flex-col mb-4 w-[33%]">
     <label class="mb-2 primaryTxt" for="annualLeaveBalance"> {{ 'Annual Leave Balance' | translate }}</label>
     <input id="annualLeaveBalance" (input)="validateNumber($event, 'annualLeaveBalance')"
-      class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter annualLeaveBalance' | translate }}"
-      [(ngModel)]="Data.annualLeaveBalance" />
+      class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+      placeholder="{{ 'Enter annualLeaveBalance' | translate }}" [(ngModel)]="Data.annualLeaveBalance" />
   </div>
   <div class="flex flex-col mb-4 w-[33%]">
     <label class="mb-2 primaryTxt" for="casualLeavesBalance"> {{ 'Casual Leaves Balance' | translate }}</label>
     <input id="casualLeavesBalance" (input)="validateNumber($event, 'casualLeavesBalance')"
-      class="rounded-lg border border-solid border-gray-300 px-4 py-3"  placeholder="{{ 'Enter casualLeavesBalance' | translate }}"
-      [(ngModel)]="Data.casualLeavesBalance" />
+      class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+      placeholder="{{ 'Enter casualLeavesBalance' | translate }}" [(ngModel)]="Data.casualLeavesBalance" />
   </div>
   <div class="flex flex-col mb-4 w-[33%]">
-    <label class="mb-2 primaryTxt" for="monthlyLeaveRequestBalance"> {{ 'Monthly Leave Request Balance' | translate }}</label>
+    <label class="mb-2 primaryTxt" for="monthlyLeaveRequestBalance"> {{ 'Monthly Leave Request Balance' | translate
+      }}</label>
     <input id="monthlyLeaveRequestBalance" (input)="validateNumber($event, 'monthlyLeaveRequestBalance')"
-      class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter monthlyLeaveRequestBalance' | translate }}"
-  
+      class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+      placeholder="{{ 'Enter monthlyLeaveRequestBalance' | translate }}"
       [(ngModel)]="Data.monthlyLeaveRequestBalance" />
   </div>
 
@@ -243,8 +242,7 @@ placeholder="{{ 'Enter User mobile' | translate }}"
   <div class="flex flex-col mb-4 w-[48%]">
     <label class="mb-2 primaryTxt" for="graduationYear"> {{ 'Graduation Year' | translate }}</label>
     <input id="graduationYear" (input)="validateNumber($event, 'graduationYear')"
-      class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-      placeholder="{{ 'Enter Year' | translate }}"
+      class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter Year' | translate }}"
       [(ngModel)]="Data.graduationYear" min="1900" max="2099" />
   </div>
 
@@ -285,8 +283,7 @@ placeholder="{{ 'Enter User mobile' | translate }}"
     <div class="flex justify-start gap-2 items-start">
       <div class="flex flex-col w-full">
         <textarea class="w-full h-[100px] rounded-lg border border-solid border-gray-300 px-2 py-1 mb-3 resize-none"
-          [(ngModel)]="Data.note" placeholder="{{ 'Enter Note' | translate }}"
-></textarea>
+          [(ngModel)]="Data.note" placeholder="{{ 'Enter Note' | translate }}"></textarea>
       </div>
     </div>
   </div>
@@ -299,7 +296,7 @@ placeholder="{{ 'Enter User mobile' | translate }}"
     <div class="flex justify-between items-center">
       <button (click)="Create()"
         class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
-         {{ 'Add Child' | translate }}
+        {{ 'Add Child' | translate }}
       </button>
     </div>
   </div>
@@ -363,22 +360,23 @@ placeholder="{{ 'Enter User mobile' | translate }}"
     </button>
 
     <h1 class="font-semibold text-2xl leading-9">
-       {{ 'Add Child' | translate }}
+      {{ 'Add Child' | translate }}
     </h1>
     <div class="mt-4 bg-[#F7F7F7] w-[573px] h-auto rounded-[24px] p-[16px_24px] gap-[20px]">
       <div class="flex flex-col mt-2 gap-2 items-start">
 
         <h6 class="font-medium text-base leading-6 mb-1 mt-3"> {{ 'National Id' | translate }}</h6>
         <input type="text" class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"
-          [(ngModel)]="NationalID" (ngModelChange)="SelectChild(NationalID)"  placeholder="{{ 'Enter National Id' | translate }}" />
-         <span *ngIf="IsNationalIsEmpty" class="text-red-500 ml-3 font-normal">{{IsNationalIsEmpty}}</span>
+          [(ngModel)]="NationalID" (ngModelChange)="SelectChild(NationalID)"
+          placeholder="{{ 'Enter National Id' | translate }}" />
+        <span *ngIf="IsNationalIsEmpty" class="text-red-500 ml-3 font-normal">{{IsNationalIsEmpty}}</span>
 
         <h6 class="font-medium text-base leading-6 mb-1 mt-3"> {{ 'Student' | translate }}</h6>
         <input type="text" class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"
           [(ngModel)]="Student.user_Name" [disabled]="true" />
 
         <button class="secondaryBg text-white font-medium px-4 py-2 rounded-lg" (click)="CreateOREdit()">
-           {{ 'Save' | translate }}
+          {{ 'Save' | translate }}
         </button>
       </div>
     </div>

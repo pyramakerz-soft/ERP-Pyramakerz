@@ -363,10 +363,11 @@ export class AccountingEmployeeEditComponent {
         console.log(EmployeeStudent)
         this.EmplyeeStudentServ.Add(EmployeeStudent, this.DomainName).subscribe((d) => {
           this.closeModal();
+          this.TableData = []
           this.EmplyeeStudentServ.Get(this.EmployeeId, this.DomainName).subscribe((d) => {
             this.TableData = d
           })
-        },error=>{
+        }, error => {
           console.log(error)
         })
       } else {
@@ -406,12 +407,25 @@ export class AccountingEmployeeEditComponent {
   }
 
   DeleteChild(id: number) {
-    this.EmplyeeStudentServ.Delete(id,this.DomainName).subscribe((d) => {
-      this.closeModal();
-      this.EmplyeeStudentServ.Get(this.EmployeeId, this.DomainName).subscribe((d) => {
-        this.TableData = d
-      })
-    })
+    Swal.fire({
+      title: 'Are you sure you want to delete this Child?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#089B41',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'Cancel',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.TableData = []
+        this.EmplyeeStudentServ.Delete(id, this.DomainName).subscribe((d) => {
+          this.closeModal();
+          this.EmplyeeStudentServ.Get(this.EmployeeId, this.DomainName).subscribe((d) => {
+            this.TableData = d
+          })
+        })
+      }
+    });
   }
 
   validateNumber(event: any, field?: keyof AccountingEmployee): void {

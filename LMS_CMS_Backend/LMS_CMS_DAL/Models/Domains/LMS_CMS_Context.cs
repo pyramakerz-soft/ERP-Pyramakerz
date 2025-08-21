@@ -2308,6 +2308,14 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasIndex(e => e.LinkFileID)
                 .HasDatabaseName("IX_PayableMaster_LinkFileID");
 
+            modelBuilder.Entity<PayableMaster>()
+                .HasIndex(e => e.BankOrSaveID)
+                .HasDatabaseName("IX_PayableMaster_BankOrSaveID");
+
+            modelBuilder.Entity<PayableMaster>()
+                .HasIndex(e => e.Date)
+                .HasDatabaseName("IX_PayableMaster_Date");
+
             modelBuilder.Entity<PayableDetails>()
                 .HasIndex(e => e.IsDeleted)
                 .HasDatabaseName("IX_PayableDetails_IsDeleted");
@@ -2315,6 +2323,30 @@ namespace LMS_CMS_DAL.Models.Domains
             modelBuilder.Entity<PayableDetails>()
                 .HasIndex(e => e.LinkFileTypeID)
                 .HasDatabaseName("IX_PayableDetails_LinkFileTypeID");
+
+            modelBuilder.Entity<ReceivableMaster>()
+                .HasIndex(e => e.IsDeleted)
+                .HasDatabaseName("IX_ReceivableMaster_IsDeleted");
+
+            modelBuilder.Entity<ReceivableMaster>()
+                .HasIndex(e => e.LinkFileID)
+                .HasDatabaseName("IX_ReceivableMaster_LinkFileID");
+
+            modelBuilder.Entity<ReceivableMaster>()
+                .HasIndex(e => e.BankOrSaveID)
+                .HasDatabaseName("IX_ReceivableMaster_BankOrSaveID");
+
+            modelBuilder.Entity<ReceivableMaster>()
+                .HasIndex(e => e.Date)
+                .HasDatabaseName("IX_ReceivableMaster_Date");
+
+            modelBuilder.Entity<ReceivableDetails>()
+                .HasIndex(e => e.IsDeleted)
+                .HasDatabaseName("IX_ReceivableDetails_IsDeleted");
+
+            modelBuilder.Entity<ReceivableDetails>()
+                .HasIndex(e => e.LinkFileTypeID)
+                .HasDatabaseName("IX_ReceivableDetails_LinkFileTypeID");
         }
     }
 }

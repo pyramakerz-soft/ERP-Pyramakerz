@@ -28,18 +28,7 @@ import {  Subscription } from 'rxjs';
   styleUrl: './tuition-discount-types.component.css'
 })
 export class TuitionDiscountTypesComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;

@@ -35,7 +35,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [HttpGet("GetByStudentId/{StudentId}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Student Medal" }
+            pages: new[] { "Add Certificate To Student" }
         )]
         public async Task<IActionResult> GetByStudentId(long StudentId)
         {
@@ -80,7 +80,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [HttpPost]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Student Medal" }
+            pages: new[] { "Add Certificate To Student" }
          )]
         public async Task<IActionResult> Add(CertificateTypeStudentAddDTO type)
         {

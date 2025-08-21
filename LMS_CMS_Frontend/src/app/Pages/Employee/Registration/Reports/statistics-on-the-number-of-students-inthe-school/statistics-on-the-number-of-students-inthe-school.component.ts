@@ -28,18 +28,7 @@ import {  Subscription } from 'rxjs';
   styleUrl: './statistics-on-the-number-of-students-inthe-school.component.css',
 })
 export class StatisticsOnTheNumberOfStudentsIntheSchoolComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');  
 
   File: any;
   DomainName: string = '';

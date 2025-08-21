@@ -31,7 +31,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [HttpGet]
         [Authorize_Endpoint_(
         allowedTypes: new[] { "octa", "employee" },
-        pages: new[] { "Lesson Resources Types" }
+        pages: new[] { "Parent Meeting" }
         )]
         public IActionResult Get()
         {
@@ -64,7 +64,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
-          pages: new[] { "Lesson Resources Types" }
+          pages: new[] { "Parent Meeting" }
         )]
         public async Task<IActionResult> GetById(long id)
         {
@@ -97,7 +97,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [HttpPost]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
-          pages: new[] { "Lesson Resources Types" }
+          pages: new[] { "Parent Meeting" }
         )]
         public async Task<IActionResult> Add(ParentMeetingAddDTO NewMeeting)
         {
@@ -140,7 +140,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee" },
            allowEdit: 1,
-           pages: new[] { "Lesson Resources Types" }
+           pages: new[] { "Parent Meeting" }
        )]
         public async Task<IActionResult> EditAsync(ParentMeetingAddDTO NewMeeting)
         {
@@ -175,7 +175,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
 
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Lesson Resources Types", roleId, userId, parentMeeting);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Parent Meeting", roleId, userId, parentMeeting);
                 if (accessCheck != null)
                 {
                     return accessCheck;
@@ -212,7 +212,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
           allowDelete: 1,
-          pages: new[] { "Lesson Resources Types" }
+          pages: new[] { "Parent Meeting" }
         )]
         public IActionResult Delete(long id)
         {
@@ -241,7 +241,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             }
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Lesson Resources Types", roleId, userId, meeting);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Parent Meeting", roleId, userId, meeting);
                 if (accessCheck != null)
                 {
                     return accessCheck;
