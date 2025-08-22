@@ -19,6 +19,7 @@ import { TestWithRegistrationForm } from '../../../../Models/Registration/test-w
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-admission-test-parent',
@@ -64,7 +65,8 @@ export class AdmissionTestParentComponent {
     private router: Router,
     public testServ: TestService,
     public RegisterationFormParentServ :RegisterationFormParentService,
-    public registrationserv: RegisterationFormTestService
+    public registrationserv: RegisterationFormTestService,
+    private realTimeService: RealTimeNotificationServiceService,
   ) { }
 
   ngOnInit() {
@@ -91,6 +93,12 @@ export class AdmissionTestParentComponent {
     this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+  }
+  ngOnDestroy(): void { 
+          this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   GetAllStudents() {

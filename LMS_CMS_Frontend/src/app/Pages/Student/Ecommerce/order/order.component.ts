@@ -12,6 +12,7 @@ import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-order',
   standalone: true,
@@ -32,7 +33,8 @@ export class OrderComponent {
   filteredOrders: Order[] = [] 
   searchTerm: string = '';
 
-  constructor(public account: AccountService,private languageService: LanguageService, public ApiServ: ApiService, private router: Router, public employeeStudentService:EmployeeStudentService, private orderrService: OrderService){}
+  constructor(public account: AccountService,private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService, public ApiServ: ApiService, private router: Router, public employeeStudentService:EmployeeStudentService, private orderrService: OrderService){}
   
   ngOnInit(){
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -54,7 +56,12 @@ export class OrderComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-
+  ngOnDestroy(): void { 
+          this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  }
   getStudents(){
     this.employeeStudentService.Get(this.UserID, this.DomainName).subscribe(
       data => {

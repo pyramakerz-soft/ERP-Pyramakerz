@@ -10,6 +10,7 @@ import Swal from 'sweetalert2';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-octa-login',
   standalone: true,
@@ -36,7 +37,7 @@ export class OctaLoginComponent {
 
   isLoading: boolean = false
 
-  constructor(private router: Router,private languageService: LanguageService, public accountService: AccountService) { }
+  constructor(private router: Router,private languageService: LanguageService, public accountService: AccountService,private realTimeService: RealTimeNotificationServiceService,) { }
 
   ngOnInit() {
     window.addEventListener('popstate', this.checkLocalStorageOnNavigate); 
@@ -48,6 +49,10 @@ export class OctaLoginComponent {
   
   ngOnDestroy(): void { 
     window.removeEventListener('popstate', this.checkLocalStorageOnNavigate);
+          this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   checkLocalStorageOnNavigate(): void { 

@@ -22,6 +22,7 @@ import { Day } from '../../../../Models/day';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-semester',
   standalone: true,
@@ -56,7 +57,8 @@ export class SemesterComponent {
     
   constructor(public account: AccountService,
     private languageService: LanguageService, public semesterService: SemesterService, public acadimicYearService: AcadimicYearService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService, 
-    private menuService: MenuService, public activeRoute: ActivatedRoute, public router:Router, public DaysServ: DaysService){}
+    private menuService: MenuService, public activeRoute: ActivatedRoute, public router:Router, public DaysServ: DaysService,
+    private realTimeService: RealTimeNotificationServiceService,){}
   
   ngOnInit(){
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -90,6 +92,14 @@ export class SemesterComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  } 
 
   GetAllDays() {
     this.DaysServ.Get(this.DomainName).subscribe((d) => {

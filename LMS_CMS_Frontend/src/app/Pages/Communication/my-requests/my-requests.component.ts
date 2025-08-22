@@ -26,11 +26,14 @@ import { ParentService } from '../../../Services/parent.service';
 import { Parent } from '../../../Models/parent';
 import { SubjectService } from '../../../Services/Employee/LMS/subject.service';
 import { Subject } from '../../../Models/LMS/subject';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../Services/shared/language.service';
+import { RealTimeNotificationServiceService } from '../../../Services/shared/real-time-notification-service.service';
+import { firstValueFrom, Subscription } from 'rxjs';
 @Component({
   selector: 'app-my-requests',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
   templateUrl: './my-requests.component.html',
   styleUrl: './my-requests.component.css'
 })
@@ -59,7 +62,8 @@ export class MyRequestsComponent {
   students:Student[] = []
   subjects:Subject[] = []
   parent:Parent = new Parent()
-
+   isRtl: boolean = false;
+  subscription!: Subscription;
   departmentID = 0
   schoolID = 0
   sectionID = 0
@@ -83,7 +87,9 @@ export class MyRequestsComponent {
     public studentService: StudentService,
     public parentService: ParentService,
     public subjectService: SubjectService,
-    public requestService: RequestService
+    public requestService: RequestService,    
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService
   ) { }
 
   ngOnInit() {
@@ -105,7 +111,17 @@ export class MyRequestsComponent {
         this.loadReceivedRequests();
       }
     });
+          this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
+      ngOnDestroy(): void {
+    this.realTimeService.stopConnection(); 
+     if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
 
   loadSentRequests(){
     this.requestByID = new Request()

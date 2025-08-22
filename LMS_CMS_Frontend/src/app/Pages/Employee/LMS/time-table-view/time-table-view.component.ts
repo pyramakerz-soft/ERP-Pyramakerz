@@ -25,6 +25,7 @@ import * as FileSaver from 'file-saver';
 import { ReportsService } from '../../../../Services/shared/reports.service';
 import { PdfPrintComponent } from '../../../../Component/pdf-print/pdf-print.component';
 import { Observable, of } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-time-table-view',
@@ -87,7 +88,8 @@ export class TimeTableViewComponent {
     public ApiServ: ApiService,
     private languageService: LanguageService,
     public reportsService: ReportsService,
-    public timetableServ: TimeTableService
+    public timetableServ: TimeTableService,
+    private realTimeService: RealTimeNotificationServiceService,
      ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -103,6 +105,14 @@ export class TimeTableViewComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  } 
+
 
   GetTimeTable() {
     this.TimeTable = [];

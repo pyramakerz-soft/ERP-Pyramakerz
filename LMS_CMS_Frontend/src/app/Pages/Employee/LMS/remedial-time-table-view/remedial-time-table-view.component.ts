@@ -26,11 +26,14 @@ import { PdfPrintComponent } from '../../../../Component/pdf-print/pdf-print.com
 import { Employee } from '../../../../Models/Employee/employee';
 import { Day } from '../../../../Models/day';
 import { TimeTableDayGroupDTO } from '../../../../Models/LMS/time-table-day-group-dto';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { firstValueFrom, Subscription } from 'rxjs';
 @Component({
   selector: 'app-remedial-time-table-view',
   standalone: true,
-  imports: [FormsModule, CommonModule, DragDropModule, PdfPrintComponent],
+  imports: [FormsModule, CommonModule, DragDropModule, PdfPrintComponent, TranslateModule],
   templateUrl: './remedial-time-table-view.component.html',
   styleUrl: './remedial-time-table-view.component.css'
 })
@@ -46,7 +49,8 @@ export class RemedialTimeTableViewComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-
+   isRtl: boolean = false;
+  subscription!: Subscription;
   RTimeTableId: number = 0;
   SelectedGradeId: number = 0;
   remedialTimeTable: RemedialTimeTable = new RemedialTimeTable();
@@ -86,7 +90,9 @@ export class RemedialTimeTableViewComponent {
     public reportsService: ReportsService,
     public RemedialClassroomServ: RemedialClassroomService,
     public RemedialTimeTableServ: RemedialTimeTableService,
-    public RemedialTimeTableClassesServ: RemedialTimeTableClassesService,
+    public RemedialTimeTableClassesServ: RemedialTimeTableClassesService,    
+        private languageService: LanguageService,
+        private realTimeService: RealTimeNotificationServiceService
   ) { }
 
   ngOnInit() {
@@ -98,7 +104,17 @@ export class RemedialTimeTableViewComponent {
     });
     this.RTimeTableId = Number(this.activeRoute.snapshot.paramMap.get('id'));
     this.GetTimeTable();
+          this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
+      ngOnDestroy(): void {
+    this.realTimeService.stopConnection(); 
+     if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
 
   GetAllGradeBySchool() {
     this.GradeServ.GetBySchoolId(this.remedialTimeTable.schoolID, this.DomainName).subscribe((d) => {

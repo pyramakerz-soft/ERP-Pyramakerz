@@ -13,6 +13,7 @@ import { LessonLive } from '../../../../Models/LMS/lesson-live';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-subject-lesson-live',
   standalone: true,
@@ -33,7 +34,8 @@ export class SubjectLessonLiveComponent {
   bgColors: string[] = ['#F7F7F7', '#D7F7FF', '#FFF1D7', '#E8EBFF'];
 
   constructor(public account: AccountService, private languageService: LanguageService,public router: Router, public ApiServ: ApiService,
-    public activeRoute: ActivatedRoute, private menuService: MenuService, public LessonLiveServ: LessonLiveService) { }
+    public activeRoute: ActivatedRoute, private menuService: MenuService, public LessonLiveServ: LessonLiveService,
+    private realTimeService: RealTimeNotificationServiceService,) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -48,6 +50,13 @@ export class SubjectLessonLiveComponent {
     this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+  ngOnDestroy(): void { 
+          this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   GetSubjectLessonLiveData() {

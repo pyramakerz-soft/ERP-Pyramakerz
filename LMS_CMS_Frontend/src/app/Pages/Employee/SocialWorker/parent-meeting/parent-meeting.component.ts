@@ -13,11 +13,14 @@ import { ApiService } from '../../../../Services/api.service';
 import { DomainService } from '../../../../Services/Employee/domain.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-parent-meeting',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './parent-meeting.component.html',
   styleUrl: './parent-meeting.component.css'
 })
@@ -33,7 +36,8 @@ export class ParentMeetingComponent {
   TableData: ParentMeeting[] = [];
   DomainName: string = '';
   UserID: number = 0;
-
+   isRtl: boolean = false;
+  subscription!: Subscription;
   isModalVisible: boolean = false;
   mode: string = '';
 
@@ -55,7 +59,9 @@ export class ParentMeetingComponent {
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
-    public ParentMeetingServ: ParentMeetingService
+    public ParentMeetingServ: ParentMeetingService,    
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -76,7 +82,17 @@ export class ParentMeetingComponent {
     });
 
     this.GetAllData();
+          this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
+      ngOnDestroy(): void {
+    this.realTimeService.stopConnection(); 
+     if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
 
   GetAllData() {
     this.TableData = [];

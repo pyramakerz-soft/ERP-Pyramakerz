@@ -9,6 +9,7 @@ import { firstValueFrom } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-school-type',
   standalone: true,
@@ -29,7 +30,7 @@ export class SchoolTypeComponent {
 
   isSaved = false
 
-  constructor(private languageService: LanguageService,public schoolTypeService: SchoolTypeService){}
+  constructor(private languageService: LanguageService,public schoolTypeService: SchoolTypeService,private realTimeService: RealTimeNotificationServiceService,){}
 
   ngOnInit(){
     this.getSchoolTypeData()
@@ -38,6 +39,14 @@ export class SchoolTypeComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+  ngOnDestroy(): void { 
+          this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  }
+
 
   getSchoolTypeData(){
     this.schoolTypeService.Get().subscribe(

@@ -13,6 +13,7 @@ import { firstValueFrom } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-school',
   standalone: true,
@@ -35,7 +36,7 @@ export class SchoolComponent {
   subscription!: Subscription;
   validationErrors: { [key in keyof School]?: string } = {};
 
-  constructor(public DomainServ: DomainService,private languageService: LanguageService, public schoolTypeService: SchoolTypeService, public schoolService: SchoolService){}
+  constructor(public DomainServ: DomainService,private languageService: LanguageService,private realTimeService: RealTimeNotificationServiceService, public schoolTypeService: SchoolTypeService, public schoolService: SchoolService){}
 
   ngOnInit(){
     this.getAllDomains();
@@ -44,6 +45,13 @@ export class SchoolComponent {
     this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+  ngOnDestroy(): void { 
+          this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   getAllDomains() {

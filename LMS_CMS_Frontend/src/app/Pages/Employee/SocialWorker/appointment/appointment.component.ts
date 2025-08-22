@@ -19,7 +19,9 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { AppointmentGrade } from '../../../../Models/SocialWorker/appointment-grade';
 import { Grade } from '../../../../Models/LMS/grade';
 import { TranslateModule } from '@ngx-translate/core';
-
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-appointment',
   standalone: true,
@@ -40,7 +42,8 @@ export class AppointmentComponent {
   TableData: Appointment[] = [];
   DomainName: string = '';
   UserID: number = 0;
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   isModalVisible: boolean = false;
   mode: string = 'Create';
 
@@ -70,6 +73,8 @@ export class AppointmentComponent {
     public SchoolServ: SchoolService,
     public GradeServ: GradeService,
     public AppointmentServ: AppointmentService,
+    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService,
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -90,6 +95,17 @@ export class AppointmentComponent {
     });
 
     this.GetSchools();
+          this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   GetAllData() {

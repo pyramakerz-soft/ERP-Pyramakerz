@@ -11,6 +11,7 @@ import { RoleDetailsService } from '../../../Services/Employee/role-details.serv
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-domains',
   standalone: true,
@@ -33,7 +34,7 @@ export class DomainsComponent {
   isDropdownOpen = false;
   isSaved = false
 
-  constructor(public domainService:DomainService,private languageService: LanguageService, public roleDetailsService:RoleDetailsService){}
+  constructor(public domainService:DomainService,private languageService: LanguageService,private realTimeService: RealTimeNotificationServiceService, public roleDetailsService:RoleDetailsService){}
 
   ngOnInit(){ 
     this.getDomainData()
@@ -41,6 +42,13 @@ export class DomainsComponent {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+  ngOnDestroy(): void { 
+          this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   getDomainData(){

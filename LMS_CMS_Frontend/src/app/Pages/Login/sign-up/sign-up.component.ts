@@ -14,6 +14,7 @@ import { RecaptchaComponent, RecaptchaModule } from 'ng-recaptcha';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-sign-up',
   standalone: true,
@@ -48,13 +49,20 @@ export class SignUpComponent {
   IsConfimPassEmpty = false
   @ViewChild(RecaptchaComponent) captchaRef!: RecaptchaComponent;
 
-  constructor(private router: Router,private languageService: LanguageService, public accountService: AccountService, public ParentServ: ParentService , public ApiServ: ApiService) { }
+  constructor(private router: Router,private languageService: LanguageService,private realTimeService: RealTimeNotificationServiceService, public accountService: AccountService, public ParentServ: ParentService , public ApiServ: ApiService) { }
   ngOnInit() {
     this.DomainName = this.ApiServ.GetHeader(); 
         this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+  ngOnDestroy(): void { 
+          this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   onUserNameChange() {

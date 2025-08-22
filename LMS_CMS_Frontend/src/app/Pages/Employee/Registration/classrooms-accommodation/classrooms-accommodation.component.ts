@@ -21,9 +21,11 @@ import { SearchComponent } from '../../../../Component/search/search.component';
 import { firstValueFrom } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import Swal from 'sweetalert2';
+import { LanguageService } from '../../../../Services/shared/language.service';
 import { RegistrationFormStateService } from '../../../../Services/Employee/Registration/registration-form-state.service';
 import { RegistrationFormState } from '../../../../Models/Registration/registration-form-state';
-
+import { Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-classrooms-accommodation',
   standalone: true,
@@ -37,7 +39,8 @@ export class ClassroomsAccommodationComponent {
   DomainName: string = '';
   UserID: number = 0;
   path: string = '';
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   ClassroomId: number = 0;
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -80,7 +83,9 @@ export class ClassroomsAccommodationComponent {
     public SchoolServ: SchoolService,
     public GradeServ: GradeService,
     public registrationFormStateService: RegistrationFormStateService,
-    public YearServ: AcadimicYearService
+    public YearServ: AcadimicYearService,
+    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService,
   ) { }
 
   ngOnInit() {
@@ -103,6 +108,18 @@ export class ClassroomsAccommodationComponent {
     this.getAllSchools();
     this.getAllRegistrationFormStates();
     this.GetAllData();
+    this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
   GetAllData() {
     this.Data = []

@@ -20,6 +20,7 @@ import { LanguageService } from '../../../../Services/shared/language.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { ViolationType } from '../../../../Models/Violation/violation-type';
 import { ViolationTypeService } from '../../../../Services/Employee/Violation/violation-type.service';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-violation-types',
   standalone: true,
@@ -71,7 +72,8 @@ export class ViolationTypesComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     private router: Router,
     public empTypeServ: EmployeeTypeService,
-    private languageService: LanguageService
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService,
   ) { }
 
   ngOnInit() {
@@ -95,6 +97,13 @@ export class ViolationTypesComponent {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   GetViolation() {

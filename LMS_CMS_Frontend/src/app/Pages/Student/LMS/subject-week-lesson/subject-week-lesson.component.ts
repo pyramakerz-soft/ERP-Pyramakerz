@@ -16,6 +16,7 @@ import { LessonActivityType } from '../../../../Models/LMS/lesson-activity-type'
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-subject-week-lesson',
   standalone: true,
@@ -41,7 +42,7 @@ export class SubjectWeekLessonComponent {
   toggledIndexesActivity: Set<number> = new Set();
   toggledIndexesResource: Set<number> = new Set();
 
-  constructor(public account: AccountService, private languageService: LanguageService, public router: Router, public ApiServ: ApiService,
+  constructor(public account: AccountService,private realTimeService: RealTimeNotificationServiceService, private languageService: LanguageService, public router: Router, public ApiServ: ApiService,
     public activeRoute: ActivatedRoute, private menuService: MenuService, public LessonActivityServ: LessonActivityService, public LessonResourceServ: LessonResourceService) { }
 
   ngOnInit() {
@@ -59,7 +60,12 @@ export class SubjectWeekLessonComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-
+  ngOnDestroy(): void { 
+          this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  }
   GetActivityData() {
     this.mode = "Activity";
     this.LessonActivityServ.GetByWeekIDGroupByType(this.SubjectID, this.WeekId, this.DomainName).subscribe((d) => {

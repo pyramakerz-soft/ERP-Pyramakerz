@@ -19,6 +19,7 @@ import { SectionService } from '../../../../../Services/Employee/LMS/section.ser
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-statistics-on-the-number-of-students-inthe-school',
   standalone: true,
@@ -74,7 +75,8 @@ export class StatisticsOnTheNumberOfStudentsIntheSchoolComponent {
     private SchoolServ: SchoolService,
     private academicYearServ: AcadimicYearService,
     private SectionServ: SectionService,
-    public reportsService: ReportsService
+    public reportsService: ReportsService,
+    private realTimeService: RealTimeNotificationServiceService,
   ) {}
 
   ngOnInit() {
@@ -103,6 +105,14 @@ export class StatisticsOnTheNumberOfStudentsIntheSchoolComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  }
+
 
   getAllSchools() {
     this.SchoolServ.Get(this.DomainName).subscribe((d) => {

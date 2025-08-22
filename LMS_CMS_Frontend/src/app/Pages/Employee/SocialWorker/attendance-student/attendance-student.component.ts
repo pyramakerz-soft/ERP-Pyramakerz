@@ -25,7 +25,7 @@ import { AttendanceService } from '../../../../Services/Employee/SocialWorker/at
 import { AttendanceStudent } from '../../../../Models/SocialWorker/attendance-student';
 import { StudentService } from '../../../../Services/student.service';
 import Swal from 'sweetalert2';
-
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-attendance-student',
   standalone: true,
@@ -66,7 +66,8 @@ export class AttendanceStudentComponent {
   validationErrors: { [key in keyof Attendance]?: string } = {};
   validationIsLateErrors: { [studentId: number]: string } = {};
 
-  constructor(public account: AccountService, private languageService: LanguageService, public buildingService: BuildingService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService,
+  constructor(public account: AccountService,
+    private realTimeService: RealTimeNotificationServiceService, private languageService: LanguageService, public buildingService: BuildingService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService,
     private menuService: MenuService, public activeRoute: ActivatedRoute, public schoolService: SchoolService, public classroomService: ClassroomService, public StudentServ: StudentService,
     public gradeService: GradeService, public acadimicYearService: AcadimicYearService, public router: Router, public AttendanceServ: AttendanceService) { }
 
@@ -92,6 +93,13 @@ export class AttendanceStudentComponent {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   GetAttendance() {

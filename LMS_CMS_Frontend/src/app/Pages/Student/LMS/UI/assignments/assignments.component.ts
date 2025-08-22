@@ -5,6 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-assignments',
   standalone: true,
@@ -23,7 +24,8 @@ export class AssignmentsComponent {
   constructor(
     private route: ActivatedRoute,
     private languageService: LanguageService,
-    private router: Router
+    private router: Router,
+    private realTimeService: RealTimeNotificationServiceService,
   ) {}
 
   ngOnInit() {
@@ -38,7 +40,12 @@ export class AssignmentsComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-
+    ngOnDestroy(): void { 
+          this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  }
   formatSubjectName(subjectId: string): string {
     return subjectId.split('-')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))

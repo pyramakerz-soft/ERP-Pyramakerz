@@ -17,6 +17,7 @@ import { SemesterWorkingWeek } from '../../../../Models/LMS/semester-working-wee
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-semester-view',
   standalone: true,
@@ -48,7 +49,8 @@ export class SemesterViewComponent {
   validationErrors: { [key in keyof SemesterWorkingWeek]?: string } = {};
   isLoading = false; 
 
-  constructor(private languageService: LanguageService,public account: AccountService, public EditDeleteServ: DeleteEditPermissionService, public ApiServ: ApiService, public activeRoute: ActivatedRoute, 
+  constructor(private languageService: LanguageService,public account: AccountService,
+    private realTimeService: RealTimeNotificationServiceService, public EditDeleteServ: DeleteEditPermissionService, public ApiServ: ApiService, public activeRoute: ActivatedRoute, 
     public router:Router, private menuService: MenuService, public semesterService:SemesterService, public semesterWorkingWeekService:SemesterWorkingWeekService){}
 
   ngOnInit(){
@@ -78,6 +80,13 @@ export class SemesterViewComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  }  
 
   IsAllowDelete(InsertedByID: number) { 
     const IsAllow = this.EditDeleteServ.IsAllowDelete(InsertedByID, this.User_Data_After_Login.id, this.AllowDeleteForOthers);

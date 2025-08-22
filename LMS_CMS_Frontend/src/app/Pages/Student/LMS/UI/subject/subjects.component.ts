@@ -5,6 +5,8 @@ import { Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
+
 @Component({
   selector: 'app-subjects',
     imports: [CommonModule, FormsModule , TranslateModule],
@@ -31,7 +33,8 @@ Test() {
 
   constructor(
      private languageService: LanguageService,
-    private router: Router) {}
+    private router: Router,
+    private realTimeService: RealTimeNotificationServiceService,) {}
 
   ngOnInit() {
     this.subscription = this.languageService.language$.subscribe(direction => {
@@ -39,7 +42,12 @@ Test() {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-
+    ngOnDestroy(): void { 
+          this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  }
 navigateToSubject(subjectName: string) {
   const subjectId = subjectName.toLowerCase().replace(/\s+/g, '-');
   this.router.navigate(['/Student/Subject-Details-UI', subjectId]);
