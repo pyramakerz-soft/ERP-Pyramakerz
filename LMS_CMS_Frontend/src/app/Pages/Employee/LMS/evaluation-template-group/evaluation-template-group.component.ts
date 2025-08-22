@@ -18,6 +18,7 @@ import { EvaluationTemplateGroupService } from '../../../../Services/Employee/LM
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-evaluation-template-group',
@@ -64,7 +65,8 @@ export class EvaluationTemplateGroupComponent {
      public ApiServ: ApiService,
      public templateServ: EvaluationTemplateService ,
      public GroupServ: EvaluationTemplateGroupService ,
-     private languageService: LanguageService
+     private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService,
    ) {}
    ngOnInit() {
      this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -91,6 +93,15 @@ export class EvaluationTemplateGroupComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
    }
+
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  }
+
  
    GetTemplateData() {
      this.template = new Template();

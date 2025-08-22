@@ -36,7 +36,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [HttpGet("BySchoolId/{SchoolId}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Lesson Resources Types" }
+            pages: new[] { "Appoinment" }
         )]
         public async Task<IActionResult> GetBySchool(long SchoolId)
         {
@@ -73,7 +73,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Lesson Resources Types" }
+            pages: new[] { "Appoinment" }
          )]
         public async Task<IActionResult> GetById(long id)
         {
@@ -109,7 +109,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [HttpGet("GetByIdWithPaggination/{id}")]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
-          pages: new[] { "Lesson Resources Types" }
+          pages: new[] { "Appoinment" }
        )]
         public async Task<IActionResult> GetByIdWithPaggination(long id, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
@@ -192,7 +192,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [HttpPost]
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee" },
-           pages: new[] { "Lesson Resources Types" }
+           pages: new[] { "Appoinment" }
          )]
         public async Task<IActionResult> Add(AppointmentAddDTO NewAppointment)
         {
@@ -253,7 +253,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
           allowEdit: 1,
-          pages: new[] { "Lesson Resources Types" }
+          pages: new[] { "Appoinment" }
       )]
         public async Task<IActionResult> EditAsync(AppointmentEditDTO NewAppointment)
         {
@@ -294,7 +294,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
 
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Lesson Resources Types", roleId, userId, appointment);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Appoinment", roleId, userId, appointment);
                 if (accessCheck != null)
                 {
                     return accessCheck;
@@ -368,7 +368,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
           allowDelete: 1,
-          pages: new[] { "Lesson Resources Types" }
+          pages: new[] { "Appoinment" }
         )]
         public IActionResult Delete(long id)
         {
@@ -399,7 +399,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
 
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Lesson Resources Types", roleId, userId, appointment);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Appoinment", roleId, userId, appointment);
                 if (accessCheck != null)
                 {
                     return accessCheck;

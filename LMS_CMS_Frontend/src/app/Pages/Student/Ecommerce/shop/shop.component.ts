@@ -19,6 +19,7 @@ import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-shop',
@@ -52,7 +53,8 @@ export class ShopComponent {
   searchQuery: string = '';
    
   constructor(public inventoryCategoryService:InventoryCategoryService,private languageService: LanguageService, public inventorySubCategoryService:InventorySubCategoriesService, public employeeStudentService:EmployeeStudentService,
-    public account: AccountService, public ApiServ: ApiService, public shopItemService:ShopItemService, private router: Router, private cartShopItemService:CartShopItemService){}
+    public account: AccountService,
+    private realTimeService: RealTimeNotificationServiceService,public ApiServ: ApiService, public shopItemService:ShopItemService, private router: Router, private cartShopItemService:CartShopItemService){}
 
   ngOnInit(){
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -73,6 +75,13 @@ export class ShopComponent {
     this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+  ngOnDestroy(): void { 
+          this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   getStudents(){

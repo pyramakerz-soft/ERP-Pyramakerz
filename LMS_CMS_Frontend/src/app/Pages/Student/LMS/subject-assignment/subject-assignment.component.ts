@@ -12,7 +12,7 @@ import { AssignmentStudent } from '../../../../Models/LMS/assignment-student';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
-
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-subject-assignment',
   standalone: true,
@@ -35,7 +35,8 @@ export class SubjectAssignmentComponent {
   UnSolvedAssignment: Assignment[] = []
 
   constructor(public account: AccountService,private languageService: LanguageService, public router: Router, public ApiServ: ApiService, public AssignmentServ: AssignmentService,
-    public activeRoute: ActivatedRoute, private menuService: MenuService) { }
+    public activeRoute: ActivatedRoute, private menuService: MenuService,
+    private realTimeService: RealTimeNotificationServiceService,) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -51,7 +52,12 @@ export class SubjectAssignmentComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-
+  ngOnDestroy(): void { 
+          this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  }
   GetAssignments() {
     this.AssignmentServ.GetByStudentID(this.UserID, this.SubjectID, this.DomainName).subscribe((d) => {
       this.SolvedAssignment = d.solvedAssignments

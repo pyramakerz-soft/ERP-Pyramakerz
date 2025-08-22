@@ -23,6 +23,7 @@ import { LanguageService } from '../../../../Services/shared/language.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { AttendanceService } from '../../../../Services/Employee/SocialWorker/attendance.service';
 import Swal from 'sweetalert2';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-attendance',
@@ -64,7 +65,8 @@ export class AttendanceComponent {
   isLoading = false
   isLoadingSaveClassroom = false
 
-  constructor(public account: AccountService, private languageService: LanguageService, public buildingService: BuildingService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService,
+  constructor(public account: AccountService,
+    private realTimeService: RealTimeNotificationServiceService, private languageService: LanguageService, public buildingService: BuildingService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService,
     private menuService: MenuService, public activeRoute: ActivatedRoute, public schoolService: SchoolService, public classroomService: ClassroomService,
     public gradeService: GradeService, public acadimicYearService: AcadimicYearService, public router: Router, public AttendanceService: AttendanceService) { }
 
@@ -93,6 +95,13 @@ export class AttendanceComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
     this.GetAllSchools()
+  }
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   Create() {

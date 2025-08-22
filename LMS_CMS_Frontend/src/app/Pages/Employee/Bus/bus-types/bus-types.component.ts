@@ -16,6 +16,7 @@ import { firstValueFrom, Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-bus-types',
@@ -25,18 +26,8 @@ import { LanguageService } from '../../../../Services/shared/language.service';
   styleUrls: ['./bus-types.component.css'],
 })
 export class BusTypesComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
+
   busType: BusType = new BusType(0, '', 0);
 
   AllowEdit: boolean = false;
@@ -75,7 +66,7 @@ export class BusTypesComponent {
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
-    private languageService: LanguageService
+    private languageService: LanguageService, private realTimeService: RealTimeNotificationServiceService
 
   ) { }
 
@@ -113,6 +104,14 @@ export class BusTypesComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+
+  ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+    } 
 
   Create() {
     this.mode = 'add';

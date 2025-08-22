@@ -16,6 +16,7 @@ import { Test } from '../../../../Models/Registration/test';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-registration-confirmation-test-details',
   standalone: true,
@@ -25,18 +26,7 @@ import {  Subscription } from 'rxjs';
 })
 export class RegistrationConfirmationTestDetailsComponent {
 
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   DomainName: string = '';
   UserID: number = 0;
@@ -72,7 +62,8 @@ export class RegistrationConfirmationTestDetailsComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     private router: Router,
     public testServ: TestService,
-    public registrationserv: RegisterationFormTestService
+    public registrationserv: RegisterationFormTestService,
+    private realTimeService: RealTimeNotificationServiceService,
   ) { }
 
   ngOnInit() {
@@ -102,6 +93,13 @@ export class RegistrationConfirmationTestDetailsComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
 
+  }
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   validateNumber(event: any, field: keyof RegisterationFormTest): void {

@@ -18,6 +18,7 @@ import { InventoryMasterService } from '../../../../Services/Employee/Inventory/
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-inventory-master',
   standalone: true,
@@ -67,7 +68,8 @@ export class InventoryMasterComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public salesServ: InventoryMasterService,
-    private languageService: LanguageService
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -93,6 +95,17 @@ export class InventoryMasterComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';    
   }
+
+
+
+ ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  }
+
+
   Create() {
     this.mode = 'Create';
     this.router.navigateByUrl(`Employee/${this.inventoryFlag.enName} Item/${this.FlagId}`)

@@ -22,6 +22,7 @@ import { RegisterationFormParentService } from '../../../../Services/Employee/Re
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-registraion-test',
@@ -31,18 +32,7 @@ import {  Subscription } from 'rxjs';
   styleUrl: './registraion-test.component.css',
 })
 export class RegistraionTestComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   DomainName: string = '';
   UserID: number = 0;
@@ -85,7 +75,8 @@ export class RegistraionTestComponent {
     public registrationserv: RegisterationFormTestService,
     public testService: TestService,
     public registerationFormParentService: RegisterationFormParentService,
-    public questionServ: QuestionService
+    public questionServ: QuestionService,
+    private realTimeService: RealTimeNotificationServiceService,
   ) {}
 
   ngOnInit() {
@@ -120,6 +111,12 @@ export class RegistraionTestComponent {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+  }
+  ngOnDestroy(): void { 
+          this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   GetAllData() {

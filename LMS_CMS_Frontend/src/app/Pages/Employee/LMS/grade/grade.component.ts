@@ -17,6 +17,7 @@ import { firstValueFrom } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-grade',
   standalone: true,
@@ -50,7 +51,8 @@ export class GradeComponent {
     
   constructor(public account: AccountService ,
       private languageService: LanguageService, public sectionService: SectionService, public gradeService: GradeService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService, 
-    private menuService: MenuService, public activeRoute: ActivatedRoute, public router:Router){}
+    private menuService: MenuService, public activeRoute: ActivatedRoute, public router:Router,
+    private realTimeService: RealTimeNotificationServiceService,){}
   
   ngOnInit(){
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -83,6 +85,16 @@ export class GradeComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  }
+
+
 
   getSectionData(){
     this.sectionService.GetByID(this.sectionId, this.DomainName).subscribe(

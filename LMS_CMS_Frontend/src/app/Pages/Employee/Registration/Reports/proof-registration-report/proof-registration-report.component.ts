@@ -18,6 +18,7 @@ import { StudentService } from '../../../../../Services/student.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-proof-registration-report',
   standalone: true,
@@ -73,7 +74,8 @@ export class ProofRegistrationReportComponent {
     private SchoolServ: SchoolService,
     private academicYearServ: AcadimicYearService,
     private studentServ: StudentService,
-    public reportsService: ReportsService
+    public reportsService: ReportsService,
+    private realTimeService: RealTimeNotificationServiceService,
   ) { }
 
   ngOnInit() {
@@ -100,6 +102,14 @@ export class ProofRegistrationReportComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  }
+
 
   getAllSchools() {
     this.SchoolServ.Get(this.DomainName).subscribe((d) => {

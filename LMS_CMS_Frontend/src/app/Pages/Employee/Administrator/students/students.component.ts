@@ -22,6 +22,7 @@ import { SearchStudentComponent } from '../../../../Component/Employee/search-st
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-students',
   standalone: true,
@@ -67,7 +68,9 @@ export class StudentsComponent {
     public acadimicYearService: AcadimicYearService, 
     public floorService: FloorService, 
     public router: Router,
-      private languageService: LanguageService) { }
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService
+    ) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -94,7 +97,18 @@ export class StudentsComponent {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+
+
   }
+
+
+      ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+    } 
+
 
   IsAllowDelete(InsertedByID: number) {
     const IsAllow = this.EditDeleteServ.IsAllowDelete(InsertedByID, this.UserID, this.AllowDeleteForOthers);

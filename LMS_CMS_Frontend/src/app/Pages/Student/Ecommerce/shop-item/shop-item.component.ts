@@ -15,6 +15,7 @@ import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-shop-item',
@@ -41,7 +42,8 @@ export class ShopItemComponent {
   selectedSize: number = 0;
   
   constructor(public activeRoute: ActivatedRoute,private languageService: LanguageService, public account: AccountService, public ApiServ: ApiService, private router: Router, public shopItemService:ShopItemService
-    , private cartShopItemService:CartShopItemService, public employeeStudentService:EmployeeStudentService
+    , private cartShopItemService:CartShopItemService, public employeeStudentService:EmployeeStudentService,
+    private realTimeService: RealTimeNotificationServiceService,
   ){}
 
   ngOnInit(){
@@ -65,6 +67,13 @@ export class ShopItemComponent {
     this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+  ngOnDestroy(): void { 
+          this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   getStudents(){

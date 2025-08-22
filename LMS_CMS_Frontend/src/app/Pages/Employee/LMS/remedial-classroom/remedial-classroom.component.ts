@@ -26,11 +26,15 @@ import { ClassroomSubjectService } from '../../../../Services/Employee/LMS/class
 import { SearchStudentComponent } from '../../../../Component/Employee/search-student/search-student.component';
 import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import {  Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-remedial-classroom',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './remedial-classroom.component.html',
   styleUrl: './remedial-classroom.component.css'
 })
@@ -67,7 +71,8 @@ export class RemedialClassroomComponent {
   isModalOpen: boolean = false;
   hiddenInputs: string[] = [];
   hiddenColumns: string[] = ['Actions'];
-
+   isRtl: boolean = false;
+  subscription!: Subscription;
   constructor(
     private router: Router,
     private menuService: MenuService,
@@ -83,7 +88,9 @@ export class RemedialClassroomComponent {
     public SubjectServ: SubjectService,
     public EmployeeServ: EmployeeService,
     public ClassroomSubjectServ: ClassroomSubjectService,
-    private cdRef: ChangeDetectorRef
+    private cdRef: ChangeDetectorRef,
+    private realTimeService: RealTimeNotificationServiceService,    
+    private languageService: LanguageService,
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -103,7 +110,19 @@ export class RemedialClassroomComponent {
       }
     });
     this.GetAllSchools();
+          this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
+      ngOnDestroy(): void {
+    this.realTimeService.stopConnection(); 
+     if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
+
+
 
   GetAllSchools() {
     this.schools = [];

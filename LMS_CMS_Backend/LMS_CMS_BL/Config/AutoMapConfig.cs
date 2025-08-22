@@ -651,10 +651,11 @@ namespace LMS_CMS_BL.Config
             CreateMap<ShopItemSizeAddDTO, ShopItemSize>();
 
 
-
             CreateMap<InventoryMaster, InventoryMasterGetDTO>()  
                  .ForMember(dest => dest.SaveName, opt => opt.MapFrom(src => src.Save != null ? src.Save.Name : null))
                  .ForMember(dest => dest.BankName, opt => opt.MapFrom(src => src.Bank != null ? src.Bank.Name : null))
+                 .ForMember(dest => dest.SchoolName, opt => opt.MapFrom(src => src.School.Name))
+                 .ForMember(dest => dest.SchoolPCName, opt => opt.MapFrom(src => src.SchoolPCs.PCName))
                  .ForMember(dest => dest.FlagArName, opt => opt.MapFrom(src => src.InventoryFlags.arName))
                  .ForMember(dest => dest.FlagEnName, opt => opt.MapFrom(src => src.InventoryFlags.enName))
                  .ForMember(dest => dest.FlagArTitle, opt => opt.MapFrom(src => src.InventoryFlags.ar_Title))

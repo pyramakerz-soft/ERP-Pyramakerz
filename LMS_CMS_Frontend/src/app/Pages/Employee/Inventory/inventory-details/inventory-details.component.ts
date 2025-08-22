@@ -46,6 +46,7 @@ import { SchoolPCsService } from '../../../../Services/Employee/Inventory/school
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-inventory-details',
   standalone: true,
@@ -54,18 +55,7 @@ import { Subscription } from 'rxjs';
   styleUrl: './inventory-details.component.css',
 })
 export class InventoryDetailsComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -171,7 +161,8 @@ export class InventoryDetailsComponent {
     public reportsService: ReportsService,
     public SchoolServ: SchoolService,
     public schoolpcsServ: SchoolPCsService,
-    private languageService: LanguageService
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService
   ) { }
   async ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -255,6 +246,14 @@ export class InventoryDetailsComponent {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+
+ ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   moveToMaster() {
@@ -691,8 +690,8 @@ export class InventoryDetailsComponent {
       if (file.size > 25 * 1024 * 1024) {
         this.validationErrors['NewAttachments'] =
           'One or more files exceed the maximum size of 25 MB.';
-        input.value = ''; 
-        return; 
+        input.value = '';
+        return;
       }
     }
     if (this.mode === 'Create') {
@@ -886,6 +885,48 @@ export class InventoryDetailsComponent {
 
   //////////////////////////// Print ////////////////////////////////
 
+  get infoRows() {
+    const rows = [
+      { keyEn: 'Store : ' + this.Data.storeName },
+      { keyEn: 'Invoice Number : ' + this.Data.invoiceNumber },
+      { keyEn: 'Date : ' + this.Data.date },
+      { keyEn: 'School : ' + this.Data.schoolName },
+      { keyEn: 'schoolPC : ' + this.Data.schoolPCName },
+      { keyEn: 'Total : ' + this.Data.total },
+    ];
+
+    if (this.FlagId == 9 || this.FlagId == 10 || this.FlagId == 13) {
+      rows.push({ keyEn: 'Remaining : ' + this.Data.remaining });
+      rows.push({ keyEn: 'Supplier : ' + this.Data.supplierName });
+      rows.push({ keyEn: 'Note : ' + this.Data.notes });
+      if (this.Data.isCash) {
+        rows.push({ keyEn: 'cash Amount: ' + this.Data.cashAmount });
+        rows.push({ keyEn: 'Safe: ' + this.Data.saveName });
+      }
+      if (this.Data.isVisa) {
+        rows.push({ keyEn: 'Visa Amount: ' + this.Data.visaAmount });
+        rows.push({ keyEn: 'Bank: ' + this.Data.bankName });
+      }
+    }
+    if (this.FlagId == 11 || this.FlagId == 12) {
+      rows.push({ keyEn: 'Remaining : ' + this.Data.remaining });
+      rows.push({ keyEn: 'Student : ' + this.Data.studentName });
+      rows.push({ keyEn: 'Note : ' + this.Data.notes });
+      if (this.Data.isCash) {
+        rows.push({ keyEn: 'cash Amount: ' + this.Data.cashAmount });
+        rows.push({ keyEn: 'Safe: ' + this.Data.saveName });
+      }
+      if (this.Data.isVisa) {
+        rows.push({ keyEn: 'Visa Amount: ' + this.Data.visaAmount });
+        rows.push({ keyEn: 'Bank: ' + this.Data.bankName });
+      }
+    }
+    if (this.FlagId == 8) {
+      rows.push({ keyEn: 'Store To Transform: ' + this.Data.storeToTransformName });
+    }
+    return rows;
+  }
+
   async Print() {
     await this.formateData()
     this.showPDF = true;
@@ -958,24 +999,65 @@ export class InventoryDetailsComponent {
       { header: 'Total_Price', key: 'totalPrice' },
       { header: 'Notes', key: 'notes' },
     ];
-    const sourceData = this.mode === "Create" ? this.Data?.inventoryDetails ?? [] : this.TableData ?? [];
+
+    const sourceData = this.mode === "Create"
+      ? this.Data?.inventoryDetails ?? []
+      : this.TableData ?? [];
+
     const dataRows = sourceData.map(row =>
       headerKeyMap.map(({ key }) => (row as any)?.[key] ?? '')
     );
 
+    // Build info rows with conditions (same as getter)
+    const safe = (val: any) => (val !== undefined && val !== null ? val : '');
+
+    const infoRows = [
+      { key: 'Store', value: safe(this.Data?.storeName) },
+      { key: 'Invoice Number', value: safe(this.Data?.invoiceNumber) },
+      { key: 'Date', value: safe(this.Data?.date) },
+      { key: 'School', value: safe(this.Data?.schoolName) },
+      { key: 'School PC', value: safe(this.Data?.schoolPCName) },
+      { key: 'Total', value: safe(this.Data?.total) },
+    ];
+
+    const addPaymentRows = () => {
+      if (this.Data?.isCash) {
+        infoRows.push({ key: 'Cash Amount', value: safe(this.Data.cashAmount) });
+        infoRows.push({ key: 'Safe', value: safe(this.Data.saveName) });
+      }
+      if (this.Data?.isVisa) {
+        infoRows.push({ key: 'Visa Amount', value: safe(this.Data.visaAmount) });
+        infoRows.push({ key: 'Bank', value: safe(this.Data.bankName) });
+      }
+    };
+
+    if ([9, 10, 13].includes(this.FlagId)) {
+      infoRows.push({ key: 'Remaining', value: safe(this.Data?.remaining) });
+      infoRows.push({ key: 'Supplier', value: safe(this.Data?.supplierName) });
+      infoRows.push({ key: 'Note', value: safe(this.Data?.notes) });
+      addPaymentRows();
+    }
+
+    if ([11, 12].includes(this.FlagId)) {
+      infoRows.push({ key: 'Remaining', value: safe(this.Data?.remaining) });
+      infoRows.push({ key: 'Student', value: safe(this.Data?.studentName) });
+      infoRows.push({ key: 'Note', value: safe(this.Data?.notes) });
+      addPaymentRows();
+    }
+
+    if (this.FlagId === 8) {
+      infoRows.push({ key: 'Store To Transform', value: safe(this.Data?.storeToTransformName) });
+    }
+
+    // Pass everything to the service
     await this.reportsService.generateExcelReport({
-      infoRows: [
-        { key: 'Store', value: this.Data?.storeName ?? '' },
-        { key: 'Invoice Number', value: this.Data?.invoiceNumber ?? '' },
-        { key: 'Date', value: this.Data?.date },
-        { key: 'Total', value: this.Data?.total ?? '' }
-      ],
+      infoRows: infoRows,
       filename: "Inventory.xlsx",
       tables: [
         {
           title: this.Data?.flagEnName ?? 'Inventory',
           headers: headerKeyMap.map(h => h.header),
-          data: dataRows
+          data: dataRows,
         }
       ]
     });

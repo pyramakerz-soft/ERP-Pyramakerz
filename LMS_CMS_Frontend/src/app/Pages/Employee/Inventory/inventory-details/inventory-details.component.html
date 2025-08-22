@@ -577,20 +577,7 @@
 
 <div class="absolute -top-[9999px] -left-[9999px]"> <!-- for print  -->
   <div id="Data" class="hidden">
-    <app-pdf-print *ngIf="showPDF" [fileName]="'Inventory'" [infoRows]="[
-      {
-        keyEn: 'Store :' + this.Data.storeName,
-      },
-      {
-        keyEn: 'Invoice Number : ' + this.Data.invoiceNumber,
-      },
-      {
-        keyEn: 'Date : ' + this.Data.date,
-      },
-      {
-        keyEn: 'Total : ' + this.Data.total,
-      }
-    ]" [tableHeaders]="['BarCode', 'Item_Id', 'Item_Name', 'Quantity', 'Price' , 'Total_Price' , 'Notes']"
+    <app-pdf-print *ngIf="showPDF" [fileName]="'Inventory'" [infoRows]="infoRows" [tableHeaders]="['BarCode', 'Item_Id', 'Item_Name', 'Quantity', 'Price' , 'Total_Price' , 'Notes']"
       [tableData]="tableDataForPrint" #pdfComponentRef></app-pdf-print>
   </div>
 </div>

@@ -15,6 +15,7 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { SocialWorkerMedalService } from '../../../../Services/Employee/SocialWorker/social-worker-medal.service';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-social-worker-medal',
@@ -60,7 +61,8 @@ export class SocialWorkerMedalComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public SocialWorkerMedalServ: SocialWorkerMedalService,
-    private languageService: LanguageService
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService,
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -86,6 +88,13 @@ export class SocialWorkerMedalComponent {
     this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   GetAllData() {

@@ -17,6 +17,9 @@ import { InterviewTimeTable } from '../../../../Models/Registration/interview-ti
 import Swal from 'sweetalert2';
 import { firstValueFrom, lastValueFrom } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
+import { Subscription } from 'rxjs';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-interview-time-table',
@@ -29,7 +32,8 @@ export class InterviewTimeTableComponent {
   keysArray: string[] = ['id', 'date', 'fromTime', 'toTime', 'capacity', 'reserved', 'academicYearName'];
   key: string = "id";
   value: any = "";
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   interviewTimeTableData: InterviewTimeTable[] = []
 
   SchoolData: School[] = []
@@ -70,7 +74,9 @@ export class InterviewTimeTableComponent {
 
   isLoading = false
 
-  constructor(public account: AccountService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService,
+  constructor(public account: AccountService,
+    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService,
     private menuService: MenuService, public activeRoute: ActivatedRoute, public router: Router,
     public yearService: AcadimicYearService, public interviewTimeTableService: InterviewTimeTableService,
     public schoolService: SchoolService) { }
@@ -98,6 +104,18 @@ export class InterviewTimeTableComponent {
         this.AllowDeleteForOthers = settingsPage.allow_Delete_For_Others;
       }
     });
+    this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   async onSearchEvent(event: { key: string; value: any }) {

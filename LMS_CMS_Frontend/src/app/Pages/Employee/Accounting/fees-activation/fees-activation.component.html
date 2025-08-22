@@ -10,6 +10,8 @@
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5">
             <option [value]="0" disabled hidden> {{ 'Select a School' | translate }}</option>
             <option *ngFor="let S of Schools" [value]="S.id">{{ S.name }}</option>
+            <option *ngIf="Schools.length === 0" disabled selected>No Data Found</option>
+
         </select>
     </div>
 
@@ -22,6 +24,7 @@
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5">
             <option [value]="0" disabled hidden> {{ 'Select a Year' | translate }}</option>
             <option *ngFor="let S of AcademicYears" [value]="S.id">{{ S.name }}</option>
+            <option *ngIf="AcademicYears.length === 0" disabled selected>No Data Found</option>
         </select>
     </div>
 
@@ -34,6 +37,7 @@
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5">
             <option [value]="0" disabled hidden> {{ 'Select a Section' | translate }}</option>
             <option *ngFor="let S of Sections" [value]="S.id">{{ S.name }}</option>
+            <option *ngIf="Sections.length === 0" disabled selected>No Data Found</option>
         </select>
     </div>
 
@@ -45,6 +49,7 @@
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5">
             <option [value]="0" disabled hidden> {{ 'Select a Grade' | translate }}</option>
             <option *ngFor="let S of Grades" [value]="S.id">{{ S.name }}</option>
+            <option *ngIf="Grades.length === 0" disabled selected>No Data Found</option>
         </select>
     </div>
 
@@ -57,6 +62,7 @@
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5">
             <option [value]="0" disabled hidden> {{ 'Select a Classroom' | translate }}</option>
             <option *ngFor="let S of ClassRooms" [value]="S.id">{{ S.name }}</option>
+            <option *ngIf="ClassRooms.length === 0" disabled selected>No Data Found</option>
         </select>
     </div>
 
@@ -68,6 +74,8 @@
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5">
             <option [value]="0" disabled hidden> {{ 'Select a Student' | translate }}</option>
             <option *ngFor="let S of Students" [value]="S.id">{{ S.en_name }}</option>
+            <option *ngIf="Students.length === 0" disabled selected>No Data Found</option>
+
         </select>
     </div>
 
@@ -80,8 +88,10 @@
         </button>
     </div>
 
-    <div *ngIf="SchoolId != 0 || SectionId != 0 || GradeId != 0 || YearId != 0" class="rounded-full p-2 border-4" (click)="clearFilter()">
-        <i class="fa-solid fa-rotate-left secondaryTxt text-2xl w-8 h-8 text-center hover:cursor-pointer rounded-full"></i>
+    <div *ngIf="SchoolId != 0 || SectionId != 0 || GradeId != 0 || YearId != 0" class="rounded-full p-2 border-4"
+        (click)="clearFilter()">
+        <i
+            class="fa-solid fa-rotate-left secondaryTxt text-2xl w-8 h-8 text-center hover:cursor-pointer rounded-full"></i>
     </div>
 
 </div>
@@ -94,6 +104,7 @@
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5">
             <option [value]="0" disabled hidden> {{ 'Select a Type' | translate }}</option>
             <option *ngFor="let S of FeesTypes" [value]="S.id">{{ S.name }}</option>
+            <option *ngIf="FeesTypes.length === 0" disabled selected>No Data Found</option>
         </select>
         <span *ngIf="validationErrors['feeTypeID']" class="text-red-500 ml-3 font-normal">{{
             validationErrors["feeTypeID"]}}</span>
@@ -106,6 +117,8 @@
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5">
             <option [value]="0" disabled hidden> {{ 'Select a Type' | translate }}</option>
             <option *ngFor="let S of FeesDiscountType" [value]="S.id">{{ S.name }}</option>
+            <option *ngIf="FeesDiscountType.length === 0" disabled selected>No Data Found</option>
+
         </select>
     </div>
 
@@ -218,7 +231,9 @@
                         <ng-container *ngIf="editingRowId === row.feeActivationID; else textModeFeesTypes">
                             <select [(ngModel)]="row.feeTypeID"
                                 class="w-full border border-gray-300 px-2 py-1 rounded-md">
+                                <option value=0 disabled selected hidden>Select a FeesTypes</option>
                                 <option *ngFor="let S of FeesTypes" [value]="S.id">{{ S.name }}</option>
+                                <option *ngIf="FeesTypes.length === 0" disabled selected>No Data Found</option>
                             </select>
                         </ng-container>
                         <ng-template #textModeFeesTypes>{{ row.feeTypeName }}</ng-template>
@@ -227,7 +242,10 @@
                         <ng-container *ngIf="editingRowId === row.feeActivationID; else textModeFeesDiscountType">
                             <select [(ngModel)]="row.feeDiscountTypeID"
                                 class="w-full border border-gray-300 px-2 py-1 rounded-md">
+                                <option value=0 disabled selected hidden>Select a FeesDiscountType</option>
                                 <option *ngFor="let S of FeesDiscountType" [value]="S.id">{{ S.name }}</option>
+                                <option *ngIf="FeesDiscountType.length === 0" disabled selected>No Data Found</option>
+
                             </select>
                         </ng-container>
                         <ng-template #textModeFeesDiscountType>{{ row.feeDiscountTypeName }}</ng-template>

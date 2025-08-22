@@ -12,6 +12,7 @@ import { Dose } from '../../../../Models/Clinic/dose';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-doses',
   standalone: true,
@@ -35,7 +36,7 @@ export class DosesComponent implements OnInit {
 
   constructor(private doseService: DoseService, 
     private apiService: ApiService,
-      private languageService: LanguageService) {}
+      private languageService: LanguageService, private realTimeService: RealTimeNotificationServiceService) {}
 
   ngOnInit(): void {
     this.DomainName = this.apiService.GetHeader();
@@ -45,6 +46,12 @@ export class DosesComponent implements OnInit {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+    ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+    } 
 
   async getDoses() {
     try {

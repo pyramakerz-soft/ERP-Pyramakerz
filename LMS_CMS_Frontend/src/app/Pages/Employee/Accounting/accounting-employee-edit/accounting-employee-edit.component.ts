@@ -35,6 +35,7 @@ import { Student } from '../../../../Models/student';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { firstValueFrom, Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-accounting-employee-edit',
   standalone: true,
@@ -121,7 +122,8 @@ export class AccountingEmployeeEditComponent {
     public jobCategoryServ: JobCategoriesService,
     public EmplyeeStudentServ: EmployeeStudentService,
     public StudentServ: StudentService,
-    private languageService: LanguageService
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService
   ) { }
 
   ngOnInit() {
@@ -156,6 +158,14 @@ export class AccountingEmployeeEditComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+      ngOnDestroy(): void {
+    this.realTimeService.stopConnection(); 
+     if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
+
 
   GetAllData() {
     this.employeeServ.GetAcountingEmployee(this.EmployeeId, this.DomainName).subscribe((d: any) => {
@@ -363,10 +373,11 @@ export class AccountingEmployeeEditComponent {
         console.log(EmployeeStudent)
         this.EmplyeeStudentServ.Add(EmployeeStudent, this.DomainName).subscribe((d) => {
           this.closeModal();
+          this.TableData = []
           this.EmplyeeStudentServ.Get(this.EmployeeId, this.DomainName).subscribe((d) => {
             this.TableData = d
           })
-        },error=>{
+        }, error => {
           console.log(error)
         })
       } else {
@@ -406,12 +417,25 @@ export class AccountingEmployeeEditComponent {
   }
 
   DeleteChild(id: number) {
-    this.EmplyeeStudentServ.Delete(id,this.DomainName).subscribe((d) => {
-      this.closeModal();
-      this.EmplyeeStudentServ.Get(this.EmployeeId, this.DomainName).subscribe((d) => {
-        this.TableData = d
-      })
-    })
+    Swal.fire({
+      title: 'Are you sure you want to delete this Child?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#089B41',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'Cancel',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.TableData = []
+        this.EmplyeeStudentServ.Delete(id, this.DomainName).subscribe((d) => {
+          this.closeModal();
+          this.EmplyeeStudentServ.Get(this.EmployeeId, this.DomainName).subscribe((d) => {
+            this.TableData = d
+          })
+        })
+      }
+    });
   }
 
   validateNumber(event: any, field?: keyof AccountingEmployee): void {

@@ -19,6 +19,7 @@ import Swal from 'sweetalert2';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-duty',
@@ -28,18 +29,7 @@ import {  Subscription } from 'rxjs';
   styleUrl: './duty.component.css',
 })
 export class DutyComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   DomainName: string = '';
   UserID: number = 0;
@@ -77,7 +67,8 @@ export class DutyComponent {
     private languageService: LanguageService,
     private SchoolServ: SchoolService,
     private DutyServ: DutyService,
-    private ClassroomServ: ClassroomService
+    private ClassroomServ: ClassroomService,
+    private realTimeService: RealTimeNotificationServiceService,
   ) { }
 
   ngOnInit() {
@@ -106,6 +97,15 @@ export class DutyComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  }
+
+
 
   GetByDate() {
     this.TableData = []

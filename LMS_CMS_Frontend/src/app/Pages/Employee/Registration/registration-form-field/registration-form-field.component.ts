@@ -13,7 +13,9 @@ import Swal from 'sweetalert2';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { firstValueFrom } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
-
+import { LanguageService } from '../../../../Services/shared/language.service';
+import { Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-registration-form-field',
   standalone: true,
@@ -23,18 +25,7 @@ import { TranslateModule } from '@ngx-translate/core';
 })
 export class RegistrationFormFieldComponent {
 
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   DomainName: string = '';
   UserID: number = 0;
@@ -45,7 +36,8 @@ export class RegistrationFormFieldComponent {
   AllowDelete: boolean = false;
   AllowEditForOthers: boolean = false;
   AllowDeleteForOthers: boolean = false;
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   mode: string = 'Create'
 
   isModalVisible: boolean = false;
@@ -66,7 +58,9 @@ export class RegistrationFormFieldComponent {
     private menuService: MenuService,
     public EditDeleteServ: DeleteEditPermissionService,
     private router: Router,
-    public CategoryServ: RegistrationCategoryService
+    public CategoryServ: RegistrationCategoryService,
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService,
   ) { }
 
   ngOnInit() {
@@ -89,6 +83,19 @@ export class RegistrationFormFieldComponent {
     });
 
     this.GetAllData();
+      this.subscription = this.languageService.language$.subscribe(
+      (direction) => {
+        this.isRtl = direction === 'rtl';
+      }
+    );
+    this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   GetAllData() {

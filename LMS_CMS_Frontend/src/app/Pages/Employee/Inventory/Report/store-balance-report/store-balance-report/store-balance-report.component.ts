@@ -13,11 +13,14 @@ import {
 import { InventoryDetailsService } from '../../../../../../Services/Employee/Inventory/inventory-details.service';
 import { StoresService } from '../../../../../../Services/Employee/Inventory/stores.service';
 import { InventoryCategoryService } from '../../../../../../Services/Employee/Inventory/inventory-category.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../../../Services/shared/language.service';
+import { RealTimeNotificationServiceService } from '../../../../../../Services/shared/real-time-notification-service.service';
+import { firstValueFrom, Subscription } from 'rxjs';
 @Component({
   selector: 'app-store-balance-report',
   standalone: true,
-  imports: [CommonModule, FormsModule, PdfPrintComponent],
+  imports: [CommonModule, FormsModule, PdfPrintComponent, TranslateModule],
   templateUrl: './store-balance-report.component.html',
   styleUrls: ['./store-balance-report.component.css'],
 })
@@ -36,7 +39,8 @@ export class StoreBalanceReportComponent implements OnInit {
   hasBalance: boolean = true;
   overdrawnBalance: boolean = true;
   zeroBalances: boolean = true;
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   stores: any[] = [];
   categories: any[] = [];
   reportData: StoreBalanceReport | null = null;
@@ -60,7 +64,9 @@ export class StoreBalanceReportComponent implements OnInit {
     private inventoryDetailsService: InventoryDetailsService,
     private storesService: StoresService,
     private categoryService: InventoryCategoryService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,    
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService
   ) {}
 
   ngOnInit() {
@@ -71,7 +77,17 @@ export class StoreBalanceReportComponent implements OnInit {
       this.loadCategories();
       this.getPdfTableHeaders()
     });
+          this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
+      ngOnDestroy(): void {
+    this.realTimeService.stopConnection(); 
+     if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
 
   private setPageTitle() {
     switch (this.reportType) {

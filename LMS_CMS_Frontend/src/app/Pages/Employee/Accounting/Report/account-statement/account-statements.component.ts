@@ -13,7 +13,7 @@ import Swal from 'sweetalert2';
 import { ReportsService } from '../../../../../Services/Employee/Accounting/reports.service';
 import { SupplierService } from '../../../../../Services/Employee/Accounting/supplier.service';
 import { Supplier } from '../../../../../Models/Accounting/supplier';
-
+import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-account-statements',
   standalone: true,
@@ -64,7 +64,8 @@ export class AccountStatementsComponent {
     public reportsService: ReportsService,
     private router: Router,
     private languageService: LanguageService,
-        private supplierService: SupplierService
+        private supplierService: SupplierService,
+    private realTimeService: RealTimeNotificationServiceService
   ) {}
 
 ngOnInit() {
@@ -95,6 +96,17 @@ ngOnInit() {
   
   this.loadSuppliers();
 }
+
+      ngOnDestroy(): void {
+    this.realTimeService.stopConnection(); 
+     if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
+
+
+
+
   InputChange() {
     this.showTable = false;
     // this.showViewReportBtn = 

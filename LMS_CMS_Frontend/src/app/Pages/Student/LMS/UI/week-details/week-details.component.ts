@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-week-details',
   standalone: true,
@@ -44,7 +45,8 @@ export class WeekDetailsComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private languageService: LanguageService,
-    private router: Router
+    private router: Router,
+    private realTimeService: RealTimeNotificationServiceService,
   ) {}
 
   ngOnInit() {
@@ -65,7 +67,12 @@ export class WeekDetailsComponent implements OnInit {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-
+    ngOnDestroy(): void { 
+          this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  }
   formatName(name: string): string {
     return name.split('-')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))

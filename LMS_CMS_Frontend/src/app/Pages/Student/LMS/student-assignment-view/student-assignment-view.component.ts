@@ -18,6 +18,7 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-student-assignment-view',
   standalone: true,
@@ -52,7 +53,8 @@ export class StudentAssignmentViewComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public assignmentStudentServ: AssignmentStudentService,
-    public assignmentServ: AssignmentService
+    public assignmentServ: AssignmentService,
+    private realTimeService: RealTimeNotificationServiceService,
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -67,6 +69,12 @@ export class StudentAssignmentViewComponent {
     this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+  }
+  ngOnDestroy(): void { 
+          this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   GetAssignment() {

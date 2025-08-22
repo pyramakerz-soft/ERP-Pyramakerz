@@ -17,6 +17,7 @@ import { firstValueFrom } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-section',
   standalone: true,
@@ -43,18 +44,8 @@ export class SectionComponent {
   subscription!: Subscription;
   DomainName: string = '';
   UserID: number = 0;
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
+
   isLoading = false;
 
   Schools: School[] = [];
@@ -68,7 +59,8 @@ export class SectionComponent {
     public schoolService: SchoolService,
     public router: Router,
     public sectionService: SectionService,
-    private languageService: LanguageService
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService,
   ) {}
 
   ngOnInit() {
@@ -98,6 +90,13 @@ export class SectionComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  } 
 
   openModal(Id?: number) {
     if (Id) {

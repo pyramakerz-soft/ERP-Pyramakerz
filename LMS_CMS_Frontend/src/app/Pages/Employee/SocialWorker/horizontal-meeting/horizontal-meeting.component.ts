@@ -13,11 +13,14 @@ import { ApiService } from '../../../../Services/api.service';
 import { DomainService } from '../../../../Services/Employee/domain.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
-
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-horizontal-meeting',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './horizontal-meeting.component.html',
   styleUrl: './horizontal-meeting.component.css'
 })
@@ -29,7 +32,8 @@ export class HorizontalMeetingComponent {
   AllowDelete: boolean = false;
   AllowEditForOthers: boolean = false;
   AllowDeleteForOthers: boolean = false;
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   TableData: HorizontalMeeting[] = [];
   DomainName: string = '';
   UserID: number = 0;
@@ -55,7 +59,9 @@ export class HorizontalMeetingComponent {
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
-    public HorizontalMeetingServ: HorizontalMeetingService
+    public HorizontalMeetingServ: HorizontalMeetingService,
+    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService,
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -76,7 +82,17 @@ export class HorizontalMeetingComponent {
     });
 
     this.GetAllData();
+    this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
+      ngOnDestroy(): void {
+    this.realTimeService.stopConnection(); 
+     if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
 
   GetAllData() {
     this.TableData = [];

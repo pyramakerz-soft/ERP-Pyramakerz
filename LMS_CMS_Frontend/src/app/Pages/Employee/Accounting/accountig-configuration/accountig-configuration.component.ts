@@ -11,6 +11,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { firstValueFrom, Subscription } from 'rxjs';
 @Component({
   selector: 'app-accountig-configuration',
@@ -36,7 +37,8 @@ export class AccountigConfigurationComponent {
     public ApiServ: ApiService,     
     public accountingTreeChartService: AccountingTreeChartService,
     public accountingConfigurationService: AccountingConfigurationService,
-    private languageService: LanguageService
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService
   ) {}
 
   ngOnInit() {
@@ -53,6 +55,13 @@ export class AccountigConfigurationComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+    ngOnDestroy(): void {
+    this.realTimeService.stopConnection(); 
+     if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
 
   GetById(){
     this.accountConfigData = new AccountingConfiguration()

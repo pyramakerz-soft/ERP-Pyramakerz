@@ -17,6 +17,7 @@ import Swal from 'sweetalert2';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-time-table-replace',
   standalone: true,
@@ -25,18 +26,7 @@ import {  Subscription } from 'rxjs';
   styleUrl: './time-table-replace.component.css',
 })
 export class TimeTableReplaceComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   DomainName: string = '';
   UserID: number = 0;
@@ -74,6 +64,7 @@ export class TimeTableReplaceComponent {
     public ApiServ: ApiService,
     public timetableServ: TimeTableService,
     private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService,
   ) {}
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -90,6 +81,14 @@ export class TimeTableReplaceComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  } 
+
 
   GetTimeTable() {
     this.timetableServ

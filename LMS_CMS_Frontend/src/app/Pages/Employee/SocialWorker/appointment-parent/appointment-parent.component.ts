@@ -17,7 +17,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { SearchComponent } from '../../../../Component/search/search.component';
-
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-appointment-parent',
   standalone: true,
@@ -66,7 +66,8 @@ export class AppointmentParentComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public AppointmentServ: AppointmentService,
-    private languageService: LanguageService
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService,
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -93,6 +94,14 @@ export class AppointmentParentComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  }
+
 
   GetAllData(pageNumber: number, pageSize: number) {
     this.AppointmentServ.GetByIDWithPaggination(this.AppointmentId, this.DomainName, pageNumber, pageSize).subscribe(
