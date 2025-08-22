@@ -2296,6 +2296,10 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasIndex(e => e.IsDeleted)
                 .HasDatabaseName("IX_InventoryMaster_IsDeleted");
 
+            modelBuilder.Entity<InventoryDetails>()
+                .HasIndex(e => e.IsDeleted)
+                .HasDatabaseName("IX_InventoryDetails_IsDeleted");
+
             modelBuilder.Entity<Supplier>()
                 .HasIndex(e => e.IsDeleted)
                 .HasDatabaseName("IX_Supplier_IsDeleted");

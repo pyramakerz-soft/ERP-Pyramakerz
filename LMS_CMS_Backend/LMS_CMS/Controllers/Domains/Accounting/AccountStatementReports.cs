@@ -1,6 +1,4 @@
 ﻿using LMS_CMS_BL.UOW;
-using LMS_CMS_DAL.AccountingModule.Reports;
-using LMS_CMS_DAL.Models.Domains.AccountingModule;
 using LMS_CMS_DAL.Models.Domains.AccountingModule.Reports;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
