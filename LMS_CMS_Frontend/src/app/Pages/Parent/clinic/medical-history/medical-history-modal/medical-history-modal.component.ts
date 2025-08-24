@@ -17,6 +17,7 @@ import { ApiService } from '../../../../../Services/api.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-parent-medical-history-modal',
@@ -53,7 +54,8 @@ export class ParentMedicalHistoryModalComponent implements OnInit, OnChanges {
   constructor(
     private medicalHistoryService: MedicalHistoryService,
     private languageService: LanguageService,
-    private apiService: ApiService
+    private apiService: ApiService,
+    private realTimeService: RealTimeNotificationServiceService,
   ) {}
 
   ngOnInit() {
@@ -61,6 +63,13 @@ export class ParentMedicalHistoryModalComponent implements OnInit, OnChanges {
     this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+  ngOnDestroy(): void { 
+          this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   ngOnChanges(changes: SimpleChanges) {

@@ -35,6 +35,7 @@ import { School } from '../../../../Models/school';
 import { SchoolPCs } from '../../../../Models/Inventory/school-pcs';
 import { SchoolService } from '../../../../Services/Employee/school.service';
 import { SchoolPCsService } from '../../../../Services/Employee/Inventory/school-pcs.service';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-stocking-details',
   standalone: true,
@@ -125,7 +126,8 @@ export class StockingDetailsComponent {
     public InventoryMastrServ: InventoryMasterService,
     private cdr: ChangeDetectorRef,
     public printservice: ReportsService,
-    private languageService: LanguageService
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService
   ) { }
   async ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -166,6 +168,14 @@ export class StockingDetailsComponent {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+
+ ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   moveToMaster() {

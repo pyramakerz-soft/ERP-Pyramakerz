@@ -5,6 +5,7 @@ import { Student } from '../../../../../Models/student';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-hygiene-form-table',
   standalone: true,
@@ -25,7 +26,8 @@ export class HygieneFormTableComponent {
 
 
   constructor(
-      private languageService: LanguageService
+      private languageService: LanguageService,
+      private realTimeService: RealTimeNotificationServiceService
   ) {}
 
   ngOnInit(): void {
@@ -36,6 +38,12 @@ export class HygieneFormTableComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
+ ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  } 
 
   ngOnChanges() {
     this.students.forEach(student => {

@@ -26,7 +26,9 @@ import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import { Subscription } from 'rxjs';
+import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+
 @Component({
   selector: 'app-accounting-student-edit',
   standalone: true,
@@ -74,7 +76,8 @@ export class AccountingStudentEditComponent {
     public accountServ: AccountingTreeChartService,
     public StudentServ: StudentService,
     public NationalityServ: NationalityService,
-    private languageService: LanguageService
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -105,6 +108,13 @@ export class AccountingStudentEditComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection(); 
+     if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
+  
   GetAllData() {
     this.StudentServ.GetByID(this.StudentId, this.DomainName).subscribe((d: any) => {
       this.Data = d;

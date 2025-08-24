@@ -16,6 +16,7 @@ import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-cart',
@@ -43,7 +44,8 @@ export class CartComponent {
   
   constructor(public account: AccountService,private languageService: LanguageService, public ApiServ: ApiService, public activeRoute: ActivatedRoute, public employeeStudentService:EmployeeStudentService,
     private router: Router, private cartService: CartService, 
-    private orderService: OrderService, public cartShopItemService:CartShopItemService){}
+    private orderService: OrderService, public cartShopItemService:CartShopItemService,
+    private realTimeService: RealTimeNotificationServiceService,){}
   
   ngOnInit(){
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -64,6 +66,12 @@ export class CartComponent {
     this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+  }
+  ngOnDestroy(): void { 
+          this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   getStudents(){

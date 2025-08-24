@@ -16,7 +16,9 @@ import { TranslateModule } from '@ngx-translate/core';
 import Swal from 'sweetalert2';
 import { TestService } from '../../../../Services/Employee/Registration/test.service';
 import { Test } from '../../../../Models/Registration/test';
-
+import { LanguageService } from '../../../../Services/shared/language.service';
+import { Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-registration-form-test-answer',
   standalone: true,
@@ -30,7 +32,8 @@ export class RegistrationFormTestAnswerComponent {
   DomainName: string = '';
   UserID: number = 0;
   path: string = '';
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   Data: RegisterationFormTestAnswer[] = [];
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -59,7 +62,9 @@ export class RegistrationFormTestAnswerComponent {
     private router: Router,
     public registerServ: RegisterationFormTestAnswerService,
     public testService: TestService,
-    public registrationserv: RegisterationFormTestService
+    public registrationserv: RegisterationFormTestService,
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService,
     
   ) { }
 
@@ -93,6 +98,19 @@ export class RegistrationFormTestAnswerComponent {
 
     this.GetAllData();
     this.GetTestByID();
+      this.subscription = this.languageService.language$.subscribe(
+      (direction) => {
+        this.isRtl = direction === 'rtl';
+      }
+    );
+    this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   GetAllData() {

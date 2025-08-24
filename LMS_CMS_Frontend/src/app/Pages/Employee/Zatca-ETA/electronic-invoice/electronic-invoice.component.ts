@@ -16,6 +16,7 @@ import * as XLSX from 'xlsx';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-electronic-invoice',
   standalone: true,
@@ -66,7 +67,8 @@ export class ElectronicInvoiceComponent implements OnInit {
     private languageService: LanguageService,
     private apiService: ApiService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private realTimeService: RealTimeNotificationServiceService,
   ) {
     this.DomainName = this.apiService.GetHeader();
     this.route.data.subscribe((data) => {
@@ -82,6 +84,13 @@ export class ElectronicInvoiceComponent implements OnInit {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   private restoreState() {

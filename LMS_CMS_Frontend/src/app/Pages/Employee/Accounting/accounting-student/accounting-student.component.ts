@@ -18,7 +18,9 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { StudentService } from '../../../../Services/student.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import { Subscription } from 'rxjs';
+import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+
 @Component({
   selector: 'app-accounting-student',
   standalone: true,
@@ -60,9 +62,11 @@ export class AccountingStudentComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public StudentServ: StudentService,
-    public accountServ: AccountingTreeChartService,
-    private languageService: LanguageService
-  ) { }
+    public accountServ:AccountingTreeChartService ,
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService
+  ) {}
+
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
@@ -87,6 +91,13 @@ export class AccountingStudentComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection(); 
+     if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
 
   GetAllData() {
     this.StudentServ.GetAll(this.DomainName).subscribe((d) => {

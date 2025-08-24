@@ -34,7 +34,7 @@ import { NationalityService } from '../../../../Services/Octa/nationality.servic
 import { CountryService } from '../../../../Services/Octa/country.service';
 import { Country } from '../../../../Models/Accounting/country';
 import { RegistrationFormSubmissionService } from '../../../../Services/Employee/Registration/registration-form-submission.service';
-
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-registration-form',
   standalone: true,
@@ -110,7 +110,8 @@ export class RegistrationFormComponent {
     public gradeServce: GradeService,
     public sectionServce: SectionService,
     private languageService: LanguageService,
-    public GenderServ: GenderService
+    public GenderServ: GenderService,
+    private realTimeService: RealTimeNotificationServiceService,
   ) { }
 
   ngOnInit() {
@@ -151,10 +152,12 @@ export class RegistrationFormComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
-
   getParentByID() {
     this.parentService
       .GetByID(this.UserID, this.DomainName)

@@ -21,7 +21,8 @@ import { TestService } from '../../../../Services/Employee/Registration/test.ser
 import { RegisterationFormParentService } from '../../../../Services/Employee/Registration/registeration-form-parent.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import { Subscription } from 'rxjs';
+import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-registraion-test',
@@ -74,8 +75,9 @@ export class RegistraionTestComponent {
     public registrationserv: RegisterationFormTestService,
     public testService: TestService,
     public registerationFormParentService: RegisterationFormParentService,
-    public questionServ: QuestionService
-  ) { }
+    public questionServ: QuestionService,
+    private realTimeService: RealTimeNotificationServiceService,
+  ) {}
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -109,6 +111,12 @@ export class RegistraionTestComponent {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+  }
+  ngOnDestroy(): void { 
+          this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   GetAllData() {

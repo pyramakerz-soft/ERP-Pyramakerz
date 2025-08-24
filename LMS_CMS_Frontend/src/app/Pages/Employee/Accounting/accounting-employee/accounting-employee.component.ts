@@ -18,6 +18,8 @@ import { Employee } from '../../../../Models/Employee/employee';
 import { EmployeeGet } from '../../../../Models/Employee/employee-get';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+
 @Component({
   selector: 'app-accounting-employee',
   standalone: true,
@@ -60,8 +62,10 @@ export class AccountingEmployeeComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public EmployeeServ: EmployeeService,
-    public accountServ: AccountingTreeChartService,
-    private languageService: LanguageService
+    public accountServ:AccountingTreeChartService ,
+    private languageService: LanguageService ,
+    private realTimeService: RealTimeNotificationServiceService
+
 
   ) { }
   ngOnInit() {
@@ -88,6 +92,13 @@ export class AccountingEmployeeComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+    ngOnDestroy(): void {
+    this.realTimeService.stopConnection(); 
+     if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
 
   GetAllData() {
     this.EmployeeServ.Get_Employees(this.DomainName).subscribe((d) => {

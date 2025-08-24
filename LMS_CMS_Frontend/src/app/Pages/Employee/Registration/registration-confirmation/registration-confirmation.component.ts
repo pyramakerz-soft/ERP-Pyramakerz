@@ -18,7 +18,9 @@ import { RegistrationFormStateService } from '../../../../Services/Employee/Regi
 import { RegistrationFormState } from '../../../../Models/Registration/registration-form-state';
 import { firstValueFrom } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
-
+import { Subscription } from 'rxjs';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-registration-confirmation',
   standalone: true,
@@ -30,7 +32,8 @@ export class RegistrationConfirmationComponent {
   keysArray: string[] = ['id', 'studentEnName', 'studentArName','phone','gradeName','academicYearName','schoolName','email'];
   key: string= "id";
   value: any = "";
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   DomainName: string = "";
   UserID: number = 0;
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
@@ -54,7 +57,9 @@ export class RegistrationConfirmationComponent {
   constructor(public account: AccountService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService, 
         private menuService: MenuService, public activeRoute: ActivatedRoute, public router:Router, 
         public registerationFormParentServicea:RegisterationFormParentService, public yearService: AcadimicYearService, 
-        public schoolService: SchoolService, public stateService: RegistrationFormStateService){}
+        public schoolService: SchoolService, public stateService: RegistrationFormStateService,
+    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService,){}
 
   ngOnInit(){
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -78,6 +83,18 @@ export class RegistrationConfirmationComponent {
         this.AllowEditForOthers = settingsPage.allow_Edit_For_Others
       }
     });
+      this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   IsAllowEdit(InsertedByID: number) {

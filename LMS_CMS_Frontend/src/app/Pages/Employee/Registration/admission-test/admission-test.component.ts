@@ -22,7 +22,7 @@ import { SearchComponent } from '../../../../Component/search/search.component';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-admission-test',
   standalone: true,
@@ -78,7 +78,8 @@ export class AdmissionTestComponent {
     public GradeServ: GradeService,
     public AcadimicYearServ: AcadimicYearService,
     public SubjectServ: SubjectService,
-    private languageService: LanguageService
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService,
   ) { }
 
   ngOnInit() {
@@ -107,9 +108,15 @@ export class AdmissionTestComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
+
+
 
   onSchoolChange(selectedSchoolId: number) {
     this.test.academicYearID = 0

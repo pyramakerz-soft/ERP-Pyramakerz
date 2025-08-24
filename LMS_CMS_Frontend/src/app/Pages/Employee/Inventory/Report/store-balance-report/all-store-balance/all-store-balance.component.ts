@@ -8,13 +8,16 @@ import { PdfPrintComponent } from '../../../../../../Component/pdf-print/pdf-pri
 import { StoreBalanceReport, StoreBalanceItem, StoreBalanceDetail } from '../../../../../../Models/Inventory/store-balance';
 import { InventoryDetailsService } from '../../../../../../Services/Employee/Inventory/inventory-details.service';
 import { InventoryCategoryService } from '../../../../../../Services/Employee/Inventory/inventory-category.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../../../Services/shared/language.service';
+import { RealTimeNotificationServiceService } from '../../../../../../Services/shared/real-time-notification-service.service';
+import { firstValueFrom, Subscription } from 'rxjs';
 type ReportType = 'QuantityOnly' | 'PurchasePrice' | 'SalesPrice' | 'Cost';
 
 @Component({
   selector: 'app-all-stores-balance-report',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
   templateUrl: './all-store-balance.component.html',
   styleUrls: ['./all-store-balance.component.css'],
 })
@@ -33,7 +36,8 @@ getColumnCount(): number {
   hasBalance = true;
   overdrawnBalance = true;
   zeroBalances = true;
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   categories: any[] = [];
   reportData: StoreBalanceReport | null = null;
   showTable = false;
@@ -50,7 +54,9 @@ getColumnCount(): number {
   constructor(
     private inventoryDetailsService: InventoryDetailsService,
     private categoryService: InventoryCategoryService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,    
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService
   ) {}
 
   ngOnInit() {
@@ -59,7 +65,17 @@ getColumnCount(): number {
       this.setPageTitle();
       this.loadCategories();
     });
+          this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
+      ngOnDestroy(): void {
+    this.realTimeService.stopConnection(); 
+     if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
 
   private setPageTitle() {
     const titles: Record<ReportType, string> = {

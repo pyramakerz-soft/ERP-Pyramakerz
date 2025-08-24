@@ -21,6 +21,7 @@ import { firstValueFrom } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 
 @Component({
@@ -67,7 +68,8 @@ export class ConductComponent {
     public ConductLevelServ: ConductLevelService,
     public SectionServ: SectionService,
     public ConductServ: ConductService,
-    public ConductTypeServ: ConductTypeService
+    public ConductTypeServ: ConductTypeService,
+    private realTimeService: RealTimeNotificationServiceService,
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -92,6 +94,13 @@ export class ConductComponent {
     this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   GetAllData() {

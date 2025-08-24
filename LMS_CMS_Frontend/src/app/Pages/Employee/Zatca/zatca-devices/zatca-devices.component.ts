@@ -19,6 +19,7 @@ import { ZatcaService } from '../../../../Services/Employee/Zatca/zatca.service'
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-zatca-devices',
   standalone: true,
@@ -68,7 +69,8 @@ export class ZatcaDevicesComponent implements OnInit {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     private datePipe: DatePipe,
-    private zatcaService: ZatcaService
+    private zatcaService: ZatcaService,
+    private realTimeService: RealTimeNotificationServiceService,
 
   ) {}
 
@@ -106,6 +108,13 @@ export class ZatcaDevicesComponent implements OnInit {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   async GetTableData() {

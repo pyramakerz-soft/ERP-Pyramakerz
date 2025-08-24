@@ -14,6 +14,7 @@ import { firstValueFrom } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-electronic-invoice-detail',
   standalone: true,
@@ -80,7 +81,8 @@ export class ElectronicInvoiceDetailComponent implements OnInit {
     public ApiServ: ApiService,
     private datePipe: DatePipe,
     private zatcaService: ZatcaService,
-    private etaService: EtaService
+    private etaService: EtaService,
+    private realTimeService: RealTimeNotificationServiceService,
   ) {}
 
   ngOnInit() {
@@ -95,6 +97,13 @@ export class ElectronicInvoiceDetailComponent implements OnInit {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   // Update the loadInvoice() method in electronic-invoice-detail.component.ts

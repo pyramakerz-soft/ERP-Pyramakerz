@@ -29,6 +29,7 @@ import { ClassroomService } from '../../../../Services/Employee/LMS/classroom.se
 import Swal from 'sweetalert2';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-conduct-add-edit',
   standalone: true,
@@ -75,6 +76,7 @@ export class ConductAddEditComponent {
     private ConductTypeServ: ConductTypeService,
     private ProcedureTypeServ: ProcedureTypeService,
     private ConductServ: ConductService,
+    private realTimeService: RealTimeNotificationServiceService,
   ) { }
 
   ngOnInit() {
@@ -128,6 +130,14 @@ export class ConductAddEditComponent {
     this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   openFile(file: any) {

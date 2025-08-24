@@ -15,7 +15,7 @@ import { firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
 import { Day } from '../../../../Models/day';
 import { DaysService } from '../../../../Services/Octa/days.service';
-
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 @Component({
@@ -55,9 +55,9 @@ export class SchoolComponent {
     public activeRoute: ActivatedRoute,
     public schoolService: SchoolService,
     public DaysServ: DaysService,
-    public router: Router
-    ,
-     private languageService: LanguageService
+    public router: Router,
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService
   ) { }
 
   ngOnInit() {
@@ -85,6 +85,14 @@ export class SchoolComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+
+      ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+    } 
 
   getSchoolData() {
     this.schoolData = []

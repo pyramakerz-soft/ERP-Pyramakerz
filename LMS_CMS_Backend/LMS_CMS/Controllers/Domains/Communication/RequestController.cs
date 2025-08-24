@@ -29,8 +29,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
         private readonly FileValidationService _fileValidationService;
         private readonly SendNotificationService _sendNotificationService;
         private readonly RequestService _requestService;
+        private readonly ValidTeachersForStudentService _validTeachersForStudentService;
 
-        public RequestController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileValidationService fileValidationService, SendNotificationService sendNotificationService, RequestService requestService)
+        public RequestController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileValidationService fileValidationService, SendNotificationService sendNotificationService, RequestService requestService, ValidTeachersForStudentService validTeachersForStudentService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
@@ -38,6 +39,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             _fileValidationService = fileValidationService;
             _sendNotificationService = sendNotificationService;
             _requestService = requestService;
+            _validTeachersForStudentService = validTeachersForStudentService;
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////
@@ -81,71 +83,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             }
 
             return (englishName, arabicName);
-        }
-
-        private async Task<List<long>> GetValidTeacherIdsForStudent(long studentId, UOW Unit_Of_Work)
-        {
-            List<long> teacherIDs = new List<long>();
-
-            // Get student current grade
-            StudentGrade studentGrade = Unit_Of_Work.studentGrade_Repository.First_Or_Default(
-                d => d.IsDeleted != true && d.Grade.IsDeleted != true && d.Grade.Section.IsDeleted != true && d.AcademicYear.IsDeleted != true && d.AcademicYear.School.IsDeleted != true
-                && d.AcademicYear.IsActive == true && d.StudentID == studentId);
-
-            if (studentGrade != null)
-            {
-                // Get his classroom
-                StudentClassroom studentClassroom = Unit_Of_Work.studentClassroom_Repository.First_Or_Default(
-                    d => d.IsDeleted != true && d.Classroom.IsDeleted != true && d.Classroom.AcademicYear.IsDeleted != true && d.Classroom.AcademicYear.IsActive == true
-                    && d.StudentID == studentId && d.Classroom.GradeID == studentGrade.GradeID);
-
-                if (studentClassroom != null)
-                {
-                    // Get His subjects
-                    List<StudentClassroomSubject> studentClassroomSubjects = Unit_Of_Work.studentClassroomSubject_Repository.FindBy(
-                        d => d.IsDeleted != true && d.StudentClassroomID == studentClassroom.ID && d.Subject.IsDeleted != true && d.Hide == false);
-
-                    if (studentClassroomSubjects != null && studentClassroomSubjects.Count > 0)
-                    {
-                        List<long> subjectIDs = studentClassroomSubjects.Select(y => y.SubjectID).ToList();
-
-                        // Get his class subjects 
-                        List<ClassroomSubject> classroomSubjects = Unit_Of_Work.classroomSubject_Repository.FindBy(
-                            d => d.ClassroomID == studentClassroom.ClassID && subjectIDs.Contains(d.SubjectID) && d.IsDeleted != true && d.Hide == false && d.TeacherID != null && d.Teacher.IsDeleted != true
-                            );
-
-                        if (classroomSubjects != null && classroomSubjects.Count > 0)
-                        {
-                            teacherIDs = classroomSubjects.Where(cs => cs.TeacherID != null).Select(y => y.TeacherID.Value).ToList();
-
-                            foreach (var item in classroomSubjects)
-                            {
-                                List<ClassroomSubjectCoTeacher> classroomSubjectCoTeachers = Unit_Of_Work.classroomSubjectCoTeacher_Repository.FindBy(
-                                d => d.ClassroomSubjectID == item.ID && d.IsDeleted != true && d.CoTeacher.IsDeleted != true
-                                );
-                                if (classroomSubjectCoTeachers != null && classroomSubjectCoTeachers.Count != 0)
-                                {
-                                    teacherIDs.AddRange(classroomSubjectCoTeachers.Select(ct => ct.CoTeacherID));
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            List<RemedialClassroomStudent> remedialClassroomStudents = await Unit_Of_Work.remedialClassroomStudent_Repository.Select_All_With_IncludesById<RemedialClassroomStudent>(
-                d => d.IsDeleted != true && d.RemedialClassroom.IsDeleted != true && d.RemedialClassroom.Subject.IsDeleted != true && d.RemedialClassroom.AcademicYear.IsDeleted != true
-                && d.RemedialClassroom.AcademicYear.School.IsDeleted != true && d.RemedialClassroom.Subject.Grade.IsDeleted != true && d.RemedialClassroom.Subject.Grade.Section.IsDeleted != true
-                && d.RemedialClassroom.AcademicYear.IsActive == true && d.StudentID == studentId,
-                query => query.Include(d => d.RemedialClassroom)
-                );
-            if (remedialClassroomStudents != null && remedialClassroomStudents.Count != 0)
-            {
-                teacherIDs.AddRange(remedialClassroomStudents.Select(ct => ct.RemedialClassroom.TeacherID));
-            }
-
-            return teacherIDs.Distinct().ToList();
-        }
+        } 
 
         //////////////////////////////////////////////////////////////////////////////////////////
 
@@ -846,7 +784,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                     }
 
                     long studentId = userTypeID == 2 ? userId : NewRequest.StudentID.Value;
-                    var teacherIDs = await GetValidTeacherIdsForStudent(studentId, Unit_Of_Work);
+                    var teacherIDs = await _validTeachersForStudentService.GetValidTeacherIdsForStudent(studentId, Unit_Of_Work);
 
                     if (teacherIDs.Count == 0 || !teacherIDs.Contains(NewRequest.ReceiverID))
                     {

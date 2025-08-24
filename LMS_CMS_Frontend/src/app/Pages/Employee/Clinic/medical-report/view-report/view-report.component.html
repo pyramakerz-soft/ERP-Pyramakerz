@@ -2,13 +2,13 @@
     <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
         <i class="fa-solid fa-chevron-left cursor-pointer rtl:rotate-180" (click)="goBack()"></i>
         <h1 class="primaryTxt font-semibold text-2xl leading-9">
-            Medical Report By {{ reportType === 'parent' ? 'Parent' : 'Doctor' }}
+             {{ 'Medical Report By' | translate }} {{ reportType === 'parent' ? ('Parent'|translate) : ('Doctor'|translate) }}
         </h1>
     </div>
 </div>
 
 <div *ngIf="isLoading" class="mt-6 text-center">
-    <p>Loading...</p>
+    <p> {{ 'Loading...' | translate }}</p>
 </div>
 
 <div *ngIf="error" class="mt-6 text-center text-red-500">
@@ -20,7 +20,7 @@
     <div *ngIf="reportType === 'doctor'" class="flex flex-wrap justify-between gap-4 mb-6">
         <!-- Grade Box -->
         <div class="bg-[#EBEBEB] p-4 w-[32%]">
-            <p class="font-semibold text-sm text-[#6F6F6F] mb-2">Grade</p>
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-2"> {{ 'Grade' | translate }}</p>
             <p class="font-medium text-base text-[#1E1E1E]">
                 {{ medicalHistory.grade || 'N/A' }}
             </p>
@@ -28,14 +28,14 @@
 
         <!-- Class Box -->
         <div class="bg-[#EBEBEB] p-4 w-[32%]">
-            <p class="font-semibold text-sm text-[#6F6F6F] mb-2">Class</p>
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-2"> {{ 'Class' | translate }}</p>
             <p class="font-medium text-base text-[#1E1E1E]">
                 {{ medicalHistory.classRoom || 'N/A' }}
             </p>
         </div>
 
         <div class="bg-[#EBEBEB] p-4 w-[32%]">
-            <p class="font-semibold text-sm text-[#6F6F6F] mb-2">Student</p>
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-2"> {{ 'Student' | translate }}</p>
             <p class="font-medium text-base text-[#1E1E1E]">
                 {{ medicalHistory.student || 'N/A' }}
             </p>
@@ -57,7 +57,7 @@
     
         <!-- Description Box -->
         <div class="bg-[#EBEBEB] p-4 w-[49%]">
-            <p class="font-semibold text-sm text-[#6F6F6F] mb-2">Description</p>
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-2">  {{ 'Description' | translate }}</p>
             <p class="font-medium text-base text-[#1E1E1E]">
                 {{ medicalHistory.details || 'No description provided' }}
             </p>
@@ -66,7 +66,7 @@
 
     <!-- Permanent Drug Section (Parent only) -->
     <div *ngIf="reportType === 'parent' && medicalHistory.permanentDrug" class="bg-[#EBEBEB] p-4 rounded-lg mb-6">
-        <p class="font-semibold text-sm text-[#6F6F6F] mb-2">Permanent Drug</p>
+        <p class="font-semibold text-sm text-[#6F6F6F] mb-2">  {{ 'Permanent Drug' | translate }}</p>
         <p class="font-medium text-base text-[#1E1E1E]">
             {{ medicalHistory.permanentDrug }}
         </p>
@@ -74,7 +74,7 @@
 
     <!-- Attached Files Section -->
     <div class="bg-[#EBEBEB] p-6 rounded-lg shadow-sm">
-        <h2 class="font-semibold text-lg text-[#1E1E1E] mb-4">Attached</h2>
+        <h2 class="font-semibold text-lg text-[#1E1E1E] mb-4"> {{ 'Attached' | translate }}</h2>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <!-- First Report Box -->
@@ -87,10 +87,10 @@
                         <p class="font-medium text-base text-[#1E1E1E] mb-2">
                             {{ getFileName(medicalHistory.firstReport) }}
                         </p>
-                        <p class="font-medium text-sm text-[#6F6F6F] mb-1">File Name</p>
+                        <p class="font-medium text-sm text-[#6F6F6F] mb-1"> {{ 'File Name' | translate }}</p>
                         <a [href]="medicalHistory.firstReport" target="_blank"
                             class="text-[#A020F0] font-medium text-sm hover:underline">
-                            Click to view
+                             {{ 'Click to' | translate }} {{ 'view' | translate }}
                         </a>
                     </div>
                 </div>
@@ -106,10 +106,10 @@
                         <p class="font-medium text-base text-[#1E1E1E] mb-2">
                             {{ getFileName(medicalHistory.secReport) }}
                         </p>
-                        <p class="font-medium text-sm text-[#6F6F6F] mb-1">File Name</p>
+                        <p class="font-medium text-sm text-[#6F6F6F] mb-1">{{ 'File Name' | translate }}</p>
                         <a [href]="medicalHistory.secReport" target="_blank"
                             class="text-[#A020F0] font-medium text-sm hover:underline">
-                            Click to view
+                             {{ 'Click to' | translate }} {{ 'view' | translate }}
                         </a>
                     </div>
                 </div>
@@ -118,7 +118,7 @@
             <!-- No Files Message -->
             <div *ngIf="!hasValidFile(medicalHistory.firstReport) && !hasValidFile(medicalHistory.secReport)"
                 class="col-span-2 text-center py-4">
-                <p class="text-[#6F6F6F] font-medium">No attached files</p>
+                <p class="text-[#6F6F6F] font-medium"> {{ 'No attached files' | translate }}</p>
             </div>
         </div>
     </div>

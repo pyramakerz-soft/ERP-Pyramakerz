@@ -1,6 +1,6 @@
-<div class="flex justify-between space-x-10 items-center">
+<div class="flex justify-between space-x-10 rtl:space-x-reverse items-center">
     <div class="w-[48%] bg-[#F7F7F7] rounded-md max-h-[75vh] overflow-y-auto overflow-x-hidden">
-        <h3 class="primaryTxt font-semibold m-5">Notifications</h3> 
+        <h3 class="primaryTxt font-semibold m-5">{{ 'Notifications' | translate }}</h3> 
         <ul>
             <li *ngFor="let data of TableData; let i = index" class="relative" (click)="viewNotification(data)">
                 <div *ngIf="!data.seenOrNot"
@@ -11,12 +11,12 @@
                         <img src="Images/person-dummy.jpg" class="cursor-pointer rounded-full w-14" alt="Profile Photo">
                     </div>
                     <div class="ml-4 text-start w-full"> 
-                        <p *ngIf="data.insertedByUserName" class="primaryTxt text-sm"><span class="font-semibold">{{ data.insertedByUserName }}</span> Notifed You</p>
+                        <p *ngIf="data.insertedByUserName" class="primaryTxt text-sm"><span class="font-semibold">{{ data.insertedByUserName }}</span> {{ 'Notifed You' | translate }}</p>
                         <div class="mt-4 flex flex-col space-y-3">
                             <div *ngIf="data.text" class="w-[70%] border-l-4 border-gray-300 pl-4 primaryTxt text-base leading-relaxed truncate overflow-hidden whitespace-nowrap">
                                 {{data.text}}
                             </div> 
-                            <div *ngIf="data.imageLink" class="flex space-x-2 items-center">
+                            <div *ngIf="data.imageLink" class="flex space-x-2 rtl:space-x-reverse items-center">
                                 <img src="Images/Icon frame.png" class="border p-[4px] w-10 rounded-md" alt="Photo">
                                 <span class="primaryTxt text-sm font-semibold">{{getImageName(data.imageLink)}}</span>
                             </div> 
@@ -24,7 +24,7 @@
                                 <a [href]="data.link" class="border-b border-[#089B41] hover:text-[#089b408c]"
                                     target="_blank" (click)="$event.stopPropagation(); LinkOpened(data)"
                                     rel="noopener"> <!-- Prevents the new tab from having access to the original page via window.opener -->
-                                    View Link
+                                       {{ 'View' | translate }}  {{ 'Link' | translate }}
                                 </a>                                    
                             </div> 
                         </div>
@@ -35,7 +35,7 @@
         </ul>  
         <div *ngIf="TableData.length == 0"> 
             <div class="flex justify-center">
-                <p class="text-[#BDBDBD]">No Notifications Yet</p>
+                <p class="text-[#BDBDBD]">  {{ 'No Notifications Yet' | translate }}</p>
             </div>  
         </div>
     </div>
@@ -45,16 +45,16 @@
                 <img src="Images/person-dummy.jpg" class="cursor-pointer rounded-full w-14" alt="Profile Photo">
             </div>
             <div class="ml-4 text-start w-full"> 
-                <p *ngIf="notification.insertedByUserName" class="primaryTxt text-sm"><span class="font-semibold">{{ notification.insertedByUserName }}</span> Notifed You</p>
+                <p *ngIf="notification.insertedByUserName" class="primaryTxt text-sm"><span class="font-semibold">{{ notification.insertedByUserName }}</span> {{ 'Notifed You' | translate }}</p>
                 <div class="mt-4 flex flex-col space-y-3">
-                    <div *ngIf="notification.imageLink" class="flex space-x-2 items-center"> 
+                    <div *ngIf="notification.imageLink" class="flex space-x-2 rtl:space-x-reverse items-center"> 
                         <img [src]="notification.imageLink" class="w-[200px] object-cover rounded-md"> 
                     </div> 
                     <div *ngIf="notification.link" class="secondaryTxt text-sm font-semibold">        
                         <a [href]="notification.link" class="border-b border-[#089B41] hover:text-[#089b408c]"
                         target="_blank" (click)="LinkOpened(notification)"
                         rel="noopener"> <!-- Prevents the new tab from having access to the original page via window.opener -->
-                        View Link
+                           {{ 'View' | translate }}  {{ 'Link' | translate }}
                         </a>                                    
                     </div> 
                     <div *ngIf="notification.text" class="border-l-4 border-gray-300 pl-4 primaryTxt text-base">

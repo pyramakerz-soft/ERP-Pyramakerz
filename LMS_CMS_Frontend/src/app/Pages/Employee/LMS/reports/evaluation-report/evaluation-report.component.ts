@@ -21,6 +21,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { PdfPrintComponent } from '../../../../../Component/pdf-print/pdf-print.component';
 import Swal from 'sweetalert2';
 import * as XLSX from 'xlsx-js-style';
+import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
+
 
 @Component({
   selector: 'app-evaluation-report',
@@ -87,7 +89,8 @@ export class EvaluationReportComponent {
     public classroomService: ClassroomService,
     public employeeService: EmployeeService,
     public SchoolServ: SchoolService,
-    public templateServ: EvaluationTemplateService
+    public templateServ: EvaluationTemplateService,
+    private realTimeService: RealTimeNotificationServiceService
   ) { }
 
   ngOnInit() {
@@ -104,7 +107,12 @@ export class EvaluationReportComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-
+      ngOnDestroy(): void {
+    this.realTimeService.stopConnection(); 
+     if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
   getClassData() {
     this.Classs = [];
     if (this.SchoolID) {

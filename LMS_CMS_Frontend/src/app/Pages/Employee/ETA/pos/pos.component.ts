@@ -15,6 +15,7 @@ import Swal from 'sweetalert2';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-pos',
   standalone: true,
@@ -60,7 +61,8 @@ export class POSComponent {
     public activeRoute: ActivatedRoute, 
     public posService: POSService, 
     public router: Router,
-    private languageService: LanguageService
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService
   ) {}
 
   ngOnInit() {
@@ -89,6 +91,13 @@ export class POSComponent {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';    
+  }
+
+ ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   GetAllData(pageNumber:number, pageSize:number){

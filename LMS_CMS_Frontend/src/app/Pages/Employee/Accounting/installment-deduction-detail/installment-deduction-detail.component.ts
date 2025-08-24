@@ -24,7 +24,9 @@ import { EmployeeStudentService } from '../../../../Services/Employee/Accounting
 import { EmplyeeStudent } from '../../../../Models/Accounting/emplyee-student';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import { Subscription } from 'rxjs';
+import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+
 
 @Component({
   selector: 'app-installment-deduction-detail',
@@ -82,7 +84,8 @@ export class InstallmentDeductionDetailComponent {
     public installmentDeductionDetailServ: InstallmentDeductionDetailService,
     public installmentDeductionMasterServ: InstallmentDeductionMasterService,
     public TuitionFeesTypeServ: TuitionFeesTypeService,
-    private languageService: LanguageService
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -132,6 +135,14 @@ export class InstallmentDeductionDetailComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+   ngOnDestroy(): void {
+    this.realTimeService.stopConnection(); 
+     if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
+
 
   moveToMaster() {
     this.router.navigateByUrl(`Employee/Installment Deduction`)

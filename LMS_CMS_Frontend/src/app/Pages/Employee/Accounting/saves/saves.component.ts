@@ -20,6 +20,7 @@ import { AccountingTreeChartService } from '../../../../Services/Employee/Accoun
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-saves',
@@ -68,7 +69,8 @@ export class SavesComponent {
     public ApiServ: ApiService,
     public SaveServ: SaveService,
     public accountServ: AccountingTreeChartService,
-    private languageService: LanguageService
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -95,6 +97,15 @@ export class SavesComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+      ngOnDestroy(): void {
+    this.realTimeService.stopConnection(); 
+     if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
+
+
 
   GetAllData() {
     this.TableData = []

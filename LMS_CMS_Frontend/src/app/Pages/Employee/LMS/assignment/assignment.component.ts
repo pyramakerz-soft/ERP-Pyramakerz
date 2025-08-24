@@ -31,6 +31,7 @@ import { SchoolService } from '../../../../Services/Employee/school.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-assignment',
   standalone: true,
@@ -101,7 +102,8 @@ export class AssignmentComponent {
     public classroomSubjectService: ClassroomSubjectService,
     public assignmentTypeService: AssignmentTypeService,
     public router: Router,
-        private languageService: LanguageService
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService
   ) { }
 
   ngOnInit() {
@@ -133,6 +135,14 @@ export class AssignmentComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+ ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  }
+
 
   getAllSchools() {
     this.schools = []

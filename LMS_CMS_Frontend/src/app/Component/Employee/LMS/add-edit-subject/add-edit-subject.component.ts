@@ -37,8 +37,8 @@ export class AddEditSubjectComponent {
   Grades: Grade[] = []
   subjectCategories:SubjectCategory[] = []
   isLoading = false;
-    isRtl: boolean = false;
-    subscription!: Subscription;
+  isRtl: boolean = false;
+  subscription!: Subscription;
 
   constructor( private languageService: LanguageService,public subjectService: SubjectService, public subjectCategoryService: SubjectCategoryService, public dialogRef: MatDialogRef<AddEditSubjectComponent>, 
     public schoolService: SchoolService, public sectionService:SectionService, public gradeService:GradeService, public ApiServ:ApiService,
@@ -50,16 +50,19 @@ export class AddEditSubjectComponent {
   }
       
   ngOnInit(){
+    const currentDir = document.documentElement.dir === 'rtl' ? 'rtl' : 'ltr';
+    this.languageService.setLanguage(currentDir);
+    this.isRtl = document.documentElement.dir === 'rtl';
+    
     this.DomainName = this.ApiServ.GetHeader();
     if(this.editSubject){
       this.GetSubjectById(this.subjectId)
-    }
+    } 
     this.getSubjectCategoryData() 
     this.getSchools()
-        this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
-    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
   GetSubjectById(subjectId: number) {

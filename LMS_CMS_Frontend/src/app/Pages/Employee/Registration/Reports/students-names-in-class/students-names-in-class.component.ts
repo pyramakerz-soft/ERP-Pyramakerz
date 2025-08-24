@@ -20,6 +20,7 @@ import { PdfPrintComponent } from '../../../../../Component/pdf-print/pdf-print.
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-students-names-in-class',
   standalone: true,
@@ -69,6 +70,7 @@ export class StudentsNamesInClassComponent {
     public acadimicYearService: AcadimicYearService,
     public studentService: StudentService,
     public reportsService: ReportsService,
+    private realTimeService: RealTimeNotificationServiceService,
   ) { }
 
   ngOnInit() {
@@ -83,6 +85,13 @@ export class StudentsNamesInClassComponent {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   getSchool() {

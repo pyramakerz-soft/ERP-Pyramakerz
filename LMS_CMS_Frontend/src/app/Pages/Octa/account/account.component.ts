@@ -9,6 +9,7 @@ import { firstValueFrom } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-account',
   standalone: true,
@@ -27,7 +28,7 @@ export class AccountComponent {
   editAccount:boolean = false
   validationErrors: { [key in keyof Account]?: string } = {};
 
-  constructor(private languageService: LanguageService,public octaService: OctaService){}
+  constructor(private languageService: LanguageService,private realTimeService: RealTimeNotificationServiceService,public octaService: OctaService){}
   
   ngOnInit(){
     this.getAccountData()
@@ -35,6 +36,13 @@ export class AccountComponent {
     this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+  ngOnDestroy(): void { 
+          this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   getAccountData(){

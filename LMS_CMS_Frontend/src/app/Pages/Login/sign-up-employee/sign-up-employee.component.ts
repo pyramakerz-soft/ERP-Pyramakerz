@@ -10,6 +10,7 @@ import Swal from 'sweetalert2';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-sign-up-employee',
@@ -30,7 +31,7 @@ export class SignUpEmployeeComponent {
 
   @ViewChild(RecaptchaComponent) captchaRef!: RecaptchaComponent;
   
-  constructor(private router: Router, private languageService: LanguageService, public registeredEmployeeService: RegisteredEmployeeService, public ApiServ: ApiService) { }
+  constructor(private router: Router, private languageService: LanguageService,private realTimeService: RealTimeNotificationServiceService, public registeredEmployeeService: RegisteredEmployeeService, public ApiServ: ApiService) { }
   
   ngOnInit() {
     this.DomainName = this.ApiServ.GetHeader(); 
@@ -38,6 +39,13 @@ export class SignUpEmployeeComponent {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+  ngOnDestroy(): void { 
+          this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
  
   onCaptchaResolved(token: string | null): void {

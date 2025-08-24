@@ -18,6 +18,7 @@ import { firstValueFrom } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-bus-print-name-tag',
   standalone: true,
@@ -62,7 +63,7 @@ export class BusPrintNameTagComponent {
     public EditDeleteServ: DeleteEditPermissionService, 
     public ApiServ: ApiService, 
     public BusServ: BusService,
-    private languageService: LanguageService) { }
+    private languageService: LanguageService, private realTimeService: RealTimeNotificationServiceService) { }
 
   ngOnInit() {
 
@@ -97,6 +98,13 @@ export class BusPrintNameTagComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+            ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+    } 
 
   GetAllDomains() {
     this.DomainServ.Get().subscribe((data) => {

@@ -14,11 +14,14 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import Swal from 'sweetalert2';
 import { SearchStudentComponent } from '../../../../Component/Employee/search-student/search-student.component';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-remedial-classroom-student',
   standalone: true,
-  imports: [FormsModule, CommonModule ,SearchStudentComponent],
+  imports: [FormsModule, CommonModule ,SearchStudentComponent, TranslateModule],
   templateUrl: './remedial-classroom-student.component.html',
   styleUrl: './remedial-classroom-student.component.css',
 })
@@ -39,7 +42,8 @@ export class RemedialClassroomStudentComponent {
     new RemedialClassroomStudent();
   remedialClassroom: RemedialClassroom = new RemedialClassroom();
   validationErrors: { [key in keyof RemedialClassroomStudent]?: string } = {};
-
+   isRtl: boolean = false;
+  subscription!: Subscription;
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
   AllowEditForOthers: boolean = false;
@@ -66,7 +70,9 @@ export class RemedialClassroomStudentComponent {
     private menuService: MenuService,
     public activeRoute: ActivatedRoute,
     public router: Router,
-    public RemedialClassroomServ: RemedialClassroomService
+    public RemedialClassroomServ: RemedialClassroomService,
+    private realTimeService: RealTimeNotificationServiceService,    
+    private languageService: LanguageService,
   ) {}
 
   ngOnInit() {
@@ -92,7 +98,17 @@ export class RemedialClassroomStudentComponent {
         this.AllowEditForOthers = settingsPage.allow_Edit_For_Others;
       }
     });
+          this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
+      ngOnDestroy(): void {
+    this.realTimeService.stopConnection(); 
+     if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
 
   GetRemedialClassroom() {
     this.RemedialClassroomServ.GetById(this.RemedialClassroomID,this.DomainName).subscribe((d) => {

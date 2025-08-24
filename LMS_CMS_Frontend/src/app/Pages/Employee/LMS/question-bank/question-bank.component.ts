@@ -36,7 +36,7 @@ import { School } from '../../../../Models/school';
 import { Grade } from '../../../../Models/LMS/grade';
 import { GradeService } from '../../../../Services/Employee/LMS/grade.service';
 import { SchoolService } from '../../../../Services/Employee/school.service';
-
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-question-bank',
   standalone: true,
@@ -145,6 +145,7 @@ export class QuestionBankComponent {
     public DokLevelServ: DokLevelService,
     public QuestionBankTypeServ: QuestionBankTypeService,
     private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService,
   ) { }
 
   ngOnInit() {
@@ -175,6 +176,13 @@ export class QuestionBankComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  } 
 
   getAllGradesBySchoolId() {
     this.IsView = false

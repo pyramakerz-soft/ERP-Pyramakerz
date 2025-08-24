@@ -13,6 +13,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { AccountingConstraintsResponse } from '../../../../../Models/Accounting/accounting-constraints-report';
+import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-accountig-constraints',
@@ -49,7 +50,8 @@ export class AccountigConstraintsComponent implements OnDestroy {
     public ApiServ: ApiService,
     public reportsService: ReportsService,
     public sharedReportsService: SharedReportsService,
-    private languageService: LanguageService
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService
   ) {}
 
   ngOnInit() {
@@ -64,10 +66,16 @@ export class AccountigConstraintsComponent implements OnDestroy {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
-  }
-
+  // ngOnDestroy() {
+  //   this.subscription.unsubscribe();
+  // }
+      ngOnDestroy(): void {
+    this.realTimeService.stopConnection(); 
+     if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
+  
   async ViewReport() {
     if (this.SelectedStartDate > this.SelectedEndDate) {
       Swal.fire({

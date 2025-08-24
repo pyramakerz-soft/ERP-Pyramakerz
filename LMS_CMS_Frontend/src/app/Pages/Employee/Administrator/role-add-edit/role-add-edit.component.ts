@@ -18,6 +18,7 @@ import { RolePut } from '../../../../Models/Administrator/role-put';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-role-add-edit',
   standalone: true,
@@ -59,14 +60,16 @@ export class RoleAddEditComponent {
 
   constructor(public pageServ: PageService, 
     public RoleDetailsServ: RoleDetailsService,
-     public activeRoute: ActivatedRoute, 
-     public account: AccountService,
-      public ApiServ: ApiService,
-       private menuService: MenuService, 
-       public EditDeleteServ: DeleteEditPermissionService, 
-       public RoleServ: RoleService,
-        private router: Router,
-              private languageService: LanguageService) { }
+    public activeRoute: ActivatedRoute, 
+    public account: AccountService,
+    public ApiServ: ApiService,
+    private menuService: MenuService, 
+    public EditDeleteServ: DeleteEditPermissionService, 
+    public RoleServ: RoleService,
+    private router: Router,
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService
+  ) { }
 
   async ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -98,9 +101,15 @@ export class RoleAddEditComponent {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
-
-
   }
+
+      ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+    } 
+
 
   GetRoleName() {
     this.RoleServ.Get_Role_id(this.RoleId, this.DomainName).subscribe((data) => {

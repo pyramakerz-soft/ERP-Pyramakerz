@@ -12,6 +12,7 @@ import { Subject } from '../../../../Models/LMS/subject';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-subject',
@@ -30,7 +31,8 @@ export class SubjectComponent {
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
 
   constructor(public account: AccountService, private languageService: LanguageService, public router: Router, public ApiServ: ApiService,
-    public activeRoute: ActivatedRoute, private menuService: MenuService, public subjectService: SubjectService) { }
+    public activeRoute: ActivatedRoute, private menuService: MenuService, public subjectService: SubjectService,
+    private realTimeService: RealTimeNotificationServiceService,) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -44,6 +46,12 @@ export class SubjectComponent {
     this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+  }
+  ngOnDestroy(): void { 
+          this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   getSubjectData() {
