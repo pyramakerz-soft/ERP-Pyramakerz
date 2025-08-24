@@ -39,15 +39,14 @@
       </li>
     </ul>
   
-    <ul *ngIf="searchTriggered "
-        class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg max-h-48 overflow-y-auto top-full mt-1">
+    <ul *ngIf="searchTriggered " class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg max-h-48 overflow-y-auto top-full mt-1">
       <li class="px-4 py-2 text-gray-500">
         No results found
       </li>
     </ul>
   
-    <span *ngIf="validationErrors[validationKey]" class="text-red-500 ml-3 font-normal">
+    <!-- <span *ngIf="validationErrors[validationKey]" class="text-red-500 ml-3 font-normal">
       {{ validationErrors[validationKey] }}
-    </span>
+    </span> -->
   </div>
   

@@ -113,6 +113,7 @@ export class AdmissionTestParentComponent {
     if(CurrentStudent)
     this.testServ.GetByRegistrationFormParentIDFromParent(this.RegesterFormParentID, this.DomainName).subscribe((d:any) => {  
       this.Data = d.tests;
+      console.log(this.Data)
     })
   }
 

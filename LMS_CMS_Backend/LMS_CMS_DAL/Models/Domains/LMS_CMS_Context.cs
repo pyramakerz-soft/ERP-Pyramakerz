@@ -1301,6 +1301,18 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasForeignKey(p => p.StoreID)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<Stocking>()
+                .HasOne(p => p.School)
+                .WithMany(p => p.Stocking)
+                .HasForeignKey(p => p.SchoolId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Stocking>()
+                .HasOne(p => p.SchoolPCs)
+                .WithMany(p => p.Stocking)
+                .HasForeignKey(p => p.SchoolPCId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<EvaluationTemplateGroup>()
                 .HasOne(p => p.EvaluationTemplate)
                 .WithMany(p => p.EvaluationTemplateGroups)

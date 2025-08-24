@@ -58,5 +58,7 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public ICollection<DiscussionRoom> DiscussionRooms { get; set; } = new HashSet<DiscussionRoom>();
         public ICollection<ConductType> ConductTypes { get; set; } = new HashSet<ConductType>();
         public ICollection<Appointment> Appointments { get; set; } = new HashSet<Appointment>();
+        public ICollection<Stocking> Stocking { get; set; } = new HashSet<Stocking>();
+
     }
 }

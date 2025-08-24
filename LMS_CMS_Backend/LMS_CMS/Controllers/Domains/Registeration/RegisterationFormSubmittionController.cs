@@ -93,7 +93,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                         Nationality nationality = _Unit_Of_Work_Octa.nationality_Repository.First_Or_Default_Octa(s => s.ID.ToString() == item.TextAnswer);
                         if (nationality != null)
                         {
-                            item.TextAnswer = nationality.Name;
+                            item.TextAnswer = nationality.ID.ToString();
                             item.SelectedFieldOptionID = nationality.ID;
 
                         }
