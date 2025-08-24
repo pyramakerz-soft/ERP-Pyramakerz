@@ -287,7 +287,6 @@ export class InventoryDetailsComponent {
     this.Data.studentID = 0
     this.Data.studentName = ''
     this.studentSearch = '';
-    this.studentSearch = ''
     this.schoolPCs = []
     this.Data.schoolPCId = 0
     this.schoolpcsServ.GetBySchoolId(this.Data.schoolId, this.DomainName).subscribe((d) => {
@@ -331,15 +330,15 @@ export class InventoryDetailsComponent {
     this.onInputValueChange({ field: 'supplierId', value: supplier.id });
   }
 
-  SearchStudents = (search: string, page: number) => {
+  SearchStudents = (search: string, page: number) => { this.validationErrors['studentID'] = '' ,this.Data.studentID = 0 ,this.Data.studentName = '',this.studentSearch = ''; ;
     return this.StudentServ.GetAllWithSearch(this.Data.schoolId, search, page, 10, this.DomainName).pipe(
       map(res => ({ items: res.students, totalPages: res.totalPages }))
     );
   };
 
-  SearchSuppliers = (search: string, page: number) => {
+  SearchSuppliers = (search: string, page: number) => { this.validationErrors['supplierId'] = '';
     return this.SupplierServ.GetAllWithSearch(search, page, 10, this.DomainName).pipe(
-      map(res => ({ items: res.suppliers, totalPages: res.totalPages }))
+      map(res => ({ items: res.suppliers, totalPages: res.totalPages } ))
     );
   };
 
