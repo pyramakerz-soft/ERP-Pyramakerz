@@ -21,12 +21,12 @@ import { TestService } from '../../../../Services/Employee/Registration/test.ser
 import { RegisterationFormParentService } from '../../../../Services/Employee/Registration/registeration-form-parent.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-registraion-test',
   standalone: true,
-  imports: [CommonModule, FormsModule , TranslateModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
   templateUrl: './registraion-test.component.html',
   styleUrl: './registraion-test.component.css',
 })
@@ -75,7 +75,7 @@ export class RegistraionTestComponent {
     public testService: TestService,
     public registerationFormParentService: RegisterationFormParentService,
     public questionServ: QuestionService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -89,7 +89,7 @@ export class RegistraionTestComponent {
         );
         this.TestId = Number(params.get('TestId'));
         // this.registerationFormID = Number(params.get('registerationFormID'));
-         
+
         this.checkForTestAvailabilityForParent()
       });
     });
@@ -105,7 +105,7 @@ export class RegistraionTestComponent {
     });
 
     this.GetAllData();
-        this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
@@ -120,19 +120,22 @@ export class RegistraionTestComponent {
       )
       .subscribe(
         (d: any) => {
-          this.Data = d.questionWithAnswer; 
+          if (d.isVisibleToParent != true) {
+            this.moveToTest()
+          }
+          this.Data = d.questionWithAnswer;
           this.TestName = d.testName;
           this.mark = d.mark;
           this.TotalMark = d.totalmark;
-          this.StateId=d.state
+          this.StateId = d.state
         },
         (error) => {
           this.mode = 'test';
           this.questionServ
             .GetByTestIDGroupBy(this.TestId, this.DomainName)
             .subscribe((d: any) => {
-              this.questions = d.groupedByQuestionType ; 
-              this.TestName=d.testName;
+              this.questions = d.groupedByQuestionType;
+              this.TestName = d.testName;
               this.questionServ
                 .GetByTestID(this.TestId, this.DomainName)
                 .subscribe((q: any) => {
@@ -144,7 +147,7 @@ export class RegistraionTestComponent {
                     this.Answers = this.QuestionsByTest.map((question: any) => {
                       return new Answer(
                         question.registerationFormParentID ||
-                          this.registerationFormParentID,
+                        this.registerationFormParentID,
                         '',
                         0,
                         question.id || 0
@@ -185,7 +188,7 @@ export class RegistraionTestComponent {
     return answer ? answer.answerID === optionId : false;
   }
 
-  Save() { 
+  Save() {
     this.registerServ
       .Add(
         this.Answers,
@@ -205,12 +208,12 @@ export class RegistraionTestComponent {
       });
   }
 
-  checkForTestAvailabilityForParent(){
+  checkForTestAvailabilityForParent() {
     this.registerationFormParentService.GetById(this.registerationFormParentID, this.DomainName).subscribe(
-      registrationParent => { 
+      registrationParent => {
         this.testService.GetByID(this.TestId, this.DomainName).subscribe(
           test => {
-            if(test.gradeID != registrationParent.gradeID){
+            if (test.gradeID != registrationParent.gradeID) {
               this.moveToTest()
             }
           }
@@ -218,5 +221,5 @@ export class RegistraionTestComponent {
       }
     )
 
-  } 
+  }
 }

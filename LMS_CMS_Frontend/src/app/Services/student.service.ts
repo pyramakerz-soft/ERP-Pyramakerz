@@ -30,7 +30,7 @@ export class StudentService {
     return this.http.get<Student[]>(`${this.baseUrl}/Student`, { headers })
   }
 
-  GetAllWithSearch(KeyWord:string,PageNumber:number =1 ,pageSize:number =10 ,DomainName?:string){
+  GetAllWithSearch(SchoolId:number ,KeyWord:string,PageNumber:number =1 ,pageSize:number =10 ,DomainName?:string){
     if(DomainName!=null) {
       this.header=DomainName 
     }
@@ -40,7 +40,7 @@ export class StudentService {
     .set('domain-name', this.header)
     .set('Content-Type', 'application/json');
 
-    return this.http.get<any>(`${this.baseUrl}/Student/Search?keyword=${KeyWord}&pageNumber=${PageNumber}&pageSize=${pageSize}`, { headers })
+    return this.http.get<any>(`${this.baseUrl}/Student/SearchBySchoolId/${SchoolId}?keyword=${KeyWord}&pageNumber=${PageNumber}&pageSize=${pageSize}`, { headers })
   }
 
   GetByID(id:number,DomainName?:string){

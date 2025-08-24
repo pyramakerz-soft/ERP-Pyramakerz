@@ -35,8 +35,7 @@
         <tbody>
             <!-- No Data Row -->
             <tr *ngIf="Data.length === 0">
-                <td colspan="5"
-                    class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                <td colspan="5" class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
                      {{ 'No Data Found' | translate }}
                 </td>
             </tr>
@@ -47,20 +46,20 @@
                 class="border-t border-gray-300 text-xs md:text-sm">
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.title }}</td>
                 <td *ngIf="row.registrationTestState!=null" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    <i *ngIf="row.registrationTestStateId == 1" class="fa-solid fa-circle fa-1x" ></i>           
-                    <i *ngIf="row.registrationTestStateId === 4 || row.registrationTestStateId === 2" class="fa-solid fa-circle fa-1x text-green-500"></i>
-                    <i *ngIf="row.registrationTestStateId === 3" class="fa-solid fa-circle fa-1x text-red-500"></i>
-                    {{ row.registrationTestState }}
+                    <i *ngIf="row.registrationTestStateId == 1 || row.registrationTestVisibleToParent !=true" class="fa-solid fa-circle fa-1x" ></i>           
+                    <i *ngIf="(row.registrationTestStateId === 4 || row.registrationTestStateId === 2) && row.registrationTestVisibleToParent ==true" class="fa-solid fa-circle fa-1x text-green-500"></i>
+                    <i *ngIf="row.registrationTestStateId === 3 && row.registrationTestVisibleToParent ==true" class="fa-solid fa-circle fa-1x text-red-500"></i>
+                    {{ (row.registrationTestStateId == 1 || row.registrationTestVisibleToParent != true) ? 'Pending' : row.registrationTestState }}
                 </td>
                 <td *ngIf="row.registrationTestState==null" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Not Solved Yet' | translate }}
                 </td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.subjectName }}</td>
-                <td *ngIf="row.registrationTestMark !=null " class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.registrationTestMark }} / {{row.totalMark}}</td>
-                <td *ngIf="row.registrationTestMark ===null " class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">-- / {{row.totalMark}}</td>
+                <td *ngIf="row.registrationTestMark !=null && row.registrationTestVisibleToParent ==true" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.registrationTestMark }} / {{row.totalMark}}</td>
+                <td *ngIf="row.registrationTestMark ===null || row.registrationTestVisibleToParent !=true" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">-- / {{row.totalMark}}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     <div class="flex space-x-4 rtl:space-x-reverse">
-                        <button (click)="View(row)">
+                        <button  *ngIf="row.registrationTestState==null || (row.registrationTestState!=null && row.registrationTestVisibleToParent == true )" (click)="View(row)">
                             <img src="Images/AddMarkIcon.png" class="w-5" alt="Upload Icon">
                         </button>
                     </div>
