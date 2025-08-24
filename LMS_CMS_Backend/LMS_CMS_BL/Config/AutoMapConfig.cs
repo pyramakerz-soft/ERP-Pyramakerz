@@ -1231,7 +1231,13 @@ namespace LMS_CMS_BL.Config
             CreateMap<Request, RequestGetDTO>()
                 .ForMember(dest => dest.SenderUserTypeName, opt => opt.MapFrom(src => src.SenderUserType.Title))
                 .ForMember(dest => dest.ReceiverUserTypeName, opt => opt.MapFrom(src => src.ReceiverUserType.Title));
+            
+            CreateMap<ChatMessage, ChatGetDTO>()
+                .ForMember(dest => dest.SenderUserTypeName, opt => opt.MapFrom(src => src.SenderUserType.Title))
+                .ForMember(dest => dest.ReceiverUserTypeName, opt => opt.MapFrom(src => src.ReceiverUserType.Title));
 
+            CreateMap<ChatMessageAttachment, ChatMessageAttachmentGetDTO>();
+            
             CreateMap<IssuesType, IssueTypeGetDTO>();
             CreateMap<IssueTypeAddDTO, IssuesType>();
 

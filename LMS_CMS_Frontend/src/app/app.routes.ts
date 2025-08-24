@@ -233,6 +233,7 @@ import { AppointmentComponent } from './Pages/Employee/SocialWorker/appointment/
 import { AppointmentParentComponent } from './Pages/Employee/SocialWorker/appointment-parent/appointment-parent.component';
 import { EvaluationReportComponent } from './Pages/Employee/LMS/reports/evaluation-report/evaluation-report.component';
 import { ViolationReportComponent } from './Pages/Employee/Violation/Reports/violation-report/violation-report.component';
+import { MyMessagesComponent } from './Pages/Communication/my-messages/my-messages.component';
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
     { path: "Octa/login", component: OctaLoginComponent, title: "login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -587,6 +588,7 @@ export const routes: Routes = [
         children: [
             { path: "My Notifications", component: MyNotificationComponent, title: "Notifications", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "My Requests", component: MyRequestsComponent, title: "Requests", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "My Messages", component: MyMessagesComponent, title: "Messages", canActivate: [noNavigateWithoutLoginGuard] },
         ]
     },
 

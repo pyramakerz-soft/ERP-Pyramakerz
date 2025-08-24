@@ -94,11 +94,11 @@ export class EvaluationComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection(); 
+      if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
  

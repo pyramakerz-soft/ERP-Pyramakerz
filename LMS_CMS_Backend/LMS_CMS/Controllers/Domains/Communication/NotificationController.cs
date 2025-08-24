@@ -591,7 +591,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
            allowedTypes: new[] { "octa", "employee" },
            pages: new[] { "Notification" }
         )]
-        public async Task<IActionResult> AddAsync(NotificationAddDTO NewNotification)
+        public async Task<IActionResult> AddAsync([FromForm] NotificationAddDTO NewNotification)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
             var domainName = HttpContext.Request.Headers["Domain-Name"].FirstOrDefault();
