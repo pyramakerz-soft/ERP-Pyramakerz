@@ -9,6 +9,7 @@ using LMS_CMS_DAL.Models.Domains.ECommerce;
 using LMS_CMS_DAL.Models.Domains.ETA;
 using LMS_CMS_DAL.Models.Domains.Inventory;
 using LMS_CMS_DAL.Models.Domains.LMS;
+using LMS_CMS_DAL.Models.Domains.MaintenanceModule;
 using LMS_CMS_DAL.Models.Domains.RegisterationModule;
 using LMS_CMS_DAL.Models.Domains.SocialWorker;
 using LMS_CMS_DAL.Models.Domains.ViolationModule;
@@ -231,6 +232,14 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<AppointmentStatus> AppointmentStatus { get; set; }
         public DbSet<AppointmentParent> AppointmentParent { get; set; }
         public DbSet<AppointmentGrade> AppointmentGrade { get; set; }
+
+        // Maintenance Module
+        public DbSet<MaintenanceItem> MaintenanceItems { get; set; }
+        public DbSet<MaintenanceCompany> MaintenanceCompanies { get; set; }
+        public DbSet<MaintenanceEmployee> MaintenanceEmployees { get; set; }
+
+
+
 
 
         public LMS_CMS_Context(DbContextOptions<LMS_CMS_Context> options)
@@ -561,7 +570,7 @@ namespace LMS_CMS_DAL.Models.Domains
                  .WithMany(p => p.BusStudents)
                  .HasForeignKey(p => p.SemseterID)
                  .OnDelete(DeleteBehavior.Restrict);
-
+             
             //modelBuilder.Entity<StudentAcademicYear>()
             //     .HasOne(p => p.Student)
             //     .WithMany(p => p.StudentAcademicYears)
@@ -2100,6 +2109,13 @@ namespace LMS_CMS_DAL.Models.Domains
                 .WithMany(p => p.AppointmentGrades)
                 .HasForeignKey(p => p.AppointmentID)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Maintenance Module
+            modelBuilder.Entity<MaintenanceEmployee>()
+                 .HasOne(me => me.Employee)
+                 .WithMany()
+                 .HasForeignKey(me => me.EmployeeID)
+                 .OnDelete(DeleteBehavior.Restrict);
 
 
             ///////////////////////// Exception: /////////////////////////

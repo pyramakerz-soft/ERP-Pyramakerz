@@ -9,6 +9,7 @@ using LMS_CMS_DAL.Models.Domains.AccountingModule;
 using LMS_CMS_DAL.Models.Domains.Administration;
 using LMS_CMS_DAL.Models.Domains.BusModule;
 using LMS_CMS_DAL.Models.Domains.LMS;
+using LMS_CMS_DAL.Models.Domains.MaintenanceModule;
 using LMS_CMS_DAL.Models.Domains.ViolationModule;
 
 namespace LMS_CMS_DAL.Models.Domains
@@ -117,6 +118,7 @@ namespace LMS_CMS_DAL.Models.Domains
         public ICollection<Duty> Duties { get; set; } = new HashSet<Duty>();
         public ICollection<Violation> Violations { get; set; } = new HashSet<Violation>();
         public ICollection<RemedialClassroom> RemedialClassrooms { get; set; } = new HashSet<RemedialClassroom>();
+        public ICollection<MaintenanceEmployee> MaintenanceEmployees { get; set; } = new HashSet<MaintenanceEmployee>();
 
     }
 }

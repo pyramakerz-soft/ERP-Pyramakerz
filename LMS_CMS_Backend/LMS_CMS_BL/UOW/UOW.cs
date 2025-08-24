@@ -9,6 +9,7 @@ using LMS_CMS_DAL.Models.Domains.ECommerce;
 using LMS_CMS_DAL.Models.Domains.ETA;
 using LMS_CMS_DAL.Models.Domains.Inventory;
 using LMS_CMS_DAL.Models.Domains.LMS;
+using LMS_CMS_DAL.Models.Domains.MaintenanceModule;
 using LMS_CMS_DAL.Models.Domains.RegisterationModule;
 using LMS_CMS_DAL.Models.Domains.SocialWorker;
 using LMS_CMS_DAL.Models.Domains.ViolationModule;
@@ -244,6 +245,10 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<AppointmentStatus> AppointmentStatus_Repository;
         GenericRepo<AppointmentParent> AppointmentParent_Repository;
         GenericRepo<AppointmentGrade> AppointmentGrade_Repository;
+        GenericRepo<MaintenanceItem> MaintenanceItem_Repository;
+        GenericRepo<MaintenanceCompany> MaintenanceCompany_Repository;
+        GenericRepo<MaintenanceEmployee> MaintenanceEmployee_Repository;
+
 
         public UOW(Octa_DbContext octa_Db)
         {
@@ -2805,6 +2810,44 @@ namespace LMS_CMS_BL.UOW
                 return AppointmentGrade_Repository;
             }
         }
+        public GenericRepo<MaintenanceItem> maintenanceItem_Repository
+        {
+            get
+            {
+                if (MaintenanceItem_Repository == null)
+                {
+                    MaintenanceItem_Repository = new GenericRepo<MaintenanceItem>(db);
+                }
+                return MaintenanceItem_Repository;
+            }
+        }
+
+
+        public GenericRepo<MaintenanceCompany> maintenanceCompany_Repository
+        {
+            get
+            {
+                if (MaintenanceCompany_Repository == null)
+                {
+                    MaintenanceCompany_Repository = new GenericRepo<MaintenanceCompany>(db);
+                }
+                return MaintenanceCompany_Repository;
+            }
+        }
+
+        public GenericRepo<MaintenanceEmployee> maintenanceEmployee_Repository
+        {
+            get
+            {
+                if (MaintenanceEmployee_Repository == null)
+                {
+                    MaintenanceEmployee_Repository = new GenericRepo<MaintenanceEmployee>(db);
+                }
+                return MaintenanceEmployee_Repository;
+            }
+        }
+
+
 
         public void SaveChanges()
         {
