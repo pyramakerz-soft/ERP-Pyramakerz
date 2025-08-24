@@ -38,6 +38,8 @@ import { Student } from '../../Models/student';
 import { Subject } from '../../Models/LMS/subject';
 import { Section } from '../../Models/LMS/section';
 import { RealTimeRequestServiceService } from '../../Services/shared/real-time-request-service.service';
+import { ChatMessageService } from '../../Services/shared/chat-message.service';
+import { ChatMessage } from '../../Models/Communication/chat-message';
 
 @Component({
   selector: 'app-nav-menu',
@@ -46,7 +48,7 @@ import { RealTimeRequestServiceService } from '../../Services/shared/real-time-r
   templateUrl: './nav-menu.component.html',
   styleUrl: './nav-menu.component.css'
 })
-export class NavMenuComponent {
+export class NavMenuComponent { 
   dropdownOpen: boolean = false;
   selectedLanguage: string = "English";
   User_Type: string = "";
@@ -54,6 +56,7 @@ export class NavMenuComponent {
   isPopupOpen = false;
   isNotificationPopupOpen = false;
   isRequuestPopupOpen = false;
+  isMessagePopupOpen = false;
   allTokens: { id: number, key: string; KeyInLocal: string; value: string; UserType: string }[] = [];
   User_Data_After_Login = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   subscription: Subscription | undefined;
@@ -71,11 +74,13 @@ export class NavMenuComponent {
   requestByID:Request = new Request()
   requestToBeForwarded:Request = new Request()
   requestToBeSend:Request = new Request()
+  chatMessages: ChatMessage[] = []
   
   private destroy$ = new RxSubject<void>();
   
   notificationsUnSeenCount = 0
   requestsUnSeenCount = 0
+  messagesUnSeenCount = 0
  
   isTeacherHovered = false;
   isEmployeeHovered = false;
@@ -105,7 +110,7 @@ export class NavMenuComponent {
     private notificationService: NotificationService, private realTimeService: RealTimeNotificationServiceService, private realTimeRequestService: RealTimeRequestServiceService, public requestService:RequestService,
     public departmentService: DepartmentService, public employeeService: EmployeeService, public schoolService: SchoolService, public sectionService: SectionService,
     public gradeService: GradeService, public classroomService: ClassroomService, public studentService: StudentService, public parentService: ParentService, 
-    public subjectService: SubjectService, ) { }
+    public subjectService: SubjectService, public chatMessageService:ChatMessageService) { }
 
   ngOnInit() {
     this.GetUserInfo();
@@ -119,6 +124,7 @@ export class NavMenuComponent {
     
     this.loadUnseenNotifications()
     this.loadUnseenRequests()
+    this.loadUnseenMessages()
 
     // Subscribe to notification opened events
     this.notificationService.notificationOpened$.subscribe(() => {
@@ -128,6 +134,11 @@ export class NavMenuComponent {
     // Subscribe to request opened events
     this.requestService.requestOpened$.subscribe(() => {
       this.loadUnseenRequests();
+    });
+
+    // Subscribe to message opened events
+    this.chatMessageService.messageOpened$.subscribe(() => {
+      this.loadUnseenMessages();
     });
   }
 
@@ -140,6 +151,12 @@ export class NavMenuComponent {
   loadUnseenRequests() {
     this.requestService.UnSeenRequestCount(this.DomainName).subscribe(
       data => this.requestsUnSeenCount = data
+    );
+  }
+
+  loadUnseenMessages() {
+    this.chatMessageService.UnSeenRequestCount(this.DomainName).subscribe(
+      data => this.messagesUnSeenCount = data
     );
   }
 
@@ -199,12 +216,14 @@ export class NavMenuComponent {
     this.isPopupOpen = !this.isPopupOpen;
     this.isNotificationPopupOpen = false;
     this.isRequuestPopupOpen = false;
+    this.isMessagePopupOpen = false;
   }
   
   toggleNotificationPopup(){
     this.notifications = []
     this.isPopupOpen = false;
     this.isRequuestPopupOpen = false;
+    this.isMessagePopupOpen = false;
     this.isNotificationPopupOpen = !this.isNotificationPopupOpen;
     this.notificationService.ByUserIDFirst5(this.DomainName).subscribe(
       data => {
@@ -217,10 +236,24 @@ export class NavMenuComponent {
     this.requests = []
     this.isPopupOpen = false;
     this.isNotificationPopupOpen = false;
+    this.isMessagePopupOpen = false;
     this.isRequuestPopupOpen = !this.isRequuestPopupOpen;
     this.requestService.ByUserIDFirst5(this.DomainName).subscribe(
       data => {
         this.requests = data
+      }
+    )
+  }
+
+  toggleMessagePopup(){
+    this.chatMessages = []
+    this.isPopupOpen = false;
+    this.isNotificationPopupOpen = false;
+    this.isRequuestPopupOpen = false;
+    this.isMessagePopupOpen = !this.isMessagePopupOpen;
+    this.chatMessageService.ByUserIDFirst5(this.DomainName).subscribe(
+      data => {
+        this.chatMessages = data
       }
     )
   }
@@ -241,6 +274,7 @@ export class NavMenuComponent {
       this.isPopupOpen = false;
       this.isNotificationPopupOpen = false;
       this.isRequuestPopupOpen = false;
+      this.isMessagePopupOpen = false;
     }
   }
 
@@ -464,6 +498,20 @@ export class NavMenuComponent {
 
   viewAllRequests() {
     this.router.navigateByUrl('CommunicationModule/My Requests')
+  }
+
+  viewAllMessages() {
+    this.router.navigateByUrl('CommunicationModule/My Messages')
+  }
+  
+  moveToMessageInMyChat(chatMessage: ChatMessage) {
+    this.router.navigateByUrl('CommunicationModule/My Messages')
+    this.router.navigate(['CommunicationModule/My Messages'], {
+      queryParams: {
+        otherUserID: chatMessage.senderID,
+        otherUserTypeID: chatMessage.senderUserTypeID
+      }
+    });
   }
 
   formatInsertedAt(dateString: string | Date): string {
