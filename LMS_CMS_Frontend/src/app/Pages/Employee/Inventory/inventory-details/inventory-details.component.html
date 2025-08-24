@@ -115,6 +115,7 @@
       [selectedName]="Data.studentName" [displayProperty]="'en_name'" [validationKey]="'studentID'"
       [validationErrors]="validationErrors" [serviceFunction]="SearchStudents">
     </app-search-dropdown>
+    <span *ngIf="validationErrors['studentID']"class="text-red-500 ml-3 font-normal">{{validationErrors["studentID"] }}</span>
   </div>
 
   <div *ngIf="FlagId == 9 || FlagId == 10 || FlagId == 13" class="flex flex-col w-[24%] mb-4 relative">
@@ -122,6 +123,7 @@
       [placeholder]="'Search Supplier'" [displayProperty]="'name'" [validationKey]="'supplierId'"
       [validationErrors]="validationErrors" [serviceFunction]="SearchSuppliers">
     </app-search-dropdown>
+        <span *ngIf="validationErrors['supplierId']" class="text-red-500 ml-3 font-normal">{{validationErrors["supplierId"] }}</span>
   </div>
 
   <div *ngIf="IsRemainingCashVisa" class="flex justify-start w-full mb-4 space-x-5 rtl:space-x-reverse">
@@ -220,7 +222,8 @@
           accept="image/jpeg, image/png" multiple />
       </div>
     </div>
-    <span *ngIf="validationErrors['NewAttachments']" class="text-red-500 ml-3 font-normal">{{validationErrors["NewAttachments"]}}</span>
+    <span *ngIf="validationErrors['NewAttachments']"
+      class="text-red-500 ml-3 font-normal">{{validationErrors["NewAttachments"]}}</span>
   </div>
 
   <div *ngFor="let img of Data.attachments; let i = index">
@@ -577,7 +580,8 @@
 
 <div class="absolute -top-[9999px] -left-[9999px]"> <!-- for print  -->
   <div id="Data" class="hidden">
-    <app-pdf-print *ngIf="showPDF" [fileName]="'Inventory'" [infoRows]="infoRows" [tableHeaders]="['BarCode', 'Item_Id', 'Item_Name', 'Quantity', 'Price' , 'Total_Price' , 'Notes']"
+    <app-pdf-print *ngIf="showPDF" [fileName]="'Inventory'" [infoRows]="infoRows"
+      [tableHeaders]="['BarCode', 'Item_Id', 'Item_Name', 'Quantity', 'Price' , 'Total_Price' , 'Notes']"
       [tableData]="tableDataForPrint" #pdfComponentRef></app-pdf-print>
   </div>
 </div>

@@ -284,6 +284,11 @@ export class InventoryDetailsComponent {
   }
 
   GetAllSchoolPCs() {
+    this.Data.studentID = 0
+    this.Data.studentName = ''
+    this.studentSearch = '';
+    this.schoolPCs = []
+    this.Data.schoolPCId = 0
     this.schoolpcsServ.GetBySchoolId(this.Data.schoolId, this.DomainName).subscribe((d) => {
       this.schoolPCs = d
       if (this.schoolPCs.length == 1) {
@@ -325,15 +330,15 @@ export class InventoryDetailsComponent {
     this.onInputValueChange({ field: 'supplierId', value: supplier.id });
   }
 
-  SearchStudents = (search: string, page: number) => {
-    return this.StudentServ.GetAllWithSearch(search, page, 10, this.DomainName).pipe(
+  SearchStudents = (search: string, page: number) => { this.validationErrors['studentID'] = '' ,this.Data.studentID = 0 ,this.Data.studentName = '',this.studentSearch = ''; ;
+    return this.StudentServ.GetAllWithSearch(this.Data.schoolId, search, page, 10, this.DomainName).pipe(
       map(res => ({ items: res.students, totalPages: res.totalPages }))
     );
   };
 
-  SearchSuppliers = (search: string, page: number) => {
+  SearchSuppliers = (search: string, page: number) => { this.validationErrors['supplierId'] = '';
     return this.SupplierServ.GetAllWithSearch(search, page, 10, this.DomainName).pipe(
-      map(res => ({ items: res.suppliers, totalPages: res.totalPages }))
+      map(res => ({ items: res.suppliers, totalPages: res.totalPages } ))
     );
   };
 
@@ -818,6 +823,7 @@ export class InventoryDetailsComponent {
     if (this.FlagId == 11 || this.FlagId == 12) {
       if (this.Data.studentID == 0) {
         this.validationErrors['studentID'] = 'Student Is Required';
+        console.log(this.validationErrors['studentID'])
         return false;
       }
     }
