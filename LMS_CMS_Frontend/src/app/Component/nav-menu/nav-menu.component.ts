@@ -506,12 +506,25 @@ export class NavMenuComponent {
   
   moveToMessageInMyChat(chatMessage: ChatMessage) {
     this.router.navigateByUrl('CommunicationModule/My Messages')
-    this.router.navigate(['CommunicationModule/My Messages'], {
-      queryParams: {
-        otherUserID: chatMessage.senderID,
-        otherUserTypeID: chatMessage.senderUserTypeID
-      }
-    });
+    if(chatMessage.senderID == this.User_Data_After_Login.id && chatMessage.senderUserTypeName == this.User_Data_After_Login.type){
+      this.router.navigate(['CommunicationModule/My Messages'], {
+        queryParams: {
+          otherUserID: chatMessage.receiverID,
+          otherUserTypeID: chatMessage.receiverUserTypeID,
+          englishNameForConversation: chatMessage.receiverEnglishName,
+          arabicNameForConversation: chatMessage.receiverArabicName
+        }
+      }); 
+    }else{
+      this.router.navigate(['CommunicationModule/My Messages'], {
+        queryParams: {
+          otherUserID: chatMessage.senderID,
+          otherUserTypeID: chatMessage.senderUserTypeID,
+          englishNameForConversation: chatMessage.senderEnglishName,
+          arabicNameForConversation: chatMessage.senderArabicName
+        }
+      });
+    }
   }
 
   formatInsertedAt(dateString: string | Date): string {
