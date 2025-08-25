@@ -85,7 +85,7 @@
                 class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
         </div>
 
-        <div class="mt-6 mb-4 rounded-3xl flex justify-start flex-wrap space-x-2">
+        <div class="mt-6 mb-4 rounded-3xl flex justify-start items-center flex-wrap space-x-2">
             <div class="flex flex-col mb-4 w-full">
                 <label class="mb-2 primaryTxt" for="name">{{ 'Name' | translate }}</label>
                 <input id="name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
@@ -114,7 +114,7 @@
                 <span *ngIf="validationErrors['topSpace']"
                     class="text-red-500 ml-3 font-normal">{{validationErrors['topSpace'] }}</span>
             </div>
-            <div *ngIf="certificateType.file || certificateType.newFile" class="flex flex-col mb-4 w-[30%] mt-[7%]">
+            <div *ngIf="certificateType.file || certificateType.newFile" class="flex flex-col  mt-2 w-[30%]">
                 <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
                     (click)="test()">
                     <span>{{ 'Test' | translate }}</span>
