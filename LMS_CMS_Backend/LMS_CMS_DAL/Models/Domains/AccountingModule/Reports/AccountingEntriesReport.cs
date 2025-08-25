@@ -2,8 +2,8 @@
 {
     public class AccountingEntriesReport
     {
-        public long? MasterID { get; set; }
-        public long? DetailsID { get; set; }
+        //public long? MasterID { get; set; }
+        //public long? DetailsID { get; set; }
         public string? Account { get; set; }
         public long? Serial { get; set; }
         public long? MainAccountNo { get; set; }
@@ -13,7 +13,7 @@
         public decimal? Debit { get; set; }
         public decimal? Credit { get; set; }
         public DateTime? Date { get; set; }
-        public decimal? Balance { get; set; }
+        //public decimal? Balance { get; set; }
         //public long? LinkFileID { get; set; }
         public string? Notes { get; set; }
     }

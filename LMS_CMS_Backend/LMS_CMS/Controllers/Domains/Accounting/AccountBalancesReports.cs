@@ -31,14 +31,19 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
             var context = Unit_Of_Work.DbContext;
 
-            int startRow = ((pageNumber - 1) * pageSize) + 1;
-            int endRow = pageNumber * pageSize;
-
             List<AccountBalanceReport>? accountBalances = new();
             AccountTotals totals = new();
             AccountTotals allTotals = new();
             long? totalRecords = 0;
             DateTime baseDate = new DateTime(1900, 1, 1);
+
+            bool isCredit = linkFileID switch
+            {
+                2 or 4 or 7 or 10 or 11 => true,
+                _ => false
+            };
+
+
 
             if (mainAccountID == 0)
             {
@@ -50,13 +55,14 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 }
 
                 var temp = await context.Set<AccountBalanceReport>().FromSqlRaw(
-                    "EXEC dbo.GetAccountSummary @DateFrom, @DateTo, 0, 0, @linkFileID, @zeroBalance, @positiveBalance, @negativeBalance",
-                    new SqlParameter("@DateFrom", "1900-1-1"),
+                    "EXEC dbo.GetAccountBalance @DateTo, 0, @linkFileID, @zeroBalance, @positiveBalance, @negativeBalance, @PageNumber, @PageSize",
                     new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
                     new SqlParameter("@linkFileID", linkFileID),
                     new SqlParameter("@zeroBalance", zeroBalance),
                     new SqlParameter("@positiveBalance", positiveBalance),
-                    new SqlParameter("@negativeBalance", negativeBalance)
+                    new SqlParameter("@negativeBalance", negativeBalance),
+                    new SqlParameter("@PageNumber", pageNumber),
+                    new SqlParameter("@PageSize", pageSize)
                 )
                 .AsNoTracking()
                 .ToListAsync();
@@ -72,29 +78,33 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 allTotals.TotalDebit = accountBalances.Sum(x => x.Debit ?? 0);
                 allTotals.TotalCredit = accountBalances.Sum(x => x.Credit ?? 0);
 
-                allTotals.Differences = allTotals.TotalCredit - allTotals.TotalDebit;
+                allTotals.Differences = isCredit ? allTotals.TotalCredit - allTotals.TotalDebit : allTotals.TotalDebit - allTotals.TotalCredit;
 
-                string tableName = linkFileID switch
-                {
-                    2 => "Suppliers",
-                    3 => "Debits",
-                    4 => "Credits",
-                    5 => "Saves",
-                    6 => "Banks",
-                    7 => "Incomes",
-                    8 => "Outcomes",
-                    9 => "Assets",
-                    10 => "Employee",
-                    11 => "TuitionFeesTypes",
-                    12 => "TuitionDiscountTypes",
-                    13 => "Student",
-                    _ => throw new InvalidOperationException("Invalid LinkFileID")
-                };
+                //List<long> ids = linkFileID switch
+                //{
+                //    2 => await context.Suppliers.Select(s => s.ID).ToListAsync(),
+                //    3 => await context.Debits.Select(d => d.ID).ToListAsync(),
+                //    4 => await context.Credits.Select(c => c.ID).ToListAsync(),
+                //    5 => await context.Saves.Select(s => s.ID).ToListAsync(),
+                //    6 => await context.Banks.Select(b => b.ID).ToListAsync(),
+                //    7 => await context.Incomes.Select(i => i.ID).ToListAsync(),
+                //    8 => await context.Outcomes.Select(o => o.ID).ToListAsync(),
+                //    9 => await context.Assets.Select(a => a.ID).ToListAsync(),
+                //    10 => await context.Employee.Select(e => e.ID).ToListAsync(),
+                //    11 => await context.TuitionFeesTypes.Select(t => t.ID).ToListAsync(),
+                //    12 => await context.TuitionDiscountTypes.Select(t => t.ID).ToListAsync(),
+                //    13 => await context.Student.Select(s => s.ID).ToListAsync(),
+                //    _ => throw new InvalidOperationException("Invalid LinkFileID")
+                //};
 
-                totalRecords = (await context.Set<CountResult>()
-                    .FromSqlRaw($@"SELECT COUNT_BIG(ID) AS TotalCount FROM {tableName}")
-                    .ToListAsync())
-                    .FirstOrDefault()?.TotalCount;
+                totalRecords = (await context.Set<AccountBalanceReport>().FromSqlRaw(
+                    "EXEC dbo.GetAccountBalance @DateTo, 0, @linkFileID",
+                    new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
+                    new SqlParameter("@linkFileID", linkFileID)
+                )
+                .AsNoTracking()
+                .ToListAsync())
+                .Count();
 
             }
             else
@@ -105,13 +115,15 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                     return NotFound($"Main account with ID: {mainAccountID} not found.");
 
                 var temp = await context.Set<AccountBalanceReport>().FromSqlRaw(
-                    "EXEC dbo.GetAccountSummary @DateFrom, @DateTo, @MainAccNo, 0, 2, @zeroBalance, @positiveBalance, @negativeBalance",
-                    new SqlParameter("@DateFrom", "1900-1-1"),
+                    "EXEC dbo.GetAccountBalance @DateTo, @MainAccNo, @linkFileID, @zeroBalance, @positiveBalance, @negativeBalance, @PageNumber, @PageSize",
                     new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
-                    new SqlParameter("@MainAccNo", mainAccount.ID),
+                    new SqlParameter("@MainAccNo", mainAccountID),
+                    new SqlParameter("@linkFileID", linkFileID),
                     new SqlParameter("@zeroBalance", zeroBalance),
                     new SqlParameter("@positiveBalance", positiveBalance),
-                    new SqlParameter("@negativeBalance", negativeBalance)
+                    new SqlParameter("@negativeBalance", negativeBalance),
+                    new SqlParameter("@PageNumber", pageNumber),
+                    new SqlParameter("@PageSize", pageSize)
                 )
                 .AsNoTracking()
                 .ToListAsync();
@@ -122,18 +134,22 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 }
 
                 if (accountBalances == null || accountBalances.Count == 0)
-                    return NotFound($"No suppliers found.");
+                    return NotFound($"No accounts found.");
 
-                totalRecords = (await context.Set<CountResult>()
-                    .FromSqlInterpolated($@"
-                        SELECT ID from Suppliers WHERE AccountNumberID = {mainAccountID}")
-                    .ToListAsync())
-                    .Count();
+                totalRecords = (await context.Set<AccountBalanceReport>().FromSqlRaw(
+                    "EXEC dbo.GetAccountBalance @DateTo, @MainAccNo, @linkFileID",
+                    new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
+                    new SqlParameter("@MainAccNo", mainAccountID),
+                    new SqlParameter("@linkFileID", linkFileID)
+                )
+                .AsNoTracking()
+                .ToListAsync())
+                .Count();
 
                 allTotals.TotalDebit = accountBalances.Sum(x => x.Debit ?? 0);
                 allTotals.TotalCredit = accountBalances.Sum(x => x.Credit ?? 0);
 
-                allTotals.Differences = allTotals.TotalCredit - allTotals.TotalDebit;
+                allTotals.Differences = isCredit ? allTotals.TotalCredit - allTotals.TotalDebit : allTotals.TotalDebit - allTotals.TotalDebit;
             }
 
             var paginationMetadata = new

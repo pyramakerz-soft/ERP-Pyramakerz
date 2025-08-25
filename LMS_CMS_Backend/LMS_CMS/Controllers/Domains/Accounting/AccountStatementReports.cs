@@ -63,12 +63,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 return NotFound("Main account number not found.");
 
             var results = await context.Set<AccountStatementReport>().FromSqlRaw(
-                "EXEC dbo.GetAccountStatement @DateFrom, @DateTo, @MainAccNo, @SubAccNo, @linkFileID",
+                "EXEC dbo.GetAccountStatement @DateFrom, @DateTo, @LinkFileID, @SubAccNo",
                 new SqlParameter("@DateFrom", fromDate ?? (object)DBNull.Value),
                 new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
-                new SqlParameter("@MainAccNo", accountingTree.ID),
-                new SqlParameter("@SubAccNo", SubAccountNumber),
-                new SqlParameter("@linkFileID", linkFileID)
+                new SqlParameter("@LinkFileID", linkFileID),
+                new SqlParameter("@SubAccNo", SubAccountNumber)
             )
                 .AsNoTracking()
                 .ToListAsync();
@@ -84,25 +83,28 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             var dateToValue = fromDate.Value.AddDays(-1);
 
             calcFirstPeriod = await context.Set<AccountStatementReport>().FromSqlRaw(
-                "EXEC dbo.GetAccountStatement @DateFrom, @DateTo, @MainAccNo, @SubAccNo, @linkFileID",
+                "EXEC dbo.GetAccountStatement @DateFrom, @DateTo, @LinkFileID, @SubAccNo",
                 new SqlParameter("@DateFrom", "1900-1-1" ?? (object)DBNull.Value),
                 new SqlParameter("@DateTo", (object)dateToValue ?? DBNull.Value),
-                new SqlParameter("@MainAccNo", accountingTree.ID),
-                new SqlParameter("@SubAccNo", SubAccountNumber),
-                new SqlParameter("@linkFileID", linkFileID)
+                new SqlParameter("@LinkFileID", linkFileID),
+                new SqlParameter("@SubAccNo", SubAccountNumber)
             )
                 .AsNoTracking()
                 .ToListAsync();
 
+            bool isCredit = linkFileID switch
+            {
+                2 or 4 or 7 or 10 or 11 => true,
+                _ => false
+            };
+
             fullTotals.TotalDebit = calcFirstPeriod.Sum(x => x.Debit ?? 0);
             fullTotals.TotalCredit = calcFirstPeriod.Sum(x => x.Credit ?? 0);
 
-            firstPeriodBalance = fullTotals.TotalCredit - fullTotals.TotalDebit;
+            firstPeriodBalance = isCredit ? fullTotals.TotalCredit - fullTotals.TotalDebit : fullTotals.TotalDebit - fullTotals.TotalCredit;
 
             results.Insert(0, new AccountStatementReport
             {
-                MasterID = 0,
-                DetailsID = 0,
                 Account = "Opening Balance",
                 Serial = 0,
                 SubAccountNo = 0,
@@ -114,11 +116,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 Notes = ""
             });
 
+            decimal? balance = 0;
+
             for (int i = 1; i < results.Count; i++)
             {
                 var item = results[i];
 
-                decimal? balance = item.Credit - item.Debit;
+                balance = isCredit ? item.Credit - item.Debit : item.Debit - item.Credit;
 
                 if (i == 1)
                     runningBalance += balance + results[0].Balance;
@@ -131,13 +135,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             fullTotals.TotalDebit += results.Sum(x => x.Debit ?? 0);
             fullTotals.TotalCredit += results.Sum(x => x.Credit ?? 0);
 
-            fullTotals.Differences = fullTotals.TotalCredit - fullTotals.TotalDebit;
+            fullTotals.Differences = isCredit ? fullTotals.TotalCredit - fullTotals.TotalDebit :
+                 fullTotals.TotalDebit - fullTotals.TotalCredit;
 
-            long totalRecords = (await context.Set<CountResult>()
-                .FromSqlInterpolated($@"
-                    SELECT dbo.GetEntriesCount({fromDate}, {toDate}, {accountingTree.ID}, {SubAccountNumber}, {linkFileID}) AS TotalCount")
-                .ToListAsync())
-                .FirstOrDefault()?.TotalCount ?? 0;
+            long totalRecords = results?.Count() ?? 0;
 
             var paginationMetadata = new
             {
