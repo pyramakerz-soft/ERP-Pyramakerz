@@ -14,5 +14,6 @@ namespace LMS_CMS_BL.DTO.Violation
         public string EmployeeType { get; set; }
         public string EmployeeName { get; set; }
         public string? Details { get; set; }
+        public string? AttachmentUrl { get; set; }
     }
 }
