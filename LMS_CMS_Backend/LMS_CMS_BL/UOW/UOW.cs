@@ -7,6 +7,7 @@ using LMS_CMS_DAL.Models.Domains.ClinicModule;
 using LMS_CMS_DAL.Models.Domains.Communication;
 using LMS_CMS_DAL.Models.Domains.ECommerce;
 using LMS_CMS_DAL.Models.Domains.ETA;
+using LMS_CMS_DAL.Models.Domains.HR;
 using LMS_CMS_DAL.Models.Domains.Inventory;
 using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_DAL.Models.Domains.MaintenanceModule;
@@ -248,6 +249,18 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<MaintenanceItem> MaintenanceItem_Repository;
         GenericRepo<MaintenanceCompany> MaintenanceCompany_Repository;
         GenericRepo<MaintenanceEmployee> MaintenanceEmployee_Repository;
+
+        GenericRepo<Bouns> Bouns_Repository;
+        GenericRepo<BounsType> BounsType_Repository;
+        GenericRepo<Deduction> Deduction_Repository;
+        GenericRepo<DeductionType> DeductionType_Repository;
+        GenericRepo<EmployeeVacationCount> EmployeeVacationCount_Repository;
+        GenericRepo<LeaveRequest> LeaveRequest_Repository;
+        GenericRepo<Loans> Loans_Repository;
+        GenericRepo<OfficialHolidays> OfficialHolidays_Repository;
+        GenericRepo<VacationTypes> VacationTypes_Repository;
+        GenericRepo<VacationEmployee> VacationEmployee_Repository;
+
 
 
         public UOW(Octa_DbContext octa_Db)
@@ -2847,6 +2860,125 @@ namespace LMS_CMS_BL.UOW
             }
         }
 
+        public GenericRepo<Bouns> bouns_Repository
+        {
+            get
+            {
+                if (Bouns_Repository == null)
+                {
+                    Bouns_Repository = new GenericRepo<Bouns>(db);
+                }
+                return Bouns_Repository;
+            }
+        }
+
+        public GenericRepo<BounsType> bounsType_Repository
+        {
+            get
+            {
+                if (BounsType_Repository == null)
+                {
+                    BounsType_Repository = new GenericRepo<BounsType>(db);
+                }
+                return BounsType_Repository;
+            }
+        }
+
+        public GenericRepo<Deduction> deduction_Repository
+        {
+            get
+            {
+                if (Deduction_Repository == null)
+                {
+                    Deduction_Repository = new GenericRepo<Deduction>(db);
+                }
+                return Deduction_Repository;
+            }
+        }
+
+        public GenericRepo<DeductionType> deductionType_Repository
+        {
+            get
+            {
+                if (DeductionType_Repository == null)
+                {
+                    DeductionType_Repository = new GenericRepo<DeductionType>(db);
+                }
+                return DeductionType_Repository;
+            }
+        }
+
+        public GenericRepo<EmployeeVacationCount> employeeVacationCount_Repository
+        {
+            get
+            {
+                if (EmployeeVacationCount_Repository == null)
+                {
+                    EmployeeVacationCount_Repository = new GenericRepo<EmployeeVacationCount>(db);
+                }
+                return EmployeeVacationCount_Repository;
+            }
+        }
+
+        public GenericRepo<LeaveRequest> leaveRequest_Repository
+        {
+            get
+            {
+                if (LeaveRequest_Repository == null)
+                {
+                    LeaveRequest_Repository = new GenericRepo<LeaveRequest>(db);
+                }
+                return LeaveRequest_Repository;
+            }
+        }
+
+        public GenericRepo<Loans> loans_Repository
+        {
+            get
+            {
+                if (Loans_Repository == null)
+                {
+                    Loans_Repository = new GenericRepo<Loans>(db);
+                }
+                return Loans_Repository;
+            }
+        }
+
+        public GenericRepo<OfficialHolidays> officialHolidays_Repository
+        {
+            get
+            {
+                if (OfficialHolidays_Repository == null)
+                {
+                    OfficialHolidays_Repository = new GenericRepo<OfficialHolidays>(db);
+                }
+                return OfficialHolidays_Repository;
+            }
+        }
+
+        public GenericRepo<VacationTypes> vacationTypes_Repository
+        {
+            get
+            {
+                if (VacationTypes_Repository == null)
+                {
+                    VacationTypes_Repository = new GenericRepo<VacationTypes>(db);
+                }
+                return VacationTypes_Repository;
+            }
+        }
+
+        public GenericRepo<VacationEmployee> vacationEmployee_Repository
+        {
+            get
+            {
+                if (VacationEmployee_Repository == null)
+                {
+                    VacationEmployee_Repository = new GenericRepo<VacationEmployee>(db);
+                }
+                return VacationEmployee_Repository;
+            }
+        }
 
 
         public void SaveChanges()

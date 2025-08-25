@@ -261,6 +261,7 @@ export class InventoryDetailsComponent {
   }
 
   ////////////////////////////////////////////////////// Get Data
+
   GetAllSaves() {
     this.SaveServ.Get(this.DomainName).subscribe((d) => {
       this.Saves = d;

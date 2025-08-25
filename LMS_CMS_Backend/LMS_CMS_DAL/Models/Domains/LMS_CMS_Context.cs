@@ -7,6 +7,7 @@ using LMS_CMS_DAL.Models.Domains.ClinicModule;
 using LMS_CMS_DAL.Models.Domains.Communication;
 using LMS_CMS_DAL.Models.Domains.ECommerce;
 using LMS_CMS_DAL.Models.Domains.ETA;
+using LMS_CMS_DAL.Models.Domains.HR;
 using LMS_CMS_DAL.Models.Domains.Inventory;
 using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_DAL.Models.Domains.MaintenanceModule;
@@ -232,12 +233,21 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<AppointmentStatus> AppointmentStatus { get; set; }
         public DbSet<AppointmentParent> AppointmentParent { get; set; }
         public DbSet<AppointmentGrade> AppointmentGrade { get; set; }
-
         // Maintenance Module
         public DbSet<MaintenanceItem> MaintenanceItems { get; set; }
         public DbSet<MaintenanceCompany> MaintenanceCompanies { get; set; }
         public DbSet<MaintenanceEmployee> MaintenanceEmployees { get; set; }
 
+        public DbSet<Bouns> Bouns { get; set; }
+        public DbSet<BounsType> BounsType { get; set; }
+        public DbSet<Deduction> Deduction { get; set; }
+        public DbSet<DeductionType> DeductionType { get; set; }
+        public DbSet<EmployeeVacationCount> EmployeeVacationCount { get; set; }
+        public DbSet<LeaveRequest> LeaveRequest { get; set; }
+        public DbSet<Loans> Loans { get; set; }
+        public DbSet<OfficialHolidays> OfficialHolidays { get; set; }
+        public DbSet<VacationEmployee> VacationEmployee { get; set; }
+        public DbSet<VacationTypes> VacationTypes { get; set; }
 
 
 
@@ -411,6 +421,14 @@ namespace LMS_CMS_DAL.Models.Domains
                 .ValueGeneratedNever();
 
             modelBuilder.Entity<AppointmentStatus>()
+                .Property(p => p.ID)
+                .ValueGeneratedNever();
+
+            modelBuilder.Entity<BounsType>()
+                .Property(p => p.ID)
+                .ValueGeneratedNever();
+
+            modelBuilder.Entity<DeductionType>()
                 .Property(p => p.ID)
                 .ValueGeneratedNever();
 
@@ -2122,6 +2140,76 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasForeignKey(p => p.AppointmentID)
                 .OnDelete(DeleteBehavior.Restrict);
 
+
+
+
+            modelBuilder.Entity<Bouns>()
+                .HasOne(p => p.Employee)
+                .WithMany(p => p.Bouns)
+                .HasForeignKey(p => p.EmployeeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Bouns>()
+                .HasOne(p => p.BounsType)
+                .WithMany(p => p.Bouns)
+                .HasForeignKey(p => p.BounsTypeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Deduction>()
+                .HasOne(p => p.Employee)
+                .WithMany(p => p.Deduction)
+                .HasForeignKey(p => p.EmployeeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Deduction>()
+                .HasOne(p => p.DeductionType)
+                .WithMany(p => p.Deduction)
+                .HasForeignKey(p => p.DeductionTypeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<EmployeeVacationCount>()
+                .HasOne(p => p.Employee)
+                .WithMany(p => p.EmployeeVacationCount)
+                .HasForeignKey(p => p.EmployeeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<EmployeeVacationCount>()
+                .HasOne(p => p.VacationTypes)
+                .WithMany(p => p.EmployeeVacationCount)
+                .HasForeignKey(p => p.VacationTypesID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<LeaveRequest>()
+                .HasOne(p => p.Employee)
+                .WithMany(p => p.LeaveRequest)
+                .HasForeignKey(p => p.EmployeeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Loans>()
+                .HasOne(p => p.Employee)
+                .WithMany(p => p.Loans)
+                .HasForeignKey(p => p.EmployeeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Loans>()
+                .HasOne(p => p.Save)
+                .WithMany(p => p.Loans)
+                .HasForeignKey(p => p.SafeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<VacationEmployee>()
+                .HasOne(p => p.Employee)
+                .WithMany(p => p.VacationEmployee)
+                .HasForeignKey(p => p.EmployeeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<VacationEmployee>()
+                .HasOne(p => p.VacationTypes)
+                .WithMany(p => p.VacationEmployee)
+                .HasForeignKey(p => p.VacationTypesID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
             // Maintenance Module
             modelBuilder.Entity<MaintenanceEmployee>()
                  .HasOne(me => me.Employee)
@@ -2229,6 +2317,42 @@ namespace LMS_CMS_DAL.Models.Domains
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<MaintenanceEmployee>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Bouns>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Deduction>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<EmployeeVacationCount>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<LeaveRequest>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Loans>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<VacationEmployee>()
                 .HasOne(v => v.DeletedByEmployee)
                 .WithMany()
                 .HasForeignKey(v => v.DeletedByUserId)
