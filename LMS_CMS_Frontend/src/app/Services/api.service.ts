@@ -4,9 +4,10 @@ import { Injectable } from '@angular/core';
   providedIn: 'root',
 })
 export class ApiService {
-  // BaseUrl = 'https://localhost:7205/api/with-domain';
-  // BaseUrlOcta = 'https://localhost:7205/api';
-  // BaseUrlSignalR = 'https://localhost:7205/';
+  
+  BaseUrl = 'https://localhost:7205/api/with-domain';
+  BaseUrlOcta = 'https://localhost:7205/api';
+  BaseUrlSignalR = 'https://localhost:7205/';
 
   // BaseUrl = 'http://localhost:5094/api/with-domain';
   // BaseUrlOcta = 'http://localhost:5094/api';
@@ -22,12 +23,7 @@ export class ApiService {
     // const hostname = window.location.hostname; 
     // var Header = hostname.split('.')[0] 
     
-<<<<<<< HEAD
     var Header = 'Domain_One';   
-=======
-    var Header = 'try';    
->>>>>>> 039ea2012f5b7dde1fe330c9ae054d9bf915653a
-
     return Header;
   }
 }
