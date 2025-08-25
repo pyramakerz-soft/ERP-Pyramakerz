@@ -12,7 +12,6 @@
     <None Remove="DbScripts\GetAccountingEntries.sql" />
     <None Remove="DbScripts\GetAccountingTotals.sql" />
     <None Remove="DbScripts\GetAccountLedger.sql" />
-    <None Remove="DbScripts\GetAccountSummary.sql" />
     <None Remove="DbScripts\GetEntriesCount.sql" />
     <None Remove="DbScripts\GetSubAccountInfo.sql" />
   </ItemGroup>
@@ -23,7 +22,7 @@
     <EmbeddedResource Include="DbScripts\GetAccountingEntries.sql" />
     <EmbeddedResource Include="DbScripts\GetAccountingTotals.sql" />
     <EmbeddedResource Include="DbScripts\GetAccountLedger.sql" />
-    <EmbeddedResource Include="DbScripts\GetAccountSummary.sql" />
+    <EmbeddedResource Include="DbScripts\GetAccountBalance.sql" />
     <EmbeddedResource Include="DbScripts\GetEntriesCount.sql" />
     <EmbeddedResource Include="DbScripts\GetSubAccountInfo.sql" />
   </ItemGroup>

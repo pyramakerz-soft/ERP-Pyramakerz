@@ -76,7 +76,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////////////--77
-        [HttpGet("report")]
+        [HttpGet("ViolationReport")]
         [Authorize_Endpoint_( allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Violation Types" })]
         public async Task<IActionResult> GetViolationReport(
          [FromQuery] long? employeeTypeId,
@@ -107,7 +107,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
                     .ThenInclude(e => e.EmployeeType)
                 .Where(v => !v.IsDeleted.HasValue || !v.IsDeleted.Value);
 
-            // تطبيق الفلترات
+           
             if (employeeTypeId.HasValue)
             {
                 query = query.Where(v => v.Employee.EmployeeTypeID == employeeTypeId.Value);
@@ -129,7 +129,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
             }
 
             var violations = await query
-           .OrderByDescending(v => v.Date)
+           .OrderBy(v => v.Date)
            .Select(v => new ViolationReportDTO
            {
                ID = v.ID,
@@ -137,7 +137,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
                ViolationType = v.ViolationType.Name,
                EmployeeType = v.Employee.EmployeeType.Name,
                EmployeeName = $"{v.Employee.en_name} {v.Employee.ar_name}",
-               Details = v.Details
+               Details = v.Details,
+               //AttachmentUrl = v.AttachmentPath
            })
            .ToListAsync();
 
