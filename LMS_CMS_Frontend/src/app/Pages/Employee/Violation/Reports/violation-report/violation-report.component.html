@@ -10,10 +10,8 @@
             }}</label>
         <select id="employeeType" [(ngModel)]="SelectedEmployeeTypeId" (change)="GetViolationTypes()"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
-            <!-- <option [value]="0">{{ 'All' | translate }}</option> -->
-            <option *ngFor="let empType of empTypes" [value]="empType.id">
-                {{ empType.name }}
-            </option>
+            <option [ngValue]="0" disabled selected hidden>{{'Choose'| translate }} {{'Item'| translate }}</option>
+            <option *ngFor="let empType of empTypes" [value]="empType.id"> {{ empType.name }} </option>
         </select>
     </div>
 
@@ -24,6 +22,8 @@
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             [disabled]="!SelectedEmployeeTypeId">
             <!-- <option [value]="0">{{ 'All' | translate }}</option> -->
+            <option [ngValue]="0" disabled selected hidden>{{'Choose'| translate }} {{'Item'| translate }}</option>
+
             <option *ngFor="let violationType of violationTypes" [value]="violationType.id">
                 {{ violationType.name }}
             </option>
@@ -42,23 +42,16 @@
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
     </div>
 
-    <div class="w-full md:w-1/6 flex justify-end mt-4 md:mt-0
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    ">
-        <button class="p-3 font-medium text-xl rounded-lg" (click)="ViewReport()" [disabled]="!showViewReportBtn"
-            [ngClass]="{ 'bg-gray-100 text-gray-300': !showViewReportBtn, 'secondaryBg text-white': showViewReportBtn}">
+    <div class="w-full md:w-1/6 flex justify-end mt-4 md:mt-0 ">
+        <button class="p-3 font-medium text-xl rounded-lg" (click)="ViewReport()" 
+
+        [disabled]="!SelectedStartDate || !SelectedEndDate || !SelectedEmployeeTypeId || !SelectedViolationTypeId"
+        
+            [ngClass]="{
+             'bg-gray-100 text-gray-300': !SelectedStartDate || !SelectedEndDate || !SelectedEmployeeTypeId || !SelectedViolationTypeId,
+             'secondaryBg text-white': SelectedStartDate && SelectedEndDate && SelectedEmployeeTypeId && SelectedViolationTypeId
+             
+             }">
             {{'View Report'| translate }}
         </button>
     </div>
@@ -131,8 +124,24 @@
 
 <div class="absolute -top-[9999px] -left-[9999px]">
     <div id="Data" class="hidden">
-        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="fileName" [infoRows]="getInfoRows()"
-            [tableDataWithHeaderArray]="getTableDataWithHeader()" #pdfComponentRef>
+        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'Violation Report'" 
+            [infoRows]="getInfoRows()"
+            [tableHeaders]="['ID', 'Date', 'Violation Type', 'Employee Type', 'Employee Name', 'Details']"
+            [tableData]="tableDataForExport" #pdfComponentRef>
         </app-pdf-print>
     </div>
 </div>
+<!-- <div class="absolute -top-[9999px] -left-[9999px]">
+    <div id="Data" class="hidden">
+        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'List of students names in class'" [infoRows]="[
+                { keyEn: 'Class : ' + this.class.name},
+                { keyEn: 'Number of Students : ' + this.studentsCount.toString()},
+                { keyEn: 'Date : ' + this.date },
+                { keyEn: 'School : ' +  this.school.name },
+                { keyEn: 'Year : ' +this.AcademicYearName },
+                { keyEn: 'Grade : ' +this.GradeName }
+            ]" [tableHeaders]="['id', 'en_name', 'mobile', 'nationalityName', 'genderName']" [tableData]="StudentData"
+            #pdfComponentRef>
+        </app-pdf-print>
+    </div>
+</div> -->
