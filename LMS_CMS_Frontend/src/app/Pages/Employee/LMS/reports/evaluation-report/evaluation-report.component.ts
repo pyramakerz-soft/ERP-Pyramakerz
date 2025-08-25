@@ -23,12 +23,11 @@ import Swal from 'sweetalert2';
 import * as XLSX from 'xlsx-js-style';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 
-
 @Component({
   selector: 'app-evaluation-report',
   standalone: true,
   imports: [CommonModule, FormsModule, TranslateModule, PdfPrintComponent],
-    templateUrl: './evaluation-report.component.html',
+  templateUrl: './evaluation-report.component.html',
   styleUrl: './evaluation-report.component.css'
 })
 export class EvaluationReportComponent {
@@ -53,7 +52,7 @@ export class EvaluationReportComponent {
   showPDF: boolean = false;
   showTable: boolean = false;
   showViewReportBtn: boolean = false;
-  DataToPrint: any = null;
+  cachedTableDataForPDF: any[] = []; // NEW: Cache for PDF data
 
   // School info for PDF
   school = {
@@ -107,12 +106,14 @@ export class EvaluationReportComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-      ngOnDestroy(): void {
+
+  ngOnDestroy(): void {
     this.realTimeService.stopConnection(); 
-     if (this.subscription) {
+    if (this.subscription) {
       this.subscription.unsubscribe();
     }
-  } 
+  }
+
   getClassData() {
     this.Classs = [];
     if (this.SchoolID) {
@@ -199,6 +200,10 @@ export class EvaluationReportComponent {
         // Initialize collapsed items
         this.collapsedItems.clear();
         this.reportData.forEach((_, index) => this.collapsedItems.add(index));
+        
+        // Prepare data for export
+        this.prepareExportData();
+        
         this.isLoading = false;
       },
       (error) => {
@@ -213,6 +218,79 @@ export class EvaluationReportComponent {
       }
     );
   }
+
+// UPDATED: Prepare data for PDF export (following invoice pattern)
+private prepareExportData(): void {
+  this.cachedTableDataForPDF = [];
+
+  this.reportData.forEach((evaluation: any) => {
+    const evaluationDate = evaluation.date;
+    
+    // Process question groups
+    if (evaluation.evaluationEmployeeQuestionGroups && evaluation.evaluationEmployeeQuestionGroups.length > 0) {
+      evaluation.evaluationEmployeeQuestionGroups.forEach((group: any) => {
+        const section = {
+          header: `Evaluation: ${evaluationDate} - ${group.englishTitle || group.arabicTitle || 'Question Group'}`,
+          summary: [
+            { key: 'Evaluation Date', value: evaluationDate },
+            { key: 'Question Group', value: group.englishTitle || group.arabicTitle || 'N/A' }
+          ],
+          table: {
+            headers: ['Question', 'Rating', 'Notes', 'Average'],
+            data: []
+          }
+        };
+
+        // Add questions
+        if (group.evaluationEmployeeQuestions && group.evaluationEmployeeQuestions.length > 0) {
+          group.evaluationEmployeeQuestions.forEach((question: any) => {
+            section.table.data.push( );
+          });
+        }
+
+        this.cachedTableDataForPDF.push(section);
+      });
+    }
+
+    // Process student corrections
+    if (evaluation.evaluationEmployeeStudentBookCorrections && evaluation.evaluationEmployeeStudentBookCorrections.length > 0) {
+      evaluation.evaluationEmployeeStudentBookCorrections.forEach((correction: any) => {
+        const section = {
+          header: `Evaluation: ${evaluationDate} - Student Correction`,
+          summary: [
+            { key: 'Evaluation Date', value: evaluationDate },
+            { key: 'Student', value: correction.studentEnglishName || correction.studentArabicName || 'N/A' },
+            { key: 'Correction Book', value: correction.evaluationBookCorrectionEnglishName || correction.evaluationBookCorrectionArabicName || 'N/A' }
+          ],
+          table: {
+            headers: ['Status', 'Notes', 'Average'],
+            data: [{
+              'Status': correction.state || 0,
+              'Notes': correction.note || 'N/A',
+              'Average': correction.averageStudent || 'N/A'
+            }]
+          }
+        };
+
+        this.cachedTableDataForPDF.push(section);
+      });
+    }
+  });
+
+  // If no data, create empty structure
+  if (this.cachedTableDataForPDF.length === 0) {
+    this.cachedTableDataForPDF = [{
+      header: 'No Evaluation Data Found',
+      summary: [],
+      table: {
+        headers: [],
+        data: []
+      }
+    }];
+  }
+
+  console.log('Cached PDF Data:', this.cachedTableDataForPDF); // For debugging
+}
 
   toggleCollapse(index: number) {
     if (this.collapsedItems.has(index)) {
@@ -244,226 +322,101 @@ export class EvaluationReportComponent {
   }
 
   getInfoRows(): any[] {
+    const selectedTemplate = this.Templates.find(t => t.id == this.filterParams.templateId);
+    const selectedEmployee = this.Employees.find(e => e.id == this.filterParams.employeeId);
+    const selectedSchool = this.Schools.find(s => s.id == this.filterParams.schoolId);
+    const selectedClass = this.Classs.find(c => c.id == this.filterParams.classroomId);
+
     return [
       {
-        keyEn: 'Report Type: Evaluation Report',
-        keyAr: 'نوع التقرير: تقرير التقييم',
+        keyEn: 'Template: ' + (selectedTemplate?.englishTitle || 'All'),
+        keyAr: 'النموذج: ' + (selectedTemplate?.englishTitle || 'الكل')
+      },
+      {
+        keyEn: 'Employee: ' + (selectedEmployee?.en_name || 'All'),
+        keyAr: 'الموظف: ' + (selectedEmployee?.en_name || 'الكل')
+      },
+      {
+        keyEn: 'School: ' + (selectedSchool?.name || 'All'),
+        keyAr: 'المدرسة: ' + (selectedSchool?.name || 'الكل')
+      },
+      {
+        keyEn: 'Class: ' + (selectedClass?.name || 'All'),
+        keyAr: 'الفصل: ' + (selectedClass?.name || 'الكل')
       },
       {
         keyEn: 'Start Date: ' + this.filterParams.fromDate,
-        keyAr: 'تاريخ البدء: ' + this.filterParams.fromDate,
+        keyAr: 'تاريخ البدء: ' + this.filterParams.fromDate
       },
       {
         keyEn: 'End Date: ' + this.filterParams.toDate,
-        keyAr: 'تاريخ الانتهاء: ' + this.filterParams.toDate,
+        keyAr: 'تاريخ الانتهاء: ' + this.filterParams.toDate
       },
       {
         keyEn: 'Generated On: ' + new Date().toLocaleDateString(),
-        keyAr: 'تم الإنشاء في: ' + new Date().toLocaleDateString(),
-      },
+        keyAr: 'تم الإنشاء في: ' + new Date().toLocaleDateString()
+      }
     ];
   }
 
-  getTableDataWithHeader(): any[] {
-    return this.DataToPrint;
-  }
-
+  // UPDATED: Print method following invoice pattern
   Print() {
-    this.DataToPrint = [];
-    this.GetDataForPrint().subscribe((result) => {
-      this.DataToPrint = result;
-      this.showPDF = true;
-      setTimeout(() => {
-        const printContents = document.getElementById('Data')?.innerHTML;
-        if (!printContents) {
-          console.error('Element not found!');
-          return;
-        }
+    if (this.cachedTableDataForPDF.length === 0) {
+      Swal.fire('Warning', 'No data to print!', 'warning');
+      return;
+    }
 
-        const printStyle = `
-          <style>
-            @page { size: auto; margin: 0mm; }
-            body { margin: 0; }
-            @media print {
-              body > *:not(#print-container) { display: none !important; }
-              #print-container {
-                display: block !important;
-                position: static !important;
-                width: 100% !important;
-                height: auto !important;
-                background: white !important;
-                margin: 0 !important;
-              }
+    this.showPDF = true;
+    setTimeout(() => {
+      const printContents = document.getElementById('Data')?.innerHTML;
+      if (!printContents) {
+        console.error('Element not found!');
+        return;
+      }
+
+      const printStyle = `
+        <style>
+          @page { size: auto; margin: 0mm; }
+          body { margin: 0; }
+          @media print {
+            body > *:not(#print-container) { display: none !important; }
+            #print-container {
+              display: block !important;
+              position: static !important;
+              width: 100% !important;
+              height: auto !important;
+              background: white !important;
+              margin: 0 !important;
             }
-          </style>
-        `;
+          }
+        </style>
+      `;
 
-        const printContainer = document.createElement('div');
-        printContainer.id = 'print-container';
-        printContainer.innerHTML = printStyle + printContents;
+      const printContainer = document.createElement('div');
+      printContainer.id = 'print-container';
+      printContainer.innerHTML = printStyle + printContents;
 
-        document.body.appendChild(printContainer);
-        window.print();
+      document.body.appendChild(printContainer);
+      window.print();
 
-        setTimeout(() => {
-          document.body.removeChild(printContainer);
-          this.showPDF = false;
-        }, 100);
-      }, 500);
-    });
-  }
-
-  DownloadAsPDF() {
-    this.DataToPrint = [];
-    this.GetDataForPrint().subscribe((result) => {
-      this.DataToPrint = result;
-      this.showPDF = true;
       setTimeout(() => {
-        this.pdfComponentRef.downloadPDF();
-        setTimeout(() => (this.showPDF = false), 2000);
-      }, 500);
-    });
+        document.body.removeChild(printContainer);
+        this.showPDF = false;
+      }, 100);
+    }, 500);
   }
 
-  GetDataForPrint(): Observable<any[]> {
-    // Get all data for printing
-    const params: any = {};
-    if (this.filterParams.templateId) params.templateId = this.filterParams.templateId;
-    if (this.filterParams.fromDate) params.fromDate = this.filterParams.fromDate;
-    if (this.filterParams.toDate) params.toDate = this.filterParams.toDate;
-    if (this.filterParams.employeeId) params.employeeId = this.filterParams.employeeId;
-    if (this.filterParams.schoolId) params.schoolId = this.filterParams.schoolId;
-    if (this.filterParams.classroomId) params.classroomId = this.filterParams.classroomId;
+  // UPDATED: DownloadAsPDF method following invoice pattern
+  DownloadAsPDF() {
+    if (this.cachedTableDataForPDF.length === 0) {
+      Swal.fire('Warning', 'No data to export!', 'warning');
+      return;
+    }
 
-    return this.EvaluationEmployeeServ.GetEvaluationReport(params, this.DomainName).pipe(
-      map((data: any) => {
-        const reportData = Array.isArray(data) ? data : [];
-        
-        // Create a flattened structure for PDF display
-        const flattenedData: any[] = [];
-        
-        reportData.forEach((evaluation: any) => {
-          // Add questions section
-          evaluation.evaluationEmployeeQuestionGroups?.forEach((group: any) => {
-            group.evaluationEmployeeQuestions?.forEach((question: any) => {
-              flattenedData.push({
-                header: `Evaluation: ${evaluation.date} - ${group.englishTitle}`,
-                summary: [
-                  { key: 'Evaluation Date', value: evaluation.date },
-                  { key: 'Question Group', value: group.englishTitle },
-                  { key: 'Question', value: question.questionEnglishTitle }
-                ],
-                table: {
-                  headers: ['Rating', 'Notes', 'Average'],
-                  data: [{
-                    'Rating': question.mark,
-                    'Notes': question.note || 'N/A',
-                    'Average': question.average || 'N/A'
-                  }]
-                }
-              });
-            });
-          });
-
-          // Add student corrections section
-          evaluation.evaluationEmployeeStudentBookCorrections?.forEach((correction: any) => {
-            flattenedData.push({
-              header: `Evaluation: ${evaluation.date} - Student Correction`,
-              summary: [
-                { key: 'Evaluation Date', value: evaluation.date },
-                { key: 'Student', value: correction.studentEnglishName },
-                { key: 'Correction Book', value: correction.evaluationBookCorrectionEnglishName }
-              ],
-              table: {
-                headers: ['Status', 'Notes', 'Average'],
-                data: [{
-                  'Status': correction.state,
-                  'Notes': correction.note || 'N/A',
-                  'Average': correction.averageStudent || 'N/A'
-                }]
-              }
-            });
-          });
-        });
-
-        return flattenedData;
-      }),
-      catchError((error) => {
-        console.error('Error in GetDataForPrint:', error);
-        return of([]);
-      })
-    );
+    this.showPDF = true;
+    setTimeout(() => {
+      this.pdfComponentRef.downloadPDF();
+      setTimeout(() => (this.showPDF = false), 2000);
+    }, 500);
   }
-
-  // DownloadAsExcel() {
-  //   this.GetDataForPrint().subscribe((result) => {
-  //     if (!result || result.length === 0) {
-  //       Swal.fire({
-  //         title: 'No Data',
-  //         text: 'No data available for export.',
-  //         icon: 'info',
-  //         confirmButtonText: 'OK',
-  //       });
-  //       return;
-  //     }
-
-  //     const excelData: any[] = [];
-
-  //     // Add report title
-  //     excelData.push([{ 
-  //       v: 'EVALUATION REPORT DETAILED', 
-  //       s: { font: { bold: true, sz: 16 }, alignment: { horizontal: 'center' } } 
-  //     }]);
-  //     excelData.push([]);
-
-  //     // Add filter information
-  //     excelData.push([{ v: 'Start Date:', s: { font: { bold: true } } }, { v: this.filterParams.fromDate }]);
-  //     excelData.push([{ v: 'End Date:', s: { font: { bold: true } } }, { v: this.filterParams.toDate }]);
-  //     excelData.push([]);
-
-  //     // Add evaluation data
-  //     result.forEach((section: any, sectionIdx: number) => {
-  //       excelData.push([{ 
-  //         v: section.header, 
-  //         s: { font: { bold: true, color: { rgb: 'FFFFFF' } }, fill: { fgColor: { rgb: '4472C4' } } } 
-  //       }]);
-
-  //       // Section summary
-  //       section.summary.forEach((row: any, i: number) => {
-  //         excelData.push([
-  //           { v: row.key, s: { font: { bold: true }, fill: { fgColor: { rgb: i % 2 === 0 ? 'D9E1F2' : 'FFFFFF' } } } },
-  //           { v: row.value, s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'D9E1F2' : 'FFFFFF' } } } }
-  //         ]);
-  //       });
-
-  //       excelData.push([]);
-
-  //       // Table headers
-  //       excelData.push(section.table.headers.map((header: string) => ({
-  //         v: header,
-  //         s: { font: { bold: true }, fill: { fgColor: { rgb: '4472C4' } }, color: { rgb: 'FFFFFF' } }
-  //       })));
-
-  //       // Table data
-  //       if (section.table.data && section.table.data.length > 0) {
-  //         section.table.data.forEach((row: any, i: number) => {
-  //           excelData.push(section.table.headers.map((header: string) => ({
-  //             v: row[header],
-  //             s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'FFFFFF' } } }
-  //           })));
-  //         });
-  //       }
-
-  //       excelData.push([]);
-  //     });
-
-  //     // Create and download Excel
-  //     const worksheet = XLSX.utils.aoa_to_sheet(excelData);
-  //     const workbook = XLSX.utils.book_new();
-  //     XLSX.utils.book_append_sheet(workbook, worksheet, 'Evaluation Report');
-      
-  //     const dateStr = new Date().toISOString().slice(0, 10);
-  //     XLSX.writeFile(workbook, `Evaluation_Report_${dateStr}.xlsx`);
-  //   });
-  // }
 }

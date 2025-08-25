@@ -230,11 +230,13 @@
     </div>
 </div> -->
 
-<!-- PDF Print Section -->
 <div class="absolute -top-[9999px] -left-[9999px]">
     <div id="Data" class="hidden">
-        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="fileName" [infoRows]="getInfoRows()"
-            [tableDataWithHeaderArray]="getTableDataWithHeader()" #pdfComponentRef>
+        <app-pdf-print *ngIf="showPDF" [school]="school" 
+                       [fileName]="'Evaluation Report'"
+                       [infoRows]="getInfoRows()"
+                       [tableDataWithHeaderArray]="cachedTableDataForPDF"
+                       #pdfComponentRef>
         </app-pdf-print>
     </div>
 </div>
