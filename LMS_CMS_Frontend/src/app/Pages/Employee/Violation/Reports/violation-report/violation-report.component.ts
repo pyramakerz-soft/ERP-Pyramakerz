@@ -209,11 +209,11 @@ export class ViolationReportComponent {
   }
 
   getSelectedEmployeeTypeName(): string {
-    return this.empTypes.find(e => e.id === this.SelectedEmployeeTypeId)?.name || 'All';
+    return this.empTypes.find(e => e.id == this.SelectedEmployeeTypeId)?.name || 'All';
   }
 
   getSelectedViolationTypeName(): string {
-    return this.violationTypes.find(v => v.id === this.SelectedViolationTypeId)?.name || 'All';
+    return this.violationTypes.find(v => v.id == this.SelectedViolationTypeId)?.name || 'All';
   }
 
 
@@ -330,10 +330,10 @@ export class ViolationReportComponent {
 
     // Add filter information with styling
     const selectedEmpType = this.empTypes.find(
-      (e) => e.id === this.SelectedEmployeeTypeId
+      (e) => e.id == this.SelectedEmployeeTypeId
     );
     const selectedViolationType = this.violationTypes.find(
-      (v) => v.id === this.SelectedViolationTypeId
+      (v) => v.id == this.SelectedViolationTypeId
     );
 
     excelData.push([
