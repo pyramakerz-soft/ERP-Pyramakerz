@@ -13,11 +13,14 @@ import { StateService } from '../../../../Services/Employee/Inventory/state.serv
 import { EtaService } from '../../../../Services/Employee/ETA/eta.service';
 import { PdfPrintComponent } from '../../../../Component/pdf-print/pdf-print.component';
 import * as XLSX from 'xlsx';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-electronic-invoice',
   standalone: true,
-  imports: [FormsModule, CommonModule, PdfPrintComponent],
+  imports: [FormsModule, CommonModule, PdfPrintComponent , TranslateModule],
   templateUrl: './electronic-invoice.component.html',
   styleUrls: ['./electronic-invoice.component.css'],
   providers: [DatePipe],
@@ -30,7 +33,8 @@ export class ElectronicInvoiceComponent implements OnInit {
   DomainName: string = '';
   currentSystem: 'zatca' | 'eta' = 'zatca';
   selectedInvoices: number[] = [];
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   showTable = false;
   showViewReportBtn = false;
   transactions: ElectronicInvoice[] = [];
@@ -60,9 +64,11 @@ export class ElectronicInvoiceComponent implements OnInit {
     private stateService: StateService,
     private zatcaService: ZatcaService,
     private etaService: EtaService,
+    private languageService: LanguageService,
     private apiService: ApiService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private realTimeService: RealTimeNotificationServiceService,
   ) {
     this.DomainName = this.apiService.GetHeader();
     this.route.data.subscribe((data) => {
@@ -73,6 +79,18 @@ export class ElectronicInvoiceComponent implements OnInit {
   ngOnInit() {
     this.loadSchools();
     this.restoreState();
+
+        this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   private restoreState() {

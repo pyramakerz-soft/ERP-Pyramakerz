@@ -15,11 +15,14 @@ import { DeleteEditPermissionService } from '../../../../../Services/shared/dele
 import { MenuService } from '../../../../../Services/shared/menu.service';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
 import { StudentService } from '../../../../../Services/student.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-transfered-from-kindergarten-report',
   standalone: true,
-  imports: [CommonModule, FormsModule, PdfPrintComponent],
+  imports: [CommonModule, FormsModule, PdfPrintComponent, TranslateModule],
   templateUrl: './transfered-from-kindergarten-report.component.html',
   styleUrl: './transfered-from-kindergarten-report.component.css'
 })
@@ -45,7 +48,8 @@ export class TransferedFromKindergartenReportComponent {
   SelectedStudentId: number = 0;
   SelectedYearId: number = 0;
   showPDF: boolean = false
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   school: School = new School()
   showTable: boolean = false
   SelectedStudent: Student = new Student()
@@ -64,12 +68,14 @@ export class TransferedFromKindergartenReportComponent {
     public account: AccountService,
     public ApiServ: ApiService,
     private menuService: MenuService,
+    private languageService: LanguageService,
     public EditDeleteServ: DeleteEditPermissionService,
     private router: Router,
     private SchoolServ: SchoolService,
     private academicYearServ: AcadimicYearService,
     private studentServ: StudentService,
-    public reportsService: ReportsService
+    public reportsService: ReportsService,
+    private realTimeService: RealTimeNotificationServiceService,
   ) { }
 
   ngOnInit() {
@@ -91,6 +97,17 @@ export class TransferedFromKindergartenReportComponent {
     });
     this.getAllSchools()
     this.getAllYears()
+        this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   getAllSchools() {

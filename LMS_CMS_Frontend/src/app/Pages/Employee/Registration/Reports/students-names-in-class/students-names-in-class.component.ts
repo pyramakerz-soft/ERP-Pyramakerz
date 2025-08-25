@@ -17,11 +17,14 @@ import { Student } from '../../../../../Models/student';
 import { StudentService } from '../../../../../Services/student.service';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
 import { PdfPrintComponent } from '../../../../../Component/pdf-print/pdf-print.component';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-students-names-in-class',
   standalone: true,
-  imports: [FormsModule, CommonModule, PdfPrintComponent],
+  imports: [FormsModule, CommonModule, PdfPrintComponent , TranslateModule],
   templateUrl: './students-names-in-class.component.html',
   styleUrl: './students-names-in-class.component.css'
 })
@@ -41,7 +44,8 @@ export class StudentsNamesInClassComponent {
   school: School = new School()
   date: string = ""
   studentsCount = 0
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   showTable = false
 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
@@ -61,10 +65,12 @@ export class StudentsNamesInClassComponent {
     public ApiServ: ApiService,
     public SchoolServ: SchoolService,
     public GradeServ: GradeService,
+    private languageService: LanguageService,
     public classroomService: ClassroomService,
     public acadimicYearService: AcadimicYearService,
     public studentService: StudentService,
     public reportsService: ReportsService,
+    private realTimeService: RealTimeNotificationServiceService,
   ) { }
 
   ngOnInit() {
@@ -75,6 +81,17 @@ export class StudentsNamesInClassComponent {
     this.DomainName = this.ApiServ.GetHeader();
 
     this.getSchool()
+        this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   getSchool() {

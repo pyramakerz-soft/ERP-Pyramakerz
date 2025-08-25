@@ -18,6 +18,7 @@ import { firstValueFrom } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-shop-items',
@@ -27,18 +28,7 @@ import {  Subscription } from 'rxjs';
   styleUrl: './shop-items.component.css'
 })
 export class ShopItemsComponent {
-User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -71,7 +61,8 @@ User_Data_After_Login: TokenData = new TokenData(
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public shopItemService:ShopItemService,
-    private languageService: LanguageService
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService
   ) {}
   
   ngOnInit() {
@@ -97,6 +88,13 @@ User_Data_After_Login: TokenData = new TokenData(
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+ ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   GetAllData() {

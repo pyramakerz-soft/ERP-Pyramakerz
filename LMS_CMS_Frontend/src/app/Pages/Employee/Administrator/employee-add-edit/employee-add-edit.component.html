@@ -284,14 +284,14 @@
 
     <div class="bg-[#F6F6F6] flex items-center space-x-4 rtl:space-x-reverse w-full rounded-md border-dashed mb-4 border-2">
         <div class="flex justify-center w-full">
-            <label for="file-upload" class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
+            <label for="file" class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
                 <img src="Images/Icon frame.png" class="w-1/4" alt="Upload Icon">
                 <p class="font-normal text-xs md:text-sm text-[#8E8E93] mt-3">
                     <span class="secondaryTxt">  {{ 'Click to Upload' | translate }}</span>
                 </p>
                 <p class="font-normal text-xs md:text-sm text-[#8E8E93]"> (Max. File size: 25 MB each)</p>
             </label>
-            <input id="file-upload" type="file" class="hidden" accept="image/jpeg, image/png" multiple
+            <input id="file" type="file" class="hidden" accept="image/jpeg, image/png" multiple
                 (change)="onFilesSelected($event)" />
         </div>
     </div>

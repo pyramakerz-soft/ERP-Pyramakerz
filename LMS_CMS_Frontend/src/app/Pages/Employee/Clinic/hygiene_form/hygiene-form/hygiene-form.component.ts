@@ -12,6 +12,7 @@ import { HygieneForm } from '../../../../../Models/Clinic/HygieneForm';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-hygiene-form',
   standalone: true,
@@ -40,7 +41,8 @@ export class HygieneFormComponent implements OnInit {
     private router: Router,
     private hygieneFormService: HygieneFormService,
     private apiService: ApiService,
-      private languageService: LanguageService
+      private languageService: LanguageService,
+      private realTimeService: RealTimeNotificationServiceService
   ) {}
 
   ngOnInit() {
@@ -51,6 +53,14 @@ export class HygieneFormComponent implements OnInit {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+  ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  } 
+   
 
   async loadHygieneForms() {
       try {

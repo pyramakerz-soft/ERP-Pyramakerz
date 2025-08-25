@@ -9,6 +9,7 @@ using LMS_CMS_DAL.Models.Domains.ECommerce;
 using LMS_CMS_DAL.Models.Domains.ETA;
 using LMS_CMS_DAL.Models.Domains.Inventory;
 using LMS_CMS_DAL.Models.Domains.LMS;
+using LMS_CMS_DAL.Models.Domains.MaintenanceModule;
 using LMS_CMS_DAL.Models.Domains.RegisterationModule;
 using LMS_CMS_DAL.Models.Domains.SocialWorker;
 using LMS_CMS_DAL.Models.Domains.ViolationModule;
@@ -238,6 +239,15 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<SocialWorkerMedalStudent> SocialWorkerMedalStudent_Repository;
         GenericRepo<CertificateType> CertificateType_Repository;
         GenericRepo<CertificateStudent> CertificateStudent_Repository;
+        GenericRepo<HorizontalMeeting> HorizontalMeeting_Repository;
+        GenericRepo<ParentMeeting> ParentMeeting_Repository;
+        GenericRepo<Appointment> Appointment_Repository;
+        GenericRepo<AppointmentStatus> AppointmentStatus_Repository;
+        GenericRepo<AppointmentParent> AppointmentParent_Repository;
+        GenericRepo<AppointmentGrade> AppointmentGrade_Repository;
+        GenericRepo<MaintenanceItem> MaintenanceItem_Repository;
+        GenericRepo<MaintenanceCompany> MaintenanceCompany_Repository;
+        GenericRepo<MaintenanceEmployee> MaintenanceEmployee_Repository;
 
 
         public UOW(Octa_DbContext octa_Db)
@@ -2727,6 +2737,117 @@ namespace LMS_CMS_BL.UOW
                 return CertificateStudent_Repository;
             }
         }
+
+
+        public GenericRepo<HorizontalMeeting> horizontalMeeting_Repository
+        {
+            get
+            {
+                if (HorizontalMeeting_Repository == null)
+                {
+                    HorizontalMeeting_Repository = new GenericRepo<HorizontalMeeting>(db);
+                }
+                return HorizontalMeeting_Repository;
+            }
+        }
+
+        public GenericRepo<ParentMeeting> parentMeeting_Repository
+        {
+            get
+            {
+                if (ParentMeeting_Repository == null)
+                {
+                    ParentMeeting_Repository = new GenericRepo<ParentMeeting>(db);
+                }
+                return ParentMeeting_Repository;
+            }
+        }
+
+        public GenericRepo<Appointment> appointment_Repository
+        {
+            get
+            {
+                if (Appointment_Repository == null)
+                {
+                    Appointment_Repository = new GenericRepo<Appointment>(db);
+                }
+                return Appointment_Repository;
+            }
+        }
+
+        public GenericRepo<AppointmentStatus> appointmentStatus_Repository
+        {
+            get
+            {
+                if (AppointmentStatus_Repository == null)
+                {
+                    AppointmentStatus_Repository = new GenericRepo<AppointmentStatus>(db);
+                }
+                return AppointmentStatus_Repository;
+            }
+        }
+
+        public GenericRepo<AppointmentParent> appointmentParent_Repository
+        {
+            get
+            {
+                if (AppointmentParent_Repository == null)
+                {
+                    AppointmentParent_Repository = new GenericRepo<AppointmentParent>(db);
+                }
+                return AppointmentParent_Repository;
+            }
+        }
+
+        public GenericRepo<AppointmentGrade> appointmentGrade_Repository
+        {
+            get
+            {
+                if (AppointmentGrade_Repository == null)
+                {
+                    AppointmentGrade_Repository = new GenericRepo<AppointmentGrade>(db);
+                }
+                return AppointmentGrade_Repository;
+            }
+        }
+        public GenericRepo<MaintenanceItem> maintenanceItem_Repository
+        {
+            get
+            {
+                if (MaintenanceItem_Repository == null)
+                {
+                    MaintenanceItem_Repository = new GenericRepo<MaintenanceItem>(db);
+                }
+                return MaintenanceItem_Repository;
+            }
+        }
+
+
+        public GenericRepo<MaintenanceCompany> maintenanceCompany_Repository
+        {
+            get
+            {
+                if (MaintenanceCompany_Repository == null)
+                {
+                    MaintenanceCompany_Repository = new GenericRepo<MaintenanceCompany>(db);
+                }
+                return MaintenanceCompany_Repository;
+            }
+        }
+
+        public GenericRepo<MaintenanceEmployee> maintenanceEmployee_Repository
+        {
+            get
+            {
+                if (MaintenanceEmployee_Repository == null)
+                {
+                    MaintenanceEmployee_Repository = new GenericRepo<MaintenanceEmployee>(db);
+                }
+                return MaintenanceEmployee_Repository;
+            }
+        }
+
+
 
         public void SaveChanges()
         {

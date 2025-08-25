@@ -16,5 +16,10 @@ namespace LMS_CMS_BL.DTO.Inventory
         public long? DisbursementId { get; set; }
         public string? StoreName { get; set; }
         public long? InsertedByUserId { get; set; }
+        public long? SchoolId { get; set; }
+        public string? SchoolName { get; set; }
+        public long? SchoolPCId { get; set; }
+        public string? SchoolPCName { get; set; }
+
     }
 }

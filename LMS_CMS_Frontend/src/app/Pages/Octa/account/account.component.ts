@@ -6,11 +6,14 @@ import Swal from 'sweetalert2';
 import { Account } from '../../../Models/Octa/account';
 import { OctaService } from '../../../Services/Octa/octa.service';
 import { firstValueFrom } from 'rxjs';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-account',
   standalone: true,
-  imports: [FormsModule,CommonModule,SearchComponent],
+  imports: [FormsModule,CommonModule,SearchComponent, TranslateModule],
   templateUrl: './account.component.html',
   styleUrl: './account.component.css'
 })
@@ -18,16 +21,28 @@ export class AccountComponent {
   keysArray: string[] = ['id', 'user_Name','arabic_Name'  ];
   key: string= "id";
   value: any = "";
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   accountData:Account[] = []
   accountToMake:Account = new Account()
   editAccount:boolean = false
   validationErrors: { [key in keyof Account]?: string } = {};
 
-  constructor(public octaService: OctaService){}
+  constructor(private languageService: LanguageService,private realTimeService: RealTimeNotificationServiceService,public octaService: OctaService){}
   
   ngOnInit(){
     this.getAccountData()
+    this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+  ngOnDestroy(): void { 
+          this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   getAccountData(){

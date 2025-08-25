@@ -9,6 +9,7 @@ using LMS_CMS_DAL.Models.Domains.ECommerce;
 using LMS_CMS_DAL.Models.Domains.ETA;
 using LMS_CMS_DAL.Models.Domains.Inventory;
 using LMS_CMS_DAL.Models.Domains.LMS;
+using LMS_CMS_DAL.Models.Domains.MaintenanceModule;
 using LMS_CMS_DAL.Models.Domains.RegisterationModule;
 using LMS_CMS_DAL.Models.Domains.SocialWorker;
 using LMS_CMS_DAL.Models.Domains.ViolationModule;
@@ -225,6 +226,20 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<CertificateType> CertificateType { get; set; }
         public DbSet<SocialWorkerMedalStudent> SocialWorkerMedalStudent { get; set; }
         public DbSet<CertificateStudent> CertificateStudent { get; set; }
+        public DbSet<HorizontalMeeting> HorizontalMeeting { get; set; }
+        public DbSet<ParentMeeting> ParentMeeting { get; set; }
+        public DbSet<Appointment> Appointment { get; set; }
+        public DbSet<AppointmentStatus> AppointmentStatus { get; set; }
+        public DbSet<AppointmentParent> AppointmentParent { get; set; }
+        public DbSet<AppointmentGrade> AppointmentGrade { get; set; }
+
+        // Maintenance Module
+        public DbSet<MaintenanceItem> MaintenanceItems { get; set; }
+        public DbSet<MaintenanceCompany> MaintenanceCompanies { get; set; }
+        public DbSet<MaintenanceEmployee> MaintenanceEmployees { get; set; }
+
+
+
 
 
         public LMS_CMS_Context(DbContextOptions<LMS_CMS_Context> options)
@@ -395,6 +410,9 @@ namespace LMS_CMS_DAL.Models.Domains
                 .Property(p => p.ID)
                 .ValueGeneratedNever();
 
+            modelBuilder.Entity<AppointmentStatus>()
+                .Property(p => p.ID)
+                .ValueGeneratedNever();
 
             ///////////////////////// OnDelete: /////////////////////////
             modelBuilder.Entity<Page>()
@@ -552,7 +570,7 @@ namespace LMS_CMS_DAL.Models.Domains
                  .WithMany(p => p.BusStudents)
                  .HasForeignKey(p => p.SemseterID)
                  .OnDelete(DeleteBehavior.Restrict);
-
+             
             //modelBuilder.Entity<StudentAcademicYear>()
             //     .HasOne(p => p.Student)
             //     .WithMany(p => p.StudentAcademicYears)
@@ -1290,6 +1308,18 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasOne(p => p.Store)
                 .WithMany(p => p.Stocking)
                 .HasForeignKey(p => p.StoreID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Stocking>()
+                .HasOne(p => p.School)
+                .WithMany(p => p.Stocking)
+                .HasForeignKey(p => p.SchoolId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Stocking>()
+                .HasOne(p => p.SchoolPCs)
+                .WithMany(p => p.Stocking)
+                .HasForeignKey(p => p.SchoolPCId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<EvaluationTemplateGroup>()
@@ -2062,6 +2092,43 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasForeignKey(p => p.CertificateTypeID)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<Appointment>()
+                .HasOne(p => p.School)
+                .WithMany(p => p.Appointments)
+                .HasForeignKey(p => p.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AppointmentParent>()
+                .HasOne(p => p.Parent)
+                .WithMany(p => p.AppointmentParents)
+                .HasForeignKey(p => p.ParentID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AppointmentParent>()
+                .HasOne(p => p.Appointment)
+                .WithMany(p => p.AppointmentParents)
+                .HasForeignKey(p => p.AppointmentID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AppointmentGrade>()
+                .HasOne(p => p.Grade)
+                .WithMany(p => p.AppointmentGrades)
+                .HasForeignKey(p => p.GradeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AppointmentGrade>()
+                .HasOne(p => p.Appointment)
+                .WithMany(p => p.AppointmentGrades)
+                .HasForeignKey(p => p.AppointmentID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Maintenance Module
+            modelBuilder.Entity<MaintenanceEmployee>()
+                 .HasOne(me => me.Employee)
+                 .WithMany(me => me.MaintenanceEmployees)
+                 .HasForeignKey(me => me.EmployeeID)
+                 .OnDelete(DeleteBehavior.Restrict);
+
 
             ///////////////////////// Exception: /////////////////////////
             modelBuilder.Entity<Bus>()
@@ -2161,6 +2228,12 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasForeignKey(v => v.DeletedByUserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<MaintenanceEmployee>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
 
             ///////////////////////// Optional ID According to other field: /////////////////////////  
             modelBuilder.Entity<ReceivableMaster>()
@@ -2229,6 +2302,9 @@ namespace LMS_CMS_DAL.Models.Domains
             modelBuilder.Entity<AccountBalanceReport>()
                 .HasNoKey().ToView(null);
 
+            modelBuilder.Entity<AccountStatementReport>()
+                .HasNoKey().ToView(null);
+
             modelBuilder.Entity<AccountTotals>()
                 .HasNoKey().ToView(null);
 
@@ -2254,6 +2330,10 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasIndex(e => e.IsDeleted)
                 .HasDatabaseName("IX_InventoryMaster_IsDeleted");
 
+            modelBuilder.Entity<InventoryDetails>()
+                .HasIndex(e => e.IsDeleted)
+                .HasDatabaseName("IX_InventoryDetails_IsDeleted");
+
             modelBuilder.Entity<Supplier>()
                 .HasIndex(e => e.IsDeleted)
                 .HasDatabaseName("IX_Supplier_IsDeleted");
@@ -2266,6 +2346,14 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasIndex(e => e.LinkFileID)
                 .HasDatabaseName("IX_PayableMaster_LinkFileID");
 
+            modelBuilder.Entity<PayableMaster>()
+                .HasIndex(e => e.BankOrSaveID)
+                .HasDatabaseName("IX_PayableMaster_BankOrSaveID");
+
+            modelBuilder.Entity<PayableMaster>()
+                .HasIndex(e => e.Date)
+                .HasDatabaseName("IX_PayableMaster_Date");
+
             modelBuilder.Entity<PayableDetails>()
                 .HasIndex(e => e.IsDeleted)
                 .HasDatabaseName("IX_PayableDetails_IsDeleted");
@@ -2273,6 +2361,30 @@ namespace LMS_CMS_DAL.Models.Domains
             modelBuilder.Entity<PayableDetails>()
                 .HasIndex(e => e.LinkFileTypeID)
                 .HasDatabaseName("IX_PayableDetails_LinkFileTypeID");
+
+            modelBuilder.Entity<ReceivableMaster>()
+                .HasIndex(e => e.IsDeleted)
+                .HasDatabaseName("IX_ReceivableMaster_IsDeleted");
+
+            modelBuilder.Entity<ReceivableMaster>()
+                .HasIndex(e => e.LinkFileID)
+                .HasDatabaseName("IX_ReceivableMaster_LinkFileID");
+
+            modelBuilder.Entity<ReceivableMaster>()
+                .HasIndex(e => e.BankOrSaveID)
+                .HasDatabaseName("IX_ReceivableMaster_BankOrSaveID");
+
+            modelBuilder.Entity<ReceivableMaster>()
+                .HasIndex(e => e.Date)
+                .HasDatabaseName("IX_ReceivableMaster_Date");
+
+            modelBuilder.Entity<ReceivableDetails>()
+                .HasIndex(e => e.IsDeleted)
+                .HasDatabaseName("IX_ReceivableDetails_IsDeleted");
+
+            modelBuilder.Entity<ReceivableDetails>()
+                .HasIndex(e => e.LinkFileTypeID)
+                .HasDatabaseName("IX_ReceivableDetails_LinkFileTypeID");
         }
     }
 }

@@ -57,10 +57,10 @@
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             <div class="flex space-x-4 rtl:space-x-reverse">
-                                <button (click)="Delete(row.id)">
+                                <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)" (click)="Delete(row.id)">
                                     <i class="fa-regular fa-trash-can"></i>
                                 </button>
-                                <button (click)="Edit(row)">
+                                <button *ngIf="AllowEdit && IsAllowEdit(row.insertedByUserId)" (click)="Edit(row)">
                                     <i class="fa-solid fa-pencil"></i>
                                 </button>
                             </div>
@@ -98,7 +98,7 @@
                 <label class="mb-2 primaryTxt font-medium" for="leftSpace">{{ 'Left Space' |translate }}</label>
                 <input id="leftSpace" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                     (input)="validateNumber($event, 'leftSpace')"
-                    placeholder="{{ 'Enter' | translate }}{{ 'Left Space' | translate }}"
+                    placeholder="{{ 'Enter' | translate }} {{ 'Left Space' | translate }}"
                     [(ngModel)]="certificateType.leftSpace"
                     (ngModelChange)="onInputValueChange({ field: 'leftSpace', value: $event })" />
                 <span *ngIf="validationErrors['leftSpace']"
@@ -108,7 +108,7 @@
                 <label class="mb-2 primaryTxt font-medium" for="topSpace">{{ 'Top Space' |translate }}</label>
                 <input id="topSpace" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                     (input)="validateNumber($event, 'topSpace')"
-                    placeholder="{{ 'Enter' | translate }}{{ 'Top Space' | translate }}"
+                    placeholder="{{ 'Enter' | translate }} {{ 'Top Space' | translate }}"
                     [(ngModel)]="certificateType.topSpace"
                     (ngModelChange)="onInputValueChange({ field: 'topSpace', value: $event })" />
                 <span *ngIf="validationErrors['topSpace']"
@@ -124,7 +124,7 @@
                 <div
                     class="bg-[#F6F6F6] flex items-center space-x-4 rtl:space-x-reverse w-full rounded-md border-dashed border-2">
                     <div class="flex justify-center w-full">
-                        <label for="file-upload"
+                        <label for="newFile"
                             class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
                             <img *ngIf="!certificateType.file && !certificateType.newFile" src="Images/Icon frame.png"
                                 class="w-1/4">
@@ -136,7 +136,7 @@
                             <p class="font-normal text-xs md:text-sm text-[#8E8E93]">{{ '(Max. File size: 25 MB)' |
                                 translate }}</p>
                         </label>
-                        <input id="file-upload" type="file" class="hidden" (change)="onImageFileSelected($event)"
+                        <input id="newFile" type="file" class="hidden" (change)="onImageFileSelected($event)"
                             accept="image/jpeg, image/png" />
                     </div>
                 </div>

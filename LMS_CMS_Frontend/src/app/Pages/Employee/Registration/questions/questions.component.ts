@@ -19,7 +19,9 @@ import { SearchComponent } from '../../../../Component/search/search.component';
 import { firstValueFrom } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { QuestionOption } from '../../../../Models/Registration/question-option';
-
+import { Subscription } from 'rxjs';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-questions',
   standalone: true,
@@ -28,18 +30,7 @@ import { QuestionOption } from '../../../../Models/Registration/question-option'
   styleUrl: './questions.component.css',
 })
 export class QuestionsComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   File: any;
   DomainName: string = '';
@@ -52,7 +43,8 @@ export class QuestionsComponent {
   AllowDeleteForOthers: boolean = false;
 
   mode: string = 'Create';
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   isModalVisible: boolean = false;
   Data: Question[] = [];
   test: Test = new Test();
@@ -85,7 +77,9 @@ export class QuestionsComponent {
     private router: Router,
     public testServ: TestService,
     public QuestionServ: QuestionService,
-    public QuestionTypeServ: QuestionTypeService
+    public QuestionTypeServ: QuestionTypeService,
+    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService,
   ) { }
 
   ngOnInit() {
@@ -109,6 +103,18 @@ export class QuestionsComponent {
     });
     this.GetAllData();
     this.GetQuestionType();
+    this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   moveToEmployee() {
@@ -384,6 +390,7 @@ export class QuestionsComponent {
   }
 
   onFileUpload(event: Event): void {
+    this.validationErrors['imageFile'] = '';
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
       const file = input.files[0];

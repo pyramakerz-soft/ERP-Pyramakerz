@@ -26,6 +26,7 @@ import { AssignmentService } from '../../../../../Services/Employee/LMS/assignme
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-assignment-edit',
   standalone: true,
@@ -40,18 +41,7 @@ export class AssignmentEditComponent {
   DomainName: string = '';
   UserID: number = 0;
   path: string = '';
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   AssignmentId: number = 0;
   keysArray: string[] = [
@@ -99,7 +89,8 @@ export class AssignmentEditComponent {
     public tagServ: TagsService,
     public QuestionBankServ: QuestionBankService,
     public QuestionBankTypeServ: QuestionBankTypeService,
-    private languageService: LanguageService
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService
   ) { }
 
   ngOnInit() {
@@ -118,6 +109,15 @@ export class AssignmentEditComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+ ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  }
+
+
 
   getAssignmentData() {
     this.AssigmentQuestionServ.GetById(

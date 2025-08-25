@@ -6,13 +6,11 @@ namespace LMS_CMS_PL.Services.SignalR
 {
     public class NotificationService
     {
-        private readonly IHubContext<NotificationHub> _hubContext;
-        private readonly DbContextFactoryService _dbContextFactory;
+        private readonly IHubContext<NotificationHub> _hubContext; 
 
-        public NotificationService(IHubContext<NotificationHub> hubContext, DbContextFactoryService dbContextFactory)
+        public NotificationService(IHubContext<NotificationHub> hubContext)
         {
-            _hubContext = hubContext;
-            _dbContextFactory = dbContextFactory; 
+            _hubContext = hubContext; 
         } 
         public async Task PushRealTimeNotification(long userId, long userType, object notification, string domainName)
         {
@@ -27,7 +25,7 @@ namespace LMS_CMS_PL.Services.SignalR
             if (string.IsNullOrEmpty(domainName) || userTypeString == null)
                 throw new Exception("Invalid domain or user type.");
 
-            var uniqueKey = $"{domainName}_{userType}_{userId}";
+            var uniqueKey = $"{domainName}_{userTypeString}_{userId}";
 
             // Ensure the client is in the group
             await _hubContext.Groups.AddToGroupAsync(uniqueKey, uniqueKey);

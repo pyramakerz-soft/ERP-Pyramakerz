@@ -5,18 +5,22 @@ import { ApiService } from '../../../../../Services/api.service';
 import { firstValueFrom } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../../Services/shared/language.service';
+import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
+import {  Subscription } from 'rxjs';
 @Component({
   selector: 'app-view-report',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
     templateUrl: './view-report.component.html',
   styleUrl: './view-report.component.css'
 })
 export class ViewReportComponent implements OnInit {
   @Input() reportType: 'parent' | 'doctor' = 'parent';
   @Input() id?: number;
-  
+  isRtl: boolean = false;
+  subscription!: Subscription;
   medicalHistory: any;
   isLoading = false;
   error = '';
@@ -25,7 +29,9 @@ export class ViewReportComponent implements OnInit {
     private medicalHistoryService: MedicalHistoryService,
     private route: ActivatedRoute,
     private router: Router,
-    private apiService: ApiService
+    private apiService: ApiService,
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService
   ) {}
 
   ngOnInit(): void {
@@ -35,7 +41,18 @@ export class ViewReportComponent implements OnInit {
         if (this.id) {
             this.loadMedicalHistory();
         }
+      this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+    ngOnDestroy(): void {
+    this.realTimeService.stopConnection(); 
+     if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
 
   async loadMedicalHistory() {
     this.isLoading = true;

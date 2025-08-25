@@ -19,7 +19,9 @@ import { FieldAddEdit } from '../../../../Models/Registration/field-add-edit';
 import { firstValueFrom } from 'rxjs';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { TranslateModule } from '@ngx-translate/core';
-
+import { Subscription } from 'rxjs';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-fields',
   standalone: true,
@@ -28,23 +30,13 @@ import { TranslateModule } from '@ngx-translate/core';
   styleUrl: './fields.component.css',
 })
 export class FieldsComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   DomainName: string = '';
   UserID: number = 0;
   path: string = '';
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   Category: RegistrationCategory = new RegistrationCategory();
   Data: Field[] = [];
 
@@ -71,7 +63,6 @@ export class FieldsComponent {
     'arName',
     'enName',
     'orderInForm',
-    'isMandatory',
     'fieldTypeName',
   ];
 
@@ -87,7 +78,9 @@ export class FieldsComponent {
     private router: Router,
     public CategoryServ: RegistrationCategoryService,
     public fieldServ: FieldsService,
-    public fieldTypeServ: FieldTypeService
+    public fieldTypeServ: FieldTypeService,
+    private realTimeService: RealTimeNotificationServiceService,
+    private languageService: LanguageService,
   ) { }
 
   ngOnInit() {
@@ -113,6 +106,18 @@ export class FieldsComponent {
     this.GetAllData();
     this.GetFieldType();
     this.GetCategoryData();
+    this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   moveToEmployee() {

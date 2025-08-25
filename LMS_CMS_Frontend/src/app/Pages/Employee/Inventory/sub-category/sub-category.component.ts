@@ -19,6 +19,7 @@ import { firstValueFrom } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-sub-category',
@@ -28,18 +29,7 @@ import {  Subscription } from 'rxjs';
   styleUrl: './sub-category.component.css'
 })
 export class SubCategoryComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -77,7 +67,8 @@ export class SubCategoryComponent {
     public ApiServ: ApiService,
     public CategoryServ: InventoryCategoryService,
     public InventorySubCategoryServ: InventorySubCategoriesService,
-      private languageService: LanguageService
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService
   ) { }
 
   ngOnInit() {
@@ -106,6 +97,14 @@ export class SubCategoryComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl'; 
   }
+
+ ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  }
+
 
   GetAllData() {
     this.TableData = []

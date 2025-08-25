@@ -20,6 +20,7 @@ import { AccountingTreeChartService } from '../../../../Services/Employee/Accoun
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-saves',
@@ -29,18 +30,7 @@ import {  Subscription } from 'rxjs';
   styleUrl: './saves.component.css'
 })
 export class SavesComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -79,7 +69,8 @@ export class SavesComponent {
     public ApiServ: ApiService,
     public SaveServ: SaveService,
     public accountServ: AccountingTreeChartService,
-    private languageService: LanguageService
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -106,6 +97,15 @@ export class SavesComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+      ngOnDestroy(): void {
+    this.realTimeService.stopConnection(); 
+     if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
+
+
 
   GetAllData() {
     this.TableData = []

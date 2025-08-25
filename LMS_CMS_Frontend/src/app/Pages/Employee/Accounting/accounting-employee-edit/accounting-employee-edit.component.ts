@@ -35,6 +35,7 @@ import { Student } from '../../../../Models/student';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { firstValueFrom, Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-accounting-employee-edit',
   standalone: true,
@@ -43,18 +44,7 @@ import { firstValueFrom, Subscription } from 'rxjs';
   styleUrl: './accounting-employee-edit.component.css'
 })
 export class AccountingEmployeeEditComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -109,6 +99,7 @@ export class AccountingEmployeeEditComponent {
   };
 
   validationErrors: { [key in keyof AccountingEmployee]?: string } = {};
+  IsNationalIsEmpty: string = ''
 
   constructor(
     private router: Router,
@@ -131,7 +122,8 @@ export class AccountingEmployeeEditComponent {
     public jobCategoryServ: JobCategoriesService,
     public EmplyeeStudentServ: EmployeeStudentService,
     public StudentServ: StudentService,
-    private languageService: LanguageService
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService
   ) { }
 
   ngOnInit() {
@@ -161,15 +153,23 @@ export class AccountingEmployeeEditComponent {
     this.GetAllAcademicDegrees();
     this.GetAllJobCategories();
 
-      this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
+      ngOnDestroy(): void {
+    this.realTimeService.stopConnection(); 
+     if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
+
+
   GetAllData() {
     this.employeeServ.GetAcountingEmployee(this.EmployeeId, this.DomainName).subscribe((d: any) => {
-      this.Data = d;   
+      this.Data = d;
       this.JobCategoryId = this.Data.jobCategoryID
       this.GetAllJobCategories();
       this.GetAllJobs()
@@ -177,8 +177,8 @@ export class AccountingEmployeeEditComponent {
       this.selectedDays = this.days.filter(day => this.Data.days.includes(day.id));
       this.parseDepartureTime(this.Data.departureTime);
       this.parseAttendanceTime(this.Data.attendanceTime);
-      if(this.Data.dateOfLeavingWork!="" && this.Data.dateOfLeavingWork != null){
-        this.EndDate=true
+      if (this.Data.dateOfLeavingWork != "" && this.Data.dateOfLeavingWork != null) {
+        this.EndDate = true
       }
 
     })
@@ -230,7 +230,7 @@ export class AccountingEmployeeEditComponent {
       this.days = d;
     });
   }
- 
+
   GetAllReasons() {
     this.ReasonsServ.Get(this.DomainName).subscribe((d) => {
       this.Reasons = d;
@@ -247,9 +247,9 @@ export class AccountingEmployeeEditComponent {
         (this.Data as any)[key] = null;
       }
     });
-    if(this.isFormValid()){
-      this.getFormattedTime() 
-      this.isLoading = true 
+    if (this.isFormValid()) {
+      this.getFormattedTime()
+      this.isLoading = true
       this.employeeServ.EditAccountingEmployee(this.Data, this.DomainName).subscribe((d) => {
         this.GetAllData();
         Swal.fire({
@@ -261,7 +261,7 @@ export class AccountingEmployeeEditComponent {
         this.router.navigateByUrl(`Employee/Employee Accounting`)
         this.isLoading = false
       },
-        err => { 
+        err => {
           this.isLoading = false
           Swal.fire({
             icon: 'error',
@@ -277,10 +277,10 @@ export class AccountingEmployeeEditComponent {
   onIsActiveChange(event: Event) {
     const isChecked = (event.target as HTMLInputElement).checked;
     this.EndDate = isChecked
-    if(this.EndDate == false){
-      this.Data.reasonForLeavingWork= ''
-      this.Data.reasonOfLeavingID= 0
-      this.Data.dateOfLeavingWork= ''
+    if (this.EndDate == false) {
+      this.Data.reasonForLeavingWork = ''
+      this.Data.reasonOfLeavingID = 0
+      this.Data.dateOfLeavingWork = ''
     }
   }
 
@@ -292,15 +292,15 @@ export class AccountingEmployeeEditComponent {
   selectDay(day: { id: number; name: string }) {
     if (!this.selectedDays.some((selected) => selected.id === day.id)) {
       this.selectedDays.push(day);
-  
+
       if (!Array.isArray(this.Data.days)) {
         this.Data.days = [];
       }
-  
+
       this.Data.days.push(day.id);
     }
   }
-  
+
   removeDay(dayId: number) {
     this.selectedDays = this.selectedDays.filter((day) => day.id !== dayId);
     this.Data.days = this.Data.days.filter((id) => id !== dayId);
@@ -349,6 +349,7 @@ export class AccountingEmployeeEditComponent {
   }
 
   SelectChild(nationalId: string) {
+    this.IsNationalIsEmpty = ''
     this.Student = new Student()
     this.emplyeeStudent = new EmplyeeStudent()
     this.StudentServ.GetByNationalID(nationalId, this.DomainName).subscribe((d) => {
@@ -358,17 +359,28 @@ export class AccountingEmployeeEditComponent {
     })
   }
 
-
   CreateOREdit() {
-    if (this.emplyeeStudent.studentID != 0) { 
+    if (this.NationalID == '') {
+      this.IsNationalIsEmpty = 'National Id Is Required'
+      return;
+    }
+    if (this.emplyeeStudent.studentID != 0) {
       if (!this.Data.students.includes(this.emplyeeStudent.studentID)) {
         var EmployeeStudent = new EmplyeeStudent();
         EmployeeStudent.studentName = this.Student.user_Name;
-        EmployeeStudent.studentID = this.emplyeeStudent.id; 
-        this.TableData.push(EmployeeStudent); 
-        this.Data.students.push(this.emplyeeStudent.studentID);
-        this.closeModal();
-      }else{
+        EmployeeStudent.studentID = this.emplyeeStudent.studentID;
+        EmployeeStudent.employeeID = this.EmployeeId;
+        console.log(EmployeeStudent)
+        this.EmplyeeStudentServ.Add(EmployeeStudent, this.DomainName).subscribe((d) => {
+          this.closeModal();
+          this.TableData = []
+          this.EmplyeeStudentServ.Get(this.EmployeeId, this.DomainName).subscribe((d) => {
+            this.TableData = d
+          })
+        }, error => {
+          console.log(error)
+        })
+      } else {
         Swal.fire({
           icon: 'error',
           title: 'Oops...',
@@ -405,8 +417,25 @@ export class AccountingEmployeeEditComponent {
   }
 
   DeleteChild(id: number) {
-    this.TableData = this.TableData.filter((student) => student.id !== id);
-    this.Data.students = this.Data.students.filter((id) => id !== id);
+    Swal.fire({
+      title: 'Are you sure you want to delete this Child?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#089B41',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'Cancel',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.TableData = []
+        this.EmplyeeStudentServ.Delete(id, this.DomainName).subscribe((d) => {
+          this.closeModal();
+          this.EmplyeeStudentServ.Get(this.EmployeeId, this.DomainName).subscribe((d) => {
+            this.TableData = d
+          })
+        })
+      }
+    });
   }
 
   validateNumber(event: any, field?: keyof AccountingEmployee): void {
@@ -438,7 +467,7 @@ export class AccountingEmployeeEditComponent {
         const field = key as keyof AccountingEmployee;
         if (!this.Data[field]) {
           if (
-            field == 'user_Name' ) {
+            field == 'user_Name') {
             this.validationErrors[field] = `*${this.capitalizeField(
               field
             )} is required`;
@@ -450,23 +479,23 @@ export class AccountingEmployeeEditComponent {
           this.attendanceTime.minutes,
           this.attendanceTime.periods
         );
-        
+
         const departureMins = this.convertToMinutes(
           this.departureTime.hour,
           this.departureTime.minute,
           this.departureTime.period
         );
-        
+
         if (attendanceMins === departureMins) {
           this.validationErrors['departureTime'] = 'Attendance Time and Departure Time cannot be the same.';
           isValid = false;
         }
-         
+
         if (departureMins < attendanceMins) {
           this.validationErrors['departureTime'] = 'Departure Time cannot be before Attendance Time.';
           isValid = false;
         }
-        
+
       }
     }
     return isValid;
@@ -475,15 +504,15 @@ export class AccountingEmployeeEditComponent {
   convertToMinutes(hour: number | string, minute: number | string, period: string): number {
     let h = parseInt(hour as string, 10);
     let m = parseInt(minute as string, 10);
-  
+
     if (period === 'PM' && h < 12) {
       h += 12;
     } else if (period === 'AM' && h === 12) {
       h = 0;
     }
-  
+
     return h * 60 + m;
   }
-  
+
 }
 

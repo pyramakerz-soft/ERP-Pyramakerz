@@ -13,11 +13,14 @@ import { LessonLiveService } from '../../../../Services/Employee/LMS/lesson-live
 import { SubjectService } from '../../../../Services/Employee/LMS/subject.service'; 
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-student-lesson-live',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, TranslateModule],
   templateUrl: './student-lesson-live.component.html',
   styleUrl: './student-lesson-live.component.css'
 })
@@ -28,7 +31,8 @@ User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '',
   AllowDelete: boolean = false;
   AllowEditForOthers: boolean = false;
   AllowDeleteForOthers: boolean = false;
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   TableData: LessonLive[] = [];
   SelectedGradeId: number = 0;
   SelectedClassId: number = 0;
@@ -51,12 +55,14 @@ User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '',
     private menuService: MenuService,
     public activeRoute: ActivatedRoute,
     public account: AccountService,
+    private languageService: LanguageService,
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public LessonLiveServ: LessonLiveService ,
     public ClassroomServ :ClassroomService , 
-    public SubjectServ : SubjectService 
+    public SubjectServ : SubjectService ,
+    private realTimeService: RealTimeNotificationServiceService,
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -77,8 +83,17 @@ User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '',
     });
 
     this.GetAllData();
+        this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
-
+  ngOnDestroy(): void { 
+          this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  }
   GetAllData() {
     this.TableData = [];
     this.LessonLiveServ.GetByStudentID(this.UserID,this.DomainName).subscribe((d) => {

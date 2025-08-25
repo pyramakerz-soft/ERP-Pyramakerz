@@ -1,5 +1,5 @@
 <div class="flex justify-between items-center">
-    <div class="flex justify-between items-center space-x-5">
+    <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
         <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToAcademicYear()"></i>
         <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ remedialClassroom.name }}</h1>
     </div>
@@ -8,66 +8,66 @@
 <div class="flex flex-wrap mt-5">
     <div class="p-3 w-[30%]">
         <div class="bg-[#EBEBEB] p-3 mb-4">
-            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Number Of Session</p>
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">{{ 'Number Of Session' | translate }}</p>
             <p class="font-medium text-base text-[#1E1E1E]">{{ remedialClassroom.numberOfSession }}</p>
         </div>
     </div>
     <div class="p-3 w-[30%]">
         <div class="bg-[#EBEBEB] p-3 mb-4">
-            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">School Name</p>
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">{{ 'School Name' | translate }}</p>
             <p class="font-medium text-base text-[#1E1E1E]">{{ remedialClassroom.schoolName }}</p>
         </div>
     </div>
     <div class="p-3 w-[30%]">
         <div class="bg-[#EBEBEB] p-3 mb-4">
-            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Academic Year</p>
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">{{ 'Academic Year' | translate }}</p>
             <p class="font-medium text-base text-[#1E1E1E]">{{ remedialClassroom.academicYearName }}</p>
         </div>
     </div>
     <div class="p-3 w-[30%]">
         <div class="bg-[#EBEBEB] p-3 mb-4">
-            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Grade</p>
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">{{ 'Grade' | translate }}</p>
             <p class="font-medium text-base text-[#1E1E1E]">{{ remedialClassroom.gradeName }}</p>
         </div>
     </div>
     <div class="p-3 w-[30%]">
         <div class="bg-[#EBEBEB] p-3 mb-4">
-            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Subject</p>
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">{{ 'Subject' | translate }}</p>
             <p class="font-medium text-base text-[#1E1E1E]">{{ remedialClassroom.subjectEnglishName }}</p>
         </div>
     </div>
     <div class="p-3 w-[30%]">
         <div class="bg-[#EBEBEB] p-3 mb-4">
-            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">Teacher</p>
+            <p class="font-semibold text-sm text-[#6F6F6F] mb-3">{{ 'Teacher' | translate }}</p>
             <p class="font-medium text-base text-[#1E1E1E]">{{ remedialClassroom.teacherEnName}}</p>
         </div>
     </div>
 </div>
 
 <div class="flex justify-between items-center">
-    <h1 class="primaryTxt font-semibold text-2xl leading-9">Students</h1>
+    <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ 'Students' | translate }}</h1>
     <div class="flex justify-between items-center ">
         <!-- <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search> -->
 
         <button (click)="openModal()"
             class="secondaryBorder secondaryTxt rounded-lg px-4 py-3 flex items-center justify-center gap-2">
-            Add Student
+             {{ 'Add' | translate }} {{ 'Student' | translate }}
         </button>
     </div>
 </div>
 
 <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD] max-w-full">
-    <table class="overflow-auto w-full bg-[#EBEBEB] text-left text-[#6F6F6F]">
+    <table class="overflow-auto w-full bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
         <thead class="bg-[##EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
             <tr>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    ID
+                    {{ 'ID' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Student Name
+                     {{ 'Student Name' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    Actions
+                    {{ 'Actions' | translate }}
                 </th>
             </tr>
         </thead>
@@ -76,7 +76,7 @@
             <tr *ngIf="remedialClassroom.remedialClassroomStudents.length==0">
                 <td colspan="4"
                     class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-                    No Data Found
+                    {{ 'No Data Found' | translate }}
                 </td>
             </tr>
 
@@ -88,7 +88,7 @@
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{ row.id }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.studentEnName }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    <div class="flex space-x-4">
+                    <div class="flex space-x-4 rtl:space-x-reverse">
                         <button (click)="dalete(row.id)">
                             <i class="fa-regular fa-trash-can"></i>
                         </button>

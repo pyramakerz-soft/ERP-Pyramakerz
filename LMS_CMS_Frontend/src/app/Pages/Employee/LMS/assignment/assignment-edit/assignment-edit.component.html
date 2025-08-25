@@ -166,7 +166,7 @@
         <div class="mt-6 w-full mb-4">
             <div class="bg-[#F6F6F6] flex items-center space-x-4 rtl:space-x-reverse w-full rounded-md border-dashed border-2">
                 <div class="flex justify-center w-full">
-                    <label for="file-upload"
+                    <label for="imageFile"
                         class="cursor-pointer flex flex-col items-center rounded-xl px-6 py-3 lg:py-5">
                         <img *ngIf="!assignment.fileFile" src="Images/Icon frame.png" class="w-1/4">
                         <img *ngIf="assignment.fileFile" src="Images/FileAttached.png" class="w-1/4">
@@ -174,7 +174,7 @@
                           {{ 'Click to' | translate }}  {{ 'Upload' | translate }}  {{ '(Word - PDF)' | translate }}</span></p>
                         <p class="font-normal text-xs md:text-sm text-[#8E8E93]">   {{ '(Max. File size: 25 MB)' | translate }}</p>
                     </label>
-                    <input id="file-upload" type="file" class="hidden" (change)="onFileSelected($event)" />
+                    <input id="imageFile" type="file" class="hidden" (change)="onFileSelected($event)" />
                 </div>
             </div>
         </div>

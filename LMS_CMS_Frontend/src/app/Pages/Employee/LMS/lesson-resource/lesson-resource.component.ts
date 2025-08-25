@@ -22,6 +22,7 @@ import { ClassroomService } from '../../../../Services/Employee/LMS/classroom.se
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-lesson-resource',
@@ -77,7 +78,8 @@ export class LessonResourceComponent {
     private sanitizer: DomSanitizer,
     private classroomService: ClassroomService,
     public lessonResourceTypeService:LessonResourceTypeService,
-    private languageService: LanguageService
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService,
   ) {}
 
   ngOnInit() {
@@ -110,6 +112,13 @@ export class LessonResourceComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  }  
 
   IsAllowDelete(InsertedByID: number) {
     const IsAllow = this.EditDeleteServ.IsAllowDelete(

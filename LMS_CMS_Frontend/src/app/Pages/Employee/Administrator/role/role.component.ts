@@ -15,6 +15,7 @@ import { SearchComponent } from '../../../../Component/search/search.component';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-role',
   standalone: true,
@@ -23,18 +24,7 @@ import {  Subscription } from 'rxjs';
   styleUrl: './role.component.css',
 })
 export class RoleComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   TableData: Role[] = [];
 
@@ -60,7 +50,8 @@ export class RoleComponent {
     private menuService: MenuService,
     public EditDeleteServ: DeleteEditPermissionService,
     private router: Router,
-          private languageService: LanguageService
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService
   ) {}
 
   ngOnInit() {
@@ -90,6 +81,18 @@ export class RoleComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+
+
+      ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+    } 
+
+
+
   async getAllRoles() {
     try {
       const data = await firstValueFrom(

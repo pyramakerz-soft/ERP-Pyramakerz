@@ -25,27 +25,18 @@ import Swal from 'sweetalert2';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+
 @Component({
   selector: 'app-accounting-tree',
   standalone: true,
-  imports: [SearchComponent, FormsModule, CommonModule, AccountingItemComponent , TranslateModule],
+  imports: [SearchComponent, FormsModule, CommonModule, AccountingItemComponent, TranslateModule],
   templateUrl: './accounting-tree.component.html',
   styleUrl: './accounting-tree.component.css'
 })
 export class AccountingTreeComponent {
 
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -73,7 +64,7 @@ export class AccountingTreeComponent {
   accountingTreeChart: AccountingTreeChart = new AccountingTreeChart();
   mainAccountingTreeChart: AccountingTreeChart = new AccountingTreeChart();
   isEdit: boolean = false;
- isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   validationErrors: { [key in keyof AccountingTreeChart]?: string } = {};
 
@@ -91,7 +82,9 @@ export class AccountingTreeComponent {
     public motionTypeService: MotionTypeService,
     public subTypeService: SubTypeService,
     public endTypeService: EndTypeService,
-     private languageService: LanguageService
+     private languageService: LanguageService,
+      private realTimeService: RealTimeNotificationServiceService
+
   ) { }
 
   ngOnInit() {
@@ -119,11 +112,19 @@ export class AccountingTreeComponent {
     this.GetSubTypeData();
     this.GetEndTypeData();
 
-     this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection(); 
+     if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
+
 
   GetAllData() {
     this.accountingTreeChartService.Get(this.DomainName).subscribe(
@@ -163,7 +164,7 @@ export class AccountingTreeComponent {
         (err) => {
           this.isEdit = false
           this.accountingTreeChart = new AccountingTreeChart()
-          this.accountingTreeChart.id = id 
+          this.accountingTreeChart.id = id
           this.GetMainData()
         }
       )
@@ -241,8 +242,8 @@ export class AccountingTreeComponent {
         }
       }
     }
-  } 
- 
+  }
+
   capitalizeField(field: keyof AccountingTreeChart): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
@@ -269,15 +270,15 @@ export class AccountingTreeComponent {
             this.validationErrors[field] = '';
           }
 
-          if (field == "id") { 
-            if(this.accountingTreeChart.id != null){
-              if(isNaN(this.accountingTreeChart.id)){
-                this.validationErrors["id"] = 'Id Can Only Contain Numbers' 
+          if (field == "id") {
+            if (this.accountingTreeChart.id != null) {
+              if (isNaN(this.accountingTreeChart.id)) {
+                this.validationErrors["id"] = 'Id Can Only Contain Numbers'
                 isValid = false;
-              }else{
+              } else {
                 this.validationErrors["id"] = ''
               }
-            }             
+            }
           }
         }
       }
@@ -296,15 +297,15 @@ export class AccountingTreeComponent {
       this.validationErrors["mainAccountNumberID"] = ''
       this.validationErrors["linkFileID"] = ''
     }
-    if (field == "id") { 
-      if(this.accountingTreeChart.id != null){
-        if(isNaN(this.accountingTreeChart.id)){
+    if (field == "id") {
+      if (this.accountingTreeChart.id != null) {
+        if (isNaN(this.accountingTreeChart.id)) {
           this.validationErrors["id"] = 'Id Can Only Contain Numbers'
           this.accountingTreeChart.id = null
-        }else{
+        } else {
           this.validationErrors["id"] = ''
         }
-      } 
+      }
     }
     if (field == "mainAccountNumberID") {
       this.validationErrors["motionTypeID"] = ''

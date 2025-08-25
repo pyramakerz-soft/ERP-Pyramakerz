@@ -16,11 +16,14 @@ import { Order } from '../../../../Models/Student/ECommerce/order';
 // import html2pdf from 'html2pdf.js';
 import html2pdf from 'html2pdf.js';
 import { ReportsService } from '../../../../Services/shared/reports.service';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-order-items',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslateModule],
   templateUrl: './order-items.component.html',
   styleUrl: './order-items.component.css'
 })
@@ -37,9 +40,12 @@ export class OrderItemsComponent {
   totalSalesPrices: number = 0;
   totalVat: number = 0;
   previousRoute: any;
+  isRtl: boolean = false;
+  subscription!: Subscription;
   
-  constructor(public account: AccountService, public ApiServ: ApiService, private router: Router, public cartService:CartService, 
-    public orderService:OrderService, public activeRoute: ActivatedRoute, public reportsService:ReportsService){}
+  constructor(public account: AccountService,private languageService: LanguageService, public ApiServ: ApiService, private router: Router, public cartService:CartService, 
+    public orderService:OrderService, public activeRoute: ActivatedRoute, public reportsService:ReportsService,
+    private realTimeService: RealTimeNotificationServiceService,){}
   
   ngOnInit(){
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -62,6 +68,16 @@ export class OrderItemsComponent {
     });  
 
     this.getOrderById()
+        this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+  }
+  ngOnDestroy(): void { 
+          this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   goToCart() {

@@ -10,11 +10,14 @@ import { SchoolType } from '../../../Models/Octa/school-type';
 import { SchoolTypeService } from '../../../Services/Octa/school-type.service';
 import { SchoolService } from '../../../Services/Employee/school.service';
 import { firstValueFrom } from 'rxjs';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-school',
   standalone: true,
-  imports: [FormsModule,CommonModule,SearchComponent],
+  imports: [FormsModule,CommonModule,SearchComponent , TranslateModule],
   templateUrl: './school.component.html',
   styleUrl: './school.component.css'
 })
@@ -29,13 +32,26 @@ export class SchoolComponent {
   schoolData :School[] = []
   school :School  = new School()
   editSchool = false
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   validationErrors: { [key in keyof School]?: string } = {};
 
-  constructor(public DomainServ: DomainService, public schoolTypeService: SchoolTypeService, public schoolService: SchoolService){}
+  constructor(public DomainServ: DomainService,private languageService: LanguageService,private realTimeService: RealTimeNotificationServiceService, public schoolTypeService: SchoolTypeService, public schoolService: SchoolService){}
 
   ngOnInit(){
     this.getAllDomains();
+        
+    this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+  ngOnDestroy(): void { 
+          this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   getAllDomains() {

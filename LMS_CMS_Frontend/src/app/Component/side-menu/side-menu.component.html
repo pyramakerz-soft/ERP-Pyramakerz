@@ -53,7 +53,7 @@
         <div class="text-xl w-full" *ngIf="menuItemsForEmployee">
             <div class="px-9 py-3 w-full flex items-center space-x-3 rtl:space-x-reverse">
                 <img class="w-3 lg:w-fit" src="Icons/SideMenuIcons/Dashboard.png" />
-                <a class="cursor-pointer hover:opacity-30" routerLink="#">Dashboard</a>
+                <a class="cursor-pointer hover:opacity-30" routerLink="#">{{ 'Dashboard ' | translate }}</a>
             </div>
             <app-side-menu-item *ngFor="let item of menuItemsForEmployee" [item]="item"></app-side-menu-item>
         </div>  

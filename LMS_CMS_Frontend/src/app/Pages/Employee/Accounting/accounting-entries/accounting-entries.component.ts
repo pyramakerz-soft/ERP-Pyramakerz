@@ -16,7 +16,7 @@ import { firstValueFrom } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
-
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-accounting-entries',
   standalone: true,
@@ -35,7 +35,7 @@ export class AccountingEntriesComponent {
   DomainName: string = '';
   UserID: number = 0;
 
-  keysArray: string[] = ['id', 'docNumber' ,"date", "accountingEntriesDocTypeName"];
+  keysArray: string[] = ['id', 'docNumber', "accountingEntriesDocTypeName"];
 
   path: string = '';
   key: string = 'id';
@@ -60,7 +60,9 @@ constructor(
      public EditDeleteServ: DeleteEditPermissionService, 
      public ApiServ: ApiService, 
      public accountingEntriesService:AccountingEntriesService,
-    private languageService: LanguageService){}
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService
+  ){}
     
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -87,6 +89,14 @@ constructor(
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+
+      ngOnDestroy(): void {
+    this.realTimeService.stopConnection(); 
+     if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
 
   async onSearchEvent(event: { key: string; value: any }) { 
     this.PageSize = this.TotalRecords

@@ -2,11 +2,14 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-lesson-live',
   standalone: true,
-  imports: [CommonModule , FormsModule],
+  imports: [CommonModule , FormsModule , TranslateModule],
   templateUrl: './lesson-live.component.html',
   styleUrl: './lesson-live.component.css'
 })
@@ -14,12 +17,15 @@ export class LessonLiveUIComponent {
   subjectName: string = '';
   activeTab: string = 'resources'; // Default active tab
 
-
+  isRtl: boolean = false;
+  subscription!: Subscription;
   selectedWeek: string | null = null;
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router
+    private languageService: LanguageService,
+    private router: Router,
+    private realTimeService: RealTimeNotificationServiceService,
   ) {}
 
   ngOnInit() {
@@ -29,8 +35,17 @@ export class LessonLiveUIComponent {
         this.subjectName = this.formatSubjectName(subjectId);
       }
     });
+    this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
-
+    ngOnDestroy(): void { 
+          this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  }
   formatSubjectName(subjectId: string): string {
     return subjectId.split('-')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))

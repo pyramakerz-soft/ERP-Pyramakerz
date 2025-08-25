@@ -20,6 +20,7 @@ import { firstValueFrom } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-stores',
@@ -29,25 +30,14 @@ import {  Subscription } from 'rxjs';
   styleUrl: './stores.component.css'
 })
 export class StoresComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   DomainName: string = '';
   UserID: number = 0;
   path: string = '';
 
   TableData: Store[] = [];
-  store: StoreAdd = new StoreAdd();
+  store: Store = new Store();
 
   isModalVisible: boolean = false;
   mode: string = 'Create';
@@ -80,7 +70,8 @@ export class StoresComponent {
     private router: Router,
     public StoresServ: StoresService,
     public CategoryServ: InventoryCategoryService,
-    private languageService: LanguageService
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService
   ) { }
 
   ngOnInit() {
@@ -107,6 +98,14 @@ export class StoresComponent {
     this.isRtl = document.documentElement.dir === 'rtl';    
   }
 
+
+ ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  }
+
   GetAllData() {
     this.TableData = []
     this.StoresServ.Get(this.DomainName).subscribe((d) => {
@@ -122,7 +121,7 @@ export class StoresComponent {
 
   Create() {
     this.mode = 'Create';
-    this.store = new StoreAdd();
+    this.store = new Store();
     this.dropdownOpen = false;
     this.openModal();
     this.CategoriesSelected = [];
@@ -134,10 +133,12 @@ export class StoresComponent {
 
   Edit(row: Store): void {
     this.mode = 'Edit';
-    this.store.id = row.id;
-    this.store.name = row.name;
-    this.store.categoriesIds = row.storeCategories.map(s => s.id);
-    this.CategoriesSelected = row.storeCategories
+    this.StoresServ.GetById(row.id,this.DomainName).subscribe((d)=>{
+      this.store = d;
+      this.CategoriesSelected = this.store.storeCategories
+      this.store.categoriesIds = this.store.storeCategories.map(s => s.id);
+      console.log(this.store)
+    })
     this.openModal();
     this.dropdownOpen = false;
   }

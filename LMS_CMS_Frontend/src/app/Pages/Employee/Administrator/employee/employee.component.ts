@@ -16,6 +16,7 @@ import { firstValueFrom } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-employee',
@@ -52,7 +53,8 @@ export class EmployeeComponent {
     public EditDeleteServ: DeleteEditPermissionService,
      private router: Router, 
      public EmpServ: EmployeeService,
-        private languageService: LanguageService
+        private languageService: LanguageService,
+        private realTimeService: RealTimeNotificationServiceService
     ) { }
 
   ngOnInit() {
@@ -81,6 +83,16 @@ export class EmployeeComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
 
   }
+
+
+      ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+    } 
+
+
   GetEmployee() {
     this.EmpServ.Get_Employees(this.DomainName).subscribe((data) => {
       this.TableData = data

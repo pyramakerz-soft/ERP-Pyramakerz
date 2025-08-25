@@ -18,6 +18,7 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-evaluation-template-group-question',
   standalone: true,
@@ -63,7 +64,8 @@ export class EvaluationTemplateGroupQuestionComponent {
      public ApiServ: ApiService,
      public questionsServ: EvaluationTemplateGroupQuestionService ,
      public GroupServ: EvaluationTemplateGroupService ,
-    private languageService: LanguageService
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService,
    ) {}
    ngOnInit() {
      this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -90,6 +92,15 @@ export class EvaluationTemplateGroupQuestionComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
    }
+
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  }
+
  
    GetGroupData() {
      this.group = new EvaluationTemplateGroups();

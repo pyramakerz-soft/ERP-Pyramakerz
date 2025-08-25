@@ -1,6 +1,7 @@
 ﻿using LMS_CMS_DAL.Models.Domains.BusModule;
 using LMS_CMS_DAL.Models.Domains.Inventory;
 using LMS_CMS_DAL.Models.Domains.RegisterationModule;
+using LMS_CMS_DAL.Models.Domains.SocialWorker;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -38,6 +39,7 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public ICollection<Test> Tests { get; set; } = new HashSet<Test>();
         public ICollection<ShopItem> ShopItem { get; set; } = new HashSet<ShopItem>();
         public ICollection<GradeSupervisor> GradeSupervisors { get; set; } = new HashSet<GradeSupervisor>();
+        public ICollection<AppointmentGrade> AppointmentGrades { get; set; } = new HashSet<AppointmentGrade>();
 
     }
 }

@@ -1,33 +1,33 @@
 <div class="flex justify-between items-center">
-    <h1 class="primaryTxt font-semibold text-2xl leading-9">Student Issue</h1>
+    <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Student Issue' | translate }}</h1>
     <div class="flex justify-between items-center">
         <app-search [keysArray]="keysArray"(searchEvent)="onSearchEvent($event)"></app-search>
         <button (click)="Create()"
             class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
-            Create Student Issue
+             {{ 'Create' | translate }} {{ 'Student Issue' | translate }}
         </button>
     </div>
 </div>
 
 <div>
     <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
-        <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
+        <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
             <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
                 <tr>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        ID
+                        {{ 'ID' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Student Name
+                         {{ 'Student Name' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Issue Type Name
+                         {{ 'Issue Type Name' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Date
+                        {{ 'Date' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        Actions
+                        {{ 'Actions' | translate }}
                     </th>
                 </tr>
             </thead>
@@ -36,7 +36,7 @@
                 <tr *ngIf="TableData.length === 0">
                     <td colspan="6"
                         class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-                        No Data Found
+                       {{ 'No Data Found' | translate }}
                     </td>
                 </tr>
                 <!-- Data Rows -->
@@ -56,11 +56,11 @@
                         {{ row.date | date:'yyyy-MM-dd' }}
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        <div class="flex space-x-4">
-                            <button (click)="Delete(row.id)">
+                        <div class="flex space-x-4 rtl:space-x-reverse">
+                            <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)" (click)="Delete(row.id)">
                                 <i class="fa-regular fa-trash-can"></i>
                             </button>
-                            <button (click)="Edit(row.id)">
+                            <button *ngIf="AllowEdit && IsAllowEdit(row.insertedByUserId)" (click)="Edit(row.id)">
                                 <i class="fa-solid fa-pencil"></i>
                             </button>
                         </div>
@@ -75,81 +75,81 @@
     class="fixed top-0 left-0 right-0 z-50 flex justify-center items-center w-full h-full bg-black/50">
     <div class="bg-white rounded-2xl p-12 w-1/2 max-h-[95%] overflow-y-auto">
         <div class="flex justify-between items-center">
-            <h1 *ngIf="mode == 'Create'" class="font-semibold text-2xl leading-9">Create Student Issue</h1>
-            <h1 *ngIf="mode == 'Edit'" class="font-semibold text-2xl leading-9">Edit Student Issue</h1>
+            <h1 *ngIf="mode == 'Create'" class="font-semibold text-2xl leading-9"> {{ 'Create' | translate }} {{ 'Student Issue' | translate }}</h1>
+            <h1 *ngIf="mode == 'Edit'" class="font-semibold text-2xl leading-9"> {{ 'Edit' | translate }} {{ 'Student Issue' | translate }}</h1>
             <button (click)="closeModal()" type="button"
                 class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
         </div>
 
         <div class="mt-6 mb-4 rounded-3xl flex justify-between flex-wrap">
             <div class="flex flex-col mb-4 w-full">
-                <label class="mb-2 primaryTxt" for="date">Date</label>
+                <label class="mb-2 primaryTxt" for="date">{{ 'Date' | translate }}</label>
                 <input id="date" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                    placeholder="Enter date" [(ngModel)]="studentIssue.date"
+                    placeholder="{{ 'Enter' | translate }} {{ 'Date' | translate }}" [(ngModel)]="studentIssue.date"
                     (ngModelChange)="onInputValueChange({ field: 'date', value: $event })" />
                 <span *ngIf="validationErrors['date']"class="text-red-500 ml-3 font-normal">{{validationErrors['date']}}</span>
             </div>
             <div class="flex flex-col mb-4 w-full">
-                <label class="mb-2 primaryTxt" for="schoolID">School</label>
+                <label class="mb-2 primaryTxt" for="schoolID"> {{ 'School' | translate }}</label>
                 <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="schoolID"
                     [(ngModel)]="studentIssue.schoolID" (change)="GetAllGradesBySchool()"
                     (ngModelChange)="onInputValueChange({ field: 'schoolID', value: $event })">
-                    <option [value]="0" disabled selected hidden>Choose School</option>
+                    <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'School' | translate }}</option>
                     <option *ngFor="let c of schools" [value]="c.id">{{ c.name }}</option>
-                    <option *ngIf="schools.length === 0" disabled selected>No Data Found</option>
+                    <option *ngIf="schools.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
                 </select>
                 <span *ngIf="validationErrors['schoolID']" class="text-red-500 ml-3 font-normal">{{validationErrors['schoolID'] }}</span>
             </div>
 
             <div class="flex flex-col mb-4 w-full">
-                <label for="Grade" class="mb-2 primaryTxt">Grade</label>
+                <label for="Grade" class="mb-2 primaryTxt">{{ 'Grade' | translate }}</label>
                 <select id="Grade" class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
                     [(ngModel)]="studentIssue.gradeID" [disabled]="!studentIssue.schoolID"
                     (change)="GetAllClassesByGrade()" (ngModelChange)="onInputValueChange({ field: 'gradeID', value: $event })">
-                    <option value=0 disabled selected hidden>Select Grade</option>
+                    <option value=0 disabled selected hidden>{{ 'Select' | translate }} {{ 'Grade' | translate }}</option>
                     <option *ngFor="let ac of grades" [value]="ac.id">
                         {{ ac.name }}
                     </option>
-                    <option *ngIf="grades.length === 0" disabled selected> No Data Found</option>
+                    <option *ngIf="grades.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
                 </select>
                 <span *ngIf="validationErrors['gradeID']" class="text-red-500 ml-3 font-normal">{{validationErrors['gradeID'] }}</span>
             </div>
 
             <div class="flex flex-col mb-4 w-full">
-                <label for="classroomID" class="mb-2 primaryTxt">Class</label>
+                <label for="classroomID" class="mb-2 primaryTxt">{{ 'Class' | translate }}</label>
                 <select id="classroomID" class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
                     [(ngModel)]="studentIssue.classroomID" [disabled]="!studentIssue.gradeID"
                     (change)="GetAllStudentsByClass()" (ngModelChange)="onInputValueChange({ field: 'classroomID', value: $event })">
-                    <option value=0 disabled selected hidden>Select Class</option>
+                    <option value=0 disabled selected hidden>{{ 'Select' | translate }} {{ 'Class' | translate }}</option>
                     <option *ngFor="let ac of classrooms" [value]="ac.id">
                         {{ ac.name }}
                     </option>
-                    <option *ngIf="classrooms.length === 0" disabled selected> No Data Found</option>
+                    <option *ngIf="classrooms.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
                 </select>
                 <span *ngIf="validationErrors['classroomID']" class="text-red-500 ml-3 font-normal">{{validationErrors['classroomID'] }}</span>
             </div>
 
             <div class="flex flex-col mb-4 w-full">
-                <label for="studentID" class="mb-2 primaryTxt">Student</label>
+                <label for="studentID" class="mb-2 primaryTxt">{{ 'Student' | translate }}</label>
                 <select id="studentID" class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
                     [(ngModel)]="studentIssue.studentID" [disabled]="!studentIssue.classroomID" (ngModelChange)="onInputValueChange({ field: 'studentID', value: $event })">
-                    <option value=0 disabled selected hidden>Select Student</option>
+                    <option value=0 disabled selected hidden>{{ 'Select' | translate }} {{ 'Student' | translate }}</option>
                     <option *ngFor="let ac of students" [value]="ac.id">
                         {{ ac.en_name }}
                     </option>
-                    <option *ngIf="students.length === 0" disabled selected> No Data Found</option>
+                    <option *ngIf="students.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
                 </select>
                 <span *ngIf="validationErrors['studentID']" class="text-red-500 ml-3 font-normal">{{validationErrors['studentID'] }}</span>
             </div>
 
             <div class="flex flex-col mb-4 w-full">
-                <label class="mb-2 primaryTxt" for="issuesTypeID">Issue Type</label>
+                <label class="mb-2 primaryTxt" for="issuesTypeID">{{ 'Issue Type' | translate }}</label>
                 <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
                     id="issuesTypeID" [(ngModel)]="studentIssue.issuesTypeID"
                     (ngModelChange)="onInputValueChange({ field: 'issuesTypeID', value: $event })">
-                    <option [value]="0" disabled selected hidden>Choose Issue Type</option>
+                    <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Issue Type' | translate }}</option>
                     <option *ngFor="let c of issueTypes" [value]="c.id">{{ c.name }}</option>
-                    <option *ngIf="issueTypes.length === 0" disabled selected>No Data Found</option>
+                    <option *ngIf="issueTypes.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
                 </select>
                 <span *ngIf="validationErrors['issuesTypeID']" class="text-red-500 ml-3 font-normal">{{validationErrors['issuesTypeID'] }}</span>
             </div>
@@ -158,7 +158,7 @@
         <div class="flex justify-end">
             <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
                 (click)="CreateOREdit()">
-                <span *ngIf="!isLoading">Save</span>
+                <span *ngIf="!isLoading">{{ 'Save' | translate }}</span>
                 <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
             </button>
         </div>

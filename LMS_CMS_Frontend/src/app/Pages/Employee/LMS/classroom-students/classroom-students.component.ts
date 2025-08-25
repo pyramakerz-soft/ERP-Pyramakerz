@@ -19,6 +19,7 @@ import { Student } from '../../../../Models/student';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-classroom-students',
   standalone: true,
@@ -68,7 +69,8 @@ export class ClassroomStudentsComponent {
     private menuService: MenuService,
     private classroomStudentService: ClassroomStudentService, 
     public router: Router,
-    private languageService: LanguageService
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService,
   ) {}
 
   ngOnInit() {
@@ -101,6 +103,14 @@ export class ClassroomStudentsComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+   ngOnDestroy(): void {
+      this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+  }
+
 
   GoToClass() {
     this.router.navigateByUrl('Employee/Classroom/'+ this.classId);

@@ -4,8 +4,9 @@ export class Store {
     constructor(
         public id: number = 0,
         public name: string = '',
-        public storeCategories :Category[] = [],
-        public insertedByUserId :number =0,
-        public insertedAt :string ="",
-    ) {}
+        public storeCategories: Category[] = [],
+        public categoriesIds: number[] = [],
+        public insertedByUserId: number = 0,
+        public insertedAt: string = "",
+    ) { }
 }

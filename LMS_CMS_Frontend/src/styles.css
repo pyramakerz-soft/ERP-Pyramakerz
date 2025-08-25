@@ -31,6 +31,11 @@
     border: 1px solid #089B41;
 }
 
+.primaryBorder {
+    /* border: 1px solid #089B41; */
+    border: 1px solid #394B6E;
+}
+
 .grayBorder {
     border: 1px solid #6F6F6F;
 }

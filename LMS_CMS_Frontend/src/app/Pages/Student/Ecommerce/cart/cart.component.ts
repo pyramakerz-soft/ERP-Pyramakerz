@@ -13,11 +13,15 @@ import { CartShopItem } from '../../../../Models/Student/ECommerce/cart-shop-ite
 import { EmplyeeStudent } from '../../../../Models/Accounting/emplyee-student';
 import { EmployeeStudentService } from '../../../../Services/Employee/Accounting/employee-student.service';
 import { FormsModule } from '@angular/forms';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import {  Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-cart',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
   templateUrl: './cart.component.html',
   styleUrl: './cart.component.css'
 })
@@ -27,7 +31,8 @@ export class CartComponent {
   StuID: number = 0;
   emplyeeStudent: EmplyeeStudent[] = [];
   DomainName: string = "";
-    
+  isRtl: boolean = false;
+  subscription!: Subscription;
   cart:Cart = new Cart()
   totalSalesPrices: number = 0;
   totalVat: number = 0;
@@ -37,9 +42,10 @@ export class CartComponent {
   filteredCartShopItem: CartShopItem[] = [] 
   searchTerm: string = '';
   
-  constructor(public account: AccountService, public ApiServ: ApiService, public activeRoute: ActivatedRoute, public employeeStudentService:EmployeeStudentService,
+  constructor(public account: AccountService,private languageService: LanguageService, public ApiServ: ApiService, public activeRoute: ActivatedRoute, public employeeStudentService:EmployeeStudentService,
     private router: Router, private cartService: CartService, 
-    private orderService: OrderService, public cartShopItemService:CartShopItemService){}
+    private orderService: OrderService, public cartShopItemService:CartShopItemService,
+    private realTimeService: RealTimeNotificationServiceService,){}
   
   ngOnInit(){
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -56,6 +62,16 @@ export class CartComponent {
     }
 
     this.getCart() 
+    this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+  }
+  ngOnDestroy(): void { 
+          this.realTimeService.stopConnection(); 
+       if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
   }
 
   getStudents(){

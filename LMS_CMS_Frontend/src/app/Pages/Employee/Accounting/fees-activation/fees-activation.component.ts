@@ -32,6 +32,7 @@ import { StudentService } from '../../../../Services/student.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
+import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-fees-activation',
   standalone: true,
@@ -109,6 +110,7 @@ export class FeesActivationComponent {
     public TuitionFeesTypeServ: TuitionFeesTypeService,
     public FeesDiscountTypeServ: TuitionDiscountTypeService,
     public AcademicYearServ: AcadimicYearService,
+        private realTimeService: RealTimeNotificationServiceService
   ) { }
 
   ngOnInit() {
@@ -137,6 +139,13 @@ export class FeesActivationComponent {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+ ngOnDestroy(): void {
+    this.realTimeService.stopConnection(); 
+     if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  } 
 
   GetAllFeesData() {
     this.TableData = []
