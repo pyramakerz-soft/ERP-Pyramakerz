@@ -219,7 +219,6 @@ export class EvaluationReportComponent {
     );
   }
 
-// UPDATED: Prepare data for PDF export (following invoice pattern)
 private prepareExportData(): void {
   this.cachedTableDataForPDF = [];
 
@@ -231,20 +230,23 @@ private prepareExportData(): void {
       evaluation.evaluationEmployeeQuestionGroups.forEach((group: any) => {
         const section = {
           header: `Evaluation: ${evaluationDate} - ${group.englishTitle || group.arabicTitle || 'Question Group'}`,
-          summary: [
+          data: [ // Changed from 'summary' to 'data' to match pdf-print component
             { key: 'Evaluation Date', value: evaluationDate },
             { key: 'Question Group', value: group.englishTitle || group.arabicTitle || 'N/A' }
           ],
-          table: {
-            headers: ['Question', 'Rating', 'Notes', 'Average'],
-            data: []
-          }
+          tableHeaders: ['Question', 'Rating', 'Notes', 'Average'], // Changed from 'headers' to 'tableHeaders'
+          tableData: [] as {Question: string, Rating: number, Notes: string, Average: string}[] // Changed from 'data' to 'tableData'
         };
 
         // Add questions
         if (group.evaluationEmployeeQuestions && group.evaluationEmployeeQuestions.length > 0) {
           group.evaluationEmployeeQuestions.forEach((question: any) => {
-            section.table.data.push( );
+            section.tableData.push({
+              'Question': question.questionEnglishTitle || question.questionArabicTitle || 'N/A',
+              'Rating': question.mark || 0,
+              'Notes': question.note || 'N/A',
+              'Average': question.average || 'N/A'
+            });
           });
         }
 
@@ -257,19 +259,17 @@ private prepareExportData(): void {
       evaluation.evaluationEmployeeStudentBookCorrections.forEach((correction: any) => {
         const section = {
           header: `Evaluation: ${evaluationDate} - Student Correction`,
-          summary: [
+          data: [ // Changed from 'summary' to 'data'
             { key: 'Evaluation Date', value: evaluationDate },
             { key: 'Student', value: correction.studentEnglishName || correction.studentArabicName || 'N/A' },
             { key: 'Correction Book', value: correction.evaluationBookCorrectionEnglishName || correction.evaluationBookCorrectionArabicName || 'N/A' }
           ],
-          table: {
-            headers: ['Status', 'Notes', 'Average'],
-            data: [{
-              'Status': correction.state || 0,
-              'Notes': correction.note || 'N/A',
-              'Average': correction.averageStudent || 'N/A'
-            }]
-          }
+          tableHeaders: ['Status', 'Notes', 'Average'], // Changed from 'headers' to 'tableHeaders'
+          tableData: [{ // Changed from 'data' to 'tableData'
+            'Status': correction.state || 0,
+            'Notes': correction.note || 'N/A',
+            'Average': correction.averageStudent || 'N/A'
+          }]
         };
 
         this.cachedTableDataForPDF.push(section);
@@ -281,15 +281,13 @@ private prepareExportData(): void {
   if (this.cachedTableDataForPDF.length === 0) {
     this.cachedTableDataForPDF = [{
       header: 'No Evaluation Data Found',
-      summary: [],
-      table: {
-        headers: [],
-        data: []
-      }
+      data: [],
+      tableHeaders: [],
+      tableData: []
     }];
   }
 
-  console.log('Cached PDF Data:', this.cachedTableDataForPDF); // For debugging
+  console.log('Cached PDF Data:', this.cachedTableDataForPDF);
 }
 
   toggleCollapse(index: number) {
