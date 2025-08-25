@@ -10,6 +10,7 @@ using LMS_CMS_BL.DTO.ECommerce;
 using LMS_CMS_BL.DTO.ETA;
 using LMS_CMS_BL.DTO.Inventory;
 using LMS_CMS_BL.DTO.LMS;
+using LMS_CMS_BL.DTO.Maintenance;
 using LMS_CMS_BL.DTO.Octa;
 using LMS_CMS_BL.DTO.Registration;
 using LMS_CMS_BL.DTO.SocialWorker;
@@ -25,6 +26,7 @@ using LMS_CMS_DAL.Models.Domains.ECommerce;
 using LMS_CMS_DAL.Models.Domains.ETA;
 using LMS_CMS_DAL.Models.Domains.Inventory;
 using LMS_CMS_DAL.Models.Domains.LMS;
+using LMS_CMS_DAL.Models.Domains.MaintenanceModule;
 using LMS_CMS_DAL.Models.Domains.RegisterationModule;
 using LMS_CMS_DAL.Models.Domains.SocialWorker;
 using LMS_CMS_DAL.Models.Domains.ViolationModule;
@@ -1231,7 +1233,13 @@ namespace LMS_CMS_BL.Config
             CreateMap<Request, RequestGetDTO>()
                 .ForMember(dest => dest.SenderUserTypeName, opt => opt.MapFrom(src => src.SenderUserType.Title))
                 .ForMember(dest => dest.ReceiverUserTypeName, opt => opt.MapFrom(src => src.ReceiverUserType.Title));
+            
+            CreateMap<ChatMessage, ChatGetDTO>()
+                .ForMember(dest => dest.SenderUserTypeName, opt => opt.MapFrom(src => src.SenderUserType.Title))
+                .ForMember(dest => dest.ReceiverUserTypeName, opt => opt.MapFrom(src => src.ReceiverUserType.Title));
 
+            CreateMap<ChatMessageAttachment, ChatMessageAttachmentGetDTO>();
+            
             CreateMap<IssuesType, IssueTypeGetDTO>();
             CreateMap<IssueTypeAddDTO, IssuesType>();
 
@@ -1315,6 +1323,12 @@ namespace LMS_CMS_BL.Config
                 .ForMember(dest => dest.SchoolName, opt => opt.MapFrom(src => src.School.Name));
             CreateMap<AppointmentAddDTO, Appointment>();
             CreateMap<AppointmentEditDTO, Appointment>();
+
+            // Maintenance
+
+            CreateMap<MaintenanceItemAddDTO, MaintenanceItem>();
+            CreateMap<MaintenanceItemEditDTO, MaintenanceItem>(); 
+            CreateMap<MaintenanceItem, MaintenanceItemGetDTO>();
         }
     } 
 }

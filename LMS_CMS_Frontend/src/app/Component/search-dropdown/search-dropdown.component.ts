@@ -40,16 +40,17 @@ export class SearchDropdownComponent {
     // Optional: log to confirm it works
   }
 
-   ngOnChanges(changes: SimpleChanges): void {
-    if (
-      changes['selectedName'] &&
-      changes['selectedName'].currentValue &&
-      !this.searchTerm
-    ) {
-      this.searchTerm = changes['selectedName'].currentValue;
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['selectedName'] && !changes['selectedName'].firstChange) {
+      this.searchTerm = changes['selectedName'].currentValue || '';
+    }
+
+    if (changes['selectedValue'] && !changes['selectedValue'].firstChange && !changes['selectedValue'].currentValue) {
+      // Clear search term if selectedValue is reset to 0 or null
+      this.searchTerm = '';
     }
   }
-  
+
   // Detect clicks outside this component
   @HostListener('document:click', ['$event'])
   onClickOutside(event: Event): void {
@@ -77,7 +78,7 @@ export class SearchDropdownComponent {
     this.searchTerm = item[this.displayProperty];
     this.selectedValueChange.emit(item.id);
     this.showDropdown = false;
-    this.validationErrors=[]
+    this.validationErrors = []
   }
 
   hideDropdown(): void {

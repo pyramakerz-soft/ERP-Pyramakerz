@@ -674,7 +674,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee", "parent", "student" }
         )]
-        public async Task<IActionResult> AddAsync(RequestAddDTO NewRequest)
+        public async Task<IActionResult> AddAsync([FromForm] RequestAddDTO NewRequest)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
             var domainName = HttpContext.Request.Headers["Domain-Name"].FirstOrDefault();

@@ -10,12 +10,54 @@
         </div> 
         <div class="flex space-x-4 rtl:space-x-reverse items-center"> 
             <div class="relative dropdown-container"> 
-                <div class="relative cursor-pointer hover:opacity-80 hover:scale-110 transition-all" (click)="toggleNotificationPopup()" >
+                <div class="relative cursor-pointer hover:opacity-80 hover:scale-110 transition-all" (click)="toggleMessagePopup()" >
                     <i class="fi fi-rr-comment-alt-dots text-white text-3xl flex items-center"></i> 
-                    <span *ngIf="notificationsUnSeenCount > 0"
+                    <span *ngIf="messagesUnSeenCount > 0"
                         class="primaryBg absolute -top-2 -right-2 border-2 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold" >
-                        {{ notificationsUnSeenCount }}
+                        {{ messagesUnSeenCount }}
                     </span>
+                </div>
+                <div *ngIf="isMessagePopupOpen" class="absolute ltr:right-0 rtl:left-0 mt-2 w-[440px] bg-white shadow-lg z-50">
+                    <div class="flex justify-between space-x-3 rtl:space-x-reverse p-4">
+                        <h3 class="primaryTxt font-semibold"> {{ 'Messages' | translate }}</h3>
+                        <div class="flex space-x-2 rtl:space-x-reverse"> 
+                            <button (click)="viewAllMessages()" class="text-gray-500 text-sm hover:text-gray-700 transition">  {{ 'View' | translate }} {{ 'All' | translate }}<i class="fas fa-arrow-right ml-2"></i></button>
+                        </div>
+                    </div>
+                    <ul>
+                        <li *ngFor="let chatMessage of chatMessages; let i = index" class="relative" (click)="moveToMessageInMyChat(chatMessage)">
+                            <div>
+                                <div *ngIf="!chatMessage.seenOrNot"
+                                    class="absolute top-2 left-2 w-2.5 h-2.5 border border-[#4d8db4] bg-[#8ccff8b6] rounded-full z-10">
+                                </div>
+                                <div class="flex hover:bg-gray-100 p-3 items-start" [ngClass]="{'border-b': i != chatMessages.length, 'bg-[#e3ebf0b6]': !chatMessage.seenOrNot}">
+                                    <div class="flex-shrink-0">
+                                        <img src="Images/person-dummy.jpg" class="cursor-pointer rounded-full w-14" alt="Profile Photo">
+                                    </div>
+                                    <div class="ml-4 text-start w-full"> 
+                                        <p *ngIf="chatMessage.senderID" class="primaryTxt text-sm"><span class="font-semibold">{{ chatMessage.senderEnglishName }}</span>  {{ 'Sent you a message' | translate }}</p>
+                                        <div class="mt-4 flex flex-col space-y-3">
+                                            <div *ngIf="chatMessage.message" class="w-[70%] border-l-4 border-gray-300 pl-4 primaryTxt text-base leading-relaxed truncate overflow-hidden whitespace-nowrap">
+                                                {{chatMessage.message}}
+                                            </div> 
+                                            <div *ngIf="chatMessage.chatMessageAttachments.length != 0" class="space-y-2">
+                                                <div *ngFor="let att of chatMessage.chatMessageAttachments; let i = index" class="flex space-x-2 rtl:space-x-reverse items-center">
+                                                    <img src="Images/Icon frame.png" class="border p-[4px] w-10 rounded-md" alt="Photo">
+                                                    <span class="primaryTxt text-sm font-semibold">{{getFileName(att.fileLink)}}</span>
+                                                </div>
+                                            </div>  
+                                        </div>
+                                        <p class="text-[#BDBDBD] text-sm font-semibold mt-2">{{ formatInsertedAt(chatMessage.insertedAt) }}</p>
+                                    </div>
+                                </div>
+                            </div> 
+                        </li>
+                        <li *ngIf="chatMessages.length == 0"> 
+                            <div class="flex justify-center">
+                                <p class="text-[#BDBDBD]">{{ 'No Messages Yet' | translate }}</p>
+                            </div>  
+                        </li>
+                    </ul> 
                 </div>
             </div>
             <div class="relative dropdown-container"> 
