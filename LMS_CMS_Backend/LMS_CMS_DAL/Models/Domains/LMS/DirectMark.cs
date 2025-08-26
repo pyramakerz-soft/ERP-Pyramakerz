@@ -21,9 +21,11 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public float Mark { get; set; }
         public DateOnly Date { get; set; }
 
+
         [ForeignKey("Subject")] 
         public long SubjectID { get; set; }
         public Subject Subject { get; set; }
+
 
         [ForeignKey("SubjectWeightType")]
         public long SubjectWeightTypeID { get; set; }
