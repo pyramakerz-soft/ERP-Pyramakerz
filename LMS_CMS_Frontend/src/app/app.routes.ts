@@ -235,6 +235,7 @@ import { EvaluationReportComponent } from './Pages/Employee/LMS/reports/evaluati
 import { ViolationReportComponent } from './Pages/Employee/Violation/Reports/violation-report/violation-report.component';
 import { MyMessagesComponent } from './Pages/Communication/my-messages/my-messages.component';
 import { DailyPreformanceReportComponent } from './Pages/Employee/LMS/reports/daily-preformance-report/daily-preformance-report.component';
+import { DirectMarkComponent } from './Pages/Employee/LMS/direct-mark/direct-mark.component';
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
     { path: "Octa/login", component: OctaLoginComponent, title: "login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -516,6 +517,8 @@ export const routes: Routes = [
             { path: "Parent Meeting", component: ParentMeetingComponent, title: "Parent Meeting", canActivate: [noNavigateWithoutLoginGuard,navigateIfHaveSettingPageGuard] },
             { path: "Appoinment", component: AppointmentComponent, title: "Appoinment", canActivate: [noNavigateWithoutLoginGuard,navigateIfHaveSettingPageGuard] },
             { path: "Appoinment/:id", component: AppointmentParentComponent, title: "Appoinment", canActivate: [noNavigateWithoutLoginGuard,navigateIfHaveSettingPageGuard] },
+            { path: "Direct Mark", component: DirectMarkComponent, title: "Direct Mark", canActivate: [noNavigateWithoutLoginGuard] },
+
         ]
     },
     {

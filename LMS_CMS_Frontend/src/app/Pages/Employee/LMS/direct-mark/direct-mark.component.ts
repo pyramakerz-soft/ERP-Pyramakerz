@@ -25,18 +25,20 @@ import { LanguageService } from '../../../../Services/shared/language.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { Subject } from '../../../../Models/LMS/subject';
-import { Subscription } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
+import Swal from 'sweetalert2';
+import { Classroom } from '../../../../Models/LMS/classroom';
 
 @Component({
   selector: 'app-direct-mark',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent , TranslateModule],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './direct-mark.component.html',
   styleUrl: './direct-mark.component.css'
 })
 export class DirectMarkComponent {
 
-  validationErrors: { [key in keyof Assignment]?: string } = {};
+  validationErrors: { [key in keyof DirectMark]?: string } = {};
   keysArray: string[] = ['id', 'englishName', 'arabicName', 'mark', 'assignmentTypeEnglishName', 'assignmentTypeArabicName'];
   key: string = 'id';
   value: any = '';
@@ -55,6 +57,7 @@ export class DirectMarkComponent {
   directMark: DirectMark = new DirectMark();
   TableData: DirectMark[] = [];
   schools: School[] = [];
+  subjects: Subject[] = [];
   Grades: Grade[] = []
 
   CurrentPage: number = 1
@@ -72,6 +75,8 @@ export class DirectMarkComponent {
   GradesForCreate: Grade[] = []
   subjectsForCreate: Subject[] = [];
   subjectWeightsForCreate: SubjectWeight[] = [];
+  classrooms: Classroom[] = [];
+  classDropdownOpen = false;
 
   IsView: boolean = false
 
@@ -107,7 +112,7 @@ export class DirectMarkComponent {
     });
 
     // this.GetAllData(this.CurrentPage, this.PageSize)
-    // this.getSubjectData();
+    this.getSubjectData();
 
     this.menuService.menuItemsForEmployee$.subscribe((items) => {
       const settingsPage = this.menuService.findByPageName(this.path, items);
@@ -119,20 +124,19 @@ export class DirectMarkComponent {
       }
     });
     this.getAllSchools()
-    
+
     this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
- ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
-
 
   getAllSchools() {
     this.schools = []
@@ -141,11 +145,15 @@ export class DirectMarkComponent {
     })
   }
 
+  SubjectChanged() {
+    this.IsView = false
+  }
+
   getAllSubject() {
-    // this.subjects = []
+    this.subjects = []
     this.IsView = false
     this.subjectService.GetByGradeId(this.SelectedGradeId, this.DomainName).subscribe((d) => {
-      // this.subjects = d
+      this.subjects = d
     })
   }
 
@@ -153,11 +161,56 @@ export class DirectMarkComponent {
     this.IsView = false
     this.Grades = []
     this.SelectedGradeId = 0
-    // this.subjects = []
-    this.SelectedSchoolId = 0
+    this.subjects = []
     this.GradeServ.GetBySchoolId(this.SelectedSchoolId, this.DomainName).subscribe((d) => {
       this.Grades = d
     })
+  }
+
+  GetClassroomsData() {
+    this.classrooms = []
+    this.ClassroomServ.GetBySubjectId(this.directMark.subjectID, this.DomainName).subscribe((d) => {
+      this.classrooms = d
+    })
+  }
+
+  toggleClassDropdown() {
+    this.classDropdownOpen = !this.classDropdownOpen;
+  }
+
+  toggleSelectAll(event: Event) {
+    const checked = (event.target as HTMLInputElement).checked;
+    if (checked) {
+      // this.directMark.directMarkClasses = [...this.classrooms];
+      this.directMark.classids = this.classrooms.map(c => c.id);
+      this.directMark.allClasses = true;
+    } else {
+      this.directMark.directMarkClasses = [];
+      this.directMark.classids = [];
+      this.directMark.allClasses = false;
+    }
+    this.onInputValueChange({ field: 'classids', value: this.directMark.classids });
+  }
+
+  toggleClass(classroom: any) {
+    const index = this.directMark.directMarkClasses.findIndex(c => c.id === classroom.id);
+    if (index === -1) {
+      this.directMark.directMarkClasses.push(classroom);
+    } else {
+      this.directMark.directMarkClasses.splice(index, 1);
+    }
+    this.directMark.classids = this.directMark.directMarkClasses.map(c => c.id);
+    this.directMark.allClasses = this.directMark.directMarkClasses.length === this.classrooms.length;
+
+    this.onInputValueChange({ field: 'classids', value: this.directMark.classids });
+  }
+
+  removeClass(classId: number) {
+    this.directMark.directMarkClasses = this.directMark.directMarkClasses.filter(c => c.id !== classId);
+    this.directMark.classids = this.directMark.directMarkClasses.map(c => c.id);
+    this.directMark.allClasses = false;
+
+    this.onInputValueChange({ field: 'classids', value: this.directMark.classids });
   }
 
   GetAllData(pageNumber: number, pageSize: number) {
@@ -192,7 +245,7 @@ export class DirectMarkComponent {
           }
         }
       )
-    } 
+    }
   }
 
   changeCurrentPage(currentPage: number) {
@@ -242,11 +295,11 @@ export class DirectMarkComponent {
 
   openModal(Id?: number) {
     if (Id) {
-      // this.getAssignmentById(Id);
+      this.getDirectById(Id);
     }
 
     this.directMark = new DirectMark();
-    // this.getSubjectData();
+    this.getSubjectData();
 
     document.getElementById('Add_Modal')?.classList.remove('hidden');
     document.getElementById('Add_Modal')?.classList.add('flex');
@@ -266,41 +319,215 @@ export class DirectMarkComponent {
     this.GetAllData(this.CurrentPage, this.PageSize)
   }
 
-  // getDirectById(Id: number) {
-  //   this.assignment = new Assignment()
-  //   this.assignmentService.GetByID(Id, this.DomainName).subscribe(
-  //     data => {
-  //       this.assignment = data
-  //       this.GradeServ.GetBySchoolId(this.assignment.schoolID, this.DomainName).subscribe((d) => {
-  //         this.GradesForCreate = d
-  //         this.subjectsForCreate = []
-  //         this.subjectService.GetByGradeId(this.assignment.gradeID, this.DomainName).subscribe((d) => {
-  //           this.subjectsForCreate = d
-  //         })
+  getDirectById(Id: number) {
+    this.directMark = new DirectMark()
+    this.DirectMarkServ.GetById(Id, this.DomainName).subscribe(
+      data => {
+        this.directMark = data
+        this.GradeServ.GetBySchoolId(this.directMark.schoolID, this.DomainName).subscribe((d) => {
+          this.GradesForCreate = d
+          this.subjectsForCreate = []
+          this.subjectService.GetByGradeId(this.directMark.gradeID, this.DomainName).subscribe((d) => {
+            this.subjectsForCreate = d
+          })
+        })
+        this.getSubjectWeightData()
+      }
+    )
+  }
 
-  //       })
-  //       this.getSubjectWeightData()
-  //       this.getClassesData()
-  //     }
-  //   )
-  // }
+  getSubjectData() {
+    this.subjects = []
+    this.subjectService.GetByGradeId(this.directMark.gradeID, this.DomainName).subscribe((d) => {
+      this.subjectsForCreate = d
+    })
+  }
 
-  // getSubjectData() {
-  //   this.subjects = []
-  //   this.subjectService.Get(this.DomainName).subscribe(
-  //     data => {
-  //       this.subjects = data
-  //     }
-  //   )
-  // }
+  getSubjectWeightData() {
+    this.subjectWeightsForCreate = []
+    this.subjectWeightService.GetBySubjectId(this.directMark.subjectID, this.DomainName).subscribe(
+      data => {
+        this.subjectWeightsForCreate = data
+      }
+    )
+  }
 
-  // getSubjectWeightData() {
-  //   this.subjectWeights = []
-  //   this.subjectWeightService.GetBySubjectId(this.assignment.subjectID, this.DomainName).subscribe(
-  //     data => {
-  //       this.subjectWeights = data
-  //     }
-  //   )
-  // }
+  async onSearchEvent(event: { key: string; value: any }) {
+    this.PageSize = this.TotalRecords
+    this.CurrentPage = 1
+    this.TotalPages = 1
+    this.key = event.key;
+    this.value = event.value;
+    try {
+      const data: any = await firstValueFrom(
+        this.DirectMarkServ.GetBySubjectID(this.SelectedSubjectId, this.DomainName, this.CurrentPage, this.PageSize)
+      );
+      this.TableData = data.data || [];
 
+      if (this.value !== '') {
+        const numericValue = isNaN(Number(this.value))
+          ? this.value
+          : parseInt(this.value, 10);
+
+        this.TableData = this.TableData.filter((t) => {
+          const fieldValue = t[this.key as keyof typeof t];
+          if (typeof fieldValue === 'string') {
+            return fieldValue.toLowerCase().includes(this.value.toLowerCase());
+          }
+          if (typeof fieldValue === 'number') {
+            return fieldValue.toString().includes(numericValue.toString())
+          }
+          return fieldValue == this.value;
+        });
+      }
+    } catch (error) {
+      this.TableData = [];
+    }
+  }
+
+  IsAllowDelete(InsertedByID: number) {
+    const IsAllow = this.EditDeleteServ.IsAllowDelete(
+      InsertedByID,
+      this.UserID,
+      this.AllowDeleteForOthers
+    );
+    return IsAllow;
+  }
+
+  IsAllowEdit(InsertedByID: number) {
+    const IsAllow = this.EditDeleteServ.IsAllowEdit(
+      InsertedByID,
+      this.UserID,
+      this.AllowEditForOthers
+    );
+    return IsAllow;
+  }
+
+  onInputValueChange(event: { field: keyof DirectMark; value: any }) {
+    const { field, value } = event;
+    (this.directMark as any)[field] = value;
+    if (value) {
+      this.validationErrors[field] = '';
+    }
+  }
+
+  isFormValid(): boolean {
+    let isValid = true;
+    for (const key in this.directMark) {
+      if (this.directMark.hasOwnProperty(key)) {
+        const field = key as keyof DirectMark;
+        if (!this.directMark[field]) {
+          if (field == 'englishName' || field == 'arabicName' || field == 'mark' || field == 'subjectID' || field == 'subjectWeightTypeID') {
+            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`;
+            isValid = false;
+          }
+        }
+      }
+    }
+    return isValid;
+  }
+
+  capitalizeField(field: keyof DirectMark): string {
+    return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
+  }
+
+  Save() {
+    if (this.isFormValid()) {
+      this.DirectMarkServ.Add(this.directMark, this.DomainName).subscribe(
+        (result: any) => {
+          this.closeModal();
+          this.GetAllData(this.CurrentPage, this.PageSize)
+          this.isLoading = false;
+        },
+        (error) => {
+          this.isLoading = false;
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Try Again Later!',
+            confirmButtonText: 'Okay',
+            customClass: { confirmButton: 'secondaryBg' },
+          });
+        }
+      );
+    } else {
+      this.DirectMarkServ.Edit(this.directMark, this.DomainName).subscribe(
+        (result: any) => {
+          this.closeModal();
+          this.GetAllData(this.CurrentPage, this.PageSize)
+          this.isLoading = false;
+        },
+        (error) => {
+          this.isLoading = false;
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Try Again Later!',
+            confirmButtonText: 'Okay',
+            customClass: { confirmButton: 'secondaryBg' },
+          });
+        }
+      );
+    }
+  }
+
+  Delete(id: number) {
+    Swal.fire({
+      title: 'Are you sure you want to delete this Direct Mark?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#089B41',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'Cancel',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.DirectMarkServ.Delete(id, this.DomainName).subscribe((D) => {
+          this.GetAllData(this.CurrentPage, this.PageSize)
+        })
+      }
+    });
+  }
+
+  onSchoolModalChange() {
+    this.directMark.subjectWeightTypeID = 0
+    this.viewStudents = false
+    this.viewClassStudents = false
+    this.GradesForCreate = []
+    this.subjectsForCreate = []
+    this.directMark.gradeID = 0
+    this.directMark.subjectID = 0
+    this.GradeServ.GetBySchoolId(this.directMark.schoolID, this.DomainName).subscribe((d) => {
+      this.GradesForCreate = d
+    })
+  }
+
+  onGradeModalChange() {
+    this.directMark.subjectWeightTypeID = 0
+    this.viewStudents = false
+    this.viewClassStudents = false
+    this.subjectsForCreate = []
+    this.directMark.subjectID = 0
+    this.subjectService.GetByGradeId(this.directMark.gradeID, this.DomainName).subscribe((d) => {
+      this.subjectsForCreate = d
+    })
+  }
+
+  onSubjectModalChange() {
+    this.directMark.subjectWeightTypeID = 0
+    this.getSubjectWeightData();
+    this.GetClassroomsData()
+    this.viewStudents = false
+    this.viewClassStudents = false
+  }
+
+  validateNumber(event: any, field: keyof DirectMark): void {
+    const value = event.target.value;
+    if (isNaN(value) || value === '' || Number(value) <= 0) {
+      event.target.value = '';
+      if (typeof this.directMark[field] === 'string') {
+        this.directMark[field] = '' as never;
+      }
+    }
+  }
 }
