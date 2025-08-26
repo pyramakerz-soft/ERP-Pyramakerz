@@ -119,10 +119,12 @@ export class SubjectComponent {
   // }
 
   GetDate() {
-    this.IsView = true
-    this.subjectService.GetByGradeId(this.SelectedGradeId, this.DomainName).subscribe((d) => {
-      this.subjectData = d;
-    })
+    if(this.SelectedGradeId){
+      this.IsView = true
+      this.subjectService.GetByGradeId(this.SelectedGradeId, this.DomainName).subscribe((d) => {
+        this.subjectData = d;
+      })
+    }
   }
 
   getAllGradesBySchoolId() {

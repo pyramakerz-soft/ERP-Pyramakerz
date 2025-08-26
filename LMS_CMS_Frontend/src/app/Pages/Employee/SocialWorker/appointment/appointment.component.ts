@@ -341,7 +341,7 @@ export class AppointmentComponent {
   }
 
   removeSelected(id: number): void {
-    this.gradeSelected = this.gradeSelected.filter((e) => e.id !== id);
+    this.gradeSelected = this.gradeSelected.filter((e) => e.gradeID !== id);
     this.appointment.gradeIds = this.appointment.gradeIds.filter((i) => i !== id);
   }
 

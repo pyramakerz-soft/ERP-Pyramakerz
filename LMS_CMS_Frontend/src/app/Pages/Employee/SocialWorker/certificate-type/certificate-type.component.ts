@@ -98,11 +98,11 @@ export class CertificateTypeComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   GetAllData() {
@@ -244,16 +244,86 @@ export class CertificateTypeComponent {
 
   test() {
     let imageUrl = this.imagePreview || this.certificateType.file;
+
     if (imageUrl) {
+      // Encode URL if it's a file path, not base64
       if (!imageUrl.startsWith('data:')) {
         imageUrl = encodeURI(imageUrl);
       }
+
       this.safeBackgroundImage = this.sanitizer.bypassSecurityTrustStyle(`url("${imageUrl}")`);
 
-      // Download directly using raw URL
-      this.downloadCertificate(imageUrl);
+      // Open certificate preview in new tab
+      this.ViewCertificate(imageUrl, this.certificateType);
     }
   }
+
+  ViewCertificate(imageUrl: string, row: any) {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d')!;
+    const img = new Image();
+
+    img.crossOrigin = 'anonymous';
+    img.src = imageUrl; // ✅ use the correct image URL
+
+    img.onload = () => {
+      // Match canvas to image size
+      canvas.width = img.width;
+      canvas.height = img.height;
+
+      // Draw base image
+      ctx.drawImage(img, 0, 0);
+
+      // Convert % position to pixels
+      const leftPx = (this.certificateType.leftSpace / 100) * img.width;
+      const topPx = (this.certificateType.topSpace / 100) * img.height;
+
+      // Write the student name dynamically
+      ctx.font = `${Math.floor(img.height * 0.05)}px Arial`;
+      ctx.fillStyle = 'black';
+      ctx.textBaseline = 'top';
+      ctx.fillText("Student Name Will Be Here", leftPx, topPx);
+
+      // Convert canvas to base64 image
+      const dataUrl = canvas.toDataURL('image/png');
+
+      // Open in a new browser tab
+      const win = window.open('', '_blank');
+      if (win) {
+        win.document.write(`
+        <html>
+        <head>
+          <style>
+            body {
+              margin: 0;
+              height: 100vh;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              background: #f0f0f0;
+            }
+            img {
+              max-width: 100%;
+              height: auto;
+              box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            }
+          </style>
+        </head>
+        <body>
+          <img src="${dataUrl}" alt="Certificate Preview">
+        </body>
+        </html>
+      `);
+        win.document.close();
+      }
+    };
+
+    img.onerror = () => {
+      console.error('Failed to load image:', imageUrl);
+      alert('Unable to load certificate image.');
+    };
+  }
+
 
   downloadCertificate(imageUrl: string) {
     const canvas = document.createElement('canvas');

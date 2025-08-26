@@ -37,9 +37,6 @@
                       {{ 'Name' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
-                      {{ 'Create' | translate }}  {{ 'Date' | translate }}
-                </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
                       {{ 'Favorite' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
@@ -61,8 +58,6 @@
 
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{ row.id }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.name }}</td>
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.insertedAt | date:
-                    'dd/MM/yyyy HH:mm' }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     <div class="flex w-full space-x-5 rtl:space-x-reverse items-center mb-4">
                         <input type="checkbox" id="hide" class="w-5 h-5" [(ngModel)]="row.isFavourite"

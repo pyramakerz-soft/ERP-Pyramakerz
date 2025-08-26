@@ -139,45 +139,57 @@
                     </div>
 
 
-                    <div class="mt-4">
+                    <div class="mb-4">
                         <div class="flex flex-col mb-1">
                             <label class="mb-3" for="ac"> {{ 'Grade' | translate }}</label>
                             <div class="relative">
-                                <div class="border border-gray-300 rounded-lg px-4 py-3 cursor-pointer"
-                                    (click)="toggleDropdown()" tabindex="0">
+                                <!-- Main box -->
+                                <div class="border bg-white border-gray-300 rounded-lg px-4 py-3 cursor-pointer"
+                                    [class.opacity-50]="!appointment.schoolID"
+                                    [class.cursor-not-allowed]="!appointment.schoolID"
+                                    (click)="appointment.schoolID && toggleDropdown()" tabindex="0">
+
+                                    <!-- Selected Grades -->
                                     <div *ngIf="gradeSelected.length > 0; else placeholder">
                                         <div class="flex flex-wrap">
-                                            <span
-                                                class="mr-2 mb-1 bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center"
+                                            <span class="mr-2 mb-1 px-3 py-1 rounded-full bg-gray-100 text-sm flex items-center"
                                                 *ngFor="let selected of gradeSelected">
                                                 {{ selected.gradeName }}
                                                 <span class="ml-2 cursor-pointer text-red-500"
-                                                    (click)="removeSelected(selected.gradeID)">
+                                                    (click)="appointment.schoolID && removeSelected(selected.gradeID)">
                                                     &times;
                                                 </span>
                                             </span>
                                         </div>
                                     </div>
+
+                                    <!-- Placeholder -->
                                     <ng-template #placeholder>
-                                        <span class="text-gray-400"> {{ 'Choose Grade' | translate }}</span>
+                                        <span> {{ 'Choose Grade' | translate }}</span>
                                     </ng-template>
                                 </div>
+
+                                <!-- Dropdown List -->
                                 <div class="absolute bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10"
-                                    *ngIf="dropdownOpen">
+                                    *ngIf="dropdownOpen && appointment.schoolID">
                                     <ul>
                                         <li *ngFor="let grade of grades"
-                                            class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                                            class="px-4 py-2 cursor-pointer hover:bg-gray-100"
                                             (click)="selectGrade(grade)"
                                             (ngModelChange)="onInputValueChange({ field: 'gradeIds', value: $event })">
-                                            {{ grade.name|translate }}
+                                            {{ grade.name | translate }}
+                                        </li>
+                                        <li *ngIf="grades.length === 0"
+                                            class="px-4 py-2 text-gray-400 cursor-not-allowed">
+                                            {{ 'No Data Found' | translate }}
                                         </li>
                                     </ul>
                                 </div>
                             </div>
                         </div>
+                        <!-- Validation Message -->
+                        <span *ngIf="validationErrors['gradeIds']" class="text-red-500 ml-3 font-normal">{{validationErrors["gradeIds"]}}</span>
                     </div>
-                    <span *ngIf="validationErrors['gradeIds']"
-                        class="text-red-500 ml-3 font-normal">{{validationErrors["gradeIds"]}}</span>
 
                     <div class="flex flex-col mb-4 w-full">
                         <label class="mb-2" for="date"> {{ 'Date' | translate }}</label>

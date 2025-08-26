@@ -21,6 +21,7 @@ export class ChatMessage {
         public chatMessageAttachments : ChatMessageAttachement[]=[], 
         public chatMessageAttachmentFiles : File[]|null=null, 
         public userFilters : UserFilters= new UserFilters(),
-        public chatMessageID: number = 0
+        public chatMessageID: number = 0,
+        public unreadCount: number = 0
     ) {}    
 }      

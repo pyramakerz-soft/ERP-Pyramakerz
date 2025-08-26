@@ -124,5 +124,75 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             Unit_Of_Work.SaveChanges();
             return Ok(type);
         }
+
+        ////////////////////////////////
+
+        [HttpDelete("{id}")]
+        [Authorize_Endpoint_(
+          allowedTypes: new[] { "octa", "employee" },
+          allowDelete: 1,
+          pages: new[] { "Add Certificate To Student" }
+        )]
+        public IActionResult Delete(long id)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            if (id == null)
+            {
+                return BadRequest("id cannot be null");
+            }
+
+            CertificateStudent medal = Unit_Of_Work.certificateStudent_Repository.First_Or_Default(s => s.ID == id && s.IsDeleted != true);
+            if (medal == null)
+            {
+                return BadRequest("Certificate Student not exist");
+            }
+
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Add Certificate To Student", roleId, userId, medal);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
+            }
+
+
+            medal.IsDeleted = true;
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            medal.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            if (userTypeClaim == "octa")
+            {
+                medal.DeletedByOctaId = userId;
+                if (medal.DeletedByUserId != null)
+                {
+                    medal.DeletedByUserId = null;
+                }
+            }
+            else if (userTypeClaim == "employee")
+            {
+                medal.DeletedByUserId = userId;
+                if (medal.DeletedByOctaId != null)
+                {
+                    medal.DeletedByOctaId = null;
+                }
+            }
+
+            Unit_Of_Work.certificateStudent_Repository.Update(medal);
+            Unit_Of_Work.SaveChanges();
+            return Ok();
+        }
     }
 }

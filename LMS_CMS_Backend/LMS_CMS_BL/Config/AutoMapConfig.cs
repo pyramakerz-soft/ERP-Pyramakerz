@@ -8,6 +8,7 @@ using LMS_CMS_BL.DTO.Clinic;
 using LMS_CMS_BL.DTO.Communication;
 using LMS_CMS_BL.DTO.ECommerce;
 using LMS_CMS_BL.DTO.ETA;
+using LMS_CMS_BL.DTO.HR;
 using LMS_CMS_BL.DTO.Inventory;
 using LMS_CMS_BL.DTO.LMS;
 using LMS_CMS_BL.DTO.Maintenance;
@@ -24,6 +25,7 @@ using LMS_CMS_DAL.Models.Domains.ClinicModule;
 using LMS_CMS_DAL.Models.Domains.Communication;
 using LMS_CMS_DAL.Models.Domains.ECommerce;
 using LMS_CMS_DAL.Models.Domains.ETA;
+using LMS_CMS_DAL.Models.Domains.HR;
 using LMS_CMS_DAL.Models.Domains.Inventory;
 using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_DAL.Models.Domains.MaintenanceModule;
@@ -1323,6 +1325,9 @@ namespace LMS_CMS_BL.Config
                 .ForMember(dest => dest.SchoolName, opt => opt.MapFrom(src => src.School.Name));
             CreateMap<AppointmentAddDTO, Appointment>();
             CreateMap<AppointmentEditDTO, Appointment>();
+
+            CreateMap<OfficialHolidays, OfficialHolidaysGetDTO>();
+            CreateMap<OfficialHolidaysAddDTO, OfficialHolidays>();
 
             // Maintenance
 
