@@ -64,6 +64,11 @@ export class AttendanceComponent {
 
   isLoading = false
   isLoadingSaveClassroom = false
+  CurrentPage: number = 1
+  PageSize: number = 10
+  TotalPages: number = 1
+  TotalRecords: number = 0
+  isDeleting: boolean = false;
 
   constructor(public account: AccountService,
     private realTimeService: RealTimeNotificationServiceService, private languageService: LanguageService, public buildingService: BuildingService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService,
@@ -97,11 +102,11 @@ export class AttendanceComponent {
     this.GetAllSchools()
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   Create() {
@@ -109,7 +114,7 @@ export class AttendanceComponent {
   }
 
   Edit(id: number) {
-    this.router.navigateByUrl(`Employee/Attendance/`+id);
+    this.router.navigateByUrl(`Employee/Attendance/` + id);
   }
 
   Delete(id: number) {
@@ -124,7 +129,7 @@ export class AttendanceComponent {
     }).then((result) => {
       if (result.isConfirmed) {
         this.AttendanceService.Delete(id, this.DomainName).subscribe((d) => {
-          this.GetAllAttendance();
+          this.GetAllAttendance(this.CurrentPage, this.PageSize)
         });
       }
     });
@@ -170,12 +175,75 @@ export class AttendanceComponent {
     })
   }
 
-  GetAllAttendance() {
+  GetAllAttendance(pageNumber: number, pageSize: number) {
     this.TableData = []
     this.IsViewTable = true
-    this.AttendanceService.GetByAcademicYearAndClass(this.SelectedAcademicYearId, this.SelectedClassId, this.DomainName).subscribe((d) => {
-      this.TableData = d
-    })
+    this.AttendanceService.GetByAcademicYearAndClass(this.SelectedAcademicYearId, this.SelectedClassId, this.DomainName, pageNumber, pageSize).subscribe(
+      (data) => {
+        this.CurrentPage = data.pagination.currentPage
+        this.PageSize = data.pagination.pageSize
+        this.TotalPages = data.pagination.totalPages
+        this.TotalRecords = data.pagination.totalRecords
+        this.TableData = data.data
+      },
+      (error) => {
+        if (error.status == 404) {
+          if (this.TotalRecords != 0) {
+            let lastPage = this.TotalRecords / this.PageSize
+            if (lastPage >= 1) {
+              if (this.isDeleting) {
+                this.CurrentPage = Math.floor(lastPage)
+                this.isDeleting = false
+              } else {
+                this.CurrentPage = Math.ceil(lastPage)
+              }
+              this.GetAllAttendance(this.CurrentPage, this.PageSize)
+            }
+          }
+        }
+      }
+    )
+  }
+
+  changeCurrentPage(currentPage: number) {
+    this.CurrentPage = currentPage
+    this.GetAllAttendance(this.CurrentPage, this.PageSize)
+  }
+
+  validateNumber(event: any): void {
+    const value = event.target.value;
+    this.PageSize = 0
+  }
+
+  validatePageSize(event: any) {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+    }
+  }
+
+  get visiblePages(): number[] {
+    const total = this.TotalPages;
+    const current = this.CurrentPage;
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const half = Math.floor(maxVisible / 2);
+    let start = current - half;
+    let end = current + half;
+
+    if (start < 1) {
+      start = 1;
+      end = maxVisible;
+    } else if (end > total) {
+      end = total;
+      start = total - maxVisible + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   }
 
   IsAllowDelete(InsertedByID: number) {
@@ -188,17 +256,24 @@ export class AttendanceComponent {
     return IsAllow;
   }
 
-  async onSearchEvent(event: { key: string, value: any }) {
+  async onSearchEvent(event: { key: string; value: any }) {
+    this.PageSize = this.TotalRecords
+    this.CurrentPage = 1
+    this.TotalPages = 1
     this.key = event.key;
     this.value = event.value;
     try {
-      const data: Attendance[] = await firstValueFrom(this.AttendanceService.GetByAcademicYearAndClass(this.SelectedAcademicYearId, this.SelectedClassId, this.DomainName));
-      this.TableData = data || [];
+      const data: any = await firstValueFrom(
+        this.AttendanceService.GetByAcademicYearAndClass(this.SelectedAcademicYearId, this.SelectedClassId, this.DomainName, this.CurrentPage, this.PageSize)
+      );
+      this.TableData = data.data || [];
 
-      if (this.value !== "") {
-        const numericValue = isNaN(Number(this.value)) ? this.value : parseInt(this.value, 10);
+      if (this.value !== '') {
+        const numericValue = isNaN(Number(this.value))
+          ? this.value
+          : parseInt(this.value, 10);
 
-        this.TableData = this.TableData.filter(t => {
+        this.TableData = this.TableData.filter((t) => {
           const fieldValue = t[this.key as keyof typeof t];
           if (typeof fieldValue === 'string') {
             return fieldValue.toLowerCase().includes(this.value.toLowerCase());

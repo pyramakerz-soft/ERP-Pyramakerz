@@ -8,18 +8,19 @@ using System.Threading.Tasks;
 
 namespace LMS_CMS_DAL.Models.Domains.LMS
 {
-    public class DirectMarkClassroomStudent : AuditableEntity
+    public class DirectMarkClassesStudent : AuditableEntity
     {
         [Key]
         public long ID { get; set; }
-        public float Mark { get; set; }
+        public float? Degree { get; set; }
 
-        [ForeignKey("WeightType")]
-        public long WeightTypeID { get; set; }
-        public WeightType WeightType { get; set; }
+        [ForeignKey("DirectMark")]
+        public long DirectMarkID { get; set; }
+        public DirectMark DirectMark { get; set; }
 
         [ForeignKey("StudentClassroom")]
         public long StudentClassroomID { get; set; }
         public StudentClassroom StudentClassroom { get; set; }
+
     }
 }

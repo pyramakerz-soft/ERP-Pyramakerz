@@ -198,7 +198,7 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<AssignmentStudent> AssignmentStudent_Repository;
         GenericRepo<AssignmentStudentIsSpecific> AssignmentStudentIsSpecific_Repository;
         GenericRepo<AssignmentQuestion> AssignmentQuestion_Repository;
-        GenericRepo<DirectMarkClassroomStudent> DirectMarkClassroomStudent_Repository;
+        GenericRepo<DirectMarkClasses> DirectMarkClasses_Repository;
         GenericRepo<AssignmentStudentQuestion> AssignmentStudentQuestion_Repository;
         GenericRepo<ETAPOS> POS_Repository;
         GenericRepo<TaxCustomer> TaxCustomer_Repository;
@@ -260,7 +260,8 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<OfficialHolidays> OfficialHolidays_Repository;
         GenericRepo<VacationTypes> VacationTypes_Repository;
         GenericRepo<VacationEmployee> VacationEmployee_Repository;
-
+        GenericRepo<DirectMark> DirectMark_Repository;
+        GenericRepo<DirectMarkClassesStudent> DirectMarkClassesStudent_Repository;
 
 
         public UOW(Octa_DbContext octa_Db)
@@ -2259,18 +2260,42 @@ namespace LMS_CMS_BL.UOW
             }
         }
         
-        public GenericRepo<DirectMarkClassroomStudent> directMarkClassroomStudent_Repository
+        public GenericRepo<DirectMarkClasses> directMarkClasses_Repository
         {
             get
             {
-                if (DirectMarkClassroomStudent_Repository == null)
+                if (DirectMarkClasses_Repository == null)
                 {
-                    DirectMarkClassroomStudent_Repository = new GenericRepo<DirectMarkClassroomStudent>(db);
+                    DirectMarkClasses_Repository = new GenericRepo<DirectMarkClasses>(db);
                 }
-                return DirectMarkClassroomStudent_Repository;
+                return DirectMarkClasses_Repository;
             }
         }
-        
+
+        public GenericRepo<DirectMark> directMark_Repository
+        {
+            get
+            {
+                if (DirectMark_Repository == null)
+                {
+                    DirectMark_Repository = new GenericRepo<DirectMark>(db);
+                }
+                return DirectMark_Repository;
+            }
+        }
+
+        public GenericRepo<DirectMarkClassesStudent> directMarkClassesStudent_Repository
+        {
+            get
+            {
+                if (DirectMarkClassesStudent_Repository == null)
+                {
+                    DirectMarkClassesStudent_Repository = new GenericRepo<DirectMarkClassesStudent>(db);
+                }
+                return DirectMarkClassesStudent_Repository;
+            }
+        }
+
         public GenericRepo<AssignmentStudentQuestion> assignmentStudentQuestion_Repository
         {
             get

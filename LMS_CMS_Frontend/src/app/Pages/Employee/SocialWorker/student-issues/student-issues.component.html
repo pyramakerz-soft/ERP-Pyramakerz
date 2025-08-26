@@ -24,9 +24,6 @@
                          {{ 'Issue Type Name' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ 'Date' | translate }}
-                    </th>
-                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         {{ 'Actions' | translate }}
                     </th>
                 </tr>
@@ -51,9 +48,6 @@
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ row.issuesTypeName }}
-                    </td>
-                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ row.date | date:'yyyy-MM-dd' }}
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         <div class="flex space-x-4 rtl:space-x-reverse">
@@ -152,6 +146,15 @@
                     <option *ngIf="issueTypes.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
                 </select>
                 <span *ngIf="validationErrors['issuesTypeID']" class="text-red-500 ml-3 font-normal">{{validationErrors['issuesTypeID'] }}</span>
+            </div>
+
+            <div class="flex flex-col mb-4 w-full">
+                <label class="mb-2 primaryTxt" for="Details"> {{ 'Details' | translate }}</label>
+                <textarea id="Details" type="text"
+                    class="w-full h-[100px] rounded-lg border border-solid border-gray-300 px-2 py-1 mb-3 resize-none"
+                    placeholder="{{ 'Enter' | translate }} {{ 'Details' | translate }}" [(ngModel)]="studentIssue.details"
+                    (ngModelChange)="onInputValueChange({ field: 'details', value: $event })"></textarea>
+                <span *ngIf="validationErrors['details']" class="text-red-500 ml-3 font-normal">{{validationErrors['details']}}</span>
             </div>
 
         </div>
