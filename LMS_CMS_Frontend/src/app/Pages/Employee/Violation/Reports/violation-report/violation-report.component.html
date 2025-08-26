@@ -125,7 +125,24 @@
 <div class="absolute -top-[9999px] -left-[9999px]">
     <div id="Data" class="hidden">
         <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'Violation Report'" 
-            [infoRows]="getInfoRows()"
+            [infoRows]="[
+      {
+        keyEn: 'Employee Type: ' + this.employeeTypeName ,
+        keyAr: 'نوع الموظف: ' + this.employeeTypeName ,
+      },
+      {
+        keyEn: 'Violation Type: ' + this.violationTypeName ,
+        keyAr: 'نوع المخالفة: ' + this.violationTypeName ,
+      },
+      {
+        keyEn: 'Start Date: ' + this.SelectedStartDate,
+        keyAr: 'تاريخ البدء: ' + this.SelectedStartDate,
+      },
+      {
+        keyEn: 'End Date: ' + this.SelectedEndDate,
+        keyAr: 'تاريخ الانتهاء: ' + this.SelectedEndDate,
+      },
+      ]"
             [tableHeaders]="['ID', 'Date', 'Violation Type', 'Employee Type', 'Employee Name', 'Details']"
             [tableData]="tableDataForExport" #pdfComponentRef>
         </app-pdf-print>

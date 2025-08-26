@@ -165,6 +165,17 @@ export class ViolationReportComponent {
     return 'Violation Report';
   }
 
+
+  get employeeTypeName(): string {
+    const empType = this.empTypes.find(e => e.id == this.SelectedEmployeeTypeId);
+    return empType ? empType.name : 'Undefined';    
+  }
+
+  get violationTypeName(): string {
+    const violType = this.violationTypes.find(v => v.id == this.SelectedViolationTypeId);
+    return violType ? violType.name : 'Undefined';
+  }
+
   getInfoRows(): any[] {
     const selectedEmpType = this.empTypes.find(
       (e) => e.id == this.SelectedEmployeeTypeId

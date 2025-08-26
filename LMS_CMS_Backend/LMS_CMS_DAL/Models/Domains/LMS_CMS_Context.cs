@@ -187,7 +187,7 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<AssignmentStudent> AssignmentStudent { get; set; }
         public DbSet<AssignmentStudentIsSpecific> AssignmentStudentIsSpecific { get; set; }
         public DbSet<AssignmentQuestion> AssignmentQuestion { get; set; }
-        public DbSet<DirectMarkClassroomStudent> DirectMarkClassroomStudent { get; set; }
+        public DbSet<DirectMarkClassesStudent> DirectMarkClassesStudent { get; set; }
         public DbSet<AssignmentStudentQuestion> AssignmentStudentQuestion { get; set; }
         public DbSet<ETAPOS> ETAPOS { get; set; }
         public DbSet<AssignmentStudentQuestionAnswerOption> AssignmentStudentQuestionAnswerOption { get; set; }
@@ -233,10 +233,15 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<AppointmentStatus> AppointmentStatus { get; set; }
         public DbSet<AppointmentParent> AppointmentParent { get; set; }
         public DbSet<AppointmentGrade> AppointmentGrade { get; set; }
+        public DbSet<DirectMark> DirectMark { get; set; }
+        public DbSet<DirectMarkClasses> DirectMarkClasses { get; set; }
+
         // Maintenance Module
         public DbSet<MaintenanceItem> MaintenanceItems { get; set; }
         public DbSet<MaintenanceCompany> MaintenanceCompanies { get; set; }
         public DbSet<MaintenanceEmployee> MaintenanceEmployees { get; set; }
+        public DbSet<Maintenance> Maintenances { get; set; }
+
 
         public DbSet<Bouns> Bouns { get; set; }
         public DbSet<BounsType> BounsType { get; set; }
@@ -1718,15 +1723,15 @@ namespace LMS_CMS_DAL.Models.Domains
               .HasForeignKey(p => p.QuestionBankID)
               .OnDelete(DeleteBehavior.Restrict);
             
-            modelBuilder.Entity<DirectMarkClassroomStudent>()
-              .HasOne(p => p.WeightType)
-              .WithMany(p => p.DirectMarkClassroomStudents)
-              .HasForeignKey(p => p.WeightTypeID)
+            modelBuilder.Entity<DirectMarkClassesStudent>()
+              .HasOne(p => p.DirectMark)
+              .WithMany(p => p.DirectMarkClassesStudent)
+              .HasForeignKey(p => p.DirectMarkID)
               .OnDelete(DeleteBehavior.Restrict);
             
-            modelBuilder.Entity<DirectMarkClassroomStudent>()
+            modelBuilder.Entity<DirectMarkClassesStudent>()
               .HasOne(p => p.StudentClassroom)
-              .WithMany(p => p.DirectMarkClassroomStudents)
+              .WithMany(p => p.DirectMarkClassesStudent)
               .HasForeignKey(p => p.StudentClassroomID)
               .OnDelete(DeleteBehavior.Restrict);
             
@@ -2140,9 +2145,6 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasForeignKey(p => p.AppointmentID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-
-
-
             modelBuilder.Entity<Bouns>()
                 .HasOne(p => p.Employee)
                 .WithMany(p => p.Bouns)
@@ -2209,6 +2211,29 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasForeignKey(p => p.VacationTypesID)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<DirectMark>()
+                .HasOne(p => p.Subject)
+                .WithMany(p => p.DirectMarks)
+                .HasForeignKey(p => p.SubjectID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<DirectMark>()
+                .HasOne(p => p.SubjectWeightType)
+                .WithMany(p => p.DirectMarks)
+                .HasForeignKey(p => p.SubjectWeightTypeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<DirectMarkClasses>()
+                .HasOne(p => p.DirectMark)
+                .WithMany(p => p.DirectMarkClasses)
+                .HasForeignKey(p => p.DirectMarkID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<DirectMarkClasses>()
+                .HasOne(p => p.Classroom)
+                .WithMany(p => p.DirectMarkClasses)
+                .HasForeignKey(p => p.ClassroomID)
+                .OnDelete(DeleteBehavior.Restrict);
 
             // Maintenance Module
             modelBuilder.Entity<MaintenanceEmployee>()
@@ -2216,6 +2241,24 @@ namespace LMS_CMS_DAL.Models.Domains
                  .WithMany(me => me.MaintenanceEmployees)
                  .HasForeignKey(me => me.EmployeeID)
                  .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Maintenance>()
+               .HasOne(m => m.Item)
+               .WithMany(m => m.Maintenances)
+               .HasForeignKey(m => m.ItemID)
+               .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Maintenance>()
+                .HasOne(m => m.Employee)
+                .WithMany(m => m.Maintenances)
+                .HasForeignKey(m => m.EmployeeID)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<Maintenance>()
+                .HasOne(m => m.Company)
+                .WithMany(m => m.Maintenances)
+                .HasForeignKey(m => m.CompanyID)
+                .OnDelete(DeleteBehavior.SetNull);
 
 
             ///////////////////////// Exception: /////////////////////////
@@ -2320,7 +2363,7 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasOne(v => v.DeletedByEmployee)
                 .WithMany()
                 .HasForeignKey(v => v.DeletedByUserId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Restrict); 
 
             modelBuilder.Entity<Bouns>()
                 .HasOne(v => v.DeletedByEmployee)
@@ -2353,6 +2396,12 @@ namespace LMS_CMS_DAL.Models.Domains
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<VacationEmployee>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Maintenance>()
                 .HasOne(v => v.DeletedByEmployee)
                 .WithMany()
                 .HasForeignKey(v => v.DeletedByUserId)

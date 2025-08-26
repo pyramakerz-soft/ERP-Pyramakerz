@@ -15,7 +15,7 @@ export class AttendanceService {
     this.baseUrl = ApiServ.BaseUrl
   }
 
-  GetByAcademicYearAndClass(academicYearID:number ,classroomID:number , DomainName: string) {
+  GetByAcademicYearAndClass(academicYearID: number, classroomID: number, DomainName: string, pageNumber: number, pageSize: number) {
     if (DomainName != null) {
       this.header = DomainName
     }
@@ -25,7 +25,7 @@ export class AttendanceService {
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
 
-    return this.http.get<Attendance[]>(`${this.baseUrl}/Attendance/ByAcademicYearAndClass/${academicYearID}/${classroomID}`, { headers });
+    return this.http.get<{ data: Attendance[], pagination: any }>(`${this.baseUrl}/Attendance/ByAcademicYearAndClass/${academicYearID}/${classroomID}?pageNumber=${pageNumber}&pageSize=${pageSize}`, { headers });
   }
 
   GetByID(id: number, DomainName: string) {

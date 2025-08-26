@@ -1,0 +1,123 @@
+<div class="flex justify-between mb-3">
+    <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ 'Daily Performance Report' | translate }}</h1>
+</div>
+
+<div class="my-5 flex flex-wrap md:flex-nowrap items-end space-x-0 md:space-x-6 space-y-4 md:space-y-0 mb-6">
+    <!-- Student Selector -->
+    <div class="w-full md:w-1/4">
+        <label for="student" class="block mb-2 text-sm font-medium text-gray-900">{{'Student'| translate }}</label>
+        <select id="student" [(ngModel)]="SelectedStudentId" (change)="DateChange()"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
+            <option [ngValue]="0" disabled selected hidden>{{'Choose'| translate }} {{'Student'| translate }}</option>
+            <option *ngFor="let student of students" [value]="student.id"> {{ student.name }} </option>
+        </select>
+    </div>
+
+    <!-- Start Date -->
+    <div class="w-full md:w-1/4">
+        <label for="fromDate" class="block mb-2 text-sm font-medium text-gray-900">{{'Start Date'| translate }}</label>
+        <input id="fromDate" type="date" [(ngModel)]="SelectedStartDate" (change)="DateChange()"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
+    </div>
+
+    <!-- End Date -->
+    <div class="w-full md:w-1/4">
+        <label for="toDate" class="block mb-2 text-sm font-medium text-gray-900">{{'End Date'| translate }}</label>
+        <input id="toDate" type="date" [(ngModel)]="SelectedEndDate" (change)="DateChange()"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
+    </div>
+
+    <!-- View Report Button -->
+    <div class="w-full md:w-1/6 flex justify-end mt-4 md:mt-0 ">
+        <button class="p-3 font-medium text-xl rounded-lg" (click)="ViewReport()" 
+            [disabled]="!SelectedStartDate || !SelectedEndDate || !SelectedStudentId || isLoading"
+            [ngClass]="{
+                'bg-gray-100 text-gray-300': !SelectedStartDate || !SelectedEndDate || !SelectedStudentId,
+                'secondaryBg text-white': SelectedStartDate && SelectedEndDate && SelectedStudentId
+            }">
+            <span *ngIf="!isLoading">{{'View Report'| translate }}</span>
+            <span *ngIf="isLoading">{{'Loading...'| translate }}</span>
+        </button>
+    </div>
+</div>
+
+<div *ngIf="showTable" class="mt-5 flex justify-end space-x-4 rtl:space-x-reverse">
+    <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="DownloadAsExcel()">
+    <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()">
+    <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()">
+</div>
+
+<div *ngIf="showTable" class="mt-5">
+    <div *ngIf="tableData.length == 0" class="w-full justify-center items-center flex">
+        <span class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+            {{'No Data Found'| translate }}
+        </span>
+    </div>
+
+    <div *ngIf="tableData.length > 0" class="overflow-x-auto rounded-2xl border border-[#BDBDBD]">
+        <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
+            <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+                <tr>
+                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ 'Date' | translate }}
+                    </th>
+                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ 'English Name' | translate }}
+                    </th>
+                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ 'Arabic Name' | translate }}
+                    </th>
+                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ 'Student ID' | translate }}
+                    </th>
+                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ 'Performance Type (EN)' | translate }}
+                    </th>
+                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ 'Performance Type (AR)' | translate }}
+                    </th>
+                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ 'Comment' | translate }}
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let data of tableData; let i = index"
+                    [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
+                    class="border-t border-gray-300 text-xs md:text-sm">
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ data.date }}
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ data.englishNameStudent }}
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ data.arabicNameStudent }}
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ data.studentId }}
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ data.performanceTypeEn }}
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ data.performanceTypeAr }}
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ data.comment || 'N/A' }}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="absolute -top-[9999px] -left-[9999px]">
+    <div id="Data" class="hidden">
+        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="fileName" 
+            [infoRows]="getInfoRows()"
+            [tableHeaders]="['Date', 'English Name', 'Arabic Name', 'Student ID', 'Performance Type (EN)', 'Performance Type (AR)', 'Comment']"
+            [tableData]="tableDataForExport" #pdfComponentRef>
+        </app-pdf-print>
+    </div>
+</div>
