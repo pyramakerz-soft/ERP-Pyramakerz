@@ -7,7 +7,7 @@ export class DirectMark {
             public englishName: string = '',
             public arabicName: string = '',
             public mark: number | null = null,
-            public Date: string = '',
+            public date: string = '',
             public subjectEnglishName: string = '',
             public subjectArabicName: string = '',
             public subjectID: number = 0,
