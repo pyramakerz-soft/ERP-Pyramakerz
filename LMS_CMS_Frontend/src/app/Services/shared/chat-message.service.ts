@@ -83,7 +83,8 @@ export class ChatMessageService {
 
     const formData = new FormData(); ;  
     formData.append('message', chatMessage.message ?? '');  
-    formData.append('receiverUserTypeID', chatMessage.receiverUserTypeID.toString() ?? '');   
+    formData.append('receiverUserTypeID', chatMessage.receiverUserTypeID?.toString() ?? '');   
+    formData.append('isTeacher', chatMessage.isTeacher.toString() ?? false);   
 
     if (chatMessage.userFilters) {
       const uf = chatMessage.userFilters;
@@ -118,6 +119,30 @@ export class ChatMessageService {
     }
 
     return this.http.post(`${this.baseUrl}/Chat`, formData, { headers });
+  }   
+
+  SendToOneUser(chatMessage: ChatMessage, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName;
+    }
+
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`);
+
+    const formData = new FormData(); ;  
+    formData.append('message', chatMessage.message ?? '');  
+    formData.append('receiverUserTypeID', chatMessage.receiverUserTypeID?.toString() ?? '');   
+    formData.append('receiverID', chatMessage.receiverID?.toString() ?? '');    
+
+    if (chatMessage.chatMessageAttachmentFiles && chatMessage.chatMessageAttachmentFiles.length > 0) { 
+      chatMessage.chatMessageAttachmentFiles.forEach((file: File) => { 
+        formData.append('ChatMessageAttachmentFiles', file, file.name);
+      });
+    }
+
+    return this.http.post(`${this.baseUrl}/Chat/SendToOneUser`, formData, { headers });
   }   
 
   Forward(forwardData: ChatMessage, DomainName: string) {

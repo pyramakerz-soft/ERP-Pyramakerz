@@ -16,5 +16,11 @@ namespace LMS_CMS_BL.DTO.Communication
         public long ReceiverUserTypeID { get; set; }
         public UserFilter? UserFilters { get; set; }
         public List<IFormFile>? ChatMessageAttachmentFiles { get; set; } = new List<IFormFile>(); 
+
+        // If i am sending message to one user (one user endpoint)
+        public long? ReceiverID { get; set; }
+
+        // For Parent and student
+        public bool IsTeacher { get; set; }
     }
 } 

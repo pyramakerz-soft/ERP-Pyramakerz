@@ -394,6 +394,12 @@ export class NotificationComponent {
         },
         error => {
           this.isLoading = false;
+          Swal.fire({
+            title: error.error,
+            icon: 'error', 
+            confirmButtonColor: '#089B41', 
+            confirmButtonText: "OK"
+          })
         }
       ); 
     }

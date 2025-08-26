@@ -105,6 +105,13 @@ export class NavMenuComponent {
   
   subjectID = 0 
 
+  private readonly allowedExtensions: string[] = [
+    '.jpg', '.jpeg', '.png', '.gif',
+    '.pdf', '.doc', '.docx', '.txt',
+    '.xls', '.xlsx', '.csv',
+    '.mp4', '.avi', '.mkv', '.mov'
+  ];
+
   constructor(private router: Router, public account: AccountService, public languageService: LanguageService, public ApiServ: ApiService, public octaService:OctaService,
     private translate: TranslateService, private communicationService: NewTokenService, private logOutService: LogOutService, 
     private notificationService: NotificationService, private realTimeService: RealTimeNotificationServiceService, private realTimeRequestService: RealTimeRequestServiceService, public requestService:RequestService,
@@ -157,7 +164,7 @@ export class NavMenuComponent {
   loadUnseenMessages() {
     this.chatMessageService.UnSeenRequestCount(this.DomainName).subscribe(
       data => this.messagesUnSeenCount = data
-    );
+    ); 
   }
 
   getAllTokens(): void {
@@ -1052,6 +1059,19 @@ export class NavMenuComponent {
     const input = event.target as HTMLInputElement;
 
     if (file) {
+      const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
+      if (!this.allowedExtensions.includes(fileExtension)) {
+        Swal.fire({
+          title: 'Invalid file type',
+          html: `The file <strong>${file.name}</strong> is not an allowed type. Allowed types are:<br><strong>${this.allowedExtensions.join(', ')}</strong>`,
+          icon: 'warning',
+          confirmButtonColor: '#089B41',
+          confirmButtonText: "OK"
+        });
+        this.requestToBeSend.fileFile = null;
+        return;
+      }
+
       if (file.size > 25 * 1024 * 1024) {
         Swal.fire({
           title: 'The file size exceeds the maximum limit of 25 MB.',
