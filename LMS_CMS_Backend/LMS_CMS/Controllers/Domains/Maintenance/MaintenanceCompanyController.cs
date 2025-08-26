@@ -7,23 +7,22 @@ using LMS_CMS_PL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Linq;
-
 
 namespace LMS_CMS_PL.Controllers.Domains.Maintenance
 {
     [Route("api/with-domain/[controller]")]
     [ApiController]
     [Authorize]
-
-    public class MaintenanceItemController : ControllerBase
+    public class MaintenanceCompanyController : ControllerBase
     {
+
+
         private readonly DbContextFactoryService _dbContextFactory;
         IMapper mapper;
         private readonly CheckPageAccessService _checkPageAccessService;
 
 
-        public MaintenanceItemController(
+        public MaintenanceCompanyController(
             DbContextFactoryService dbContextFactory,
             IMapper mapper,
             CheckPageAccessService checkPageAccessService)
@@ -33,10 +32,12 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
             _checkPageAccessService = checkPageAccessService;
         }
 
+
         [HttpGet]
-        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Maintenance Items" })]
+        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Maintenance Companies" })]
         public IActionResult GetAll()
         {
+
             UOW uow = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
@@ -46,28 +47,28 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
             if (userIdClaim == null || userTypeClaim == null)
                 return Unauthorized("User ID or Type claim not found.");
 
-           
-            List<MaintenanceItem> items = uow.maintenanceItem_Repository.FindBy(t => t.IsDeleted != true);
 
-            if (items == null || !items.Any())
-                return NotFound("No Maintenance Items found.");
+            IEnumerable<MaintenanceCompany> companies = uow.maintenanceCompany_Repository.FindBy(t => t.IsDeleted != true);
 
-            
-           List<MaintenanceItemGetDTO> dtoList = mapper.Map<List<MaintenanceItemGetDTO>>(items);
+            if (companies == null || !companies.Any())
+                return NotFound("No Maintenance companies found.");
+
+
+            List<MaintenanceCompanyGetDto> dtoList = mapper.Map<List<MaintenanceCompanyGetDto>>(companies);
 
             return Ok(dtoList);
         }
 
 
         [HttpGet("{id}")]
-        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Maintenance Items" })]
+        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Maintenance Companies" })]
         public IActionResult GetById(long id)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             if (id == 0)
             {
-                return BadRequest("Enter item ID");
+                return BadRequest("Enter Company ID");
             }
 
             var userClaims = HttpContext.User.Claims;
@@ -80,51 +81,51 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            MaintenanceItem? item = Unit_Of_Work.maintenanceItem_Repository
+            MaintenanceCompany? item = Unit_Of_Work.maintenanceCompany_Repository
                                        .First_Or_Default(i => i.ID == id && i.IsDeleted != true);
 
 
-            if (item == null) return NotFound("No Maintenance Item with this ID");
+            if (item == null) return NotFound("No Maintenance company with this ID");
 
-            MaintenanceItemGetDTO dto = mapper.Map<MaintenanceItemGetDTO>(item);
+            MaintenanceCompanyGetDto dto = mapper.Map<MaintenanceCompanyGetDto>(item);
 
             return Ok(dto);
         }
 
-        [HttpPost]
-        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Maintenance Items" })]
-        public IActionResult Add(MaintenanceItemAddDTO model)
-        {
-            UOW uow = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-            long.TryParse(userIdClaim, out long userId);
-            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+            [HttpPost]
+            [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, allowEdit: 1, pages: new[] { "Maintenance Companies" })]
+            public IActionResult Add(MaintenanceCompanyAddDto model)
+            {
+                UOW uow = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            if (userIdClaim == null || userTypeClaim == null)
-                return Unauthorized("User ID or Type claim not found.");
+                var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+                long.TryParse(userIdClaim, out long userId);
+                var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
 
-            if (model == null || string.IsNullOrWhiteSpace(model.Ar_Name) || string.IsNullOrWhiteSpace(model.En_Name))
-                return BadRequest("Name is required");
+                if (userIdClaim == null || userTypeClaim == null)
+                    return Unauthorized("User ID or Type claim not found.");
 
-            var cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+                if (model == null || string.IsNullOrWhiteSpace(model.Ar_Name) || string.IsNullOrWhiteSpace(model.En_Name))
+                    return BadRequest("Name is required");
 
-            MaintenanceItem? entity = mapper.Map<MaintenanceItem>(model);
-            entity.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                var cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
 
-            if (userTypeClaim == "octa") entity.InsertedByOctaId = userId;
-            else if (userTypeClaim == "employee") entity.InsertedByUserId = userId;
+                MaintenanceCompany? entity = mapper.Map<MaintenanceCompany>(model);
+                entity.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
 
-            uow.maintenanceItem_Repository.Add(entity);
-            uow.SaveChanges();
+                if (userTypeClaim == "octa") entity.InsertedByOctaId = userId;
+                else if (userTypeClaim == "employee") entity.InsertedByUserId = userId;
 
-            return Ok(model);
+                uow.maintenanceCompany_Repository.Add(entity);
+                uow.SaveChanges();
+
+                return Ok(model);
         }
 
-        
         [HttpPut]
-        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, allowEdit: 1, pages: new[] { "Maintenance Items" })]
-        public IActionResult Edit(MaintenanceItemEditDTO model)
+        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, allowEdit: 1, pages: new[] { "Maintenance Companies" })]
+        public IActionResult Edit(MaintenanceCompanyEditDto model)
         {
             UOW uow = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -138,15 +139,15 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
                 return Unauthorized("User ID or Type claim not found.");
 
             if (model == null) return BadRequest();
-            if (model == null || string.IsNullOrWhiteSpace(model.A_Name) || string.IsNullOrWhiteSpace(model.E_Name))
+            if (model == null || string.IsNullOrWhiteSpace(model.Ar_Name) || string.IsNullOrWhiteSpace(model.En_Name))
                 return BadRequest("Name is required");
 
-            MaintenanceItem? entity = uow.maintenanceItem_Repository.First_Or_Default(i => i.ID == model.ID && i.IsDeleted != true);
-            if (entity == null) return NotFound("No Maintenance Item with this ID");
+            MaintenanceCompany? entity = uow.maintenanceCompany_Repository.First_Or_Default(i => i.ID == model.ID && i.IsDeleted != true);
+            if (entity == null) return NotFound("No Maintenance company with this ID");
 
             if (userTypeClaim == "employee")
             {
-                var accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(uow, "Maintenance Items", roleId, userId, entity);
+                var accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(uow, "Maintenance Companies", roleId, userId, entity);
                 if (accessCheck != null) return accessCheck;
             }
 
@@ -166,13 +167,14 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
                 if (entity.UpdatedByOctaId != null) entity.UpdatedByOctaId = null;
             }
 
-            uow.maintenanceItem_Repository.Update(entity);
+            uow.maintenanceCompany_Repository.Update(entity);
             uow.SaveChanges();
 
             return Ok(model);
         }
+
         [HttpDelete]
-        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, allowDelete: 1, pages: new[] { "Maintenance Items" })]
+        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, allowDelete: 1, pages: new[] { "Maintenance Companies" })]
         public IActionResult Delete(long id)
         {
             UOW uow = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -186,16 +188,16 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
             if (userIdClaim == null || userTypeClaim == null)
                 return Unauthorized("User ID or Type claim not found.");
 
-            if (id == 0) return BadRequest("Maintenance Item ID cannot be null.");
+            if (id == 0) return BadRequest("Maintenance company ID cannot be null.");
 
-            MaintenanceItem? entity = uow.maintenanceItem_Repository.Select_By_Id(id);
+            MaintenanceCompany? entity = uow.maintenanceCompany_Repository.Select_By_Id(id);
 
             if (entity == null || entity.IsDeleted == true)
-                return NotFound("No Maintenance Item with this ID");
+                return NotFound("No Maintenance company with this ID");
 
             if (userTypeClaim == "employee")
             {
-                var accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(uow, "Maintenance Items", roleId, userId, entity);
+                var accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(uow, "Maintenance Companies", roleId, userId, entity);
                 if (accessCheck != null) return accessCheck;
             }
 
@@ -215,10 +217,15 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
                 if (entity.DeletedByOctaId != null) entity.DeletedByOctaId = null;
             }
 
-            uow.maintenanceItem_Repository.Update(entity);
+            uow.maintenanceCompany_Repository.Update(entity);
             uow.SaveChanges();
 
             return Ok();
         }
-        }
+
+
+
+
+
+    }
 }
