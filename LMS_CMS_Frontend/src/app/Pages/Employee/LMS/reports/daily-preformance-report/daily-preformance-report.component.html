@@ -1,58 +1,42 @@
-<!-- violation-report.component.html -->
 <div class="flex justify-between mb-3">
-    <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ 'Violation Report' | translate }}</h1>
+    <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ 'Daily Performance Report' | translate }}</h1>
 </div>
 
 <div class="my-5 flex flex-wrap md:flex-nowrap items-end space-x-0 md:space-x-6 space-y-4 md:space-y-0 mb-6">
-
+    <!-- Student Selector -->
     <div class="w-full md:w-1/4">
-        <label for="employeeType" class="block mb-2 text-sm font-medium text-gray-900">{{'Employee Type'| translate
-            }}</label>
-        <select id="employeeType" [(ngModel)]="SelectedEmployeeTypeId" (change)="GetViolationTypes()"
+        <label for="student" class="block mb-2 text-sm font-medium text-gray-900">{{'Student'| translate }}</label>
+        <select id="student" [(ngModel)]="SelectedStudentId" (change)="DateChange()"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
-            <option [ngValue]="0" disabled selected hidden>{{'Choose'| translate }} {{'Item'| translate }}</option>
-            <option *ngFor="let empType of empTypes" [value]="empType.id"> {{ empType.name }} </option>
+            <option [ngValue]="0" disabled selected hidden>{{'Choose'| translate }} {{'Student'| translate }}</option>
+            <option *ngFor="let student of students" [value]="student.id"> {{ student.name }} </option>
         </select>
     </div>
 
-    <div class="w-full md:w-1/4">
-        <label for="violationType" class="block mb-2 text-sm font-medium text-gray-900">{{'Violation Type'| translate
-            }}</label>
-        <select id="violationType" [(ngModel)]="SelectedViolationTypeId" (change)="DateChange()"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
-            [disabled]="!SelectedEmployeeTypeId">
-            <!-- <option [value]="0">{{ 'All' | translate }}</option> -->
-            <option [ngValue]="0" disabled selected hidden>{{'Choose'| translate }} {{'Item'| translate }}</option>
-
-            <option *ngFor="let violationType of violationTypes" [value]="violationType.id">
-                {{ violationType.name }}
-            </option>
-        </select>
-    </div>
-
+    <!-- Start Date -->
     <div class="w-full md:w-1/4">
         <label for="fromDate" class="block mb-2 text-sm font-medium text-gray-900">{{'Start Date'| translate }}</label>
         <input id="fromDate" type="date" [(ngModel)]="SelectedStartDate" (change)="DateChange()"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
     </div>
 
+    <!-- End Date -->
     <div class="w-full md:w-1/4">
         <label for="toDate" class="block mb-2 text-sm font-medium text-gray-900">{{'End Date'| translate }}</label>
         <input id="toDate" type="date" [(ngModel)]="SelectedEndDate" (change)="DateChange()"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
     </div>
 
+    <!-- View Report Button -->
     <div class="w-full md:w-1/6 flex justify-end mt-4 md:mt-0 ">
         <button class="p-3 font-medium text-xl rounded-lg" (click)="ViewReport()" 
-
-        [disabled]="!SelectedStartDate || !SelectedEndDate || !SelectedEmployeeTypeId || !SelectedViolationTypeId"
-        
+            [disabled]="!SelectedStartDate || !SelectedEndDate || !SelectedStudentId || isLoading"
             [ngClass]="{
-             'bg-gray-100 text-gray-300': !SelectedStartDate || !SelectedEndDate || !SelectedEmployeeTypeId || !SelectedViolationTypeId,
-             'secondaryBg text-white': SelectedStartDate && SelectedEndDate && SelectedEmployeeTypeId && SelectedViolationTypeId
-             
-             }">
-            {{'View Report'| translate }}
+                'bg-gray-100 text-gray-300': !SelectedStartDate || !SelectedEndDate || !SelectedStudentId,
+                'secondaryBg text-white': SelectedStartDate && SelectedEndDate && SelectedStudentId
+            }">
+            <span *ngIf="!isLoading">{{'View Report'| translate }}</span>
+            <span *ngIf="isLoading">{{'Loading...'| translate }}</span>
         </button>
     </div>
 </div>
@@ -75,22 +59,25 @@
             <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
                 <tr>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ 'ID' | translate }}
-                    </th>
-                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         {{ 'Date' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ 'Violation Type' | translate }}
+                        {{ 'English Name' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ 'Employee Type' | translate }}
+                        {{ 'Arabic Name' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ 'Employee Name' | translate }}
+                        {{ 'Student ID' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ 'Details' | translate }}
+                        {{ 'Performance Type (EN)' | translate }}
+                    </th>
+                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ 'Performance Type (AR)' | translate }}
+                    </th>
+                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ 'Comment' | translate }}
                     </th>
                 </tr>
             </thead>
@@ -99,22 +86,25 @@
                     [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
                     class="border-t border-gray-300 text-xs md:text-sm">
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ data.id }}
-                    </td>
-                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ data.date }}
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ data.violationType }}
+                        {{ data.englishNameStudent }}
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ data.employeeType }}
+                        {{ data.arabicNameStudent }}
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ data.employeeName }}
+                        {{ data.studentId }}
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ data.details }}
+                        {{ data.performanceTypeEn }}
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ data.performanceTypeAr }}
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ data.comment || 'N/A' }}
                     </td>
                 </tr>
             </tbody>
@@ -124,41 +114,10 @@
 
 <div class="absolute -top-[9999px] -left-[9999px]">
     <div id="Data" class="hidden">
-        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'Violation Report'" 
-            [infoRows]="[
-      {
-        keyEn: 'Employee Type: ' + this.employeeTypeName ,
-        keyAr: 'نوع الموظف: ' + this.employeeTypeName ,
-      },
-      {
-        keyEn: 'Violation Type: ' + this.violationTypeName ,
-        keyAr: 'نوع المخالفة: ' + this.violationTypeName ,
-      },
-      {
-        keyEn: 'Start Date: ' + this.SelectedStartDate,
-        keyAr: 'تاريخ البدء: ' + this.SelectedStartDate,
-      },
-      {
-        keyEn: 'End Date: ' + this.SelectedEndDate,
-        keyAr: 'تاريخ الانتهاء: ' + this.SelectedEndDate,
-      },
-      ]"
-            [tableHeaders]="['ID', 'Date', 'Violation Type', 'Employee Type', 'Employee Name', 'Details']"
+        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="fileName" 
+            [infoRows]="getInfoRows()"
+            [tableHeaders]="['Date', 'English Name', 'Arabic Name', 'Student ID', 'Performance Type (EN)', 'Performance Type (AR)', 'Comment']"
             [tableData]="tableDataForExport" #pdfComponentRef>
         </app-pdf-print>
     </div>
 </div>
-<!-- <div class="absolute -top-[9999px] -left-[9999px]">
-    <div id="Data" class="hidden">
-        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'List of students names in class'" [infoRows]="[
-                { keyEn: 'Class : ' + this.class.name},
-                { keyEn: 'Number of Students : ' + this.studentsCount.toString()},
-                { keyEn: 'Date : ' + this.date },
-                { keyEn: 'School : ' +  this.school.name },
-                { keyEn: 'Year : ' +this.AcademicYearName },
-                { keyEn: 'Grade : ' +this.GradeName }
-            ]" [tableHeaders]="['id', 'en_name', 'mobile', 'nationalityName', 'genderName']" [tableData]="StudentData"
-            #pdfComponentRef>
-        </app-pdf-print>
-    </div>
-</div> -->
