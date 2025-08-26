@@ -26,29 +26,50 @@
                     </div>
                     <ul>
                         <li *ngFor="let chatMessage of chatMessages; let i = index" class="relative" (click)="moveToMessageInMyChat(chatMessage)">
-                            <div>
-                                <div *ngIf="!chatMessage.seenOrNot"
-                                    class="absolute top-2 left-2 w-2.5 h-2.5 border border-[#4d8db4] bg-[#8ccff8b6] rounded-full z-10">
+                            <div> 
+                                <div *ngIf="chatMessage.unreadCount > 0"
+                                    class="absolute top-2 left-2 w-5 h-5 border border-[#4d8db4] bg-[#8ccff8b6] text-blue-700 text-xs font-bold rounded-full flex items-center justify-center z-10">
+                                    {{ chatMessage.unreadCount }}
                                 </div>
-                                <div class="flex hover:bg-gray-100 p-3 items-start" [ngClass]="{'border-b': i != chatMessages.length, 'bg-[#e3ebf0b6]': !chatMessage.seenOrNot}">
+                                <div class="flex hover:bg-gray-100 p-3 items-start" [ngClass]="{'border-b': i != chatMessages.length, 'bg-[#e3ebf0b6]': !chatMessage.seenOrNot && chatMessage.receiverID == User_Data_After_Login.id && chatMessage.receiverUserTypeName == User_Data_After_Login.type}">
                                     <div class="flex-shrink-0">
                                         <img src="Images/person-dummy.jpg" class="cursor-pointer rounded-full w-14" alt="Profile Photo">
                                     </div>
                                     <div class="ml-4 text-start w-full"> 
-                                        <p *ngIf="chatMessage.senderID" class="primaryTxt text-sm"><span class="font-semibold">{{ chatMessage.senderEnglishName }}</span>  {{ 'Sent you a message' | translate }}</p>
+                                        <p *ngIf="chatMessage.receiverID == User_Data_After_Login.id && chatMessage.receiverUserTypeName == User_Data_After_Login.type" class="primaryTxt text-sm"><span class="font-semibold">{{ chatMessage.senderEnglishName }}</span>  {{ 'Sent you a message' | translate }}</p>
+                                        <p *ngIf="chatMessage.senderID == User_Data_After_Login.id && chatMessage.senderUserTypeName == User_Data_After_Login.type" class="primaryTxt text-sm"><span class="font-semibold">{{ chatMessage.receiverEnglishName }}</span></p>
                                         <div class="mt-4 flex flex-col space-y-3">
                                             <div *ngIf="chatMessage.message" class="w-[70%] border-l-4 border-gray-300 pl-4 primaryTxt text-base leading-relaxed truncate overflow-hidden whitespace-nowrap">
                                                 {{chatMessage.message}}
                                             </div> 
                                             <div *ngIf="chatMessage.chatMessageAttachments.length != 0" class="space-y-2">
-                                                <div *ngFor="let att of chatMessage.chatMessageAttachments; let i = index" class="flex space-x-2 rtl:space-x-reverse items-center">
-                                                    <img src="Images/Icon frame.png" class="border p-[4px] w-10 rounded-md" alt="Photo">
-                                                    <span class="primaryTxt text-sm font-semibold">{{getFileName(att.fileLink)}}</span>
+                                                <div *ngIf="chatMessage.chatMessageAttachments.length === 1" class="flex space-x-2 rtl:space-x-reverse items-center">
+                                                    <img src="Images/Icon frame.png" 
+                                                        class="border p-[4px] w-10 h-10 rounded-md object-contain" 
+                                                        alt="File icon">
+                                                    <span class="primaryTxt text-sm font-semibold truncate max-w-[150px]">
+                                                        {{getFileName(chatMessage.chatMessageAttachments[0].fileLink)}}
+                                                    </span>
+                                                </div>
+                                                <div *ngIf="chatMessage.chatMessageAttachments.length > 1" class="flex items-center space-x-2 rtl:space-x-reverse">
+                                                    <div class="flex space-x-1 rtl:space-x-reverse">
+                                                        <div *ngFor="let att of chatMessage.chatMessageAttachments | slice:0:1" class="relative">
+                                                            <img src="Images/Icon frame.png" 
+                                                                class="border p-1 w-8 h-8 rounded-md object-contain" 
+                                                                alt="File icon">
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="bg-gray-200 rounded-full px-2 py-1">
+                                                        <span class="primaryTxt text-xs font-semibold">
+                                                            +{{chatMessage.chatMessageAttachments.length - 1}} {{ 'files' | translate }}
+                                                        </span>
+                                                    </div> 
                                                 </div>
                                             </div>  
                                         </div>
                                         <p class="text-[#BDBDBD] text-sm font-semibold mt-2">{{ formatInsertedAt(chatMessage.insertedAt) }}</p>
-                                    </div>
+                                    </div> 
                                 </div>
                             </div> 
                         </li>

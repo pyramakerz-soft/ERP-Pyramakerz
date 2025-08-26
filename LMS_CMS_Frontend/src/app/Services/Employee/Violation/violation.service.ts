@@ -149,7 +149,7 @@ export class ViolationService {
       .set('toDate', toDate);
 
     return this.http.get<ViolationReport[]>(
-      `${this.baseUrl}/Violation/report`,
+      `${this.baseUrl}/Violation/ViolationReport`,
       {
         headers: headers,
         params: params,

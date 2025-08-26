@@ -110,7 +110,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             }
 
             List<ChatMessage> chatMessages = await Unit_Of_Work.chatMessage_Repository.Select_All_With_IncludesById<ChatMessage>(
-                    f => (f.ReceiverID == userId && f.ReceiverUserTypeID == userTypeID),
+                    f => ((f.ReceiverID == userId && f.ReceiverUserTypeID == userTypeID) || (f.SenderID == userId && f.SenderUserTypeID == userTypeID)),
                     query => query.Include(d => d.SenderUserType),
                     query => query.Include(d => d.ReceiverUserType),
                     query => query.Include(d => d.ChatMessageAttachments)
@@ -121,19 +121,65 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                 return NotFound();
             }
 
-            chatMessages = chatMessages
-                .OrderByDescending(d => d.InsertedAt)
-                .Take(5)
-                .ToList();
-
-            List<ChatGetDTO> chatMessagesGetDTO = mapper.Map<List<ChatGetDTO>>(chatMessages);
-
-            foreach (var chatMessage in chatMessagesGetDTO)
+            var conversations = chatMessages
+            .GroupBy(m =>
+                (m.SenderID == userId && m.SenderUserTypeID == userTypeID) ?
+                new { UserId = m.ReceiverID, UserTypeId = m.ReceiverUserTypeID } :
+                new { UserId = m.SenderID, UserTypeId = m.SenderUserTypeID }
+            )
+            .Select(g => new
             {
-                if(chatMessage.ChatMessageAttachments != null && chatMessage.ChatMessageAttachments.Count > 0)
+                OtherUserId = g.Key.UserId,
+                OtherUserTypeId = g.Key.UserTypeId,
+                LastMessage = g.OrderByDescending(m => m.InsertedAt).FirstOrDefault(),
+                UnreadCount = g.Count(m =>
+                    m.ReceiverID == userId &&
+                    m.ReceiverUserTypeID == userTypeID &&
+                    !m.SeenOrNot)
+            })
+            .OrderByDescending(c => c.LastMessage.InsertedAt)
+            .Take(5)
+            .ToList();
+
+            var result = new List<ChatGetDTO>();
+            foreach (var conv in conversations)
+            {
+                var lastMessage = conv.LastMessage; 
+                 
+                (string senderEnglishName, string senderArabicName) = GetUserNames(Unit_Of_Work, lastMessage.SenderID, lastMessage.SenderUserTypeID);
+                (string receiverEnglishName, string receiverArabicName) = GetUserNames(Unit_Of_Work, lastMessage.ReceiverID, lastMessage.ReceiverUserTypeID);
+
+                var chatDto = new ChatGetDTO
+                {
+                    ID = lastMessage.ID,
+                    Message = lastMessage.Message,
+                    SeenOrNot = lastMessage.SeenOrNot,
+                    ForwardedOrNot = lastMessage.ForwardedOrNot,
+                    SenderID = lastMessage.SenderID,
+                    SenderEnglishName = senderEnglishName,
+                    SenderArabicName = senderArabicName,
+                    SenderUserTypeID = lastMessage.SenderUserTypeID,
+                    SenderUserTypeName = lastMessage.SenderUserType.Title,
+                    ReceiverID = lastMessage.ReceiverID,
+                    ReceiverEnglishName = receiverEnglishName,
+                    ReceiverArabicName = receiverArabicName,
+                    ReceiverUserTypeID = lastMessage.ReceiverUserTypeID,
+                    ReceiverUserTypeName = lastMessage.ReceiverUserType.Title,
+                    InsertedAt = lastMessage.InsertedAt,
+                    UnreadCount = conv.UnreadCount,
+                    ChatMessageAttachments = lastMessage.ChatMessageAttachments?
+                        .Select(a => new ChatMessageAttachmentGetDTO
+                        {
+                            ID = a.ID,
+                            ChatMessageID = a.ChatMessageID, 
+                            FileLink = a.FileLink
+                        }).ToList() ?? new List<ChatMessageAttachmentGetDTO>()
+                };
+                 
+                if (chatDto.ChatMessageAttachments != null && chatDto.ChatMessageAttachments.Count > 0)
                 {
                     string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-                    foreach (var item in chatMessage.ChatMessageAttachments)
+                    foreach (var item in chatDto.ChatMessageAttachments)
                     {
                         if (!string.IsNullOrEmpty(item.FileLink))
                         {
@@ -142,11 +188,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                     }
                 }
 
-                (chatMessage.SenderEnglishName, chatMessage.SenderArabicName) = GetUserNames(Unit_Of_Work, chatMessage.SenderID, chatMessage.SenderUserTypeID);
-                (chatMessage.ReceiverEnglishName, chatMessage.ReceiverArabicName) = GetUserNames(Unit_Of_Work, chatMessage.ReceiverID, chatMessage.ReceiverUserTypeID);
+                result.Add(chatDto);
             }
 
-            return Ok(chatMessagesGetDTO);
+            return Ok(result); 
         }
         
         //////////////////////////////////////////////////////////////////////////////////////////
@@ -223,8 +268,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                     ReceiverID = lastMessage.ReceiverID,
                     ReceiverUserTypeID = lastMessage.ReceiverUserTypeID,
                     SenderUserTypeName = lastMessage.SenderUserType.Title,
-                    ReceiverUserTypeName = lastMessage.SenderUserType.Title,
+                    ReceiverUserTypeName = lastMessage.ReceiverUserType.Title,
                     InsertedAt = lastMessage.InsertedAt,
+                    UnreadCount = conv.UnreadCount,
                     ChatMessageAttachments = lastMessage.ChatMessageAttachments?
                         .Select(a => new ChatMessageAttachmentGetDTO
                         {

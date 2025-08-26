@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using LMS_CMS_DAL.Models.Domains.AccountingModule;
 using LMS_CMS_DAL.Models.Domains.Administration;
 using LMS_CMS_DAL.Models.Domains.BusModule;
+using LMS_CMS_DAL.Models.Domains.HR;
 using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_DAL.Models.Domains.MaintenanceModule;
 using LMS_CMS_DAL.Models.Domains.ViolationModule;
@@ -120,7 +121,11 @@ namespace LMS_CMS_DAL.Models.Domains
         public ICollection<RemedialClassroom> RemedialClassrooms { get; set; } = new HashSet<RemedialClassroom>();
         public ICollection<MaintenanceEmployee> MaintenanceEmployees { get; set; } = new HashSet<MaintenanceEmployee>();
         public ICollection<Maintenance> Maintenances { get; set; } = new HashSet<Maintenance>();
-
-
+        public ICollection<Loans> Loans { get; set; } = new HashSet<Loans>();
+        public ICollection<Bouns> Bouns { get; set; } = new HashSet<Bouns>();
+        public ICollection<Deduction> Deduction { get; set; } = new HashSet<Deduction>();
+        public ICollection<EmployeeVacationCount> EmployeeVacationCount { get; set; } = new HashSet<EmployeeVacationCount>();
+        public ICollection<LeaveRequest> LeaveRequest { get; set; } = new HashSet<LeaveRequest>();
+        public ICollection<VacationEmployee> VacationEmployee { get; set; } = new HashSet<VacationEmployee>(); 
     }
 }

@@ -88,11 +88,11 @@
                         </th>
                         <th
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            {{ 'Added At' | translate }}
+                            {{ 'Added By' | translate }}
                         </th>
                         <th
                             class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                            {{ 'Added By' | translate }}
+                            {{ 'Actions' | translate }}
                         </th>
                     </tr>
                 </thead>
@@ -119,11 +119,17 @@
                             {{ row.socialWorkerMedalName }}
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                            {{row.insertedAt| date:'MMM d, yyyy'}}
-                        </td>
-                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             {{row.insertedByUserName}}
                         </td>
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            <div class="flex space-x-4 rtl:space-x-reverse">
+                                <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)"
+                                    (click)="Delete(row.id)">
+                                    <i class="fa-regular fa-trash-can"></i>
+                                </button>
+                            </div>
+                        </td>
+
                     </tr>
                 </tbody>
             </table>
@@ -152,7 +158,8 @@
                 <img *ngIf="row.file" [src]="row.file" class="w-24 h-24 object-cover rounded-xl" />
                 <p>{{row.name}}</p>
             </div>
-            <span *ngIf="validationErrors['socialWorkerMedalID']" class="text-red-500 ml-3 font-normal">{{validationErrors['socialWorkerMedalID']}}</span>
+            <span *ngIf="validationErrors['socialWorkerMedalID']"
+                class="text-red-500 ml-3 font-normal">{{validationErrors['socialWorkerMedalID']}}</span>
         </div>
 
         <div class="flex justify-end">

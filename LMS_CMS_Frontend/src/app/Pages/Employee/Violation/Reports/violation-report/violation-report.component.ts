@@ -42,6 +42,7 @@ export class ViolationReportComponent {
 
   empTypes: EmployeeTypeGet[] = [];
   violationTypes: ViolationType[] = [];
+    tableDataForExport: any[] = []; // Added for PDF export
 
   school = {
     reportHeaderOneEn: 'Violation Report',
@@ -145,6 +146,8 @@ export class ViolationReportComponent {
       .subscribe(
         (data) => {
           this.tableData = data;
+          this.prepareExportData(); // Prepare data for export
+          this.showTable = true;
         },
         (error) => {
           console.error('Error fetching violation report:', error);
@@ -154,30 +157,41 @@ export class ViolationReportComponent {
             icon: 'error',
             confirmButtonText: 'OK',
           });
+          this.showTable = true;
         }
       );
   }
-
   get fileName(): string {
     return 'Violation Report';
   }
 
+
+  get employeeTypeName(): string {
+    const empType = this.empTypes.find(e => e.id == this.SelectedEmployeeTypeId);
+    return empType ? empType.name : 'Undefined';    
+  }
+
+  get violationTypeName(): string {
+    const violType = this.violationTypes.find(v => v.id == this.SelectedViolationTypeId);
+    return violType ? violType.name : 'Undefined';
+  }
+
   getInfoRows(): any[] {
     const selectedEmpType = this.empTypes.find(
-      (e) => e.id === this.SelectedEmployeeTypeId
+      (e) => e.id == this.SelectedEmployeeTypeId
     );
     const selectedViolationType = this.violationTypes.find(
-      (v) => v.id === this.SelectedViolationTypeId
+      (v) => v.id == this.SelectedViolationTypeId
     );
 
     return [
       {
-        keyEn: 'Employee Type: ' + (selectedEmpType?.name || 'All'),
-        keyAr: 'نوع الموظف: ' + (selectedEmpType?.name || 'الكل'),
+        keyEn: 'Employee Type: ' + (selectedEmpType?.name),
+        keyAr: 'نوع الموظف: ' + (selectedEmpType?.name ),
       },
       {
-        keyEn: 'Violation Type: ' + (selectedViolationType?.name || 'All'),
-        keyAr: 'نوع المخالفة: ' + (selectedViolationType?.name || 'الكل'),
+        keyEn: 'Violation Type: ' + (selectedViolationType?.name),
+        keyAr: 'نوع المخالفة: ' + (selectedViolationType?.name),
       },
       {
         keyEn: 'Start Date: ' + this.SelectedStartDate,
@@ -193,6 +207,26 @@ export class ViolationReportComponent {
       },
     ];
   }
+
+    private prepareExportData(): void {
+    this.tableDataForExport = this.tableData.map((item) => ({
+      'ID': item.id,
+      'Date': item.date,
+      'Violation Type': item.violationType,
+      'Employee Type': item.employeeType,
+      'Employee Name': item.employeeName,
+      'Details': item.details || 'N/A',
+    }));
+  }
+
+  getSelectedEmployeeTypeName(): string {
+    return this.empTypes.find(e => e.id == this.SelectedEmployeeTypeId)?.name || 'All';
+  }
+
+  getSelectedViolationTypeName(): string {
+    return this.violationTypes.find(v => v.id == this.SelectedViolationTypeId)?.name || 'All';
+  }
+
 
   getTableDataWithHeader(): any[] {
     return [
@@ -222,16 +256,19 @@ export class ViolationReportComponent {
   }
 
   Print() {
-    this.DataToPrint = this.getTableDataWithHeader();
+    if (this.tableDataForExport.length === 0) {
+      Swal.fire('Warning', 'No data to print!', 'warning');
+      return;
+    }
+    
     this.showPDF = true;
-
     setTimeout(() => {
       const printContents = document.getElementById('Data')?.innerHTML;
       if (!printContents) {
         console.error('Element not found!');
         return;
       }
-
+      
       const printStyle = `
         <style>
           @page { size: auto; margin: 0mm; }
@@ -249,14 +286,14 @@ export class ViolationReportComponent {
           }
         </style>
       `;
-
+      
       const printContainer = document.createElement('div');
       printContainer.id = 'print-container';
       printContainer.innerHTML = printStyle + printContents;
-
+      
       document.body.appendChild(printContainer);
       window.print();
-
+      
       setTimeout(() => {
         document.body.removeChild(printContainer);
         this.showPDF = false;
@@ -265,9 +302,12 @@ export class ViolationReportComponent {
   }
 
   DownloadAsPDF() {
-    this.DataToPrint = this.getTableDataWithHeader();
-    this.showPDF = true;
+    if (this.tableDataForExport.length === 0) {
+      Swal.fire('Warning', 'No data to export!', 'warning');
+      return;
+    }
 
+    this.showPDF = true;
     setTimeout(() => {
       this.pdfComponentRef.downloadPDF();
       setTimeout(() => (this.showPDF = false), 2000);
@@ -301,10 +341,10 @@ export class ViolationReportComponent {
 
     // Add filter information with styling
     const selectedEmpType = this.empTypes.find(
-      (e) => e.id === this.SelectedEmployeeTypeId
+      (e) => e.id == this.SelectedEmployeeTypeId
     );
     const selectedViolationType = this.violationTypes.find(
-      (v) => v.id === this.SelectedViolationTypeId
+      (v) => v.id == this.SelectedViolationTypeId
     );
 
     excelData.push([

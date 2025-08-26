@@ -26,6 +26,7 @@ namespace LMS_CMS_BL.DTO.Communication
         public long ReceiverUserTypeID { get; set; }
         public string ReceiverUserTypeName { get; set; }
         public DateTime? InsertedAt { get; set; }
+        public int UnreadCount { get; set; }
 
         public List<ChatMessageAttachmentGetDTO> ChatMessageAttachments { get; set; } = new List<ChatMessageAttachmentGetDTO>(); 
     }
