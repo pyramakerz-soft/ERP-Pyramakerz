@@ -248,6 +248,9 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<MaintenanceItem> MaintenanceItem_Repository;
         GenericRepo<MaintenanceCompany> MaintenanceCompany_Repository;
         GenericRepo<MaintenanceEmployee> MaintenanceEmployee_Repository;
+        GenericRepo<Maintenance> Maintenance_Repository;
+
+        
 
 
         public UOW(Octa_DbContext octa_Db)
@@ -2844,6 +2847,18 @@ namespace LMS_CMS_BL.UOW
                     MaintenanceEmployee_Repository = new GenericRepo<MaintenanceEmployee>(db);
                 }
                 return MaintenanceEmployee_Repository;
+            }
+        }
+
+        public GenericRepo<Maintenance> maintenance_Repository
+        {
+            get
+            {
+                if (Maintenance_Repository == null)
+                {
+                    Maintenance_Repository = new GenericRepo<Maintenance>(db);
+                }
+                return Maintenance_Repository;
             }
         }
 

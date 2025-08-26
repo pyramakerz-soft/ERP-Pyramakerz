@@ -1329,6 +1329,34 @@ namespace LMS_CMS_BL.Config
             CreateMap<MaintenanceItemAddDTO, MaintenanceItem>();
             CreateMap<MaintenanceItemEditDTO, MaintenanceItem>(); 
             CreateMap<MaintenanceItem, MaintenanceItemGetDTO>();
+
+            CreateMap<MaintenanceCompany, MaintenanceCompanyGetDto>();
+
+           
+            CreateMap<MaintenanceCompanyAddDto, MaintenanceCompany>();
+
+            
+            CreateMap<MaintenanceCompanyEditDto, MaintenanceCompany>();
+
+
+
+
+            CreateMap<MaintenanceEmployee, MaintenanceEmployeeGetDto>()
+             .ForMember(dest => dest.En_Name,
+                        opt => opt.MapFrom(src => src.Employee != null ? src.Employee.en_name : null))
+             .ForMember(dest => dest.Ar_Name,
+                        opt => opt.MapFrom(src => src.Employee != null ? src.Employee.ar_name : null));
+
+            CreateMap<MaintenanceEmployeeAddDto, MaintenanceEmployee>();
+
+
+
+
+
+
+
+
+
         }
     } 
 }

@@ -6,12 +6,13 @@ using System.Threading.Tasks;
 
 namespace LMS_CMS_BL.DTO.Maintenance
 {
-    public class MaintenanceItemGetDTO
+    public class MaintenanceCompanyGetDto
     {
+
         public long ID { get; set; }
         public string En_Name { get; set; }
         public string Ar_Name { get; set; }
-        
-        public long? InsertedByUserId { get; set; }
+         
+        public long? InsertedByUserId { get; set; } 
     }
 }

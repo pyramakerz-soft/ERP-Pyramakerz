@@ -5,11 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LMS_CMS_DAL.Models.Domains.MaintenanceModule
+namespace LMS_CMS_BL.DTO.Maintenance
 {
-    public class MaintenanceCompany : AuditableEntity
+    public  class MaintenanceCompanyEditDto
     {
-        [Key]
+        //[Required(ErrorMessage = "ID is required for updating a company")]
         public long ID { get; set; }
 
         [Required(ErrorMessage = "Name is required")]
@@ -19,8 +19,5 @@ namespace LMS_CMS_DAL.Models.Domains.MaintenanceModule
         [Required(ErrorMessage = "الاسم مطلوب")]
         [StringLength(100, ErrorMessage = "لا يمكن أن يكون الاسم أطول من 100 حرف")]
         public string Ar_Name { get; set; }
-
-        public ICollection<Maintenance> Maintenances { get; set; } = new HashSet<Maintenance>();
-
     }
 }

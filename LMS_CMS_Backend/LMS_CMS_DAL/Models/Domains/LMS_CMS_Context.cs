@@ -237,6 +237,8 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<MaintenanceItem> MaintenanceItems { get; set; }
         public DbSet<MaintenanceCompany> MaintenanceCompanies { get; set; }
         public DbSet<MaintenanceEmployee> MaintenanceEmployees { get; set; }
+        public DbSet<Maintenance> Maintenances { get; set; }
+
 
 
 
@@ -2129,6 +2131,24 @@ namespace LMS_CMS_DAL.Models.Domains
                  .HasForeignKey(me => me.EmployeeID)
                  .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<Maintenance>()
+               .HasOne(m => m.Item)
+               .WithMany(m => m.Maintenances)
+               .HasForeignKey(m => m.ItemID)
+               .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Maintenance>()
+                .HasOne(m => m.Employee)
+                .WithMany(m => m.Maintenances)
+                .HasForeignKey(m => m.EmployeeID)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<Maintenance>()
+                .HasOne(m => m.Company)
+                .WithMany(m => m.Maintenances)
+                .HasForeignKey(m => m.CompanyID)
+                .OnDelete(DeleteBehavior.SetNull);
+
 
             ///////////////////////// Exception: /////////////////////////
             modelBuilder.Entity<Bus>()
@@ -2232,7 +2252,7 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasOne(v => v.DeletedByEmployee)
                 .WithMany()
                 .HasForeignKey(v => v.DeletedByUserId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Restrict); 
 
 
             ///////////////////////// Optional ID According to other field: /////////////////////////  

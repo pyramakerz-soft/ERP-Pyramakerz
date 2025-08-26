@@ -119,6 +119,8 @@ namespace LMS_CMS_DAL.Models.Domains
         public ICollection<Violation> Violations { get; set; } = new HashSet<Violation>();
         public ICollection<RemedialClassroom> RemedialClassrooms { get; set; } = new HashSet<RemedialClassroom>();
         public ICollection<MaintenanceEmployee> MaintenanceEmployees { get; set; } = new HashSet<MaintenanceEmployee>();
+        public ICollection<Maintenance> Maintenances { get; set; } = new HashSet<Maintenance>();
+
 
     }
 }
