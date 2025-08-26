@@ -6,7 +6,6 @@ using LMS_CMS_PL.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Identity.Client;
 
 namespace LMS_CMS_PL.Controllers.Domains.Accounting
 {
