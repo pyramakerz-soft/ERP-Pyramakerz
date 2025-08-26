@@ -234,6 +234,7 @@ import { AppointmentParentComponent } from './Pages/Employee/SocialWorker/appoin
 import { EvaluationReportComponent } from './Pages/Employee/LMS/reports/evaluation-report/evaluation-report.component';
 import { ViolationReportComponent } from './Pages/Employee/Violation/Reports/violation-report/violation-report.component';
 import { MyMessagesComponent } from './Pages/Communication/my-messages/my-messages.component';
+import { DailyPreformanceReportComponent } from './Pages/Employee/LMS/reports/daily-preformance-report/daily-preformance-report.component';
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
     { path: "Octa/login", component: OctaLoginComponent, title: "login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -449,6 +450,8 @@ export const routes: Routes = [
             { path: "Student/:Id", component: RegistrationConfirmationDetailsComponent, title: "Student", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Enter Daily Performance", component: DailyPerformanceMasterComponent, title: "Daily Performance", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Daily Performance/:id", component: DailyPerformanceViewComponent, title: "Daily Performance View", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Daily Performance Student Reports", component: DailyPreformanceReportComponent, title: "Daily Performance Reports", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Daily Performance Classroom Reports", component: DailyPreformanceReportComponent, title: "Daily Performance Reports", canActivate: [noNavigateWithoutLoginGuard] ,   data: { useClassroomFlag: true } },
             { path: "Assignment", component: AssignmentComponent, title: "Assignment", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Assignment/:id", component: AssignmentEditComponent, title: "Assignment Edit", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "report item card", component: ReportItemCardComponent, title: "Item Card Report", canActivate: [noNavigateWithoutLoginGuard], data: { showAverage: false } },

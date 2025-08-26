@@ -1,34 +1,27 @@
-import { Component, ViewChild } from '@angular/core';
-import { Subscription } from 'rxjs';
-import { ViolationReport } from '../../../../../Models/Violation/violation-report';
-import { EmployeeTypeGet } from '../../../../../Models/Administrator/employee-type-get';
-import { ViolationType } from '../../../../../Models/Violation/violation-type';
-import { PdfPrintComponent } from '../../../../../Component/pdf-print/pdf-print.component';
-import { ViolationService } from '../../../../../Services/Employee/Violation/violation.service';
-import { EmployeeTypeService } from '../../../../../Services/Employee/employee-type.service';
-import { ViolationTypeService } from '../../../../../Services/Employee/Violation/violation-type.service';
-import { ApiService } from '../../../../../Services/api.service';
-import { AccountService } from '../../../../../Services/account.service';
-import { LanguageService } from '../../../../../Services/shared/language.service';
-import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
-import * as XLSX from 'xlsx-js-style';
+import { PdfPrintComponent } from '../../../../../Component/pdf-print/pdf-print.component';
+import { Subscription } from 'rxjs';
+import { DailyPerformanceService } from '../../../../../Services/Employee/LMS/daily-performance.service';
+import { ApiService } from '../../../../../Services/api.service';
+import { StudentService } from '../../../../../Services/student.service';
+import { LanguageService } from '../../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
-
+import Swal from 'sweetalert2';
+import * as XLSX from 'xlsx-js-style';
 
 @Component({
-  selector: 'app-violation-report',
+  selector: 'app-daily-preformance-report',
   standalone: true,
   imports: [CommonModule, FormsModule, TranslateModule, PdfPrintComponent],
-  templateUrl: './violation-report.component.html',
-  styleUrl: './violation-report.component.css',
+  templateUrl: './daily-preformance-report.component.html',
+  styleUrl: './daily-preformance-report.component.css'
 })
-export class ViolationReportComponent {
+export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
   DomainName: string = '';
-  SelectedEmployeeTypeId: number = 0;
-  SelectedViolationTypeId: number = 0;
+  SelectedStudentId: number = 0;
   SelectedStartDate: string = '';
   SelectedEndDate: string = '';
 
@@ -37,36 +30,32 @@ export class ViolationReportComponent {
   showPDF: boolean = false;
   isRtl: boolean = false;
   subscription!: Subscription;
-  tableData: ViolationReport[] = [];
-  DataToPrint: any = null;
-
-  empTypes: EmployeeTypeGet[] = [];
-  violationTypes: ViolationType[] = [];
-    tableDataForExport: any[] = []; // Added for PDF export
+  tableData: any[] = [];
+  tableDataForExport: any[] = [];
+  students: any[] = [];
+  isLoading: boolean = false;
 
   school = {
-    reportHeaderOneEn: 'Violation Report',
-    reportHeaderTwoEn: 'Detailed Violation Summary',
-    reportHeaderOneAr: 'تقرير المخالفات',
-    reportHeaderTwoAr: 'ملخص المخالفات التفصيلي',
+    reportHeaderOneEn: 'Daily Performance Report',
+    reportHeaderTwoEn: 'Detailed Daily Performance Summary',
+    reportHeaderOneAr: 'تقرير الأداء اليومي',
+    reportHeaderTwoAr: 'ملخص الأداء اليومي التفصيلي',
     reportImage: 'assets/images/logo.png',
   };
 
   @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;
 
   constructor(
-    public violationService: ViolationService,
-    public employeeTypeService: EmployeeTypeService,
-    public violationTypeService: ViolationTypeService,
+    public dailyPerformanceService: DailyPerformanceService,
     public apiService: ApiService,
-    public accountService: AccountService,
+    public studentService: StudentService,
     private languageService: LanguageService,
     private realTimeService: RealTimeNotificationServiceService,
   ) {}
 
   ngOnInit() {
     this.DomainName = this.apiService.GetHeader();
-    this.GetEmployeeTypes();
+    this.loadStudents();
 
     this.subscription = this.languageService.language$.subscribe(
       (direction) => {
@@ -76,42 +65,37 @@ export class ViolationReportComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
-  }
-
-  GetEmployeeTypes() {
-    this.employeeTypeService.Get(this.DomainName).subscribe((data) => {
-      this.empTypes = data;
-    });
-  }
-
-  GetViolationTypes() {
-    if (this.SelectedEmployeeTypeId) {
-      this.violationTypeService
-        .GetByEmployeeType(this.SelectedEmployeeTypeId, this.DomainName)
-        .subscribe((data) => {
-          this.violationTypes = data;
-          this.SelectedViolationTypeId = 0;
-        });
-    } else {
-      this.violationTypes = [];
-      this.SelectedViolationTypeId = 0;
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection(); 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
     }
-    this.DateChange();
+  }
+
+  loadStudents() {
+    this.studentService.GetAll(this.DomainName).subscribe(
+      (data) => {
+        this.students = data.map(student => ({
+          id: student.id,
+          name: student.en_name || student.ar_name || 'Unknown'
+        }));
+      },
+      (error) => {
+        console.error('Error loading students:', error);
+        Swal.fire({
+          title: 'Error',
+          text: 'Failed to load students.',
+          icon: 'error',
+          confirmButtonText: 'OK',
+        });
+      }
+    );
   }
 
   DateChange() {
     this.showTable = false;
 
-    if (
-      this.SelectedEndDate &&
-      this.SelectedStartDate &&
-      this.SelectedEmployeeTypeId
-    ) {
+    if (this.SelectedEndDate && this.SelectedStartDate && this.SelectedStudentId) {
       this.showViewReportBtn = true;
     } else {
       this.showViewReportBtn = false;
@@ -128,17 +112,16 @@ export class ViolationReportComponent {
       });
     } else {
       this.GetData();
-      this.showTable = true;
     }
   }
 
   GetData() {
+    this.isLoading = true;
     this.tableData = [];
 
-    this.violationService
-      .GetViolationReport(
-        this.SelectedEmployeeTypeId,
-        this.SelectedViolationTypeId,
+    this.dailyPerformanceService
+      .GetDailyPerformanceReport(
+        this.SelectedStudentId,
         this.SelectedStartDate,
         this.SelectedEndDate,
         this.DomainName
@@ -146,52 +129,38 @@ export class ViolationReportComponent {
       .subscribe(
         (data) => {
           this.tableData = data;
-          this.prepareExportData(); // Prepare data for export
+          this.prepareExportData();
           this.showTable = true;
+          this.isLoading = false;
         },
         (error) => {
-          console.error('Error fetching violation report:', error);
+          console.error('Error fetching daily performance report:', error);
           Swal.fire({
             title: 'Error',
-            text: 'Failed to fetch violation report data.',
+            text: 'Failed to fetch daily performance report data.',
             icon: 'error',
             confirmButtonText: 'OK',
           });
           this.showTable = true;
+          this.isLoading = false;
         }
       );
   }
+
   get fileName(): string {
-    return 'Violation Report';
+    return 'Daily Performance Report';
   }
 
-
-  get employeeTypeName(): string {
-    const empType = this.empTypes.find(e => e.id == this.SelectedEmployeeTypeId);
-    return empType ? empType.name : 'Undefined';    
-  }
-
-  get violationTypeName(): string {
-    const violType = this.violationTypes.find(v => v.id == this.SelectedViolationTypeId);
-    return violType ? violType.name : 'Undefined';
+  get studentName(): string {
+    const student = this.students.find(s => s.id == this.SelectedStudentId);
+    return student ? student.name : 'Undefined';    
   }
 
   getInfoRows(): any[] {
-    const selectedEmpType = this.empTypes.find(
-      (e) => e.id == this.SelectedEmployeeTypeId
-    );
-    const selectedViolationType = this.violationTypes.find(
-      (v) => v.id == this.SelectedViolationTypeId
-    );
-
     return [
       {
-        keyEn: 'Employee Type: ' + (selectedEmpType?.name),
-        keyAr: 'نوع الموظف: ' + (selectedEmpType?.name ),
-      },
-      {
-        keyEn: 'Violation Type: ' + (selectedViolationType?.name),
-        keyAr: 'نوع المخالفة: ' + (selectedViolationType?.name),
+        keyEn: 'Student: ' + this.studentName,
+        keyAr: 'الطالب: ' + this.studentName,
       },
       {
         keyEn: 'Start Date: ' + this.SelectedStartDate,
@@ -208,47 +177,41 @@ export class ViolationReportComponent {
     ];
   }
 
-    private prepareExportData(): void {
+  private prepareExportData(): void {
     this.tableDataForExport = this.tableData.map((item) => ({
-      'ID': item.id,
       'Date': item.date,
-      'Violation Type': item.violationType,
-      'Employee Type': item.employeeType,
-      'Employee Name': item.employeeName,
-      'Details': item.details || 'N/A',
+      'English Name': item.englishNameStudent,
+      'Arabic Name': item.arabicNameStudent,
+      'Student ID': item.studentId,
+      'Performance Type (EN)': item.performanceTypeEn,
+      'Performance Type (AR)': item.performanceTypeAr,
+      'Comment': item.comment || 'N/A',
     }));
   }
-
-  getSelectedEmployeeTypeName(): string {
-    return this.empTypes.find(e => e.id == this.SelectedEmployeeTypeId)?.name || 'All';
-  }
-
-  getSelectedViolationTypeName(): string {
-    return this.violationTypes.find(v => v.id == this.SelectedViolationTypeId)?.name || 'All';
-  }
-
 
   getTableDataWithHeader(): any[] {
     return [
       {
-        header: 'Violation Report',
+        header: 'Daily Performance Report',
         summary: this.getInfoRows(),
         table: {
           headers: [
-            'ID',
             'Date',
-            'Violation Type',
-            'Employee Type',
-            'Employee Name',
-            'Details',
+            'English Name',
+            'Arabic Name',
+            'Student ID',
+            'Performance Type (EN)',
+            'Performance Type (AR)',
+            'Comment',
           ],
           data: this.tableData.map((item) => ({
-            ID: item.id,
             Date: item.date,
-            'Violation Type': item.violationType,
-            'Employee Type': item.employeeType,
-            'Employee Name': item.employeeName,
-            Details: item.details,
+            'English Name': item.englishNameStudent,
+            'Arabic Name': item.arabicNameStudent,
+            'Student ID': item.studentId,
+            'Performance Type (EN)': item.performanceTypeEn,
+            'Performance Type (AR)': item.performanceTypeAr,
+            Comment: item.comment,
           })),
         },
       },
@@ -330,7 +293,7 @@ export class ViolationReportComponent {
     // Add report title with styling
     excelData.push([
       {
-        v: 'VIOLATION REPORT DETAILED',
+        v: 'DAILY PERFORMANCE REPORT',
         s: {
           font: { bold: true, sz: 16 },
           alignment: { horizontal: 'center' },
@@ -340,20 +303,11 @@ export class ViolationReportComponent {
     excelData.push([]); // empty row
 
     // Add filter information with styling
-    const selectedEmpType = this.empTypes.find(
-      (e) => e.id == this.SelectedEmployeeTypeId
-    );
-    const selectedViolationType = this.violationTypes.find(
-      (v) => v.id == this.SelectedViolationTypeId
-    );
+    const selectedStudent = this.students.find(s => s.id == this.SelectedStudentId);
 
     excelData.push([
-      { v: 'Employee Type:', s: { font: { bold: true } } },
-      { v: selectedEmpType?.name || 'All', s: { font: { bold: true } } },
-    ]);
-    excelData.push([
-      { v: 'Violation Type:', s: { font: { bold: true } } },
-      { v: selectedViolationType?.name || 'All', s: { font: { bold: true } } },
+      { v: 'Student:', s: { font: { bold: true } } },
+      { v: selectedStudent?.name || 'All', s: { font: { bold: true } } },
     ]);
     excelData.push([
       { v: 'Start Date:', s: { font: { bold: true } } },
@@ -367,12 +321,13 @@ export class ViolationReportComponent {
 
     // Table headers
     const headers = [
-      'ID',
       'Date',
-      'Violation Type',
-      'Employee Type',
-      'Employee Name',
-      'Details',
+      'English Name',
+      'Arabic Name',
+      'Student ID',
+      'Performance Type (EN)',
+      'Performance Type (AR)',
+      'Comment',
     ];
     excelData.push(
       headers.map((header) => ({
@@ -394,23 +349,20 @@ export class ViolationReportComponent {
     // Table rows
     if (this.tableData && this.tableData.length > 0) {
       this.tableData.forEach((row, i) => {
-        excelData.push(
-          headers.map((header) => ({
-            v:
-              row[
-                header.toLowerCase().replace(' ', '') as keyof ViolationReport
-              ] || '',
-            s: {
-              fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'FFFFFF' } },
-              border: { left: { style: 'thin' }, right: { style: 'thin' } },
-            },
-          }))
-        );
+        excelData.push([
+          { v: row.date, s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'FFFFFF' } } } },
+          { v: row.englishNameStudent, s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'FFFFFF' } } } },
+          { v: row.arabicNameStudent, s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'FFFFFF' } } } },
+          { v: row.studentId, s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'FFFFFF' } } } },
+          { v: row.performanceTypeEn, s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'FFFFFF' } } } },
+          { v: row.performanceTypeAr, s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'FFFFFF' } } } },
+          { v: row.comment || 'N/A', s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'FFFFFF' } } } },
+        ]);
       });
     } else {
       excelData.push([
         {
-          v: 'No violations found for the selected criteria',
+          v: 'No daily performance records found for the selected criteria',
           s: {
             font: { italic: true },
             alignment: { horizontal: 'center' },
@@ -431,13 +383,21 @@ export class ViolationReportComponent {
     });
 
     // Apply column widths
-    worksheet['!cols'] = Array(headers.length).fill({ wch: 20 });
+    worksheet['!cols'] = [
+      { wch: 15 }, // Date
+      { wch: 20 }, // English Name
+      { wch: 20 }, // Arabic Name
+      { wch: 10 }, // Student ID
+      { wch: 20 }, // Performance Type (EN)
+      { wch: 20 }, // Performance Type (AR)
+      { wch: 30 }, // Comment
+    ];
 
     // Create workbook and save
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Violation Report');
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Daily Performance Report');
 
     const dateStr = new Date().toISOString().slice(0, 10);
-    XLSX.writeFile(workbook, `Violation_Report_${dateStr}.xlsx`);
+    XLSX.writeFile(workbook, `Daily_Performance_Report_${dateStr}.xlsx`);
   }
 }
