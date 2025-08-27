@@ -31,20 +31,20 @@
   <div class="flex flex-col mb-4 w-[49%]">
     <label class="mb-2 primaryTxt" for="Phone"> {{ 'Phone' | translate }}</label>
     <input id="phone" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-      (input)="validateNumber($event,'phone')" placeholder="{{ 'Enter User phone' | translate }}"
+      (input)="validateNumberOnly($event,'phone')" placeholder="{{ 'Enter User phone' | translate }}"
       [(ngModel)]="Data.phone" />
   </div>
 
   <div class="flex flex-col mb-4 w-[49%]">
     <label class="mb-2 primaryTxt" for="mobile"> {{ 'Mobile Number' | translate }}</label>
     <input id="mobile" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-      (input)="validateNumber($event,'mobile')" placeholder="{{ 'Enter User mobile' | translate }}"
+      (input)="validateNumberOnly($event,'mobile')" placeholder="{{ 'Enter User mobile' | translate }}"
       [(ngModel)]="Data.mobile" />
   </div>
 
   <div class="flex flex-col mb-4 w-[49%]">
     <label class="mb-2 primaryTxt" for="National">{{'National Id'| translate }}</label>
-    <input id="National" (input)="validateNumber($event,'nationalID')"
+    <input id="National" (input)="validateNumberOnly($event,'nationalID')"
       class="rounded-lg border border-solid border-gray-300 px-4 py-3"
       placeholder="{{ 'Enter National Id' | translate }}" [(ngModel)]="Data.nationalID" />
   </div>
@@ -126,10 +126,10 @@
     <label class="mb-2 primaryTxt" for="attendanceTime"> {{ 'Attendance Time' | translate }}</label>
     <div class="flex items-center gap-2">
       <input (ngModelChange)=" onInputValueChange({ field: 'attendanceTime', value: $event })" id="attendanceHours"
-        (input)="validateNumber($event)" class="rounded-lg border border-solid border-gray-300 px-4 py-3 w-[30%]"
+        (input)="validateNumberOnly($event)" class="rounded-lg border border-solid border-gray-300 px-4 py-3 w-[30%]"
         placeholder="{{ 'HH' | translate }}" [(ngModel)]="attendanceTime.hours" type="number" min="1" max="12" />
       <input (ngModelChange)=" onInputValueChange({ field: 'attendanceTime', value: $event })" id="attendanceMinutes"
-        (input)="validateNumber($event)" class="rounded-lg border border-solid border-gray-300 px-4 py-3 w-[30%]"
+        (input)="validateNumberOnly($event)" class="rounded-lg border border-solid border-gray-300 px-4 py-3 w-[30%]"
         placeholder="{{ 'MM' | translate }}" type="number" [(ngModel)]="attendanceTime.minutes" min="0" max="59" />
       <select (ngModelChange)=" onInputValueChange({ field: 'attendanceTime', value: $event })" id="attendancePeriod"
         class="rounded-lg border border-solid border-gray-300 px-4 py-3 w-[30%]" [(ngModel)]="attendanceTime.periods">
@@ -143,10 +143,10 @@
     <label class="mb-2 primaryTxt" for="departureTime"> {{ 'Departure Time' | translate }}</label>
     <div class="flex items-center gap-2">
       <input (ngModelChange)=" onInputValueChange({ field: 'departureTime', value: $event })" id="departureHours"
-        (input)="validateNumber($event)" class="rounded-lg border border-solid border-gray-300 px-4 py-3 w-[30%]"
+        (input)="validateNumberOnly($event)" class="rounded-lg border border-solid border-gray-300 px-4 py-3 w-[30%]"
         placeholder="{{ 'HH' | translate }}" type="number" [(ngModel)]="departureTime.hour" min="1" max="12" />
       <input (ngModelChange)=" onInputValueChange({ field: 'departureTime', value: $event })" id="departureMinutes"
-        (input)="validateNumber($event)" class="rounded-lg border border-solid border-gray-300 px-4 py-3 w-[30%]"
+        (input)="validateNumberOnly($event)" class="rounded-lg border border-solid border-gray-300 px-4 py-3 w-[30%]"
         placeholder="{{ 'MM' | translate }}" type="number" [(ngModel)]="departureTime.minute" min="0" max="59" />
       <select (ngModelChange)=" onInputValueChange({ field: 'departureTime', value: $event })" id="departurePeriod"
         class="rounded-lg border border-solid border-gray-300 px-4 py-3 w-[30%]" [(ngModel)]="departureTime.period">
@@ -241,7 +241,7 @@
 
   <div class="flex flex-col mb-4 w-[48%]">
     <label class="mb-2 primaryTxt" for="graduationYear"> {{ 'Graduation Year' | translate }}</label>
-    <input id="graduationYear" (input)="validateNumber($event, 'graduationYear')"
+    <input id="graduationYear" (input)="validateNumberOnly($event, 'graduationYear')"
       class="rounded-lg border border-solid border-gray-300 px-4 py-3" placeholder="{{ 'Enter Year' | translate }}"
       [(ngModel)]="Data.graduationYear" min="1900" max="2099" />
   </div>

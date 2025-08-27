@@ -222,7 +222,9 @@ export class LessonActivityComponent {
   }
   
   validateNumber(event: any, field: keyof LessonActivity): void {
-    const value = event.target.value;
+    let value = event.target.value;
+    value = value.replace(/[^0-9]/g, '')
+    event.target.value = value;
     if (isNaN(value) || value === '') {
       event.target.value = ''; 
       if (typeof this.lessonActivity[field] === 'string') {

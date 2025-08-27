@@ -1359,15 +1359,10 @@ namespace LMS_CMS_BL.Config
 
             CreateMap<MaintenanceCompany, MaintenanceCompanyGetDto>();
 
-           
             CreateMap<MaintenanceCompanyAddDto, MaintenanceCompany>();
 
-            
             CreateMap<MaintenanceCompanyEditDto, MaintenanceCompany>();
-
-
-
-
+             
             CreateMap<MaintenanceEmployee, MaintenanceEmployeeGetDto>()
              .ForMember(dest => dest.En_Name,
                         opt => opt.MapFrom(src => src.Employee != null ? src.Employee.en_name : null))
@@ -1376,14 +1371,7 @@ namespace LMS_CMS_BL.Config
 
             CreateMap<MaintenanceEmployeeAddDto, MaintenanceEmployee>();
 
-
-
-
-
-
-
-
-
+            CreateMap<ConnectionStatus, ConnectionStatusGetDTO>();
         }
     } 
 }

@@ -253,6 +253,7 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<OfficialHolidays> OfficialHolidays { get; set; }
         public DbSet<VacationEmployee> VacationEmployee { get; set; }
         public DbSet<VacationTypes> VacationTypes { get; set; }
+        public DbSet<ConnectionStatus> ConnectionStatus { get; set; }
 
 
 
@@ -2252,13 +2253,31 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasOne(m => m.Employee)
                 .WithMany(m => m.Maintenances)
                 .HasForeignKey(m => m.EmployeeID)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Maintenance>()
                 .HasOne(m => m.Company)
                 .WithMany(m => m.Maintenances)
                 .HasForeignKey(m => m.CompanyID)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<Employee>()
+                .HasOne(m => m.ConnectionStatus)
+                .WithMany(m => m.Employees)
+                .HasForeignKey(m => m.ConnectionStatusID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<Student>()
+                .HasOne(m => m.ConnectionStatus)
+                .WithMany(m => m.Students)
+                .HasForeignKey(m => m.ConnectionStatusID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<Parent>()
+                .HasOne(m => m.ConnectionStatus)
+                .WithMany(m => m.Parents)
+                .HasForeignKey(m => m.ConnectionStatusID)
+                .OnDelete(DeleteBehavior.Restrict);
 
 
             ///////////////////////// Exception: /////////////////////////

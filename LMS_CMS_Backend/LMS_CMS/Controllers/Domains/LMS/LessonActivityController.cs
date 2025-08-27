@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
 using LMS_CMS_BL.DTO.LMS;
 using LMS_CMS_BL.UOW;
+using LMS_CMS_DAL.Models.Domains.Communication;
 using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
+using LMS_CMS_PL.Services.FileValidations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -20,12 +22,14 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         private readonly DbContextFactoryService _dbContextFactory;
         IMapper mapper;
         private readonly CheckPageAccessService _checkPageAccessService;
+        private readonly FileValidationService _fileValidationService;
 
-        public LessonActivityController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService)
+        public LessonActivityController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileValidationService fileValidationService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _checkPageAccessService = checkPageAccessService;
+            _fileValidationService = fileValidationService;
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -209,26 +213,16 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             if (lesson == null)
             {
                 return BadRequest("No Lesson Activity Type with this ID");
-            } 
-             
-            if(NewLessonActivity.AttachmentFile != null)
-            {
-                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/LessonActivity");
-                var lessonActivityFolder = Path.Combine(baseFolder, NewLessonActivity.EnglishTitle);
-                if (!Directory.Exists(lessonActivityFolder))
-                {
-                    Directory.CreateDirectory(lessonActivityFolder);
-                }
-
-                if (NewLessonActivity.AttachmentFile.Length > 0)
-                {
-                    var filePath = Path.Combine(lessonActivityFolder, NewLessonActivity.AttachmentFile.FileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await NewLessonActivity.AttachmentFile.CopyToAsync(stream);
-                    }
-                }
             }
+
+            if (NewLessonActivity.AttachmentFile != null)
+            {
+                string returnFileInput = await _fileValidationService.ValidateFileWithTimeoutAsync(NewLessonActivity.AttachmentFile);
+                if (returnFileInput != null)
+                {
+                    return BadRequest(returnFileInput);
+                }
+            } 
 
             LessonActivity lessonActivity = mapper.Map<LessonActivity>(NewLessonActivity);
 
@@ -242,14 +236,31 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             {
                 lessonActivity.InsertedByUserId = userId;
             }
+             
+            Unit_Of_Work.lessonActivity_Repository.Add(lessonActivity);
+            Unit_Of_Work.SaveChanges();
 
             if (NewLessonActivity.AttachmentFile != null)
             {
-                lessonActivity.AttachmentLink = Path.Combine("Uploads", "LessonActivity", NewLessonActivity.EnglishTitle, NewLessonActivity.AttachmentFile.FileName);
-            }
+                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/LessonActivity");
+                var lessFolder = Path.Combine(baseFolder, lessonActivity.ID.ToString());
+                if (!Directory.Exists(lessFolder))
+                {
+                    Directory.CreateDirectory(lessFolder);
+                }
 
-            Unit_Of_Work.lessonActivity_Repository.Add(lessonActivity);
-            Unit_Of_Work.SaveChanges();
+                if (NewLessonActivity.AttachmentFile.Length > 0)
+                {
+                    var filePath = Path.Combine(lessFolder, NewLessonActivity.AttachmentFile.FileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await NewLessonActivity.AttachmentFile.CopyToAsync(stream);
+                    }
+                }
+
+                lessonActivity.AttachmentLink = Path.Combine("Uploads", "LessonActivity", lessonActivity.ID.ToString(), NewLessonActivity.AttachmentFile.FileName);
+                Unit_Of_Work.lessonActivity_Repository.Update(lessonActivity);
+            }
             return Ok();
         }
 
@@ -305,6 +316,15 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 if (accessCheck != null)
                 {
                     return accessCheck;
+                }
+            }
+
+            if (EditLessonActivity.AttachmentFile != null)
+            {
+                string returnFileInput = await _fileValidationService.ValidateFileWithTimeoutAsync(EditLessonActivity.AttachmentFile);
+                if (returnFileInput != null)
+                {
+                    return BadRequest(returnFileInput);
                 }
             }
 

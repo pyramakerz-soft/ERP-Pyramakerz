@@ -354,7 +354,10 @@ export class ClassroomComponent {
   }
  
   validateNumber(event: any, field: keyof Classroom): void {
-    const value = event.target.value;
+    let value = event.target.value;
+    value = value.replace(/[^0-9]/g, '')
+    event.target.value = value;
+
     if (isNaN(value) || value === '') {
       event.target.value = ''; 
       if (typeof this.classroom[field] === 'string') {

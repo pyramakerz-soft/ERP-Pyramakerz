@@ -19,12 +19,14 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         private readonly DbContextFactoryService _dbContextFactory;
         IMapper mapper;
         private readonly CheckPageAccessService _checkPageAccessService;
+        private readonly FileValidationService _fileValidationService;
 
-        public LessonResourceController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService)
+        public LessonResourceController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileValidationService fileValidationService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _checkPageAccessService = checkPageAccessService;
+            _fileValidationService = fileValidationService;
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -232,24 +234,14 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             if (lesson == null)
             {
                 return BadRequest("No Lesson Resource Type with this ID");
-            }
+            } 
 
             if (NewLessonResource.AttachmentFile != null)
             {
-                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/LessonResource");
-                var lessonResourceFolder = Path.Combine(baseFolder, NewLessonResource.EnglishTitle);
-                if (!Directory.Exists(lessonResourceFolder))
+                string returnFileInput = await _fileValidationService.ValidateFileWithTimeoutAsync(NewLessonResource.AttachmentFile);
+                if (returnFileInput != null)
                 {
-                    Directory.CreateDirectory(lessonResourceFolder);
-                }
-
-                if (NewLessonResource.AttachmentFile.Length > 0)
-                {
-                    var filePath = Path.Combine(lessonResourceFolder, NewLessonResource.AttachmentFile.FileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await NewLessonResource.AttachmentFile.CopyToAsync(stream);
-                    }
+                    return BadRequest(returnFileInput);
                 }
             }
 
@@ -264,15 +256,33 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             else if (userTypeClaim == "employee")
             {
                 lessonResource.InsertedByUserId = userId;
-            }
-
-            if (NewLessonResource.AttachmentFile != null)
-            {
-                lessonResource.AttachmentLink = Path.Combine("Uploads", "LessonResource", NewLessonResource.EnglishTitle, NewLessonResource.AttachmentFile.FileName);
-            }
+            } 
 
             Unit_Of_Work.lessonResource_Repository.Add(lessonResource);
             Unit_Of_Work.SaveChanges();
+             
+
+            if (NewLessonResource.AttachmentFile != null)
+            {
+                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/LessonResource");
+                var lessFolder = Path.Combine(baseFolder, lessonResource.ID.ToString());
+                if (!Directory.Exists(lessFolder))
+                {
+                    Directory.CreateDirectory(lessFolder);
+                }
+
+                if (NewLessonResource.AttachmentFile.Length > 0)
+                {
+                    var filePath = Path.Combine(lessFolder, NewLessonResource.AttachmentFile.FileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await NewLessonResource.AttachmentFile.CopyToAsync(stream);
+                    }
+                }
+
+                lessonResource.AttachmentLink = Path.Combine("Uploads", "LessonResource", lessonResource.ID.ToString(), NewLessonResource.AttachmentFile.FileName);
+                Unit_Of_Work.lessonResource_Repository.Update(lessonResource);
+            }
 
             if (NewLessonResource.Classes != null && NewLessonResource.Classes.Count != 0)
             {
@@ -359,6 +369,15 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 if (accessCheck != null)
                 {
                     return accessCheck;
+                }
+            }
+
+            if (EditLessonResource.AttachmentFile != null)
+            {
+                string returnFileInput = await _fileValidationService.ValidateFileWithTimeoutAsync(EditLessonResource.AttachmentFile);
+                if (returnFileInput != null)
+                {
+                    return BadRequest(returnFileInput);
                 }
             }
 

@@ -47,14 +47,14 @@ namespace LMS_CMS_DAL.Models.Domains
         public long? Nationality { get; set; }
         public string? DateOfAppointment { get; set; }
         public string? DateOfLeavingWork { get; set; }
-        public int? MonthSalary { get; set; }
+        public decimal? MonthSalary { get; set; }
         public bool? HasAttendance { get; set; }
         public string? AttendanceTime { get; set; }
         public string? DepartureTime { get; set; }
         public float? DelayAllowance { get; set; }
-        public int? AnnualLeaveBalance { get; set; }
-        public int? CasualLeavesBalance { get; set; }
-        public int? MonthlyLeaveRequestBalance { get; set; }
+        public decimal? AnnualLeaveBalance { get; set; }
+        public decimal? CasualLeavesBalance { get; set; }
+        public decimal? MonthlyLeaveRequestBalance { get; set; }
         public int? GraduationYear { get; set; }
         public string? Note { get; set; }
         public bool? CanReceiveRequest { get; set; } 
@@ -100,6 +100,11 @@ namespace LMS_CMS_DAL.Models.Domains
         [ForeignKey("AcademicDegree")]
         public long? AcademicDegreeID { get; set; }
         public AcademicDegree AcademicDegree { get; set; }
+        
+
+        [ForeignKey("ConnectionStatus")]
+        public long? ConnectionStatusID { get; set; }
+        public ConnectionStatus ConnectionStatus { get; set; }
 
         public ICollection<Bus> DrivenBuses { get; set; } = new HashSet<Bus>();
         public ICollection<Bus> DriverAssistant { get; set; } = new HashSet<Bus>();

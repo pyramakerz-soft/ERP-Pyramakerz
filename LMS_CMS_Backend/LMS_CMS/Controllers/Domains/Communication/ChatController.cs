@@ -374,18 +374,18 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                 (chatMessage.ReceiverEnglishName, chatMessage.ReceiverArabicName) = GetUserNames(Unit_Of_Work, chatMessage.ReceiverID, chatMessage.ReceiverUserTypeID);
             }
 
+            var domainName = HttpContext.Request.Headers["Domain-Name"].FirstOrDefault();
+
             foreach (var item in chatMessages)
             {
                 if (item.ReceiverID == userId && item.ReceiverUserTypeID == userTypeID)
                 {
                     item.SeenOrNot = true;
-                    Unit_Of_Work.chatMessage_Repository.Update(item);
+                    Unit_Of_Work.chatMessage_Repository.Update(item); 
                 }    
             }
 
-            Unit_Of_Work.SaveChanges();
-
-            var domainName = HttpContext.Request.Headers["Domain-Name"].FirstOrDefault();
+            Unit_Of_Work.SaveChanges(); 
              
             return Ok(chatMessagesGetDTO);
         }

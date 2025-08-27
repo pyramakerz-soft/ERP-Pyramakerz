@@ -90,7 +90,7 @@
                             </p>
                         </div>
                         <div>
-                            <div class="rounded-lg py-3 px-4" 
+                            <div *ngIf="conv.message" class="rounded-lg py-3 px-4" 
                             [ngClass]="{'primaryTxt bg-white': conv.receiverID == User_Data_After_Login.id && conv.receiverUserTypeName == User_Data_After_Login.type, 
                                         'primaryBg text-white': conv.senderID == User_Data_After_Login.id && conv.senderUserTypeName == User_Data_After_Login.type}">
                                 <p>{{conv.message}}</p>
