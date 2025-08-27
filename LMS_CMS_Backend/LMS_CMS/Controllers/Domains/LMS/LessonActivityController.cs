@@ -328,163 +328,60 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 }
             }
 
-            string enNameExists = lessonActivityExists.EnglishTitle;
-            string AttachmentLinkExists = lessonActivityExists.AttachmentLink;
-            if(EditLessonActivity.AttachmentFile != null)
+            if (EditLessonActivity.AttachmentFile != null)
             {
                 var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/LessonActivity");
-                if (!string.IsNullOrEmpty(lessonActivityExists.AttachmentLink))
+                var lessFolder = Path.Combine(baseFolder, EditLessonActivity.ID.ToString());
+
+                if (System.IO.File.Exists(lessFolder))
                 {
-                    if (AttachmentLinkExists != null && AttachmentLinkExists.StartsWith("Uploads", StringComparison.OrdinalIgnoreCase))
-                    {
-                        var oldLessonActivityFolder = Path.Combine(baseFolder, enNameExists);
-
-                        string existingFilePath = Path.Combine(baseFolder, enNameExists);
-
-                        if (System.IO.File.Exists(existingFilePath))
-                        {
-                            System.IO.File.Delete(existingFilePath); // Delete the old file
-                        }
-
-                        if (Directory.Exists(oldLessonActivityFolder))
-                        {
-                            Directory.Delete(oldLessonActivityFolder, true);
-                        }
-                    }
-
+                    System.IO.File.Delete(lessFolder); // Delete the old file
                 }
 
-                var lessonActivityFolder = Path.Combine(baseFolder, EditLessonActivity.EnglishTitle);
-                if (!Directory.Exists(lessonActivityFolder))
+                if (Directory.Exists(lessFolder))
                 {
-                    Directory.CreateDirectory(lessonActivityFolder);
+                    Directory.Delete(lessFolder, true);
+                }
+
+                if (!Directory.Exists(lessFolder))
+                {
+                    Directory.CreateDirectory(lessFolder);
                 }
 
                 if (EditLessonActivity.AttachmentFile.Length > 0)
                 {
-                    var filePath = Path.Combine(lessonActivityFolder, EditLessonActivity.AttachmentFile.FileName);
+                    var filePath = Path.Combine(lessFolder, EditLessonActivity.AttachmentFile.FileName);
                     using (var stream = new FileStream(filePath, FileMode.Create))
                     {
                         await EditLessonActivity.AttachmentFile.CopyToAsync(stream);
                     }
                 }
 
-                EditLessonActivity.AttachmentLink = Path.Combine("Uploads", "LessonActivity", EditLessonActivity.EnglishTitle, EditLessonActivity.AttachmentFile.FileName); 
+                EditLessonActivity.AttachmentLink = Path.Combine("Uploads", "LessonActivity", lessonActivityExists.ID.ToString(), EditLessonActivity.AttachmentFile.FileName);
             }
             else
-            { 
-                if(EditLessonActivity.AttachmentLink == null)
+            {
+                if (!string.IsNullOrEmpty(lessonActivityExists.AttachmentLink))
                 {
-                    if (!string.IsNullOrEmpty(lessonActivityExists.AttachmentLink))
+                    if (lessonActivityExists.AttachmentLink.StartsWith("Uploads", StringComparison.OrdinalIgnoreCase))
                     {
-                        if(AttachmentLinkExists.StartsWith("Uploads", StringComparison.OrdinalIgnoreCase))
+                        var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/LessonActivity");
+                        var oldLessonResourceFolder = Path.Combine(baseFolder, lessonActivityExists.ID.ToString());
+
+                        string existingFilePath = Path.Combine(baseFolder, lessonActivityExists.ID.ToString());
+
+                        if (System.IO.File.Exists(existingFilePath))
                         {
-                            var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/LessonActivity");
-                            var oldLessonActivityFolder = Path.Combine(baseFolder, enNameExists); 
+                            System.IO.File.Delete(existingFilePath); // Delete the old file
+                        }
 
-                            string existingFilePath = Path.Combine(baseFolder, enNameExists);
-
-                            if (System.IO.File.Exists(existingFilePath))
-                            {
-                                System.IO.File.Delete(existingFilePath); // Delete the old file
-                            }
-
-                            if (Directory.Exists(oldLessonActivityFolder))
-                            {
-                                Directory.Delete(oldLessonActivityFolder, true);
-                            }
+                        if (Directory.Exists(oldLessonResourceFolder))
+                        {
+                            Directory.Delete(oldLessonResourceFolder, true);
                         }
                     }
                 }
-                else
-                {
-                    string url = EditLessonActivity.AttachmentLink.Replace("/", "\\");
-                    if (AttachmentLinkExists != null)
-                    {
-                        if (AttachmentLinkExists.StartsWith("Uploads", StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (EditLessonActivity.EnglishTitle != enNameExists)
-                            {
-                                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/LessonActivity");
-                                var oldLessonActivityFolder = Path.Combine(baseFolder, enNameExists);
-                                var newLessonActivityFolder = Path.Combine(baseFolder, EditLessonActivity.EnglishTitle);
-                                if (url.EndsWith(AttachmentLinkExists, StringComparison.OrdinalIgnoreCase))
-                                { 
-                                    // Rename the folder if it exists
-                                    if (Directory.Exists(oldLessonActivityFolder))
-                                    {
-                                        if (!Directory.Exists(newLessonActivityFolder))
-                                        {
-                                            Directory.CreateDirectory(newLessonActivityFolder);
-                                        }
-
-                                        var files = Directory.GetFiles(oldLessonActivityFolder);
-                                        foreach (var file in files)
-                                        {
-                                            var fileName = Path.GetFileName(file);
-                                            var destFile = Path.Combine(newLessonActivityFolder, fileName);
-                                            System.IO.File.Move(file, destFile);
-                                        }
-
-                                        Directory.Delete(oldLessonActivityFolder);
-                                    }
-                                    EditLessonActivity.AttachmentLink = Path.Combine("Uploads", "LessonActivity", EditLessonActivity.EnglishTitle, Path.GetFileName(AttachmentLinkExists));
-                                }
-                                else
-                                {
-                                    EditLessonActivity.AttachmentLink = EditLessonActivity.AttachmentLink;  
-
-                                    string existingFilePath = Path.Combine(baseFolder, enNameExists);
-
-                                    if (System.IO.File.Exists(existingFilePath))
-                                    {
-                                        System.IO.File.Delete(existingFilePath); // Delete the old file
-                                    }
-
-                                    if (Directory.Exists(oldLessonActivityFolder))
-                                    {
-                                        Directory.Delete(oldLessonActivityFolder, true);
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/LessonActivity");
-                                var oldLessonActivityFolder = Path.Combine(baseFolder, enNameExists); 
-
-                                string existingFilePath = Path.Combine(baseFolder, enNameExists);
-
-                                if (System.IO.File.Exists(existingFilePath))
-                                {
-                                    System.IO.File.Delete(existingFilePath); // Delete the old file
-                                }
-
-                                if (Directory.Exists(oldLessonActivityFolder))
-                                {
-                                    Directory.Delete(oldLessonActivityFolder, true);
-                                }
-
-                                if (url.EndsWith(AttachmentLinkExists, StringComparison.OrdinalIgnoreCase))
-                                {
-                                    EditLessonActivity.AttachmentLink = AttachmentLinkExists;
-                                }
-                                else{
-                                    EditLessonActivity.AttachmentLink = EditLessonActivity.AttachmentLink;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            EditLessonActivity.AttachmentLink = EditLessonActivity.AttachmentLink;
-                        }
-                    }
-                    else
-                    {
-
-                        EditLessonActivity.AttachmentLink = EditLessonActivity.AttachmentLink;
-                    }
-                }
-            } 
+            }
 
             mapper.Map(EditLessonActivity, lessonActivityExists);
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
