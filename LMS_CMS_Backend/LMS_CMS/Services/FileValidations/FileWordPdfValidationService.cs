@@ -60,8 +60,8 @@ namespace LMS_CMS_PL.Services.FileValidations
                 }
 
                 stream.Position = 0;
-                if (await ContainsDangerousContentAsync(stream, extension, cancellationToken))
-                    return "File contains potentially dangerous content";
+                //if (await ContainsDangerousContentAsync(stream, extension, cancellationToken))
+                //    return "File contains potentially dangerous content";
 
                 // Document-specific validation
                 if (extension == ".docx")

@@ -44,6 +44,7 @@ export class MyMessagesComponent {
   chatMessages:ChatMessage[]= []
   conversation:ChatMessage[]= []
   isConversationOpen = false
+  isShowChat = false
   englishNameForConversation = ''
   arabicNameForConversation = ''
 
@@ -112,6 +113,12 @@ export class MyMessagesComponent {
     this.chatMessageService.BySenderAndReceiverID(userID, userTypeID, this.DomainName).subscribe(
       data => {
         this.conversation = data  
+
+        if(this.isShowChat){
+          // call the subscribe again for the other pages
+          this.chatMessageService.notifyMessageOpened();
+          this.isShowChat = false
+        }
       }
     )
   }
@@ -175,6 +182,7 @@ export class MyMessagesComponent {
 
     // this will automatically loaded because of the route
     // this.loadSpecificChat(otherUserID, otherUserTypeID);
+    this.isShowChat = true
     this.router.navigate([], {
         relativeTo: this.route,
         queryParams: {
@@ -184,7 +192,7 @@ export class MyMessagesComponent {
             arabicNameForConversation: this.arabicNameForConversation
         },
         queryParamsHandling: 'merge' 
-    }); 
+    });  
   }
 
   getFileType(fileLink: string): string {

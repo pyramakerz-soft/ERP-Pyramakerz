@@ -276,6 +276,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
             employee.Address = registeredEmployee.Address;
             employee.Role_ID = acceptedEmployeeDto.RoleID;
             employee.EmployeeTypeID = acceptedEmployeeDto.EmployeeTypeID;
+            employee.ConnectionStatusID = 1;
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             employee.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);

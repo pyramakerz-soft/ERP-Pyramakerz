@@ -262,6 +262,7 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<VacationEmployee> VacationEmployee_Repository;
         GenericRepo<DirectMark> DirectMark_Repository;
         GenericRepo<DirectMarkClassesStudent> DirectMarkClassesStudent_Repository;
+        GenericRepo<ConnectionStatus> ConnectionStatus_Repository;
 
 
         public UOW(Octa_DbContext octa_Db)
@@ -3014,6 +3015,18 @@ namespace LMS_CMS_BL.UOW
                     VacationEmployee_Repository = new GenericRepo<VacationEmployee>(db);
                 }
                 return VacationEmployee_Repository;
+            }
+        } 
+        
+        public GenericRepo<ConnectionStatus> connectionStatus_Repository
+        {
+            get
+            {
+                if (ConnectionStatus_Repository == null)
+                {
+                    ConnectionStatus_Repository = new GenericRepo<ConnectionStatus>(db);
+                }
+                return ConnectionStatus_Repository;
             }
         } 
 

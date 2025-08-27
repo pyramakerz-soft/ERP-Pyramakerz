@@ -3753,6 +3753,27 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.ToTable("Request");
                 });
 
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.ConnectionStatus", b =>
+                {
+                    b.Property<long>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("ID"));
+
+                    b.Property<string>("Ar_Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("En_Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("ConnectionStatus");
+                });
+
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.Days", b =>
                 {
                     b.Property<long>("ID")
@@ -4282,8 +4303,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<string>("Address")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("AnnualLeaveBalance")
-                        .HasColumnType("int");
+                    b.Property<decimal?>("AnnualLeaveBalance")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("AttendanceTime")
                         .HasColumnType("nvarchar(max)");
@@ -4303,8 +4324,11 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<bool?>("CanReceiveRequestFromParent")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("CasualLeavesBalance")
-                        .HasColumnType("int");
+                    b.Property<decimal?>("CasualLeavesBalance")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<long?>("ConnectionStatusID")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("DateOfAppointment")
                         .HasColumnType("nvarchar(max)");
@@ -4366,11 +4390,11 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<string>("Mobile")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("MonthSalary")
-                        .HasColumnType("int");
+                    b.Property<decimal?>("MonthSalary")
+                        .HasColumnType("decimal(18,2)");
 
-                    b.Property<int?>("MonthlyLeaveRequestBalance")
-                        .HasColumnType("int");
+                    b.Property<decimal?>("MonthlyLeaveRequestBalance")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("NationalID")
                         .HasColumnType("nvarchar(max)");
@@ -4431,6 +4455,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.HasIndex("AccountNumberID");
 
                     b.HasIndex("BusCompanyID");
+
+                    b.HasIndex("ConnectionStatusID");
 
                     b.HasIndex("DeletedByUserId");
 
@@ -9754,6 +9780,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<string>("BuildingNumber")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<long?>("ConnectionStatusID")
+                        .HasColumnType("bigint");
+
                     b.Property<string>("CountryCode")
                         .HasColumnType("nvarchar(max)");
 
@@ -9941,6 +9970,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.HasKey("ID");
 
                     b.HasIndex("AccountNumberID");
+
+                    b.HasIndex("ConnectionStatusID");
 
                     b.HasIndex("DeletedByUserId");
 
@@ -11345,6 +11376,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<string>("ConfirmationCode")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<long?>("ConnectionStatusID")
+                        .HasColumnType("bigint");
+
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
 
@@ -11421,6 +11455,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .HasColumnType("nvarchar(100)");
 
                     b.HasKey("ID");
+
+                    b.HasIndex("ConnectionStatusID");
 
                     b.HasIndex("DeletedByUserId");
 
@@ -15970,6 +16006,11 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .HasForeignKey("BusCompanyID")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.ConnectionStatus", "ConnectionStatus")
+                        .WithMany("Employees")
+                        .HasForeignKey("ConnectionStatusID")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "DeletedByEmployee")
                         .WithMany()
                         .HasForeignKey("DeletedByUserId");
@@ -16014,6 +16055,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Navigation("AccountNumber");
 
                     b.Navigation("BusCompany");
+
+                    b.Navigation("ConnectionStatus");
 
                     b.Navigation("DeletedByEmployee");
 
@@ -18656,6 +18699,11 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .HasForeignKey("AccountNumberID")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.ConnectionStatus", "ConnectionStatus")
+                        .WithMany("Students")
+                        .HasForeignKey("ConnectionStatusID")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "DeletedByEmployee")
                         .WithMany()
                         .HasForeignKey("DeletedByUserId")
@@ -18693,6 +18741,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .HasForeignKey("UpdatedByUserId");
 
                     b.Navigation("AccountNumber");
+
+                    b.Navigation("ConnectionStatus");
 
                     b.Navigation("DeletedByEmployee");
 
@@ -19297,7 +19347,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.HasOne("LMS_CMS_DAL.Models.Domains.MaintenanceModule.MaintenanceCompany", "Company")
                         .WithMany("Maintenances")
                         .HasForeignKey("CompanyID")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "DeletedByEmployee")
                         .WithMany()
@@ -19307,7 +19357,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "Employee")
                         .WithMany("Maintenances")
                         .HasForeignKey("EmployeeID")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "InsertedByEmployee")
                         .WithMany()
@@ -19420,6 +19470,11 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.Parent", b =>
                 {
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.ConnectionStatus", "ConnectionStatus")
+                        .WithMany("Parents")
+                        .HasForeignKey("ConnectionStatusID")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "DeletedByEmployee")
                         .WithMany()
                         .HasForeignKey("DeletedByUserId");
@@ -19431,6 +19486,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "UpdatedByEmployee")
                         .WithMany()
                         .HasForeignKey("UpdatedByUserId");
+
+                    b.Navigation("ConnectionStatus");
 
                     b.Navigation("DeletedByEmployee");
 
@@ -20943,6 +21000,15 @@ namespace LMS_CMS_DAL.Migrations.Domains
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.Communication.Notification", b =>
                 {
                     b.Navigation("NotificationSharedTos");
+                });
+
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.ConnectionStatus", b =>
+                {
+                    b.Navigation("Employees");
+
+                    b.Navigation("Parents");
+
+                    b.Navigation("Students");
                 });
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.Days", b =>

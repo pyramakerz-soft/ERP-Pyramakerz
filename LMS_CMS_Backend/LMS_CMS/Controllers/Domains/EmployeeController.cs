@@ -573,6 +573,7 @@ namespace LMS_CMS_PL.Controllers.Domains
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             employee.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            employee.ConnectionStatusID = 1;
             if (userTypeClaim == "octa")
             {
                 employee.InsertedByOctaId = userId;
