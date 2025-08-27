@@ -1346,6 +1346,7 @@ namespace LMS_CMS_BL.Config
                 .ForMember(dest => dest.GradeID, opt => opt.MapFrom(src => src.Subject.GradeID))
                 .ForMember(dest => dest.GradeName, opt => opt.MapFrom(src => src.Subject.Grade.Name))
                 .ForMember(dest => dest.SchoolName, opt => opt.MapFrom(src => src.Subject.Grade.Section.school.Name))
+                .ForMember(dest => dest.SchoolID, opt => opt.MapFrom(src => src.Subject.Grade.Section.school.ID))
                 .ForMember(dest => dest.SubjectWeightTypeEnglishName, opt => opt.MapFrom(src => src.SubjectWeightType.WeightType.EnglishName))
                 .ForMember(dest => dest.SubjectWeightTypeArabicName, opt => opt.MapFrom(src => src.SubjectWeightType.WeightType.ArabicName));
             CreateMap<DirectMarkAddDTO, DirectMark>();

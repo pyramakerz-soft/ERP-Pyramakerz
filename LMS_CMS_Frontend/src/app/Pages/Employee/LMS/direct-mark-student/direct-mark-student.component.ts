@@ -1,43 +1,40 @@
 import { Component } from '@angular/core';
-import { AssignmentStudent } from '../../../../Models/LMS/assignment-student';
-import { Classroom } from '../../../../Models/LMS/classroom';
-import { AssignmentStudentService } from '../../../../Services/Employee/LMS/assignment-student.service';
-import { ClassroomService } from '../../../../Services/Employee/LMS/classroom.service';
+import { DirectMark } from '../../../../Models/LMS/direct-mark';
+import { DirectMarkService } from '../../../../Services/Employee/LMS/direct-mark.service';
+import { DirectMarkClassesStudent } from '../../../../Models/LMS/direct-mark-classes-student';
+import { DirectMarkClassesStudentService } from '../../../../Services/Employee/LMS/direct-mark-classes-student.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { SearchComponent } from '../../../../Component/search/search.component';
+import { TranslateModule } from '@ngx-translate/core';
+import { Subscription } from 'rxjs';
+import { Classroom } from '../../../../Models/LMS/classroom';
 import { TokenData } from '../../../../Models/token-data';
 import { AccountService } from '../../../../Services/account.service';
 import { ApiService } from '../../../../Services/api.service';
 import { BusTypeService } from '../../../../Services/Employee/Bus/bus-type.service';
 import { DomainService } from '../../../../Services/Employee/domain.service';
+import { AssignmentStudentService } from '../../../../Services/Employee/LMS/assignment-student.service';
+import { ClassroomService } from '../../../../Services/Employee/LMS/classroom.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
-import { MenuService } from '../../../../Services/shared/menu.service';
-import { AssignmentService } from '../../../../Services/Employee/LMS/assignment.service';
-import { Assignment } from '../../../../Models/LMS/assignment';
-import Swal from 'sweetalert2';
-import { Grade } from '../../../../Models/LMS/grade';
-import { School } from '../../../../Models/school';
-import { GradeService } from '../../../../Services/Employee/LMS/grade.service';
-import { SchoolService } from '../../../../Services/Employee/school.service';
-import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import { Subscription } from 'rxjs';
+import { MenuService } from '../../../../Services/shared/menu.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { DirectMarkClassesService } from '../../../../Services/Employee/LMS/direct-mark-classes.service';
+import { DirectMarkClasses } from '../../../../Models/LMS/direct-mark-classes';
+import Swal from 'sweetalert2';
+
 @Component({
-  selector: 'app-assignment-student',
+  selector: 'app-direct-mark-student',
   standalone: true,
   imports: [FormsModule, CommonModule, TranslateModule],
-  templateUrl: './assignment-student.component.html',
-  styleUrl: './assignment-student.component.css'
+  templateUrl: './direct-mark-student.component.html',
+  styleUrl: './direct-mark-student.component.css'
 })
-export class AssignmentStudentComponent {
+export class DirectMarkStudentComponent {
 
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
-  classes: Classroom[] = []
-  TableData: AssignmentStudent[] = [];
   isRtl: boolean = false;
   subscription!: Subscription;
   DomainName: string = '';
@@ -55,17 +52,17 @@ export class AssignmentStudentComponent {
   TotalPages: number = 1
   TotalRecords: number = 0
   isDeleting: boolean = false;
-  AssignmentId: number = 0;
+  DirectMarkId: number = 0;
   ClassId: number = 0;
+  classRoomId: number = 0;
   IsShowTabls: boolean = false
+  // editDegree: boolean = false
   editDegreeId: number | null = null
-  assignment: Assignment = new Assignment()
 
-  schools: School[] = []
-  Grades: Grade[] = []
-
-  SelectedSchoolId: number = 0;
-  SelectedGradeId: number = 0;
+  classes: DirectMarkClasses[] = []
+  TableData: DirectMarkClassesStudent[] = []
+  OriginalData: DirectMarkClassesStudent[] = []
+  directMark: DirectMark = new DirectMark()
 
   constructor(
     private router: Router,
@@ -77,10 +74,9 @@ export class AssignmentStudentComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public assignmentStudentServ: AssignmentStudentService,
-    private SchoolServ: SchoolService,
-    private GradeServ: GradeService,
     public classServ: ClassroomService,
-    public assignmentServ: AssignmentService,
+    public DirectMarkClassesStudentServ: DirectMarkClassesStudentService,
+    public DirectMarkClassesServ: DirectMarkClassesService,
     private languageService: LanguageService,
     private realTimeService: RealTimeNotificationServiceService
   ) { }
@@ -91,11 +87,8 @@ export class AssignmentStudentComponent {
     this.activeRoute.url.subscribe((url) => {
       this.path = url[0].path;
     });
-    this.AssignmentId = Number(this.activeRoute.snapshot.paramMap.get('id'));
-    this.GetAssignment()
-    this.GetAllData(this.CurrentPage, this.PageSize)
-    this.getAllSchools()
-
+    this.DirectMarkId = Number(this.activeRoute.snapshot.paramMap.get('id'));
+    this.getAllClass()
     this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
@@ -109,48 +102,26 @@ export class AssignmentStudentComponent {
     }
   }
 
-
-  GetAssignment() {
-    this.assignmentServ.GetByID(this.AssignmentId, this.DomainName).subscribe((d) => {
-      this.assignment = d
-    })
-  }
-
-  getAllSchools() {
-    this.schools = []
-    this.SchoolServ.Get(this.DomainName).subscribe((d) => {
-      this.schools = d
-    })
-  }
-
-  getAllGradesBySchoolId() {
-    this.Grades = []
-    this.IsShowTabls = false
-    this.SelectedGradeId = 0
-    this.ClassId = 0
-    this.GradeServ.GetBySchoolId(this.SelectedSchoolId, this.DomainName).subscribe((d) => {
-      this.Grades = d
-    })
-  }
-
-  getAllClassByGradeId() {
+  getAllClass() {
     this.classes = []
-    this.ClassId = 0
     this.IsShowTabls = false
-    this.classServ.GetByGradeId(this.SelectedGradeId, this.DomainName).subscribe((d) => {
+    this.DirectMarkClassesServ.GetByDirectMarkId(this.DirectMarkId, this.DomainName).subscribe((d) => {
       this.classes = d
     })
   }
 
   GetAllData(pageNumber: number, pageSize: number) {
     this.TableData = []
-    this.assignmentStudentServ.GetByAssignmentClass(this.AssignmentId, this.ClassId, this.DomainName, pageNumber, pageSize).subscribe(
+    this.classRoomId = this.classes.find(s => s.id == this.ClassId)?.classroomID || 0
+    this.DirectMarkClassesStudentServ.GetByDirectMarkId(this.DirectMarkId, this.classRoomId, this.DomainName, pageNumber, pageSize).subscribe(
       (data) => {
         this.CurrentPage = data.pagination.currentPage
         this.PageSize = data.pagination.pageSize
         this.TotalPages = data.pagination.totalPages
         this.TotalRecords = data.pagination.totalRecords
         this.TableData = data.data
+        console.log(this.TableData)
+        this.directMark = data.directMark
       },
       (error) => {
         if (error.status == 404) {
@@ -217,8 +188,8 @@ export class AssignmentStudentComponent {
     this.GetAllData(this.CurrentPage, this.PageSize)
   }
 
-  moveToAssignment() {
-    this.router.navigateByUrl(`Employee/Assignment/${this.AssignmentId}`)
+  moveToDirectMark() {
+    this.router.navigateByUrl(`Employee/Direct Mark`)
   }
 
   classChanged() {
@@ -226,46 +197,23 @@ export class AssignmentStudentComponent {
     this.TableData = []
   }
 
-  moveToDetails(id: number) {
-    this.router.navigateByUrl(`Employee/Assignment Student Answer/${id}`)
-  }
-
-  openFile(link: string | null) {
-    if (link) {
-      window.open(link, '_blank');
-    } else {
-      console.warn('File link is missing');
-    }
-  }
-
-  saveDegree(row: AssignmentStudent): void {
-    if (row.degree != null && row.degree <= row.assignmentDegree) {
-      Swal.fire({
-        title: 'Apply Late Submission Penalty?',
-        text: 'The student submitted after the due date. Do you want to apply the late submission penalty?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#089B41',
-        cancelButtonColor: '#17253E',
-        confirmButtonText: 'Apply Penalty',
-        cancelButtonText: 'Forgive Delay',
-      }).then((result) => {
-        row.evaluationConsideringTheDelay = result.isConfirmed;
-        this.assignmentStudentServ.Edit(row, this.DomainName).subscribe((d) => {
-          this.editDegreeId = null
-          this.GetAllData(this.CurrentPage, this.PageSize)
-        }, error => {
-          this.editDegreeId = null
-          Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: 'Try Again Later!',
-            confirmButtonText: 'Okay',
-            customClass: { confirmButton: 'secondaryBg' },
-          });
-          this.GetAllData(this.CurrentPage, this.PageSize)
-        })
-      });
+  save(row: DirectMarkClassesStudent): void {
+    if (row.degree <= this.directMark.mark) {
+      // this.editDegree = false
+      this.DirectMarkClassesStudentServ.Edit(row, this.DomainName).subscribe((d) => {
+        this.GetAllData(this.CurrentPage, this.PageSize)
+        this.editDegreeId = null
+      }, error => {
+        this.editDegreeId = null
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'Try Again Later!',
+          confirmButtonText: 'Okay',
+          customClass: { confirmButton: 'secondaryBg' },
+        });
+        this.GetAllData(this.CurrentPage, this.PageSize)
+      })
     }
   }
 }

@@ -28,6 +28,7 @@ import { Subject } from '../../../../Models/LMS/subject';
 import { firstValueFrom, Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
 import { Classroom } from '../../../../Models/LMS/classroom';
+import { DirectMarkClasses } from '../../../../Models/LMS/direct-mark-classes';
 
 @Component({
   selector: 'app-direct-mark',
@@ -39,7 +40,7 @@ import { Classroom } from '../../../../Models/LMS/classroom';
 export class DirectMarkComponent {
 
   validationErrors: { [key in keyof DirectMark]?: string } = {};
-  keysArray: string[] = ['id', 'englishName', 'arabicName', 'mark', 'assignmentTypeEnglishName', 'assignmentTypeArabicName'];
+  keysArray: string[] = ['id', 'englishName', 'arabicName', 'mark', 'subjectArabicName', 'subjectEnglishName'];
   key: string = 'id';
   value: any = '';
 
@@ -178,11 +179,24 @@ export class DirectMarkComponent {
     this.classDropdownOpen = !this.classDropdownOpen;
   }
 
+  IfClassExist(classId: number) {
+    return this.directMark.directMarkClasses.some(s => s.classroomID === classId);
+  }
+
   toggleSelectAll(event: Event) {
     const checked = (event.target as HTMLInputElement).checked;
     if (checked) {
-      // this.directMark.directMarkClasses = [...this.classrooms];
-      this.directMark.classids = this.classrooms.map(c => c.id);
+      this.directMark.directMarkClasses = []
+      this.directMark.directMarkClasses = this.classrooms.map(s => ({
+        directMarkEnglishName: '',
+        directMarkArabicName: '',
+        insertedByUserId: 0,
+        directMarkID: 0,
+        id: 0,
+        classroomID: s.id,
+        classroomName: s.name
+      }));
+      this.directMark.classids = this.directMark.directMarkClasses.map(c => c.classroomID);
       this.directMark.allClasses = true;
     } else {
       this.directMark.directMarkClasses = [];
@@ -192,34 +206,31 @@ export class DirectMarkComponent {
     this.onInputValueChange({ field: 'classids', value: this.directMark.classids });
   }
 
-  toggleClass(classroom: any) {
-    const index = this.directMark.directMarkClasses.findIndex(c => c.id === classroom.id);
-    if (index === -1) {
-      this.directMark.directMarkClasses.push(classroom);
+  toggleClass(event: Event, classroom: Classroom) {
+    console.log(this.directMark.directMarkClasses, classroom)
+    const checked = (event.target as HTMLInputElement).checked;
+    if (checked) {
+      var classMark = new DirectMarkClasses()
+      classMark.classroomID = classroom.id
+      classMark.classroomName = classroom.name
+      this.directMark.directMarkClasses.push(classMark);
+      console.log(this.directMark.directMarkClasses)
     } else {
-      this.directMark.directMarkClasses.splice(index, 1);
+      this.directMark.directMarkClasses = this.directMark.directMarkClasses.filter(s => s.classroomID != classroom.id)
     }
-    this.directMark.classids = this.directMark.directMarkClasses.map(c => c.id);
     this.directMark.allClasses = this.directMark.directMarkClasses.length === this.classrooms.length;
-
-    this.onInputValueChange({ field: 'classids', value: this.directMark.classids });
-  }
-
-  removeClass(classId: number) {
-    this.directMark.directMarkClasses = this.directMark.directMarkClasses.filter(c => c.id !== classId);
-    this.directMark.classids = this.directMark.directMarkClasses.map(c => c.id);
-    this.directMark.allClasses = false;
+    this.directMark.classids = this.directMark.directMarkClasses.map(c => c.classroomID);
 
     this.onInputValueChange({ field: 'classids', value: this.directMark.classids });
   }
 
   GetAllData(pageNumber: number, pageSize: number) {
     this.TableData = []
-    this.IsView = true
     this.CurrentPage = 1
     this.TotalPages = 1
     this.TotalRecords = 0
-    if (this.SelectedSchoolId != 0) {
+    if (this.SelectedSchoolId != 0 && this.SelectedGradeId != 0 && this.SelectedSubjectId != 0) {
+      this.IsView = true
       this.DirectMarkServ.GetBySubjectID(this.SelectedSubjectId, this.DomainName, pageNumber, pageSize).subscribe(
         (data) => {
           this.CurrentPage = data.pagination.currentPage
@@ -290,7 +301,7 @@ export class DirectMarkComponent {
   }
 
   View(id: number) {
-    this.router.navigateByUrl(`Employee/Assignment/${id}`)
+    this.router.navigateByUrl(`Employee/Direct Mark/${id}`)
   }
 
   openModal(Id?: number) {
@@ -301,6 +312,7 @@ export class DirectMarkComponent {
     this.directMark = new DirectMark();
     this.getSubjectData();
 
+    this.classDropdownOpen = false
     document.getElementById('Add_Modal')?.classList.remove('hidden');
     document.getElementById('Add_Modal')?.classList.add('flex');
   }
@@ -310,6 +322,7 @@ export class DirectMarkComponent {
     document.getElementById('Add_Modal')?.classList.add('hidden');
     this.validationErrors = {};
 
+    this.classDropdownOpen = false
     this.subjectWeightsForCreate = [];
     this.viewStudents = false
     this.viewClassStudents = false
@@ -324,20 +337,26 @@ export class DirectMarkComponent {
     this.DirectMarkServ.GetById(Id, this.DomainName).subscribe(
       data => {
         this.directMark = data
+        console.log(this.directMark)
         this.GradeServ.GetBySchoolId(this.directMark.schoolID, this.DomainName).subscribe((d) => {
           this.GradesForCreate = d
           this.subjectsForCreate = []
           this.subjectService.GetByGradeId(this.directMark.gradeID, this.DomainName).subscribe((d) => {
             this.subjectsForCreate = d
+            this.getSubjectWeightData()
+            this.ClassroomServ.GetBySubjectId(this.directMark.subjectID, this.DomainName).subscribe((d) => {
+              this.classrooms = d
+              this.directMark.allClasses = this.directMark.directMarkClasses.length === this.classrooms.length;
+              this.directMark.classids = this.directMark.directMarkClasses.map(c => c.classroomID)
+            })
           })
         })
-        this.getSubjectWeightData()
       }
     )
   }
 
   getSubjectData() {
-    this.subjects = []
+    this.subjectsForCreate = []
     this.subjectService.GetByGradeId(this.directMark.gradeID, this.DomainName).subscribe((d) => {
       this.subjectsForCreate = d
     })
@@ -433,41 +452,58 @@ export class DirectMarkComponent {
 
   Save() {
     if (this.isFormValid()) {
-      this.DirectMarkServ.Add(this.directMark, this.DomainName).subscribe(
-        (result: any) => {
-          this.closeModal();
-          this.GetAllData(this.CurrentPage, this.PageSize)
-          this.isLoading = false;
-        },
-        (error) => {
-          this.isLoading = false;
-          Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: 'Try Again Later!',
-            confirmButtonText: 'Okay',
-            customClass: { confirmButton: 'secondaryBg' },
-          });
-        }
-      );
-    } else {
-      this.DirectMarkServ.Edit(this.directMark, this.DomainName).subscribe(
-        (result: any) => {
-          this.closeModal();
-          this.GetAllData(this.CurrentPage, this.PageSize)
-          this.isLoading = false;
-        },
-        (error) => {
-          this.isLoading = false;
-          Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: 'Try Again Later!',
-            confirmButtonText: 'Okay',
-            customClass: { confirmButton: 'secondaryBg' },
-          });
-        }
-      );
+      if (this.directMark.id == 0) {
+        this.DirectMarkServ.Add(this.directMark, this.DomainName).subscribe(
+          (result: any) => {
+            this.closeModal();
+            this.GetAllData(this.CurrentPage, this.PageSize)
+            this.isLoading = false;
+            this.classDropdownOpen = false
+            Swal.fire({
+              icon: 'success',
+              title: 'Done',
+              text: 'Created Successfully',
+              confirmButtonColor: '#089B41',
+            });
+          },
+          (error) => {
+            this.isLoading = false;
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'Try Again Later!',
+              confirmButtonText: 'Okay',
+              customClass: { confirmButton: 'secondaryBg' },
+            });
+          }
+        );
+      } else {
+        console.log("this.directMark before edit", this.directMark)
+        this.DirectMarkServ.Edit(this.directMark, this.DomainName).subscribe(
+          (result: any) => {
+            this.closeModal();
+            this.GetAllData(this.CurrentPage, this.PageSize)
+            this.isLoading = false;
+            this.classDropdownOpen = false
+            Swal.fire({
+              icon: 'success',
+              title: 'Done',
+              text: 'Updatedd Successfully',
+              confirmButtonColor: '#089B41',
+            });
+          },
+          (error) => {
+            this.isLoading = false;
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'Try Again Later!',
+              confirmButtonText: 'Okay',
+              customClass: { confirmButton: 'secondaryBg' },
+            });
+          }
+        );
+      }
     }
   }
 

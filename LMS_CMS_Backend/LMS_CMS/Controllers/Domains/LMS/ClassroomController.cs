@@ -233,6 +233,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             return Ok(DTO);
         }
 
+
         [HttpGet("ByGradeAndAcademicYearID/{GradeId}/{AcYeaId}")]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },

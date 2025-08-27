@@ -29,13 +29,16 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         /////////////////
         
-        [HttpGet("GetByDirectMarkId/{DirectMarkId}")]
+        [HttpGet("GetByDirectMarkId/{DirectMarkId}/{ClassId}")]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
           pages: new[] { "Semester" }
         )]
-        public async Task<IActionResult> GetAsync(long DirectMarkId)
+        public async Task<IActionResult> GetAsync(long DirectMarkId, long ClassId, [FromQuery] int pageNumber = 1,[FromQuery] int pageSize = 10)
         {
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             var userClaims = HttpContext.User.Claims;
@@ -47,19 +50,58 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             {
                 return Unauthorized("User ID or Type claim not found.");
             }
-            List<DirectMarkClassesStudent> DirectMarkClassesStudents = await Unit_Of_Work.directMarkClassesStudent_Repository.Select_All_With_IncludesById<DirectMarkClassesStudent>(
-                    sem => sem.IsDeleted != true && sem.DirectMarkID== DirectMarkId,
-                    query => query.Include(emp => emp.StudentClassroom).ThenInclude(a=>a.Student),
-                    query => query.Include(emp => emp.DirectMark));
 
-            if (DirectMarkClassesStudents == null || DirectMarkClassesStudents.Count == 0)
+            DirectMark directMark =await Unit_Of_Work.directMark_Repository.FindByIncludesAsync(
+                    sem => sem.IsDeleted != true && sem.ID == DirectMarkId,
+                    query => query.Include(d => d.Subject),
+                    query => query.Include(d => d.Subject.Grade));
+
+            if (directMark == null)
             {
                 return NotFound();
             }
 
-            List<DirectMarkClassesStudentGetDTO> DTO = mapper.Map<List<DirectMarkClassesStudentGetDTO>>(DirectMarkClassesStudents);
+            // Count total records for pagination metadata
+            int totalRecords = await Unit_Of_Work.directMarkClassesStudent_Repository
+                .CountAsync(sem => sem.IsDeleted != true && sem.DirectMarkID == DirectMarkId && sem.StudentClassroom.ClassID== ClassId);
 
-            return Ok(DTO);
+            if (totalRecords == 0)
+                return NotFound();
+
+            // Fetch paginated records with includes
+            List<DirectMarkClassesStudent> DirectMarkClassesStudents = await Unit_Of_Work.directMarkClassesStudent_Repository
+                .Select_All_With_IncludesById_Pagination<DirectMarkClassesStudent>(
+                    sem => sem.IsDeleted != true && sem.DirectMarkID == DirectMarkId && sem.StudentClassroom.ClassID == ClassId,
+                    query => query.Include(emp => emp.StudentClassroom)
+                                  .ThenInclude(a => a.Student),
+                    query => query.Include(emp => emp.DirectMark)
+                )
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            if (DirectMarkClassesStudents == null || DirectMarkClassesStudents.Count == 0)
+                return NotFound();
+
+            // Map to DTO
+            List<DirectMarkClassesStudentGetDTO> DTO = mapper.Map<List<DirectMarkClassesStudentGetDTO>>(DirectMarkClassesStudents);
+            DirectMarkGetDTO DirectMarkDTO = mapper.Map<DirectMarkGetDTO>(directMark);
+
+            // Build pagination metadata
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new
+            {
+                Data = DTO,
+                DirectMark = DirectMarkDTO,
+                Pagination = paginationMetadata
+            });
         }
 
         /////////////////
@@ -71,7 +113,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             allowEdit: 1,
             pages: new[] { "Academic Years" }
         )]
-        public IActionResult Edit(List<DirectMarkClassesStudentEditDTO> NewDirectMarkClassesStudent)
+        public IActionResult Edit(DirectMarkClassesStudentEditDTO NewDirectMarkClassesStudent)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -87,37 +129,34 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            foreach (var mark in NewDirectMarkClassesStudent)
+            DirectMarkClassesStudent directMarkClassesStudent = Unit_Of_Work.directMarkClassesStudent_Repository.First_Or_Default(s => s.ID == NewDirectMarkClassesStudent.ID);
+            if(directMarkClassesStudent == null)
             {
-                DirectMarkClassesStudent directMarkClassesStudent = Unit_Of_Work.directMarkClassesStudent_Repository.First_Or_Default(s => s.ID == mark.ID);
-                if(directMarkClassesStudent == null)
-                {
-                    return NotFound("No DirectMarkClassesStudent with this ID");
-                }
-                directMarkClassesStudent.Degree=mark.Degree;
-
-                TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-                directMarkClassesStudent.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
-                if (userTypeClaim == "octa")
-                {
-                    directMarkClassesStudent.UpdatedByOctaId = userId;
-                    if (directMarkClassesStudent.UpdatedByUserId != null)
-                    {
-                        directMarkClassesStudent.UpdatedByUserId = null;
-                    }
-
-                }
-                else if (userTypeClaim == "employee")
-                {
-                    directMarkClassesStudent.UpdatedByUserId = userId;
-                    if (directMarkClassesStudent.UpdatedByOctaId != null)
-                    {
-                        directMarkClassesStudent.UpdatedByOctaId = null;
-                    }
-                }
-                Unit_Of_Work.directMarkClassesStudent_Repository.Update(directMarkClassesStudent);
-                Unit_Of_Work.SaveChanges();
+                return NotFound("No DirectMarkClassesStudent with this ID");
             }
+            directMarkClassesStudent.Degree= NewDirectMarkClassesStudent.Degree;
+
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            directMarkClassesStudent.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            if (userTypeClaim == "octa")
+            {
+                directMarkClassesStudent.UpdatedByOctaId = userId;
+                if (directMarkClassesStudent.UpdatedByUserId != null)
+                {
+                    directMarkClassesStudent.UpdatedByUserId = null;
+                }
+
+            }
+            else if (userTypeClaim == "employee")
+            {
+                directMarkClassesStudent.UpdatedByUserId = userId;
+                if (directMarkClassesStudent.UpdatedByOctaId != null)
+                {
+                    directMarkClassesStudent.UpdatedByOctaId = null;
+                }
+            }
+            Unit_Of_Work.directMarkClassesStudent_Repository.Update(directMarkClassesStudent);
+            Unit_Of_Work.SaveChanges();
 
             return Ok(NewDirectMarkClassesStudent);
 
