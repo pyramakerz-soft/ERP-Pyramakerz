@@ -11,6 +11,8 @@ import { LanguageService } from '../../../../../Services/shared/language.service
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 import Swal from 'sweetalert2';
 import * as XLSX from 'xlsx-js-style';
+import { ClassroomService } from '../../../../../Services/Employee/LMS/classroom.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-daily-preformance-report',
@@ -19,11 +21,12 @@ import * as XLSX from 'xlsx-js-style';
   templateUrl: './daily-preformance-report.component.html',
   styleUrl: './daily-preformance-report.component.css'
 })
-export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
-  DomainName: string = '';
+export class DailyPreformanceReportComponent implements OnInit, OnDestroy {  DomainName: string = '';
   SelectedStudentId: number = 0;
+  SelectedClassroomId: number = 0; // Add classroom selection
   SelectedStartDate: string = '';
   SelectedEndDate: string = '';
+  reportType: string = 'student'; // Default to student report
 
   showTable: boolean = false;
   showViewReportBtn: boolean = false;
@@ -33,6 +36,7 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
   tableData: any[] = [];
   tableDataForExport: any[] = [];
   students: any[] = [];
+  classrooms: any[] = []; // Add classrooms array
   isLoading: boolean = false;
 
   school = {
@@ -49,13 +53,27 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
     public dailyPerformanceService: DailyPerformanceService,
     public apiService: ApiService,
     public studentService: StudentService,
+    public classroomService: ClassroomService, // Add classroom service
     private languageService: LanguageService,
     private realTimeService: RealTimeNotificationServiceService,
+    private route: ActivatedRoute // Add route
   ) {}
 
   ngOnInit() {
     this.DomainName = this.apiService.GetHeader();
-    this.loadStudents();
+    
+    // Get report type from route data
+    this.reportType = this.route.snapshot.data['reportType'] || 'student';
+    
+    if (this.reportType === 'student') {
+      this.loadStudents();
+      this.school.reportHeaderOneEn = 'Student Daily Performance Report';
+      this.school.reportHeaderOneAr = 'تقرير أداء الطالب اليومي';
+    } else {
+      this.loadClassrooms();
+      this.school.reportHeaderOneEn = 'Classroom Daily Performance Report';
+      this.school.reportHeaderOneAr = 'تقرير أداء الفصل اليومي';
+    }
 
     this.subscription = this.languageService.language$.subscribe(
       (direction) => {
@@ -92,13 +110,41 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
     );
   }
 
+  loadClassrooms() {
+    this.classroomService.Get(this.DomainName).subscribe(
+      (data) => {
+        this.classrooms = data.map(classroom => ({
+          id: classroom.id,
+          name: classroom.name || 'Unknown'
+        }));
+      },
+      (error) => {
+        console.error('Error loading classrooms:', error);
+        Swal.fire({
+          title: 'Error',
+          text: 'Failed to load classrooms.',
+          icon: 'error',
+          confirmButtonText: 'OK',
+        });
+      }
+    );
+  }
+
   DateChange() {
     this.showTable = false;
 
-    if (this.SelectedEndDate && this.SelectedStartDate && this.SelectedStudentId) {
-      this.showViewReportBtn = true;
+    if (this.reportType === 'student') {
+      if (this.SelectedEndDate && this.SelectedStartDate && this.SelectedStudentId) {
+        this.showViewReportBtn = true;
+      } else {
+        this.showViewReportBtn = false;
+      }
     } else {
-      this.showViewReportBtn = false;
+      if (this.SelectedEndDate && this.SelectedStartDate && this.SelectedClassroomId) {
+        this.showViewReportBtn = true;
+      } else {
+        this.showViewReportBtn = false;
+      }
     }
   }
 
@@ -119,36 +165,64 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.tableData = [];
 
-    this.dailyPerformanceService
-      .GetDailyPerformanceReport(
-        this.SelectedStudentId,
-        this.SelectedStartDate,
-        this.SelectedEndDate,
-        this.DomainName
-      )
-      .subscribe(
-        (data) => {
-          this.tableData = data;
-          this.prepareExportData();
-          this.showTable = true;
-          this.isLoading = false;
-        },
-        (error) => {
-          console.error('Error fetching daily performance report:', error);
-          Swal.fire({
-            title: 'Error',
-            text: 'Failed to fetch daily performance report data.',
-            icon: 'error',
-            confirmButtonText: 'OK',
-          });
-          this.showTable = true;
-          this.isLoading = false;
-        }
-      );
+    if (this.reportType === 'student') {
+      this.dailyPerformanceService
+        .GetDailyPerformanceReport(
+          this.SelectedStudentId,
+          this.SelectedStartDate,
+          this.SelectedEndDate,
+          this.DomainName
+        )
+        .subscribe(
+          (data) => {
+            this.processData(data);
+          },
+          (error) => {
+            this.handleError(error);
+          }
+        );
+    } else {
+      this.dailyPerformanceService
+        .GetClassroomDailyPerformanceAverages(
+          this.SelectedClassroomId,
+          this.SelectedStartDate,
+          this.SelectedEndDate,
+          this.DomainName
+        )
+        .subscribe(
+          (data) => {
+            this.processData(data);
+          },
+          (error) => {
+            this.handleError(error);
+          }
+        );
+    }
+  }
+
+  private processData(data: any[]) {
+    this.tableData = data;
+    this.prepareExportData();
+    this.showTable = true;
+    this.isLoading = false;
+  }
+
+  private handleError(error: any) {
+    console.error('Error fetching daily performance report:', error);
+    // Swal.fire({
+    //   title: 'Error',
+    //   text: 'Failed to fetch daily performance report data.',
+    //   icon: 'error',
+    //   confirmButtonText: 'OK',
+    // });
+    this.showTable = true;
+    this.isLoading = false;
   }
 
   get fileName(): string {
-    return 'Daily Performance Report';
+    return this.reportType === 'student' 
+      ? 'Student Daily Performance Report' 
+      : 'Classroom Daily Performance Report';
   }
 
   get studentName(): string {
@@ -156,67 +230,128 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
     return student ? student.name : 'Undefined';    
   }
 
-  getInfoRows(): any[] {
-    return [
-      {
-        keyEn: 'Student: ' + this.studentName,
-        keyAr: 'الطالب: ' + this.studentName,
-      },
-      {
-        keyEn: 'Start Date: ' + this.SelectedStartDate,
-        keyAr: 'تاريخ البدء: ' + this.SelectedStartDate,
-      },
-      {
-        keyEn: 'End Date: ' + this.SelectedEndDate,
-        keyAr: 'تاريخ الانتهاء: ' + this.SelectedEndDate,
-      },
-      {
-        keyEn: 'Generated On: ' + new Date().toLocaleDateString(),
-        keyAr: 'تم الإنشاء في: ' + new Date().toLocaleDateString(),
-      },
-    ];
+  get classroomName(): string {
+    const classroom = this.classrooms.find(c => c.id == this.SelectedClassroomId);
+    return classroom ? classroom.name : 'Undefined';    
   }
 
-  private prepareExportData(): void {
+  getInfoRows(): any[] {
+    if (this.reportType === 'student') {
+      return [
+        {
+          keyEn: 'Student: ' + this.studentName,
+          keyAr: 'الطالب: ' + this.studentName,
+        },
+        {
+          keyEn: 'Start Date: ' + this.SelectedStartDate,
+          keyAr: 'تاريخ البدء: ' + this.SelectedStartDate,
+        },
+        {
+          keyEn: 'End Date: ' + this.SelectedEndDate,
+          keyAr: 'تاريخ الانتهاء: ' + this.SelectedEndDate,
+        },
+        {
+          keyEn: 'Generated On: ' + new Date().toLocaleDateString(),
+          keyAr: 'تم الإنشاء في: ' + new Date().toLocaleDateString(),
+        },
+      ];
+    } else {
+      return [
+        {
+          keyEn: 'Classroom: ' + this.classroomName,
+          keyAr: 'الفصل: ' + this.classroomName,
+        },
+        {
+          keyEn: 'Start Date: ' + this.SelectedStartDate,
+          keyAr: 'تاريخ البدء: ' + this.SelectedStartDate,
+        },
+        {
+          keyEn: 'End Date: ' + this.SelectedEndDate,
+          keyAr: 'تاريخ الانتهاء: ' + this.SelectedEndDate,
+        },
+        {
+          keyEn: 'Generated On: ' + new Date().toLocaleDateString(),
+          keyAr: 'تم الإنشاء في: ' + new Date().toLocaleDateString(),
+        },
+      ];
+    }
+  }
+
+private prepareExportData(): void {
+  if (this.reportType === 'student') {
     this.tableDataForExport = this.tableData.map((item) => ({
       'Date': item.date,
-      'English Name': item.englishNameStudent,
-      'Arabic Name': item.arabicNameStudent,
+      'En Name': item.englishNameStudent,
+      'Ar Name': item.arabicNameStudent,
       'Student ID': item.studentId,
-      'Performance Type (EN)': item.performanceTypeEn,
-      'Performance Type (AR)': item.performanceTypeAr,
+      'Performance Type': item.performanceTypeEn,
+      'Performance Type AR': item.performanceTypeAr,
+      'Comment': item.comment || 'N/A',
+    }));
+  } else {
+    this.tableDataForExport = this.tableData.map((item) => ({
+      'Date': item.date,
+      'Avg Score': item.averageScore || 'N/A',
+      'Performance Type': item.performanceTypeEn,
+      'Performance Type AR': item.performanceTypeAr,
       'Comment': item.comment || 'N/A',
     }));
   }
+}
 
-  getTableDataWithHeader(): any[] {
+getTableDataWithHeader(): any[] {
+  if (this.reportType === 'student') {
     return [
       {
-        header: 'Daily Performance Report',
+        header: 'Student Daily Performance Report',
         summary: this.getInfoRows(),
         table: {
           headers: [
             'Date',
-            'English Name',
-            'Arabic Name',
+            'Ar Name',
+            'Ar Name',
             'Student ID',
-            'Performance Type (EN)',
-            'Performance Type (AR)',
+            'Performance Type',
+            'Performance Type AR',
             'Comment',
           ],
           data: this.tableData.map((item) => ({
             Date: item.date,
-            'English Name': item.englishNameStudent,
-            'Arabic Name': item.arabicNameStudent,
+            'En Name': item.englishNameStudent,
+            'Ar Name': item.arabicNameStudent,
             'Student ID': item.studentId,
-            'Performance Type (EN)': item.performanceTypeEn,
-            'Performance Type (AR)': item.performanceTypeAr,
+            'Performance Type': item.performanceTypeEn,
+            'Performance Type AR': item.performanceTypeAr,
+            Comment: item.comment,
+          })),
+        },
+      },
+    ];
+  } else {
+    return [
+      {
+        header: 'Classroom Daily Performance Report',
+        summary: this.getInfoRows(),
+        table: {
+          headers: [
+            'Date',
+            'Avg Score',
+            'Performance Type',
+            'Performance Type AR',
+            'Comment',
+          ],
+          data: this.tableData.map((item) => ({
+            Date: item.date,
+            'Avg Score': item.averageScore,
+            'Performance Type': item.performanceTypeEn,
+            'Performance Type AR': item.performanceTypeAr,
             Comment: item.comment,
           })),
         },
       },
     ];
   }
+}
 
   Print() {
     if (this.tableDataForExport.length === 0) {
@@ -277,78 +412,99 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
     }, 500);
   }
 
-  DownloadAsExcel() {
-    if (!this.tableData || this.tableData.length === 0) {
-      Swal.fire({
-        title: 'No Data',
-        text: 'No data available for export.',
-        icon: 'info',
-        confirmButtonText: 'OK',
-      });
-      return;
-    }
+DownloadAsExcel() {
+  if (!this.tableData || this.tableData.length === 0) {
+    Swal.fire({
+      title: 'No Data',
+      text: 'No data available for export.',
+      icon: 'info',
+      confirmButtonText: 'OK',
+    });
+    return;
+  }
 
-    const excelData: any[] = [];
+  const excelData: any[] = [];
 
-    // Add report title with styling
-    excelData.push([
-      {
-        v: 'DAILY PERFORMANCE REPORT',
-        s: {
-          font: { bold: true, sz: 16 },
-          alignment: { horizontal: 'center' },
-        },
+  // Add report title with styling
+  excelData.push([
+    {
+      v: this.reportType === 'student' ? 'STUDENT DAILY PERFORMANCE REPORT' : 'CLASSROOM DAILY PERFORMANCE REPORT',
+      s: {
+        font: { bold: true, sz: 16 },
+        alignment: { horizontal: 'center' },
       },
-    ]);
-    excelData.push([]); // empty row
+    },
+  ]);
+  excelData.push([]); // empty row
 
-    // Add filter information with styling
+  // Add filter information with styling
+  if (this.reportType === 'student') {
     const selectedStudent = this.students.find(s => s.id == this.SelectedStudentId);
-
     excelData.push([
       { v: 'Student:', s: { font: { bold: true } } },
       { v: selectedStudent?.name || 'All', s: { font: { bold: true } } },
     ]);
+  } else {
+    const selectedClassroom = this.classrooms.find(c => c.id == this.SelectedClassroomId);
     excelData.push([
-      { v: 'Start Date:', s: { font: { bold: true } } },
-      { v: this.SelectedStartDate, s: { font: { bold: true } } },
+      { v: 'Classroom:', s: { font: { bold: true } } },
+      { v: selectedClassroom?.name || 'All', s: { font: { bold: true } } },
     ]);
-    excelData.push([
-      { v: 'End Date:', s: { font: { bold: true } } },
-      { v: this.SelectedEndDate, s: { font: { bold: true } } },
-    ]);
-    excelData.push([]); // empty row
+  }
+  
+  excelData.push([
+    { v: 'Start Date:', s: { font: { bold: true } } },
+    { v: this.SelectedStartDate, s: { font: { bold: true } } },
+  ]);
+  excelData.push([
+    { v: 'End Date:', s: { font: { bold: true } } },
+    { v: this.SelectedEndDate, s: { font: { bold: true } } },
+  ]);
+  excelData.push([]); // empty row
 
-    // Table headers
-    const headers = [
+  // Table headers
+  let headers: string[] = [];
+  if (this.reportType === 'student') {
+    headers = [
       'Date',
-      'English Name',
-      'Arabic Name',
+      'En Name',
+      'Ar Name',
       'Student ID',
-      'Performance Type (EN)',
-      'Performance Type (AR)',
+      'Performance Type',
+      'Performance Type AR',
       'Comment',
     ];
-    excelData.push(
-      headers.map((header) => ({
-        v: header,
-        s: {
-          font: { bold: true },
-          fill: { fgColor: { rgb: '4472C4' } },
-          color: { rgb: 'FFFFFF' },
-          border: {
-            top: { style: 'thin' },
-            bottom: { style: 'thin' },
-            left: { style: 'thin' },
-            right: { style: 'thin' },
-          },
+  } else {
+    headers = [
+      'Date',
+      'Avg Score',
+      'Performance Type',
+      'Performance Type AR',
+      'Comment',
+    ];
+  }
+  
+  excelData.push(
+    headers.map((header) => ({
+      v: header,
+      s: {
+        font: { bold: true },
+        fill: { fgColor: { rgb: '4472C4' } },
+        color: { rgb: 'FFFFFF' },
+        border: {
+          top: { style: 'thin' },
+          bottom: { style: 'thin' },
+          left: { style: 'thin' },
+          right: { style: 'thin' },
         },
-      }))
-    );
+      },
+    }))
+  );
 
-    // Table rows
-    if (this.tableData && this.tableData.length > 0) {
-      this.tableData.forEach((row, i) => {
+  // Table rows
+  if (this.tableData && this.tableData.length > 0) {
+    this.tableData.forEach((row, i) => {
+      if (this.reportType === 'student') {
         excelData.push([
           { v: row.date, s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'FFFFFF' } } } },
           { v: row.englishNameStudent, s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'FFFFFF' } } } },
@@ -358,46 +514,66 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
           { v: row.performanceTypeAr, s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'FFFFFF' } } } },
           { v: row.comment || 'N/A', s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'FFFFFF' } } } },
         ]);
-      });
-    } else {
-      excelData.push([
-        {
-          v: 'No daily performance records found for the selected criteria',
-          s: {
-            font: { italic: true },
-            alignment: { horizontal: 'center' },
-          },
-          colSpan: headers.length,
-        },
-      ]);
-    }
-
-    // Create worksheet
-    const worksheet = XLSX.utils.aoa_to_sheet(excelData);
-
-    // Merge cells for headers
-    if (!worksheet['!merges']) worksheet['!merges'] = [];
-    worksheet['!merges'].push({
-      s: { r: 0, c: 0 },
-      e: { r: 0, c: headers.length - 1 },
+      } else {
+        excelData.push([
+          { v: row.date, s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'FFFFFF' } } } },
+          { v: row.averageScore || 'N/A', s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'FFFFFF' } } } },
+          { v: row.performanceTypeEn, s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'FFFFFF' } } } },
+          { v: row.performanceTypeAr, s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'FFFFFF' } } } },
+          { v: row.comment || 'N/A', s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'FFFFFF' } } } },
+        ]);
+      }
     });
+  } else {
+    excelData.push([
+      {
+        v: 'No daily performance records found for the selected criteria',
+        s: {
+          font: { italic: true },
+          alignment: { horizontal: 'center' },
+        },
+        colSpan: headers.length,
+      },
+    ]);
+  }
 
-    // Apply column widths
+  // Create worksheet
+  const worksheet = XLSX.utils.aoa_to_sheet(excelData);
+
+  // Merge cells for headers
+  if (!worksheet['!merges']) worksheet['!merges'] = [];
+  worksheet['!merges'].push({
+    s: { r: 0, c: 0 },
+    e: { r: 0, c: headers.length - 1 },
+  });
+
+  // Apply column widths
+  if (this.reportType === 'student') {
     worksheet['!cols'] = [
       { wch: 15 }, // Date
-      { wch: 20 }, // English Name
-      { wch: 20 }, // Arabic Name
+      { wch: 20 }, // En Name
+      { wch: 20 }, // Ar Name
       { wch: 10 }, // Student ID
-      { wch: 20 }, // Performance Type (EN)
-      { wch: 20 }, // Performance Type (AR)
+      { wch: 20 }, // Performance Type
+      { wch: 20 }, // Performance Type AR
       { wch: 30 }, // Comment
     ];
-
-    // Create workbook and save
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Daily Performance Report');
-
-    const dateStr = new Date().toISOString().slice(0, 10);
-    XLSX.writeFile(workbook, `Daily_Performance_Report_${dateStr}.xlsx`);
+  } else {
+    worksheet['!cols'] = [
+      { wch: 15 }, // Date
+      { wch: 20 }, // Avg Score
+      { wch: 20 }, // Performance Type
+      { wch: 20 }, // Performance Type AR
+      { wch: 30 }, // Comment
+    ];
   }
+
+  // Create workbook and save
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Daily Performance Report');
+
+  const dateStr = new Date().toISOString().slice(0, 10);
+  const reportTypeStr = this.reportType === 'student' ? 'Student' : 'Classroom';
+  XLSX.writeFile(workbook, `${reportTypeStr}_Daily_Performance_Report_${dateStr}.xlsx`);
+}
 }

@@ -76,15 +76,85 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////////////--77
+        //[HttpGet("ViolationReport")]
+        //[Authorize_Endpoint_( allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Violation Types" })]
+        //public async Task<IActionResult> GetViolationReport(
+        // [FromQuery] long? employeeTypeId,
+        // [FromQuery] long? violationTypeId,
+        // [FromQuery] DateOnly? fromDate,
+        // [FromQuery] DateOnly? toDate)
+        // {
+
+        //    if (!fromDate.HasValue || !toDate.HasValue)
+        //        return BadRequest("Both FromDate and ToDate are required.");
+
+        //    if (fromDate.Value > toDate.Value)
+        //        return BadRequest("FromDate cannot be greater than ToDate.");
+
+        //    UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+        //    var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+        //    var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+        //    if (string.IsNullOrEmpty(userIdClaim) || string.IsNullOrEmpty(userTypeClaim))
+        //    {
+        //        return Unauthorized("User ID or Type claim not found.");
+        //    }
+
+        //    IQueryable<Violation> query = Unit_Of_Work.violations_Repository.Query()
+        //        .Include(v => v.ViolationType)
+        //        .Include(v => v.Employee)
+        //            .ThenInclude(e => e.EmployeeType)
+        //        .Where(v => !v.IsDeleted.HasValue || !v.IsDeleted.Value);
+
+
+        //    if (employeeTypeId.HasValue)
+        //    {
+        //        query = query.Where(v => v.Employee.EmployeeTypeID == employeeTypeId.Value);
+        //    }
+
+        //    if (violationTypeId.HasValue)
+        //    {
+        //        query = query.Where(v => v.ViolationTypeID == violationTypeId.Value);
+        //    }
+
+        //    if (fromDate.HasValue)
+        //    {
+        //        query = query.Where(v => v.Date >= fromDate.Value);
+        //    }
+
+        //    if (toDate.HasValue)
+        //    {
+        //        query = query.Where(v => v.Date <= toDate.Value);
+        //    }
+
+        //    var violations = await query
+        //   .OrderBy(v => v.Date)
+        //   .Select(v => new ViolationReportDTO
+        //   {
+        //       ID = v.ID,
+        //       Date = v.Date, 
+        //       ViolationType = v.ViolationType.Name,
+        //       EmployeeType = v.Employee.EmployeeType.Name,
+        //       EmployeeName = $"{v.Employee.en_name} {v.Employee.ar_name}",
+        //       Details = v.Details,
+        //       //AttachmentUrl = v.AttachmentPath
+        //   })
+        //   .ToListAsync();
+
+        //        return Ok(violations);
+        //    }
+        /////////////////////////////////////////////////////////////////////////////////////////////////--77
+
         [HttpGet("ViolationReport")]
-        [Authorize_Endpoint_( allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Violation Types" })]
+        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Violation Types" })]
         public async Task<IActionResult> GetViolationReport(
          [FromQuery] long? employeeTypeId,
          [FromQuery] long? violationTypeId,
          [FromQuery] DateOnly? fromDate,
          [FromQuery] DateOnly? toDate)
-         {
-           
+        {
+
             if (!fromDate.HasValue || !toDate.HasValue)
                 return BadRequest("Both FromDate and ToDate are required.");
 
@@ -107,7 +177,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
                     .ThenInclude(e => e.EmployeeType)
                 .Where(v => !v.IsDeleted.HasValue || !v.IsDeleted.Value);
 
-           
+
             if (employeeTypeId.HasValue)
             {
                 query = query.Where(v => v.Employee.EmployeeTypeID == employeeTypeId.Value);
@@ -130,20 +200,22 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
 
             var violations = await query
            .OrderBy(v => v.Date)
-           .Select(v => new ViolationReportDTO
-           {
-               ID = v.ID,
-               Date = v.Date, 
-               ViolationType = v.ViolationType.Name,
-               EmployeeType = v.Employee.EmployeeType.Name,
-               EmployeeName = $"{v.Employee.en_name} {v.Employee.ar_name}",
-               Details = v.Details,
-               //AttachmentUrl = v.AttachmentPath
-           })
            .ToListAsync();
 
-                return Ok(violations);
+            var violationReports = mapper.Map<List<ViolationReportDTO>>(violations);
+
+            string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+            foreach (var report in violationReports)
+            {
+                if (!string.IsNullOrEmpty(report.AttachmentUrl))
+                {
+                    report.AttachmentUrl = $"{serverUrl}{report.AttachmentUrl.Replace("\\", "/")}";
+                }
             }
+            return Ok(violationReports);
+        }
+
+
         /////////////////////////////////////////////////////////////////////////////////////////////////
 
         [HttpGet("{id}")]

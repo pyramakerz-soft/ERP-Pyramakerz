@@ -34,7 +34,7 @@
         <label for="employee" class="mb-2 font-medium">{{ 'Employee' | translate }}</label>
         <select id="employee" class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
             [(ngModel)]="filterParams.employeeId">
-            <option [value]="0">{{ 'All Employees' | translate }}</option>
+            <option [value]="null">{{'Select'| translate }}  {{'All'| translate }}</option>
             <option *ngFor="let employee of Employees" [value]="employee.id">{{ employee.en_name }}</option>
         </select>
     </div>
@@ -43,7 +43,7 @@
         <label for="school" class="mb-2 font-medium">{{ 'School' | translate }}</label>
         <select id="school" class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
             [(ngModel)]="SchoolID" (change)="onSchoolChange($event)">
-            <option [value]="0">{{ 'All Schools' | translate }}</option>
+            <option [value]="null" selected>{{'Select'| translate }}  {{'All'| translate }}</option>
             <option *ngFor="let school of Schools" [value]="school.id">{{ school.name }}</option>
         </select>
     </div>
@@ -55,7 +55,7 @@
         <label class="mb-2 font-medium" for="Class" [ngClass]="{ 'text-gray-400': !SchoolID, 'primaryTxt': SchoolID }">{{ 'Class' | translate }}</label>
         <select id="class" class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
             [disabled]="!SchoolID" [(ngModel)]="filterParams.classroomId">
-            <option [value]="0">{{ 'All Classes' | translate }}</option>
+            <option [value]="null" selected>{{'Select'| translate }}  {{'All'| translate }}</option>
             <option *ngFor="let class of Classs" [value]="class.id">{{ class.name }}</option>
         </select>
     </div>

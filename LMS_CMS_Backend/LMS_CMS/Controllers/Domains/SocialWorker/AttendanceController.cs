@@ -327,7 +327,6 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
                 }
             }
 
-
             attendance.IsDeleted = true;
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             attendance.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
@@ -352,5 +351,93 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             Unit_Of_Work.SaveChanges();
             return Ok();
         }
+        ////////////////////////////////////////////////////////////////////////////////--77
+        [HttpGet("AttendanceReport")]
+        [Authorize_Endpoint_(
+        allowedTypes: new[] { "octa", "employee" },
+        pages: new[] { "Attendance" }
+        )]
+            public async Task<IActionResult> AttendanceReport(
+            [FromQuery] DateOnly? FromDate,
+            [FromQuery] DateOnly? ToDate,
+            [FromQuery] long? SchoolId = null,
+            [FromQuery] long? AcademicYearId = null,
+            [FromQuery] long? GradeId = null,
+            [FromQuery] long? ClassroomId = null,
+            [FromQuery] long? StudentId = null)
+                {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = userClaims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = userClaims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            // Validate that FromDate and ToDate are provided
+            if (!FromDate.HasValue || !ToDate.HasValue)
+            {
+                return BadRequest("Both FromDate and ToDate are required.");
+            }
+
+            // Ensure ToDate is not before FromDate
+            if (ToDate.Value < FromDate.Value)
+            {
+                return BadRequest("ToDate cannot be earlier than FromDate.");
+            }
+
+            IQueryable<AttendanceStudent> query = Unit_Of_Work.attendanceStudent_Repository.Query()
+                .Where(ats => ats.IsDeleted != true && ats.Attendance.IsDeleted != true && ats.Attendance.Date >= FromDate.Value && ats.Attendance.Date <= ToDate.Value);
+
+            if (SchoolId.HasValue)
+            {
+                query = query.Where(ats => ats.Attendance.AcademicYear.SchoolID == SchoolId.Value);
+            }
+
+            if (AcademicYearId.HasValue)
+            {
+                query = query.Where(ats => ats.Attendance.AcademicYearID == AcademicYearId.Value);
+            }
+
+            if (GradeId.HasValue)
+            {
+                query = query.Where(ats => ats.Attendance.Classroom.GradeID == GradeId.Value);
+            }
+
+            if (ClassroomId.HasValue)
+            {
+                query = query.Where(ats => ats.Attendance.ClassroomID == ClassroomId.Value);
+            }
+
+            if (StudentId.HasValue)
+            {
+                query = query.Where(ats => ats.StudentID == StudentId.Value);
+            }
+
+            var attendanceStudents = await query
+                .Include(ats => ats.Attendance)
+                    .ThenInclude(a => a.AcademicYear)
+                    .ThenInclude(ay => ay.School)
+                .Include(ats => ats.Attendance)
+                    .ThenInclude(a => a.Classroom)
+                    .ThenInclude(cr => cr.Grade)
+                .Include(ats => ats.Student)
+                .ToListAsync();
+
+            if (attendanceStudents == null || attendanceStudents.Count == 0)
+            {
+                return NotFound("No attendance records found for the specified criteria.");
+            }
+
+            var reportData = mapper.Map<List<AttendanceReportDTO>>(attendanceStudents);
+
+            return Ok(reportData);
+        }
+
+
     }
 }
