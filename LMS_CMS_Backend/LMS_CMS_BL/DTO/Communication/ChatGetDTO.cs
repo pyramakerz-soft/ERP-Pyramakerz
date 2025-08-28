@@ -20,11 +20,13 @@ namespace LMS_CMS_BL.DTO.Communication
         public string SenderArabicName { get; set; }
         public long SenderUserTypeID { get; set; }
         public string SenderUserTypeName { get; set; }
+        public long SenderConnectionStatusID { get; set; }
         public long ReceiverID { get; set; }
         public string ReceiverEnglishName { get; set; }
         public string ReceiverArabicName { get; set; }
         public long ReceiverUserTypeID { get; set; }
         public string ReceiverUserTypeName { get; set; }
+        public long ReceiverConnectionStatusID { get; set; }
         public DateTime? InsertedAt { get; set; }
         public int UnreadCount { get; set; }
 
