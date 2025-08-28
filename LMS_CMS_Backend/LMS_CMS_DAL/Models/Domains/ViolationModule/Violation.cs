@@ -13,7 +13,7 @@ namespace LMS_CMS_DAL.Models.Domains.ViolationModule
         [Key]
         public long ID { get; set; }
         public string? Details { get; set; }
-        public string? Attach { get; set; }
+        public string? Attach { get; set; }  //7
         public DateOnly Date { get; set; }
 
         [ForeignKey("ViolationType")]
