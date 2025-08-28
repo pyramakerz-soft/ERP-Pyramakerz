@@ -209,12 +209,12 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {  Dom
 
   private handleError(error: any) {
     console.error('Error fetching daily performance report:', error);
-    Swal.fire({
-      title: 'Error',
-      text: 'Failed to fetch daily performance report data.',
-      icon: 'error',
-      confirmButtonText: 'OK',
-    });
+    // Swal.fire({
+    //   title: 'Error',
+    //   text: 'Failed to fetch daily performance report data.',
+    //   icon: 'error',
+    //   confirmButtonText: 'OK',
+    // });
     this.showTable = true;
     this.isLoading = false;
   }
