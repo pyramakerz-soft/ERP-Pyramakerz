@@ -2240,7 +2240,7 @@ namespace LMS_CMS_DAL.Models.Domains
             modelBuilder.Entity<MaintenanceEmployee>()
                  .HasOne(me => me.Employee)
                  .WithMany(me => me.MaintenanceEmployees)
-                 .HasForeignKey(me => me.EmployeeID)
+                 .HasForeignKey(me => me.MaintenanceEmployeeID)
                  .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Maintenance>()
@@ -2250,9 +2250,9 @@ namespace LMS_CMS_DAL.Models.Domains
                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Maintenance>()
-                .HasOne(m => m.Employee)
+                .HasOne(m => m.MaintenanceEmployee)
                 .WithMany(m => m.Maintenances)
-                .HasForeignKey(m => m.EmployeeID)
+                .HasForeignKey(m => m.MaintenanceEmployeeID)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Maintenance>()
@@ -2260,6 +2260,7 @@ namespace LMS_CMS_DAL.Models.Domains
                 .WithMany(m => m.Maintenances)
                 .HasForeignKey(m => m.CompanyID)
                 .OnDelete(DeleteBehavior.Restrict);
+
             
             modelBuilder.Entity<Employee>()
                 .HasOne(m => m.ConnectionStatus)

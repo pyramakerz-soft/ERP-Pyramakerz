@@ -15,11 +15,8 @@ namespace LMS_CMS_BL.DTO.Maintenance
         [Required]
         public long ItemID { get; set; }
 
-        [Required]
-        [MaxLength(50)]
-
         public long? CompanyID { get; set; }
-        public long? EmployeeID { get; set; }
+        public long? MaintenanceEmployeeID { get; set; }
 
         [Required]
         public decimal Cost { get; set; }
