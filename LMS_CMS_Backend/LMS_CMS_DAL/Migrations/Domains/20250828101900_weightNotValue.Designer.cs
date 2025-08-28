@@ -4,6 +4,7 @@ using LMS_CMS_DAL.Models.Domains;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LMS_CMS_DAL.Migrations.Domains
 {
     [DbContext(typeof(LMS_CMS_Context))]
-    partial class LMS_CMS_ContextModelSnapshot : ModelSnapshot
+    [Migration("20250828101900_weightNotValue")]
+    partial class weightNotValue
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -11107,6 +11110,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<long?>("DeletedByUserId")
                         .HasColumnType("bigint");
 
+                    b.Property<long?>("EmployeeID")
+                        .HasColumnType("bigint");
+
                     b.Property<DateTime?>("InsertedAt")
                         .HasColumnType("datetime2");
 
@@ -11120,9 +11126,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .HasColumnType("bit");
 
                     b.Property<long>("ItemID")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("MaintenanceEmployeeID")
                         .HasColumnType("bigint");
 
                     b.Property<string>("Note")
@@ -11143,11 +11146,11 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.HasIndex("DeletedByUserId");
 
+                    b.HasIndex("EmployeeID");
+
                     b.HasIndex("InsertedByUserId");
 
                     b.HasIndex("ItemID");
-
-                    b.HasIndex("MaintenanceEmployeeID");
 
                     b.HasIndex("UpdatedByUserId");
 
@@ -11230,6 +11233,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<long?>("DeletedByUserId")
                         .HasColumnType("bigint");
 
+                    b.Property<long>("EmployeeID")
+                        .HasColumnType("bigint");
+
                     b.Property<DateTime?>("InsertedAt")
                         .HasColumnType("datetime2");
 
@@ -11241,9 +11247,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
-
-                    b.Property<long>("MaintenanceEmployeeID")
-                        .HasColumnType("bigint");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -11258,9 +11261,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.HasIndex("DeletedByUserId");
 
-                    b.HasIndex("InsertedByUserId");
+                    b.HasIndex("EmployeeID");
 
-                    b.HasIndex("MaintenanceEmployeeID");
+                    b.HasIndex("InsertedByUserId");
 
                     b.HasIndex("UpdatedByUserId");
 
@@ -19352,6 +19355,11 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .HasForeignKey("DeletedByUserId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "Employee")
+                        .WithMany("Maintenances")
+                        .HasForeignKey("EmployeeID")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "InsertedByEmployee")
                         .WithMany()
                         .HasForeignKey("InsertedByUserId");
@@ -19362,11 +19370,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("LMS_CMS_DAL.Models.Domains.MaintenanceModule.MaintenanceEmployee", "MaintenanceEmployee")
-                        .WithMany("Maintenances")
-                        .HasForeignKey("MaintenanceEmployeeID")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "UpdatedByEmployee")
                         .WithMany()
                         .HasForeignKey("UpdatedByUserId");
@@ -19375,11 +19378,11 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.Navigation("DeletedByEmployee");
 
+                    b.Navigation("Employee");
+
                     b.Navigation("InsertedByEmployee");
 
                     b.Navigation("Item");
-
-                    b.Navigation("MaintenanceEmployee");
 
                     b.Navigation("UpdatedByEmployee");
                 });
@@ -19412,15 +19415,15 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .HasForeignKey("DeletedByUserId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "Employee")
+                        .WithMany("MaintenanceEmployees")
+                        .HasForeignKey("EmployeeID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "InsertedByEmployee")
                         .WithMany()
                         .HasForeignKey("InsertedByUserId");
-
-                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "Employee")
-                        .WithMany("MaintenanceEmployees")
-                        .HasForeignKey("MaintenanceEmployeeID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
 
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "UpdatedByEmployee")
                         .WithMany()
@@ -21080,6 +21083,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.Navigation("MaintenanceEmployees");
 
+                    b.Navigation("Maintenances");
+
                     b.Navigation("RemedialClassrooms");
 
                     b.Navigation("SubjectSupervisors");
@@ -21612,11 +21617,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                 });
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.MaintenanceModule.MaintenanceCompany", b =>
-                {
-                    b.Navigation("Maintenances");
-                });
-
-            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.MaintenanceModule.MaintenanceEmployee", b =>
                 {
                     b.Navigation("Maintenances");
                 });

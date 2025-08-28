@@ -11,7 +11,7 @@ import { Assignment } from '../../../../Models/LMS/assignment';
 import { AssignmentStudent } from '../../../../Models/LMS/assignment-student';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-subject-assignment',
@@ -34,7 +34,7 @@ export class SubjectAssignmentComponent {
   SolvedAssignment: AssignmentStudent[] = []
   UnSolvedAssignment: Assignment[] = []
 
-  constructor(public account: AccountService,private languageService: LanguageService, public router: Router, public ApiServ: ApiService, public AssignmentServ: AssignmentService,
+  constructor(public account: AccountService, private languageService: LanguageService, public router: Router, public ApiServ: ApiService, public AssignmentServ: AssignmentService,
     public activeRoute: ActivatedRoute, private menuService: MenuService,
     private realTimeService: RealTimeNotificationServiceService,) { }
 
@@ -48,20 +48,24 @@ export class SubjectAssignmentComponent {
     this.SubjectID = Number(this.activeRoute.snapshot.paramMap.get('SubjectId'));
     this.GetAssignments()
     this.subscription = this.languageService.language$.subscribe(direction => {
-    this.isRtl = direction === 'rtl';
+      this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-  ngOnDestroy(): void { 
-          this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
+
   GetAssignments() {
     this.AssignmentServ.GetByStudentID(this.UserID, this.SubjectID, this.DomainName).subscribe((d) => {
       this.SolvedAssignment = d.solvedAssignments
       this.UnSolvedAssignment = d.unsolvedAssignments
+    }, error => {
+      this.router.navigateByUrl(`Student/Subject`)
     })
   }
 
