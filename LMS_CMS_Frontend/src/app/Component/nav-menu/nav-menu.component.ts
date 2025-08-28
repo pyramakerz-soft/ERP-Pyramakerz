@@ -555,7 +555,8 @@ export class NavMenuComponent {
           otherUserID: chatMessage.receiverID,
           otherUserTypeID: chatMessage.receiverUserTypeID,
           englishNameForConversation: chatMessage.receiverEnglishName,
-          arabicNameForConversation: chatMessage.receiverArabicName
+          arabicNameForConversation: chatMessage.receiverArabicName,
+          connectionStatusForConversation: chatMessage.receiverConnectionStatusID
         }
       }); 
     }else{
@@ -564,7 +565,8 @@ export class NavMenuComponent {
           otherUserID: chatMessage.senderID,
           otherUserTypeID: chatMessage.senderUserTypeID,
           englishNameForConversation: chatMessage.senderEnglishName,
-          arabicNameForConversation: chatMessage.senderArabicName
+          arabicNameForConversation: chatMessage.senderArabicName,
+          connectionStatusForConversation: chatMessage.senderConnectionStatusID
         }
       });
     }
