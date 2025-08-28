@@ -8,7 +8,7 @@
     <div class="w-[24%]">
         <label for="School1" class="block mb-2 text-sm font-medium text-gray-900">{{ 'School' | translate }}</label>
         <select id="School1" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
-            [(ngModel)]="SelectedSchoolId" (change)="getAllGradesBySchoolId(); IsShowTabls = false">
+            [(ngModel)]="SelectedSchoolId" (change)="getAllGradesBySchoolId(); IsShowTabls = false;  SelectedSearchType=''; ">
             <option value=0 disabled selected hidden> {{ 'Select' | translate }}{{ 'School' | translate }}</option>
             <option *ngFor="let stu of schools" [value]="stu.id">
                 {{ stu.name }}
@@ -57,7 +57,7 @@
         <select id="SelectedSearchType"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             [(ngModel)]="SelectedSearchType" [disabled]="!SelectedSchoolId" (change)="OnSearchTypeChange()">
-            <option [value]='' disabled selected hidden> {{ 'Choose' | translate }} {{ 'Search Type' | translate }}
+            <option [value]="''" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Search Type' | translate }}
             </option>
             <option *ngFor="let c of SearchType" [value]="c">{{ c }}</option>
             <option *ngIf="SearchType.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>

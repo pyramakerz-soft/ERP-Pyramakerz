@@ -146,6 +146,10 @@ export class CertificateComponent {
   OnSearchTypeChange() {
     this.IsShowTabls = false
     this.TableData = []
+    this.SelectedAcademicYearId = 0
+    this.SelectedSemesterId = 0
+    this.DateFrom = ''
+    this.DateTo = ''
     if (this.SelectedSearchType == 'Academic Year') {
       this.getAcadimicYearsBySchool();
     }
@@ -155,6 +159,10 @@ export class CertificateComponent {
   }
 
   SelectAcadimicYear() {
+    this.IsShowTabls = false
+    this.TableData = []
+    this.DateFrom = ''
+    this.DateTo = ''
     const year = this.academicYears.find(y => y.id == this.SelectedAcademicYearId);
     if (year) {
       this.DateFrom = year.dateFrom;
@@ -163,6 +171,10 @@ export class CertificateComponent {
   }
 
   SelectSemester() {
+    this.IsShowTabls = false
+    this.TableData = []
+    this.DateFrom = ''
+    this.DateTo = ''
     const sem = this.semester.find(s => s.id == this.SelectedSemesterId);
     if (sem) {
       this.DateFrom = sem.dateFrom;
@@ -171,6 +183,10 @@ export class CertificateComponent {
   }
 
   onMonthChange(event: any): void {
+    this.IsShowTabls = false
+    this.TableData = []
+    this.DateFrom = ''
+    this.DateTo = ''
     const monthValue = event.target.value; // Format: "YYYY-MM"
     if (monthValue) {
       const [year, month] = monthValue.split('-').map(Number);

@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace LMS_CMS_PL.Controllers.Domains.LMS
 {
@@ -33,7 +32,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet("ByStudentId/{SchoolId}/{StudentId}/{DateFrom}/{DateTo}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Building" }
+            pages: new[] { "Certificate" }
         )]
         public async Task<IActionResult> GetById(long SchoolId, long StudentId, DateOnly DateFrom, DateOnly DateTo)
         {
@@ -50,15 +49,13 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             if (student == null)
                 return BadRequest("There is no student with this ID");
 
-            DateTime dateFrom = DateFrom.ToDateTime(new TimeOnly(0, 0));
-            DateTime dateTo = DateTo.ToDateTime(new TimeOnly(0, 0));
-
-            StudentClassroom studentClassroom = Unit_Of_Work.studentClassroom_Repository
+            // Get classroom for this student
+            var studentClassroom = Unit_Of_Work.studentClassroom_Repository
                 .First_Or_Default(s => s.StudentID == StudentId &&
                                        s.IsDeleted != true &&
                                        s.Classroom.IsDeleted != true &&
-                                       DateTime.Parse(s.Classroom.AcademicYear.DateFrom) >= dateFrom &&
-                                       DateTime.Parse(s.Classroom.AcademicYear.DateTo) <= dateTo &&
+                                       s.Classroom.AcademicYear.DateFrom <= DateFrom &&
+                                       s.Classroom.AcademicYear.DateTo >= DateTo &&
                                        s.Classroom.AcademicYear.SchoolID == SchoolId);
 
             if (studentClassroom == null)
@@ -162,12 +159,12 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     }
 
                     int totalItems = directMarks.Count + allAssignments.Count;
-                    float avgDegree = totalItems > 0 ? (sumPercentageDegree / totalItems) * swt.Value : 0;
+                    float avgDegree = totalItems > 0 ? (sumPercentageDegree / totalItems) * swt.Weight : 0;
 
 
                     var certificateSubjectObject = new CertificateSubject();
                     certificateSubjectObject.Degree = avgDegree;
-                    certificateSubjectObject.Mark = swt.Value;
+                    certificateSubjectObject.Mark = swt.Weight;
                     certificateSubjectObject.WeightTypeArName = swt.WeightType.ArabicName;
                     certificateSubjectObject.WeightTypeEnName = swt.WeightType.EnglishName;
                     certificateSubjectObject.WeightTypeId = swt.WeightType.ID;

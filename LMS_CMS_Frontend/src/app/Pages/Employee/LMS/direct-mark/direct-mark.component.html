@@ -30,7 +30,8 @@
         <select id="Grade" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             [(ngModel)]="SelectedGradeId" [disabled]="!SelectedSchoolId" (change)="getAllSubject();">
 
-            <option [ngValue]="0" disabled hidden [selected]="SelectedGradeId == 0">{{ 'Select' | translate }} {{ 'Grade'
+            <option [ngValue]="0" disabled hidden [selected]="SelectedGradeId == 0">{{ 'Select' | translate }} {{
+                'Grade'
                 | translate }}</option>
             <ng-container *ngIf="Grades.length > 0; else noDataGrade">
                 <option *ngFor="let ac of Grades" [ngValue]="ac.id">{{ ac.name }}</option>
@@ -121,13 +122,13 @@
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         <div class="flex space-x-4 rtl:space-x-reverse">
-                            <button  (click)="Delete(row.id)">
+                            <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)" (click)="Delete(row.id)">
                                 <i class="fa-regular fa-trash-can"></i>
                             </button>
-                            <button  (click)="openModal(row.id)">
+                            <button *ngIf="AllowEdit && IsAllowEdit(row.insertedByUserId)" (click)="openModal(row.id)">
                                 <i class="fa-solid fa-pencil"></i>
                             </button>
-                            <button (click)="View(row.id)">
+                            <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)" (click)="View(row.id)">
                                 <i class="fa-solid fa-eye"></i>
                             </button>
                         </div>
