@@ -18,8 +18,8 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         [Required(ErrorMessage = "Name is required")]
         [StringLength(100, ErrorMessage = "Name cannot be longer than 100 characters.")]
         public string Name { get; set; }
-        public string DateFrom { get; set; }
-        public string DateTo { get; set; }
+        public DateOnly DateFrom { get; set; }
+        public DateOnly DateTo { get; set; }
         public bool IsActive { get; set; }
         [ForeignKey("School")]
         public long SchoolID { get; set; }

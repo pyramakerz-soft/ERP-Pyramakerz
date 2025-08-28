@@ -95,10 +95,10 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            Conduct conduct =await Unit_Of_Work.conduct_Repository.FindByIncludesAsync(
+            Conduct conduct = await Unit_Of_Work.conduct_Repository.FindByIncludesAsync(
                     sem => sem.IsDeleted != true && sem.ID == id,
                     query => query.Include(emp => emp.Student),
-                    query => query.Include(emp => emp.Classroom).ThenInclude(a=>a.Grade),
+                    query => query.Include(emp => emp.Classroom).ThenInclude(a => a.Grade),
                     query => query.Include(emp => emp.ConductType)
                         .ThenInclude(a => a.School),
                     query => query.Include(emp => emp.ProcedureType));
@@ -127,7 +127,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
           allowedTypes: new[] { "octa", "employee" },
           pages: new[] { "Conducts" }
         )]
-        public async Task<IActionResult> Add([FromForm]ConductAddDTO NewConduct)
+        public async Task<IActionResult> Add([FromForm] ConductAddDTO NewConduct)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -316,7 +316,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         }
 
         ////////////////////////////////     
-        
+
         [HttpDelete("{id}")]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
@@ -359,7 +359,6 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
                 }
             }
 
-
             conduct.IsDeleted = true;
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             conduct.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
@@ -384,5 +383,96 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             Unit_Of_Work.SaveChanges();
             return Ok();
         }
+    
+    //////////////////////////////////////////////////////////////////////////////////////////--77
+        [HttpGet("ConductReport")]
+            [Authorize_Endpoint_(
+        allowedTypes: new[] { "octa", "employee" },
+        pages: new[] { "Conducts" }
+        )]
+            public async Task<IActionResult> ConductReport(
+        [FromQuery] DateOnly? FromDate,
+        [FromQuery] DateOnly? ToDate,
+        [FromQuery] long? SchoolId = null,
+        [FromQuery] long? GradeId = null,
+        [FromQuery] long? ClassroomId = null,
+        [FromQuery] long? StudentId = null,
+        [FromQuery] long? ConductTypeId = null,
+        [FromQuery] long? ProcedureTypeId = null)
+            {
+                UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+        var userClaims = HttpContext.User.Claims;
+        var userIdClaim = userClaims.FirstOrDefault(c => c.Type == "id")?.Value;
+        long.TryParse(userIdClaim, out long userId);
+        var userTypeClaim = userClaims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+        if (userIdClaim == null || userTypeClaim == null)
+        {
+            return Unauthorized("User ID or Type claim not found.");
+        }
+
+        // Validate that FromDate and ToDate are provided
+        if (!FromDate.HasValue || !ToDate.HasValue)
+        {
+            return BadRequest("Both FromDate and ToDate are required.");
+        }
+
+        // Ensure ToDate is not before FromDate
+        if (ToDate.Value < FromDate.Value)
+        {
+            return BadRequest("ToDate cannot be earlier than FromDate.");
+        }
+
+        IQueryable<Conduct> query = Unit_Of_Work.conduct_Repository.Query()
+            .Where(c => c.IsDeleted != true && c.Date >= FromDate.Value && c.Date <= ToDate.Value);
+
+        if (SchoolId.HasValue)
+        {
+            query = query.Where(c => c.ConductType.SchoolID == SchoolId.Value);
+        }
+
+        if (GradeId.HasValue)
+        {
+            query = query.Where(c => c.Classroom.GradeID == GradeId.Value);
+        }
+
+        if (ClassroomId.HasValue)
+        {
+            query = query.Where(c => c.ClassroomID == ClassroomId.Value);
+        }
+
+        if (StudentId.HasValue)
+        {
+            query = query.Where(c => c.StudentID == StudentId.Value);
+        }
+
+        if (ConductTypeId.HasValue)
+        {
+            query = query.Where(c => c.ConductTypeID == ConductTypeId.Value);
+        }
+
+        if (ProcedureTypeId.HasValue)
+        {
+            query = query.Where(c => c.ProcedureTypeID == ProcedureTypeId.Value);
+        }
+
+        var conducts = await query
+            .Include(c => c.Student)
+            .Include(c => c.ConductType)
+            .Include(c => c.ProcedureType)
+            .Include(c => c.Classroom)
+                .ThenInclude(cr => cr.Grade)
+            .ToListAsync();
+
+        if (conducts == null || conducts.Count == 0)
+        {
+            return NotFound("No conduct records found for the specified criteria.");
+        }
+
+        var reportData = mapper.Map<List<ConductReportDTO>>(conducts);
+
+        return Ok(reportData);
+    }
     }
 }
