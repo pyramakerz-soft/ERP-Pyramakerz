@@ -237,6 +237,7 @@ import { MyMessagesComponent } from './Pages/Communication/my-messages/my-messag
 import { DailyPreformanceReportComponent } from './Pages/Employee/LMS/reports/daily-preformance-report/daily-preformance-report.component';
 import { DirectMarkComponent } from './Pages/Employee/LMS/direct-mark/direct-mark.component';
 import { DirectMarkStudentComponent } from './Pages/Employee/LMS/direct-mark-student/direct-mark-student.component';
+import { CertificateComponent } from './Pages/Employee/LMS/certificate/certificate.component';
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
     { path: "Octa/login", component: OctaLoginComponent, title: "login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -520,6 +521,7 @@ export const routes: Routes = [
             { path: "Appoinment/:id", component: AppointmentParentComponent, title: "Appoinment", canActivate: [noNavigateWithoutLoginGuard,navigateIfHaveSettingPageGuard] },
             { path: "Direct Mark", component: DirectMarkComponent, title: "Direct Mark", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Direct Mark/:id", component: DirectMarkStudentComponent, title: "Direct Mark", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Certificate", component: CertificateComponent, title: "Certificate", canActivate: [noNavigateWithoutLoginGuard] },
 
         ]
     },
