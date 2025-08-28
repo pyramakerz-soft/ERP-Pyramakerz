@@ -453,8 +453,20 @@ export const routes: Routes = [
             { path: "Student/:Id", component: RegistrationConfirmationDetailsComponent, title: "Student", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Enter Daily Performance", component: DailyPerformanceMasterComponent, title: "Daily Performance", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Daily Performance/:id", component: DailyPerformanceViewComponent, title: "Daily Performance View", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "Daily Performance Student Reports", component: DailyPreformanceReportComponent, title: "Daily Performance Reports", canActivate: [noNavigateWithoutLoginGuard] },
-            { path: "Daily Performance Classroom Reports", component: DailyPreformanceReportComponent, title: "Daily Performance Reports", canActivate: [noNavigateWithoutLoginGuard] ,   data: { useClassroomFlag: true } },
+              { 
+  path: "daily-performance-report", 
+  component: DailyPreformanceReportComponent, 
+  title: "Daily Performance Report", 
+  canActivate: [noNavigateWithoutLoginGuard], 
+  data: { reportType: 'student' } 
+},
+{ 
+  path: "classroom-daily-performance-report", 
+  component: DailyPreformanceReportComponent, 
+  title: "Classroom Daily Performance Report", 
+  canActivate: [noNavigateWithoutLoginGuard], 
+  data: { reportType: 'classroom' } 
+},
             { path: "Assignment", component: AssignmentComponent, title: "Assignment", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Assignment/:id", component: AssignmentEditComponent, title: "Assignment Edit", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "report item card", component: ReportItemCardComponent, title: "Item Card Report", canActivate: [noNavigateWithoutLoginGuard], data: { showAverage: false } },

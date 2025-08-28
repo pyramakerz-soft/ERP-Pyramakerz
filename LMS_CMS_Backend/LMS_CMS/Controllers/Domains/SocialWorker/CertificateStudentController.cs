@@ -163,7 +163,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             if (userTypeClaim == "employee")
             {
                 IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Add Certificate To Student", roleId, userId, medal);
-                if (accessCheck != null)
+                if (accessCheck != null)  
                 {
                     return accessCheck;
                 }
@@ -194,5 +194,69 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
             Unit_Of_Work.SaveChanges();
             return Ok();
         }
+        ////////////////////////////////////////////////////////////////////////////////////////////--77
+        [HttpGet("CertificateToStudentReport")]
+        [Authorize_Endpoint_(
+        allowedTypes: new[] { "octa", "employee" },
+        pages: new[] { "Add Certificate To Student" }
+         )]
+        public async Task<IActionResult> CertificateToStudentReport(
+        [FromQuery] long? SchoolId = null,
+        [FromQuery] long? GradeId = null,
+        [FromQuery] long? ClassroomId = null,
+        [FromQuery] long? StudentId = null)
+            {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = userClaims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = userClaims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            // Validate that all filters are provided (mandatory)
+            if (!SchoolId.HasValue || !GradeId.HasValue || !ClassroomId.HasValue || !StudentId.HasValue)
+            {
+                return BadRequest("School, Grade, Classroom, and Student are all required.");
+            }
+
+            IQueryable<CertificateStudent> query = Unit_Of_Work.certificateStudent_Repository.Query()
+                .Where(cs => cs.IsDeleted != true && cs.Student.IsDeleted != true)
+                .Join(Unit_Of_Work.studentClassroom_Repository.Query(),
+                    cs => cs.StudentID,
+                    sc => sc.StudentID,
+                    (cs, sc) => new { CertificateStudent = cs, StudentClassroom = sc })
+                .Where(joined => joined.StudentClassroom.IsDeleted != true
+                    && joined.StudentClassroom.ClassID == ClassroomId.Value
+                    && joined.StudentClassroom.Classroom.GradeID == GradeId.Value
+                    && joined.StudentClassroom.Classroom.Grade.IsDeleted != true
+                    && joined.StudentClassroom.Classroom.Grade.Section.IsDeleted != true
+                    && joined.StudentClassroom.Classroom.Grade.Section.school.IsDeleted != true
+                    && joined.StudentClassroom.Classroom.Grade.Section.school.ID == SchoolId.Value
+                    && joined.CertificateStudent.StudentID == StudentId.Value)
+                .Select(joined => joined.CertificateStudent);
+
+            var certificateStudents = await query
+                .Include(cs => cs.Student)
+                .Include(cs => cs.CertificateType)
+                .Include(cs => cs.InsertedByEmployee)
+                .OrderBy(cs => cs.InsertedAt)
+                .ToListAsync();
+
+            if (certificateStudents == null || certificateStudents.Count == 0)
+            {
+                return NotFound("No certificate records found for the specified criteria.");
+            }
+
+            var reportData = mapper.Map<List<CertificateStudentReportDTO>>(certificateStudents);
+
+            return Ok(reportData);
+        }
+
+
     }
 }
