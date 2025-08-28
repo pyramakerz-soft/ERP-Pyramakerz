@@ -69,8 +69,8 @@ namespace LMS_CMS_PL.Services.FileValidations
                     return $"File content doesn't match its extension. Expected {extension} video file.";
 
                 stream.Position = 0;
-                if (await ContainsDangerousContentAsync(stream, extension, cancellationToken))
-                    return "File contains potentially dangerous content";
+                //if (await ContainsDangerousContentAsync(stream, extension, cancellationToken))
+                //    return "File contains potentially dangerous content";
 
                 // Video-specific validation
                 if (extension == ".mp4" && !await ContainsMp4MoovAtom(stream))

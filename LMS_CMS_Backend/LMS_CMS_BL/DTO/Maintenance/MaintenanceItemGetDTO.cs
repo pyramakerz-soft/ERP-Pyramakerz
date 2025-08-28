@@ -9,16 +9,9 @@ namespace LMS_CMS_BL.DTO.Maintenance
     public class MaintenanceItemGetDTO
     {
         public long ID { get; set; }
-        public string Name { get; set; }
+        public string En_Name { get; set; }
+        public string Ar_Name { get; set; }
         
-
-        // audit (match what your BusCompany uses)
-        public long? InsertedByOctaId { get; set; }
         public long? InsertedByUserId { get; set; }
-        public long? UpdatedByOctaId { get; set; }
-        public long? UpdatedByUserId { get; set; }
-        public long? DeletedByOctaId { get; set; }
-        public long? DeletedByUserId { get; set; }
-        public System.DateTime? InsertedAt { get; set; }
     }
 }

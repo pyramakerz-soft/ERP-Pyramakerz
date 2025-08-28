@@ -2,7 +2,7 @@
     <div class="w-[48%] bg-[#F7F7F7] rounded-md max-h-[75vh] overflow-y-auto overflow-x-hidden">
         <h3 class="primaryTxt font-semibold m-5">{{ 'Notifications' | translate }}</h3> 
         <ul>
-            <li *ngFor="let data of TableData; let i = index" class="relative" (click)="viewNotification(data)">
+            <li *ngFor="let data of TableData; let i = index" class="relative cursor-pointer" (click)="viewNotification(data)">
                 <div *ngIf="!data.seenOrNot"
                     class="absolute top-2 left-2 w-2.5 h-2.5 border border-[#4d8db4] bg-[#8ccff8b6] rounded-full z-10">
                 </div>

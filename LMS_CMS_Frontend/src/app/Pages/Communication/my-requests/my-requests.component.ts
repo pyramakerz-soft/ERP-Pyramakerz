@@ -62,7 +62,7 @@ export class MyRequestsComponent {
   students:Student[] = []
   subjects:Subject[] = []
   parent:Parent = new Parent()
-   isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   departmentID = 0
   schoolID = 0
@@ -73,6 +73,13 @@ export class MyRequestsComponent {
   subjectID = 0  
 
   private isLocalNotification = false;
+
+  private readonly allowedExtensions: string[] = [
+    '.jpg', '.jpeg', '.png', '.gif',
+    '.pdf', '.doc', '.docx', '.txt',
+    '.xls', '.xlsx', '.csv',
+    '.mp4', '.avi', '.mkv', '.mov'
+  ];
 
   constructor(
     public account: AccountService,
@@ -111,12 +118,14 @@ export class MyRequestsComponent {
         this.loadReceivedRequests();
       }
     });
-          this.subscription = this.languageService.language$.subscribe(direction => {
+            
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-      ngOnDestroy(): void {
+  
+  ngOnDestroy(): void {
     this.realTimeService.stopConnection(); 
      if (this.subscription) {
       this.subscription.unsubscribe();
@@ -652,6 +661,20 @@ export class MyRequestsComponent {
     const input = event.target as HTMLInputElement;
 
     if (file) {
+      const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
+ 
+      if (!this.allowedExtensions.includes(fileExtension)) {
+        Swal.fire({
+          title: 'Invalid file type',
+          html: `The file <strong>${file.name}</strong> is not an allowed type. Allowed types are:<br><strong>${this.allowedExtensions.join(', ')}</strong>`,
+          icon: 'warning',
+          confirmButtonColor: '#089B41',
+          confirmButtonText: "OK"
+        });
+        this.requestToBeSend.fileFile = null;
+        return;
+      }
+
       if (file.size > 25 * 1024 * 1024) {
         Swal.fire({
           title: 'The file size exceeds the maximum limit of 25 MB.',

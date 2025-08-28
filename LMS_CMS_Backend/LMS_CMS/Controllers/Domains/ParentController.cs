@@ -135,6 +135,7 @@ namespace LMS_CMS_PL.Controllers.Domains
             var confirmationCode = new Random().Next(100000, 999999).ToString();
             Parent NewParent =mapper.Map<Parent>(UserInfo);
             NewParent.Password = BCrypt.Net.BCrypt.HashPassword(NewParent.Password);
+            NewParent.ConnectionStatusID = 1;
             Unit_Of_Work.parent_Repository.Add(NewParent);
             Unit_Of_Work.SaveChanges();
 

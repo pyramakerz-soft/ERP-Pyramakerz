@@ -1,0 +1,368 @@
+<div class="flex justify-between items-center">
+    <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Direct Marks' | translate }}</h1>
+    <div class="flex justify-between items-center space-x-4 rtl:space-x-reverse">
+        <app-search *ngIf="IsView" [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
+
+        <button (click)="openModal()"
+            class="secondaryBorder secondaryTxt rounded-lg px-4 py-3 flex items-center justify-center gap-2">
+            {{ 'Create' | translate }} {{ 'Direct Mark' | translate }}
+        </button>
+    </div>
+</div>
+
+
+<div class="flex justify-start items-center space-x-4 rtl:space-x-reverse">
+
+    <div class="w-[49%]">
+        <label for="School1" class="block mb-2 text-sm font-medium text-gray-900">{{ 'School' | translate }}</label>
+        <select id="School1" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [(ngModel)]="SelectedSchoolId" (change)="getAllGradesBySchoolId();">
+            <option [value]="0" disabled selected hidden>{{ 'Select' | translate }} {{ 'School' | translate }}</option>
+            <option *ngFor="let stu of schools" [value]="stu.id">
+                {{ stu.name }}
+            </option>
+            <option *ngIf="schools.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+        </select>
+    </div>
+
+    <div class="w-[49%]">
+        <label for="Grade" class="block mb-2 text-sm font-medium text-gray-900">{{ 'Grade' | translate }}</label>
+        <select id="Grade" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [(ngModel)]="SelectedGradeId" [disabled]="!SelectedSchoolId" (change)="getAllSubject();">
+
+            <option [ngValue]="0" disabled hidden [selected]="SelectedGradeId == 0">{{ 'Select' | translate }} {{ 'Grade'
+                | translate }}</option>
+            <ng-container *ngIf="Grades.length > 0; else noDataGrade">
+                <option *ngFor="let ac of Grades" [ngValue]="ac.id">{{ ac.name }}</option>
+            </ng-container>
+            <ng-template #noDataGrade>
+                <option disabled>{{ 'No Data Found' | translate }}</option>
+            </ng-template>
+        </select>
+    </div>
+
+    <div class="w-[49%]">
+        <label for="subject" class="block mb-2 text-sm font-medium text-gray-900"> {{ 'Subjects' | translate }}</label>
+        <select id="subject" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [(ngModel)]="SelectedSubjectId" [disabled]="!SelectedGradeId" (change)="SubjectChanged();">
+            <option [ngValue]="0" disabled hidden [selected]="SelectedSubjectId == 0">{{ 'Select' | translate }} {{
+                'Subject' |
+                translate }}</option>
+            <ng-container *ngIf="subjects.length > 0; else noData">
+                <option *ngFor="let ac of subjects" [ngValue]="ac.id">{{ ac.en_name }}</option>
+            </ng-container>
+            <ng-template #noData>
+                <option disabled>{{ 'No Data Found' | translate }}</option>
+            </ng-template>
+
+        </select>
+    </div>
+
+    <div class="mt-7 ml-2">
+        <button class="p-3 font-medium text-xl rounded-lg"
+            [disabled]="!SelectedSchoolId || !SelectedGradeId || !SelectedSubjectId " (click)="viewTable()"
+            [ngClass]="{ 'bg-gray-100 text-gray-300': !SelectedSchoolId || !SelectedGradeId || !SelectedSubjectId , 'secondaryBg text-white': SelectedSchoolId && SelectedGradeId && SelectedSubjectId  }">
+            {{ 'View' | translate }}
+        </button>
+    </div>
+</div>
+
+<div *ngIf="IsView">
+    <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
+        <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left text-[#6F6F6F]">
+            <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+                <tr>
+                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ 'ID' | translate }}</th>
+                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ 'English Name' | translate }}</th>
+                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ 'Arabic Name' | translate }}</th>
+                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ 'Mark' | translate }}</th>
+                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ 'Subject' | translate }} {{ 'English Name' | translate }}</th>
+                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ 'Subject' | translate }} {{ 'Arabic Name' | translate }}</th>
+                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ 'Actions' | translate }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- No Data Row -->
+                <tr *ngIf="TableData.length === 0">
+                    <td colspan="12"
+                        class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                        {{ 'No Data Found' | translate }}
+                    </td>
+                </tr>
+
+                <!-- Data Rows -->
+                <tr *ngFor="let row of TableData; let i = index"
+                    [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
+                    class="border-t border-gray-300 text-xs md:text-sm">
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ row.id }}
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ row.englishName }}
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ row.arabicName }}
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ row.mark }}
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ row.subjectEnglishName }}
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ row.subjectArabicName }}
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        <div class="flex space-x-4 rtl:space-x-reverse">
+                            <button  (click)="Delete(row.id)">
+                                <i class="fa-regular fa-trash-can"></i>
+                            </button>
+                            <button  (click)="openModal(row.id)">
+                                <i class="fa-solid fa-pencil"></i>
+                            </button>
+                            <button (click)="View(row.id)">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<div *ngIf="IsView" class="mt-8 flex justify-between items-center">
+    <div class="flex items-center space-x-4 rtl:space-x-reverse">
+        <button class="flex items-center space-x-2 rounded-lg border py-3 px-4 rtl:space-x-reverse"
+            (click)="changeCurrentPage(CurrentPage-1)" [disabled]="CurrentPage === 1 || TableData.length == 0"
+            [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === 1 || TableData.length == 0}">
+            <i class="fa-solid fa-arrow-left"></i>
+            <p> {{ 'Previous' | translate }}</p>
+        </button>
+        <div class="flex">
+            <div *ngFor="let page of visiblePages" class="rounded-lg py-[10px] w-[40px]"
+                [ngClass]="{ 'border': page === CurrentPage, 'hover:bg-gray-100': page !== CurrentPage }"
+                (click)="changeCurrentPage(page)">
+                <p class="cursor-pointer text-center">{{ page }}</p>
+            </div>
+        </div>
+        <button class="flex items-center space-x-2 rounded-lg border py-3 px-4 rtl:space-x-reverse"
+            (click)="changeCurrentPage(CurrentPage+1)" [disabled]="CurrentPage === TotalPages || TableData.length == 0"
+            [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === TotalPages || TableData.length == 0}">
+            <p> {{ 'Next' | translate }}</p>
+            <i class="fa-solid fa-arrow-right"></i>
+        </button>
+    </div>
+
+    <div class="flex items-center space-x-2 rtl:space-x-reverse">
+        <input (input)="validateNumberForPagination($event)" class="rounded-lg border py-3 px-4 w-[73px]"
+            [(ngModel)]="PageSize" min="1" (input)="validatePageSize($event)"
+            (ngModelChange)="changeCurrentPage(CurrentPage)">
+        <p> {{ 'items Per Page' | translate }}</p>
+    </div>
+
+    <div>
+        <p>{{CurrentPage}} {{ 'of' | translate }} {{TotalPages}} {{ 'pages' | translate }} ({{TotalRecords}} {{ 'Item' |
+            translate }})</p>
+    </div>
+</div>
+
+
+<div id="Add_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
+    <div class="bg-white rounded-2xl p-12 w-[669px] max-h-[90%] overflow-y-auto">
+        <div class="flex justify-between items-center">
+            <h1 *ngIf="directMark.id == 0" class="font-semibold text-2xl leading-9"> {{ 'Create' | translate }} {{
+                'Direct Mark' | translate }}</h1>
+            <h1 *ngIf="directMark.id != 0" class="font-semibold text-2xl leading-9"> {{ 'Edit' | translate }} {{
+                'Direct Mark' | translate }}</h1>
+            <button (click)="closeModal()" type="button"
+                class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
+        </div>
+
+        <div class="mt-6 mb-4 flex justify-between flex-wrap">
+            <div class="flex flex-col mb-4 w-full">
+                <label class="mb-2 primaryTxt" for="Subject"> {{ 'School' | translate }}</label>
+                <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="School"
+                    [ngClass]="{ 'bg-[#EBEBEB]': directMark.id != 0 }" [disabled]="directMark.id != 0"
+                    (change)="onSchoolModalChange()" [(ngModel)]="directMark.schoolID"
+                    (ngModelChange)="onInputValueChange({ field: 'schoolID', value: $event })">
+                    <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'School' | translate }}
+                    </option>
+                    <option *ngFor="let c of schools" [value]="c.id">{{ c.name }}</option>
+                    <option *ngIf="schools.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+                </select>
+                <span *ngIf="validationErrors['schoolID']" class="text-red-500 ml-3 font-normal">{{
+                    validationErrors['schoolID'] }}</span>
+            </div>
+            <div class="flex flex-col mb-4 w-full">
+                <label class="mb-2 primaryTxt"
+                    [ngClass]="{ 'text-gray-400': !directMark.schoolID || directMark.id != 0 , 'primaryTxt': directMark.schoolID }"
+                    for="Grade">{{ 'Grade' | translate }}</label>
+                <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Grade"
+                    [ngClass]="{ 'bg-[#EBEBEB]': directMark.id != 0 ||!directMark.schoolID  }"
+                    [disabled]="(!directMark.schoolID) || directMark.id != 0" (change)="onGradeModalChange()"
+                    [(ngModel)]="directMark.gradeID"
+                    (ngModelChange)="onInputValueChange({ field: 'gradeID', value: $event })">
+                    <option [ngValue]="0" disabled hidden [selected]="directMark.gradeID == 0">{{ 'Choose' | translate
+                        }} {{ 'Grade' | translate }}</option>
+                    <ng-container *ngIf="GradesForCreate.length > 0; else noDataGradesForCreate">
+                        <option *ngFor="let ac of GradesForCreate" [ngValue]="ac.id">{{ ac.name }}</option>
+                    </ng-container>
+                    <ng-template #noDataGradesForCreate>
+                        <option disabled>{{ 'No Data Found' | translate }}</option>
+                    </ng-template>
+                </select>
+                <span *ngIf="validationErrors['gradeID']"
+                    class="text-red-500 ml-3 font-normal">{{validationErrors['gradeID'] }}</span>
+            </div>
+            <div class="flex flex-col mb-4 w-full">
+                <label class="mb-2 primaryTxt"
+                    [ngClass]="{ 'text-gray-400': !directMark.gradeID, 'primaryTxt': directMark.gradeID }"
+                    for="Subject"> {{ 'Subject' | translate }}</label>
+                <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Subject"
+                    [ngClass]="{ 'bg-[#EBEBEB]': directMark.id != 0 ||!directMark.gradeID  }"
+                    [disabled]="(!directMark.gradeID) || directMark.id != 0" (change)="onSubjectModalChange()"
+                    [(ngModel)]="directMark.subjectID"
+                    (ngModelChange)="onInputValueChange({ field: 'subjectID', value: $event })">
+                    <option [ngValue]="0" disabled hidden [selected]="directMark.subjectID == 0">{{ 'Choose' | translate
+                        }} {{ 'Subject' | translate }}</option>
+                    <ng-container *ngIf="subjectsForCreate.length > 0; else noDatasubjectsForCreate">
+                        <option *ngFor="let ac of subjectsForCreate" [ngValue]="ac.id">{{ ac.en_name }}</option>
+                    </ng-container>
+                    <ng-template #noDatasubjectsForCreate>
+                        <option disabled>{{ 'No Data Found' | translate }}</option>
+                    </ng-template>
+                </select>
+                <span *ngIf="validationErrors['subjectID']" class="text-red-500 ml-3 font-normal">{{
+                    validationErrors['subjectID'] }}</span>
+            </div>
+            <div class="flex flex-col mb-4 w-full">
+                <label class="mb-2" for="Subjectweight"
+                    [ngClass]="{ 'text-gray-400': !directMark.subjectID, 'primaryTxt': directMark.subjectID }">
+                    {{ 'Subject Weight Type' | translate }} </label>
+                <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Subject"
+                    [disabled]="!directMark.subjectID" [ngClass]="{ 'bg-[#EBEBEB]': !directMark.subjectID }"
+                    [(ngModel)]="directMark.subjectWeightTypeID"
+                    (ngModelChange)="onInputValueChange({ field: 'subjectWeightTypeID', value: $event })">
+                    <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Subject Weight Type' |
+                        translate }}</option>
+                    <option *ngFor="let c of subjectWeightsForCreate" [value]="c.id">{{ c.weightTypeEnglishName }}
+                    </option>
+                    <option *ngIf="subjectWeightsForCreate.length === 0" disabled selected>{{ 'No Data Found' |
+                        translate }}
+                    </option>
+                </select>
+                <span *ngIf="validationErrors['subjectWeightTypeID']" class="text-red-500 ml-3 font-normal">{{
+                    validationErrors['subjectWeightTypeID'] }}</span>
+            </div>
+
+            <div class="flex flex-col mb-4 w-full">
+                <label class="mb-2" for="classids"
+                    [ngClass]="{ 'text-gray-400': !directMark.subjectID, 'primaryTxt': directMark.subjectID }">
+                    {{ 'Classes' | translate }}
+                </label>
+
+                <div class="relative">
+                    <!-- Main box -->
+                    <div class="border bg-white border-gray-300 rounded-lg px-4 py-3 cursor-pointer"
+                        [class.opacity-50]="!directMark.subjectID" [class.cursor-not-allowed]="!directMark.subjectID"
+                        (click)="directMark.subjectID && toggleClassDropdown()" tabindex="0">
+
+                        <!-- Selected classes -->
+                        <div *ngIf="directMark.directMarkClasses.length > 0; else placeholder"
+                            class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 bg-gray-200 rounded text-sm flex items-center"
+                                *ngFor="let selected of directMark.directMarkClasses">
+                                {{ selected.classroomName }}
+                            </span>
+                        </div>
+
+                        <!-- Placeholder -->
+                        <ng-template #placeholder>
+                            <span>{{ 'Choose Classroom' | translate }}</span>
+                        </ng-template>
+                    </div>
+
+                    <!-- Dropdown -->
+                    <div class="absolute bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10 max-h-60 overflow-auto"
+                        *ngIf="directMark.directMarkClasses && directMark.subjectID && classDropdownOpen">
+                        <ul>
+                            <li class="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                                <input type="checkbox" class="mr-2" [checked]="directMark.allClasses"
+                                    (change)="toggleSelectAll($event)">
+                                {{ 'Choose All' | translate }}
+                            </li>
+
+                            <li *ngFor="let c of classrooms"
+                                class="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                                <input type="checkbox" class="mr-2" [checked]="IfClassExist(c.id)"
+                                    (change)="toggleClass($event,c)">
+                                {{ c.name }}
+                            </li>
+
+                            <li *ngIf="classrooms.length === 0" class="px-4 py-2 text-gray-400 cursor-not-allowed">
+                                {{ 'No Data Found' | translate }}
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Validation -->
+                <span *ngIf="validationErrors['classids']" class="text-red-500 ml-3 font-normal">
+                    {{ validationErrors['classids'] }}
+                </span>
+            </div>
+
+            <div class="flex flex-col mb-4 w-full">
+                <label class="mb-2 primaryTxt" for="englishName">{{ 'English Name' | translate }}</label>
+                <input id="englishName" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                    placeholder="{{ 'Enter' | translate }} {{ 'English Name' | translate }}"
+                    [(ngModel)]="directMark.englishName"
+                    (ngModelChange)="onInputValueChange({ field: 'englishName', value: $event })" />
+                <span *ngIf="validationErrors['englishName']" class="text-red-500 ml-3 font-normal">{{
+                    validationErrors['englishName'] }}</span>
+            </div>
+            <div class="flex flex-col mb-4 w-full">
+                <label class="mb-2 primaryTxt" for="arabicName"> {{ 'Arabic Name' | translate }}</label>
+                <input id="arabicName" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                    placeholder="{{ 'Enter' | translate }} {{ 'Arabic Name' | translate }}"
+                    [(ngModel)]="directMark.arabicName"
+                    (ngModelChange)="onInputValueChange({ field: 'arabicName', value: $event })" />
+                <span *ngIf="validationErrors['arabicName']" class="text-red-500 ml-3 font-normal">{{
+                    validationErrors['arabicName'] }}</span>
+            </div>
+            <div class="flex flex-col mb-4 w-[49%]">
+                <label class="mb-2 primaryTxt" for="mark"> {{ 'Mark' | translate }}</label>
+                <input id="order" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                    placeholder="{{ 'Enter' | translate }} {{ 'Mark' | translate }}" [(ngModel)]="directMark.mark"
+                    (input)="validateNumber($event, 'mark')"
+                    (ngModelChange)="onInputValueChange({ field: 'mark', value: $event })" />
+                <span *ngIf="validationErrors['mark']" class="text-red-500 ml-3 font-normal">{{ validationErrors['mark']
+                    }}</span>
+            </div>
+            <div class="flex flex-col mb-4 w-[49%]">
+                <label class="mb-2 primaryTxt" for="date"> {{ ' Date' | translate }}</label>
+                <input id="Date" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                    [(ngModel)]="directMark.date"
+                    (ngModelChange)="onInputValueChange({ field: 'date', value: $event })" />
+                <span *ngIf="validationErrors['date']" class="text-red-500 ml-3 font-normal">{{
+                    validationErrors['date'] }}</span>
+            </div>
+        </div>
+        <div class="flex justify-end">
+            <button [disabled]="isLoading"
+                class="secondaryBg text-white font-medium px-4 py-2 rounded-lg cursor-pointer" (click)="Save()">
+                <span *ngIf="!isLoading">{{ 'Save' | translate }}</span>
+                <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+            </button>
+        </div>
+    </div>
+</div>

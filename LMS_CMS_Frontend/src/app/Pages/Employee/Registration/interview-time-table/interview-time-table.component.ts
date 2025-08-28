@@ -345,7 +345,9 @@ export class InterviewTimeTableComponent {
   }
 
   validateNumber(event: any, field: keyof InterviewTimeTable): void {
-    const value = event.target.value;
+    let value = event.target.value;
+    value = value.replace(/[^0-9]/g, '')
+    event.target.value = value;
     if (isNaN(value) || value === '') {
       event.target.value = '';
       if (typeof this.interviewTimeTable[field] === 'string') {
@@ -355,6 +357,7 @@ export class InterviewTimeTableComponent {
   }
 
   handleDays(event: Event, optionSelected: string) {
+    this.validationErrors['days'] = ''
     const checkbox = event.target as HTMLInputElement;
 
     if (checkbox.checked) {
@@ -379,7 +382,7 @@ export class InterviewTimeTableComponent {
         } else {
           if (!this.editInterviewTimeTable) {
             if (this.interviewTimeTable.days.length == 0) {
-              this.validationErrors["days"] = `*${this.capitalizeField("days")} is required`
+              this.validationErrors["days"] = `*${this.capitalizeField("days")} are required`
               isValid = false;
             }
           }

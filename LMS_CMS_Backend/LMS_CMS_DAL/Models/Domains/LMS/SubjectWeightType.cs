@@ -23,5 +23,6 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public float Value { get; set; }
 
         public ICollection<Assignment> Assignments { get; set; } = new HashSet<Assignment>();
+        public ICollection<DirectMark> DirectMarks { get; set; } = new HashSet<DirectMark>();
     }
 }

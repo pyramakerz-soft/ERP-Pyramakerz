@@ -19,9 +19,6 @@
                {{ 'ID' | translate }}
               </th>
               <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                  {{ 'Date' | translate }}
-              </th>
-              <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                  {{ 'Actions' | translate }}
               </th>
             </tr>
@@ -42,9 +39,6 @@
               <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                 {{ row.id }}
               </td>  
-              <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                {{ row.date }}
-              </td>
               <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                 <div class="flex space-x-4 rtl:space-x-reverse">
                   <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)" (click)="Delete(row.id)">

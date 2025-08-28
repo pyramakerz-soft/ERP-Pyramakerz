@@ -103,8 +103,8 @@ namespace LMS_CMS_PL.Services
                 stream.Position = 0;
 
                 // Scan for dangerous patterns
-                if (await ContainsDangerousContentAsync(stream, extension, cancellationToken))
-                    return "File contains potentially dangerous content";
+                //if (await ContainsDangerousContentAsync(stream, extension, cancellationToken))
+                //    return "File contains potentially dangerous content";
             }
             catch (Exception ex)
             {

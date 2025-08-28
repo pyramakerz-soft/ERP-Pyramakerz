@@ -293,7 +293,7 @@ export class BusDetailsComponent {
     if (field === 'capacity') {
         if (!/^\d+$/.test(value) && value !== '') {
             event.target.value = '';  // Clear invalid input
-            this.bus['capacity'] = 0;  // Reset bus field to empty string
+            this.bus['capacity'] = null;  // Reset bus field to empty string
         }
     } else {
         // For other fields, check if the value is a valid number

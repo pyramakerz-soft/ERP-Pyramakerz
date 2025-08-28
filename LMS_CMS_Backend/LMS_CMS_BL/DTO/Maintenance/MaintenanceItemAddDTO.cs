@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,15 +9,13 @@ namespace LMS_CMS_BL.DTO.Maintenance
 {
     public  class MaintenanceItemAddDTO
     {
-        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Name is required")]
-        [System.ComponentModel.DataAnnotations.StringLength(150)]
-        public string E_Name { get; set; }
+        [Required(ErrorMessage = "Name is required")]
+        [StringLength(150)]
+        public string En_Name { get; set; }
 
-        //[System.ComponentModel.DataAnnotations.Required(ErrorMessage = "الاسم مطلوب")]
-        //[Required(ErrorMessage = "الاسم مطلوب")]
-
-        [System.ComponentModel.DataAnnotations.StringLength(150)]
-        public string A_Name { get; set; }
+        [Required(ErrorMessage = "الاسم مطلوب")] 
+        [StringLength(150)]
+        public string Ar_Name { get; set; }
 
     }
 }

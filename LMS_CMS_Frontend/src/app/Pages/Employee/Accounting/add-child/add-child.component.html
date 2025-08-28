@@ -104,6 +104,7 @@
             <input type="text"
             class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"
             [(ngModel)]="NationalID"
+            (input)="validateNumberOnly($event)"
             (ngModelChange)="SelectChild(NationalID)"
    placeholder="{{ 'Enter National Id' | translate }}"  />
 

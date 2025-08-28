@@ -198,7 +198,7 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<AssignmentStudent> AssignmentStudent_Repository;
         GenericRepo<AssignmentStudentIsSpecific> AssignmentStudentIsSpecific_Repository;
         GenericRepo<AssignmentQuestion> AssignmentQuestion_Repository;
-        GenericRepo<DirectMarkClassroomStudent> DirectMarkClassroomStudent_Repository;
+        GenericRepo<DirectMarkClasses> DirectMarkClasses_Repository;
         GenericRepo<AssignmentStudentQuestion> AssignmentStudentQuestion_Repository;
         GenericRepo<ETAPOS> POS_Repository;
         GenericRepo<TaxCustomer> TaxCustomer_Repository;
@@ -249,7 +249,7 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<MaintenanceItem> MaintenanceItem_Repository;
         GenericRepo<MaintenanceCompany> MaintenanceCompany_Repository;
         GenericRepo<MaintenanceEmployee> MaintenanceEmployee_Repository;
-
+        GenericRepo<Maintenance> Maintenance_Repository; 
         GenericRepo<Bouns> Bouns_Repository;
         GenericRepo<BounsType> BounsType_Repository;
         GenericRepo<Deduction> Deduction_Repository;
@@ -260,7 +260,9 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<OfficialHolidays> OfficialHolidays_Repository;
         GenericRepo<VacationTypes> VacationTypes_Repository;
         GenericRepo<VacationEmployee> VacationEmployee_Repository;
-
+        GenericRepo<DirectMark> DirectMark_Repository;
+        GenericRepo<DirectMarkClassesStudent> DirectMarkClassesStudent_Repository;
+        GenericRepo<ConnectionStatus> ConnectionStatus_Repository;
 
 
         public UOW(Octa_DbContext octa_Db)
@@ -2259,18 +2261,42 @@ namespace LMS_CMS_BL.UOW
             }
         }
         
-        public GenericRepo<DirectMarkClassroomStudent> directMarkClassroomStudent_Repository
+        public GenericRepo<DirectMarkClasses> directMarkClasses_Repository
         {
             get
             {
-                if (DirectMarkClassroomStudent_Repository == null)
+                if (DirectMarkClasses_Repository == null)
                 {
-                    DirectMarkClassroomStudent_Repository = new GenericRepo<DirectMarkClassroomStudent>(db);
+                    DirectMarkClasses_Repository = new GenericRepo<DirectMarkClasses>(db);
                 }
-                return DirectMarkClassroomStudent_Repository;
+                return DirectMarkClasses_Repository;
             }
         }
-        
+
+        public GenericRepo<DirectMark> directMark_Repository
+        {
+            get
+            {
+                if (DirectMark_Repository == null)
+                {
+                    DirectMark_Repository = new GenericRepo<DirectMark>(db);
+                }
+                return DirectMark_Repository;
+            }
+        }
+
+        public GenericRepo<DirectMarkClassesStudent> directMarkClassesStudent_Repository
+        {
+            get
+            {
+                if (DirectMarkClassesStudent_Repository == null)
+                {
+                    DirectMarkClassesStudent_Repository = new GenericRepo<DirectMarkClassesStudent>(db);
+                }
+                return DirectMarkClassesStudent_Repository;
+            }
+        }
+
         public GenericRepo<AssignmentStudentQuestion> assignmentStudentQuestion_Repository
         {
             get
@@ -2859,6 +2885,18 @@ namespace LMS_CMS_BL.UOW
                 return MaintenanceEmployee_Repository;
             }
         }
+         
+        public GenericRepo<Maintenance> maintenance_Repository
+        {
+            get
+            {
+                if (Maintenance_Repository == null)
+                {
+                    Maintenance_Repository = new GenericRepo<Maintenance>(db);
+                }
+                return Maintenance_Repository;
+            }
+        }
 
         public GenericRepo<Bouns> bouns_Repository
         {
@@ -2978,7 +3016,19 @@ namespace LMS_CMS_BL.UOW
                 }
                 return VacationEmployee_Repository;
             }
-        }
+        } 
+        
+        public GenericRepo<ConnectionStatus> connectionStatus_Repository
+        {
+            get
+            {
+                if (ConnectionStatus_Repository == null)
+                {
+                    ConnectionStatus_Repository = new GenericRepo<ConnectionStatus>(db);
+                }
+                return ConnectionStatus_Repository;
+            }
+        } 
 
 
         public void SaveChanges()
