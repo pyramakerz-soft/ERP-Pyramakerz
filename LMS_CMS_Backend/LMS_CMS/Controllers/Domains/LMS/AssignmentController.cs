@@ -19,6 +19,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
     [Authorize]
     public class AssignmentController : ControllerBase
     {
+
         private readonly DbContextFactoryService _dbContextFactory;
         IMapper mapper;
         private readonly CheckPageAccessService _checkPageAccessService;
@@ -36,7 +37,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee"},
+            allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Assignment" }
         )]
         public async Task<IActionResult> GetAsync([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
@@ -57,7 +58,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             int totalRecords = await Unit_Of_Work.assignment_Repository
-               .CountAsync(f => f.IsDeleted != true); 
+               .CountAsync(f => f.IsDeleted != true);
 
             List<Assignment> Assignment = await Unit_Of_Work.assignment_Repository
                 .Select_All_With_IncludesById_Pagination<Assignment>(
@@ -102,14 +103,14 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
             };
 
-            return Ok(new { Data = AssignmentGetDTOs, Pagination = paginationMetadata }); 
+            return Ok(new { Data = AssignmentGetDTOs, Pagination = paginationMetadata });
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////
 
         [HttpGet("GetBySubjectID/{subID}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee"} ,
+            allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Assignment" }
         )]
         public async Task<IActionResult> GetBySubjectID(long subID, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
@@ -130,7 +131,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             Subject subject = Unit_Of_Work.subject_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == subID);
-            if(subject == null)
+            if (subject == null)
             {
                 return BadRequest("No subject with this id");
             }
@@ -155,7 +156,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
-             
+
             if (Assignment == null || Assignment.Count == 0)
             {
                 return NotFound();
@@ -164,8 +165,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             List<AssignmentGetDTO> AssignmentGetDTOs = mapper.Map<List<AssignmentGetDTO>>(Assignment);
 
             string serverUrl = $"{Request.Scheme}://{Request.Host}/";
-             
-            foreach(var AssignmentGetDTO in AssignmentGetDTOs)
+
+            foreach (var AssignmentGetDTO in AssignmentGetDTOs)
             {
                 if (!string.IsNullOrEmpty(AssignmentGetDTO.LinkFile))
                 {
@@ -183,12 +184,12 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             return Ok(new { Data = AssignmentGetDTOs, Pagination = paginationMetadata });
         }
-        
+
         //////////////////////////////////////////////////////////////////////////////////////////
 
         [HttpGet("GetByID/{id}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee"},
+            allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Assignment" }
         )]
         public async Task<IActionResult> GetByID(long id)
@@ -205,7 +206,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            Assignment assignment= Unit_Of_Work.assignment_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == id);
+            Assignment assignment = Unit_Of_Work.assignment_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == id);
             if (assignment == null)
             {
                 return BadRequest("No assignment with this id");
@@ -248,11 +249,11 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("GetByStudentID/{studID}/{subjID}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" ,"student"},
+            allowedTypes: new[] { "octa", "employee", "student" },
             pages: new[] { "Assignment" }
         )]
         public async Task<IActionResult> GetByStudentID(long studID, long subjID)
-        {  
+        {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             var userClaims = HttpContext.User.Claims;
@@ -265,18 +266,18 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            Subject subject = Unit_Of_Work.subject_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == subjID);;
+            Subject subject = Unit_Of_Work.subject_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == subjID); ;
             if (subject == null)
             {
                 return BadRequest("No subject with this id");
             }
-            
-            Student student = Unit_Of_Work.student_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == studID);;
+
+            Student student = Unit_Of_Work.student_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == studID); ;
             if (student == null)
             {
                 return BadRequest("No student with this id");
             }
-             
+
             // Get StudentClassID According to current academic year
             StudentClassroom studentClassroom = Unit_Of_Work.studentClassroom_Repository.First_Or_Default(d => d.IsDeleted != true && d.StudentID == studID && d.Classroom.IsDeleted != true && d.Classroom.AcademicYear.IsActive == true);
 
@@ -290,7 +291,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 d => d.IsDeleted != true && d.ClassroomID == studentClassroom.ClassID && d.SubjectID == subjID && d.Hide != true
                 );
 
-            if(classroomSubject == null)
+            if (classroomSubject == null)
             {
                 return NotFound("This Subject isn't in the student classroom");
             }
@@ -310,12 +311,12 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             List<AssignmentStudentIsSpecific> assignmentStudentIsSpecifics = await Unit_Of_Work.assignmentStudentIsSpecific_Repository.Select_All_With_IncludesById<AssignmentStudentIsSpecific>(
                 d => d.IsDeleted != true && d.StudentClassroomID == studentClassroom.ID && d.Assignment.IsDeleted != true && d.Assignment.SubjectID == subjID && today >= d.Assignment.OpenDate,
                 query => query.Include(d => d.Assignment).ThenInclude(d => d.AssignmentType),
-                query => query.Include(d => d.Assignment).ThenInclude(d => d.SubjectWeightType).ThenInclude(d =>d.WeightType),
+                query => query.Include(d => d.Assignment).ThenInclude(d => d.SubjectWeightType).ThenInclude(d => d.WeightType),
                 query => query.Include(d => d.Assignment).ThenInclude(d => d.Subject)
                 );
-            
+
             List<Assignment> assignments = await Unit_Of_Work.assignment_Repository.Select_All_With_IncludesById<Assignment>(
-                d => d.IsDeleted != true && d.SubjectID == subjID && d.IsSpecificStudents != true && today >=d.OpenDate ,
+                d => d.IsDeleted != true && d.SubjectID == subjID && d.IsSpecificStudents != true && today >= d.OpenDate,
                 query => query.Include(d => d.AssignmentType),
                 query => query.Include(d => d.InsertedByEmployee),
                 query => query.Include(d => d.SubjectWeightType).ThenInclude(d => d.WeightType),
@@ -328,11 +329,11 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             {
                 allAssignments.AddRange(assignmentStudentIsSpecifics.Select(a => a.Assignment));
             }
-            if(assignments != null)
+            if (assignments != null)
             {
                 allAssignments.AddRange(assignments);
             }
-            
+
             // Filter out repeated entries
             allAssignments = allAssignments
                 .GroupBy(a => a.ID) // Group by ID (or any unique property)
@@ -354,7 +355,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 query => query.Include(d => d.Assignment).ThenInclude(d => d.SubjectWeightType).ThenInclude(d => d.WeightType),
                 query => query.Include(d => d.Assignment).ThenInclude(d => d.Subject)
                 );
-             
+
             List<Assignment> unsolvedAssignments = new List<Assignment>();
 
             foreach (var assignment in allAssignments)
@@ -364,10 +365,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
                 if (!isSolved)
                 {
-                    unsolvedAssignments.Add(assignment); 
-                } 
-            } 
-              
+                    unsolvedAssignments.Add(assignment);
+                }
+            }
+
             List<AssignmentForStudentGetDTO> assignmentStudentsSolvedGetDTOs = mapper.Map<List<AssignmentForStudentGetDTO>>(assignmentStudentsSolved);
             List<AssignmentGetDTO> unsolvedAssignmentsGetDTOs = mapper.Map<List<AssignmentGetDTO>>(unsolvedAssignments);
 
@@ -398,31 +399,31 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             {
                 return BadRequest("Classroom cannot be null");
             }
-             
+
             Subject subject = Unit_Of_Work.subject_Repository.First_Or_Default(g => g.ID == NewAssignment.SubjectID && g.IsDeleted != true);
             if (subject == null)
             {
                 return BadRequest("No subject with this ID");
             }
-            
+
             SubjectWeightType subjectWeightType = Unit_Of_Work.subjectWeightType_Repository.First_Or_Default(g => g.ID == NewAssignment.SubjectWeightTypeID && g.IsDeleted != true);
             if (subjectWeightType == null)
             {
                 return BadRequest("No subject Weight Type with this ID");
-            } 
+            }
 
-            if(subjectWeightType.SubjectID != NewAssignment.SubjectID)
+            if (subjectWeightType.SubjectID != NewAssignment.SubjectID)
             {
                 return BadRequest("This Subject isn't assigned to this Subject Weight Type");
             }
-              
+
             AssignmentType assignmentType = Unit_Of_Work.assignmentType_Repository.First_Or_Default(g => g.ID == NewAssignment.AssignmentTypeID);
             if (assignmentType == null)
             {
                 return BadRequest("No Assignment Type with this ID");
-            } 
-             
-            if(NewAssignment.DueDate == null)
+            }
+
+            if (NewAssignment.DueDate == null)
             {
                 NewAssignment.DueDate = NewAssignment.CutOfDate;
             }
@@ -442,12 +443,12 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return BadRequest("Open date must be on or before due date.");
             }
 
-            if(NewAssignment.IsSpecificStudents == true && (NewAssignment.StudentClassroomIDs == null || NewAssignment.StudentClassroomIDs.Count == 0))
+            if (NewAssignment.IsSpecificStudents == true && (NewAssignment.StudentClassroomIDs == null || NewAssignment.StudentClassroomIDs.Count == 0))
             {
                 return BadRequest("You Didn't choose Students");
             }
 
-            if(NewAssignment.IsSpecificStudents == false)
+            if (NewAssignment.IsSpecificStudents == false)
             {
                 NewAssignment.StudentClassroomIDs = null;
             }
@@ -467,7 +468,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             Unit_Of_Work.assignment_Repository.Add(assignment);
             Unit_Of_Work.SaveChanges();
 
-            if(NewAssignment.StudentClassroomIDs != null)
+            if (NewAssignment.StudentClassroomIDs != null)
             {
                 foreach (var studentClass in NewAssignment.StudentClassroomIDs)
                 {
@@ -480,7 +481,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                         && d.Subject.IsDeleted != true && d.StudentClassroom.Classroom.IsDeleted != true && d.StudentClassroom.Student.IsDeleted != true
                         );
 
-                    if(studentClassroom != null && studentClassroomSubject != null)
+                    if (studentClassroom != null && studentClassroomSubject != null)
                     {
                         AssignmentStudentIsSpecific assignmentStudent = new AssignmentStudentIsSpecific();
                         assignmentStudent.AssignmentID = assignment.ID;
@@ -499,7 +500,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     }
                 }
             }
-             
+
             Unit_Of_Work.SaveChanges();
             return Ok(NewAssignment);
         }
@@ -538,7 +539,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return BadRequest("No Assignment with this ID");
             }
 
-            if(assignmentExists.AssignmentTypeID != 1)
+            if (assignmentExists.AssignmentTypeID != 1)
             {
                 return BadRequest("You Can't add File To those type that aren't Textbook Assignment");
             }
@@ -562,7 +563,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             // Add For The first Time
-            if(assignmentExists.LinkFile == null && EditAssignment.FileFile != null)
+            if (assignmentExists.LinkFile == null && EditAssignment.FileFile != null)
             {
                 var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Assignment");
                 var assignmentFolder = Path.Combine(baseFolder, assignmentExists.ID.ToString());
@@ -615,7 +616,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     assignmentExists.LinkFile = Path.Combine("Uploads", "Assignment", assignmentExists.ID.ToString(), EditAssignment.FileFile.FileName);
                 }
             }
-             
+
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             assignmentExists.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
             if (userTypeClaim == "octa")
@@ -637,7 +638,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             Unit_Of_Work.assignment_Repository.Update(assignmentExists);
             Unit_Of_Work.SaveChanges();
-  
+
             return Ok(EditAssignment);
         }
 
@@ -676,11 +677,11 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return BadRequest("No Assignment with this ID");
             }
 
-            if(assignmentExists.SubjectID != EditAssignment.SubjectID)
+            if (assignmentExists.SubjectID != EditAssignment.SubjectID)
             {
                 return BadRequest("You Can't Change the subject");
             }
-            
+
             Subject subject = Unit_Of_Work.subject_Repository.First_Or_Default(g => g.ID == EditAssignment.SubjectID && g.IsDeleted != true);
             if (subject == null)
             {
@@ -745,11 +746,11 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             if (EditAssignment.IsSpecificStudents == false && assignmentExists.IsSpecificStudents == true)
-            { 
+            {
                 List<AssignmentStudentIsSpecific> assignmentStudentIsSpecifics = Unit_Of_Work.assignmentStudentIsSpecific_Repository.FindBy(
                     d => d.IsDeleted != true && d.AssignmentID == EditAssignment.ID
                     );
-                   
+
                 if (assignmentStudentIsSpecifics != null)
                 {
                     foreach (var existing in assignmentStudentIsSpecifics)
@@ -774,9 +775,9 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                         }
                         Unit_Of_Work.assignmentStudentIsSpecific_Repository.Update(existing);
                     }
-                } 
+                }
             }
-            else if(EditAssignment.IsSpecificStudents == true && assignmentExists.IsSpecificStudents == false)
+            else if (EditAssignment.IsSpecificStudents == true && assignmentExists.IsSpecificStudents == false)
             {
                 foreach (var studentClassID in EditAssignment.StudentClassroomIDs)
                 {
@@ -789,7 +790,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                         );
 
                     if (studentClassroom != null && studentClassroomSubject != null)
-                    { 
+                    {
                         AssignmentStudentIsSpecific newAssignmentStudent = new AssignmentStudentIsSpecific();
                         newAssignmentStudent.AssignmentID = EditAssignment.ID;
                         newAssignmentStudent.StudentClassroomID = studentClassID;
@@ -807,7 +808,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     }
                 }
             }
-            else if(EditAssignment.IsSpecificStudents == true && assignmentExists.IsSpecificStudents == true)
+            else if (EditAssignment.IsSpecificStudents == true && assignmentExists.IsSpecificStudents == true)
             {
                 List<AssignmentStudentIsSpecific> assignmentStudentIsSpecifics = Unit_Of_Work.assignmentStudentIsSpecific_Repository
                     .FindBy(d => d.IsDeleted != true && d.AssignmentID == EditAssignment.ID)
@@ -1103,7 +1104,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             Unit_Of_Work.assignment_Repository.Update(assignmentExists);
             Unit_Of_Work.SaveChanges();
-             
+
             return Ok(EditAssignment);
         }
 
