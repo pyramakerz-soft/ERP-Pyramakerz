@@ -43,10 +43,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
 
         //////////////////////////////////////////////////////////////////////////////////////////
 
-        private (string EnglishName, string ArabicName) GetUserNames(UOW unitOfWork, long userId, long userTypeId)
+        private (string EnglishName, string ArabicName, long ConnectionStatusID) GetUserNames(UOW unitOfWork, long userId, long userTypeId)
         {
             string englishName = string.Empty;
             string arabicName = string.Empty;
+            long? connectionStatusID = 0;
 
             switch (userTypeId)
             {
@@ -56,6 +57,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                     {
                         englishName = employee.en_name;
                         arabicName = employee.ar_name;
+                        connectionStatusID = employee.ConnectionStatusID;
                     }
                     break;
 
@@ -65,6 +67,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                     {
                         englishName = student.en_name;
                         arabicName = student.ar_name;
+                        connectionStatusID = student.ConnectionStatusID;
                     }
                     break;
 
@@ -74,6 +77,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                     {
                         englishName = parent.en_name;
                         arabicName = parent.ar_name;
+                        connectionStatusID = parent.ConnectionStatusID;
                     }
                     break;
 
@@ -81,7 +85,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                     throw new ArgumentException("Invalid user type ID");
             }
 
-            return (englishName, arabicName);
+            return (englishName, arabicName, connectionStatusID.Value);
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////
@@ -149,8 +153,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             {
                 var lastMessage = conv.LastMessage; 
                  
-                (string senderEnglishName, string senderArabicName) = GetUserNames(Unit_Of_Work, lastMessage.SenderID, lastMessage.SenderUserTypeID);
-                (string receiverEnglishName, string receiverArabicName) = GetUserNames(Unit_Of_Work, lastMessage.ReceiverID, lastMessage.ReceiverUserTypeID);
+                (string senderEnglishName, string senderArabicName, long senderConnectionStatusID) = GetUserNames(Unit_Of_Work, lastMessage.SenderID, lastMessage.SenderUserTypeID);
+                (string receiverEnglishName, string receiverArabicName, long receiverConnectionStatusID) = GetUserNames(Unit_Of_Work, lastMessage.ReceiverID, lastMessage.ReceiverUserTypeID);
 
                 var chatDto = new ChatGetDTO
                 {
@@ -161,6 +165,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                     SenderID = lastMessage.SenderID,
                     SenderEnglishName = senderEnglishName,
                     SenderArabicName = senderArabicName,
+                    SenderConnectionStatusID = senderConnectionStatusID,
                     SenderUserTypeID = lastMessage.SenderUserTypeID,
                     SenderUserTypeName = lastMessage.SenderUserType.Title,
                     ReceiverID = lastMessage.ReceiverID,
@@ -168,6 +173,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                     ReceiverArabicName = receiverArabicName,
                     ReceiverUserTypeID = lastMessage.ReceiverUserTypeID,
                     ReceiverUserTypeName = lastMessage.ReceiverUserType.Title,
+                    ReceiverConnectionStatusID = receiverConnectionStatusID,
                     InsertedAt = lastMessage.InsertedAt,
                     UnreadCount = conv.UnreadCount,
                     ChatMessageAttachments = lastMessage.ChatMessageAttachments?
@@ -283,8 +289,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                         }).ToList() ?? new List<ChatMessageAttachmentGetDTO>()
                 };
                  
-                (chatDto.SenderEnglishName, chatDto.SenderArabicName) = GetUserNames(Unit_Of_Work, chatDto.SenderID, chatDto.SenderUserTypeID);
-                (chatDto.ReceiverEnglishName, chatDto.ReceiverArabicName) = GetUserNames(Unit_Of_Work, chatDto.ReceiverID, chatDto.ReceiverUserTypeID); 
+                (chatDto.SenderEnglishName, chatDto.SenderArabicName, chatDto.SenderConnectionStatusID) = GetUserNames(Unit_Of_Work, chatDto.SenderID, chatDto.SenderUserTypeID);
+                (chatDto.ReceiverEnglishName, chatDto.ReceiverArabicName, chatDto.ReceiverConnectionStatusID) = GetUserNames(Unit_Of_Work, chatDto.ReceiverID, chatDto.ReceiverUserTypeID); 
 
                 result.Add(chatDto);
             } 
@@ -370,8 +376,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                     }
                 }
 
-                (chatMessage.SenderEnglishName, chatMessage.SenderArabicName) = GetUserNames(Unit_Of_Work, chatMessage.SenderID, chatMessage.SenderUserTypeID);
-                (chatMessage.ReceiverEnglishName, chatMessage.ReceiverArabicName) = GetUserNames(Unit_Of_Work, chatMessage.ReceiverID, chatMessage.ReceiverUserTypeID);
+                (chatMessage.SenderEnglishName, chatMessage.SenderArabicName, chatMessage.SenderConnectionStatusID) = GetUserNames(Unit_Of_Work, chatMessage.SenderID, chatMessage.SenderUserTypeID);
+                (chatMessage.ReceiverEnglishName, chatMessage.ReceiverArabicName, chatMessage.ReceiverConnectionStatusID) = GetUserNames(Unit_Of_Work, chatMessage.ReceiverID, chatMessage.ReceiverUserTypeID);
             }
 
             var domainName = HttpContext.Request.Headers["Domain-Name"].FirstOrDefault();

@@ -11,7 +11,7 @@ namespace LMS_CMS_BL.DTO.Accounting
     {
         public long ID { get; set; }
         public string DocNumber { get; set; }
-        public string Date { get; set; }
+        public DateOnly Date { get; set; }
         public string Notes { get; set; } 
         public long ReceivableDocTypesID { get; set; } 
         public string ReceivableDocTypesName { get; set; } 
