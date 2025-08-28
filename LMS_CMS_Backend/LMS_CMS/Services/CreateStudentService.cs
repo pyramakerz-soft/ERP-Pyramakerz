@@ -103,7 +103,8 @@ namespace LMS_CMS_PL.Services
                 AdmissionDate = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone).ToString("yyyy-MM-dd"),
                 InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone),
                 InsertedByOctaId = userTypeClaim == "octa" ? userId : null,
-                InsertedByUserId = userTypeClaim == "employee" ? userId : null
+                InsertedByUserId = userTypeClaim == "employee" ? userId : null,
+                ConnectionStatusID = 1
             };
 
             Unit_Of_Work.student_Repository.Add(student);

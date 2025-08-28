@@ -193,6 +193,18 @@ export class AddEditSubjectComponent {
     }
   }
 
+  validateNumberOnly(event: any, field: keyof Subject): void {
+    let value = event.target.value;
+    value = value.replace(/[^0-9]/g, '')
+    event.target.value = value;
+    if (isNaN(value) || value === '') {
+      event.target.value = ''; 
+      if (typeof this.subject[field] === 'string') {
+        this.subject[field] = '' as never;  
+      }
+    }
+  }
+
   onIsHideChange(event: Event) {
     const isChecked = (event.target as HTMLInputElement).checked;
     this.subject.hideFromGradeReport = isChecked
@@ -255,7 +267,13 @@ export class AddEditSubjectComponent {
                   this.closeDialog();
                 },
                 error => {
-                  this.isLoading = false;
+                  this.isLoading = false; 
+                  Swal.fire({
+                    icon: 'error',
+                    text: error.error,
+                    confirmButtonText: 'Okay',
+                    customClass: { confirmButton: 'secondaryBg' },
+                  });
                 }
               );
             });
@@ -265,7 +283,13 @@ export class AddEditSubjectComponent {
                 this.closeDialog();
               },
               error => {
-                this.isLoading = false;
+                this.isLoading = false; 
+                Swal.fire({
+                  icon: 'error',
+                  text: error.error,
+                  confirmButtonText: 'Okay',
+                  customClass: { confirmButton: 'secondaryBg' },
+                });
               }
             );
           }       
@@ -275,7 +299,13 @@ export class AddEditSubjectComponent {
               this.closeDialog()
             },
             error => {
-              this.isLoading = false;
+              this.isLoading = false; 
+              Swal.fire({
+                icon: 'error',
+                text: error.error,
+                confirmButtonText: 'Okay',
+                customClass: { confirmButton: 'secondaryBg' },
+              });
             }
           );
         }  

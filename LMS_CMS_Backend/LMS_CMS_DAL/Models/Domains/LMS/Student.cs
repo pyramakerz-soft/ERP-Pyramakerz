@@ -78,6 +78,11 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public long? StartAcademicYearID { get; set; }
         public AcademicYear StartAcademicYear { get; set; }
 
+
+        [ForeignKey("ConnectionStatus")]
+        public long? ConnectionStatusID { get; set; }
+        public ConnectionStatus ConnectionStatus { get; set; }
+
         public string? DateOfBirth {  get; set; }
         public string? PlaceOfBirth { get; set; }
         public string? Religion {  get; set; } 

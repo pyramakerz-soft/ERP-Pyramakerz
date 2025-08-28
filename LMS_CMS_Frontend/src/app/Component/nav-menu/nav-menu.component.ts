@@ -40,6 +40,8 @@ import { Section } from '../../Models/LMS/section';
 import { RealTimeRequestServiceService } from '../../Services/shared/real-time-request-service.service';
 import { ChatMessageService } from '../../Services/shared/chat-message.service';
 import { ChatMessage } from '../../Models/Communication/chat-message';
+import { ConnectionStatus } from '../../Models/connection-status';
+import { ConnectionStatusServiceService } from '../../Services/shared/connection-status-service.service';
 
 @Component({
   selector: 'app-nav-menu',
@@ -105,12 +107,23 @@ export class NavMenuComponent {
   
   subjectID = 0 
 
+  connectionStatus:ConnectionStatus[] = []
+  isStateDropdownOpen = false;
+  currentState:ConnectionStatus = new ConnectionStatus()
+
+  private readonly allowedExtensions: string[] = [
+    '.jpg', '.jpeg', '.png', '.gif',
+    '.pdf', '.doc', '.docx', '.txt',
+    '.xls', '.xlsx', '.csv',
+    '.mp4', '.avi', '.mkv', '.mov'
+  ];
+
   constructor(private router: Router, public account: AccountService, public languageService: LanguageService, public ApiServ: ApiService, public octaService:OctaService,
     private translate: TranslateService, private communicationService: NewTokenService, private logOutService: LogOutService, 
     private notificationService: NotificationService, private realTimeService: RealTimeNotificationServiceService, private realTimeRequestService: RealTimeRequestServiceService, public requestService:RequestService,
     public departmentService: DepartmentService, public employeeService: EmployeeService, public schoolService: SchoolService, public sectionService: SectionService,
     public gradeService: GradeService, public classroomService: ClassroomService, public studentService: StudentService, public parentService: ParentService, 
-    public subjectService: SubjectService, public chatMessageService:ChatMessageService) { }
+    public subjectService: SubjectService, public chatMessageService:ChatMessageService, public connectionStatusService:ConnectionStatusServiceService) { }
 
   ngOnInit() {
     this.GetUserInfo();
@@ -121,6 +134,9 @@ export class NavMenuComponent {
       this.GetUserInfo();
     });
     this.DomainName = this.ApiServ.GetHeader();
+    
+    this.getConnectionStatus()
+    this.getUserStatus()
     
     this.loadUnseenNotifications()
     this.loadUnseenRequests()
@@ -142,6 +158,32 @@ export class NavMenuComponent {
     });
   }
 
+  getConnectionStatus() {
+    this.connectionStatusService.Get(this.DomainName).subscribe(
+      data => this.connectionStatus = data
+    );
+  }
+
+  getUserStatus() {
+    this.connectionStatusService.GetUserState(this.DomainName).subscribe(
+      data => this.currentState = data
+    );
+  }
+ 
+  toggleStateDropdown() {
+    this.isStateDropdownOpen = !this.isStateDropdownOpen;
+  }
+
+  // Set the selected state
+  selectState(state: ConnectionStatus) {
+    this.connectionStatusService.ChangeConnectionStatus(state.id, this.DomainName).subscribe(
+      data => {
+        this.currentState = state;
+      }
+    )
+    this.isStateDropdownOpen = false; 
+  }
+
   loadUnseenNotifications() {
     this.notificationService.UnSeenNotificationCount(this.DomainName).subscribe(
       data => this.notificationsUnSeenCount = data
@@ -157,7 +199,7 @@ export class NavMenuComponent {
   loadUnseenMessages() {
     this.chatMessageService.UnSeenRequestCount(this.DomainName).subscribe(
       data => this.messagesUnSeenCount = data
-    );
+    );  
   }
 
   getAllTokens(): void {
@@ -272,6 +314,7 @@ export class NavMenuComponent {
 
     if (!clickedInsideAny) {
       this.isPopupOpen = false;
+      this.isStateDropdownOpen = false
       this.isNotificationPopupOpen = false;
       this.isRequuestPopupOpen = false;
       this.isMessagePopupOpen = false;
@@ -512,7 +555,8 @@ export class NavMenuComponent {
           otherUserID: chatMessage.receiverID,
           otherUserTypeID: chatMessage.receiverUserTypeID,
           englishNameForConversation: chatMessage.receiverEnglishName,
-          arabicNameForConversation: chatMessage.receiverArabicName
+          arabicNameForConversation: chatMessage.receiverArabicName,
+          connectionStatusForConversation: chatMessage.receiverConnectionStatusID
         }
       }); 
     }else{
@@ -521,7 +565,8 @@ export class NavMenuComponent {
           otherUserID: chatMessage.senderID,
           otherUserTypeID: chatMessage.senderUserTypeID,
           englishNameForConversation: chatMessage.senderEnglishName,
-          arabicNameForConversation: chatMessage.senderArabicName
+          arabicNameForConversation: chatMessage.senderArabicName,
+          connectionStatusForConversation: chatMessage.senderConnectionStatusID
         }
       });
     }
@@ -1052,6 +1097,19 @@ export class NavMenuComponent {
     const input = event.target as HTMLInputElement;
 
     if (file) {
+      const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
+      if (!this.allowedExtensions.includes(fileExtension)) {
+        Swal.fire({
+          title: 'Invalid file type',
+          html: `The file <strong>${file.name}</strong> is not an allowed type. Allowed types are:<br><strong>${this.allowedExtensions.join(', ')}</strong>`,
+          icon: 'warning',
+          confirmButtonColor: '#089B41',
+          confirmButtonText: "OK"
+        });
+        this.requestToBeSend.fileFile = null;
+        return;
+      }
+
       if (file.size > 25 * 1024 * 1024) {
         Swal.fire({
           title: 'The file size exceeds the maximum limit of 25 MB.',

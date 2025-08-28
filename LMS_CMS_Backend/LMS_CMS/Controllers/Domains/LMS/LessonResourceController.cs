@@ -19,12 +19,14 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         private readonly DbContextFactoryService _dbContextFactory;
         IMapper mapper;
         private readonly CheckPageAccessService _checkPageAccessService;
+        private readonly FileValidationService _fileValidationService;
 
-        public LessonResourceController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService)
+        public LessonResourceController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService, FileValidationService fileValidationService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
             _checkPageAccessService = checkPageAccessService;
+            _fileValidationService = fileValidationService;
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -232,24 +234,14 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             if (lesson == null)
             {
                 return BadRequest("No Lesson Resource Type with this ID");
-            }
+            } 
 
             if (NewLessonResource.AttachmentFile != null)
             {
-                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/LessonResource");
-                var lessonResourceFolder = Path.Combine(baseFolder, NewLessonResource.EnglishTitle);
-                if (!Directory.Exists(lessonResourceFolder))
+                string returnFileInput = await _fileValidationService.ValidateFileWithTimeoutAsync(NewLessonResource.AttachmentFile);
+                if (returnFileInput != null)
                 {
-                    Directory.CreateDirectory(lessonResourceFolder);
-                }
-
-                if (NewLessonResource.AttachmentFile.Length > 0)
-                {
-                    var filePath = Path.Combine(lessonResourceFolder, NewLessonResource.AttachmentFile.FileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await NewLessonResource.AttachmentFile.CopyToAsync(stream);
-                    }
+                    return BadRequest(returnFileInput);
                 }
             }
 
@@ -264,15 +256,33 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             else if (userTypeClaim == "employee")
             {
                 lessonResource.InsertedByUserId = userId;
-            }
-
-            if (NewLessonResource.AttachmentFile != null)
-            {
-                lessonResource.AttachmentLink = Path.Combine("Uploads", "LessonResource", NewLessonResource.EnglishTitle, NewLessonResource.AttachmentFile.FileName);
-            }
+            } 
 
             Unit_Of_Work.lessonResource_Repository.Add(lessonResource);
             Unit_Of_Work.SaveChanges();
+             
+
+            if (NewLessonResource.AttachmentFile != null)
+            {
+                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/LessonResource");
+                var lessFolder = Path.Combine(baseFolder, lessonResource.ID.ToString());
+                if (!Directory.Exists(lessFolder))
+                {
+                    Directory.CreateDirectory(lessFolder);
+                }
+
+                if (NewLessonResource.AttachmentFile.Length > 0)
+                {
+                    var filePath = Path.Combine(lessFolder, NewLessonResource.AttachmentFile.FileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await NewLessonResource.AttachmentFile.CopyToAsync(stream);
+                    }
+                }
+
+                lessonResource.AttachmentLink = Path.Combine("Uploads", "LessonResource", lessonResource.ID.ToString(), NewLessonResource.AttachmentFile.FileName);
+                Unit_Of_Work.lessonResource_Repository.Update(lessonResource);
+            }
 
             if (NewLessonResource.Classes != null && NewLessonResource.Classes.Count != 0)
             {
@@ -362,18 +372,56 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 }
             }
 
-            string enNameExists = lessonResourceExists.EnglishTitle;
-            string AttachmentLinkExists = lessonResourceExists.AttachmentLink;
+            if (EditLessonResource.AttachmentFile != null)
+            {
+                string returnFileInput = await _fileValidationService.ValidateFileWithTimeoutAsync(EditLessonResource.AttachmentFile);
+                if (returnFileInput != null)
+                {
+                    return BadRequest(returnFileInput);
+                }
+            }
+             
             if (EditLessonResource.AttachmentFile != null)
             {
                 var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/LessonResource");
+                var lessFolder = Path.Combine(baseFolder, EditLessonResource.ID.ToString());
+
+                if (System.IO.File.Exists(lessFolder))
+                {
+                    System.IO.File.Delete(lessFolder); // Delete the old file
+                }
+
+                if (Directory.Exists(lessFolder))
+                {
+                    Directory.Delete(lessFolder, true);
+                }
+
+                if (!Directory.Exists(lessFolder))
+                {
+                    Directory.CreateDirectory(lessFolder);
+                }
+
+                if (EditLessonResource.AttachmentFile.Length > 0)
+                {
+                    var filePath = Path.Combine(lessFolder, EditLessonResource.AttachmentFile.FileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await EditLessonResource.AttachmentFile.CopyToAsync(stream);
+                    }
+                }
+
+                EditLessonResource.AttachmentLink = Path.Combine("Uploads", "LessonResource", lessonResourceExists.ID.ToString(), EditLessonResource.AttachmentFile.FileName);
+            }
+            else
+            {
                 if (!string.IsNullOrEmpty(lessonResourceExists.AttachmentLink))
                 {
-                    if (AttachmentLinkExists != null && AttachmentLinkExists.StartsWith("Uploads", StringComparison.OrdinalIgnoreCase))
+                    if (lessonResourceExists.AttachmentLink.StartsWith("Uploads", StringComparison.OrdinalIgnoreCase))
                     {
-                        var oldLessonResourceFolder = Path.Combine(baseFolder, enNameExists);
+                        var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/LessonResource");
+                        var oldLessonResourceFolder = Path.Combine(baseFolder, lessonResourceExists.ID.ToString());
 
-                        string existingFilePath = Path.Combine(baseFolder, enNameExists);
+                        string existingFilePath = Path.Combine(baseFolder, lessonResourceExists.ID.ToString());
 
                         if (System.IO.File.Exists(existingFilePath))
                         {
@@ -385,140 +433,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                             Directory.Delete(oldLessonResourceFolder, true);
                         }
                     }
-
-                }
-
-                var lessonResourceFolder = Path.Combine(baseFolder, EditLessonResource.EnglishTitle);
-                if (!Directory.Exists(lessonResourceFolder))
-                {
-                    Directory.CreateDirectory(lessonResourceFolder);
-                }
-
-                if (EditLessonResource.AttachmentFile.Length > 0)
-                {
-                    var filePath = Path.Combine(lessonResourceFolder, EditLessonResource.AttachmentFile.FileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await EditLessonResource.AttachmentFile.CopyToAsync(stream);
-                    }
-                }
-
-                EditLessonResource.AttachmentLink = Path.Combine("Uploads", "LessonResource", EditLessonResource.EnglishTitle, EditLessonResource.AttachmentFile.FileName);
-            }
-            else
-            {
-                if (EditLessonResource.AttachmentLink == null)
-                {
-                    if (!string.IsNullOrEmpty(lessonResourceExists.AttachmentLink))
-                    {
-                        if (AttachmentLinkExists.StartsWith("Uploads", StringComparison.OrdinalIgnoreCase))
-                        {
-                            var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/LessonResource");
-                            var oldLessonResourceFolder = Path.Combine(baseFolder, enNameExists);
-
-                            string existingFilePath = Path.Combine(baseFolder, enNameExists);
-
-                            if (System.IO.File.Exists(existingFilePath))
-                            {
-                                System.IO.File.Delete(existingFilePath); // Delete the old file
-                            }
-
-                            if (Directory.Exists(oldLessonResourceFolder))
-                            {
-                                Directory.Delete(oldLessonResourceFolder, true);
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    string url = EditLessonResource.AttachmentLink.Replace("/", "\\");
-                    if (AttachmentLinkExists != null)
-                    {
-                        if (AttachmentLinkExists.StartsWith("Uploads", StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (EditLessonResource.EnglishTitle != enNameExists)
-                            {
-                                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/LessonResource");
-                                var oldLessonResourceFolder = Path.Combine(baseFolder, enNameExists);
-                                var newLessonResourceFolder = Path.Combine(baseFolder, EditLessonResource.EnglishTitle);
-                                if (url.EndsWith(AttachmentLinkExists, StringComparison.OrdinalIgnoreCase))
-                                {
-                                    // Rename the folder if it exists
-                                    if (Directory.Exists(oldLessonResourceFolder))
-                                    {
-                                        if (!Directory.Exists(newLessonResourceFolder))
-                                        {
-                                            Directory.CreateDirectory(newLessonResourceFolder);
-                                        }
-
-                                        var files = Directory.GetFiles(oldLessonResourceFolder);
-                                        foreach (var file in files)
-                                        {
-                                            var fileName = Path.GetFileName(file);
-                                            var destFile = Path.Combine(newLessonResourceFolder, fileName);
-                                            System.IO.File.Move(file, destFile);
-                                        }
-
-                                        Directory.Delete(oldLessonResourceFolder);
-                                    }
-                                    EditLessonResource.AttachmentLink = Path.Combine("Uploads", "LessonResource", EditLessonResource.EnglishTitle, Path.GetFileName(AttachmentLinkExists));
-                                }
-                                else
-                                {
-                                    EditLessonResource.AttachmentLink = EditLessonResource.AttachmentLink;
-
-                                    string existingFilePath = Path.Combine(baseFolder, enNameExists);
-
-                                    if (System.IO.File.Exists(existingFilePath))
-                                    {
-                                        System.IO.File.Delete(existingFilePath); // Delete the old file
-                                    }
-
-                                    if (Directory.Exists(oldLessonResourceFolder))
-                                    {
-                                        Directory.Delete(oldLessonResourceFolder, true);
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/LessonResource");
-                                var oldLessonResourceFolder = Path.Combine(baseFolder, enNameExists);
-
-                                string existingFilePath = Path.Combine(baseFolder, enNameExists);
-
-                                if (System.IO.File.Exists(existingFilePath))
-                                {
-                                    System.IO.File.Delete(existingFilePath); // Delete the old file
-                                }
-
-                                if (Directory.Exists(oldLessonResourceFolder))
-                                {
-                                    Directory.Delete(oldLessonResourceFolder, true);
-                                }
-
-                                if (url.EndsWith(AttachmentLinkExists, StringComparison.OrdinalIgnoreCase))
-                                {
-                                    EditLessonResource.AttachmentLink = AttachmentLinkExists;
-                                }
-                                else
-                                {
-                                    EditLessonResource.AttachmentLink = EditLessonResource.AttachmentLink;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            EditLessonResource.AttachmentLink = EditLessonResource.AttachmentLink;
-                        }
-                    }
-                    else
-                    {
-
-                        EditLessonResource.AttachmentLink = EditLessonResource.AttachmentLink;
-                    }
-                }
+                } 
             }
 
             mapper.Map(EditLessonResource, lessonResourceExists);

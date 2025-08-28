@@ -780,7 +780,9 @@ export class LessonComponent {
   }
 
   validateNumber(event: any, field: keyof Lesson): void {
-    const value = event.target.value;
+    let value = event.target.value;
+    value = value.replace(/[^0-9]/g, '')
+    event.target.value = value;
     if (isNaN(value) || value === '') {
       event.target.value = ''; 
       if (typeof this.lesson[field] === 'string') {

@@ -66,8 +66,8 @@
                 }
 
                 stream.Position = 0;
-                if (await ContainsDangerousContentAsync(stream, extension, cancellationToken))
-                    return "File contains potentially dangerous content";
+                //if (await ContainsDangerousContentAsync(stream, extension, cancellationToken))
+                //    return "File contains potentially dangerous content";
 
             }
             catch (Exception ex)

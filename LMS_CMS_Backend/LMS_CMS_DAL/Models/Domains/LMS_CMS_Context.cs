@@ -240,6 +240,8 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<MaintenanceItem> MaintenanceItems { get; set; }
         public DbSet<MaintenanceCompany> MaintenanceCompanies { get; set; }
         public DbSet<MaintenanceEmployee> MaintenanceEmployees { get; set; }
+        public DbSet<Maintenance> Maintenances { get; set; }
+
 
         public DbSet<Bouns> Bouns { get; set; }
         public DbSet<BounsType> BounsType { get; set; }
@@ -251,6 +253,7 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<OfficialHolidays> OfficialHolidays { get; set; }
         public DbSet<VacationEmployee> VacationEmployee { get; set; }
         public DbSet<VacationTypes> VacationTypes { get; set; }
+        public DbSet<ConnectionStatus> ConnectionStatus { get; set; }
 
 
 
@@ -2240,6 +2243,42 @@ namespace LMS_CMS_DAL.Models.Domains
                  .HasForeignKey(me => me.EmployeeID)
                  .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<Maintenance>()
+               .HasOne(m => m.Item)
+               .WithMany(m => m.Maintenances)
+               .HasForeignKey(m => m.ItemID)
+               .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Maintenance>()
+                .HasOne(m => m.Employee)
+                .WithMany(m => m.Maintenances)
+                .HasForeignKey(m => m.EmployeeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Maintenance>()
+                .HasOne(m => m.Company)
+                .WithMany(m => m.Maintenances)
+                .HasForeignKey(m => m.CompanyID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<Employee>()
+                .HasOne(m => m.ConnectionStatus)
+                .WithMany(m => m.Employees)
+                .HasForeignKey(m => m.ConnectionStatusID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<Student>()
+                .HasOne(m => m.ConnectionStatus)
+                .WithMany(m => m.Students)
+                .HasForeignKey(m => m.ConnectionStatusID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<Parent>()
+                .HasOne(m => m.ConnectionStatus)
+                .WithMany(m => m.Parents)
+                .HasForeignKey(m => m.ConnectionStatusID)
+                .OnDelete(DeleteBehavior.Restrict);
+
 
             ///////////////////////// Exception: /////////////////////////
             modelBuilder.Entity<Bus>()
@@ -2343,7 +2382,7 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasOne(v => v.DeletedByEmployee)
                 .WithMany()
                 .HasForeignKey(v => v.DeletedByUserId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Restrict); 
 
             modelBuilder.Entity<Bouns>()
                 .HasOne(v => v.DeletedByEmployee)
@@ -2376,6 +2415,12 @@ namespace LMS_CMS_DAL.Models.Domains
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<VacationEmployee>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Maintenance>()
                 .HasOne(v => v.DeletedByEmployee)
                 .WithMany()
                 .HasForeignKey(v => v.DeletedByUserId)

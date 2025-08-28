@@ -112,7 +112,7 @@ namespace LMS_CMS
                             // If the request is for our hub...
                             var path = context.HttpContext.Request.Path;
                             if (!string.IsNullOrEmpty(accessToken) &&
-                                 (path.StartsWithSegments("/notificationHub") || path.StartsWithSegments("/requestHub")))
+                                 (path.StartsWithSegments("/notificationHub") || path.StartsWithSegments("/requestHub") || path.StartsWithSegments("/chatMessageHub")))
                             { 
                                 context.Token = accessToken;
                             }
@@ -152,6 +152,7 @@ namespace LMS_CMS
             builder.Services.AddScoped<UserTreeService>();
             builder.Services.AddScoped<NotificationService>();
             builder.Services.AddScoped<RequestService>();
+            builder.Services.AddScoped<ChatMessageService>();
             builder.Services.AddScoped<SendNotificationService>();
             builder.Services.AddScoped<ValidTeachersForStudentService>();
 
@@ -261,6 +262,7 @@ namespace LMS_CMS
             // 2) SignalR
             app.MapHub<NotificationHub>("/notificationHub").RequireAuthorization();
             app.MapHub<RequestHub>("/requestHub").RequireAuthorization();
+            app.MapHub<ChatMessageHub>("/chatMessageHub").RequireAuthorization();
 
             //app.Urls.Add("http://0.0.0.0:5000");
             //app.UseCors(builder =>

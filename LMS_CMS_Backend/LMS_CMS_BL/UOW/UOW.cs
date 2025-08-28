@@ -249,7 +249,7 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<MaintenanceItem> MaintenanceItem_Repository;
         GenericRepo<MaintenanceCompany> MaintenanceCompany_Repository;
         GenericRepo<MaintenanceEmployee> MaintenanceEmployee_Repository;
-
+        GenericRepo<Maintenance> Maintenance_Repository; 
         GenericRepo<Bouns> Bouns_Repository;
         GenericRepo<BounsType> BounsType_Repository;
         GenericRepo<Deduction> Deduction_Repository;
@@ -262,6 +262,7 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<VacationEmployee> VacationEmployee_Repository;
         GenericRepo<DirectMark> DirectMark_Repository;
         GenericRepo<DirectMarkClassesStudent> DirectMarkClassesStudent_Repository;
+        GenericRepo<ConnectionStatus> ConnectionStatus_Repository;
 
 
         public UOW(Octa_DbContext octa_Db)
@@ -2884,6 +2885,18 @@ namespace LMS_CMS_BL.UOW
                 return MaintenanceEmployee_Repository;
             }
         }
+         
+        public GenericRepo<Maintenance> maintenance_Repository
+        {
+            get
+            {
+                if (Maintenance_Repository == null)
+                {
+                    Maintenance_Repository = new GenericRepo<Maintenance>(db);
+                }
+                return Maintenance_Repository;
+            }
+        }
 
         public GenericRepo<Bouns> bouns_Repository
         {
@@ -3003,7 +3016,19 @@ namespace LMS_CMS_BL.UOW
                 }
                 return VacationEmployee_Repository;
             }
-        }
+        } 
+        
+        public GenericRepo<ConnectionStatus> connectionStatus_Repository
+        {
+            get
+            {
+                if (ConnectionStatus_Repository == null)
+                {
+                    ConnectionStatus_Repository = new GenericRepo<ConnectionStatus>(db);
+                }
+                return ConnectionStatus_Repository;
+            }
+        } 
 
 
         public void SaveChanges()

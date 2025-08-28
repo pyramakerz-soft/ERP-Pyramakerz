@@ -19,5 +19,8 @@ namespace LMS_CMS_DAL.Models.Domains.MaintenanceModule
         [Required(ErrorMessage = "الاسم مطلوب")]
         [StringLength(100, ErrorMessage = "لا يمكن أن يكون الاسم أطول من 100 حرف")]
         public string Ar_Name { get; set; }
+
+        public ICollection<Maintenance> Maintenances { get; set; } = new HashSet<Maintenance>();
+
     }
 }
