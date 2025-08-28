@@ -51,7 +51,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
                     query => query
                         .Include(m => m.Item)
                         .Include(m => m.Company)
-                        .Include(m => m.MaintenanceEmployee)
+                        .Include(m => m.MaintenanceEmployee.Employee)
                 );
 
 
@@ -88,7 +88,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
                          query => query
                            .Include(m => m.Item)
                            .Include(m => m.Company)
-                           .Include(m => m.MaintenanceEmployee)
+                           .Include(m => m.MaintenanceEmployee.Employee)
                 );
 
             if (item == null) return NotFound("No Maintenance record with this ID");
@@ -142,20 +142,29 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
             }
 
             LMS_CMS_DAL.Models.Domains.MaintenanceModule.Maintenance record = mapper.Map<LMS_CMS_DAL.Models.Domains.MaintenanceModule.Maintenance>(model);
-            //entity.Type = type;
+ 
+
+            if (model.CompanyID == 0)
+            {
+                model.CompanyID = null;
+            }
+            if (model.MaintenanceEmployeeID == 0)
+            {
+                model.MaintenanceEmployeeID = null;
+            }
             var cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             record.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
-            record.IsDeleted = false;
+
 
             if (userTypeClaim == "octa")
             {
                 record.InsertedByOctaId = userId;
-                record.InsertedByUserId = null;
+
             }
             else if (userTypeClaim == "employee")
             {
                 record.InsertedByUserId = userId;
-                record.InsertedByOctaId = null;
+
             }
 
 
@@ -164,7 +173,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
 
             return Ok(model);
         }
-        [HttpPut("{id}")]
+        [HttpPut]
         [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, allowEdit: 1, pages: new[] { "Maintenance" })]
         public IActionResult Edit(MaintenanceEditDto model)
         {
@@ -181,7 +190,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
 
             if (model == null) return BadRequest();
 
-            var entity = uow.maintenance_Repository.First_Or_Default(i => i.ID == model.ID && i.IsDeleted != true);
+            LMS_CMS_DAL.Models.Domains.MaintenanceModule.Maintenance entity = uow.maintenance_Repository.First_Or_Default(i => i.ID == model.ID && i.IsDeleted != true);
             if (entity == null) return NotFound("No Maintenance record with this ID");
 
             if (userTypeClaim == "employee")
@@ -190,50 +199,42 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
                 if (accessCheck != null) return accessCheck;
             }
 
-
-            if (model.Date.HasValue)
-                entity.Date = model.Date.Value;
-
-            if (model.ItemID.HasValue)
-            {
-                var item = uow.maintenanceItem_Repository
-                    .First_Or_Default(i => i.ID == model.ItemID.Value && i.IsDeleted != true);
-
-                if (item == null)
-                    return NotFound($"Maintenance Item with ID {model.ItemID.Value} not found.");
-
-                entity.ItemID = model.ItemID.Value;
-            }
+            MaintenanceItem item = uow.maintenanceItem_Repository.First_Or_Default(i => i.ID == model.ItemID && i.IsDeleted != true);
+            if (item == null)
+                return NotFound($"Maintenance Item with ID {model.ItemID} not found.");
 
             bool hasEmployee = model.MaintenanceEmployeeID.HasValue;
             bool hasCompany = model.CompanyID.HasValue;
 
             if (hasEmployee && hasCompany)
                 return BadRequest("You cannot provide both EmployeeID and CompanyID. Choose one.");
+            if (!hasEmployee && !hasCompany)
+                return BadRequest("You must provide either EmployeeID or CompanyID.");
 
-            
             if (hasEmployee)
             {
                 var emp = uow.employee_Repository.First_Or_Default(e => e.ID == model.MaintenanceEmployeeID && e.IsDeleted != true);
                 if (emp == null) return NotFound("Employee not found");
-                entity.MaintenanceEmployeeID = model.MaintenanceEmployeeID;
-                entity.CompanyID = null;
             }
             else if (hasCompany)
             {
                 var comp = uow.maintenanceCompany_Repository.First_Or_Default(c => c.ID == model.CompanyID && c.IsDeleted != true);
                 if (comp == null) return NotFound("Company not found");
-                entity.CompanyID = model.CompanyID;
-                entity.MaintenanceEmployeeID = null;
             }
 
-            
-            if (model.Cost.HasValue)
-                entity.Cost = model.Cost.Value;
 
-          
-            if (!string.IsNullOrWhiteSpace(model.Note))
-                entity.Note = model.Note;
+            if (model.CompanyID == 0)
+            {
+                model.CompanyID = null;
+            }
+            if (model.MaintenanceEmployeeID == 0)
+            {
+                model.MaintenanceEmployeeID = null;
+            }
+
+            mapper.Map(model, entity);
+
+
 
             var cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             entity.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
@@ -252,7 +253,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
             uow.maintenance_Repository.Update(entity);
             uow.SaveChanges();
 
-            return Ok(entity);
+            return Ok(model);
         }
 
 

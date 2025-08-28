@@ -12,13 +12,13 @@ namespace LMS_CMS_BL.DTO.Maintenance
 
         [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Name is required")]
         [System.ComponentModel.DataAnnotations.StringLength(150)]
-        public string E_Name { get; set; }
+        public string En_Name { get; set; }
 
         //[System.ComponentModel.DataAnnotations.Required(ErrorMessage = "الاسم مطلوب")]
         //[Required(ErrorMessage = "الاسم مطلوب")]
 
         [System.ComponentModel.DataAnnotations.StringLength(150)]
-        public string A_Name { get; set; }
+        public string Ar_Name { get; set; }
 
     }
 }

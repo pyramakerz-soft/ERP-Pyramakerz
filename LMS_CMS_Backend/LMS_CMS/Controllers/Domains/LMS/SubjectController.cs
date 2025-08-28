@@ -254,10 +254,26 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             if(NewSubject.AssignmentCutOffDatePercentage > 100 || NewSubject.AssignmentCutOffDatePercentage < 0)
             {
                 return BadRequest("Percentage must be between 0 and 100");
+            } 
+
+            Subject subject = mapper.Map<Subject>(NewSubject);
+
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            subject.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            subject.IconLink = "test";
+            if (userTypeClaim == "octa")
+            {
+                subject.InsertedByOctaId = userId;
             }
+            else if (userTypeClaim == "employee")
+            {
+                subject.InsertedByUserId = userId;
+            }
+            Unit_Of_Work.subject_Repository.Add(subject);
+            Unit_Of_Work.SaveChanges();
 
             var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/SubjectIcon");
-            var subjectFolder = Path.Combine(baseFolder, NewSubject.en_name);
+            var subjectFolder = Path.Combine(baseFolder, subject.ID.ToString());
             if (!Directory.Exists(subjectFolder))
             {
                 Directory.CreateDirectory(subjectFolder);
@@ -275,23 +291,10 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 }
             }
 
-            Subject subject = mapper.Map<Subject>(NewSubject);
-
-            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-            subject.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
-            if (userTypeClaim == "octa")
-            {
-                subject.InsertedByOctaId = userId;
-            }
-            else if (userTypeClaim == "employee")
-            {
-                subject.InsertedByUserId = userId;
-            }
-
-            subject.IconLink = Path.Combine("Uploads", "SubjectIcon", NewSubject.en_name, NewSubject.IconFile.FileName);
-
-            Unit_Of_Work.subject_Repository.Add(subject);
+            subject.IconLink = Path.Combine("Uploads", "SubjectIcon", subject.ID.ToString(), NewSubject.IconFile.FileName);
+            Unit_Of_Work.subject_Repository.Update(subject);
             Unit_Of_Work.SaveChanges();
+
             return Ok(NewSubject);
         }
 
@@ -356,9 +359,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             Subject SubjectExists = Unit_Of_Work.subject_Repository.Select_By_Id(EditSubject.ID);
-
-            string iconLinkExists = SubjectExists.IconLink;
-            string enNameExists = SubjectExists.en_name;
+             
             if (SubjectExists == null || SubjectExists.IsDeleted == true)
             {
                 return NotFound("No Subject with this ID");
@@ -376,66 +377,34 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             if (EditSubject.IconFile != null)
             {
                 var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/SubjectIcon");
-                var oldSubjectFolder = Path.Combine(baseFolder, enNameExists);
-                var subjectFolder = Path.Combine(baseFolder, EditSubject.en_name);
+                var subjFolder = Path.Combine(baseFolder, EditSubject.ID.ToString());
 
-                string existingFilePath = Path.Combine(baseFolder, enNameExists);
-
-                if (System.IO.File.Exists(existingFilePath))
+                if (System.IO.File.Exists(subjFolder))
                 {
-                    System.IO.File.Delete(existingFilePath); // Delete the old file
-                }
-                
-                if (Directory.Exists(oldSubjectFolder))
-                {
-                    Directory.Delete(oldSubjectFolder, true);
+                    System.IO.File.Delete(subjFolder); // Delete the old file
                 }
 
-                if (!Directory.Exists(subjectFolder))
+                if (Directory.Exists(subjFolder))
                 {
-                    Directory.CreateDirectory(subjectFolder);
+                    Directory.Delete(subjFolder, true);
+                }
+
+                if (!Directory.Exists(subjFolder))
+                {
+                    Directory.CreateDirectory(subjFolder);
                 }
 
                 if (EditSubject.IconFile.Length > 0)
                 {
-                    var filePath = Path.Combine(subjectFolder, EditSubject.IconFile.FileName);
+                    var filePath = Path.Combine(subjFolder, EditSubject.IconFile.FileName);
                     using (var stream = new FileStream(filePath, FileMode.Create))
                     {
                         await EditSubject.IconFile.CopyToAsync(stream);
                     }
                 }
 
-                EditSubject.IconLink = Path.Combine("Uploads", "SubjectIcon", EditSubject.en_name, EditSubject.IconFile.FileName);
-            }
-            else
-            {
-                if (EditSubject.en_name != enNameExists)
-                {
-                    var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/SubjectIcon");
-                    var oldSubjectFolder = Path.Combine(baseFolder, enNameExists);
-                    var newSubjectFolder = Path.Combine(baseFolder, EditSubject.en_name);
-
-                    // Rename the folder if it exists
-                    if (Directory.Exists(oldSubjectFolder))
-                    {
-                        if (!Directory.Exists(newSubjectFolder))
-                        {
-                            Directory.CreateDirectory(newSubjectFolder);
-                        }
-                         
-                        var files = Directory.GetFiles(oldSubjectFolder);
-                        foreach (var file in files)
-                        {
-                            var fileName = Path.GetFileName(file);
-                            var destFile = Path.Combine(newSubjectFolder, fileName);
-                            System.IO.File.Move(file, destFile);
-                        }
-                         
-                        Directory.Delete(oldSubjectFolder);
-                    }
-                }
-                EditSubject.IconLink = Path.Combine("Uploads", "SubjectIcon", EditSubject.en_name, Path.GetFileName(iconLinkExists));
-            }
+                EditSubject.IconLink = Path.Combine("Uploads", "SubjectIcon", EditSubject.ID.ToString(), EditSubject.IconFile.FileName);
+            } 
 
             mapper.Map(EditSubject, SubjectExists);
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");

@@ -18,8 +18,7 @@ namespace LMS_CMS_BL.DTO.Maintenance
         public long? CompanyID { get; set; }
         public long? MaintenanceEmployeeID { get; set; }
 
-        [Range(0, double.MaxValue)]
-
+        [Required]
         public decimal Cost { get; set; }
 
         public string? Note { get; set; }

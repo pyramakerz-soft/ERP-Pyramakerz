@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -42,6 +43,10 @@ namespace LMS_CMS_DAL.Models.Domains
         public string? Qualification { get; set; } 
         public string? Profession { get; set; }
         public string? WorkPlace { get; set; }
+
+        [ForeignKey("ConnectionStatus")]
+        public long? ConnectionStatusID { get; set; }
+        public ConnectionStatus ConnectionStatus { get; set; }
 
         public ICollection<Student> Students { get; set; } = new HashSet<Student>();
         public ICollection<RegisterationFormParent> RegisterationFormParents { get; set; } = new HashSet<RegisterationFormParent>();

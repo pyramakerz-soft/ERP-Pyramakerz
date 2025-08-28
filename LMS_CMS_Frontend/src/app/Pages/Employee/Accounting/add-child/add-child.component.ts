@@ -254,4 +254,16 @@ export class AddChildComponent {
       this.TableData = [];
     }
   }
+ 
+  validateNumberOnly(event: any): void {
+    let value = event.target.value; 
+    value = value.replace(/[^0-9]/g, ''); 
+    event.target.value = value;
+ 
+    if (isNaN(Number(value)) || value === '') {
+      event.target.value = ''; 
+    } else { 
+      this.NationalID = value;
+    }
+  }
 }

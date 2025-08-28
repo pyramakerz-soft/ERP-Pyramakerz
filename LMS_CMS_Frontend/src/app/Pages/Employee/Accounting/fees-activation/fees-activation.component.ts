@@ -192,13 +192,30 @@ export class FeesActivationComponent {
     }
   }
 
+  // validateNumberForDiscount(event: any): void {
+  //   const value = event.target.value;
+  //   if (isNaN(value) || value === '') {
+  //     event.target.value = '';
+  //     this.DiscountPercentage = 0
+  //   }
+  // }
+
   validateNumberForDiscount(event: any): void {
-    const value = event.target.value;
-    if (isNaN(value) || value === '') {
-      event.target.value = '';
-      this.DiscountPercentage = 0
+    let value = event.target.value;
+
+    value = value.replace(/[^0-9.]/g, '');
+
+    if ((value.split('.').length - 1) > 1) {
+      value = value.slice(0, value.length - 1); 
     }
-  }
+ 
+    if (parseFloat(value) > 100) {
+      value = '100';   
+    }
+ 
+    event.target.value = value;
+    this.DiscountPercentage = value ? parseFloat(value) : 0;  
+}
 
   IsAllowDelete(InsertedByID: number) {
     const IsAllow = this.EditDeleteServ.IsAllowDelete(

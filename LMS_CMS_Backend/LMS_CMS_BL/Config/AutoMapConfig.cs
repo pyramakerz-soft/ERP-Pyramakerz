@@ -1346,6 +1346,7 @@ namespace LMS_CMS_BL.Config
                 .ForMember(dest => dest.GradeID, opt => opt.MapFrom(src => src.Subject.GradeID))
                 .ForMember(dest => dest.GradeName, opt => opt.MapFrom(src => src.Subject.Grade.Name))
                 .ForMember(dest => dest.SchoolName, opt => opt.MapFrom(src => src.Subject.Grade.Section.school.Name))
+                .ForMember(dest => dest.SchoolID, opt => opt.MapFrom(src => src.Subject.Grade.Section.school.ID))
                 .ForMember(dest => dest.SubjectWeightTypeEnglishName, opt => opt.MapFrom(src => src.SubjectWeightType.WeightType.EnglishName))
                 .ForMember(dest => dest.SubjectWeightTypeArabicName, opt => opt.MapFrom(src => src.SubjectWeightType.WeightType.ArabicName));
             CreateMap<DirectMarkAddDTO, DirectMark>();
@@ -1359,15 +1360,10 @@ namespace LMS_CMS_BL.Config
 
             CreateMap<MaintenanceCompany, MaintenanceCompanyGetDto>();
 
-           
             CreateMap<MaintenanceCompanyAddDto, MaintenanceCompany>();
 
-            
             CreateMap<MaintenanceCompanyEditDto, MaintenanceCompany>();
-
-
-
-
+             
             CreateMap<MaintenanceEmployee, MaintenanceEmployeeGetDto>()
              .ForMember(dest => dest.En_Name,
                         opt => opt.MapFrom(src => src.Employee != null ? src.Employee.en_name : null))
@@ -1413,16 +1409,8 @@ namespace LMS_CMS_BL.Config
             //                     ? src.Company.En_Name
             //                    : (!string.IsNullOrEmpty(src.Company.Ar_Name) ? src.Company.Ar_Name : null))
             //                                 : null)); 
+            CreateMap<ConnectionStatus, ConnectionStatusGetDTO>();
         }
-    }
-
-
-
-
-
-
-
-
-
+    } 
 }
     

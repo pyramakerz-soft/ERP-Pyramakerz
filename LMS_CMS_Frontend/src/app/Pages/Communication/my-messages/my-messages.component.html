@@ -17,8 +17,20 @@
                         {{ chatMessage.unreadCount }}
                     </div>
                     <div class="flex hover:bg-gray-100 p-3 items-start" [ngClass]="{'border-b': i != chatMessages.length, 'bg-[#e3ebf0b6]': !chatMessage.seenOrNot && chatMessage.receiverID == User_Data_After_Login.id && chatMessage.receiverUserTypeName == User_Data_After_Login.type}">
-                        <div class="flex-shrink-0">
-                            <img src="Images/person-dummy.jpg" class="cursor-pointer rounded-full w-14" alt="Profile Photo">
+                        <div class="flex-shrink-0"> 
+                            <div class="relative">
+                                <img src="Images/person-dummy.jpg" class="cursor-pointer rounded-full w-14" alt="Profile Photo">   
+                                <span *ngIf="chatMessage.receiverID == User_Data_After_Login.id && chatMessage.receiverUserTypeName == User_Data_After_Login.type" class="absolute bottom-0 right-0 w-4 h-4 border-white rounded-full border-2" [ngClass]="{
+                                    'bg-green-500': chatMessage.senderConnectionStatusID=== 1,
+                                    'bg-red-500': chatMessage.senderConnectionStatusID === 2,
+                                    'bg-yellow-500': chatMessage.senderConnectionStatusID === 3,
+                                }"></span>
+                                <span *ngIf="chatMessage.senderID == User_Data_After_Login.id && chatMessage.senderUserTypeName == User_Data_After_Login.type" class="absolute bottom-0 right-0 w-4 h-4 border-white rounded-full border-2" [ngClass]="{
+                                    'bg-green-500': chatMessage.receiverConnectionStatusID=== 1,
+                                    'bg-red-500': chatMessage.receiverConnectionStatusID === 2,
+                                    'bg-yellow-500': chatMessage.receiverConnectionStatusID === 3,
+                                }"></span>
+                            </div> 
                         </div>
                         <div class="ml-4 text-start w-full"> 
                             <p *ngIf="chatMessage.receiverID == User_Data_After_Login.id && chatMessage.receiverUserTypeName == User_Data_After_Login.type" class="primaryTxt text-sm"><span class="font-semibold">{{ chatMessage.senderEnglishName }}</span> Sent you a message</p>
@@ -66,8 +78,15 @@
         </ul>  
     </div>
     <div *ngIf="isConversationOpen" class="w-[80%] h-[87vh] overflow-x-hidden flex flex-col justify-between">
-        <div class="py-6 px-8 flex space-x-3 rtl:space-x-reverse items-center border-b shadow-sm">
-            <img src="Images/person-dummy.jpg" class="cursor-pointer rounded-full w-14" alt="Profile Photo">
+        <div class="py-6 px-8 flex space-x-3 rtl:space-x-reverse items-center border-b shadow-sm"> 
+            <div class="relative">
+                <img src="Images/person-dummy.jpg" class="cursor-pointer rounded-full w-14" alt="Profile Photo">   
+                <span class="absolute bottom-0 right-0 w-4 h-4 border-white rounded-full border-2" [ngClass]="{
+                    'bg-green-500': connectionStatusForConversation=== 1,
+                    'bg-red-500': connectionStatusForConversation === 2,
+                    'bg-yellow-500': connectionStatusForConversation === 3,
+                }"></span> 
+            </div> 
             <p class="primaryTxt text-sm font-semibold">{{ englishNameForConversation }}</p>
         </div>
 
@@ -79,8 +98,15 @@
                 <div class="w-full flex items-start space-x-3" [ngClass]="{'mb-5': i != conversation.length,
                     'flex-row-reverse space-x-reverse': conv.senderID == User_Data_After_Login.id && conv.senderUserTypeName == User_Data_After_Login.type
                 }">
-                    <div class="flex-shrink-0">
-                        <img src="Images/person-dummy.jpg" class="cursor-pointer rounded-full w-11" alt="Profile Photo">
+                    <div class="flex-shrink-0">  
+                        <div class="relative">
+                            <img src="Images/person-dummy.jpg" class="cursor-pointer rounded-full w-11" alt="Profile Photo">     
+                            <span class="absolute bottom-0 right-0 w-4 h-4 border-white rounded-full border-2" [ngClass]="{
+                                'bg-green-500': conv.senderConnectionStatusID=== 1,
+                                'bg-red-500': conv.senderConnectionStatusID === 2,
+                                'bg-yellow-500': conv.senderConnectionStatusID === 3,
+                            }"></span> 
+                        </div> 
                     </div>
                     <div class="flex flex-col max-w-[66%] text-start">
                         <div *ngIf="conv.forwardedOrNot && conv.receiverID == User_Data_After_Login.id && conv.receiverUserTypeName == User_Data_After_Login.type">
@@ -90,7 +116,7 @@
                             </p>
                         </div>
                         <div>
-                            <div class="rounded-lg py-3 px-4" 
+                            <div *ngIf="conv.message" class="rounded-lg py-3 px-4" 
                             [ngClass]="{'primaryTxt bg-white': conv.receiverID == User_Data_After_Login.id && conv.receiverUserTypeName == User_Data_After_Login.type, 
                                         'primaryBg text-white': conv.senderID == User_Data_After_Login.id && conv.senderUserTypeName == User_Data_After_Login.type}">
                                 <p>{{conv.message}}</p>

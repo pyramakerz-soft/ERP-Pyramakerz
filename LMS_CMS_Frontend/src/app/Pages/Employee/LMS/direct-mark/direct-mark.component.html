@@ -1,7 +1,7 @@
 <div class="flex justify-between items-center">
     <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Direct Marks' | translate }}</h1>
     <div class="flex justify-between items-center space-x-4 rtl:space-x-reverse">
-        <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
+        <app-search *ngIf="IsView" [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
 
         <button (click)="openModal()"
             class="secondaryBorder secondaryTxt rounded-lg px-4 py-3 flex items-center justify-center gap-2">
@@ -17,7 +17,7 @@
         <label for="School1" class="block mb-2 text-sm font-medium text-gray-900">{{ 'School' | translate }}</label>
         <select id="School1" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             [(ngModel)]="SelectedSchoolId" (change)="getAllGradesBySchoolId();">
-            <option [value]="0" disabled selected hidden>{{ 'Select' | translate }}{{ 'School' | translate }}</option>
+            <option [value]="0" disabled selected hidden>{{ 'Select' | translate }} {{ 'School' | translate }}</option>
             <option *ngFor="let stu of schools" [value]="stu.id">
                 {{ stu.name }}
             </option>
@@ -30,7 +30,7 @@
         <select id="Grade" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             [(ngModel)]="SelectedGradeId" [disabled]="!SelectedSchoolId" (change)="getAllSubject();">
 
-            <option [ngValue]="0" disabled hidden [selected]="SelectedGradeId == 0">{{ 'Select' | translate }}{{ 'Grade'
+            <option [ngValue]="0" disabled hidden [selected]="SelectedGradeId == 0">{{ 'Select' | translate }} {{ 'Grade'
                 | translate }}</option>
             <ng-container *ngIf="Grades.length > 0; else noDataGrade">
                 <option *ngFor="let ac of Grades" [ngValue]="ac.id">{{ ac.name }}</option>
@@ -121,10 +121,10 @@
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         <div class="flex space-x-4 rtl:space-x-reverse">
-                            <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)" (click)="Delete(row.id)">
+                            <button  (click)="Delete(row.id)">
                                 <i class="fa-regular fa-trash-can"></i>
                             </button>
-                            <button *ngIf="AllowEdit && IsAllowEdit(row.insertedByUserId)" (click)="openModal(row.id)">
+                            <button  (click)="openModal(row.id)">
                                 <i class="fa-solid fa-pencil"></i>
                             </button>
                             <button (click)="View(row.id)">
@@ -277,13 +277,11 @@
                         (click)="directMark.subjectID && toggleClassDropdown()" tabindex="0">
 
                         <!-- Selected classes -->
-                        <div *ngIf="directMark.directMarkClasses.length > 0; else placeholder" class="flex flex-wrap gap-2">
+                        <div *ngIf="directMark.directMarkClasses.length > 0; else placeholder"
+                            class="flex flex-wrap gap-2">
                             <span class="px-3 py-1 bg-gray-200 rounded text-sm flex items-center"
                                 *ngFor="let selected of directMark.directMarkClasses">
-                                {{ selected.classroomName }} 
-                                <span class="ml-2 cursor-pointer text-gray-700" (click)="removeClass(selected.id)">
-                                    ✕
-                                </span>
+                                {{ selected.classroomName }}
                             </span>
                         </div>
 
@@ -295,7 +293,7 @@
 
                     <!-- Dropdown -->
                     <div class="absolute bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10 max-h-60 overflow-auto"
-                        *ngIf="directMark.directMarkClasses && directMark.subjectID">
+                        *ngIf="directMark.directMarkClasses && directMark.subjectID && classDropdownOpen">
                         <ul>
                             <li class="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
                                 <input type="checkbox" class="mr-2" [checked]="directMark.allClasses"
@@ -305,9 +303,9 @@
 
                             <li *ngFor="let c of classrooms"
                                 class="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                                <input type="checkbox" class="mr-2"
-                                     [checked]="directMark.allClasses" (change)="toggleClass(c)">
-                                {{ c.name }} 
+                                <input type="checkbox" class="mr-2" [checked]="IfClassExist(c.id)"
+                                    (change)="toggleClass($event,c)">
+                                {{ c.name }}
                             </li>
 
                             <li *ngIf="classrooms.length === 0" class="px-4 py-2 text-gray-400 cursor-not-allowed">

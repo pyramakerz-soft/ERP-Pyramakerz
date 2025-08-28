@@ -439,7 +439,7 @@ export class AccountingEmployeeEditComponent {
   }
 
   validateNumber(event: any, field?: keyof AccountingEmployee): void {
-    const value = event.target.value;
+    let value = event.target.value; 
     if (isNaN(value) || value === '') {
       event.target.value = '';
       if (field) {
@@ -449,6 +449,21 @@ export class AccountingEmployeeEditComponent {
       }
     }
   }
+
+  validateNumberOnly(event: any, field?: keyof AccountingEmployee): void {
+    let value = event.target.value;
+    value = value.replace(/[^0-9]/g, '')
+    event.target.value = value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+      if (field) {
+        if (typeof this.Data[field] === 'string') {
+          this.Data[field] = '' as never;
+        }
+      }
+    }
+  }
+
   capitalizeField(field: keyof AccountingEmployee): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }

@@ -138,7 +138,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
                 return Unauthorized("User ID or Type claim not found.");
 
             if (model == null) return BadRequest();
-            if (model == null || string.IsNullOrWhiteSpace(model.A_Name) || string.IsNullOrWhiteSpace(model.E_Name))
+            if (model == null || string.IsNullOrWhiteSpace(model.Ar_Name) || string.IsNullOrWhiteSpace(model.En_Name))
                 return BadRequest("Name is required");
 
             MaintenanceItem? entity = uow.maintenanceItem_Repository.First_Or_Default(i => i.ID == model.ID && i.IsDeleted != true);

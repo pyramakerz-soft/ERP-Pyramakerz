@@ -65,7 +65,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     f => f.IsDeleted != true && f.SubjectID == subID,
                     query => query.Include(d => d.Subject),
                     query => query.Include(d => d.SubjectWeightType.WeightType),
-                    query => query.Include(d => d.DirectMarkClasses),
+                    query => query.Include(d => d.DirectMarkClasses.Where(e => e.IsDeleted != true && e.Classroom.IsDeleted != true))
+                        .ThenInclude(dc => dc.Classroom),
                     query => query.Include(d => d.DirectMarkClassesStudent
                         .Where(e => e.IsDeleted != true && e.StudentClassroom.Student.IsDeleted != true && e.StudentClassroom.Classroom.IsDeleted != true))
                         .ThenInclude(d => d.StudentClassroom)
@@ -98,7 +99,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         /////////////////
 
-        [HttpGet("GetByID/{id}")]
+        [HttpGet("{id}")]
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee" },
            pages: new[] { "Assignment" }
@@ -123,7 +124,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     query => query.Include(d => d.Subject.Grade),
                     query => query.Include(d => d.Subject.Grade.Section.school),
                     query => query.Include(d => d.SubjectWeightType.WeightType),
-                    query => query.Include(d => d.DirectMarkClasses),
+                    query => query.Include(d => d.DirectMarkClasses.Where(e => e.IsDeleted != true && e.Classroom.IsDeleted != true ))
+                        .ThenInclude(dc => dc.Classroom),
                     query => query.Include(d => d.DirectMarkClassesStudent
                         .Where(e => e.IsDeleted != true && e.StudentClassroom.Student.IsDeleted != true && e.StudentClassroom.Classroom.IsDeleted != true))
                         .ThenInclude(d => d.StudentClassroom)
@@ -274,7 +276,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             allowEdit: 1,
-            pages: new[] { "Academic Years" }
+            pages: new[] { "Assignment" }
         )]
         public IActionResult Edit(DirectMarkEditDTO NewDirectMark)
         {
@@ -342,8 +344,72 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
             Unit_Of_Work.directMark_Repository.Update(directMark);
             Unit_Of_Work.SaveChanges();
-            return Ok(NewDirectMark);
 
+            List<DirectMarkClasses> existingClasses = Unit_Of_Work.directMarkClasses_Repository.FindBy(s => s.DirectMarkID == directMark.ID && s.IsDeleted != true);
+            List<long> existingClassIds = existingClasses.Select(x => x.ClassroomID).Distinct().ToList();
+            List<long> updatedClassIds = NewDirectMark.classids ?? new List<long>();
+
+            var classesToAdd = updatedClassIds.Except(existingClassIds).ToList();
+            var classesToDelete = existingClassIds.Except(updatedClassIds).ToList();
+
+            // Add new classes and related students
+            foreach (var classId in classesToAdd)
+            {
+                DirectMarkClasses newClass = new DirectMarkClasses
+                {
+                    ClassroomID = classId,
+                    DirectMarkID = directMark.ID
+                };
+                Unit_Of_Work.directMarkClasses_Repository.Add(newClass);
+                Unit_Of_Work.SaveChanges();
+
+                List<StudentClassroomSubject> studentClassroomSubjects = Unit_Of_Work.studentClassroomSubject_Repository.FindBy(
+                    a => a.SubjectID == directMark.SubjectID &&
+                         a.Hide != true &&
+                         a.StudentClassroom.ClassID == classId &&
+                         a.StudentClassroom.Classroom.AcademicYear.IsActive == true &&
+                         a.StudentClassroom.Classroom.AcademicYear.SchoolID == NewDirectMark.SchoolID
+                );
+
+                foreach (var studentClassroomId in studentClassroomSubjects.Select(a => a.StudentClassroomID).Distinct())
+                {
+                    DirectMarkClassesStudent student = new DirectMarkClassesStudent
+                    {
+                        StudentClassroomID = studentClassroomId,
+                        DirectMarkID = directMark.ID,
+                        Degree = 0
+                    };
+                    Unit_Of_Work.directMarkClassesStudent_Repository.Add(student);
+                }
+                Unit_Of_Work.SaveChanges();
+            }
+
+
+            // Delete removed classes and related students
+            foreach (var classId in classesToDelete)
+            {
+                var classToRemove = existingClasses.FirstOrDefault(c => c.ClassroomID == classId);
+                if (classToRemove != null)
+                {
+                    classToRemove.IsDeleted = true;
+                    Unit_Of_Work.directMarkClasses_Repository.Update(classToRemove);
+                }
+
+                var studentsToRemove = Unit_Of_Work.directMarkClassesStudent_Repository.FindBy(
+                    s => s.DirectMarkID == directMark.ID &&
+                         s.StudentClassroom.ClassID == classId &&
+                         s.IsDeleted != true
+                );
+                foreach (var student in studentsToRemove)
+                {
+                    student.IsDeleted = true;
+                    Unit_Of_Work.directMarkClassesStudent_Repository.Update(student);
+                }
+
+                Unit_Of_Work.SaveChanges();
+            }
+
+            return Ok(NewDirectMark);
         }
 
         /////////////////
