@@ -12,6 +12,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MaintenanceItem } from '../../../../Models/Maintenance/maintenance-item';
 import { MaintenanceItemService } from '../../../../Services/Employee/Maintenance/maintenance-item.service';
+import { ApiService } from '../../../../Services/api.service';
 
 @Component({
   selector: 'app-maintenance-items',
@@ -27,7 +28,7 @@ export class MaintenanceItemsComponent {
   TableData: MaintenanceItem[] = []
   keysArray: string[] = ['id', 'en_Name', 'ar_Name'];
   key: string= "id";
-  DomainName:any='try';
+  DomainName: string = '';
   EditDeleteServ: any;
   value: any;
   selectedItem: MaintenanceItem | null = null;
@@ -35,12 +36,13 @@ export class MaintenanceItemsComponent {
   isModalOpen= false;
   constructor(    
       private languageService: LanguageService,
-      private router: Router, 
+      private router: Router,
+      private apiService: ApiService, 
       public mainServ: MaintenanceItemService,
       private realTimeService: RealTimeNotificationServiceService){}
 
     ngOnInit() {
-
+      this.DomainName = this.apiService.GetHeader();
       this.mainServ.Get(this.DomainName).subscribe({
       next: (data:any) => {
         this.TableData = data;
