@@ -6,7 +6,7 @@
 
             <button (click)="openModal()"
                 class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
-                 {{ 'Create Company' | translate }}
+                 {{ 'Create' | translate }} {{ 'company' | translate }}
             </button>
         </div>
     </div>
@@ -83,7 +83,7 @@
     <label class="mb-2 primaryTxt" for="companyEn">{{ 'Company English Name' | translate }}</label>
     <input id="companyEn" type="text"
            class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-           placeholder="{{ 'Enter company' | translate }}"
+           placeholder="{{ 'Enter' | translate }} {{ 'company' | translate }}"
            [(ngModel)]="selectedCompany.en_Name" />
   </div>
 
@@ -91,7 +91,7 @@
     <label class="mb-2 primaryTxt" for="companyAr">{{ 'Company Arabic Name' | translate }}</label>
     <input id="companyAr" type="text"
            class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-           placeholder="{{ 'Enter company' | translate }}"
+           placeholder="{{ 'Enter' | translate }} {{ 'company' | translate }}"
            [(ngModel)]="selectedCompany.ar_Name" />
   </div>
 </div>

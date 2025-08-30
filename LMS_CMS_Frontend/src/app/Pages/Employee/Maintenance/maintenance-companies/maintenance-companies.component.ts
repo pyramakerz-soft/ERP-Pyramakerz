@@ -79,7 +79,7 @@ Edit(id: number) {
 
 
   Delete(id: number) {
-    confirm("are you sure delete this item")
+   if( confirm("are you sure delete this item")){
      this.mainServ.Delete(id, this.DomainName).subscribe({
       next: () => {
         this.TableData = this.TableData.filter(c => c.id !== id);
@@ -87,7 +87,7 @@ Edit(id: number) {
       error: (err:any) => {
         console.error('Error deleting company:', err);
       }
-    });
+    });}
   }
 
 
@@ -161,6 +161,10 @@ async save() {
     this.isLoading = false;
   }
 }
+
+
+
+
 }
 
 

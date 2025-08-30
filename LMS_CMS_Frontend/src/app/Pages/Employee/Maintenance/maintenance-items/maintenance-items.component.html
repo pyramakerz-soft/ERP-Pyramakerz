@@ -1,1 +1,110 @@
-<p>maintenance-items works!</p>
+<div class="">
+    <div class="flex justify-between items-center">
+        <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Item' | translate }}</h1>
+        <div class="flex justify-between items-center ">
+            <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
+
+            <button (click)="openModal()"
+                class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
+                 {{ 'Create' | translate }}{{ 'Item' | translate }}
+            </button>
+        </div>
+    </div>
+
+
+    <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD] max-w-full">
+        <table class="overflow-auto w-full bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
+            <thead class="bg-[##EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+                <tr>
+                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ 'ID' | translate }}
+                    </th>
+                    <th
+                        class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
+                         {{ 'Item English Name' | translate }}
+                    </th>
+                      <th
+                        class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
+                         {{ 'Item Arabic Name' | translate }}
+                    </th>
+                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                       {{ 'Actions' | translate }}
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- No Data Row -->
+                <tr *ngIf="TableData.length === 0">
+                    <td colspan="11"
+                        class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                    {{ 'No Data Found' | translate }}
+                    </td>
+                </tr>
+
+                <!-- Data Rows -->
+                <tr 
+                    *ngFor="let row of TableData; let i = index"
+                    [ngClass]="{'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1}"
+                    class="border-t border-gray-300 text-xs md:text-sm">
+                    <td
+                        class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#30462e] hover:bg-gray-200">
+                        {{row.id}}</td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{row.en_Name}}</td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{row.ar_Name}}</td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        <div class="flex space-x-4 rtl:space-x-reverse">
+                                 <button  (click)="Delete(row.id)">
+                                    <i class="fa-regular fa-trash-can"></i>
+                                </button>
+                                <button  (click)="Edit(row.id)">
+                                    <i class="fa-solid fa-pencil"></i>
+                                </button>
+                               
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+
+<div id="Add_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
+    
+    <div class="bg-white rounded-2xl p-12 w-[669px] max-h-[90%] overflow-y-auto">
+        <div class="flex justify-between items-center"> 
+            <h1 class="font-semibold text-2xl leading-9"> {{ 'Item' | translate }}</h1>
+            <button (click)="closeModal()" type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
+        </div>
+        
+<div *ngIf="selectedItem" class="flex flex-col mt-6 mb-4 bg-[#F7F7F7] rounded-3xl p-4"> 
+  <div class="flex w-full flex-col mb-4">
+    <label class="mb-2 primaryTxt" for="ItemEn">{{ 'Item English Name' | translate }}</label>
+    <input id="ItemEn" type="text"
+           class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+           placeholder="{{ 'Enter' | translate }} {{ 'Item' | translate }}"
+           [(ngModel)]="selectedItem.en_Name" />
+  </div>
+
+  <div class="flex w-full flex-col mb-4">
+    <label class="mb-2 primaryTxt" for="ItemAr">{{ 'Item Arabic Name' | translate }}</label>
+    <input id="ItemAr" type="text"
+           class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+           placeholder="{{ 'Enter' | translate }} {{ 'Item' | translate }}"
+           [(ngModel)]="selectedItem.ar_Name" />
+  </div>
+</div>
+
+
+        <div class="flex justify-end">
+            <button
+                [disabled]="isLoading"
+                class="secondaryBg text-white font-medium px-4 py-2 rounded-lg cursor-pointer"
+                (click)="save()">
+                <span *ngIf="!isLoading">{{'Save'| translate }}</span>
+                <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+            </button>
+        </div>
+    </div>
+</div> 
