@@ -102,7 +102,7 @@
                       {{ 'Weight Type' | translate }}  {{ 'Arabic Name' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
-                      {{ 'Value' | translate }}
+                      {{ 'Weight' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Actions' | translate }}
@@ -124,7 +124,7 @@
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{ row.id }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{ row.weightTypeEnglishName }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{ row.weightTypeArabicName }}</td>
-                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{ row.value }}</td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#2E3646]">{{ row.weight }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     <div class="flex space-x-4 rtl:space-x-reverse">
                         <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)"
@@ -215,12 +215,12 @@
                 <span *ngIf="validationErrorsForWeights['weightTypeID']" class="text-red-500 ml-3 font-normal">{{ validationErrorsForWeights['weightTypeID'] }}</span>
             </div>
             <div class="flex w-full flex-col mb-4">
-                <label class="mb-2 primaryTxt" for="Value">{{ 'Value' | translate }}</label>
-                <input id="Value" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                    (input)="validateNumber($event, 'value')"
-                    placeholder="{{ 'Enter' | translate }} {{ 'Value' | translate }}" [(ngModel)]="subjectWeightElement.value"
-                    (ngModelChange)="onInputValueChangeForSubjectWeight({ field: 'value', value: $event })" />
-                <span *ngIf="validationErrorsForWeights['value']" class="text-red-500 ml-3 font-normal">{{ validationErrorsForWeights['value'] }}</span>
+                <label class="mb-2 primaryTxt" for="Weight">{{ 'Weight' | translate }}</label>
+                <input id="Weight" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                    (input)="validateNumber($event, 'weight')"
+                    placeholder="{{ 'Enter' | translate }} {{ 'Weight' | translate }}" [(ngModel)]="subjectWeightElement.weight"
+                    (ngModelChange)="onInputValueChangeForSubjectWeight({ field: 'weight', value: $event })" />
+                <span *ngIf="validationErrorsForWeights['weight']" class="text-red-500 ml-3 font-normal">{{ validationErrorsForWeights['weight'] }}</span>
             </div>   
         </div>
 

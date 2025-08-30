@@ -32,7 +32,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet("GetByDirectMarkId/{DirectMarkId}/{ClassId}")]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
-          pages: new[] { "Semester" }
+          pages: new[] { "Direct Mark" }
         )]
         public async Task<IActionResult> GetAsync(long DirectMarkId, long ClassId, [FromQuery] int pageNumber = 1,[FromQuery] int pageSize = 10)
         {
@@ -111,7 +111,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             allowEdit: 1,
-            pages: new[] { "Academic Years" }
+            pages: new[] { "Direct Mark" }
         )]
         public IActionResult Edit(DirectMarkClassesStudentEditDTO NewDirectMarkClassesStudent)
         {

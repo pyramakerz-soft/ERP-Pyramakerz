@@ -1,14 +1,17 @@
 ﻿using AutoMapper;
 using LMS_CMS_BL.DTO.LMS;
+using LMS_CMS_BL.DTO.SocialWorker;
 using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains;
 using LMS_CMS_DAL.Models.Domains.LMS;
+using LMS_CMS_DAL.Models.Domains.SocialWorker;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
 using LMS_CMS_PL.Services.FileValidations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace LMS_CMS_PL.Controllers.Domains.LMS
@@ -360,5 +363,69 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             Unit_Of_Work.SaveChanges();
             return Ok();
         }
+        ///////////////////////////////////////////////////////////////////////////////////////--77
+        [HttpGet("MedalToStudentReport")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Medal Types" }
+        )]
+                public async Task<IActionResult> MedalToStudentReport(
+            [FromQuery] long? SchoolId = null,
+            [FromQuery] long? GradeId = null,
+            [FromQuery] long? ClassroomId = null,
+            [FromQuery] long? StudentId = null)
+                {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = userClaims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = userClaims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            // Validate that all filters are provided (mandatory)
+            if (!SchoolId.HasValue || !GradeId.HasValue || !ClassroomId.HasValue || !StudentId.HasValue)
+            {
+                return BadRequest("School, Grade, Classroom, and Student are all required.");
+            }
+
+            IQueryable<SocialWorkerMedalStudent> query = Unit_Of_Work.socialWorkerMedalStudent_Repository.Query()
+                .Where(sms => sms.IsDeleted != true && sms.Student.IsDeleted != true)
+                .Join(Unit_Of_Work.studentClassroom_Repository.Query(),
+                    sms => sms.StudentID,
+                    sc => sc.StudentID,
+                    (sms, sc) => new { SocialWorkerMedalStudent = sms, StudentClassroom = sc })
+                .Where(joined => joined.StudentClassroom.IsDeleted != true
+                    && joined.StudentClassroom.ClassID == ClassroomId.Value
+                    && joined.StudentClassroom.Classroom.GradeID == GradeId.Value
+                    && joined.StudentClassroom.Classroom.Grade.IsDeleted != true
+                    && joined.StudentClassroom.Classroom.Grade.Section.IsDeleted != true
+                    && joined.StudentClassroom.Classroom.Grade.Section.school.IsDeleted != true
+                    && joined.StudentClassroom.Classroom.Grade.Section.school.ID == SchoolId.Value
+                    && joined.SocialWorkerMedalStudent.StudentID == StudentId.Value)
+                .Select(joined => joined.SocialWorkerMedalStudent);
+
+            var medalStudents = await query
+                .Include(sms => sms.Student)
+                .Include(sms => sms.SocialWorkerMedal)
+                .Include(sms => sms.InsertedByEmployee)
+                .OrderBy(sms => sms.InsertedAt)
+                .ToListAsync();
+
+            if (medalStudents == null || medalStudents.Count == 0)
+            {
+                return NotFound("No medal records found for the specified criteria.");
+            }
+
+            var reportData = mapper.Map<List<SocialWorkerMedalStudentReportDTO>>(medalStudents);
+
+            return Ok(reportData);
+        }
+
+
     }
 }

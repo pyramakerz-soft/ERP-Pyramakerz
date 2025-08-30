@@ -14,3 +14,6 @@ export class CertificateStudent {
         public insertedAt: string = ""
     ) { }
 }
+
+
+

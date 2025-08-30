@@ -93,9 +93,7 @@ export class MyMessagesComponent {
       this.otherUserTypeID = params['otherUserTypeID'] ? +params['otherUserTypeID'] : null;
       this.englishNameForConversation = params['englishNameForConversation'] ? params['englishNameForConversation'] : ""
       this.arabicNameForConversation = params['arabicNameForConversation'] ? params['arabicNameForConversation'] : ""
-      this.connectionStatusForConversation = params['connectionStatusForConversation'] ? params['connectionStatusForConversation'] : 0
-       
-      console.log(this.connectionStatusForConversation)
+      this.connectionStatusForConversation = params['connectionStatusForConversation'] ? params['connectionStatusForConversation'] : 0 
 
       if (this.otherUserID && this.otherUserTypeID) {
         this.loadSpecificChat(this.otherUserID, this.otherUserTypeID);
@@ -104,7 +102,9 @@ export class MyMessagesComponent {
 
     // Subscribe to request opened events 
     this.chatMessageService.messageOpened$.subscribe(() => {
-      this.loadAllMessages();
+      if(!this.isShowChat){
+        this.loadAllMessages();
+      }
       if (this.otherUserID && this.otherUserTypeID) {
         this.loadSpecificChat(this.otherUserID, this.otherUserTypeID);
       } 
@@ -116,8 +116,7 @@ export class MyMessagesComponent {
     this.isConversationOpen = true
     this.chatMessageService.BySenderAndReceiverID(userID, userTypeID, this.DomainName).subscribe(
       data => {
-        this.conversation = data  
-      console.log(this.connectionStatusForConversation)
+        this.conversation = data   
 
         if(this.isShowChat){
           // call the subscribe again for the other pages
@@ -169,6 +168,8 @@ export class MyMessagesComponent {
   showChat(chatMessage: ChatMessage) { 
     this.messageToBeSend = new ChatMessage() 
     this.messageToBeForwarded = new ChatMessage() 
+    chatMessage.unreadCount = 0
+    chatMessage.seenOrNot = true
     var otherUserID = 0
     var otherUserTypeID = 0
     if(chatMessage.receiverID == this.User_Data_After_Login.id && chatMessage.receiverUserTypeName == this.User_Data_After_Login.type){

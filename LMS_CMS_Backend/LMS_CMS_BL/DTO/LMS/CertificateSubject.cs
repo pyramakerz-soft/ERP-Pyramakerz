@@ -8,10 +8,13 @@ namespace LMS_CMS_BL.DTO.LMS
 {
     public class CertificateSubject
     {
-        public long ID { get; set; }
-        public string en_name { get; set; }
-        public string ar_name { get; set; }
-        public List<CertificateDegree> Marks { get; set; } 
-
+        public long SubjectID { get; set; }
+        public string SubjectEn_name { get; set; }
+        public string SubjectAr_name { get; set; }
+        public long WeightTypeId { get; set; }
+        public string WeightTypeEnName { get; set; }
+        public string WeightTypeArName { get; set; }
+        public float Degree { get; set; }
+        public float Mark { get; set; }
     }
 }

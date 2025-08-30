@@ -143,7 +143,6 @@ export class AssignmentComponent {
       }
   }
 
-
   getAllSchools() {
     this.schools = []
     this.SchoolServ.Get(this.DomainName).subscribe((d) => {
@@ -176,12 +175,12 @@ export class AssignmentComponent {
   }
 
   GetAllData(pageNumber: number, pageSize: number) {
-    this.assignmentData = []
-    this.IsView = true
-    this.CurrentPage = 1
-    this.TotalPages = 1
-    this.TotalRecords = 0
     if (this.subjectID != 0) {
+        this.assignmentData = []
+        this.IsView = true
+        this.CurrentPage = 1
+        this.TotalPages = 1
+        this.TotalRecords = 0
       this.assignmentService.GetBySubjectID(this.subjectID, this.DomainName, pageNumber, pageSize).subscribe(
         (data) => {
           this.CurrentPage = data.pagination.currentPage
@@ -208,31 +207,31 @@ export class AssignmentComponent {
         }
       )
     } else {
-      this.assignmentService.Get(this.DomainName, pageNumber, pageSize).subscribe(
-        (data) => {
-          this.CurrentPage = data.pagination.currentPage
-          this.PageSize = data.pagination.pageSize
-          this.TotalPages = data.pagination.totalPages
-          this.TotalRecords = data.pagination.totalRecords
-          this.assignmentData = data.data
-        },
-        (error) => {
-          if (error.status == 404) {
-            if (this.TotalRecords != 0) {
-              let lastPage = this.TotalRecords / this.PageSize
-              if (lastPage >= 1) {
-                if (this.isDeleting) {
-                  this.CurrentPage = Math.floor(lastPage)
-                  this.isDeleting = false
-                } else {
-                  this.CurrentPage = Math.ceil(lastPage)
-                }
-                this.GetAllData(this.CurrentPage, this.PageSize)
-              }
-            }
-          }
-        }
-      )
+    //   this.assignmentService.Get(this.DomainName, pageNumber, pageSize).subscribe(
+    //     (data) => {
+    //       this.CurrentPage = data.pagination.currentPage
+    //       this.PageSize = data.pagination.pageSize
+    //       this.TotalPages = data.pagination.totalPages
+    //       this.TotalRecords = data.pagination.totalRecords
+    //       this.assignmentData = data.data
+    //     },
+    //     (error) => {
+    //       if (error.status == 404) {
+    //         if (this.TotalRecords != 0) {
+    //           let lastPage = this.TotalRecords / this.PageSize
+    //           if (lastPage >= 1) {
+    //             if (this.isDeleting) {
+    //               this.CurrentPage = Math.floor(lastPage)
+    //               this.isDeleting = false
+    //             } else {
+    //               this.CurrentPage = Math.ceil(lastPage)
+    //             }
+    //             this.GetAllData(this.CurrentPage, this.PageSize)
+    //           }
+    //         }
+    //       }
+    //     }
+    //   )
     }
   }
 

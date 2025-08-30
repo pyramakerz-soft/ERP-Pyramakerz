@@ -1190,6 +1190,15 @@ namespace LMS_CMS_PL.Controllers.Domains
                 return NotFound("No Employee with this ID");
             }
 
+            if(newEmployee.NationalID != null)
+            {
+                Employee emp = Unit_Of_Work.employee_Repository.First_Or_Default(d => d.IsDeleted != true && d.NationalID == newEmployee.NationalID && d.ID != newEmployee.ID);
+                if(emp != null)
+                {
+                    return BadRequest("This National ID already exists");
+                }
+            }
+
             if (newEmployee.AccountNumberID != 0 && newEmployee.AccountNumberID != null)
             {
                 AccountingTreeChart account = Unit_Of_Work.accountingTreeChart_Repository.First_Or_Default(t => t.IsDeleted != true && t.ID == newEmployee.AccountNumberID);

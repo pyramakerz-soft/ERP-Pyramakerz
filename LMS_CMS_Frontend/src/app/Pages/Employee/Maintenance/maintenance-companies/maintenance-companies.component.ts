@@ -70,8 +70,8 @@ Edit(id: number) {
   const company = this.TableData.find((row: any) => row.id === id);
 
   if (company) {
-    this.selectedCompany = { ...company };  // keep company data
-    this.openModal(false);                  // open modal in "edit mode"
+    this.selectedCompany = { ...company };  
+    this.openModal(false);                  
   } else {
     console.error("Company not found with id:", id);
   }
@@ -79,6 +79,7 @@ Edit(id: number) {
 
 
   Delete(id: number) {
+    confirm("are you sure delete this item")
      this.mainServ.Delete(id, this.DomainName).subscribe({
       next: () => {
         this.TableData = this.TableData.filter(c => c.id !== id);
@@ -125,8 +126,7 @@ Edit(id: number) {
 
 openModal(forNew: boolean = true) {
   if (forNew) {
-    // Only reset when creating a new company
-    this.selectedCompany = new MaintenanceCompanies(0, '', '');
+  this.selectedCompany = new MaintenanceCompanies(0, '', '');
   }
   this.isModalOpen = true;
 
@@ -135,13 +135,6 @@ openModal(forNew: boolean = true) {
 }
 
 
-// openModal() {
-//   this.selectedCompany = new MaintenanceCompanies(0, '', '');
-//   this.isModalOpen = true;
-
-//      document.getElementById('Add_Modal')?.classList.remove('hidden');
-//      document.getElementById('Add_Modal')?.classList.add('flex');
-// }
 
  closeModal() {
     document.getElementById('Add_Modal')?.classList.remove('flex');
@@ -152,18 +145,14 @@ async save() {
   this.isLoading = true;
   try {
     if (this.selectedCompany?.id && this.selectedCompany.id !== 0) {
-      // Update existing
       await firstValueFrom(this.mainServ.Edit(this.selectedCompany, this.DomainName));
       Swal.fire('Updated!', 'Company updated successfully.', 'success');
     } else {
-      // Add new
       await firstValueFrom(this.mainServ.Add(this.selectedCompany!, this.DomainName));
       Swal.fire('Added!', 'Company added successfully.', 'success');
     }
 
     this.closeModal();
-
-    // Refresh table
     this.TableData = await firstValueFrom(this.mainServ.Get(this.DomainName));
   } catch (error) {
     console.error("Save failed:", error);
@@ -175,30 +164,7 @@ async save() {
 }
 
 
-// async save() {
-//   this.isLoading = true;
-//   try {
-//     if (this.selectedCompany?.id && this.selectedCompany.id !== 0) {
-//       // Edit
-//       await firstValueFrom(this.mainServ.Edit(this.selectedCompany, this.DomainName));
-//       Swal.fire('Updated!', 'Company updated successfully.', 'success');
-//     } else {
-//       // Add
-//       await firstValueFrom(this.mainServ.Add(this.selectedCompany!, this.DomainName));
-//       Swal.fire('Added!', 'Company added successfully.', 'success');
-//     }
 
-//     this.closeModal();
-
-//     // Refresh table
-//     this.TableData = await firstValueFrom(this.mainServ.Get(this.DomainName));
-//   } catch (error) {
-//     console.error("Save failed:", error);
-//     Swal.fire('Error', 'Something went wrong.', 'error');
-//   } finally {
-//     this.isLoading = false;
-//   }
-// }
 
 
 

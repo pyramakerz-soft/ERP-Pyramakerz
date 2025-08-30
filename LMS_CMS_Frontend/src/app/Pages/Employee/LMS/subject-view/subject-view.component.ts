@@ -19,7 +19,7 @@ import { FormsModule } from '@angular/forms';
 import { WeightTypeService } from '../../../../Services/Employee/LMS/weight-type.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-subject-view',
@@ -29,7 +29,7 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   styleUrl: './subject-view.component.css'
 })
 export class SubjectViewComponent {
-  subject:Subject = new Subject()
+  subject: Subject = new Subject()
   subjectId = 0;
   DomainName = "";
   AllowEdit: boolean = false;
@@ -41,24 +41,24 @@ export class SubjectViewComponent {
   UserID: number = 0;
   User_Data_After_Login: TokenData = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   path: string = ""
-  SubjectWeights:SubjectWeight[]=[]
-  subjectWeightElement:SubjectWeight = new SubjectWeight()
-  SubjectResourceElement:SubjectResource = new SubjectResource()
-  SubjectResources:SubjectResource[]=[]
-  WeightTypes:WeightType[]=[]
+  SubjectWeights: SubjectWeight[] = []
+  subjectWeightElement: SubjectWeight = new SubjectWeight()
+  SubjectResourceElement: SubjectResource = new SubjectResource()
+  SubjectResources: SubjectResource[] = []
+  WeightTypes: WeightType[] = []
   editSubjectWeight: boolean = false;
-  
+
   validationErrorsForWeights: { [key in keyof SubjectWeight]?: string } = {};
   validationErrorsForResources: { [key in keyof SubjectResource]?: string } = {};
 
   isLoading = false;
-  isWeightPart:boolean = true
+  isWeightPart: boolean = true
 
-  constructor(private languageService: LanguageService,public subjectService: SubjectService, public activeRoute:ActivatedRoute, public router:Router, public EditDeleteServ: DeleteEditPermissionService, 
-    public account: AccountService, private menuService: MenuService, public dialog: MatDialog, public subjectWeightService:SubjectWeightService, 
-    public subjectResourceService:SubjectResourceService,private realTimeService: RealTimeNotificationServiceService, public weightTypeService:WeightTypeService){}
+  constructor(private languageService: LanguageService, public subjectService: SubjectService, public activeRoute: ActivatedRoute, public router: Router, public EditDeleteServ: DeleteEditPermissionService,
+    public account: AccountService, private menuService: MenuService, public dialog: MatDialog, public subjectWeightService: SubjectWeightService,
+    public subjectResourceService: SubjectResourceService, private realTimeService: RealTimeNotificationServiceService, public weightTypeService: WeightTypeService) { }
 
-  async ngOnInit(){
+  async ngOnInit() {
     this.subjectId = await Number(this.activeRoute.snapshot.paramMap.get('SubId'))
     this.DomainName = await String(this.activeRoute.snapshot.paramMap.get('domainName'))
 
@@ -76,7 +76,7 @@ export class SubjectViewComponent {
     this.menuService.menuItemsForEmployee$.subscribe((items) => {
       const settingsPage = this.menuService.findByPageName(this.path, items);
       if (settingsPage) {
-         this.AllowEdit = settingsPage.allow_Edit;
+        this.AllowEdit = settingsPage.allow_Edit;
         this.AllowDelete = settingsPage.allow_Delete;
         this.AllowDeleteForOthers = settingsPage.allow_Delete_For_Others;
         this.AllowEditForOthers = settingsPage.allow_Edit_For_Others;
@@ -84,17 +84,17 @@ export class SubjectViewComponent {
     });
 
     this.subscription = this.languageService.language$.subscribe(direction => {
-    this.isRtl = direction === 'rtl';
+      this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
-  } 
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
 
 
   GetSubjectById() {
@@ -103,12 +103,12 @@ export class SubjectViewComponent {
     })
   }
 
-  moveToSubjects(){
+  moveToSubjects() {
     this.router.navigateByUrl('Employee/Subject');
   }
 
-  editModal(){
-    this.openDialog(this.subject.id, true); 
+  editModal() {
+    this.openDialog(this.subject.id, true);
   }
 
   openDialog(subjectId?: number, editSubject?: boolean): void {
@@ -126,7 +126,7 @@ export class SubjectViewComponent {
     dialogRef.afterClosed().subscribe(result => {
       this.GetSubjectById()
     });
-  }  
+  }
 
   IsAllowDelete(InsertedByID: number) {
     const IsAllow = this.EditDeleteServ.IsAllowDelete(InsertedByID, this.UserID, this.AllowDeleteForOthers);
@@ -138,7 +138,7 @@ export class SubjectViewComponent {
     return IsAllow;
   }
 
-  GetSubjectWeightsBySubjectID(){
+  GetSubjectWeightsBySubjectID() {
     this.SubjectWeights = []
     this.subjectWeightService.GetBySubjectId(this.subjectId, this.DomainName).subscribe(
       data => {
@@ -147,7 +147,7 @@ export class SubjectViewComponent {
     )
   }
 
-  GetWeightTypes(){
+  GetWeightTypes() {
     this.WeightTypes = []
     this.weightTypeService.Get(this.DomainName).subscribe(
       data => {
@@ -156,7 +156,7 @@ export class SubjectViewComponent {
     )
   }
 
-  GetSubjectResourcesBySubjectID(){
+  GetSubjectResourcesBySubjectID() {
     this.SubjectResources = []
     this.subjectResourceService.GetBySubjectId(this.subjectId, this.DomainName).subscribe(
       data => {
@@ -165,7 +165,7 @@ export class SubjectViewComponent {
     )
   }
 
-  GetSubjectWeightById(id:number){
+  GetSubjectWeightById(id: number) {
     this.subjectWeightElement = new SubjectWeight()
     this.subjectWeightService.GetByID(id, this.DomainName).subscribe(
       data => {
@@ -177,7 +177,7 @@ export class SubjectViewComponent {
   subjectWeight(id?: number) {
     if (id) {
       this.editSubjectWeight = true;
-      this.GetSubjectWeightById(id); 
+      this.GetSubjectWeightById(id);
     }
 
     this.GetWeightTypes()
@@ -186,7 +186,7 @@ export class SubjectViewComponent {
     document.getElementById("Weight_Modal")?.classList.add("flex");
   }
 
-  subjectResource(){
+  subjectResource() {
     document.getElementById("Resource_Modal")?.classList.remove("hidden");
     document.getElementById("Resource_Modal")?.classList.add("flex");
   }
@@ -197,21 +197,21 @@ export class SubjectViewComponent {
 
     this.subjectWeightElement = new SubjectWeight()
 
-    if(this.editSubjectWeight){
+    if (this.editSubjectWeight) {
       this.editSubjectWeight = false
     }
-    this.validationErrorsForWeights = {}; 
-  } 
+    this.validationErrorsForWeights = {};
+  }
 
   closeSubjectResource() {
     document.getElementById("Resource_Modal")?.classList.remove("flex");
     document.getElementById("Resource_Modal")?.classList.add("hidden");
     this.SubjectResourceElement = new SubjectResource()
-    
-    this.validationErrorsForResources = {}; 
-  } 
 
-  DeleteSubjectWeight(id:number){
+    this.validationErrorsForResources = {};
+  }
+
+  DeleteSubjectWeight(id: number) {
     Swal.fire({
       title: 'Are you sure you want to delete this Subject Weight?',
       icon: 'warning',
@@ -223,7 +223,7 @@ export class SubjectViewComponent {
     }).then((result) => {
       if (result.isConfirmed) {
         this.subjectWeightService.Delete(id, this.DomainName).subscribe(
-          (data: any) => { 
+          (data: any) => {
             this.GetSubjectWeightsBySubjectID()
           }
         );
@@ -231,7 +231,7 @@ export class SubjectViewComponent {
     });
   }
 
-  DeleteSubjecResource(id:number){
+  DeleteSubjecResource(id: number) {
     Swal.fire({
       title: 'Are you sure you want to delete this Subject Resource?',
       icon: 'warning',
@@ -243,7 +243,7 @@ export class SubjectViewComponent {
     }).then((result) => {
       if (result.isConfirmed) {
         this.subjectResourceService.Delete(id, this.DomainName).subscribe(
-          (data: any) => { 
+          (data: any) => {
             this.GetSubjectResourcesBySubjectID()
           }
         );
@@ -271,7 +271,7 @@ export class SubjectViewComponent {
   capitalizeFieldForSubjectWeight(field: keyof SubjectWeight): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
-  
+
   capitalizeFieldForSubjectResource(field: keyof SubjectResource): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
@@ -282,43 +282,43 @@ export class SubjectViewComponent {
       if (this.subjectWeightElement.hasOwnProperty(key)) {
         const field = key as keyof SubjectWeight;
         if (!this.subjectWeightElement[field]) {
-          if(field == "weightTypeID" || field == "value"){
+          if (field == "weightTypeID" || field == "weight") {
             this.validationErrorsForWeights[field] = `*${this.capitalizeFieldForSubjectWeight(field)} is required`
             isValid = false;
           }
-        } else { 
+        } else {
           this.validationErrorsForWeights[field] = '';
         }
       }
     }
     return isValid;
   }
-  
+
   isFormValidForSubjectResource(): boolean {
     let isValid = true;
     for (const key in this.SubjectResourceElement) {
       if (this.SubjectResourceElement.hasOwnProperty(key)) {
         const field = key as keyof SubjectResource;
         if (!this.SubjectResourceElement[field]) {
-          if(field == "file" || field == "englishName" || field == 'arabicName'){
+          if (field == "file" || field == "englishName" || field == 'arabicName') {
             this.validationErrorsForResources[field] = `*${this.capitalizeFieldForSubjectResource(field)} is required`
             isValid = false;
           }
-        } else { 
-          if(field == "englishName" || field == 'arabicName'){
-            if(this.SubjectResourceElement.englishName.length > 100 || this.SubjectResourceElement.arabicName.length > 100){
+        } else {
+          if (field == "englishName" || field == 'arabicName') {
+            if (this.SubjectResourceElement.englishName.length > 100 || this.SubjectResourceElement.arabicName.length > 100) {
               this.validationErrorsForResources[field] = `*${this.capitalizeFieldForSubjectResource(field)} cannot be longer than 100 characters`
               isValid = false;
-            }else{
+            } else {
               this.validationErrorsForResources[field] = '';
             }
-          }else{
+          } else {
             this.validationErrorsForResources[field] = '';
           }
         }
       }
     }
-     
+
     return isValid;
   }
 
@@ -330,11 +330,11 @@ export class SubjectViewComponent {
       if (file.size > 25 * 1024 * 1024) {
         this.validationErrorsForResources['file'] = 'The file size exceeds the maximum limit of 25 MB.';
         this.SubjectResourceElement.file = null;
-        return; 
-      } 
-      else{
+        return;
+      }
+      else {
         this.SubjectResourceElement.file = file
-        this.validationErrorsForResources['file'] = ''; 
+        this.validationErrorsForResources['file'] = '';
         const reader = new FileReader();
         reader.readAsDataURL(file);
       }
@@ -349,7 +349,7 @@ export class SubjectViewComponent {
       this.validationErrorsForWeights[field] = '';
     }
   }
-  
+
   onInputValueChangeForSubjectResource(event: { field: keyof SubjectResource, value: any }) {
     const { field, value } = event;
     (this.subjectWeightElement as any)[field] = value;
@@ -361,18 +361,18 @@ export class SubjectViewComponent {
   validateNumber(event: any, field: keyof SubjectWeight): void {
     const value = event.target.value;
     if (isNaN(value) || value === '') {
-      event.target.value = ''; 
+      event.target.value = '';
       if (typeof this.subjectWeightElement[field] === 'string') {
-        this.subjectWeightElement[field] = '' as never;  
+        this.subjectWeightElement[field] = '' as never;
       }
     }
   }
 
-  SaveSubjectWeight(){
-    if(this.isFormValidForSubjectWeight()){
+  SaveSubjectWeight() {
+    if (this.isFormValidForSubjectWeight()) {
       this.subjectWeightElement.subjectID = this.subjectId
-      this.isLoading = true; 
-      if(this.editSubjectWeight == false){
+      this.isLoading = true;
+      if (this.editSubjectWeight == false) {
         this.subjectWeightService.Add(this.subjectWeightElement, this.DomainName).subscribe(
           (result: any) => {
             this.closeSubjectWeight()
@@ -390,7 +390,7 @@ export class SubjectViewComponent {
             });
           }
         );
-      } else{
+      } else {
         this.subjectWeightService.Edit(this.subjectWeightElement, this.DomainName).subscribe(
           (result: any) => {
             this.closeSubjectWeight()
@@ -408,14 +408,14 @@ export class SubjectViewComponent {
             });
           }
         );
-      }   
+      }
     }
   }
 
-  SaveSubjectResource(){
-    if(this.isFormValidForSubjectResource()){
-      this.SubjectResourceElement.subjectID = this.subjectId 
-      this.isLoading = true; 
+  SaveSubjectResource() {
+    if (this.isFormValidForSubjectResource()) {
+      this.SubjectResourceElement.subjectID = this.subjectId
+      this.isLoading = true;
       this.subjectResourceService.Add(this.SubjectResourceElement, this.DomainName).subscribe(
         (result: any) => {
           this.closeSubjectResource()
@@ -432,7 +432,7 @@ export class SubjectViewComponent {
             customClass: { confirmButton: 'secondaryBg' },
           });
         }
-      ); 
+      );
     }
   }
 }
