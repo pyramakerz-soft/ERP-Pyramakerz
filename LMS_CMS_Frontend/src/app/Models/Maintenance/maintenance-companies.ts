@@ -1,0 +1,8 @@
+export class MaintenanceCompanies {
+      constructor(
+   public id: number, 
+   public en_Name: string,
+   public ar_Name: string
+
+  ) {}
+}
