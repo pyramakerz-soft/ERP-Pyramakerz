@@ -73,10 +73,10 @@ export class EvaluationReportComponent {
     templateId: 0,
     fromDate: '',
     toDate: '',
-    employeeId: 0,
-    schoolId: 0,
-    classroomId: 0
-  };
+    employeeId: null,
+    schoolId: null,
+    classroomId: null
+  }; 
 
   constructor(
     private router: Router,
@@ -148,11 +148,11 @@ export class EvaluationReportComponent {
 
   onSchoolChange(event: Event) {
     this.Classs = [];
-    this.filterParams.classroomId = 0;
+    this.filterParams.classroomId = null;
     
     const selectedValue = (event.target as HTMLSelectElement).value;
     this.SchoolID = Number(selectedValue);
-    this.filterParams.schoolId = this.SchoolID;
+    // this.filterParams.schoolId = this.SchoolID;
     
     if (this.SchoolID) {
       this.getClassData();
@@ -302,9 +302,9 @@ private prepareExportData(): void {
       templateId: 0,
       fromDate: '',
       toDate: '',
-      employeeId: 0,
-      schoolId: 0,
-      classroomId: 0
+      employeeId: null,
+      schoolId: null,
+      classroomId: null
     };
     this.SchoolID = 0;
     this.Classs = [];

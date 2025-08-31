@@ -32,7 +32,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet("ByStudentId/{SchoolId}/{StudentId}/{DateFrom}/{DateTo}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Building" }
+            pages: new[] { "Certificate" }
         )]
         public async Task<IActionResult> GetById(long SchoolId, long StudentId, DateOnly DateFrom, DateOnly DateTo)
         {
@@ -54,12 +54,14 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 .First_Or_Default(s => s.StudentID == StudentId &&
                                        s.IsDeleted != true &&
                                        s.Classroom.IsDeleted != true &&
-                                       s.Classroom.AcademicYear.IsActive &&
+                                       s.Classroom.AcademicYear.DateFrom <= DateFrom &&
+                                       s.Classroom.AcademicYear.DateTo >= DateTo &&
                                        s.Classroom.AcademicYear.SchoolID == SchoolId);
+
             if (studentClassroom == null)
                 return BadRequest("This student is not enrolled in a classroom for the current academic year.");
 
-            // Subjects for this student
+            // All Subjects for this student
             var studentClassroomSubjects = await Unit_Of_Work.studentClassroomSubject_Repository
                 .Select_All_With_IncludesById<StudentClassroomSubject>(
                     f => f.IsDeleted != true && f.StudentClassroomID == studentClassroom.ID && !f.Hide);
@@ -68,25 +70,29 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return NotFound("No subjects found for this student.");
 
             var subjectIds = studentClassroomSubjects.Select(s => s.SubjectID).Distinct().ToList();
+            List<Subject> subjects = Unit_Of_Work.subject_Repository.FindBy(s => subjectIds.Contains(s.ID));
+            List<SubjectGetDTO> SubjectDTO= mapper.Map<List<SubjectGetDTO>>(subjects);  // first column
+
+
+            // All Weight types for this subject
+            List<SubjectWeightType> AllsubjectWeightTypes = await Unit_Of_Work.subjectWeightType_Repository
+                .Select_All_With_IncludesById<SubjectWeightType>(s => subjectIds.Contains(s.SubjectID) && s.IsDeleted != true && s.WeightType.IsDeleted != true,
+                    query => query.Include(d => d.WeightType));
+            var WeightTypeIds = AllsubjectWeightTypes.Select(a=>a.WeightTypeID).Distinct().ToList();
+            List<WeightType> AllWeightType = Unit_Of_Work.weightType_Repository.FindBy(w => WeightTypeIds.Contains(w.ID));
+            List<WeightTypeGetDTO> WeightTypeDTO =mapper.Map<List<WeightTypeGetDTO>>(AllWeightType);     //Header
+
+            List<CertificateSubject> certificateSubjects = new List<CertificateSubject>(); // The Data Fill In cell
 
             foreach (var subjectId in subjectIds)
             {
                 var subject = Unit_Of_Work.subject_Repository.First_Or_Default(s => s.ID == subjectId && s.IsDeleted != true);
                 if (subject == null) continue;
 
-                var certificateSubject = new CertificateSubject
-                {
-                    ID = subject.ID,
-                    en_name = subject.en_name,
-                    ar_name = subject.ar_name,
-                    Marks = new List<CertificateDegree>()
-                };
 
                 // Weight types for this subject
-                List<SubjectWeightType> subjectWeightTypes = await Unit_Of_Work.subjectWeightType_Repository
-                    .Select_All_With_IncludesById<SubjectWeightType>(s => s.SubjectID == subjectId && s.IsDeleted != true ,
-                        query => query.Include(d => d.WeightType)
-                    );
+                List<SubjectWeightType> subjectWeightTypes = await Unit_Of_Work.subjectWeightType_Repository.Select_All_With_IncludesById<SubjectWeightType>(s => s.SubjectID == subjectId && s.IsDeleted != true && s.WeightType.IsDeleted!= true,
+                        query => query.Include(d => d.WeightType));
 
                 foreach (var swt in subjectWeightTypes)
                 {
@@ -137,8 +143,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                                      a.IsDeleted != true &&
                                      a.SubjectWeightTypeID == swt.WeightTypeID &&
                                      a.Date >= DateFrom &&
-                                     a.Date <= DateTo)
-                        .ToList();
+                                     a.Date <= DateTo).ToList();
 
                     foreach (var mark in directMarks)
                     {
@@ -154,22 +159,25 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     }
 
                     int totalItems = directMarks.Count + allAssignments.Count;
-                    float avgDegree = totalItems > 0 ? (sumPercentageDegree / totalItems) * swt.Value : 0;
+                    float avgDegree = totalItems > 0 ? (sumPercentageDegree / totalItems) * swt.Weight : 0;
 
-                    // Add to Marks
-                    certificateSubject.Marks.Add(new CertificateDegree
-                    {
-                        Degree = avgDegree,
-                        Mark = swt.Value,
-                        WeightTypeArName = swt.WeightType.ArabicName,
-                        WeightTypeEnName = swt.WeightType.EnglishName
-                    });
+
+                    var certificateSubjectObject = new CertificateSubject();
+                    certificateSubjectObject.Degree = avgDegree;
+                    certificateSubjectObject.Mark = swt.Weight;
+                    certificateSubjectObject.WeightTypeArName = swt.WeightType.ArabicName;
+                    certificateSubjectObject.WeightTypeEnName = swt.WeightType.EnglishName;
+                    certificateSubjectObject.WeightTypeId = swt.WeightType.ID;
+                    certificateSubjectObject.SubjectID = subject.ID;
+                    certificateSubjectObject.SubjectAr_name = subject.ar_name;
+                    certificateSubjectObject.SubjectEn_name = subject.en_name;
+
+                    certificateSubjects.Add(certificateSubjectObject);
                 }
 
-                certificateGetDTO.CertificateSubjects.Add(certificateSubject);
             }
 
-            return Ok(certificateGetDTO);
+            return Ok(new { SubjectDTO = SubjectDTO, Header = WeightTypeDTO, cells = certificateSubjects });
         }
 
     }

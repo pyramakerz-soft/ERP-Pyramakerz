@@ -10,7 +10,7 @@
             }}</label>
         <select id="employeeType" [(ngModel)]="SelectedEmployeeTypeId" (change)="GetViolationTypes()"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
-            <option [ngValue]="0" disabled selected hidden>{{'Choose'| translate }} {{'Item'| translate }}</option>
+            <option [ngValue]="0" disabled selected hidden>{{'Choose'| translate }} {{'Employee Type'| translate }}</option>
             <option *ngFor="let empType of empTypes" [value]="empType.id"> {{ empType.name }} </option>
         </select>
     </div>
@@ -22,7 +22,7 @@
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             [disabled]="!SelectedEmployeeTypeId">
             <!-- <option [value]="0">{{ 'All' | translate }}</option> -->
-            <option [ngValue]="0" disabled selected hidden>{{'Choose'| translate }} {{'Item'| translate }}</option>
+            <option [ngValue]="0" disabled selected hidden>{{'Choose'| translate }} {{'Violation Type'| translate }}</option>
 
             <option *ngFor="let violationType of violationTypes" [value]="violationType.id">
                 {{ violationType.name }}
