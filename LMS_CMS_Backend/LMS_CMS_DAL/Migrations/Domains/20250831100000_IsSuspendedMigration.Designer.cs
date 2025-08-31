@@ -4,6 +4,7 @@ using LMS_CMS_DAL.Models.Domains;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LMS_CMS_DAL.Migrations.Domains
 {
     [DbContext(typeof(LMS_CMS_Context))]
-    partial class LMS_CMS_ContextModelSnapshot : ModelSnapshot
+    [Migration("20250831100000_IsSuspendedMigration")]
+    partial class IsSuspendedMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -11236,9 +11239,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<long?>("DeletedByUserId")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("EmployeeID")
-                        .HasColumnType("bigint");
-
                     b.Property<DateTime?>("InsertedAt")
                         .HasColumnType("datetime2");
 
@@ -11250,6 +11250,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
+
+                    b.Property<long>("MaintenanceEmployeeID")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -11264,9 +11267,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.HasIndex("DeletedByUserId");
 
-                    b.HasIndex("EmployeeID");
-
                     b.HasIndex("InsertedByUserId");
+
+                    b.HasIndex("MaintenanceEmployeeID");
 
                     b.HasIndex("UpdatedByUserId");
 
@@ -19418,15 +19421,15 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .HasForeignKey("DeletedByUserId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "Employee")
-                        .WithMany("MaintenanceEmployees")
-                        .HasForeignKey("EmployeeID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "InsertedByEmployee")
                         .WithMany()
                         .HasForeignKey("InsertedByUserId");
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "Employee")
+                        .WithMany("MaintenanceEmployees")
+                        .HasForeignKey("MaintenanceEmployeeID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "UpdatedByEmployee")
                         .WithMany()

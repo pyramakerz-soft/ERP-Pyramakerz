@@ -60,6 +60,7 @@ namespace LMS_CMS_DAL.Models.Domains
         public bool? CanReceiveRequest { get; set; } 
         public bool? CanReceiveRequestFromParent { get; set; }
         public bool? CanReceiveMessageFromParent { get; set; }
+        public bool IsSuspended { get; set; }
 
         [ForeignKey("Role")]
         [Required]

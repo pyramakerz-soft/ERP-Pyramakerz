@@ -11,7 +11,8 @@ namespace LMS_CMS_BL.DTO.SocialWorker
         public long ID { get; set; }
         public DateOnly Date { get; set; }
         public long StudentID { get; set; }
-        public string StudentName { get; set; } // Will use StudentEnName or StudentArName
+        public string StudentEnName { get; set; } 
+        public string StudentArName { get; set; } 
         public ConductTypeReportDTO ConductType { get; set; }
         public ProcedureTypeReportDTO ProcedureType { get; set; }
         public string? Details { get; set; }

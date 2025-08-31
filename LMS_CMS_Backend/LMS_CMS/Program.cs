@@ -1,3 +1,22 @@
+using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.EntityFrameworkCore;
+using LMS_CMS_BL.UOW;
+using LMS_CMS_BL.Config;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using System.Text;
+using LMS_CMS_PL.Middleware;
+using LMS_CMS_DAL.Models.Domains;
+using LMS_CMS_DAL.Models.Octa;
+using LMS_CMS_PL.Services;
+using LMS_CMS_DAL.Models;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.FileProviders;
+using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Zatca.EInvoice.SDK.Contracts;
+using Zatca.EInvoice.SDK;
 using Amazon;
 using Amazon.S3;
 using Amazon.SecretsManager;
@@ -217,7 +236,18 @@ namespace LMS_CMS
             //app.UseMiddleware<DbConnection_Check_Middleware>(); 
 
             /// 3)
-            app.UseCors(txt);
+            app.UseForwardedHeaders(new ForwardedHeadersOptions {
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
+
+app.UseRouting();
+app.UseCors("AllowAllOrigins"); // you can keep it permissive; same-origin won’t need it
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllers();
+app.MapFallbackToFile("index.html");
+
 
             ///////// send files
             app.UseStaticFiles();
@@ -231,8 +261,6 @@ namespace LMS_CMS
                 }
             });
 
-            //////// Authentication
-            app.UseAuthentication();
 
 
             //////// Get Connection String
@@ -255,14 +283,14 @@ namespace LMS_CMS
             /// For Endpoint, to check if the user has access for this endpoint or not
             /// Make sure to be here before UseAuthorization
             app.UseMiddleware<Endpoint_Authorization_Middleware>();
-             
-            app.UseAuthorization();
+        
 
 
             // 2) SignalR
             app.MapHub<NotificationHub>("/notificationHub").RequireAuthorization();
             app.MapHub<RequestHub>("/requestHub").RequireAuthorization();
             app.MapHub<ChatMessageHub>("/chatMessageHub").RequireAuthorization();
+            
 
             //app.Urls.Add("http://0.0.0.0:5000");
             //app.UseCors(builder =>
