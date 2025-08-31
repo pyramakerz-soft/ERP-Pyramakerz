@@ -385,94 +385,95 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         }
     
     //////////////////////////////////////////////////////////////////////////////////////////--77
-        [HttpGet("ConductReport")]
-            [Authorize_Endpoint_(
-        allowedTypes: new[] { "octa", "employee" },
-        pages: new[] { "Conducts" }
-        )]
+            [HttpGet("ConductReport")]
+                [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Conducts" }
+            )]
             public async Task<IActionResult> ConductReport(
-        [FromQuery] DateOnly? FromDate,
-        [FromQuery] DateOnly? ToDate,
-        [FromQuery] long? SchoolId = null,
-        [FromQuery] long? GradeId = null,
-        [FromQuery] long? ClassroomId = null,
-        [FromQuery] long? StudentId = null,
-        [FromQuery] long? ConductTypeId = null,
-        [FromQuery] long? ProcedureTypeId = null)
+            [FromQuery] DateOnly? FromDate,
+            [FromQuery] DateOnly? ToDate,
+            [FromQuery] long? SchoolId = null,
+            [FromQuery] long? GradeId = null,
+            [FromQuery] long? ClassroomId = null,
+            [FromQuery] long? StudentId = null,
+            [FromQuery] long? ConductTypeId = null,
+            [FromQuery] long? ProcedureTypeId = null)
             {
-                UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-        var userClaims = HttpContext.User.Claims;
-        var userIdClaim = userClaims.FirstOrDefault(c => c.Type == "id")?.Value;
-        long.TryParse(userIdClaim, out long userId);
-        var userTypeClaim = userClaims.FirstOrDefault(c => c.Type == "type")?.Value;
+             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-        if (userIdClaim == null || userTypeClaim == null)
-        {
-            return Unauthorized("User ID or Type claim not found.");
-        }
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = userClaims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = userClaims.FirstOrDefault(c => c.Type == "type")?.Value;
 
-        // Validate that FromDate and ToDate are provided
-        if (!FromDate.HasValue || !ToDate.HasValue)
-        {
-            return BadRequest("Both FromDate and ToDate are required.");
-        }
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
 
-        // Ensure ToDate is not before FromDate
-        if (ToDate.Value < FromDate.Value)
-        {
-            return BadRequest("ToDate cannot be earlier than FromDate.");
-        }
+            if (!FromDate.HasValue || !ToDate.HasValue)
+            {
+                return BadRequest("Both FromDate and ToDate are required.");
+            }
 
-        IQueryable<Conduct> query = Unit_Of_Work.conduct_Repository.Query()
-            .Where(c => c.IsDeleted != true && c.Date >= FromDate.Value && c.Date <= ToDate.Value);
+            if (ToDate.Value < FromDate.Value)
+            {
+                return BadRequest("ToDate cannot be earlier than FromDate.");
+            }
 
-        if (SchoolId.HasValue)
-        {
-            query = query.Where(c => c.ConductType.SchoolID == SchoolId.Value);
-        }
+            IQueryable<Conduct> query = Unit_Of_Work.conduct_Repository.Query()
+                .Where(c => c.IsDeleted != true && c.Date >= FromDate.Value && c.Date <= ToDate.Value);
 
-        if (GradeId.HasValue)
-        {
-            query = query.Where(c => c.Classroom.GradeID == GradeId.Value);
-        }
+            if (SchoolId.HasValue)
+            {
+                query = query.Where(c => c.ConductType.SchoolID == SchoolId.Value);
+            }
 
-        if (ClassroomId.HasValue)
-        {
-            query = query.Where(c => c.ClassroomID == ClassroomId.Value);
-        }
+            if (GradeId.HasValue)
+            {
+                query = query.Where(c => c.Classroom.GradeID == GradeId.Value);
+            }
 
-        if (StudentId.HasValue)
-        {
-            query = query.Where(c => c.StudentID == StudentId.Value);
-        }
+            if (ClassroomId.HasValue)
+            {
+                query = query.Where(c => c.ClassroomID == ClassroomId.Value);
+            }
 
-        if (ConductTypeId.HasValue)
-        {
-            query = query.Where(c => c.ConductTypeID == ConductTypeId.Value);
-        }
+            if (StudentId.HasValue)
+            {
+                query = query.Where(c => c.StudentID == StudentId.Value);
+            }
 
-        if (ProcedureTypeId.HasValue)
-        {
-            query = query.Where(c => c.ProcedureTypeID == ProcedureTypeId.Value);
-        }
+            if (ConductTypeId.HasValue)
+            {
+                query = query.Where(c => c.ConductTypeID == ConductTypeId.Value);
+            }
 
-        var conducts = await query
-            .Include(c => c.Student)
-            .Include(c => c.ConductType)
-            .Include(c => c.ProcedureType)
-            .Include(c => c.Classroom)
-                .ThenInclude(cr => cr.Grade)
-            .ToListAsync();
+            if (ProcedureTypeId.HasValue)
+            {
+                query = query.Where(c => c.ProcedureTypeID == ProcedureTypeId.Value);
+            }
 
-        if (conducts == null || conducts.Count == 0)
-        {
-            return NotFound("No conduct records found for the specified criteria.");
-        }
+            var conducts = await query
+                .Include(c => c.Student)
+                .Include(c => c.ConductType)
+                .Include(c => c.ProcedureType)
+                .Include(c => c.Classroom)
+                    .ThenInclude(cr => cr.Grade)
+                    .OrderBy(c => c.Date)
+                .ToListAsync();
 
-        var reportData = mapper.Map<List<ConductReportDTO>>(conducts);
+            if (conducts == null || conducts.Count == 0)
+            {
+                return NotFound("No conduct records found for the specified criteria.");
+            }
 
-        return Ok(reportData);
-    }
+            var reportData = mapper.Map<List<ConductReportDTO>>(conducts);
+
+            return Ok(reportData);
+
+            }
     }
 }

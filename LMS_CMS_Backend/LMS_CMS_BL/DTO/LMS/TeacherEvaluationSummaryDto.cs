@@ -13,7 +13,7 @@ namespace LMS_CMS_BL.DTO.LMS
         public string EmployeeEnglishName { get; set; } = "";
         public string EmployeeArabicName { get; set; } = "";
         public string OverallAverage { get; set; } = "0.00";
-        //public string DepartmentName { get; set; } = "";
+        public string DepartmentName { get; set; } = "";
     }
 
 }

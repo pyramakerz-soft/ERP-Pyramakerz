@@ -378,13 +378,11 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            // Validate that FromDate and ToDate are provided
             if (!FromDate.HasValue || !ToDate.HasValue)
             {
                 return BadRequest("Both FromDate and ToDate are required.");
             }
 
-            // Ensure ToDate is not before FromDate
             if (ToDate.Value < FromDate.Value)
             {
                 return BadRequest("ToDate cannot be earlier than FromDate.");
@@ -426,6 +424,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
                     .ThenInclude(a => a.Classroom)
                     .ThenInclude(cr => cr.Grade)
                 .Include(ats => ats.Student)
+                .OrderBy(ats => ats.Attendance.Date)
                 .ToListAsync();
 
             if (attendanceStudents == null || attendanceStudents.Count == 0)
