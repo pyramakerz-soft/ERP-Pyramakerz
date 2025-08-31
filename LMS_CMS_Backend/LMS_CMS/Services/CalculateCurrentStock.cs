@@ -6,7 +6,7 @@ namespace LMS_CMS_PL.Services
 {
     public class CalculateCurrentStock
     {
-        public async Task<int> GetCurrentStock(LMS_CMS_Context db, long storeId, long shopItemId, DateTime date)
+        public async Task<int> GetCurrentStock(LMS_CMS_Context db, long storeId, long shopItemId, DateOnly date)
         {
 
             var totalStock = await (from details in db.InventoryDetails
@@ -24,7 +24,7 @@ namespace LMS_CMS_PL.Services
         }
 
         //////
-        public async Task<int> GetCurrentStockInTransformedStore(LMS_CMS_Context db, long storeId, long shopItemId, DateTime date)
+        public async Task<int> GetCurrentStockInTransformedStore(LMS_CMS_Context db, long storeId, long shopItemId, DateOnly date)
         {
 
             var totalStock = await (from details in db.InventoryDetails

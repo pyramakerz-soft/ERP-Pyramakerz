@@ -218,7 +218,6 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            // Validate that all filters are provided (mandatory)
             if (!SchoolId.HasValue || !GradeId.HasValue || !ClassroomId.HasValue || !StudentId.HasValue)
             {
                 return BadRequest("School, Grade, Classroom, and Student are all required.");
@@ -230,15 +229,15 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
                     cs => cs.StudentID,
                     sc => sc.StudentID,
                     (cs, sc) => new { CertificateStudent = cs, StudentClassroom = sc })
-                .Where(joined => joined.StudentClassroom.IsDeleted != true
-                    && joined.StudentClassroom.ClassID == ClassroomId.Value
-                    && joined.StudentClassroom.Classroom.GradeID == GradeId.Value
-                    && joined.StudentClassroom.Classroom.Grade.IsDeleted != true
-                    && joined.StudentClassroom.Classroom.Grade.Section.IsDeleted != true
-                    && joined.StudentClassroom.Classroom.Grade.Section.school.IsDeleted != true
-                    && joined.StudentClassroom.Classroom.Grade.Section.school.ID == SchoolId.Value
-                    && joined.CertificateStudent.StudentID == StudentId.Value)
-                .Select(joined => joined.CertificateStudent);
+                .Where(jo => jo.StudentClassroom.IsDeleted != true
+                    && jo.StudentClassroom.ClassID == ClassroomId.Value
+                    && jo.StudentClassroom.Classroom.GradeID == GradeId.Value
+                    && jo.StudentClassroom.Classroom.Grade.IsDeleted != true
+                    && jo.StudentClassroom.Classroom.Grade.Section.IsDeleted != true
+                    && jo.StudentClassroom.Classroom.Grade.Section.school.IsDeleted != true
+                    && jo.StudentClassroom.Classroom.Grade.Section.school.ID == SchoolId.Value
+                    && jo.CertificateStudent.StudentID == StudentId.Value)
+                .Select(j => j.CertificateStudent);
 
             var certificateStudents = await query
                 .Include(cs => cs.Student)

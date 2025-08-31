@@ -108,8 +108,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 return BadRequest("FlagIds cannot be null or empty.");
 
             // ✅ تحويل DateTo إلى نهاية اليوم لضمان شمول اليوم كله
-            var dateFrom = obj.DateFrom.Date;
-            var dateTo = obj.DateTo.Date.AddDays(1).AddTicks(-1);
+            var dateFrom = obj.DateFrom;
+            var dateTo = obj.DateTo;
 
             if (dateFrom > dateTo)
                 return BadRequest("DateFrom cannot be after DateTo.");
@@ -179,8 +179,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             if (obj.FlagIds == null || !obj.FlagIds.Any())
                 return BadRequest("FlagIds cannot be null or empty.");
 
-            var dateFrom = obj.DateFrom.Date;
-            var dateTo = obj.DateTo.Date.AddDays(1).AddTicks(-1); // نهاية اليوم
+            var dateFrom = obj.DateFrom;
+            var dateTo = obj.DateTo; // نهاية اليوم
 
             if (dateFrom > dateTo)
                 return BadRequest("DateFrom cannot be after DateTo.");

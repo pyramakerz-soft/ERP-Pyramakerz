@@ -8,7 +8,7 @@ namespace LMS_CMS_BL.DTO.Inventory
 {
     public class InventoryNetTransactionDTO  //77
     {
-        public DateTime Date { get; set; }             
+        public DateOnly Date { get; set; }             
         public long FlagId { get; set; }               
         public string FlagName { get; set; }
         public string InvoiceNumber { get; set; }
