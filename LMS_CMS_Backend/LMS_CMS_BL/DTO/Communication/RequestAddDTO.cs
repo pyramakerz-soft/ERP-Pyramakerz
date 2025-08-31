@@ -11,7 +11,7 @@ namespace LMS_CMS_BL.DTO.Communication
 {
     public class RequestAddDTO
     { 
-        public string? Message { get; set; }
+        public string Message { get; set; }
         public string? Link { get; set; }
         public IFormFile? FileFile { get; set; } 
         public long ReceiverID { get; set; }
