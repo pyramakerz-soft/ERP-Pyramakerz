@@ -282,6 +282,13 @@ namespace LMS_CMS
             app.MapHub<NotificationHub>("/notificationHub").RequireAuthorization();
             app.MapHub<RequestHub>("/requestHub").RequireAuthorization();
             app.MapHub<ChatMessageHub>("/chatMessageHub").RequireAuthorization();
+            
+            app.AddPolicy("AllowSpecific", p =>
+                p.WithOrigins("https://octa-edu.com", "https://www.octa-edu.com")
+                 .AllowAnyMethod()
+                 .AllowAnyHeader()
+                 .AllowCredentials()
+                 .WithExposedHeaders("Content-Disposition"));
 
             //app.Urls.Add("http://0.0.0.0:5000");
             //app.UseCors(builder =>
