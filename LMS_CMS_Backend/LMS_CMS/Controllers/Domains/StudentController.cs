@@ -1538,6 +1538,76 @@ namespace LMS_CMS_PL.Controllers.Domains
             Unit_Of_Work.SaveChanges();
 
             return Ok();
-        } 
+        }
+
+        //////////////////////////////////////////////////////
+
+        [HttpDelete("Suspend/{id}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            allowEdit: 1,
+            pages: new[] { "Student" }
+        )]
+        public IActionResult Suspend(long id)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            if (id == null)
+            {
+                return BadRequest("id cannot be null");
+            }
+
+            Student stud = Unit_Of_Work.student_Repository.Select_By_Id(id);
+
+            if (stud == null || stud.IsDeleted == true)
+            {
+                return NotFound("No Student with this ID");
+            }
+
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Student", roleId, userId, stud);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
+            }
+
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            stud.IsSuspended = !stud.IsSuspended;
+            stud.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            if (userTypeClaim == "octa")
+            {
+                stud.UpdatedByOctaId = userId;
+                if (stud.UpdatedByUserId != null)
+                {
+                    stud.UpdatedByUserId = null;
+                }
+            }
+            else if (userTypeClaim == "employee")
+            {
+                stud.UpdatedByUserId = userId;
+                if (stud.UpdatedByOctaId != null)
+                {
+                    stud.UpdatedByOctaId = null;
+                }
+            }
+
+            Unit_Of_Work.student_Repository.Update(stud);
+            Unit_Of_Work.SaveChanges();
+            return Ok();
+        }
     }
 }

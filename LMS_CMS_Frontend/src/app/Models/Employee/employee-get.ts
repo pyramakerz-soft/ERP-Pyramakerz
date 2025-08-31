@@ -34,6 +34,7 @@ export class EmployeeGet {
         public subjectSelected :number []=[],
         public newSubjectsSelected :number []=[],
         public deletedSubjectsSelected :number []=[],
+        public isSuspended: boolean = false, 
     ) {}
 }
 
