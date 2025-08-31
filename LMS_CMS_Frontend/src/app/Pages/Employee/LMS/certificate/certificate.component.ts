@@ -242,9 +242,12 @@ export class CertificateComponent {
   GetAllData() {
     this.TableData = []
     this.CertificateServ.Get(this.SelectedSchoolId, this.SelectedStudentId, this.DateFrom, this.DateTo, this.DomainName).subscribe((d) => {
+      console.log(d)
       this.subjects = d.subjectDTO
       this.TableData = d.cells
       this.weightTypes = d.header
+    },error=>{
+      console.log(error)
     })
   }
 
@@ -253,11 +256,11 @@ export class CertificateComponent {
     this.GetAllData()
   }
 
-  getDegree(subjectId: number, weightTypeId: number): number | string {
+  getDegree(subjectId: number, weightTypeId: number): string {
     const cell = this.TableData.find(
       (c: Certificate) => c.subjectID === subjectId && c.weightTypeId === weightTypeId
     );
-    return cell ? cell.degree : '-';
+    return cell ? `${cell.degree} /${cell.mark} `  : '-';
   }
 
 }
