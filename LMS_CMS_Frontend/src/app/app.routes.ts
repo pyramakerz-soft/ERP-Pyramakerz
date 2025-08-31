@@ -537,6 +537,7 @@ export const routes: Routes = [
             { path: "Registration Form", component: RegistrationFormComponent, title: "Registration Form" },
             { path: "Interview Registration", component: InterviewRegistrationComponentParent, title: "Interview Registration" },
             { path: "Medical History", component: ParentMedicalHistoryComponent, title: "Medical History" },
+            { path: "Parent Certificate", component: CertificateComponent, title: "Certificate", canActivate: [noNavigateWithoutLoginGuard] },
         ]
     },
     {
@@ -566,6 +567,7 @@ export const routes: Routes = [
             { path: "SubjectLive/:SubjectId", component: SubjectLessonLiveComponent, title: "SubjectResources", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "SubjectAssignment/:SubjectId", component: SubjectAssignmentComponent, title: "SubjectAssignment", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "AssignmentView/:AssignmentStudentId", component: StudentAssignmentViewComponent, title: "AssignmentView", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Student Certificate", component: CertificateComponent, title: "Certificate", canActivate: [noNavigateWithoutLoginGuard] },
         ]
     },
     {

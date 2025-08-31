@@ -36,7 +36,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
         [HttpGet]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Violation Types" }
+            pages: new[] { "violation" }
         )]
         public async Task<IActionResult> GetAsync()
         {
@@ -147,7 +147,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
         /////////////////////////////////////////////////////////////////////////////////////////////////--77
 
         [HttpGet("ViolationReport")]
-        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Violation Types" })]
+        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "violation" })]
         public async Task<IActionResult> GetViolationReport(
          [FromQuery] long? employeeTypeId,
          [FromQuery] long? violationTypeId,
@@ -221,7 +221,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Violation Types" }
+            pages: new[] { "violation" }
         )]
         public async Task<IActionResult> GetAsyncByID(long id)
         {
@@ -263,7 +263,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
         [HttpPost]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Violation Types" }
+            pages: new[] { "violation" }
         )]
         public async Task<IActionResult> Add([FromForm]ViolationAddDTO Newviolation)
         {
@@ -355,7 +355,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
          allowEdit: 1,
-         pages: new[] { "Violation Types" }
+         pages: new[] { "violation" }
         )]
         public async Task<IActionResult> EditAsync([FromForm] ViolationEditDTO Newviolation)
         {
@@ -477,7 +477,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             allowDelete: 1,
-            pages: new[] { "Violation Types" }
+            pages: new[] { "violation" }
         )]
         public IActionResult Delete(long id)
         {
