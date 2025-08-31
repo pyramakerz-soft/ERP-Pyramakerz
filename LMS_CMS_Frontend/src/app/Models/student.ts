@@ -26,5 +26,6 @@ export class Student {
       public academicYearName: string = '',
       public gradeName: string = '',
       public className: string = '',
+      public isSuspended: boolean = false, 
   ) {}
 } 

@@ -453,7 +453,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             var formattedDate = request.InsertedAt?.ToString("MMMM dd, yyyy 'at' hh:mm tt");
             (var englishUserName, var arabicUserName) = GetUserNames(Unit_Of_Work, request.ReceiverID, request.ReceiverUserTypeID);
 
-            var message = $"Your Request Has Been Accepted by {englishUserName} ({arabicUserName}) (submitted on {formattedDate})";
+            var message = $"Your Request {request.Message} Has Been Accepted by {englishUserName} ({arabicUserName}) (submitted on {formattedDate})";
 
             await _sendNotificationService.SendNotificationAsync(Unit_Of_Work, message, request.SenderUserTypeID, request.SenderID, domainName);
             await _requestService.NotifyNewRequest(request.SenderID, request.SenderUserTypeID, domainName);
@@ -514,7 +514,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             var formattedDate = request.InsertedAt?.ToString("MMMM dd, yyyy 'at' hh:mm tt"); 
             (var englishUserName, var arabicUserName) = GetUserNames(Unit_Of_Work, request.ReceiverID, request.ReceiverUserTypeID);
              
-            var message = $"Your Request Has Been Declined by {englishUserName} ({arabicUserName}) (submitted on {formattedDate})";
+            var message = $"Your Request {request.Message} Has Been Declined by {englishUserName} ({arabicUserName}) (submitted on {formattedDate})";
 
             await _sendNotificationService.SendNotificationAsync(Unit_Of_Work, message, request.SenderUserTypeID, request.SenderID, domainName);
             await _requestService.NotifyNewRequest(request.SenderID, request.SenderUserTypeID, domainName);
@@ -745,9 +745,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                 return BadRequest("You can't send the request to yourself");
             }
 
-            if (NewRequest.FileFile == null && NewRequest.Message == null && NewRequest.Link == null)
+            if (NewRequest.FileFile == null || NewRequest.Message == "")
             {
-                return BadRequest("You have to choose one element atleast to appear");
+                return BadRequest("You have to insert Message");
             }
 
             if ((userTypeID == 2 || userTypeID == 3) && (NewRequest.ReceiverUserTypeID == 2 || NewRequest.ReceiverUserTypeID == 3))

@@ -213,15 +213,13 @@ namespace LMS_CMS_BL.Config
             CreateMap<ViolationEditDTO, Violation>();
 
             // Add this mapping to AutoMapConfig.cs inside the CreateMap section--77
-
             CreateMap<Violation, ViolationReportDTO>()
                 .ForMember(dest => dest.ViolationType, opt => opt.MapFrom(src => src.ViolationType.Name))
                 .ForMember(dest => dest.EmployeeType, opt => opt.MapFrom(src => src.Employee.EmployeeType.Name))
-                .ForMember(dest => dest.EmployeeName, opt => opt.MapFrom(src => $"{src.Employee.en_name} {src.Employee.ar_name}"))
+                .ForMember(dest => dest.EmployeeEnglishName, opt => opt.MapFrom(src => src.Employee.en_name))
+                .ForMember(dest => dest.EmployeeArabicName, opt => opt.MapFrom(src => src.Employee.ar_name))
                 .ForMember(dest => dest.AttachmentUrl, opt => opt.MapFrom(src => src.Attach));
             //--77
-
-
 
             CreateMap<Building, BuildingGetDTO>()
                .ForMember(dest => dest.SchoolID, opt => opt.MapFrom(src => src.school.ID))
@@ -1228,9 +1226,10 @@ namespace LMS_CMS_BL.Config
 
             CreateMap<ConductTypeAddDTO, ConductType>();
             CreateMap<ConductTypeEditDTO, ConductType>();
-            // New mapping for ConductReportDTO
+            // New mapping for ConductReportDTO--77
             CreateMap<Conduct, ConductReportDTO>()
-            .ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => src.Student.en_name ?? src.Student.ar_name))
+           .ForMember(dest => dest.StudentArName, opt => opt.MapFrom(src => src.Student.ar_name))
+            .ForMember(dest => dest.StudentEnName, opt => opt.MapFrom(src => src.Student.en_name))
             .ForMember(dest => dest.ConductType, opt => opt.MapFrom(src => new ConductTypeReportDTO
             {
                 ID = src.ConductType.ID,
@@ -1239,7 +1238,7 @@ namespace LMS_CMS_BL.Config
             .ForMember(dest => dest.ProcedureType, opt => opt.MapFrom(src => new ProcedureTypeReportDTO
             {
                 ID = src.ProcedureType.ID,
-                Name = src.ProcedureType.Name // Adjust if ProcedureType uses en_name or ar_name
+                Name = src.ProcedureType.Name 
             }));
             //--77
 
@@ -1279,8 +1278,6 @@ namespace LMS_CMS_BL.Config
                     ID = src.IssuesType.ID,
                     Name = src.IssuesType.Name
                 }));
-
-
 
             CreateMap<SocialWorkerMedal, SocialWorkerMedalGetDTO>();
             CreateMap<SocialWorkerMedalAddDTO, SocialWorkerMedal>();
@@ -1414,50 +1411,23 @@ namespace LMS_CMS_BL.Config
             CreateMap<MaintenanceCompanyEditDto, MaintenanceCompany>();
              
             CreateMap<MaintenanceEmployee, MaintenanceEmployeeGetDto>()
-             .ForMember(dest => dest.En_Name,
-                        opt => opt.MapFrom(src => src.Employee != null ? src.Employee.en_name : null))
-             .ForMember(dest => dest.Ar_Name,
-                        opt => opt.MapFrom(src => src.Employee != null ? src.Employee.ar_name : null));
+                .ForMember(dest => dest.En_Name, opt => opt.MapFrom(src => src.Employee != null ? src.Employee.en_name : null))
+                .ForMember(dest => dest.Ar_Name, opt => opt.MapFrom(src => src.Employee != null ? src.Employee.ar_name : null));
 
             CreateMap<MaintenanceEmployeeAddDto, MaintenanceEmployee>();
 
 
             CreateMap<Maintenance, MaintenanceGetDto>()
-                .ForMember(dest => dest.ItemEnglishName,
-                    opt => opt.MapFrom(src => src.Item.En_Name))
-                .ForMember(dest => dest.ItemArabicName,
-                    opt => opt.MapFrom(src => src.Item.Ar_Name))
-                .ForMember(dest => dest.CompanyEnglishName,
-                    opt => opt.MapFrom(src => src.Company.En_Name))
-                .ForMember(dest => dest.CompanyArabicName,
-                    opt => opt.MapFrom(src => src.Company.Ar_Name))
-                .ForMember(dest => dest.EmployeeEnglishName,
-                   opt => opt.MapFrom(src => src.MaintenanceEmployee.Employee.en_name))
-                    .ForMember(dest => dest.EmployeeArabicName,
-                      opt => opt.MapFrom(src => src.MaintenanceEmployee.Employee.ar_name));
+                .ForMember(dest => dest.ItemEnglishName, opt => opt.MapFrom(src => src.Item.En_Name))
+                .ForMember(dest => dest.ItemArabicName, opt => opt.MapFrom(src => src.Item.Ar_Name))
+                .ForMember(dest => dest.CompanyEnglishName, opt => opt.MapFrom(src => src.Company.En_Name))
+                .ForMember(dest => dest.CompanyArabicName, opt => opt.MapFrom(src => src.Company.Ar_Name))
+                .ForMember(dest => dest.EmployeeEnglishName, opt => opt.MapFrom(src => src.MaintenanceEmployee.Employee.en_name))
+                .ForMember(dest => dest.EmployeeArabicName, opt => opt.MapFrom(src => src.MaintenanceEmployee.Employee.ar_name));
                        
             CreateMap<MaintenanceAddDto, Maintenance>();
             CreateMap<MaintenanceEditDto, Maintenance>();
-             
-            //CreateMap<Maintenance, MaintenanceGetDto>()
-            //        .ForMember(dest => dest.ItemName, opt => opt.MapFrom(src =>
-            //             src.Item != null
-            //                  ? (!string.IsNullOrEmpty(src.Item.En_Name)
-            //                     ? src.Item.En_Name
-            //                  : (!string.IsNullOrEmpty(src.Item.Ar_Name) ? src.Item.Ar_Name : null))
-            //                  : null))
-            //                .ForMember(dest => dest.EmployeeName, opt => opt.MapFrom(src =>
-            //                      src.Employee != null
-            //                        ? (!string.IsNullOrEmpty(src.Employee.en_name)
-            //                            ? src.Employee.en_name
-            //                    : (!string.IsNullOrEmpty(src.Employee.ar_name) ? src.Employee.ar_name : null))
-            //                                  : null))
-            //            .ForMember(dest => dest.CompanyName, opt => opt.MapFrom(src =>
-            //             src.Company != null
-            //               ? (!string.IsNullOrEmpty(src.Company.En_Name)
-            //                     ? src.Company.En_Name
-            //                    : (!string.IsNullOrEmpty(src.Company.Ar_Name) ? src.Company.Ar_Name : null))
-            //                                 : null)); 
+              
             CreateMap<ConnectionStatus, ConnectionStatusGetDTO>();
         }
     } 

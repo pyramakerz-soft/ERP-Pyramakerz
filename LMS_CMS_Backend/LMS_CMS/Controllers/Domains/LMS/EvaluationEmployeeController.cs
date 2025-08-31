@@ -419,13 +419,12 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
             return Ok(reports);
         }
-
-
+      
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////--77
-            [HttpGet("TeacherEvaluationReport")]
-            [Authorize_Endpoint_(
-                allowedTypes: new[] { "octa", "employee" },
-                pages: new[] { "Evaluation" }
+        [HttpGet("TeacherEvaluationReport")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Evaluation" }
             )]
             public async Task<IActionResult> GetEvaluationReportSummary(
             [FromQuery] DateOnly fromDate,
@@ -453,14 +452,17 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                             e.Date >= fromDate &&
                             e.Date <= toDate);
 
-            if (employeeId.HasValue)
-                query = query.Where(e => e.EvaluatedID == employeeId);
-
-            if (departmentId.HasValue)
-                query = query.Where(e => e.Evaluated.DepartmentID == departmentId);
-
+            if (employeeId.HasValue) 
+            {
+                query = query.Where(e => e.EvaluatedID == employeeId.Value);
+            }
+            else if (departmentId.HasValue) 
+            {
+                query = query.Where(e => e.Evaluated.DepartmentID == departmentId.Value);
+            }
             var evaluations = await query
                 .Include(e => e.Evaluated)
+                .ThenInclude(emp => emp.Department) 
                 .Include(e => e.EvaluationTemplate)
                 .ToListAsync();
 
@@ -498,7 +500,8 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     EmployeeId = g.Key.EvaluatedID,
                     EmployeeEnglishName = employee.en_name ?? "",
                     EmployeeArabicName = employee.ar_name ?? "",
-                    OverallAverage = overallAverage,
+                    OverallAverage = overallAverage ?? "",
+                    DepartmentName = employee.Department?.Name ?? ""
                 };
             }).ToList();
 

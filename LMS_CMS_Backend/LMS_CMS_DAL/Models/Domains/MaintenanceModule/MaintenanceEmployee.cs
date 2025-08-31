@@ -14,11 +14,9 @@ namespace LMS_CMS_DAL.Models.Domains.MaintenanceModule
         public long ID { get; set; }
 
         [ForeignKey("Employee")]
-        public long MaintenanceEmployeeID { get; set; }
-
-        // Navigation property (relationship)
+        public long EmployeeID { get; set; } 
         public Employee Employee { get; set; }
+     
         public ICollection<Maintenance> Maintenances { get; set; } = new HashSet<Maintenance>();
-
     }
 }

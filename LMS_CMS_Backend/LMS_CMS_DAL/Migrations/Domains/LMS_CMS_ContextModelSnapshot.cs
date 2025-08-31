@@ -1613,9 +1613,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.AccountingModule.Reports.TotalResult", b =>
                 {
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
                     b.Property<decimal>("Difference")
                         .HasColumnType("decimal(18,2)");
 
@@ -4382,6 +4379,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .HasColumnType("bigint");
 
                     b.Property<bool?>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsSuspended")
                         .HasColumnType("bit");
 
                     b.Property<long?>("JobID")
@@ -9838,6 +9838,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<bool?>("IsRegisteredInNoor")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsSuspended")
+                        .HasColumnType("bit");
+
                     b.Property<string>("LandMark")
                         .HasColumnType("nvarchar(max)");
 
@@ -11233,6 +11236,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<long?>("DeletedByUserId")
                         .HasColumnType("bigint");
 
+                    b.Property<long>("EmployeeID")
+                        .HasColumnType("bigint");
+
                     b.Property<DateTime?>("InsertedAt")
                         .HasColumnType("datetime2");
 
@@ -11244,9 +11250,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
-
-                    b.Property<long>("MaintenanceEmployeeID")
-                        .HasColumnType("bigint");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -11261,9 +11264,9 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.HasIndex("DeletedByUserId");
 
-                    b.HasIndex("InsertedByUserId");
+                    b.HasIndex("EmployeeID");
 
-                    b.HasIndex("MaintenanceEmployeeID");
+                    b.HasIndex("InsertedByUserId");
 
                     b.HasIndex("UpdatedByUserId");
 
@@ -19415,15 +19418,15 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .HasForeignKey("DeletedByUserId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "Employee")
+                        .WithMany("MaintenanceEmployees")
+                        .HasForeignKey("EmployeeID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "InsertedByEmployee")
                         .WithMany()
                         .HasForeignKey("InsertedByUserId");
-
-                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "Employee")
-                        .WithMany("MaintenanceEmployees")
-                        .HasForeignKey("MaintenanceEmployeeID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
 
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "UpdatedByEmployee")
                         .WithMany()

@@ -2240,7 +2240,7 @@ namespace LMS_CMS_DAL.Models.Domains
             modelBuilder.Entity<MaintenanceEmployee>()
                  .HasOne(me => me.Employee)
                  .WithMany(me => me.MaintenanceEmployees)
-                 .HasForeignKey(me => me.MaintenanceEmployeeID)
+                 .HasForeignKey(me => me.EmployeeID)
                  .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Maintenance>()

@@ -3,6 +3,8 @@ import { ConductTypeSection } from "./conduct-type-section";
 export class ConductType {
     constructor(
         public id: number = 0,
+                public name: string = '',
+
         public en_name: string = '',
         public ar_name: string = '',
         public conductLevelID: number = 0,

@@ -13,15 +13,17 @@ import Swal from 'sweetalert2';
 import * as XLSX from 'xlsx-js-style';
 import { ClassroomService } from '../../../../../Services/Employee/LMS/classroom.service';
 import { ActivatedRoute } from '@angular/router';
+import { ReportsService } from '../../../../../Services/shared/reports.service';
 
 @Component({
   selector: 'app-daily-preformance-report',
   standalone: true,
   imports: [CommonModule, FormsModule, TranslateModule, PdfPrintComponent],
   templateUrl: './daily-preformance-report.component.html',
-  styleUrl: './daily-preformance-report.component.css'
+  styleUrl: './daily-preformance-report.component.css',
 })
-export class DailyPreformanceReportComponent implements OnInit, OnDestroy {  DomainName: string = '';
+export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
+  DomainName: string = '';
   SelectedStudentId: number = 0;
   SelectedClassroomId: number = 0; // Add classroom selection
   SelectedStartDate: string = '';
@@ -56,15 +58,16 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {  Dom
     public classroomService: ClassroomService, // Add classroom service
     private languageService: LanguageService,
     private realTimeService: RealTimeNotificationServiceService,
-    private route: ActivatedRoute // Add route
+    private route: ActivatedRoute,
+    private reportsService: ReportsService // Add this line
   ) {}
 
   ngOnInit() {
     this.DomainName = this.apiService.GetHeader();
-    
+
     // Get report type from route data
     this.reportType = this.route.snapshot.data['reportType'] || 'student';
-    
+
     if (this.reportType === 'student') {
       this.loadStudents();
       this.school.reportHeaderOneEn = 'Student Daily Performance Report';
@@ -84,67 +87,69 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {  Dom
   }
 
   ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
+    this.realTimeService.stopConnection();
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
   }
 
+  // In the loadStudents() method, update the error handling:
   loadStudents() {
     this.studentService.GetAll(this.DomainName).subscribe(
       (data) => {
-        this.students = data.map(student => ({
-          id: student.id,
-          name: student.en_name || student.ar_name || 'Unknown'
-        }));
+        if (data && data.length > 0) {
+          this.students = data.map((student) => ({
+            id: student.id,
+            name: student.en_name || student.ar_name || 'Unknown',
+          }));
+        } else {
+          // If no students found, add a "No data" option
+          this.students = [{ id: -1, name: 'No data available' }];
+        }
       },
       (error) => {
         console.error('Error loading students:', error);
-        Swal.fire({
-          title: 'Error',
-          text: 'Failed to load students.',
-          icon: 'error',
-          confirmButtonText: 'OK',
-        });
+        // Add "No data" option on error too
+        this.students = [{ id: -1, name: 'No data available' }];
       }
     );
   }
 
+  // In the loadClassrooms() method, update the error handling:
   loadClassrooms() {
     this.classroomService.Get(this.DomainName).subscribe(
       (data) => {
-        this.classrooms = data.map(classroom => ({
-          id: classroom.id,
-          name: classroom.name || 'Unknown'
-        }));
+        if (data && data.length > 0) {
+          this.classrooms = data.map((classroom) => ({
+            id: classroom.id,
+            name: classroom.name || 'Unknown',
+          }));
+        } else {
+          // If no classrooms found, add a "No data" option
+          this.classrooms = [{ id: -1, name: 'No data available' }];
+        }
       },
       (error) => {
         console.error('Error loading classrooms:', error);
-        Swal.fire({
-          title: 'Error',
-          text: 'Failed to load classrooms.',
-          icon: 'error',
-          confirmButtonText: 'OK',
-        });
+        // Add "No data" option on error too
+        this.classrooms = [{ id: -1, name: 'No data available' }];
       }
     );
   }
 
+  // Update the DateChange() method to handle the "No data" case:
   DateChange() {
     this.showTable = false;
 
-    if (this.reportType === 'student') {
-      if (this.SelectedEndDate && this.SelectedStartDate && this.SelectedStudentId) {
-        this.showViewReportBtn = true;
-      } else {
-        this.showViewReportBtn = false;
-      }
+    // Disable button if "No data" is selected or no valid selection
+    const hasValidSelection =
+      (this.reportType === 'student' && this.SelectedStudentId > 0) ||
+      (this.reportType === 'classroom' && this.SelectedClassroomId > 0);
+
+    if (this.SelectedEndDate && this.SelectedStartDate && hasValidSelection) {
+      this.showViewReportBtn = true;
     } else {
-      if (this.SelectedEndDate && this.SelectedStartDate && this.SelectedClassroomId) {
-        this.showViewReportBtn = true;
-      } else {
-        this.showViewReportBtn = false;
-      }
+      this.showViewReportBtn = false;
     }
   }
 
@@ -220,19 +225,21 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {  Dom
   }
 
   get fileName(): string {
-    return this.reportType === 'student' 
-      ? 'Student Daily Performance Report' 
+    return this.reportType === 'student'
+      ? 'Student Daily Performance Report'
       : 'Classroom Daily Performance Report';
   }
 
   get studentName(): string {
-    const student = this.students.find(s => s.id == this.SelectedStudentId);
-    return student ? student.name : 'Undefined';    
+    const student = this.students.find((s) => s.id == this.SelectedStudentId);
+    return student ? student.name : 'Undefined';
   }
 
   get classroomName(): string {
-    const classroom = this.classrooms.find(c => c.id == this.SelectedClassroomId);
-    return classroom ? classroom.name : 'Undefined';    
+    const classroom = this.classrooms.find(
+      (c) => c.id == this.SelectedClassroomId
+    );
+    return classroom ? classroom.name : 'Undefined';
   }
 
   getInfoRows(): any[] {
@@ -277,88 +284,88 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {  Dom
     }
   }
 
-private prepareExportData(): void {
-  if (this.reportType === 'student') {
-    this.tableDataForExport = this.tableData.map((item) => ({
-      'Date': item.date,
-      'En Name': item.englishNameStudent,
-      'Ar Name': item.arabicNameStudent,
-      'Student ID': item.studentId,
-      'Performance Type': item.performanceTypeEn,
-      'Performance Type AR': item.performanceTypeAr,
-      'Comment': item.comment || 'N/A',
-    }));
-  } else {
-    this.tableDataForExport = this.tableData.map((item) => ({
-      'Date': item.date,
-      'Avg Score': item.averageScore || 'N/A',
-      'Performance Type': item.performanceTypeEn,
-      'Performance Type AR': item.performanceTypeAr,
-      'Comment': item.comment || 'N/A',
-    }));
+  private prepareExportData(): void {
+    if (this.reportType === 'student') {
+      this.tableDataForExport = this.tableData.map((item) => ({
+        Date: item.date,
+        'En Name': item.englishNameStudent,
+        'Ar Name': item.arabicNameStudent,
+        'Student ID': item.studentId,
+        'Performance Type': item.performanceTypeEn,
+        'Performance Type AR': item.performanceTypeAr,
+        Comment: item.comment || 'N/A',
+      }));
+    } else {
+      this.tableDataForExport = this.tableData.map((item) => ({
+        Date: item.date,
+        'Avg Score': item.averageScore || 'N/A',
+        'Performance Type': item.performanceTypeEn,
+        'Performance Type AR': item.performanceTypeAr,
+        Comment: item.comment || 'N/A',
+      }));
+    }
   }
-}
 
-getTableDataWithHeader(): any[] {
-  if (this.reportType === 'student') {
-    return [
-      {
-        header: 'Student Daily Performance Report',
-        summary: this.getInfoRows(),
-        table: {
-          headers: [
-            'Date',
-            'Ar Name',
-            'Ar Name',
-            'Student ID',
-            'Performance Type',
-            'Performance Type AR',
-            'Comment',
-          ],
-          data: this.tableData.map((item) => ({
-            Date: item.date,
-            'En Name': item.englishNameStudent,
-            'Ar Name': item.arabicNameStudent,
-            'Student ID': item.studentId,
-            'Performance Type': item.performanceTypeEn,
-            'Performance Type AR': item.performanceTypeAr,
-            Comment: item.comment,
-          })),
+  getTableDataWithHeader(): any[] {
+    if (this.reportType === 'student') {
+      return [
+        {
+          header: 'Student Daily Performance Report',
+          summary: this.getInfoRows(),
+          table: {
+            headers: [
+              'Date',
+              'Ar Name',
+              'Ar Name',
+              'Student ID',
+              'Performance Type',
+              'Performance Type AR',
+              'Comment',
+            ],
+            data: this.tableData.map((item) => ({
+              Date: item.date,
+              'En Name': item.englishNameStudent,
+              'Ar Name': item.arabicNameStudent,
+              'Student ID': item.studentId,
+              'Performance Type': item.performanceTypeEn,
+              'Performance Type AR': item.performanceTypeAr,
+              Comment: item.comment,
+            })),
+          },
         },
-      },
-    ];
-  } else {
-    return [
-      {
-        header: 'Classroom Daily Performance Report',
-        summary: this.getInfoRows(),
-        table: {
-          headers: [
-            'Date',
-            'Avg Score',
-            'Performance Type',
-            'Performance Type AR',
-            'Comment',
-          ],
-          data: this.tableData.map((item) => ({
-            Date: item.date,
-            'Avg Score': item.averageScore,
-            'Performance Type': item.performanceTypeEn,
-            'Performance Type AR': item.performanceTypeAr,
-            Comment: item.comment,
-          })),
+      ];
+    } else {
+      return [
+        {
+          header: 'Classroom Daily Performance Report',
+          summary: this.getInfoRows(),
+          table: {
+            headers: [
+              'Date',
+              'Avg Score',
+              'Performance Type',
+              'Performance Type AR',
+              'Comment',
+            ],
+            data: this.tableData.map((item) => ({
+              Date: item.date,
+              'Avg Score': item.averageScore,
+              'Performance Type': item.performanceTypeEn,
+              'Performance Type AR': item.performanceTypeAr,
+              Comment: item.comment,
+            })),
+          },
         },
-      },
-    ];
+      ];
+    }
   }
-}
 
   Print() {
     if (this.tableDataForExport.length === 0) {
       Swal.fire('Warning', 'No data to print!', 'warning');
       return;
     }
-    
+
     this.showPDF = true;
     setTimeout(() => {
       const printContents = document.getElementById('Data')?.innerHTML;
@@ -366,7 +373,7 @@ getTableDataWithHeader(): any[] {
         console.error('Element not found!');
         return;
       }
-      
+
       const printStyle = `
         <style>
           @page { size: auto; margin: 0mm; }
@@ -384,14 +391,14 @@ getTableDataWithHeader(): any[] {
           }
         </style>
       `;
-      
+
       const printContainer = document.createElement('div');
       printContainer.id = 'print-container';
       printContainer.innerHTML = printStyle + printContents;
-      
+
       document.body.appendChild(printContainer);
       window.print();
-      
+
       setTimeout(() => {
         document.body.removeChild(printContainer);
         this.showPDF = false;
@@ -412,168 +419,132 @@ getTableDataWithHeader(): any[] {
     }, 500);
   }
 
-DownloadAsExcel() {
-  if (!this.tableData || this.tableData.length === 0) {
-    Swal.fire({
-      title: 'No Data',
-      text: 'No data available for export.',
-      icon: 'info',
-      confirmButtonText: 'OK',
-    });
-    return;
-  }
+  async DownloadAsExcel() {
+    if (!this.tableData || this.tableData.length === 0) {
+      Swal.fire({
+        title: 'No Data',
+        text: 'No data available for export.',
+        icon: 'info',
+        confirmButtonText: 'OK',
+      });
+      return;
+    }
 
-  const excelData: any[] = [];
+    try {
+      // Prepare table data for export
+      const tableData = this.tableData.map((item) => {
+        if (this.reportType === 'student') {
+          return [
+            item.date,
+            item.englishNameStudent,
+            item.arabicNameStudent,
+            item.studentId,
+            item.performanceTypeEn,
+            item.performanceTypeAr,
+            item.comment || 'N/A',
+          ];
+        } else {
+          return [
+            item.date,
+            item.averageScore || 'N/A',
+            item.performanceTypeEn,
+            item.performanceTypeAr,
+            item.comment || 'N/A',
+          ];
+        }
+      });
 
-  // Add report title with styling
-  excelData.push([
-    {
-      v: this.reportType === 'student' ? 'STUDENT DAILY PERFORMANCE REPORT' : 'CLASSROOM DAILY PERFORMANCE REPORT',
-      s: {
-        font: { bold: true, sz: 16 },
-        alignment: { horizontal: 'center' },
-      },
-    },
-  ]);
-  excelData.push([]); // empty row
+      // Prepare info rows
+      const infoRows = [];
 
-  // Add filter information with styling
-  if (this.reportType === 'student') {
-    const selectedStudent = this.students.find(s => s.id == this.SelectedStudentId);
-    excelData.push([
-      { v: 'Student:', s: { font: { bold: true } } },
-      { v: selectedStudent?.name || 'All', s: { font: { bold: true } } },
-    ]);
-  } else {
-    const selectedClassroom = this.classrooms.find(c => c.id == this.SelectedClassroomId);
-    excelData.push([
-      { v: 'Classroom:', s: { font: { bold: true } } },
-      { v: selectedClassroom?.name || 'All', s: { font: { bold: true } } },
-    ]);
-  }
-  
-  excelData.push([
-    { v: 'Start Date:', s: { font: { bold: true } } },
-    { v: this.SelectedStartDate, s: { font: { bold: true } } },
-  ]);
-  excelData.push([
-    { v: 'End Date:', s: { font: { bold: true } } },
-    { v: this.SelectedEndDate, s: { font: { bold: true } } },
-  ]);
-  excelData.push([]); // empty row
-
-  // Table headers
-  let headers: string[] = [];
-  if (this.reportType === 'student') {
-    headers = [
-      'Date',
-      'En Name',
-      'Ar Name',
-      'Student ID',
-      'Performance Type',
-      'Performance Type AR',
-      'Comment',
-    ];
-  } else {
-    headers = [
-      'Date',
-      'Avg Score',
-      'Performance Type',
-      'Performance Type AR',
-      'Comment',
-    ];
-  }
-  
-  excelData.push(
-    headers.map((header) => ({
-      v: header,
-      s: {
-        font: { bold: true },
-        fill: { fgColor: { rgb: '4472C4' } },
-        color: { rgb: 'FFFFFF' },
-        border: {
-          top: { style: 'thin' },
-          bottom: { style: 'thin' },
-          left: { style: 'thin' },
-          right: { style: 'thin' },
-        },
-      },
-    }))
-  );
-
-  // Table rows
-  if (this.tableData && this.tableData.length > 0) {
-    this.tableData.forEach((row, i) => {
       if (this.reportType === 'student') {
-        excelData.push([
-          { v: row.date, s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'FFFFFF' } } } },
-          { v: row.englishNameStudent, s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'FFFFFF' } } } },
-          { v: row.arabicNameStudent, s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'FFFFFF' } } } },
-          { v: row.studentId, s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'FFFFFF' } } } },
-          { v: row.performanceTypeEn, s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'FFFFFF' } } } },
-          { v: row.performanceTypeAr, s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'FFFFFF' } } } },
-          { v: row.comment || 'N/A', s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'FFFFFF' } } } },
-        ]);
+        const selectedStudent = this.students.find(
+          (s) => s.id == this.SelectedStudentId
+        );
+        infoRows.push({
+          key: 'Student',
+          value: selectedStudent?.name || 'All',
+        });
       } else {
-        excelData.push([
-          { v: row.date, s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'FFFFFF' } } } },
-          { v: row.averageScore || 'N/A', s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'FFFFFF' } } } },
-          { v: row.performanceTypeEn, s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'FFFFFF' } } } },
-          { v: row.performanceTypeAr, s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'FFFFFF' } } } },
-          { v: row.comment || 'N/A', s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'FFFFFF' } } } },
-        ]);
+        const selectedClassroom = this.classrooms.find(
+          (c) => c.id == this.SelectedClassroomId
+        );
+        infoRows.push({
+          key: 'Classroom',
+          value: selectedClassroom?.name || 'All',
+        });
       }
-    });
-  } else {
-    excelData.push([
-      {
-        v: 'No daily performance records found for the selected criteria',
-        s: {
-          font: { italic: true },
-          alignment: { horizontal: 'center' },
+
+      infoRows.push(
+        { key: 'Start Date', value: this.SelectedStartDate },
+        { key: 'End Date', value: this.SelectedEndDate },
+        { key: 'Generated On', value: new Date().toLocaleDateString() }
+      );
+
+      // Prepare headers based on report type
+      const headers =
+        this.reportType === 'student'
+          ? [
+              'Date',
+              'En Name',
+              'Ar Name',
+              'Student ID',
+              'Performance Type',
+              'Performance Type AR',
+              'Comment',
+            ]
+          : [
+              'Date',
+              'Avg Score',
+              'Performance Type',
+              'Performance Type AR',
+              'Comment',
+            ];
+
+      // Generate the Excel report using the service
+      await this.reportsService.generateExcelReport({
+        mainHeader: {
+          en:
+            this.reportType === 'student'
+              ? 'Student Daily Performance Report'
+              : 'Classroom Daily Performance Report',
+          ar:
+            this.reportType === 'student'
+              ? 'تقرير أداء الطالب اليومي'
+              : 'تقرير أداء الفصل اليومي',
         },
-        colSpan: headers.length,
-      },
-    ]);
+        subHeaders: [
+          {
+            en: 'Detailed Daily Performance Summary',
+            ar: 'ملخص الأداء اليومي التفصيلي',
+          },
+        ],
+        infoRows: infoRows,
+        reportImage: this.school.reportImage,
+        tables: [
+          {
+            title:
+              this.reportType === 'student'
+                ? 'Student Performance Data'
+                : 'Classroom Performance Data',
+            headers: headers,
+            data: tableData,
+          },
+        ],
+        filename: `${
+          this.reportType === 'student' ? 'Student' : 'Classroom'
+        }_Daily_Performance_Report_${new Date()
+          .toISOString()
+          .slice(0, 10)}.xlsx`,
+      });
+    } catch (error) {
+      console.error('Error generating Excel report:', error);
+      Swal.fire({
+        title: 'Error',
+        text: 'Failed to generate Excel report.',
+        icon: 'error',
+        confirmButtonText: 'OK',
+      });
+    }
   }
-
-  // Create worksheet
-  const worksheet = XLSX.utils.aoa_to_sheet(excelData);
-
-  // Merge cells for headers
-  if (!worksheet['!merges']) worksheet['!merges'] = [];
-  worksheet['!merges'].push({
-    s: { r: 0, c: 0 },
-    e: { r: 0, c: headers.length - 1 },
-  });
-
-  // Apply column widths
-  if (this.reportType === 'student') {
-    worksheet['!cols'] = [
-      { wch: 15 }, // Date
-      { wch: 20 }, // En Name
-      { wch: 20 }, // Ar Name
-      { wch: 10 }, // Student ID
-      { wch: 20 }, // Performance Type
-      { wch: 20 }, // Performance Type AR
-      { wch: 30 }, // Comment
-    ];
-  } else {
-    worksheet['!cols'] = [
-      { wch: 15 }, // Date
-      { wch: 20 }, // Avg Score
-      { wch: 20 }, // Performance Type
-      { wch: 20 }, // Performance Type AR
-      { wch: 30 }, // Comment
-    ];
-  }
-
-  // Create workbook and save
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, 'Daily Performance Report');
-
-  const dateStr = new Date().toISOString().slice(0, 10);
-  const reportTypeStr = this.reportType === 'student' ? 'Student' : 'Classroom';
-  XLSX.writeFile(workbook, `${reportTypeStr}_Daily_Performance_Report_${dateStr}.xlsx`);
-}
 }

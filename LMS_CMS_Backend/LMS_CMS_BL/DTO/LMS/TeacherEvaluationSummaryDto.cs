@@ -10,10 +10,10 @@ namespace LMS_CMS_BL.DTO.LMS
     {
         public DateOnly Date { get; set; }
         public long EmployeeId { get; set; }
-        public string EmployeeEnglishName { get; set; }
-        public string EmployeeArabicName { get; set; }
-        
-        public string OverallAverage { get; set; }
-
+        public string EmployeeEnglishName { get; set; } = "";
+        public string EmployeeArabicName { get; set; } = "";
+        public string OverallAverage { get; set; } = "0.00";
+        public string DepartmentName { get; set; } = "";
     }
+
 }

@@ -42,23 +42,25 @@
     <div class="flex flex-col w-[25%] mb-4">
         <label for="school" class="mb-2 font-medium">{{ 'School' | translate }}</label>
         <select id="school" class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
-            [(ngModel)]="SchoolID" (change)="onSchoolChange($event)">
-            <option [value]="null" selected>{{'Select'| translate }}  {{'All'| translate }}</option>
+            [(ngModel)]="filterParams.schoolId" (change)="onSchoolChange($event)">
+            <option [value]="null" selected>{{'Select'| translate }} {{'All'| translate }}</option>
             <option *ngFor="let school of Schools" [value]="school.id">{{ school.name }}</option>
         </select>
-    </div>
+        </div>
 
 
 
 
-    <div class="flex flex-col w-[25%] mb-4">
-        <label class="mb-2 font-medium" for="Class" [ngClass]="{ 'text-gray-400': !SchoolID, 'primaryTxt': SchoolID }">{{ 'Class' | translate }}</label>
-        <select id="class" class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
-            [disabled]="!SchoolID" [(ngModel)]="filterParams.classroomId">
-            <option [value]="null" selected>{{'Select'| translate }}  {{'All'| translate }}</option>
-            <option *ngFor="let class of Classs" [value]="class.id">{{ class.name }}</option>
-        </select>
-    </div>
+        <div class="flex flex-col w-[25%] mb-4">
+            <label class="mb-2 font-medium" for="Class"
+                [ngClass]="{ 'text-gray-400': !filterParams.schoolId, 'primaryTxt': filterParams.schoolId }">{{ 'Class' |
+                translate }}</label>
+            <select id="class" class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
+                [disabled]="!filterParams.schoolId" [(ngModel)]="filterParams.classroomId">
+                <option [value]="null" selected>{{'Select'| translate }} {{'All'| translate }}</option>
+                <option *ngFor="let class of Classs" [value]="class.id">{{ class.name }}</option>
+            </select>  
+        </div>
 
 
 
@@ -85,9 +87,9 @@
 <!-- Report Results -->
 <div *ngIf="showTable" class="mt-5">
     <div *ngIf="reportData.length === 0 && !isLoading" class="w-full justify-center items-center flex py-8">
-        <span class="bg-white px-4 py-2 text-center border border-gray-300 text-sm md:text-base">
-            {{ 'No Data Found' | translate }}
-        </span>
+            <span class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                {{'No Data Found'| translate }}
+            </span>
     </div>
 
     <div *ngIf="isLoading" class="w-full justify-center items-center flex py-8">

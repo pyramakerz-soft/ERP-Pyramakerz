@@ -35,6 +35,9 @@
                       {{ 'Academic Year' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Is Suspended' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                      {{ 'Actions' | translate }}
                 </th>
             </tr>
@@ -42,7 +45,7 @@
         <tbody>
             <!-- No Data Row -->
             <tr *ngIf="StudentsData.length === 0">
-                <td colspan="7"
+                <td colspan="8"
                     class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
                     {{ 'No Data Found' | translate }}
                 </td>
@@ -60,6 +63,10 @@
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.currentGradeName }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.currentAcademicYear }}</td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    <i *ngIf="row.isSuspended" class="secondaryTxt text-2xl fa-regular fa-square-check"></i>
+                    <i *ngIf="!row.isSuspended" class="text-[#BDBDBD] text-2xl fa-regular fa-square"></i>
+                </td> 
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     <div class="flex space-x-4 rtl:space-x-reverse">
                         <button  (click)="Delete(row.id)" *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)">
                             <i class="fa-regular fa-trash-can"></i>
@@ -69,6 +76,9 @@
                         </button>
                         <button  (click)="View(row.registrationFormParentID)">
                             <i class="fa-solid fa-eye"></i> 
+                        </button>
+                        <button (click)="suspend(row)" title="Suspend">
+                            <i class="fa-solid fa-hand"></i>
                         </button>
                     </div>
                 </td>
