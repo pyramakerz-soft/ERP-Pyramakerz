@@ -58,7 +58,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Inventory" })]
-        public async Task<IActionResult> GetInventoryNetCombinedAsync(long storeId, long shopItemId, DateTime fromDate, DateTime toDate)
+        public async Task<IActionResult> GetInventoryNetCombinedAsync(long storeId, long shopItemId, DateOnly fromDate, DateOnly toDate)
         {
             try
             {
@@ -79,7 +79,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             }
         }
 
-        private async Task<InventoryNetSummaryDTO> GetInventoryNetSummaryInternalAsync(long storeId, long shopItemId, DateTime toDate)
+        private async Task<InventoryNetSummaryDTO> GetInventoryNetSummaryInternalAsync(long storeId, long shopItemId, DateOnly toDate)
         {
             var Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
             var flagsToExclude = new long[] { 13 };
@@ -120,7 +120,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             {
                 ShopItemId = shopItemId,
                 StoreId = storeId,
-                ToDate = toDate.AddDays(-1),
+                ToDate = toDate,
                 InQuantity = quantityBalance > 0 ? quantityBalance : 0,
                 outQuantity = quantityBalance < 0 ? -quantityBalance : 0,
                 Quantitybalance = quantityBalance,
@@ -129,10 +129,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         }
 
 
-        private async Task<List<InventoryNetTransactionDTO>> GetInventoryNetTransactionsInternalAsync(long storeId, long shopItemId, DateTime fromDate, DateTime toDate)
+        private async Task<List<InventoryNetTransactionDTO>> GetInventoryNetTransactionsInternalAsync(long storeId, long shopItemId, DateOnly fromDate, DateOnly toDate)
         {
-            var parsedFromDate = fromDate.Date;
-            var parsedToDate = toDate.Date.AddDays(1).AddTicks(-1);
+            var parsedFromDate = fromDate;
+            var parsedToDate = toDate;
 
             if (parsedFromDate > parsedToDate)
                 throw new ArgumentException("The start date cannot be after the end date.");
@@ -207,10 +207,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Inventory" }
         )]
-        public async Task<IActionResult> CalculateAverageCostAsync(DateTime fromDate, DateTime toDate)
+        public async Task<IActionResult> CalculateAverageCostAsync(DateOnly fromDate, DateOnly toDate)
         {
-            var parsedFromDate = fromDate.Date;
-            var parsedToDate = toDate.Date.AddDays(1).AddTicks(-1); // نهاية اليوم
+            var parsedFromDate = fromDate;
+            var parsedToDate = toDate; // نهاية اليوم
 
             if (parsedFromDate > parsedToDate)
                 return BadRequest("The start date cannot be after the end date.");
@@ -244,10 +244,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             await Unit_Of_Work.SaveChangesAsync();
             // ========== المرحلة 3: الحركات اليومية ==========
             var currentDate = parsedFromDate;
-            while (currentDate <= parsedToDate.Date)
+            while (currentDate <= parsedToDate)
             {
                 var dailyItems = allInventoryData
-                    .Where(im => im.FlagId != 1 && im.FlagId != 9 && im.Date.Date == currentDate.Date)
+                    .Where(im => im.FlagId != 1 && im.FlagId != 9 && im.Date == currentDate)
                     .SelectMany(im => im.InventoryDetails);
 
                 foreach (var item in dailyItems)
@@ -257,13 +257,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                     Unit_Of_Work.inventoryDetails_Repository.Update(item);
                 }
                 await Unit_Of_Work.SaveChangesAsync();
-                currentDate = currentDate.AddDays(1);
+                currentDate = currentDate;
             }
 
             return Ok();
         }
         // /////////////////////////////////////////////////////////////-7
-        private async Task<decimal> CalculateAverageCostForItem(long shopItemId, DateTime targetDate)
+        private async Task<decimal> CalculateAverageCostForItem(long shopItemId, DateOnly targetDate)
         {
             var Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
             var dbItems = await Unit_Of_Work.inventoryDetails_Repository
@@ -275,8 +275,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                     id.ShopItemID == shopItemId &&
                     id.InventoryMaster.InventoryFlags.ItemInOut != 0 &&
                     (
-                        id.InventoryMaster.Date.Date < targetDate.Date || // قبل اليوم المطلوب
-                        (id.InventoryMaster.Date.Date == targetDate.Date && // أو في نفس اليوم مع كود 1 أو 9
+                        id.InventoryMaster.Date < targetDate || // قبل اليوم المطلوب
+                        (id.InventoryMaster.Date == targetDate && // أو في نفس اليوم مع كود 1 أو 9
                          (id.InventoryMaster.FlagId == 1 || id.InventoryMaster.FlagId == 9))
                     ))
                 .ToListAsync();
@@ -301,13 +301,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         [HttpGet("StoreBalance")]
         [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Inventory" })]
         public async Task<IActionResult> GetStoreBalanceAsync(
-        long storeId, DateTime toDate, int ReportFlagType, int categoryId = 0, int typeId = 0,
+        long storeId, DateOnly toDate, int ReportFlagType, int categoryId = 0, int typeId = 0,
         bool hasBalance = false, bool overdrawnBalance = false, bool zeroBalances = false)
         {  
             if (storeId == 0)
                 return BadRequest("StoreId is required");
 
-            var parsedToDate = toDate.Date.AddDays(1).AddTicks(-1);
+            var parsedToDate = toDate;
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             var data = await Unit_Of_Work.inventoryDetails_Repository
@@ -578,13 +578,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         [HttpGet("AllStoresBalanceHorizontal")]
         [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Inventory" })]
         public async Task<IActionResult> GetAllStoresBalanceHorizontalAsync(
-        DateTime toDate, int reportType = 1, int categoryId = 0, int typeId = 0,
+        DateOnly toDate, int reportType = 1, int categoryId = 0, int typeId = 0,
         bool hasBalance = false, bool overdrawnBalance = false, bool zeroBalances = false)
         {
             if (toDate == default)
                 return BadRequest("ToDate is required");
 
-            var parsedToDate = toDate.Date.AddDays(1).AddTicks(-1);
+            DateOnly parsedToDate = toDate;
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             var data = await Unit_Of_Work.inventoryDetails_Repository

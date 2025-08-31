@@ -307,7 +307,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                  allowedTypes: new[] { "octa", "employee" },
                  pages: new[] { "Inventory" }
              )]
-        public async Task<IActionResult> GetCurrentStockByIDAsync(long StoreId , long ShopItemID , DateTime date) 
+        public async Task<IActionResult> GetCurrentStockByIDAsync(long StoreId , long ShopItemID , DateOnly date) 
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
             LMS_CMS_Context db = Unit_Of_Work.inventoryMaster_Repository.Database();
@@ -324,7 +324,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                  allowedTypes: new[] { "octa", "employee" },
         pages: new[] { "Inventory" }
              )]
-        public async Task<IActionResult> GetCurrentStockByCategoryId(long StoreId, long CategoryId, DateTime date)
+        public async Task<IActionResult> GetCurrentStockByCategoryId(long StoreId, long CategoryId, DateOnly date)
         {
 
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -360,7 +360,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                  allowedTypes: new[] { "octa", "employee" },
                  pages: new[] { "Inventory" }
              )]
-        public async Task<IActionResult> GetCurrentStockBySubCategoryId(long StoreId, long SubCategoryId, DateTime date)
+        public async Task<IActionResult> GetCurrentStockBySubCategoryId(long StoreId, long SubCategoryId, DateOnly date)
         {
 
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
