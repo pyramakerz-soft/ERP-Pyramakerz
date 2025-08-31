@@ -537,13 +537,22 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                             e.Date >= fromDate &&
                             e.Date <= toDate);
 
-            if (employeeId.HasValue && departmentId.HasValue)
-            {
-                query = query.Where(e =>
-                    e.EvaluatedID == employeeId.Value &&
-                    e.Evaluated.DepartmentID == departmentId.Value);
-            }
-            else if (employeeId.HasValue) // موظف فقط
+            //if (employeeId.HasValue && departmentId.HasValue)
+            //{
+            //    query = query.Where(e =>
+            //        e.EvaluatedID == employeeId.Value &&
+            //        e.Evaluated.DepartmentID == departmentId.Value);
+            //}
+            //else if (employeeId.HasValue) // موظف فقط
+            //{
+            //    query = query.Where(e => e.EvaluatedID == employeeId.Value);
+            //}
+            //else if (departmentId.HasValue) // قسم فقط
+            //{
+            //    query = query.Where(e => e.Evaluated.DepartmentID == departmentId.Value);
+            //}
+
+            if (employeeId.HasValue) // الأولوية للموظف
             {
                 query = query.Where(e => e.EvaluatedID == employeeId.Value);
             }
