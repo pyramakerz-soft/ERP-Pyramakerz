@@ -239,6 +239,7 @@ import { DirectMarkComponent } from './Pages/Employee/LMS/direct-mark/direct-mar
 import { DirectMarkStudentComponent } from './Pages/Employee/LMS/direct-mark-student/direct-mark-student.component';
 import { CertificateComponent } from './Pages/Employee/LMS/certificate/certificate.component';
 import { TeacherEvaluationReportComponent } from './Pages/Employee/LMS/reports/teacher-evaluation-report/teacher-evaluation-report.component';
+import { ConductReportComponent } from './Pages/Employee/SocialWorker/Reports/conduct-report/conduct-report.component';
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
     { path: "Octa/login", component: OctaLoginComponent, title: "login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -508,6 +509,9 @@ export const routes: Routes = [
             { path: 'Conducts', component: ConductComponent, title: 'Conduct', canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], },
             { path: "Conduct Edit/:id", component: ConductAddEditComponent, title: "Conduct", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Conduct Create", component: ConductAddEditComponent, title: "Conduct", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
+            
+            { path: 'Conducts Report', component: ConductReportComponent, title: 'Conduct Report', canActivate: [noNavigateWithoutLoginGuard], },
+
             { path: "Supplier Statement",  component: AccountStatementsComponent,  title: "Supplier Statement",  canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard]  },
             { path: "Safe Statement",  component: AccountStatementsComponent,  title: "Safe Statement",  canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard]  },
             { path: "Bank Statement",  component: AccountStatementsComponent,  title: "Bank Statement",  canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard]  },
