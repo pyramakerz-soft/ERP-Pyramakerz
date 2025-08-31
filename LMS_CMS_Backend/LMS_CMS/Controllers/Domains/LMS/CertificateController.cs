@@ -131,7 +131,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                                                    a.AssignmentID == assignment.ID &&
                                                    a.IsDeleted != true);
 
-                        if (assignmentStudent != null)
+                        if (assignmentStudent?.Degree != null && assignment?.Mark != null && assignment.Mark > 0)
                         {
                             sumPercentageDegree += ((float)assignmentStudent.Degree / assignment.Mark);
                         }
@@ -152,7 +152,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                                                    a.DirectMarkID == mark.ID &&
                                                    a.IsDeleted != true);
 
-                        if (studentDirectMark != null)
+                        if (studentDirectMark?.Degree != null && mark?.Mark != null && mark.Mark > 0)
                         {
                             sumPercentageDegree += ((float)studentDirectMark.Degree / mark.Mark);
                         }
