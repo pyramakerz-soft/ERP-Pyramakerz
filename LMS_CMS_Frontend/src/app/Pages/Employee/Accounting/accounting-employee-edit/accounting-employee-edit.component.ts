@@ -266,7 +266,7 @@ export class AccountingEmployeeEditComponent {
           Swal.fire({
             icon: 'error',
             title: 'Oops...',
-            text: 'Try Again Later!',
+            text: err.error,
             confirmButtonText: 'Okay',
             customClass: { confirmButton: 'secondaryBg' },
           });

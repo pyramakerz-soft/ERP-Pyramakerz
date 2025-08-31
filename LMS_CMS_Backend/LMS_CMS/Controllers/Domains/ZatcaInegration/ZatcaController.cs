@@ -621,7 +621,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Zatca Electronic-Invoice" }
         )]
-        public async Task<IActionResult> FilterBySchoolAndDate(long schoolId, DateTime startDate, DateTime endDate, int pageNumber = 1, int pageSize = 10)
+        public async Task<IActionResult> FilterBySchoolAndDate(long schoolId, DateOnly startDate, DateOnly endDate, int pageNumber = 1, int pageSize = 10)
         {
             if (endDate < startDate)
                 return BadRequest("Start date must be equal or greater than End date");
@@ -638,7 +638,7 @@ namespace LMS_CMS_PL.Controllers.Domains.ZatcaInegration
                 d => d.SchoolId == schoolId &&
                 d.IsDeleted != true &&
                 (d.FlagId == 11 || d.FlagId == 12) &&
-                d.Date.Date >= startDate && d.Date.Date <= endDate.AddDays(1)) 
+                d.Date >= startDate && d.Date <= endDate) 
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();

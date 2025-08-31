@@ -32,7 +32,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet("GetBySubjectID/{subID}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Assignment" }
+            pages: new[] { "Direct Mark" }
         )]
         public async Task<IActionResult> GetBySubjectID(long subID, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
@@ -102,7 +102,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee" },
-           pages: new[] { "Assignment" }
+           pages: new[] { "Direct Mark" }
        )]
         public async Task<IActionResult> GetByID(long id)
         {
@@ -150,7 +150,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpPost]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Assignment" }
+            pages: new[] { "Direct Mark" }
          )]
         public async Task<IActionResult> Add(DirectMarkAddDTO NewDirectMark)
         {
@@ -276,7 +276,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             allowEdit: 1,
-            pages: new[] { "Assignment" }
+            pages: new[] { "Direct Mark" }
         )]
         public IActionResult Edit(DirectMarkEditDTO NewDirectMark)
         {
@@ -313,7 +313,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Academic Years", roleId, userId, directMark);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Direct Mark", roleId, userId, directMark);
                 if (accessCheck != null)
                 {
                     return accessCheck;
@@ -418,7 +418,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [Authorize_Endpoint_(
              allowedTypes: new[] { "octa", "employee" },
              allowDelete: 1,
-             pages: new[] { "Academic Years" }
+             pages: new[] { "Direct Mark" }
          )]
         public IActionResult Delete(long id)
         {
@@ -449,7 +449,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Academic Years", roleId, userId, directMark);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Direct Mark", roleId, userId, directMark);
                 if (accessCheck != null)
                 {
                     return accessCheck;

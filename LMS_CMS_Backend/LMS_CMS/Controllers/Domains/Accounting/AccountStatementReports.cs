@@ -135,7 +135,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             fullTotals.TotalDebit += results.Sum(x => x.Debit ?? 0);
             fullTotals.TotalCredit += results.Sum(x => x.Credit ?? 0);
 
-            fullTotals.Differences = isCredit ? fullTotals.TotalCredit - fullTotals.TotalDebit :
+            fullTotals.Difference = isCredit ? fullTotals.TotalCredit - fullTotals.TotalDebit :
                  fullTotals.TotalDebit - fullTotals.TotalCredit;
 
             long totalRecords = results?.Count() ?? 0;
@@ -156,7 +156,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 {
                     totalDebit = fullTotals.TotalDebit,
                     totalCredit = fullTotals.TotalCredit,
-                    difference = fullTotals.Differences
+                    difference = fullTotals.Difference
                 },
                 Pagination = paginationMetadata
             });

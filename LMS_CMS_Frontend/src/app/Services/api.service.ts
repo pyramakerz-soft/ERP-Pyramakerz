@@ -22,12 +22,7 @@ export class ApiService {
     // const hostname = window.location.hostname; 
     // var Header = hostname.split('.')[0] 
     
-<<<<<<< HEAD
-    var Header = 'Domain_One';    
-=======
-    var Header = 'ss_two';     
->>>>>>> 543e64fb434e136ae5c1e3bbb5de5bb2f61ffa58
-
+    var Header = 'domain';     
     return Header;
   }
 }

@@ -32,7 +32,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet("ByDirectMarkId/{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee", "parent" },
-            pages: new[] { "Academic Years" }
+            pages: new[] { "Direct Mark" }
         )]
         public async Task<IActionResult> GetByDirectMarkIdAsync(long id)
         {
