@@ -422,10 +422,94 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////--77
-            [HttpGet("TeacherEvaluationReport")]
-            [Authorize_Endpoint_(
-                allowedTypes: new[] { "octa", "employee" },
-                pages: new[] { "Evaluation" }
+        //    [HttpGet("TeacherEvaluationReport")]
+        //    [Authorize_Endpoint_(
+        //        allowedTypes: new[] { "octa", "employee" },
+        //        pages: new[] { "Evaluation" }
+        //    )]
+        //    public async Task<IActionResult> GetEvaluationReportSummary(
+        //    [FromQuery] DateOnly fromDate,
+        //    [FromQuery] DateOnly toDate,
+        //    [FromQuery] long? employeeId = null,
+        //    [FromQuery] long? departmentId = null)
+        //        {
+        //    UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+        //    var userClaims = HttpContext.User.Claims;
+        //    var userIdClaim = userClaims.FirstOrDefault(c => c.Type == "id")?.Value;
+        //    var userTypeClaim = userClaims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+        //    if (userIdClaim == null || userTypeClaim == null)
+        //        return Unauthorized("User ID or Type claim not found.");
+
+        //    if (fromDate == default || toDate == default)
+        //        return BadRequest("From Date and To Date are required.");
+
+        //    if (fromDate > toDate)
+        //        return BadRequest("From Date cannot be greater than To Date.");
+
+        //    var query = Unit_Of_Work.evaluationEmployee_Repository.Query()
+        //        .Where(e => e.IsDeleted != true &&
+        //                    e.Date >= fromDate &&
+        //                    e.Date <= toDate);
+
+        //    if (employeeId.HasValue)
+        //        query = query.Where(e => e.EvaluatedID == employeeId);
+
+        //    if (departmentId.HasValue)
+        //        query = query.Where(e => e.Evaluated.DepartmentID == departmentId);
+
+        //    var evaluations = await query
+        //        .Include(e => e.Evaluated)
+        //        .Include(e => e.EvaluationTemplate)
+        //        .ToListAsync();
+
+        //    if (!evaluations.Any())
+        //        return Ok(new List<TeacherEvaluationSummaryDto>());
+
+        //    var evalIds = evaluations.Select(ev => ev.ID).ToList();
+
+        //    var allQuestions = Unit_Of_Work.evaluationEmployeeQuestion_Repository.Query()
+        //        .Where(q => evalIds.Contains(q.EvaluationEmployeeID) && q.IsDeleted != true)
+        //        .ToList();
+
+        //    var grouped = evaluations
+        //        .GroupBy(e => new { e.EvaluatedID, e.Date })
+        //        .OrderBy(g => g.Key.EvaluatedID)
+        //        .ThenBy(g => g.Key.Date);
+
+        //    var result = grouped.Select(g =>
+        //    {
+        //        var employee = g.First().Evaluated;
+
+        //        var employeeQuestions = allQuestions
+        //            .Where(q => g.Select(ev => ev.ID).Contains(q.EvaluationEmployeeID))
+        //            .ToList();
+
+        //        var allMarks = employeeQuestions.Select(q => q.Mark).ToList();
+
+        //        var overallAverage = allMarks.Any()
+        //            ? allMarks.Average().ToString("F2")
+        //            : "0.00";
+
+        //        return new TeacherEvaluationSummaryDto
+        //        {
+        //            Date = g.Key.Date,
+        //            EmployeeId = g.Key.EvaluatedID,
+        //            EmployeeEnglishName = employee.en_name ?? "",
+        //            EmployeeArabicName = employee.ar_name ?? "",
+        //            OverallAverage = overallAverage,
+        //        };
+        //    }).ToList();
+
+        //    return Ok(result);
+        //}
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////--77
+        [HttpGet("TeacherEvaluationReport")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Evaluation" }
             )]
             public async Task<IActionResult> GetEvaluationReportSummary(
             [FromQuery] DateOnly fromDate,
@@ -453,14 +537,24 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                             e.Date >= fromDate &&
                             e.Date <= toDate);
 
-            if (employeeId.HasValue)
-                query = query.Where(e => e.EvaluatedID == employeeId);
-
-            if (departmentId.HasValue)
-                query = query.Where(e => e.Evaluated.DepartmentID == departmentId);
+            if (employeeId.HasValue && departmentId.HasValue)
+            {
+                query = query.Where(e =>
+                    e.EvaluatedID == employeeId.Value &&
+                    e.Evaluated.DepartmentID == departmentId.Value);
+            }
+            else if (employeeId.HasValue) // موظف فقط
+            {
+                query = query.Where(e => e.EvaluatedID == employeeId.Value);
+            }
+            else if (departmentId.HasValue) // قسم فقط
+            {
+                query = query.Where(e => e.Evaluated.DepartmentID == departmentId.Value);
+            }
 
             var evaluations = await query
                 .Include(e => e.Evaluated)
+                .ThenInclude(emp => emp.Department) 
                 .Include(e => e.EvaluationTemplate)
                 .ToListAsync();
 
@@ -499,6 +593,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     EmployeeEnglishName = employee.en_name ?? "",
                     EmployeeArabicName = employee.ar_name ?? "",
                     OverallAverage = overallAverage,
+                    //DepartmentName = employee.Department?.Name ?? "" 
                 };
             }).ToList();
 
