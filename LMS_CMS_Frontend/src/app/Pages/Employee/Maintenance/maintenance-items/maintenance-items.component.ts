@@ -83,7 +83,7 @@ Edit(id: number) {
 
 
   Delete(id: number) {
-   if( confirm("are you sure delete this item")){
+   if( confirm("Are you sure you want to delete this item")){
      this.mainServ.Delete(id, this.DomainName).subscribe({
       next: () => {
         this.TableData = this.TableData.filter(c => c.id !== id);
