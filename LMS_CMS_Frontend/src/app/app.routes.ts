@@ -238,6 +238,7 @@ import { DailyPreformanceReportComponent } from './Pages/Employee/LMS/reports/da
 import { DirectMarkComponent } from './Pages/Employee/LMS/direct-mark/direct-mark.component';
 import { DirectMarkStudentComponent } from './Pages/Employee/LMS/direct-mark-student/direct-mark-student.component';
 import { CertificateComponent } from './Pages/Employee/LMS/certificate/certificate.component';
+import { TeacherEvaluationReportComponent } from './Pages/Employee/LMS/reports/teacher-evaluation-report/teacher-evaluation-report.component';
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
     { path: "Octa/login", component: OctaLoginComponent, title: "login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -414,7 +415,10 @@ export const routes: Routes = [
             { path: 'Purchase Transaction Detailed Report', component: InvoiceReportMasterDetailedComponent, title: 'Purchase Transaction Report Detailed', canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], data: { reportType: 'purchase' } },
             { path: "Book Correction", component: BookCorrectionComponent, title: "BookCorrectionComponent", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Evaluation", component: EvaluationComponent, title: "Evaluation", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
+
             { path: "Evaluation Report", component: EvaluationReportComponent, title: "Evaluation Report", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Teacher Evaluation Report", component: TeacherEvaluationReportComponent, title: "Teacher Evaluation Report", canActivate: [noNavigateWithoutLoginGuard] },
+
             { path: "EvaluationTemplateGroup/:id", component: EvaluationTemplateGroupComponent, title: "EvaluationTemplateGroup", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "EvaluationTemplateGroupQuestion/:id", component: EvaluationTemplateGroupQuestionComponent, title: "EvaluationTemplateGroup", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Received Evaluations", component: EvaluationFeedbackComponent, title: "Received Evaluations", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
@@ -455,8 +459,10 @@ export const routes: Routes = [
             { path: "Daily Performance/:id", component: DailyPerformanceViewComponent, title: "Daily Performance View", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Daily Performance Student Reports", component: DailyPreformanceReportComponent, title: "Daily Performance Reports", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Daily Performance Classroom Reports", component: DailyPreformanceReportComponent, title: "Daily Performance Reports", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] ,   data: { useClassroomFlag: true } },
-            // { path: "daily-performance-report", component: DailyPreformanceReportComponent, title: "Daily Performance Report", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], data: { reportType: 'student' } },
-            // { path: "classroom-daily-performance-report", component: DailyPreformanceReportComponent, title: "Classroom Daily Performance Report", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], data: { reportType: 'classroom' } },
+            
+            { path: "daily-performance-report", component: DailyPreformanceReportComponent, title: "Daily Performance Report", canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'student' } },
+            { path: "classroom-daily-performance-report", component: DailyPreformanceReportComponent, title: "Classroom Daily Performance Report", canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'classroom' } },
+            
             { path: "Assignment", component: AssignmentComponent, title: "Assignment", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Assignment/:id", component: AssignmentEditComponent, title: "Assignment Edit", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "report item card", component: ReportItemCardComponent, title: "Item Card Report", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], data: { showAverage: false } },
@@ -492,7 +498,9 @@ export const routes: Routes = [
             { path: 'Discussion Room', component: DiscussionRoomComponent, title: 'Discussion Room', canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], },
             { path: 'violation', component: ViolationComponent, title: 'Violation', canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], },
             { path: 'Violation/:id', component: ViolationViewComponent, title: 'Violation', canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], },
+            
             { path: 'violation Report', component: ViolationReportComponent, title: 'Violation Report', canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], },
+
             { path: 'Notification', component: NotificationComponent, title: 'Notification', canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], }, 
             { path: 'Remedial Classes', component: RemedialClassroomComponent, title: 'Remedial Classroom', canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], },
             { path: 'Remedial Classes/:id', component: RemedialClassroomStudentComponent, title: 'Remedial Classroom', canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], },
