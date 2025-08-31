@@ -16,6 +16,7 @@ import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import * as XLSX from 'xlsx-js-style';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
+import { ReportsService } from '../../../../../Services/shared/reports.service';
 
 
 @Component({
@@ -42,7 +43,7 @@ export class ViolationReportComponent {
 
   empTypes: EmployeeTypeGet[] = [];
   violationTypes: ViolationType[] = [];
-    tableDataForExport: any[] = []; // Added for PDF export
+  tableDataForExport: any[] = []; // Added for PDF export
 
   school = {
     reportHeaderOneEn: 'Violation Report',
@@ -62,6 +63,7 @@ export class ViolationReportComponent {
     public accountService: AccountService,
     private languageService: LanguageService,
     private realTimeService: RealTimeNotificationServiceService,
+    private reportsService: ReportsService // Add this line
   ) {}
 
   ngOnInit() {
@@ -76,11 +78,11 @@ export class ViolationReportComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   GetEmployeeTypes() {
@@ -165,14 +167,17 @@ export class ViolationReportComponent {
     return 'Violation Report';
   }
 
-
   get employeeTypeName(): string {
-    const empType = this.empTypes.find(e => e.id == this.SelectedEmployeeTypeId);
-    return empType ? empType.name : 'Undefined';    
+    const empType = this.empTypes.find(
+      (e) => e.id == this.SelectedEmployeeTypeId
+    );
+    return empType ? empType.name : 'Undefined';
   }
 
   get violationTypeName(): string {
-    const violType = this.violationTypes.find(v => v.id == this.SelectedViolationTypeId);
+    const violType = this.violationTypes.find(
+      (v) => v.id == this.SelectedViolationTypeId
+    );
     return violType ? violType.name : 'Undefined';
   }
 
@@ -186,12 +191,12 @@ export class ViolationReportComponent {
 
     return [
       {
-        keyEn: 'Employee Type: ' + (selectedEmpType?.name),
-        keyAr: 'نوع الموظف: ' + (selectedEmpType?.name ),
+        keyEn: 'Employee Type: ' + selectedEmpType?.name,
+        keyAr: 'نوع الموظف: ' + selectedEmpType?.name,
       },
       {
-        keyEn: 'Violation Type: ' + (selectedViolationType?.name),
-        keyAr: 'نوع المخالفة: ' + (selectedViolationType?.name),
+        keyEn: 'Violation Type: ' + selectedViolationType?.name,
+        keyAr: 'نوع المخالفة: ' + selectedViolationType?.name,
       },
       {
         keyEn: 'Start Date: ' + this.SelectedStartDate,
@@ -208,25 +213,30 @@ export class ViolationReportComponent {
     ];
   }
 
-    private prepareExportData(): void {
+  private prepareExportData(): void {
     this.tableDataForExport = this.tableData.map((item) => ({
-      'ID': item.id,
-      'Date': item.date,
+      ID: item.id,
+      Date: item.date,
       'Violation Type': item.violationType,
       'Employee Type': item.employeeType,
       'Employee Name': item.employeeName,
-      'Details': item.details || 'N/A',
+      Details: item.details || 'N/A',
     }));
   }
 
   getSelectedEmployeeTypeName(): string {
-    return this.empTypes.find(e => e.id == this.SelectedEmployeeTypeId)?.name || 'All';
+    return (
+      this.empTypes.find((e) => e.id == this.SelectedEmployeeTypeId)?.name ||
+      'All'
+    );
   }
 
   getSelectedViolationTypeName(): string {
-    return this.violationTypes.find(v => v.id == this.SelectedViolationTypeId)?.name || 'All';
+    return (
+      this.violationTypes.find((v) => v.id == this.SelectedViolationTypeId)
+        ?.name || 'All'
+    );
   }
-
 
   getTableDataWithHeader(): any[] {
     return [
@@ -260,7 +270,7 @@ export class ViolationReportComponent {
       Swal.fire('Warning', 'No data to print!', 'warning');
       return;
     }
-    
+
     this.showPDF = true;
     setTimeout(() => {
       const printContents = document.getElementById('Data')?.innerHTML;
@@ -268,7 +278,7 @@ export class ViolationReportComponent {
         console.error('Element not found!');
         return;
       }
-      
+
       const printStyle = `
         <style>
           @page { size: auto; margin: 0mm; }
@@ -286,14 +296,14 @@ export class ViolationReportComponent {
           }
         </style>
       `;
-      
+
       const printContainer = document.createElement('div');
       printContainer.id = 'print-container';
       printContainer.innerHTML = printStyle + printContents;
-      
+
       document.body.appendChild(printContainer);
       window.print();
-      
+
       setTimeout(() => {
         document.body.removeChild(printContainer);
         this.showPDF = false;
@@ -314,7 +324,7 @@ export class ViolationReportComponent {
     }, 500);
   }
 
-  DownloadAsExcel() {
+  async DownloadAsExcel() {
     if (!this.tableData || this.tableData.length === 0) {
       Swal.fire({
         title: 'No Data',
@@ -325,119 +335,76 @@ export class ViolationReportComponent {
       return;
     }
 
-    const excelData: any[] = [];
-
-    // Add report title with styling
-    excelData.push([
-      {
-        v: 'VIOLATION REPORT DETAILED',
-        s: {
-          font: { bold: true, sz: 16 },
-          alignment: { horizontal: 'center' },
-        },
-      },
-    ]);
-    excelData.push([]); // empty row
-
-    // Add filter information with styling
-    const selectedEmpType = this.empTypes.find(
-      (e) => e.id == this.SelectedEmployeeTypeId
-    );
-    const selectedViolationType = this.violationTypes.find(
-      (v) => v.id == this.SelectedViolationTypeId
-    );
-
-    excelData.push([
-      { v: 'Employee Type:', s: { font: { bold: true } } },
-      { v: selectedEmpType?.name || 'All', s: { font: { bold: true } } },
-    ]);
-    excelData.push([
-      { v: 'Violation Type:', s: { font: { bold: true } } },
-      { v: selectedViolationType?.name || 'All', s: { font: { bold: true } } },
-    ]);
-    excelData.push([
-      { v: 'Start Date:', s: { font: { bold: true } } },
-      { v: this.SelectedStartDate, s: { font: { bold: true } } },
-    ]);
-    excelData.push([
-      { v: 'End Date:', s: { font: { bold: true } } },
-      { v: this.SelectedEndDate, s: { font: { bold: true } } },
-    ]);
-    excelData.push([]); // empty row
-
-    // Table headers
-    const headers = [
-      'ID',
-      'Date',
-      'Violation Type',
-      'Employee Type',
-      'Employee Name',
-      'Details',
-    ];
-    excelData.push(
-      headers.map((header) => ({
-        v: header,
-        s: {
-          font: { bold: true },
-          fill: { fgColor: { rgb: '4472C4' } },
-          color: { rgb: 'FFFFFF' },
-          border: {
-            top: { style: 'thin' },
-            bottom: { style: 'thin' },
-            left: { style: 'thin' },
-            right: { style: 'thin' },
-          },
-        },
-      }))
-    );
-
-    // Table rows
-    if (this.tableData && this.tableData.length > 0) {
-      this.tableData.forEach((row, i) => {
-        excelData.push(
-          headers.map((header) => ({
-            v:
-              row[
-                header.toLowerCase().replace(' ', '') as keyof ViolationReport
-              ] || '',
-            s: {
-              fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'FFFFFF' } },
-              border: { left: { style: 'thin' }, right: { style: 'thin' } },
-            },
-          }))
-        );
-      });
-    } else {
-      excelData.push([
-        {
-          v: 'No violations found for the selected criteria',
-          s: {
-            font: { italic: true },
-            alignment: { horizontal: 'center' },
-          },
-          colSpan: headers.length,
-        },
+    try {
+      // Prepare table data for export
+      const tableData = this.tableData.map((item) => [
+        item.id,
+        item.date,
+        item.violationType,
+        item.employeeType,
+        item.employeeName,
+        item.details || 'N/A',
       ]);
+
+      // Prepare info rows
+      const selectedEmpType = this.empTypes.find(
+        (e) => e.id == this.SelectedEmployeeTypeId
+      );
+      const selectedViolationType = this.violationTypes.find(
+        (v) => v.id == this.SelectedViolationTypeId
+      );
+
+      const infoRows = [
+        { key: 'Employee Type', value: selectedEmpType?.name || 'All' },
+        { key: 'Violation Type', value: selectedViolationType?.name || 'All' },
+        { key: 'Start Date', value: this.SelectedStartDate },
+        { key: 'End Date', value: this.SelectedEndDate },
+        { key: 'Generated On', value: new Date().toLocaleDateString() },
+      ];
+
+      // Prepare headers
+      const headers = [
+        'ID',
+        'Date',
+        'Violation Type',
+        'Employee Type',
+        'Employee Name',
+        'Details',
+      ];
+
+      // Generate the Excel report using the service - skip the image to avoid the error
+      await this.reportsService.generateExcelReport({
+        mainHeader: {
+          en: 'Violation Report',
+          ar: 'تقرير المخالفات',
+        },
+        subHeaders: [
+          {
+            en: 'Detailed Violation Summary',
+            ar: 'ملخص المخالفات التفصيلي',
+          },
+        ],
+        infoRows: infoRows,
+        reportImage: undefined, // Skip the image to avoid the "Unsupported media" error
+        tables: [
+          {
+            title: 'Violation Data',
+            headers: headers,
+            data: tableData,
+          },
+        ],
+        filename: `Violation_Report_${new Date()
+          .toISOString()
+          .slice(0, 10)}.xlsx`,
+      });
+    } catch (error) {
+      console.error('Error generating Excel report:', error);
+      Swal.fire({
+        title: 'Error',
+        text: 'Failed to generate Excel report.',
+        icon: 'error',
+        confirmButtonText: 'OK',
+      });
     }
-
-    // Create worksheet
-    const worksheet = XLSX.utils.aoa_to_sheet(excelData);
-
-    // Merge cells for headers
-    if (!worksheet['!merges']) worksheet['!merges'] = [];
-    worksheet['!merges'].push({
-      s: { r: 0, c: 0 },
-      e: { r: 0, c: headers.length - 1 },
-    });
-
-    // Apply column widths
-    worksheet['!cols'] = Array(headers.length).fill({ wch: 20 });
-
-    // Create workbook and save
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Violation Report');
-
-    const dateStr = new Date().toISOString().slice(0, 10);
-    XLSX.writeFile(workbook, `Violation_Report_${dateStr}.xlsx`);
   }
 }

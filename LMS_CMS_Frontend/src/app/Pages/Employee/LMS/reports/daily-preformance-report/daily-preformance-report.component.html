@@ -3,24 +3,29 @@
 </div>
 
 <div class="my-5 flex flex-wrap md:flex-nowrap items-end space-x-0 md:space-x-6 space-y-4 md:space-y-0 mb-6">
-    <!-- Student/Classroom Selector -->
-    <div class="w-full md:w-1/4" *ngIf="reportType === 'student'">
-        <label for="student" class="block mb-2 text-sm font-medium text-gray-900">{{'Student'| translate }}</label>
-        <select id="student" [(ngModel)]="SelectedStudentId" (change)="DateChange()"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
-            <option [ngValue]="0" disabled selected hidden>{{'Choose'| translate }} {{'Student'| translate }}</option>
-            <option *ngFor="let student of students" [value]="student.id"> {{ student.name }} </option>
-        </select>
-    </div>
+<!-- Update the student select dropdown -->
+<div class="w-full md:w-1/4" *ngIf="reportType === 'student'">
+    <label for="student" class="block mb-2 text-sm font-medium text-gray-900">{{'Student'| translate }}</label>
+    <select id="student" [(ngModel)]="SelectedStudentId" (change)="DateChange()"
+        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
+        <option [ngValue]="0" disabled selected hidden>{{'Choose'| translate }} {{'Student'| translate }}</option>
+        <option *ngFor="let student of students" [value]="student.id" [disabled]="student.id === -1">
+            {{ student.name }}
+        </option>
+    </select>
+</div>
 
-    <div class="w-full md:w-1/4" *ngIf="reportType === 'classroom'">
-        <label for="classroom" class="block mb-2 text-sm font-medium text-gray-900">{{'Classroom'| translate }}</label>
-        <select id="classroom" [(ngModel)]="SelectedClassroomId" (change)="DateChange()"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
-            <option [ngValue]="0" disabled selected hidden>{{'Choose'| translate }} {{'Classroom'| translate }}</option>
-            <option *ngFor="let classroom of classrooms" [value]="classroom.id"> {{ classroom.name }} </option>
-        </select>
-    </div>
+<!-- Update the classroom select dropdown -->
+<div class="w-full md:w-1/4" *ngIf="reportType === 'classroom'">
+    <label for="classroom" class="block mb-2 text-sm font-medium text-gray-900">{{'Classroom'| translate }}</label>
+    <select id="classroom" [(ngModel)]="SelectedClassroomId" (change)="DateChange()"
+        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
+        <option [ngValue]="0" disabled selected hidden>{{'Choose'| translate }} {{'Classroom'| translate }}</option>
+        <option *ngFor="let classroom of classrooms" [value]="classroom.id" [disabled]="classroom.id === -1">
+            {{ classroom.name }}
+        </option>
+    </select>
+</div>
 
     <!-- Start Date -->
     <div class="w-full md:w-1/4">
