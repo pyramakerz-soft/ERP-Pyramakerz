@@ -236,7 +236,18 @@ namespace LMS_CMS
             //app.UseMiddleware<DbConnection_Check_Middleware>(); 
 
             /// 3)
-            app.UseCors(txt);
+            app.UseForwardedHeaders(new ForwardedHeadersOptions {
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
+
+app.UseRouting();
+app.UseCors("AllowAllOrigins"); // you can keep it permissive; same-origin won’t need it
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllers();
+app.MapFallbackToFile("index.html");
+
 
             ///////// send files
             app.UseStaticFiles();
@@ -250,8 +261,6 @@ namespace LMS_CMS
                 }
             });
 
-            //////// Authentication
-            app.UseAuthentication();
 
 
             //////// Get Connection String
@@ -274,8 +283,7 @@ namespace LMS_CMS
             /// For Endpoint, to check if the user has access for this endpoint or not
             /// Make sure to be here before UseAuthorization
             app.UseMiddleware<Endpoint_Authorization_Middleware>();
-             
-            app.UseAuthorization();
+        
 
 
             // 2) SignalR
@@ -283,12 +291,6 @@ namespace LMS_CMS
             app.MapHub<RequestHub>("/requestHub").RequireAuthorization();
             app.MapHub<ChatMessageHub>("/chatMessageHub").RequireAuthorization();
             
-            app.AddPolicy("AllowSpecific", p =>
-                p.WithOrigins("https://octa-edu.com", "https://www.octa-edu.com")
-                 .AllowAnyMethod()
-                 .AllowAnyHeader()
-                 .AllowCredentials()
-                 .WithExposedHeaders("Content-Disposition"));
 
             //app.Urls.Add("http://0.0.0.0:5000");
             //app.UseCors(builder =>
