@@ -308,4 +308,5 @@ getOrderedColor(index: number): string {
     this.evaluationData = [];
     this.hasData = false;
   }
+  
 }
