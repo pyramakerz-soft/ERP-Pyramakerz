@@ -5,6 +5,7 @@ import { ApiService } from '../../api.service';
 import { WeightType } from '../../../Models/LMS/weight-type';
 import { Subject } from '../../../Models/LMS/subject';
 import { Certificate } from '../../../Models/LMS/certificate';
+import { CertificateSubjectTotalMark } from '../../../Models/LMS/certificate-subject-total-mark';
 
 @Injectable({
   providedIn: 'root'
@@ -27,6 +28,6 @@ export class CertificateService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-      return this.http.get<{ subjectDTO: Subject[],header: WeightType[],cells: Certificate[] }>(`${this.baseUrl}/Certificate/ByStudentId/${SchoolId}/${StudentId}/${DateFrom}/${DateTo}`, { headers });
+      return this.http.get<{ subjectDTO: Subject[],header: WeightType[],cells: Certificate[] ,lastColumn :CertificateSubjectTotalMark[] }>(`${this.baseUrl}/Certificate/ByStudentId/${SchoolId}/${StudentId}/${DateFrom}/${DateTo}`, { headers });
   }
 }

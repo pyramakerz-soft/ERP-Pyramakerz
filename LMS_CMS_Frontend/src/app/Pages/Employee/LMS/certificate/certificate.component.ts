@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { Student } from '../../../../Models/student';
 import { Classroom } from '../../../../Models/LMS/classroom';
 import { StudentService } from '../../../../Services/student.service';
@@ -30,11 +30,15 @@ import { SemesterComponent } from '../semester/semester.component';
 import { SemesterService } from '../../../../Services/Employee/LMS/semester.service';
 import { AcademicYear } from '../../../../Models/LMS/academic-year';
 import { Semester } from '../../../../Models/LMS/semester';
+import { CertificateSubjectTotalMark } from '../../../../Models/LMS/certificate-subject-total-mark';
+import { ReportsService } from '../../../../Services/shared/reports.service';
+import { PdfPrintComponent } from '../../../../Component/pdf-print/pdf-print.component';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-certificate',
   standalone: true,
-  imports: [FormsModule, CommonModule, TranslateModule],
+  imports: [FormsModule, CommonModule, TranslateModule, PdfPrintComponent],
   templateUrl: './certificate.component.html',
   styleUrl: './certificate.component.css'
 })
@@ -62,6 +66,7 @@ export class CertificateComponent {
   Students: Student[] = []
   academicYears: AcademicYear[] = []
   semester: Semester[] = []
+  LastColumn: CertificateSubjectTotalMark[] = []
 
   SelectedSchoolId: number = 0;
   SelectedGradeId: number = 0;
@@ -69,10 +74,20 @@ export class CertificateComponent {
   SelectedStudentId: number = 0;
   SelectedAcademicYearId: number = 0;
   SelectedSemesterId: number = 0;
+  SelectedSchoolName: string = '';
+  SelectedGradeName: string = '';
+  SelectedClassName: string = '';
+  SelectedStudentName: string = '';
+  SelectedAcademicYearName: string = '';
+  SelectedSemesterName: string = '';
   DateFrom: string = '';
   DateTo: string = '';
   IsShowTabls: boolean = false
-
+  @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;
+  showPDF = false;
+  tableHeadersForPDF: any[] = [];
+  tableDataForPDF: any[] = [];
+  infoRows: any[] = [];
   SearchType: string[] = ['Academic Year', 'Month', 'Semester'];
   SelectedSearchType: string = '';
 
@@ -93,15 +108,28 @@ export class CertificateComponent {
     public SemesterServ: SemesterService,
     public CertificateServ: CertificateService,
     private languageService: LanguageService,
+    public reportsService: ReportsService,
+    private cdr: ChangeDetectorRef,
     private realTimeService: RealTimeNotificationServiceService
   ) { }
+
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
     this.DomainName = this.ApiServ.GetHeader();
     this.activeRoute.url.subscribe((url) => {
       this.path = url[0].path;
+      console.log("path", this.path)
+      if (this.path == 'Student Certificate') {
+        this.mode = 'student'
+        this.SelectedStudentId = this.UserID
+      } else if (this.path == 'Parent Certificate') {
+        this.mode = 'parent'
+      } else {
+        this.mode = 'employee'
+      }
     });
+
     this.getAllSchools()
 
     this.subscription = this.languageService.language$.subscribe(direction => {
@@ -132,8 +160,13 @@ export class CertificateComponent {
   }
 
   getSemestersBySchool() {
+    this.IsShowTabls = false
+    this.TableData = []
     this.semester = []
-    this.SemesterServ.GetBySchoolId(this.SelectedSchoolId, this.DomainName).subscribe((d) => {
+    this.SelectedSemesterId = 0
+    this.DateFrom = ''
+    this.DateTo = ''
+    this.SemesterServ.GetByAcademicYearId(this.SelectedAcademicYearId, this.DomainName).subscribe((d) => {
       this.semester = d
     })
   }
@@ -154,7 +187,7 @@ export class CertificateComponent {
       this.getAcadimicYearsBySchool();
     }
     else if (this.SelectedSearchType == 'Semester') {
-      this.getSemestersBySchool();
+      this.getAcadimicYearsBySchool();
     }
   }
 
@@ -208,13 +241,17 @@ export class CertificateComponent {
   }
 
   getAllGradesBySchoolId() {
+    this.DateFrom = ''
+    this.DateTo = ''
     this.IsShowTabls = false
     this.Grades = []
     this.Classes = []
-    this.Students = []
     this.SelectedGradeId = 0
     this.SelectedClassId = 0
-    this.SelectedStudentId = 0
+    if (this.mode == 'employee') {
+      this.Students = []
+      this.SelectedStudentId = 0
+    }
     this.GradeServ.GetBySchoolId(this.SelectedSchoolId, this.DomainName).subscribe((d) => {
       this.Grades = d
     })
@@ -246,7 +283,8 @@ export class CertificateComponent {
       this.subjects = d.subjectDTO
       this.TableData = d.cells
       this.weightTypes = d.header
-    },error=>{
+      this.LastColumn = d.lastColumn
+    }, error => {
       console.log(error)
     })
   }
@@ -256,11 +294,216 @@ export class CertificateComponent {
     this.GetAllData()
   }
 
+  ValidateViewOr() {
+    if (this.mode === 'employee') {
+      return !this.SelectedSchoolId || !this.SelectedGradeId || !this.SelectedClassId ||
+        !this.SelectedStudentId || !this.DateFrom || !this.DateTo;
+    }
+    else if (this.mode === 'student') {
+      return !this.SelectedSchoolId || !this.DateFrom || !this.DateTo;
+    }
+    else if (this.mode === 'parent') {
+      return !this.SelectedSchoolId || !this.SelectedStudentId || !this.DateFrom || !this.DateTo;
+    }
+    return true;
+  }
+
+  ValidateViewAnd() {
+    if (this.mode === 'employee') {
+      return this.SelectedSchoolId && this.SelectedGradeId && this.SelectedClassId && this.SelectedStudentId && this.DateFrom && this.DateTo;
+    }
+    else if (this.mode === 'student') {
+      return this.SelectedSchoolId && this.DateFrom && this.DateTo;
+    }
+    else if (this.mode === 'parent') {
+      return this.SelectedSchoolId && this.SelectedStudentId && this.DateFrom && this.DateTo;
+    }
+    return true;
+  }
+
   getDegree(subjectId: number, weightTypeId: number): string {
     const cell = this.TableData.find(
       (c: Certificate) => c.subjectID === subjectId && c.weightTypeId === weightTypeId
     );
-    return cell ? `${cell.degree} /${cell.mark} `  : '-';
+    return cell ? `${cell.degree} /${cell.mark} ` : '-';
+  }
+
+  getTotal(subjectId: number): string {
+
+    const cell = this.LastColumn.find((c: CertificateSubjectTotalMark) => c.subjectID === subjectId);
+    return cell ? `${cell.degree} /${cell.mark} ` : '-';
+  }
+
+  async getPDFData() {
+    // Build headers dynamically
+    this.tableHeadersForPDF = [
+      'Subjects',
+      ...this.weightTypes.map(wt => wt.englishName),
+      'Total'
+    ];
+
+    this.tableDataForPDF = this.subjects.map(subject => {
+      const row: Record<string, string> = {};
+      row['Subjects'] = subject.en_name;
+      this.weightTypes.forEach(wt => {
+        row[wt.englishName] = this.getDegree(subject.id, wt.id);
+      });
+      row['Total'] = this.getTotal(subject.id);
+      return row;
+    });
+    console.log('Prepared data:', this.tableDataForPDF);
+  }
+
+
+  async Print() {
+    await this.getInfoData()
+    this.showPDF = true;
+    setTimeout(() => {
+      const printContents = document.getElementById('Data')?.innerHTML;
+      if (!printContents) {
+        console.error('Element not found!');
+        return;
+      }
+
+      // Create a print-specific stylesheet
+      const printStyle = `
+        <style>
+          @page { size: auto; margin: 0mm; }
+          body { 
+            margin: 0; 
+          }
+
+          @media print {
+            body > *:not(#print-container) {
+              display: none !important;
+            }
+            #print-container {
+              display: block !important;
+              position: static !important;
+              top: auto !important;
+              left: auto !important;
+              width: 100% !important;
+              height: auto !important;
+              background: white !important;
+              box-shadow: none !important;
+              margin: 0 !important;
+            }
+          }
+        </style>
+      `;
+
+      // Create a container for printing
+      const printContainer = document.createElement('div');
+      printContainer.id = 'print-container';
+      printContainer.innerHTML = printStyle + printContents;
+
+      // Add to body and print
+      document.body.appendChild(printContainer);
+      window.print();
+
+      // Clean up
+      setTimeout(() => {
+        document.body.removeChild(printContainer);
+        this.showPDF = false;
+      }, 100);
+    }, 500);
+  }
+
+  async DownloadAsPDF() {
+    await this.getPDFData();
+    await this.getInfoData()
+    this.showPDF = true;
+    // this.cdr.detectChanges();
+    setTimeout(() => {
+      if (this.pdfComponentRef) {
+        console.log('PDF Component is ready');
+        this.pdfComponentRef.downloadPDF();
+        setTimeout(() => (this.showPDF = false), 2000);
+      } else {
+        console.error('PDF Component not found at the time of generation');
+      }
+    }, 800); // Slight delay to ensure render is complete
+  }
+
+  async DownloadAsExcel() {
+    await this.getInfoData()
+    const headerKeyMap = [
+      { key: 'subject', header: 'Subjects' },
+      ...this.weightTypes.map(wt => ({ key: wt.id.toString(), header: wt.englishName })),
+      { key: 'total', header: 'Total' }
+    ];
+
+    const dataMatrix = this.subjects.map(subject => {
+      const row: any[] = [];
+      row.push(subject.en_name);
+      this.weightTypes.forEach(wt => {
+        row.push(this.getDegree(subject.id, wt.id) || '-');
+      });
+      row.push(this.getTotal(subject.id));
+      return row;
+    });
+
+    const infoRows = [
+      { key: 'School Name', value: this.SelectedSchoolName },
+      { key: 'Grade Name', value: this.SelectedGradeName },
+      { key: 'Class Name', value: this.SelectedClassName },
+      { key: 'Student Name', value: this.SelectedStudentName },
+      { key: 'Created At', value: new Date().toLocaleString() }
+    ];
+
+    if (this.SelectedSearchType === 'Academic Year') {
+      infoRows.push({ key: 'Academic Year', value: this.SelectedAcademicYearName });
+    }
+    if (this.SelectedSearchType === 'Semester') {
+      infoRows.push({ key: 'Academic Year', value: this.SelectedAcademicYearName });
+      infoRows.push({ key: 'Semester', value: this.SelectedSemesterName });
+    }
+    if (this.SelectedSearchType === 'Month') {
+      infoRows.push({ key: 'DateFrom', value: this.DateFrom });
+      infoRows.push({ key: 'DateTo', value: this.DateTo });
+    }
+
+    await this.reportsService.generateExcelReport({
+      infoRows: infoRows,
+      filename: 'Certificate.xlsx',
+      tables: [
+        {
+          title: '',
+          headers: headerKeyMap.map(h => h.header),
+          data: dataMatrix
+        }
+      ]
+    });
+  }
+
+  getInfoData() {
+    this.SelectedSchoolName = this.schools.find(s => s.id == this.SelectedSchoolId)!.name || '';
+    this.SelectedGradeName = this.Grades.find(s => s.id == this.SelectedGradeId)!.name || ''
+    this.SelectedClassName = this.Classes.find(s => s.id == this.SelectedClassId)!.name || ''
+    this.SelectedStudentName = this.Students.find(s => s.id == this.SelectedStudentId)!.en_name || ''
+
+    this.infoRows = [
+      { keyEn: 'School Name : ' + this.SelectedSchoolName },
+      { keyEn: 'Grade Name : ' + this.SelectedGradeName },
+      { keyEn: 'Class Name : ' + this.SelectedClassName },
+      { keyEn: 'Student Name : ' + this.SelectedStudentName },
+    ];
+
+    if (this.SelectedSearchType === 'Academic Year') {
+      this.SelectedAcademicYearName = this.academicYears.find(s => s.id == this.SelectedSchoolId)!.name || ''
+      this.infoRows.push({ keyEn: 'Academic Year : ' + this.SelectedAcademicYearName });
+    }
+    if (this.SelectedSearchType === 'Semester') {
+      this.SelectedAcademicYearName = this.academicYears.find(s => s.id == this.SelectedAcademicYearId)!.name || ''
+      this.SelectedSemesterName = this.semester.find(s => s.id == this.SelectedSemesterId)!.name || ''
+      this.infoRows.push({ keyEn: 'Academic Year : ' + this.SelectedAcademicYearName });
+      this.infoRows.push({ keyEn: 'Semester : ' + this.SelectedSemesterName });
+    }
+    if (this.SelectedSearchType === 'Month') {
+      this.infoRows.push({ keyEn: 'DateFrom : ' + this.DateFrom });
+      this.infoRows.push({ keyEn: 'DateTo : ' + this.DateTo });
+    }
+    return this.infoRows
   }
 
 }
