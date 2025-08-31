@@ -1411,50 +1411,23 @@ namespace LMS_CMS_BL.Config
             CreateMap<MaintenanceCompanyEditDto, MaintenanceCompany>();
              
             CreateMap<MaintenanceEmployee, MaintenanceEmployeeGetDto>()
-             .ForMember(dest => dest.En_Name,
-                        opt => opt.MapFrom(src => src.Employee != null ? src.Employee.en_name : null))
-             .ForMember(dest => dest.Ar_Name,
-                        opt => opt.MapFrom(src => src.Employee != null ? src.Employee.ar_name : null));
+                .ForMember(dest => dest.En_Name, opt => opt.MapFrom(src => src.Employee != null ? src.Employee.en_name : null))
+                .ForMember(dest => dest.Ar_Name, opt => opt.MapFrom(src => src.Employee != null ? src.Employee.ar_name : null));
 
             CreateMap<MaintenanceEmployeeAddDto, MaintenanceEmployee>();
 
 
             CreateMap<Maintenance, MaintenanceGetDto>()
-                .ForMember(dest => dest.ItemEnglishName,
-                    opt => opt.MapFrom(src => src.Item.En_Name))
-                .ForMember(dest => dest.ItemArabicName,
-                    opt => opt.MapFrom(src => src.Item.Ar_Name))
-                .ForMember(dest => dest.CompanyEnglishName,
-                    opt => opt.MapFrom(src => src.Company.En_Name))
-                .ForMember(dest => dest.CompanyArabicName,
-                    opt => opt.MapFrom(src => src.Company.Ar_Name))
-                .ForMember(dest => dest.EmployeeEnglishName,
-                   opt => opt.MapFrom(src => src.MaintenanceEmployee.Employee.en_name))
-                    .ForMember(dest => dest.EmployeeArabicName,
-                      opt => opt.MapFrom(src => src.MaintenanceEmployee.Employee.ar_name));
+                .ForMember(dest => dest.ItemEnglishName, opt => opt.MapFrom(src => src.Item.En_Name))
+                .ForMember(dest => dest.ItemArabicName, opt => opt.MapFrom(src => src.Item.Ar_Name))
+                .ForMember(dest => dest.CompanyEnglishName, opt => opt.MapFrom(src => src.Company.En_Name))
+                .ForMember(dest => dest.CompanyArabicName, opt => opt.MapFrom(src => src.Company.Ar_Name))
+                .ForMember(dest => dest.EmployeeEnglishName, opt => opt.MapFrom(src => src.MaintenanceEmployee.Employee.en_name))
+                .ForMember(dest => dest.EmployeeArabicName, opt => opt.MapFrom(src => src.MaintenanceEmployee.Employee.ar_name));
                        
             CreateMap<MaintenanceAddDto, Maintenance>();
             CreateMap<MaintenanceEditDto, Maintenance>();
-             
-            //CreateMap<Maintenance, MaintenanceGetDto>()
-            //        .ForMember(dest => dest.ItemName, opt => opt.MapFrom(src =>
-            //             src.Item != null
-            //                  ? (!string.IsNullOrEmpty(src.Item.En_Name)
-            //                     ? src.Item.En_Name
-            //                  : (!string.IsNullOrEmpty(src.Item.Ar_Name) ? src.Item.Ar_Name : null))
-            //                  : null))
-            //                .ForMember(dest => dest.EmployeeName, opt => opt.MapFrom(src =>
-            //                      src.Employee != null
-            //                        ? (!string.IsNullOrEmpty(src.Employee.en_name)
-            //                            ? src.Employee.en_name
-            //                    : (!string.IsNullOrEmpty(src.Employee.ar_name) ? src.Employee.ar_name : null))
-            //                                  : null))
-            //            .ForMember(dest => dest.CompanyName, opt => opt.MapFrom(src =>
-            //             src.Company != null
-            //               ? (!string.IsNullOrEmpty(src.Company.En_Name)
-            //                     ? src.Company.En_Name
-            //                    : (!string.IsNullOrEmpty(src.Company.Ar_Name) ? src.Company.Ar_Name : null))
-            //                                 : null)); 
+              
             CreateMap<ConnectionStatus, ConnectionStatusGetDTO>();
         }
     } 
