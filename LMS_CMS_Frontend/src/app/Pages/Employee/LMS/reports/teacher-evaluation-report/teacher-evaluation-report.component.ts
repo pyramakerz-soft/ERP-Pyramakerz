@@ -73,56 +73,56 @@ export class TeacherEvaluationReportComponent implements OnInit {
     );
   }
 
-generateReport() {
-  if (!this.filterParams.fromDate || !this.filterParams.toDate) {
-    Swal.fire('Warning', 'Please select both start and end dates', 'warning');
-    return;
-  }
-
-  if (this.filterParams.fromDate > this.filterParams.toDate) {
-    Swal.fire('Invalid Date Range', 'Start date cannot be later than end date', 'warning');
-    return;
-  }
-
-  this.hasGeneratedReport = true; // Set flag to true when report is generated
-  this.isLoading = true;
-  this.evaluationData = [];
-  this.hasData = false;
-
-  // Destroy any existing chart
-  if (this.chart) {
-    this.chart.destroy();
-    this.chart = null;
-  }
-
-  this.evaluationService.getTeacherEvaluationReport(
-    this.filterParams.fromDate,
-    this.filterParams.toDate,
-    this.filterParams.employeeId,
-    this.filterParams.departmentId,
-    this.DomainName
-  ).subscribe(
-    (data) => {
-      console.log('Fetched Evaluation Data:', data);
-      this.evaluationData = data;
-      this.hasData = data.length > 0;
-      
-      if (this.hasData) {
-        setTimeout(() => {
-          this.createChart();
-        }, 100);
-      }
-      
-      this.isLoading = false;
-    },
-    (error) => {
-      console.error('Error fetching evaluation report:', error);
-      Swal.fire('Error', 'Failed to fetch evaluation data', 'error');
-      this.isLoading = false;
-      this.hasData = false;
+  generateReport() {
+    if (!this.filterParams.fromDate || !this.filterParams.toDate) {
+      Swal.fire('Warning', 'Please select both start and end dates', 'warning');
+      return;
     }
-  );
-}
+
+    if (this.filterParams.fromDate > this.filterParams.toDate) {
+      Swal.fire('Invalid Date Range', 'Start date cannot be later than end date', 'warning');
+      return;
+    }
+
+    this.hasGeneratedReport = true; // Set flag to true when report is generated
+    this.isLoading = true;
+    this.evaluationData = [];
+    this.hasData = false;
+
+    // Destroy any existing chart
+    if (this.chart) {
+      this.chart.destroy();
+      this.chart = null;
+    }
+
+    this.evaluationService.getTeacherEvaluationReport(
+      this.filterParams.fromDate,
+      this.filterParams.toDate,
+      this.filterParams.employeeId,
+      this.filterParams.departmentId,
+      this.DomainName
+    ).subscribe(
+      (data) => {
+        console.log('Fetched Evaluation Data:', data);
+        this.evaluationData = data;
+        this.hasData = data.length > 0;
+        
+        if (this.hasData) {
+          setTimeout(() => {
+            this.createChart();
+          }, 100);
+        }
+        
+        this.isLoading = false;
+      },
+      (error) => {
+        console.error('Error fetching evaluation report:', error);
+        Swal.fire('Error', 'Failed to fetch evaluation data', 'error');
+        this.isLoading = false;
+        this.hasData = false;
+      }
+    );
+  }
   
 createChart() {
   if (this.chart) {
@@ -132,6 +132,7 @@ createChart() {
   try {
     // Group data by employee
     const employeeData: { [key: string]: any } = {};
+    let employeeIndex = 0;
     
     this.evaluationData.forEach(item => {
       const employeeKey = `${item.employeeId}-${item.employeeEnglishName}`;
@@ -140,9 +141,10 @@ createChart() {
           label: item.employeeEnglishName,
           data: [],
           dates: [],
-          borderColor: this.getRandomColor(),
-          offset: Object.keys(employeeData).length * 6 // Offset each teacher by 6 units
+          borderColor: this.getOrderedColor(employeeIndex), // Use ordered color
+          offset: employeeIndex * 6 // Offset each teacher by 6 units
         };
+        employeeIndex++;
       }
       
       employeeData[employeeKey].data.push(parseFloat(item.overallAverage));
@@ -167,17 +169,6 @@ createChart() {
       fill: false
     }));
 
-    // Create custom y-axis labels
-    const yAxisTicks = [];
-    for (let i = 0; i <= 5; i++) {
-      Object.values(employeeData).forEach((employee, teacherIndex) => {
-        yAxisTicks.push({
-          value: i + (teacherIndex * 6),
-          label: teacherIndex === 0 ? i.toString() : ''
-        });
-      });
-    }
-
     const config: ChartConfiguration = {
       type: 'line',
       data: {
@@ -189,7 +180,7 @@ createChart() {
         maintainAspectRatio: false,
         plugins: {
           title: {
-            display: true,
+            display: false,
             text: 'Teacher Evaluation Performance Over Time',
             font: {
               size: 16
@@ -216,23 +207,26 @@ createChart() {
             beginAtZero: true,
             min: 0,
             max: (Object.keys(employeeData).length * 6) + 5,
-            title: {
-              display: true,
-              text: 'Rating (1-5)'
-            },
-           ticks: {
-  stepSize: 1,
-  callback: function(value) {
-    // Convert value to number and only show labels for the base scale (0-5)
-    const numericValue = typeof value === 'string' ? parseFloat(value) : value;
-    return numericValue < 6 ? numericValue.toString() : '';
-  }
-}
+            display: false, // Hide y-axis numbers but keep space
+            grid: {
+              display: false // Hide y-axis grid lines
+            }
           },
           x: {
             title: {
-              display: true,
+              display: false,
               text: 'Evaluation Date'
+            },
+            grid: {
+              color: '#EAEAEA', // Light gray grid lines
+              drawOnChartArea: true,
+              drawTicks: true
+            },
+            ticks: {
+              color: '#666666', // Dark gray text color
+              font: {
+                size: 12
+              }
             }
           }
         },
@@ -255,34 +249,47 @@ createChart() {
   }
 }
 
-  getRandomColor(): string {
-    const colors = [
-      '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40',
-      '#FF6384', '#C9CBCF', '#4BC0C0', '#FFCD56', '#C9CBCF', '#FF6384',
-      '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#FF6384'
-    ];
-    return colors[Math.floor(Math.random() * colors.length)];
-  }
-  
-onFilterChange() {
-  // Remove the chart when any filter changes
-  if (this.chart) {
-    this.chart.destroy();
-    this.chart = null;
-  }
-  this.hasGeneratedReport = false; // Reset the flag
-  this.hasData = false; // Reset data flag
+getOrderedColor(index: number): string {
+  const orderedColors = [
+    '#FF6384', // Red
+    '#36A2EB', // Blue
+    '#FFCE56', // Yellow
+    '#4BC0C0', // Teal
+    '#9966FF', // Purple
+    '#FF9F40', // Orange
+    '#C9CBCF', // Gray
+    '#FFCD56', // Gold
+    '#4BC0C0', // Cyan
+    '#9C27B0', // Deep Purple
+    '#3F51B5', // Indigo
+    '#F44336', // Red
+    '#4CAF50', // Green
+    '#FF9800', // Amber
+    '#607D8B', // Blue Gray
+    '#795548'  // Brown
+  ];
+  return orderedColors[index % orderedColors.length];
 }
+  
+  onFilterChange() {
+    // Remove the chart when any filter changes
+    if (this.chart) {
+      this.chart.destroy();
+      this.chart = null;
+    }
+    this.hasGeneratedReport = false; // Reset the flag
+    this.hasData = false; // Reset data flag
+  }
 
-onDepartmentChange() {
-  this.employees = [];
-  this.filterParams.employeeId = null;
-  this.onFilterChange(); // Call the filter change method
-  
-  if (this.filterParams.departmentId) {
-    this.loadEmployeesByDepartment(this.filterParams.departmentId);
+  onDepartmentChange() {
+    this.employees = [];
+    this.filterParams.employeeId = null;
+    this.onFilterChange(); // Call the filter change method
+    
+    if (this.filterParams.departmentId) {
+      this.loadEmployeesByDepartment(this.filterParams.departmentId);
+    }
   }
-}
 
   clearFilters() {
     this.filterParams = {
