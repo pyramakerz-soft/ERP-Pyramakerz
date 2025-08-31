@@ -39,7 +39,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
+            allowedTypes: new[] { "octa", "employee" , "student", "parent" },
             pages: new[] { "Classroom" }
         )]
         public async Task<IActionResult> GetAsync()
@@ -66,7 +66,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("GetBySchoolId/{schoolID}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
+            allowedTypes: new[] { "octa", "employee", "student", "parent" },
             pages: new[] { "Classroom" }
         )]
         public async Task<IActionResult> GetBySchoolId(long schoolID)
@@ -99,7 +99,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
+            allowedTypes: new[] { "octa", "employee", "student", "parent" },
             pages: new[] { "Classroom" }
         )]
         public async Task<IActionResult> GetById(long id)
@@ -177,7 +177,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("ByGradeID/{id}")]
         [Authorize_Endpoint_(
-          allowedTypes: new[] { "octa", "employee" },
+          allowedTypes: new[] {"octa", "employee", "student", "parent" },
           pages: new[] { "Classroom" }
         )]
         public async Task<IActionResult> GetByGradeIdAsync(long id)
