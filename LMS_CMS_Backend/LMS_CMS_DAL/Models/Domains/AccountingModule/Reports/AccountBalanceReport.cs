@@ -2,9 +2,9 @@
 {
     public class AccountBalanceReport
     {
-        public long? ID { get; set; }
-        public string? Name { get; set; }
-        public decimal? Debit { get; set; }
-        public decimal? Credit { get; set; }
+        public long ID { get; set; }
+        public string Name { get; set; }
+        public decimal Debit { get; set; }
+        public decimal Credit { get; set; }
     }
 }
