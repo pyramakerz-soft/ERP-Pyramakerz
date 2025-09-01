@@ -1375,6 +1375,27 @@ namespace LMS_CMS_BL.Config
             CreateMap<OfficialHolidays, OfficialHolidaysGetDTO>();
             CreateMap<OfficialHolidaysAddDTO, OfficialHolidays>();
 
+            CreateMap<VacationTypes, VacationTypesGetDTO>();
+            CreateMap<VacationTypesAddDTO, VacationTypes>();
+
+            CreateMap<Loans, loansGetDTO>()
+                .ForMember(dest => dest.SaveName, opt => opt.MapFrom(src => src.Save))
+                .ForMember(dest => dest.EmployeeArName, opt => opt.MapFrom(src => src.Employee.ar_name))
+                .ForMember(dest => dest.EmployeeEnName, opt => opt.MapFrom(src => src.Employee.en_name));
+            CreateMap<loansAddDTO, Loans>();
+
+            CreateMap<Bouns, BounsGetDTO>()
+                .ForMember(dest => dest.BounsTypeName, opt => opt.MapFrom(src => src.BounsType.Name))
+                .ForMember(dest => dest.EmployeeArName, opt => opt.MapFrom(src => src.Employee.ar_name))
+                .ForMember(dest => dest.EmployeeEnName, opt => opt.MapFrom(src => src.Employee.en_name));
+            CreateMap<BounsAddDTO, Bouns>();
+
+            CreateMap<Deduction, DeductionGetDTO>()
+                .ForMember(dest => dest.DeductionTypeName, opt => opt.MapFrom(src => src.DeductionType.Name))
+                .ForMember(dest => dest.EmployeeArName, opt => opt.MapFrom(src => src.Employee.ar_name))
+                .ForMember(dest => dest.EmployeeEnName, opt => opt.MapFrom(src => src.Employee.en_name));
+            CreateMap<DeductionAddDTO, Deduction>();
+
             CreateMap<DirectMarkClasses, DirectMarkClassesGetDTO>()
                 .ForMember(dest => dest.DirectMarkEnglishName, opt => opt.MapFrom(src => src.DirectMark.EnglishName))
                 .ForMember(dest => dest.DirectMarkArabicName, opt => opt.MapFrom(src => src.DirectMark.ArabicName))

@@ -62,6 +62,18 @@ export class AssignmentService {
     return this.http.get<any>(`${this.baseUrl}/Assignment/GetByStudentID/${StudentId}/${SubjectId}`, { headers })
   }
 
+  CheckIfHaveAccess(StudentId: number, AssignmentId: number, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<any>(`${this.baseUrl}/Assignment/CheckIfHaveAccess/${StudentId}/${AssignmentId}`, { headers })
+  }
+
   Add(Assignment: Assignment, DomainName: string) {
     if (DomainName != null) {
       this.header = DomainName

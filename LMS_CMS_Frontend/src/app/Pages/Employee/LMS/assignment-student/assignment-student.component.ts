@@ -268,4 +268,14 @@ export class AssignmentStudentComponent {
       });
     }
   }
+
+  validateNumberAssignmentStudent(event: any, field: keyof AssignmentStudent, row: AssignmentStudent): void {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+      if (typeof row[field] === 'string') {
+        row[field] = '' as never;
+      }
+    }
+  }
 }

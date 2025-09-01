@@ -68,6 +68,8 @@ export class CertificateComponent {
   semester: Semester[] = []
   LastColumn: CertificateSubjectTotalMark[] = []
 
+  student: Student = new Student()
+  studentOfParent: Student[] = []
   SelectedSchoolId: number = 0;
   SelectedGradeId: number = 0;
   SelectedClassId: number = 0;
@@ -123,8 +125,14 @@ export class CertificateComponent {
       if (this.path == 'Student Certificate') {
         this.mode = 'student'
         this.SelectedStudentId = this.UserID
+        this.StudentServ.GetByID(this.SelectedStudentId, this.DomainName).subscribe((d) => {
+          this.student = d
+        })
       } else if (this.path == 'Parent Certificate') {
         this.mode = 'parent'
+        this.StudentServ.Get_By_ParentID(this.UserID, this.DomainName).subscribe((d) => {
+          this.studentOfParent = d
+        })
       } else {
         this.mode = 'employee'
       }
@@ -252,6 +260,11 @@ export class CertificateComponent {
       this.Students = []
       this.SelectedStudentId = 0
     }
+    else if (this.mode == 'parent') {
+
+      this.Students = []
+      this.SelectedStudentId = 0
+    }
     this.GradeServ.GetBySchoolId(this.SelectedSchoolId, this.DomainName).subscribe((d) => {
       this.Grades = d
     })
@@ -356,6 +369,7 @@ export class CertificateComponent {
 
 
   async Print() {
+    await this.getPDFData();
     await this.getInfoData()
     this.showPDF = true;
     setTimeout(() => {
@@ -413,7 +427,6 @@ export class CertificateComponent {
     await this.getPDFData();
     await this.getInfoData()
     this.showPDF = true;
-    // this.cdr.detectChanges();
     setTimeout(() => {
       if (this.pdfComponentRef) {
         console.log('PDF Component is ready');
@@ -426,6 +439,7 @@ export class CertificateComponent {
   }
 
   async DownloadAsExcel() {
+    console.log(this.mode)
     await this.getInfoData()
     const headerKeyMap = [
       { key: 'subject', header: 'Subjects' },
@@ -444,23 +458,33 @@ export class CertificateComponent {
     });
 
     const infoRows = [
-      { key: 'School Name', value: this.SelectedSchoolName },
-      { key: 'Grade Name', value: this.SelectedGradeName },
-      { key: 'Class Name', value: this.SelectedClassName },
-      { key: 'Student Name', value: this.SelectedStudentName },
-      { key: 'Created At', value: new Date().toLocaleString() }
+      { key: 'School', value: this.SelectedSchoolName },
     ];
-
+    if (this.mode == 'employee') {
+      this.SelectedGradeName = this.Grades.find(s => s.id == this.SelectedGradeId)!.name || ''
+      this.SelectedClassName = this.Classes.find(s => s.id == this.SelectedClassId)!.name || ''
+      this.SelectedStudentName = this.Students.find(s => s.id == this.SelectedStudentId)!.en_name || ''
+      infoRows.push({ key: 'Grade ', value: this.SelectedGradeName });
+      infoRows.push({ key: 'Class ', value: this.SelectedClassName });
+      infoRows.push({ key: 'Student ', value: this.SelectedStudentName });
+    }
+    else if (this.mode == 'student') {
+      infoRows.push({ key: 'Student ', value: this.student.en_name });
+    }
+    else if (this.mode == 'parent') {
+      this.SelectedStudentName = this.studentOfParent.find(s => s.id == this.SelectedStudentId)!.en_name || ''
+      infoRows.push({ key: 'Student ', value: this.SelectedStudentName });
+    }
     if (this.SelectedSearchType === 'Academic Year') {
-      infoRows.push({ key: 'Academic Year', value: this.SelectedAcademicYearName });
+      infoRows.push({ key: 'Academic Year ', value: this.SelectedAcademicYearName });
     }
     if (this.SelectedSearchType === 'Semester') {
-      infoRows.push({ key: 'Academic Year', value: this.SelectedAcademicYearName });
-      infoRows.push({ key: 'Semester', value: this.SelectedSemesterName });
+      infoRows.push({ key: 'Academic Year ', value: this.SelectedAcademicYearName });
+      infoRows.push({ key: 'Semester ', value: this.SelectedSemesterName });
     }
     if (this.SelectedSearchType === 'Month') {
-      infoRows.push({ key: 'DateFrom', value: this.DateFrom });
-      infoRows.push({ key: 'DateTo', value: this.DateTo });
+      infoRows.push({ key: 'DateFrom ', value: this.DateFrom });
+      infoRows.push({ key: 'DateTo ', value: this.DateTo });
     }
 
     await this.reportsService.generateExcelReport({
@@ -478,16 +502,26 @@ export class CertificateComponent {
 
   getInfoData() {
     this.SelectedSchoolName = this.schools.find(s => s.id == this.SelectedSchoolId)!.name || '';
-    this.SelectedGradeName = this.Grades.find(s => s.id == this.SelectedGradeId)!.name || ''
-    this.SelectedClassName = this.Classes.find(s => s.id == this.SelectedClassId)!.name || ''
-    this.SelectedStudentName = this.Students.find(s => s.id == this.SelectedStudentId)!.en_name || ''
 
     this.infoRows = [
-      { keyEn: 'School Name : ' + this.SelectedSchoolName },
-      { keyEn: 'Grade Name : ' + this.SelectedGradeName },
-      { keyEn: 'Class Name : ' + this.SelectedClassName },
-      { keyEn: 'Student Name : ' + this.SelectedStudentName },
+      { keyEn: 'School : ' + this.SelectedSchoolName },
     ];
+
+    if (this.mode == 'employee') {
+      this.SelectedGradeName = this.Grades.find(s => s.id == this.SelectedGradeId)!.name || ''
+      this.SelectedClassName = this.Classes.find(s => s.id == this.SelectedClassId)!.name || ''
+      this.SelectedStudentName = this.Students.find(s => s.id == this.SelectedStudentId)!.en_name || ''
+      this.infoRows.push({ keyEn: 'Grade : ' + this.SelectedGradeName });
+      this.infoRows.push({ keyEn: 'Class : ' + this.SelectedClassName });
+      this.infoRows.push({ keyEn: 'Student : ' + this.SelectedStudentName });
+    }
+    else if (this.mode == 'student') {
+      this.infoRows.push({ keyEn: 'Student : ' + this.student.en_name });
+    }
+    else if (this.mode == 'parent') {
+      this.SelectedStudentName = this.studentOfParent.find(s => s.id == this.SelectedStudentId)!.en_name || ''
+      this.infoRows.push({ keyEn: 'Student : ' + this.SelectedStudentName });
+    }
 
     if (this.SelectedSearchType === 'Academic Year') {
       this.SelectedAcademicYearName = this.academicYears.find(s => s.id == this.SelectedSchoolId)!.name || ''
