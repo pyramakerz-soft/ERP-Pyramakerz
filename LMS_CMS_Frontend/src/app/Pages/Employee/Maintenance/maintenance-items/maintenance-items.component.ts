@@ -243,40 +243,6 @@ Edit(id: number) {
       }
     }
 
-// openModal() {
-//   this.isEditMode = false;
-//   this.selectedItem = new MaintenanceItem(0, '', '');
-//   this.showModal();
-// }
-
-// Edit(row: any) {
-//   this.isEditMode = true;
-//   this.isLoading = true;
-
-// if (this.selectedItem.En_Name) {
-//   this.selectedItem.en_Name = this.selectedItem.En_Name;
-// }
-// if (this.selectedItem.Ar_Name) {
-//   this.selectedItem.ar_Name = this.selectedItem.Ar_Name;
-// }
-
-
-//   this.mainServ.GetByID(row.id, this.DomainName).subscribe({
-//     next: (company: any) => {
-//       console.log("Item from API:", company);
-
-//       // If API returns array
-//       this.selectedItem = Array.isArray(company) ? company[0] : company;
-
-//       this.showModal();
-//       this.isLoading = false;
-//     },
-//     error: (err) => {
-//       console.error('Error fetching company', err);
-//       this.isLoading = false;
-//     }
-//   });
-// }
 
 
 openModal(forNew: boolean = true) {
@@ -322,35 +288,6 @@ async save() {
     this.isEditMode = false;
   }
 }
-
-
-
-
-
-// async save(): Promise<void> {
-//   if (!this.selectedItem) return;
-
-//   this.isSaving = true;
-//   try {
-//     if (this.selectedItem.id && this.selectedItem.id > 0) {
-//       await firstValueFrom(this.mainServ.Edit(this.selectedItem, this.DomainName));
-//       console.log("Saving company:", this.selectedItem, "isEditMode:", this.isEditMode);
-//     } else {
-//       await firstValueFrom(this.mainServ.Add(this.selectedItem, this.DomainName));
-//     }
-
-//     this.loadCompanies();
-//     this.closeModal();
-//   } catch (error) {
-//     console.error('Error saving company:', error);
-//   } finally {
-//     this.isSaving = false;
-//   }
-// }
-
-
-
-
 
 
 
