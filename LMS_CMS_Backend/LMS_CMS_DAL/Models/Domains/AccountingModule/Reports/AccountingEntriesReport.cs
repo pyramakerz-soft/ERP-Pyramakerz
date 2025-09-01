@@ -1,4 +1,4 @@
-﻿namespace LMS_CMS_DAL.AccountingModule.Reports
+﻿namespace LMS_CMS_DAL.Models.Domains.AccountingModule.Reports
 {
     public class AccountingEntriesReport
     {
