@@ -11,3 +11,12 @@ export class StudentMedal {
             public insertedAt: string = ""
         ) {}
 } 
+export class MedalStudentReportItem {
+  constructor(
+    public id: number,
+    public medal: number,
+    public medalName: string,
+    public addedAt: string,
+    public addedBy: string
+  ) {}
+}

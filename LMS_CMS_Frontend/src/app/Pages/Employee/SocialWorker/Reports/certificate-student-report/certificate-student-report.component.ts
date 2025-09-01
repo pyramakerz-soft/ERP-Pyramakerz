@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { PdfPrintComponent } from '../../../../../Component/pdf-print/pdf-print.component';
 import { TranslateModule } from '@ngx-translate/core';
+import { PdfPrintComponent } from '../../../../../Component/pdf-print/pdf-print.component';
+import { CertificateStudentReportItem } from '../../../../../Models/SocialWorker/certificate-student';
 import { firstValueFrom, Subscription } from 'rxjs';
-import { ConductService } from '../../../../../Services/Employee/SocialWorker/conduct.service';
 import { SchoolService } from '../../../../../Services/Employee/school.service';
 import { GradeService } from '../../../../../Services/Employee/LMS/grade.service';
 import { ClassroomService } from '../../../../../Services/Employee/LMS/classroom.service';
@@ -14,40 +14,31 @@ import { LanguageService } from '../../../../../Services/shared/language.service
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 import Swal from 'sweetalert2';
 import * as XLSX from 'xlsx';
-import { ConductTypeService } from '../../../../../Services/Employee/SocialWorker/conduct-type.service';
-import { ProcedureTypeService } from '../../../../../Services/Employee/SocialWorker/procedure-type.service';
-import { ConductType } from '../../../../../Models/SocialWorker/conduct-type';
-import { ProcedureType } from '../../../../../Models/SocialWorker/procedure-type';
-import { ConductReportItem } from '../../../../../Models/SocialWorker/conduct';
+import { CertificateStudentService } from '../../../../../Services/Employee/SocialWorker/certificate-student.service';
+
 
 @Component({
-  selector: 'app-conduct-report',
+  selector: 'app-certificate-student-report',
   standalone: true,
   imports: [CommonModule, FormsModule, TranslateModule, PdfPrintComponent],
-  templateUrl: './conduct-report.component.html',
-  styleUrl: './conduct-report.component.css'
+  templateUrl: './certificate-student-report.component.html',
+  styleUrl: './certificate-student-report.component.css'
 })
-export class ConductReportComponent implements OnInit {
-  // Filter properties
-  dateFrom: string = '';
-  dateTo: string = '';
-  selectedSchoolId: number | null = null;
-  selectedGradeId: number | null = null;
-  selectedClassId: number | null = null;
-  selectedStudentId: number | null = null;
-  selectedConductTypeId: number | null = null;
-  selectedProcedureTypeId: number | null = null;
+export class CertificateStudentReportComponent implements OnInit {
+  // Filter properties (all mandatory)
+  selectedSchoolId: number = 0;
+  selectedGradeId: number = 0;
+  selectedClassId: number = 0;
+  selectedStudentId: number = 0;
 
   // Data sources
   schools: any[] = [];
   grades: any[] = [];
   classes: any[] = [];
   students: any[] = [];
-  conductTypes: ConductType[] = [];
-  procedureTypes: ProcedureType[] = [];
 
   // Report data
-  conductReports: ConductReportItem[] = [];
+  certificateReports: CertificateStudentReportItem[] = [];
   showTable: boolean = false;
   isLoading: boolean = false;
   showViewReportBtn: boolean = false;
@@ -61,16 +52,14 @@ export class ConductReportComponent implements OnInit {
   showPDF = false;
   reportsForExport: any[] = [];
   school = {
-    reportHeaderOneEn: 'Conduct Report',
-    reportHeaderTwoEn: 'Student Behavior Records',
-    reportHeaderOneAr: 'تقرير السلوك',
-    reportHeaderTwoAr: 'سجلات سلوك الطلاب'
+    reportHeaderOneEn: 'Certificate Student Report',
+    reportHeaderTwoEn: 'Student Certificate Records',
+    reportHeaderOneAr: 'تقرير شهادات الطالب',
+    reportHeaderTwoAr: 'سجلات شهادات الطالب'
   };
 
   constructor(
-    private conductService: ConductService,
-    private conductTypeService: ConductTypeService,
-    private procedureTypeService: ProcedureTypeService,
+    private certificateReportService: CertificateStudentService,
     private schoolService: SchoolService,
     private gradeService: GradeService,
     private classroomService: ClassroomService,
@@ -82,7 +71,6 @@ export class ConductReportComponent implements OnInit {
 
   ngOnInit() {
     this.loadSchools();
-    this.loadProcedureTypes();
     
     this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
@@ -115,21 +103,15 @@ export class ConductReportComponent implements OnInit {
           this.gradeService.GetBySchoolId(this.selectedSchoolId, domainName)
         );
         this.grades = data;
-        this.selectedGradeId = null;
+        this.selectedGradeId = 0;
         this.classes = [];
-        this.selectedClassId = null;
+        this.selectedClassId = 0;
         this.students = [];
-        this.selectedStudentId = null;
+        this.selectedStudentId = 0;
+        this.onFilterChange();
       } catch (error) {
         console.error('Error loading grades:', error);
       }
-    } else {
-      this.grades = [];
-      this.selectedGradeId = null;
-      this.classes = [];
-      this.selectedClassId = null;
-      this.students = [];
-      this.selectedStudentId = null;
     }
   }
 
@@ -141,17 +123,13 @@ export class ConductReportComponent implements OnInit {
           this.classroomService.GetByGradeId(this.selectedGradeId, domainName)
         );
         this.classes = data;
-        this.selectedClassId = null;
+        this.selectedClassId = 0;
         this.students = [];
-        this.selectedStudentId = null;
+        this.selectedStudentId = 0;
+        this.onFilterChange();
       } catch (error) {
         console.error('Error loading classes:', error);
       }
-    } else {
-      this.classes = [];
-      this.selectedClassId = null;
-      this.students = [];
-      this.selectedStudentId = null;
     }
   }
 
@@ -166,75 +144,30 @@ export class ConductReportComponent implements OnInit {
           id: student.id,
           name: student.en_name || student.ar_name || 'Unknown',
         }));
-        this.selectedStudentId = null;
+        this.selectedStudentId = 0;
+        this.onFilterChange();
       } catch (error) {
         console.error('Error loading students:', error);
       }
     } else {
       this.students = [];
-      this.selectedStudentId = null;
+      this.selectedStudentId = 0;
+      this.onFilterChange();
     }
-  }
-
-  async loadConductTypes() {
-    if (this.selectedSchoolId) {
-      try {
-        const domainName = this.apiService.GetHeader();
-        const data = await firstValueFrom(
-          this.conductTypeService.GetBySchool(this.selectedSchoolId, domainName)
-        );
-        this.conductTypes = data;
-        console.log('seif')
-        console.log('Conduct types loaded:', this.conductTypes);
-      } catch (error) {
-        console.error('Error loading conduct types:', error);
-        this.conductTypes = [];
-      }
-    } else {
-      this.conductTypes = [];
-    }
-  }
-
-  async loadProcedureTypes() {
-    try {
-      const domainName = this.apiService.GetHeader();
-      const data = await firstValueFrom(
-        this.procedureTypeService.Get(domainName)
-      );
-      this.procedureTypes = data;
-    } catch (error) {
-      console.error('Error loading procedure types:', error);
-      this.procedureTypes = [];
-    }
-  }
-
-  onSchoolChange() {
-    this.loadGrades();
-    this.loadConductTypes();
-    this.onFilterChange();
-  }
-
-  onGradeChange() {
-    this.loadClasses();
-    this.onFilterChange();
-  }
-
-  onClassChange() {
-    this.loadStudents();
-    this.onFilterChange();
   }
 
   onFilterChange() {
     this.showTable = false;
-    this.showViewReportBtn = this.dateFrom !== '' && this.dateTo !== '';
-    this.conductReports = [];
+    this.showViewReportBtn = !!this.selectedSchoolId && !!this.selectedGradeId && 
+                            !!this.selectedClassId && !!this.selectedStudentId;
+    this.certificateReports = [];
   }
 
   async viewReport() {
-    if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
+    if (!this.selectedSchoolId || !this.selectedGradeId || !this.selectedClassId || !this.selectedStudentId) {
       Swal.fire({
-        title: 'Invalid Date Range',
-        text: 'Start date cannot be later than end date.',
+        title: 'Incomplete Selection',
+        text: 'Please select School, Grade, Class, and Student to generate the report.',
         icon: 'warning',
         confirmButtonText: 'OK',
       });
@@ -247,39 +180,34 @@ export class ConductReportComponent implements OnInit {
     try {
       const domainName = this.apiService.GetHeader();
       const response = await firstValueFrom(
-        this.conductService.GetConductReport(
-          domainName,
-          this.dateFrom,
-          this.dateTo,
-          this.selectedSchoolId || undefined,
-          this.selectedGradeId || undefined,
-          this.selectedClassId || undefined,
-          this.selectedStudentId || undefined,
-          this.selectedConductTypeId || undefined,
-          this.selectedProcedureTypeId || undefined
+        this.certificateReportService.GetCertificateToStudentReport(
+          this.selectedSchoolId,
+          this.selectedGradeId,
+          this.selectedClassId,
+          this.selectedStudentId,
+          domainName
         )
       );
 
       console.log('API Response:', response);
       
-      // Handle the response directly as an array
       if (Array.isArray(response)) {
-        this.conductReports = response;
-        console.log('Conduct reports loaded:', this.conductReports.length);
+        this.certificateReports = response;
+        console.log('Certificate reports loaded:', this.certificateReports.length);
       } else {
         console.log('Response is not an array:', response);
-        this.conductReports = [];
+        this.certificateReports = [];
       }
 
       this.prepareExportData();
       this.showTable = true;
     } catch (error) {
-      console.error('Error loading conduct reports:', error);
-      this.conductReports = [];
+      console.error('Error loading certificate reports:', error);
+      this.certificateReports = [];
       this.showTable = true;
       Swal.fire({
         title: 'Error',
-        text: 'Failed to load conduct reports',
+        text: 'Failed to load certificate reports',
         icon: 'error',
         confirmButtonText: 'OK',
       });
@@ -289,49 +217,36 @@ export class ConductReportComponent implements OnInit {
   }
 
   private prepareExportData(): void {
-    this.reportsForExport = this.conductReports.map((report) => ({
-      'Date': new Date(report.date).toLocaleDateString(),
-      'Student Name': report.studentEnName,
-      'Conduct Type': report.conductType?.en_name || 'N/A',
-      'Procedure Type': report.procedureType?.name || 'N/A',
-      'Details': report.details || 'N/A'
+    this.reportsForExport = this.certificateReports.map((report) => ({
+      'Medal ID': report.medal,
+      'Medal Name': report.medalName,
+      'Added At': new Date(report.addedAt).toLocaleDateString(),
+      'Added By': report.addedBy
     }));
   }
 
   getSchoolName(): string {
-    return this.schools.find(s => s.id === this.selectedSchoolId)?.name || 'All Schools';
+    return this.schools.find(s => s.id == this.selectedSchoolId)?.name || 'All Schools';
   }
 
   getGradeName(): string {
-    return this.grades.find(g => g.id === this.selectedGradeId)?.name || 'All Grades';
+    return this.grades.find(g => g.id == this.selectedGradeId)?.name || 'All Grades';
   }
 
   getClassName(): string {
-    return this.classes.find(c => c.id === this.selectedClassId)?.name || 'All Classes';
+    return this.classes.find(c => c.id == this.selectedClassId)?.name || 'All Classes';
   }
 
   getStudentName(): string {
-    return this.students.find(s => s.id === this.selectedStudentId)?.name || 'All Students';
-  }
-
-  getConductTypeName(): string {
-    return this.conductTypes.find(ct => ct.id === this.selectedConductTypeId)?.en_name || 'All Types';
-  }
-
-  getProcedureTypeName(): string {
-    return this.procedureTypes.find(pt => pt.id === this.selectedProcedureTypeId)?.name || 'All Types';
+    return this.students.find(s => s.id == this.selectedStudentId)?.name || 'All Students';
   }
 
   getInfoRows(): any[] {
     return [
-      { keyEn: 'From Date: ' + this.dateFrom },
-      { keyEn: 'To Date: ' + this.dateTo },
       { keyEn: 'School: ' + this.getSchoolName() },
       { keyEn: 'Grade: ' + this.getGradeName() },
       { keyEn: 'Class: ' + this.getClassName() },
-      { keyEn: 'Student: ' + this.getStudentName() },
-      { keyEn: 'Conduct Type: ' + this.getConductTypeName() },
-      { keyEn: 'Procedure Type: ' + this.getProcedureTypeName() }
+      { keyEn: 'Student: ' + this.getStudentName() }
     ];
   }
 
@@ -405,9 +320,9 @@ export class ConductReportComponent implements OnInit {
 
     const worksheet = XLSX.utils.json_to_sheet(this.reportsForExport);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Conduct Report');
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Certificate Report');
     
     const dateStr = new Date().toISOString().slice(0, 10);
-    XLSX.writeFile(workbook, `Conduct_Report_${dateStr}.xlsx`);
+    XLSX.writeFile(workbook, `Certificate_Report_${dateStr}.xlsx`);
   }
 }

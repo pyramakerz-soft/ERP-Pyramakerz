@@ -3,8 +3,11 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { PdfPrintComponent } from '../../../../../Component/pdf-print/pdf-print.component';
 import { TranslateModule } from '@ngx-translate/core';
+import { StudentIssueReportItem } from '../../../../../Models/SocialWorker/student-issue';
 import { firstValueFrom, Subscription } from 'rxjs';
-import { ConductService } from '../../../../../Services/Employee/SocialWorker/conduct.service';
+import { IssueType } from '../../../../../Models/SocialWorker/issue-type';
+import { IssueTypeService } from '../../../../../Services/Employee/SocialWorker/issue-type.service';
+import { StudentIssueService } from '../../../../../Services/Employee/SocialWorker/student-issue.service';
 import { SchoolService } from '../../../../../Services/Employee/school.service';
 import { GradeService } from '../../../../../Services/Employee/LMS/grade.service';
 import { ClassroomService } from '../../../../../Services/Employee/LMS/classroom.service';
@@ -14,20 +17,16 @@ import { LanguageService } from '../../../../../Services/shared/language.service
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 import Swal from 'sweetalert2';
 import * as XLSX from 'xlsx';
-import { ConductTypeService } from '../../../../../Services/Employee/SocialWorker/conduct-type.service';
-import { ProcedureTypeService } from '../../../../../Services/Employee/SocialWorker/procedure-type.service';
-import { ConductType } from '../../../../../Models/SocialWorker/conduct-type';
-import { ProcedureType } from '../../../../../Models/SocialWorker/procedure-type';
-import { ConductReportItem } from '../../../../../Models/SocialWorker/conduct';
+
 
 @Component({
-  selector: 'app-conduct-report',
+  selector: 'app-student-issue-report',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslateModule, PdfPrintComponent],
-  templateUrl: './conduct-report.component.html',
-  styleUrl: './conduct-report.component.css'
+  imports: [CommonModule, FormsModule, PdfPrintComponent, TranslateModule],
+  templateUrl: './student-issue-report.component.html',
+  styleUrl: './student-issue-report.component.css'
 })
-export class ConductReportComponent implements OnInit {
+export class StudentIssueReportComponent  implements OnInit {
   // Filter properties
   dateFrom: string = '';
   dateTo: string = '';
@@ -35,19 +34,17 @@ export class ConductReportComponent implements OnInit {
   selectedGradeId: number | null = null;
   selectedClassId: number | null = null;
   selectedStudentId: number | null = null;
-  selectedConductTypeId: number | null = null;
-  selectedProcedureTypeId: number | null = null;
+  selectedIssueTypeId: number | null = null;
 
   // Data sources
   schools: any[] = [];
   grades: any[] = [];
   classes: any[] = [];
   students: any[] = [];
-  conductTypes: ConductType[] = [];
-  procedureTypes: ProcedureType[] = [];
+  issueTypes: IssueType[] = [];
 
   // Report data
-  conductReports: ConductReportItem[] = [];
+  studentIssueReports: StudentIssueReportItem[] = [];
   showTable: boolean = false;
   isLoading: boolean = false;
   showViewReportBtn: boolean = false;
@@ -61,16 +58,15 @@ export class ConductReportComponent implements OnInit {
   showPDF = false;
   reportsForExport: any[] = [];
   school = {
-    reportHeaderOneEn: 'Conduct Report',
-    reportHeaderTwoEn: 'Student Behavior Records',
-    reportHeaderOneAr: 'تقرير السلوك',
-    reportHeaderTwoAr: 'سجلات سلوك الطلاب'
+    reportHeaderOneEn: 'Student Issue Report',
+    reportHeaderTwoEn: 'Student Issues Records',
+    reportHeaderOneAr: 'تقرير مشاكل الطلاب',
+    reportHeaderTwoAr: 'سجلات مشاكل الطلاب'
   };
 
   constructor(
-    private conductService: ConductService,
-    private conductTypeService: ConductTypeService,
-    private procedureTypeService: ProcedureTypeService,
+    private studentIssueService: StudentIssueService,
+    private issueTypeService: IssueTypeService,
     private schoolService: SchoolService,
     private gradeService: GradeService,
     private classroomService: ClassroomService,
@@ -82,7 +78,7 @@ export class ConductReportComponent implements OnInit {
 
   ngOnInit() {
     this.loadSchools();
-    this.loadProcedureTypes();
+    this.loadIssueTypes();
     
     this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
@@ -123,13 +119,6 @@ export class ConductReportComponent implements OnInit {
       } catch (error) {
         console.error('Error loading grades:', error);
       }
-    } else {
-      this.grades = [];
-      this.selectedGradeId = null;
-      this.classes = [];
-      this.selectedClassId = null;
-      this.students = [];
-      this.selectedStudentId = null;
     }
   }
 
@@ -147,11 +136,6 @@ export class ConductReportComponent implements OnInit {
       } catch (error) {
         console.error('Error loading classes:', error);
       }
-    } else {
-      this.classes = [];
-      this.selectedClassId = null;
-      this.students = [];
-      this.selectedStudentId = null;
     }
   }
 
@@ -176,41 +160,21 @@ export class ConductReportComponent implements OnInit {
     }
   }
 
-  async loadConductTypes() {
-    if (this.selectedSchoolId) {
-      try {
-        const domainName = this.apiService.GetHeader();
-        const data = await firstValueFrom(
-          this.conductTypeService.GetBySchool(this.selectedSchoolId, domainName)
-        );
-        this.conductTypes = data;
-        console.log('seif')
-        console.log('Conduct types loaded:', this.conductTypes);
-      } catch (error) {
-        console.error('Error loading conduct types:', error);
-        this.conductTypes = [];
-      }
-    } else {
-      this.conductTypes = [];
-    }
-  }
-
-  async loadProcedureTypes() {
+  async loadIssueTypes() {
     try {
       const domainName = this.apiService.GetHeader();
       const data = await firstValueFrom(
-        this.procedureTypeService.Get(domainName)
+        this.issueTypeService.Get(domainName)
       );
-      this.procedureTypes = data;
+      this.issueTypes = data;
     } catch (error) {
-      console.error('Error loading procedure types:', error);
-      this.procedureTypes = [];
+      console.error('Error loading issue types:', error);
+      this.issueTypes = [];
     }
   }
 
   onSchoolChange() {
     this.loadGrades();
-    this.loadConductTypes();
     this.onFilterChange();
   }
 
@@ -227,7 +191,7 @@ export class ConductReportComponent implements OnInit {
   onFilterChange() {
     this.showTable = false;
     this.showViewReportBtn = this.dateFrom !== '' && this.dateTo !== '';
-    this.conductReports = [];
+    this.studentIssueReports = [];
   }
 
   async viewReport() {
@@ -247,7 +211,7 @@ export class ConductReportComponent implements OnInit {
     try {
       const domainName = this.apiService.GetHeader();
       const response = await firstValueFrom(
-        this.conductService.GetConductReport(
+        this.studentIssueService.GetStudentIssueReport(
           domainName,
           this.dateFrom,
           this.dateTo,
@@ -255,8 +219,7 @@ export class ConductReportComponent implements OnInit {
           this.selectedGradeId || undefined,
           this.selectedClassId || undefined,
           this.selectedStudentId || undefined,
-          this.selectedConductTypeId || undefined,
-          this.selectedProcedureTypeId || undefined
+          this.selectedIssueTypeId || undefined
         )
       );
 
@@ -264,36 +227,35 @@ export class ConductReportComponent implements OnInit {
       
       // Handle the response directly as an array
       if (Array.isArray(response)) {
-        this.conductReports = response;
-        console.log('Conduct reports loaded:', this.conductReports.length);
+        this.studentIssueReports = response;
+        console.log('Student issue reports loaded:', this.studentIssueReports.length);
       } else {
         console.log('Response is not an array:', response);
-        this.conductReports = [];
+        this.studentIssueReports = [];
       }
 
       this.prepareExportData();
       this.showTable = true;
     } catch (error) {
-      console.error('Error loading conduct reports:', error);
-      this.conductReports = [];
+      console.error('Error loading student issue reports:', error);
+      this.studentIssueReports = [];
       this.showTable = true;
-      Swal.fire({
-        title: 'Error',
-        text: 'Failed to load conduct reports',
-        icon: 'error',
-        confirmButtonText: 'OK',
-      });
+      // Swal.fire({
+      //   title: 'Error',
+      //   text: 'Failed to load student issue reports',
+      //   icon: 'error',
+      //   confirmButtonText: 'OK',
+      // });
     } finally {
       this.isLoading = false;
     }
   }
 
   private prepareExportData(): void {
-    this.reportsForExport = this.conductReports.map((report) => ({
+    this.reportsForExport = this.studentIssueReports.map((report) => ({
       'Date': new Date(report.date).toLocaleDateString(),
-      'Student Name': report.studentEnName,
-      'Conduct Type': report.conductType?.en_name || 'N/A',
-      'Procedure Type': report.procedureType?.name || 'N/A',
+      'Student Name': report.studentName,
+      'Issue Type': report.issuesType?.name || 'N/A',
       'Details': report.details || 'N/A'
     }));
   }
@@ -314,12 +276,9 @@ export class ConductReportComponent implements OnInit {
     return this.students.find(s => s.id === this.selectedStudentId)?.name || 'All Students';
   }
 
-  getConductTypeName(): string {
-    return this.conductTypes.find(ct => ct.id === this.selectedConductTypeId)?.en_name || 'All Types';
-  }
-
-  getProcedureTypeName(): string {
-    return this.procedureTypes.find(pt => pt.id === this.selectedProcedureTypeId)?.name || 'All Types';
+  getIssueTypeName(): string {
+    const type = this.issueTypes.find(it => it.id === this.selectedIssueTypeId);
+    return type ? (type.name) : 'All Types';
   }
 
   getInfoRows(): any[] {
@@ -330,8 +289,7 @@ export class ConductReportComponent implements OnInit {
       { keyEn: 'Grade: ' + this.getGradeName() },
       { keyEn: 'Class: ' + this.getClassName() },
       { keyEn: 'Student: ' + this.getStudentName() },
-      { keyEn: 'Conduct Type: ' + this.getConductTypeName() },
-      { keyEn: 'Procedure Type: ' + this.getProcedureTypeName() }
+      { keyEn: 'Issue Type: ' + this.getIssueTypeName() }
     ];
   }
 
@@ -405,9 +363,9 @@ export class ConductReportComponent implements OnInit {
 
     const worksheet = XLSX.utils.json_to_sheet(this.reportsForExport);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Conduct Report');
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Student Issue Report');
     
     const dateStr = new Date().toISOString().slice(0, 10);
-    XLSX.writeFile(workbook, `Conduct_Report_${dateStr}.xlsx`);
+    XLSX.writeFile(workbook, `Student_Issue_Report_${dateStr}.xlsx`);
   }
 }

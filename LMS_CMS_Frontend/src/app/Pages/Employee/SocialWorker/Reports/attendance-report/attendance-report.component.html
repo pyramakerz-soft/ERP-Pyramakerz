@@ -1,6 +1,6 @@
 <div class="flex justify-between">
     <h1 class="primaryTxt font-bold text-2xl leading-9">
-        {{ 'Conduct Report' | translate }}
+        {{ 'Attendance Report' | translate }}
     </h1>
 </div>
 
@@ -26,6 +26,16 @@
             [(ngModel)]="selectedSchoolId" (change)="onSchoolChange()">
             <option [ngValue]="null">{{ 'Choose' | translate }} {{ 'School' | translate }}</option>
             <option *ngFor="let school of schools" [ngValue]="school.id">{{ school.name }}</option>
+        </select>
+    </div>
+
+    <!-- Academic Year Selector -->
+    <div class="w-[24%] mb-4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="academicYear">{{ 'Academic Year' | translate }}</label>
+        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="academicYear"
+            [(ngModel)]="selectedAcademicYearId" (change)="onAcademicYearChange()" [disabled]="!selectedSchoolId">
+            <option [ngValue]="null">{{ 'Choose' | translate }} {{ 'Academic Year' | translate }}</option>
+            <option *ngFor="let academicYear of academicYears" [ngValue]="academicYear.id">{{ academicYear.name }}</option>
         </select>
     </div>
 
@@ -59,30 +69,8 @@
         </select>
     </div>
 
-    <!-- Conduct Type Selector -->
-    <div class="w-[24%] mb-4">
-        <label class="block mb-2 text-sm font-medium text-gray-900" for="conductType">{{ 'Conduct Type' | translate }}</label>
-        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="conductType"
-            [(ngModel)]="selectedConductTypeId" (ngModelChange)="onFilterChange()" [disabled]="!selectedSchoolId">
-            <option [ngValue]="null">{{ 'Choose' | translate }} {{ 'Conduct Type' | translate }}</option>
-            <option *ngFor="let type of conductTypes" [ngValue]="type.id">{{ type.en_name }}</option>
-        </select>
-    </div>
-
-    <!-- Procedure Type Selector -->
-    <div class="w-[24%] mb-4">
-        <label class="block mb-2 text-sm font-medium text-gray-900" for="procedureType">{{ 'Procedure Type' | translate }}</label>
-        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="procedureType"
-            [(ngModel)]="selectedProcedureTypeId" (ngModelChange)="onFilterChange()">
-            <option [ngValue]="null">{{ 'Choose' | translate }} {{ 'Procedure Type' | translate }}</option>
-            <option *ngFor="let type of procedureTypes" [ngValue]="type.id">{{ type.name }}</option>
-        </select>
-    </div>
-
-</div>
-
     <!-- View Report Button -->
-    <div class="flex justify-end mb-4">
+    <div class="w-[24%] flex justify-end">
         <button class="p-4 font-medium text-xl rounded-lg" (click)="viewReport()"
             [disabled]="!showViewReportBtn || isLoading" [ngClass]="{ 
             'bg-gray-100 text-gray-300 cursor-not-allowed': !showViewReportBtn || isLoading, 
@@ -92,6 +80,7 @@
             <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
         </button>
     </div>
+</div>
 
 <!-- Export Buttons -->
 <div *ngIf="showTable" class="mb-5 flex justify-end space-x-4 rtl:space-x-reverse">
@@ -112,40 +101,40 @@
                     {{ 'Student Name' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ 'Conduct Type' | translate }}
+                    {{ 'Status' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ 'Procedure Type' | translate }}
+                    {{ 'Late Time (minutes)' | translate }}
                 </th>
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ 'Details' | translate }}
+                    {{ 'Notes' | translate }}
                 </th>
             </tr>
         </thead>
         <tbody>
-            <tr *ngIf="conductReports.length === 0">
+            <tr *ngIf="attendanceReports.length === 0">
                 <td colspan="5" class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
                     {{ 'No Data Found' | translate }}
                 </td>
             </tr>
 
-            <tr *ngFor="let report of conductReports; let i = index"
+            <tr *ngFor="let report of attendanceReports; let i = index"
                 [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
                 class="border-t border-gray-300 text-xs md:text-sm">
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     {{ report.date | date:'mediumDate' }}
                 </td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ report.studentEnName }}
+                    {{ report.studentName }}
                 </td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ report.conductType.name || 'N/A' }}
+                    {{ report.isLate ? ('Late' | translate) : ('Present' | translate) }}
                 </td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ report.procedureType.name || 'N/A' }}
+                    {{ report.isLate ? report.lateTimeInMinutes : 'N/A' }}
                 </td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ report.details || 'N/A' }}
+                    {{ report.notes || 'N/A' }}
                 </td>
             </tr>
         </tbody>
@@ -155,9 +144,9 @@
 <!-- Hidden PDF Container -->
 <div class="absolute -top-[9999px] -left-[9999px]">
     <div id="Data" class="hidden">
-        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'Conduct Report'"
+        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'Attendance Report'"
             [infoRows]="getInfoRows()"
-            [tableHeaders]="['Date', 'Student Name', 'Conduct Type', 'Procedure Type', 'Details']"
+            [tableHeaders]="['Date', 'Student Name', 'Status', 'Late Time (minutes)', 'Notes']"
             [tableData]="reportsForExport" #pdfComponentRef>
         </app-pdf-print>
     </div>
