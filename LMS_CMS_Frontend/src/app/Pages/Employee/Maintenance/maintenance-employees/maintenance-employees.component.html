@@ -1,12 +1,12 @@
 <div class="">
     <div class="flex justify-between items-center">
-        <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Item' | translate }}</h1>
+        <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Employee' | translate }}</h1>
         <div class="flex justify-between items-center ">
             <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
 
             <button (click)="openModal()"
                 class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
-                 {{ 'Create' | translate }}{{ 'Item' | translate }}
+                 {{ 'Create' | translate }}{{ 'Employee' | translate }}
             </button>
         </div>
     </div>
@@ -21,7 +21,7 @@
                     </th>
                     <th
                         class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
-                         {{ 'UserName' | translate }}
+                         {{ 'User_Name' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                        {{ 'Actions' | translate }}
@@ -45,12 +45,13 @@
                     <td
                         class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#30462e] hover:bg-gray-200">
                         {{row.id}}</td>
-                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{row.user_Name}}</td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{row.en_Name}}</td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         <div class="flex space-x-4 rtl:space-x-reverse">
-                                 <button  (click)="Delete(row.id)">
-                                    <i class="fa-regular fa-trash-can"></i>
-                                </button>
+                            <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)"
+                                    (click)="Delete(row.id)">
+                            <i class="fa-regular fa-trash-can"></i>
+                            </button>
                                
                         </div>
                     </td>
@@ -62,35 +63,29 @@
 
 
 
-<div id="Add_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
-    
-    <div class="bg-white rounded-2xl p-12 w-[669px] max-h-[90%] overflow-y-auto">
-        <div class="flex justify-between items-center"> 
-            <h1 class="font-semibold text-2xl leading-9"> {{ 'Item' | translate }}</h1>
-            <button (click)="closeModal()" type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
-        </div>
-        
-<div *ngIf="selectedItem" class="flex flex-col mt-6 mb-4 bg-[#F7F7F7] rounded-3xl p-4"> 
-  <div class="flex w-full flex-col mb-4">
-    <label class="mb-2 primaryTxt" for="ItemEn">{{ 'Item English Name' | translate }}</label>
-    <input id="ItemEn" type="text"
-           class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-           placeholder="{{ 'Enter' | translate }} {{ 'Item' | translate }}"
-           [(ngModel)]="selectedItem.user_Name" />
-  </div>
-
-</div>
-
-
-        <div class="flex justify-end">
-            <button
-                [disabled]="isLoading"
-                class="secondaryBg text-white font-medium px-4 py-2 rounded-lg cursor-pointer"
-                (click)="save()">
-                <span *ngIf="!isLoading">{{'Save'| translate }}</span>
-                <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
-            </button>
-        </div>
+<div *ngIf="isModalOpen" id="Add_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 flex">
+  <div class="bg-white rounded-2xl p-12 w-[669px] max-h-[90%] overflow-y-auto">
+    <div class="flex justify-between items-center">
+      <h1 class="font-semibold text-2xl leading-9">{{ 'Employee' | translate }}</h1>
+      <button (click)="closeModal()" type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
     </div>
-</div> 
 
+    <div class="flex flex-col mt-6 mb-4 bg-[#F7F7F7] rounded-3xl p-4">
+      <div class="flex flex-col mb-4 w-full">
+        <label class="mb-2 primaryTxt">{{ 'Employee' | translate }}</label>
+        <select [(ngModel)]="selectedEmployeeId" class="rounded-lg border border-solid border-gray-300 px-4 py-3">
+          <option [ngValue]="null" disabled hidden>{{ 'Select' | translate }} {{ 'Employee' | translate }}</option>
+          <option *ngFor="let emp of employees" [ngValue]="emp.id">{{ emp.user_Name }}</option>
+          <option *ngIf="employees.length === 0" disabled>{{ 'No Data Found' | translate }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="flex justify-end">
+      <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg cursor-pointer" (click)="save()">
+        <span *ngIf="!isLoading">{{ 'Save' | translate }}</span>
+        <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+      </button>
+    </div>
+  </div>
+</div>

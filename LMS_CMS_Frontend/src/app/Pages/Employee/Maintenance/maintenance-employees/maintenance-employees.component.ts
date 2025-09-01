@@ -6,13 +6,15 @@ import { firstValueFrom, Subscription } from 'rxjs';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { TokenData } from '../../../../Models/token-data';
 import { EmployeeGet } from '../../../../Models/Employee/employee-get';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../../../../Services/api.service';
 import { MaintenanceEmployeesService } from '../../../../Services/Employee/Maintenance/maintenance-employees.service';
 import { EmployeeService } from '../../../../Services/Employee/employee.service';
+import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
+import { AccountService } from '../../../../Services/account.service';
 
 @Component({
   selector: 'app-maintenance-employees',
@@ -22,27 +24,48 @@ import { EmployeeService } from '../../../../Services/Employee/employee.service'
   styleUrl: './maintenance-employees.component.css'
 })
 export class MaintenanceEmployeesComponent {
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
+  UserID: number = 0;
+  AllowDeleteForOthers: boolean = false;
+  AllowDelete: boolean = true;
+
   isRtl: boolean = false;
   subscription!: Subscription;
-  TableData: EmployeeGet[] = []
+  TableData: any[] = [];        // Employees already linked to maintenance
+  employees: EmployeeGet[] = []; // All available employees for dropdown
+  selectedEmployeeId: number | null = null; // 👈 FIXED
   keysArray: string[] = ['id', 'en_Name', 'ar_Name'];
   key: string= "id";
   DomainName: string = '';
   EditDeleteServ: any;
   value: any;
-  selectedItem: EmployeeGet | null = null;
+  selectedEmployee: EmployeeGet | null = null;
   isLoading = false;
   isModalOpen= false;
+  path: string = "";
+  IsChoosenDomain: boolean = false;
+
   constructor(    
       private languageService: LanguageService,
       private router: Router,
       private apiService: ApiService, 
       public mainServ: MaintenanceEmployeesService,
+      private deleteEditPermissionServ: DeleteEditPermissionService,
+      public account: AccountService,
       public EmpServ: EmployeeService,
+      private activeRoute: ActivatedRoute,
       private realTimeService: RealTimeNotificationServiceService){}
 
-    ngOnInit() {
+ngOnInit() {
+    this.User_Data_After_Login = this.account.Get_Data_Form_Token();
+    this.UserID = this.User_Data_After_Login.id;
+    if (this.User_Data_After_Login.type === "employee") {
+      this.IsChoosenDomain = true;
       this.DomainName = this.apiService.GetHeader();
+      
+      this.activeRoute.url.subscribe(url => {
+        this.path = url[0].path;
+      });
       this.mainServ.Get(this.DomainName).subscribe({
       next: (data:any) => {
         this.TableData = data;
@@ -51,58 +74,86 @@ export class MaintenanceEmployeesComponent {
       error: (err:any) => {
         console.error('Error fetching companies:', err);
       }
-    });
+    });}
 
-      this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-    ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
-     if (this.subscription) {
-      this.subscription.unsubscribe();
+
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) this.subscription.unsubscribe();
+  }
+
+
+
+  IsAllowDelete(InsertedByID: number): boolean {
+  return this.deleteEditPermissionServ.IsAllowDelete(
+    InsertedByID,
+    this.UserID,
+    this.AllowDeleteForOthers
+  );
+}
+
+
+  async GetTableData() {
+    this.TableData = [];
+    try {
+      const data = await firstValueFrom(this.mainServ.Get(this.DomainName)); 
+      this.TableData = data;
+    } catch (error) {
+      this.TableData = [];
     }
   }
 
 
 
-
-
-
-// Edit(id: number) {
-//   const Item = this.TableData.find((row: any) => row.id === id);
-
-//   if (Item) {
-//     this.selectedItem = { ...Item };  
-//     this.openModal(false);                  
-//   } else {
-//     console.error("Item not found with id:", id);
-//   }
-// }
-
-
-  Delete(id: number) {
-   if( confirm("Are you sure you want to delete this item")){
-     this.mainServ.Delete(id, this.DomainName).subscribe({
-      next: () => {
-        this.TableData = this.TableData.filter(c => c.id !== id);
-      },
-      error: (err:any) => {
-        console.error('Error deleting Item:', err);
-      }
-    });}
-  }
-
-
-
+Delete(id: number) {
+  Swal.fire({
+    title: 'Are you sure you want to delete this device?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#FF7519',
+    cancelButtonColor: '#17253E',
+    confirmButtonText: 'Delete',
+    cancelButtonText: 'Cancel'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      this.isLoading = true;
+      this.mainServ.Delete(id, this.DomainName).subscribe({
+        next: () => {
+          this.GetTableData();
+          this.isLoading = false;
+          Swal.fire({
+            icon: 'success',
+            title: 'Deleted!',
+            text: 'Device has been deleted.',
+            confirmButtonText: 'Okay'
+          });
+        },
+        error: (error) => {
+          this.isLoading = false;
+          console.error('Delete error details:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: error.message || 'Failed to delete device',
+            confirmButtonText: 'Okay'
+          });
+        }
+      });
+    }
+  });
+}
 
 
  async onSearchEvent(event: { key: string, value: any }) {
       this.key = event.key;
       this.value = event.value;
       try {
-        const data: EmployeeGet[] = await firstValueFrom( this.EmpServ.Get_Employees(this.DomainName));  
+        const data: EmployeeGet[] = await firstValueFrom( this.mainServ.Get(this.DomainName));  
         this.TableData = data || [];
     
         if (this.value !== "") {
@@ -128,42 +179,41 @@ export class MaintenanceEmployeesComponent {
 
 
 
-openModal(forNew: boolean = true) {
-  if (forNew) {
-  this.selectedItem = new EmployeeGet(0, '', '', '', '', '', '', '', '','', '', 0,'',0,'',0,'',[],[],0,false, false,false,[],[],[],[],[],[],[],[],[],);
+openModal() {
+    this.selectedEmployeeId = null; // reset
+    this.isModalOpen = true;
+    document.getElementById('Add_Modal')?.classList.remove('hidden');
+    document.getElementById('Add_Modal')?.classList.add('flex');
   }
-  this.isModalOpen = true;
 
-  document.getElementById('Add_Modal')?.classList.remove('hidden');
-  document.getElementById('Add_Modal')?.classList.add('flex');
-}
-
-
-
- closeModal() {
+  closeModal() {
+    this.isModalOpen = false;
     document.getElementById('Add_Modal')?.classList.remove('flex');
-    document.getElementById('Add_Modal')?.classList.add('hidden');   
+    document.getElementById('Add_Modal')?.classList.add('hidden');
   }
 
-async save() {
-  this.isLoading = true;
-  try {
+  async save() {
+    if (!this.selectedEmployeeId) {
+      Swal.fire('Error', 'Please select an employee first.', 'error');
+      return;
+    }
 
-      // If no ID → add new
-      await firstValueFrom(this.EmpServ.Add(this.selectedItem!, this.DomainName));
-      Swal.fire('Added!', 'Item added successfully.', 'success');
-    
+    this.isLoading = true;
+    try {
+      const payload = { employeeId: this.selectedEmployeeId }; // 👈 FIXED
+      await firstValueFrom(this.mainServ.Add(payload, this.DomainName));
 
-    this.closeModal();
-    this.TableData = await firstValueFrom(this.EmpServ.Get_Employees(this.DomainName));
+      Swal.fire('Added!', 'Employee added to maintenance successfully.', 'success');
 
-  } catch (error) {
-    console.error("Save failed:", error);
-    Swal.fire('Error', 'Something went wrong.', 'error');
-  } finally {
-    this.isLoading = false;
+      this.closeModal();
+      this.TableData = await firstValueFrom(this.mainServ.Get(this.DomainName));
+    } catch (error) {
+      console.error("Save failed:", error);
+      Swal.fire('Error', 'Something went wrong.', 'error');
+    } finally {
+      this.isLoading = false;
+    }
   }
 }
 
 
-}

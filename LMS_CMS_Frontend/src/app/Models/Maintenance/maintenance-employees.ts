@@ -1,6 +1,9 @@
 export class MaintenanceEmployees {
           constructor(
    public id: number, 
-   public user_Name: string,
+   public employeeID:number,
+   public en_Name:string,
+   public ar_Name:string,
+   public insertedByUserId:number
   ) {}
 }

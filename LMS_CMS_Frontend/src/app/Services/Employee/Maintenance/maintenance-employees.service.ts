@@ -30,7 +30,8 @@ export class MaintenanceEmployeesService {
   }
 
 
-  Add(MaintenanceEmployee: EmployeeGet, DomainName: string): Observable<any> {
+
+  Add(MaintenanceEmployee: { employeeId: number }, DomainName: string): Observable<any> {
     if (DomainName != null) {
       this.header = DomainName;
     }
