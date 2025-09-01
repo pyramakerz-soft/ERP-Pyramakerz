@@ -32,10 +32,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             var context = Unit_Of_Work.DbContext;
 
             List<AccountBalanceReport>? accountBalances = new();
-            AccountTotals totals = new();
             AccountTotals allTotals = new();
             long? totalRecords = 0;
-            DateTime baseDate = new DateTime(1900, 1, 1);
 
             bool isCredit = linkFileID switch
             {
@@ -61,8 +59,22 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 if (accountBalances == null || accountBalances.Count == 0)
                     return NotFound($"No account found.");
 
-                allTotals.TotalDebit = accountBalances.Sum(x => x.Debit ?? 0);
-                allTotals.TotalCredit = accountBalances.Sum(x => x.Credit ?? 0);
+                foreach (var item in accountBalances)
+                {
+                    if (isCredit && item.Credit < 0)
+                    {
+                        item.Debit = item.Credit * -1;
+                        item.Credit = 0;
+                    }
+                    else if (!isCredit && item.Debit < 0)
+                    {
+                        item.Credit = item.Debit * -1;
+                        item.Debit = 0;
+                    }
+                }
+
+                allTotals.TotalDebit = accountBalances.Sum(x => x.Debit);
+                allTotals.TotalCredit = accountBalances.Sum(x => x.Credit);
 
                 allTotals.Differences = isCredit ? allTotals.TotalCredit - allTotals.TotalDebit : allTotals.TotalDebit - allTotals.TotalCredit;
 
@@ -108,6 +120,20 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 if (accountBalances == null || accountBalances.Count == 0)
                     return NotFound($"No accounts found.");
 
+                foreach (var item in accountBalances)
+                {
+                    if (isCredit && item.Credit < 0)
+                    {
+                        item.Debit = item.Credit * -1;
+                        item.Credit = 0;
+                    }
+                    else if (!isCredit && item.Debit < 0)
+                    {
+                        item.Credit = item.Debit * -1;
+                        item.Debit = 0;
+                    }
+                }
+
                 totalRecords = linkFileID switch
                 {
                     2 => (await context.Suppliers.Where(s => s.AccountNumberID == accountID && s.IsDeleted != true).ToListAsync()).Count(),
@@ -125,10 +151,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                     _ => throw new InvalidOperationException("Invalid LinkFileID")
                 };
 
-                allTotals.TotalDebit = accountBalances.Sum(x => x.Debit ?? 0);
-                allTotals.TotalCredit = accountBalances.Sum(x => x.Credit ?? 0);
+                allTotals.TotalDebit = accountBalances.Sum(x => x.Debit);
+                allTotals.TotalCredit = accountBalances.Sum(x => x.Credit);
 
-                allTotals.Differences = isCredit ? allTotals.TotalCredit - allTotals.TotalDebit : allTotals.TotalDebit - allTotals.TotalDebit;
+                allTotals.Differences = isCredit ? allTotals.TotalCredit - allTotals.TotalDebit : allTotals.TotalDebit - allTotals.TotalCredit;
             }
 
             var paginationMetadata = new

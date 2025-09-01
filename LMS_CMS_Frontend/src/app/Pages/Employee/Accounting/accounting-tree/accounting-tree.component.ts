@@ -145,7 +145,7 @@ export class AccountingTreeComponent {
   GetMainDataChildFiltered(id: number) {
     this.accountingTreeChartService.GetMainDataChildFiltered(id, this.DomainName).subscribe(
       (data) => {
-        this.MainData = data
+        this.MainData = data 
       }
     )
   }
@@ -227,7 +227,7 @@ export class AccountingTreeComponent {
     this.accountingTreeChart.linkFileID = 0
   }
 
-  handleIDSelected(accounting: number) {
+  handleIDSelected(accounting: number) { 
     this.accountingTreeChart.id = accounting
     this.GetDataByID()
   }

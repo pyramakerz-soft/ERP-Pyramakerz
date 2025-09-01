@@ -18,16 +18,8 @@ import { ConductTypeService } from '../../../../../Services/Employee/SocialWorke
 import { ProcedureTypeService } from '../../../../../Services/Employee/SocialWorker/procedure-type.service';
 import { ConductType } from '../../../../../Models/SocialWorker/conduct-type';
 import { ProcedureType } from '../../../../../Models/SocialWorker/procedure-type';
+import { ConductReportItem } from '../../../../../Models/SocialWorker/conduct';
 
-interface ConductReportItem {
-  id: number;
-  date: string;
-  studentID: number;
-  studentName: string;
-  conductType: ConductType;
-  procedureType: ProcedureType;
-  details: string;
-}
 @Component({
   selector: 'app-conduct-report',
   standalone: true,
@@ -90,6 +82,7 @@ export class ConductReportComponent implements OnInit {
 
   ngOnInit() {
     this.loadSchools();
+    this.loadProcedureTypes();
     
     this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
@@ -130,6 +123,13 @@ export class ConductReportComponent implements OnInit {
       } catch (error) {
         console.error('Error loading grades:', error);
       }
+    } else {
+      this.grades = [];
+      this.selectedGradeId = null;
+      this.classes = [];
+      this.selectedClassId = null;
+      this.students = [];
+      this.selectedStudentId = null;
     }
   }
 
@@ -147,6 +147,11 @@ export class ConductReportComponent implements OnInit {
       } catch (error) {
         console.error('Error loading classes:', error);
       }
+    } else {
+      this.classes = [];
+      this.selectedClassId = null;
+      this.students = [];
+      this.selectedStudentId = null;
     }
   }
 
@@ -179,6 +184,8 @@ export class ConductReportComponent implements OnInit {
           this.conductTypeService.GetBySchool(this.selectedSchoolId, domainName)
         );
         this.conductTypes = data;
+        console.log('seif')
+        console.log('Conduct types loaded:', this.conductTypes);
       } catch (error) {
         console.error('Error loading conduct types:', error);
         this.conductTypes = [];
@@ -204,7 +211,6 @@ export class ConductReportComponent implements OnInit {
   onSchoolChange() {
     this.loadGrades();
     this.loadConductTypes();
-    this.loadProcedureTypes();
     this.onFilterChange();
   }
 
@@ -285,7 +291,7 @@ export class ConductReportComponent implements OnInit {
   private prepareExportData(): void {
     this.reportsForExport = this.conductReports.map((report) => ({
       'Date': new Date(report.date).toLocaleDateString(),
-      'Student Name': report.studentName,
+      'Student Name': report.studentEnName,
       'Conduct Type': report.conductType?.en_name || 'N/A',
       'Procedure Type': report.procedureType?.name || 'N/A',
       'Details': report.details || 'N/A'
@@ -325,7 +331,7 @@ export class ConductReportComponent implements OnInit {
       { keyEn: 'Class: ' + this.getClassName() },
       { keyEn: 'Student: ' + this.getStudentName() },
       { keyEn: 'Conduct Type: ' + this.getConductTypeName() },
-      { keyEn: 'Procedure Type: ...' + this.getProcedureTypeName() }
+      { keyEn: 'Procedure Type: ' + this.getProcedureTypeName() }
     ];
   }
 

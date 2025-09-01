@@ -25,49 +25,49 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Account Statement" }
         )]
-        public async Task<IActionResult> GetAccountStatement(long linkFileID, DateTime? fromDate, DateTime? toDate, long SubAccountNumber, int pageNumber = 1, int pageSize = 10)
+        public async Task<IActionResult> GetAccountStatement(long linkFileID, DateTime? fromDate, DateTime? toDate, long SubAccountID, int pageNumber = 1, int pageSize = 10)
         {
             if (fromDate.HasValue && toDate.HasValue && toDate < fromDate)
                 return BadRequest("Start date must be equal or greater than End date");
 
-            if (SubAccountNumber <= 0)
+            if (SubAccountID <= 0)
                 return BadRequest("sub-account number can not be 0.");
 
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
             var context = Unit_Of_Work.DbContext;
 
-            long? accountNumberId = linkFileID switch
+            long? accountId = linkFileID switch
             {
-                2 => Unit_Of_Work.supplier_Repository.First_Or_Default(s => s.ID == SubAccountNumber)?.AccountNumberID,
-                3 => Unit_Of_Work.debit_Repository.First_Or_Default(d => d.ID == SubAccountNumber)?.AccountNumberID,
-                4 => Unit_Of_Work.credit_Repository.First_Or_Default(c => c.ID == SubAccountNumber)?.AccountNumberID,
-                5 => Unit_Of_Work.save_Repository.First_Or_Default(s => s.ID == SubAccountNumber)?.AccountNumberID,
-                6 => Unit_Of_Work.bank_Repository.First_Or_Default(b => b.ID == SubAccountNumber)?.AccountNumberID,
-                7 => Unit_Of_Work.income_Repository.First_Or_Default(s => s.ID == SubAccountNumber)?.AccountNumberID,
-                8 => Unit_Of_Work.outcome_Repository.First_Or_Default(s => s.ID == SubAccountNumber)?.AccountNumberID,
-                9 => Unit_Of_Work.asset_Repository.First_Or_Default(s => s.ID == SubAccountNumber)?.AccountNumberID,
-                10 => Unit_Of_Work.employee_Repository.First_Or_Default(s => s.ID == SubAccountNumber)?.AccountNumberID,
-                11 => Unit_Of_Work.tuitionFeesType_Repository.First_Or_Default(s => s.ID == SubAccountNumber)?.AccountNumberID,
-                12 => Unit_Of_Work.tuitionDiscountType_Repository.First_Or_Default(s => s.ID == SubAccountNumber)?.AccountNumberID,
-                13 => Unit_Of_Work.student_Repository.First_Or_Default(s => s.ID == SubAccountNumber)?.AccountNumberID,
+                2 => Unit_Of_Work.supplier_Repository.First_Or_Default(s => s.ID == SubAccountID)?.AccountNumberID,
+                3 => Unit_Of_Work.debit_Repository.First_Or_Default(d => d.ID == SubAccountID)?.AccountNumberID,
+                4 => Unit_Of_Work.credit_Repository.First_Or_Default(c => c.ID == SubAccountID)?.AccountNumberID,
+                5 => Unit_Of_Work.save_Repository.First_Or_Default(s => s.ID == SubAccountID)?.AccountNumberID,
+                6 => Unit_Of_Work.bank_Repository.First_Or_Default(b => b.ID == SubAccountID)?.AccountNumberID,
+                7 => Unit_Of_Work.income_Repository.First_Or_Default(s => s.ID == SubAccountID)?.AccountNumberID,
+                8 => Unit_Of_Work.outcome_Repository.First_Or_Default(s => s.ID == SubAccountID)?.AccountNumberID,
+                9 => Unit_Of_Work.asset_Repository.First_Or_Default(s => s.ID == SubAccountID)?.AccountNumberID,
+                10 => Unit_Of_Work.employee_Repository.First_Or_Default(s => s.ID == SubAccountID)?.AccountNumberID,
+                11 => Unit_Of_Work.tuitionFeesType_Repository.First_Or_Default(s => s.ID == SubAccountID)?.AccountNumberID,
+                12 => Unit_Of_Work.tuitionDiscountType_Repository.First_Or_Default(s => s.ID == SubAccountID)?.AccountNumberID,
+                13 => Unit_Of_Work.student_Repository.First_Or_Default(s => s.ID == SubAccountID)?.AccountNumberID,
                 _ => null
             };
 
-            if (accountNumberId == null)
+            if (accountId == null || accountId == 0)
                 return NotFound("Sub account number not found.");
 
             var accountingTree = Unit_Of_Work.accountingTreeChart_Repository
-                .First_Or_Default(a => a.ID == accountNumberId && a.IsDeleted != true);
+                .First_Or_Default(a => a.ID == accountId && a.IsDeleted != true);
 
             if (accountingTree == null)
                 return NotFound("Main account number not found.");
 
             var results = await context.Set<AccountStatementReport>().FromSqlRaw(
-                "EXEC dbo.GetAccountStatement @DateFrom, @DateTo, @LinkFileID, @SubAccNo",
+                "EXEC dbo.GetAccountStatement @DateFrom, @DateTo, @MainAccNo, @SubAccNo",
                 new SqlParameter("@DateFrom", fromDate ?? (object)DBNull.Value),
                 new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
-                new SqlParameter("@LinkFileID", linkFileID),
-                new SqlParameter("@SubAccNo", SubAccountNumber)
+                new SqlParameter("@MainAccNo", accountId),
+                new SqlParameter("@SubAccNo", SubAccountID)
             )
                 .AsNoTracking()
                 .ToListAsync();
@@ -83,11 +83,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             var dateToValue = fromDate.Value.AddDays(-1);
 
             calcFirstPeriod = await context.Set<AccountStatementReport>().FromSqlRaw(
-                "EXEC dbo.GetAccountStatement @DateFrom, @DateTo, @LinkFileID, @SubAccNo",
+                "EXEC dbo.GetAccountStatement @DateFrom, @DateTo, @MainAccNo, @SubAccNo",
                 new SqlParameter("@DateFrom", "1900-1-1" ?? (object)DBNull.Value),
                 new SqlParameter("@DateTo", (object)dateToValue ?? DBNull.Value),
-                new SqlParameter("@LinkFileID", linkFileID),
-                new SqlParameter("@SubAccNo", SubAccountNumber)
+                new SqlParameter("@MainAccNo", accountId),
+                new SqlParameter("@SubAccNo", SubAccountID)
             )
                 .AsNoTracking()
                 .ToListAsync();
@@ -107,10 +107,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             {
                 Account = "Opening Balance",
                 Serial = 0,
-                SubAccountNo = 0,
                 SubAccount = "",
-                Debit = 0,
-                Credit = 0,
+                Debit = !isCredit ? firstPeriodBalance : 0,
+                Credit =  isCredit ? firstPeriodBalance : 0,
                 Date = dateToValue,
                 Balance = firstPeriodBalance,
                 Notes = ""
@@ -132,13 +131,19 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 item.Balance = runningBalance;
             }
 
-            fullTotals.TotalDebit += results.Sum(x => x.Debit ?? 0);
-            fullTotals.TotalCredit += results.Sum(x => x.Credit ?? 0);
+            fullTotals.TotalDebit = results.Sum(x => x.Debit ?? 0);
+            fullTotals.TotalCredit = results.Sum(x => x.Credit ?? 0);
 
             fullTotals.Difference = isCredit ? fullTotals.TotalCredit - fullTotals.TotalDebit :
                  fullTotals.TotalDebit - fullTotals.TotalCredit;
 
-            long totalRecords = results?.Count() ?? 0;
+            var totalRecords = await context.Database
+                .SqlQueryRaw<long>("SELECT dbo.GetEntriesCount(@DateFrom, @DateTo, @MainAccNo, @SubAccNo) AS Value",
+                    new SqlParameter("@DateFrom", fromDate ?? (object)DBNull.Value),
+                    new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
+                    new SqlParameter("@MainAccNo", accountId),
+                    new SqlParameter("@SubAccNo", SubAccountID))
+                .FirstAsync();
 
             var paginationMetadata = new
             {

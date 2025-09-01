@@ -16,37 +16,36 @@ BEGIN
         SELECT 
             SA.SubAccountNo AS ID,
             SA.SubAccountName AS Name,
-            SUM(ISNULL(E.Debit, 0)) AS Debit,
-            SUM(ISNULL(E.Credit, 0)) AS Credit,
-            ROW_NUMBER() OVER (ORDER BY SA.SubAccountNo, SA.SubAccountName) AS RowNum
+            CASE 
+                WHEN @LinkFileID IN (1, 3, 5, 6, 8, 9, 12, 13) 
+                    THEN SUM(ISNULL(E.Debit,0)) - SUM(ISNULL(E.Credit,0))
+					ELSE 0
+            END AS Debit,
+            CASE 
+                WHEN @LinkFileID IN (2, 4, 7, 10, 11) 
+                    THEN SUM(ISNULL(E.Credit,0)) - SUM(ISNULL(E.Debit,0)) 
+					ELSE 0
+            END AS Credit,
+            CASE 
+                WHEN @LinkFileID IN (2, 4, 7, 10, 11) 
+                    THEN SUM(ISNULL(E.Credit,0)) - SUM(ISNULL(E.Debit,0))  
+					ELSE SUM(ISNULL(E.Debit,0)) - SUM(ISNULL(E.Credit,0))      
+            END AS Balance
         FROM dbo.GetSubAccountInfo(@LinkFileID, NULL) SA
-        LEFT JOIN dbo.EntriesFun('1900-1-1', @DateTo) E
-            ON E.SubAccountNo = SA.SubAccountNo
-           AND (
-                 @LinkFileID = E.MainAccountNo 
-                 OR @LinkFileID = (
-                       SELECT ATC.LinkFileID 
-                       FROM AccountingTreeCharts ATC 
-                       WHERE ATC.ID = E.ATCID
-                   )
-               )
-        WHERE (@MainAccNo = 0 OR @MainAccNo = SA.AccountID)
+        LEFT JOIN dbo.EntriesFun('1900-01-01', @DateTo) E
+            ON (E.MainAccNo = SA.AccountID AND E.MainSubAccNo = SA.SubAccountNo)
+        WHERE (@MainAccNo = 0 OR E.MainAccNo = @MainAccNo)
         GROUP BY SA.SubAccountNo, SA.SubAccountName
     )
-    SELECT ID, Name, Debit, Credit
+    SELECT ID, Name, 
+	Debit, 
+	Credit
     FROM CTE
-    WHERE RowNum BETWEEN ((@PageNumber-1)*@PageSize + 1) AND (@PageNumber*@PageSize)
-	AND (
-		(@ZeroBalance = 1 AND Credit = 0 AND Debit = 0)
-    OR
-		(@PositiveBalance = 1 AND 
-			CASE WHEN @LinkFileID IN (2, 4, 7, 10, 11) THEN Credit - Debit ELSE Debit - Credit END > 0)
-    OR
-		(@NegativeBalance = 1 AND 
-			CASE WHEN @LinkFileID IN (2, 4, 7, 10, 11) THEN Debit - Credit ELSE Credit - Debit END > 0)
-)
-
-    ORDER BY RowNum
-	OFFSET (@PageNumber - 1) * @PageSize ROWS
+    WHERE 
+          (@ZeroBalance = 1 AND Balance = 0)
+       OR (@PositiveBalance = 1 AND Balance > 0)
+       OR (@NegativeBalance = 1 AND Balance < 0)
+    ORDER BY ID
+    OFFSET (@PageNumber - 1) * @PageSize ROWS
     FETCH NEXT @PageSize ROWS ONLY;
 END

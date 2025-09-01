@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ApiService } from '../../api.service';
-import { CertificateStudent} from '../../../Models/SocialWorker/certificate-student';
+import { CertificateStudent, CertificateStudentReportItem} from '../../../Models/SocialWorker/certificate-student';
 
 
 @Injectable({
@@ -55,21 +55,26 @@ export class CertificateStudentService {
     return this.http.delete(`${this.baseUrl}/CertificateStudent/${id}`, { headers })
   }
   
-//////////////////////////////////////////--77
+  GetCertificateToStudentReport(
+    SchoolId: number,
+    GradeId: number,
+    ClassroomId: number,
+    StudentId: number,
+    DomainName: string
+  ) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
 
-//  GetCertificateToStudentReport(SchoolId: number, GradeId: number, ClassroomId: number, StudentId: number, DomainName: string)
-//  : Observable<CertificateStudentReportDTO[]>{
-//  if (DomainName != null) {
-//       this.header = DomainName
-//     }
-//    const token = localStorage.getItem("current_token");
-//     const headers = new HttpHeaders()
-//       .set('domain-name', this.header)
-//       .set('Authorization', `Bearer ${token}`)
-//       .set('Content-Type', 'application/json');
-//       const url = `${this.baseUrl}/CertificateStudent/CertificateToStudentReport?SchoolId=${SchoolId}&GradeId=${GradeId}&ClassroomId=${ClassroomId}&StudentId=${StudentId}`;
-//     return this.http.get<CertificateStudentReportDTO[]>(url, { headers });
-
+    const url = `${this.baseUrl}/CertificateStudent/CertificateToStudentReport?SchoolId=${SchoolId}&GradeId=${GradeId}&ClassroomId=${ClassroomId}&StudentId=${StudentId}`;
+    return this.http.get<CertificateStudentReportItem[]>(url, { headers });
+  }
     }
  
 
