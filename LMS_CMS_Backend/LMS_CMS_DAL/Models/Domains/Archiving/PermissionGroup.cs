@@ -21,5 +21,6 @@ namespace LMS_CMS_DAL.Models.Domains.Archiving
         public string Ar_Name { get; set; }
 
         public ICollection<PermissionGroupEmployee> PermissionGroupEmployees { get; set; } = new HashSet<PermissionGroupEmployee>();
+        public ICollection<PermissionGroupDetails> PermissionGroupDetails { get; set; } = new List<PermissionGroupDetails>();
     }
 }

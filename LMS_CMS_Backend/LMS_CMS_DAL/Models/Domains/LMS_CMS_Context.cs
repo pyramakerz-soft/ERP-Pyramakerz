@@ -2307,6 +2307,12 @@ namespace LMS_CMS_DAL.Models.Domains
                 .WithMany(m => m.PermissionGroupDetails)
                 .HasForeignKey(m => m.ArchivingTreeID)
                 .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<PermissionGroupDetails>()
+                .HasOne(m => m.PermissionGroup)
+                .WithMany(m => m.PermissionGroupDetails)
+                .HasForeignKey(m => m.PermissionGroupID)
+                .OnDelete(DeleteBehavior.Restrict);
 
 
             ///////////////////////// Exception: /////////////////////////

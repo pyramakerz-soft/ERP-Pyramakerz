@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
+using LMS_CMS_BL.DTO.Accounting;
 using LMS_CMS_BL.DTO.Archiving;
 using LMS_CMS_BL.DTO.Communication;
 using LMS_CMS_BL.DTO.LMS;
 using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains;
+using LMS_CMS_DAL.Models.Domains.AccountingModule;
 using LMS_CMS_DAL.Models.Domains.Archiving;
 using LMS_CMS_DAL.Models.Domains.Communication;
 using LMS_CMS_DAL.Models.Domains.LMS;
@@ -39,8 +41,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Permission Groups" }
         )]
-        public IActionResult GetAsync()
+        public IActionResult GetAsync([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             List<PermissionGroup> permissionGroups = Unit_Of_Work.permissionGroup_Repository.FindBy(f => f.IsDeleted != true);
@@ -54,7 +59,43 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
 
             return Ok(permissionGroupGetDTOs);
         }
+        public async Task<IActionResult> GetAsync()
+        {
+            
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
+            // Get total record count
+            int totalRecords = await Unit_Of_Work.installmentDeductionMaster_Repository
+                .CountAsync(f => f.IsDeleted != true);
+
+            // Apply pagination
+            List<InstallmentDeductionMaster> installmentDeductionMasters = await Unit_Of_Work.installmentDeductionMaster_Repository
+                .Select_All_With_IncludesById_Pagination<InstallmentDeductionMaster>(
+                    f => f.IsDeleted != true,
+                    query => query.Include(Income => Income.Student),
+                    query => query.Include(Income => Income.Employee))
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            if (installmentDeductionMasters == null || installmentDeductionMasters.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<InstallmentDeductionMasterGetDTO> DTOs = mapper.Map<List<InstallmentDeductionMasterGetDTO>>(installmentDeductionMasters);
+
+            // Pagination metadata
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = DTOs, Pagination = paginationMetadata });
+        }
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         [HttpGet("{id}")]

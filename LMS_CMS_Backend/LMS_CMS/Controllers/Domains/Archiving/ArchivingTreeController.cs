@@ -158,6 +158,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
                 {
                     return NotFound("No Archiving with this ID");
                 }
+
+                if(archivingTreeExist.FileLink != null)
+                {
+                    return BadRequest("This is not a folder");
+                }
             }
             else
             {
@@ -257,6 +262,29 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
                 {
                     return accessCheck;
                 }
+            }
+
+            List<PermissionGroupEmployee> permissionGroupEmployees = Unit_Of_Work.permissionGroupEmployee_Repository.FindBy(d => d.IsDeleted != true && d.EmployeeID == userId && d.PermissionGroup.IsDeleted != true);
+            if (permissionGroupEmployees == null)
+            {
+                return BadRequest("You Don't have any permission to delete this");
+            }
+            else
+            {
+                List<long> permissionGroupIDsForUser = new List<long>();
+                permissionGroupIDsForUser = permissionGroupEmployees.Select(d => d.PermissionGroupID).ToList();
+
+                bool hasDeletePermission = Unit_Of_Work.permissionGroupDetails_Repository.FindBy(d => d.IsDeleted != true && permissionGroupIDsForUser.Contains(d.PermissionGroupID) && d.ArchivingTreeID == id)
+                    .Any(permissionGroupDetail =>
+                        permissionGroupDetail.Allow_Delete == true ||
+                        permissionGroupDetail.Allow_Delete_For_Others == true ||
+                        (permissionGroupDetail.Allow_Delete_For_Others == false &&
+                         permissionGroupDetail.InsertedByUserId == userId));
+
+                if (!hasDeletePermission)
+                {
+                    return BadRequest("You don't have permission to delete this");
+                } 
             }
 
             archivingTreeExist.IsDeleted = true;

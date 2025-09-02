@@ -18,5 +18,9 @@ namespace LMS_CMS_DAL.Models.Domains.Archiving
         [ForeignKey("ArchivingTree")]
         public long ArchivingTreeID { get; set; }
         public ArchivingTree ArchivingTree { get; set; }
+
+        [ForeignKey("PermissionGroup")]
+        public long PermissionGroupID { get; set; }
+        public PermissionGroup PermissionGroup { get; set; }
     }
 }
