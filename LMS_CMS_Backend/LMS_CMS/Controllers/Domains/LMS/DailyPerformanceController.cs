@@ -226,8 +226,6 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                       m.InsertedAt.HasValue && 
                       DateOnly.FromDateTime(m.InsertedAt.Value) >= fromDate &&
                       DateOnly.FromDateTime(m.InsertedAt.Value) <= toDate,
-                 //query => query.Include(m => m.Subject).ThenInclude(s => s.Grade),
-                 //query => query.Include(m => m.Classroom),
                  query => query.Include(m => m.DailyPerformances).ThenInclude(dp => dp.Student),
                  query => query.Include(m => m.DailyPerformances).ThenInclude(dp => dp.StudentPerformance).ThenInclude(sp => sp.PerformanceType)
              );
@@ -315,7 +313,6 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             var reportItems = new List<ClassroomDailyPerformanceAverageDTO>();
             foreach (var master in masters)
             {
-               
                 var ClassroomPerformances = master.DailyPerformances
                 .Where(dp => dp.IsDeleted != true)
                 .ToList();
@@ -353,46 +350,3 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
 
 
-
-
-
-
-//// قاموس لتحويل PerformanceType إلى قيم عددية
-//var scoreMapping = new Dictionary<string, double> 
-//{
-//    { "Performance_xc", 5.0 },
-//    { "type_zx", 3.0 }
-//    // أضف المزيد من الأنواع حسب الحاجة
-//};
-
-
-//    var groupedByDate = masters
-//    .SelectMany(m => m.DailyPerformances
-//        .Where(dp => dp.IsDeleted != true)
-//        .SelectMany(dp => dp.StudentPerformance
-//            .Where(sp => sp.IsDeleted != true)
-//            .Select(sp => new
-//            {
-//                Date = DateOnly.FromDateTime(m.InsertedAt!.Value),
-//                Score = scoreMapping.ContainsKey(sp.PerformanceType.EnglishName) ? scoreMapping[sp.PerformanceType.EnglishName] : 0.0,
-//                PerformanceTypeEn = sp.PerformanceType.EnglishName,
-//                //PerformanceTypeAr = sp.PerformanceType.ArabicName,
-//                Comment = dp.Comment
-//            })))
-//    .GroupBy(x => x.Date)
-//    .Select(g => new ClassroomDailyPerformanceAverageDTO
-//    {
-//        Date = g.Key,
-//        AverageScore = g.Average(x => x.Score),
-//        StudentCount = g.Count(),
-//        PerformanceDetails = g.Select(x => new PerformanceDetail
-//        {
-//            PerformanceTypeEn = x.PerformanceTypeEn,
-//            //PerformanceTypeAr = x.PerformanceTypeAr,
-//            Comment = x.Comment
-//        }).ToList()
-//    })
-//    .OrderBy(r => r.Date)
-//    .ToList();
-
-//reportItems.AddRange(groupedByDate);
