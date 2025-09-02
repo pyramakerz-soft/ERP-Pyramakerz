@@ -358,14 +358,10 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         pages: new[] { "Attendance" }
         )]
             public async Task<IActionResult> AttendanceReport(
-            [FromQuery] DateOnly? FromDate,
-            [FromQuery] DateOnly? ToDate,
-            [FromQuery] long? SchoolId = null,
-            [FromQuery] long? AcademicYearId = null,
-            [FromQuery] long? GradeId = null,
-            [FromQuery] long? ClassroomId = null,
-            [FromQuery] long? StudentId = null)
-                {
+            [FromQuery] DateOnly? FromDate,[FromQuery] DateOnly? ToDate,[FromQuery] long? SchoolId = null,
+            [FromQuery] long? AcademicYearId = null, [FromQuery] long? GradeId = null,
+            [FromQuery] long? ClassroomId = null,[FromQuery] long? StudentId = null)
+            {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             var userClaims = HttpContext.User.Claims;

@@ -74,9 +74,12 @@ export class HygieneFormComponent implements OnInit {
               date: new Date(item.date).toLocaleDateString(),
               actions: { delete: true, edit: true, view: true }
           }));
+          // console.log(this.originalHygieneForms);
 
           
           this.hygieneForms = [...this.originalHygieneForms];
+          console.log('Hygiene Forms Loaded:');
+          console.log(this.hygieneForms);
       } catch (error) {
           console.error('Error fetching hygiene forms:', error);
       }

@@ -3068,6 +3068,17 @@ namespace LMS_CMS_BL.UOW
                 return PermissionGroupEmployee_Repository;
             }
         } 
+         public GenericRepo<PermissionGroupDetails> permissionGroupDetails_Repository
+        {
+            get
+            {
+                if (PermissionGroupDetails_Repository == null)
+                {
+                    PermissionGroupDetails_Repository = new GenericRepo<PermissionGroupDetails>(db);
+                }
+                return PermissionGroupDetails_Repository;
+            }
+        } 
 
 
         public void SaveChanges()

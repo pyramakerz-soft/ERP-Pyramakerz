@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
+using LMS_CMS_BL.DTO.Accounting;
 using LMS_CMS_BL.DTO.Archiving;
 using LMS_CMS_BL.DTO.Communication;
 using LMS_CMS_BL.DTO.LMS;
 using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains;
+using LMS_CMS_DAL.Models.Domains.AccountingModule;
 using LMS_CMS_DAL.Models.Domains.Archiving;
 using LMS_CMS_DAL.Models.Domains.Communication;
 using LMS_CMS_DAL.Models.Domains.LMS;
@@ -39,21 +41,39 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Permission Groups" }
         )]
-        public IActionResult GetAsync()
+        public async Task<IActionResult> GetAsync([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
 
-            List<PermissionGroup> permissionGroups = Unit_Of_Work.permissionGroup_Repository.FindBy(f => f.IsDeleted != true);
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+            int totalRecords = await Unit_Of_Work.permissionGroup_Repository
+               .CountAsync(f => f.IsDeleted != true);
+             
+            List<PermissionGroup> permissionGroups = await Unit_Of_Work.permissionGroup_Repository
+                .Select_All_With_IncludesById_Pagination<PermissionGroup>(
+                    f => f.IsDeleted != true)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
 
             if (permissionGroups == null || permissionGroups.Count == 0)
             {
                 return NotFound();
             }
 
-            List<PermissionGroupGetDTO> permissionGroupGetDTOs = mapper.Map<List<PermissionGroupGetDTO>>(permissionGroups); 
+            List<PermissionGroupGetDTO> permissionGroupGetDTOs = mapper.Map<List<PermissionGroupGetDTO>>(permissionGroups);
 
-            return Ok(permissionGroupGetDTOs);
-        }
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = permissionGroupGetDTOs, Pagination = paginationMetadata }); 
+        } 
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

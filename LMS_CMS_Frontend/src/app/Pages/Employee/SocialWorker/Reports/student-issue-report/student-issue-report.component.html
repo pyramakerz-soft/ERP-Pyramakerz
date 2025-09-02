@@ -6,65 +6,65 @@
 
 <div class="my-5 flex flex-wrap justify-between items-center">
     <!-- Date From -->
-    <div class="flex flex-col w-[24%] mb-4">
-        <label class="mb-2 font-medium" for="dateFrom">{{ 'Date From' | translate }}</label>
-        <input type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="dateFrom"
+    <div class="w-[24%] mb-4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="dateFrom">{{ 'Date From' | translate }}</label>
+        <input type="date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="dateFrom"
             [(ngModel)]="dateFrom" (ngModelChange)="onFilterChange()" required>
     </div>
 
     <!-- Date To -->
-    <div class="flex flex-col w-[24%] mb-4">
-        <label class="mb-2 font-medium" for="dateTo">{{ 'Date To' | translate }}</label>
-        <input type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="dateTo"
+    <div class="w-[24%] mb-4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="dateTo">{{ 'Date To' | translate }}</label>
+        <input type="date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="dateTo"
             [(ngModel)]="dateTo" (ngModelChange)="onFilterChange()" required>
     </div>
 
     <!-- School Selector -->
-    <div class="flex flex-col w-[24%] mb-4">
-        <label class="mb-2 font-medium" for="school">{{ 'School' | translate }}</label>
-        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="school"
-            [(ngModel)]="selectedSchoolId" (ngModelChange)="onSchoolChange()">
-            <option [ngValue]="null">{{ 'Select' | translate }} {{ 'All' | translate }} {{ 'Schools' | translate }}</option>
+    <div class="w-[24%] mb-4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="school">{{ 'School' | translate }}</label>
+        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="school"
+            [(ngModel)]="selectedSchoolId" (change)="onSchoolChange()">
+            <option [ngValue]="null">{{ 'Choose' | translate }} {{ 'School' | translate }}</option>
             <option *ngFor="let school of schools" [ngValue]="school.id">{{ school.name }}</option>
         </select>
     </div>
 
     <!-- Grade Selector -->
-    <div class="flex flex-col w-[24%] mb-4">
-        <label class="mb-2 font-medium" for="grade">{{ 'Grade' | translate }}</label>
-        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="grade"
-            [(ngModel)]="selectedGradeId" (ngModelChange)="onGradeChange()" [disabled]="!selectedSchoolId">
-            <option [ngValue]="null">{{ 'Select' | translate }} {{ 'All' | translate }} {{ 'Grades' | translate }}</option>
+    <div class="w-[24%] mb-4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="grade">{{ 'Grade' | translate }}</label>
+        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="grade"
+            [(ngModel)]="selectedGradeId" (change)="onGradeChange()" [disabled]="!selectedSchoolId">
+            <option [ngValue]="null">{{ 'Choose' | translate }} {{ 'Grade' | translate }}</option>
             <option *ngFor="let grade of grades" [ngValue]="grade.id">{{ grade.name }}</option>
         </select>
     </div>
 
     <!-- Class Selector -->
-    <div class="flex flex-col w-[24%] mb-4">
-        <label class="mb-2 font-medium" for="class">{{ 'Class' | translate }}</label>
-        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="class"
-            [(ngModel)]="selectedClassId" (ngModelChange)="onClassChange()" [disabled]="!selectedGradeId">
-            <option [ngValue]="null">{{ 'Select' | translate }} {{ 'All' | translate }} {{ 'Classes' | translate }}</option>
+    <div class="w-[24%] mb-4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="class">{{ 'Class' | translate }}</label>
+        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="class"
+            [(ngModel)]="selectedClassId" (change)="onClassChange()" [disabled]="!selectedGradeId">
+            <option [ngValue]="null">{{ 'Choose' | translate }} {{ 'Class' | translate }}</option>
             <option *ngFor="let class of classes" [ngValue]="class.id">{{ class.name }}</option>
         </select>
     </div>
 
     <!-- Student Selector -->
-    <div class="flex flex-col w-[24%] mb-4">
-        <label class="mb-2 font-medium" for="student">{{ 'Student' | translate }}</label>
-        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="student"
+    <div class="w-[24%] mb-4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="student">{{ 'Student' | translate }}</label>
+        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="student"
             [(ngModel)]="selectedStudentId" (ngModelChange)="onFilterChange()" [disabled]="!selectedClassId">
-            <option [ngValue]="null">{{ 'Select' | translate }} {{ 'All' | translate }} {{ 'Students' | translate }}</option>
+            <option [ngValue]="null">{{ 'Choose' | translate }} {{ 'Student' | translate }}</option>
             <option *ngFor="let student of students" [ngValue]="student.id">{{ student.name }}</option>
         </select>
     </div>
 
     <!-- Issue Type Selector -->
-    <div class="flex flex-col w-[24%] mb-4">
-        <label class="mb-2 font-medium" for="issueType">{{ 'Issue Type' | translate }}</label>
-        <select class="rounded-lg border border-solid border-gray-300 px-4 py-3" id="issueType"
+    <div class="w-[24%] mb-4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="issueType">{{ 'Issue Type' | translate }}</label>
+        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="issueType"
             [(ngModel)]="selectedIssueTypeId" (ngModelChange)="onFilterChange()">
-            <option [ngValue]="null">{{ 'Select' | translate }} {{ 'All' | translate }} {{ 'Types' | translate }}</option>
+            <option [ngValue]="null">{{ 'Choose' | translate }} {{ 'Issue Type' | translate }}</option>
             <option *ngFor="let type of issueTypes" [ngValue]="type.id">{{ type.name }}</option>
         </select>
     </div>
