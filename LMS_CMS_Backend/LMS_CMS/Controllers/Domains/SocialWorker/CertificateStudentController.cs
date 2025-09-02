@@ -189,7 +189,6 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
                     medal.DeletedByOctaId = null;
                 }
             }
-
             Unit_Of_Work.certificateStudent_Repository.Update(medal);
             Unit_Of_Work.SaveChanges();
             return Ok();
