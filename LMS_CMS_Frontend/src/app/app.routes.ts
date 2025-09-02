@@ -245,6 +245,7 @@ import { VacationTypesComponent } from './Pages/Employee/HR/vacation-types/vacat
 import { AttendanceReportComponent } from './Pages/Employee/SocialWorker/Reports/attendance-report/attendance-report.component';
 import { StudentIssueReportComponent } from './Pages/Employee/SocialWorker/Reports/student-issue-report/student-issue-report.component';
 import { CertificateStudentReportComponent } from './Pages/Employee/SocialWorker/Reports/certificate-student-report/certificate-student-report.component';
+import { StudentMedalReportComponent } from './Pages/Employee/SocialWorker/Reports/student-medal-report/student-medal-report.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -520,7 +521,7 @@ export const routes: Routes = [
             { path: 'Attendance Report', component: AttendanceReportComponent, title: 'Attendance Report', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Student Issue Report', component: StudentIssueReportComponent, title: 'Student Issue Report', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Certificate To Student Report', component: CertificateStudentReportComponent, title: 'Certificate To Student Report', canActivate: [noNavigateWithoutLoginGuard], },
-            { path: 'Medal To Student Report', component: CertificateStudentReportComponent, title: 'Medal To Student Report', canActivate: [noNavigateWithoutLoginGuard], },
+            { path: 'Medal To Student Report', component: StudentMedalReportComponent, title: 'Medal To Student Report', canActivate: [noNavigateWithoutLoginGuard], },
 
             { path: "Supplier Statement",  component: AccountStatementsComponent,  title: "Supplier Statement",  canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard]  },
             { path: "Safe Statement",  component: AccountStatementsComponent,  title: "Safe Statement",  canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard]  },

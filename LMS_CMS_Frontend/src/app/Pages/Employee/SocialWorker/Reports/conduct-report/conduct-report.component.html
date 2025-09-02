@@ -158,7 +158,7 @@
         <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'Conduct Report'"
             [infoRows]="getInfoRows()"
             [tableHeaders]="['Date', 'Student Name', 'Conduct Type', 'Procedure Type', 'Details']"
-            [tableData]="reportsForExport" #pdfComponentRef>
+            [tableData]="reportsForPDF" #pdfComponentRef> 
         </app-pdf-print>
     </div>
 </div>

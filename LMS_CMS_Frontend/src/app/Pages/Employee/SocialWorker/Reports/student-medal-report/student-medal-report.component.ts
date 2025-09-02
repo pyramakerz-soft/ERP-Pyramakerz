@@ -15,6 +15,7 @@ import { LanguageService } from '../../../../../Services/shared/language.service
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 import Swal from 'sweetalert2';
 import { SocialWorkerMedalStudentService } from '../../../../../Services/Employee/SocialWorker/social-worker-medal-student.service';
+import { ReportsService } from '../../../../../Services/shared/reports.service';
 
 @Component({
   selector: 'app-student-medal-report',
@@ -40,6 +41,8 @@ export class StudentMedalReportComponent implements OnInit {
   medalReports: MedalStudentReportItem[] = [];
   showTable: boolean = false;
   isLoading: boolean = false;
+  isExporting: boolean = false;
+  reportsForExcel: any[] = [];
 
   // Language and RTL
   isRtl: boolean = false;
@@ -64,7 +67,8 @@ export class StudentMedalReportComponent implements OnInit {
     private studentService: StudentService,
     private apiService: ApiService,
     private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private realTimeService: RealTimeNotificationServiceService,
+    private reportsService: ReportsService
   ) {}
 
   ngOnInit() {
@@ -203,14 +207,23 @@ export class StudentMedalReportComponent implements OnInit {
     }
   }
 
-  private prepareExportData(): void {
-    this.reportsForExport = this.medalReports.map((report) => ({
-      'Medal ID': report.medal,
-      'Medal Name': report.medalName,
-      'Added At': new Date(report.addedAt).toLocaleDateString(),
-      'Added By': report.addedBy
-    }));
-  }
+private prepareExportData(): void {
+  // For PDF (object format)
+  this.reportsForExport = this.medalReports.map((report) => ({
+    'Medal ID': report.medal,
+    'Medal Name': report.medalName,
+    'Added At': new Date(report.addedAt).toLocaleDateString(),
+    'Added By': report.addedBy
+  }));
+
+  // For Excel (array format)
+  this.reportsForExcel = this.medalReports.map((report) => [
+    report.medal,
+    report.medalName,
+    new Date(report.addedAt).toLocaleDateString(),
+    report.addedBy
+  ]);
+}
 
   getSchoolName(): string {
     return this.schools.find(s => s.id == this.selectedSchoolId)?.name || 'All Schools';
@@ -299,17 +312,46 @@ export class StudentMedalReportComponent implements OnInit {
     }, 500);
   }
 
-  exportExcel() {
-    if (this.reportsForExport.length === 0) {
-      Swal.fire('Warning', 'No data to export!', 'warning');
-      return;
-    }
-
-    const worksheet = XLSX.utils.json_to_sheet(this.reportsForExport);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Medal Report');
-    
-    const dateStr = new Date().toISOString().slice(0, 10);
-    XLSX.writeFile(workbook, `Medal_Report_${dateStr}.xlsx`);
+async exportExcel() {
+  if (this.reportsForExcel.length === 0) {
+    Swal.fire('Warning', 'No data to export!', 'warning');
+    return;
   }
+
+  this.isExporting = true;
+  
+  try {
+    await this.reportsService.generateExcelReport({
+      mainHeader: {
+        en: 'Medal Student Report',
+        ar: 'تقرير ميداليات الطالب'
+      },
+      subHeaders: [
+        {
+          en: 'Student Medal Records',
+          ar: 'سجلات ميداليات الطالب'
+        }
+      ],
+      infoRows: [
+        { key: 'School', value: this.getSchoolName() },
+        { key: 'Grade', value: this.getGradeName() },
+        { key: 'Class', value: this.getClassName() },
+        { key: 'Student', value: this.getStudentName() }
+      ],
+      tables: [
+        {
+          title: 'Medal Report Data',
+          headers: ['Medal ID', 'Medal Name', 'Added At', 'Added By'],
+          data: this.reportsForExcel
+        }
+      ],
+      filename: `Medal_Report_${new Date().toISOString().slice(0, 10)}.xlsx`
+    });
+  } catch (error) {
+    console.error('Error exporting to Excel:', error);
+    Swal.fire('Error', 'Failed to export to Excel', 'error');
+  } finally {
+    this.isExporting = false;
+  }
+}
 }

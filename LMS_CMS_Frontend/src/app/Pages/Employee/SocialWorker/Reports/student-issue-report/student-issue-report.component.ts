@@ -16,8 +16,7 @@ import { ApiService } from '../../../../../Services/api.service';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 import Swal from 'sweetalert2';
-import * as XLSX from 'xlsx';
-
+import { ReportsService } from '../../../../../Services/shared/reports.service';
 
 @Component({
   selector: 'app-student-issue-report',
@@ -48,6 +47,8 @@ export class StudentIssueReportComponent  implements OnInit {
   showTable: boolean = false;
   isLoading: boolean = false;
   showViewReportBtn: boolean = false;
+  isExporting: boolean = false;
+  reportsForExcel: any[] = [];
 
   // Language and RTL
   isRtl: boolean = false;
@@ -73,7 +74,8 @@ export class StudentIssueReportComponent  implements OnInit {
     private studentService: StudentService,
     private apiService: ApiService,
     private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private realTimeService: RealTimeNotificationServiceService,
+    private reportsService: ReportsService
   ) {}
 
   ngOnInit() {
@@ -119,6 +121,13 @@ export class StudentIssueReportComponent  implements OnInit {
       } catch (error) {
         console.error('Error loading grades:', error);
       }
+    } else {
+      this.grades = [];
+      this.selectedGradeId = null;
+      this.classes = [];
+      this.selectedClassId = null;
+      this.students = [];
+      this.selectedStudentId = null;
     }
   }
 
@@ -136,6 +145,11 @@ export class StudentIssueReportComponent  implements OnInit {
       } catch (error) {
         console.error('Error loading classes:', error);
       }
+    } else {
+      this.classes = [];
+      this.selectedClassId = null;
+      this.students = [];
+      this.selectedStudentId = null;
     }
   }
 
@@ -240,24 +254,27 @@ export class StudentIssueReportComponent  implements OnInit {
       console.error('Error loading student issue reports:', error);
       this.studentIssueReports = [];
       this.showTable = true;
-      // Swal.fire({
-      //   title: 'Error',
-      //   text: 'Failed to load student issue reports',
-      //   icon: 'error',
-      //   confirmButtonText: 'OK',
-      // });
     } finally {
       this.isLoading = false;
     }
   }
 
   private prepareExportData(): void {
+    // For PDF (object format)
     this.reportsForExport = this.studentIssueReports.map((report) => ({
       'Date': new Date(report.date).toLocaleDateString(),
       'Student Name': report.studentName,
       'Issue Type': report.issuesType?.name || 'N/A',
       'Details': report.details || 'N/A'
     }));
+
+    // For Excel (array format)
+    this.reportsForExcel = this.studentIssueReports.map((report) => [
+      new Date(report.date).toLocaleDateString(),
+      report.studentName,
+      report.issuesType?.name || 'N/A',
+      report.details || 'N/A'
+    ]);
   }
 
   getSchoolName(): string {
@@ -355,17 +372,49 @@ export class StudentIssueReportComponent  implements OnInit {
     }, 500);
   }
 
-  exportExcel() {
-    if (this.reportsForExport.length === 0) {
+  async exportExcel() {
+    if (this.reportsForExcel.length === 0) {
       Swal.fire('Warning', 'No data to export!', 'warning');
       return;
     }
 
-    const worksheet = XLSX.utils.json_to_sheet(this.reportsForExport);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Student Issue Report');
+    this.isExporting = true;
     
-    const dateStr = new Date().toISOString().slice(0, 10);
-    XLSX.writeFile(workbook, `Student_Issue_Report_${dateStr}.xlsx`);
+    try {
+      await this.reportsService.generateExcelReport({
+        mainHeader: {
+          en: 'Student Issue Report',
+          ar: 'تقرير مشاكل الطلاب'
+        },
+        subHeaders: [
+          {
+            en: 'Student Issues Records',
+            ar: 'سجلات مشاكل الطلاب'
+          }
+        ],
+        infoRows: [
+          { key: 'From Date', value: this.dateFrom },
+          { key: 'To Date', value: this.dateTo },
+          { key: 'School', value: this.getSchoolName() },
+          { key: 'Grade', value: this.getGradeName() },
+          { key: 'Class', value: this.getClassName() },
+          { key: 'Student', value: this.getStudentName() },
+          { key: 'Issue Type', value: this.getIssueTypeName() }
+        ],
+        tables: [
+          {
+            title: 'Student Issue Report Data',
+            headers: ['Date', 'Student Name', 'Issue Type', 'Details'],
+            data: this.reportsForExcel
+          }
+        ],
+        filename: `Student_Issue_Report_${new Date().toISOString().slice(0, 10)}.xlsx`
+      });
+    } catch (error) {
+      console.error('Error exporting to Excel:', error);
+      Swal.fire('Error', 'Failed to export to Excel', 'error');
+    } finally {
+      this.isExporting = false;
+    }
   }
 }
