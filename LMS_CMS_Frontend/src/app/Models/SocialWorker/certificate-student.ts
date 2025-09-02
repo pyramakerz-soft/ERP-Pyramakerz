@@ -15,5 +15,15 @@ export class CertificateStudent {
     ) { }
 }
 
+export class CertificateStudentReportItem {
+  constructor(
+    public id: number,
+    public medal: number,
+    public medalName: string,
+    public addedAt: string,
+    public addedBy: string
+  ) {}
+}
+
 
 

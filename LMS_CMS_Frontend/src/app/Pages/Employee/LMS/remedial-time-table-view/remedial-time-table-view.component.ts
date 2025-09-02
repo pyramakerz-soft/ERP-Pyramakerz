@@ -91,8 +91,8 @@ export class RemedialTimeTableViewComponent {
     public RemedialClassroomServ: RemedialClassroomService,
     public RemedialTimeTableServ: RemedialTimeTableService,
     public RemedialTimeTableClassesServ: RemedialTimeTableClassesService,    
-        private languageService: LanguageService,
-        private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService
   ) { }
 
   ngOnInit() {

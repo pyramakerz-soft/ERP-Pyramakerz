@@ -39,7 +39,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee", "parent"}
+            allowedTypes: new[] { "octa", "employee", "parent" , "student"}
         )]
         public async Task<IActionResult> GetAsync()
         {
@@ -82,7 +82,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
+            allowedTypes: new[] { "octa", "employee", "student", "parent" },
              pages: new[] { "School" }
         )]
         public async Task<IActionResult> GetAsync(long id)
@@ -168,7 +168,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpPut]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
+            allowedTypes: new[] { "octa", "employee", "student" },
             allowEdit: 1,
             pages: new[] { "School" }
         )]

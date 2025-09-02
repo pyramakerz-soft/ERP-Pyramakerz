@@ -55,6 +55,7 @@ namespace LMS_CMS_DAL.Models.Domains.LMS
         public string? Room { get; set; }
         public string? LandMark { get; set; }
         public string? AdditionalInfo { get; set; }
+        public bool IsSuspended { get; set; }
 
         [ForeignKey("TaxCustomer")]
         public int? TypeID { get; set; }

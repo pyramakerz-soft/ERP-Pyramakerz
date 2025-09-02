@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using LMS_CMS_DAL.Models.Domains.AccountingModule;
 using LMS_CMS_DAL.Models.Domains.Administration;
+using LMS_CMS_DAL.Models.Domains.Archiving;
 using LMS_CMS_DAL.Models.Domains.BusModule;
 using LMS_CMS_DAL.Models.Domains.HR;
 using LMS_CMS_DAL.Models.Domains.LMS;
@@ -60,6 +61,7 @@ namespace LMS_CMS_DAL.Models.Domains
         public bool? CanReceiveRequest { get; set; } 
         public bool? CanReceiveRequestFromParent { get; set; }
         public bool? CanReceiveMessageFromParent { get; set; }
+        public bool IsSuspended { get; set; }
 
         [ForeignKey("Role")]
         [Required]
@@ -130,6 +132,7 @@ namespace LMS_CMS_DAL.Models.Domains
         public ICollection<Deduction> Deduction { get; set; } = new HashSet<Deduction>();
         public ICollection<EmployeeVacationCount> EmployeeVacationCount { get; set; } = new HashSet<EmployeeVacationCount>();
         public ICollection<LeaveRequest> LeaveRequest { get; set; } = new HashSet<LeaveRequest>();
-        public ICollection<VacationEmployee> VacationEmployee { get; set; } = new HashSet<VacationEmployee>(); 
+        public ICollection<VacationEmployee> VacationEmployee { get; set; } = new HashSet<VacationEmployee>();
+        public ICollection<PermissionGroupEmployee> PermissionGroupEmployees { get; set; } = new HashSet<PermissionGroupEmployee>();
     }
 }

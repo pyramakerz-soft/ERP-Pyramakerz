@@ -31,18 +31,13 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("ByStudentId/{SchoolId}/{StudentId}/{DateFrom}/{DateTo}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
+            allowedTypes: new[] {"octa", "employee", "student", "parent" },
             pages: new[] { "Certificate" }
         )]
         public async Task<IActionResult> GetById(long SchoolId, long StudentId, DateOnly DateFrom, DateOnly DateTo)
         {
             var Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            // DTO initialization
-            var certificateGetDTO = new CertificateGetDTO
-            {
-                CertificateSubjects = new List<CertificateSubject>()
-            };
 
             // Check if student exists
             var student = Unit_Of_Work.student_Repository.First_Or_Default(s => s.ID == StudentId && s.IsDeleted != true);
@@ -83,12 +78,19 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             List<WeightTypeGetDTO> WeightTypeDTO =mapper.Map<List<WeightTypeGetDTO>>(AllWeightType);     //Header
 
             List<CertificateSubject> certificateSubjects = new List<CertificateSubject>(); // The Data Fill In cell
+            List<CertificateSubjectTotalMark> certificateSubjectTotalMark = new List<CertificateSubjectTotalMark>(); // total marks in last column
 
             foreach (var subjectId in subjectIds)
             {
                 var subject = Unit_Of_Work.subject_Repository.First_Or_Default(s => s.ID == subjectId && s.IsDeleted != true);
                 if (subject == null) continue;
 
+                var subjectTotalMark =  new CertificateSubjectTotalMark();
+                subjectTotalMark.SubjectID = subject.ID;
+                subjectTotalMark.SubjectEn_name = subject.en_name;
+                subjectTotalMark.SubjectAr_name = subject.ar_name;
+                subjectTotalMark.Degree =0;
+                subjectTotalMark.Mark = 0;
 
                 // Weight types for this subject
                 List<SubjectWeightType> subjectWeightTypes = await Unit_Of_Work.subjectWeightType_Repository.Select_All_With_IncludesById<SubjectWeightType>(s => s.SubjectID == subjectId && s.IsDeleted != true && s.WeightType.IsDeleted!= true,
@@ -163,8 +165,26 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
 
                     var certificateSubjectObject = new CertificateSubject();
-                    certificateSubjectObject.Degree = avgDegree;
                     certificateSubjectObject.Mark = swt.Weight;
+
+                    float weight =avgDegree;
+                    int integerPart = (int)Math.Floor(weight);
+                    float decimalPart = weight - integerPart;
+
+                    if (decimalPart > 0.5)
+                    {
+                        certificateSubjectObject.Degree = integerPart + 1;
+                    }
+                    else if (decimalPart < 0.5)
+                    {
+                        certificateSubjectObject.Degree = integerPart;
+                    }
+                    else // decimalPart == 0.5
+                    {
+                        certificateSubjectObject.Degree = integerPart + 0.5f;
+                    }
+                    //certificateSubjectObject.Degree = avgDegree;
+
                     certificateSubjectObject.WeightTypeArName = swt.WeightType.ArabicName;
                     certificateSubjectObject.WeightTypeEnName = swt.WeightType.EnglishName;
                     certificateSubjectObject.WeightTypeId = swt.WeightType.ID;
@@ -173,11 +193,13 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                     certificateSubjectObject.SubjectEn_name = subject.en_name;
 
                     certificateSubjects.Add(certificateSubjectObject);
+                    subjectTotalMark.Mark += certificateSubjectObject.Mark;
+                    subjectTotalMark.Degree += certificateSubjectObject.Degree;
                 }
-
+                certificateSubjectTotalMark.Add(subjectTotalMark);
             }
 
-            return Ok(new { SubjectDTO = SubjectDTO, Header = WeightTypeDTO, cells = certificateSubjects });
+            return Ok(new { SubjectDTO = SubjectDTO, Header = WeightTypeDTO, cells = certificateSubjects , LastColumn = certificateSubjectTotalMark });
         }
 
     }

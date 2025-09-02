@@ -18,3 +18,16 @@ export class StudentIssue {
         public insertedAt: string = '',
     ) { }
 }
+export class StudentIssueReportItem {
+    constructor(
+  public id: number,
+  public date: string,
+  public studentID: number,
+  public studentName: string,
+  public issuesType: {
+     id: number,
+     name: string,
+  },
+  public details: string,
+){}
+}

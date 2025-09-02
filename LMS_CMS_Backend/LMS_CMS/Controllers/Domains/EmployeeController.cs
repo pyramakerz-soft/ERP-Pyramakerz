@@ -983,8 +983,7 @@ namespace LMS_CMS_PL.Controllers.Domains
             }
             await Unit_Of_Work.SaveChangesAsync();
             return Ok(newEmployee);
-        }
-
+        } 
 
         //////////////////////////////////////////////////////
 
@@ -1047,6 +1046,76 @@ namespace LMS_CMS_PL.Controllers.Domains
                 if (employee.DeletedByOctaId != null)
                 {
                     employee.DeletedByOctaId = null;
+                }
+            }
+
+            Unit_Of_Work.employee_Repository.Update(employee);
+            Unit_Of_Work.SaveChanges();
+            return Ok();
+        }
+        
+        //////////////////////////////////////////////////////
+
+        [HttpDelete("Suspend/{id}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            allowEdit: 1,
+            pages: new[] { "Employee" }
+        )]
+        public IActionResult Suspend(long id)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            if (id == null)
+            {
+                return BadRequest("id cannot be null");
+            }
+
+            Employee employee = Unit_Of_Work.employee_Repository.Select_By_Id(id);
+
+            if (employee == null || employee.IsDeleted == true)
+            {
+                return NotFound("No employee with this ID");
+            }
+            
+            if (userTypeClaim == "employee")
+            {
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Employee", roleId, userId, employee);
+                if (accessCheck != null)
+                {
+                    return accessCheck;
+                }
+            }
+             
+            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            employee.IsSuspended = !employee.IsSuspended;
+            employee.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+            if (userTypeClaim == "octa")
+            {
+                employee.UpdatedByOctaId = userId;
+                if (employee.UpdatedByUserId != null)
+                {
+                    employee.UpdatedByUserId = null;
+                }
+            }
+            else if (userTypeClaim == "employee")
+            {
+                employee.UpdatedByUserId = userId;
+                if (employee.UpdatedByOctaId != null)
+                {
+                    employee.UpdatedByOctaId = null;
                 }
             }
 

@@ -154,6 +154,53 @@ export class EmployeeComponent {
   view(id:number){
     this.router.navigateByUrl(`Employee/Employee Details/${id}`)
   }
+
+  suspend(emp:EmployeeGet){ 
+    let message = ""
+    let doneMessage = ""
+    let doneTitle = ""
+    if(emp.isSuspended == false){
+      message = "Are you sure you want to Suspend this Employee?"
+      doneMessage = "The Employee has been Suspend successfully."
+      doneTitle = "Suspend!"
+    }else{
+      message = "Are you sure you want to UnSuspend this Employee?"
+      doneMessage = "The Employee has been UnSuspend successfully."
+      doneTitle = "UnSuspend!"
+    }
+    Swal.fire({
+      title: message,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#089B41',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: doneTitle,
+      cancelButtonText: 'Cancel',
+    }).then((result) => {
+      if (result.isConfirmed) { 
+        this.EmpServ.Suspend(emp.id, this.DomainName).subscribe({
+          next: () => {
+            Swal.fire({
+              icon: 'success',
+              title: doneTitle,
+              text: doneMessage,
+              confirmButtonColor: '#089B41',
+            });
+            this.GetEmployee(); 
+          },
+          error: (error) => {
+            const errorMessage = error?.error || 'An unexpected error occurred.';
+            Swal.fire({
+              icon: 'error',
+              title: 'Error!',
+              text: errorMessage,
+              confirmButtonColor: '#089B41',
+            });
+          },
+        });
+      }
+    });
+  }
   
   IsAllowDelete(InsertedByID: number) {
     const IsAllow = this.EditDeleteServ.IsAllowDelete(InsertedByID, this.UserID, this.AllowDeleteForOthers);

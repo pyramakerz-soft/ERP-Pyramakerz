@@ -20,12 +20,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
         private readonly DbContextFactoryService _dbContextFactory;
         IMapper mapper;
         private readonly CheckPageAccessService _checkPageAccessService;
-
-
-        public MaintenanceEmployeeController(
-            DbContextFactoryService dbContextFactory,
-            IMapper mapper,
-            CheckPageAccessService checkPageAccessService)
+         
+        public MaintenanceEmployeeController(DbContextFactoryService dbContextFactory, IMapper mapper, CheckPageAccessService checkPageAccessService)
         {
             _dbContextFactory = dbContextFactory;
             this.mapper = mapper;
@@ -34,7 +30,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
 
 
         [HttpGet]
-        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Maintenance Employees" })]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" }, 
+            pages: new[] { "Maintenance Employees" }
+        )]
         public async Task<IActionResult> GetAllAsync()
         {
 
@@ -63,7 +62,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
         }
 
         [HttpGet("{id}")]
-        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Maintenance Employees" })]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" }, 
+            pages: new[] { "Maintenance Employees" }
+        )]
         public async Task<IActionResult> GetByIdAsync(long id)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -83,10 +85,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            MaintenanceEmployee? item = await Unit_Of_Work.maintenanceEmployee_Repository
-                                       .FindByIncludesAsync(i => i.ID == id && i.IsDeleted != true, 
-                                       quer => quer.Include(e => e.Employee));
-
+            MaintenanceEmployee? item = await Unit_Of_Work.maintenanceEmployee_Repository.FindByIncludesAsync(i => i.ID == id && i.IsDeleted != true, quer => quer.Include(e => e.Employee));
 
             if (item == null) return NotFound("No employee with this ID");
 
@@ -95,25 +94,26 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
             return Ok(dto);
         }
 
-            [HttpPost]
-            [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, allowEdit: 1, pages: new[] { "Maintenance Employees" })]
-            public IActionResult Add(MaintenanceEmployeeAddDto model)
-            {
-                UOW uow = _dbContextFactory.CreateOneDbContext(HttpContext);
-
+        [HttpPost]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" }, 
+            pages: new[] { "Maintenance Employees" }
+        )]
+        public IActionResult Add(MaintenanceEmployeeAddDto model)
+        {
+            UOW uow = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             if (model == null)
                 return BadRequest("Invalid employee data.");
 
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-                long.TryParse(userIdClaim, out long userId);
-                var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
 
-                if (userIdClaim == null || userTypeClaim == null)
-                    return Unauthorized("User ID or Type claim not found.");
+            if (userIdClaim == null || userTypeClaim == null)
+                return Unauthorized("User ID or Type claim not found.");
 
-            var employeeExists = uow.employee_Repository
-                            .First_Or_Default(e => e.ID == model.EmployeeID && e.IsDeleted != true);
+            var employeeExists = uow.employee_Repository.First_Or_Default(e => e.ID == model.EmployeeID && e.IsDeleted != true);
 
             if (employeeExists == null)
             {
@@ -123,21 +123,23 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
             var cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
 
             MaintenanceEmployee? entity = mapper.Map<MaintenanceEmployee>(model);
-                entity.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+             entity.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
 
-                if (userTypeClaim == "octa") entity.InsertedByOctaId = userId;
-                else if (userTypeClaim == "employee") entity.InsertedByUserId = userId;
+            if (userTypeClaim == "octa") entity.InsertedByOctaId = userId;
+            else if (userTypeClaim == "employee") entity.InsertedByUserId = userId;
 
-                uow.maintenanceEmployee_Repository.Add(entity);
-                uow.SaveChanges();
+            uow.maintenanceEmployee_Repository.Add(entity);
+            uow.SaveChanges();
 
-                return Ok(model);
+            return Ok(model);
         }
 
-        
-
         [HttpDelete]
-        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, allowEdit: 1, pages: new[] { "Maintenance Employees" })]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" }, 
+            allowDelete: 1, 
+            pages: new[] { "Maintenance Employees" }
+        )]
         public IActionResult Delete(long id)
         {
             UOW uow = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -160,7 +162,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
             
             if (userTypeClaim == "employee")
             {
-                var accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(uow, "Maintenance Employees", roleId, userId, entity);
+                var accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(uow, "Maintenance Employees", roleId, userId, entity);
                 if (accessCheck != null) return accessCheck;
             }
 
@@ -183,11 +185,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
             uow.SaveChanges();
 
             return Ok();
-        }
-
-
-
-
-
+        } 
     }
 }

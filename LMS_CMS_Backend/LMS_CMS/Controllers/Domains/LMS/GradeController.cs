@@ -36,7 +36,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" }
+            allowedTypes: new[] { "octa", "employee", "student", "parent" }
         )]
         public async Task<IActionResult> GetAsync()
         {
@@ -68,7 +68,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("GetBySection/{id}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee", "parent" }
+            allowedTypes: new[] { "octa", "employee", "parent", "student" }
         )]
         public async Task<IActionResult> GetAsync(long id)
         {
@@ -101,7 +101,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         [HttpGet("GetBySchool/{id}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" }
+            allowedTypes: new[] { "octa", "employee" , "student", "parent" }
         )]
         public async Task<IActionResult> GetBySchool(long id)
         {
