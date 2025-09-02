@@ -15,7 +15,7 @@ export class LoansService {
     this.baseUrl = ApiServ.BaseUrl
   }
 
-  Get(DomainName: string) {
+  Get(DomainName: string, pageNumber: number, pageSize: number) {
     if (DomainName != null) {
       this.header = DomainName
     }
@@ -24,8 +24,7 @@ export class LoansService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-
-    return this.http.get<Loans[]>(`${this.baseUrl}/Loans`, { headers });
+    return this.http.get<{ data: Loans[], pagination: any }>(`${this.baseUrl}/Loans?pageNumber=${pageNumber}&pageSize=${pageSize}`, { headers });
   }
 
   GetByID(id: number, DomainName: string) {

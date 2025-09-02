@@ -37,7 +37,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
           allowedTypes: new[] { "octa", "employee" },
           pages: new[] { "Conduct Level" }
          )]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> GetAsync([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -51,10 +51,19 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            List<Loans> loans =await Unit_Of_Work.loans_Repository.Select_All_With_IncludesById<Loans>(
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+
+            int totalRecords = await Unit_Of_Work.loans_Repository
+               .CountAsync(f => f.IsDeleted != true);
+
+            List<Loans> loans =await Unit_Of_Work.loans_Repository.Select_All_With_IncludesById_Pagination<Loans>(
                     sem => sem.IsDeleted != true,
                      query => query.Include(emp => emp.Employee),
-                    query => query.Include(emp => emp.Save));
+                    query => query.Include(emp => emp.Save))
+               .Skip((pageNumber - 1) * pageSize)
+               .Take(pageSize)
+               .ToListAsync(); 
 
             if (loans == null || loans.Count == 0)
             {
@@ -63,7 +72,15 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
             List<loansGetDTO> Dto = mapper.Map<List<loansGetDTO>>(loans);
 
-            return Ok(Dto);
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+
+            return Ok(new { Data = Dto, Pagination = paginationMetadata });
         }
 
         ////////////////////////////////

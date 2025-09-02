@@ -15,7 +15,7 @@ export class DeductionService {
     this.baseUrl = ApiServ.BaseUrl
   }
 
-  Get(DomainName: string) {
+  Get(DomainName: string, pageNumber: number, pageSize: number) {
     if (DomainName != null) {
       this.header = DomainName
     }
@@ -24,8 +24,7 @@ export class DeductionService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-
-    return this.http.get<Deduction[]>(`${this.baseUrl}/Deduction`, { headers });
+    return this.http.get<{ data: Deduction[], pagination: any }>(`${this.baseUrl}/Deduction?pageNumber=${pageNumber}&pageSize=${pageSize}`, { headers });
   }
 
   GetByID(id: number, DomainName: string) {

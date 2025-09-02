@@ -37,7 +37,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
           allowedTypes: new[] { "octa", "employee" },
           pages: new[] { "Conduct Level" }
          )]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> GetAsync([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -51,10 +51,19 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            List<Bouns> bouns =await Unit_Of_Work.bouns_Repository.Select_All_With_IncludesById<Bouns>(
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+
+            int totalRecords = await Unit_Of_Work.bouns_Repository
+               .CountAsync(f => f.IsDeleted != true);
+
+            List<Bouns> bouns =await Unit_Of_Work.bouns_Repository.Select_All_With_IncludesById_Pagination<Bouns>(
                     sem => sem.IsDeleted != true,
                     query => query.Include(emp => emp.Employee),
-                    query => query.Include(emp => emp.BounsType));
+                    query => query.Include(emp => emp.BounsType))
+                   .Skip((pageNumber - 1) * pageSize)
+                   .Take(pageSize)
+                   .ToListAsync();
 
             if (bouns == null || bouns.Count == 0)
             {
@@ -62,8 +71,15 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             }
 
             List<BounsGetDTO> Dto = mapper.Map<List<BounsGetDTO>>(bouns);
+            var paginationMetadata = new
+            {
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
 
-            return Ok(Dto);
+            return Ok(new { Data = Dto, Pagination = paginationMetadata });
         }
 
         ////////////////////////////////

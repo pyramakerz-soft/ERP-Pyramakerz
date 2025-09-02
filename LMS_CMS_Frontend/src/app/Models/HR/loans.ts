@@ -1,9 +1,8 @@
 export class Loans {
     constructor(
         public id: number = 0,
-        public name: string = '',
         public date: string = '',
-        public Notes: string = '',
+        public notes: string = '',
         public deductionStartMonth: string = '',
         public amount: number = 0,
         public numberOfDeduction: number = 0,

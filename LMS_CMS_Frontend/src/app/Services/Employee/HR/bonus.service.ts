@@ -14,7 +14,7 @@ export class BonusService {
     this.baseUrl = ApiServ.BaseUrl
   }
 
-  Get(DomainName: string) {
+  Get(DomainName: string, pageNumber: number, pageSize: number) {
     if (DomainName != null) {
       this.header = DomainName
     }
@@ -23,8 +23,7 @@ export class BonusService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-
-    return this.http.get<Bonus[]>(`${this.baseUrl}/Bonus`, { headers });
+    return this.http.get<{ data: Bonus[], pagination: any }>(`${this.baseUrl}/Bonus?pageNumber=${pageNumber}&pageSize=${pageSize}`, { headers });
   }
 
   GetByID(id: number, DomainName: string) {

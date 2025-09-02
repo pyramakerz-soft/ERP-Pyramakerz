@@ -1380,10 +1380,13 @@ namespace LMS_CMS_BL.Config
             CreateMap<VacationTypesAddDTO, VacationTypes>();
 
             CreateMap<Loans, loansGetDTO>()
-                .ForMember(dest => dest.SaveName, opt => opt.MapFrom(src => src.Save))
+                .ForMember(dest => dest.SaveName, opt => opt.MapFrom(src => src.Save.Name))
                 .ForMember(dest => dest.EmployeeArName, opt => opt.MapFrom(src => src.Employee.ar_name))
                 .ForMember(dest => dest.EmployeeEnName, opt => opt.MapFrom(src => src.Employee.en_name));
             CreateMap<loansAddDTO, Loans>();
+
+            CreateMap<BounsType, BounsTypeGetDTO>();
+            CreateMap<DeductionType, DeductionTypeGetDTO>();
 
             CreateMap<Bouns, BounsGetDTO>()
                 .ForMember(dest => dest.BounsTypeName, opt => opt.MapFrom(src => src.BounsType.Name))

@@ -15,7 +15,7 @@ export class LeaveRequestService {
     this.baseUrl = ApiServ.BaseUrl
   }
 
-  Get(DomainName: string) {
+  Get(DomainName: string, pageNumber: number, pageSize: number) {
     if (DomainName != null) {
       this.header = DomainName
     }
@@ -24,8 +24,7 @@ export class LeaveRequestService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-
-    return this.http.get<LeaveRequest[]>(`${this.baseUrl}/LeaveRequest`, { headers });
+    return this.http.get<{ data: LeaveRequest[], pagination: any }>(`${this.baseUrl}/LeaveRequest?pageNumber=${pageNumber}&pageSize=${pageSize}`, { headers });
   }
 
   GetByID(id: number, DomainName: string) {
