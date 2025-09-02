@@ -41,51 +41,29 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Permission Groups" }
         )]
-        public IActionResult GetAsync([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetAsync([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             if (pageNumber < 1) pageNumber = 1;
             if (pageSize < 1) pageSize = 10;
 
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-
-            List<PermissionGroup> permissionGroups = Unit_Of_Work.permissionGroup_Repository.FindBy(f => f.IsDeleted != true);
+            int totalRecords = await Unit_Of_Work.permissionGroup_Repository
+               .CountAsync(f => f.IsDeleted != true);
+             
+            List<PermissionGroup> permissionGroups = await Unit_Of_Work.permissionGroup_Repository
+                .Select_All_With_IncludesById_Pagination<PermissionGroup>(
+                    f => f.IsDeleted != true)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
 
             if (permissionGroups == null || permissionGroups.Count == 0)
             {
                 return NotFound();
             }
 
-            List<PermissionGroupGetDTO> permissionGroupGetDTOs = mapper.Map<List<PermissionGroupGetDTO>>(permissionGroups); 
+            List<PermissionGroupGetDTO> permissionGroupGetDTOs = mapper.Map<List<PermissionGroupGetDTO>>(permissionGroups);
 
-            return Ok(permissionGroupGetDTOs);
-        }
-        public async Task<IActionResult> GetAsync()
-        {
-            
-            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-
-            // Get total record count
-            int totalRecords = await Unit_Of_Work.installmentDeductionMaster_Repository
-                .CountAsync(f => f.IsDeleted != true);
-
-            // Apply pagination
-            List<InstallmentDeductionMaster> installmentDeductionMasters = await Unit_Of_Work.installmentDeductionMaster_Repository
-                .Select_All_With_IncludesById_Pagination<InstallmentDeductionMaster>(
-                    f => f.IsDeleted != true,
-                    query => query.Include(Income => Income.Student),
-                    query => query.Include(Income => Income.Employee))
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
-
-            if (installmentDeductionMasters == null || installmentDeductionMasters.Count == 0)
-            {
-                return NotFound();
-            }
-
-            List<InstallmentDeductionMasterGetDTO> DTOs = mapper.Map<List<InstallmentDeductionMasterGetDTO>>(installmentDeductionMasters);
-
-            // Pagination metadata
             var paginationMetadata = new
             {
                 TotalRecords = totalRecords,
@@ -94,8 +72,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
                 TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
             };
 
-            return Ok(new { Data = DTOs, Pagination = paginationMetadata });
-        }
+            return Ok(new { Data = permissionGroupGetDTOs, Pagination = paginationMetadata }); 
+        } 
+
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         [HttpGet("{id}")]

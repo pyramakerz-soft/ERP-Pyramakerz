@@ -15,6 +15,7 @@ import { RealTimeNotificationServiceService } from '../../../../../Services/shar
 import Swal from 'sweetalert2';
 import * as XLSX from 'xlsx';
 import { CertificateStudentService } from '../../../../../Services/Employee/SocialWorker/certificate-student.service';
+import { ReportsService } from '../../../../../Services/shared/reports.service';
 
 
 @Component({
@@ -42,6 +43,9 @@ export class CertificateStudentReportComponent implements OnInit {
   showTable: boolean = false;
   isLoading: boolean = false;
   showViewReportBtn: boolean = false;
+  isExporting: boolean = false;
+  reportsForExcel: any[] = [];
+
 
   // Language and RTL
   isRtl: boolean = false;
@@ -66,7 +70,9 @@ export class CertificateStudentReportComponent implements OnInit {
     private studentService: StudentService,
     private apiService: ApiService,
     private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private realTimeService: RealTimeNotificationServiceService,
+      private reportsService: ReportsService 
+
   ) {}
 
   ngOnInit() {
@@ -216,14 +222,23 @@ export class CertificateStudentReportComponent implements OnInit {
     }
   }
 
-  private prepareExportData(): void {
-    this.reportsForExport = this.certificateReports.map((report) => ({
-      'Medal ID': report.medal,
-      'Medal Name': report.medalName,
-      'Added At': new Date(report.addedAt).toLocaleDateString(),
-      'Added By': report.addedBy
-    }));
-  }
+private prepareExportData(): void {
+  // For PDF (object format)
+  this.reportsForExport = this.certificateReports.map((report) => ({
+    'Medal ID': report.medal,
+    'Medal Name': report.medalName,
+    'Added At': new Date(report.addedAt).toLocaleDateString(),
+    'Added By': report.addedBy
+  }));
+
+  // For Excel (array format)
+  this.reportsForExcel = this.certificateReports.map((report) => [
+    report.medal,
+    report.medalName,
+    new Date(report.addedAt).toLocaleDateString(),
+    report.addedBy
+  ]);
+}
 
   getSchoolName(): string {
     return this.schools.find(s => s.id == this.selectedSchoolId)?.name || 'All Schools';
@@ -312,17 +327,46 @@ export class CertificateStudentReportComponent implements OnInit {
     }, 500);
   }
 
-  exportExcel() {
-    if (this.reportsForExport.length === 0) {
-      Swal.fire('Warning', 'No data to export!', 'warning');
-      return;
-    }
-
-    const worksheet = XLSX.utils.json_to_sheet(this.reportsForExport);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Certificate Report');
-    
-    const dateStr = new Date().toISOString().slice(0, 10);
-    XLSX.writeFile(workbook, `Certificate_Report_${dateStr}.xlsx`);
+async exportExcel() {
+  if (this.reportsForExcel.length === 0) {
+    Swal.fire('Warning', 'No data to export!', 'warning');
+    return;
   }
+
+  this.isExporting = true;
+  
+  try {
+    await this.reportsService.generateExcelReport({
+      mainHeader: {
+        en: 'Certificate Student Report',
+        ar: 'تقرير شهادات الطالب'
+      },
+      subHeaders: [
+        {
+          en: 'Student Certificate Records',
+          ar: 'سجلات شهادات الطالب'
+        }
+      ],
+      infoRows: [
+        { key: 'School', value: this.getSchoolName() },
+        { key: 'Grade', value: this.getGradeName() },
+        { key: 'Class', value: this.getClassName() },
+        { key: 'Student', value: this.getStudentName() }
+      ],
+      tables: [
+        {
+          title: 'Certificate Report Data',
+          headers: ['Medal ID', 'Medal Name', 'Added At', 'Added By'],
+          data: this.reportsForExcel
+        }
+      ],
+      filename: `Certificate_Report_${new Date().toISOString().slice(0, 10)}.xlsx`
+    });
+  } catch (error) {
+    console.error('Error exporting to Excel:', error);
+    Swal.fire('Error', 'Failed to export to Excel', 'error');
+  } finally {
+    this.isExporting = false;
+  }
+}
 }
