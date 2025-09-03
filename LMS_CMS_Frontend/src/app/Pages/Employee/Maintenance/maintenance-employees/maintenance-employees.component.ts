@@ -31,9 +31,9 @@ export class MaintenanceEmployeesComponent {
 
   isRtl: boolean = false;
   subscription!: Subscription;
-  TableData: any[] = [];        // Employees already linked to maintenance
-  employees: EmployeeGet[] = []; // All available employees for dropdown
-  selectedEmployeeId: number | null = null; // 👈 FIXED
+  TableData: any[] = [];       
+  employees: EmployeeGet[] = []; 
+  selectedEmployeeId: number | null = null;
   keysArray: string[] = ['id', 'en_Name', 'ar_Name'];
   key: string= "id";
   DomainName: string = '';
@@ -66,15 +66,9 @@ ngOnInit() {
       this.activeRoute.url.subscribe(url => {
         this.path = url[0].path;
       });
-      this.mainServ.Get(this.DomainName).subscribe({
-      next: (data:any) => {
-        this.TableData = data;
-        console.log(this.TableData)
-      },
-      error: (err:any) => {
-        console.error('Error fetching companies:', err);
-      }
-    });}
+    this.GetTableData()
+    }
+    this.GetSelectData()
 
     this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
@@ -108,7 +102,15 @@ ngOnInit() {
     }
   }
 
-
+  async GetSelectData() {
+    this.employees = [];
+    try {
+      const data = await firstValueFrom(this.EmpServ.Get_Employees(this.DomainName)); 
+      this.employees = data;
+    } catch (error) {
+      this.employees = [];
+    }
+  }
 
 Delete(id: number) {
   Swal.fire({
@@ -180,7 +182,7 @@ Delete(id: number) {
 
 
 openModal() {
-    this.selectedEmployeeId = null; // reset
+    this.selectedEmployeeId = null; 
     this.isModalOpen = true;
     document.getElementById('Add_Modal')?.classList.remove('hidden');
     document.getElementById('Add_Modal')?.classList.add('flex');
@@ -200,7 +202,7 @@ openModal() {
 
     this.isLoading = true;
     try {
-      const payload = { employeeId: this.selectedEmployeeId }; // 👈 FIXED
+      const payload = { employeeId: this.selectedEmployeeId };
       await firstValueFrom(this.mainServ.Add(payload, this.DomainName));
 
       Swal.fire('Added!', 'Employee added to maintenance successfully.', 'success');
