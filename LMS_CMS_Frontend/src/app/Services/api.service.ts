@@ -26,8 +26,6 @@ export class ApiService {
   var Header = 'try';    
 
 
-
     return Header;
   }
 }
-

@@ -13,21 +13,13 @@ import { ApiService } from '../../../../../Services/api.service';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 import Swal from 'sweetalert2';
-import * as XLSX from 'xlsx';
 import { ConductTypeService } from '../../../../../Services/Employee/SocialWorker/conduct-type.service';
 import { ProcedureTypeService } from '../../../../../Services/Employee/SocialWorker/procedure-type.service';
 import { ConductType } from '../../../../../Models/SocialWorker/conduct-type';
 import { ProcedureType } from '../../../../../Models/SocialWorker/procedure-type';
+import { ConductReportItem } from '../../../../../Models/SocialWorker/conduct';
+import { ReportsService } from '../../../../../Services/shared/reports.service';
 
-interface ConductReportItem {
-  id: number;
-  date: string;
-  studentID: number;
-  studentName: string;
-  conductType: ConductType;
-  procedureType: ProcedureType;
-  details: string;
-}
 @Component({
   selector: 'app-conduct-report',
   standalone: true,
@@ -59,6 +51,8 @@ export class ConductReportComponent implements OnInit {
   showTable: boolean = false;
   isLoading: boolean = false;
   showViewReportBtn: boolean = false;
+  reportsForPDF: any[] = [];
+
 
   // Language and RTL
   isRtl: boolean = false;
@@ -75,21 +69,23 @@ export class ConductReportComponent implements OnInit {
     reportHeaderTwoAr: 'سجلات سلوك الطلاب'
   };
 
-  constructor(
-    private conductService: ConductService,
-    private conductTypeService: ConductTypeService,
-    private procedureTypeService: ProcedureTypeService,
-    private schoolService: SchoolService,
-    private gradeService: GradeService,
-    private classroomService: ClassroomService,
-    private studentService: StudentService,
-    private apiService: ApiService,
-    private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
-  ) {}
+constructor(
+  private conductService: ConductService,
+  private conductTypeService: ConductTypeService,
+  private procedureTypeService: ProcedureTypeService,
+  private schoolService: SchoolService,
+  private gradeService: GradeService,
+  private classroomService: ClassroomService,
+  private studentService: StudentService,
+  private apiService: ApiService,
+  private languageService: LanguageService,
+  private realTimeService: RealTimeNotificationServiceService,
+  private reportsService: ReportsService 
+) {}
 
   ngOnInit() {
     this.loadSchools();
+    this.loadProcedureTypes();
     
     this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
@@ -130,6 +126,13 @@ export class ConductReportComponent implements OnInit {
       } catch (error) {
         console.error('Error loading grades:', error);
       }
+    } else {
+      this.grades = [];
+      this.selectedGradeId = null;
+      this.classes = [];
+      this.selectedClassId = null;
+      this.students = [];
+      this.selectedStudentId = null;
     }
   }
 
@@ -147,6 +150,11 @@ export class ConductReportComponent implements OnInit {
       } catch (error) {
         console.error('Error loading classes:', error);
       }
+    } else {
+      this.classes = [];
+      this.selectedClassId = null;
+      this.students = [];
+      this.selectedStudentId = null;
     }
   }
 
@@ -179,6 +187,8 @@ export class ConductReportComponent implements OnInit {
           this.conductTypeService.GetBySchool(this.selectedSchoolId, domainName)
         );
         this.conductTypes = data;
+        console.log('seif')
+        console.log('Conduct types loaded:', this.conductTypes);
       } catch (error) {
         console.error('Error loading conduct types:', error);
         this.conductTypes = [];
@@ -204,7 +214,6 @@ export class ConductReportComponent implements OnInit {
   onSchoolChange() {
     this.loadGrades();
     this.loadConductTypes();
-    this.loadProcedureTypes();
     this.onFilterChange();
   }
 
@@ -282,38 +291,48 @@ export class ConductReportComponent implements OnInit {
     }
   }
 
-  private prepareExportData(): void {
-    this.reportsForExport = this.conductReports.map((report) => ({
-      'Date': new Date(report.date).toLocaleDateString(),
-      'Student Name': report.studentName,
-      'Conduct Type': report.conductType?.en_name || 'N/A',
-      'Procedure Type': report.procedureType?.name || 'N/A',
-      'Details': report.details || 'N/A'
-    }));
-  }
+private prepareExportData(): void {
+  // For Excel (array format)
+  this.reportsForExport = this.conductReports.map((report) => [
+    new Date(report.date).toLocaleDateString(),
+    report.studentEnName,
+    report.conductType?.name || 'N/A',
+    report.procedureType?.name || 'N/A',
+    report.details || 'N/A'
+  ]);
+
+  // For PDF (object format with proper keys)
+  this.reportsForPDF = this.conductReports.map((report) => ({
+    'Date': new Date(report.date).toLocaleDateString(),
+    'Student Name': report.studentEnName,
+    'Conduct Type': report.conductType?.name || 'N/A',
+    'Procedure Type': report.procedureType?.name || 'N/A',
+    'Details': report.details || 'N/A'
+  }));
+}
 
   getSchoolName(): string {
-    return this.schools.find(s => s.id === this.selectedSchoolId)?.name || 'All Schools';
+    return this.schools.find(s => s.id == this.selectedSchoolId)?.name || 'All Schools';
   }
 
   getGradeName(): string {
-    return this.grades.find(g => g.id === this.selectedGradeId)?.name || 'All Grades';
+    return this.grades.find(g => g.id == this.selectedGradeId)?.name || 'All Grades';
   }
 
   getClassName(): string {
-    return this.classes.find(c => c.id === this.selectedClassId)?.name || 'All Classes';
+    return this.classes.find(c => c.id == this.selectedClassId)?.name || 'All Classes';
   }
 
   getStudentName(): string {
-    return this.students.find(s => s.id === this.selectedStudentId)?.name || 'All Students';
+    return this.students.find(s => s.id == this.selectedStudentId)?.name || 'All Students';
   }
 
   getConductTypeName(): string {
-    return this.conductTypes.find(ct => ct.id === this.selectedConductTypeId)?.en_name || 'All Types';
+    return this.conductTypes.find(ct => ct.id == this.selectedConductTypeId)?.en_name || 'All Types';
   }
 
   getProcedureTypeName(): string {
-    return this.procedureTypes.find(pt => pt.id === this.selectedProcedureTypeId)?.name || 'All Types';
+    return this.procedureTypes.find(pt => pt.id == this.selectedProcedureTypeId)?.name || 'All Types';
   }
 
   getInfoRows(): any[] {
@@ -325,7 +344,7 @@ export class ConductReportComponent implements OnInit {
       { keyEn: 'Class: ' + this.getClassName() },
       { keyEn: 'Student: ' + this.getStudentName() },
       { keyEn: 'Conduct Type: ' + this.getConductTypeName() },
-      { keyEn: 'Procedure Type: ...' + this.getProcedureTypeName() }
+      { keyEn: 'Procedure Type: ' + this.getProcedureTypeName() }
     ];
   }
 
@@ -391,17 +410,46 @@ export class ConductReportComponent implements OnInit {
     }, 500);
   }
 
-  exportExcel() {
-    if (this.reportsForExport.length === 0) {
-      Swal.fire('Warning', 'No data to export!', 'warning');
-      return;
-    }
-
-    const worksheet = XLSX.utils.json_to_sheet(this.reportsForExport);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Conduct Report');
-    
-    const dateStr = new Date().toISOString().slice(0, 10);
-    XLSX.writeFile(workbook, `Conduct_Report_${dateStr}.xlsx`);
+async exportExcel() {
+  if (this.reportsForExport.length === 0) {
+    Swal.fire('Warning', 'No data to export!', 'warning');
+    return;
   }
+
+  try {
+    await this.reportsService.generateExcelReport({
+      mainHeader: {
+        en: 'Conduct Report',
+        ar: 'تقرير السلوك'
+      },
+      subHeaders: [
+        {
+          en: 'Student Behavior Records',
+          ar: 'سجلات سلوك الطلاب'
+        }
+      ],
+      infoRows: [
+        { key: 'From Date', value: this.dateFrom },
+        { key: 'To Date', value: this.dateTo },
+        { key: 'School', value: this.getSchoolName() },
+        { key: 'Grade', value: this.getGradeName() },
+        { key: 'Class', value: this.getClassName() },
+        { key: 'Student', value: this.getStudentName() },
+        { key: 'Conduct Type', value: this.getConductTypeName() },
+        { key: 'Procedure Type', value: this.getProcedureTypeName() }
+      ],
+      tables: [
+        {
+          title: 'Conduct Report Data',
+          headers: ['Date', 'Student Name', 'Conduct Type', 'Procedure Type', 'Details'],
+          data: this.reportsForExport
+        }
+      ],
+      filename: `Conduct_Report_${new Date().toISOString().slice(0, 10)}.xlsx`
+    });
+  } catch (error) {
+    console.error('Error exporting to Excel:', error);
+    Swal.fire('Error', 'Failed to export to Excel', 'error');
+  }
+}
 }

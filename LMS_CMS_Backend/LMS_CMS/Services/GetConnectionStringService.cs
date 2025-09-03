@@ -15,6 +15,7 @@
         //}
 
         public string BuildConnectionString(string domainName)
+
         {
 
 

@@ -86,6 +86,12 @@ export class AssignmentStudentComponent {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
+
+    this.assignmentServ.CheckIfHaveAccess(this.UserID, this.AssignmentId, this.DomainName).subscribe((d) => {
+      console.log(d)
+    }, error => {
+      this.router.navigateByUrl(`Student/SubjectAssignment/${this.assignment.subjectID}`)
+    })
   }
 
   ngOnDestroy(): void {
@@ -105,9 +111,6 @@ export class AssignmentStudentComponent {
       if (today >= cutoff) {
         this.router.navigateByUrl(`Student/SubjectAssignment/${this.assignment.subjectID}`)
       }
-
-      // check 
-
 
       this.assignmentStudent.assignmentStudentQuestions = this.assignment.assignmentQuestions.map(q => {
         const question = q.questionBank;

@@ -116,9 +116,9 @@
                     </div>
 
                     <div class="flex flex-col mb-4 w-full">
-                        <label class="mb-2" for="studentID">{{ 'School' | translate }}</label>
+                        <label class="mb-2" for="schoolID">{{ 'School' | translate }}</label>
                         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
-                            id="studentID" [(ngModel)]="appointment.schoolID" (change)="GetAllGrades()"
+                            id="schoolID" [(ngModel)]="appointment.schoolID" (change)="GetAllGrades()"
                             (ngModelChange)="onInputValueChange({ field: 'schoolID', value: $event })">
                             <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'School' |
                                 translate }}</option>

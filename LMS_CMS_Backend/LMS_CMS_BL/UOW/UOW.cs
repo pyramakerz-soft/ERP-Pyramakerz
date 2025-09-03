@@ -2,6 +2,7 @@
 using LMS_CMS_DAL.Models.Domains;
 using LMS_CMS_DAL.Models.Domains.AccountingModule;
 using LMS_CMS_DAL.Models.Domains.Administration;
+using LMS_CMS_DAL.Models.Domains.Archiving;
 using LMS_CMS_DAL.Models.Domains.BusModule;
 using LMS_CMS_DAL.Models.Domains.ClinicModule;
 using LMS_CMS_DAL.Models.Domains.Communication;
@@ -263,6 +264,10 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<DirectMark> DirectMark_Repository;
         GenericRepo<DirectMarkClassesStudent> DirectMarkClassesStudent_Repository;
         GenericRepo<ConnectionStatus> ConnectionStatus_Repository;
+        GenericRepo<ArchivingTree> ArchivingTree_Repository;
+        GenericRepo<PermissionGroup> PermissionGroup_Repository;
+        GenericRepo<PermissionGroupEmployee> PermissionGroupEmployee_Repository;
+        GenericRepo<PermissionGroupDetails> PermissionGroupDetails_Repository; 
 
 
         public UOW(Octa_DbContext octa_Db)
@@ -3027,6 +3032,51 @@ namespace LMS_CMS_BL.UOW
                     ConnectionStatus_Repository = new GenericRepo<ConnectionStatus>(db);
                 }
                 return ConnectionStatus_Repository;
+            }
+        } 
+        
+        public GenericRepo<ArchivingTree> archivingTree_Repository
+        {
+            get
+            {
+                if (ArchivingTree_Repository == null)
+                {
+                    ArchivingTree_Repository = new GenericRepo<ArchivingTree>(db);
+                }
+                return ArchivingTree_Repository;
+            }
+        } 
+        public GenericRepo<PermissionGroup> permissionGroup_Repository
+        {
+            get
+            {
+                if (PermissionGroup_Repository == null)
+                {
+                    PermissionGroup_Repository = new GenericRepo<PermissionGroup>(db);
+                }
+                return PermissionGroup_Repository;
+            }
+        } 
+        public GenericRepo<PermissionGroupEmployee> permissionGroupEmployee_Repository
+        {
+            get
+            {
+                if (PermissionGroupEmployee_Repository == null)
+                {
+                    PermissionGroupEmployee_Repository = new GenericRepo<PermissionGroupEmployee>(db);
+                }
+                return PermissionGroupEmployee_Repository;
+            }
+        } 
+         public GenericRepo<PermissionGroupDetails> permissionGroupDetails_Repository
+        {
+            get
+            {
+                if (PermissionGroupDetails_Repository == null)
+                {
+                    PermissionGroupDetails_Repository = new GenericRepo<PermissionGroupDetails>(db);
+                }
+                return PermissionGroupDetails_Repository;
             }
         } 
 

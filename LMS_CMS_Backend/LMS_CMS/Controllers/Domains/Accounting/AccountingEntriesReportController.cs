@@ -1,5 +1,4 @@
 ﻿using LMS_CMS_BL.UOW;
-using LMS_CMS_DAL.AccountingModule.Reports;
 using LMS_CMS_DAL.Models.Domains.AccountingModule.Reports;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
@@ -87,7 +86,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 .ToListAsync();
 
             var totalRecords = await context.Database
-                .SqlQueryRaw<long>("SELECT dbo.GetEntriesCount(@DateFrom, @DateTo) AS Value",
+                .SqlQueryRaw<long>("SELECT dbo.GetEntriesCount(@DateFrom, @DateTo, 0, 0) AS Value",
                     new SqlParameter("@DateFrom", fromDate ?? (object)DBNull.Value),
                     new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value))
                 .FirstAsync();

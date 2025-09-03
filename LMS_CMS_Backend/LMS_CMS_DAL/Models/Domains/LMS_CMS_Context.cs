@@ -1,7 +1,7 @@
-﻿using LMS_CMS_DAL.AccountingModule.Reports;
-using LMS_CMS_DAL.Models.Domains.AccountingModule;
+﻿using LMS_CMS_DAL.Models.Domains.AccountingModule;
 using LMS_CMS_DAL.Models.Domains.AccountingModule.Reports;
 using LMS_CMS_DAL.Models.Domains.Administration;
+using LMS_CMS_DAL.Models.Domains.Archiving;
 using LMS_CMS_DAL.Models.Domains.BusModule;
 using LMS_CMS_DAL.Models.Domains.ClinicModule;
 using LMS_CMS_DAL.Models.Domains.Communication;
@@ -254,6 +254,10 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<VacationEmployee> VacationEmployee { get; set; }
         public DbSet<VacationTypes> VacationTypes { get; set; }
         public DbSet<ConnectionStatus> ConnectionStatus { get; set; }
+        public DbSet<ArchivingTree> ArchivingTree{ get; set; }
+        public DbSet<PermissionGroup> PermissionGroup { get; set; }
+        public DbSet<PermissionGroupDetails> PermissionGroupDetails { get; set; }
+        public DbSet<PermissionGroupEmployee> PermissionGroupEmployee { get; set; }
 
 
 
@@ -2279,6 +2283,36 @@ namespace LMS_CMS_DAL.Models.Domains
                 .WithMany(m => m.Parents)
                 .HasForeignKey(m => m.ConnectionStatusID)
                 .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<ArchivingTree>()
+                .HasOne(m => m.ArchivingTreeParent)
+                .WithMany(m => m.ChildArchivingTrees)
+                .HasForeignKey(m => m.ArchivingTreeParentID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<PermissionGroupEmployee>()
+                .HasOne(m => m.Employee)
+                .WithMany(m => m.PermissionGroupEmployees)
+                .HasForeignKey(m => m.EmployeeID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<PermissionGroupEmployee>()
+                .HasOne(m => m.PermissionGroup)
+                .WithMany(m => m.PermissionGroupEmployees)
+                .HasForeignKey(m => m.PermissionGroupID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<PermissionGroupDetails>()
+                .HasOne(m => m.ArchivingTree)
+                .WithMany(m => m.PermissionGroupDetails)
+                .HasForeignKey(m => m.ArchivingTreeID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<PermissionGroupDetails>()
+                .HasOne(m => m.PermissionGroup)
+                .WithMany(m => m.PermissionGroupDetails)
+                .HasForeignKey(m => m.PermissionGroupID)
+                .OnDelete(DeleteBehavior.Restrict);
 
 
             ///////////////////////// Exception: /////////////////////////
@@ -2422,6 +2456,12 @@ namespace LMS_CMS_DAL.Models.Domains
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Maintenance>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<PermissionGroupEmployee>()
                 .HasOne(v => v.DeletedByEmployee)
                 .WithMany()
                 .HasForeignKey(v => v.DeletedByUserId)

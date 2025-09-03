@@ -377,6 +377,100 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
         //////////////////////////////////////////////////////////////////////////////////////////
 
+        [HttpGet("CheckIfHaveAccess/{studID}/{AssignmentId}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee", "student" },
+            pages: new[] { "Assignment" }
+        )]
+        public async Task<IActionResult> CheckIfHaveAccess(long studID, long AssignmentId)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            Student student = Unit_Of_Work.student_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == studID); ;
+            if (student == null)
+            {
+                return BadRequest("No student with this id");
+            }
+
+            // Get StudentClassID According to current academic year
+            StudentClassroom studentClassroom = Unit_Of_Work.studentClassroom_Repository.First_Or_Default(d => d.IsDeleted != true && d.StudentID == studID && d.Classroom.IsDeleted != true && d.Classroom.AcademicYear.IsActive == true);
+
+            if (studentClassroom == null)
+            {
+                return NotFound("This Student isn't in a Class yet in this active year");
+            }
+            DateOnly today = DateOnly.FromDateTime(DateTime.Now);
+
+            List<AssignmentStudentIsSpecific> assignmentStudentIsSpecifics = await Unit_Of_Work.assignmentStudentIsSpecific_Repository.Select_All_With_IncludesById<AssignmentStudentIsSpecific>(
+                d => d.IsDeleted != true && d.StudentClassroomID == studentClassroom.ID && d.Assignment.IsDeleted != true && today >= d.Assignment.OpenDate,
+                query => query.Include(d => d.Assignment).ThenInclude(d => d.AssignmentType),
+                query => query.Include(d => d.Assignment).ThenInclude(d => d.SubjectWeightType).ThenInclude(d => d.WeightType),
+                query => query.Include(d => d.Assignment).ThenInclude(d => d.Subject)
+                );
+
+            List<ClassroomSubject> classroomSubjects = await Unit_Of_Work.classroomSubject_Repository.Select_All_With_IncludesById<ClassroomSubject>(
+                   f => f.IsDeleted != true && f.ClassroomID == studentClassroom.ClassID && f.Classroom.IsDeleted != true && f.Subject.IsDeleted != true ,
+                   query => query.Include(emp => emp.Subject),
+                   query => query.Include(emp => emp.Classroom),
+                   query => query.Include(emp => emp.Teacher),
+                   query => query.Include(emp => emp.ClassroomSubjectCoTeachers.Where(c => c.IsDeleted != true)).ThenInclude(c => c.CoTeacher)
+                   );
+
+            if (classroomSubjects == null || classroomSubjects.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<long> classroomSubjectids = classroomSubjects.Select(s => s.SubjectID).Distinct().ToList();
+            List<Assignment> assignments = await Unit_Of_Work.assignment_Repository.Select_All_With_IncludesById<Assignment>(
+                d => d.IsDeleted != true && d.IsSpecificStudents != true && classroomSubjectids.Contains(d.SubjectID) && today >= d.OpenDate,
+                query => query.Include(d => d.AssignmentType),
+                query => query.Include(d => d.InsertedByEmployee),
+                query => query.Include(d => d.SubjectWeightType).ThenInclude(d => d.WeightType),
+                query => query.Include(d => d.Subject)
+                );
+
+            List<Assignment> allAssignments = new List<Assignment>();
+
+            if (assignmentStudentIsSpecifics != null)
+            {
+                allAssignments.AddRange(assignmentStudentIsSpecifics.Select(a => a.Assignment));
+            }
+            if (assignments != null)
+            {
+                allAssignments.AddRange(assignments);
+            }
+
+            // Filter out repeated entries
+            allAssignments = allAssignments
+                .GroupBy(a => a.ID) // Group by ID (or any unique property)
+                .Select(g => g.First()) // Take the first assignment from each group
+                .ToList();
+            var allAssignmentsIds = allAssignments.Select(a=>a.ID).Distinct().ToList();
+            if(allAssignmentsIds.Contains(AssignmentId))
+            {
+               return Ok();
+
+            }
+            else
+            {
+                return BadRequest("this student does not have access on this assignment");
+            }
+
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////////////
+
         [HttpPost]
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee" },

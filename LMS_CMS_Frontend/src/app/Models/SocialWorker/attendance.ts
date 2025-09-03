@@ -18,4 +18,16 @@ export class Attendance {
     ) { }
 }
 
+export class  AttendanceReportItem {
+    constructor(
+        public id: number,
+        public date: string,
+        public studentID: number,
+        public studentName: string,
+        public notes: string,
+        public isLate: boolean,
+        public lateTimeInMinutes: number,
+            ) {}
+}
+
 

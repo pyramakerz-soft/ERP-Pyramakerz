@@ -18,24 +18,15 @@ BEGIN
             SUM(ISNULL(E.Credit, 0)) AS Credit
         FROM dbo.GetSubAccountInfo(@LinkFileID, NULL) SA
         LEFT JOIN dbo.EntriesFun(@DateFrom, @DateTo) E
-            ON E.SubAccountNo = SA.SubAccountNo
-           AND (
-                 @LinkFileID = E.MainAccountNo 
-                 OR @LinkFileID = (
-                       SELECT ATC.LinkFileID 
-                       FROM AccountingTreeCharts ATC 
-                       WHERE ATC.ID = E.ATCID
-                   )
-               )
-        WHERE (@MainAccNo = 0 OR @MainAccNo = SA.AccountID)
+            ON (E.MainAccNo = SA.AccountID AND E.MainSubAccNo = SA.SubAccountNo)
+        WHERE (@MainAccNo = 0 OR E.MainAccNo = @MainAccNo)
         GROUP BY SA.SubAccountNo, SA.SubAccountName
     )
     SELECT 
         ID,
         Name,
         Debit,
-        Credit,
-        COUNT(*) OVER() AS TotalCount   -- gives total rows before paging
+        Credit
     FROM LedgerCTE
     ORDER BY ID
     OFFSET (@PageNumber - 1) * @PageSize ROWS

@@ -41,7 +41,7 @@
         </select>
     </div>
 
-    <div *ngIf="mode!='student'" class="w-[24%]">
+    <div *ngIf="mode=='employee'" class="w-[24%]">
         <label for="Student" class="block mb-2 text-sm font-medium text-gray-900"> {{ 'Student' | translate }}</label>
         <select id="Student" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             [(ngModel)]="SelectedStudentId" [disabled]="!SelectedClassId" (change)="OnStudentChange()">
@@ -49,6 +49,17 @@
             </option>
             <option *ngFor="let c of Students" [value]="c.id">{{ c.en_name }}</option>
             <option *ngIf="Students.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
+        </select>
+    </div>
+
+    <div *ngIf="mode=='parent'" class="w-[24%]">
+        <label for="Student" class="block mb-2 text-sm font-medium text-gray-900"> {{ 'Student' | translate }}</label>
+        <select id="Student" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [(ngModel)]="SelectedStudentId" (change)="OnStudentChange()">
+            <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Student' | translate }}
+            </option>
+            <option *ngFor="let c of studentOfParent" [value]="c.id">{{ c.en_name }}</option>
+            <option *ngIf="studentOfParent.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
         </select>
     </div>
 
@@ -114,9 +125,7 @@
     </div>
 
     <div class="mt-7 ml-2">
-        <button class="p-3 font-medium text-xl rounded-lg"
-            [disabled]="ValidateViewOr()"
-            (click)="Apply()"
+        <button class="p-3 font-medium text-xl rounded-lg" [disabled]="ValidateViewOr()" (click)="Apply()"
             [ngClass]="{ 'bg-gray-100 text-gray-300':ValidateViewOr(), 'secondaryBg text-white': ValidateViewAnd()}">
             {{ 'View' | translate }}
         </button>
@@ -186,9 +195,8 @@
 
 <div class="absolute -top-[9999px] -left-[9999px]">
     <div id="Data" class="hidden">
-        <app-pdf-print *ngIf="showPDF" [fileName]="'Certificate Report'"
-            [infoRows]="getInfoData()" [tableHeaders]="tableHeadersForPDF"
-            [tableData]="tableDataForPDF" #pdfComponentRef>
+        <app-pdf-print *ngIf="showPDF" [fileName]="'Certificate Report'" [infoRows]="getInfoData()"
+            [tableHeaders]="tableHeadersForPDF" [tableData]="tableDataForPDF" #pdfComponentRef>
         </app-pdf-print>
     </div>
 </div>

@@ -53,6 +53,7 @@ export class ViewHygieneFormComponent implements OnInit {
     if (id) {
       await this.loadHygieneTypes();
       this.loadHygieneForm(Number(id));
+      console.log(this.loadHygieneForm(Number(id)));
     }
       this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
@@ -76,6 +77,8 @@ export class ViewHygieneFormComponent implements OnInit {
         this.hygieneTypesService.Get(domainName)
       );
       this.hygieneTypes = data;
+      console.log('testing hygiene types');
+      console.log(this.hygieneTypes);
     } catch (error) {
       console.error('Error loading hygiene types:', error);
     }
@@ -87,6 +90,7 @@ export class ViewHygieneFormComponent implements OnInit {
       this.hygieneFormService.GetById(id, domainName).subscribe({
         next: (hygieneForm) => {
           this.hygieneForm = hygieneForm;
+          console.log(hygieneForm);
           this.prepareStudentData(hygieneForm);
         },
         error: (error) => {
@@ -98,31 +102,31 @@ export class ViewHygieneFormComponent implements OnInit {
     }
   }
 
-  private prepareStudentData(hygieneForm: HygieneForm) {
-    this.students = hygieneForm.studentHygieneTypes.map(
-      (studentHygieneType) => {
-        const studentData: any = {
-          id: studentHygieneType.studentId,
-          en_name: studentHygieneType.student,
-          attendance: studentHygieneType.attendance,
-          comment: studentHygieneType.comment,
-          actionTaken: studentHygieneType.actionTaken,
-        };
+private prepareStudentData(hygieneForm: HygieneForm) {
+  this.students = hygieneForm.studentHygieneTypes.map(
+    (studentHygieneType) => {
+      const studentData: any = {
+        id: studentHygieneType.studentId,
+        en_name: studentHygieneType.student,
+        attendance: studentHygieneType.attendance,
+        comment: studentHygieneType.comment,
+        actionTaken: studentHygieneType.actionTaken,
+      };
 
-        // Initialize all hygiene types as false
-        this.hygieneTypes.forEach((hygieneType) => {
-          studentData[`hygieneType_${hygieneType.id}`] = false;
+      // Initialize all hygiene types as null (empty) instead of false
+      this.hygieneTypes.forEach((hygieneType) => {
+        studentData[`hygieneType_${hygieneType.id}`] = null;
+      });
+
+      // Set the hygiene types that exist in the student's data
+      if (studentHygieneType.hygieneTypes && studentHygieneType.attendance) {
+        studentHygieneType.hygieneTypes.forEach((hygieneType) => {
+          studentData[`hygieneType_${hygieneType.id}`] = true;
         });
-
-        // Set to true only the hygiene types that exist in the student's data
-        if (studentHygieneType.hygieneTypes && studentHygieneType.attendance) {
-          studentHygieneType.hygieneTypes.forEach((hygieneType) => {
-            studentData[`hygieneType_${hygieneType.id}`] = true;
-          });
-        }
-
-        return studentData;
       }
-    );
-  }
+
+      return studentData;
+    }
+  );
+}
 }
