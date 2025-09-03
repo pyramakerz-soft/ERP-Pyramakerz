@@ -113,17 +113,28 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             }
 
             leaveRequestsGetDTO Dto = mapper.Map<leaveRequestsGetDTO>(leaveRequest);
-            List<LeaveRequest> leaveRequests = Unit_Of_Work.leaveRequest_Repository
-                .FindBy(l => l.EmployeeID == Dto.EmployeeID && l.IsDeleted != true);
 
+            // Get current month and year
+            var currentDate = DateTime.UtcNow;
+            var currentMonth = currentDate.Month;
+            var currentYear = currentDate.Year;
+
+            // Filter leave requests for the current month only
+            List<LeaveRequest> leaveRequests = Unit_Of_Work.leaveRequest_Repository
+                .FindBy(l => l.EmployeeID == Dto.EmployeeID
+                          && l.IsDeleted != true
+                          && l.Date.Month == currentMonth
+                          && l.Date.Year == currentYear);
+
+            // Sum up hours and minutes
             var allHours = leaveRequests.Sum(l => l.Hours);
             var allMinutes = leaveRequests.Sum(l => l.Minutes);
 
-            // Convert total minutes to hours and remaining minutes
+            // Convert total minutes into hours and remaining minutes
             allHours += allMinutes / 60;
             allMinutes = allMinutes % 60;
 
-            // Convert hours and minutes to decimal (e.g., 4.10 for 4 hours 10 minutes)
+            // Convert hours and minutes to decimal (e.g., 4.5 for 4 hours 30 minutes)
             Dto.Used = allHours + (allMinutes / 60.0m);
 
             return Ok(Dto);
@@ -157,7 +168,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             Employee employee = Unit_Of_Work.employee_Repository.First_Or_Default(e => e.ID == newRequest.EmployeeID);
             if (employee == null)
             {
-                return BadRequest("there is no employee with this id");
+                return BadRequest("there is no employee with this id"); 
             }
 
 
@@ -175,7 +186,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             var Used = allHours + (allMinutes / 60.0m);
             var newHM = newRequest.Hours + (newRequest.Minutes / 60.0m);
 
-            if (employee.MonthlyLeaveRequestBalance > (Used + newHM) )
+            if (Used + newHM > employee.MonthlyLeaveRequestBalance)
             {
                 return BadRequest("You Can not exceed MonthlyLeaveRequestBalance");
             }
@@ -256,7 +267,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             var Used = allHours + (allMinutes / 60.0m);
             var newHM = newRequest.Hours + (newRequest.Minutes / 60.0m);
 
-            if (employee.MonthlyLeaveRequestBalance > (Used + newHM))
+            if (Used + newHM > employee.MonthlyLeaveRequestBalance)
             {
                 return BadRequest("You Can not exceed MonthlyLeaveRequestBalance");
             }
