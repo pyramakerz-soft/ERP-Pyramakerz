@@ -122,6 +122,15 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
                 return BadRequest("No Employee with this ID");
             }
 
+            PermissionGroupEmployee permissionGroupEmployeeExist = Unit_Of_Work.permissionGroupEmployee_Repository.First_Or_Default(
+                d => d.EmployeeID == NewPermissionEmployee.EmployeeID && d.PermissionGroupID == NewPermissionEmployee.PermissionGroupID && d.IsDeleted != true
+                );
+
+            if (permissionGroupEmployeeExist != null)
+            {
+                return BadRequest("Employee Already exists in this group");
+            }
+
             PermissionGroupEmployee permissionGroupEmployee = mapper.Map<PermissionGroupEmployee>(NewPermissionEmployee);
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
