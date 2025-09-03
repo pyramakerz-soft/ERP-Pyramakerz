@@ -251,6 +251,7 @@ import { DeductionComponent } from './Pages/Employee/HR/deduction/deduction.comp
 import { LeaveRequestComponent } from './Pages/Employee/HR/leave-request/leave-request.component';
 import { StudentMedalReportComponent } from './Pages/Employee/SocialWorker/Reports/student-medal-report/student-medal-report.component';
 import { AccountBalanceComponent } from './Pages/Employee/Accounting/Report/account-balance/account-balance.component';
+import { AccountingSubledgerComponent } from './Pages/Employee/Accounting/Report/accounting-subledger/accounting-subledger.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -525,6 +526,7 @@ export const routes: Routes = [
             { path: 'Certificate To Student Report', component: CertificateStudentReportComponent, title: 'Certificate To Student Report', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Medal To Student Report', component: StudentMedalReportComponent, title: 'Medal To Student Report', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Account Balance Report', component: AccountBalanceComponent, title: 'Account Balance Report', canActivate: [noNavigateWithoutLoginGuard], },
+            { path: 'Account Subledger Report', component: AccountingSubledgerComponent, title: 'Account Subledger Report', canActivate: [noNavigateWithoutLoginGuard], },
             { path: "Supplier Statement",  component: AccountStatementsComponent,  title: "Supplier Statement",  canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard]  },
             { path: "Safe Statement",  component: AccountStatementsComponent,  title: "Safe Statement",  canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard]  },
             { path: "Bank Statement",  component: AccountStatementsComponent,  title: "Bank Statement",  canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard]  },

@@ -127,6 +127,12 @@
                     </td>
                 </tr>
 
+                <!--<tr *ngIf="conductReports.length === 0">
+                <td colspan="5" class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                    {{ 'No Data Found' | translate }}
+                </td>
+            </tr> -->
+
                 <tr *ngFor="let item of reportData.data; let i = index" 
                     [ngClass]="{ 
                         'bg-[#F7F7F7]': i % 2 === 1, 
@@ -178,8 +184,4 @@
             </button>
         </div>
     </div> -->
-</div>
-
-<div *ngIf="showTable && !reportData" class="text-center py-8 text-gray-500">
-    {{ 'No data available for the selected filters' | translate }}
 </div>

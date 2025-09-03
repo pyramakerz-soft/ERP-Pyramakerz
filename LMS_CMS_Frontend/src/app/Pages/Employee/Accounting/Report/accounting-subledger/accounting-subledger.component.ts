@@ -1,41 +1,36 @@
-import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { AccountSubledgerResponse } from '../../../../../Models/Accounting/account-subledger-report';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
-import { AccountBalanceResponse } from '../../../../../Models/Accounting/accounting-balance';
 import { AccountingTreeChart } from '../../../../../Models/Accounting/accounting-tree-chart';
 import { Subscription } from 'rxjs';
 import { TokenData } from '../../../../../Models/token-data';
-import { AccountingBalanceResponse } from '../../../../../Services/Employee/Accounting/accounting-balance.service';
+import { AccountingSubledgerService } from '../../../../../Services/Employee/Accounting/accounting-subledger.service';
 import { AccountingTreeChartService } from '../../../../../Services/Employee/Accounting/accounting-tree-chart.service';
-import { MenuService } from '../../../../../Services/shared/menu.service';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import { AccountService } from '../../../../../Services/account.service';
 import { ApiService } from '../../../../../Services/api.service';
-import { DeleteEditPermissionService } from '../../../../../Services/shared/delete-edit-permission.service';
-import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
 
 @Component({
-  selector: 'app-account-balance',
+  selector: 'app-accounting-subledger',
   standalone: true,
   imports: [CommonModule, FormsModule, TranslateModule],
-  templateUrl: './account-balance.component.html',
-  styleUrl: './account-balance.component.css'
+  templateUrl: './accounting-subledger.component.html',
+  styleUrl: './accounting-subledger.component.css'
 })
-export class AccountBalanceComponent  implements OnInit {
+export class AccountingSubledgerComponent implements OnInit {
   // Filter parameters
+  fromDate: string = '';
   toDate: string = '';
   linkFileID: number = 0;
   accountID: number = 0;
-  zeroBalance: boolean = true;
-  positiveBalance: boolean = true;
-  negativeBalance: boolean = true;
   pageNumber: number = 1;
   pageSize: number = 10;
 
   // Data
-  reportData: AccountBalanceResponse | null = null;
+  reportData: AccountSubledgerResponse | null = null;
   accounts: AccountingTreeChart[] = [];
   linkFileOptions: any[] = [
     { id: 2, name: 'Suppliers' },
@@ -61,14 +56,11 @@ export class AccountBalanceComponent  implements OnInit {
   DomainName: string = '';
 
   constructor(
-    private accountingBalanceService: AccountingBalanceResponse,
+    private accountingSubledgerService: AccountingSubledgerService,
     private accountingTreeChartService: AccountingTreeChartService,
-    private menuService: MenuService,
     private languageService: LanguageService,
     public account: AccountService,
-    public ApiServ: ApiService,
-    public EditDeleteServ: DeleteEditPermissionService,
-    private router: Router
+    public ApiServ: ApiService
   ) { }
 
   ngOnInit() {
@@ -105,14 +97,24 @@ export class AccountBalanceComponent  implements OnInit {
   onFilterChange() {
     this.showTable = false;
     this.reportData = null;
-    this.pageNumber = 1; // Reset to first page when filters change
+    this.pageNumber = 1;
   }
 
   viewReport() {
-    if (!this.toDate || !this.linkFileID) {
+    if (!this.fromDate || !this.toDate || !this.linkFileID) {
       Swal.fire({
         title: 'Missing Information',
-        text: 'Please select both Date and Account Type',
+        text: 'Please select Date Range and Account Type',
+        icon: 'warning',
+        confirmButtonText: 'OK',
+      });
+      return;
+    }
+
+    if (new Date(this.fromDate) > new Date(this.toDate)) {
+      Swal.fire({
+        title: 'Invalid Date Range',
+        text: 'Start date cannot be later than end date.',
         icon: 'warning',
         confirmButtonText: 'OK',
       });
@@ -122,13 +124,11 @@ export class AccountBalanceComponent  implements OnInit {
     this.isLoading = true;
     this.showTable = false;
 
-    this.accountingBalanceService.GetAccountBalance(
+    this.accountingSubledgerService.GetAccountsLedger(
+      new Date(this.fromDate),
       new Date(this.toDate),
       this.linkFileID,
       this.accountID,
-      this.zeroBalance,
-      this.positiveBalance,
-      this.negativeBalance,
       this.pageNumber,
       this.pageSize,
       this.DomainName
@@ -143,12 +143,21 @@ export class AccountBalanceComponent  implements OnInit {
         this.reportData = null;
         this.showTable = true;
         this.isLoading = false;
-        Swal.fire({
-          title: 'Error',
-          text: 'Failed to load report data',
-          icon: 'error',
-          confirmButtonText: 'OK',
-        });
+        if (error.status === 404) {
+          Swal.fire({
+            title: 'No Data Found',
+            text: 'No data available for the selected filters',
+            icon: 'info',
+            confirmButtonText: 'OK',
+          });
+        } else {
+          Swal.fire({
+            title: 'Error',
+            text: 'Failed to load report data',
+            icon: 'error',
+            confirmButtonText: 'OK',
+          });
+        }
       }
     });
   }
@@ -170,4 +179,43 @@ export class AccountBalanceComponent  implements OnInit {
     return account ? account.name : 'All Accounts';
   }
 
+  // Add Math object for template usage
+  Math = Math;
+
+  // Pagination methods similar to accounting-constraints component
+  get visiblePages(): number[] {
+    const total = this.reportData?.pagination.totalPages || 1;
+    const current = this.pageNumber;
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const half = Math.floor(maxVisible / 2);
+    let start = current - half;
+    let end = current + half;
+
+    if (start < 1) {
+      start = 1;
+      end = maxVisible;
+    } else if (end > total) {
+      end = total;
+      start = total - maxVisible + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
+
+  validatePageSize(event: any) {
+    const value = event.target.value;
+    if (isNaN(value) || value === '') {
+      event.target.value = '';
+    }
+  }
+
+  validateNumberForPagination(event: any): void {
+    const value = event.target.value;
+    this.pageSize = 0;
+  }
 }

@@ -1,14 +1,15 @@
-// Services/Employee/Accounting/accounting-balance.service.ts
+// Services/Employee/Accounting/accounting-subledger.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ApiService } from '../../api.service';
-import { AccountBalanceResponse } from '../../../Models/Accounting/accounting-balance';
+import { AccountSubledgerResponse } from '../../../Models/Accounting/account-subledger-report';
+
 
 @Injectable({
   providedIn: 'root'
 })
-export class AccountingBalanceResponse {
+export class AccountingSubledgerService {
   baseUrl = "";
   header = "";
 
@@ -16,29 +17,27 @@ export class AccountingBalanceResponse {
     this.baseUrl = ApiServ.BaseUrl;
   }
 
-  GetAccountBalance(
+  GetAccountsLedger(
+    fromDate: Date,
     toDate: Date,
     linkFileID: number,
     accountID: number = 0,
-    zeroBalance: boolean = true,
-    positiveBalance: boolean = true,
-    negativeBalance: boolean = true,
     pageNumber: number = 1,
     pageSize: number = 10,
     DomainName: string
-  ): Observable<AccountBalanceResponse> {
+  ): Observable<AccountSubledgerResponse> {
     if (DomainName != null) {
       this.header = DomainName;
     }
 
-    const formattedDate = toDate.toISOString().split('T')[0];
+    // Format dates as YYYY-MM-DD
+    const formattedFromDate = fromDate.toISOString().split('T')[0];
+    const formattedToDate = toDate.toISOString().split('T')[0];
 
     let params = new HttpParams()
-      .set('toDate', formattedDate)
+      .set('fromDate', formattedFromDate)
+      .set('toDate', formattedToDate)
       .set('linkFileID', linkFileID.toString())
-      .set('zeroBalance', zeroBalance.toString())
-      .set('positiveBalance', positiveBalance.toString())
-      .set('negativeBalance', negativeBalance.toString())
       .set('pageNumber', pageNumber.toString())
       .set('pageSize', pageSize.toString());
 
@@ -52,7 +51,7 @@ export class AccountingBalanceResponse {
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
 
-    return this.http.get<AccountBalanceResponse>(`${this.baseUrl}/AccountBalancesReports/GetAccountBalance`, {
+    return this.http.get<AccountSubledgerResponse>(`${this.baseUrl}/AccountingSubledgerReport/GetAccountsLedger`, {
       headers,
       params
     });

@@ -280,12 +280,12 @@ constructor(
       console.error('Error loading conduct reports:', error);
       this.conductReports = [];
       this.showTable = true;
-      Swal.fire({
-        title: 'Error',
-        text: 'Failed to load conduct reports',
-        icon: 'error',
-        confirmButtonText: 'OK',
-      });
+      // Swal.fire({
+      //   title: 'Error',
+      //   text: 'Failed to load conduct reports',
+      //   icon: 'error',
+      //   confirmButtonText: 'OK',
+      // });
     } finally {
       this.isLoading = false;
     }
