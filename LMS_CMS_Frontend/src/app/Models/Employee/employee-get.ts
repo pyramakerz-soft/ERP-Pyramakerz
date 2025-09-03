@@ -18,6 +18,8 @@ export class EmployeeGet {
         public busCompanyID: number = 0,
         public busCompanyName: string = '',
         public employeeTypeID: number = 0,
+        public monthlyLeaveRequestBalance: number = 0,
+        public monthlyLeaveRequestUsed: number = 0,
         public employeeTypeName: string = '',
         public files :EmployeeAttachment []=[],
         public editedFiles :EmployeeAttachment []=[],
