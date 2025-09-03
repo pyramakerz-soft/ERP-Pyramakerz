@@ -112,7 +112,7 @@
                 <label class="mb-2 primaryTxt" for="hours"> {{ 'Hours' | translate }}</label>
                 <input id="hours" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                     placeholder="{{ 'Enter hours' | translate }}" [(ngModel)]="leaveRequest.hours" (input)="validateNumber($event,'hours')"
-                    (ngModelChange)="onInputValueChange({ field: 'hours', value: $event })" />
+                    (ngModelChange)="onInputValueChange({ field: 'hours', value: $event }); CalculateRemains()" />
                 <span *ngIf="validationErrors['hours']" class="text-red-500 ml-3 font-normal">{{validationErrors['hours']}}</span>
             </div>
 
@@ -120,7 +120,7 @@
                 <label class="mb-2 primaryTxt" for="minutes"> {{ 'minutes' | translate }}</label>
                 <input id="minutes" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                     placeholder="{{ 'Enter minutes' | translate }}" [(ngModel)]="leaveRequest.minutes" (input)="validateNumber($event,'minutes')"
-                    (ngModelChange)="onInputValueChange({ field: 'minutes', value: $event })" />
+                    (ngModelChange)="onInputValueChange({ field: 'hours', value: $event }) ; CalculateRemains()" />
                 <span *ngIf="validationErrors['minutes']" class="text-red-500 ml-3 font-normal">{{validationErrors['minutes']}}</span>
             </div>
 
@@ -133,12 +133,12 @@
             <div class="flex flex-col mb-4 w-[32%]">
                 <label class="mb-2 primaryTxt" for="used"> {{ 'used' | translate }}</label>
                 <input id="used" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3 bg-[#EBEBEB]" 
-                 readonly [(ngModel)]="leaveRequest.used"/>
+                 readonly [value]="formatHours(leaveRequest.used)"/>
             </div>
             <div class="flex flex-col mb-4 w-[32%]">
                 <label class="mb-2 primaryTxt" for="remains"> {{ 'Remains' | translate }}</label>
                 <input id="remains" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3 bg-[#EBEBEB]" 
-                readonly [(ngModel)]="leaveRequest.remains"/>
+                readonly [value]="formatHours(leaveRequest.remains)"/>
             </div>
 
             <div class="flex flex-col mb-4 w-full">

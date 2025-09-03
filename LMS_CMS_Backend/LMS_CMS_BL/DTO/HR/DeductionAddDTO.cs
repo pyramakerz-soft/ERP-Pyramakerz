@@ -12,7 +12,7 @@ namespace LMS_CMS_BL.DTO.HR
         public DateOnly Date { get; set; }
         public int NumberOfDeductionDays { get; set; }
         public int Hours { get; set; }
-        public int? Minutes { get; set; }
+        public int Minutes { get; set; }
         public long Amount { get; set; }
         public string? Notes { get; set; }
         public long EmployeeID { get; set; }

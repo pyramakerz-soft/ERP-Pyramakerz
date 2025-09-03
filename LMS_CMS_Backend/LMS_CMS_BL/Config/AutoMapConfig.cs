@@ -1388,6 +1388,12 @@ namespace LMS_CMS_BL.Config
             CreateMap<BounsType, BounsTypeGetDTO>();
             CreateMap<DeductionType, DeductionTypeGetDTO>();
 
+            CreateMap<LeaveRequest, leaveRequestsGetDTO>()
+                .ForMember(dest => dest.MonthlyLeaveRequestBalance, opt => opt.MapFrom(src => src.Employee.MonthlyLeaveRequestBalance))
+                .ForMember(dest => dest.EmployeeArName, opt => opt.MapFrom(src => src.Employee.ar_name))
+                .ForMember(dest => dest.EmployeeEnName, opt => opt.MapFrom(src => src.Employee.en_name));
+            CreateMap<leaveRequestsAddDTO, LeaveRequest>();
+
             CreateMap<Bouns, BounsGetDTO>()
                 .ForMember(dest => dest.BounsTypeName, opt => opt.MapFrom(src => src.BounsType.Name))
                 .ForMember(dest => dest.EmployeeArName, opt => opt.MapFrom(src => src.Employee.ar_name))

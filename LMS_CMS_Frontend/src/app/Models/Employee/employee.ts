@@ -8,8 +8,9 @@ export class Employee {
         public role_ID: number = 0,
         public busCompanyID: number = 0,
         public employeeTypeID: number = 0,
-        public canReceiveRequest: boolean = false, 
+        public canReceiveRequest: boolean = false,
         public canReceiveRequestFromParent: boolean = false,
         public canReceiveMessageFromParent: boolean = false,
-    ) {}
+        public monthlyLeaveRequestBalance: number = 0,
+    ) { }
 }
