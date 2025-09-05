@@ -257,28 +257,6 @@ Save() {
 
 
 
-  // async save() {
-  //   if (!this.selectedEmployeeId) {
-  //     Swal.fire('Error', 'Please select an employee first.', 'error');
-  //     return;
-  //   }
-
-  //   this.isLoading = true;
-  //   try {
-  //     const payload = { employeeId: this.selectedEmployeeId };
-  //     await firstValueFrom(this.mainServ.Add(payload, this.DomainName));
-
-  //     Swal.fire('Added!', 'Employee added to maintenance successfully.', 'success');
-
-  //     this.closeModal();
-  //     this.TableData = await firstValueFrom(this.mainServ.Get(this.DomainName));
-  //   } catch (error) {
-  //     console.error("Save failed:", error);
-  //     Swal.fire('Error', 'Something went wrong.', 'error');
-  //   } finally {
-  //     this.isLoading = false;
-  //   }
-  // }
 }
 
 
