@@ -31,7 +31,7 @@
             <tbody>
                 <!-- No Data Row -->
                 <tr *ngIf="TableData.length === 0">
-                    <td colspan="11"
+                    <td colspan="3"
                         class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
                     {{ 'No Data Found' | translate }}
                     </td>
@@ -43,7 +43,7 @@
                     [ngClass]="{'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1}"
                     class="border-t border-gray-300 text-xs md:text-sm">
                     <td
-                        class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#30462e] hover:bg-gray-200">
+                        class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#30462e]">
                         {{row.id}}</td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{row.en_Name}}</td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
@@ -73,16 +73,17 @@
     <div class="flex flex-col mt-6 mb-4 bg-[#F7F7F7] rounded-3xl p-4">
       <div class="flex flex-col mb-4 w-full">
         <label class="mb-2 primaryTxt">{{ 'Employee' | translate }}</label>
-        <select [(ngModel)]="selectedEmployeeId" class="rounded-lg border border-solid border-gray-300 px-4 py-3">
+        <select [(ngModel)]="selectedEmployeeId" (ngModelChange)="onInputValueChange({ field: 'id', value: $event })" class="rounded-lg border border-solid border-gray-300 px-4 py-3">
           <option [ngValue]="null" disabled hidden>{{ 'Select' | translate }} {{ 'Employee' | translate }}</option>
           <option *ngFor="let emp of employees" [ngValue]="emp.id">{{ emp.user_Name }}</option>
           <option *ngIf="employees.length === 0" disabled>{{ 'No Data Found' | translate }}</option>
         </select>
+        <span *ngIf="validationErrors['id']" class="text-red-500 ml-3 font-normal">{{ validationErrors['id'] }}</span>
       </div>
     </div>
 
     <div class="flex justify-end">
-      <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg cursor-pointer" (click)="save()">
+      <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg cursor-pointer" (click)="Save()">
         <span *ngIf="!isLoading">{{ 'Save' | translate }}</span>
         <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
       </button>

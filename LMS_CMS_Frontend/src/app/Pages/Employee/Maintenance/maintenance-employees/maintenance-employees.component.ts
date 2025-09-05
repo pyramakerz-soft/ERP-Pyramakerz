@@ -28,12 +28,12 @@ export class MaintenanceEmployeesComponent {
   UserID: number = 0;
   AllowDeleteForOthers: boolean = false;
   AllowDelete: boolean = true;
-
+  validationErrors: { [key in keyof EmployeeGet]?: string } = {};
   isRtl: boolean = false;
   subscription!: Subscription;
   TableData: any[] = [];       
   employees: EmployeeGet[] = []; 
-  selectedEmployeeId: number | null = null;
+  selectedEmployeeId: number=0;
   keysArray: string[] = ['id', 'en_Name', 'ar_Name'];
   key: string= "id";
   DomainName: string = '';
@@ -148,7 +148,28 @@ Delete(id: number) {
       });
     }
   });
+
 }
+
+
+  isFormValid(): boolean {
+    let isValid = true;
+    for (const key in this.selectedEmployee) { 
+      if (this.selectedEmployee.hasOwnProperty(key)) {
+        const field = key as keyof EmployeeGet;
+        if (!this.selectedEmployee[field]) {
+          if (field == 'id') {
+            this.validationErrors[field] = `*${this.capitalizeField( field )} is required`;
+            isValid = false;
+          }
+        } else { 
+          this.validationErrors[field] = '';
+        }
+      }
+    } 
+    return isValid;
+  }
+
 
 
  async onSearchEvent(event: { key: string, value: any }) {
@@ -178,11 +199,20 @@ Delete(id: number) {
     }
 
 
-
+  onInputValueChange(event: { field: keyof EmployeeGet; value: any }) {
+    const { field, value } = event;
+    (this.selectedEmployee as any)[field] = value;
+    if (value) {
+      this.validationErrors[field] = '';
+    } 
+  }
+    capitalizeField(field: keyof EmployeeGet): string {
+      return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
+    }
 
 
 openModal() {
-    this.selectedEmployeeId = null; 
+    this.selectedEmployeeId = 0; 
     this.isModalOpen = true;
     document.getElementById('Add_Modal')?.classList.remove('hidden');
     document.getElementById('Add_Modal')?.classList.add('flex');
@@ -192,30 +222,63 @@ openModal() {
     this.isModalOpen = false;
     document.getElementById('Add_Modal')?.classList.remove('flex');
     document.getElementById('Add_Modal')?.classList.add('hidden');
+    this.validationErrors = {};
   }
 
-  async save() {
-    if (!this.selectedEmployeeId) {
-      Swal.fire('Error', 'Please select an employee first.', 'error');
-      return;
-    }
 
-    this.isLoading = true;
-    try {
-      const payload = { employeeId: this.selectedEmployeeId };
-      await firstValueFrom(this.mainServ.Add(payload, this.DomainName));
 
-      Swal.fire('Added!', 'Employee added to maintenance successfully.', 'success');
+Save() {  
+  if (this.isFormValid()) {
+    if (this.selectedEmployeeId) {   
+      this.isLoading = true;    
 
-      this.closeModal();
-      this.TableData = await firstValueFrom(this.mainServ.Get(this.DomainName));
-    } catch (error) {
-      console.error("Save failed:", error);
-      Swal.fire('Error', 'Something went wrong.', 'error');
-    } finally {
-      this.isLoading = false;
-    }
+      const payload = { employeeId: this.selectedEmployeeId }; 
+      this.mainServ.Add(payload, this.DomainName).subscribe(
+        (result: any) => {
+          this.closeModal();
+          this.GetTableData();
+          this.isLoading = false;
+          Swal.fire('Added!', 'Employee added to maintenance successfully.', 'success');
+        },
+        (error) => {
+          this.isLoading = false;
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: error.error || 'Try Again Later!',
+            confirmButtonText: 'Okay',
+            customClass: { confirmButton: 'secondaryBg' },
+          });
+        }
+      );
+    } 
   }
+}
+
+
+
+  // async save() {
+  //   if (!this.selectedEmployeeId) {
+  //     Swal.fire('Error', 'Please select an employee first.', 'error');
+  //     return;
+  //   }
+
+  //   this.isLoading = true;
+  //   try {
+  //     const payload = { employeeId: this.selectedEmployeeId };
+  //     await firstValueFrom(this.mainServ.Add(payload, this.DomainName));
+
+  //     Swal.fire('Added!', 'Employee added to maintenance successfully.', 'success');
+
+  //     this.closeModal();
+  //     this.TableData = await firstValueFrom(this.mainServ.Get(this.DomainName));
+  //   } catch (error) {
+  //     console.error("Save failed:", error);
+  //     Swal.fire('Error', 'Something went wrong.', 'error');
+  //   } finally {
+  //     this.isLoading = false;
+  //   }
+  // }
 }
 
 

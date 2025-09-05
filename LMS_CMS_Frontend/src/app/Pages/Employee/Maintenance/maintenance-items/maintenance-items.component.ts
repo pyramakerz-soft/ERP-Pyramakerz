@@ -43,7 +43,8 @@ User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '',
   selectedItem: MaintenanceItem | null = null;
   isLoading = false;
   isModalOpen= false;
-  validationErrors: { [key: string]: string } = {};
+  // validationErrors: { [key: string]: string } = {};
+  validationErrors: { [key in keyof MaintenanceItem]?: string } = {}; 
   academicDegree: MaintenanceItem = new MaintenanceItem(0,'','');
   mode: string = "";
   isEditMode = false;
@@ -167,40 +168,56 @@ Delete(id: number) {
 }
 
 
-
-
-
-
-isFormValid(): boolean {
-  this.validationErrors = {};
-  let isValid = true;
-
-  if (!this.selectedItem?.en_Name) {
-    this.validationErrors['en_Name'] = '*English Name is required';
-    isValid = false;
-  }
-  if (!this.selectedItem?.ar_Name) {
-    this.validationErrors['ar_Name'] = '*Arabic Name is required';
-    isValid = false;
-  }
-  if ((this.selectedItem?.en_Name?.length ?? 0) > 100) {
-    this.validationErrors['en_Name'] = '*English Name cannot exceed 100 characters';
-    isValid = false;
-  }
-  if ((this.selectedItem?.ar_Name?.length ?? 0) > 100) {
-    this.validationErrors['ar_Name'] = '*Arabic Name cannot exceed 100 characters';
-    isValid = false;
+  isFormValid(): boolean {
+    let isValid = true;
+    for (const key in this.selectedItem) { 
+      if (this.selectedItem.hasOwnProperty(key)) {
+        const field = key as keyof MaintenanceItem;
+        if (!this.selectedItem[field]) {
+          if (field == 'en_Name'||field == 'ar_Name' ) {
+            this.validationErrors[field] = `*${this.capitalizeField( field )} is required`;
+            isValid = false;
+          }
+        } else { 
+          this.validationErrors[field] = '';
+        }
+      }
+    } 
+    return isValid;
   }
 
-  return isValid;
-}
 
-onInputValueChange(event: { field: string; value: any }) {
-  (this.selectedItem as any)[event.field] = event.value;
-  if (event.value) {
-    this.validationErrors[event.field] = '';
-  }
-}
+
+// isFormValid(): boolean {
+//   this.validationErrors = {};
+//   let isValid = true;
+
+//   if (!this.selectedItem?.en_Name) {
+//     this.validationErrors['en_Name'] = '*English Name is required';
+//     isValid = false;
+//   }
+//   if (!this.selectedItem?.ar_Name) {
+//     this.validationErrors['ar_Name'] = '*Arabic Name is required';
+//     isValid = false;
+//   }
+//   if ((this.selectedItem?.en_Name?.length ?? 0) > 100) {
+//     this.validationErrors['en_Name'] = '*English Name cannot exceed 100 characters';
+//     isValid = false;
+//   }
+//   if ((this.selectedItem?.ar_Name?.length ?? 0) > 100) {
+//     this.validationErrors['ar_Name'] = '*Arabic Name cannot exceed 100 characters';
+//     isValid = false;
+//   }
+
+//   return isValid;
+// }
+
+// onInputValueChange(event: { field: string; value: any }) {
+//   (this.selectedItem as any)[event.field] = event.value;
+//   if (event.value) {
+//     this.validationErrors[event.field] = '';
+//   }
+// }
 
 
 Edit(id: number) {
@@ -256,38 +273,94 @@ openModal(forNew: boolean = true) {
   document.getElementById('Add_Modal')?.classList.add('flex');
 }
 
-
+  onInputValueChange(event: { field: keyof MaintenanceItem; value: any }) {
+    const { field, value } = event;
+    (this.selectedItem as any)[field] = value;
+    if (value) {
+      this.validationErrors[field] = '';
+    } 
+  }
+    capitalizeField(field: keyof MaintenanceItem): string {
+      return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
+    }
 
  closeModal() {
     document.getElementById('Add_Modal')?.classList.remove('flex');
     document.getElementById('Add_Modal')?.classList.add('hidden');   
+    this.validationErrors = {};
   }
 
-async save() {
-  if (!this.isFormValid() || !this.selectedItem) {
-    return;
-  }
 
-  this.isLoading = true;
-  try {
-    if (this.isEditMode && this.selectedItem.id > 0) {
-      await firstValueFrom(this.mainServ.Edit(this.selectedItem, this.DomainName));
-      Swal.fire('Updated!', 'Item updated successfully.', 'success');
-    } else {
-      await firstValueFrom(this.mainServ.Add(this.selectedItem, this.DomainName));
-      Swal.fire('Added!', 'Item added successfully.', 'success');
+
+
+  Save() {  
+    if (this.isFormValid()) {
+      this.isLoading = true;    
+      if (this.selectedItem?.id == 0) { 
+        this.mainServ.Add(this.selectedItem!, this.DomainName).subscribe(
+          (result: any) => {
+            this.closeModal();
+            this.GetTableData();
+            this.isLoading = false;
+          },
+          (error) => {
+            this.isLoading = false;
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'Try Again Later!',
+              confirmButtonText: 'Okay',
+              customClass: { confirmButton: 'secondaryBg' },
+            });
+          }
+        );
+      } else {
+        this.mainServ.Edit(this.selectedItem!, this.DomainName).subscribe(
+          (result: any) => {
+            this.closeModal();
+            this.GetTableData();
+            this.isLoading = false;
+          },
+          (error) => {
+            this.isLoading = false;
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'Try Again Later!',
+              confirmButtonText: 'Okay',
+              customClass: { confirmButton: 'secondaryBg' },
+            });
+          }
+        );
+      }
     }
-
-    this.closeModal();
-    this.TableData = await firstValueFrom(this.mainServ.Get(this.DomainName));
-  } catch (error) {
-    console.error("Save failed:", error);
-    Swal.fire('Error', 'Something went wrong.', 'error');
-  } finally {
-    this.isLoading = false;
-    this.isEditMode = false;
   }
-}
+
+// async save() {
+//   if (!this.isFormValid() || !this.selectedItem) {
+//     return;
+//   }
+
+//   this.isLoading = true;
+//   try {
+//     if (this.isEditMode && this.selectedItem.id > 0) {
+//       await firstValueFrom(this.mainServ.Edit(this.selectedItem, this.DomainName));
+//       Swal.fire('Updated!', 'Item updated successfully.', 'success');
+//     } else {
+//       await firstValueFrom(this.mainServ.Add(this.selectedItem, this.DomainName));
+//       Swal.fire('Added!', 'Item added successfully.', 'success');
+//     }
+
+//     this.closeModal();
+//     this.TableData = await firstValueFrom(this.mainServ.Get(this.DomainName));
+//   } catch (error) {
+//     console.error("Save failed:", error);
+//     Swal.fire('Error', 'Something went wrong.', 'error');
+//   } finally {
+//     this.isLoading = false;
+//     this.isEditMode = false;
+//   }
+// }
 
 
 

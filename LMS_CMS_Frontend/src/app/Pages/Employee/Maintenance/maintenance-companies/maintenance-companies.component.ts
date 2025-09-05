@@ -44,7 +44,8 @@ export class MaintenanceCompaniesComponent {
   selectedCompany: MaintenanceCompanies | null = null;
   isLoading = false;
   isModalOpen= false;
-  validationErrors: { [key: string]: string } = {};
+  // validationErrors: { [key: string]: string } = {};
+  validationErrors: { [key in keyof MaintenanceCompanies]?: string } = {}; 
   academicDegree: MaintenanceCompanies = new MaintenanceCompanies(0,'','');
   mode: string = "";
   isEditMode = false;
@@ -169,39 +170,66 @@ Delete(id: number) {
 
 
 
-
-
-
-isFormValid(): boolean {
-  this.validationErrors = {};
-  let isValid = true;
-
-  if (!this.selectedCompany?.en_Name) {
-    this.validationErrors['en_Name'] = '*English Name is required';
-    isValid = false;
-  }
-  if (!this.selectedCompany?.ar_Name) {
-    this.validationErrors['ar_Name'] = '*Arabic Name is required';
-    isValid = false;
-  }
-  if ((this.selectedCompany?.en_Name?.length ?? 0) > 100) {
-    this.validationErrors['en_Name'] = '*English Name cannot exceed 100 characters';
-    isValid = false;
-  }
-  if ((this.selectedCompany?.ar_Name?.length ?? 0) > 100) {
-    this.validationErrors['ar_Name'] = '*Arabic Name cannot exceed 100 characters';
-    isValid = false;
+  isFormValid(): boolean {
+    let isValid = true;
+    for (const key in this.selectedCompany) { 
+      if (this.selectedCompany.hasOwnProperty(key)) {
+        const field = key as keyof MaintenanceCompanies;
+        if (!this.selectedCompany[field]) {
+          if (field == 'en_Name'||field == 'ar_Name' ) {
+            this.validationErrors[field] = `*${this.capitalizeField( field )} is required`;
+            isValid = false;
+          }
+        } else { 
+          this.validationErrors[field] = '';
+        }
+      }
+    } 
+    return isValid;
   }
 
-  return isValid;
-}
 
-onInputValueChange(event: { field: string; value: any }) {
-  (this.selectedCompany as any)[event.field] = event.value;
-  if (event.value) {
-    this.validationErrors[event.field] = '';
+// isFormValid(): boolean {
+//   this.validationErrors = {};
+//   let isValid = true;
+
+//   if (!this.selectedCompany?.en_Name) {
+//     this.validationErrors['en_Name'] = '*English Name is required';
+//     isValid = false;
+//   }
+//   if (!this.selectedCompany?.ar_Name) {
+//     this.validationErrors['ar_Name'] = '*Arabic Name is required';
+//     isValid = false;
+//   }
+//   if ((this.selectedCompany?.en_Name?.length ?? 0) > 100) {
+//     this.validationErrors['en_Name'] = '*English Name cannot exceed 100 characters';
+//     isValid = false;
+//   }
+//   if ((this.selectedCompany?.ar_Name?.length ?? 0) > 100) {
+//     this.validationErrors['ar_Name'] = '*Arabic Name cannot exceed 100 characters';
+//     isValid = false;
+//   }
+
+//   return isValid;
+// }
+
+// onInputValueChange(event: { field: string; value: any }) {
+//   (this.selectedCompany as any)[event.field] = event.value;
+//   if (event.value) {
+//     this.validationErrors[event.field] = '';
+//   }
+// }
+
+  onInputValueChange(event: { field: keyof MaintenanceCompanies; value: any }) {
+    const { field, value } = event;
+    (this.selectedCompany as any)[field] = value;
+    if (value) {
+      this.validationErrors[field] = '';
+    } 
   }
-}
+    capitalizeField(field: keyof MaintenanceCompanies): string {
+      return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
+    }
 
 
 Edit(id: number) {
@@ -263,33 +291,79 @@ openModal(forNew: boolean = true) {
  closeModal() {
     document.getElementById('Add_Modal')?.classList.remove('flex');
     document.getElementById('Add_Modal')?.classList.add('hidden');   
+    this.validationErrors = {};
   }
 
-async save() {
-  if (!this.isFormValid() || !this.selectedCompany) {
-    return;
-  }
 
-  this.isLoading = true;
-  try {
-    if (this.isEditMode && this.selectedCompany.id > 0) {
-      await firstValueFrom(this.mainServ.Edit(this.selectedCompany, this.DomainName));
-      Swal.fire('Updated!', 'Company updated successfully.', 'success');
-    } else {
-      await firstValueFrom(this.mainServ.Add(this.selectedCompany, this.DomainName));
-      Swal.fire('Added!', 'Company added successfully.', 'success');
+  Save() {  
+    if (this.isFormValid()) {
+      this.isLoading = true;    
+      if (this.selectedCompany?.id == 0) { 
+        this.mainServ.Add(this.selectedCompany!, this.DomainName).subscribe(
+          (result: any) => {
+            this.closeModal();
+            this.GetTableData();
+            this.isLoading = false;
+          },
+          (error) => {
+            this.isLoading = false;
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'Try Again Later!',
+              confirmButtonText: 'Okay',
+              customClass: { confirmButton: 'secondaryBg' },
+            });
+          }
+        );
+      } else {
+        this.mainServ.Edit(this.selectedCompany!, this.DomainName).subscribe(
+          (result: any) => {
+            this.closeModal();
+            this.GetTableData();
+            this.isLoading = false;
+          },
+          (error) => {
+            this.isLoading = false;
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'Try Again Later!',
+              confirmButtonText: 'Okay',
+              customClass: { confirmButton: 'secondaryBg' },
+            });
+          }
+        );
+      }
     }
-
-    this.closeModal();
-    this.TableData = await firstValueFrom(this.mainServ.Get(this.DomainName));
-  } catch (error) {
-    console.error("Save failed:", error);
-    Swal.fire('Error', 'Something went wrong.', 'error');
-  } finally {
-    this.isLoading = false;
-    this.isEditMode = false;
   }
-}
+
+
+// async save() {
+//   if (!this.isFormValid() || !this.selectedCompany) {
+//     return;
+//   }
+
+//   this.isLoading = true;
+//   try {
+//     if (this.isEditMode && this.selectedCompany.id > 0) {
+//       await firstValueFrom(this.mainServ.Edit(this.selectedCompany, this.DomainName));
+//       Swal.fire('Updated!', 'Company updated successfully.', 'success');
+//     } else {
+//       await firstValueFrom(this.mainServ.Add(this.selectedCompany, this.DomainName));
+//       Swal.fire('Added!', 'Company added successfully.', 'success');
+//     }
+
+//     this.closeModal();
+//     this.TableData = await firstValueFrom(this.mainServ.Get(this.DomainName));
+//   } catch (error) {
+//     console.error("Save failed:", error);
+//     Swal.fire('Error', 'Something went wrong.', 'error');
+//   } finally {
+//     this.isLoading = false;
+//     this.isEditMode = false;
+//   }
+// }
 
 
 
