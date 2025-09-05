@@ -24,7 +24,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         [HttpGet("GetAccountBalance")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Accounts Balances" }
+            pages: new[] {"Account Balance Report" }
         )]
         public async Task<IActionResult> GetAccountBalance(DateTime? toDate, long linkFileID, long? accountID = 0, bool zeroBalance = true, bool positiveBalance = true, bool negativeBalance = true, int pageNumber = 1, int pageSize = 10)
         {

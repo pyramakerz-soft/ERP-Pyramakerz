@@ -253,6 +253,11 @@ import { BonusComponent } from './Pages/Employee/HR/bonus/bonus.component';
 import { DeductionComponent } from './Pages/Employee/HR/deduction/deduction.component';
 import { LeaveRequestComponent } from './Pages/Employee/HR/leave-request/leave-request.component';
 import { StudentMedalReportComponent } from './Pages/Employee/SocialWorker/Reports/student-medal-report/student-medal-report.component';
+import { AccountBalanceComponent } from './Pages/Employee/Accounting/Report/account-balance/account-balance.component';
+import { AccountingSubledgerComponent } from './Pages/Employee/Accounting/Report/accounting-subledger/accounting-subledger.component';
+import { PermissionGroupComponent } from './Pages/Employee/Archiving/permission-group/permission-group.component';
+import { PermissionGroupEmployeeComponent } from './Pages/Employee/Archiving/permission-group-employee/permission-group-employee.component';
+import { PermissionGroupDetailsComponent } from './Pages/Employee/Archiving/permission-group-details/permission-group-details.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -528,8 +533,9 @@ export const routes: Routes = [
             { path: 'Attendance Report', component: AttendanceReportComponent, title: 'Attendance Report', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Student Issue Report', component: StudentIssueReportComponent, title: 'Student Issue Report', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Certificate To Student Report', component: CertificateStudentReportComponent, title: 'Certificate To Student Report', canActivate: [noNavigateWithoutLoginGuard], },
-            // { path: 'Medal To Student Report', component: CertificateStudentReportComponent, title: 'Medal To Student Report', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Medal To Student Report', component: StudentMedalReportComponent, title: 'Medal To Student Report', canActivate: [noNavigateWithoutLoginGuard], },
+            { path: 'Account Balance Report', component: AccountBalanceComponent, title: 'Account Balance Report', canActivate: [noNavigateWithoutLoginGuard], },
+            { path: 'Account Subledger Report', component: AccountingSubledgerComponent, title: 'Account Subledger Report', canActivate: [noNavigateWithoutLoginGuard], },
             { path: "Supplier Statement",  component: AccountStatementsComponent,  title: "Supplier Statement",  canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard]  },
             { path: "Safe Statement",  component: AccountStatementsComponent,  title: "Safe Statement",  canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard]  },
             { path: "Bank Statement",  component: AccountStatementsComponent,  title: "Bank Statement",  canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard]  },
@@ -555,6 +561,9 @@ export const routes: Routes = [
             { path: "Bonus", component: BonusComponent, title: "Bonus", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Deduction", component: DeductionComponent, title: "Deduction", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Leave Request", component: LeaveRequestComponent, title: "Leave Request", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Permissions Groups", component: PermissionGroupComponent, title: "Permissions Groups", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Permissions Group Employee/:id", component: PermissionGroupEmployeeComponent, title: "Permissions Group Employee", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Permissions Group Archiving/:id", component: PermissionGroupDetailsComponent, title: "Permissions Group Archiving", canActivate: [noNavigateWithoutLoginGuard] },
         ]
     },
     {

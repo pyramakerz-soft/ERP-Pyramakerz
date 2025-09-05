@@ -189,36 +189,6 @@ Delete(id: number) {
   }
 
 
-// isFormValid(): boolean {
-//   this.validationErrors = {};
-//   let isValid = true;
-
-//   if (!this.selectedCompany?.en_Name) {
-//     this.validationErrors['en_Name'] = '*English Name is required';
-//     isValid = false;
-//   }
-//   if (!this.selectedCompany?.ar_Name) {
-//     this.validationErrors['ar_Name'] = '*Arabic Name is required';
-//     isValid = false;
-//   }
-//   if ((this.selectedCompany?.en_Name?.length ?? 0) > 100) {
-//     this.validationErrors['en_Name'] = '*English Name cannot exceed 100 characters';
-//     isValid = false;
-//   }
-//   if ((this.selectedCompany?.ar_Name?.length ?? 0) > 100) {
-//     this.validationErrors['ar_Name'] = '*Arabic Name cannot exceed 100 characters';
-//     isValid = false;
-//   }
-
-//   return isValid;
-// }
-
-// onInputValueChange(event: { field: string; value: any }) {
-//   (this.selectedCompany as any)[event.field] = event.value;
-//   if (event.value) {
-//     this.validationErrors[event.field] = '';
-//   }
-// }
 
   onInputValueChange(event: { field: keyof MaintenanceCompanies; value: any }) {
     const { field, value } = event;
@@ -337,41 +307,6 @@ openModal(forNew: boolean = true) {
       }
     }
   }
-
-
-// async save() {
-//   if (!this.isFormValid() || !this.selectedCompany) {
-//     return;
-//   }
-
-//   this.isLoading = true;
-//   try {
-//     if (this.isEditMode && this.selectedCompany.id > 0) {
-//       await firstValueFrom(this.mainServ.Edit(this.selectedCompany, this.DomainName));
-//       Swal.fire('Updated!', 'Company updated successfully.', 'success');
-//     } else {
-//       await firstValueFrom(this.mainServ.Add(this.selectedCompany, this.DomainName));
-//       Swal.fire('Added!', 'Company added successfully.', 'success');
-//     }
-
-//     this.closeModal();
-//     this.TableData = await firstValueFrom(this.mainServ.Get(this.DomainName));
-//   } catch (error) {
-//     console.error("Save failed:", error);
-//     Swal.fire('Error', 'Something went wrong.', 'error');
-//   } finally {
-//     this.isLoading = false;
-//     this.isEditMode = false;
-//   }
-// }
-
-
-
-
-
-
-
-
 
 
 

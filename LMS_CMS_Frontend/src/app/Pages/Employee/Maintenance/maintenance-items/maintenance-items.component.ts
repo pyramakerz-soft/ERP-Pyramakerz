@@ -188,45 +188,13 @@ Delete(id: number) {
 
 
 
-// isFormValid(): boolean {
-//   this.validationErrors = {};
-//   let isValid = true;
-
-//   if (!this.selectedItem?.en_Name) {
-//     this.validationErrors['en_Name'] = '*English Name is required';
-//     isValid = false;
-//   }
-//   if (!this.selectedItem?.ar_Name) {
-//     this.validationErrors['ar_Name'] = '*Arabic Name is required';
-//     isValid = false;
-//   }
-//   if ((this.selectedItem?.en_Name?.length ?? 0) > 100) {
-//     this.validationErrors['en_Name'] = '*English Name cannot exceed 100 characters';
-//     isValid = false;
-//   }
-//   if ((this.selectedItem?.ar_Name?.length ?? 0) > 100) {
-//     this.validationErrors['ar_Name'] = '*Arabic Name cannot exceed 100 characters';
-//     isValid = false;
-//   }
-
-//   return isValid;
-// }
-
-// onInputValueChange(event: { field: string; value: any }) {
-//   (this.selectedItem as any)[event.field] = event.value;
-//   if (event.value) {
-//     this.validationErrors[event.field] = '';
-//   }
-// }
-
-
 Edit(id: number) {
   const Item = this.TableData.find((row: any) => row.id === id);
 
   if (Item) {
-    this.isEditMode = true;             // 👈 explicitly set edit mode
-    this.selectedItem = { ...Item }; // clone to avoid mutating the table row
-    this.openModal(false);              // false = editing
+    this.isEditMode = true;            
+    this.selectedItem = { ...Item }; 
+    this.openModal(false);              
   } else {
     console.error("Item not found with id:", id);
   }
@@ -336,31 +304,6 @@ openModal(forNew: boolean = true) {
     }
   }
 
-// async save() {
-//   if (!this.isFormValid() || !this.selectedItem) {
-//     return;
-//   }
-
-//   this.isLoading = true;
-//   try {
-//     if (this.isEditMode && this.selectedItem.id > 0) {
-//       await firstValueFrom(this.mainServ.Edit(this.selectedItem, this.DomainName));
-//       Swal.fire('Updated!', 'Item updated successfully.', 'success');
-//     } else {
-//       await firstValueFrom(this.mainServ.Add(this.selectedItem, this.DomainName));
-//       Swal.fire('Added!', 'Item added successfully.', 'success');
-//     }
-
-//     this.closeModal();
-//     this.TableData = await firstValueFrom(this.mainServ.Get(this.DomainName));
-//   } catch (error) {
-//     console.error("Save failed:", error);
-//     Swal.fire('Error', 'Something went wrong.', 'error');
-//   } finally {
-//     this.isLoading = false;
-//     this.isEditMode = false;
-//   }
-// }
 
 
 

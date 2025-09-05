@@ -39,7 +39,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
         [HttpGet]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Permission Groups" }
+            pages: new[] { "Permissions Groups" }
         )]
         public async Task<IActionResult> GetAsync([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
@@ -80,7 +80,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Permission Groups" }
+            pages: new[] { "Permissions Groups" }
         )]
         public IActionResult GetById(long id)
         {
@@ -110,7 +110,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
         [HttpPost]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Permission Groups" }
+            pages: new[] { "Permissions Groups" }
         )]
         public IActionResult Add(PermissionGroupAddDTO NewGroup)
         {
@@ -154,7 +154,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             allowEdit: 1,
-            pages: new[] { "Permission Groups" }
+            pages: new[] { "Permissions Groups" }
         )]
         public IActionResult Edit(PermissionGroupPutDTO EditedGroup)
         {
@@ -184,7 +184,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
 
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Permission Groups", roleId, userId, PermissionGroupExists);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Permissions Groups", roleId, userId, PermissionGroupExists);
                 if (accessCheck != null)
                 {
                     return accessCheck;
@@ -222,7 +222,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             allowDelete: 1,
-            pages: new[] { "Permission Groups" }
+            pages: new[] { "Permissions Groups" }
         )]
         public IActionResult Delete(long id)
         {
@@ -254,7 +254,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
 
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Permission Groups", roleId, userId, permissionGroup);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Permissions Groups", roleId, userId, permissionGroup);
                 if (accessCheck != null)
                 {
                     return accessCheck;
