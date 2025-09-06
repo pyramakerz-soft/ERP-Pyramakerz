@@ -238,16 +238,16 @@ namespace LMS_CMS
 
             /// 3)
             app.UseForwardedHeaders(new ForwardedHeadersOptions {
-    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
-});
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            });
 
-app.UseRouting();
-app.UseCors("AllowAllOrigins"); // you can keep it permissive; same-origin won’t need it
-app.UseAuthentication();
-app.UseAuthorization();
+            app.UseRouting();
+            app.UseCors("AllowAllOrigins"); // you can keep it permissive; same-origin won’t need it
+            app.UseAuthentication();
+            app.UseAuthorization();
 
-app.MapControllers();
-app.MapFallbackToFile("index.html");
+            app.MapControllers();
+            app.MapFallbackToFile("index.html");
 
 
             ///////// send files

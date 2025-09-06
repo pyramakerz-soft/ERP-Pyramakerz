@@ -31,8 +31,8 @@ export class DosesComponent implements OnInit {
   isModalVisible = false;
   doses: Dose[] = [];
   DomainName: string = '';
-   isRtl: boolean = false;
-    subscription!: Subscription;
+  isRtl: boolean = false;
+  subscription!: Subscription;
 
   constructor(private doseService: DoseService, 
     private apiService: ApiService,
@@ -41,8 +41,8 @@ export class DosesComponent implements OnInit {
   ngOnInit(): void {
     this.DomainName = this.apiService.GetHeader();
     this.getDoses();
-     this.subscription = this.languageService.language$.subscribe(direction => {
-      this.isRtl = direction === 'rtl';
+    this.subscription = this.languageService.language$.subscribe(direction => {
+    this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }

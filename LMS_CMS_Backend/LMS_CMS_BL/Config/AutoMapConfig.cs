@@ -2,7 +2,7 @@
 using LMS_CMS_BL.DTO;
 using LMS_CMS_BL.DTO.Accounting;
 using LMS_CMS_BL.DTO.Administration;
-
+using LMS_CMS_BL.DTO.Archiving;
 using LMS_CMS_BL.DTO.Bus;
 using LMS_CMS_BL.DTO.Clinic;
 using LMS_CMS_BL.DTO.Communication;
@@ -20,6 +20,7 @@ using LMS_CMS_BL.DTO.Zatca;
 using LMS_CMS_DAL.Models.Domains;
 using LMS_CMS_DAL.Models.Domains.AccountingModule;
 using LMS_CMS_DAL.Models.Domains.Administration;
+using LMS_CMS_DAL.Models.Domains.Archiving;
 using LMS_CMS_DAL.Models.Domains.BusModule;
 using LMS_CMS_DAL.Models.Domains.ClinicModule;
 using LMS_CMS_DAL.Models.Domains.Communication;
@@ -1375,6 +1376,36 @@ namespace LMS_CMS_BL.Config
             CreateMap<OfficialHolidays, OfficialHolidaysGetDTO>();
             CreateMap<OfficialHolidaysAddDTO, OfficialHolidays>();
 
+            CreateMap<VacationTypes, VacationTypesGetDTO>();
+            CreateMap<VacationTypesAddDTO, VacationTypes>();
+
+            CreateMap<Loans, loansGetDTO>()
+                .ForMember(dest => dest.SaveName, opt => opt.MapFrom(src => src.Save.Name))
+                .ForMember(dest => dest.EmployeeArName, opt => opt.MapFrom(src => src.Employee.ar_name))
+                .ForMember(dest => dest.EmployeeEnName, opt => opt.MapFrom(src => src.Employee.en_name));
+            CreateMap<loansAddDTO, Loans>();
+
+            CreateMap<BounsType, BounsTypeGetDTO>();
+            CreateMap<DeductionType, DeductionTypeGetDTO>();
+
+            CreateMap<LeaveRequest, leaveRequestsGetDTO>()
+                .ForMember(dest => dest.MonthlyLeaveRequestBalance, opt => opt.MapFrom(src => src.Employee.MonthlyLeaveRequestBalance))
+                .ForMember(dest => dest.EmployeeArName, opt => opt.MapFrom(src => src.Employee.ar_name))
+                .ForMember(dest => dest.EmployeeEnName, opt => opt.MapFrom(src => src.Employee.en_name));
+            CreateMap<leaveRequestsAddDTO, LeaveRequest>();
+
+            CreateMap<Bouns, BounsGetDTO>()
+                .ForMember(dest => dest.BounsTypeName, opt => opt.MapFrom(src => src.BounsType.Name))
+                .ForMember(dest => dest.EmployeeArName, opt => opt.MapFrom(src => src.Employee.ar_name))
+                .ForMember(dest => dest.EmployeeEnName, opt => opt.MapFrom(src => src.Employee.en_name));
+            CreateMap<BounsAddDTO, Bouns>();
+
+            CreateMap<Deduction, DeductionGetDTO>()
+                .ForMember(dest => dest.DeductionTypeName, opt => opt.MapFrom(src => src.DeductionType.Name))
+                .ForMember(dest => dest.EmployeeArName, opt => opt.MapFrom(src => src.Employee.ar_name))
+                .ForMember(dest => dest.EmployeeEnName, opt => opt.MapFrom(src => src.Employee.en_name));
+            CreateMap<DeductionAddDTO, Deduction>();
+
             CreateMap<DirectMarkClasses, DirectMarkClassesGetDTO>()
                 .ForMember(dest => dest.DirectMarkEnglishName, opt => opt.MapFrom(src => src.DirectMark.EnglishName))
                 .ForMember(dest => dest.DirectMarkArabicName, opt => opt.MapFrom(src => src.DirectMark.ArabicName))
@@ -1429,6 +1460,20 @@ namespace LMS_CMS_BL.Config
             CreateMap<MaintenanceEditDto, Maintenance>();
               
             CreateMap<ConnectionStatus, ConnectionStatusGetDTO>();
+
+            CreateMap<ArchivingTree, ArchivingTreeGetDTO>();
+            CreateMap<ArchivingAddDTO, ArchivingTree>();
+
+            CreateMap<PermissionGroup, PermissionGroupGetDTO>();
+            CreateMap<PermissionGroupAddDTO, PermissionGroup>();
+            CreateMap<PermissionGroupPutDTO, PermissionGroup>();
+
+            CreateMap<PermissionGroupEmployee, PermissionGroupEmployeeGetDTO>()
+                .ForMember(dest => dest.EmployeeEnglishName, opt => opt.MapFrom(src => src.Employee.en_name))
+                .ForMember(dest => dest.EmployeeArabicName, opt => opt.MapFrom(src => src.Employee.ar_name));
+            CreateMap<PermissionGroupEmployeeAddDTO, PermissionGroupEmployee>();
+
+            CreateMap<PermissionGroupDetails, PermissionGroupDetailsGetDTO>();
         }
     } 
 }

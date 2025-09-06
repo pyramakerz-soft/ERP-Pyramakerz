@@ -7,6 +7,7 @@ using LMS_CMS_DAL.Models.Domains;
 using LMS_CMS_DAL.Models.Domains.AccountingModule;
 using LMS_CMS_DAL.Models.Domains.Administration;
 using LMS_CMS_DAL.Models.Domains.BusModule;
+using LMS_CMS_DAL.Models.Domains.HR;
 using LMS_CMS_DAL.Models.Domains.LMS;
 using LMS_CMS_DAL.Models.Octa;
 using LMS_CMS_PL.Attribute;
@@ -129,6 +130,29 @@ namespace LMS_CMS_PL.Controllers.Domains
                     employeeDTO.GradeSelected = grades.Select(v => v.ID).ToList();
                 else
                     employeeDTO.GradeSelected = new List<long>();
+
+                // Get current month and year
+                var currentDate = DateTime.UtcNow;
+                var currentMonth = currentDate.Month;
+                var currentYear = currentDate.Year;
+
+                // Filter leave requests for the current month only
+                List<LeaveRequest> leaveRequests = Unit_Of_Work.leaveRequest_Repository
+                    .FindBy(l => l.EmployeeID == employeeDTO.ID
+                              && l.IsDeleted != true
+                              && l.Date.Month == currentMonth
+                              && l.Date.Year == currentYear);
+
+                // Sum up hours and minutes
+                var allHours = leaveRequests.Sum(l => l.Hours);
+                var allMinutes = leaveRequests.Sum(l => l.Minutes);
+
+                // Convert total minutes into hours and remaining minutes
+                allHours += allMinutes / 60;
+                allMinutes = allMinutes % 60;
+
+                // Convert hours and minutes to decimal (e.g., 4.5 for 4 hours 30 minutes)
+                employeeDTO.MonthlyLeaveRequestUsed = allHours + (allMinutes / 60.0m);
 
             }
 

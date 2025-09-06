@@ -37,43 +37,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.ToTable("HygieneTypeStudentHygieneTypes");
                 });
 
-            modelBuilder.Entity("LMS_CMS_DAL.AccountingModule.Reports.AccountingEntriesReport", b =>
-                {
-                    b.Property<string>("Account")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal?>("Credit")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime?>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal?>("Debit")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("MainAccount")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<long?>("MainAccountNo")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<long?>("Serial")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("SubAccount")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<long?>("SubAccountNo")
-                        .HasColumnType("bigint");
-
-                    b.ToTable((string)null);
-
-                    b.ToView(null, (string)null);
-                });
-
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.AccountingModule.AccountingConfigs", b =>
                 {
                     b.Property<int>("ID")
@@ -1515,16 +1478,17 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.AccountingModule.Reports.AccountBalanceReport", b =>
                 {
-                    b.Property<decimal?>("Credit")
+                    b.Property<decimal>("Credit")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal?>("Debit")
+                    b.Property<decimal>("Debit")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<long?>("ID")
+                    b.Property<long>("ID")
                         .HasColumnType("bigint");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.ToTable((string)null);
@@ -1558,9 +1522,6 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Property<string>("SubAccount")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<long?>("SubAccountNo")
-                        .HasColumnType("bigint");
-
                     b.ToTable((string)null);
 
                     b.ToView(null, (string)null);
@@ -1576,6 +1537,43 @@ namespace LMS_CMS_DAL.Migrations.Domains
 
                     b.Property<decimal?>("TotalDebit")
                         .HasColumnType("decimal(18,2)");
+
+                    b.ToTable((string)null);
+
+                    b.ToView(null, (string)null);
+                });
+
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.AccountingModule.Reports.AccountingEntriesReport", b =>
+                {
+                    b.Property<string>("Account")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal?>("Credit")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime?>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal?>("Debit")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("MainAccount")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long?>("MainAccountNo")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long?>("Serial")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("SubAccount")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long?>("SubAccountNo")
+                        .HasColumnType("bigint");
 
                     b.ToTable((string)null);
 
@@ -2361,6 +2359,251 @@ namespace LMS_CMS_DAL.Migrations.Domains
                         .IsUnique();
 
                     b.ToTable("RegisteredEmployee");
+                });
+
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.Archiving.ArchivingTree", b =>
+                {
+                    b.Property<long>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("ID"));
+
+                    b.Property<long?>("ArchivingTreeParentID")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("DeletedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("DeletedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("FileLink")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("InsertedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("InsertedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("InsertedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool?>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("UpdatedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("UpdatedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("ArchivingTreeParentID");
+
+                    b.HasIndex("DeletedByUserId");
+
+                    b.HasIndex("InsertedByUserId");
+
+                    b.HasIndex("UpdatedByUserId");
+
+                    b.ToTable("ArchivingTree");
+                });
+
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.Archiving.PermissionGroup", b =>
+                {
+                    b.Property<long>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("ID"));
+
+                    b.Property<string>("Ar_Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("DeletedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("DeletedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("En_Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("InsertedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("InsertedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("InsertedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool?>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("UpdatedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("UpdatedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("DeletedByUserId");
+
+                    b.HasIndex("InsertedByUserId");
+
+                    b.HasIndex("UpdatedByUserId");
+
+                    b.ToTable("PermissionGroup");
+                });
+
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.Archiving.PermissionGroupDetails", b =>
+                {
+                    b.Property<long>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("ID"));
+
+                    b.Property<bool>("Allow_Delete")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("Allow_Delete_For_Others")
+                        .HasColumnType("bit");
+
+                    b.Property<long>("ArchivingTreeID")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("DeletedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("DeletedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("InsertedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("InsertedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("InsertedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool?>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<long>("PermissionGroupID")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("UpdatedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("UpdatedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("ArchivingTreeID");
+
+                    b.HasIndex("DeletedByUserId");
+
+                    b.HasIndex("InsertedByUserId");
+
+                    b.HasIndex("PermissionGroupID");
+
+                    b.HasIndex("UpdatedByUserId");
+
+                    b.ToTable("PermissionGroupDetails");
+                });
+
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.Archiving.PermissionGroupEmployee", b =>
+                {
+                    b.Property<long>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("ID"));
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("DeletedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("DeletedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("EmployeeID")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("InsertedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("InsertedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("InsertedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool?>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<long>("PermissionGroupID")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("UpdatedByOctaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("UpdatedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("DeletedByUserId");
+
+                    b.HasIndex("EmployeeID");
+
+                    b.HasIndex("InsertedByUserId");
+
+                    b.HasIndex("PermissionGroupID");
+
+                    b.HasIndex("UpdatedByUserId");
+
+                    b.ToTable("PermissionGroupEmployee");
                 });
 
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.BusModule.Bus", b =>
@@ -15085,6 +15328,130 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Navigation("UpdatedByEmployee");
                 });
 
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.Archiving.ArchivingTree", b =>
+                {
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Archiving.ArchivingTree", "ArchivingTreeParent")
+                        .WithMany("ChildArchivingTrees")
+                        .HasForeignKey("ArchivingTreeParentID")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "DeletedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("DeletedByUserId");
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "InsertedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("InsertedByUserId");
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "UpdatedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("UpdatedByUserId");
+
+                    b.Navigation("ArchivingTreeParent");
+
+                    b.Navigation("DeletedByEmployee");
+
+                    b.Navigation("InsertedByEmployee");
+
+                    b.Navigation("UpdatedByEmployee");
+                });
+
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.Archiving.PermissionGroup", b =>
+                {
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "DeletedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("DeletedByUserId");
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "InsertedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("InsertedByUserId");
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "UpdatedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("UpdatedByUserId");
+
+                    b.Navigation("DeletedByEmployee");
+
+                    b.Navigation("InsertedByEmployee");
+
+                    b.Navigation("UpdatedByEmployee");
+                });
+
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.Archiving.PermissionGroupDetails", b =>
+                {
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Archiving.ArchivingTree", "ArchivingTree")
+                        .WithMany("PermissionGroupDetails")
+                        .HasForeignKey("ArchivingTreeID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "DeletedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("DeletedByUserId");
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "InsertedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("InsertedByUserId");
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Archiving.PermissionGroup", "PermissionGroup")
+                        .WithMany("PermissionGroupDetails")
+                        .HasForeignKey("PermissionGroupID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "UpdatedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("UpdatedByUserId");
+
+                    b.Navigation("ArchivingTree");
+
+                    b.Navigation("DeletedByEmployee");
+
+                    b.Navigation("InsertedByEmployee");
+
+                    b.Navigation("PermissionGroup");
+
+                    b.Navigation("UpdatedByEmployee");
+                });
+
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.Archiving.PermissionGroupEmployee", b =>
+                {
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "DeletedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("DeletedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "Employee")
+                        .WithMany("PermissionGroupEmployees")
+                        .HasForeignKey("EmployeeID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "InsertedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("InsertedByUserId");
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Archiving.PermissionGroup", "PermissionGroup")
+                        .WithMany("PermissionGroupEmployees")
+                        .HasForeignKey("PermissionGroupID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "UpdatedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("UpdatedByUserId");
+
+                    b.Navigation("DeletedByEmployee");
+
+                    b.Navigation("Employee");
+
+                    b.Navigation("InsertedByEmployee");
+
+                    b.Navigation("PermissionGroup");
+
+                    b.Navigation("UpdatedByEmployee");
+                });
+
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.BusModule.Bus", b =>
                 {
                     b.HasOne("LMS_CMS_DAL.Models.Domains.BusModule.BusCompany", "BusCompany")
@@ -20954,6 +21321,20 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Navigation("Employees");
                 });
 
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.Archiving.ArchivingTree", b =>
+                {
+                    b.Navigation("ChildArchivingTrees");
+
+                    b.Navigation("PermissionGroupDetails");
+                });
+
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.Archiving.PermissionGroup", b =>
+                {
+                    b.Navigation("PermissionGroupDetails");
+
+                    b.Navigation("PermissionGroupEmployees");
+                });
+
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.BusModule.Bus", b =>
                 {
                     b.Navigation("BusStudents");
@@ -21085,6 +21466,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Navigation("Loans");
 
                     b.Navigation("MaintenanceEmployees");
+
+                    b.Navigation("PermissionGroupEmployees");
 
                     b.Navigation("RemedialClassrooms");
 

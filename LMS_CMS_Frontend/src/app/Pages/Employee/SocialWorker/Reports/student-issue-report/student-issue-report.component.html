@@ -1,0 +1,147 @@
+<div class="flex justify-between">
+    <h1 class="primaryTxt font-bold text-2xl leading-9">
+        {{ 'Student Issue Report' | translate }}
+    </h1>
+</div>
+
+<div class="my-5 flex flex-wrap justify-between items-center">
+    <!-- Date From -->
+    <div class="w-[24%] mb-4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="dateFrom">{{ 'Date From' | translate }}</label>
+        <input type="date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="dateFrom"
+            [(ngModel)]="dateFrom" (ngModelChange)="onFilterChange()" required>
+    </div>
+
+    <!-- Date To -->
+    <div class="w-[24%] mb-4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="dateTo">{{ 'Date To' | translate }}</label>
+        <input type="date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="dateTo"
+            [(ngModel)]="dateTo" (ngModelChange)="onFilterChange()" required>
+    </div>
+
+    <!-- School Selector -->
+    <div class="w-[24%] mb-4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="school">{{ 'School' | translate }}</label>
+        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="school"
+            [(ngModel)]="selectedSchoolId" (change)="onSchoolChange()">
+            <option [ngValue]="null">{{ 'Choose' | translate }} {{ 'School' | translate }}</option>
+            <option *ngFor="let school of schools" [ngValue]="school.id">{{ school.name }}</option>
+        </select>
+    </div>
+
+    <!-- Grade Selector -->
+    <div class="w-[24%] mb-4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="grade">{{ 'Grade' | translate }}</label>
+        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="grade"
+            [(ngModel)]="selectedGradeId" (change)="onGradeChange()" [disabled]="!selectedSchoolId">
+            <option [ngValue]="null">{{ 'Choose' | translate }} {{ 'Grade' | translate }}</option>
+            <option *ngFor="let grade of grades" [ngValue]="grade.id">{{ grade.name }}</option>
+        </select>
+    </div>
+
+    <!-- Class Selector -->
+    <div class="w-[24%] mb-4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="class">{{ 'Class' | translate }}</label>
+        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="class"
+            [(ngModel)]="selectedClassId" (change)="onClassChange()" [disabled]="!selectedGradeId">
+            <option [ngValue]="null">{{ 'Choose' | translate }} {{ 'Class' | translate }}</option>
+            <option *ngFor="let class of classes" [ngValue]="class.id">{{ class.name }}</option>
+        </select>
+    </div>
+
+    <!-- Student Selector -->
+    <div class="w-[24%] mb-4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="student">{{ 'Student' | translate }}</label>
+        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="student"
+            [(ngModel)]="selectedStudentId" (ngModelChange)="onFilterChange()" [disabled]="!selectedClassId">
+            <option [ngValue]="null">{{ 'Choose' | translate }} {{ 'Student' | translate }}</option>
+            <option *ngFor="let student of students" [ngValue]="student.id">{{ student.name }}</option>
+        </select>
+    </div>
+
+    <!-- Issue Type Selector -->
+    <div class="w-[24%] mb-4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="issueType">{{ 'Issue Type' | translate }}</label>
+        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="issueType"
+            [(ngModel)]="selectedIssueTypeId" (ngModelChange)="onFilterChange()">
+            <option [ngValue]="null">{{ 'Choose' | translate }} {{ 'Issue Type' | translate }}</option>
+            <option *ngFor="let type of issueTypes" [ngValue]="type.id">{{ type.name }}</option>
+        </select>
+    </div>
+
+    <!-- View Report Button -->
+    <div class="w-[24%] flex justify-end">
+        <button class="p-4 font-medium text-xl rounded-lg" (click)="viewReport()"
+            [disabled]="!showViewReportBtn || isLoading" [ngClass]="{ 
+            'bg-gray-100 text-gray-300 cursor-not-allowed': !showViewReportBtn || isLoading, 
+            'secondaryBg text-white': showViewReportBtn && !isLoading
+        }">
+            <span *ngIf="!isLoading">{{ 'View Report' | translate }}</span>
+            <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+        </button>
+    </div>
+</div>
+
+<!-- Export Buttons -->
+<div *ngIf="showTable" class="mb-5 flex justify-end space-x-4 rtl:space-x-reverse">
+    <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="exportExcel()" title="Export to Excel">
+    <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()" title="Export to PDF">
+    <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()" title="Print Report">
+</div>
+
+<!-- Results Table -->
+<div *ngIf="showTable" class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
+    <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
+        <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+            <tr>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Date' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Student Name' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Issue Type' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Details' | translate }}
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngIf="studentIssueReports.length === 0">
+                <td colspan="4" class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                    {{ 'No Data Found' | translate }}
+                </td>
+            </tr>
+
+            <tr *ngFor="let report of studentIssueReports; let i = index"
+                [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
+                class="border-t border-gray-300 text-xs md:text-sm">
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ report.date | date:'mediumDate' }}
+                </td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ report.studentName }}
+                </td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ report.issuesType.name || 'N/A' }}
+                </td>
+                <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ report.details || 'N/A' }}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Hidden PDF Container -->
+<div class="absolute -top-[9999px] -left-[9999px]">
+    <div id="Data" class="hidden">
+        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'Student Issue Report'"
+            [infoRows]="getInfoRows()"
+            [tableHeaders]="['Date', 'Student Name', 'Issue Type', 'Details']"
+            [tableData]="reportsForExport" #pdfComponentRef>
+        </app-pdf-print>
+    </div>
+</div>

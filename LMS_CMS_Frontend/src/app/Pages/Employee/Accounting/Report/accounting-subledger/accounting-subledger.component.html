@@ -1,0 +1,226 @@
+<!-- account-subledger-report.component.html -->
+<div class="flex justify-between">
+    <h1 class="primaryTxt font-semibold text-2xl leading-9">
+        {{ 'Accounts Subledger Report' | translate }}
+    </h1>
+</div>
+
+<div class="my-5 flex flex-wrap md:flex-nowrap items-end space-x-0 md:space-x-6 rtl:space-x-reverse space-y-4 md:space-y-0 mb-6">
+    <!-- Date From -->
+    <div class="w-full md:w-1/4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="fromDate">{{ 'From Date' | translate }}</label>
+        <input type="date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            id="fromDate" [(ngModel)]="fromDate" (ngModelChange)="onFilterChange()" required>
+    </div>
+
+    <!-- Date To -->
+    <div class="w-full md:w-1/4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="toDate">{{ 'To Date' | translate }}</label>
+        <input type="date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            id="toDate" [(ngModel)]="toDate" (ngModelChange)="onFilterChange()" required>
+    </div>
+
+    <!-- Account Type Selector -->
+    <div class="w-full md:w-1/4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="linkFileID">{{ 'Account Type' | translate }}</label>
+        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="linkFileID"
+            [(ngModel)]="linkFileID" (ngModelChange)="onFilterChange()" required>
+            <option [ngValue]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Account Type' | translate }}</option>
+            <option *ngFor="let option of linkFileOptions" [ngValue]="option.id">{{ option.name | translate }}</option>
+        </select>
+    </div>
+
+    <!-- Account Selector -->
+    <div class="w-full md:w-1/4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="accountID">{{ 'Account' | translate }}</label>
+        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="accountID"
+            [(ngModel)]="accountID" (ngModelChange)="onFilterChange()">
+            <option [ngValue]="0">{{ 'All' | translate }} {{ 'Accounts' | translate }}</option>
+            <option *ngFor="let account of accounts" [ngValue]="account.id">{{ account.name }}</option>
+        </select>
+    </div>
+
+    <div class="w-full md:w-1/6 flex justify-end mt-4 md:mt-0">
+        <button class="p-3 font-medium text-xl rounded-lg" (click)="viewReport()"
+            [disabled]="!fromDate || !toDate || !linkFileID" [ngClass]="{
+                'bg-gray-100 text-gray-300': !fromDate || !toDate || !linkFileID,
+                'secondaryBg text-white': fromDate && toDate && linkFileID
+            }">
+            {{ 'View Report' | translate }}
+        </button>
+    </div>
+</div>
+
+<!-- Loading Indicator -->
+<div *ngIf="isLoading" class="flex justify-center items-center py-8">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-secondaryBg"></div>
+</div>
+
+<div *ngIf="showTable && reportData" class="mb-5">
+    <!-- Report Summary -->
+    <!-- <div class="bg-blue-50 p-4 rounded-lg mb-4">
+        <h3 class="font-semibold text-lg mb-2">{{ 'Report Summary' | translate }}</h3>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+                <span class="font-medium">{{ 'Account Type' | translate }}:</span> {{ getLinkFileName(linkFileID) }}
+            </div>
+            <div>
+                <span class="font-medium">{{ 'Account' | translate }}:</span> {{ getAccountName(accountID) }}
+            </div>
+            <div>
+                <span class="font-medium">{{ 'From Date' | translate }}:</span> {{ fromDate }}
+            </div>
+            <div>
+                <span class="font-medium">{{ 'To Date' | translate }}:</span> {{ toDate }}
+            </div>
+        </div>
+    </div> -->
+
+    <!-- First Period Totals -->
+    <div class="bg-gray-50 p-4 rounded-lg mb-4">
+        <h3 class="font-semibold text-lg mb-2">{{ 'Opening Balance' | translate }}</h3>
+        <div class="overflow-x-auto rounded-2xl border border-[#BDBDBD] mb-4">
+            <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
+                <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+                    <tr>
+                        <th class="py-3 px-4 whitespace-nowrap">{{ 'ID' | translate }}</th>
+                        <th class="py-3 px-4 whitespace-nowrap">{{ 'Name' | translate }}</th>
+                        <th class="py-3 px-4 whitespace-nowrap">{{ 'Debit' | translate }}</th>
+                        <th class="py-3 px-4 whitespace-nowrap">{{ 'Credit' | translate }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngIf="reportData.firstPeriodTotals.balance.length === 0">
+                        <td colspan="4" class="bg-white px-4 py-2 h-[72px] text-center">
+                            {{ 'No Data Found' | translate }}
+                        </td>
+                    </tr>
+                    <tr *ngFor="let item of reportData.firstPeriodTotals.balance; let i = index" 
+                        [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }">
+                        <td class="py-5 px-4">{{ item.id }}</td>
+                        <td class="py-5 px-4">{{ item.name }}</td>
+                        <td class="py-5 px-4">{{ item.debit | number:'1.2-2' }}</td>
+                        <td class="py-5 px-4">{{ item.credit | number:'1.2-2' }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="flex justify-end space-x-8 p-4 bg-gray-100 rounded-lg">
+            <div><span class="font-semibold">{{ 'Total Debit' | translate }}:</span> {{ reportData.firstPeriodTotals.total.totalDebit | number:'1.2-2' }}</div>
+            <div><span class="font-semibold">{{ 'Total Credit' | translate }}:</span> {{ reportData.firstPeriodTotals.total.totalCredit | number:'1.2-2' }}</div>
+            <div><span class="font-semibold">{{ 'Difference' | translate }}:</span> {{ reportData.firstPeriodTotals.total.difference | number:'1.2-2' }}</div>
+        </div>
+    </div>
+
+    <!-- Transactions Period Totals -->
+    <div class="bg-gray-50 p-4 rounded-lg mb-4">
+        <h3 class="font-semibold text-lg mb-2">{{ 'Transactions Period' | translate }}</h3>
+        <div class="overflow-x-auto rounded-2xl border border-[#BDBDBD] mb-4">
+            <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
+                <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+                    <tr>
+                        <th class="py-3 px-4 whitespace-nowrap">{{ 'ID' | translate }}</th>
+                        <th class="py-3 px-4 whitespace-nowrap">{{ 'Name' | translate }}</th>
+                        <th class="py-3 px-4 whitespace-nowrap">{{ 'Debit' | translate }}</th>
+                        <th class="py-3 px-4 whitespace-nowrap">{{ 'Credit' | translate }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngIf="reportData.transactionsPeriodTotals.balance.length === 0">
+                        <td colspan="4" class="bg-white px-4 py-2 h-[72px] text-center">
+                            {{ 'No Data Found' | translate }}
+                        </td>
+                    </tr>
+                    <tr *ngFor="let item of reportData.transactionsPeriodTotals.balance; let i = index" 
+                        [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }">
+                        <td class="py-5 px-4">{{ item.id }}</td>
+                        <td class="py-5 px-4">{{ item.name }}</td>
+                        <td class="py-5 px-4">{{ item.debit | number:'1.2-2' }}</td>
+                        <td class="py-5 px-4">{{ item.credit | number:'1.2-2' }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="flex justify-end space-x-8 p-4 bg-gray-100 rounded-lg">
+            <div><span class="font-semibold">{{ 'Total Debit' | translate }}:</span> {{ reportData.transactionsPeriodTotals.total.totalDebit | number:'1.2-2' }}</div>
+            <div><span class="font-semibold">{{ 'Total Credit' | translate }}:</span> {{ reportData.transactionsPeriodTotals.total.totalCredit | number:'1.2-2' }}</div>
+            <div><span class="font-semibold">{{ 'Difference' | translate }}:</span> {{ reportData.transactionsPeriodTotals.total.difference | number:'1.2-2' }}</div>
+        </div>
+    </div>
+
+    <!-- Last Period Totals -->
+    <div class="bg-gray-50 p-4 rounded-lg mb-4">
+        <h3 class="font-semibold text-lg mb-2">{{ 'Closing Balance' | translate }}</h3>
+        <div class="overflow-x-auto rounded-2xl border border-[#BDBDBD] mb-4">
+            <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
+                <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+                    <tr>
+                        <th class="py-3 px-4 whitespace-nowrap">{{ 'ID' | translate }}</th>
+                        <th class="py-3 px-4 whitespace-nowrap">{{ 'Name' | translate }}</th>
+                        <th class="py-3 px-4 whitespace-nowrap">{{ 'Debit' | translate }}</th>
+                        <th class="py-3 px-4 whitespace-nowrap">{{ 'Credit' | translate }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngIf="reportData.lastPeriodTotals.bakance.length === 0">
+                        <td colspan="4" class="bg-white px-4 py-2 h-[72px] text-center">
+                            {{ 'No Data Found' | translate }}
+                        </td>
+                    </tr>
+                    <tr *ngFor="let item of reportData.lastPeriodTotals.bakance; let i = index" 
+                        [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }">
+                        <td class="py-5 px-4">{{ item.id }}</td>
+                        <td class="py-5 px-4">{{ item.name }}</td>
+                        <td class="py-5 px-4">{{ item.debit | number:'1.2-2' }}</td>
+                        <td class="py-5 px-4">{{ item.credit | number:'1.2-2' }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="flex justify-end space-x-8 p-4 bg-gray-100 rounded-lg">
+            <div><span class="font-semibold">{{ 'Total Debit' | translate }}:</span> {{ reportData.lastPeriodTotals.total.totalDebit | number:'1.2-2' }}</div>
+            <div><span class="font-semibold">{{ 'Total Credit' | translate }}:</span> {{ reportData.lastPeriodTotals.total.totalCredit | number:'1.2-2' }}</div>
+            <div><span class="font-semibold">{{ 'Difference' | translate }}:</span> {{ reportData.lastPeriodTotals.total.difference | number:'1.2-2' }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- 
+<div>testtesttetst</div>
+<div *ngIf="showTable && reportData && reportData.pagination.totalPages > 1" class="mt-8 flex justify-between items-center">
+    <div class="flex items-center space-x-4 flex-row rtl:flex-row-reverse">
+        <button class="flex items-center space-x-2 rounded-lg border py-3 px-4 flex-row rtl:flex-row-reverse"
+            (click)="changePage(pageNumber-1)" [disabled]="pageNumber === 1"
+            [ngClass]="{'cursor-not-allowed opacity-50': pageNumber === 1}">
+            <i class="fa-solid fa-arrow-left"></i>
+            <p>{{'Previous'| translate }}</p>
+        </button>
+        <div class="flex">
+            <div *ngFor="let page of visiblePages"
+                class="rounded-lg py-[10px] w-[40px]"
+                [ngClass]="{ 'border': page === pageNumber, 'hover:bg-gray-100': page !== pageNumber }"
+                (click)="changePage(page)">
+                <p class="cursor-pointer text-center">{{ page }}</p>
+            </div>
+        </div>
+        <button class="flex items-center space-x-2 rounded-lg border py-3 px-4 flex-row rtl:flex-row-reverse"
+            (click)="changePage(pageNumber+1)"
+            [disabled]="pageNumber === (reportData.pagination.totalPages || 1)"
+            [ngClass]="{'cursor-not-allowed opacity-50': pageNumber === (reportData.pagination.totalPages || 1)}">
+            <p>{{'Next'| translate }}</p>
+            <i class="fa-solid fa-arrow-right"></i>
+        </button>
+    </div>
+
+    <div class="flex items-center space-x-2">
+        <input (input)="validateNumberForPagination($event)" class="rounded-lg border py-3 px-4 w-[73px]"
+            [(ngModel)]="pageSize" min="1" (input)="validatePageSize($event)"
+            (ngModelChange)="changePage(1)">
+        <p>{{'items Per Page'| translate }}</p>
+    </div>
+
+    <div>
+        <p>{{pageNumber}} {{'of'| translate }} {{reportData.pagination.totalPages}} {{'pages'| translate }} ({{reportData.pagination.totalRecords}} {{'Item'| translate }})</p>
+    </div>
+</div> -->

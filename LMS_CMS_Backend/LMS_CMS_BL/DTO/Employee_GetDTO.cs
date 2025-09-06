@@ -41,10 +41,14 @@ namespace LMS_CMS_BL.DTO
         public bool? CanReceiveRequest { get; set; } 
         public bool? CanReceiveRequestFromParent { get; set; }
         public bool? CanReceiveMessageFromParent { get; set; }
+        public decimal? MonthlyLeaveRequestBalance { get; set; }
+        public decimal? MonthlyLeaveRequestUsed { get; set; }
         public bool IsSuspended { get; set; }
         public List<EmployeeAttachmentDTO>? Files { get; set; }
         public List<long>? FloorsSelected { get; set; }
         public List<long>? GradeSelected { get; set; }
-        public List<long>? SubjectSelected { get; set; } 
+        public List<long>? SubjectSelected { get; set; }
+
+        public long? InsertedByUserId { get; set; }
     }
 }

@@ -1,3 +1,6 @@
+import { ConductType } from "./conduct-type";
+import { ProcedureType } from "./procedure-type";
+
 export class Conduct {
     constructor(
         public id: number = 0,
@@ -23,4 +26,16 @@ export class Conduct {
         public insertedByUserId: number = 0,
         public insertedAt: string = '',
     ) { }
+}
+
+export class ConductReportItem {
+    constructor(
+  public id: number,
+  public date: string,
+  public studentID: number,
+  public studentEnName: string,
+  public conductType: ConductType,
+  public procedureType: ProcedureType,
+  public details: string,
+    ){}
 }
