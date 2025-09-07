@@ -15,8 +15,6 @@
         //}
 
         public string BuildConnectionString(string domainName)
-
-
         {
             var dataSource = "SW-13\\SQLEXPRESS";
             var initialCatalog = domainName;

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using LMS_CMS_DAL.Models.Domains.HR;
+using LMS_CMS_DAL.Models.Domains;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
@@ -6,20 +8,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LMS_CMS_DAL.Models.Domains.HR
+namespace LMS_CMS_BL.DTO.HR
 {
-    public class AnnualVacationEmployee : AuditableEntity
+    public class AnnualVacationEmployeeGetDTO
     {
-        [Key]
         public long ID { get; set; }
         public int Balance { get; set; }
-
-        [ForeignKey("Employee")]
         public long EmployeeID { get; set; }
-        public Employee Employee { get; set; }
-
-        [ForeignKey("VacationTypes")]
+        public string EmployeeEnName { get; set; }
+        public string EmployeeArName { get; set; }
         public long VacationTypesID { get; set; }
-        public VacationTypes VacationTypes { get; set; }
+        public string VacationTypeName { get; set; }
     }
 }

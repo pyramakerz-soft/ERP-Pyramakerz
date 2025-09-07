@@ -520,7 +520,7 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
           },
         ],
         infoRows: infoRows,
-        reportImage: this.school.reportImage,
+        // reportImage: this.school.reportImage,
         tables: [
           {
             title:

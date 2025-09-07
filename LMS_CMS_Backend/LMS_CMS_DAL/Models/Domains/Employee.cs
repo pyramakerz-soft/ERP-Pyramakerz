@@ -133,6 +133,7 @@ namespace LMS_CMS_DAL.Models.Domains
         public ICollection<EmployeeVacationCount> EmployeeVacationCount { get; set; } = new HashSet<EmployeeVacationCount>();
         public ICollection<LeaveRequest> LeaveRequest { get; set; } = new HashSet<LeaveRequest>();
         public ICollection<VacationEmployee> VacationEmployee { get; set; } = new HashSet<VacationEmployee>();
+        public ICollection<AnnualVacationEmployee> AnnualVacationEmployee { get; set; } = new HashSet<AnnualVacationEmployee>();
         public ICollection<PermissionGroupEmployee> PermissionGroupEmployees { get; set; } = new HashSet<PermissionGroupEmployee>();
     }
 }

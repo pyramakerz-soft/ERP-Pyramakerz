@@ -3,6 +3,6 @@ export class ViolationReport {
   date: string = '';
   violationType: string = '';
   employeeType: string = '';
-  employeeName: string = '';
+  employeeEnglishName: string = '';
   details: string = '';
 }

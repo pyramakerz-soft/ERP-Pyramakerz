@@ -7,73 +7,63 @@
     <div class="flex flex-col w-[30%] mb-4">
         <label for="template" class="mb-2 font-medium">{{ 'Template' | translate }}</label>
         <select id="template" class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
-            [(ngModel)]="filterParams.templateId">
+            [(ngModel)]="filterParams.templateId" (ngModelChange)="onFilterChange()">
             <option [value]="0" disabled selected hidden>  {{ 'Choose' | translate }} {{ 'Template' | translate }}</option>
             <option *ngFor="let template of Templates" [value]="template.id">{{ template.englishTitle }}</option>
             <option *ngIf="Templates.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
-
         </select>
     </div>
 
-    
     <div class="flex flex-col w-[30%] mb-4">
         <label for="fromDate" class="mb-2 font-medium">{{ 'Start Date' | translate }}</label>
-        <input id="fromDate" type="date" [(ngModel)]="filterParams.fromDate" (change)="DateChange()"
+        <input id="fromDate" type="date" [(ngModel)]="filterParams.fromDate" 
+               (change)="DateChange()" (ngModelChange)="onFilterChange()"
             class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto">
     </div>
 
     <div class="flex flex-col w-[30%] mb-4">
         <label for="toDate" class="mb-2 font-medium">{{ 'End Date' | translate }}</label>
-        <input id="toDate" type="date" [(ngModel)]="filterParams.toDate" (change)="DateChange()"
+        <input id="toDate" type="date" [(ngModel)]="filterParams.toDate" 
+               (change)="DateChange()" (ngModelChange)="onFilterChange()"
             class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto">
     </div>
-
-
 
     <div class="flex flex-col w-[25%] mb-4">
         <label for="employee" class="mb-2 font-medium">{{ 'Employee' | translate }}</label>
         <select id="employee" class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
-            [(ngModel)]="filterParams.employeeId">
-            <option [value]="null">{{'Select'| translate }}  {{'All'| translate }}</option>
-            <option *ngFor="let employee of Employees" [value]="employee.id">{{ employee.en_name }}</option>
-        </select>
+            [(ngModel)]="filterParams.employeeId" (ngModelChange)="onFilterChange()">
+  <option [value]="0" selected>{{'Select'| translate }}  {{'All'| translate }}</option>
+  <option *ngFor="let employee of Employees" [value]="employee.id">{{ employee.en_name }}</option>
+</select>
     </div>
 
     <div class="flex flex-col w-[25%] mb-4">
         <label for="school" class="mb-2 font-medium">{{ 'School' | translate }}</label>
         <select id="school" class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
-            [(ngModel)]="filterParams.schoolId" (change)="onSchoolChange($event)">
+            [(ngModel)]="filterParams.schoolId" (change)="onSchoolChange($event)" (ngModelChange)="onFilterChange()">
             <option [value]="null" selected>{{'Select'| translate }} {{'All'| translate }}</option>
             <option *ngFor="let school of Schools" [value]="school.id">{{ school.name }}</option>
         </select>
-        </div>
+    </div>
 
-
-
-
-        <div class="flex flex-col w-[25%] mb-4">
-            <label class="mb-2 font-medium" for="Class"
-                [ngClass]="{ 'text-gray-400': !filterParams.schoolId, 'primaryTxt': filterParams.schoolId }">{{ 'Class' |
-                translate }}</label>
-            <select id="class" class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
-                [disabled]="!filterParams.schoolId" [(ngModel)]="filterParams.classroomId">
-                <option [value]="null" selected>{{'Select'| translate }} {{'All'| translate }}</option>
-                <option *ngFor="let class of Classs" [value]="class.id">{{ class.name }}</option>
-            </select>  
-        </div>
-
-
-
+    <div class="flex flex-col w-[25%] mb-4">
+        <label class="mb-2 font-medium" for="Class"
+            [ngClass]="{ 'text-gray-400': !filterParams.schoolId, 'primaryTxt': filterParams.schoolId }">{{ 'Class' |
+            translate }}</label>
+        <select id="class" class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
+            [disabled]="!filterParams.schoolId" [(ngModel)]="filterParams.classroomId" (ngModelChange)="onFilterChange()">
+            <option [value]="0" selected>{{'Select'| translate }} {{'All'| translate }}</option>
+            <option *ngFor="let class of Classs" [value]="class.id">{{ class.name }}</option>
+        </select>  
+    </div>
 
     <div class="px-4 py-3 cursor-pointer font-medium text-lg rounded-lg">
-        <button class="p-3 font-medium text-xl rounded-lg" (click)="generateReport()"
-            [disabled]="!filterParams.templateId || !filterParams.fromDate || !filterParams.toDate"
-
-            [ngClass]="{ 'bg-gray-100 text-gray-300': !filterParams.fromDate || !filterParams.toDate || !filterParams.templateId,
-             'secondaryBg text-white': filterParams.fromDate && filterParams.toDate && filterParams.templateId }">
-
-            {{ 'View Report' | translate }}
-        </button>
+<button class="p-3 font-medium text-xl rounded-lg" (click)="generateReport()"
+    [disabled]="!filterParams.templateId || !filterParams.fromDate || !filterParams.toDate"
+    [ngClass]="{ 'bg-gray-100 text-gray-300': !filterParams.fromDate || !filterParams.toDate || !filterParams.templateId,
+     'secondaryBg text-white': filterParams.fromDate && filterParams.toDate && filterParams.templateId }">
+    {{ 'View Report' | translate }}
+</button>
     </div>
 </div>
 
@@ -236,7 +226,32 @@
     <div id="Data" class="hidden">
         <app-pdf-print *ngIf="showPDF" [school]="school" 
                        [fileName]="'Evaluation Report'"
-                       [infoRows]="getInfoRows()"
+                       [infoRows]="[
+                { 
+                  keyEn: 'Template: ' + getTemplateName(),
+                  keyAr: 'النموذج: ' + getTemplateName()
+                },
+                {
+                  keyEn: 'Employee: ' + getEmployeeName(),
+                  keyAr: 'الموظف: ' + getEmployeeName()
+                },
+                {
+                  keyEn: 'School: ' + getSchoolName(),
+                  keyAr: 'المدرسة: ' + getSchoolName()
+                },
+                {
+                  keyEn: 'Class: ' + getClassName(),
+                  keyAr: 'الفصل: ' + getClassName()
+                },
+                {
+                  keyEn: 'Date Range: ' + getDateRange(),
+                  keyAr: 'النطاق الزمني: ' + getDateRange()
+                },
+                {
+                  keyEn: 'Generated On: ' + getGeneratedDate(),
+                  keyAr: 'تم الإنشاء في: ' + getGeneratedDate()
+                }
+              ]"
                        [tableDataWithHeaderArray]="cachedTableDataForPDF"
                        #pdfComponentRef>
         </app-pdf-print>

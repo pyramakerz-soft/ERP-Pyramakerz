@@ -18,13 +18,13 @@
         <input type="date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="dateTo"
             [(ngModel)]="dateTo" (ngModelChange)="onFilterChange()" required>
     </div>
-
     <!-- School Selector -->
     <div class="w-[24%] mb-4">
         <label class="block mb-2 text-sm font-medium text-gray-900" for="school">{{ 'School' | translate }}</label>
         <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="school"
             [(ngModel)]="selectedSchoolId" (change)="onSchoolChange()">
-            <option [ngValue]="null">{{ 'Choose' | translate }} {{ 'School' | translate }}</option>
+            <option [ngValue]="null" selected hidden>{{ 'Choose' | translate }} {{ 'School' | translate }}</option>
+            <option *ngIf="schools.length === 0" disabled>{{ 'No Data' | translate }}</option>
             <option *ngFor="let school of schools" [ngValue]="school.id">{{ school.name }}</option>
         </select>
     </div>
@@ -34,7 +34,8 @@
         <label class="block mb-2 text-sm font-medium text-gray-900" for="grade">{{ 'Grade' | translate }}</label>
         <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="grade"
             [(ngModel)]="selectedGradeId" (change)="onGradeChange()" [disabled]="!selectedSchoolId">
-            <option [ngValue]="null">{{ 'Choose' | translate }} {{ 'Grade' | translate }}</option>
+            <option [ngValue]="null" selected hidden>{{ 'Choose' | translate }} {{ 'Grade' | translate }}</option>
+            <option *ngIf="grades.length === 0" disabled>{{ 'No Data' | translate }}</option>
             <option *ngFor="let grade of grades" [ngValue]="grade.id">{{ grade.name }}</option>
         </select>
     </div>
@@ -44,7 +45,8 @@
         <label class="block mb-2 text-sm font-medium text-gray-900" for="class">{{ 'Class' | translate }}</label>
         <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="class"
             [(ngModel)]="selectedClassId" (change)="onClassChange()" [disabled]="!selectedGradeId">
-            <option [ngValue]="null">{{ 'Choose' | translate }} {{ 'Class' | translate }}</option>
+            <option [ngValue]="null" selected hidden>{{ 'Choose' | translate }} {{ 'Class' | translate }}</option>
+            <option *ngIf="classes.length === 0" disabled>{{ 'No Data' | translate }}</option>
             <option *ngFor="let class of classes" [ngValue]="class.id">{{ class.name }}</option>
         </select>
     </div>
@@ -54,7 +56,8 @@
         <label class="block mb-2 text-sm font-medium text-gray-900" for="student">{{ 'Student' | translate }}</label>
         <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="student"
             [(ngModel)]="selectedStudentId" (ngModelChange)="onFilterChange()" [disabled]="!selectedClassId">
-            <option [ngValue]="null">{{ 'Choose' | translate }} {{ 'Student' | translate }}</option>
+            <option [ngValue]="null" selected hidden>{{ 'Choose' | translate }} {{ 'Student' | translate }}</option>
+            <option *ngIf="students.length === 0" disabled>{{ 'No Data' | translate }}</option>
             <option *ngFor="let student of students" [ngValue]="student.id">{{ student.name }}</option>
         </select>
     </div>
@@ -64,7 +67,8 @@
         <label class="block mb-2 text-sm font-medium text-gray-900" for="conductType">{{ 'Conduct Type' | translate }}</label>
         <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="conductType"
             [(ngModel)]="selectedConductTypeId" (ngModelChange)="onFilterChange()" [disabled]="!selectedSchoolId">
-            <option [ngValue]="null">{{ 'Choose' | translate }} {{ 'Conduct Type' | translate }}</option>
+            <option [ngValue]="null" selected hidden>{{ 'Choose' | translate }} {{ 'Conduct Type' | translate }}</option>
+            <option *ngIf="conductTypes.length === 0" disabled>{{ 'No Data' | translate }}</option>
             <option *ngFor="let type of conductTypes" [ngValue]="type.id">{{ type.en_name }}</option>
         </select>
     </div>
@@ -74,11 +78,11 @@
         <label class="block mb-2 text-sm font-medium text-gray-900" for="procedureType">{{ 'Procedure Type' | translate }}</label>
         <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="procedureType"
             [(ngModel)]="selectedProcedureTypeId" (ngModelChange)="onFilterChange()">
-            <option [ngValue]="null">{{ 'Choose' | translate }} {{ 'Procedure Type' | translate }}</option>
+            <option [ngValue]="null" selected hidden>{{ 'Choose' | translate }} {{ 'Procedure Type' | translate }}</option>
+            <option *ngIf="procedureTypes.length === 0" disabled>{{ 'No Data' | translate }}</option>
             <option *ngFor="let type of procedureTypes" [ngValue]="type.id">{{ type.name }}</option>
         </select>
     </div>
-
 </div>
 
     <!-- View Report Button -->

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LMS_CMS_BL.DTO.HR;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -41,6 +42,6 @@ namespace LMS_CMS_BL.DTO.Accounting
         public long? ReasonOfLeavingID { get; set; }
         public List<int>? Days { get; set; }
         public List<long>? Students { get; set; }
-
+        public List<AnnualVacationEmployeeEditDTO>? AnnualVacationEmployee { get; set; }
     }
 }
