@@ -197,7 +197,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [HttpGet("CertificateToStudentReport")]
         [Authorize_Endpoint_(
         allowedTypes: new[] { "octa", "employee" },
-        pages: new[] { "Add Certificate To Student" }
+        pages: new[] { "Certificate To Student Report" }
          )]
         public async Task<IActionResult> CertificateToStudentReport(
         [FromQuery] long? SchoolId = null,

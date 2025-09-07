@@ -34,7 +34,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         )]
         public async Task<IActionResult> GetAsync()
         {
-            // الكود يربط الطلب الحالي بقاعدة البيانات المناسبة من خلال UOW.
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             List<InventoryDetails> salesItems = await Unit_Of_Work.inventoryDetails_Repository.Select_All_With_IncludesById<InventoryDetails>(
@@ -53,11 +52,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             return Ok(DTO);
         }
 
-        /// ///////////////////////////////////////////////////
+        /// //////////////////////////////////////////////////////////////////////--77
         [HttpGet("inventory-net-combined")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Inventory" })]
+            pages: new[] { "report item card" , "report item card with average" })]
         public async Task<IActionResult> GetInventoryNetCombinedAsync(long storeId, long shopItemId, DateOnly fromDate, DateOnly toDate)
         {
             try
@@ -205,19 +204,17 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         [HttpGet("AverageCost")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Inventory" }
+            pages: new[] { "Average Cost Calculation" }
         )]
         public async Task<IActionResult> CalculateAverageCostAsync(DateOnly fromDate, DateOnly toDate)
         {
             var parsedFromDate = fromDate;
-            var parsedToDate = toDate; // نهاية اليوم
+            var parsedToDate = toDate;
 
             if (parsedFromDate > parsedToDate)
                 return BadRequest("The start date cannot be after the end date.");
 
             var Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-
-            // ✅ تحميل جميع الحركات مرة واحدة
          var allInventoryData = await Unit_Of_Work.inventoryMaster_Repository
         .Select_All_With_IncludesById<InventoryMaster>(
             im => im.IsDeleted != true &&
@@ -275,8 +272,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                     id.ShopItemID == shopItemId &&
                     id.InventoryMaster.InventoryFlags.ItemInOut != 0 &&
                     (
-                        id.InventoryMaster.Date < targetDate || // قبل اليوم المطلوب
-                        (id.InventoryMaster.Date == targetDate && // أو في نفس اليوم مع كود 1 أو 9
+                        id.InventoryMaster.Date < targetDate || 
+                        (id.InventoryMaster.Date == targetDate && 
                          (id.InventoryMaster.FlagId == 1 || id.InventoryMaster.FlagId == 9))
                     ))
                 .ToListAsync();
@@ -284,7 +281,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             if (!dbItems.Any())
                 return 0;
 
-            // حساب المتوسط المرجح (Moving Average)
             decimal totalWeightedCost = dbItems.Sum(id =>
                 id.InventoryMaster.InventoryFlags.ItemInOut * (id.AverageCost ?? 0));
 
@@ -299,7 +295,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         //////////////////////////////////////////////////////////////////////////////////////////-777
    
         [HttpGet("StoreBalance")]
-        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Inventory" })]
+        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, 
+            pages: new[] { "Store Items Balance" , "Store Items Balance with Purchase" , "Store Items Balance with Sales"
+        , "Store Items Balance with Average Cost" , "Store Limited Items"})]
         public async Task<IActionResult> GetStoreBalanceAsync(
         long storeId, DateOnly toDate, int ReportFlagType, int categoryId = 0, int typeId = 0,
         bool hasBalance = false, bool overdrawnBalance = false, bool zeroBalances = false)
@@ -439,144 +437,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
         /////////////////////////////////////////////////////////////////////////////////////-777
 
-        //[HttpGet("AllStoresBalance")]
-        //[Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Inventory" })]
-        //public async Task<IActionResult> GetAllStoresBalanceAsync(
-        //DateTime toDate, int reportType = 1, int categoryId = 0, int typeId = 0,
-        //bool hasBalance = false, bool overdrawnBalance = false, bool zeroBalances = false)
-        //{
-        //    if (toDate == default)
-        //        return BadRequest("ToDate is required");
-
-        //    var parsedToDate = toDate.Date.AddDays(1).AddTicks(-1);
-        //    UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-
-        //    var data = await Unit_Of_Work.inventoryDetails_Repository
-        //        .Select_All_With_IncludesById<InventoryDetails>(
-        //            id => id.InventoryMaster.Date <= parsedToDate &&
-        //                  id.IsDeleted != true &&
-        //                  id.InventoryMaster.IsDeleted != true,
-        //            q => q.Include(id => id.InventoryMaster)
-        //                  .ThenInclude(im => im.InventoryFlags),
-        //            q => q.Include(id => id.InventoryMaster)
-        //                  .ThenInclude(im => im.Store),
-        //            q => q.Include(id => id.ShopItem)
-        //                  .ThenInclude(si => si.InventorySubCategories)
-        //                  .ThenInclude(sub => sub.InventoryCategories));
-
-        //     if (data == null || data.Count == 0)
-        //        return NotFound("No inventory items found.");
-        //    // جلب جميع StoreCategories مرة واحدة
-        //     var storeCategories = Unit_Of_Work.storeCategories_Repository
-        //        .Select_All()
-        //        .Where(sc => sc.IsDeleted != true)
-        //        .ToList();
-
-        //     var filtered = data.Where(id =>
-        //        (categoryId == 0 || id.ShopItem.InventorySubCategories.InventoryCategoriesID == categoryId) &&
-        //        (typeId == 0 || id.ShopItem.InventorySubCategoriesID == typeId) &&
-        //        (typeId != 0 || storeCategories
-        //            .Where(sc => sc.StoreID == id.InventoryMaster.Store.ID) // الفلترة حسب StoreID لكل صنف
-        //            .Select(sc => sc.InventoryCategoriesID)
-        //            .Contains(id.ShopItem.InventorySubCategories.InventoryCategoriesID)) &&
-        //        (id.InventoryMaster.InventoryFlags.ItemInOut == 1 || id.InventoryMaster.InventoryFlags.ItemInOut == -1));
-
-        //     var groupedData = filtered
-        //        .GroupBy(id => new
-        //        {
-        //            id.ShopItem.ID,
-        //            id.ShopItem.EnName,
-        //            StoreName = id.InventoryMaster.Store.Name,
-        //            id.ShopItem.PurchasePrice,
-        //            id.ShopItem.SalesPrice
-        //        })
-        //        .Select(g => {
-        //            var quantity = g.Sum(id => id.Quantity * id.InventoryMaster.InventoryFlags.ItemInOut);
-        //            var totalCost = g.Sum(id => id.AverageCost * id.InventoryMaster.InventoryFlags.ItemInOut);
-        //            var averageCost = quantity != 0 ? totalCost / quantity : (decimal?)null;
-
-        //            var totalPurchaseValue = (decimal?)(quantity * g.Key.PurchasePrice);
-        //            var totalSalesValue = (decimal?)(quantity * g.Key.SalesPrice);
-
-        //            return new AllStoresBalanceReportDto
-        //            {
-        //                ItemCode = g.Key.ID,
-        //                ItemName = g.Key.EnName,
-        //                StoreName = g.Key.StoreName,
-        //                Quantity = quantity,
-        //                PurchasePrice =  g.Key.PurchasePrice ,
-        //                TotalPurchaseValue = totalPurchaseValue,
-        //                SalesPrice =  g.Key.SalesPrice ,
-        //                TotalSalesValue = totalSalesValue,
-        //                AverageCost = averageCost,
-        //                TotalCost = totalCost
-        //            };
-        //        })
-        //        .Where(x =>
-        //            (hasBalance && x.Quantity > 0) ||
-        //            (overdrawnBalance && x.Quantity < 0) ||
-        //            (zeroBalances && x.Quantity == 0))
-        //        .ToList();
-
-        //        var totalQuantity = groupedData.Sum(x => x.Quantity);
-        //        var totalPurchaseValue = groupedData.Sum(x => x.TotalPurchaseValue ?? 0);
-        //        var totalSalesValue = groupedData.Sum(x => x.TotalSalesValue ?? 0);
-        //        var totalCostValue = groupedData.Sum(x => x.TotalCost);
-
-        //        object result;
-        //        switch (reportType)
-        //        {
-        //            case 1:
-        //            result = new
-        //            {
-        //                ReportType = "QuantityOnly",
-        //                Data = groupedData.Select(x => new { x.ItemCode, x.ItemName, x.StoreName, x.Quantity }),
-        //                TotalQuantity = totalQuantity
-        //            };
-        //            break;
-        //        case 2:
-        //            result = new
-        //            {
-        //                ReportType = "PurchasePrice",
-        //                Data = groupedData
-        //                    .Where(x => x.PurchasePrice.HasValue)
-        //                    .Select(x => new { x.ItemCode, x.ItemName, x.StoreName, x.Quantity, x.PurchasePrice, x.TotalPurchaseValue }),
-        //                TotalPurchaseValue = totalPurchaseValue,
-        //                TotalQuantity = totalQuantity
-        //            };
-        //            break;
-
-        //        case 3:
-        //            result = new
-        //            {
-        //                ReportType = "SalesPrice",
-        //                Data = groupedData
-        //                    .Where(x => x.SalesPrice.HasValue)
-        //                    .Select(x => new { x.ItemCode, x.ItemName, x.StoreName, x.Quantity, x.SalesPrice, x.TotalSalesValue }),
-        //                TotalSalesValue = totalSalesValue,
-        //                TotalQuantity = totalQuantity
-        //            };
-        //            break;
-        //        case 4:
-        //            result = new
-        //            {      
-        //                ReportType = "CostValue",
-        //                Data = groupedData.Select(x => new { x.ItemCode, x.ItemName, x.StoreName, x.Quantity, x.AverageCost, x.TotalCost }),
-        //                TotalCostValue = totalCostValue,
-        //                TotalQuantity = totalQuantity
-        //            };
-        //            break;
-        //        default:
-        //            return BadRequest("Invalid report type.");
-        //        }
-        //        return Ok(result);
-        //}
-
-        /////////////////////////////////////////////////////////////////////////////////////-777
-
-
         [HttpGet("AllStoresBalanceHorizontal")]
-        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Inventory" })]
+        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, 
+            pages: new[] { "All Stores Item Balance" , "All Stores Item Balance with Purchase" ,
+                "All Stores Item Balance with Sales", "All Stores Item Balance with Average Cost" })]
         public async Task<IActionResult> GetAllStoresBalanceHorizontalAsync(
         DateOnly toDate, int reportType = 1, int categoryId = 0, int typeId = 0,
         bool hasBalance = false, bool overdrawnBalance = false, bool zeroBalances = false)
