@@ -85,9 +85,9 @@ export class EvaluationReportComponent {
     templateId: 0,
     fromDate: '',
     toDate: '',
-    employeeId: null as number | null,
+    employeeId: 0,
     schoolId: null as number | null, // Change this line
-    classroomId: null as number | null,
+    classroomId: 0,
   };
 
   constructor(
@@ -133,6 +133,11 @@ export class EvaluationReportComponent {
       this.subscription.unsubscribe();
     }
   }
+  onFilterChange() {
+  this.showTable = false;
+  this.reportData = [];
+  this.cachedTableDataForPDF = [];
+}
 
   getClassData() {
     this.Classs = [];
@@ -168,7 +173,7 @@ export class EvaluationReportComponent {
 
   onSchoolChange(event: Event) {
     this.Classs = [];
-    this.filterParams.classroomId = null;
+    this.filterParams.classroomId = 0;
 
     const selectedValue = (event.target as HTMLSelectElement).value;
 
@@ -217,22 +222,22 @@ export class EvaluationReportComponent {
       params.templateId = this.filterParams.templateId;
     if (this.filterParams.fromDate)
       params.fromDate = this.filterParams.fromDate;
-    if (this.filterParams.toDate) params.toDate = this.filterParams.toDate;
-    if (this.filterParams.employeeId)
+    if (this.filterParams.toDate) 
+      params.toDate = this.filterParams.toDate; 
+    if (this.filterParams.employeeId && +this.filterParams.employeeId !== 0)
       params.employeeId = this.filterParams.employeeId;
     if (this.filterParams.schoolId)
       params.schoolId = this.filterParams.schoolId;
-    if (this.filterParams.classroomId)
+    if (this.filterParams.classroomId && +this.filterParams.classroomId !== 0)
       params.classroomId = this.filterParams.classroomId;
 
+    console.log(params)
     this.EvaluationEmployeeServ.GetEvaluationReport(
       params,
       this.DomainName
     ).subscribe(
       (data: any) => {
-        // Handle array response (no pagination)
-        this.reportData = Array.isArray(data) ? data : [];
-console.log(this.reportData)
+        this.reportData = Array.isArray(data) ? data : [];  
         // Initialize collapsed items
         this.collapsedItems.clear();
         this.reportData.forEach((_, index) => this.collapsedItems.add(index));
@@ -374,9 +379,9 @@ private prepareExportData(): void {
       templateId: 0,
       fromDate: '',
       toDate: '',
-      employeeId: null,
+      employeeId: 0,
       schoolId: null,
-      classroomId: null,
+      classroomId: 0,
     };
     this.SchoolID = 0;
     this.Classs = [];
@@ -389,6 +394,40 @@ private prepareExportData(): void {
   get fileName(): string {
     return 'Evaluation Report';
   }
+
+
+getTemplateName(): string {
+  // if (!this.filterParams.templateId) return 'All Templates';
+  const template = this.Templates.find(t => t.id == this.filterParams.templateId);
+  return template?.englishTitle || 'N/A';
+}
+
+getEmployeeName(): string {
+  if (!this.filterParams.employeeId) return 'All Employees';
+  const employee = this.Employees.find(e => e.id == this.filterParams.employeeId);
+  return employee?.en_name || 'N/A';
+}
+
+getSchoolName(): string {
+  if (!this.filterParams.schoolId) return 'All Schools';
+  const school = this.Schools.find(s => s.id == this.filterParams.schoolId);
+  return school?.name || 'N/A';
+}
+
+getClassName(): string {
+  if (!this.filterParams.classroomId) return 'All Classes';
+  const classroom = this.Classs.find(c => c.id == this.filterParams.classroomId);
+  return classroom?.name || 'N/A';
+}
+
+getDateRange(): string {
+  if (!this.filterParams.fromDate || !this.filterParams.toDate) return 'N/A';
+  return `${this.filterParams.fromDate} to ${this.filterParams.toDate}`;
+}
+
+getGeneratedDate(): string {
+  return new Date().toLocaleDateString();
+}
 
   getInfoRows(): any[] {
     const selectedTemplate = this.Templates.find(

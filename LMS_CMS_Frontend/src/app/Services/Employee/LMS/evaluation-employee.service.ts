@@ -96,39 +96,42 @@ export class EvaluationEmployeeService {
     );
   }
 
-  GetEvaluationReport(params: any, DomainName: string) {
-    if (DomainName != null) {
-      this.header = DomainName;
-    }
-
-    const token = localStorage.getItem('current_token');
-    const headers = new HttpHeaders()
-      .set('domain-name', this.header)
-      .set('Authorization', `Bearer ${token}`)
-      .set('Content-Type', 'application/json');
-
-    let queryParams = new HttpParams();
-
-    if (params.templateId)
-      queryParams = queryParams.set('templateId', params.templateId);
-    if (params.fromDate)
-      queryParams = queryParams.set('fromDate', params.fromDate);
-    if (params.toDate) queryParams = queryParams.set('toDate', params.toDate);
-    if (params.employeeId)
-      queryParams = queryParams.set('employeeId', params.employeeId);
-    if (params.schoolId)
-      queryParams = queryParams.set('schoolId', params.schoolId);
-    if (params.classroomId)
-      queryParams = queryParams.set('classroomId', params.classroomId);
-
-    return this.http.get<any[]>(
-      `${this.baseUrl}/EvaluationEmployee/EvaluationReport`,
-      {
-        headers,
-        params: queryParams,
-      }
-    );
+GetEvaluationReport(params: any, DomainName: string) {
+  if (DomainName != null) {
+    this.header = DomainName;
   }
+
+  const token = localStorage.getItem('current_token');
+  const headers = new HttpHeaders()
+    .set('domain-name', this.header)
+    .set('Authorization', `Bearer ${token}`)
+    .set('Content-Type', 'application/json');
+
+  let queryParams = new HttpParams();
+
+  if (params.templateId)
+    queryParams = queryParams.set('templateId', params.templateId);
+  if (params.fromDate)
+    queryParams = queryParams.set('fromDate', params.fromDate);
+  if (params.toDate) queryParams = queryParams.set('toDate', params.toDate);
+  
+  // Only add employeeId if it has a value (not null and not 0)
+  if (params.employeeId)
+    queryParams = queryParams.set('employeeId', params.employeeId);
+  
+  if (params.schoolId)
+    queryParams = queryParams.set('schoolId', params.schoolId);
+  if (params.classroomId)
+    queryParams = queryParams.set('classroomId', params.classroomId);
+console.log(queryParams);
+  return this.http.get<any[]>(
+    `${this.baseUrl}/EvaluationEmployee/EvaluationReport`,
+    {
+      headers,
+      params: queryParams,
+    }
+  );
+}
 
   getTeacherEvaluationReport(
     fromDate: string,
