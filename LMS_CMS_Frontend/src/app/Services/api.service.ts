@@ -24,7 +24,7 @@ export class ApiService {
 
     
     
-  var Header = 'Domain_One';    
+  var Header = 'ss_two';    
 
     return Header;
   }
