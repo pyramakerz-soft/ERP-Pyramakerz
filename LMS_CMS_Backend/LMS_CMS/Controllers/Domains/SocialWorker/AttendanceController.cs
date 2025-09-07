@@ -355,7 +355,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [HttpGet("AttendanceReport")]
         [Authorize_Endpoint_(
         allowedTypes: new[] { "octa", "employee" },
-        pages: new[] { "Attendance" }
+        pages: new[] { "Attendance Report" }
         )]
             public async Task<IActionResult> AttendanceReport(
             [FromQuery] DateOnly? FromDate,[FromQuery] DateOnly? ToDate,[FromQuery] long? SchoolId = null,

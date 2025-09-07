@@ -319,7 +319,7 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
         [HttpGet("StudentIssueReport")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Student Issues" }
+            pages: new[] { "Student Issue Report" }
         )]
                 public async Task<IActionResult> StudentIssueReport(
             [FromQuery] DateOnly? FromDate,

@@ -297,7 +297,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet("EvaluationReport")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Evaluation" }
+            pages: new[] { "Evaluation Report" }
         )]
             public async Task<IActionResult> GetEvaluationReport(
             [FromQuery] long templateId,[FromQuery] DateOnly fromDate, [FromQuery] DateOnly toDate,
@@ -425,7 +425,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet("TeacherEvaluationReport")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Evaluation" }
+            pages: new[] { "Teacher Evaluation Report" }
             )]
             public async Task<IActionResult> GetEvaluationReportSummary(
             [FromQuery] DateOnly fromDate,

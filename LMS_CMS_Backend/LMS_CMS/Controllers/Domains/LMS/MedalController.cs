@@ -367,7 +367,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet("MedalToStudentReport")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Medal Types" }
+            pages: new[] { "Medal To Student Report" }
         )]
                 public async Task<IActionResult> MedalToStudentReport(
             [FromQuery] long? SchoolId = null,
