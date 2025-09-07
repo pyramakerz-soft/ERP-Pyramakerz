@@ -8,6 +8,7 @@ using LMS_CMS_PL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace LMS_CMS_PL.Controllers.Domains.Archiving
 {
@@ -34,7 +35,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Permissions Group Employee" }
         )]
-        public IActionResult GetAsync(long PGID)
+        public async Task<IActionResult> GetAsync(long PGID)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -44,7 +45,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
                 return BadRequest("No Permission Group with this ID");
             }
 
-            List<PermissionGroupEmployee> permissionGroupEmployees = Unit_Of_Work.permissionGroupEmployee_Repository.FindBy(f => f.IsDeleted != true && f.PermissionGroupID == PGID && f.Employee.IsDeleted != true && f.PermissionGroup.IsDeleted != true);
+            List<PermissionGroupEmployee> permissionGroupEmployees = await Unit_Of_Work.permissionGroupEmployee_Repository.Select_All_With_IncludesById<PermissionGroupEmployee>(
+                f => f.IsDeleted != true && f.PermissionGroupID == PGID && f.Employee.IsDeleted != true && f.PermissionGroup.IsDeleted != true,
+                query => query.Include(d => d.Employee)
+                );
 
             if (permissionGroupEmployees == null || permissionGroupEmployees.Count == 0)
             {
@@ -63,7 +67,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Permissions Group Employee" }
         )]
-        public IActionResult GetById(long id)
+        public async Task<IActionResult> GetByIdAsync(long id)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -72,8 +76,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
                 return BadRequest("Enter Permission Group ID");
             }
 
-            PermissionGroupEmployee permissionGroupEmployee = Unit_Of_Work.permissionGroupEmployee_Repository.First_Or_Default(
-                t => t.IsDeleted != true && t.ID == id && t.Employee.IsDeleted != true && t.PermissionGroup.IsDeleted != true);
+            PermissionGroupEmployee permissionGroupEmployee = await Unit_Of_Work.permissionGroupEmployee_Repository.FindByIncludesAsync(
+                t => t.IsDeleted != true && t.ID == id && t.Employee.IsDeleted != true && t.PermissionGroup.IsDeleted != true,
+                query => query.Include(d => d.Employee)
+                );
              
             if (permissionGroupEmployee == null)
             {
