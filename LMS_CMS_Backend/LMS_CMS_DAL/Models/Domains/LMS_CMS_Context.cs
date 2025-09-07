@@ -258,7 +258,7 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<PermissionGroup> PermissionGroup { get; set; }
         public DbSet<PermissionGroupDetails> PermissionGroupDetails { get; set; }
         public DbSet<PermissionGroupEmployee> PermissionGroupEmployee { get; set; }
-
+        public DbSet<AnnualVacationEmployee> AnnualVacationEmployee { get; set; }
 
 
 
@@ -2314,6 +2314,17 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasForeignKey(m => m.PermissionGroupID)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<AnnualVacationEmployee>()
+                .HasOne(m => m.Employee)
+                .WithMany(m => m.AnnualVacationEmployee)
+                .HasForeignKey(m => m.EmployeeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AnnualVacationEmployee>()
+                .HasOne(m => m.VacationTypes)
+                .WithMany(m => m.AnnualVacationEmployee)
+                .HasForeignKey(m => m.VacationTypesID)
+                .OnDelete(DeleteBehavior.Restrict);
 
             ///////////////////////// Exception: /////////////////////////
             modelBuilder.Entity<Bus>()
@@ -2462,6 +2473,12 @@ namespace LMS_CMS_DAL.Models.Domains
                 .OnDelete(DeleteBehavior.Restrict);
             
             modelBuilder.Entity<PermissionGroupEmployee>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AnnualVacationEmployee>()
                 .HasOne(v => v.DeletedByEmployee)
                 .WithMany()
                 .HasForeignKey(v => v.DeletedByUserId)

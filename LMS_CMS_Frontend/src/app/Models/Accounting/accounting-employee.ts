@@ -1,3 +1,5 @@
+import { AnnualVacationEmployee } from "../HR/annual-vacation-employee";
+
 export class AccountingEmployee {
     constructor(
         public id: number = 0,
@@ -40,6 +42,7 @@ export class AccountingEmployee {
         public academicDegreeName: string = '',
         public days:number[]=[],
         public students:number[]=[],
+        public annualVacationEmployees:AnnualVacationEmployee[]=[],
         public accountNumberName: string = '',
         public accountNumberID :number =0,
         public insertedByUserId :number =0,

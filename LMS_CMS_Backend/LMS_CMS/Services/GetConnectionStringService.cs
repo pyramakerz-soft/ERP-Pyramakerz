@@ -13,10 +13,10 @@
 
         //    return $"Data Source={dataSource};Initial Catalog={initialCatalog};User ID={userId};Password={password};{trustServerCertificate}";
         //}
-         
-        public string BuildConnectionString(string domainName) 
-        { 
-            var dataSource = ".";   
+
+        public string BuildConnectionString(string domainName)
+        {
+            var dataSource = "SW-13\\SQLEXPRESS";
             var initialCatalog = domainName;
 
             return $"Data Source={dataSource};Initial Catalog={initialCatalog};Integrated Security = True;TrustServerCertificate=True";

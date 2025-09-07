@@ -94,11 +94,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             return Ok(new { Data = DTO, Pagination = paginationMetadata , inventoryFlag=Flagdto });
         }
 
-        /////////////////////////////////////////////////////////////////////////////-77
+        ///////////////////////////////////////////////////////////////////////////////////////////-77
         [HttpGet("Search")]
         [Authorize_Endpoint_(
-              allowedTypes: new[] { "octa", "employee" },
-              pages: new[] { "Inventory" }
+        allowedTypes: new[] { "octa", "employee" },
+         pages: new[] { "Inventory Transaction Report" , "Purchase Transaction Report" , "Sales Transaction Report" }
          )]
         public async Task<IActionResult> GetSearch([FromQuery] InventoryMasterSearch obj)
         {
@@ -106,15 +106,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
 
             if (obj.FlagIds == null || !obj.FlagIds.Any())
                 return BadRequest("FlagIds cannot be null or empty.");
-
-            // ✅ تحويل DateTo إلى نهاية اليوم لضمان شمول اليوم كله
             var dateFrom = obj.DateFrom;
             var dateTo = obj.DateTo;
 
             if (dateFrom > dateTo)
                 return BadRequest("DateFrom cannot be after DateTo.");
-
-            // ✅ جلب البيانات الأساسية
             var data = await Unit_Of_Work.inventoryMaster_Repository.Select_All_With_IncludesById<InventoryMaster>(
                 f => f.IsDeleted != true && obj.FlagIds.Contains(f.FlagId),
                 query => query
@@ -128,8 +124,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                     .Include(x => x.Save)
                     .Include(x => x.Bank)
             );
-
-            // ✅ التصفية حسب التاريخ وباقي الفلاتر
             var filteredData = data.Where(f =>
                 f.Date >= dateFrom && f.Date <= dateTo &&
                 (obj.StoredId == null || (f.Store != null && f.Store.ID == obj.StoredId)) &&
@@ -170,7 +164,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         [HttpGet("SearchInvoice")]
         [Authorize_Endpoint_(
         allowedTypes: new[] { "octa", "employee" },
-        pages: new[] { "Inventory" }
+        pages: new[] { "Inventory Transaction Detailed Report" , "Sales Transaction Detailed Report" , "Purchase Transaction Detailed Report" }
         )]
         public async Task<IActionResult> GetSearchInvoice([FromQuery] InventoryMasterSearch obj)
         {
@@ -180,12 +174,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 return BadRequest("FlagIds cannot be null or empty.");
 
             var dateFrom = obj.DateFrom;
-            var dateTo = obj.DateTo; // نهاية اليوم
+            var dateTo = obj.DateTo; 
 
             if (dateFrom > dateTo)
                 return BadRequest("DateFrom cannot be after DateTo.");
-
-            // ✅ جلب البيانات + Supplier
             var data = await Unit_Of_Work.inventoryMaster_Repository.Select_All_With_IncludesById<InventoryMaster>(
                 f => f.IsDeleted != true && obj.FlagIds.Contains(f.FlagId),
                 query => query
@@ -214,8 +206,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 return NotFound("No records found matching the search criteria.");
 
             var allTotal = filteredData.Sum(item => item.Total * (item.InventoryFlags?.FlagValue ?? 0));
-
-            // ✅ بناء DTO يدويًا مع الحقول المطلوبة
             var summaryDtos = filteredData.Select(f => new
             {
                 f.ID,

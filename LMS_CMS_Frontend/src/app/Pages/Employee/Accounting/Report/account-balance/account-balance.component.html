@@ -69,53 +69,21 @@
 </div>
 
 <div *ngIf="showTable && reportData" class="mb-5">
-    <!-- Report Summary -->
-    <div class="bg-blue-50 p-4 rounded-lg mb-4">
-        <h3 class="font-semibold text-lg mb-2">{{ 'Report Summary' | translate }}</h3>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-                <span class="font-medium">{{ 'Account Type' | translate }}:</span> {{ getLinkFileName(linkFileID) }}
-            </div>
-            <div>
-                <span class="font-medium">{{ 'Account' | translate }}:</span> {{ getAccountName(accountID) }}
-            </div>
-            <div>
-                <span class="font-medium">{{ 'Date' | translate }}:</span> {{ toDate }}
-            </div>
-        </div>
-    </div>
-
-    <!-- Totals Summary -->
-    <div class="bg-green-50 p-4 rounded-lg mb-4">
-        <h3 class="font-semibold text-lg mb-2">{{ 'Totals' | translate }}</h3>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-                <span class="font-medium">{{ 'Total Debit' | translate }}:</span> {{ reportData.totals.totalDebit | number:'1.2-2' }}
-            </div>
-            <div>
-                <span class="font-medium">{{ 'Total Credit' | translate }}:</span> {{ reportData.totals.totalCredit | number:'1.2-2' }}
-            </div>
-            <div>
-                <span class="font-medium">{{ 'Difference' | translate }}:</span> {{ reportData.totals.differences | number:'1.2-2' }}
-            </div>
-        </div>
-    </div>
-
     <!-- Data Table -->
     <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
         <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
             <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
                 <tr>
-                    <th class="py-3 px-4 min-w-[80px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    <th class="py-3 px-4 whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         {{ 'ID' | translate }}
                     </th>
-                    <th class="py-3 px-4 min-w-[200px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    <th class="py-3 px-4 whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         {{ 'Name' | translate }}
                     </th>
-                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    <th class="py-3 px-4 whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         {{ 'Debit' | translate }}
                     </th>
-                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    <th class="py-3 px-4 whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         {{ 'Credit' | translate }}
                     </th>
                 </tr>
@@ -145,16 +113,34 @@
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ item.name }}
                     </td>
-                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-right">
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ item.debit | number:'1.2-2' }}
                     </td>
-                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-right">
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ item.credit | number:'1.2-2' }}
                     </td>
                 </tr>
             </tbody>
         </table>
     </div>
+
+    
+    <!-- Totals Summary -->
+    <div class="bg-green-50 p-4 rounded-lg mb-4">
+        <h3 class="font-semibold text-lg mb-2">{{ 'Totals' | translate }}</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <span class="font-medium">{{ 'Total Debit' | translate }}:</span> {{ reportData.totals.totalDebit | number:'1.2-2' }}
+            </div>
+            <div>
+                <span class="font-medium">{{ 'Total Credit' | translate }}:</span> {{ reportData.totals.totalCredit | number:'1.2-2' }}
+            </div>
+            <div>
+                <span class="font-medium">{{ 'Difference' | translate }}:</span> {{ reportData.totals.differences | number:'1.2-2' }}
+            </div>
+        </div>
+    </div>
+
 
     <!-- Pagination -->
     <!-- <div *ngIf="reportData.pagination.totalPages > 1" class="flex justify-between items-center mt-4">

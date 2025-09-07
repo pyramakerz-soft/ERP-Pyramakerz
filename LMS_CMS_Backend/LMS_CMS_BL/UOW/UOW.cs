@@ -268,6 +268,7 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<PermissionGroup> PermissionGroup_Repository;
         GenericRepo<PermissionGroupEmployee> PermissionGroupEmployee_Repository;
         GenericRepo<PermissionGroupDetails> PermissionGroupDetails_Repository; 
+        GenericRepo<AnnualVacationEmployee> AnnualVacationEmployee_Repository;
 
 
         public UOW(Octa_DbContext octa_Db)
@@ -3078,7 +3079,19 @@ namespace LMS_CMS_BL.UOW
                 }
                 return PermissionGroupDetails_Repository;
             }
-        } 
+        }
+
+        public GenericRepo<AnnualVacationEmployee> annualVacationEmployee_Repository
+        {
+            get
+            {
+                if (AnnualVacationEmployee_Repository == null)
+                {
+                    AnnualVacationEmployee_Repository = new GenericRepo<AnnualVacationEmployee>(db);
+                }
+                return AnnualVacationEmployee_Repository;
+            }
+        }
 
 
         public void SaveChanges()
