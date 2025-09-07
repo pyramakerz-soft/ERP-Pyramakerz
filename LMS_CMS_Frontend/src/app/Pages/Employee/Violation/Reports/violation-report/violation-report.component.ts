@@ -219,7 +219,7 @@ export class ViolationReportComponent {
       Date: item.date,
       'Violation Type': item.violationType,
       'Employee Type': item.employeeType,
-      'Employee Name': item.employeeName,
+      'Employee Name': item.employeeEnglishName,
       Details: item.details || 'N/A',
     }));
   }
@@ -257,7 +257,7 @@ export class ViolationReportComponent {
             Date: item.date,
             'Violation Type': item.violationType,
             'Employee Type': item.employeeType,
-            'Employee Name': item.employeeName,
+            'Employee Name': item.employeeEnglishName,
             Details: item.details,
           })),
         },
@@ -342,7 +342,7 @@ export class ViolationReportComponent {
         item.date,
         item.violationType,
         item.employeeType,
-        item.employeeName,
+        item.employeeEnglishName,
         item.details || 'N/A',
       ]);
 
