@@ -11,6 +11,7 @@
         <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="school"
             [(ngModel)]="selectedSchoolId" (change)="loadGrades()" required>
             <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'School' | translate }}</option>
+            <option *ngIf="schools.length === 0" disabled>{{ 'No Data' | translate }}</option>
             <option *ngFor="let school of schools" [value]="school.id">{{ school.name }}</option>
         </select>
     </div>
@@ -21,6 +22,7 @@
         <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="grade"
             [(ngModel)]="selectedGradeId" (change)="loadClasses()" [disabled]="!selectedSchoolId" required>
             <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Grade' | translate }}</option>
+            <option *ngIf="grades.length === 0" disabled>{{ 'No Data' | translate }}</option>
             <option *ngFor="let grade of grades" [value]="grade.id">{{ grade.name }}</option>
         </select>
     </div>
@@ -31,6 +33,7 @@
         <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="class"
             [(ngModel)]="selectedClassId" (change)="loadStudents()" [disabled]="!selectedGradeId" required>
             <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Class' | translate }}</option>
+            <option *ngIf="classes.length === 0" disabled>{{ 'No Data' | translate }}</option>
             <option *ngFor="let class of classes" [value]="class.id">{{ class.name }}</option>
         </select>
     </div>
@@ -41,6 +44,7 @@
         <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="student"
             [(ngModel)]="selectedStudentId" (change)="onFilterChange()" [disabled]="!selectedClassId" required>
             <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Student' | translate }}</option>
+            <option *ngIf="students.length === 0" disabled>{{ 'No Data' | translate }}</option>
             <option *ngFor="let student of students" [value]="student.id">{{ student.name }}</option>
         </select>
     </div>
@@ -57,6 +61,7 @@
         </button>
     </div>
 </div>
+
 
 <!-- Export Buttons -->
 <div *ngIf="showTable" class="mb-5 flex justify-end space-x-4 rtl:space-x-reverse">

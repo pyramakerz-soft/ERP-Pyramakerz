@@ -187,8 +187,6 @@ constructor(
           this.conductTypeService.GetBySchool(this.selectedSchoolId, domainName)
         );
         this.conductTypes = data;
-        console.log('seif')
-        console.log('Conduct types loaded:', this.conductTypes);
       } catch (error) {
         console.error('Error loading conduct types:', error);
         this.conductTypes = [];
