@@ -1148,5 +1148,13 @@
   "URL": "الرابط",
   "Horizontal Meeting": "اجتماع أفقي",
   "Meeting link": "رابط الاجتماع",
-  "Parent Meeting": "اجتماع أولياء الأمور"
+  "Parent Meeting": "اجتماع أولياء الأمور",
+  "Item English Name": "الاسم الإنجليزي للعنصر",
+  "Item Arabic Name": "الاسم العربي للعنصر",
+  "Company English Name": "الاسم الإنجليزي للشركة",
+  "Company Arabic Name": "الاسم العربي للشركة",
+  "En_ Name": "الاسم بالإنجليزية",
+  "Ar_ Name": "الاسم بالعربية",
+  "company": "شركة",
+  "Companies": "الشركات"
 }

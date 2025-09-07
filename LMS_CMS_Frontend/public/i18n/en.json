@@ -1144,14 +1144,22 @@
   "No Class":"No Class",
   "Session":"Session",
   "Print Time Table":"Print Time Table",
-"Appoinment":"Appoinment",
-"Appoinment Title":"Appoinment Title",
-"Enter date":"Enter date",
-"Due Date To Parent To Accept":"Due Date To Parent To Accept",
-"URL":"URL",
-"Horizontal Meeting":"Horizontal Meeting",
-"Meeting link":"Meeting link",
-"Parent Meeting":"Parent Meeting"
+  "Appoinment":"Appoinment",
+  "Appoinment Title":"Appoinment Title",
+  "Enter date":"Enter date",
+  "Due Date To Parent To Accept":"Due Date To Parent To Accept",
+  "URL":"URL",
+  "Horizontal Meeting":"Horizontal Meeting",
+  "Meeting link":"Meeting link",
+  "Parent Meeting":"Parent Meeting",
+  "Item English Name":"Item English Name",
+  "Item Arabic Name":"Item Arabic Name",
+  "Company English Name":"Company English Name",
+  "Company Arabic Name":"Company Arabic Name",
+  "En_ Name":"En_Name",
+  "Ar_ Name":"Ar_Name",
+  "company":"company",
+  "Companies":"Companies"
 
 
 }
