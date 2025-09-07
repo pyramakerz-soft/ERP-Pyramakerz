@@ -52,6 +52,7 @@ export class LeaveRequestComponent {
   keysArray: string[] = ['id', 'name'];
 
   leaveRequest: LeaveRequest = new LeaveRequest();
+  OldleaveRequest: LeaveRequest = new LeaveRequest();
 
   validationErrors: { [key in keyof LeaveRequest]?: string } = {};
   isLoading = false;
@@ -175,43 +176,61 @@ export class LeaveRequestComponent {
   Edit(id: number) {
     this.mode = 'Edit';
     this.LeaveRequestServ.GetByID(id, this.DomainName).subscribe((d) => {
-      this.leaveRequest = d;
+      this.leaveRequest = { ...d };
+      this.OldleaveRequest = { ...d };
     });
     this.openModal();
   }
 
   EmployeeIsChanged() {
-    var emp = this.employees.find(e => e.id == this.leaveRequest.employeeID)
-    if (emp) {
+    this.LeaveRequestServ.GetRemainLeavRequestsByEmployeeId(this.leaveRequest.employeeID, this.leaveRequest.date, this.DomainName).subscribe((emp) => {
       this.selectedEmployee = emp
       this.leaveRequest.monthlyLeaveRequestBalance = emp.monthlyLeaveRequestBalance
       this.leaveRequest.used = emp.monthlyLeaveRequestUsed
-    }
+      this.leaveRequest.remains = this.leaveRequest.monthlyLeaveRequestBalance - this.leaveRequest.used
+      this.CalculateRemains();
+    });
   }
 
   CalculateRemains() {
     const balance = Number(this.leaveRequest.monthlyLeaveRequestBalance) || 0;
     const alreadyUsed = Number(this.selectedEmployee.monthlyLeaveRequestUsed) || 0;
-    console.log(1234, this.selectedEmployee, alreadyUsed)
+
     const currentHours = Number(this.leaveRequest.hours) || 0;
     const currentMinutes = Number(this.leaveRequest.minutes) || 0;
 
-    // Convert everything to minutes
-    const balanceMinutes = balance * 60;
-    const usedMinutes = (alreadyUsed * 60) + (currentHours * 60) + currentMinutes;
+    if (this.mode === 'Edit') {
+      // Convert old values to minutes
+      const oldHours = Number(this.OldleaveRequest.hours) || 0;
+      const oldMinutes = Number(this.OldleaveRequest.minutes) || 0;
+      const oldTotalMinutes = (oldHours * 60) + oldMinutes;
 
-    // Remaining minutes
-    let remainingMinutes = balanceMinutes - usedMinutes;
-    if (remainingMinutes < 0) remainingMinutes = 0;
+      // Convert new values to minutes
+      const newTotalMinutes = (currentHours * 60) + currentMinutes;
 
-    // Save as decimal hours (numeric)
-    this.leaveRequest.used = usedMinutes / 60;
-    this.leaveRequest.remains = remainingMinutes / 60;
+      // Already used (from DB) includes the old request, so subtract it first, then add the new one
+      let usedMinutes = (alreadyUsed * 60) - oldTotalMinutes + newTotalMinutes;
 
-    // Debug logs
-    console.log('Balance:', balance);
-    console.log('Used (numeric):', this.leaveRequest.used);
-    console.log('Remaining (numeric):', this.leaveRequest.remains);
+      if (usedMinutes < 0) usedMinutes = 0;
+
+      // Remaining minutes
+      let remainingMinutes = (balance * 60) - usedMinutes;
+      if (remainingMinutes < 0) remainingMinutes = 0;
+
+      this.leaveRequest.used = usedMinutes / 60;
+      this.leaveRequest.remains = remainingMinutes / 60;
+
+    } else {
+      // Create mode → always add current
+      const balanceMinutes = balance * 60;
+      const usedMinutes = (alreadyUsed * 60) + (currentHours * 60) + currentMinutes;
+
+      let remainingMinutes = balanceMinutes - usedMinutes;
+      if (remainingMinutes < 0) remainingMinutes = 0;
+
+      this.leaveRequest.used = usedMinutes / 60;
+      this.leaveRequest.remains = remainingMinutes / 60;
+    }
   }
 
   formatHours(value: number): string {
@@ -221,17 +240,39 @@ export class LeaveRequestComponent {
   }
 
   validateNumber(event: any, field: keyof LeaveRequest): void {
-    const value = Number(event.target.value);
-    if (isNaN(value)) {
+    let value = event.target.value;
+    // Allow only digits
+    value = value.replace(/[^0-9]/g, '');
+    event.target.value = value;
+
+    if (value === '') {
       this.leaveRequest[field] = 0 as never;
       return;
     }
-    if (field === 'minutes' && value > 59) {
-      this.leaveRequest.minutes = 59;
+
+    const numericValue = Number(value);
+
+    if (field === 'minutes') {
+      if (numericValue > 59) {
+        this.leaveRequest.minutes = 59; // cap minutes at 59
+        event.target.value = '59';
+      } else {
+        this.leaveRequest.minutes = numericValue;
+        this.validationErrors['minutes'] = '';
+        this.validationErrors['hours'] = '';
+      }
     }
-    if (field === 'hours' && this.leaveRequest.hours > this.leaveRequest.monthlyLeaveRequestBalance) {
-      this.leaveRequest.hours = 0;
+
+    if (field === 'hours') {
+      if (numericValue > this.leaveRequest.monthlyLeaveRequestBalance) {
+        this.leaveRequest.hours = this.leaveRequest.monthlyLeaveRequestBalance;
+        event.target.value = String(this.leaveRequest.monthlyLeaveRequestBalance);
+      } else {
+        this.leaveRequest.hours = numericValue;
+        this.validationErrors['hours'] = '';
+      }
     }
+
     this.CalculateRemains();
   }
 
@@ -256,7 +297,6 @@ export class LeaveRequestComponent {
   CreateOREdit() {
     if (this.isFormValid()) {
       this.isLoading = true;
-      console.log(this.leaveRequest)
       if (this.mode == 'Create') {
         this.LeaveRequestServ.Add(this.leaveRequest, this.DomainName).subscribe(
           (d) => {
@@ -271,8 +311,6 @@ export class LeaveRequestComponent {
             });
           },
           (error) => {
-            console.log(error)
-
             this.isLoading = false; // Hide spinner
             Swal.fire({
               icon: 'error',
@@ -353,7 +391,12 @@ export class LeaveRequestComponent {
       }
     }
     if (this.leaveRequest.hours == 0 && this.leaveRequest.minutes == 0) {
-      this.validationErrors['hours']="Please enter hours or minutes."
+      this.validationErrors['hours'] = "Please enter hours or minutes."
+      isValid = false;
+    }
+    // validate tha not give him more than this.leaveRequest.remains
+    if (this.leaveRequest.used > this.leaveRequest.monthlyLeaveRequestBalance) {
+      this.validationErrors['hours'] = "You Can not exceed MonthlyLeaveRequestBalance"
       isValid = false;
     }
     return isValid;
@@ -364,6 +407,7 @@ export class LeaveRequestComponent {
   }
 
   onInputValueChange(event: { field: keyof LeaveRequest; value: any }) {
+    this.validationErrors['hours'] = '';
     const { field, value } = event;
     (this.leaveRequest as any)[field] = value;
     if (value) {
