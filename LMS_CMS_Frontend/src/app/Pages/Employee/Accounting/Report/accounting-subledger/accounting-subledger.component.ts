@@ -100,67 +100,83 @@ export class AccountingSubledgerComponent implements OnInit {
     this.pageNumber = 1;
   }
 
-  viewReport() {
-    if (!this.fromDate || !this.toDate || !this.linkFileID) {
-      Swal.fire({
-        title: 'Missing Information',
-        text: 'Please select Date Range and Account Type',
-        icon: 'warning',
-        confirmButtonText: 'OK',
-      });
-      return;
-    }
-
-    if (new Date(this.fromDate) > new Date(this.toDate)) {
-      Swal.fire({
-        title: 'Invalid Date Range',
-        text: 'Start date cannot be later than end date.',
-        icon: 'warning',
-        confirmButtonText: 'OK',
-      });
-      return;
-    }
-
-    this.isLoading = true;
-    this.showTable = false;
-
-    this.accountingSubledgerService.GetAccountsLedger(
-      new Date(this.fromDate),
-      new Date(this.toDate),
-      this.linkFileID,
-      this.accountID,
-      this.pageNumber,
-      this.pageSize,
-      this.DomainName
-    ).subscribe({
-      next: (response) => {
-        this.reportData = response;
-        this.showTable = true;
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Error loading report:', error);
-        this.reportData = null;
-        this.showTable = true;
-        this.isLoading = false;
-        if (error.status === 404) {
-          Swal.fire({
-            title: 'No Data Found',
-            text: 'No data available for the selected filters',
-            icon: 'info',
-            confirmButtonText: 'OK',
-          });
-        } else {
-          Swal.fire({
-            title: 'Error',
-            text: 'Failed to load report data',
-            icon: 'error',
-            confirmButtonText: 'OK',
-          });
-        }
-      }
+viewReport() {
+  if (!this.fromDate || !this.toDate || !this.linkFileID) {
+    Swal.fire({
+      title: 'Missing Information',
+      text: 'Please select Date Range and Account Type',
+      icon: 'warning',
+      confirmButtonText: 'OK',
     });
+    return;
   }
+
+  if (new Date(this.fromDate) > new Date(this.toDate)) {
+    Swal.fire({
+      title: 'Invalid Date Range',
+      text: 'Start date cannot be later than end date.',
+      icon: 'warning',
+      confirmButtonText: 'OK',
+    });
+    return;
+  }
+
+  this.isLoading = true;
+  this.showTable = false;
+
+  this.accountingSubledgerService.GetAccountsLedger(
+    new Date(this.fromDate),
+    new Date(this.toDate),
+    this.linkFileID,
+    this.accountID,
+    this.pageNumber,
+    this.pageSize,
+    this.DomainName
+  ).subscribe({
+    next: (response) => {
+      this.reportData = response;
+      this.showTable = true;
+      this.isLoading = false;
+      
+      // Check if all sections have no data
+      const hasNoData = response.firstPeriodTotals.balance.length === 0 &&
+                       response.transactionsPeriodTotals.balance.length === 0 &&
+                       response.lastPeriodTotals.balance.length === 0;
+      
+      if (hasNoData) {
+        Swal.fire({
+          title: 'No Data Found',
+          text: 'No data available for the selected filters',
+          icon: 'info',
+          confirmButtonText: 'OK',
+        });
+      }
+    },
+    error: (error) => {
+      console.error('Error loading report:', error);
+      this.reportData = null;
+      this.showTable = true;
+      this.isLoading = false;
+      
+      if (error.status === 404) {
+        Swal.fire({
+          title: 'No Data Found',
+          text: 'No data available for the selected filters',
+          icon: 'info',
+          confirmButtonText: 'OK',
+        });
+      } else {
+        console.log(error);
+        // Swal.fire({
+        //   title: 'Error',
+        //   text: 'Failed to load report data',
+        //   icon: 'error',
+        //   confirmButtonText: 'OK',
+        // });
+      }
+    }
+  });
+}
 
   changePage(newPage: number) {
     if (newPage > 0 && newPage <= (this.reportData?.pagination.totalPages || 1)) {

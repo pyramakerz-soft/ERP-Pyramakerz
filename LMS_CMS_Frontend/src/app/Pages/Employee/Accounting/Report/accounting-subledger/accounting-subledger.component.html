@@ -57,27 +57,16 @@
 </div>
 
 <div *ngIf="showTable && reportData" class="mb-5">
-    <!-- Report Summary -->
-    <!-- <div class="bg-blue-50 p-4 rounded-lg mb-4">
-        <h3 class="font-semibold text-lg mb-2">{{ 'Report Summary' | translate }}</h3>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-                <span class="font-medium">{{ 'Account Type' | translate }}:</span> {{ getLinkFileName(linkFileID) }}
-            </div>
-            <div>
-                <span class="font-medium">{{ 'Account' | translate }}:</span> {{ getAccountName(accountID) }}
-            </div>
-            <div>
-                <span class="font-medium">{{ 'From Date' | translate }}:</span> {{ fromDate }}
-            </div>
-            <div>
-                <span class="font-medium">{{ 'To Date' | translate }}:</span> {{ toDate }}
-            </div>
-        </div>
-    </div> -->
+    <!-- Global No Data Found message -->
+    <div *ngIf="reportData.firstPeriodTotals.balance.length === 0 && reportData.transactionsPeriodTotals.balance.length === 0 && reportData.lastPeriodTotals.balance.length === 0" 
+         class="w-full justify-center items-center flex">
+        <span class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+            {{'No Data Found'| translate }}
+        </span>
+    </div>
 
     <!-- First Period Totals -->
-    <div class="bg-gray-50 p-4 rounded-lg mb-4">
+    <div class="bg-gray-50 p-4 rounded-lg mb-4" *ngIf="reportData.firstPeriodTotals.balance.length > 0">
         <h3 class="font-semibold text-lg mb-2">{{ 'Opening Balance' | translate }}</h3>
         <div class="overflow-x-auto rounded-2xl border border-[#BDBDBD] mb-4">
             <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
@@ -163,12 +152,12 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr *ngIf="reportData.lastPeriodTotals.bakance.length === 0">
+                    <tr *ngIf="reportData.lastPeriodTotals.balance.length === 0">
                         <td colspan="4" class="bg-white px-4 py-2 h-[72px] text-center">
                             {{ 'No Data Found' | translate }}
                         </td>
                     </tr>
-                    <tr *ngFor="let item of reportData.lastPeriodTotals.bakance; let i = index" 
+                    <tr *ngFor="let item of reportData.lastPeriodTotals.balance; let i = index" 
                         [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }">
                         <td class="py-5 px-4">{{ item.id }}</td>
                         <td class="py-5 px-4">{{ item.name }}</td>

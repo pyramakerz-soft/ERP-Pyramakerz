@@ -77,20 +77,20 @@
                         {{ 'Date' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ 'En Name' | translate }}
+                        {{ 'Name' | translate }}
                     </th>
-                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    <!-- <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         {{ 'Ar Name' | translate }}
-                    </th>
+                    </th> -->
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         {{ 'Student ID' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         {{ 'Performance Type' | translate }}
                     </th>
-                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    <!-- <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         {{ 'Performance Type AR' | translate }}
-                    </th>
+                    </th> -->
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         {{ 'Comment' | translate }}
                     </th>
@@ -106,18 +106,18 @@
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ data.englishNameStudent }}
                     </td>
-                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    <!-- <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ data.arabicNameStudent }}
-                    </td>
+                    </td> -->
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ data.studentId }}
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ data.performanceTypeEn }}
                     </td>
-                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    <!-- <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ data.performanceTypeAr }}
-                    </td>
+                    </td> -->
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ data.comment || 'N/A' }}
                     </td>
@@ -140,9 +140,9 @@
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         {{ 'Performance Type' | translate }}
                     </th>
-                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    <!-- <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         {{ 'Performance Type AR' | translate }}
-                    </th>
+                    </th> -->
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         {{ 'Comment' | translate }}
                     </th>
@@ -161,9 +161,9 @@
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ data.performanceTypeEn }}
                     </td>
-                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    <!-- <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ data.performanceTypeAr }}
-                    </td>
+                    </td> -->
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ data.comment || 'N/A' }}
                     </td>
@@ -176,10 +176,38 @@
 <div class="absolute -top-[9999px] -left-[9999px]">
     <div id="Data" class="hidden">
         <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="fileName" 
-            [infoRows]="getInfoRows()"
+            [infoRows]="reportType === 'student' ? 
+            [      
+                {
+                    keyEn: 'Student: ' + studentName,
+                    keyAr: 'الطالب: ' + studentName,
+                },
+                {
+                    keyEn: 'Start Date: ' + SelectedStartDate,
+                    keyAr: 'تاريخ البدء: ' + SelectedStartDate,
+                },
+                {
+                    keyEn: 'End Date: ' + SelectedEndDate,
+                    keyAr: 'تاريخ الانتهاء: ' + SelectedEndDate,
+                }
+            ] : 
+            [
+                {
+                    keyEn: 'Classroom: ' + classroomName,
+                    keyAr: 'الفصل: ' + classroomName,
+                },
+                {
+                    keyEn: 'Start Date: ' + SelectedStartDate,
+                    keyAr: 'تاريخ البدء: ' + SelectedStartDate,
+                },
+                {
+                    keyEn: 'End Date: ' + SelectedEndDate,
+                    keyAr: 'تاريخ الانتهاء: ' + SelectedEndDate,
+                }
+            ]"
             [tableHeaders]="reportType === 'student' 
-                ? ['Date', 'En Name', 'Ar Name', 'Performance Type', 'Performance Type AR', 'Comment']
-                : ['Date', 'Avg Score', 'Performance Type', 'Performance Type AR', 'Comment']"
+                ? ['Date', 'Name','Student ID', 'Performance Type', 'Comment']
+                : ['Date', 'Avg Score', 'Performance Type', 'Comment']"
             [tableData]="tableDataForExport" #pdfComponentRef>
         </app-pdf-print>
     </div>
