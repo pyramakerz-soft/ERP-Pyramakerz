@@ -77,7 +77,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
 
         /////////////////////////////////////////////////////////////////////////////////////////////////--77
         [HttpGet("ViolationReport")]
-        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "violation" })]
+        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "violation Report" })]
         public async Task<IActionResult> GetViolationReport(
          [FromQuery] long? employeeTypeId,[FromQuery] long? violationTypeId,
          [FromQuery] DateOnly? fromDate, [FromQuery] DateOnly? toDate)

@@ -104,13 +104,13 @@
                 <label class="mb-2 primaryTxt" for="date"> {{ 'Date' | translate }}</label>
                 <input id="date" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                     placeholder="{{ 'Enter Date' | translate }}" [(ngModel)]="leaveRequest.date"
-                    (ngModelChange)="onInputValueChange({ field: 'date', value: $event })" />
+                    (ngModelChange)="onInputValueChange({ field: 'date', value: $event }); EmployeeIsChanged()" />
                 <span *ngIf="validationErrors['date']" class="text-red-500 ml-3 font-normal">{{validationErrors['date']}}</span>
             </div>
 
            <div class="flex flex-col mb-4 w-[49%]">
                 <label class="mb-2 primaryTxt" for="hours"> {{ 'Hours' | translate }}</label>
-                <input id="hours" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                <input id="hours" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" [disabled]="!leaveRequest.employeeID || !leaveRequest.date"
                     placeholder="{{ 'Enter hours' | translate }}" [(ngModel)]="leaveRequest.hours" (input)="validateNumber($event,'hours')"
                     (ngModelChange)="onInputValueChange({ field: 'hours', value: $event }); CalculateRemains()" />
                 <span *ngIf="validationErrors['hours']" class="text-red-500 ml-3 font-normal">{{validationErrors['hours']}}</span>
@@ -118,9 +118,9 @@
 
             <div class="flex flex-col mb-4 w-[49%]">
                 <label class="mb-2 primaryTxt" for="minutes"> {{ 'minutes' | translate }}</label>
-                <input id="minutes" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                <input id="minutes" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3" [disabled]="!leaveRequest.employeeID || !leaveRequest.date"
                     placeholder="{{ 'Enter minutes' | translate }}" [(ngModel)]="leaveRequest.minutes" (input)="validateNumber($event,'minutes')"
-                    (ngModelChange)="onInputValueChange({ field: 'hours', value: $event }) ; CalculateRemains()" />
+                    (ngModelChange)="onInputValueChange({ field: 'minutes', value: $event }) ; CalculateRemains()" />
                 <span *ngIf="validationErrors['minutes']" class="text-red-500 ml-3 font-normal">{{validationErrors['minutes']}}</span>
             </div>
 

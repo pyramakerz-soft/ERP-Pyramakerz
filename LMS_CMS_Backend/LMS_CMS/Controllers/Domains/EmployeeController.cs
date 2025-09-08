@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using LMS_CMS_BL.DTO;
 using LMS_CMS_BL.DTO.Accounting;
+using LMS_CMS_BL.DTO.HR;
 using LMS_CMS_BL.DTO.LMS;
 using LMS_CMS_BL.UOW;
 using LMS_CMS_DAL.Models.Domains;
@@ -1252,6 +1253,9 @@ namespace LMS_CMS_PL.Controllers.Domains
                 employeeDTO.Students = new List<long> { };
             }
 
+            List<AnnualVacationEmployee> annualVacationEmployees = Unit_Of_Work.annualVacationEmployee_Repository.FindBy(a => a.EmployeeID == id && a.IsDeleted != true);
+            employeeDTO.AnnualVacationEmployee = mapper.Map<List<AnnualVacationEmployeeGetDTO>>(annualVacationEmployees);
+
             return Ok(employeeDTO);
         }
         //////////////////////////////////////////////////////////////////////////////
@@ -1445,28 +1449,35 @@ namespace LMS_CMS_PL.Controllers.Domains
 
             }
             //////delete all empStudents
-          List<EmployeeStudent> employeeStudents = await Unit_Of_Work.employeeStudent_Repository.Select_All_With_IncludesById<EmployeeStudent>(
-                  sem => sem.EmployeeID == newEmployee.ID);
+            
+            List<EmployeeStudent> employeeStudents = await Unit_Of_Work.employeeStudent_Repository.Select_All_With_IncludesById<EmployeeStudent>(
+                    sem => sem.EmployeeID == newEmployee.ID);
           
-          foreach (EmployeeStudent emp in employeeStudents)
-          {
-              Unit_Of_Work.employeeStudent_Repository.Delete(emp.ID);
-              Unit_Of_Work.SaveChanges();
-          }
+            foreach (EmployeeStudent emp in employeeStudents)
+            {
+                Unit_Of_Work.employeeStudent_Repository.Delete(emp.ID);
+                Unit_Of_Work.SaveChanges();
+            }
           
-          foreach (var empStudent in newEmployee.Students)
-          {
+            foreach (var empStudent in newEmployee.Students)
+            {
                 Student student = Unit_Of_Work.student_Repository.First_Or_Default(s => s.ID == empStudent && s.IsDeleted != true);
                 if (student != null)
                 {
-                  EmployeeStudent emp = new EmployeeStudent();
-                  emp.EmployeeID = newEmployee.ID;
-                  emp.StudentID = empStudent;
-                  Unit_Of_Work.employeeStudent_Repository.Add(emp);
-                  Unit_Of_Work.SaveChanges();
+                    EmployeeStudent emp = new EmployeeStudent();
+                    emp.EmployeeID = newEmployee.ID;
+                    emp.StudentID = empStudent;
+                    Unit_Of_Work.employeeStudent_Repository.Add(emp);
+                    Unit_Of_Work.SaveChanges();
 
                 }
-          }
+            }
+
+            if (newEmployee.AnnualVacationEmployee.Count > 0)
+            {
+                List<AnnualVacationEmployee> annualVacationEmployees = mapper.Map<List<AnnualVacationEmployee>>(newEmployee.AnnualVacationEmployee);
+                Unit_Of_Work.annualVacationEmployee_Repository.UpdateRange(annualVacationEmployees);
+            }
           
           return Ok(newEmployee);
         }

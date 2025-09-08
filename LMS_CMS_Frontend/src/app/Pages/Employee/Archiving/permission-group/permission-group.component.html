@@ -56,10 +56,10 @@
                 <button *ngIf="AllowEdit && IsAllowEdit(row.insertedByUserId)" (click)="openModal(row.id)">
                   <i class="fa-solid fa-pencil"></i>
                 </button>
-                <button (click)="AddEmployee(row.id)" title="Archiving Permissions">
+                <button (click)="AddEmployee(row.id)" title="Add Employee">
                   <i class="fa-solid fa-user-plus"></i>
                 </button>
-                <button (click)="Archiving(row.id)" title="Add Employee">
+                <button (click)="Archiving(row.id)" title="Archiving Permissions">
                   <i class="fa-solid fa-lock"></i>
                 </button>
               </div>

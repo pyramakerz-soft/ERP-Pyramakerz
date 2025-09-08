@@ -382,6 +382,11 @@ export class AccountingEntriesDetailsComponent {
         }, 
         (error) => {
           this.isLoading = false; 
+          Swal.fire({
+            icon: 'warning', 
+            title: error.error,
+            confirmButtonText: 'Okay'
+          });
         }
       )
     }

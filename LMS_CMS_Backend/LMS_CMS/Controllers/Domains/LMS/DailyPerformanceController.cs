@@ -188,7 +188,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet("DailyPerformanceReport")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Enter Daily Performance", "Daily Performance" }
+            pages: new[] { "Student Daily Performance Report" }
         )]
         public async Task<IActionResult> GetDailyPerformanceReport(long studentId, DateOnly fromDate, DateOnly toDate)
         {
@@ -270,7 +270,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet("ClassRoomDailyPerformanceAverages")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Enter Daily Performance", "Daily Performance" }
+            pages: new[] { "Classroom Daily Performance Report" }
         )]
         public async Task<IActionResult> GetClassroomDailyPerformanceAverages(long classroomId, DateOnly fromDate, DateOnly toDate)
         {

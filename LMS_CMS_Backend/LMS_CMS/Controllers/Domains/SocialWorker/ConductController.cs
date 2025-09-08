@@ -386,9 +386,9 @@ namespace LMS_CMS_PL.Controllers.Domains.SocialWorker
     
     //////////////////////////////////////////////////////////////////////////////////////////--77
             [HttpGet("ConductReport")]
-                [Authorize_Endpoint_(
+            [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Conducts" }
+            pages: new[] { "Conducts Report" }
             )]
             public async Task<IActionResult> ConductReport(
             [FromQuery] DateOnly? FromDate,

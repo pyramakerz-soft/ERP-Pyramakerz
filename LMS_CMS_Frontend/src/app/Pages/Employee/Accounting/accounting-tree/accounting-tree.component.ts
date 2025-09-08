@@ -30,7 +30,7 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
 @Component({
   selector: 'app-accounting-tree',
   standalone: true,
-  imports: [SearchComponent, FormsModule, CommonModule, AccountingItemComponent, TranslateModule],
+  imports: [FormsModule, CommonModule, AccountingItemComponent, TranslateModule],
   templateUrl: './accounting-tree.component.html',
   styleUrl: './accounting-tree.component.css'
 })

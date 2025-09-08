@@ -22,6 +22,8 @@ import { PdfPrintComponent } from '../../../../../Component/pdf-print/pdf-print.
 import Swal from 'sweetalert2';
 import * as XLSX from 'xlsx-js-style';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
+import { Student } from '../../../../../Models/student';
+import { ReportsService } from '../../../../../Services/shared/reports.service';
 
 @Component({
   selector: 'app-evaluation-report',
@@ -83,9 +85,9 @@ export class EvaluationReportComponent {
     templateId: 0,
     fromDate: '',
     toDate: '',
-    employeeId: null as number | null,
+    employeeId: 0,
     schoolId: null as number | null, // Change this line
-    classroomId: null as number | null,
+    classroomId: 0,
   };
 
   constructor(
@@ -99,7 +101,9 @@ export class EvaluationReportComponent {
     public employeeService: EmployeeService,
     public SchoolServ: SchoolService,
     public templateServ: EvaluationTemplateService,
-    private realTimeService: RealTimeNotificationServiceService
+    private realTimeService: RealTimeNotificationServiceService,
+    private reportsService: ReportsService
+
   ) {}
 
   ngOnInit() {
@@ -129,6 +133,11 @@ export class EvaluationReportComponent {
       this.subscription.unsubscribe();
     }
   }
+  onFilterChange() {
+  this.showTable = false;
+  this.reportData = [];
+  this.cachedTableDataForPDF = [];
+}
 
   getClassData() {
     this.Classs = [];
@@ -164,7 +173,7 @@ export class EvaluationReportComponent {
 
   onSchoolChange(event: Event) {
     this.Classs = [];
-    this.filterParams.classroomId = null;
+    this.filterParams.classroomId = 0;
 
     const selectedValue = (event.target as HTMLSelectElement).value;
 
@@ -213,22 +222,22 @@ export class EvaluationReportComponent {
       params.templateId = this.filterParams.templateId;
     if (this.filterParams.fromDate)
       params.fromDate = this.filterParams.fromDate;
-    if (this.filterParams.toDate) params.toDate = this.filterParams.toDate;
-    if (this.filterParams.employeeId)
+    if (this.filterParams.toDate) 
+      params.toDate = this.filterParams.toDate; 
+    if (this.filterParams.employeeId && +this.filterParams.employeeId !== 0)
       params.employeeId = this.filterParams.employeeId;
     if (this.filterParams.schoolId)
       params.schoolId = this.filterParams.schoolId;
-    if (this.filterParams.classroomId)
+    if (this.filterParams.classroomId && +this.filterParams.classroomId !== 0)
       params.classroomId = this.filterParams.classroomId;
 
+    console.log(params)
     this.EvaluationEmployeeServ.GetEvaluationReport(
       params,
       this.DomainName
     ).subscribe(
       (data: any) => {
-        // Handle array response (no pagination)
-        this.reportData = Array.isArray(data) ? data : [];
-
+        this.reportData = Array.isArray(data) ? data : [];  
         // Initialize collapsed items
         this.collapsedItems.clear();
         this.reportData.forEach((_, index) => this.collapsedItems.add(index));
@@ -251,115 +260,111 @@ export class EvaluationReportComponent {
     );
   }
 
-  private prepareExportData(): void {
-    this.cachedTableDataForPDF = [];
+private prepareExportData(): void {
+  this.cachedTableDataForPDF = [];
 
-    this.reportData.forEach((evaluation: any) => {
-      const evaluationDate = evaluation.date;
+  this.reportData.forEach((evaluation: any) => {
+    const evaluationDate = evaluation.date;
 
-      // Process question groups
-      if (
-        evaluation.evaluationEmployeeQuestionGroups &&
-        evaluation.evaluationEmployeeQuestionGroups.length > 0
-      ) {
-        evaluation.evaluationEmployeeQuestionGroups.forEach((group: any) => {
-          const section = {
-            header: `Evaluation: ${evaluationDate} - ${
-              group.englishTitle || group.arabicTitle || 'Question Group'
-            }`,
-            data: [
-              { key: 'Evaluation Date', value: evaluationDate },
-              {
-                key: 'Question Group',
-                value: group.englishTitle || group.arabicTitle || 'N/A',
-              },
-            ],
-            tableHeaders: ['Question', 'Rating', 'Notes', 'Average'],
-            tableData: [] as {
-              Question: string;
-              Rating: number;
-              Notes: string;
-              Average: string;
-            }[],
-          };
+    // Process question groups
+    if (
+      evaluation.evaluationEmployeeQuestionGroups &&
+      evaluation.evaluationEmployeeQuestionGroups.length > 0
+    ) {
+      evaluation.evaluationEmployeeQuestionGroups.forEach((group: any) => {
+        const section = {
+          header: `Evaluation: ${evaluationDate} - ${
+            group.englishTitle || group.arabicTitle || 'Question Group'
+          }`,
+          data: [
+            { key: 'Evaluation Date', value: evaluationDate },
+            {
+              key: 'Question Group',
+              value: group.englishTitle || group.arabicTitle || 'N/A',
+            },
+          ],
+          tableHeaders: ['Question', 'Rating', 'Notes' /*, 'Average'*/],
+          tableData: [] as {
+            Question: string;
+            Rating: number;
+            Notes: string;
+            // Average: string;
+          }[],
+        };
 
-          // Add questions
-          if (
-            group.evaluationEmployeeQuestions &&
-            group.evaluationEmployeeQuestions.length > 0
-          ) {
-            group.evaluationEmployeeQuestions.forEach((question: any) => {
-              section.tableData.push({
-                Question:
-                  question.questionEnglishTitle ||
-                  question.questionArabicTitle ||
-                  'N/A',
-                Rating: question.mark || 0,
-                Notes: question.note || 'N/A',
-                Average: question.average || 'N/A',
-              });
+        // Add questions
+        if (
+          group.evaluationEmployeeQuestions &&
+          group.evaluationEmployeeQuestions.length > 0
+        ) {
+          group.evaluationEmployeeQuestions.forEach((question: any) => {
+            section.tableData.push({
+              Question:
+                question.questionEnglishTitle ||
+                question.questionArabicTitle ||
+                'N/A',
+              Rating: question.mark || 0,
+              Notes: question.note || 'N/A',
+              // Average: question.average || 'N/A',
             });
-          }
+          });
+        }
 
-          this.cachedTableDataForPDF.push(section);
-        });
-      }
-
-      // Process student corrections
-      if (
-        evaluation.evaluationEmployeeStudentBookCorrections &&
-        evaluation.evaluationEmployeeStudentBookCorrections.length > 0
-      ) {
-        evaluation.evaluationEmployeeStudentBookCorrections.forEach(
-          (correction: any) => {
-            const section = {
-              header: `Evaluation: ${evaluationDate} - Student Correction`,
-              data: [
-                { key: 'Evaluation Date', value: evaluationDate },
-                {
-                  key: 'Student',
-                  value:
-                    correction.studentEnglishName ||
-                    correction.studentArabicName ||
-                    'N/A',
-                },
-                {
-                  key: 'Correction Book',
-                  value:
-                    correction.evaluationBookCorrectionEnglishName ||
-                    correction.evaluationBookCorrectionArabicName ||
-                    'N/A',
-                },
-              ],
-              tableHeaders: ['Status', 'Notes', 'Average'],
-              tableData: [
-                {
-                  Status: correction.state || 0,
-                  Notes: correction.note || 'N/A',
-                  Average: correction.averageStudent || 'N/A',
-                },
-              ],
-            };
-
-            this.cachedTableDataForPDF.push(section);
-          }
-        );
-      }
-    });
-
-    if (this.cachedTableDataForPDF.length === 0) {
-      this.cachedTableDataForPDF = [
-        {
-          header: 'No Evaluation Data Found',
-          data: [],
-          tableHeaders: [],
-          tableData: [],
-        },
-      ];
+        this.cachedTableDataForPDF.push(section);
+      });
     }
 
-    console.log('Cached PDF Data:', this.cachedTableDataForPDF);
+    // Process student corrections - GROUP THEM TOGETHER like in the UI
+    if (
+      evaluation.evaluationEmployeeStudentBookCorrections &&
+      evaluation.evaluationEmployeeStudentBookCorrections.length > 0
+    ) {
+      const section = {
+        header: `Evaluation: ${evaluationDate} - Student Corrections`,
+        data: [
+          { key: 'Evaluation Date', value: evaluationDate },
+        ],
+        tableHeaders: ['Student', 'Correction Book', 'Status', 'Notes' /*, 'Average'*/],
+        tableData: [] as {
+          Student: string;
+          'Correction Book': string;
+          Status: number;
+          Notes: string;
+          // Average: string;
+        }[],
+      };
+
+      // Add all student corrections to the same table (like in UI)
+      evaluation.evaluationEmployeeStudentBookCorrections.forEach(
+        (correction: any) => {
+          section.tableData.push({
+            Student: correction.studentEnglishName || correction.studentArabicName || 'N/A',
+            'Correction Book': correction.evaluationBookCorrectionEnglishName || 
+                              correction.evaluationBookCorrectionArabicName || 'N/A',
+            Status: correction.state || 0,
+            Notes: correction.note || 'N/A',
+            // Average: correction.averageStudent || 'N/A',
+          });
+        }
+      );
+
+      this.cachedTableDataForPDF.push(section);
+    }
+  });
+
+  if (this.cachedTableDataForPDF.length === 0) {
+    this.cachedTableDataForPDF = [
+      {
+        header: 'No Evaluation Data Found',
+        data: [],
+        tableHeaders: [],
+        tableData: [],
+      },
+    ];
   }
+
+  console.log('Cached PDF Data:', this.cachedTableDataForPDF);
+}
 
   toggleCollapse(index: number) {
     if (this.collapsedItems.has(index)) {
@@ -374,9 +379,9 @@ export class EvaluationReportComponent {
       templateId: 0,
       fromDate: '',
       toDate: '',
-      employeeId: null,
+      employeeId: 0,
       schoolId: null,
-      classroomId: null,
+      classroomId: 0,
     };
     this.SchoolID = 0;
     this.Classs = [];
@@ -389,6 +394,40 @@ export class EvaluationReportComponent {
   get fileName(): string {
     return 'Evaluation Report';
   }
+
+
+getTemplateName(): string {
+  // if (!this.filterParams.templateId) return 'All Templates';
+  const template = this.Templates.find(t => t.id == this.filterParams.templateId);
+  return template?.englishTitle || 'N/A';
+}
+
+getEmployeeName(): string {
+  if (!this.filterParams.employeeId) return 'All Employees';
+  const employee = this.Employees.find(e => e.id == this.filterParams.employeeId);
+  return employee?.en_name || 'N/A';
+}
+
+getSchoolName(): string {
+  if (!this.filterParams.schoolId) return 'All Schools';
+  const school = this.Schools.find(s => s.id == this.filterParams.schoolId);
+  return school?.name || 'N/A';
+}
+
+getClassName(): string {
+  if (!this.filterParams.classroomId) return 'All Classes';
+  const classroom = this.Classs.find(c => c.id == this.filterParams.classroomId);
+  return classroom?.name || 'N/A';
+}
+
+getDateRange(): string {
+  if (!this.filterParams.fromDate || !this.filterParams.toDate) return 'N/A';
+  return `${this.filterParams.fromDate} to ${this.filterParams.toDate}`;
+}
+
+getGeneratedDate(): string {
+  return new Date().toLocaleDateString();
+}
 
   getInfoRows(): any[] {
     const selectedTemplate = this.Templates.find(
@@ -495,7 +534,7 @@ export class EvaluationReportComponent {
     }, 500);
   }
 
-  exportExcel() {
+  async exportExcel() {
     if (this.reportData.length === 0) {
       Swal.fire({
         title: 'Warning',
@@ -506,378 +545,128 @@ export class EvaluationReportComponent {
       return;
     }
 
-    // Prepare data with styling information
-    const excelData = [];
+    try {
+      const selectedTemplate = this.Templates.find(
+        (t) => t.id == this.filterParams.templateId
+      );
+      const selectedEmployee = this.Employees.find(
+        (e) => e.id == this.filterParams.employeeId
+      );
+      const selectedSchool = this.Schools.find(
+        (s) => s.id == this.filterParams.schoolId
+      );
+      const selectedClass = this.Classs.find(
+        (c) => c.id == this.filterParams.classroomId
+      );
 
-    // Add report title with styling
-    excelData.push([
-      {
-        v: 'EVALUATION REPORT',
-        s: {
-          font: { bold: true, size: 16 },
-          alignment: { horizontal: 'center' },
-        },
-      },
-    ]);
-    excelData.push([]); // empty row
+      // Prepare tables data
+      const tables: any[] = [];
 
-    // Add filter information with styling
-    const selectedTemplate = this.Templates.find(
-      (t) => t.id == this.filterParams.templateId
-    );
-    const selectedEmployee = this.Employees.find(
-      (e) => e.id == this.filterParams.employeeId
-    );
-    const selectedSchool = this.Schools.find(
-      (s) => s.id == this.filterParams.schoolId
-    );
-    const selectedClass = this.Classs.find(
-      (c) => c.id == this.filterParams.classroomId
-    );
+      // Process each evaluation
+      this.reportData.forEach((evaluation: any) => {
+        const evaluationDate = evaluation.date;
 
-    excelData.push([
-      { v: 'Template:', s: { font: { bold: true } } },
-      {
-        v: selectedTemplate?.englishTitle || 'All',
-        s: { font: { bold: true } },
-      },
-    ]);
-    excelData.push([
-      { v: 'Employee:', s: { font: { bold: true } } },
-      { v: selectedEmployee?.en_name || 'All', s: { font: { bold: true } } },
-    ]);
-    excelData.push([
-      { v: 'School:', s: { font: { bold: true } } },
-      { v: selectedSchool?.name || 'All', s: { font: { bold: true } } },
-    ]);
-    excelData.push([
-      { v: 'Class:', s: { font: { bold: true } } },
-      { v: selectedClass?.name || 'All', s: { font: { bold: true } } },
-    ]);
-    excelData.push([
-      { v: 'From Date:', s: { font: { bold: true } } },
-      { v: this.filterParams.fromDate, s: { font: { bold: true } } },
-    ]);
-    excelData.push([
-      { v: 'To Date:', s: { font: { bold: true } } },
-      { v: this.filterParams.toDate, s: { font: { bold: true } } },
-    ]);
-    excelData.push([]); // empty row
+        // Process question groups
+        if (
+          evaluation.evaluationEmployeeQuestionGroups &&
+          evaluation.evaluationEmployeeQuestionGroups.length > 0
+        ) {
+          evaluation.evaluationEmployeeQuestionGroups.forEach((group: any) => {
+            const tableData: any[][] = [];
+            
+            // Add headers
+            // tableData.push(['Question', 'Rating', 'Notes']);
 
-    // Add evaluation data
-    this.reportData.forEach((evaluation: any) => {
-      const evaluationDate = evaluation.date;
-
-      // Add evaluation header with styling
-      excelData.push([
-        {
-          v: `Evaluation Date: ${evaluationDate}`,
-          s: {
-            font: { bold: true, color: { rgb: 'FFFFFF' } },
-            fill: { fgColor: { rgb: '4472C4' } },
-          },
-        },
-      ]);
-
-      excelData.push([]); // empty row
-
-      // Process question groups
-      if (
-        evaluation.evaluationEmployeeQuestionGroups &&
-        evaluation.evaluationEmployeeQuestionGroups.length > 0
-      ) {
-        evaluation.evaluationEmployeeQuestionGroups.forEach((group: any) => {
-          // Add group header with styling
-          excelData.push([
-            {
-              v: `Group: ${group.englishTitle || group.arabicTitle || 'N/A'}`,
-              s: {
-                font: { bold: true, color: { rgb: 'FFFFFF' } },
-                fill: { fgColor: { rgb: '5B9BD5' } },
-              },
-            },
-          ]);
-
-          // Add questions table header with styling
-          excelData.push([
-            {
-              v: 'Question',
-              s: {
-                font: { bold: true },
-                fill: { fgColor: { rgb: 'D9E1F2' } },
-                border: {
-                  top: { style: 'thin' },
-                  bottom: { style: 'thin' },
-                  left: { style: 'thin' },
-                  right: { style: 'thin' },
-                },
-              },
-            },
-            {
-              v: 'Rating',
-              s: {
-                font: { bold: true },
-                fill: { fgColor: { rgb: 'D9E1F2' } },
-                border: {
-                  top: { style: 'thin' },
-                  bottom: { style: 'thin' },
-                  left: { style: 'thin' },
-                  right: { style: 'thin' },
-                },
-              },
-            },
-            {
-              v: 'Notes',
-              s: {
-                font: { bold: true },
-                fill: { fgColor: { rgb: 'D9E1F2' } },
-                border: {
-                  top: { style: 'thin' },
-                  bottom: { style: 'thin' },
-                  left: { style: 'thin' },
-                  right: { style: 'thin' },
-                },
-              },
-            },
-            // { v: 'Average', s: { font: { bold: true }, fill: { fgColor: { rgb: 'D9E1F2' } }, border: { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } } } }
-          ]);
-
-          // Add questions with alternating row colors
-          if (
-            group.evaluationEmployeeQuestions &&
-            group.evaluationEmployeeQuestions.length > 0
-          ) {
-            group.evaluationEmployeeQuestions.forEach(
-              (question: any, i: number) => {
-                // Create star rating visualization - use proper star symbols
-                const stars =
-                  '★'.repeat(question.mark || 0) +
-                  '☆'.repeat(5 - (question.mark || 0));
-
-                excelData.push([
-                  {
-                    v:
-                      question.questionEnglishTitle ||
-                      question.questionArabicTitle ||
-                      'N/A',
-                    s: {
-                      fill: {
-                        fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'FFFFFF' },
-                      },
-                      border: {
-                        left: { style: 'thin' },
-                        right: { style: 'thin' },
-                      },
-                    },
-                  },
-                  {
-                    v: stars,
-                    s: {
-                      fill: {
-                        fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'FFFFFF' },
-                      },
-                      border: {
-                        left: { style: 'thin' },
-                        right: { style: 'thin' },
-                      },
-                    },
-                  },
-                  {
-                    v: question.note || 'N/A',
-                    s: {
-                      fill: {
-                        fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'FFFFFF' },
-                      },
-                      border: {
-                        left: { style: 'thin' },
-                        right: { style: 'thin' },
-                      },
-                    },
-                  },
-                  // { v: question.average || 'N/A', s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'FFFFFF' } }, border: { left: { style: 'thin' }, right: { style: 'thin' } } } }
+            // Add questions
+            if (
+              group.evaluationEmployeeQuestions &&
+              group.evaluationEmployeeQuestions.length > 0
+            ) {
+              group.evaluationEmployeeQuestions.forEach((question: any) => {
+                const stars = '★'.repeat(question.mark || 0) + '☆'.repeat(5 - (question.mark || 0));
+                tableData.push([
+                  question.questionEnglishTitle || question.questionArabicTitle || 'N/A',
+                  stars,
+                  question.note || 'N/A'
                 ]);
-              }
-            );
-          } else {
-            excelData.push([
-              {
-                v: 'No questions found for this group',
-                s: {
-                  font: { italic: true },
-                  alignment: { horizontal: 'center' },
-                },
-                colSpan: 4,
-              },
+              });
+            }
+
+            tables.push({
+              title: `Evaluation: ${evaluationDate} - ${group.englishTitle || group.arabicTitle || 'Question Group'}`,
+              headers: ['Question', 'Rating', 'Notes'],
+              data: tableData
+            });
+          });
+        }
+
+        // Process student corrections
+        if (
+          evaluation.evaluationEmployeeStudentBookCorrections &&
+          evaluation.evaluationEmployeeStudentBookCorrections.length > 0
+        ) {
+          const tableData: any[][] = [];
+          
+          // Add headers
+          // tableData.push(['Student', 'Correction Book', 'Status', 'Notes']);
+
+          // Add student corrections
+          evaluation.evaluationEmployeeStudentBookCorrections.forEach((correction: any) => {
+            const statusStars = '★'.repeat(correction.state || 0) + '☆'.repeat(5 - (correction.state || 0));
+            tableData.push([
+              correction.studentEnglishName || correction.studentArabicName || 'N/A',
+              correction.evaluationBookCorrectionEnglishName || correction.evaluationBookCorrectionArabicName || 'N/A',
+              statusStars,
+              correction.note || 'N/A'
             ]);
+          });
+
+          tables.push({
+            title: `Evaluation: ${evaluationDate} - Student Corrections`,
+            headers: ['Student', 'Correction Book', 'Status', 'Notes'],
+            data: tableData
+          });
+        }
+      });
+
+      // Prepare info rows
+      const infoRows = [
+        { key: 'Template', value: selectedTemplate?.englishTitle || 'All' },
+        { key: 'Employee', value: selectedEmployee?.en_name || 'All' },
+        { key: 'School', value: selectedSchool?.name || 'All' },
+        { key: 'Class', value: selectedClass?.name || 'All' },
+        { key: 'Start Date', value: this.filterParams.fromDate },
+        { key: 'End Date', value: this.filterParams.toDate },
+        { key: 'Generated On', value: new Date().toLocaleDateString() }
+      ];
+
+      // Generate Excel using ReportsService
+      await this.reportsService.generateExcelReport({
+        mainHeader: {
+          en: 'EVALUATION REPORT',
+          ar: 'تقرير التقييم'
+        },
+        subHeaders: [
+          {
+            en: 'Employee Performance Evaluation Summary',
+            ar: 'ملخص تقييم أداء الموظفين'
           }
+        ],
+        infoRows: infoRows,
+        // reportImage: 'assets/images/logo.png',
+        tables: tables,
+        filename: `Evaluation_Report_${new Date().toISOString().slice(0, 10)}.xlsx`
+      });
 
-          excelData.push([]); // empty row
-        });
-      }
-
-      // Process student corrections
-      if (
-        evaluation.evaluationEmployeeStudentBookCorrections &&
-        evaluation.evaluationEmployeeStudentBookCorrections.length > 0
-      ) {
-        // Add student corrections header with styling
-        excelData.push([
-          {
-            v: 'Student Corrections',
-            s: {
-              font: { bold: true, color: { rgb: 'FFFFFF' } },
-              fill: { fgColor: { rgb: 'ED7D31' } },
-            },
-          },
-        ]);
-
-        // Add corrections table header with styling
-        excelData.push([
-          {
-            v: 'Student',
-            s: {
-              font: { bold: true },
-              fill: { fgColor: { rgb: 'FCE4D6' } },
-              border: {
-                top: { style: 'thin' },
-                bottom: { style: 'thin' },
-                left: { style: 'thin' },
-                right: { style: 'thin' },
-              },
-            },
-          },
-          {
-            v: 'Correction Book',
-            s: {
-              font: { bold: true },
-              fill: { fgColor: { rgb: 'FCE4D6' } },
-              border: {
-                top: { style: 'thin' },
-                bottom: { style: 'thin' },
-                left: { style: 'thin' },
-                right: { style: 'thin' },
-              },
-            },
-          },
-          {
-            v: 'Status',
-            s: {
-              font: { bold: true },
-              fill: { fgColor: { rgb: 'FCE4D6' } },
-              border: {
-                top: { style: 'thin' },
-                bottom: { style: 'thin' },
-                left: { style: 'thin' },
-                right: { style: 'thin' },
-              },
-            },
-          },
-          {
-            v: 'Notes',
-            s: {
-              font: { bold: true },
-              fill: { fgColor: { rgb: 'FCE4D6' } },
-              border: {
-                top: { style: 'thin' },
-                bottom: { style: 'thin' },
-                left: { style: 'thin' },
-                right: { style: 'thin' },
-              },
-            },
-          },
-          {
-            v: 'Average',
-            s: {
-              font: { bold: true },
-              fill: { fgColor: { rgb: 'FCE4D6' } },
-              border: {
-                top: { style: 'thin' },
-                bottom: { style: 'thin' },
-                left: { style: 'thin' },
-                right: { style: 'thin' },
-              },
-            },
-          },
-        ]);
-
-        // Add corrections with alternating row colors
-        evaluation.evaluationEmployeeStudentBookCorrections.forEach(
-          (correction: any, i: number) => {
-            // Create star rating visualization for status
-            const statusStars =
-              '★'.repeat(correction.state || 0) +
-              '☆'.repeat(5 - (correction.state || 0));
-
-            excelData.push([
-              {
-                v:
-                  correction.studentEnglishName ||
-                  correction.studentArabicName ||
-                  'N/A',
-                s: {
-                  fill: { fgColor: { rgb: i % 2 === 0 ? 'FBE5D6' : 'FFFFFF' } },
-                  border: { left: { style: 'thin' }, right: { style: 'thin' } },
-                },
-              },
-              {
-                v:
-                  correction.evaluationBookCorrectionEnglishName ||
-                  correction.evaluationBookCorrectionArabicName ||
-                  'N/A',
-                s: {
-                  fill: { fgColor: { rgb: i % 2 === 0 ? 'FBE5D6' : 'FFFFFF' } },
-                  border: { left: { style: 'thin' }, right: { style: 'thin' } },
-                },
-              },
-              {
-                v: statusStars,
-                s: {
-                  fill: { fgColor: { rgb: i % 2 === 0 ? 'FBE5D6' : 'FFFFFF' } },
-                  border: { left: { style: 'thin' }, right: { style: 'thin' } },
-                },
-              },
-              {
-                v: correction.note || 'N/A',
-                s: {
-                  fill: { fgColor: { rgb: i % 2 === 0 ? 'FBE5D6' : 'FFFFFF' } },
-                  border: { left: { style: 'thin' }, right: { style: 'thin' } },
-                },
-              },
-              {
-                v: correction.averageStudent || 'N/A',
-                s: {
-                  fill: { fgColor: { rgb: i % 2 === 0 ? 'FBE5D6' : 'FFFFFF' } },
-                  border: { left: { style: 'thin' }, right: { style: 'thin' } },
-                },
-              },
-            ]);
-          }
-        );
-
-        excelData.push([]); // empty row
-      }
-
-      excelData.push([]); // empty row for spacing between evaluations
-      excelData.push([]); // extra empty row
-    });
-
-    // Create worksheet
-    const worksheet = XLSX.utils.aoa_to_sheet(excelData);
-
-    // Apply column widths
-    worksheet['!cols'] = [
-      { wch: 40 }, // Question/Student
-      { wch: 15 }, // Rating/Status
-      { wch: 30 }, // Notes
-      { wch: 12 }, // Average
-      { wch: 30 }, // Correction Book (for student corrections)
-    ];
-
-    // Create workbook and save
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Evaluation Report');
-
-    const dateStr = new Date().toISOString().slice(0, 10);
-    XLSX.writeFile(workbook, `Evaluation_Report_${dateStr}.xlsx`);
+    } catch (error) {
+      console.error('Error generating Excel report:', error);
+      Swal.fire({
+        title: 'Error',
+        text: 'Failed to generate Excel report',
+        icon: 'error',
+        confirmButtonText: 'OK',
+      });
+    }
   }
+
 }
