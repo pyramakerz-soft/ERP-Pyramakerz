@@ -51,6 +51,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
                     query => query.Include(h => h.School),
                     query => query.Include(h => h.Grade),
                     query => query.Include(h => h.StudentHygieneTypes)?.ThenInclude(x => x.HygieneTypes.Where(d => d.IsDeleted != true)),
+                    query => query.Include(h => h.StudentHygieneTypes).ThenInclude(sht => sht.Student),
                     query => query.Include(x => x.InsertedByEmployee)
             );
 
