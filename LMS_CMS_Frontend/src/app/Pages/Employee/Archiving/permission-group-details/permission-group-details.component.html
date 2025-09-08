@@ -1,1 +1,34 @@
-<p>permission-group-details works!</p>
+<div class="">
+    <div class="flex justify-between items-center">
+        <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
+            <i class="fa-solid fa-chevron-left cursor-pointer" (click)="MoveToPermissionGroup()"></i>
+            <h1 class="primaryTxt font-semibold text-2xl leading-9">Permission Group Details</h1>
+        </div>
+        <div class="flex justify-end">
+            <button [disabled]="isLoading"
+                class="secondaryBg text-white font-medium px-4 py-2 rounded-lg cursor-pointer" (click)="Save()">
+                <span *ngIf="!isLoading">Save</span>
+                <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+            </button>
+        </div>
+    </div> 
+</div>
+
+<div class="mt-7">
+    <div class="p-6 bg-[#F7F7F7] w-[60%] rounded-3xl overflow-x-auto">
+        <div class="flex space-x-2 rtl:space-x-reverse items-center w-full">
+            <img src="Icons/Folder.png">
+            <p class="text-2xl">Archiving Tree</p>
+        </div>
+
+        <div *ngIf="archivingTrees.length == 0" class="w-full">
+            <p class="text-gray-600 py-2 text-center">
+                No Data Found
+            </p>
+        </div>
+
+        <div *ngIf="archivingTrees.length != 0" class="w-full"> 
+            <app-permission-group-archiving-item [archivingData]="archivingTrees" (Selected)="SelectData($event)"></app-permission-group-archiving-item>
+        </div>
+    </div> 
+</div>
