@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
+using System.Linq;
 using static Amazon.S3.Util.S3EventNotification;
 
 namespace LMS_CMS_PL.Controllers.Domains.Maintenance
@@ -300,6 +301,62 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
             uow.SaveChanges();
 
             return Ok();
+        }
+        [HttpPost("report")]
+        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Maintenance" })]
+        public async Task<IActionResult> GetReport([FromBody] MaintenanceReportRequestDto request)
+        {
+            UOW uow = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
+
+            if (userIdClaim == null || userTypeClaim == null)
+                return Unauthorized("User ID or Type claim not found.");
+
+            if (request == null)
+                return BadRequest("Invalid request.");
+
+            if (request.FromDate == default || request.ToDate == default)
+                return BadRequest("StartDate and EndDate are required.");
+
+            if (request.MaintenanceEmployeeId.HasValue && request.CompanyId.HasValue)
+                return BadRequest("You cannot filter by both Employee and Company at the same time.");
+
+            //IQueryable<LMS_CMS_DAL.Models.Domains.MaintenanceModule.Maintenance> query =
+            //               uow.maintenance_Repository.Query()
+            //                  .Include(m => m.Item)
+            //                  .Include(m => m.Company)
+            //                  .Include(m => m.MaintenanceEmployee).ThenInclude(me => me.Employee)
+            //                  .Where(m => m.IsDeleted != true && m.Date >= request.FromDate && m.Date <= request.ToDate);
+
+            List<LMS_CMS_DAL.Models.Domains.MaintenanceModule.Maintenance> query = await uow.maintenance_Repository.Select_All_With_IncludesById<LMS_CMS_DAL.Models.Domains.MaintenanceModule.Maintenance>(
+                              t => t.IsDeleted != true && t.Date >= request.FromDate && t.Date <= request.ToDate,
+                              query => query.Include(m => m.Item), 
+                              query => query.Include(m => m.Company),
+                              query => query.Include(m => m.MaintenanceEmployee).ThenInclude(me => me.Employee)
+                           );
+
+            //if (!query.Any())
+            //    return NotFound("No Maintenance records found for this filter.");
+
+            if (request.ItemId.HasValue && request.ItemId.Value > 0)
+                query = query.Where(m => m.ItemID == request.ItemId.Value).ToList();
+
+            if (request.MaintenanceEmployeeId.HasValue && request.MaintenanceEmployeeId.Value > 0)
+                query = query.Where(m => m.MaintenanceEmployeeID == request.MaintenanceEmployeeId.Value).ToList();
+
+            if (request.CompanyId.HasValue && request.CompanyId.Value > 0)
+                query = query.Where(m => m.CompanyID == request.CompanyId.Value).ToList();
+
+
+            List<MaintenanceGetDto> dtoList = mapper.Map<List<MaintenanceGetDto>>(query);
+
+            return Ok(dtoList);
+
         }
     }
 }
