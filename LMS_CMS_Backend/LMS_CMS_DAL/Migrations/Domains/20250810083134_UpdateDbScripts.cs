@@ -19,7 +19,8 @@ namespace LMS_CMS_DAL.Migrations.LMS_CMS_
                 "LMS_CMS_DAL.DbScripts.GetAccountingTotals.sql",
                 "LMS_CMS_DAL.DbScripts.GetEntriesCount.sql",
                 "LMS_CMS_DAL.DbScripts.GetAccountLedger.sql",
-                "LMS_CMS_DAL.DbScripts.GetAccountSummary.sql"
+                "LMS_CMS_DAL.DbScripts.GetAccountSummary.sql",
+                "LMS_CMS_DAL.DbScripts.GetAccountStatement.sql"
             };
 
             foreach (var scriptName in scripts)

@@ -24,29 +24,43 @@
     <div class="w-full md:w-1/4">
         <label class="block mb-2 text-sm font-medium text-gray-900" for="linkFileID">{{ 'Account Type' | translate }}</label>
         <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="linkFileID"
-            [(ngModel)]="linkFileID" (ngModelChange)="onFilterChange()" required>
+            [(ngModel)]="linkFileID" (ngModelChange)="onLinkFileChange()" required>
             <option [ngValue]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Account Type' | translate }}</option>
-            <option *ngFor="let option of linkFileOptions" [ngValue]="option.id">{{ option.name | translate }}</option>
+            <option *ngFor="let option of linkFileOptions" [ngValue]="option.id">
+                {{ isRtl && option.arName ? option.arName : option.name | translate }}
+            </option>
         </select>
+        <!-- <div *ngIf="isLinkFilesLoading" class="text-sm text-gray-500 mt-1">
+            {{ 'Loading...' | translate }}
+        </div> -->
     </div>
 
     <!-- Account Selector -->
     <div class="w-full md:w-1/4">
         <label class="block mb-2 text-sm font-medium text-gray-900" for="accountID">{{ 'Account' | translate }}</label>
         <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="accountID"
-            [(ngModel)]="accountID" (ngModelChange)="onFilterChange()">
+            [(ngModel)]="accountID" (ngModelChange)="onFilterChange()" [disabled]="!linkFileID || isAccountsLoading">
             <option [ngValue]="0">{{ 'All' | translate }} {{ 'Accounts' | translate }}</option>
-            <option *ngFor="let account of accounts" [ngValue]="account.id">{{ account.name }}</option>
+            <option *ngFor="let account of accountOptions" [ngValue]="account.id">
+                {{ account.name }}
+            </option>
+            <option *ngIf="accountOptions.length === 0 && !isAccountsLoading" disabled>
+                {{ 'No accounts available' | translate }}
+            </option>
         </select>
+        <div *ngIf="isAccountsLoading" class="text-sm text-gray-500 mt-1">
+            {{ 'Loading accounts...' | translate }}
+        </div>
     </div>
 
     <div class="w-full md:w-1/6 flex justify-end mt-4 md:mt-0">
         <button class="p-3 font-medium text-xl rounded-lg" (click)="viewReport()"
-            [disabled]="!fromDate || !toDate || !linkFileID" [ngClass]="{
-                'bg-gray-100 text-gray-300': !fromDate || !toDate || !linkFileID,
-                'secondaryBg text-white': fromDate && toDate && linkFileID
+            [disabled]="!fromDate || !toDate || !linkFileID || isLoading" [ngClass]="{
+                'bg-gray-100 text-gray-300': !fromDate || !toDate || !linkFileID || isLoading,
+                'secondaryBg text-white': fromDate && toDate && linkFileID && !isLoading
             }">
-            {{ 'View Report' | translate }}
+            <span *ngIf="!isLoading">{{ 'View Report' | translate }}</span>
+            <span *ngIf="isLoading">{{ 'Loading...' | translate }}</span>
         </button>
     </div>
 </div>
@@ -57,25 +71,6 @@
 </div>
 
 <div *ngIf="showTable && reportData" class="mb-5">
-    <!-- Report Summary -->
-    <!-- <div class="bg-blue-50 p-4 rounded-lg mb-4">
-        <h3 class="font-semibold text-lg mb-2">{{ 'Report Summary' | translate }}</h3>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-                <span class="font-medium">{{ 'Account Type' | translate }}:</span> {{ getLinkFileName(linkFileID) }}
-            </div>
-            <div>
-                <span class="font-medium">{{ 'Account' | translate }}:</span> {{ getAccountName(accountID) }}
-            </div>
-            <div>
-                <span class="font-medium">{{ 'From Date' | translate }}:</span> {{ fromDate }}
-            </div>
-            <div>
-                <span class="font-medium">{{ 'To Date' | translate }}:</span> {{ toDate }}
-            </div>
-        </div>
-    </div> -->
-
     <!-- First Period Totals -->
     <div class="bg-gray-50 p-4 rounded-lg mb-4">
         <h3 class="font-semibold text-lg mb-2">{{ 'Opening Balance' | translate }}</h3>
@@ -185,42 +180,3 @@
         </div>
     </div>
 </div>
-
-<!-- 
-<div>testtesttetst</div>
-<div *ngIf="showTable && reportData && reportData.pagination.totalPages > 1" class="mt-8 flex justify-between items-center">
-    <div class="flex items-center space-x-4 flex-row rtl:flex-row-reverse">
-        <button class="flex items-center space-x-2 rounded-lg border py-3 px-4 flex-row rtl:flex-row-reverse"
-            (click)="changePage(pageNumber-1)" [disabled]="pageNumber === 1"
-            [ngClass]="{'cursor-not-allowed opacity-50': pageNumber === 1}">
-            <i class="fa-solid fa-arrow-left"></i>
-            <p>{{'Previous'| translate }}</p>
-        </button>
-        <div class="flex">
-            <div *ngFor="let page of visiblePages"
-                class="rounded-lg py-[10px] w-[40px]"
-                [ngClass]="{ 'border': page === pageNumber, 'hover:bg-gray-100': page !== pageNumber }"
-                (click)="changePage(page)">
-                <p class="cursor-pointer text-center">{{ page }}</p>
-            </div>
-        </div>
-        <button class="flex items-center space-x-2 rounded-lg border py-3 px-4 flex-row rtl:flex-row-reverse"
-            (click)="changePage(pageNumber+1)"
-            [disabled]="pageNumber === (reportData.pagination.totalPages || 1)"
-            [ngClass]="{'cursor-not-allowed opacity-50': pageNumber === (reportData.pagination.totalPages || 1)}">
-            <p>{{'Next'| translate }}</p>
-            <i class="fa-solid fa-arrow-right"></i>
-        </button>
-    </div>
-
-    <div class="flex items-center space-x-2">
-        <input (input)="validateNumberForPagination($event)" class="rounded-lg border py-3 px-4 w-[73px]"
-            [(ngModel)]="pageSize" min="1" (input)="validatePageSize($event)"
-            (ngModelChange)="changePage(1)">
-        <p>{{'items Per Page'| translate }}</p>
-    </div>
-
-    <div>
-        <p>{{pageNumber}} {{'of'| translate }} {{reportData.pagination.totalPages}} {{'pages'| translate }} ({{reportData.pagination.totalRecords}} {{'Item'| translate }})</p>
-    </div>
-</div> -->

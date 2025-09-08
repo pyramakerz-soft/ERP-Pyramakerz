@@ -1,41 +1,42 @@
-import { Component, OnInit } from '@angular/core';
-import { AccountSubledgerResponse } from '../../../../../Models/Accounting/account-subledger-report';
 import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
+import { AccountStatementResponse } from '../../../../../Models/Accounting/accounting-statement';
 import { AccountingTreeChart } from '../../../../../Models/Accounting/accounting-tree-chart';
+import { LinkFile } from '../../../../../Models/Accounting/link-file';
 import { Subscription } from 'rxjs';
 import { TokenData } from '../../../../../Models/token-data';
-import { AccountingSubledgerService } from '../../../../../Services/Employee/Accounting/accounting-subledger.service';
+import { AccountStatementService } from '../../../../../Services/Employee/Accounting/accounting-statement.service';
 import { AccountingTreeChartService } from '../../../../../Services/Employee/Accounting/accounting-tree-chart.service';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import { AccountService } from '../../../../../Services/account.service';
 import { ApiService } from '../../../../../Services/api.service';
-import Swal from 'sweetalert2';
+import { DataAccordingToLinkFileService } from '../../../../../Services/Employee/Accounting/data-according-to-link-file.service';
 import { LinkFileService } from '../../../../../Services/Employee/Accounting/link-file.service';
-import { LinkFile } from '../../../../../Models/Accounting/link-file';
+import Swal from 'sweetalert2';
 
 @Component({
-  selector: 'app-accounting-subledger',
+  selector: 'app-accounting-statement-report',
   standalone: true,
   imports: [CommonModule, FormsModule, TranslateModule],
-  templateUrl: './accounting-subledger.component.html',
-  styleUrl: './accounting-subledger.component.css'
+  templateUrl: './accounting-statement-report.component.html',
+  styleUrl: './accounting-statement-report.component.css'
 })
-export class AccountingSubledgerComponent implements OnInit {
+export class AccountingStatementReportComponent implements OnInit {
   // Filter parameters
   fromDate: string = '';
   toDate: string = '';
   linkFileID: number = 0;
-  accountID: number = 0;
+  subAccountID: number = 0;
   pageNumber: number = 1;
   pageSize: number = 10;
 
   // Data
-  reportData: AccountSubledgerResponse | null = null;
+  reportData: AccountStatementResponse | null = null;
   accounts: AccountingTreeChart[] = [];
   linkFileOptions: LinkFile[] = [];
-  accountOptions: AccountingTreeChart[] = []; // For accounts based on selected link file
+  accountOptions: any[] = []; // For accounts based on selected link file
 
   // UI state
   isLoading: boolean = false;
@@ -48,11 +49,12 @@ export class AccountingSubledgerComponent implements OnInit {
   DomainName: string = '';
 
   constructor(
-    private accountingSubledgerService: AccountingSubledgerService,
+    private accountStatementService: AccountStatementService,
     private accountingTreeChartService: AccountingTreeChartService,
     private languageService: LanguageService,
     public account: AccountService,
     public ApiServ: ApiService,
+    private dataAccordingToLinkFileService: DataAccordingToLinkFileService,
     private linkFileService: LinkFileService
   ) { }
 
@@ -90,7 +92,7 @@ export class AccountingSubledgerComponent implements OnInit {
 
   loadAccounts() {
     this.isLoading = true;
-    this.accountingTreeChartService.GetBySubID(this.DomainName).subscribe({
+    this.accountingTreeChartService.Get(this.DomainName).subscribe({
       next: (accounts) => {
         this.accounts = accounts;
         this.isLoading = false;
@@ -103,7 +105,7 @@ export class AccountingSubledgerComponent implements OnInit {
   }
 
   onLinkFileChange() {
-    this.accountID = 0; // Reset account selection
+    this.subAccountID = 0; // Reset account selection
     this.accountOptions = []; // Clear previous account options
     this.showTable = false;
     this.reportData = null;
@@ -115,7 +117,7 @@ export class AccountingSubledgerComponent implements OnInit {
 
   loadAccountsByLinkFile() {
     this.isAccountsLoading = true;
-    this.accountingTreeChartService.GetByLinkFileId(this.linkFileID, this.DomainName).subscribe({
+    this.dataAccordingToLinkFileService.GetTableDataAccordingToLinkFile(this.DomainName, this.linkFileID).subscribe({
       next: (accounts) => {
         this.accountOptions = accounts;
         this.isAccountsLoading = false;
@@ -157,11 +159,11 @@ export class AccountingSubledgerComponent implements OnInit {
     this.isLoading = true;
     this.showTable = false;
 
-    this.accountingSubledgerService.GetAccountsLedger(
+    this.accountStatementService.GetAccountStatement(
       new Date(this.fromDate),
       new Date(this.toDate),
       this.linkFileID,
-      this.accountID,
+      this.subAccountID,
       this.pageNumber,
       this.pageSize,
       this.DomainName
@@ -213,12 +215,16 @@ export class AccountingSubledgerComponent implements OnInit {
     // First check in accountOptions (link file specific accounts)
     const accountFromLinkFile = this.accountOptions.find(acc => acc.id === id);
     if (accountFromLinkFile) {
-      return accountFromLinkFile.name;
+      return accountFromLinkFile.name || accountFromLinkFile.en_name || 'Unknown';
     }
     
     // Fallback to general accounts
     const account = this.accounts.find(acc => acc.id === id);
     return account ? account.name : 'Unknown Account';
+  }
+
+  formatDate(dateString: string): string {
+    return new Date(dateString).toLocaleDateString();
   }
 
   // Add Math object for template usage
@@ -247,17 +253,5 @@ export class AccountingSubledgerComponent implements OnInit {
     }
 
     return Array.from({ length: end - start + 1 }, (_, i) => start + i);
-  }
-
-  validatePageSize(event: any) {
-    const value = event.target.value;
-    if (isNaN(value) || value === '') {
-      event.target.value = '';
-    }
-  }
-
-  validateNumberForPagination(event: any): void {
-    const value = event.target.value;
-    this.pageSize = 0;
   }
 }

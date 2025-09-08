@@ -288,11 +288,11 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
     if (this.reportType === 'student') {
       this.tableDataForExport = this.tableData.map((item) => ({
         Date: item.date,
-        'En Name': item.englishNameStudent,
+        'Name': item.englishNameStudent,
         'Ar Name': item.arabicNameStudent,
         'Student ID': item.studentId,
         'Performance Type': item.performanceTypeEn,
-        'Performance Type AR': item.performanceTypeAr,
+        // 'Performance Type AR': item.performanceTypeAr,
         Comment: item.comment || 'N/A',
       }));
     } else {
@@ -300,7 +300,7 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
         Date: item.date,
         'Avg Score': item.averageScore || 'N/A',
         'Performance Type': item.performanceTypeEn,
-        'Performance Type AR': item.performanceTypeAr,
+        // 'Performance Type AR': item.performanceTypeAr,
         Comment: item.comment || 'N/A',
       }));
     }
@@ -315,20 +315,20 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
           table: {
             headers: [
               'Date',
-              'Ar Name',
-              'Ar Name',
+              'Name',
+              // 'Ar Name',
               'Student ID',
               'Performance Type',
-              'Performance Type AR',
+              // 'Performance Type AR',
               'Comment',
             ],
             data: this.tableData.map((item) => ({
               Date: item.date,
-              'En Name': item.englishNameStudent,
-              'Ar Name': item.arabicNameStudent,
+              'Name': item.englishNameStudent,
+              // 'Ar Name': item.arabicNameStudent,
               'Student ID': item.studentId,
               'Performance Type': item.performanceTypeEn,
-              'Performance Type AR': item.performanceTypeAr,
+              // 'Performance Type AR': item.performanceTypeAr,
               Comment: item.comment,
             })),
           },
@@ -344,14 +344,14 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
               'Date',
               'Avg Score',
               'Performance Type',
-              'Performance Type AR',
+              // 'Performance Type AR',
               'Comment',
             ],
             data: this.tableData.map((item) => ({
               Date: item.date,
               'Avg Score': item.averageScore,
               'Performance Type': item.performanceTypeEn,
-              'Performance Type AR': item.performanceTypeAr,
+              // 'Performance Type AR': item.performanceTypeAr,
               Comment: item.comment,
             })),
           },
@@ -437,10 +437,10 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
           return [
             item.date,
             item.englishNameStudent,
-            item.arabicNameStudent,
+            // item.arabicNameStudent,
             item.studentId,
             item.performanceTypeEn,
-            item.performanceTypeAr,
+            // item.performanceTypeAr,
             item.comment || 'N/A',
           ];
         } else {
@@ -448,7 +448,7 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
             item.date,
             item.averageScore || 'N/A',
             item.performanceTypeEn,
-            item.performanceTypeAr,
+            // item.performanceTypeAr,
             item.comment || 'N/A',
           ];
         }
@@ -486,18 +486,18 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
         this.reportType === 'student'
           ? [
               'Date',
-              'En Name',
-              'Ar Name',
+              'Name',
+              // 'Ar Name',
               'Student ID',
               'Performance Type',
-              'Performance Type AR',
+              // 'Performance Type AR',
               'Comment',
             ]
           : [
               'Date',
               'Avg Score',
               'Performance Type',
-              'Performance Type AR',
+              // 'Performance Type AR',
               'Comment',
             ];
 
