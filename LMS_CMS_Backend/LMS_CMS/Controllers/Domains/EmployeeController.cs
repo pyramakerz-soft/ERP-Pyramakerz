@@ -1253,7 +1253,10 @@ namespace LMS_CMS_PL.Controllers.Domains
                 employeeDTO.Students = new List<long> { };
             }
 
-            List<AnnualVacationEmployee> annualVacationEmployees = Unit_Of_Work.annualVacationEmployee_Repository.FindBy(a => a.EmployeeID == id && a.IsDeleted != true);
+            List<AnnualVacationEmployee> annualVacationEmployees = await Unit_Of_Work.annualVacationEmployee_Repository.Select_All_With_IncludesById<AnnualVacationEmployee>(a => a.EmployeeID == id && a.IsDeleted != true
+            , query => query.Include(emp => emp.Employee),
+                query => query.Include(emp => emp.VacationTypes));
+
             employeeDTO.AnnualVacationEmployee = mapper.Map<List<AnnualVacationEmployeeGetDTO>>(annualVacationEmployees);
 
             return Ok(employeeDTO);
@@ -1475,11 +1478,21 @@ namespace LMS_CMS_PL.Controllers.Domains
 
             if (newEmployee.AnnualVacationEmployee.Count > 0)
             {
-                List<AnnualVacationEmployee> annualVacationEmployees = mapper.Map<List<AnnualVacationEmployee>>(newEmployee.AnnualVacationEmployee);
-                Unit_Of_Work.annualVacationEmployee_Repository.UpdateRange(annualVacationEmployees);
+                foreach (var vacDto in newEmployee.AnnualVacationEmployee)
+                {
+                    var existingEntity = Unit_Of_Work.annualVacationEmployee_Repository.First_Or_Default(v => v.ID == vacDto.ID);
+
+                    if (existingEntity != null)
+                    {
+                        mapper.Map(vacDto, existingEntity); // update fields in tracked entity
+                        Unit_Of_Work.annualVacationEmployee_Repository.Update(existingEntity);
+                        Unit_Of_Work.SaveChanges();
+                    }
+                }
             }
-          
-          return Ok(newEmployee);
+
+
+            return Ok(newEmployee);
         }
     }   
 }
