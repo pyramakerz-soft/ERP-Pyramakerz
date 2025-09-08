@@ -1,14 +1,21 @@
-<!-- account-balance-report.component.html -->
+<!-- account-statement.component.html -->
 <div class="flex justify-between">
     <h1 class="primaryTxt font-semibold text-2xl leading-9">
-        {{ 'Account Balances Report' | translate }}
+        {{ 'Account Statement Report' | translate }}
     </h1>
 </div>
 
 <div class="my-5 flex flex-wrap md:flex-nowrap items-end space-x-0 md:space-x-6 rtl:space-x-reverse space-y-4 md:space-y-0 mb-6">
+    <!-- Date From -->
+    <div class="w-full md:w-1/4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="fromDate">{{ 'From Date' | translate }}</label>
+        <input type="date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            id="fromDate" [(ngModel)]="fromDate" (ngModelChange)="onFilterChange()" required>
+    </div>
+
     <!-- Date To -->
     <div class="w-full md:w-1/4">
-        <label class="block mb-2 text-sm font-medium text-gray-900" for="toDate">{{ 'Date To' | translate }}</label>
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="toDate">{{ 'To Date' | translate }}</label>
         <input type="date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             id="toDate" [(ngModel)]="toDate" (ngModelChange)="onFilterChange()" required>
     </div>
@@ -30,12 +37,13 @@
 
     <!-- Account Selector -->
     <div class="w-full md:w-1/4">
-        <label class="block mb-2 text-sm font-medium text-gray-900" for="accountID">{{ 'Account' | translate }}</label>
-        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="accountID"
-            [(ngModel)]="accountID" (ngModelChange)="onFilterChange()" [disabled]="!linkFileID || isAccountsLoading">
-            <option [ngValue]="0">{{ 'All' | translate }} {{ 'Accounts' | translate }}</option>
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="subAccountID">{{ 'Account' | translate }}</label>
+        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="subAccountID"
+            [(ngModel)]="subAccountID" (ngModelChange)="onFilterChange()" [disabled]="!linkFileID || isAccountsLoading">
+            <option [ngValue]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Sub Account' | translate }}</option>
+            <!-- <option [ngValue]="0">{{ 'All' | translate }} {{ 'Accounts' | translate }}</option> -->
             <option *ngFor="let account of accountOptions" [ngValue]="account.id">
-                {{ account.name }}
+                {{ account.name || account.en_name }}
             </option>
             <option *ngIf="accountOptions.length === 0 && !isAccountsLoading" disabled>
                 {{ 'No accounts available' | translate }}
@@ -46,32 +54,14 @@
         </div>
     </div>
 
-    <!-- Checkboxes -->
-    <div class="w-full md:w-1/3 flex flex-col">
-        <label class="block mb-2 text-sm font-medium text-gray-900">{{ 'Filters' | translate }}</label>
-        <div class="flex flex-wrap gap-4">
-            <div class="flex items-center">
-                <input type="checkbox" id="zeroBalance" [(ngModel)]="zeroBalance" (ngModelChange)="onFilterChange()" class="mr-2 accent-secondaryBg">
-                <label for="zeroBalance" class="text-sm text-gray-700">{{ 'Zero Balance' | translate }}</label>
-            </div>
-            <div class="flex items-center">
-                <input type="checkbox" id="positiveBalance" [(ngModel)]="positiveBalance" (ngModelChange)="onFilterChange()" class="mr-2 accent-secondaryBg">
-                <label for="positiveBalance" class="text-sm text-gray-700">{{ 'Positive Balance' | translate }}</label>
-            </div>
-            <div class="flex items-center">
-                <input type="checkbox" id="negativeBalance" [(ngModel)]="negativeBalance" (ngModelChange)="onFilterChange()" class="mr-2 accent-secondaryBg">
-                <label for="negativeBalance" class="text-sm text-gray-700">{{ 'Negative Balance' | translate }}</label>
-            </div>
-        </div>
-    </div>
-
     <div class="w-full md:w-1/6 flex justify-end mt-4 md:mt-0">
         <button class="p-3 font-medium text-xl rounded-lg" (click)="viewReport()"
-            [disabled]="!toDate || !linkFileID" [ngClass]="{
-                'bg-gray-100 text-gray-300': !toDate || !linkFileID,
-                'secondaryBg text-white': toDate && linkFileID
+            [disabled]="!fromDate || !toDate || !linkFileID || !subAccountID || isLoading" [ngClass]="{
+                'bg-gray-100 text-gray-300': !fromDate || !toDate || !linkFileID || isLoading,
+                'secondaryBg text-white': fromDate && toDate && linkFileID && !isLoading
             }">
-            {{ 'View Report' | translate }}
+            <span *ngIf="!isLoading">{{ 'View Report' | translate }}</span>
+            <span *ngIf="isLoading">{{ 'Loading...' | translate }}</span>
         </button>
     </div>
 </div>
@@ -82,21 +72,30 @@
 </div>
 
 <div *ngIf="showTable && reportData" class="mb-5">
-  <!-- Add export buttons -->
-  <div class="mt-5 flex justify-end space-x-4 rtl:space-x-reverse">
-    <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="DownloadAsExcel()" [title]="'Download Excel' | translate">
-    <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()" [title]="'Download PDF' | translate">
-    <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()" [title]="'Print' | translate">
-  </div>    <!-- Data Table -->
+    <!-- Opening Balance -->
+    <div class="bg-gray-50 p-4 rounded-lg mb-4">
+        <h3 class="font-semibold text-lg mb-2">{{ 'Opening Balance' | translate }}</h3>
+        <div class="text-lg">
+            {{ reportData.firstPeriodBalance | number:'1.2-2' }}
+        </div>
+    </div>
+
+    <!-- Data Table -->
     <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
         <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
             <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
                 <tr>
                     <th class="py-3 px-4 whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ 'ID' | translate }}
+                        {{ 'Date' | translate }}
                     </th>
                     <th class="py-3 px-4 whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ 'Name' | translate }}
+                        {{ 'Account' | translate }}
+                    </th>
+                    <th class="py-3 px-4 whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ 'Serial' | translate }}
+                    </th>
+                    <th class="py-3 px-4 whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ 'Sub Account' | translate }}
                     </th>
                     <th class="py-3 px-4 whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         {{ 'Debit' | translate }}
@@ -104,20 +103,20 @@
                     <th class="py-3 px-4 whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         {{ 'Credit' | translate }}
                     </th>
+                    <th class="py-3 px-4 whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ 'Balance' | translate }}
+                    </th>
+                    <th class="py-3 px-4 whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ 'Notes' | translate }}
+                    </th>
                 </tr>
             </thead>
             <tbody>
                 <tr *ngIf="reportData.data.length === 0">
-                    <td colspan="4" class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                    <td colspan="8" class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
                         {{ 'No Data Found' | translate }}
                     </td>
                 </tr>
-
-                <!--<tr *ngIf="conductReports.length === 0">
-                <td colspan="5" class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-                    {{ 'No Data Found' | translate }}
-                </td>
-            </tr> -->
 
                 <tr *ngFor="let item of reportData.data; let i = index" 
                     [ngClass]="{ 
@@ -126,10 +125,16 @@
                     }" 
                     class="border-t border-gray-300 text-xs md:text-sm">
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ item.id }}
+                        {{ formatDate(item.date) }}
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ item.name }}
+                        {{ item.account }}
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ item.serial }}
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ item.subAccount }}
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ item.debit | number:'1.2-2' }}
@@ -137,31 +142,35 @@
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ item.credit | number:'1.2-2' }}
                     </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ item.balance | number:'1.2-2' }}
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ item.notes || '-' }}
+                    </td>
                 </tr>
             </tbody>
         </table>
     </div>
 
-    
     <!-- Totals Summary -->
     <div class="bg-gray-50 p-4 rounded-lg mb-4">
         <h3 class="font-semibold text-lg mb-2">{{ 'Totals' | translate }}</h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-                <span class="font-medium">{{ 'Total Debit' | translate }}:</span> {{ reportData.totals.totalDebit | number:'1.2-2' }}
+                <span class="font-medium">{{ 'Total Debit' | translate }}:</span> {{ reportData.fullTotals.totalDebit | number:'1.2-2' }}
             </div>
             <div>
-                <span class="font-medium">{{ 'Total Credit' | translate }}:</span> {{ reportData.totals.totalCredit | number:'1.2-2' }}
+                <span class="font-medium">{{ 'Total Credit' | translate }}:</span> {{ reportData.fullTotals.totalCredit | number:'1.2-2' }}
             </div>
             <div>
-                <span class="font-medium">{{ 'Difference' | translate }}:</span> {{ reportData.totals.differences | number:'1.2-2' }}
+                <span class="font-medium">{{ 'Difference' | translate }}:</span> {{ reportData.fullTotals.difference | number:'1.2-2' }}
             </div>
         </div>
     </div>
 
-
     <!-- Pagination -->
-    <!-- <div *ngIf="reportData.pagination.totalPages > 1" class="flex justify-between items-center mt-4">
+    <div *ngIf="reportData.pagination.totalPages > 1" class="flex justify-between items-center mt-4">
         <div class="text-sm text-gray-600">
             {{ 'Showing' | translate }} {{ (pageNumber - 1) * pageSize + 1 }} - {{ Math.min(pageNumber * pageSize, reportData.pagination.totalRecords) }} 
             {{ 'of' | translate }} {{ reportData.pagination.totalRecords }} {{ 'records' | translate }}
@@ -187,23 +196,5 @@
                 &raquo;
             </button>
         </div>
-    </div> -->
+    </div>
 </div>
-
-
-<!-- PDF container (keep at the bottom) -->
-<div class="absolute -top-[9999px] -left-[9999px]">
-  <div id="accountBalanceData" class="hidden">
-    <app-pdf-print *ngIf="showPDF" [school]="school" 
-                   [fileName]="'Account Balance Report'"
-                   [infoRows]="getInfoRows()"
-                   [tableDataWithHeaderArray]="cachedTableDataForPDF"
-                   #pdfComponentRef>
-    </app-pdf-print>
-  </div>
-</div>
-
-<!--                     { keyEn: 'Date To: ' + toDate, keyAr: 'التاريخ إلى: ' + toDate },
-                    { keyEn: 'Account Type: ' + getLinkFileName(linkFileID), keyAr: 'نوع الحساب: ' + getLinkFileName(linkFileID) },
-                    { keyEn: 'Account: ' + getAccountName(accountID), keyAr: 'الحساب: ' + getAccountName(accountID) },
-                    { keyEn: 'Generated On: ' + new Date().toLocaleDateString(), keyAr: 'تم الإنشاء في: ' + new Date().toLocaleDateString() } -->

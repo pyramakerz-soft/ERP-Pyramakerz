@@ -5,8 +5,8 @@
 <!-- Filters Section -->
 <div class="my-5 flex flex-wrap justify-between items-center">
     <div class="flex flex-col w-[30%] mb-4">
-        <label for="template" class="mb-2 font-medium">{{ 'Template' | translate }}</label>
-        <select id="template" class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
+        <label for="template" class="block mb-2 text-sm font-medium text-gray-900">{{ 'Template' | translate }}</label>
+        <select id="template"  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             [(ngModel)]="filterParams.templateId" (ngModelChange)="onFilterChange()">
             <option [value]="0" disabled selected hidden>  {{ 'Choose' | translate }} {{ 'Template' | translate }}</option>
             <option *ngFor="let template of Templates" [value]="template.id">{{ template.englishTitle }}</option>
@@ -15,22 +15,22 @@
     </div>
 
     <div class="flex flex-col w-[30%] mb-4">
-        <label for="fromDate" class="mb-2 font-medium">{{ 'Start Date' | translate }}</label>
-        <input id="fromDate" type="date" [(ngModel)]="filterParams.fromDate" 
+        <label for="fromDate" class="block mb-2 text-sm font-medium text-gray-900">{{ 'Start Date' | translate }}</label>
+        <input id="fromDate" type="date" class="block mb-2 text-sm font-medium text-gray-900" [(ngModel)]="filterParams.fromDate" 
                (change)="DateChange()" (ngModelChange)="onFilterChange()"
-            class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto">
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
     </div>
 
     <div class="flex flex-col w-[30%] mb-4">
-        <label for="toDate" class="mb-2 font-medium">{{ 'End Date' | translate }}</label>
-        <input id="toDate" type="date" [(ngModel)]="filterParams.toDate" 
+        <label for="toDate" class="block mb-2 text-sm font-medium text-gray-900">{{ 'End Date' | translate }}</label>
+        <input id="toDate" type="date" class="block mb-2 text-sm font-medium text-gray-900" [(ngModel)]="filterParams.toDate" 
                (change)="DateChange()" (ngModelChange)="onFilterChange()"
-            class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto">
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
     </div>
 
     <div class="flex flex-col w-[25%] mb-4">
-        <label for="employee" class="mb-2 font-medium">{{ 'Employee' | translate }}</label>
-        <select id="employee" class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
+        <label for="employee" class="block mb-2 text-sm font-medium text-gray-900">{{ 'Employee' | translate }}</label>
+        <select id="employee"  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             [(ngModel)]="filterParams.employeeId" (ngModelChange)="onFilterChange()">
   <option [value]="0" selected>{{'Select'| translate }}  {{'All'| translate }}</option>
   <option *ngFor="let employee of Employees" [value]="employee.id">{{ employee.en_name }}</option>
@@ -38,8 +38,8 @@
     </div>
 
     <div class="flex flex-col w-[25%] mb-4">
-        <label for="school" class="mb-2 font-medium">{{ 'School' | translate }}</label>
-        <select id="school" class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
+        <label for="school" class="block mb-2 text-sm font-medium text-gray-900">{{ 'School' | translate }}</label>
+        <select id="school"  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             [(ngModel)]="filterParams.schoolId" (change)="onSchoolChange($event)" (ngModelChange)="onFilterChange()">
             <option [value]="null" selected>{{'Select'| translate }} {{'All'| translate }}</option>
             <option *ngFor="let school of Schools" [value]="school.id">{{ school.name }}</option>
@@ -47,10 +47,10 @@
     </div>
 
     <div class="flex flex-col w-[25%] mb-4">
-        <label class="mb-2 font-medium" for="Class"
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="Class"
             [ngClass]="{ 'text-gray-400': !filterParams.schoolId, 'primaryTxt': filterParams.schoolId }">{{ 'Class' |
             translate }}</label>
-        <select id="class" class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto"
+        <select id="class"  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
             [disabled]="!filterParams.schoolId" [(ngModel)]="filterParams.classroomId" (ngModelChange)="onFilterChange()">
             <option [value]="0" selected>{{'Select'| translate }} {{'All'| translate }}</option>
             <option *ngFor="let class of Classs" [value]="class.id">{{ class.name }}</option>

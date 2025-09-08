@@ -117,8 +117,17 @@ namespace LMS_CMS_PL.Controllers.Domains.Maintenance
 
             if (employeeExists == null)
             {
-                return NotFound($"Employee with ID does not exist.");
+                return NotFound($"Employee with this ID does not exist.");
             }
+
+            MaintenanceEmployee maintenanceEmployeeExists = uow.maintenanceEmployee_Repository
+                                        .First_Or_Default(me => me.EmployeeID == model.EmployeeID && me.IsDeleted != true);
+
+            if (maintenanceEmployeeExists != null)
+            {
+                return BadRequest($"Employee is already added to Maintenance Employees.");
+            }
+
 
             var cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
 
