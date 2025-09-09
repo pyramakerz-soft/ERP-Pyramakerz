@@ -164,21 +164,48 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
             AnnualVacationEmployeeGetDTO dto = mapper.Map<AnnualVacationEmployeeGetDTO>(annualvacationEmployee);
 
+            // find current cycle based on hire date
+            DateOnly hireDate = employee.HireDate.Value;
+            int yearDiff = date.Year - hireDate.Year;
 
-            List<VacationEmployee> vacationEmployee = Unit_Of_Work.vacationEmployee_Repository.FindBy(sem => sem.IsDeleted != true && sem.EmployeeID == EmployeeId && sem.VacationTypesID == VacationId
-            && sem.DateFrom.Year == date.Year); // ask ayman when employee vacation has restarted
+            // determine current cycle start
+            DateOnly cycleStart = new DateOnly(hireDate.Year + yearDiff, hireDate.Month, hireDate.Day);
+
+            // if date is before this year’s anniversary, move cycle back one year
+            if (date < cycleStart)
+            {
+                cycleStart = cycleStart.AddYears(-1);
+            }
+
+            DateOnly cycleEnd = cycleStart.AddYears(1).AddDays(-1);
+
+            List<VacationEmployee> vacationEmployee = Unit_Of_Work.vacationEmployee_Repository.FindBy(
+                sem => sem.IsDeleted != true &&
+                        sem.EmployeeID == EmployeeId &&
+                        sem.VacationTypesID == VacationId &&
+                        sem.DateFrom <= cycleEnd &&                // vacation starts before or on cycle end
+                        (sem.DateTo ?? sem.DateFrom) >= cycleStart // vacation ends after or on cycle start
+            );
 
             foreach (var vac in vacationEmployee)
             {
-                if (vac.HalfDay)
+                var vacStart = vac.DateFrom;
+                var vacEnd = vac.DateTo ?? vac.DateFrom;
+
+                // Clip vacation range to cycle boundaries
+                var effectiveStart = vacStart < cycleStart ? cycleStart : vacStart;
+                var effectiveEnd = vacEnd > cycleEnd ? cycleEnd : vacEnd;
+
+                if (effectiveStart > effectiveEnd)
+                    continue; // no overlap with this cycle
+
+                if (vac.HalfDay && effectiveStart == effectiveEnd)
                 {
                     dto.used += 0.5;
                 }
                 else
                 {
-                    var from = vac.DateFrom;
-                    var to = vac.DateTo ?? vac.DateFrom;
-                    dto.used += (to.DayNumber - from.DayNumber) + 1; // inclusive
+                    dto.used += (effectiveEnd.DayNumber - effectiveStart.DayNumber) + 1; // inclusive
                 }
             }
 
@@ -201,25 +228,18 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
 
             if (userIdClaim == null || userTypeClaim == null)
-            {
                 return Unauthorized("User ID or Type claim not found.");
-            }
-            if (newVacation == null)
-            {
-                return BadRequest("vacation is empty");
-            }
 
-            Employee employee = Unit_Of_Work.employee_Repository.First_Or_Default(e=>e.ID==newVacation.EmployeeID && e.IsDeleted!= true);
+            if (newVacation == null)
+                return BadRequest("vacation is empty");
+
+            Employee employee = Unit_Of_Work.employee_Repository.First_Or_Default(e => e.ID == newVacation.EmployeeID && e.IsDeleted != true);
             if (employee == null)
-            {
                 return BadRequest("there is no employee with this id");
-            }
 
             VacationTypes type = Unit_Of_Work.vacationTypes_Repository.First_Or_Default(e => e.ID == newVacation.VacationTypesID && e.IsDeleted != true);
             if (type == null)
-            {
                 return BadRequest("there is no type with this id");
-            }
 
             // Check if employee is assigned to this vacation type
             AnnualVacationEmployee annualvacationEmployee = await Unit_Of_Work.annualVacationEmployee_Repository.FindByIncludesAsync(
@@ -230,60 +250,83 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             if (annualvacationEmployee == null)
                 return BadRequest("this employee is not assigned to this vacation type");
 
-            double balance = annualvacationEmployee.Balance; // make sure DTO has Balance
+            double balance = annualvacationEmployee.Balance;
 
-            // Calculate already used days this year
+            //  Determine current cycle based on hire date
+            DateOnly hireDate = employee.HireDate.Value;
+            DateOnly requestDate = newVacation.DateFrom;
+            int yearDiff = requestDate.Year - hireDate.Year;
+            DateOnly cycleStart = new DateOnly(hireDate.Year + yearDiff, hireDate.Month, hireDate.Day);
+
+            if (requestDate < cycleStart)
+                cycleStart = cycleStart.AddYears(-1);
+
+            DateOnly cycleEnd = cycleStart.AddYears(1).AddDays(-1);
+
+            //  Get vacations overlapping this cycle
             var vacationEmployeeList = Unit_Of_Work.vacationEmployee_Repository.FindBy(sem =>
                 sem.IsDeleted != true &&
                 sem.EmployeeID == newVacation.EmployeeID &&
                 sem.VacationTypesID == newVacation.VacationTypesID &&
-                sem.DateFrom.Year == newVacation.DateFrom.Year
+                sem.DateFrom <= cycleEnd &&
+                (sem.DateTo ?? sem.DateFrom) >= cycleStart
             ).ToList();
 
+            //  Calculate already used days clipped to cycle
             double usedDays = 0;
             foreach (var vac in vacationEmployeeList)
             {
-                if (vac.HalfDay)
+                var vacStart = vac.DateFrom;
+                var vacEnd = vac.DateTo ?? vac.DateFrom;
+
+                var effectiveStart = vacStart < cycleStart ? cycleStart : vacStart;
+                var effectiveEnd = vacEnd > cycleEnd ? cycleEnd : vacEnd;
+
+                if (effectiveStart > effectiveEnd)
+                    continue;
+
+                if (vac.HalfDay && effectiveStart == effectiveEnd)
                     usedDays += 0.5;
                 else
-                {
-                    var from = vac.DateFrom;
-                    var to = vac.DateTo ?? vac.DateFrom;
-                    usedDays += (to.DayNumber - from.DayNumber) + 1;
-                }
+                    usedDays += (effectiveEnd.DayNumber - effectiveStart.DayNumber) + 1;
             }
 
-            double requestedDays;
-            if (newVacation.HalfDay)
-                requestedDays = 0.5;
-            else
+            //  Calculate requested vacation days clipped to cycle
+            var reqStart = newVacation.DateFrom;
+            var reqEnd = newVacation.DateTo ?? newVacation.DateFrom;
+
+            var reqEffectiveStart = reqStart < cycleStart ? cycleStart : reqStart;
+            var reqEffectiveEnd = reqEnd > cycleEnd ? cycleEnd : reqEnd;
+
+            double requestedDays = 0;
+            if (reqEffectiveStart <= reqEffectiveEnd)
             {
-                var from = newVacation.DateFrom;
-                var to = newVacation.DateTo ?? newVacation.DateFrom;
-                requestedDays = (to.DayNumber - from.DayNumber) + 1;
+                if (newVacation.HalfDay && reqEffectiveStart == reqEffectiveEnd)
+                    requestedDays = 0.5;
+                else
+                    requestedDays = (reqEffectiveEnd.DayNumber - reqEffectiveStart.DayNumber) + 1;
             }
 
+            //  Validation
             if (usedDays + requestedDays > balance)
             {
                 return BadRequest($"Not enough balance. Balance = {balance}, Used = {usedDays}, Requested = {requestedDays}");
             }
 
+            // Save vacation
             VacationEmployee vacationEmployee = mapper.Map<VacationEmployee>(newVacation);
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             vacationEmployee.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+
             if (userTypeClaim == "octa")
-            {
                 vacationEmployee.InsertedByOctaId = userId;
-            }
             else if (userTypeClaim == "employee")
-            {
                 vacationEmployee.InsertedByUserId = userId;
-            }
+
             Unit_Of_Work.vacationEmployee_Repository.Add(vacationEmployee);
             Unit_Of_Work.SaveChanges();
 
-           
             return Ok(newVacation);
         }
 
@@ -338,7 +381,6 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 return BadRequest("there is no type with this id");
             }
 
-            // Check if employee is assigned to this vacation type
             AnnualVacationEmployee annualvacationEmployee = await Unit_Of_Work.annualVacationEmployee_Repository.FindByIncludesAsync(
                 a => a.EmployeeID == newVacation.EmployeeID && a.VacationTypesID == newVacation.VacationTypesID && a.IsDeleted != true,
                 query => query.Include(emp => emp.Employee),
@@ -347,40 +389,65 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             if (annualvacationEmployee == null)
                 return BadRequest("this employee is not assigned to this vacation type");
 
-            double balance = annualvacationEmployee.Balance; // make sure DTO has Balance
+            double balance = annualvacationEmployee.Balance;
 
-            // Calculate already used days this year
+            //  Determine current cycle based on hire date
+            DateOnly hireDate = employee.HireDate.Value;
+            DateOnly requestDate = newVacation.DateFrom;
+            int yearDiff = requestDate.Year - hireDate.Year;
+            DateOnly cycleStart = new DateOnly(hireDate.Year + yearDiff, hireDate.Month, hireDate.Day);
+
+            if (requestDate < cycleStart)
+                cycleStart = cycleStart.AddYears(-1);
+
+            DateOnly cycleEnd = cycleStart.AddYears(1).AddDays(-1);
+
+            //  Get vacations overlapping this cycle
             var vacationEmployeeList = Unit_Of_Work.vacationEmployee_Repository.FindBy(sem =>
                 sem.IsDeleted != true &&
                 sem.ID != newVacation.ID &&
                 sem.EmployeeID == newVacation.EmployeeID &&
                 sem.VacationTypesID == newVacation.VacationTypesID &&
-                sem.DateFrom.Year == newVacation.DateFrom.Year
+                sem.DateFrom <= cycleEnd &&
+                (sem.DateTo ?? sem.DateFrom) >= cycleStart
             );
 
+            //  Calculate already used days clipped to cycle
             double usedDays = 0;
             foreach (var vac in vacationEmployeeList)
             {
-                if (vac.HalfDay)
+                var vacStart = vac.DateFrom;
+                var vacEnd = vac.DateTo ?? vac.DateFrom;
+
+                var effectiveStart = vacStart < cycleStart ? cycleStart : vacStart;
+                var effectiveEnd = vacEnd > cycleEnd ? cycleEnd : vacEnd;
+
+                if (effectiveStart > effectiveEnd)
+                    continue;
+
+                if (vac.HalfDay && effectiveStart == effectiveEnd)
                     usedDays += 0.5;
                 else
-                {
-                    var from = vac.DateFrom;
-                    var to = vac.DateTo ?? vac.DateFrom;
-                    usedDays += (to.DayNumber - from.DayNumber) + 1;
-                }
+                    usedDays += (effectiveEnd.DayNumber - effectiveStart.DayNumber) + 1;
             }
 
-            double requestedDays;
-            if (newVacation.HalfDay)
-                requestedDays = 0.5;
-            else
+            //  Calculate requested vacation days clipped to cycle
+            var reqStart = newVacation.DateFrom;
+            var reqEnd = newVacation.DateTo ?? newVacation.DateFrom;
+
+            var reqEffectiveStart = reqStart < cycleStart ? cycleStart : reqStart;
+            var reqEffectiveEnd = reqEnd > cycleEnd ? cycleEnd : reqEnd;
+
+            double requestedDays = 0;
+            if (reqEffectiveStart <= reqEffectiveEnd)
             {
-                var from = newVacation.DateFrom;
-                var to = newVacation.DateTo ?? newVacation.DateFrom;
-                requestedDays = (to.DayNumber - from.DayNumber) + 1;
+                if (newVacation.HalfDay && reqEffectiveStart == reqEffectiveEnd)
+                    requestedDays = 0.5;
+                else
+                    requestedDays = (reqEffectiveEnd.DayNumber - reqEffectiveStart.DayNumber) + 1;
             }
 
+            //  Validation
             if (usedDays + requestedDays > balance)
             {
                 return BadRequest($"Not enough balance. Balance = {balance}, Used = {usedDays}, Requested = {requestedDays}");

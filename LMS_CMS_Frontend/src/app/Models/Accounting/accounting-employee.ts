@@ -19,7 +19,7 @@ export class AccountingEmployee {
         public nationality: number =0,
         public nationalityName: string = '',
         public expireDate: string = '',
-        public dateOfAppointment: string = '',
+        public hireDate: string = '',
         public dateOfLeavingWork: string = '',
         public monthSalary: number|null = null,
         public hasAttendance: boolean = false,
