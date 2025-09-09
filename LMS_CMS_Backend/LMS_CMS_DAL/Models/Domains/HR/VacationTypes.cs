@@ -14,7 +14,6 @@ namespace LMS_CMS_DAL.Models.Domains.HR
         [Required(ErrorMessage = "Name is required")]
         [StringLength(100, ErrorMessage = "Name cannot be longer than 100 characters.")]
         public string Name { get; set; }
-        public ICollection<EmployeeVacationCount> EmployeeVacationCount { get; set; } = new HashSet<EmployeeVacationCount>();
         public ICollection<VacationEmployee> VacationEmployee { get; set; } = new HashSet<VacationEmployee>();
         public ICollection<AnnualVacationEmployee> AnnualVacationEmployee { get; set; } = new HashSet<AnnualVacationEmployee>();
     }

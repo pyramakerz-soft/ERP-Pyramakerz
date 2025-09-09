@@ -172,6 +172,8 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
             Employee_GetDTO EmployeeDTO = mapper.Map<Employee_GetDTO>(Employee);
 
+
+
             // Get current month and year
             var currentDate = date;
             var currentMonth = currentDate.Month;

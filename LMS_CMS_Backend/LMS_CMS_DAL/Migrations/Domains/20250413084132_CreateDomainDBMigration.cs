@@ -990,7 +990,7 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     ResidenceNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     BirthdayDate = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Nationality = table.Column<long>(type: "bigint", nullable: true),
-                    DateOfAppointment = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    HireDate = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     DateOfLeavingWork = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     MonthSalary = table.Column<int>(type: "int", nullable: true),
                     HasAttendance = table.Column<bool>(type: "bit", nullable: true),
