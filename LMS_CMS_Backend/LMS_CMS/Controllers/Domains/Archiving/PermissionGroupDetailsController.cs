@@ -46,7 +46,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
             }
 
             List<PermissionGroupDetails> permissionGroupDetails = Unit_Of_Work.permissionGroupDetails_Repository.FindBy(
-                f => f.IsDeleted != true && f.PermissionGroupID == PGID && f.PermissionGroup.IsDeleted != true
+                f => f.IsDeleted != true && f.PermissionGroupID == PGID && f.PermissionGroup.IsDeleted != true && f.ArchivingTree.IsDeleted != true
                 );
 
             if (permissionGroupDetails == null || permissionGroupDetails.Count == 0)
