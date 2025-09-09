@@ -23,7 +23,7 @@ namespace LMS_CMS_BL.DTO.Accounting
         public string? ResidenceNumber { get; set; }
         public string? BirthdayDate { get; set; }
         public long? Nationality { get; set; }
-        public string? DateOfAppointment { get; set; }
+        public DateOnly? HireDate { get; set; }
         public string? DateOfLeavingWork { get; set; }
         public decimal? MonthSalary { get; set; }
         public bool? HasAttendance { get; set; }

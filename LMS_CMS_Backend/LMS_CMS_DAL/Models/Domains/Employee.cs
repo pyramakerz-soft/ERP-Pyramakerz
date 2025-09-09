@@ -46,7 +46,7 @@ namespace LMS_CMS_DAL.Models.Domains
         public string? ResidenceNumber { get; set; }
         public string? BirthdayDate { get; set; }
         public long? Nationality { get; set; }
-        public string? DateOfAppointment { get; set; }
+        public DateOnly? HireDate { get; set; }
         public string? DateOfLeavingWork { get; set; }
         public decimal? MonthSalary { get; set; }
         public bool? HasAttendance { get; set; }
@@ -130,7 +130,6 @@ namespace LMS_CMS_DAL.Models.Domains
         public ICollection<Loans> Loans { get; set; } = new HashSet<Loans>();
         public ICollection<Bouns> Bouns { get; set; } = new HashSet<Bouns>();
         public ICollection<Deduction> Deduction { get; set; } = new HashSet<Deduction>();
-        public ICollection<EmployeeVacationCount> EmployeeVacationCount { get; set; } = new HashSet<EmployeeVacationCount>();
         public ICollection<LeaveRequest> LeaveRequest { get; set; } = new HashSet<LeaveRequest>();
         public ICollection<VacationEmployee> VacationEmployee { get; set; } = new HashSet<VacationEmployee>();
         public ICollection<AnnualVacationEmployee> AnnualVacationEmployee { get; set; } = new HashSet<AnnualVacationEmployee>();
