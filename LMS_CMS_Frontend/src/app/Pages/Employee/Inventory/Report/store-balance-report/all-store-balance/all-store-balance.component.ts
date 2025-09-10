@@ -12,6 +12,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../../../Services/shared/real-time-notification-service.service';
 import { firstValueFrom, Subscription } from 'rxjs';
+import * as XLSX from 'xlsx';
+
 type ReportType = 'QuantityOnly' | 'PurchasePrice' | 'SalesPrice' | 'Cost';
 
 @Component({
@@ -22,12 +24,17 @@ type ReportType = 'QuantityOnly' | 'PurchasePrice' | 'SalesPrice' | 'Cost';
   styleUrls: ['./all-store-balance.component.css'],
 })
 export class AllStoresBalanceReportComponent implements OnInit {
-getColumnCount(): number {
-    const storesCount = this.getStoreColumns().length;
-    return 2 + // Fixed columns (Item Code, Item Name)
-           (storesCount * (this.showPriceColumn() ? 3 : 1)) + // Store columns
-           1; // Total column
-}
+  showPDF = false;
+reportForExport: any[] = [];
+baseHeaders: string[] = [];
+
+
+// getColumnCount(): number {
+//     const storesCount = this.getStoreColumns().length;
+//     return 2 + // Fixed columns (Item Code, Item Name)
+//            (storesCount * (this.showPriceColumn() ? 3 : 1)) + // Store columns
+//            1; // Total column
+// }
   reportType: ReportType = 'QuantityOnly';
   pageTitle = 'All Stores Quantity Report';
   dateTo = '';
@@ -118,51 +125,46 @@ getColumnCount(): number {
     this.reportData = null;
   }
 
-  viewReport() {
-    if (!this.dateTo) {
-      Swal.fire({
-        title: 'Missing Information',
-        text: 'Please select Date',
-        icon: 'warning',
-        confirmButtonText: 'OK',
-      });
-      return;
-    }
-
-    this.isLoading = true;
-    this.showTable = false;
-
-    this.inventoryDetailsService
-      .getAllStoresBalance(
-        this.dateTo,
-        this.getReportFlagType(),
-        this.selectedCategoryId || 0,
-        this.selectedTypeId || 0,
-        this.hasBalance,
-        this.overdrawnBalance,
-        this.zeroBalances,
-        this.inventoryDetailsService.ApiServ.GetHeader()
-      )
-      .subscribe({
-        next: (response) => {
-          this.reportData = response;
-          this.showTable = true;
-          this.isLoading = false;
-        },
-        error: (error) => {
-          console.error('Error loading report:', error);
-          this.reportData = null;
-          this.showTable = true;
-          this.isLoading = false;
-          // Swal.fire({
-          //   title: 'Error',
-          //   text: 'Failed to load report data',
-          //   icon: 'error',
-          //   confirmButtonText: 'OK',
-          // });
-        },
-      });
+viewReport() {
+  if (!this.dateTo) {
+    Swal.fire({
+      title: 'Missing Information',
+      text: 'Please select Date',
+      icon: 'warning',
+      confirmButtonText: 'OK',
+    });
+    return;
   }
+
+  this.isLoading = true;
+  this.showTable = false;
+
+  this.inventoryDetailsService
+    .getAllStoresBalance(
+      this.dateTo,
+      this.getReportFlagType(),
+      this.selectedCategoryId || 0,
+      this.selectedTypeId || 0,
+      this.hasBalance,
+      this.overdrawnBalance,
+      this.zeroBalances,
+      this.inventoryDetailsService.ApiServ.GetHeader()
+    )
+    .subscribe({
+      next: (response) => {
+        this.reportData = response;
+        this.prepareExportData(); // Add this line
+        this.showTable = true;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading report:', error);
+        this.reportData = null;
+        this.showTable = true;
+        this.isLoading = false;
+      },
+    });
+}
 
   getStoreColumns(): string[] {
     if (!this.reportData?.data?.length) return [];
@@ -244,4 +246,173 @@ getStoreData(item: StoreBalanceItem, storeName: string): {
       default: return '';
     }
   }
+
+  // Add these methods to the AllStoresBalanceReportComponent class
+
+prepareExportData(): void {
+  if (!this.reportData) return;
+  
+  this.reportForExport = [];
+  const storeColumns = this.getStoreColumns();
+  
+  this.reportData.data.forEach((item: StoreBalanceItem) => {
+    const baseData: any = {
+      'Item Code': item.itemCode,
+      'Item Name': item.itemName
+    };
+    
+    // Add each store's data
+    storeColumns.forEach(storeName => {
+      const storeData = this.getStoreData(item, storeName);
+      baseData[`${storeName} Qty`] = storeData.quantity ?? 0;
+      
+      if (this.showPriceColumn()) {
+        baseData[`${storeName} ${this.getPriceColumnLabel()}`] = storeData.price ?? 0;
+        baseData[`${storeName} Value`] = storeData.value ?? 0;
+      }
+    });
+    
+    // Add total
+    baseData['Total'] = this.getItemTotal(item);
+    
+    this.reportForExport.push(baseData);
+  });
+}
+
+getPdfTableHeaders(): string[] {
+  const headers = ['Item Code', 'Item Name'];
+  const storeColumns = this.getStoreColumns();
+  
+  storeColumns.forEach(storeName => {
+    headers.push(`${storeName} Qty`);
+    if (this.showPriceColumn()) {
+      headers.push(`${storeName} ${this.getPriceColumnLabel()}`);
+      headers.push(`${storeName} Value`);
+    }
+  });
+  
+  headers.push('Total');
+  return headers;
+}
+
+getPrintInfoRows(): any[] {
+  return [
+    { keyEn: 'Report Type: ' + this.pageTitle },
+    { keyEn: 'To Date: ' + (this.dateTo ? new Date(this.dateTo).toLocaleDateString() : 'N/A') },
+    { keyEn: 'Category: ' + (this.selectedCategoryId ? 
+      this.categories.find(c => c.id === this.selectedCategoryId)?.name || 'N/A' : 'All Categories') },
+    { keyEn: 'Has Balance: ' + (this.hasBalance ? 'Yes' : 'No') },
+    { keyEn: 'Overdrawn Balance: ' + (this.overdrawnBalance ? 'Yes' : 'No') },
+    { keyEn: 'Zero Balances: ' + (this.zeroBalances ? 'Yes' : 'No') }
+  ];
+}
+
+Print() {
+  if (!this.reportData?.data?.length) {
+    Swal.fire('Warning', 'No data to print!', 'warning');
+    return;
+  }
+  
+  this.prepareExportData();
+  this.baseHeaders = this.getPdfTableHeaders();
+  this.showPDF = true;
+  
+  setTimeout(() => {
+    const printContents = document.getElementById('printData')?.innerHTML;
+    if (!printContents) {
+      console.error('Print element not found!');
+      this.showPDF = false;
+      return;
+    }
+    
+    const printStyle = `
+      <style>
+        @page { size: auto; margin: 10mm; }
+        body { margin: 0; font-family: Arial, sans-serif; }
+        .print-container { 
+          width: 100%; 
+          padding: 20px; 
+          box-sizing: border-box;
+        }
+        .store-section { 
+          margin-bottom: 30px; 
+          page-break-inside: avoid;
+        }
+        .store-header { 
+          font-size: 18px; 
+          font-weight: bold; 
+          margin-bottom: 10px; 
+          color: #333;
+        }
+        .store-table { 
+          width: 100%; 
+          border-collapse: collapse; 
+          margin-bottom: 15px;
+        }
+        .store-table th, .store-table td { 
+          border: 1px solid #ddd; 
+          padding: 8px; 
+          text-align: left;
+          font-size: 12px;
+        }
+        .store-table th { 
+          background-color: #f5f5f5; 
+          font-weight: bold;
+        }
+        .store-table tr:nth-child(even) { 
+          background-color: #f9f9f9; 
+        }
+        .total-row { 
+          font-weight: bold; 
+          background-color: #e5e5e5 !important; 
+        }
+        .report-info { 
+          margin-bottom: 20px; 
+          font-size: 14px;
+        }
+        .report-info div { 
+          margin-bottom: 5px; 
+        }
+        @media print {
+          body > *:not(#print-wrapper) { display: none !important; }
+          #print-wrapper {
+            display: block !important;
+            position: static !important;
+            width: 100% !important;
+            background: white !important;
+          }
+          .store-section { 
+            page-break-inside: avoid; 
+          }
+        }
+      </style>
+    `;
+    
+    const printWrapper = document.createElement('div');
+    printWrapper.id = 'print-wrapper';
+    printWrapper.innerHTML = printStyle + printContents;
+    document.body.appendChild(printWrapper);
+    
+    window.print();
+    
+    setTimeout(() => {
+      document.body.removeChild(printWrapper);
+      this.showPDF = false;
+    }, 100);
+  }, 500);
+}
+
+exportExcel() {
+  if (!this.reportData?.data?.length) {
+    Swal.fire('Warning', 'No data to export!', 'warning');
+    return;
+  }
+  
+  this.prepareExportData();
+  const worksheet = XLSX.utils.json_to_sheet(this.reportForExport);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Report');
+  const dateStr = new Date().toISOString().slice(0, 10);
+  XLSX.writeFile(workbook, `${this.pageTitle.replace(/\s+/g, '_')}_${dateStr}.xlsx`);
+}
 }
