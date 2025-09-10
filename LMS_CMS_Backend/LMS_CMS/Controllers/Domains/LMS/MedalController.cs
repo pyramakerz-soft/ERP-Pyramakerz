@@ -369,7 +369,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Medal To Student Report" }
         )]
-                public async Task<IActionResult> MedalToStudentReport(
+            public async Task<IActionResult> MedalToStudentReport(
             [FromQuery] long? SchoolId = null,
             [FromQuery] long? GradeId = null,
             [FromQuery] long? ClassroomId = null,

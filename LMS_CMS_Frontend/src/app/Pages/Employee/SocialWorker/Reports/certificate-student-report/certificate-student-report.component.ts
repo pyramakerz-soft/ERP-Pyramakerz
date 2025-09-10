@@ -225,16 +225,16 @@ export class CertificateStudentReportComponent implements OnInit {
 private prepareExportData(): void {
   // For PDF (object format)
   this.reportsForExport = this.certificateReports.map((report) => ({
-    'Medal ID': report.medal,
-    'Medal Name': report.medalName,
+    'Medal ID': report.certificateTypeID,
+    'Medal Name': report.certificateTypeName,
     'Added At': new Date(report.addedAt).toLocaleDateString(),
     'Added By': report.addedBy
   }));
 
   // For Excel (array format)
   this.reportsForExcel = this.certificateReports.map((report) => [
-    report.medal,
-    report.medalName,
+    report.certificateTypeID,
+    report.certificateTypeName,
     new Date(report.addedAt).toLocaleDateString(),
     report.addedBy
   ]);

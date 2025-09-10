@@ -4,7 +4,7 @@ export class VacationEmployee {
     public date: string = '',
     public notes: string = '',
     public dateFrom: string = '',
-    public dateTo: string = '',
+    public dateTo: string | null= '',
     public halfDay: boolean = false,
     public used: number = 0,
     public balance: number = 0,
