@@ -24,7 +24,7 @@ export class ApiService {
 
 
 
-    var Header = 'domain';
+    var Header = 'xx';
     return Header;
   }
 }
