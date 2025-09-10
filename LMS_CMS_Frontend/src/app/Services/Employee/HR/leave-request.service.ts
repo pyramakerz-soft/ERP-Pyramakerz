@@ -2,6 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ApiService } from '../../api.service';
 import { LeaveRequest } from '../../../Models/HR/leave-request';
+import { EmployeeGet } from '../../../Models/Employee/employee-get';
 
 @Injectable({
   providedIn: 'root'
@@ -37,6 +38,18 @@ export class LeaveRequestService {
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
     return this.http.get<LeaveRequest>(`${this.baseUrl}/LeaveRequest/${id}`, { headers })
+  }
+
+  GetRemainLeavRequestsByEmployeeId(Eid: number, date: string, DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<EmployeeGet>(`${this.baseUrl}/LeaveRequest/getRemainLeavRequestsByEmployeeId/${Eid}/${date}`, { headers })
   }
 
   Add(LeaveRequest: LeaveRequest, DomainName: string) {

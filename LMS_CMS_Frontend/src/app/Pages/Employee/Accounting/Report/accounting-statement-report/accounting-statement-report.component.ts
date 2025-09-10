@@ -1,0 +1,257 @@
+import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { TranslateModule } from '@ngx-translate/core';
+import { AccountStatementResponse } from '../../../../../Models/Accounting/accounting-statement';
+import { AccountingTreeChart } from '../../../../../Models/Accounting/accounting-tree-chart';
+import { LinkFile } from '../../../../../Models/Accounting/link-file';
+import { Subscription } from 'rxjs';
+import { TokenData } from '../../../../../Models/token-data';
+import { AccountStatementService } from '../../../../../Services/Employee/Accounting/accounting-statement.service';
+import { AccountingTreeChartService } from '../../../../../Services/Employee/Accounting/accounting-tree-chart.service';
+import { LanguageService } from '../../../../../Services/shared/language.service';
+import { AccountService } from '../../../../../Services/account.service';
+import { ApiService } from '../../../../../Services/api.service';
+import { DataAccordingToLinkFileService } from '../../../../../Services/Employee/Accounting/data-according-to-link-file.service';
+import { LinkFileService } from '../../../../../Services/Employee/Accounting/link-file.service';
+import Swal from 'sweetalert2';
+
+@Component({
+  selector: 'app-accounting-statement-report',
+  standalone: true,
+  imports: [CommonModule, FormsModule, TranslateModule],
+  templateUrl: './accounting-statement-report.component.html',
+  styleUrl: './accounting-statement-report.component.css'
+})
+export class AccountingStatementReportComponent implements OnInit {
+  // Filter parameters
+  fromDate: string = '';
+  toDate: string = '';
+  linkFileID: number = 0;
+  subAccountID: number = 0;
+  pageNumber: number = 1;
+  pageSize: number = 10;
+
+  // Data
+  reportData: AccountStatementResponse | null = null;
+  accounts: AccountingTreeChart[] = [];
+  linkFileOptions: LinkFile[] = [];
+  accountOptions: any[] = []; // For accounts based on selected link file
+
+  // UI state
+  isLoading: boolean = false;
+  isLinkFilesLoading: boolean = false;
+  isAccountsLoading: boolean = false;
+  showTable: boolean = false;
+  isRtl: boolean = false;
+  subscription!: Subscription;
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
+  DomainName: string = '';
+
+  constructor(
+    private accountStatementService: AccountStatementService,
+    private accountingTreeChartService: AccountingTreeChartService,
+    private languageService: LanguageService,
+    public account: AccountService,
+    public ApiServ: ApiService,
+    private dataAccordingToLinkFileService: DataAccordingToLinkFileService,
+    private linkFileService: LinkFileService
+  ) { }
+
+  ngOnInit() {
+    this.User_Data_After_Login = this.account.Get_Data_Form_Token();
+    this.DomainName = this.ApiServ.GetHeader();
+    this.loadLinkFiles();
+    this.loadAccounts();
+    
+    this.subscription = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+  ngOnDestroy(): void {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
+  loadLinkFiles() {
+    this.isLinkFilesLoading = true;
+    this.linkFileService.Get(this.DomainName).subscribe({
+      next: (linkFiles) => {
+        this.linkFileOptions = linkFiles;
+        this.isLinkFilesLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading link files:', error);
+        this.isLinkFilesLoading = false;
+      }
+    });
+  }
+
+  loadAccounts() {
+    this.isLoading = true;
+    this.accountingTreeChartService.Get(this.DomainName).subscribe({
+      next: (accounts) => {
+        this.accounts = accounts;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading accounts:', error);
+        this.isLoading = false;
+      }
+    });
+  }
+
+  onLinkFileChange() {
+    this.subAccountID = 0; // Reset account selection
+    this.accountOptions = []; // Clear previous account options
+    this.showTable = false;
+    this.reportData = null;
+    
+    if (this.linkFileID > 0) {
+      this.loadAccountsByLinkFile();
+    }
+  }
+
+  loadAccountsByLinkFile() {
+    this.isAccountsLoading = true;
+    this.dataAccordingToLinkFileService.GetTableDataAccordingToLinkFile(this.DomainName, this.linkFileID).subscribe({
+      next: (accounts) => {
+        this.accountOptions = accounts;
+        this.isAccountsLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading accounts by link file:', error);
+        this.isAccountsLoading = false;
+      }
+    });
+  }
+
+  onFilterChange() {
+    this.showTable = false;
+    this.reportData = null;
+    this.pageNumber = 1;
+  }
+
+  viewReport() {
+    if (!this.fromDate || !this.toDate || !this.linkFileID) {
+      Swal.fire({
+        title: 'Missing Information',
+        text: 'Please select Date Range and Account Type',
+        icon: 'warning',
+        confirmButtonText: 'OK',
+      });
+      return;
+    }
+
+    if (new Date(this.fromDate) > new Date(this.toDate)) {
+      Swal.fire({
+        title: 'Invalid Date Range',
+        text: 'Start date cannot be later than end date.',
+        icon: 'warning',
+        confirmButtonText: 'OK',
+      });
+      return;
+    }
+
+    this.isLoading = true;
+    this.showTable = false;
+
+    this.accountStatementService.GetAccountStatement(
+      new Date(this.fromDate),
+      new Date(this.toDate),
+      this.linkFileID,
+      this.subAccountID,
+      this.pageNumber,
+      this.pageSize,
+      this.DomainName
+    ).subscribe({
+      next: (response) => {
+        this.reportData = response;
+        this.showTable = true;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading report:', error);
+        this.reportData = null;
+        this.showTable = true;
+        this.isLoading = false;
+        if (error.status === 404) {
+          Swal.fire({
+            title: 'No Data Found',
+            text: 'No data available for the selected filters',
+            icon: 'info',
+            confirmButtonText: 'OK',
+          });
+        } else {
+          Swal.fire({
+            title: 'Error',
+            text: 'Failed to load report data',
+            icon: 'error',
+            confirmButtonText: 'OK',
+          });
+        }
+      }
+    });
+  }
+
+  changePage(newPage: number) {
+    if (newPage > 0 && newPage <= (this.reportData?.pagination.totalPages || 1)) {
+      this.pageNumber = newPage;
+      this.viewReport();
+    }
+  }
+
+  getLinkFileName(id: number): string {
+    const option = this.linkFileOptions.find(opt => opt.id === id);
+    return option ? option.name : 'Unknown';
+  }
+
+  getAccountName(id: number): string {
+    if (id === 0) return 'All Accounts';
+    
+    // First check in accountOptions (link file specific accounts)
+    const accountFromLinkFile = this.accountOptions.find(acc => acc.id === id);
+    if (accountFromLinkFile) {
+      return accountFromLinkFile.name || accountFromLinkFile.en_name || 'Unknown';
+    }
+    
+    // Fallback to general accounts
+    const account = this.accounts.find(acc => acc.id === id);
+    return account ? account.name : 'Unknown Account';
+  }
+
+  formatDate(dateString: string): string {
+    return new Date(dateString).toLocaleDateString();
+  }
+
+  // Add Math object for template usage
+  Math = Math;
+
+  // Pagination methods
+  get visiblePages(): number[] {
+    const total = this.reportData?.pagination.totalPages || 1;
+    const current = this.pageNumber;
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const half = Math.floor(maxVisible / 2);
+    let start = current - half;
+    let end = current + half;
+
+    if (start < 1) {
+      start = 1;
+      end = maxVisible;
+    } else if (end > total) {
+      end = total;
+      start = total - maxVisible + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
+}

@@ -170,6 +170,7 @@ export class AccountingEmployeeEditComponent {
   GetAllData() {
     this.employeeServ.GetAcountingEmployee(this.EmployeeId, this.DomainName).subscribe((d: any) => {
       this.Data = d;
+      console.log(this.Data)
       this.JobCategoryId = this.Data.jobCategoryID
       this.GetAllJobCategories();
       this.GetAllJobs()

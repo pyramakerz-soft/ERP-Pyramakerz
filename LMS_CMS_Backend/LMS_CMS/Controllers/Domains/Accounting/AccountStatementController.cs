@@ -10,11 +10,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 {
     [Route("api/with-domain/[controller]")]
     [ApiController]
-    public class AccountStatementReports : ControllerBase
+    public class AccountStatementController : ControllerBase
     {
         private readonly DbContextFactoryService _dbContextFactory;
 
-        public AccountStatementReports(DbContextFactoryService dbContextFactory)
+        public AccountStatementController(DbContextFactoryService dbContextFactory)
         {
             _dbContextFactory = dbContextFactory;
         }

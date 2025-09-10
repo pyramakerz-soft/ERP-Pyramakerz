@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Drawing.Printing;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using LMS_CMS_BL.DTO;
 
 namespace LMS_CMS_PL.Controllers.Domains.HR
 {
@@ -142,6 +144,64 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
         ////////////////////////////////
 
+        [HttpGet("getRemainLeavRequestsByEmployeeId/{Empid}/{date}")]
+        [Authorize_Endpoint_(
+          allowedTypes: new[] { "octa", "employee" },
+          pages: new[] { "Conduct Level" }
+        )]
+        public async Task<IActionResult> getRemainLeavRequestsByEmployeeId(long Empid ,DateOnly date)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            Employee Employee = Unit_Of_Work.employee_Repository.First_Or_Default(sem => sem.IsDeleted != true);
+
+            if (Employee == null )
+            {
+                return NotFound();
+            }
+
+            Employee_GetDTO EmployeeDTO = mapper.Map<Employee_GetDTO>(Employee);
+
+
+
+            // Get current month and year
+            var currentDate = date;
+            var currentMonth = currentDate.Month;
+            var currentYear = currentDate.Year;
+
+            // Filter leave requests for the current month only
+            List<LeaveRequest> leaveRequests = Unit_Of_Work.leaveRequest_Repository
+                .FindBy(l => l.EmployeeID == Empid
+                          && l.IsDeleted != true
+                          && l.Date.Month == currentMonth
+                          && l.Date.Year == currentYear);
+
+            // Sum up hours and minutes
+            var allHours = leaveRequests.Sum(l => l.Hours);
+            var allMinutes = leaveRequests.Sum(l => l.Minutes);
+
+            // Convert total minutes into hours and remaining minutes
+            allHours += allMinutes / 60;
+            allMinutes = allMinutes % 60;
+
+            // Convert hours and minutes to decimal (e.g., 4.5 for 4 hours 30 minutes)
+            EmployeeDTO.MonthlyLeaveRequestUsed = allHours + (allMinutes / 60.0m);
+
+            return Ok(EmployeeDTO);
+        }
+
+        ////////////////////////////////
+
         [HttpPost]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
@@ -172,8 +232,16 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             }
 
 
+            var currentDate = newRequest.Date;
+            var currentMonth = currentDate.Month;
+            var currentYear = currentDate.Year;
+
+            // Filter leave requests for the current month only
             List<LeaveRequest> leaveRequests = Unit_Of_Work.leaveRequest_Repository
-               .FindBy(l => l.EmployeeID == newRequest.EmployeeID && l.IsDeleted != true);
+                .FindBy(l => l.EmployeeID == newRequest.EmployeeID
+                          && l.IsDeleted != true
+                          && l.Date.Month == currentMonth
+                          && l.Date.Year == currentYear);
 
             var allHours = leaveRequests.Sum(l => l.Hours);
             var allMinutes = leaveRequests.Sum(l => l.Minutes);
@@ -253,8 +321,17 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 return BadRequest("leaveRequest not exist");
             }
 
+            var currentDate = newRequest.Date;
+            var currentMonth = currentDate.Month;
+            var currentYear = currentDate.Year;
+
+            // Filter leave requests for the current month only
             List<LeaveRequest> leaveRequests = Unit_Of_Work.leaveRequest_Repository
-              .FindBy(l => l.EmployeeID == newRequest.EmployeeID && l.IsDeleted != true && l.ID != newRequest.ID);
+                .FindBy(l => l.EmployeeID == newRequest.EmployeeID
+                          && l.ID != newRequest.ID
+                          && l.IsDeleted != true
+                          && l.Date.Month == currentMonth
+                          && l.Date.Year == currentYear);
 
             var allHours = leaveRequests.Sum(l => l.Hours);
             var allMinutes = leaveRequests.Sum(l => l.Minutes);

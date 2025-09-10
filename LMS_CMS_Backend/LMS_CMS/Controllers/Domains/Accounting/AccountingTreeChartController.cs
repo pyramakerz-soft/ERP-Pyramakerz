@@ -249,6 +249,36 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
             return Ok(accountingTreeChartsDTO);
         }
+
+        ///////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpGet("GetByLinkFileId/{linkFileID}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Accounting" }
+        )]
+        public async Task<IActionResult> GetByLinkFileId(long linkFileID)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            List<AccountingTreeChart> accountingTreeCharts = await Unit_Of_Work.accountingTreeChart_Repository.Select_All_With_IncludesById<AccountingTreeChart>(
+                    f => f.IsDeleted != true && f.LinkFileID == linkFileID,
+                    query => query.Include(ac => ac.LinkFile),
+                    query => query.Include(ac => ac.MotionType),
+                    query => query.Include(ac => ac.SubType),
+                    query => query.Include(ac => ac.EndType),
+                    query => query.Include(ac => ac.Parent)
+                    );
+
+            if (accountingTreeCharts == null || accountingTreeCharts.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<AccountingTreeChartGetDTO> accountingTreeChartsDTO = mapper.Map<List<AccountingTreeChartGetDTO>>(accountingTreeCharts);
+
+            return Ok(accountingTreeChartsDTO);
+        }
         
         ///////////////////////////////////////////////////////////////////////////////////////
 

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using LMS_CMS_BL.DTO.HR;
 using LMS_CMS_BL.UOW;
+using LMS_CMS_DAL.Models.Domains;
 using LMS_CMS_DAL.Models.Domains.HR;
 using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
@@ -30,8 +31,9 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         
         [HttpGet]
         [Authorize_Endpoint_(
-           allowedTypes: new[] { "octa", "employee" },
-           pages: new[] { "Conduct Level" }
+           allowedTypes: new[] { "octa", "employee" }
+           //,
+           //pages: new[] { "Conduct Level" }
           )]
         public IActionResult Get()
         {
@@ -95,8 +97,9 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
         [HttpPost]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Conduct Level" }
+            allowedTypes: new[] { "octa", "employee" }
+            //,
+            //pages: new[] { "Conduct Level" }
          )]
         public async Task<IActionResult> Add(VacationTypesAddDTO newVacation)
         {
@@ -130,6 +133,17 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             }
             Unit_Of_Work.vacationTypes_Repository.Add(vacation);
             Unit_Of_Work.SaveChanges();
+
+            // Add this Vacation types for all employee 
+            List<Employee> employees = Unit_Of_Work.employee_Repository.FindBy(e=>e.IsDeleted!= true);
+            foreach (Employee employee in employees)
+            {
+                var annualVacation = new AnnualVacationEmployee();
+                annualVacation.EmployeeID = employee.ID;
+                annualVacation.VacationTypesID = vacation.ID;
+                Unit_Of_Work.annualVacationEmployee_Repository.Add(annualVacation);
+                Unit_Of_Work.SaveChanges();
+            }
             return Ok(newVacation);
         }
 

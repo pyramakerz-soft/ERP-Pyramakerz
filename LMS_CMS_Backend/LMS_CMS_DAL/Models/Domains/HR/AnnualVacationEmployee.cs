@@ -8,12 +8,11 @@ using System.Threading.Tasks;
 
 namespace LMS_CMS_DAL.Models.Domains.HR
 {
-    public class EmployeeVacationCount : AuditableEntity
+    public class AnnualVacationEmployee : AuditableEntity
     {
         [Key]
         public long ID { get; set; }
-        public int Ballance { get; set; }
-        public int Used { get; set; }
+        public int Balance { get; set; }
 
         [ForeignKey("Employee")]
         public long EmployeeID { get; set; }

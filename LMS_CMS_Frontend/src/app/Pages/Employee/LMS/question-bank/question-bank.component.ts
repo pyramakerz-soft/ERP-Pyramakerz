@@ -798,6 +798,7 @@ export class QuestionBankComponent {
   }
 
   closeModal() {
+    this.questionBank = new QuestionBank()
     this.isModalVisible = false;
   }
 

@@ -255,7 +255,6 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<BounsType> BounsType_Repository;
         GenericRepo<Deduction> Deduction_Repository;
         GenericRepo<DeductionType> DeductionType_Repository;
-        GenericRepo<EmployeeVacationCount> EmployeeVacationCount_Repository;
         GenericRepo<LeaveRequest> LeaveRequest_Repository;
         GenericRepo<Loans> Loans_Repository;
         GenericRepo<OfficialHolidays> OfficialHolidays_Repository;
@@ -268,6 +267,7 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<PermissionGroup> PermissionGroup_Repository;
         GenericRepo<PermissionGroupEmployee> PermissionGroupEmployee_Repository;
         GenericRepo<PermissionGroupDetails> PermissionGroupDetails_Repository; 
+        GenericRepo<AnnualVacationEmployee> AnnualVacationEmployee_Repository;
 
 
         public UOW(Octa_DbContext octa_Db)
@@ -2951,18 +2951,6 @@ namespace LMS_CMS_BL.UOW
             }
         }
 
-        public GenericRepo<EmployeeVacationCount> employeeVacationCount_Repository
-        {
-            get
-            {
-                if (EmployeeVacationCount_Repository == null)
-                {
-                    EmployeeVacationCount_Repository = new GenericRepo<EmployeeVacationCount>(db);
-                }
-                return EmployeeVacationCount_Repository;
-            }
-        }
-
         public GenericRepo<LeaveRequest> leaveRequest_Repository
         {
             get
@@ -3078,7 +3066,19 @@ namespace LMS_CMS_BL.UOW
                 }
                 return PermissionGroupDetails_Repository;
             }
-        } 
+        }
+
+        public GenericRepo<AnnualVacationEmployee> annualVacationEmployee_Repository
+        {
+            get
+            {
+                if (AnnualVacationEmployee_Repository == null)
+                {
+                    AnnualVacationEmployee_Repository = new GenericRepo<AnnualVacationEmployee>(db);
+                }
+                return AnnualVacationEmployee_Repository;
+            }
+        }
 
 
         public void SaveChanges()

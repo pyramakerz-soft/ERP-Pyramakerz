@@ -12,6 +12,8 @@ import { LanguageService } from '../../../../../Services/shared/language.service
 import { AccountService } from '../../../../../Services/account.service';
 import { ApiService } from '../../../../../Services/api.service';
 import Swal from 'sweetalert2';
+import { LinkFileService } from '../../../../../Services/Employee/Accounting/link-file.service';
+import { LinkFile } from '../../../../../Models/Accounting/link-file';
 
 @Component({
   selector: 'app-accounting-subledger',
@@ -32,23 +34,13 @@ export class AccountingSubledgerComponent implements OnInit {
   // Data
   reportData: AccountSubledgerResponse | null = null;
   accounts: AccountingTreeChart[] = [];
-  linkFileOptions: any[] = [
-    { id: 2, name: 'Suppliers' },
-    { id: 3, name: 'Debits' },
-    { id: 4, name: 'Credits' },
-    { id: 5, name: 'Saves' },
-    { id: 6, name: 'Banks' },
-    { id: 7, name: 'Incomes' },
-    { id: 8, name: 'Outcomes' },
-    { id: 9, name: 'Assets' },
-    { id: 10, name: 'Employees' },
-    { id: 11, name: 'Tuition Fees Types' },
-    { id: 12, name: 'Tuition Discount Types' },
-    { id: 13, name: 'Students' }
-  ];
+  linkFileOptions: LinkFile[] = [];
+  accountOptions: AccountingTreeChart[] = []; // For accounts based on selected link file
 
   // UI state
   isLoading: boolean = false;
+  isLinkFilesLoading: boolean = false;
+  isAccountsLoading: boolean = false;
   showTable: boolean = false;
   isRtl: boolean = false;
   subscription!: Subscription;
@@ -60,12 +52,14 @@ export class AccountingSubledgerComponent implements OnInit {
     private accountingTreeChartService: AccountingTreeChartService,
     private languageService: LanguageService,
     public account: AccountService,
-    public ApiServ: ApiService
+    public ApiServ: ApiService,
+    private linkFileService: LinkFileService
   ) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.DomainName = this.ApiServ.GetHeader();
+    this.loadLinkFiles();
     this.loadAccounts();
     
     this.subscription = this.languageService.language$.subscribe(direction => {
@@ -80,9 +74,23 @@ export class AccountingSubledgerComponent implements OnInit {
     }
   }
 
+  loadLinkFiles() {
+    this.isLinkFilesLoading = true;
+    this.linkFileService.Get(this.DomainName).subscribe({
+      next: (linkFiles) => {
+        this.linkFileOptions = linkFiles;
+        this.isLinkFilesLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading link files:', error);
+        this.isLinkFilesLoading = false;
+      }
+    });
+  }
+
   loadAccounts() {
     this.isLoading = true;
-    this.accountingTreeChartService.Get(this.DomainName).subscribe({
+    this.accountingTreeChartService.GetBySubID(this.DomainName).subscribe({
       next: (accounts) => {
         this.accounts = accounts;
         this.isLoading = false;
@@ -90,6 +98,31 @@ export class AccountingSubledgerComponent implements OnInit {
       error: (error) => {
         console.error('Error loading accounts:', error);
         this.isLoading = false;
+      }
+    });
+  }
+
+  onLinkFileChange() {
+    this.accountID = 0; // Reset account selection
+    this.accountOptions = []; // Clear previous account options
+    this.showTable = false;
+    this.reportData = null;
+    
+    if (this.linkFileID > 0) {
+      this.loadAccountsByLinkFile();
+    }
+  }
+
+  loadAccountsByLinkFile() {
+    this.isAccountsLoading = true;
+    this.accountingTreeChartService.GetByLinkFileId(this.linkFileID, this.DomainName).subscribe({
+      next: (accounts) => {
+        this.accountOptions = accounts;
+        this.isAccountsLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading accounts by link file:', error);
+        this.isAccountsLoading = false;
       }
     });
   }
@@ -175,14 +208,23 @@ export class AccountingSubledgerComponent implements OnInit {
   }
 
   getAccountName(id: number): string {
+    if (id === 0) return 'All Accounts';
+    
+    // First check in accountOptions (link file specific accounts)
+    const accountFromLinkFile = this.accountOptions.find(acc => acc.id === id);
+    if (accountFromLinkFile) {
+      return accountFromLinkFile.name;
+    }
+    
+    // Fallback to general accounts
     const account = this.accounts.find(acc => acc.id === id);
-    return account ? account.name : 'All Accounts';
+    return account ? account.name : 'Unknown Account';
   }
 
   // Add Math object for template usage
   Math = Math;
 
-  // Pagination methods similar to accounting-constraints component
+  // Pagination methods
   get visiblePages(): number[] {
     const total = this.reportData?.pagination.totalPages || 1;
     const current = this.pageNumber;

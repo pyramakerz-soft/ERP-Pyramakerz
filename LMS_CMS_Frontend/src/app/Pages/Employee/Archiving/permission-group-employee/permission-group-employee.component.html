@@ -1,7 +1,11 @@
-<!-- <div class="">
+<div class="">
   <div class="flex justify-between items-center">
-    <h1 class="primaryTxt font-semibold text-2xl leading-9">Permission Group Employees</h1>
+    <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
+      <i class="fa-solid fa-chevron-left cursor-pointer" (click)="MoveToPermissionGroup()"></i>
+      <h1 class="primaryTxt font-semibold text-2xl leading-9">Permission Group Employees</h1>
+    </div>
     <div class="flex justify-between items-center"> 
+      <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
       <button (click)="openModal()"
         class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
         Add Employee
@@ -18,10 +22,10 @@
               ID
             </th>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-              English Name
+              Employee English Name
             </th>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-              Arabic Name
+              Employee Arabic Name
             </th>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
               Actions
@@ -42,25 +46,16 @@
               {{ row.id }}
             </td>
             <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-              {{ row.en_Name }}
+              {{ row.employeeEnglishName }}
             </td>
             <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-              {{ row.ar_Name }}
+              {{ row.employeeArabicName }}
             </td>
             <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
               <div class="flex space-x-4 rtl:space-x-reverse">
                 <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)" (click)="Delete(row.id)">
                   <i class="fa-regular fa-trash-can"></i>
-                </button>
-                <button *ngIf="AllowEdit && IsAllowEdit(row.insertedByUserId)" (click)="openModal(row.id)">
-                  <i class="fa-solid fa-pencil"></i>
-                </button>
-                <button (click)="AddEmployee(row.id)" title="Archiving Permissions">
-                  <i class="fa-solid fa-user-plus"></i>
-                </button>
-                <button (click)="Archiving(row.id)" title="Add Employee">
-                  <i class="fa-solid fa-lock"></i>
-                </button>
+                </button> 
               </div>
             </td>
           </tr>
@@ -68,66 +63,26 @@
       </table>
     </div>
   </div>
-</div>
+</div> 
 
 
-<div class="mt-8 flex justify-between items-center">
-  <div class="flex items-center space-x-4 rtl:space-x-reverse">
-    <button class="flex items-center space-x-2 rounded-lg border py-3 px-4 rtl:space-x-reverse"
-      (click)="changeCurrentPage(CurrentPage-1)" [disabled]="CurrentPage === 1 || TableData.length == 0"
-      [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === 1 || TableData.length == 0}">
-      <i class="fa-solid fa-arrow-left"></i>
-      <p>Previous</p>
-    </button>
-    <div class="flex">
-      <div *ngFor="let page of visiblePages" class="rounded-lg py-[10px] w-[40px]"
-        [ngClass]="{ 'border': page === CurrentPage, 'hover:bg-gray-100': page !== CurrentPage }"
-        (click)="changeCurrentPage(page)">
-        <p class="cursor-pointer text-center">{{ page }}</p>
-      </div>
-    </div>
-    <button class="flex items-center space-x-2 rounded-lg border py-3 px-4 rtl:space-x-reverse"
-      (click)="changeCurrentPage(CurrentPage+1)" [disabled]="CurrentPage === TotalPages || TableData.length == 0"
-      [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === TotalPages || TableData.length == 0}">
-      <p>Next</p>
-      <i class="fa-solid fa-arrow-right"></i>
-    </button>
-  </div>
-
-  <div class="flex items-center space-x-2 rtl:space-x-reverse">
-    <input (input)="validateNumber($event)" class="rounded-lg border py-3 px-4 w-[73px]" [(ngModel)]="PageSize" min="1"
-      (input)="validatePageSize($event)" (ngModelChange)="changeCurrentPage(CurrentPage)">
-    <p>items Per Page</p>
-  </div>
-
-  <div>
-    <p>{{CurrentPage}} of {{TotalPages}} pages ({{TotalRecords}} Item)</p>
-  </div>
-</div>
 
 <div id="Add_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
   <div class="bg-white rounded-2xl p-12 w-[669px] max-h-[90%] overflow-y-auto">
     <div class="flex justify-between items-center">
-      <h1 *ngIf="permissionGroup.id == 0" class="font-semibold text-2xl leading-9">Create Permission Group</h1>
-      <h1 *ngIf="permissionGroup.id != 0" class="font-semibold text-2xl leading-9">Edit Permission Group</h1>
-      <button (click)="closeModal()" type="button"
-        class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
+      <h1 class="font-semibold text-2xl leading-9">Add Employee</h1> 
+      <button (click)="closeModal()" type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
     </div>
 
     <div class="mt-6 mb-4 flex justify-between flex-wrap">
-      <div class="flex flex-col mb-4 w-full">
-        <label class="mb-2 primaryTxt" for="en_Name">English Name</label>
-        <input id="en_Name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-          placeholder="Enter English Name" [(ngModel)]="permissionGroup.en_Name"
-          (ngModelChange)="onInputValueChange({ field: 'en_Name', value: $event })" />
-        <span *ngIf="validationErrors['en_Name']" class="text-red-500 ml-3 font-normal">{{ validationErrors['en_Name']}}</span>
-      </div>
-      <div class="flex flex-col mb-4 w-full">
-        <label class="mb-2 primaryTxt" for="ar_Name">Arabic Name</label>
-        <input id="ar_Name" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-          placeholder="Enter Arabic Name" [(ngModel)]="permissionGroup.ar_Name"
-          (ngModelChange)="onInputValueChange({ field: 'ar_Name', value: $event })" />
-        <span *ngIf="validationErrors['ar_Name']" class="text-red-500 ml-3 font-normal">{{ validationErrors['ar_Name']}}</span>
+      <div class="flex flex-col w-full">
+          <label class="mb-2 primaryTxt" for="Employee">Employee</label>
+          <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="Employee"
+              [(ngModel)]="permissionGroupEmployee.employeeID">
+              <option [value]="0" disabled selected hidden>Choose Employee</option>
+              <option *ngFor="let c of employees" [value]="c.id">{{ c.en_name }}</option>
+              <option *ngIf="employees.length === 0" disabled selected>No Data Found</option>
+          </select> 
       </div>
     </div>
 
@@ -139,4 +94,4 @@
       </button>
     </div>
   </div>
-</div> -->
+</div>
