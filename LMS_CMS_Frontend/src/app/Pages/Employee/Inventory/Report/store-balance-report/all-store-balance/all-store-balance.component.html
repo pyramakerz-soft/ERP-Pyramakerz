@@ -51,6 +51,13 @@
     </div>
 </div>
 
+<!-- Export buttons -->
+<div *ngIf="showTable" class="mb-5 flex justify-end space-x-4 rtl:space-x-reverse">
+    <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="exportExcel()" title="Export to Excel">
+    <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()" title="Export to PDF">
+    <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()" title="Print Report">
+</div>
+
 <div *ngIf="showTable" class="mt-5 overflow-x-auto">
     <div class="flex space-x-4 rtl:space-x-reverse pb-2">
         <!-- Fixed Columns Table (Item Code, Item Name) -->
@@ -152,7 +159,7 @@
         </div>
 
         <!-- Grand Total Table -->
-        <div class="flex-shrink-0">
+        <div class="flex-shrink-0 justify-end">
 
                 <div  class="flex-shrink-0">
                 <!-- Store Name Header - Styled as section title -->
@@ -200,4 +207,15 @@
 
         </div>
         </div>
+</div>
+
+<!-- PDF Print Container (Hidden) -->
+<div class="absolute -top-[9999px] -left-[9999px]">
+    <div id="Data" class="hidden">
+        <app-pdf-print *ngIf="showPDF" [school]="school" 
+                       [fileName]="pageTitle"
+                       [tableDataWithHeaderArray]="cachedTableDataForPDF"
+                       #pdfComponentRef>
+        </app-pdf-print>
+    </div>
 </div>

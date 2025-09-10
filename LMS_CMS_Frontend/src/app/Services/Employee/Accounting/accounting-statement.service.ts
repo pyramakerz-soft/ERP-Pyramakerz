@@ -48,7 +48,7 @@ export class AccountStatementService {
       .set('pageSize', pageSize.toString());
 
     return this.http.get<AccountStatementResponse>(
-      `${this.baseUrl}/AccountStatementReports/GetAccountStatement`,
+      `${this.baseUrl}/AccountStatement/GetAccountStatement`,
       { headers, params }
     );
   }

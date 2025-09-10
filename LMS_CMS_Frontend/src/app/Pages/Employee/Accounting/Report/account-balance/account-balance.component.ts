@@ -235,12 +235,11 @@ export class AccountBalanceComponent implements OnInit {
     
     if (this.reportData && this.reportData.data.length > 0) {
       const section = {
-        header: 'Account Balance Report',
+        header: 'Totals',
         data: [
-          { key: 'Date To', value: this.toDate },
-          { key: 'Account Type', value: this.getLinkFileName(this.linkFileID) },
-          { key: 'Account', value: this.getAccountName(this.accountID) },
-          { key: 'Generated On', value: new Date().toLocaleDateString() }
+          { key: 'Total Debit : ', value: this.reportData.totals.totalDebit },
+          { key: 'Total Credit : ', value: this.reportData.totals.totalCredit },
+          { key: 'Diffrenece : ', value: this.reportData.totals.differences },
         ],
         tableHeaders: ['ID', 'Name', 'Debit', 'Credit'],
         tableData: this.reportData.data.map(item => ({

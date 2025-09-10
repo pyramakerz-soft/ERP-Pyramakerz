@@ -71,6 +71,13 @@
 </div>
 
 <div *ngIf="showTable && reportData" class="mb-5">
+
+<div *ngIf="showTable" class="mb-5 flex justify-end space-x-4 rtl:space-x-reverse">
+    <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="DownloadAsExcel()" [title]="'Download Excel' | translate">
+    <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()" [title]="'Download PDF' | translate">
+    <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()" [title]="'Print' | translate">
+  </div>  
+
     <!-- First Period Totals -->
     <div class="bg-gray-50 p-4 rounded-lg mb-4">
         <h3 class="font-semibold text-lg mb-2">{{ 'Opening Balance' | translate }}</h3>
@@ -179,4 +186,31 @@
             <div><span class="font-semibold">{{ 'Difference' | translate }}:</span> {{ reportData.lastPeriodTotals.total.difference | number:'1.2-2' }}</div>
         </div>
     </div>
+</div>
+
+<div class="absolute -top-[9999px] -left-[9999px]">
+  <div id="accountSubledgerData" class="hidden">
+    <app-pdf-print *ngIf="showPDF" [school]="school" 
+                   [fileName]="'Accounts Subledger Report'"
+[infoRows]="[
+     {
+        keyEn: 'Date From: ' + this.fromDate,
+        keyAr: 'التاريخ من: ' + this.fromDate
+      },
+      {
+        keyEn: 'Date To: ' + this.toDate,
+        keyAr: 'التاريخ إلى: ' + this.toDate
+      },
+      {
+        keyEn: 'Account Type: ' + this.getLinkFileName(this.linkFileID),
+        keyAr: 'نوع الحساب: ' + this.getLinkFileName(this.linkFileID)
+      },
+      {
+        keyEn: 'Account: ' + this.getAccountName(this.accountID),
+        keyAr: 'الحساب: ' + this.getAccountName(this.accountID)
+      },
+      ]"                   [tableDataWithHeaderArray]="cachedTableDataForPDF"
+                   #pdfComponentRef>
+    </app-pdf-print>
+  </div>
 </div>

@@ -6,41 +6,42 @@
 <div class="my-5 flex flex-wrap md:flex-nowrap items-end space-x-0 md:space-x-6 space-y-4 md:space-y-0 mb-6">
     <!-- Department Select -->
     <div class="w-full md:w-1/4">
-    <label for="department" class="block mb-2 text-sm font-medium text-gray-900">{{'Department'| translate }}</label>
-    <select id="department" [(ngModel)]="filterParams.departmentId" (change)="onDepartmentChange()"
-        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
-        <option [ngValue]="null" selected>{{'Select'| translate }} {{'All'| translate }}</option>
-        <option *ngFor="let department of departments" [value]="department.id"> 
-            {{ department.name }} 
-        </option>
-    </select>
-</div>
+        <label for="department" class="block mb-2 text-sm font-medium text-gray-900">{{'Department'| translate }}</label>
+        <select id="department" [(ngModel)]="filterParams.departmentId" (change)="onDepartmentChange()"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
+            <option [ngValue]="null" selected>{{'Select'| translate }} {{'All'| translate }}</option>
+            <option *ngFor="let department of departments" [value]="department.id"> 
+                {{ department.name }} 
+            </option>
+        </select>
+    </div>
 
     <!-- Employee Select -->
-<div class="w-full md:w-1/4">
-    <label for="employee" class="block mb-2 text-sm font-medium text-gray-900">{{'Employee'| translate }}</label>
-    <select id="employee" [(ngModel)]="filterParams.employeeId" (change)="onFilterChange()"
-        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
-        [disabled]="!filterParams.departmentId && departments.length > 0">
-        <option [ngValue]="null" selected>{{'Select'| translate }} {{'All'| translate }}</option>
-        <option *ngFor="let employee of employees" [value]="employee.id">
-            {{ employee.en_name }} 
-        </option>
-    </select>
-</div>
+    <div class="w-full md:w-1/4">
+        <label for="employee" class="block mb-2 text-sm font-medium text-gray-900">{{'Employee'| translate }}</label>
+        <select id="employee" [(ngModel)]="filterParams.employeeId"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            [disabled]="!filterParams.departmentId && departments.length > 0">
+            <option [ngValue]="null" selected>{{'Select'| translate }} {{'All'| translate }}</option>
+            <option *ngFor="let employee of employees" [value]="employee.id">
+                {{ employee.en_name }} 
+            </option>
+        </select>
+    </div>
 
     <!-- Start Date -->
-<div class="w-full md:w-1/4">
-    <label for="fromDate" class="block mb-2 text-sm font-medium text-gray-900">{{'Start Date'| translate }}</label>
-    <input id="fromDate" type="date" [(ngModel)]="filterParams.fromDate" (change)="onFilterChange()"
-        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
-</div>
+    <div class="w-full md:w-1/4">
+        <label for="fromDate" class="block mb-2 text-sm font-medium text-gray-900">{{'Start Date'| translate }}</label>
+        <input id="fromDate" type="date" [(ngModel)]="filterParams.fromDate"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
+    </div>
 
-<div class="w-full md:w-1/4">
-    <label for="toDate" class="block mb-2 text-sm font-medium text-gray-900">{{'End Date'| translate }}</label>
-    <input id="toDate" type="date" [(ngModel)]="filterParams.toDate" (change)="onFilterChange()"
-        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
-</div>
+    <!-- End Date -->
+    <div class="w-full md:w-1/4">
+        <label for="toDate" class="block mb-2 text-sm font-medium text-gray-900">{{'End Date'| translate }}</label>
+        <input id="toDate" type="date" [(ngModel)]="filterParams.toDate"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
+    </div>
 
     <div class="w-full md:w-1/6 flex justify-end space-x-2 mt-4 md:mt-0">
         <button class="p-3 font-medium text-xl rounded-lg" (click)="generateReport()"
@@ -50,31 +51,34 @@
             }">
             {{'View Report'| translate }}
         </button>
-        
-        <!-- <button class="p-3 font-medium text-xl rounded-lg bg-gray-300 text-gray-700 hover:bg-gray-400" 
-                (click)="clearFilters()">
-            {{'Clear'| translate }}
-        </button> -->
     </div>
 </div>
 
-<div *ngIf="hasGeneratedReport && hasData && !isLoading" class="mt-8 bg-white p-6 rounded-lg shadow-md">
+<!-- Export Buttons -->
+<div *ngIf="hasData && !isLoading" class="mt-5 flex justify-end space-x-4 rtl:space-x-reverse">
+    <!-- <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="DownloadAsExcel()" [title]="'Download Excel' | translate"> -->
+    <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="downloadAsPDF()" [title]="'Download PDF' | translate">
+    <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="print()" [title]="'Print' | translate">
+</div>
+
+
+<!-- Chart Section -->
+<div #reportContent *ngIf="hasData && !isLoading" class="mt-8 bg-white p-6 rounded-lg shadow-md">
     <div class="chart-container" style="position: relative; height: 400px;">
         <canvas #chartCanvas id="evaluationChart"></canvas>
     </div>
 </div>
 
-<!-- No Data Message - Only show if report has been generated AND there is no data -->
-<div *ngIf="hasGeneratedReport && !hasData && !isLoading && evaluationData.length === 0" class="w-full justify-center items-center flex py-8">
-    <span class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-        {{'No Data Found'| translate }}
-    </span>
+<!-- Loading Indicator -->
+<div *ngIf="isLoading" class="mt-8 bg-white p-6 rounded-lg shadow-md text-center">
+    <i class="fas fa-spinner fa-spin text-2xl text-blue-600"></i>
+    <p class="mt-2 text-gray-600">{{'Loading evaluation data...' | translate }}</p>
 </div>
 
-<!-- Loading Indicator -->
-<div *ngIf="isLoading" class="w-full justify-center items-center flex py-8">
-    <span class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-        <i class="fas fa-spinner fa-spin text-blue-600"></i>
-        {{'Loading...'| translate }}
-    </span>
+<!-- Exporting Indicator -->
+<div *ngIf="isExporting" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+        <i class="fas fa-spinner fa-spin text-2xl text-blue-600 mb-2"></i>
+        <p class="text-gray-700">{{'Generating report...' | translate }}</p>
+    </div>
 </div>
