@@ -624,7 +624,7 @@ export class AssignmentComponent {
       if (this.assignment.hasOwnProperty(key)) {
         const field = key as keyof Assignment;
         if (!this.assignment[field]) {
-          if (field == 'englishName' || field == 'arabicName' || field == 'mark' || field == 'assignmentTypeID' || field == 'subjectID' || field == 'subjectWeightTypeID' || field == 'openDate' || field == 'cutOfDate') {
+          if (field == 'englishName' || field == 'arabicName' || field == 'mark' || field == 'passMark' || field == 'assignmentTypeID' || field == 'subjectID' || field == 'subjectWeightTypeID' || field == 'openDate' || field == 'cutOfDate') {
             this.validationErrors[field] = `*${this.capitalizeField(field)} is required`;
             isValid = false;
           }
@@ -663,6 +663,11 @@ export class AssignmentComponent {
 
             if (this.assignment.cutOfDate && (cutOfDate < openDate || cutOfDate < dueDate)) {
               this.validationErrors['cutOfDate'] = '*Cut Off Date must be after both Open Date and Due Date';
+              isValid = false;
+            }
+
+            if ((this.assignment.passMark  && this.assignment.mark) &&this.assignment.passMark > this.assignment.mark) {
+              this.validationErrors['passMark'] = '*Pass Mark must be smaller than Mark';
               isValid = false;
             }
           } else {

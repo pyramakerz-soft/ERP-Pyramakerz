@@ -101,29 +101,64 @@
             </div>
 
             <div class="flex flex-col mb-4 w-full">
+                <label class="mb-2 primaryTxt" for="vacationTypesID">{{ 'Vacation Type' | translate }}</label>
+                <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="vacationTypesID"
+                    [(ngModel)]="vacationEmployee.vacationTypesID" (ngModelChange)="onInputValueChange({ field: 'vacationTypesID', value: $event }); EmployeeIsChanged()" >
+                    <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Vacation Type' |translate }}</option>
+                    <option *ngFor="let emp of vacationTypes" [value]="emp.id">{{ emp.name }}
+                    </option>
+                    <option *ngIf="vacationTypes.length === 0" disabled selected> {{ 'No Data Found' |translate }}
+                    </option>
+                </select>
+                <span *ngIf="validationErrors['vacationTypesID']" class="text-red-500 ml-3 font-normal">{{validationErrors["vacationTypesID"]}}</span>
+            </div>
+
+            <div class="flex flex-col mb-4 w-full">
                 <label class="mb-2 primaryTxt" for="date"> {{ 'Date' | translate }}</label>
                 <input id="date" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                     placeholder="{{ 'Enter Date' | translate }}" [(ngModel)]="vacationEmployee.date"
-                    (ngModelChange)="onInputValueChange({ field: 'date', value: $event }); EmployeeIsChanged()" />
+                    (ngModelChange)="onInputValueChange({ field: 'date', value: $event })" />
                 <span *ngIf="validationErrors['date']" class="text-red-500 ml-3 font-normal">{{validationErrors['date']}}</span>
+            </div>
+
+            <div class="flex w-full space-x-5 rtl:space-x-reverse items-center mb-4">
+                <input type="checkbox" id="halfDay" class="w-5 h-5"
+                    [(ngModel)]="vacationEmployee.halfDay" (change)="onIshalfDayChange($event)">
+                <label for="halfDay" class="text-sm">  {{ 'Half Day' | translate }}</label>
+            </div>
+
+            <div class="flex flex-col mb-4 w-[48%]">
+                <label class="mb-2 primaryTxt" for="dateFrom"> {{ 'Date From' | translate }}</label>
+                <input id="dateFrom" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                    placeholder="{{ 'Enter Date' | translate }}" [(ngModel)]="vacationEmployee.dateFrom"
+                    (ngModelChange)="onInputValueChange({ field: 'dateFrom', value: $event }); EmployeeIsChanged(); DateFromIsChanged()" />
+                <span *ngIf="validationErrors['dateFrom']" class="text-red-500 ml-3 font-normal">{{validationErrors['dateFrom']}}</span>
+            </div>
+
+            <div class="flex flex-col mb-4 w-[48%]">
+                <label class="mb-2 primaryTxt" for="dateTo"> {{ 'Date To' | translate }}</label>
+                <input id="dateTo" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3" [disabled]="vacationEmployee.halfDay || !vacationEmployee.dateFrom"
+                    placeholder="{{ 'Enter Date' | translate }}" [(ngModel)]="vacationEmployee.dateTo"
+                    (ngModelChange)="onInputValueChange({ field: 'dateTo', value: $event }); CalculateRemains()" [min]="vacationEmployee.dateFrom" />
+                <span *ngIf="validationErrors['dateTo']" class="text-red-500 ml-3 font-normal">{{validationErrors['dateTo']}}</span>
             </div>
 
             <div class="flex flex-col mb-4 w-[32%]">
                 <label class="mb-2 primaryTxt" for="balance">{{ 'Balance' | translate }}</label>
                 <input id="balance" type="text"
                 class="rounded-lg border border-solid border-gray-300 px-4 py-3 bg-[#EBEBEB]"
-                readonly  [(ngModel)]="vacationEmployee.balance"/>
+                readonly [(ngModel)]="vacationEmployee.balance"/>
             </div>
 
             <div class="flex flex-col mb-4 w-[32%]">
                 <label class="mb-2 primaryTxt" for="used"> {{ 'used' | translate }}</label>
                 <input id="used" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3 bg-[#EBEBEB]" 
-                 readonly [value]="formatHours(vacationEmployee.used)"/>
+                 readonly [value]="vacationEmployee.used"/>
             </div>
             <div class="flex flex-col mb-4 w-[32%]">
                 <label class="mb-2 primaryTxt" for="remains"> {{ 'Remains' | translate }}</label>
                 <input id="remains" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3 bg-[#EBEBEB]" 
-                readonly [value]="formatHours(vacationEmployee.remains)"/>
+                readonly [value]="vacationEmployee.remains"/>
             </div>
 
             <div class="flex flex-col mb-4 w-full">
@@ -134,6 +169,7 @@
                 </textarea>
             </div>
 
+            <span *ngIf="this.vacationEmployee.used > this.vacationEmployee.balance" class="text-red-500 ml-3 font-normal">You Can Not Exceed Balance</span>
         </div>
         <div class="flex justify-end">
             <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"

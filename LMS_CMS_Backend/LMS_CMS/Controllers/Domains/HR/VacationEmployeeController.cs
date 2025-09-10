@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace LMS_CMS_PL.Controllers.Domains.HR
 {
@@ -105,6 +106,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 return Unauthorized("User ID or Type claim not found.");
             }
 
+
             VacationEmployee vacationEmployee =await Unit_Of_Work.vacationEmployee_Repository.FindByIncludesAsync(sem => sem.IsDeleted != true && sem.ID == id,
                      query => query.Include(emp => emp.Employee),
                      query => query.Include(emp => emp.VacationTypes));
@@ -114,7 +116,71 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 return NotFound();
             }
 
+            Employee employee = Unit_Of_Work.employee_Repository.First_Or_Default(e => e.ID == vacationEmployee.EmployeeID && e.IsDeleted != true);
+            if (employee == null)
+            {
+                return BadRequest("there is no employee with this id");
+            }
+
             VacationEmployeeGetDTO Dto = mapper.Map<VacationEmployeeGetDTO>(vacationEmployee);
+
+            AnnualVacationEmployee annualvacationEmployee = await Unit_Of_Work.annualVacationEmployee_Repository.FindByIncludesAsync(
+                 a => a.EmployeeID == vacationEmployee.EmployeeID && a.VacationTypesID == vacationEmployee.VacationTypesID && a.IsDeleted != true,
+                 query => query.Include(emp => emp.Employee),
+                 query => query.Include(emp => emp.VacationTypes));
+
+            if (annualvacationEmployee == null)
+            {
+                return BadRequest("this employee not assign for this vacation type");
+            }
+
+            AnnualVacationEmployeeGetDTO dto = mapper.Map<AnnualVacationEmployeeGetDTO>(annualvacationEmployee);
+
+            Dto.Balance = dto.Balance;
+            // find current cycle based on hire date
+            DateOnly hireDate = employee.HireDate.Value;
+            int yearDiff = vacationEmployee.DateFrom.Year - hireDate.Year;
+
+            // determine current cycle start
+            DateOnly cycleStart = new DateOnly(hireDate.Year + yearDiff, hireDate.Month, hireDate.Day);
+
+            // if date is before this year’s anniversary, move cycle back one year
+            if (vacationEmployee.DateFrom < cycleStart)
+            {
+                cycleStart = cycleStart.AddYears(-1);
+            }
+
+            DateOnly cycleEnd = cycleStart.AddYears(1).AddDays(-1);
+
+            List<VacationEmployee> vacationEmployees = Unit_Of_Work.vacationEmployee_Repository.FindBy(
+                sem => sem.IsDeleted != true &&
+                        sem.EmployeeID == vacationEmployee.EmployeeID &&
+                        sem.VacationTypesID == vacationEmployee.VacationTypesID &&
+                        sem.DateFrom <= cycleEnd &&                // vacation starts before or on cycle end
+                        (sem.DateTo ?? sem.DateFrom) >= cycleStart // vacation ends after or on cycle start
+            );
+
+            foreach (var vac in vacationEmployees)
+            {
+                var vacStart = vac.DateFrom;
+                var vacEnd = vac.DateTo ?? vac.DateFrom;
+
+                // Clip vacation range to cycle boundaries
+                var effectiveStart = vacStart < cycleStart ? cycleStart : vacStart;
+                var effectiveEnd = vacEnd > cycleEnd ? cycleEnd : vacEnd;
+
+                if (effectiveStart > effectiveEnd)
+                    continue; // no overlap with this cycle
+
+                if (vac.HalfDay && effectiveStart == effectiveEnd)
+                {
+                    Dto.used += 0.5;
+                }
+                else
+                {
+                    Dto.used += (effectiveEnd.DayNumber - effectiveStart.DayNumber) + 1; // inclusive
+                }
+            }
 
             return Ok(Dto);
         }
@@ -153,7 +219,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             }
 
             AnnualVacationEmployee annualvacationEmployee =await Unit_Of_Work.annualVacationEmployee_Repository.FindByIncludesAsync(
-                     a=>a.EmployeeID == EmployeeId && a. VacationTypesID==VacationId && a.IsDeleted == true,
+                     a=>a.EmployeeID == EmployeeId && a.VacationTypesID==VacationId && a.IsDeleted != true,
                      query => query.Include(emp => emp.Employee),
                      query => query.Include(emp => emp.VacationTypes));
 
@@ -165,7 +231,13 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             AnnualVacationEmployeeGetDTO dto = mapper.Map<AnnualVacationEmployeeGetDTO>(annualvacationEmployee);
 
             // find current cycle based on hire date
+            if (employee.HireDate == null)
+            {
+                return BadRequest("This employee does not have a hire date set.");
+            }
+
             DateOnly hireDate = employee.HireDate.Value;
+
             int yearDiff = date.Year - hireDate.Year;
 
             // determine current cycle start
@@ -186,6 +258,12 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                         sem.DateFrom <= cycleEnd &&                // vacation starts before or on cycle end
                         (sem.DateTo ?? sem.DateFrom) >= cycleStart // vacation ends after or on cycle start
             );
+
+            if(vacationEmployee== null ||vacationEmployee.Count == 0)
+            {
+                dto.used = 0;
+                return Ok(dto);
+            }
 
             foreach (var vac in vacationEmployee)
             {
@@ -253,7 +331,14 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             double balance = annualvacationEmployee.Balance;
 
             //  Determine current cycle based on hire date
+            // find current cycle based on hire date
+            if (employee.HireDate == null)
+            {
+                return BadRequest("This employee does not have a hire date set.");
+            }
+
             DateOnly hireDate = employee.HireDate.Value;
+
             DateOnly requestDate = newVacation.DateFrom;
             int yearDiff = requestDate.Year - hireDate.Year;
             DateOnly cycleStart = new DateOnly(hireDate.Year + yearDiff, hireDate.Month, hireDate.Day);
@@ -270,7 +355,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 sem.VacationTypesID == newVacation.VacationTypesID &&
                 sem.DateFrom <= cycleEnd &&
                 (sem.DateTo ?? sem.DateFrom) >= cycleStart
-            ).ToList();
+            );
 
             //  Calculate already used days clipped to cycle
             double usedDays = 0;
