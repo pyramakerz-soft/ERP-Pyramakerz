@@ -1,5 +1,5 @@
 // all-store-balance.component.ts
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -12,20 +12,29 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../../../Services/shared/real-time-notification-service.service';
 import { firstValueFrom, Subscription } from 'rxjs';
-import * as XLSX from 'xlsx-js-style';
+import * as XLSX from 'xlsx';
 
 type ReportType = 'QuantityOnly' | 'PurchasePrice' | 'SalesPrice' | 'Cost';
 
 @Component({
   selector: 'app-all-stores-balance-report',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslateModule, PdfPrintComponent],
+  imports: [CommonModule, FormsModule, TranslateModule],
   templateUrl: './all-store-balance.component.html',
   styleUrls: ['./all-store-balance.component.css'],
 })
 export class AllStoresBalanceReportComponent implements OnInit {
-  @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;
-  
+  showPDF = false;
+reportForExport: any[] = [];
+baseHeaders: string[] = [];
+
+
+// getColumnCount(): number {
+//     const storesCount = this.getStoreColumns().length;
+//     return 2 + // Fixed columns (Item Code, Item Name)
+//            (storesCount * (this.showPriceColumn() ? 3 : 1)) + // Store columns
+//            1; // Total column
+// }
   reportType: ReportType = 'QuantityOnly';
   pageTitle = 'All Stores Quantity Report';
   dateTo = '';
@@ -40,8 +49,6 @@ export class AllStoresBalanceReportComponent implements OnInit {
   reportData: StoreBalanceReport | null = null;
   showTable = false;
   isLoading = false;
-  showPDF = false;
-  cachedTableDataForPDF: any[] = [];
 
   school = {
     reportHeaderOneEn: '',
@@ -65,15 +72,14 @@ export class AllStoresBalanceReportComponent implements OnInit {
       this.setPageTitle();
       this.loadCategories();
     });
-    this.subscription = this.languageService.language$.subscribe(direction => {
+          this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-
-  ngOnDestroy(): void {
+      ngOnDestroy(): void {
     this.realTimeService.stopConnection(); 
-    if (this.subscription) {
+     if (this.subscription) {
       this.subscription.unsubscribe();
     }
   } 
@@ -119,46 +125,46 @@ export class AllStoresBalanceReportComponent implements OnInit {
     this.reportData = null;
   }
 
-  viewReport() {
-    if (!this.dateTo) {
-      Swal.fire({
-        title: 'Missing Information',
-        text: 'Please select Date',
-        icon: 'warning',
-        confirmButtonText: 'OK',
-      });
-      return;
-    }
-
-    this.isLoading = true;
-    this.showTable = false;
-
-    this.inventoryDetailsService
-      .getAllStoresBalance(
-        this.dateTo,
-        this.getReportFlagType(),
-        this.selectedCategoryId || 0,
-        this.selectedTypeId || 0,
-        this.hasBalance,
-        this.overdrawnBalance,
-        this.zeroBalances,
-        this.inventoryDetailsService.ApiServ.GetHeader()
-      )
-      .subscribe({
-        next: (response) => {
-          this.reportData = response;
-          this.showTable = true;
-          this.isLoading = false;
-          this.prepareExportData();
-        },
-        error: (error) => {
-          console.error('Error loading report:', error);
-          this.reportData = null;
-          this.showTable = true;
-          this.isLoading = false;
-        },
-      });
+viewReport() {
+  if (!this.dateTo) {
+    Swal.fire({
+      title: 'Missing Information',
+      text: 'Please select Date',
+      icon: 'warning',
+      confirmButtonText: 'OK',
+    });
+    return;
   }
+
+  this.isLoading = true;
+  this.showTable = false;
+
+  this.inventoryDetailsService
+    .getAllStoresBalance(
+      this.dateTo,
+      this.getReportFlagType(),
+      this.selectedCategoryId || 0,
+      this.selectedTypeId || 0,
+      this.hasBalance,
+      this.overdrawnBalance,
+      this.zeroBalances,
+      this.inventoryDetailsService.ApiServ.GetHeader()
+    )
+    .subscribe({
+      next: (response) => {
+        this.reportData = response;
+        this.prepareExportData(); // Add this line
+        this.showTable = true;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading report:', error);
+        this.reportData = null;
+        this.showTable = true;
+        this.isLoading = false;
+      },
+    });
+}
 
   getStoreColumns(): string[] {
     if (!this.reportData?.data?.length) return [];
@@ -172,52 +178,52 @@ export class AllStoresBalanceReportComponent implements OnInit {
     return Array.from(stores);
   }
 
-  getStoreTotalQuantity(storeName: string): number {
-    if (!this.reportData?.data) return 0;
-    
-    return this.reportData.data.reduce((total, item) => {
-      const storeData = this.getStoreData(item, storeName);
-      return total + (storeData.quantity ?? 0);
-    }, 0);
+getStoreTotalQuantity(storeName: string): number {
+  if (!this.reportData?.data) return 0;
+  
+  return this.reportData.data.reduce((total, item) => {
+    const storeData = this.getStoreData(item, storeName);
+    return total + (storeData.quantity ?? 0);
+  }, 0);
+}
+
+getStoreTotalValue(storeName: string): number {
+  if (!this.reportData?.data) return 0;
+  
+  return this.reportData.data.reduce((total, item) => {
+    const storeData = this.getStoreData(item, storeName);
+    return total + (storeData.value ?? 0);
+  }, 0);
+}
+
+getStoreData(item: StoreBalanceItem, storeName: string): {
+  quantity: number | null;
+  price: number | null;
+  value: number | null
+} {
+  const store = item.stores?.find(s => s.storeName === storeName);
+  if (!store) return { quantity: null, price: null, value: null };
+
+  let price: number | null = null;
+  
+  switch(this.reportType) {
+    case 'PurchasePrice':
+      price = store.PurchasePrice ?? null;
+      break;
+    case 'SalesPrice':
+      price = store.SalePrice ?? null;
+      break;
+    case 'Cost':
+      price = store.AverageCost ?? null;
+      break;
   }
 
-  getStoreTotalValue(storeName: string): number {
-    if (!this.reportData?.data) return 0;
-    
-    return this.reportData.data.reduce((total, item) => {
-      const storeData = this.getStoreData(item, storeName);
-      return total + (storeData.value ?? 0);
-    }, 0);
-  }
-
-  getStoreData(item: StoreBalanceItem, storeName: string): {
-    quantity: number | null;
-    price: number | null;
-    value: number | null
-  } {
-    const store = item.stores?.find(s => s.storeName === storeName);
-    if (!store) return { quantity: null, price: null, value: null };
-
-    let price: number | null = null;
-    
-    switch(this.reportType) {
-      case 'PurchasePrice':
-        price = store.PurchasePrice ?? null;
-        break;
-      case 'SalesPrice':
-        price = store.SalePrice ?? null;
-        break;
-      case 'Cost':
-        price = store.AverageCost ?? null;
-        break;
-    }
-
-    return {
-      quantity: store.quantity ?? null,
-      price: price,
-      value: store.value ?? null
-    };
-  }
+  return {
+    quantity: store.quantity ?? null,
+    price: price,
+    value: store.value ?? null
+  };
+}
 
   getItemTotal(item: StoreBalanceItem): number {
     switch(this.reportType) {
@@ -241,337 +247,172 @@ export class AllStoresBalanceReportComponent implements OnInit {
     }
   }
 
-  // Export functionality
-  prepareExportData(): void {
-    if (!this.reportData?.data) return;
-    
-    const storeColumns = this.getStoreColumns();
-    const tableHeaders = ['Item Code', 'Item Name'];
-    
-    // Add store columns
-    storeColumns.forEach(store => {
-      tableHeaders.push(`${store} - Qty`);
-      if (this.showPriceColumn()) {
-        tableHeaders.push(`${store} - ${this.getPriceColumnLabel()}`);
-        tableHeaders.push(`${store} - Value`);
-      }
-    });
-    
-    // Add total column
-    tableHeaders.push('Total');
-    
-    // Prepare table data
-    const tableData = this.reportData.data.map(item => {
-      const rowData: any = {
-        'Item Code': item.itemCode,
-        'Item Name': item.itemName
-      };
-      
-      // Add store data
-      storeColumns.forEach(store => {
-        const storeData = this.getStoreData(item, store);
-        rowData[`${store} - Qty`] = storeData.quantity ?? 0;
-        
-        if (this.showPriceColumn()) {
-          rowData[`${store} - ${this.getPriceColumnLabel()}`] = storeData.price ?? 0;
-          rowData[`${store} - Value`] = storeData.value ?? 0;
-        }
-      });
-      
-      // Add total
-      rowData['Total'] = this.getItemTotal(item);
-      
-      return rowData;
-    });
-    
-    // Add grand total row
-    const grandTotalRow: any = {
-      'Item Code': '',
-      'Item Name': 'Grand Total'
+  // Add these methods to the AllStoresBalanceReportComponent class
+
+prepareExportData(): void {
+  if (!this.reportData) return;
+  
+  this.reportForExport = [];
+  const storeColumns = this.getStoreColumns();
+  
+  this.reportData.data.forEach((item: StoreBalanceItem) => {
+    const baseData: any = {
+      'Item Code': item.itemCode,
+      'Item Name': item.itemName
     };
     
-    storeColumns.forEach(store => {
-      grandTotalRow[`${store} - Qty`] = this.getStoreTotalQuantity(store);
+    // Add each store's data
+    storeColumns.forEach(storeName => {
+      const storeData = this.getStoreData(item, storeName);
+      baseData[`${storeName} Qty`] = storeData.quantity ?? 0;
       
       if (this.showPriceColumn()) {
-        grandTotalRow[`${store} - ${this.getPriceColumnLabel()}`] = '';
-        grandTotalRow[`${store} - Value`] = this.getStoreTotalValue(store);
+        baseData[`${storeName} ${this.getPriceColumnLabel()}`] = storeData.price ?? 0;
+        baseData[`${storeName} Value`] = storeData.value ?? 0;
       }
     });
     
-    grandTotalRow['Total'] = this.reportType === 'QuantityOnly' 
-      ? this.reportData.grandTotals?.TotalQuantity 
-      : this.reportData.grandTotals?.TotalValue;
+    // Add total
+    baseData['Total'] = this.getItemTotal(item);
     
-    tableData.push(grandTotalRow);
-    
-    this.cachedTableDataForPDF = [{
-      header: 'Grand Total',
-      data: [
-        { key: 'Total Quantity', value: this.reportData.grandTotals?.TotalQuantity || 0, label: 'Total Quantity' },
-      ],
-      tableHeaders: tableHeaders,
-      tableData: tableData
-    }];
-  }
+    this.reportForExport.push(baseData);
+  });
+}
 
-  getTableDataWithHeader(): any[] {
-    return this.cachedTableDataForPDF;
-  }
+getPdfTableHeaders(): string[] {
+  const headers = ['Item Code', 'Item Name'];
+  const storeColumns = this.getStoreColumns();
+  
+  storeColumns.forEach(storeName => {
+    headers.push(`${storeName} Qty`);
+    if (this.showPriceColumn()) {
+      headers.push(`${storeName} ${this.getPriceColumnLabel()}`);
+      headers.push(`${storeName} Value`);
+    }
+  });
+  
+  headers.push('Total');
+  return headers;
+}
 
-  DownloadAsPDF() {
-    if (!this.reportData?.data || this.reportData.data.length === 0) {
-      alert('No data to export!');
+getPrintInfoRows(): any[] {
+  return [
+    { keyEn: 'Report Type: ' + this.pageTitle },
+    { keyEn: 'To Date: ' + (this.dateTo ? new Date(this.dateTo).toLocaleDateString() : 'N/A') },
+    { keyEn: 'Category: ' + (this.selectedCategoryId ? 
+      this.categories.find(c => c.id === this.selectedCategoryId)?.name || 'N/A' : 'All Categories') },
+    { keyEn: 'Has Balance: ' + (this.hasBalance ? 'Yes' : 'No') },
+    { keyEn: 'Overdrawn Balance: ' + (this.overdrawnBalance ? 'Yes' : 'No') },
+    { keyEn: 'Zero Balances: ' + (this.zeroBalances ? 'Yes' : 'No') }
+  ];
+}
+
+Print() {
+  if (!this.reportData?.data?.length) {
+    Swal.fire('Warning', 'No data to print!', 'warning');
+    return;
+  }
+  
+  this.prepareExportData();
+  this.baseHeaders = this.getPdfTableHeaders();
+  this.showPDF = true;
+  
+  setTimeout(() => {
+    const printContents = document.getElementById('printData')?.innerHTML;
+    if (!printContents) {
+      console.error('Print element not found!');
+      this.showPDF = false;
       return;
     }
-
-    this.showPDF = true;
-    setTimeout(() => {
-      this.pdfComponentRef.downloadPDF();
-      setTimeout(() => (this.showPDF = false), 2000);
-    }, 500);
-  }
-
-  Print() {
-    if (!this.reportData?.data || this.reportData.data.length === 0) {
-      alert('No data to print!');
-      return;
-    }
-
-    this.showPDF = true;
-    setTimeout(() => {
-      const printContents = document.getElementById('Data')?.innerHTML;
-      if (!printContents) {
-        console.error('Element not found!');
-        return;
-      }
-
-      const printStyle = `
-        <style>
-          @page { size: landscape; margin: 0mm; }
-          body { margin: 0; }
-          @media print {
-            body > *:not(#print-container) { display: none !important; }
-            #print-container {
-              display: block !important;
-              position: static !important;
-              width: 100% !important;
-              height: auto !important;
-              background: white !important;
-              margin: 0 !important;
-            }
-          }
-        </style>
-      `;
-
-      const printContainer = document.createElement('div');
-      printContainer.id = 'print-container';
-      printContainer.innerHTML = printStyle + printContents;
-
-      document.body.appendChild(printContainer);
-      window.print();
-
-      setTimeout(() => {
-        document.body.removeChild(printContainer);
-        this.showPDF = false;
-      }, 100);
-    }, 500);
-  }
-
-  exportExcel() {
-    if (!this.reportData?.data || this.reportData.data.length === 0) {
-      alert('No data to export!');
-      return;
-    }
-
-    const storeColumns = this.getStoreColumns();
-    const excelData = [];
-
-    // Add report title with styling
-    excelData.push([{ 
-      v: this.pageTitle.toUpperCase(), 
-      s: { font: { bold: true, size: 16 }, alignment: { horizontal: 'center' } } 
-    }]);
-    excelData.push([]); // empty row
-
-    // Add filter information with styling
-    excelData.push([
-      { v: 'Date To:', s: { font: { bold: true } } },
-      { v: this.dateTo, s: { font: { bold: true } } }
-    ]);
-    excelData.push([
-      { v: 'Category:', s: { font: { bold: true } } },
-      { v: this.selectedCategoryId 
-          ? this.categories.find(c => c.id === this.selectedCategoryId)?.name || 'All' 
-          : 'All', 
-        s: { font: { bold: true } } 
-      }
-    ]);
-    excelData.push([
-      { v: 'Has Balance:', s: { font: { bold: true } } },
-      { v: this.hasBalance ? 'Yes' : 'No', s: { font: { bold: true } } }
-    ]);
-    excelData.push([
-      { v: 'Overdrawn Balance:', s: { font: { bold: true } } },
-      { v: this.overdrawnBalance ? 'Yes' : 'No', s: { font: { bold: true } } }
-    ]);
-    excelData.push([
-      { v: 'Zero Balances:', s: { font: { bold: true } } },
-      { v: this.zeroBalances ? 'Yes' : 'No', s: { font: { bold: true } } }
-    ]);
-    excelData.push([]); // empty row
-
-    // Prepare table headers
-    const headers = ['Item Code', 'Item Name'];
     
-    // Add store columns
-    storeColumns.forEach(store => {
-      headers.push(`${store} - Qty`);
-      if (this.showPriceColumn()) {
-        headers.push(`${store} - ${this.getPriceColumnLabel()}`);
-        headers.push(`${store} - Value`);
-      }
-    });
-    
-    // Add total column
-    headers.push('Total');
-    
-    // Add headers to excel data with styling
-    excelData.push(headers.map(header => ({ 
-      v: header, 
-      s: { 
-        font: { bold: true }, 
-        fill: { fgColor: { rgb: '4472C4' } }, 
-        color: { rgb: 'FFFFFF' },
-        border: { 
-          top: { style: 'thin' }, 
-          bottom: { style: 'thin' }, 
-          left: { style: 'thin' }, 
-          right: { style: 'thin' } 
-        } 
-      } 
-    })));
-
-    // Add data rows
-    this.reportData.data.forEach((item, rowIndex) => {
-      const rowData: any[] = [
-        { v: item.itemCode, s: { 
-          fill: { fgColor: { rgb: rowIndex % 2 === 0 ? 'E9E9E9' : 'FFFFFF' } },
-          border: { left: { style: 'thin' }, right: { style: 'thin' } } 
-        }},
-        { v: item.itemName, s: { 
-          fill: { fgColor: { rgb: rowIndex % 2 === 0 ? 'E9E9E9' : 'FFFFFF' } },
-          border: { left: { style: 'thin' }, right: { style: 'thin' } } 
-        }}
-      ];
-      
-      // Add store data
-      storeColumns.forEach(store => {
-        const storeData = this.getStoreData(item, store);
-        rowData.push({ v: storeData.quantity ?? 0, s: { 
-          fill: { fgColor: { rgb: rowIndex % 2 === 0 ? 'E9E9E9' : 'FFFFFF' } },
-          border: { left: { style: 'thin' }, right: { style: 'thin' } } 
-        }});
-        
-        if (this.showPriceColumn()) {
-          rowData.push({ v: storeData.price ?? 0, s: { 
-            fill: { fgColor: { rgb: rowIndex % 2 === 0 ? 'E9E9E9' : 'FFFFFF' } },
-            border: { left: { style: 'thin' }, right: { style: 'thin' } } 
-          }});
-          rowData.push({ v: storeData.value ?? 0, s: { 
-            fill: { fgColor: { rgb: rowIndex % 2 === 0 ? 'E9E9E9' : 'FFFFFF' } },
-            border: { left: { style: 'thin' }, right: { style: 'thin' } } 
-          }});
+    const printStyle = `
+      <style>
+        @page { size: auto; margin: 10mm; }
+        body { margin: 0; font-family: Arial, sans-serif; }
+        .print-container { 
+          width: 100%; 
+          padding: 20px; 
+          box-sizing: border-box;
         }
-      });
-      
-      // Add total
-      rowData.push({ v: this.getItemTotal(item), s: { 
-        fill: { fgColor: { rgb: rowIndex % 2 === 0 ? 'E9E9E9' : 'FFFFFF' } },
-        border: { left: { style: 'thin' }, right: { style: 'thin' } } 
-      }});
-      
-      excelData.push(rowData);
-    });
+        .store-section { 
+          margin-bottom: 30px; 
+          page-break-inside: avoid;
+        }
+        .store-header { 
+          font-size: 18px; 
+          font-weight: bold; 
+          margin-bottom: 10px; 
+          color: #333;
+        }
+        .store-table { 
+          width: 100%; 
+          border-collapse: collapse; 
+          margin-bottom: 15px;
+        }
+        .store-table th, .store-table td { 
+          border: 1px solid #ddd; 
+          padding: 8px; 
+          text-align: left;
+          font-size: 12px;
+        }
+        .store-table th { 
+          background-color: #f5f5f5; 
+          font-weight: bold;
+        }
+        .store-table tr:nth-child(even) { 
+          background-color: #f9f9f9; 
+        }
+        .total-row { 
+          font-weight: bold; 
+          background-color: #e5e5e5 !important; 
+        }
+        .report-info { 
+          margin-bottom: 20px; 
+          font-size: 14px;
+        }
+        .report-info div { 
+          margin-bottom: 5px; 
+        }
+        @media print {
+          body > *:not(#print-wrapper) { display: none !important; }
+          #print-wrapper {
+            display: block !important;
+            position: static !important;
+            width: 100% !important;
+            background: white !important;
+          }
+          .store-section { 
+            page-break-inside: avoid; 
+          }
+        }
+      </style>
+    `;
+    
+    const printWrapper = document.createElement('div');
+    printWrapper.id = 'print-wrapper';
+    printWrapper.innerHTML = printStyle + printContents;
+    document.body.appendChild(printWrapper);
+    
+    window.print();
+    
+    setTimeout(() => {
+      document.body.removeChild(printWrapper);
+      this.showPDF = false;
+    }, 100);
+  }, 500);
+}
 
-    // Add grand total row
-    const grandTotalRow: any[] = [
-      { v: '', s: { 
-        font: { bold: true },
-        fill: { fgColor: { rgb: 'E2EFDA' } },
-        border: { left: { style: 'thin' }, right: { style: 'thin' } } 
-      }},
-      { v: 'Grand Total', s: { 
-        font: { bold: true },
-        fill: { fgColor: { rgb: 'E2EFDA' } },
-        border: { left: { style: 'thin' }, right: { style: 'thin' } } 
-      }}
-    ];
-    
-    storeColumns.forEach(store => {
-      grandTotalRow.push({ v: this.getStoreTotalQuantity(store), s: { 
-        font: { bold: true },
-        fill: { fgColor: { rgb: 'E2EFDA' } },
-        border: { left: { style: 'thin' }, right: { style: 'thin' } } 
-      }});
-      
-      if (this.showPriceColumn()) {
-        grandTotalRow.push({ v: '', s: { 
-          font: { bold: true },
-          fill: { fgColor: { rgb: 'E2EFDA' } },
-          border: { left: { style: 'thin' }, right: { style: 'thin' } } 
-        }});
-        grandTotalRow.push({ v: this.getStoreTotalValue(store), s: { 
-          font: { bold: true },
-          fill: { fgColor: { rgb: 'E2EFDA' } },
-          border: { left: { style: 'thin' }, right: { style: 'thin' } } 
-        }});
-      }
-    });
-    
-    grandTotalRow.push({ v: this.reportType === 'QuantityOnly' 
-      ? this.reportData.grandTotals?.TotalQuantity 
-      : this.reportData.grandTotals?.TotalValue, 
-      s: { 
-        font: { bold: true },
-        fill: { fgColor: { rgb: 'E2EFDA' } },
-        border: { left: { style: 'thin' }, right: { style: 'thin' } } 
-      } 
-    });
-    
-    excelData.push(grandTotalRow);
-
-    // Create worksheet
-    const worksheet = XLSX.utils.aoa_to_sheet(excelData);
-
-    // Merge cells for title
-    if (!worksheet['!merges']) worksheet['!merges'] = [];
-    worksheet['!merges'].push({ s: { r: 0, c: 0 }, e: { r: 0, c: headers.length - 1 } });
-
-    // Apply column widths
-    const colWidths = [
-      { wch: 15 }, // Item Code
-      { wch: 30 }, // Item Name
-    ];
-    
-    // Add store columns widths
-    storeColumns.forEach(() => {
-      colWidths.push({ wch: 10 }); // Quantity
-      if (this.showPriceColumn()) {
-        colWidths.push({ wch: 12 }); // Price
-        colWidths.push({ wch: 12 }); // Value
-      }
-    });
-    
-    colWidths.push({ wch: 12 }); // Total
-    
-    worksheet['!cols'] = colWidths;
-
-    // Create workbook and save
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Store Balance');
-    
-    const dateStr = new Date().toISOString().slice(0, 10);
-    XLSX.writeFile(workbook, `Store_Balance_Report_${dateStr}.xlsx`);
+exportExcel() {
+  if (!this.reportData?.data?.length) {
+    Swal.fire('Warning', 'No data to export!', 'warning');
+    return;
   }
+  
+  this.prepareExportData();
+  const worksheet = XLSX.utils.json_to_sheet(this.reportForExport);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Report');
+  const dateStr = new Date().toISOString().slice(0, 10);
+  XLSX.writeFile(workbook, `${this.pageTitle.replace(/\s+/g, '_')}_${dateStr}.xlsx`);
+}
 }

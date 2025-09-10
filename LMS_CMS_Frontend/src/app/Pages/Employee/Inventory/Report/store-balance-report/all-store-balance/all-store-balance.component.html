@@ -51,11 +51,10 @@
     </div>
 </div>
 
-<!-- Export buttons -->
+<!-- Add this after the filter controls -->
 <div *ngIf="showTable" class="mb-5 flex justify-end space-x-4 rtl:space-x-reverse">
-    <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="exportExcel()" title="Export to Excel">
-    <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()" title="Export to PDF">
-    <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()" title="Print Report">
+  <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="exportExcel()" title="Export to Excel">
+  <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()" title="Print Report">
 </div>
 
 <div *ngIf="showTable" class="mt-5 overflow-x-auto">
@@ -159,7 +158,7 @@
         </div>
 
         <!-- Grand Total Table -->
-        <div class="flex-shrink-0 justify-end">
+        <div class="flex-shrink-0">
 
                 <div  class="flex-shrink-0">
                 <!-- Store Name Header - Styled as section title -->
@@ -207,15 +206,76 @@
 
         </div>
         </div>
-</div>
+</div>\
 
-<!-- PDF Print Container (Hidden) -->
 <div class="absolute -top-[9999px] -left-[9999px]">
-    <div id="Data" class="hidden">
-        <app-pdf-print *ngIf="showPDF" [school]="school" 
-                       [fileName]="pageTitle"
-                       [tableDataWithHeaderArray]="cachedTableDataForPDF"
-                       #pdfComponentRef>
-        </app-pdf-print>
+  <div id="printData" class="hidden">
+    <div class="print-container">
+      <!-- Report Header -->
+      <div style="text-align: center; margin-bottom: 20px;">
+        <h1 style="font-size: 24px; font-weight: bold; margin-bottom: 10px;">{{ pageTitle }}</h1>
+        <div style="font-size: 14px; color: #666;">
+        </div>
+      </div>
+      
+      <!-- Report Information -->
+      <div class="report-info">
+        <div><strong>Date To:</strong> {{ dateTo ? (dateTo | date:'mediumDate') : 'N/A' }}</div>
+        <div><strong>Filters:</strong> 
+          {{ hasBalance ? 'Has Balance, ' : '' }}
+          {{ overdrawnBalance ? 'Overdrawn Balance, ' : '' }}
+          {{ zeroBalances ? 'Zero Balances' : '' }}
+        </div>
+      </div>
+      
+      <!-- Main Items Table -->
+      <table class="store-table">
+        <thead>
+          <tr>
+            <th>Item Code</th>
+            <th>Item Name</th>
+            <th *ngFor="let store of getStoreColumns()">
+              {{ store }}<br>
+              <span style="font-weight: normal; font-size: 11px;">
+                Qty{{ showPriceColumn() ? ' | ' + getPriceColumnLabel() + ' | Value' : '' }}
+              </span>
+            </th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of reportData?.data">
+            <td>{{ item.itemCode }}</td>
+            <td>{{ item.itemName }}</td>
+            <td *ngFor="let store of getStoreColumns()">
+              {{ getStoreData(item, store).quantity ?? '0' }}<br>
+              <span *ngIf="showPriceColumn()" style="font-size: 11px;">
+                {{ (getStoreData(item, store).price | number:'1.2-2') ?? '0' }}<br>
+                {{ (getStoreData(item, store).value | number:'1.2-2') ?? '0' }}
+              </span>
+            </td>
+            <td style="font-weight: bold;">
+              {{ reportType === 'QuantityOnly' ? 
+                 (getItemTotal(item) | number:'1.0-0') : 
+                 (getItemTotal(item) | number:'1.2-2') }}
+            </td>
+          </tr>
+          <!-- Grand Total Row -->
+          <tr *ngIf="reportData?.data?.length && reportData?.grandTotals" class="total-row">
+            <td colspan="2" style="text-align: right; font-weight: bold;">Grand Total:</td>
+            <td *ngFor="let store of getStoreColumns(); let i = index" [attr.colspan]="showPriceColumn() ? 3 : 1">
+              {{ reportType === 'QuantityOnly' ? 
+                 (getStoreTotalQuantity(store) | number:'1.0-0') : 
+                 (getStoreTotalValue(store) | number:'1.2-2') }}
+            </td>
+            <td style="font-weight: bold;">
+              {{ reportType === 'QuantityOnly' ? 
+                 (reportData?.grandTotals?.TotalQuantity | number:'1.0-0') : 
+                 (reportData?.grandTotals?.TotalValue | number:'1.2-2') }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
+  </div>
 </div>
