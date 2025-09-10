@@ -5,5 +5,6 @@ export class CertificateSubjectTotalMark {
         public subjectAr_name: string = '',
         public degree: number = 0,
         public mark: number = 0,
+        public percentage: number = 0,
     ) { }
 }

@@ -207,14 +207,12 @@ export class DirectMarkComponent {
   }
 
   toggleClass(event: Event, classroom: Classroom) {
-    console.log(this.directMark.directMarkClasses, classroom)
     const checked = (event.target as HTMLInputElement).checked;
     if (checked) {
       var classMark = new DirectMarkClasses()
       classMark.classroomID = classroom.id
       classMark.classroomName = classroom.name
       this.directMark.directMarkClasses.push(classMark);
-      console.log(this.directMark.directMarkClasses)
     } else {
       this.directMark.directMarkClasses = this.directMark.directMarkClasses.filter(s => s.classroomID != classroom.id)
     }
@@ -337,7 +335,6 @@ export class DirectMarkComponent {
     this.DirectMarkServ.GetById(Id, this.DomainName).subscribe(
       data => {
         this.directMark = data
-        console.log(this.directMark)
         this.GradeServ.GetBySchoolId(this.directMark.schoolID, this.DomainName).subscribe((d) => {
           this.GradesForCreate = d
           this.subjectsForCreate = []
@@ -478,7 +475,6 @@ export class DirectMarkComponent {
           }
         );
       } else {
-        console.log("this.directMark before edit", this.directMark)
         this.DirectMarkServ.Edit(this.directMark, this.DomainName).subscribe(
           (result: any) => {
             this.closeModal();

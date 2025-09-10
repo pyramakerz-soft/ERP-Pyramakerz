@@ -37,7 +37,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         [HttpGet]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
-          pages: new[] { "Conduct Level" }
+          pages: new[] { "Leave Request" }
          )]
         public async Task<IActionResult> GetAsync([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
@@ -90,7 +90,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
-          pages: new[] { "Conduct Level" }
+          pages: new[] { "Leave Request" }
         )]
         public async Task<IActionResult> GetById(long id)
         {
@@ -147,7 +147,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         [HttpGet("getRemainLeavRequestsByEmployeeId/{Empid}/{date}")]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
-          pages: new[] { "Conduct Level" }
+          pages: new[] { "Leave Request" }
         )]
         public async Task<IActionResult> getRemainLeavRequestsByEmployeeId(long Empid ,DateOnly date)
         {
@@ -205,7 +205,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         [HttpPost]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Conduct Level" }
+            pages: new[] { "Leave Request" }
          )]
         public async Task<IActionResult> Add(leaveRequestsAddDTO newRequest)
         {
@@ -282,7 +282,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee" },
            allowEdit: 1,
-           pages: new[] { "Conduct Level" }
+           pages: new[] { "Leave Request" }
        )]
         public async Task<IActionResult> EditAsync(leaveRequestsAddDTO newRequest)
         {
@@ -351,7 +351,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Conduct Level", roleId, userId, leaveRequest);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Leave Request", roleId, userId, leaveRequest);
                 if (accessCheck != null)
                 {
                     return accessCheck;
@@ -388,7 +388,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
           allowDelete: 1,
-          pages: new[] { "Lesson Resources Types" }
+          pages: new[] { "Leave Request" }
         )]
         public IActionResult Delete(long id)
         {
@@ -417,7 +417,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             }
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Conduct Level", roleId, userId, leaveRequest);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Leave Request", roleId, userId, leaveRequest);
                 if (accessCheck != null)
                 {
                     return accessCheck;

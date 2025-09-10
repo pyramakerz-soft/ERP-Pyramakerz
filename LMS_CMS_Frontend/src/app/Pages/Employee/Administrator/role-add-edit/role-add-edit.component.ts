@@ -17,7 +17,7 @@ import { RoleDetailsService } from '../../../../Services/Employee/role-details.s
 import { RolePut } from '../../../../Models/Administrator/role-put';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-role-add-edit',
@@ -37,7 +37,7 @@ export class RoleAddEditComponent {
   PagecollapseStates: boolean[][] = [];
   collapseStates: boolean[] = [];
   checkboxStates: { [key: string]: boolean } = {};
- isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   ResultArray: {
     Rowkey: number;
@@ -56,15 +56,15 @@ export class RoleAddEditComponent {
   dataForEdit: PagesWithRoleId[] = []
   loading = true;
   validationErrors: { [key in keyof RolePut]?: string } = {};
-  isLoading=false
+  isLoading = false
 
-  constructor(public pageServ: PageService, 
+  constructor(public pageServ: PageService,
     public RoleDetailsServ: RoleDetailsService,
-    public activeRoute: ActivatedRoute, 
+    public activeRoute: ActivatedRoute,
     public account: AccountService,
     public ApiServ: ApiService,
-    private menuService: MenuService, 
-    public EditDeleteServ: DeleteEditPermissionService, 
+    private menuService: MenuService,
+    public EditDeleteServ: DeleteEditPermissionService,
     public RoleServ: RoleService,
     private router: Router,
     private languageService: LanguageService,
@@ -97,18 +97,18 @@ export class RoleAddEditComponent {
         this.loading = false; // Not loading in create mode
       }
     }
-  this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-      ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
-    } 
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
 
 
   GetRoleName() {
@@ -217,6 +217,7 @@ export class RoleAddEditComponent {
       resultItem[permission] = !resultItem[permission];
       if (resultItem[permission] == true && resultItem.IsSave == false) {
         resultItem.IsSave = true;
+        this.SetForRow(pageId ,rowId, true);
       }
     }
   }
@@ -311,7 +312,7 @@ export class RoleAddEditComponent {
     this.DataToSave.name = this.RoleName
     this.DataToSave.pages = resultItems;
     if (this.isFormValid()) {
-      this.isLoading=true
+      this.isLoading = true
       if (this.mode == "Create") {
         this.RoleServ.AddRole(this.DataToSave, this.DomainName).subscribe({
           next: (response) => {
@@ -321,11 +322,11 @@ export class RoleAddEditComponent {
               text: 'Role Added Succeessfully',
               confirmButtonColor: '#089B41',
             });
-            this.isLoading=false
+            this.isLoading = false
             this.router.navigateByUrl("Employee/Role")
           },
-          error: (error) => { 
-            this.isLoading=false
+          error: (error) => {
+            this.isLoading = false
 
             const nameError = error?.error?.errors?.Name?.[0]
 
@@ -347,7 +348,7 @@ export class RoleAddEditComponent {
                 confirmButtonText: 'Okay',
                 customClass: { confirmButton: 'secondaryBg' },
               });
-            } else { 
+            } else {
               Swal.fire({
                 icon: 'error',
                 title: 'Error',
@@ -357,7 +358,7 @@ export class RoleAddEditComponent {
                   'An unexpected error occurred',
                 confirmButtonColor: '#089B41',
               });
-            } 
+            }
           },
         });
       }
@@ -370,11 +371,11 @@ export class RoleAddEditComponent {
               text: 'Role Edited Succeessfully',
               confirmButtonColor: '#089B41',
             });
-            this.isLoading=false
+            this.isLoading = false
             this.router.navigateByUrl("Employee/Role")
           },
-          error: (error) => { 
-            this.isLoading=false
+          error: (error) => {
+            this.isLoading = false
 
             const nameError = error?.error?.errors?.Name?.[0]
 
@@ -396,7 +397,7 @@ export class RoleAddEditComponent {
                 confirmButtonText: 'Okay',
                 customClass: { confirmButton: 'secondaryBg' },
               });
-            } else { 
+            } else {
               Swal.fire({
                 icon: 'error',
                 title: 'Error',
@@ -406,7 +407,7 @@ export class RoleAddEditComponent {
                   'An unexpected error occurred',
                 confirmButtonColor: '#089B41',
               });
-            } 
+            }
           },
         });
       }
@@ -422,7 +423,7 @@ export class RoleAddEditComponent {
       }
     }
   }
-  
+
   isFormValid(): boolean {
     let isValid = true;
     for (const key in this.DataToSave) {
@@ -447,11 +448,11 @@ export class RoleAddEditComponent {
         text: "Pages list cannot be null or empty",
       });
       isValid = false;
-    } 
+    }
 
     return isValid;
   }
-  
+
   capitalizeField(field: keyof RolePut): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }

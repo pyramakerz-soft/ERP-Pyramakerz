@@ -35,7 +35,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         [HttpGet]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
-          pages: new[] { "Conduct Level" }
+          pages: new[] { "Loans" }
          )]
         public async Task<IActionResult> GetAsync([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
@@ -88,7 +88,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
-          pages: new[] { "Conduct Level" }
+          pages: new[] { "Loans" }
         )]
         public async Task<IActionResult> GetById(long id)
         {
@@ -123,7 +123,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         [HttpPost]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Conduct Level" }
+            pages: new[] { "Loans" }
          )]
         public async Task<IActionResult> Add(loansAddDTO newLoan)
         {
@@ -178,7 +178,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee" },
            allowEdit: 1,
-           pages: new[] { "Conduct Level" }
+           pages: new[] { "Loans" }
        )]
         public async Task<IActionResult> EditAsync(loansAddDTO newLoan)
         {
@@ -225,7 +225,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Conduct Level", roleId, userId, loans);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Loans", roleId, userId, loans);
                 if (accessCheck != null)
                 {
                     return accessCheck;
@@ -262,7 +262,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
           allowDelete: 1,
-          pages: new[] { "Lesson Resources Types" }
+          pages: new[] { "Loans" }
         )]
         public IActionResult Delete(long id)
         {
@@ -291,7 +291,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             }
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Conduct Level", roleId, userId, loan);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Loans", roleId, userId, loan);
                 if (accessCheck != null)
                 {
                     return accessCheck;

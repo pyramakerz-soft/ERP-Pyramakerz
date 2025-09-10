@@ -3,6 +3,11 @@
         <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToDirectMark()"></i>
         <h1 class="primaryTxt font-semibold text-2xl leading-9"> Direct Mark Students</h1>
     </div>
+
+    <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg mt-2" (click)="save()">
+    <span *ngIf="!isLoading"> {{ 'Save' | translate }}</span>
+    <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+  </button>
 </div>
 
 <div class="flex justify-start items-center space-x-4 rtl:space-x-reverse">
@@ -63,17 +68,10 @@
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0" >
                         <div class="flex items-center gap-2">
-                            <input *ngIf=" row.id == editDegreeId" type="number" [(ngModel)]="row.degree"
+                            <input type="number" [(ngModel)]="row.degree"
                                 [max]="row.degree" min="0"
                                 class="w-20 px-2 py-1 border border-gray-300 rounded" />
-                            <span *ngIf="row.id != editDegreeId">{{ row.degree }}</span>
                             / {{ directMark.mark }}
-                            <button *ngIf="row.id == editDegreeId" (click)="save(row)">
-                                <i class="far fa-check-circle secondaryTxt"></i>
-                            </button>
-                            <button *ngIf="row.id != editDegreeId" (click)="editDegreeId = row.id">
-                                <i class="fa-solid fa-pencil"></i>
-                            </button>
                         </div>
                         <div *ngIf="row.degree!= 0 && row.degree > directMark.mark" class="text-red-500 text-sm mt-1">
                                {{ 'Degree cannot exceed' | translate }} {{ directMark.mark }}.

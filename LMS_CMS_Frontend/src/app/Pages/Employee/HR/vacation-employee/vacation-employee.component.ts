@@ -60,6 +60,7 @@ export class VacationEmployeeComponent {
   employees: EmployeeGet[] = [];
   vacationTypes: VacationTypes[] = [];
   selectedEmployee: EmployeeGet = new EmployeeGet();
+  HireDateError: boolean = false;
 
   CurrentPage: number = 1
   PageSize: number = 10
@@ -193,6 +194,7 @@ export class VacationEmployeeComponent {
     if (this.vacationEmployee.employeeID && this.vacationEmployee.vacationTypesID && this.vacationEmployee.dateFrom) {
       this.VacationEmployeeServ.GetBalanceAndUsedVacationEmployee(this.vacationEmployee.employeeID, this.vacationEmployee.vacationTypesID, this.vacationEmployee.dateFrom, this.DomainName).subscribe((emp) => {
         console.log(emp)
+        this.HireDateError = false
         this.vacationEmployee.balance = emp.balance
         this.vacationEmployee.used = emp.used
         this.vacationEmployee.remains = this.vacationEmployee.balance - emp.used
@@ -202,6 +204,7 @@ export class VacationEmployeeComponent {
       }, error => {
         console.log(error.error);
         if (typeof error.error === 'string' && error.error.includes("This employee does not have a hire date set")) {
+          this.HireDateError = true
           Swal.fire({
             icon: 'error',
             title: 'Oops...',
@@ -215,7 +218,7 @@ export class VacationEmployeeComponent {
   }
 
   DateFromIsChanged() {
-    if (this.vacationEmployee.halfDay != true && (this.vacationEmployee.dateTo == '' || this.vacationEmployee.dateTo == null || this.vacationEmployee.dateTo > this.vacationEmployee.dateFrom)) {
+    if (this.vacationEmployee.halfDay != true && (this.vacationEmployee.dateTo == '' || this.vacationEmployee.dateTo == null || this.vacationEmployee.dateTo < this.vacationEmployee.dateFrom)) {
       this.vacationEmployee.dateTo = this.vacationEmployee.dateFrom
     }
   }
@@ -397,6 +400,16 @@ export class VacationEmployeeComponent {
       isValid = false;
     }
 
+    if (this.HireDateError == true) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'This employee does not have a hire date set!',
+        confirmButtonText: 'Okay',
+        customClass: { confirmButton: 'secondaryBg' }
+      });
+      isValid = false;
+    }
     return isValid;
   }
 

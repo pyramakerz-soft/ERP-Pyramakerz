@@ -103,14 +103,14 @@
                 <label class="mb-2 primaryTxt" for="dateFrom"> {{ 'Date From' | translate }}</label>
                 <input id="dateFrom" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                     placeholder="{{ 'Enter Date From' | translate }}" [(ngModel)]="officialHoliday.dateFrom"
-                    (ngModelChange)="onInputValueChange({ field: 'dateFrom', value: $event })" />
+                    (ngModelChange)="onInputValueChange({ field: 'dateFrom', value: $event }); onDateFromChange()"  />
                 <span *ngIf="validationErrors['dateFrom']" class="text-red-500 ml-3 font-normal">{{
                     validationErrors['dateFrom']}}</span>
             </div>
             <div class="flex flex-col mb-4 w-full">
                 <label class="mb-2 primaryTxt" for="dateTo"> {{ 'Date To' | translate }}</label>
                 <input id="dateTo" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                    placeholder="{{ 'Enter Date To' | translate }}" [(ngModel)]="officialHoliday.dateTo"
+                    placeholder="{{ 'Enter Date To' | translate }}" [(ngModel)]="officialHoliday.dateTo"  [min]="officialHoliday.dateFrom" 
                     (ngModelChange)="onInputValueChange({ field: 'dateTo', value: $event })" />
                 <span *ngIf="validationErrors['dateTo']" class="text-red-500 ml-3 font-normal">{{
                     validationErrors['dateTo']}}</span>

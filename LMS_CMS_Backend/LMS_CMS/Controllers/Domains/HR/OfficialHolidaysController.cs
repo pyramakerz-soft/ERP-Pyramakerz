@@ -33,7 +33,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         [HttpGet]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
-          pages: new[] { "Conduct Level" }
+          pages: new[] { "Official Holidays" }
          )]
         public IActionResult Get()
         {
@@ -66,7 +66,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
-          pages: new[] { "Conduct Level" }
+          pages: new[] { "Official Holidays" }
         )]
         public async Task<IActionResult> GetById(long id)
         {
@@ -99,7 +99,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         [HttpPost]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Conduct Level" }
+            pages: new[] { "Official Holidays" }
          )]
         public async Task<IActionResult> Add(OfficialHolidaysAddDTO newHoliday)
         {
@@ -142,7 +142,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee" },
            allowEdit: 1,
-           pages: new[] { "Conduct Level" }
+           pages: new[] { "Official Holidays" }
        )]
         public async Task<IActionResult> EditAsync(OfficialHolidaysAddDTO newHoliday)
         {
@@ -177,7 +177,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Conduct Level", roleId, userId, officialHolidays);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Official Holidays", roleId, userId, officialHolidays);
                 if (accessCheck != null)
                 {
                     return accessCheck;
@@ -214,7 +214,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
           allowDelete: 1,
-          pages: new[] { "Lesson Resources Types" }
+          pages: new[] { "Official Holidays" }
         )]
         public IActionResult Delete(long id)
         {
@@ -243,7 +243,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             }
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Conduct Level", roleId, userId, officialHolidays);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Official Holidays", roleId, userId, officialHolidays);
                 if (accessCheck != null)
                 {
                     return accessCheck;

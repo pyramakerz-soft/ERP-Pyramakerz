@@ -29,7 +29,7 @@ export class DirectMarkClassesStudentService {
     return this.http.get<{ data: DirectMarkClassesStudent[],directMark :DirectMark , pagination: any }>(`${this.baseUrl}/DirectMarkClassesStudent/GetByDirectMarkId/${DirectMarkID}/${ClassId}?pageNumber=${pageNumber}&pageSize=${pageSize}`, { headers })
   }
 
-  Edit(directMarkClassesStudent: DirectMarkClassesStudent, DomainName: string){
+  Edit(directMarkClassesStudent: DirectMarkClassesStudent[], DomainName: string){
     if (DomainName != null) {
       this.header = DomainName
     }
@@ -38,6 +38,6 @@ export class DirectMarkClassesStudentService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.put<DirectMarkClassesStudent>(`${this.baseUrl}/DirectMarkClassesStudent`, directMarkClassesStudent, { headers });
+    return this.http.put<DirectMarkClassesStudent[]>(`${this.baseUrl}/DirectMarkClassesStudent`, directMarkClassesStudent, { headers });
   }
 }

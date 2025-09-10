@@ -35,8 +35,8 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         [HttpGet]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" }
-          //,
-          //pages: new[] { "Conduct Level" }
+          ,
+          pages: new[] { "Vacation Employee" }
          )]
         public async Task<IActionResult> GetAsync([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
@@ -89,8 +89,8 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" }
-          //,
-          //pages: new[] { "Conduct Level" }
+          ,
+          pages: new[] { "Vacation Employee" }
         )]
         public async Task<IActionResult> GetById(long id)
         {
@@ -189,7 +189,8 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         
         [HttpGet("GetBalanceAndUsedVacationEmployee/{EmployeeId}/{VacationId}/{date}")]
         [Authorize_Endpoint_(
-          allowedTypes: new[] { "octa", "employee" }
+          allowedTypes: new[] { "octa", "employee" },
+          pages: new[] { "Vacation Employee" }
 
         )]
         public async Task<IActionResult> GetBalanceAndUsedVacationEmployee(long EmployeeId,long VacationId , DateOnly date)
@@ -294,7 +295,8 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
         [HttpPost]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" }
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Vacation Employee" }
          )]
         public async Task<IActionResult> Add(VacationEmployeeAddDTO newVacation)
         {
@@ -420,7 +422,8 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         [HttpPut]
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee" },
-           allowEdit: 1
+           allowEdit: 1,
+          pages: new[] { "Vacation Employee" }
        )]
         public async Task<IActionResult> EditAsync(VacationEmployeeAddDTO newVacation)
         {
@@ -540,7 +543,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Conduct Level", roleId, userId, vacation);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Vacation Employee", roleId, userId, vacation);
                 if (accessCheck != null)
                 {
                     return accessCheck;
@@ -576,7 +579,8 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         [HttpDelete("{id}")]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
-          allowDelete: 1
+          allowDelete: 1,
+          pages: new[] { "Vacation Employee" }
         )]
         public IActionResult Delete(long id)
         {
@@ -605,7 +609,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             }
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Conduct Level", roleId, userId, vacation);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Vacation Employee", roleId, userId, vacation);
                 if (accessCheck != null)
                 {
                     return accessCheck;

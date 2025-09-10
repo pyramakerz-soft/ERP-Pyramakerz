@@ -31,7 +31,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         [HttpGet]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
-          pages: new[] { "Conduct Level" }
+          pages: new[] { "Bonus" }
          )]
         public IActionResult Get()
         {

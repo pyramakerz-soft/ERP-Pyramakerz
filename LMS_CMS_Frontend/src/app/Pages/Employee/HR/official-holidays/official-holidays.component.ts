@@ -253,6 +253,12 @@ export class OfficialHolidaysComponent {
     }
   }
 
+  onDateFromChange(){
+    if(this.officialHoliday.dateTo=='' || this.officialHoliday.dateTo < this.officialHoliday.dateFrom){
+      this.officialHoliday.dateTo = this.officialHoliday.dateFrom
+    }
+  }
+
   async onSearchEvent(event: { key: string; value: any }) {
     this.key = event.key;
     this.value = event.value;

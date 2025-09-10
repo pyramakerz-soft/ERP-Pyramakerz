@@ -32,8 +32,8 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         [HttpGet]
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee" }
-           //,
-           //pages: new[] { "Conduct Level" }
+           ,
+           pages: new[] { "Vacation Types" }
           )]
         public IActionResult Get()
         {
@@ -66,7 +66,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
-          pages: new[] { "Conduct Level" }
+          pages: new[] { "Vacation Types" }
         )]
         public async Task<IActionResult> GetById(long id)
         {
@@ -98,8 +98,8 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         [HttpPost]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" }
-            //,
-            //pages: new[] { "Conduct Level" }
+            ,
+            pages: new[] { "Vacation Types" }
          )]
         public async Task<IActionResult> Add(VacationTypesAddDTO newVacation)
         {
@@ -153,7 +153,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee" },
            allowEdit: 1,
-           pages: new[] { "Conduct Level" }
+           pages: new[] { "Vacation Types" }
        )]
         public async Task<IActionResult> EditAsync(VacationTypesAddDTO newVacation)
         {
@@ -188,7 +188,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Conduct Level", roleId, userId, vacation);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Vacation Types", roleId, userId, vacation);
                 if (accessCheck != null)
                 {
                     return accessCheck;
@@ -225,7 +225,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
           allowDelete: 1,
-          pages: new[] { "Lesson Resources Types" }
+          pages: new[] { "Vacation Types" }
         )]
         public IActionResult Delete(long id)
         {
@@ -254,7 +254,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             }
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Conduct Level", roleId, userId, vacation);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Vacation Types", roleId, userId, vacation);
                 if (accessCheck != null)
                 {
                     return accessCheck;

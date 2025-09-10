@@ -199,7 +199,15 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 certificateSubjectTotalMark.Add(subjectTotalMark);
             }
 
-            return Ok(new { SubjectDTO = SubjectDTO, Header = WeightTypeDTO, cells = certificateSubjects , LastColumn = certificateSubjectTotalMark });
+            foreach (var percentage in certificateSubjectTotalMark)
+            {
+                if (percentage.Mark == 0)
+                    percentage.Percentage = 0;  
+                else
+                    percentage.Percentage = (percentage.Degree / percentage.Mark) * 100;
+            }
+
+            return Ok(new { SubjectDTO = SubjectDTO, Header = WeightTypeDTO, cells = certificateSubjects , LastColumn = certificateSubjectTotalMark});
         }
 
     }

@@ -61,6 +61,7 @@ export class CertificateComponent {
   subjects: Subject[] = [];
   weightTypes: WeightType[] = [];
   schools: School[] = []
+  SelectedSchool: School = new School()
   Grades: Grade[] = []
   Classes: Classroom[] = []
   Students: Student[] = []
@@ -237,8 +238,12 @@ export class CertificateComponent {
       const endDate = new Date(year, month, 0); // last day of month
 
       // Format to yyyy-MM-dd
-      const formatDate = (date: Date) =>
-        date.toISOString().split('T')[0];
+      const formatDate = (date: Date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
 
       this.DateFrom = formatDate(startDate);
       this.DateTo = formatDate(endDate);
@@ -256,6 +261,10 @@ export class CertificateComponent {
     this.Classes = []
     this.SelectedGradeId = 0
     this.SelectedClassId = 0
+    var sc = this.schools.find(s => s.id == this.SelectedSchoolId);
+    if (sc) {
+      this.SelectedSchool = sc
+    }
     if (this.mode == 'employee') {
       this.Students = []
       this.SelectedStudentId = 0
@@ -342,9 +351,42 @@ export class CertificateComponent {
   }
 
   getTotal(subjectId: number): string {
-
     const cell = this.LastColumn.find((c: CertificateSubjectTotalMark) => c.subjectID === subjectId);
     return cell ? `${cell.degree} /${cell.mark} ` : '-';
+  }
+
+  getSum(): string {
+    const sumMark = this.LastColumn
+      .map((c: CertificateSubjectTotalMark) => c.mark)
+      .reduce((acc, val) => acc + val, 0);
+
+    const sumDegree = this.LastColumn
+      .map((c: CertificateSubjectTotalMark) => c.degree)
+      .reduce((acc, val) => acc + val, 0);
+
+    return sumMark > 0 ? `${sumDegree} / ${sumMark}` : '-';
+  }
+
+  getSumPercentage() {
+    const sumMark = this.LastColumn
+      .map((c: CertificateSubjectTotalMark) => c.mark)
+      .reduce((acc, val) => acc + val, 0);
+
+    const sumDegree = this.LastColumn
+      .map((c: CertificateSubjectTotalMark) => c.degree)
+      .reduce((acc, val) => acc + val, 0);
+
+    if (sumMark > 0) {
+      const percentage = (sumDegree / sumMark) * 100;
+      return `${percentage.toFixed(2)} %`; // rounded to 2 decimals
+    }
+
+    return '-';
+  }
+
+  getPercentage(subjectId: number): string {
+    const cell = this.LastColumn.find((c: CertificateSubjectTotalMark) => c.subjectID === subjectId);
+    return cell ? `${cell.percentage} %` : '-';
   }
 
   async getPDFData() {
@@ -352,21 +394,37 @@ export class CertificateComponent {
     this.tableHeadersForPDF = [
       'Subjects',
       ...this.weightTypes.map(wt => wt.englishName),
-      'Total'
+      'Total',
+      'Percentage'
     ];
 
+    // Build rows for each subject
     this.tableDataForPDF = this.subjects.map(subject => {
       const row: Record<string, string> = {};
       row['Subjects'] = subject.en_name;
       this.weightTypes.forEach(wt => {
-        row[wt.englishName] = this.getDegree(subject.id, wt.id);
+        row[wt.englishName] = this.getDegree(subject.id, wt.id) || '-';
       });
       row['Total'] = this.getTotal(subject.id);
+      row['Percentage'] = this.getPercentage(subject.id);
       return row;
     });
-    console.log('Prepared data:', this.tableDataForPDF);
-  }
 
+    // Add total row
+    const totalRow: Record<string, string> = {};
+    totalRow['Subjects'] = 'Total';
+
+    this.weightTypes.forEach(wt => {
+      totalRow[wt.englishName] = '-';
+    });
+
+    totalRow['Total'] = this.getSum();
+    totalRow['Percentage'] = this.getSumPercentage();
+
+    this.tableDataForPDF.push(totalRow);
+
+    console.log('Prepared PDF data:', this.tableDataForPDF);
+  }
 
   async Print() {
     await this.getPDFData();
@@ -444,7 +502,8 @@ export class CertificateComponent {
     const headerKeyMap = [
       { key: 'subject', header: 'Subjects' },
       ...this.weightTypes.map(wt => ({ key: wt.id.toString(), header: wt.englishName })),
-      { key: 'total', header: 'Total' }
+      { key: 'total', header: 'Total' },
+      { key: 'percentage', header: 'Percentage' }
     ];
 
     const dataMatrix = this.subjects.map(subject => {
@@ -454,8 +513,16 @@ export class CertificateComponent {
         row.push(this.getDegree(subject.id, wt.id) || '-');
       });
       row.push(this.getTotal(subject.id));
+      row.push(this.getPercentage(subject.id)); // ✅ new column data
       return row;
     });
+
+    const totalRow: any[] = [];
+    totalRow.push('Total');
+    this.weightTypes.forEach(() => totalRow.push('-')); // leave weight type columns blank
+    totalRow.push(this.getSum());
+    totalRow.push(this.getSumPercentage()); // ✅ percentage in last column
+    dataMatrix.push(totalRow);
 
     const infoRows = [
       { key: 'School', value: this.SelectedSchoolName },
@@ -487,9 +554,20 @@ export class CertificateComponent {
       infoRows.push({ key: 'DateTo ', value: this.DateTo });
     }
 
+    const now = new Date();
+    const formattedDate = `${now.getFullYear()}-${(now.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')} `
+      + `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes()
+        .toString()
+        .padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+    infoRows.push({ key: 'Printed At ', value: formattedDate });
+
+
     await this.reportsService.generateExcelReport({
       infoRows: infoRows,
       filename: 'Certificate.xlsx',
+      reportImage: this.SelectedSchool.reportImage,
       tables: [
         {
           title: '',
@@ -537,6 +615,16 @@ export class CertificateComponent {
       this.infoRows.push({ keyEn: 'DateFrom : ' + this.DateFrom });
       this.infoRows.push({ keyEn: 'DateTo : ' + this.DateTo });
     }
+    const now = new Date();
+    const formattedDate = `${now.getFullYear()}-${(now.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')} `
+      + `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes()
+        .toString()
+        .padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+
+    this.infoRows.push({ keyEn: 'Printed At : ' + formattedDate });
+
     return this.infoRows
   }
 

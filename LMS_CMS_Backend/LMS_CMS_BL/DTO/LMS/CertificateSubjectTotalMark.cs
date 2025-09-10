@@ -13,5 +13,7 @@ namespace LMS_CMS_BL.DTO.LMS
         public string SubjectAr_name { get; set; }
         public float Degree { get; set; }
         public float Mark { get; set; }
+        public double Percentage { get; set; }
+
     }
 }
