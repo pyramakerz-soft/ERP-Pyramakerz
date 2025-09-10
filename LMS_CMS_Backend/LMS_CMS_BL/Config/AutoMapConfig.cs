@@ -1317,8 +1317,8 @@ namespace LMS_CMS_BL.Config
 
             // New mapping for CertificateStudentReportDTO--77
             CreateMap<CertificateStudent, CertificateStudentReportDTO>()
-                .ForMember(dest => dest.Medal, opt => opt.MapFrom(src => src.CertificateTypeID))
-                .ForMember(dest => dest.MedalName, opt => opt.MapFrom(src => src.CertificateType.Name))
+                .ForMember(dest => dest.CertificateTypeID, opt => opt.MapFrom(src => src.CertificateTypeID))
+                .ForMember(dest => dest.CertificateTypeName, opt => opt.MapFrom(src => src.CertificateType.Name))
                 .ForMember(dest => dest.AddedAt, opt => opt.MapFrom(src => src.InsertedAt))
                 .ForMember(dest => dest.AddedBy, opt => opt.MapFrom(src => src.InsertedByEmployee.en_name ?? src.InsertedByEmployee.ar_name));
             //--77
