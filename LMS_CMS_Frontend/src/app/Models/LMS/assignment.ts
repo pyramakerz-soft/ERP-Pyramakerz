@@ -7,6 +7,7 @@ export class Assignment {
         public englishName: string = '',
         public arabicName: string = '',
         public mark: number | null = null,
+        public passMark: number | null = null,
         public openDate: string = '',
         public dueDate: string | null = null,
         public cutOfDate: string = '',

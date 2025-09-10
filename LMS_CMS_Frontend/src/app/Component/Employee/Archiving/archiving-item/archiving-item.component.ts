@@ -21,4 +21,13 @@ export class ArchivingItemComponent {
     if(archiving.id)
     this.Selected.emit(archiving.id);
   }
+
+  getFileExtension(filename: string): string {
+    if (!filename) return '';
+    
+    const lastDotIndex = filename.lastIndexOf('.');
+    if (lastDotIndex === -1) return '';
+    
+    return filename.slice(lastDotIndex).toLowerCase();
+  }
 }

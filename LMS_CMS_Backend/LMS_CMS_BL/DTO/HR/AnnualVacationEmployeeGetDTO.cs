@@ -14,6 +14,7 @@ namespace LMS_CMS_BL.DTO.HR
     {
         public long ID { get; set; }
         public int Balance { get; set; }
+        public double used { get; set; }
         public long EmployeeID { get; set; }
         public string EmployeeEnName { get; set; }
         public string EmployeeArName { get; set; }

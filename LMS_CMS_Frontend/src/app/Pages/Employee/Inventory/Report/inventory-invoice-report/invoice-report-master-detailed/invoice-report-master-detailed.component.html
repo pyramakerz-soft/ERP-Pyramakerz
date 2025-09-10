@@ -158,6 +158,11 @@
     <div id="Data" class="hidden">
         <app-pdf-print *ngIf="showPDF" [school]="school" 
                        [fileName]="'Inventory Transactions Detailed Report'"
+                       [infoRows]="[
+       { keyEn: 'From Date: ' + this.dateFrom, valueEn: '' },
+       { keyEn: 'To Date: ' + this.dateTo, valueEn: '' },
+       { keyEn: 'Store: ' + this.getStoreName(), valueEn: '' },
+            ]"
                        [tableDataWithHeaderArray]="cachedTableDataForPDF"
                        #pdfComponentRef>
         </app-pdf-print>

@@ -259,6 +259,8 @@ import { PermissionGroupComponent } from './Pages/Employee/Archiving/permission-
 import { PermissionGroupEmployeeComponent } from './Pages/Employee/Archiving/permission-group-employee/permission-group-employee.component';
 import { PermissionGroupDetailsComponent } from './Pages/Employee/Archiving/permission-group-details/permission-group-details.component';
 import { ArchivingComponent } from './Pages/Employee/Archiving/archiving/archiving.component';
+import { AccountingStatementReportComponent } from './Pages/Employee/Accounting/Report/accounting-statement-report/accounting-statement-report.component';
+import { VacationEmployeeComponent } from './Pages/Employee/HR/vacation-employee/vacation-employee.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -537,6 +539,7 @@ export const routes: Routes = [
             { path: 'Medal To Student Report', component: StudentMedalReportComponent, title: 'Medal To Student Report', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Account Balance Report', component: AccountBalanceComponent, title: 'Account Balance Report', canActivate: [noNavigateWithoutLoginGuard], },
             { path: 'Account Subledger Report', component: AccountingSubledgerComponent, title: 'Account Subledger Report', canActivate: [noNavigateWithoutLoginGuard], },
+            { path: 'Account Statement Report', component: AccountingStatementReportComponent, title: 'Account Statement Report', canActivate: [noNavigateWithoutLoginGuard], },
             { path: "Supplier Statement",  component: AccountStatementsComponent,  title: "Supplier Statement",  canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard]  },
             { path: "Safe Statement",  component: AccountStatementsComponent,  title: "Safe Statement",  canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard]  },
             { path: "Bank Statement",  component: AccountStatementsComponent,  title: "Bank Statement",  canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard]  },
@@ -566,6 +569,7 @@ export const routes: Routes = [
             { path: "Permissions Group Employee/:id", component: PermissionGroupEmployeeComponent, title: "Permissions Group Employee", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Permissions Group Archiving/:id", component: PermissionGroupDetailsComponent, title: "Permissions Group Archiving", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Archiving", component: ArchivingComponent, title: "Archiving", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Vacation Employee", component: VacationEmployeeComponent, title: "Vacation Employee", canActivate: [noNavigateWithoutLoginGuard] },
         ]
     },
     {

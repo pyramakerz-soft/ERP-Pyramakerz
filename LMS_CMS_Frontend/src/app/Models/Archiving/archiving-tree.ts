@@ -6,6 +6,11 @@ export class ArchivingTree {
         public fileFile : File|null = null,
         public archivingTreeParentID: number = 0, 
         public children: ArchivingTree[] = [], 
-        public insertedByUserId :number = 0
+        public insertedByUserId :number = 0,
+
+
+        public allow_Delete: boolean = false,  
+        public allow_Delete_For_Others: boolean = false,
+        public selected: boolean = false 
     ) {}
 }

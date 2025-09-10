@@ -1,0 +1,200 @@
+<!-- account-statement.component.html -->
+<div class="flex justify-between">
+    <h1 class="primaryTxt font-semibold text-2xl leading-9">
+        {{ 'Account Statement Report' | translate }}
+    </h1>
+</div>
+
+<div class="my-5 flex flex-wrap md:flex-nowrap items-end space-x-0 md:space-x-6 rtl:space-x-reverse space-y-4 md:space-y-0 mb-6">
+    <!-- Date From -->
+    <div class="w-full md:w-1/4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="fromDate">{{ 'From Date' | translate }}</label>
+        <input type="date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            id="fromDate" [(ngModel)]="fromDate" (ngModelChange)="onFilterChange()" required>
+    </div>
+
+    <!-- Date To -->
+    <div class="w-full md:w-1/4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="toDate">{{ 'To Date' | translate }}</label>
+        <input type="date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            id="toDate" [(ngModel)]="toDate" (ngModelChange)="onFilterChange()" required>
+    </div>
+
+    <!-- Account Type Selector -->
+    <div class="w-full md:w-1/4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="linkFileID">{{ 'Account Type' | translate }}</label>
+        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="linkFileID"
+            [(ngModel)]="linkFileID" (ngModelChange)="onLinkFileChange()" required>
+            <option [ngValue]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Account Type' | translate }}</option>
+            <option *ngFor="let option of linkFileOptions" [ngValue]="option.id">
+                {{ isRtl && option.arName ? option.arName : option.name | translate }}
+            </option>
+        </select>
+        <div *ngIf="isLinkFilesLoading" class="text-sm text-gray-500 mt-1">
+            {{ 'Loading...' | translate }}
+        </div>
+    </div>
+
+    <!-- Account Selector -->
+    <div class="w-full md:w-1/4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="subAccountID">{{ 'Account' | translate }}</label>
+        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="subAccountID"
+            [(ngModel)]="subAccountID" (ngModelChange)="onFilterChange()" [disabled]="!linkFileID || isAccountsLoading">
+            <option [ngValue]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Sub Account' | translate }}</option>
+            <!-- <option [ngValue]="0">{{ 'All' | translate }} {{ 'Accounts' | translate }}</option> -->
+            <option *ngFor="let account of accountOptions" [ngValue]="account.id">
+                {{ account.name || account.en_name }}
+            </option>
+            <option *ngIf="accountOptions.length === 0 && !isAccountsLoading" disabled>
+                {{ 'No accounts available' | translate }}
+            </option>
+        </select>
+        <div *ngIf="isAccountsLoading" class="text-sm text-gray-500 mt-1">
+            {{ 'Loading accounts...' | translate }}
+        </div>
+    </div>
+
+    <div class="w-full md:w-1/6 flex justify-end mt-4 md:mt-0">
+        <button class="p-3 font-medium text-xl rounded-lg" (click)="viewReport()"
+            [disabled]="!fromDate || !toDate || !linkFileID || !subAccountID || isLoading" [ngClass]="{
+                'bg-gray-100 text-gray-300': !fromDate || !toDate || !linkFileID || isLoading,
+                'secondaryBg text-white': fromDate && toDate && linkFileID && !isLoading
+            }">
+            <span *ngIf="!isLoading">{{ 'View Report' | translate }}</span>
+            <span *ngIf="isLoading">{{ 'Loading...' | translate }}</span>
+        </button>
+    </div>
+</div>
+
+<!-- Loading Indicator -->
+<div *ngIf="isLoading" class="flex justify-center items-center py-8">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-secondaryBg"></div>
+</div>
+
+<div *ngIf="showTable && reportData" class="mb-5">
+    <!-- Opening Balance -->
+    <div class="bg-gray-50 p-4 rounded-lg mb-4">
+        <h3 class="font-semibold text-lg mb-2">{{ 'Opening Balance' | translate }}</h3>
+        <div class="text-lg">
+            {{ reportData.firstPeriodBalance | number:'1.2-2' }}
+        </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
+        <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
+            <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+                <tr>
+                    <th class="py-3 px-4 whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ 'Date' | translate }}
+                    </th>
+                    <th class="py-3 px-4 whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ 'Account' | translate }}
+                    </th>
+                    <th class="py-3 px-4 whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ 'Serial' | translate }}
+                    </th>
+                    <th class="py-3 px-4 whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ 'Sub Account' | translate }}
+                    </th>
+                    <th class="py-3 px-4 whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ 'Debit' | translate }}
+                    </th>
+                    <th class="py-3 px-4 whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ 'Credit' | translate }}
+                    </th>
+                    <th class="py-3 px-4 whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ 'Balance' | translate }}
+                    </th>
+                    <th class="py-3 px-4 whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ 'Notes' | translate }}
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngIf="reportData.data.length === 0">
+                    <td colspan="8" class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                        {{ 'No Data Found' | translate }}
+                    </td>
+                </tr>
+
+                <tr *ngFor="let item of reportData.data; let i = index" 
+                    [ngClass]="{ 
+                        'bg-[#F7F7F7]': i % 2 === 1, 
+                        'bg-white': i % 2 !== 1
+                    }" 
+                    class="border-t border-gray-300 text-xs md:text-sm">
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ formatDate(item.date) }}
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ item.account }}
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ item.serial }}
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ item.subAccount }}
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ item.debit | number:'1.2-2' }}
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ item.credit | number:'1.2-2' }}
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ item.balance | number:'1.2-2' }}
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ item.notes || '-' }}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Totals Summary -->
+    <div class="bg-gray-50 p-4 rounded-lg mb-4">
+        <h3 class="font-semibold text-lg mb-2">{{ 'Totals' | translate }}</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <span class="font-medium">{{ 'Total Debit' | translate }}:</span> {{ reportData.fullTotals.totalDebit | number:'1.2-2' }}
+            </div>
+            <div>
+                <span class="font-medium">{{ 'Total Credit' | translate }}:</span> {{ reportData.fullTotals.totalCredit | number:'1.2-2' }}
+            </div>
+            <div>
+                <span class="font-medium">{{ 'Difference' | translate }}:</span> {{ reportData.fullTotals.difference | number:'1.2-2' }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <div *ngIf="reportData.pagination.totalPages > 1" class="flex justify-between items-center mt-4">
+        <div class="text-sm text-gray-600">
+            {{ 'Showing' | translate }} {{ (pageNumber - 1) * pageSize + 1 }} - {{ Math.min(pageNumber * pageSize, reportData.pagination.totalRecords) }} 
+            {{ 'of' | translate }} {{ reportData.pagination.totalRecords }} {{ 'records' | translate }}
+        </div>
+        <div class="flex space-x-2 rtl:space-x-reverse">
+            <button (click)="changePage(1)" [disabled]="pageNumber === 1" 
+                class="px-3 py-1 rounded border" [ngClass]="{'bg-gray-200': pageNumber === 1, 'bg-white': pageNumber !== 1}">
+                &laquo;
+            </button>
+            <button (click)="changePage(pageNumber - 1)" [disabled]="pageNumber === 1" 
+                class="px-3 py-1 rounded border" [ngClass]="{'bg-gray-200': pageNumber === 1, 'bg-white': pageNumber !== 1}">
+                &lsaquo;
+            </button>
+            
+            <span class="px-3 py-1">{{ pageNumber }} / {{ reportData.pagination.totalPages }}</span>
+            
+            <button (click)="changePage(pageNumber + 1)" [disabled]="pageNumber === reportData.pagination.totalPages" 
+                class="px-3 py-1 rounded border" [ngClass]="{'bg-gray-200': pageNumber === reportData.pagination.totalPages, 'bg-white': pageNumber !== reportData.pagination.totalPages}">
+                &rsaquo;
+            </button>
+            <button (click)="changePage(reportData.pagination.totalPages)" [disabled]="pageNumber === reportData.pagination.totalPages" 
+                class="px-3 py-1 rounded border" [ngClass]="{'bg-gray-200': pageNumber === reportData.pagination.totalPages, 'bg-white': pageNumber !== reportData.pagination.totalPages}">
+                &raquo;
+            </button>
+        </div>
+    </div>
+</div>

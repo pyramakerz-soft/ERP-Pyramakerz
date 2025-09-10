@@ -1317,8 +1317,8 @@ namespace LMS_CMS_BL.Config
 
             // New mapping for CertificateStudentReportDTO--77
             CreateMap<CertificateStudent, CertificateStudentReportDTO>()
-                .ForMember(dest => dest.Medal, opt => opt.MapFrom(src => src.CertificateTypeID))
-                .ForMember(dest => dest.MedalName, opt => opt.MapFrom(src => src.CertificateType.Name))
+                .ForMember(dest => dest.CertificateTypeID, opt => opt.MapFrom(src => src.CertificateTypeID))
+                .ForMember(dest => dest.CertificateTypeName, opt => opt.MapFrom(src => src.CertificateType.Name))
                 .ForMember(dest => dest.AddedAt, opt => opt.MapFrom(src => src.InsertedAt))
                 .ForMember(dest => dest.AddedBy, opt => opt.MapFrom(src => src.InsertedByEmployee.en_name ?? src.InsertedByEmployee.ar_name));
             //--77
@@ -1476,9 +1476,16 @@ namespace LMS_CMS_BL.Config
             CreateMap<PermissionGroupDetails, PermissionGroupDetailsGetDTO>();
 
             CreateMap<AnnualVacationEmployee, AnnualVacationEmployeeGetDTO>()
+                .ForMember(dest => dest.VacationTypeName, opt => opt.MapFrom(src => src.VacationTypes.Name))
                 .ForMember(dest => dest.EmployeeEnName, opt => opt.MapFrom(src => src.Employee.en_name))
                 .ForMember(dest => dest.EmployeeArName, opt => opt.MapFrom(src => src.Employee.ar_name));
             CreateMap<AnnualVacationEmployeeEditDTO, AnnualVacationEmployee>();
+
+            CreateMap<VacationEmployee, VacationEmployeeGetDTO>()
+                .ForMember(dest => dest.VacationTypesName, opt => opt.MapFrom(src => src.VacationTypes.Name))
+                .ForMember(dest => dest.EmployeeEnName, opt => opt.MapFrom(src => src.Employee.en_name))
+                .ForMember(dest => dest.EmployeeArName, opt => opt.MapFrom(src => src.Employee.ar_name));
+            CreateMap<VacationEmployeeAddDTO, VacationEmployee>();
         }
     } 
 }

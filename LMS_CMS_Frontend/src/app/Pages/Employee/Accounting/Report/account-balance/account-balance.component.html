@@ -17,20 +17,33 @@
     <div class="w-full md:w-1/4">
         <label class="block mb-2 text-sm font-medium text-gray-900" for="linkFileID">{{ 'Account Type' | translate }}</label>
         <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="linkFileID"
-            [(ngModel)]="linkFileID" (ngModelChange)="onFilterChange()" required>
+            [(ngModel)]="linkFileID" (ngModelChange)="onLinkFileChange()" required>
             <option [ngValue]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Account Type' | translate }}</option>
-            <option *ngFor="let option of linkFileOptions" [ngValue]="option.id">{{ option.name | translate }}</option>
+            <option *ngFor="let option of linkFileOptions" [ngValue]="option.id">
+                {{ isRtl && option.arName ? option.arName : option.name | translate }}
+            </option>
         </select>
+        <div *ngIf="isLinkFilesLoading" class="text-sm text-gray-500 mt-1">
+            {{ 'Loading...' | translate }}
+        </div>
     </div>
 
     <!-- Account Selector -->
     <div class="w-full md:w-1/4">
         <label class="block mb-2 text-sm font-medium text-gray-900" for="accountID">{{ 'Account' | translate }}</label>
         <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="accountID"
-            [(ngModel)]="accountID" (ngModelChange)="onFilterChange()">
+            [(ngModel)]="accountID" (ngModelChange)="onFilterChange()" [disabled]="!linkFileID || isAccountsLoading">
             <option [ngValue]="0">{{ 'All' | translate }} {{ 'Accounts' | translate }}</option>
-            <option *ngFor="let account of accounts" [ngValue]="account.id">{{ account.name }}</option>
+            <option *ngFor="let account of accountOptions" [ngValue]="account.id">
+                {{ account.name }}
+            </option>
+            <option *ngIf="accountOptions.length === 0 && !isAccountsLoading" disabled>
+                {{ 'No accounts available' | translate }}
+            </option>
         </select>
+        <div *ngIf="isAccountsLoading" class="text-sm text-gray-500 mt-1">
+            {{ 'Loading accounts...' | translate }}
+        </div>
     </div>
 
     <!-- Checkboxes -->
@@ -69,6 +82,12 @@
 </div>
 
 <div *ngIf="showTable && reportData" class="mb-5">
+  <!-- Add export buttons -->
+  <div class="mt-5 flex justify-end space-x-4 rtl:space-x-reverse">
+    <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="DownloadAsExcel()" [title]="'Download Excel' | translate">
+    <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()" [title]="'Download PDF' | translate">
+    <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()" [title]="'Print' | translate">
+  </div>  
     <!-- Data Table -->
     <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
         <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
@@ -126,7 +145,7 @@
 
     
     <!-- Totals Summary -->
-    <div class="bg-green-50 p-4 rounded-lg mb-4">
+    <div class="bg-gray-50 p-4 rounded-lg mb-4">
         <h3 class="font-semibold text-lg mb-2">{{ 'Totals' | translate }}</h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
@@ -171,3 +190,60 @@
         </div>
     </div> -->
 </div>
+
+
+<!-- PDF container (keep at the bottom) -->
+<div class="absolute -top-[9999px] -left-[9999px]">
+  <div id="accountBalanceData" class="hidden">
+    <app-pdf-print *ngIf="showPDF" [school]="school" 
+                   [fileName]="'Account Balance Report'"
+[infoRows]="[
+{
+        keyEn: 'Date To: ' + this.toDate,
+        keyAr: 'التاريخ إلى: ' + this.toDate
+      },
+      {
+        keyEn: 'Account Type: ' + this.getLinkFileName(this.linkFileID),
+        keyAr: 'نوع الحساب: ' + this.getLinkFileName(this.linkFileID)
+      },
+      {
+        keyEn: 'Account: ' + this.getAccountName(this.accountID),
+        keyAr: 'الحساب: ' + this.getAccountName(this.accountID)
+      },
+      ]"                   [tableDataWithHeaderArray]="cachedTableDataForPDF"
+                   #pdfComponentRef>
+    </app-pdf-print>
+  </div>
+</div>
+
+<!--                     { keyEn: 'Date To: ' + toDate, keyAr: 'التاريخ إلى: ' + toDate },
+                    { keyEn: 'Account Type: ' + getLinkFileName(linkFileID), keyAr: 'نوع الحساب: ' + getLinkFileName(linkFileID) },
+                    { keyEn: 'Account: ' + getAccountName(accountID), keyAr: 'الحساب: ' + getAccountName(accountID) },
+                    { keyEn: 'Generated On: ' + new Date().toLocaleDateString(), keyAr: 'تم الإنشاء في: ' + new Date().toLocaleDateString() } -->
+
+                    <!-- <div class="absolute -top-[9999px] -left-[9999px]">
+    <div id="Data" class="hidden">
+        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'Violation Report'" 
+            [infoRows]="[
+      {
+        keyEn: 'Employee Type: ' + this.employeeTypeName ,
+        keyAr: 'نوع الموظف: ' + this.employeeTypeName ,
+      },
+      {
+        keyEn: 'Violation Type: ' + this.violationTypeName ,
+        keyAr: 'نوع المخالفة: ' + this.violationTypeName ,
+      },
+      {
+        keyEn: 'Start Date: ' + this.SelectedStartDate,
+        keyAr: 'تاريخ البدء: ' + this.SelectedStartDate,
+      },
+      {
+        keyEn: 'End Date: ' + this.SelectedEndDate,
+        keyAr: 'تاريخ الانتهاء: ' + this.SelectedEndDate,
+      },
+      ]"
+            [tableHeaders]="['ID', 'Date', 'Violation Type', 'Employee Type', 'Employee Name', 'Details']"
+            [tableData]="tableDataForExport" #pdfComponentRef>
+        </app-pdf-print>
+    </div>
+</div> -->

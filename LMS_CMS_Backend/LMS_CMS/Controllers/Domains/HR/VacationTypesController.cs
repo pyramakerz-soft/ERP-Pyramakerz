@@ -31,8 +31,9 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         
         [HttpGet]
         [Authorize_Endpoint_(
-           allowedTypes: new[] { "octa", "employee" },
-           pages: new[] { "Conduct Level" }
+           allowedTypes: new[] { "octa", "employee" }
+           //,
+           //pages: new[] { "Conduct Level" }
           )]
         public IActionResult Get()
         {
@@ -96,8 +97,9 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
         [HttpPost]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Conduct Level" }
+            allowedTypes: new[] { "octa", "employee" }
+            //,
+            //pages: new[] { "Conduct Level" }
          )]
         public async Task<IActionResult> Add(VacationTypesAddDTO newVacation)
         {

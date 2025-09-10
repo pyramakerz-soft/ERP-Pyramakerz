@@ -247,7 +247,6 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<BounsType> BounsType { get; set; }
         public DbSet<Deduction> Deduction { get; set; }
         public DbSet<DeductionType> DeductionType { get; set; }
-        public DbSet<EmployeeVacationCount> EmployeeVacationCount { get; set; }
         public DbSet<LeaveRequest> LeaveRequest { get; set; }
         public DbSet<Loans> Loans { get; set; }
         public DbSet<OfficialHolidays> OfficialHolidays { get; set; }
@@ -2174,18 +2173,6 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasForeignKey(p => p.DeductionTypeID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<EmployeeVacationCount>()
-                .HasOne(p => p.Employee)
-                .WithMany(p => p.EmployeeVacationCount)
-                .HasForeignKey(p => p.EmployeeID)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<EmployeeVacationCount>()
-                .HasOne(p => p.VacationTypes)
-                .WithMany(p => p.EmployeeVacationCount)
-                .HasForeignKey(p => p.VacationTypesID)
-                .OnDelete(DeleteBehavior.Restrict);
-
             modelBuilder.Entity<LeaveRequest>()
                 .HasOne(p => p.Employee)
                 .WithMany(p => p.LeaveRequest)
@@ -2437,12 +2424,6 @@ namespace LMS_CMS_DAL.Models.Domains
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Deduction>()
-                .HasOne(v => v.DeletedByEmployee)
-                .WithMany()
-                .HasForeignKey(v => v.DeletedByUserId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<EmployeeVacationCount>()
                 .HasOne(v => v.DeletedByEmployee)
                 .WithMany()
                 .HasForeignKey(v => v.DeletedByUserId)

@@ -7,10 +7,17 @@
                     'fa-chevron-down': !archiving.isOpen,
                     'fa-chevron-up': archiving.isOpen
                   }"></i>
-            </div> 
-            <div [class.cursor-pointer]="archiving.filelink === ''" class="flex items-center space-x-2" (click)="archiving.filelink === '' ? getData(archiving) : null">
-                <p>{{archiving.id}}</p>
-                <p>{{archiving.name}}</p>
+            </div>  
+            <div [class.cursor-pointer]="archiving.fileLink === '' || archiving.fileLink == null" class="flex items-center space-x-2" 
+            (click)="archiving.fileLink === '' || archiving.fileLink == null ? getData(archiving) : null">
+                <i *ngIf="archiving.fileLink === '' || archiving.fileLink == null" class="fa-solid fa-folder-open text-white text-lg"></i>
+                <i *ngIf="archiving.fileLink !== '' && archiving.fileLink != null" class="fa-regular fa-file primaryTxt text-2xl"></i>
+                <div class="flex items-center gap-1">
+                    <p>{{archiving.name}}</p>
+                    <span *ngIf="archiving.fileLink !== '' && archiving.fileLink != null" class="text-gray-500 text-sm">
+                        {{getFileExtension(archiving.fileLink)}}
+                    </span>
+                </div>
             </div>
         </div>
 
