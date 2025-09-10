@@ -185,96 +185,100 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
 
         ////////////////////////////////////////////////////////////////////////////--77
+        //[HttpGet("DailyPerformanceReport")]
+        //[Authorize_Endpoint_(
+        //    allowedTypes: new[] { "octa", "employee" },
+        //    pages: new[] { "Student Daily Performance Report" }
+        //)]
+        //public async Task<IActionResult> GetDailyPerformanceReport(long studentId, DateOnly fromDate, DateOnly toDate)
+        //{
+
+        //    UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+        //    var userClaims = HttpContext.User.Claims;
+        //    var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+        //    long.TryParse(userIdClaim, out long userId);
+        //    var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+        //    if (userIdClaim == null || userTypeClaim == null)
+        //    {
+        //        return Unauthorized("User ID or type does not exist");
+        //    }
+        //    if (toDate < fromDate)
+        //    {
+        //        return BadRequest("The end date must be after the start date.");
+        //    }
+
+        //    var student = await Unit_Of_Work.student_Repository
+        //        .FindByIncludesAsync(
+        //            s => s.ID == studentId && s.IsDeleted != true,
+        //            query => query.Include(s => s.StudentGrades).ThenInclude(sg => sg.Grade)
+        //        );
+
+        //    if (student == null)
+        //    {
+        //        return NotFound("Student not present");
+        //    }
+
+        //    var masters = await Unit_Of_Work.dailyPerformanceMaster_Repository
+        //     .Select_All_With_IncludesById<DailyPerformanceMaster>(
+        //         m => m.IsDeleted != true &&
+        //              m.InsertedAt.HasValue && 
+        //              DateOnly.FromDateTime(m.InsertedAt.Value) >= fromDate &&
+        //              DateOnly.FromDateTime(m.InsertedAt.Value) <= toDate,
+        //         query => query.Include(m => m.DailyPerformances).ThenInclude(dp => dp.Student),
+        //         query => query.Include(m => m.DailyPerformances).ThenInclude(dp => dp.StudentPerformance).ThenInclude(sp => sp.PerformanceType)
+        //     );
+
+        //    var reportItems = new List<DailyPerformanceReportDTO>();
+
+        //    foreach (var master in masters)
+        //    {
+        //        var studentPerformances = master.DailyPerformances
+        //            .Where(dp => dp.StudentID == studentId && dp.IsDeleted != true)
+        //            .ToList();
+
+        //        foreach (var dp in studentPerformances)
+        //        {
+        //            foreach (var sp in dp.StudentPerformance.Where(s => s.IsDeleted != true))
+        //            {
+        //                reportItems.Add(new DailyPerformanceReportDTO
+        //                {
+        //                    Date = DateOnly.FromDateTime(master.InsertedAt!.Value),
+        //                    EnglishNameStudent = $"{dp.Student.en_name}",
+        //                    ArabicNameStudent = $"{dp.Student.ar_name}",
+        //                    StudentId = dp.StudentID,
+        //                    PerformanceTypeEn = sp.PerformanceType.EnglishName,
+        //                    PerformanceTypeAr = sp.PerformanceType.ArabicName, 
+        //                    Comment = dp.Comment
+        //                });
+        //            }
+        //        }
+        //    }
+
+        //    if (!reportItems.Any())
+        //    {
+        //        return NotFound("No daily performance records were found for the student in the specified date range.");
+        //    }
+
+        //    reportItems = reportItems.OrderBy(r => r.Date).ToList();
+
+        //    return Ok(reportItems);
+        //}
+        ///////////////////////////////////////////////////////////////////////////////////////--77
         [HttpGet("DailyPerformanceReport")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Student Daily Performance Report" }
+         allowedTypes: new[] { "octa", "employee" },
+         pages: new[] { "Student Daily Performance Report" }
         )]
-        public async Task<IActionResult> GetDailyPerformanceReport(long studentId, DateOnly fromDate, DateOnly toDate)
+        public async Task<IActionResult> GetDailyPerformanceReport(
+         long? schoolId,
+         long? gradeId,
+         long? classroomId,
+         DateOnly? fromDate,
+         DateOnly? toDate,
+         long? studentId = null)
         {
-          
-            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-
-            var userClaims = HttpContext.User.Claims;
-            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-            long.TryParse(userIdClaim, out long userId);
-            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
-
-            if (userIdClaim == null || userTypeClaim == null)
-            {
-                return Unauthorized("User ID or type does not exist");
-            }
-            if (toDate < fromDate)
-            {
-                return BadRequest("The end date must be after the start date.");
-            }
-
-            var student = await Unit_Of_Work.student_Repository
-                .FindByIncludesAsync(
-                    s => s.ID == studentId && s.IsDeleted != true,
-                    query => query.Include(s => s.StudentGrades).ThenInclude(sg => sg.Grade)
-                );
-
-            if (student == null)
-            {
-                return NotFound("Student not present");
-            }
-
-            var masters = await Unit_Of_Work.dailyPerformanceMaster_Repository
-             .Select_All_With_IncludesById<DailyPerformanceMaster>(
-                 m => m.IsDeleted != true &&
-                      m.InsertedAt.HasValue && 
-                      DateOnly.FromDateTime(m.InsertedAt.Value) >= fromDate &&
-                      DateOnly.FromDateTime(m.InsertedAt.Value) <= toDate,
-                 query => query.Include(m => m.DailyPerformances).ThenInclude(dp => dp.Student),
-                 query => query.Include(m => m.DailyPerformances).ThenInclude(dp => dp.StudentPerformance).ThenInclude(sp => sp.PerformanceType)
-             );
-          
-            var reportItems = new List<DailyPerformanceReportDTO>();
-
-            foreach (var master in masters)
-            {
-                var studentPerformances = master.DailyPerformances
-                    .Where(dp => dp.StudentID == studentId && dp.IsDeleted != true)
-                    .ToList();
-
-                foreach (var dp in studentPerformances)
-                {
-                    foreach (var sp in dp.StudentPerformance.Where(s => s.IsDeleted != true))
-                    {
-                        reportItems.Add(new DailyPerformanceReportDTO
-                        {
-                            Date = DateOnly.FromDateTime(master.InsertedAt!.Value),
-                            EnglishNameStudent = $"{dp.Student.en_name}",
-                            ArabicNameStudent = $"{dp.Student.ar_name}",
-                            StudentId = dp.StudentID,
-                            PerformanceTypeEn = sp.PerformanceType.EnglishName,
-                            PerformanceTypeAr = sp.PerformanceType.ArabicName, 
-                            Comment = dp.Comment
-                        });
-                    }
-                }
-            }
-
-            if (!reportItems.Any())
-            {
-                return NotFound("No daily performance records were found for the student in the specified date range.");
-            }
-
-            reportItems = reportItems.OrderBy(r => r.Date).ToList();
-
-            return Ok(reportItems);
-        }
-        ////////////////////////////////////////////////////////////////////////////////////////--77
-        
-        [HttpGet("ClassRoomDailyPerformanceAverages")]
-        [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Classroom Daily Performance Report" }
-        )]
-        public async Task<IActionResult> GetClassroomDailyPerformanceAverages(long classroomId, DateOnly fromDate, DateOnly toDate)
-        {
-
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             var userClaims = HttpContext.User.Claims;
@@ -292,14 +296,23 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 return BadRequest("The end date must be after the start date.");
             }
 
-            var classroom = await Unit_Of_Work.classroom_Repository.FindByIncludesAsync
-                (c => c.ID == classroomId && c.IsDeleted != true);
+            if (!fromDate.HasValue || !toDate.HasValue)
+                return BadRequest("The start and end date must be entered.");
+
+            if (!schoolId.HasValue || !gradeId.HasValue || !classroomId.HasValue)
+                return BadRequest("School and grade level and Classroom must be entered.");
+
+            var classroom = await Unit_Of_Work.classroom_Repository
+                .FindByIncludesAsync(
+                    c => c.ID == classroomId && c.IsDeleted != true &&
+                         c.GradeID == gradeId && c.Grade.Section.SchoolID == schoolId,
+                    query => query.Include(c => c.Grade).ThenInclude(g => g.Section).ThenInclude(s => s.school)
+                );
 
             if (classroom == null)
             {
-                return NotFound("Chapter not found");
+                return NotFound("The class does not exist or does not match the specified school or grade.");
             }
-
             var masters = await Unit_Of_Work.dailyPerformanceMaster_Repository
                 .Select_All_With_IncludesById<DailyPerformanceMaster>(
                     m => m.IsDeleted != true &&
@@ -307,35 +320,156 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                          m.InsertedAt.HasValue &&
                          DateOnly.FromDateTime(m.InsertedAt.Value) >= fromDate &&
                          DateOnly.FromDateTime(m.InsertedAt.Value) <= toDate,
-                    query => query.Include(m => m.DailyPerformances).ThenInclude(dp => dp.StudentPerformance).ThenInclude(sp => sp.PerformanceType)
+                    query => query.Include(m => m.DailyPerformances)
+                                  .ThenInclude(dp => dp.Student),
+                    query => query.Include(m => m.DailyPerformances)
+                                  .ThenInclude(dp => dp.StudentPerformance)
+                                  .ThenInclude(sp => sp.PerformanceType)
                 );
 
-            var reportItems = new List<ClassroomDailyPerformanceAverageDTO>();
+            var reportItems = new List<DailyPerformanceReportDTO>();
+
             foreach (var master in masters)
             {
-                var ClassroomPerformances = master.DailyPerformances
-                .Where(dp => dp.IsDeleted != true)
-                .ToList();
+                var studentPerformances = master.DailyPerformances
+                    .Where(dp => dp.IsDeleted != true && (!studentId.HasValue || dp.StudentID == studentId.Value))
+                    .ToList();
 
-                foreach (var dp in ClassroomPerformances)
+                foreach (var dp in studentPerformances)
                 {
-                    var avgScore = dp.StudentPerformance 
-                       .Where(s => s.IsDeleted != true)
-                       .Average(x => x.Stars);
-
                     foreach (var sp in dp.StudentPerformance.Where(s => s.IsDeleted != true))
                     {
-                        reportItems.Add(new ClassroomDailyPerformanceAverageDTO
+                        reportItems.Add(new DailyPerformanceReportDTO
                         {
                             Date = DateOnly.FromDateTime(master.InsertedAt!.Value),
-                            AverageScore = avgScore, 
+                            EnglishNameStudent = $"{dp.Student?.en_name}",
+                            ArabicNameStudent = $"{dp.Student?.ar_name}",
+                            StudentId = dp.StudentID,
                             PerformanceTypeEn = sp.PerformanceType.EnglishName,
                             PerformanceTypeAr = sp.PerformanceType.ArabicName,
-                            Comment = dp.Comment
+                            Comment = dp.Comment,
+                            SchoolId = classroom.Grade?.Section?.school?.ID ?? 0,
+                            GradeId = classroom.GradeID,
+                            ClassroomId = classroom.ID,
+                            ClassroomName = classroom.Name
                         });
                     }
                 }
             }
+
+            if (!reportItems.Any())
+            {
+                return NotFound("No daily performance records were found for the specified criteria.");
+            }
+
+            reportItems = reportItems.OrderBy(r => r.Date).ToList();
+            return Ok(reportItems);
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////////////--77
+        [HttpGet("ClassRoomDailyPerformanceAverages")]
+        [Authorize_Endpoint_(
+        allowedTypes: new[] { "octa", "employee" },
+        pages: new[] { "Classroom Daily Performance Report" }
+        )]
+        public async Task<IActionResult> GetClassroomDailyPerformanceAverages(
+        long? schoolId = null, long? gradeId = null, long? classroomId = null,
+        DateOnly? fromDate = null, DateOnly? toDate = null)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = userClaims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = userClaims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or type does not exist");
+            }
+
+            if (!fromDate.HasValue || !toDate.HasValue)
+                return BadRequest("The start and end date must be entered.");
+
+            if (toDate < fromDate)
+            {
+                return BadRequest("The end date must be after the start date.");
+            }
+            if (!schoolId.HasValue || !gradeId.HasValue)
+                return BadRequest("School and grade level must be entered.");
+
+            IQueryable<Classroom> classroomQuery = Unit_Of_Work.classroom_Repository
+              .Query()
+              .Where(c => c.IsDeleted != true)
+              .Include(c => c.Grade)
+              .ThenInclude(g => g.Section);
+
+
+            if (schoolId.HasValue)
+            {
+                classroomQuery = classroomQuery.Where(c => c.Grade.Section.SchoolID == schoolId.Value);
+            }
+
+            if (gradeId.HasValue)
+            {
+                classroomQuery = classroomQuery.Where(c => c.GradeID == gradeId.Value);
+            }
+
+            if (classroomId.HasValue)
+            {
+                classroomQuery = classroomQuery.Where(c => c.ID == classroomId.Value);
+            }
+
+            var classrooms = await classroomQuery.ToListAsync();
+ 
+
+            if (!classrooms.Any())
+            {
+                return NotFound("No classes were found that matched the specified criteria.");
+            }
+
+            var reportItems = new List<ClassroomDailyPerformanceAverageDTO>();
+            foreach (var classroom in classrooms)
+            {
+                var masters = await Unit_Of_Work.dailyPerformanceMaster_Repository
+                    .Select_All_With_IncludesById<DailyPerformanceMaster>(
+                        m => m.IsDeleted != true &&
+                             m.ClassroomID == classroom.ID &&
+                             (!fromDate.HasValue || (m.InsertedAt.HasValue && DateOnly.FromDateTime(m.InsertedAt.Value) >= fromDate.Value)) &&
+                             (!toDate.HasValue || (m.InsertedAt.HasValue && DateOnly.FromDateTime(m.InsertedAt.Value) <= toDate.Value)),
+                        query => query.Include(m => m.DailyPerformances)
+                                      .ThenInclude(dp => dp.StudentPerformance)
+                                      .ThenInclude(sp => sp.PerformanceType)
+                    );
+
+                foreach (var master in masters)
+                {
+                    var classroomPerformances = master.DailyPerformances
+                        .Where(dp => dp.IsDeleted != true)
+                        .ToList();
+
+                    foreach (var dp in classroomPerformances)
+                    {
+                        var avgScore = dp.StudentPerformance
+                            .Where(s => s.IsDeleted != true)
+                            .Average(x => x.Stars);
+
+                        foreach (var sp in dp.StudentPerformance.Where(s => s.IsDeleted != true))
+                        {
+                            reportItems.Add(new ClassroomDailyPerformanceAverageDTO
+                            {
+                                Date = DateOnly.FromDateTime(master.InsertedAt!.Value),
+                                ClassroomName = classroom.Name,
+                                AverageScore = avgScore,
+                                PerformanceTypeEn = sp.PerformanceType.EnglishName,
+                                PerformanceTypeAr = sp.PerformanceType.ArabicName,
+                                Comment = dp.Comment
+                            });
+                        }
+                    }
+                }
+            }
+
             if (!reportItems.Any())
             {
                 return NotFound("No daily performance records were found for the class in the specified date range.");
@@ -343,9 +477,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             reportItems = reportItems.OrderBy(r => r.Date).ToList();
             return Ok(reportItems);
         }
-
     }
-
 }
 
 
