@@ -15,6 +15,7 @@ namespace LMS_CMS_BL.DTO.LMS
         public string EnglishName { get; set; } 
         public string ArabicName { get; set; }
         public float Mark { get; set; }
+        public float PassMark { get; set; }
         public DateOnly OpenDate { get; set; }
         public DateOnly DueDate { get; set; }
         public DateOnly CutOfDate { get; set; }

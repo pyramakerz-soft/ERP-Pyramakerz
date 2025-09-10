@@ -20,6 +20,7 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { VacationTypesService } from '../../../../Services/Employee/HR/vacation-types.service';
 
 @Component({
   selector: 'app-vacation-employee',
@@ -77,6 +78,7 @@ export class VacationEmployeeComponent {
     public ApiServ: ApiService,
     public VacationEmployeeServ: VacationEmployeeService,
     public EmployeeServ: EmployeeService,
+    public VacationTypesServ: VacationTypesService,
     private realTimeService: RealTimeNotificationServiceService,
   ) { }
 
@@ -176,26 +178,82 @@ export class VacationEmployeeComponent {
     this.mode = 'Edit';
     this.VacationEmployeeServ.GetByID(id, this.DomainName).subscribe((d) => {
       this.vacationEmployee = { ...d };
+      this.vacationEmployee.remains = this.vacationEmployee.balance - this.vacationEmployee.used
       this.OldVacationEmployee = { ...d };
     });
     this.openModal();
   }
 
   EmployeeIsChanged() {
-    this.VacationEmployeeServ.GetBalanceAndUsedVacationEmployee(this.vacationEmployee.employeeID, this.vacationEmployee.vacationTypesID, this.vacationEmployee.date, this.DomainName).subscribe((emp) => {
-      this.CalculateRemains();
-    });
+    this.vacationEmployee.balance = 0
+    this.vacationEmployee.used = 0
+    this.vacationEmployee.remains = 0
+    this.OldVacationEmployee.balance = 0
+    this.OldVacationEmployee.used = 0
+    if (this.vacationEmployee.employeeID && this.vacationEmployee.vacationTypesID && this.vacationEmployee.dateFrom) {
+      this.VacationEmployeeServ.GetBalanceAndUsedVacationEmployee(this.vacationEmployee.employeeID, this.vacationEmployee.vacationTypesID, this.vacationEmployee.dateFrom, this.DomainName).subscribe((emp) => {
+        console.log(emp)
+        this.vacationEmployee.balance = emp.balance
+        this.vacationEmployee.used = emp.used
+        this.vacationEmployee.remains = this.vacationEmployee.balance - emp.used
+        this.OldVacationEmployee.balance = emp.balance
+        this.OldVacationEmployee.used = emp.used
+        this.CalculateRemains()
+      }, error => {
+        console.log(error.error);
+        if (typeof error.error === 'string' && error.error.includes("This employee does not have a hire date set")) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'This employee does not have a hire date set!',
+            confirmButtonText: 'Okay',
+            customClass: { confirmButton: 'secondaryBg' }
+          });
+        }
+      });
+    }
+  }
+
+  DateFromIsChanged() {
+    if (this.vacationEmployee.halfDay != true && (this.vacationEmployee.dateTo == '' || this.vacationEmployee.dateTo == null || this.vacationEmployee.dateTo > this.vacationEmployee.dateFrom)) {
+      this.vacationEmployee.dateTo = this.vacationEmployee.dateFrom
+    }
   }
 
   CalculateRemains() {
-   
+    console.log(11, this.vacationEmployee, this.OldVacationEmployee)
+    let usedDays = this.OldVacationEmployee.used || 0;
+    if (this.vacationEmployee.halfDay) {
+      // Half day request
+      usedDays += 0.5;
+    } else {
+      // Calculate number of days inclusive
+      const from = new Date(this.vacationEmployee.dateFrom);
+      const to = new Date(this.vacationEmployee.dateTo || this.vacationEmployee.dateFrom);
+
+      const diffTime = to.getTime() - from.getTime();
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+      usedDays += diffDays;
+    }
+
+    this.vacationEmployee.used = usedDays;
+    this.vacationEmployee.remains = this.vacationEmployee.balance - this.vacationEmployee.used;
+    console.log(22, this.vacationEmployee, this.OldVacationEmployee)
+
   }
 
-  formatHours(value: number): string {
-    const hours = Math.floor(value);
-    const minutes = Math.round((value - hours) * 60);
-    return `${hours}.${minutes.toString().padStart(2, '0')}`;
+  onIshalfDayChange(event: Event) {
+    const isChecked = (event.target as HTMLInputElement).checked;
+    this.vacationEmployee.halfDay = isChecked;
+    if (this.vacationEmployee.halfDay) {
+      this.vacationEmployee.dateTo = null
+    } else {
+      this.vacationEmployee.dateTo = this.vacationEmployee.dateFrom
+    }
+    this.CalculateRemains()
   }
+
 
   validateNumber(event: any, field: keyof VacationEmployee): void {
     let value = event.target.value;
@@ -207,8 +265,6 @@ export class VacationEmployeeComponent {
       this.vacationEmployee[field] = 0 as never;
       return;
     }
-
-    this.CalculateRemains();
   }
 
   IsAllowDelete(InsertedByID: number) {
@@ -232,6 +288,7 @@ export class VacationEmployeeComponent {
   CreateOREdit() {
     if (this.isFormValid()) {
       this.isLoading = true;
+      console.log(this.vacationEmployee)
       if (this.mode == 'Create') {
         this.VacationEmployeeServ.Add(this.vacationEmployee, this.DomainName).subscribe(
           (d) => {
@@ -246,6 +303,7 @@ export class VacationEmployeeComponent {
             });
           },
           (error) => {
+            console.log(error)
             this.isLoading = false; // Hide spinner
             Swal.fire({
               icon: 'error',
@@ -271,6 +329,7 @@ export class VacationEmployeeComponent {
             this.closeModal();
           },
           (error) => {
+            console.log(error)
             this.isLoading = false; // Hide spinner
             Swal.fire({
               icon: 'error',
@@ -291,8 +350,11 @@ export class VacationEmployeeComponent {
 
   openModal() {
     this.validationErrors = {};
+    this.vacationEmployee = new VacationEmployee()
+    this.OldVacationEmployee = new VacationEmployee()
     this.isModalVisible = true;
     this.getAllEmployees()
+    this.getAllVacationType()
   }
 
   getAllEmployees() {
@@ -304,6 +366,12 @@ export class VacationEmployeeComponent {
           this.selectedEmployee = emp
         }
       }
+    })
+  }
+
+  getAllVacationType() {
+    this.VacationTypesServ.Get(this.DomainName).subscribe((d) => {
+      this.vacationTypes = d
     })
   }
 
@@ -325,6 +393,10 @@ export class VacationEmployeeComponent {
         }
       }
     }
+    if (this.vacationEmployee.used > this.vacationEmployee.balance) {
+      isValid = false;
+    }
+
     return isValid;
   }
 
