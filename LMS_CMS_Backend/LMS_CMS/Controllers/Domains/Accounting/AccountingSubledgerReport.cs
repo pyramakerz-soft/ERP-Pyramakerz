@@ -26,7 +26,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
         [HttpGet("GetAccountsLedger")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Suppliers Subledger" }
+            pages: new[] { "Account Subledger Report" }
         )]
         public async Task<IActionResult> GetAccountsLedger(DateTime? fromDate, DateTime? toDate, long linkFileID, long? accountID = 0, int pageNumber = 1, int pageSize = 10)
         {

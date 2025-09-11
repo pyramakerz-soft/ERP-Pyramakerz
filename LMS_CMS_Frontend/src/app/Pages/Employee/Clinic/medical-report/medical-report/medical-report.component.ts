@@ -453,10 +453,10 @@ case 'Follow Up':
 
   this.pdfInfoRows = [
     { keyEn: 'Report Type: ' + this.selectedTab },
-    { keyEn: 'School: ' + (selectedSchool?.name || 'N/A') },
-    { keyEn: 'Grade: ' + (selectedGrade?.name || 'N/A') },
-    { keyEn: 'Class: ' + (selectedClass?.name || 'N/A') },
-    { keyEn: 'Student: ' + (selectedStudent?.name || 'N/A') },
+    { keyEn: 'School: ' + (selectedSchool?.name || '-') },
+    { keyEn: 'Grade: ' + (selectedGrade?.name || '-') },
+    { keyEn: 'Class: ' + (selectedClass?.name || '-') },
+    { keyEn: 'Student: ' + (selectedStudent?.name || '-') },
     { keyEn: 'Report Date: ' + new Date().toLocaleDateString() },
   ];
 }
@@ -572,19 +572,19 @@ case 'Follow Up':
     ]);
     excelData.push([
       { v: 'School:', s: { font: { bold: true } } },
-      { v: selectedSchool?.name || 'N/A', s: { font: { bold: true } } },
+      { v: selectedSchool?.name || '-', s: { font: { bold: true } } },
     ]);
     excelData.push([
       { v: 'Grade:', s: { font: { bold: true } } },
-      { v: selectedGrade?.name || 'N/A', s: { font: { bold: true } } },
+      { v: selectedGrade?.name || '-', s: { font: { bold: true } } },
     ]);
     excelData.push([
       { v: 'Class:', s: { font: { bold: true } } },
-      { v: selectedClass?.name || 'N/A', s: { font: { bold: true } } },
+      { v: selectedClass?.name || '-', s: { font: { bold: true } } },
     ]);
     excelData.push([
       { v: 'Student:', s: { font: { bold: true } } },
-      { v: selectedStudent?.name || 'N/A', s: { font: { bold: true } } },
+      { v: selectedStudent?.name || '-', s: { font: { bold: true } } },
     ]);
     excelData.push([]);
 

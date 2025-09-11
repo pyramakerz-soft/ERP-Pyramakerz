@@ -259,7 +259,7 @@ export class StoreBalanceReportComponent implements OnInit {
   //   return [
   //     { keyEn: 'Report Type: ' + this.pageTitle },
   //     { keyEn: 'To Date: ' + this.dateTo },
-  //     { keyEn: 'Store: ' + (selectedStore?.name || 'N/A') },
+  //     { keyEn: 'Store: ' + (selectedStore?.name || '-') },
   //     {
   //       keyEn:
   //         'Category: ' +
@@ -276,19 +276,19 @@ export class StoreBalanceReportComponent implements OnInit {
   
 
   getStoreName(): string {
-  if (!this.selectedStoreId) return 'N/A';
+  if (!this.selectedStoreId) return '-';
   const store = this.stores.find(s => s.id === this.selectedStoreId);
-  return store?.name || 'N/A';
+  return store?.name || '-';
 }
 
 getCategoryName(): string {
   if (!this.selectedCategoryId) return 'All Categories';
   const category = this.categories.find(c => c.id === this.selectedCategoryId);
-  return category?.name || 'N/A';
+  return category?.name || '-';
 }
 
 getDateInfo(): string {
-  return this.dateTo ? new Date(this.dateTo).toLocaleDateString() : 'N/A';
+  return this.dateTo ? new Date(this.dateTo).toLocaleDateString() : '-';
 }
 
 getBalanceFiltersInfo(): string {

@@ -47,7 +47,7 @@ export class InventoryTransactionReportComponent implements OnInit {
             ? 'Visa'
             : 'Other',
         },
-        { key: 'Notes', value: transaction.notes || 'N/A' },
+        { key: 'Notes', value: transaction.notes || '-' },
       ],
       details: {
         headers: ['Item ID', 'Quantity', 'Price', 'Total Price', 'Notes'],
@@ -56,7 +56,7 @@ export class InventoryTransactionReportComponent implements OnInit {
           Quantity: detail.quantity,
           Price: detail.price,
           'Total Price': detail.totalPrice,
-          Notes: detail.notes || 'N/A',
+          Notes: detail.notes || '-',
         })),
       },
     }));
@@ -347,7 +347,7 @@ export class InventoryTransactionReportComponent implements OnInit {
       Store: t.storeName,
       'Total Amount': t.total,
       'Transaction Type': t.flagEnName,
-      Notes: t.notes || 'N/A',
+      Notes: t.notes || '-',
     }));
   }
 
@@ -479,7 +479,7 @@ async exportExcel() {
     'Transaction Type': t.flagEnName,
     'Total Amount': t.total,
     'Payment Type': t.isCash ? 'Cash' : t.isVisa ? 'Visa' : 'Other',
-    Notes: t.notes || 'N/A',
+    Notes: t.notes || '-',
   }));
 
   await this.reportsService.generateExcelReport({

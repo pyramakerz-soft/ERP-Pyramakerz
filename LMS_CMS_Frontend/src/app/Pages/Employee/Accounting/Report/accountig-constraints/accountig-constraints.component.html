@@ -80,13 +80,13 @@
                             [ngClass]="{ 'bg-gray-100': i % 2 === 1, 'bg-white': i%2 !=1 }">
                             <!-- <td class="py-5 px-4">{{ entry.masterID }}</td> -->
                             <!-- <td class="py-5 px-4">{{ entry.detailsID }}</td> -->
-                            <td class="py-5 px-4">{{ entry.account || 'N/A' }}</td>
-                            <!-- <td class="py-5 px-4">{{ entry.serial || 'N/A' }}</td> -->
-                            <td class="py-5 px-4">{{ entry.invoiceNumber || 'N/A' }}</td>
-                            <td class="py-5 px-4">{{ entry.mainAccountNo || 'N/A' }}</td>
-                            <td class="py-5 px-4">{{ entry.mainAccount || 'N/A' }}</td>
-                            <td class="py-5 px-4">{{ entry.subAccountNo || 'N/A' }}</td>
-                            <td class="py-5 px-4">{{ entry.subAccount || 'N/A' }}</td>
+                            <td class="py-5 px-4">{{ entry.account || '-' }}</td>
+                            <!-- <td class="py-5 px-4">{{ entry.serial || '-' }}</td> -->
+                            <td class="py-5 px-4">{{ entry.invoiceNumber || '-' }}</td>
+                            <td class="py-5 px-4">{{ entry.mainAccountNo || '-' }}</td>
+                            <td class="py-5 px-4">{{ entry.mainAccount || '-' }}</td>
+                            <td class="py-5 px-4">{{ entry.subAccountNo || '-' }}</td>
+                            <td class="py-5 px-4">{{ entry.subAccount || '-' }}</td>
                             <td class="py-5 px-4">{{ entry.credit }}</td>
                             <td class="py-5 px-4">{{ entry.debit }}</td>
                             <!-- <td class="py-5 px-4">{{ entry.date | date: 'MMM d, y, h:mm a' }}</td> -->

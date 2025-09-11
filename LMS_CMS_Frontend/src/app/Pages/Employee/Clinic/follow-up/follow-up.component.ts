@@ -258,18 +258,18 @@ export class FollowUpComponent implements OnInit {
         return {
           id: item.id,
           schoolId: item.schoolId,
-          schoolName: item.school || 'N/A',
+          schoolName: item.school || '-',
           gradeId: item.gradeId,
-          gradeName: item.grade || 'N/A',
+          gradeName: item.grade || '-',
           classroomId: item.classroomId,
-          className: item.classroom || 'N/A',
+          className: item.classroom || '-',
           studentId: item.studentId,
-          studentName: item.student || 'N/A',
+          studentName: item.student || '-',
           complains: item.complains || 'No Complaints',
           diagnosisId: item.diagnosisId,
           diagnosisName:
             this.diagnoses.find((d) => d.id === item.diagnosisId)?.name ||
-            'N/A',
+            '-',
           recommendation: item.recommendation || 'No Recommendation',
           sendSMSToParent: item.sendSMSToParent || false,
           followUpDrugs: item.followUpDrugs || [],
@@ -399,8 +399,8 @@ export class FollowUpComponent implements OnInit {
             const drug = this.drugs.find((d) => d.id === fd.drugId);
             const dose = this.doses.find((d) => d.id === fd.doseId);
             return {
-              drugName: drug ? drug.name : 'N/A',
-              doseTimes: dose ? dose.doseTimes : 'N/A',
+              drugName: drug ? drug.name : '-',
+              doseTimes: dose ? dose.doseTimes : '-',
             };
           }) || [];
       }

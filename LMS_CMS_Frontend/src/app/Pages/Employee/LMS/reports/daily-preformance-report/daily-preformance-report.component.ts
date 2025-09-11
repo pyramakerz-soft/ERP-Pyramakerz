@@ -293,15 +293,15 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
         'Student ID': item.studentId,
         'Performance Type': item.performanceTypeEn,
         // 'Performance Type AR': item.performanceTypeAr,
-        Comment: item.comment || 'N/A',
+        Comment: item.comment || '-',
       }));
     } else {
       this.tableDataForExport = this.tableData.map((item) => ({
         Date: item.date,
-        'Avg Score': item.averageScore || 'N/A',
+        'Avg Score': item.averageScore || '-',
         'Performance Type': item.performanceTypeEn,
         // 'Performance Type AR': item.performanceTypeAr,
-        Comment: item.comment || 'N/A',
+        Comment: item.comment || '-',
       }));
     }
   }
@@ -441,15 +441,15 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
             item.studentId,
             item.performanceTypeEn,
             // item.performanceTypeAr,
-            item.comment || 'N/A',
+            item.comment || '-',
           ];
         } else {
           return [
             item.date,
-            item.averageScore || 'N/A',
+            item.averageScore || '-',
             item.performanceTypeEn,
             // item.performanceTypeAr,
-            item.comment || 'N/A',
+            item.comment || '-',
           ];
         }
       });

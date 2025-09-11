@@ -142,10 +142,10 @@
                     {{ transaction.storeName }}
                 </td>
                 <td *ngIf="reportType === 'sales'" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ transaction.studentName || 'N/A' }}
+                    {{ transaction.studentName || '-' }}
                 </td>
                 <td *ngIf="reportType === 'purchase'" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ transaction.supplierName || 'N/A' }}
+                    {{ transaction.supplierName || '-' }}
                 </td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     {{ transaction.flagEnName }}

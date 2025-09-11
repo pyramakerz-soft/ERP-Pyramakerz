@@ -50,11 +50,15 @@
                         <i *ngIf="child.fileLink === '' || child.fileLink == null" class="fa-solid fa-folder-open primaryTxt text-2xl"></i>
                         <i *ngIf="child.fileLink !== '' && child.fileLink != null" class="fa-regular fa-file primaryTxt text-2xl"></i>
                         <div class="flex items-center gap-1">
-                        <p>{{child.name}}</p>
-                        <span *ngIf="child.fileLink !== '' && child.fileLink != null" class="text-gray-500 text-sm">
-                            {{getFileExtension(child.fileLink)}}
-                        </span>
-                    </div>
+                            <p>{{child.name}}</p>
+                            <span *ngIf="child.fileLink !== '' && child.fileLink != null" class="text-gray-500 text-sm">
+                                {{getFileExtension(child.fileLink)}}
+                            </span>
+
+                            <a *ngIf="child.fileLink !== '' && child.fileLink != null" [href]="child.fileLink" download>
+                                <i class="fas fa-download secondaryTxt"></i>  
+                            </a>
+                        </div>
                     </div>
                     <button *ngIf="AllowDelete && IsAllowDelete(child.insertedByUserId)" class="cursor-pointer"
                         (click)="Delete(child)">

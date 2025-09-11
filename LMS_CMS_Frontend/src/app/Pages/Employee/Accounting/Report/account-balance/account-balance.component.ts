@@ -56,6 +56,12 @@ export class AccountBalanceComponent implements OnInit {
 
   showPDF: boolean = false;
   cachedTableDataForPDF: any[] = [];
+
+  CurrentPage: number = 1;
+  PageSize: number = 10;
+  TotalPages: number = 1;
+  TotalRecords: number = 0;
+
   
   school = {
     reportHeaderOneEn: 'Account Balance Report',
@@ -157,50 +163,57 @@ export class AccountBalanceComponent implements OnInit {
     this.pageNumber = 1;
   }
 
-  viewReport() {
-    if (!this.toDate || !this.linkFileID) {
+viewReport() {
+  if (!this.toDate || !this.linkFileID) {
+    Swal.fire({
+      title: 'Missing Information',
+      text: 'Please select both Date and Account Type',
+      icon: 'warning',
+      confirmButtonText: 'OK',
+    });
+    return;
+  }
+
+  this.isLoading = true;
+  this.showTable = false;
+
+  this.accountingBalanceService.GetAccountBalance(
+    new Date(this.toDate),
+    this.linkFileID,
+    this.accountID,
+    this.zeroBalance,
+    this.positiveBalance,
+    this.negativeBalance,
+    this.CurrentPage, // Changed from pageNumber
+    this.PageSize,    // Changed from pageSize
+    this.DomainName
+  ).subscribe({
+    next: (response) => {
+      this.reportData = response;
+      this.showTable = true;
+      this.isLoading = false;
+      
+      // Update pagination properties from response
+      if (response.pagination) {
+        this.CurrentPage = response.pagination.currentPage;
+        this.TotalPages = response.pagination.totalPages;
+        this.TotalRecords = response.pagination.totalRecords;
+      }
+    },
+    error: (error) => {
+      console.error('Error loading report:', error);
+      this.reportData = null;
+      this.showTable = true;
+      this.isLoading = false;
       Swal.fire({
-        title: 'Missing Information',
-        text: 'Please select both Date and Account Type',
-        icon: 'warning',
+        title: 'Error',
+        text: 'Failed to load report data',
+        icon: 'error',
         confirmButtonText: 'OK',
       });
-      return;
     }
-
-    this.isLoading = true;
-    this.showTable = false;
-
-    this.accountingBalanceService.GetAccountBalance(
-      new Date(this.toDate),
-      this.linkFileID,
-      this.accountID,
-      this.zeroBalance,
-      this.positiveBalance,
-      this.negativeBalance,
-      this.pageNumber,
-      this.pageSize,
-      this.DomainName
-    ).subscribe({
-      next: (response) => {
-        this.reportData = response;
-        this.showTable = true;
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Error loading report:', error);
-        this.reportData = null;
-        this.showTable = true;
-        this.isLoading = false;
-        Swal.fire({
-          title: 'Error',
-          text: 'Failed to load report data',
-          icon: 'error',
-          confirmButtonText: 'OK',
-        });
-      }
-    });
-  }
+  });
+}
 
   changePage(newPage: number) {
     if (newPage > 0 && newPage <= (this.reportData?.pagination.totalPages || 1)) {
@@ -400,4 +413,53 @@ export class AccountBalanceComponent implements OnInit {
       });
     }
   }
+
+  changeCurrentPage(currentPage: number) {
+  this.CurrentPage = currentPage;
+  this.viewReport();
+}
+
+validatePageSize(event: any) { 
+  const value = event.target.value;
+  if (isNaN(value) || value === '' || parseInt(value) <= 0) {
+    // Set to minimum valid value instead of empty
+    this.PageSize = 1;
+    event.target.value = 1;
+  } else {
+    // Ensure it's a valid integer
+    this.PageSize = parseInt(value);
+    event.target.value = parseInt(value);
+  }
+}
+
+validateNumberForPagination(event: any): void {
+  const value = event.target.value;
+  if (value === '' || isNaN(value) || parseInt(value) <= 0) {
+    event.target.value = this.PageSize;
+  }
+}
+
+get visiblePages(): number[] {
+  const total = this.TotalPages;
+  const current = this.CurrentPage;
+  const maxVisible = 5;
+
+  if (total <= maxVisible) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+
+  const half = Math.floor(maxVisible / 2);
+  let start = current - half;
+  let end = current + half;
+
+  if (start < 1) {
+    start = 1;
+    end = maxVisible;
+  } else if (end > total) {
+    end = total;
+    start = total - maxVisible + 1;
+  }
+
+  return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+}
 }

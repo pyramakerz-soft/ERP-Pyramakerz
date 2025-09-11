@@ -396,7 +396,7 @@ export class AccountigReportsComponent {
                   { key: 'Date', value: t.date },
                   { key: 'Bank Or Save ?', value: t.linkFileName },
                   { key: 'Bank Or Save Data', value: t.bankOrSaveName },
-                  { key: 'Notes', value: t.notes || 'N/A' },
+                  { key: 'Notes', value: t.notes || '-' },
                 ],
                 table: {
                   headers: ['ID', 'Amount', 'Link File', 'Link File Type'],
@@ -436,7 +436,7 @@ export class AccountigReportsComponent {
                   { key: 'Date', value: t.date },
                   { key: 'Bank Or Save ?', value: t.linkFileName },
                   { key: 'Bank Or Save Data', value: t.bankOrSaveName },
-                  { key: 'Notes', value: t.notes || 'N/A' },
+                  { key: 'Notes', value: t.notes || '-' },
                 ],
                 table: {
                   headers: ['ID', 'Amount', 'Link File', 'Link File Type'],
@@ -475,7 +475,7 @@ export class AccountigReportsComponent {
                   { key: 'Date', value: t.date },
                   { key: 'Employee Name', value: t.employeeName },
                   { key: 'Student  Name', value: t.studentName },
-                  { key: 'Notes', value: t.notes || 'N/A' },
+                  { key: 'Notes', value: t.notes || '-' },
                 ],
                 table: {
                   headers: ['ID', 'Amount', 'Date', 'Fee Type'],
@@ -513,7 +513,7 @@ export class AccountigReportsComponent {
                   { key: 'Doc Type', value: t.accountingEntriesDocTypeName },
                   { key: 'Doc Number', value: t.docNumber },
                   { key: 'Date', value: t.date },
-                  { key: 'Notes', value: t.notes || 'N/A' },
+                  { key: 'Notes', value: t.notes || '-' },
                 ],
                 table: {
                   headers: [
