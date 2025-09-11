@@ -357,12 +357,12 @@ export class ReportItemCardComponent implements OnInit {
   //   );
   //   excelData.push([
   //     { v: 'Store:', s: { font: { bold: true } } },
-  //     { v: selectedStore?.name || 'N/A', s: { font: { bold: true } } },
+  //     { v: selectedStore?.name || '-', s: { font: { bold: true } } },
   //   ]);
   //   const selectedItem = this.items.find((i) => i.id === this.selectedItemId);
   //   excelData.push([
   //     { v: 'Item:', s: { font: { bold: true } } },
-  //     { v: selectedItem?.enName || 'N/A', s: { font: { bold: true } } },
+  //     { v: selectedItem?.enName || '-', s: { font: { bold: true } } },
   //   ]);
   //   excelData.push([]);
 
@@ -486,8 +486,8 @@ export class ReportItemCardComponent implements OnInit {
   //   return [
   //     { keyEn: 'From Date: ' + this.dateFrom },
   //     { keyEn: 'To Date: ' + this.dateTo },
-  //     { keyEn: 'Store: ' + (selectedStore?.name || 'N/A') },
-  //     { keyEn: 'Item: ' + (selectedItem?.enName || 'N/A') },
+  //     { keyEn: 'Store: ' + (selectedStore?.name || '-') },
+  //     { keyEn: 'Item: ' + (selectedItem?.enName || '-') },
   //     ...(this.showAverageColumn
   //       ? [{ keyEn: 'Includes Cost Information' }]
   //       : []),
@@ -513,15 +513,15 @@ export class ReportItemCardComponent implements OnInit {
   }
 
   getStoreName(): string {
-  if (!this.selectedStoreId) return 'N/A';
+  if (!this.selectedStoreId) return '-';
   const store = this.stores.find(s => s.id === this.selectedStoreId);
-  return store?.name || 'N/A';
+  return store?.name || '-';
 }
 
 getItemName(): string {
-  if (!this.selectedItemId) return 'N/A';
+  if (!this.selectedItemId) return '-';
   const item = this.items.find(i => i.id === this.selectedItemId);
-  return item?.enName || 'N/A';
+  return item?.enName || '-';
 }
 
 hasAverageInfo(): boolean {

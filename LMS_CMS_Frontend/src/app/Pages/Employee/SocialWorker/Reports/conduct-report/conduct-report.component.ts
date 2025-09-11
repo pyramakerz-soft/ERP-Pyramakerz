@@ -294,18 +294,18 @@ private prepareExportData(): void {
   this.reportsForExport = this.conductReports.map((report) => [
     new Date(report.date).toLocaleDateString(),
     report.studentEnName,
-    report.conductType?.name || 'N/A',
-    report.procedureType?.name || 'N/A',
-    report.details || 'N/A'
+    report.conductType?.name || '-',
+    report.procedureType?.name || '-',
+    report.details || '-'
   ]);
 
   // For PDF (object format with proper keys)
   this.reportsForPDF = this.conductReports.map((report) => ({
     'Date': new Date(report.date).toLocaleDateString(),
     'Student Name': report.studentEnName,
-    'Conduct Type': report.conductType?.name || 'N/A',
-    'Procedure Type': report.procedureType?.name || 'N/A',
-    'Details': report.details || 'N/A'
+    'Conduct Type': report.conductType?.name || '-',
+    'Procedure Type': report.procedureType?.name || '-',
+    'Details': report.details || '-'
   }));
 }
 

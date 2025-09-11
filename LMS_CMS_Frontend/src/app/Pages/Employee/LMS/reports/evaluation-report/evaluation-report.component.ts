@@ -280,7 +280,7 @@ private prepareExportData(): void {
             { key: 'Evaluation Date', value: evaluationDate },
             {
               key: 'Question Group',
-              value: group.englishTitle || group.arabicTitle || 'N/A',
+              value: group.englishTitle || group.arabicTitle || '-',
             },
           ],
           tableHeaders: ['Question', 'Rating', 'Notes' /*, 'Average'*/],
@@ -302,10 +302,10 @@ private prepareExportData(): void {
               Question:
                 question.questionEnglishTitle ||
                 question.questionArabicTitle ||
-                'N/A',
+                '-',
               Rating: question.mark || 0,
-              Notes: question.note || 'N/A',
-              // Average: question.average || 'N/A',
+              Notes: question.note || '-',
+              // Average: question.average || '-',
             });
           });
         }
@@ -338,12 +338,12 @@ private prepareExportData(): void {
       evaluation.evaluationEmployeeStudentBookCorrections.forEach(
         (correction: any) => {
           section.tableData.push({
-            Student: correction.studentEnglishName || correction.studentArabicName || 'N/A',
+            Student: correction.studentEnglishName || correction.studentArabicName || '-',
             'Correction Book': correction.evaluationBookCorrectionEnglishName || 
-                              correction.evaluationBookCorrectionArabicName || 'N/A',
+                              correction.evaluationBookCorrectionArabicName || '-',
             Status: correction.state || 0,
-            Notes: correction.note || 'N/A',
-            // Average: correction.averageStudent || 'N/A',
+            Notes: correction.note || '-',
+            // Average: correction.averageStudent || '-',
           });
         }
       );
@@ -399,29 +399,29 @@ private prepareExportData(): void {
 getTemplateName(): string {
   // if (!this.filterParams.templateId) return 'All Templates';
   const template = this.Templates.find(t => t.id == this.filterParams.templateId);
-  return template?.englishTitle || 'N/A';
+  return template?.englishTitle || '-';
 }
 
 getEmployeeName(): string {
   if (!this.filterParams.employeeId) return 'All Employees';
   const employee = this.Employees.find(e => e.id == this.filterParams.employeeId);
-  return employee?.en_name || 'N/A';
+  return employee?.en_name || '-';
 }
 
 getSchoolName(): string {
   if (!this.filterParams.schoolId) return 'All Schools';
   const school = this.Schools.find(s => s.id == this.filterParams.schoolId);
-  return school?.name || 'N/A';
+  return school?.name || '-';
 }
 
 getClassName(): string {
   if (!this.filterParams.classroomId) return 'All Classes';
   const classroom = this.Classs.find(c => c.id == this.filterParams.classroomId);
-  return classroom?.name || 'N/A';
+  return classroom?.name || '-';
 }
 
 getDateRange(): string {
-  if (!this.filterParams.fromDate || !this.filterParams.toDate) return 'N/A';
+  if (!this.filterParams.fromDate || !this.filterParams.toDate) return '-';
   return `${this.filterParams.fromDate} to ${this.filterParams.toDate}`;
 }
 
@@ -585,9 +585,9 @@ getGeneratedDate(): string {
               group.evaluationEmployeeQuestions.forEach((question: any) => {
                 const stars = '★'.repeat(question.mark || 0) + '☆'.repeat(5 - (question.mark || 0));
                 tableData.push([
-                  question.questionEnglishTitle || question.questionArabicTitle || 'N/A',
+                  question.questionEnglishTitle || question.questionArabicTitle || '-',
                   stars,
-                  question.note || 'N/A'
+                  question.note || '-'
                 ]);
               });
             }
@@ -614,10 +614,10 @@ getGeneratedDate(): string {
           evaluation.evaluationEmployeeStudentBookCorrections.forEach((correction: any) => {
             const statusStars = '★'.repeat(correction.state || 0) + '☆'.repeat(5 - (correction.state || 0));
             tableData.push([
-              correction.studentEnglishName || correction.studentArabicName || 'N/A',
-              correction.evaluationBookCorrectionEnglishName || correction.evaluationBookCorrectionArabicName || 'N/A',
+              correction.studentEnglishName || correction.studentArabicName || '-',
+              correction.evaluationBookCorrectionEnglishName || correction.evaluationBookCorrectionArabicName || '-',
               statusStars,
-              correction.note || 'N/A'
+              correction.note || '-'
             ]);
           });
 

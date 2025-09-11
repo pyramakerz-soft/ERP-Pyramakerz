@@ -259,7 +259,7 @@ export class ElectronicInvoiceDetailComponent implements OnInit {
     if (!this.invoice.inventoryDetails) return [];
 
     return this.invoice.inventoryDetails.map((item) => ({
-      Product: item.itemName || 'N/A',
+      Product: item.itemName || '-',
       Quantity: item.quantity || 0,
       Price: item.price || 0,
       Tax: item.tax || 0,

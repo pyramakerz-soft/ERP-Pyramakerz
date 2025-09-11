@@ -288,15 +288,15 @@ export class InvoiceReportMasterDetailedComponent implements OnInit {
         { key: 'Date', value: new Date(t.date).toLocaleDateString() },
         { key: 'Store', value: t.storeName },
         ...(this.reportType === 'sales'
-          ? [{ key: 'Student', value: t.studentName || 'N/A' }]
+          ? [{ key: 'Student', value: t.studentName || '-' }]
           : []),
         ...(this.reportType === 'purchase'
-          ? [{ key: 'Supplier', value: t.supplierName || 'N/A' }]
+          ? [{ key: 'Supplier', value: t.supplierName || '-' }]
           : []),
         { key: 'Transaction Type', value: t.flagEnName },
         { key: 'Invoice Number', value: t.invoiceNumber },
         { key: 'Total Price', value: t.total },
-        { key: 'Notes', value: t.notes || 'N/A' },
+        { key: 'Notes', value: t.notes || '-' },
       ],
       table: {
         headers: [
@@ -312,11 +312,11 @@ export class InvoiceReportMasterDetailedComponent implements OnInit {
           t.inventoryDetails?.map((d) => ({
             ID: d.id,
             'Item ID': d.shopItemID,
-            Name: d.shopItemName || d.name || 'N/A',
+            Name: d.shopItemName || d.name || '-',
             Quantity: d.quantity,
             Price: d.price,
             'Total Price': d.totalPrice,
-            Notes: d.notes || 'N/A',
+            Notes: d.notes || '-',
           })) || [],
       },
     }));
@@ -366,7 +366,7 @@ trackByTableRow(index: number, item: any): number {
   //     this.transactions.some((t) => t.studentName)
   //   ) {
   //     rows.push({
-  //       keyEn: 'Student: ' + (this.transactions[0]?.studentName || 'N/A'),
+  //       keyEn: 'Student: ' + (this.transactions[0]?.studentName || '-'),
   //       valueEn: '',
   //     });
   //   }
@@ -375,7 +375,7 @@ trackByTableRow(index: number, item: any): number {
   //     this.transactions.some((t) => t.supplierName)
   //   ) {
   //     rows.push({
-  //       keyEn: 'Supplier: ' + (this.transactions[0]?.supplierName || 'N/A'),
+  //       keyEn: 'Supplier: ' + (this.transactions[0]?.supplierName || '-'),
   //       valueEn: '',
   //     });
   //   }
@@ -536,11 +536,11 @@ exportExcel() {
     const details = [
       ['Date:', new Date(transaction.date).toLocaleDateString()],
       ['Store:', transaction.storeName],
-      ...(this.reportType === 'sales' ? [['Student:', transaction.studentName || 'N/A']] : []),
-      ...(this.reportType === 'purchase' ? [['Supplier:', transaction.supplierName || 'N/A']] : []),
+      ...(this.reportType === 'sales' ? [['Student:', transaction.studentName || '-']] : []),
+      ...(this.reportType === 'purchase' ? [['Supplier:', transaction.supplierName || '-']] : []),
       ['Transaction Type:', transaction.flagEnName],
       ['Total Price:', transaction.total],
-      ['Notes:', transaction.notes || 'N/A']
+      ['Notes:', transaction.notes || '-']
     ];
 
     details.forEach((row, i) => {
@@ -569,11 +569,11 @@ exportExcel() {
         excelData.push([
           { v: item.id, s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'FFFFFF' } }, border: { left: { style: 'thin' }, right: { style: 'thin' } } } },
           { v: item.shopItemID, s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'E9E9E9' } }, border: { left: { style: 'thin' }, right: { style: 'thin' } } } },
-          { v: item.shopItemName || item.name || 'N/A', s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'E9E9E9' } }, border: { left: { style: 'thin' }, right: { style: 'thin' } } } },
+          { v: item.shopItemName || item.name || '-', s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'E9E9E9' } }, border: { left: { style: 'thin' }, right: { style: 'thin' } } } },
           { v: item.quantity, s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'E9E9E9' } }, border: { left: { style: 'thin' }, right: { style: 'thin' } } } },
           { v: item.price, s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'E9E9E9' } }, border: { left: { style: 'thin' }, right: { style: 'thin' } } } },
           { v: item.totalPrice, s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'E9E9E9' } }, border: { left: { style: 'thin' }, right: { style: 'thin' } } } },
-          { v: item.notes || 'N/A', s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'E9E9E9' } }, border: { left: { style: 'thin' }, right: { style: 'thin' } } } }
+          { v: item.notes || '-', s: { fill: { fgColor: { rgb: i % 2 === 0 ? 'E9E9E9' : 'E9E9E9' } }, border: { left: { style: 'thin' }, right: { style: 'thin' } } } }
         ]);
       });
     } else {

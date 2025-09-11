@@ -286,8 +286,8 @@ private prepareExportData(): void {
     'Date': new Date(report.date).toLocaleDateString(),
     'Student Name': report.studentName,
     'Status': report.isLate ? 'Late' : 'Present',
-    'Late Time (minutes)': report.isLate ? report.lateTimeInMinutes : 'N/A',
-    'Notes': report.notes || 'N/A'
+    'Late Time (minutes)': report.isLate ? report.lateTimeInMinutes : '-',
+    'Notes': report.notes || '-'
   }));
 
   // For Excel (array format)
@@ -295,8 +295,8 @@ private prepareExportData(): void {
     new Date(report.date).toLocaleDateString(),
     report.studentName,
     report.isLate ? 'Late' : 'Present',
-    report.isLate ? report.lateTimeInMinutes : 'N/A',
-    report.notes || 'N/A'
+    report.isLate ? report.lateTimeInMinutes : '-',
+    report.notes || '-'
   ]);
 }
 
