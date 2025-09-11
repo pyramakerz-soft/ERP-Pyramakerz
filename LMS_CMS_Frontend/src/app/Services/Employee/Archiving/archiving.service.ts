@@ -38,6 +38,18 @@ export class ArchivingService {
     return this.http.get<ArchivingTree>(`${this.baseUrl}/ArchivingTree/${id}`, { headers })
   } 
 
+  GetContent(DomainName: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.get<ArchivingTree>(`${this.baseUrl}/ArchivingTree/GetContent`, { headers })
+  } 
+
   Add(archivingTree: ArchivingTree, DomainName: string) {
     if (DomainName != null) {
       this.header = DomainName;

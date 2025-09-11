@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using System.Net;
 
 namespace LMS_CMS_PL.Controllers.Domains.Archiving
@@ -37,12 +38,12 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         
-        private List<ArchivingTreeGetDTO> BuildHierarchy(List<ArchivingTree> archivingTrees, long? parentId = null)
+        private List<ArchivingTreeGetDTO> BuildHierarchy(List<ArchivingTree> allArchivingTrees, List<long> ArchivingTreeIDs, long? parentId = null)
         {
             string serverUrl = $"{Request.Scheme}://{Request.Host}/"; 
 
-            return archivingTrees
-                .Where(ac => ac.ArchivingTreeParentID == parentId)
+            return allArchivingTrees
+                .Where(ac => ac.ArchivingTreeParentID == parentId && (ac.FileLink == "" || ac.FileLink == null) && ArchivingTreeIDs.Contains(ac.ID))
                 .Select(ac => new ArchivingTreeGetDTO
                 {
                     ID = ac.ID,
@@ -50,7 +51,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
                     FileLink = !string.IsNullOrEmpty(ac.FileLink) ? $"{serverUrl}{ac.FileLink.Replace("\\", "/")}" : "",
                     ArchivingTreeParentID = ac.ArchivingTreeParentID,
                     InsertedByUserId = ac.InsertedByUserId ?? 0, 
-                    Children = BuildHierarchy(archivingTrees, ac.ID)
+                    Children = BuildHierarchy(allArchivingTrees, ArchivingTreeIDs, ac.ID)
                 }).ToList();
         }
 
@@ -94,17 +95,22 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
 
             ArchivingTreeIDs = ArchivingTreeIDs.Distinct().ToList();
 
-            List<ArchivingTree> archivingTrees = await Unit_Of_Work.archivingTree_Repository.Select_All_With_IncludesById<ArchivingTree>(
-                    f => f.IsDeleted != true && (f.FileLink == "" || f.FileLink == null) && ArchivingTreeIDs.Contains(f.ID),
-                    query => query.Include(ac => ac.ArchivingTreeParent)
-                    );
+            ArchivingTree archivingTreeContent = Unit_Of_Work.archivingTree_Repository.First_Or_Default(
+                   acc => acc.IsDeleted != true && acc.Name == "Content"
+                   );
 
-            if (archivingTrees == null || archivingTrees.Count == 0 || !archivingTrees.Any())
+            List<ArchivingTree> allArchivingTrees = await Unit_Of_Work.archivingTree_Repository.Select_All_With_IncludesById<ArchivingTree>(
+                f => f.IsDeleted != true && ArchivingTreeIDs.Contains(f.ID),
+                query => query.Include(ac => ac.ArchivingTreeParent),
+                query => query.Include(ac => ac.ChildArchivingTrees)
+                );
+             
+            if (allArchivingTrees == null || allArchivingTrees.Count == 0 || !allArchivingTrees.Any())
             {
                 return NotFound();
             }
 
-            List<ArchivingTreeGetDTO> archivingTreesDTO = BuildHierarchy(archivingTrees);
+            List<ArchivingTreeGetDTO> archivingTreesDTO = BuildHierarchy(allArchivingTrees, ArchivingTreeIDs, archivingTreeContent.ID);
 
             return Ok(archivingTreesDTO);
         }
@@ -141,7 +147,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
                 d => d.IsDeleted != true && d.EmployeeID == userId && d.PermissionGroup.IsDeleted != true);
             if (permissionGroupsEmployee == null || !permissionGroupsEmployee.Any())
             {
-                return BadRequest("You Don't have access for this item");
+                return BadRequest("You Don't have access on this item");
             }
 
             List<long> permissionGroupIDs = permissionGroupsEmployee.Select(d => d.PermissionGroupID).ToList();
@@ -159,18 +165,93 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
 
             if (ArchivingTreeIDs.Count == 0)
             {
-                return BadRequest("You Don't have access for this item");
+                return BadRequest("You Don't have access on this item");
             }
 
             ArchivingTreeIDs = ArchivingTreeIDs.Distinct().ToList();
 
             if (!ArchivingTreeIDs.Contains(id))
             {
-                return BadRequest("You Don't have access for this item");
+                return BadRequest("You Don't have access on this item");
             }
              
             List<ArchivingTree> FirstChildrenForArchivingTrees = Unit_Of_Work.archivingTree_Repository.FindBy(
-                    acc => acc.IsDeleted != true && acc.ArchivingTreeParentID == id);
+                    acc => acc.IsDeleted != true && acc.ArchivingTreeParentID == id && ArchivingTreeIDs.Contains(acc.ID));
+
+            ArchivingTreeGetDTO accountingTreeChartGetDTO = mapper.Map<ArchivingTreeGetDTO>(archivingTree); 
+             
+            if(FirstChildrenForArchivingTrees != null && FirstChildrenForArchivingTrees.Count != 0)
+            {
+                List<ArchivingTreeGetDTO> FirstChildrenForArchivingTreesDTO = mapper.Map<List<ArchivingTreeGetDTO>>(FirstChildrenForArchivingTrees);
+                accountingTreeChartGetDTO.Children = FirstChildrenForArchivingTreesDTO;
+            }
+
+            if(accountingTreeChartGetDTO.FileLink != null)
+            {
+                string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+                accountingTreeChartGetDTO.FileLink = $"{serverUrl}{accountingTreeChartGetDTO.FileLink.Replace("\\", "/")}";
+            }
+
+            return Ok(accountingTreeChartGetDTO);
+        }
+        
+        ///////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpGet("GetContent")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Archiving" }
+        )]
+        public async Task<IActionResult> GetContent()
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+             
+            ArchivingTree archivingTree = await Unit_Of_Work.archivingTree_Repository.FindByIncludesAsync(
+                    acc => acc.IsDeleted != true && acc.Name == "Content",
+                    query => query.Include(ac => ac.ArchivingTreeParent)
+                    );
+
+            if (archivingTree == null)
+            {
+                return NotFound();
+            }
+
+            List<PermissionGroupEmployee> permissionGroupsEmployee = Unit_Of_Work.permissionGroupEmployee_Repository.FindBy(
+                d => d.IsDeleted != true && d.EmployeeID == userId && d.PermissionGroup.IsDeleted != true);
+            if (permissionGroupsEmployee == null || !permissionGroupsEmployee.Any())
+            {
+                return BadRequest("You Don't have access on this item");
+            }
+
+            List<long> permissionGroupIDs = permissionGroupsEmployee.Select(d => d.PermissionGroupID).ToList();
+            List<long> ArchivingTreeIDs = new List<long>();
+
+            foreach (var permId in permissionGroupIDs)
+            {
+                List<PermissionGroupDetails> permissionGroupDetails = Unit_Of_Work.permissionGroupDetails_Repository.FindBy(
+                    d => d.IsDeleted != true && d.PermissionGroupID == permId && d.ArchivingTree.IsDeleted != true);
+                if (permissionGroupDetails != null)
+                {
+                    ArchivingTreeIDs.AddRange(permissionGroupDetails.Select(d => d.ArchivingTreeID).ToList());
+                }
+            }
+
+            if (ArchivingTreeIDs.Count == 0)
+            {
+                return BadRequest("You Don't have access on this item");
+            }
+
+            ArchivingTreeIDs = ArchivingTreeIDs.Distinct().ToList();
+
+            if (!ArchivingTreeIDs.Contains(archivingTree.ID))
+            {
+                return BadRequest("You Don't have access on this item");
+            }
+             
+            List<ArchivingTree> FirstChildrenForArchivingTrees = Unit_Of_Work.archivingTree_Repository.FindBy(
+                    acc => acc.IsDeleted != true && acc.ArchivingTreeParentID == archivingTree.ID && ArchivingTreeIDs.Contains(acc.ID));
 
             ArchivingTreeGetDTO accountingTreeChartGetDTO = mapper.Map<ArchivingTreeGetDTO>(archivingTree); 
              
@@ -229,8 +310,54 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
             }
             else
             {
-                NewArchiving.ArchivingTreeParentID = null;
-            } 
+                ArchivingTree archivingTreeContent = Unit_Of_Work.archivingTree_Repository.First_Or_Default(t => t.IsDeleted != true && t.Name == "Content");
+                if (archivingTreeContent != null)
+                { 
+                    NewArchiving.ArchivingTreeParentID = archivingTreeContent.ID;
+                }
+                else
+                {
+                     NewArchiving.ArchivingTreeParentID = null;
+                }
+            }
+
+
+            List<PermissionGroupEmployee> permissionGroupsEmployee = Unit_Of_Work.permissionGroupEmployee_Repository.FindBy(
+               d => d.IsDeleted != true && d.EmployeeID == userId && d.PermissionGroup.IsDeleted != true);
+            if (permissionGroupsEmployee == null || !permissionGroupsEmployee.Any())
+            {
+                return BadRequest("You Don't have access on this Archiving Folder");
+            }
+
+            List<long> permissionGroupIDs = permissionGroupsEmployee.Select(d => d.PermissionGroupID).ToList();
+            List<long> ArchivingTreeIDs = new List<long>();
+
+            foreach (var permId in permissionGroupIDs)
+            {
+                List<PermissionGroupDetails> permissionGroupDetails = Unit_Of_Work.permissionGroupDetails_Repository.FindBy(
+                    d => d.IsDeleted != true && d.PermissionGroupID == permId && d.ArchivingTree.IsDeleted != true);
+                if (permissionGroupDetails != null)
+                {
+                    ArchivingTreeIDs.AddRange(permissionGroupDetails.Select(d => d.ArchivingTreeID).ToList());
+                }
+            }
+
+            if (ArchivingTreeIDs.Count == 0)
+            {
+                return BadRequest("You Don't have access on this Archiving Folder");
+            }
+
+            ArchivingTreeIDs = ArchivingTreeIDs.Distinct().ToList();
+
+            if (!ArchivingTreeIDs.Contains(NewArchiving.ArchivingTreeParentID.Value))
+            {
+                return BadRequest("You Don't have access on this Archiving Folder");
+            }
+
+            if (NewArchiving.Name == "Content" || NewArchiving.Name == "content")
+            {
+                return BadRequest("Choose another name");
+            }
 
             if (NewArchiving.FileFile != null)
             {
@@ -280,6 +407,23 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
             }
             Unit_Of_Work.SaveChanges();
 
+            foreach (var permId in permissionGroupIDs)
+            {
+                PermissionGroupDetails permissionGroupDetail = Unit_Of_Work.permissionGroupDetails_Repository.First_Or_Default(
+                    d => d.IsDeleted != true && d.PermissionGroupID == permId && d.ArchivingTreeID == NewArchiving.ArchivingTreeParentID && d.ArchivingTree.IsDeleted != true);
+                if (permissionGroupDetail != null)
+                {
+                    PermissionGroupDetails permissionGroupDetailsNew = new PermissionGroupDetails();
+                    permissionGroupDetailsNew.PermissionGroupID = permissionGroupDetail.PermissionGroupID;
+                    permissionGroupDetailsNew.Allow_Delete = permissionGroupDetail.Allow_Delete;
+                    permissionGroupDetailsNew.Allow_Delete_For_Others = permissionGroupDetail.Allow_Delete_For_Others;
+                    permissionGroupDetailsNew.ArchivingTreeID = archivingTree.ID;
+
+                    Unit_Of_Work.permissionGroupDetails_Repository.Add(permissionGroupDetailsNew);
+                    Unit_Of_Work.SaveChanges();
+                }
+            } 
+
             return Ok();
         }
 
@@ -318,11 +462,15 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
                 return NotFound("No Archiving with this ID");
             } 
 
+            if(archivingTreeExist.Name == "Content")
+            {
+                return BadRequest("You can't delete this");
+            }
             List<PermissionGroupEmployee> permissionGroupsEmployee = Unit_Of_Work.permissionGroupEmployee_Repository.FindBy(
                 d => d.IsDeleted != true && d.EmployeeID == userId && d.PermissionGroup.IsDeleted != true);
             if (permissionGroupsEmployee == null || !permissionGroupsEmployee.Any())
             {
-                return BadRequest("You Don't have access for this item");
+                return BadRequest("You Don't have access on this item");
             }
 
             List<long> permissionGroupIDs = permissionGroupsEmployee.Select(d => d.PermissionGroupID).ToList();
@@ -340,14 +488,14 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
 
             if (ArchivingTreeIDs.Count == 0)
             {
-                return BadRequest("You Don't have access for this item");
+                return BadRequest("You Don't have access on this item");
             }
 
             ArchivingTreeIDs = ArchivingTreeIDs.Distinct().ToList();
 
             if (!ArchivingTreeIDs.Contains(id))
             {
-                return BadRequest("You Don't have access for this item");
+                return BadRequest("You Don't have access on this item");
             }
 
             if (userTypeClaim == "employee")

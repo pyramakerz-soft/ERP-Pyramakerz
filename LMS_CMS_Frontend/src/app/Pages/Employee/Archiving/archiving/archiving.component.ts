@@ -88,6 +88,15 @@ export class ArchivingComponent {
     )
   }
 
+  GetContent(){
+    this.archiving = new ArchivingTree()
+    this.archivingService.GetContent(this.DomainName).subscribe(
+      (data) => { 
+        this.archiving = data  
+      }
+    )
+  }
+
   IsAllowDelete(InsertedByID: number) {
     const IsAllow = this.EditDeleteServ.IsAllowDelete(InsertedByID, this.UserID, this.AllowDeleteForOthers);
     return IsAllow;
@@ -200,6 +209,8 @@ export class ArchivingComponent {
             this.closeAddFolderOrFileModal();
             if(this.archiving.id){ 
               this.GetDataByID(this.archiving.id)
+            }else{
+              this.GetContent()
             }
             this.GetAllData()
             this.isLoading = false;
@@ -225,9 +236,14 @@ export class ArchivingComponent {
         customClass: { confirmButton: 'secondaryBg' },
       });
     } 
-  } 
+  }  
 
-  RemoveArchiving() {
-    this.archiving = new ArchivingTree()
-  } 
+  getFileExtension(filename: string): string {
+    if (!filename) return '';
+    
+    const lastDotIndex = filename.lastIndexOf('.');
+    if (lastDotIndex === -1) return '';
+    
+    return filename.slice(lastDotIndex).toLowerCase();
+  }
 }
