@@ -36,3 +36,15 @@ export class Assignment {
         public insertedByUserName: string = ''
     ) { }
 }
+
+export class AssignmentReportItem {
+  constructor(
+    public id: number = 0,
+    public assignmentName: string = '',
+    public subjectID: number = 0,
+    public subjectName: string = '',
+    public attendanceNumber: number = 0,
+    public numberSuccessful: number = 0,
+    public numberFailed: number = 0
+  ) {}
+}

@@ -1333,7 +1333,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
         [HttpGet("AssignmentReport")]
         [Authorize_Endpoint_(
          allowedTypes: new[] { "octa", "employee" },
-         pages: new[] { "AssignmentReport" }
+         pages: new[] { "Assignment Report" }
          )]
             public async Task<IActionResult> AssignmentReport(
              [FromQuery] long? schoolId,
