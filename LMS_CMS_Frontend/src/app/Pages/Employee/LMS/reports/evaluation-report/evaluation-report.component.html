@@ -115,7 +115,7 @@
                                     [class.fa-regular]="j >= question.mark" 
                                     [class.text-yellow-400]="j < question.mark"></i>
                             </ng-container>
-                            <!-- <span class="ml-2 text-sm text-gray-600">({{ question.average || 'N/A' }})</span> -->
+                            <!-- <span class="ml-2 text-sm text-gray-600">({{ question.average || '-' }})</span> -->
                         </div>
                         
                         <p class="text-gray-600 text-sm" *ngIf="question.note">
@@ -172,10 +172,10 @@
                                     </div>
                                 </td>
                                 <td class="py-3 px-4 border border-[#EAECF0]">
-                                    {{ correction.note || 'N/A' }}
+                                    {{ correction.note || '-' }}
                                 </td>
                                 <!-- <td class="py-3 px-4 border border-[#EAECF0]">
-                                    {{ correction.averageStudent || 'N/A' }}
+                                    {{ correction.averageStudent || '-' }}
                                 </td> -->
                             </tr>
                         </tbody>

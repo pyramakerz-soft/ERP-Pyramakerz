@@ -56,7 +56,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
         [HttpGet("inventory-net-combined")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "report item card" , "report item card with average" })]
+            pages: new[] { "Item Card Report", "Item Card Report With Average" })]
         public async Task<IActionResult> GetInventoryNetCombinedAsync(long storeId, long shopItemId, DateOnly fromDate, DateOnly toDate)
         {
             try
@@ -180,7 +180,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 {
                     Date = d.InventoryMaster.Date,
                     FlagId = d.InventoryMaster.FlagId,
-                    FlagName = d.InventoryMaster.InventoryFlags.arName,
+                    FlagName = d.InventoryMaster.InventoryFlags.enName,
                     InvoiceNumber = d.InventoryMaster.InvoiceNumber,
                     Notes = d.InventoryMaster.Notes,
                     Quantity = d.Quantity,

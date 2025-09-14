@@ -26,11 +26,11 @@
     <div class="mt-4 text-sm">
         <div class="flex justify-start gap-4 mb-4">
             <p><strong> {{ 'Name' | translate }}:</strong> {{invoice.student}}</p>
-            <p><strong> {{ 'Address' | translate }}:</strong> {{invoice.studentAddress || 'N/A'}}</p>
+            <p><strong> {{ 'Address' | translate }}:</strong> {{invoice.studentAddress || '-'}}</p>
         </div>
         <div class="flex justify-start gap-4">
-            <p><strong> {{ 'Date' | translate }}:</strong> {{formatDate(invoice.date) || 'N/A'}}</p>
-            <p><strong> {{ 'Number' | translate }}:</strong> {{invoice.invoiceNumber || 'N/A'}}</p>
+            <p><strong> {{ 'Date' | translate }}:</strong> {{formatDate(invoice.date) || '-'}}</p>
+            <p><strong> {{ 'Number' | translate }}:</strong> {{invoice.invoiceNumber || '-'}}</p>
             <p><strong> {{ 'Status' | translate }}:</strong>
                 <span *ngIf="invoice.isValid" style="color: #267C15;">
                      {{ 'Sent' | translate }}
@@ -115,9 +115,9 @@
     <div id="invoiceData" class="hidden">
         <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'invoice_' + invoice.invoiceNumber"
             [Title]="'Simplified Tax Invoice'" [infoRows]="[
-                { keyEn: 'Invoice Number: ' + (invoice.invoiceNumber || 'N/A') },
-                { keyEn: 'Customer Name: ' + (invoice.student || 'N/A') },
-                { keyEn: 'Date: ' + (formatDate(invoice.date) || 'N/A') },
+                { keyEn: 'Invoice Number: ' + (invoice.invoiceNumber || '-') },
+                { keyEn: 'Customer Name: ' + (invoice.student || '-') },
+                { keyEn: 'Date: ' + (formatDate(invoice.date) || '-') },
                 { keyEn: 'VAT Registration Number: 123456789900003' }
             ]" [tableHeaders]="['Product', 'Quantity', 'Price', 'Tax', 'Total']" [tableData]="getInvoiceTableData()"
             [PsNotes]="[

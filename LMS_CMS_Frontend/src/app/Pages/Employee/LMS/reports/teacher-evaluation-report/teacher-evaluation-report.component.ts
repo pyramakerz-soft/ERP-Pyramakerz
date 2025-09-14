@@ -279,179 +279,159 @@ export class TeacherEvaluationReportComponent implements OnInit {
   }
 
   // ========== EXPORT METHODS ==========
-
-  async downloadAsPDF() {
-    if (!this.hasData) {
-      Swal.fire('Warning', 'No data available to export', 'warning');
-      return;
-    }
-
-    this.isExporting = true;
-
-    try {
-      // Create a temporary container for the report
-      const reportElement = this.reportContent.nativeElement.cloneNode(true);
-      
-      // Add some styles for better PDF formatting
-      reportElement.style.padding = '20px';
-      reportElement.style.backgroundColor = 'white';
-      
-      // Create a temporary container for the chart
-      const chartContainer = document.createElement('div');
-      chartContainer.style.width = '800px';
-      chartContainer.style.height = '600px';
-      
-      // Convert chart to image
-      const chartCanvas = await html2canvas(this.chartCanvas.nativeElement, {
-        scale: 2, // Higher resolution for better quality
-        backgroundColor: '#ffffff'
-      });
-      
-      chartContainer.appendChild(chartCanvas);
-      
-      // Add chart to report
-      reportElement.appendChild(chartContainer);
-      
-      // Add report details
-      const detailsDiv = document.createElement('div');
-      detailsDiv.innerHTML = `
-        <div style="margin-top: 20px; font-family: Arial, sans-serif;">
-          <h3 style="color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px;">Report Details</h3>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
-            <div><strong>Date Range:</strong> ${this.filterParams.fromDate} to ${this.filterParams.toDate}</div>
-            <div><strong>Department:</strong> ${this.getDepartmentName()}</div>
-            <div><strong>Employee:</strong> ${this.getEmployeeName()}</div>
-            <div><strong>Generated On:</strong> ${new Date().toLocaleDateString()}</div>
-            <div><strong>Total Records:</strong> ${this.evaluationData.length}</div>
-          </div>
-        </div>
-      `;
-      reportElement.appendChild(detailsDiv);
-      
-      // Create PDF
-      const pdf = new jsPDF('landscape', 'px', 'a4');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      
-      // Convert report to image
-      const reportImage = await html2canvas(reportElement, {
-        scale: 2,
-        backgroundColor: '#ffffff'
-      });
-      
-      const imgData = reportImage.toDataURL('image/png');
-      const imgWidth = pdfWidth;
-      const imgHeight = (reportImage.height * pdfWidth) / reportImage.width;
-      
-      // Add image to PDF
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-      
-      // Save PDF
-      pdf.save(`Teacher_Evaluation_Report_${new Date().toISOString().slice(0, 10)}.pdf`);
-      
-    } catch (error) {
-      console.error('Error generating PDF:', error);
-      Swal.fire('Error', 'Failed to generate PDF', 'error');
-    } finally {
-      this.isExporting = false;
-    }
+async downloadAsPDF() {
+  if (!this.hasData) {
+    Swal.fire('Warning', 'No data available to export', 'warning');
+    return;
   }
 
-  async print() {
-    if (!this.hasData) {
-      Swal.fire('Warning', 'No data available to print', 'warning');
-      return;
+  this.isExporting = true;
+
+  try {
+    // Wait a brief moment to ensure the chart is fully rendered
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    // Convert chart to image
+    const chartCanvas = await html2canvas(this.chartCanvas.nativeElement, {
+      scale: 3, // Higher resolution for PDF
+      backgroundColor: '#ffffff',
+      logging: false,
+      useCORS: true
+    });
+    
+    const imgData = chartCanvas.toDataURL('image/png');
+    
+    // Create PDF in landscape orientation
+    const pdf = new jsPDF('landscape', 'mm', 'a4');
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+    
+    // Calculate dimensions to maintain aspect ratio
+    const imgWidth = chartCanvas.width;
+    const imgHeight = chartCanvas.height;
+    const ratio = Math.min((pdfWidth - 20) / imgWidth, (pdfHeight - 20) / imgHeight);
+    const width = imgWidth * ratio;
+    const height = imgHeight * ratio;
+    
+    // Center the image on the page
+    const x = (pdfWidth - width) / 2;
+    const y = (pdfHeight - height) / 2;
+    
+    // Add image to PDF
+    pdf.addImage(imgData, 'PNG', x, y, width, height);
+    
+    // Save PDF
+    pdf.save(`Teacher_Evaluation_Chart_${new Date().toISOString().slice(0, 10)}.pdf`);
+    
+  } catch (error) {
+    console.error('Error generating PDF:', error);
+    Swal.fire('Error', 'Failed to generate PDF', 'error');
+  } finally {
+    this.isExporting = false;
+  }
+}
+
+async print() {
+  if (!this.hasData) {
+    Swal.fire('Warning', 'No data available to print', 'warning');
+    return;
+  }
+
+  this.isExporting = true;
+
+  try {
+    // Wait a brief moment to ensure the chart is fully rendered
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    // Convert chart to image
+    const chartCanvas = await html2canvas(this.chartCanvas.nativeElement, {
+      scale: 2,
+      backgroundColor: '#ffffff',
+      logging: false,
+      useCORS: true
+    });
+
+    const chartImage = chartCanvas.toDataURL('image/png');
+
+    // Create a new window for printing
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      throw new Error('Could not open print window');
     }
 
-    this.isExporting = true;
+    // Create print content with only the chart
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Teacher Evaluation Report - Chart</title>
+        <style>
+          @page { 
+            size: landscape; 
+            margin: 0; 
+          }
+          body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: white;
+          }
+          img {
+            max-width: 100%;
+            max-height: 100vh;
+            object-fit: contain;
+          }
+        </style>
+      </head>
+      <body>
+        <img src="${chartImage}" />
+      </body>
+      </html>
+    `);
 
-    try {
-      // Convert chart to image
-      const chartCanvas = await html2canvas(this.chartCanvas.nativeElement, {
-        scale: 2,
-        backgroundColor: '#ffffff'
-      });
+    printWindow.document.close();
 
-      const chartImage = chartCanvas.toDataURL('image/png');
-
-      // Create print content
-      const printContent = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>Teacher Evaluation Report</title>
-          <style>
-            @page { size: auto; margin: 0mm; }
-            body { margin: 0; padding: 15px; font-family: Arial, sans-serif; }
-            .header { text-align: center; margin-bottom: 20px; }
-            .chart-container { text-align: center; margin: 20px 0; }
-            .details { margin: 20px 0; }
-            .details-grid { 
-              display: grid; 
-              grid-template-columns: 1fr 1fr; 
-              gap: 10px; 
-              margin-top: 15px;
-            }
-            @media print {
-              body > *:not(#print-container) { display: none !important; }
-              #print-container {
-                display: block !important;
-                position: static !important;
-                width: 100% !important;
-                height: auto !important;
-                background: white !important;
-                margin: 0 !important;
-                padding: 15px !important;
-              }
-            }
-          </style>
-        </head>
-        <body>
-          <div id="print-container">
-            <div class="header">
-              <h1>Teacher Evaluation Report</h1>
-            </div>
-            
-            <div class="chart-container">
-              <img src="${chartImage}" style="max-width: 100%; height: auto;" />
-            </div>
-            
-            <div class="details">
-              <h3>Report Details</h3>
-              <div class="details-grid">
-                <div><strong>Date Range:</strong> ${this.filterParams.fromDate} to ${this.filterParams.toDate}</div>
-                <div><strong>Department:</strong> ${this.getDepartmentName()}</div>
-                <div><strong>Employee:</strong> ${this.getEmployeeName()}</div>
-                <div><strong>Generated On:</strong> ${new Date().toLocaleDateString()}</div>
-                <div><strong>Total Records:</strong> ${this.evaluationData.length}</div>
-              </div>
-            </div>
-          </div>
-        </body>
-        </html>
-      `;
-
-      // Create a temporary print container
-      const printContainer = document.createElement('div');
-      printContainer.id = 'print-container';
-      printContainer.innerHTML = printContent;
-
-      // Add to body and print
-      document.body.appendChild(printContainer);
-      window.print();
-
-      // Clean up
+    // Wait for the image to load before printing
+    printWindow.onload = () => {
       setTimeout(() => {
-        document.body.removeChild(printContainer);
-        this.isExporting = false;
-      }, 100);
+        printWindow.focus();
+        printWindow.print();
+        
+        // Close the window after printing when the print dialog is closed
+        const handleAfterPrint = () => {
+          printWindow.close();
+          this.isExporting = false;
+        };
+        
+        // Add event listener for after print
+        if (printWindow.matchMedia) {
+          const mediaQueryList = printWindow.matchMedia('print');
+          mediaQueryList.addListener((mql) => {
+            if (!mql.matches) {
+              handleAfterPrint();
+            }
+          });
+        }
+        
+        // Fallback: close after a timeout
+        setTimeout(() => {
+          if (!printWindow.closed) {
+            printWindow.close();
+            this.isExporting = false;
+          }
+        }, 5000);
+      }, 500);
+    };
 
-    } catch (error) {
-      console.error('Error printing report:', error);
-      Swal.fire('Error', 'Failed to print report', 'error');
-      this.isExporting = false;
-    }
+  } catch (error) {
+    console.error('Error printing chart:', error);
+    Swal.fire('Error', 'Failed to print chart', 'error');
+    this.isExporting = false;
   }
+}
 
   // Helper methods for export
   private getDepartmentName(): string {

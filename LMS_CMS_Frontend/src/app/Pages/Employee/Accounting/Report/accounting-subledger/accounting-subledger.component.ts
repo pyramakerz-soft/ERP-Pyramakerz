@@ -52,6 +52,12 @@ export class AccountingSubledgerComponent implements OnInit {
   // PDF Export properties
   showPDF: boolean = false;
   cachedTableDataForPDF: any[] = [];
+
+  CurrentPage: number = 1;
+  PageSize: number = 10;
+  TotalPages: number = 1;
+  TotalRecords: number = 0;
+
   
   school = {
     reportHeaderOneEn: 'Accounts Subledger Report',
@@ -150,67 +156,74 @@ export class AccountingSubledgerComponent implements OnInit {
     this.pageNumber = 1;
   }
 
-  viewReport() {
-    if (!this.fromDate || !this.toDate || !this.linkFileID) {
-      Swal.fire({
-        title: 'Missing Information',
-        text: 'Please select Date Range and Account Type',
-        icon: 'warning',
-        confirmButtonText: 'OK',
-      });
-      return;
-    }
-
-    if (new Date(this.fromDate) > new Date(this.toDate)) {
-      Swal.fire({
-        title: 'Invalid Date Range',
-        text: 'Start date cannot be later than end date.',
-        icon: 'warning',
-        confirmButtonText: 'OK',
-      });
-      return;
-    }
-
-    this.isLoading = true;
-    this.showTable = false;
-
-    this.accountingSubledgerService.GetAccountsLedger(
-      new Date(this.fromDate),
-      new Date(this.toDate),
-      this.linkFileID,
-      this.accountID,
-      this.pageNumber,
-      this.pageSize,
-      this.DomainName
-    ).subscribe({
-      next: (response) => {
-        this.reportData = response;
-        this.showTable = true;
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Error loading report:', error);
-        this.reportData = null;
-        this.showTable = true;
-        this.isLoading = false;
-        if (error.status === 404) {
-          Swal.fire({
-            title: 'No Data Found',
-            text: 'No data available for the selected filters',
-            icon: 'info',
-            confirmButtonText: 'OK',
-          });
-        } else {
-          Swal.fire({
-            title: 'Error',
-            text: 'Failed to load report data',
-            icon: 'error',
-            confirmButtonText: 'OK',
-          });
-        }
-      }
+viewReport() {
+  if (!this.fromDate || !this.toDate || !this.linkFileID) {
+    Swal.fire({
+      title: 'Missing Information',
+      text: 'Please select Date Range and Account Type',
+      icon: 'warning',
+      confirmButtonText: 'OK',
     });
+    return;
   }
+
+  if (new Date(this.fromDate) > new Date(this.toDate)) {
+    Swal.fire({
+      title: 'Invalid Date Range',
+      text: 'Start date cannot be later than end date.',
+      icon: 'warning',
+      confirmButtonText: 'OK',
+    });
+    return;
+  }
+
+  this.isLoading = true;
+  this.showTable = false;
+
+  this.accountingSubledgerService.GetAccountsLedger(
+    new Date(this.fromDate),
+    new Date(this.toDate),
+    this.linkFileID,
+    this.accountID,
+    this.CurrentPage, // Changed from pageNumber
+    this.PageSize,    // Changed from pageSize
+    this.DomainName
+  ).subscribe({
+    next: (response) => {
+      this.reportData = response;
+      this.showTable = true;
+      this.isLoading = false;
+      
+      // Update pagination properties from response
+      if (response.pagination) {
+        this.CurrentPage = response.pagination.currentPage;
+        this.TotalPages = response.pagination.totalPages;
+        this.TotalRecords = response.pagination.totalRecords;
+      }
+    },
+    error: (error) => {
+      console.error('Error loading report:', error);
+      this.reportData = null;
+      this.showTable = true;
+      this.isLoading = false;
+      if (error.status === 404) {
+        Swal.fire({
+          title: 'No Data Found',
+          text: 'No data available for the selected filters',
+          icon: 'info',
+          confirmButtonText: 'OK',
+        });
+      } else {
+        Swal.fire({
+          title: 'Error',
+          text: 'Failed to load report data',
+          icon: 'error',
+          confirmButtonText: 'OK',
+        });
+      }
+    }
+  });
+}
 
   changePage(newPage: number) {
     if (newPage > 0 && newPage <= (this.reportData?.pagination.totalPages || 1)) {
@@ -533,41 +546,53 @@ export class AccountingSubledgerComponent implements OnInit {
       });
     }
   }
+changeCurrentPage(currentPage: number) {
+  this.CurrentPage = currentPage;
+  this.viewReport();
+}
 
-  // Pagination methods
-  get visiblePages(): number[] {
-    const total = this.reportData?.pagination.totalPages || 1;
-    const current = this.pageNumber;
-    const maxVisible = 5;
+validatePageSize(event: any) { 
+  const value = event.target.value;
+  if (isNaN(value) || value === '' || parseInt(value) <= 0) {
+    // Set to minimum valid value instead of empty
+    this.PageSize = 1;
+    event.target.value = 1;
+  } else {
+    // Ensure it's a valid integer
+    this.PageSize = parseInt(value);
+    event.target.value = parseInt(value);
+  }
+}
 
-    if (total <= maxVisible) {
-      return Array.from({ length: total }, (_, i) => i + 1);
-    }
+validateNumberForPagination(event: any): void {
+  const value = event.target.value;
+  // Validate and ensure it's a positive number
+  if (value === '' || isNaN(value) || parseInt(value) <= 0) {
+    event.target.value = this.PageSize; // Reset to previous valid value
+  }
+}
 
-    const half = Math.floor(maxVisible / 2);
-    let start = current - half;
-    let end = current + half;
+get visiblePages(): number[] {
+  const total = this.TotalPages;
+  const current = this.CurrentPage;
+  const maxVisible = 5;
 
-    if (start < 1) {
-      start = 1;
-      end = maxVisible;
-    } else if (end > total) {
-      end = total;
-      start = total - maxVisible + 1;
-    }
-
-    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  if (total <= maxVisible) {
+    return Array.from({ length: total }, (_, i) => i + 1);
   }
 
-  validatePageSize(event: any) {
-    const value = event.target.value;
-    if (isNaN(value) || value === '') {
-      event.target.value = '';
-    }
+  const half = Math.floor(maxVisible / 2);
+  let start = current - half;
+  let end = current + half;
+
+  if (start < 1) {
+    start = 1;
+    end = maxVisible;
+  } else if (end > total) {
+    end = total;
+    start = total - maxVisible + 1;
   }
 
-  validateNumberForPagination(event: any): void {
-    const value = event.target.value;
-    this.pageSize = 0;
-  }
+  return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+}
 }

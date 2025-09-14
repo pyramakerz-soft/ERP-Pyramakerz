@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from '../../api.service';
 import { EmployeeGet } from '../../../Models/Employee/employee-get';
+import { MaintenanceEmployees } from '../../../Models/Maintenance/maintenance-employees';
 
 @Injectable({
   providedIn: 'root'
@@ -17,7 +18,7 @@ export class MaintenanceEmployeesService {
   }
 
   
-  Get(DomainName: string): Observable<EmployeeGet[]> {
+  Get(DomainName: string): Observable<MaintenanceEmployees[]> {
     if (DomainName != null) {
       this.header = DomainName;
     }
@@ -26,7 +27,7 @@ export class MaintenanceEmployeesService {
       .set('Domain-Name', this.header) 
       .set('Authorization', `Bearer ${token}`) 
       .set('accept', '*/*'); 
-    return this.http.get<EmployeeGet[]>(`${this.baseUrl}/MaintenanceEmployee`, { headers });
+    return this.http.get<MaintenanceEmployees[]>(`${this.baseUrl}/MaintenanceEmployee`, { headers });
   }
 
 

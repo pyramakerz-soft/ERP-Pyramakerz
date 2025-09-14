@@ -30,9 +30,9 @@
                 {{ isRtl && option.arName ? option.arName : option.name | translate }}
             </option>
         </select>
-        <div *ngIf="isLinkFilesLoading" class="text-sm text-gray-500 mt-1">
+        <!-- <div *ngIf="isLinkFilesLoading" class="text-sm text-gray-500 mt-1">
             {{ 'Loading...' | translate }}
-        </div>
+        </div> -->
     </div>
 
     <!-- Account Selector -->
@@ -49,16 +49,16 @@
                 {{ 'No accounts available' | translate }}
             </option>
         </select>
-        <div *ngIf="isAccountsLoading" class="text-sm text-gray-500 mt-1">
+        <!-- <div *ngIf="isAccountsLoading" class="text-sm text-gray-500 mt-1">
             {{ 'Loading accounts...' | translate }}
-        </div>
+        </div> -->
     </div>
 
     <div class="w-full md:w-1/6 flex justify-end mt-4 md:mt-0">
-        <button class="p-3 font-medium text-xl rounded-lg" (click)="viewReport()"
+        <button class="p-4 font-medium text-xl rounded-lg" (click)="viewReport()"
             [disabled]="!fromDate || !toDate || !linkFileID || !subAccountID || isLoading" [ngClass]="{
-                'bg-gray-100 text-gray-300': !fromDate || !toDate || !linkFileID || isLoading,
-                'secondaryBg text-white': fromDate && toDate && linkFileID && !isLoading
+                'bg-gray-100 text-gray-300': !fromDate || !toDate || !linkFileID || subAccountID ||  isLoading,
+                'secondaryBg text-white': fromDate && toDate && linkFileID && subAccountID && !isLoading
             }">
             <span *ngIf="!isLoading">{{ 'View Report' | translate }}</span>
             <span *ngIf="isLoading">{{ 'Loading...' | translate }}</span>
@@ -198,3 +198,15 @@
         </div>
     </div>
 </div>
+
+<!-- Update the PDF container section -->
+<!-- <div class="absolute -top-[9999px] -left-[9999px]">
+  <div id="accountStatementData" class="hidden">
+    <app-pdf-print *ngIf="showPDF" [school]="school" 
+                   [fileName]="type"
+                   [infoRows]="getInfoRows()"
+                   [tableDataWithHeaderArray]="getTableDataWithHeader()"
+                   #pdfComponentRef>
+    </app-pdf-print>
+  </div>
+</div> -->

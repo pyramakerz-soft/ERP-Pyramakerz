@@ -3,29 +3,59 @@
 </div>
 
 <div class="my-5 flex flex-wrap md:flex-nowrap items-end space-x-0 md:space-x-6 space-y-4 md:space-y-0 mb-6">
-<!-- Update the student select dropdown -->
-<div class="w-full md:w-1/4" *ngIf="reportType === 'student'">
-    <label for="student" class="block mb-2 text-sm font-medium text-gray-900">{{'Student'| translate }}</label>
-    <select id="student" [(ngModel)]="SelectedStudentId" (change)="DateChange()"
-        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
-        <option [ngValue]="0" disabled selected hidden>{{'Choose'| translate }} {{'Student'| translate }}</option>
-        <option *ngFor="let student of students" [value]="student.id" [disabled]="student.id === -1">
-            {{ student.name }}
-        </option>
-    </select>
-</div>
+    <!-- School Selector -->
+    <div class="w-full md:w-1/4">
+        <label for="school" class="block mb-2 text-sm font-medium text-gray-900">{{'School'| translate }}</label>
+        <select id="school" [(ngModel)]="SelectedSchoolId" (change)="loadGrades()"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
+            <option [ngValue]="0" disabled selected hidden>{{'Choose'| translate }} {{'School'| translate }}</option>
+            <option *ngIf="schools.length === 0" disabled>{{'No Data'| translate }}</option>
+            <option *ngFor="let school of schools" [value]="school.id" [disabled]="school.id === -1">
+                {{ school.name }}
+            </option>
+        </select>
+    </div>
 
-<!-- Update the classroom select dropdown -->
-<div class="w-full md:w-1/4" *ngIf="reportType === 'classroom'">
-    <label for="classroom" class="block mb-2 text-sm font-medium text-gray-900">{{'Classroom'| translate }}</label>
-    <select id="classroom" [(ngModel)]="SelectedClassroomId" (change)="DateChange()"
-        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
-        <option [ngValue]="0" disabled selected hidden>{{'Choose'| translate }} {{'Classroom'| translate }}</option>
-        <option *ngFor="let classroom of classrooms" [value]="classroom.id" [disabled]="classroom.id === -1">
-            {{ classroom.name }}
-        </option>
-    </select>
-</div>
+    <!-- Grade Selector -->
+    <div class="w-full md:w-1/4">
+        <label for="grade" class="block mb-2 text-sm font-medium text-gray-900">{{'Grade'| translate }}</label>
+        <select id="grade" [(ngModel)]="SelectedGradeId" (change)="loadClassrooms()" [disabled]="!SelectedSchoolId || SelectedSchoolId <= 0"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
+            <option [ngValue]="0" disabled selected hidden>{{'Choose'| translate }} {{'Grade'| translate }}</option>
+            <option *ngIf="grades.length === 0" disabled>{{'No Data'| translate }}</option>
+            <option *ngFor="let grade of grades" [value]="grade.id" [disabled]="grade.id === -1">
+                {{ grade.name }}
+            </option>
+        </select>
+    </div>
+
+    <!-- Classroom Selector -->
+    <div class="w-full md:w-1/4">
+        <label for="classroom" class="block mb-2 text-sm font-medium text-gray-900">{{'Classroom'| translate }}</label>
+        <select id="classroom" [(ngModel)]="SelectedClassroomId" (change)="reportType === 'student' ? loadStudents() : DateChange()" 
+            [disabled]="!SelectedGradeId || SelectedGradeId <= 0"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
+            <option [ngValue]="0" disabled selected hidden>{{'Choose'| translate }} {{'Classroom'| translate }}</option>
+            <option *ngIf="classrooms.length === 0" disabled>{{'No Data'| translate }}</option>
+            <option *ngFor="let classroom of classrooms" [value]="classroom.id" [disabled]="classroom.id === -1">
+                {{ classroom.name }}
+            </option>
+        </select>
+    </div>
+
+    <!-- Student Selector (only for student report) -->
+    <div class="w-full md:w-1/4" *ngIf="reportType === 'student'">
+        <label for="student" class="block mb-2 text-sm font-medium text-gray-900">{{'Student'| translate }}</label>
+        <select id="student" [(ngModel)]="SelectedStudentId" (change)="DateChange()"
+            [disabled]="!SelectedClassroomId || SelectedClassroomId <= 0"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
+            <option [ngValue]="0" disabled selected hidden>{{'Choose'| translate }} {{'Student'| translate }}</option>
+            <option *ngIf="students.length === 0" disabled>{{'No Data'| translate }}</option>
+            <option *ngFor="let student of students" [value]="student.id" [disabled]="student.id === -1">
+                {{ student.name }}
+            </option>
+        </select>
+    </div>
 
     <!-- Start Date -->
     <div class="w-full md:w-1/4">
@@ -44,10 +74,10 @@
     <!-- View Report Button -->
     <div class="w-full md:w-1/6 flex justify-end mt-4 md:mt-0 ">
         <button class="p-3 font-medium text-xl rounded-lg" (click)="ViewReport()" 
-            [disabled]="!SelectedStartDate || !SelectedEndDate || (reportType === 'student' ? !SelectedStudentId : !SelectedClassroomId) || isLoading"
+            [disabled]="!SelectedStartDate || !SelectedEndDate || !SelectedSchoolId || !SelectedGradeId || !SelectedClassroomId || (reportType === 'student' ? !SelectedStudentId : false) || isLoading"
             [ngClass]="{
-                'bg-gray-100 text-gray-300': !SelectedStartDate || !SelectedEndDate || (reportType === 'student' ? !SelectedStudentId : !SelectedClassroomId),
-                'secondaryBg text-white': SelectedStartDate && SelectedEndDate && (reportType === 'student' ? SelectedStudentId : SelectedClassroomId)
+                'bg-gray-100 text-gray-300': !SelectedStartDate || !SelectedEndDate || !SelectedSchoolId || !SelectedGradeId || !SelectedClassroomId || (reportType === 'student' ? !SelectedStudentId : false),
+                'secondaryBg text-white': SelectedStartDate && SelectedEndDate && SelectedSchoolId && SelectedGradeId && SelectedClassroomId && (reportType === 'student' ? SelectedStudentId : true) && !isLoading
             }">
             <span *ngIf="!isLoading">{{'View Report'| translate }}</span>
             <span *ngIf="isLoading">{{'Loading...'| translate }}</span>
@@ -79,18 +109,12 @@
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         {{ 'Name' | translate }}
                     </th>
-                    <!-- <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ 'Ar Name' | translate }}
-                    </th> -->
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         {{ 'Student ID' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         {{ 'Performance Type' | translate }}
                     </th>
-                    <!-- <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ 'Performance Type AR' | translate }}
-                    </th> -->
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         {{ 'Comment' | translate }}
                     </th>
@@ -106,24 +130,18 @@
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ data.englishNameStudent }}
                     </td>
-                    <!-- <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ data.arabicNameStudent }}
-                    </td> -->
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ data.studentId }}
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ data.performanceTypeEn }}
                     </td>
-                    <!-- <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ data.performanceTypeAr }}
-                    </td> -->
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ data.comment || 'N/A' }}
+                        {{ data.comment || '-' }}
                     </td>
                 </tr>
             </tbody>
-        </table>
+</table>
     </div>
 
     <!-- Classroom Report Table -->
@@ -135,14 +153,12 @@
                         {{ 'Date' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ 'Avg Score' | translate }}
-                    </th>
-                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         {{ 'Performance Type' | translate }}
                     </th>
-                    <!-- <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ 'Performance Type AR' | translate }}
-                    </th> -->
+                    <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ 'Avg Score' | translate }}
+                    </th>
+
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                         {{ 'Comment' | translate }}
                     </th>
@@ -156,16 +172,13 @@
                         {{ data.date }}
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ data.averageScore || 'N/A' }}
-                    </td>
-                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ data.performanceTypeEn }}
                     </td>
-                    <!-- <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ data.performanceTypeAr }}
-                    </td> -->
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ data.comment || 'N/A' }}
+                        {{ data.averageScore || '-' }}
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ data.comment || '-' }}
                     </td>
                 </tr>
             </tbody>
@@ -176,35 +189,7 @@
 <div class="absolute -top-[9999px] -left-[9999px]">
     <div id="Data" class="hidden">
         <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="fileName" 
-            [infoRows]="reportType === 'student' ? 
-            [      
-                {
-                    keyEn: 'Student: ' + studentName,
-                    keyAr: 'الطالب: ' + studentName,
-                },
-                {
-                    keyEn: 'Start Date: ' + SelectedStartDate,
-                    keyAr: 'تاريخ البدء: ' + SelectedStartDate,
-                },
-                {
-                    keyEn: 'End Date: ' + SelectedEndDate,
-                    keyAr: 'تاريخ الانتهاء: ' + SelectedEndDate,
-                }
-            ] : 
-            [
-                {
-                    keyEn: 'Classroom: ' + classroomName,
-                    keyAr: 'الفصل: ' + classroomName,
-                },
-                {
-                    keyEn: 'Start Date: ' + SelectedStartDate,
-                    keyAr: 'تاريخ البدء: ' + SelectedStartDate,
-                },
-                {
-                    keyEn: 'End Date: ' + SelectedEndDate,
-                    keyAr: 'تاريخ الانتهاء: ' + SelectedEndDate,
-                }
-            ]"
+            [infoRows]="getInfoRows()"
             [tableHeaders]="reportType === 'student' 
                 ? ['Date', 'Name','Student ID', 'Performance Type', 'Comment']
                 : ['Date', 'Avg Score', 'Performance Type', 'Comment']"

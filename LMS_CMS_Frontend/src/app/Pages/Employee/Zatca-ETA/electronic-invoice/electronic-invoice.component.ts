@@ -350,7 +350,7 @@ export class ElectronicInvoiceComponent implements OnInit {
         Status: t.isValid ? 'Sent' : 'Not Sent',
         School:
           this.schools.find((s) => s.id === this.selectedSchoolId)?.name ||
-          'N/A',
+          '-',
       }))
     );
 

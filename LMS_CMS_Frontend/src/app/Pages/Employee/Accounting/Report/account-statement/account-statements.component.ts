@@ -392,7 +392,7 @@ export class AccountStatementsComponent {
               Debit: item.debit,
               Credit: item.credit,
               Balance: item.balance,
-              Notes: item.notes || 'N/A'
+              Notes: item.notes || '-'
             }))
           }
         }];

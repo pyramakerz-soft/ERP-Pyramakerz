@@ -220,7 +220,7 @@ export class ViolationReportComponent {
       'Violation Type': item.violationType,
       'Employee Type': item.employeeType,
       'Employee Name': item.employeeEnglishName,
-      Details: item.details || 'N/A',
+      Details: item.details || '-',
     }));
   }
 
@@ -343,7 +343,7 @@ export class ViolationReportComponent {
         item.violationType,
         item.employeeType,
         item.employeeEnglishName,
-        item.details || 'N/A',
+        item.details || '-',
       ]);
 
       // Prepare info rows

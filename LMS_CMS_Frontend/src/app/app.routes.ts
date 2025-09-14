@@ -262,6 +262,8 @@ import { ArchivingComponent } from './Pages/Employee/Archiving/archiving/archivi
 import { AccountingStatementReportComponent } from './Pages/Employee/Accounting/Report/accounting-statement-report/accounting-statement-report.component';
 import { VacationEmployeeComponent } from './Pages/Employee/HR/vacation-employee/vacation-employee.component';
 import { LocationComponent } from './Pages/Employee/HR/location/location.component';
+import { AssignmentReportComponent } from './Pages/Employee/LMS/reports/assignment-report/assignment-report.component';
+import { MaintenanceComponent } from './Pages/Employee/Maintenance/maintenance/maintenance.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -479,19 +481,17 @@ export const routes: Routes = [
             { path: "Student/:Id", component: RegistrationConfirmationDetailsComponent, title: "Student", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Enter Daily Performance", component: DailyPerformanceMasterComponent, title: "Daily Performance", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Daily Performance/:id", component: DailyPerformanceViewComponent, title: "Daily Performance View", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            // { path: "Daily Performance Student Reports", component: DailyPreformanceReportComponent, title: "Daily Performance Reports", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            // { path: "Daily Performance Classroom Reports", component: DailyPreformanceReportComponent, title: "Daily Performance Reports", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] ,   data: { useClassroomFlag: true } },
             { path: "Student Daily Performance Report", component: DailyPreformanceReportComponent, title: "Daily Performance Report", canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'student' } },
             { path: "Classroom Daily Performance Report", component: DailyPreformanceReportComponent, title: "Classroom Daily Performance Report", canActivate: [noNavigateWithoutLoginGuard], data: { reportType: 'classroom' } },
             { path: "Assignment", component: AssignmentComponent, title: "Assignment", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
+            { path: "Assignment Report", component: AssignmentReportComponent, title: "Assignment Report", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Assignment/:id", component: AssignmentEditComponent, title: "Assignment Edit", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "report item card", component: ReportItemCardComponent, title: "Item Card Report", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], data: { showAverage: false } },
-            { path: "report item card with average", component: ReportItemCardComponent, title: "Item Card Report With Average", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], data: { showAverage: true } },
             { path: 'Average Cost Calculation', component: AverageCostCalcComponent, title: 'Average Cost Calculator', canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], },
             { path: "Item Card Report", component: ReportItemCardComponent, title: "Item Card Report", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], data: { showAverage: false } },
             { path: "Item Card Report With Average", component: ReportItemCardComponent, title: "Item Card Report With Average", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], data: { showAverage: true } },
             { path: "Assignment Student/:id", component: AssignmentStudentComponent, title: "AssignmentStudent", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Assignment Student Answer/:id", component: AssignmentDetailComponent, title: "Assignment Detail", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
+            { path: "Maintenance", component: MaintenanceComponent, title: "Maintenance", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Maintenance Companies", component: MaintenanceCompaniesComponent, title: "Maintenance", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Maintenance Employees", component: MaintenanceEmployeesComponent, title: "Maintenance", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Maintenance Items", component: MaintenanceItemsComponent, title: "Maintenance", canActivate: [noNavigateWithoutLoginGuard] },
