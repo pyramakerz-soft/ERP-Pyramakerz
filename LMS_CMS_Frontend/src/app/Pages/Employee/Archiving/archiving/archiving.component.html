@@ -55,7 +55,7 @@
                                 {{getFileExtension(child.fileLink)}}
                             </span>
 
-                            <a *ngIf="child.fileLink !== '' && child.fileLink != null" [href]="child.fileLink" download>
+                            <a *ngIf="child.fileLink !== '' && child.fileLink != null" [href]="child.fileLink" target="_blank" (click)="downloadFile(child.fileLink, child.fileLink)">
                                 <i class="fas fa-download secondaryTxt"></i>  
                             </a>
                         </div>

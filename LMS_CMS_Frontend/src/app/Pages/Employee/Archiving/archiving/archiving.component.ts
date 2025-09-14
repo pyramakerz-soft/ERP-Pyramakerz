@@ -72,7 +72,7 @@ export class ArchivingComponent {
   }
 
   GetAllData(){
-    this.archivingService.Get(this.DomainName).subscribe(
+    this.archivingService.GetAllPerUser(this.DomainName).subscribe(
       (data) => { 
         this.TableData = data 
       }
@@ -245,5 +245,18 @@ export class ArchivingComponent {
     if (lastDotIndex === -1) return '';
     
     return filename.slice(lastDotIndex).toLowerCase();
+  }
+
+  downloadFile(fileUrl: string, fileName: string) {
+    fetch(fileUrl)
+      .then(response => response.blob())
+      .then(blob => {
+        const link = document.createElement('a');
+        const url = window.URL.createObjectURL(blob);
+        link.href = url;
+        link.download = fileName;
+        link.click();
+        window.URL.revokeObjectURL(url);
+      });
   }
 }
