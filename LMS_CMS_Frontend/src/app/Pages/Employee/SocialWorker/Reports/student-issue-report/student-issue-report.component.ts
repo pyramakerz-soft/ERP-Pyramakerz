@@ -237,7 +237,7 @@ export class StudentIssueReportComponent  implements OnInit {
         )
       );
 
-      console.log('API Response:', response);
+      // console.log(response);
       
       // Handle the response directly as an array
       if (Array.isArray(response)) {

@@ -1,0 +1,139 @@
+<!-- maintenance.component.html -->
+<div class="">
+    <div class="flex justify-between items-center">
+        <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ 'Maintenance' | translate }}</h1>
+        <div class="flex justify-between items-center">
+            <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
+            <button (click)="openModal()"
+                class="rounded-lg px-4 py-3 flex items-center justify-center gap-2 secondaryBorder secondaryTxt">
+                 {{ 'Create' | translate }} {{ 'Maintenance' | translate }}
+            </button>
+        </div>
+    </div>
+
+    <app-table [headers]="headers" [data]="maintenanceList" [keys]="keys" (delete)="deleteMaintenance($event)"
+      [showEditAction] = false  >
+    </app-table>
+
+    <!-- Modal Overlay -->
+    <div id="maintenance-modal" tabindex="-1" aria-hidden="true" [ngClass]="{'hidden': !isModalVisible}"
+        class="fixed top-0 left-0 right-0 z-50 flex justify-center items-center w-full h-full bg-black/50">
+        
+        <!-- Modal Content -->
+        <div class="relative bg-white rounded-2xl p-8 w-[669px] max-h-[90vh] overflow-y-auto">
+            <!-- Close Icon -->
+            <div class="flex justify-between items-center w-full">
+                <!-- Modal Header -->
+                <h1 *ngIf="!editMode" class="font-semibold text-2xl leading-9"> {{ 'Create' | translate }} {{ 'Maintenance' | translate }}</h1>
+                <h1 *ngIf="editMode" class="font-semibold text-2xl leading-9"> {{ 'Edit' | translate }}  {{ 'Maintenance' | translate }}</h1>
+                <button (click)="closeModal()" class="text-gray-400 hover:text-gray-900 transition duration-200">
+                    <i class="fa-solid fa-xmark text-2xl"></i>
+                </button>
+            </div>
+
+            <!-- Modal Content -->
+            <div class="mt-4 bg-[#F7F7F7] rounded-[24px] p-[16px_24px] w-full gap-[20px] mx-auto overflow-y-auto">
+                <!-- Date -->
+                <h6 class="font-medium text-base leading-6 mb-1 mt-3">{{ 'Date' | translate }}</h6>
+                <div class="flex flex-col">
+                    <input type="date" [(ngModel)]="maintenanceForm.date" (input)="clearValidationError('date')"
+                        class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3" />
+                    <span *ngIf="validationErrors['date']" class="text-red-500 ml-3 font-normal">
+                        {{ validationErrors['date'] }}
+                    </span>
+                </div>
+
+                <!-- Item Selection -->
+                <h6 class="font-medium text-base leading-6 mb-1 mt-3">{{ 'Item' | translate }}</h6>
+                <div class="flex flex-col">
+                    <select [(ngModel)]="maintenanceForm.itemID" (change)="clearValidationError('itemID')"
+                        class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3">
+                        <option value="0">{{ 'Select Item' | translate }}</option>
+                        <option *ngFor="let item of maintenanceItems" [value]="item.id">
+                            {{ item.en_Name || item.ar_Name }}
+                        </option>
+                    </select>
+                    <span *ngIf="validationErrors['itemID']" class="text-red-500 ml-3 font-normal">
+                        {{ validationErrors['itemID'] }}
+                    </span>
+                </div>
+
+                <!-- Maintenance Type Selection (Radio Buttons) -->
+                <h6 class="font-medium text-base leading-6 mb-1 mt-3">{{ 'Maintenance Type' | translate }}</h6>
+                <div class="flex gap-4 mb-3">
+                    <label class="flex items-center">
+                        <input type="radio" name="maintenanceType" [value]="'company'" 
+                            [checked]="maintenanceType === 'company'"
+                            (change)="onMaintenanceTypeChange('company')"
+                            class="mr-2">
+                        {{ 'Company' | translate }}
+                    </label>
+                    <label class="flex items-center">
+                        <input type="radio" name="maintenanceType" [value]="'employee'"
+                            [checked]="maintenanceType === 'employee'"
+                            (change)="onMaintenanceTypeChange('employee')"
+                            class="mr-2">
+                        {{ 'Employee' | translate }}
+                    </label>
+                </div>
+
+                <!-- Company Selection (shown when company is selected) -->
+                <div *ngIf="maintenanceType === 'company'" class="flex flex-col">
+                    <h6 class="font-medium text-base leading-6 mb-1">{{ 'Company' | translate }}</h6>
+                    <select [(ngModel)]="maintenanceForm.companyID" (change)="clearValidationError('companyID')"
+                        class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3">
+                        <option value="0">{{ 'Select Company' | translate }}</option>
+                        <option *ngFor="let company of maintenanceCompanies" [value]="company.id">
+                            {{ company.en_Name || company.ar_Name }}
+                        </option>
+                    </select>
+                    <span *ngIf="validationErrors['companyID']" class="text-red-500 ml-3 font-normal">
+                        {{ validationErrors['companyID'] }}
+                    </span>
+                </div>
+
+                <!-- Employee Selection (shown when employee is selected) -->
+                <div *ngIf="maintenanceType === 'employee'" class="flex flex-col">
+                    <h6 class="font-medium text-base leading-6 mb-1">{{ 'Employee' | translate }}</h6>
+                    <select [(ngModel)]="maintenanceForm.maintenanceEmployeeID" (change)="clearValidationError('maintenanceEmployeeID')"
+                        class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3">
+                        <option value="0">{{ 'Select Employee' | translate }}</option>
+                        <option *ngFor="let employee of maintenanceEmployees" [value]="employee.id">
+                            {{ employee.en_Name || employee.ar_Name }}
+                        </option>
+                    </select>
+                    <span *ngIf="validationErrors['maintenanceEmployeeID']" class="text-red-500 ml-3 font-normal">
+                        {{ validationErrors['maintenanceEmployeeID'] }}
+                    </span>
+                </div>
+
+                <!-- Cost -->
+                <h6 class="font-medium text-base leading-6 mb-1 mt-3">{{ 'Cost' | translate }}</h6>
+                <div class="flex flex-col">
+                <input type="text" [(ngModel)]="maintenanceForm.cost" 
+                        (input)="validateNumber($event, 'cost')"
+                        class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"
+                        placeholder="{{ 'Enter' | translate }} {{ 'Cost' | translate }}" />
+                <span *ngIf="validationErrors['cost']" class="text-red-500 ml-3 font-normal">
+                    {{ validationErrors['cost'] }}
+                </span>
+                </div>
+
+                <!-- Note -->
+                <h6 class="font-medium text-base leading-6 mb-1 mt-3">{{ 'Note' | translate }}</h6>
+                <div class="flex flex-col">
+                    <textarea [(ngModel)]="maintenanceForm.note" (input)="clearValidationError('note')"
+                        class="w-full h-[100px] rounded-lg border border-solid border-gray-300 px-2 py-1 mb-3 resize-none"
+                        placeholder="{{ 'Enter' | translate }} {{ 'Note' | translate }}"></textarea>
+                </div>
+
+                <div class="flex justify-end w-full pt-6">
+                    <button (click)="saveMaintenance()" [disabled]="isSaving"
+                        class="bg-[#089B41] text-white font-medium px-5 py-3 rounded-lg transition duration-200 w-full">
+                        {{ isSaving ? ('Saving...'|translate) : ('Submit'|translate) }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
