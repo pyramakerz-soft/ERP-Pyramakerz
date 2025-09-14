@@ -25,13 +25,15 @@ import { GradeService } from '../../../../Services/Employee/LMS/grade.service';
 import { SubjectService } from '../../../../Services/Employee/LMS/subject.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { LocationService } from '../../../../Services/Employee/HR/location.service';
+import { Location } from '../../../../Models/HR/location';
 
 @Component({
   selector: 'app-employee-add-edit',
   standalone: true,
-  imports: [CommonModule, FormsModule,TranslateModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
   templateUrl: './employee-add-edit.component.html',
   styleUrl: './employee-add-edit.component.css',
 })
@@ -41,8 +43,8 @@ export class EmployeeAddEditComponent {
   DomainName: string = '';
   UserID: number = 0;
   path: string = '';
-   isRtl: boolean = false;
-    subscription!: Subscription;
+  isRtl: boolean = false;
+  subscription!: Subscription;
   Data: EmployeeGet = new EmployeeGet();
   BusCompany: BusType[] = [];
   Roles: Role[] = [];
@@ -60,6 +62,8 @@ export class EmployeeAddEditComponent {
   isLoading = false;
   floors: Floor[] = [];
   floorsSelected: Floor[] = [];
+  locations: Location[] = [];
+  locationsSelected: Location[] = [];
   grades: Grade[] = [];
   gradeSelected: Grade[] = [];
   subject: Subject[] = [];
@@ -69,6 +73,7 @@ export class EmployeeAddEditComponent {
   isSubjectSupervisor = false;
 
   dropdownOpen = false;
+  LocationdropdownOpen = false;
   GradedropdownOpen = false;
   SubjectdropdownOpen = false;
 
@@ -85,6 +90,7 @@ export class EmployeeAddEditComponent {
     private router: Router,
     public EmpServ: EmployeeService,
     public FloorServ: FloorService,
+    public LocationServ: LocationService,
     public GradeServ: GradeService,
     public SubjectServ: SubjectService,
     private languageService: LanguageService,
@@ -108,8 +114,8 @@ export class EmployeeAddEditComponent {
             this.EmpId,
             this.DomainName
           ).subscribe(async (data) => {
-            this.Data = data; 
-            this.Data.editedFiles = []; 
+            this.Data = data;
+            this.Data.editedFiles = [];
             if (data.files == null) {
               this.Data.files = [];
             }
@@ -120,6 +126,14 @@ export class EmployeeAddEditComponent {
                 this.isFloorMonitor = true
                 this.floorsSelected = this.floors.filter((s) =>
                   this.Data.floorsSelected.includes(s.id)
+                );
+              }
+            });
+            this.LocationServ.Get(this.DomainName).subscribe((data) => {
+              this.locations = data;
+              if (this.Data.locationSelected.length > 0) {
+                this.locationsSelected = this.locations.filter((s) =>
+                  this.Data.locationSelected.includes(s.id)
                 );
               }
             });
@@ -146,12 +160,13 @@ export class EmployeeAddEditComponent {
         this.GetBusCompany();
         this.GetRole();
         this.GetFloors();
+        this.GetLocations();
         this.GetGrade();
         this.GetSubject();
         this.GetEmployeeType();
       });
     }
-      this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
@@ -159,12 +174,12 @@ export class EmployeeAddEditComponent {
   }
 
 
-      ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
-    } 
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
 
 
   GetBusCompany() {
@@ -177,6 +192,13 @@ export class EmployeeAddEditComponent {
     this.floors = [];
     this.FloorServ.Get(this.DomainName).subscribe((data) => {
       this.floors = data;
+    });
+  }
+
+  GetLocations() {
+    this.locations = [];
+    this.LocationServ.Get(this.DomainName).subscribe((data) => {
+      this.locations = data;
     });
   }
 
@@ -341,6 +363,7 @@ export class EmployeeAddEditComponent {
   async Save() {
     this.Data.floorsSelected = this.floorsSelected.map((s) => s.id);
     this.Data.gradeSelected = this.gradeSelected.map((s) => s.id);
+    this.Data.locationSelected = this.locationsSelected.map((s) => s.id);
     this.Data.subjectSelected = this.subjectSelected.map((s) => s.id);
     if (this.isFormValid()) {
       this.isLoading = true;
@@ -541,6 +564,51 @@ export class EmployeeAddEditComponent {
       this.floorsSelected = [];
     }
     this.dropdownOpen = false;
+  }
+
+  //////////////////////////////////////////////////// Locations
+
+  LocationtoggleDropdown(): void {
+    this.LocationdropdownOpen = !this.LocationdropdownOpen;
+  }
+
+  LocationselectType(Type: Location): void {
+    if (!this.locationsSelected.some((e) => e.id === Type.id)) {
+      this.locationsSelected.push(Type);
+    }
+    if (this.mode == 'Edit') {
+      if (!Array.isArray(this.Data.newLocationSelected)) {
+        this.Data.newLocationSelected = [];
+      }
+      this.Data.newLocationSelected.push(Type.id);
+    }
+    this.LocationdropdownOpen = false;
+  }
+
+  LocationremoveSelected(id: number): void {
+    const index = this.locationsSelected.findIndex((tag) => tag.id === id);
+    if (index === -1) return; // Tag not found
+    const removed = this.locationsSelected.splice(index, 1)[0];
+    if (this.locationsSelected.length == 0) {
+      this.isFloorMonitor = false
+    }
+    if (this.mode === 'Edit' && removed?.id !== 0) {
+      this.Data.deletedLocationSelected = this.Data.deletedLocationSelected || [];
+      this.Data.deletedLocationSelected.push(removed.id);
+    }
+    this.LocationdropdownOpen = false;
+  }
+
+  onLocationChange() {
+    if (!this.Data.isRestrictedForLoctaion) {
+      if (this.mode === 'Edit') {
+        this.Data.deletedLocationSelected = this.Data.deletedLocationSelected || [];
+        const selectedIds = (this.locationsSelected || []).map(s => s.id);
+        this.Data.deletedLocationSelected.push(...selectedIds);
+      }
+      this.locationsSelected = [];
+    }
+    this.LocationdropdownOpen = false;
   }
 
   //////////////////////////////////////////////////// Grade

@@ -429,7 +429,7 @@
                         </ng-template>
                     </div>
                     <div class="absolute bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10"
-                        *ngIf="dropdownOpen">
+                        *ngIf="dropdownOpen && SelectedLessonID">
                         <ul *ngIf="tags.length > 0">
                             <li *ngFor="let Type of tags" class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                                 (click)="selectType(Type)">

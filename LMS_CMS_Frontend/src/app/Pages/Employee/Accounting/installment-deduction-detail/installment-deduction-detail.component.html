@@ -138,7 +138,7 @@
                         <ng-container *ngIf="editingRowId === row.id; else textModeFeesType">
                             <select [(ngModel)]="row.feeTypeID" (ngModelChange)="onInputValueChangeDetails({ field: 'feeTypeID', value: $event })"
                                 class="w-full border border-gray-300 px-2 py-1 rounded-md">
-                                <option value=0 disabled selected hidden>Select a FeesType</option>
+                                <option value=0 disabled selected hidden>Select Fees Type</option>
                                 <option *ngFor="let S of FeesType" [value]="S.id">{{ S.name }}</option>
                             </select>
                             <span *ngIf="validationErrorsInstallmentDeductionDetails['feeTypeID']" class="text-red-500 ml-3 font-normal">{{validationErrorsInstallmentDeductionDetails["feeTypeID"]}}</span>

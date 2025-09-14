@@ -261,6 +261,7 @@ import { PermissionGroupDetailsComponent } from './Pages/Employee/Archiving/perm
 import { ArchivingComponent } from './Pages/Employee/Archiving/archiving/archiving.component';
 import { AccountingStatementReportComponent } from './Pages/Employee/Accounting/Report/accounting-statement-report/accounting-statement-report.component';
 import { VacationEmployeeComponent } from './Pages/Employee/HR/vacation-employee/vacation-employee.component';
+import { LocationComponent } from './Pages/Employee/HR/location/location.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -570,6 +571,7 @@ export const routes: Routes = [
             { path: "Permissions Group Archiving/:id", component: PermissionGroupDetailsComponent, title: "Permissions Group Archiving", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Archiving", component: ArchivingComponent, title: "Archiving", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Vacation Employee", component: VacationEmployeeComponent, title: "Vacation Employee", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Location", component: LocationComponent, title: "Location", canActivate: [noNavigateWithoutLoginGuard] },
         ]
     },
     {

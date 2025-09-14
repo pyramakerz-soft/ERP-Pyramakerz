@@ -666,7 +666,8 @@ export class AssignmentComponent {
               isValid = false;
             }
 
-            if ((this.assignment.passMark  && this.assignment.mark) &&this.assignment.passMark > this.assignment.mark) {
+            if ((this.assignment.passMark  && this.assignment.mark) &&   Number(this.assignment.passMark) > Number(this.assignment.mark) ) {
+              console.log(1234,this.assignment)
               this.validationErrors['passMark'] = '*Pass Mark must be smaller than Mark';
               isValid = false;
             }

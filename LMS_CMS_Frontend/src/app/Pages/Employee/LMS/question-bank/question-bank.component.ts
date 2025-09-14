@@ -31,7 +31,7 @@ import { QuestionBankOption } from '../../../../Models/LMS/question-bank-option'
 import { SubBankQuestion } from '../../../../Models/LMS/sub-bank-question';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { School } from '../../../../Models/school';
 import { Grade } from '../../../../Models/LMS/grade';
 import { GradeService } from '../../../../Services/Employee/LMS/grade.service';
@@ -40,7 +40,7 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
 @Component({
   selector: 'app-question-bank',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent, QuillModule , TranslateModule],
+  imports: [FormsModule, CommonModule, SearchComponent, QuillModule, TranslateModule],
   templateUrl: './question-bank.component.html',
   styleUrl: './question-bank.component.css'
 })
@@ -170,19 +170,18 @@ export class QuestionBankComponent {
     this.GetAllDokLevel()
     this.GetAllQuestionBankType()
     this.GetAllBloomLevel()
-    this.GetAllTag()
     this.subscription = this.languageService.language$.subscribe(direction => {
-    this.isRtl = direction === 'rtl';
+      this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
-  } 
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
 
   getAllGradesBySchoolId() {
     this.IsView = false
@@ -365,6 +364,9 @@ export class QuestionBankComponent {
 
   onSubjectChange() {
     this.questionBank.lessonID = 0
+    this.tag = []
+    this.TagsSelected = []
+    this.questionBank.deletedQuestionBankTagsDTO = []
     this.GetAllLesson()
   }
 
@@ -380,7 +382,10 @@ export class QuestionBankComponent {
   }
 
   GetAllTag() {
-    this.TagServ.Get(this.DomainName).subscribe((d) => {
+    this.tag = []
+    this.TagsSelected = []
+    this.questionBank.deletedQuestionBankTagsDTO = []
+    this.TagServ.GetByLessonId(this.questionBank.lessonID, this.DomainName).subscribe((d) => {
       this.tag = d
     })
   }
@@ -509,7 +514,7 @@ export class QuestionBankComponent {
 
     return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   }
-  
+
   CreateOREdit() {
     this.questionBank.questionBankTagsDTO = this.TagsSelected.map(s => s.id)
     if (this.isFormValid()) {
@@ -782,6 +787,9 @@ export class QuestionBankComponent {
     this.subjectsForCreate = []
     this.questionBank.subjectID = 0
     this.questionBank.lessonID = 0
+    this.tag = []
+    this.TagsSelected = []
+    this.questionBank.deletedQuestionBankTagsDTO = []
     this.GradeServ.GetBySchoolId(this.questionBank.schoolID, this.DomainName).subscribe((d) => {
       this.GradesForCreate = d
     })
@@ -792,6 +800,9 @@ export class QuestionBankComponent {
     this.subjectsForCreate = []
     this.questionBank.lessonID = 0
     this.questionBank.subjectID = 0
+    this.tag = []
+    this.TagsSelected = []
+    this.questionBank.deletedQuestionBankTagsDTO = []
     this.SubjectServ.GetByGradeId(this.questionBank.gradeID, this.DomainName).subscribe((d) => {
       this.subjectsForCreate = d
     })

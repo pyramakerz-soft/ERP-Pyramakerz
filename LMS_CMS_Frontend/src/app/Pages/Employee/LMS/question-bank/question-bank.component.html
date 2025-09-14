@@ -225,7 +225,7 @@
         <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="lessonID"
           [ngClass]="{ 'bg-[#EBEBEB]': !questionBank.subjectID }" [disabled]="!questionBank.subjectID"
           [(ngModel)]="questionBank.lessonID"
-          (ngModelChange)="onInputValueChange({ field: 'lessonID', value: $event })">
+          (ngModelChange)="onInputValueChange({ field: 'lessonID', value: $event }); GetAllTag()">
           <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }}  {{ 'Lesson' | translate }}</option>
           <option *ngFor="let c of lesson" [value]="c.id">{{ c.englishTitle }}</option>
           <option *ngIf="lesson.length === 0" disabled selected> {{ 'No Data Found' | translate }}</option>
@@ -238,6 +238,10 @@
         <label class="mb-2 primaryTxt" for="ac"> {{ 'Tags' | translate }}</label>
         <div class="relative">
           <div class="border border-gray-300 rounded-lg px-4 py-3 cursor-pointer min-h-[48px]"
+          [ngClass]="{
+              'cursor-pointer': questionBank.lessonID,
+              'bg-gray-100 text-gray-400 cursor-not-allowed': !questionBank.lessonID
+            }"
             (click)="toggleDropdown()" tabindex="0">
             <ng-container *ngIf="TagsSelected.length > 0; else placeholder">
               <div class="flex flex-wrap">
@@ -255,13 +259,29 @@
             </ng-template>
           </div>
           <div class="absolute bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10"
-            *ngIf="dropdownOpen">
+            *ngIf="dropdownOpen && questionBank.lessonID && lesson.length!= 0">
             <ul>
               <li *ngFor="let Type of tag" class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                 (click)="selectType(Type)">
                 {{ Type.name }}
               </li>
             </ul>
+          </div>
+          <div class="absolute bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10"
+            *ngIf="dropdownOpen && questionBank.lessonID">
+            <ul *ngIf="tag.length > 0; else noData">
+              <li
+                *ngFor="let Type of tag"
+                class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                (click)="selectType(Type)">
+                {{ Type.name }}
+              </li>
+            </ul>
+            <ng-template #noData>
+              <div class="px-4 py-2 text-gray-400">
+                {{ 'No Data Found' | translate }}
+              </div>
+            </ng-template>
           </div>
         </div>
       </div>
