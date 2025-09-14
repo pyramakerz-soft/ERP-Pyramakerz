@@ -15,11 +15,12 @@ import { ApiService } from '../../../../../Services/api.service';
 import { DataAccordingToLinkFileService } from '../../../../../Services/Employee/Accounting/data-according-to-link-file.service';
 import { LinkFileService } from '../../../../../Services/Employee/Accounting/link-file.service';
 import Swal from 'sweetalert2';
+import { PdfPrintComponent } from "../../../../../Component/pdf-print/pdf-print.component";
 
 @Component({
   selector: 'app-accounting-statement-report',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslateModule],
+  imports: [CommonModule, FormsModule, TranslateModule, PdfPrintComponent],
   templateUrl: './accounting-statement-report.component.html',
   styleUrl: './accounting-statement-report.component.css'
 })
@@ -254,4 +255,5 @@ export class AccountingStatementReportComponent implements OnInit {
 
     return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   }
+  
 }

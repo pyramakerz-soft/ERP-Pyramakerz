@@ -75,7 +75,7 @@
         <label class="mb-2 primaryTxt">{{ 'Employee' | translate }}</label>
         <select [(ngModel)]="selectedEmployeeId" (ngModelChange)="onInputValueChange({ field: 'id', value: $event })" class="rounded-lg border border-solid border-gray-300 px-4 py-3">
           <option [ngValue]="null" disabled hidden>{{ 'Select' | translate }} {{ 'Employee' | translate }}</option>
-          <option *ngFor="let emp of employees" [ngValue]="emp.id">{{ emp.user_Name }}</option>
+          <option *ngFor="let emp of employees" [ngValue]="emp.id">{{ emp.insertedByUserId }}</option>
           <option *ngIf="employees.length === 0" disabled>{{ 'No Data Found' | translate }}</option>
         </select>
         <span *ngIf="validationErrors['id']" class="text-red-500 ml-3 font-normal">{{ validationErrors['id'] }}</span>

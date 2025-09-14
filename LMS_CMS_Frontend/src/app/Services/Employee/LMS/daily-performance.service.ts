@@ -56,7 +56,7 @@ export class DailyPerformanceService {
     });
   }
 
-GetDailyPerformanceReport(studentId: number, fromDate: string, toDate: string, DomainName: string) {
+GetDailyPerformanceReport(schoolId: number, gradeId: number, classroomId: number, studentId: number, fromDate: string, toDate: string, DomainName: string) {
   if (DomainName != null) {
     this.header = DomainName
   }
@@ -67,12 +67,12 @@ GetDailyPerformanceReport(studentId: number, fromDate: string, toDate: string, D
     .set('Content-Type', 'application/json');
   
   return this.http.get<any[]>(
-    `${this.baseUrl}/DailyPerformance/DailyPerformanceReport?studentId=${studentId}&fromDate=${fromDate}&toDate=${toDate}`,
+    `${this.baseUrl}/DailyPerformance/DailyPerformanceReport?schoolId=${schoolId}&gradeId=${gradeId}&classroomId=${classroomId}&studentId=${studentId}&fromDate=${fromDate}&toDate=${toDate}`,
     { headers }
   );
 }
 
-GetClassroomDailyPerformanceAverages(classroomId: number, fromDate: string, toDate: string, DomainName: string) {
+GetClassroomDailyPerformanceAverages(schoolId: number, gradeId: number, classroomId: number, fromDate: string, toDate: string, DomainName: string) {
   if (DomainName != null) {
     this.header = DomainName
   }
@@ -83,7 +83,7 @@ GetClassroomDailyPerformanceAverages(classroomId: number, fromDate: string, toDa
     .set('Content-Type', 'application/json');
   
   return this.http.get<any[]>(
-    `${this.baseUrl}/DailyPerformance/ClassRoomDailyPerformanceAverages?classroomId=${classroomId}&fromDate=${fromDate}&toDate=${toDate}`,
+    `${this.baseUrl}/DailyPerformance/ClassRoomDailyPerformanceAverages?schoolId=${schoolId}&gradeId=${gradeId}&classroomId=${classroomId}&fromDate=${fromDate}&toDate=${toDate}`,
     { headers }
   );
 }

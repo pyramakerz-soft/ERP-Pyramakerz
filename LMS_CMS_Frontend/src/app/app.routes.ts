@@ -262,6 +262,7 @@ import { ArchivingComponent } from './Pages/Employee/Archiving/archiving/archivi
 import { AccountingStatementReportComponent } from './Pages/Employee/Accounting/Report/accounting-statement-report/accounting-statement-report.component';
 import { VacationEmployeeComponent } from './Pages/Employee/HR/vacation-employee/vacation-employee.component';
 import { AssignmentReportComponent } from './Pages/Employee/LMS/reports/assignment-report/assignment-report.component';
+import { MaintenanceComponent } from './Pages/Employee/Maintenance/maintenance/maintenance.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -489,6 +490,7 @@ export const routes: Routes = [
             { path: "Item Card Report With Average", component: ReportItemCardComponent, title: "Item Card Report With Average", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard], data: { showAverage: true } },
             { path: "Assignment Student/:id", component: AssignmentStudentComponent, title: "AssignmentStudent", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Assignment Student Answer/:id", component: AssignmentDetailComponent, title: "Assignment Detail", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
+            { path: "Maintenance", component: MaintenanceComponent, title: "Maintenance", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Maintenance Companies", component: MaintenanceCompaniesComponent, title: "Maintenance", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Maintenance Employees", component: MaintenanceEmployeesComponent, title: "Maintenance", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Maintenance Items", component: MaintenanceItemsComponent, title: "Maintenance", canActivate: [noNavigateWithoutLoginGuard] },

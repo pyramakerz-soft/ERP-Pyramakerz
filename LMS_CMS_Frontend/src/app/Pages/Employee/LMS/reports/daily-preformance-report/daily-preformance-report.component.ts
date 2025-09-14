@@ -14,6 +14,9 @@ import * as XLSX from 'xlsx-js-style';
 import { ClassroomService } from '../../../../../Services/Employee/LMS/classroom.service';
 import { ActivatedRoute } from '@angular/router';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
+import { SchoolService } from '../../../../../Services/Employee/school.service';
+import { GradeService } from '../../../../../Services/Employee/LMS/grade.service';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-daily-preformance-report',
@@ -24,8 +27,10 @@ import { ReportsService } from '../../../../../Services/shared/reports.service';
 })
 export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
   DomainName: string = '';
+  SelectedSchoolId: number = 0;
+  SelectedGradeId: number = 0;
+  SelectedClassroomId: number = 0;
   SelectedStudentId: number = 0;
-  SelectedClassroomId: number = 0; // Add classroom selection
   SelectedStartDate: string = '';
   SelectedEndDate: string = '';
   reportType: string = 'student'; // Default to student report
@@ -38,7 +43,9 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
   tableData: any[] = [];
   tableDataForExport: any[] = [];
   students: any[] = [];
-  classrooms: any[] = []; // Add classrooms array
+  classrooms: any[] = [];
+  schools: any[] = [];
+  grades: any[] = [];
   isLoading: boolean = false;
 
   school = {
@@ -55,11 +62,13 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
     public dailyPerformanceService: DailyPerformanceService,
     public apiService: ApiService,
     public studentService: StudentService,
-    public classroomService: ClassroomService, // Add classroom service
+    public classroomService: ClassroomService,
+    public schoolService: SchoolService,
+    public gradeService: GradeService,
     private languageService: LanguageService,
     private realTimeService: RealTimeNotificationServiceService,
     private route: ActivatedRoute,
-    private reportsService: ReportsService // Add this line
+    private reportsService: ReportsService
   ) {}
 
   ngOnInit() {
@@ -68,12 +77,12 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
     // Get report type from route data
     this.reportType = this.route.snapshot.data['reportType'] || 'student';
 
+    this.loadSchools();
+
     if (this.reportType === 'student') {
-      this.loadStudents();
       this.school.reportHeaderOneEn = 'Student Daily Performance Report';
       this.school.reportHeaderOneAr = 'تقرير أداء الطالب اليومي';
     } else {
-      this.loadClassrooms();
       this.school.reportHeaderOneEn = 'Classroom Daily Performance Report';
       this.school.reportHeaderOneAr = 'تقرير أداء الفصل اليومي';
     }
@@ -93,63 +102,106 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
     }
   }
 
-  // In the loadStudents() method, update the error handling:
-  loadStudents() {
-    this.studentService.GetAll(this.DomainName).subscribe(
-      (data) => {
+  async loadSchools() {
+    try {
+      const data = await firstValueFrom(this.schoolService.Get(this.DomainName));
+      if (data && data.length > 0) {
+        this.schools = data;
+      } else {
+        this.schools = [{ id: -1, name: 'No data available' }];
+      }
+    } catch (error) {
+      console.error('Error loading schools:', error);
+      this.schools = [{ id: -1, name: 'No data available' }];
+    }
+  }
+
+  async loadGrades() {
+    if (this.SelectedSchoolId > 0) {
+      try {
+        const data = await firstValueFrom(
+          this.gradeService.GetBySchoolId(this.SelectedSchoolId, this.DomainName)
+        );
         if (data && data.length > 0) {
-          this.students = data.map((student) => ({
+          this.grades = data;
+        } else {
+          this.grades = [{ id: -1, name: 'No data available' }];
+        }
+        this.SelectedGradeId = 0;
+        this.classrooms = [];
+        this.SelectedClassroomId = 0;
+        this.students = [];
+        this.SelectedStudentId = 0;
+        this.DateChange();
+      } catch (error) {
+        console.error('Error loading grades:', error);
+        this.grades = [{ id: -1, name: 'No data available' }];
+      }
+    }
+  }
+
+  async loadClassrooms() {
+    if (this.SelectedGradeId > 0) {
+      try {
+        const data = await firstValueFrom(
+          this.classroomService.GetByGradeId(this.SelectedGradeId, this.DomainName)
+        );
+        if (data && data.length > 0) {
+          this.classrooms = data;
+        } else {
+          this.classrooms = [{ id: -1, name: 'No data available' }];
+        }
+        this.SelectedClassroomId = 0;
+        this.students = [];
+        this.SelectedStudentId = 0;
+        this.DateChange();
+      } catch (error) {
+        console.error('Error loading classrooms:', error);
+        this.classrooms = [{ id: -1, name: 'No data available' }];
+      }
+    }
+  }
+
+  async loadStudents() {
+    if (this.SelectedClassroomId > 0) {
+      try {
+        const data = await firstValueFrom(
+          this.studentService.GetByClassID(this.SelectedClassroomId, this.DomainName)
+        );
+        if (data && data.length > 0) {
+          this.students = data.map((student: any) => ({
             id: student.id,
             name: student.en_name || student.ar_name || 'Unknown',
           }));
         } else {
-          // If no students found, add a "No data" option
           this.students = [{ id: -1, name: 'No data available' }];
         }
-      },
-      (error) => {
+        this.SelectedStudentId = 0;
+        this.DateChange();
+      } catch (error) {
         console.error('Error loading students:', error);
-        // Add "No data" option on error too
         this.students = [{ id: -1, name: 'No data available' }];
       }
-    );
+    }
   }
 
-  // In the loadClassrooms() method, update the error handling:
-  loadClassrooms() {
-    this.classroomService.Get(this.DomainName).subscribe(
-      (data) => {
-        if (data && data.length > 0) {
-          this.classrooms = data.map((classroom) => ({
-            id: classroom.id,
-            name: classroom.name || 'Unknown',
-          }));
-        } else {
-          // If no classrooms found, add a "No data" option
-          this.classrooms = [{ id: -1, name: 'No data available' }];
-        }
-      },
-      (error) => {
-        console.error('Error loading classrooms:', error);
-        // Add "No data" option on error too
-        this.classrooms = [{ id: -1, name: 'No data available' }];
-      }
-    );
-  }
-
-  // Update the DateChange() method to handle the "No data" case:
   DateChange() {
     this.showTable = false;
 
-    // Disable button if "No data" is selected or no valid selection
-    const hasValidSelection =
-      (this.reportType === 'student' && this.SelectedStudentId > 0) ||
-      (this.reportType === 'classroom' && this.SelectedClassroomId > 0);
-
-    if (this.SelectedEndDate && this.SelectedStartDate && hasValidSelection) {
-      this.showViewReportBtn = true;
+    // Check if all required fields are filled
+    const hasRequiredFields = this.SelectedStartDate && this.SelectedEndDate;
+    
+    if (this.reportType === 'student') {
+      const hasValidSelection = this.SelectedSchoolId > 0 && 
+                               this.SelectedGradeId > 0 && 
+                               this.SelectedClassroomId > 0 && 
+                               this.SelectedStudentId > 0;
+      // this.showViewReportBtn = hasRequiredFields && hasValidSelection;
     } else {
-      this.showViewReportBtn = false;
+      const hasValidSelection = this.SelectedSchoolId > 0 && 
+                               this.SelectedGradeId > 0 && 
+                               this.SelectedClassroomId > 0;
+      // this.showViewReportBtn = hasRequiredFields && hasValidSelection;
     }
   }
 
@@ -173,6 +225,9 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
     if (this.reportType === 'student') {
       this.dailyPerformanceService
         .GetDailyPerformanceReport(
+          this.SelectedSchoolId,
+          this.SelectedGradeId,
+          this.SelectedClassroomId,
           this.SelectedStudentId,
           this.SelectedStartDate,
           this.SelectedEndDate,
@@ -189,6 +244,8 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
     } else {
       this.dailyPerformanceService
         .GetClassroomDailyPerformanceAverages(
+          this.SelectedSchoolId,
+          this.SelectedGradeId,
           this.SelectedClassroomId,
           this.SelectedStartDate,
           this.SelectedEndDate,
@@ -214,12 +271,6 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
 
   private handleError(error: any) {
     console.error('Error fetching daily performance report:', error);
-    // Swal.fire({
-    //   title: 'Error',
-    //   text: 'Failed to fetch daily performance report data.',
-    //   icon: 'error',
-    //   confirmButtonText: 'OK',
-    // });
     this.showTable = true;
     this.isLoading = false;
   }
@@ -230,58 +281,62 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
       : 'Classroom Daily Performance Report';
   }
 
-  get studentName(): string {
-    const student = this.students.find((s) => s.id == this.SelectedStudentId);
-    return student ? student.name : 'Undefined';
+  getSchoolName(): string {
+    const school = this.schools.find(s => s.id == this.SelectedSchoolId);
+    return school ? school.name : 'Undefined';
   }
 
-  get classroomName(): string {
-    const classroom = this.classrooms.find(
-      (c) => c.id == this.SelectedClassroomId
-    );
+  getGradeName(): string {
+    const grade = this.grades.find(g => g.id == this.SelectedGradeId);
+    return grade ? grade.name : 'Undefined';
+  }
+
+  getClassroomName(): string {
+    const classroom = this.classrooms.find(c => c.id == this.SelectedClassroomId);
     return classroom ? classroom.name : 'Undefined';
   }
 
+  getStudentName(): string {
+    const student = this.students.find(s => s.id == this.SelectedStudentId);
+    return student ? student.name : 'Undefined';
+  }
+
   getInfoRows(): any[] {
+    const baseInfo = [
+      {
+        keyEn: 'School: ' + this.getSchoolName(),
+        keyAr: 'المدرسة: ' + this.getSchoolName(),
+      },
+      {
+        keyEn: 'Grade: ' + this.getGradeName(),
+        keyAr: 'الصف: ' + this.getGradeName(),
+      },
+      {
+        keyEn: 'Classroom: ' + this.getClassroomName(),
+        keyAr: 'الفصل: ' + this.getClassroomName(),
+      },
+      {
+        keyEn: 'Start Date: ' + this.SelectedStartDate,
+        keyAr: 'تاريخ البدء: ' + this.SelectedStartDate,
+      },
+      {
+        keyEn: 'End Date: ' + this.SelectedEndDate,
+        keyAr: 'تاريخ الانتهاء: ' + this.SelectedEndDate,
+      },
+      {
+        keyEn: 'Generated On: ' + new Date().toLocaleDateString(),
+        keyAr: 'تم الإنشاء في: ' + new Date().toLocaleDateString(),
+      },
+    ];
+
     if (this.reportType === 'student') {
-      return [
-        {
-          keyEn: 'Student: ' + this.studentName,
-          keyAr: 'الطالب: ' + this.studentName,
-        },
-        {
-          keyEn: 'Start Date: ' + this.SelectedStartDate,
-          keyAr: 'تاريخ البدء: ' + this.SelectedStartDate,
-        },
-        {
-          keyEn: 'End Date: ' + this.SelectedEndDate,
-          keyAr: 'تاريخ الانتهاء: ' + this.SelectedEndDate,
-        },
-        {
-          keyEn: 'Generated On: ' + new Date().toLocaleDateString(),
-          keyAr: 'تم الإنشاء في: ' + new Date().toLocaleDateString(),
-        },
-      ];
-    } else {
-      return [
-        {
-          keyEn: 'Classroom: ' + this.classroomName,
-          keyAr: 'الفصل: ' + this.classroomName,
-        },
-        {
-          keyEn: 'Start Date: ' + this.SelectedStartDate,
-          keyAr: 'تاريخ البدء: ' + this.SelectedStartDate,
-        },
-        {
-          keyEn: 'End Date: ' + this.SelectedEndDate,
-          keyAr: 'تاريخ الانتهاء: ' + this.SelectedEndDate,
-        },
-        {
-          keyEn: 'Generated On: ' + new Date().toLocaleDateString(),
-          keyAr: 'تم الإنشاء في: ' + new Date().toLocaleDateString(),
-        },
-      ];
+      baseInfo.splice(3, 0, {
+        keyEn: 'Student: ' + this.getStudentName(),
+        keyAr: 'الطالب: ' + this.getStudentName(),
+      });
     }
+
+    return baseInfo;
   }
 
   private prepareExportData(): void {
@@ -292,7 +347,6 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
         'Ar Name': item.arabicNameStudent,
         'Student ID': item.studentId,
         'Performance Type': item.performanceTypeEn,
-        // 'Performance Type AR': item.performanceTypeAr,
         Comment: item.comment || '-',
       }));
     } else {
@@ -300,7 +354,6 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
         Date: item.date,
         'Avg Score': item.averageScore || '-',
         'Performance Type': item.performanceTypeEn,
-        // 'Performance Type AR': item.performanceTypeAr,
         Comment: item.comment || '-',
       }));
     }
@@ -316,19 +369,15 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
             headers: [
               'Date',
               'Name',
-              // 'Ar Name',
               'Student ID',
               'Performance Type',
-              // 'Performance Type AR',
               'Comment',
             ],
             data: this.tableData.map((item) => ({
               Date: item.date,
               'Name': item.englishNameStudent,
-              // 'Ar Name': item.arabicNameStudent,
               'Student ID': item.studentId,
               'Performance Type': item.performanceTypeEn,
-              // 'Performance Type AR': item.performanceTypeAr,
               Comment: item.comment,
             })),
           },
@@ -344,14 +393,12 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
               'Date',
               'Avg Score',
               'Performance Type',
-              // 'Performance Type AR',
               'Comment',
             ],
             data: this.tableData.map((item) => ({
               Date: item.date,
               'Avg Score': item.averageScore,
               'Performance Type': item.performanceTypeEn,
-              // 'Performance Type AR': item.performanceTypeAr,
               Comment: item.comment,
             })),
           },
@@ -437,10 +484,8 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
           return [
             item.date,
             item.englishNameStudent,
-            // item.arabicNameStudent,
             item.studentId,
             item.performanceTypeEn,
-            // item.performanceTypeAr,
             item.comment || '-',
           ];
         } else {
@@ -448,70 +493,39 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
             item.date,
             item.averageScore || '-',
             item.performanceTypeEn,
-            // item.performanceTypeAr,
             item.comment || '-',
           ];
         }
       });
 
       // Prepare info rows
-      const infoRows = [];
-
-      if (this.reportType === 'student') {
-        const selectedStudent = this.students.find(
-          (s) => s.id == this.SelectedStudentId
-        );
-        infoRows.push({
-          key: 'Student',
-          value: selectedStudent?.name || 'All',
-        });
-      } else {
-        const selectedClassroom = this.classrooms.find(
-          (c) => c.id == this.SelectedClassroomId
-        );
-        infoRows.push({
-          key: 'Classroom',
-          value: selectedClassroom?.name || 'All',
-        });
-      }
-
-      infoRows.push(
+      const infoRows = [
+        { key: 'School', value: this.getSchoolName() },
+        { key: 'Grade', value: this.getGradeName() },
+        { key: 'Classroom', value: this.getClassroomName() },
         { key: 'Start Date', value: this.SelectedStartDate },
         { key: 'End Date', value: this.SelectedEndDate },
         { key: 'Generated On', value: new Date().toLocaleDateString() }
-      );
+      ];
+
+      if (this.reportType === 'student') {
+        infoRows.splice(3, 0, { key: 'Student', value: this.getStudentName() });
+      }
 
       // Prepare headers based on report type
-      const headers =
-        this.reportType === 'student'
-          ? [
-              'Date',
-              'Name',
-              // 'Ar Name',
-              'Student ID',
-              'Performance Type',
-              // 'Performance Type AR',
-              'Comment',
-            ]
-          : [
-              'Date',
-              'Avg Score',
-              'Performance Type',
-              // 'Performance Type AR',
-              'Comment',
-            ];
+      const headers = this.reportType === 'student'
+        ? ['Date', 'Name', 'Student ID', 'Performance Type', 'Comment']
+        : ['Date', 'Avg Score', 'Performance Type', 'Comment'];
 
       // Generate the Excel report using the service
       await this.reportsService.generateExcelReport({
         mainHeader: {
-          en:
-            this.reportType === 'student'
-              ? 'Student Daily Performance Report'
-              : 'Classroom Daily Performance Report',
-          ar:
-            this.reportType === 'student'
-              ? 'تقرير أداء الطالب اليومي'
-              : 'تقرير أداء الفصل اليومي',
+          en: this.reportType === 'student'
+            ? 'Student Daily Performance Report'
+            : 'Classroom Daily Performance Report',
+          ar: this.reportType === 'student'
+            ? 'تقرير أداء الطالب اليومي'
+            : 'تقرير أداء الفصل اليومي',
         },
         subHeaders: [
           {
@@ -520,22 +534,16 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
           },
         ],
         infoRows: infoRows,
-        // reportImage: this.school.reportImage,
         tables: [
           {
-            title:
-              this.reportType === 'student'
-                ? 'Student Performance Data'
-                : 'Classroom Performance Data',
+            title: this.reportType === 'student'
+              ? 'Student Performance Data'
+              : 'Classroom Performance Data',
             headers: headers,
             data: tableData,
           },
         ],
-        filename: `${
-          this.reportType === 'student' ? 'Student' : 'Classroom'
-        }_Daily_Performance_Report_${new Date()
-          .toISOString()
-          .slice(0, 10)}.xlsx`,
+        filename: `${this.reportType === 'student' ? 'Student' : 'Classroom'}_Daily_Performance_Report_${new Date().toISOString().slice(0, 10)}.xlsx`,
       });
     } catch (error) {
       console.error('Error generating Excel report:', error);
