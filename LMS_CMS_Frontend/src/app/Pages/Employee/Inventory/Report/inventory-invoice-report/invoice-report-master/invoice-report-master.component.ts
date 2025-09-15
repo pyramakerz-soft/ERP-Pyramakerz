@@ -31,36 +31,6 @@ interface FlagOption {
 })
 
 export class InventoryTransactionReportComponent implements OnInit {
-  getTableDataWithHeader(): any[] {
-    return this.transactions.map((transaction) => ({
-      header: `Invoice #${transaction.invoiceNumber} - ${
-        transaction.storeName
-      } - ${new Date(transaction.date).toLocaleDateString()}`,
-      data: [
-        { key: 'Transaction Type', value: transaction.flagEnName },
-        { key: 'Total Amount', value: transaction.total },
-        {
-          key: 'Payment Type',
-          value: transaction.isCash
-            ? 'Cash'
-            : transaction.isVisa
-            ? 'Visa'
-            : 'Other',
-        },
-        { key: 'Notes', value: transaction.notes || '-' },
-      ],
-      details: {
-        headers: ['Item ID', 'Quantity', 'Price', 'Total Price', 'Notes'],
-        data: transaction.inventoryDetails.map((detail) => ({
-          'Item ID': detail.id,
-          Quantity: detail.quantity,
-          Price: detail.price,
-          'Total Price': detail.totalPrice,
-          Notes: detail.notes || '-',
-        })),
-      },
-    }));
-  }
 
   dateFrom: string = '';
   dateTo: string = '';
@@ -83,12 +53,13 @@ export class InventoryTransactionReportComponent implements OnInit {
 
   showPDF = false;
   transactionsForExport: any[] = [];
-  school = {
-    reportHeaderOneEn: 'Inventory Report',
-    reportHeaderTwoEn: 'Transaction Summary',
-    reportHeaderOneAr: 'تقرير المخزون',
-    reportHeaderTwoAr: 'ملخص المعاملات'
-  };
+
+
+school = {
+  reportHeaderOneEn: '',
+  reportHeaderOneAr: '',
+};
+
 
   @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;
 
@@ -154,12 +125,14 @@ export class InventoryTransactionReportComponent implements OnInit {
     private realTimeService: RealTimeNotificationServiceService
   ) {}
 
-  ngOnInit() {
-    this.route.data.subscribe((data) => {
-      this.reportType = data['reportType'];
-      this.currentFlags = this.availableFlags[this.reportType];
-      this.selectedFlagIds = this.getAllFlagsForReportType();
-    });
+ngOnInit() {
+  this.route.data.subscribe((data) => {
+    this.reportType = data['reportType'];
+    this.currentFlags = this.availableFlags[this.reportType];
+    this.selectedFlagIds = this.getAllFlagsForReportType();
+    
+    this.setSchoolHeader();
+  });
     this.loadStores();
     this.loadCategories();
     this.selectedStoreId = null;
@@ -172,6 +145,26 @@ export class InventoryTransactionReportComponent implements OnInit {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+  private setSchoolHeader(): void {
+  switch (this.reportType) {
+    case 'inventory':
+      this.school.reportHeaderOneEn = 'Inventory Transactions Report';
+      this.school.reportHeaderOneAr = 'تقرير معاملات المخزون';
+      break;
+    case 'sales':
+      this.school.reportHeaderOneEn = 'Sales Transactions Report';
+      this.school.reportHeaderOneAr = 'تقرير معاملات المبيعات';
+      break;
+    case 'purchase':
+      this.school.reportHeaderOneEn = 'Purchase Transactions Report';
+      this.school.reportHeaderOneAr = 'تقرير معاملات المشتريات';
+      break;
+    default:
+      this.school.reportHeaderOneEn = 'Transactions Report';
+      this.school.reportHeaderOneAr = 'تقرير المعاملات';
+  }
+}
 
  ngOnDestroy(): void {
       this.realTimeService.stopConnection(); 
@@ -194,32 +187,34 @@ export class InventoryTransactionReportComponent implements OnInit {
       });
   }
 
-  onCategorySelected() {
-    this.selectedSubCategoryId = null;
-    this.selectedItemId = null;
-    this.items = [];
+onCategorySelected() {
+  this.selectedSubCategoryId = null;
+  this.selectedItemId = null;
+  this.items = [];
 
-    if (this.selectedCategoryId) {
-      this.subCategoryService
-        .GetByCategoryId(
-          this.selectedCategoryId,
-          this.subCategoryService.ApiServ.GetHeader()
-        )
-        .subscribe({
-          next: (subCategories) => {
-            this.subCategories = subCategories;
-          },
-          error: (error) => {
-            console.error('Error loading subcategories:', error);
-          },
-        });
-    } else {
-      this.subCategories = [];
-    }
+  if (this.selectedCategoryId) {
+    this.subCategoryService
+      .GetByCategoryId(
+        this.selectedCategoryId,
+        this.subCategoryService.ApiServ.GetHeader()
+      )
+      .subscribe({
+        next: (subCategories) => {
+          this.subCategories = subCategories;
+        },
+        error: (error) => {
+          console.error('Error loading subcategories:', error);
+          this.subCategories = [];
+        },
+      });
+  } else {
+    this.subCategories = [];
   }
+}
 
   onSubCategorySelected() {
     this.selectedItemId = null;
+    this.items = [];
 
     if (this.selectedSubCategoryId) {
       this.shopItemService
@@ -340,17 +335,71 @@ export class InventoryTransactionReportComponent implements OnInit {
       });
   }
 
-  private prepareExportData(): void {
-    this.transactionsForExport = this.transactions.map((t) => ({
+  
+getTableDataWithHeader(): any[] {
+  return this.transactions.map((transaction) => {
+    const baseData = {
+      header: `Invoice #${transaction.invoiceNumber} - ${
+        transaction.storeName
+      } - ${new Date(transaction.date).toLocaleDateString()}`,
+      data: [
+        { key: 'Transaction Type', value: transaction.flagEnName },
+        { key: 'Total Amount', value: transaction.total },
+        {
+          key: 'Payment Type',
+          value: transaction.isCash
+            ? 'Cash'
+            : transaction.isVisa
+            ? 'Visa'
+            : 'Other',
+        },
+        { key: 'Notes', value: transaction.notes || '-' },
+      ],
+      details: {
+        headers: ['Item ID', 'Quantity', 'Price', 'Total Price', 'Notes'],
+        data: transaction.inventoryDetails.map((detail) => ({
+          'Item ID': detail.id,
+          Quantity: detail.quantity,
+          Price: detail.price,
+          'Total Price': detail.totalPrice,
+          Notes: detail.notes || '-',
+        })),
+      },
+    };
+    
+    // Add student/supplier based on report type
+    if (this.reportType === 'sales' && transaction.studentName) {
+      baseData.data.splice(1, 0, { key: 'Student', value: transaction.studentName });
+    } else if (this.reportType === 'purchase' && transaction.supplierName) {
+      baseData.data.splice(1, 0, { key: 'Supplier', value: transaction.supplierName });
+    }
+    
+    return baseData;
+  });
+}
+
+
+private prepareExportData(): void {
+  this.transactionsForExport = this.transactions.map((t) => {
+    const baseData = {
       'Invoice #': t.invoiceNumber,
       Date: new Date(t.date).toLocaleDateString(),
       Store: t.storeName,
-      // 'Student': t.studentName,
       'Total Amount': t.total,
       'Transaction Type': t.flagEnName,
       Notes: t.notes || '-',
-    }));
-  }
+    };
+    
+    // Add student/supplier based on report type
+    if (this.reportType === 'sales') {
+      return {...baseData, 'Student': t.studentName || '-'};
+    } else if (this.reportType === 'purchase') {
+      return {...baseData, 'Supplier': t.supplierName || '-'};
+    }
+    
+    return baseData;
+  });
+}
 
   // private formatDateForAPI(dateString: string): string {
   //   if (!dateString) return '';
@@ -473,21 +522,31 @@ export class InventoryTransactionReportComponent implements OnInit {
   }
 
 async exportExcel() {
-  const tableData = this.transactions.map((t) => ({
-    'Invoice #': t.invoiceNumber,
-    Date: new Date(t.date).toLocaleDateString(),
-    Store: t.storeName,
-    'Student': t.studentName,
-    'Transaction Type': t.flagEnName,
-    'Total Amount': t.total,
-    'Payment Type': t.isCash ? 'Cash' : t.isVisa ? 'Visa' : 'Other',
-    Notes: t.notes || '-',
-  }));
+  const tableData = this.transactions.map((t) => {
+    const baseData = {
+      'Invoice #': t.invoiceNumber,
+      Date: new Date(t.date).toLocaleDateString(),
+      Store: t.storeName,
+      'Transaction Type': t.flagEnName,
+      'Total Amount': t.total,
+      'Payment Type': t.isCash ? 'Cash' : t.isVisa ? 'Visa' : 'Other',
+      Notes: t.notes || '-',
+    };
+    
+    // Add student/supplier based on report type
+    if (this.reportType === 'sales') {
+      return {...baseData, 'Student': t.studentName || '-'};
+    } else if (this.reportType === 'purchase') {
+      return {...baseData, 'Supplier': t.supplierName || '-'};
+    }
+    
+    return baseData;
+  });
 
   await this.reportsService.generateExcelReport({
     mainHeader: {
-      en: 'Inventory Transactions Report',
-      ar: 'تقرير معاملات المخزون'
+      en: this.school.reportHeaderOneEn,
+      ar: this.school.reportHeaderOneAr
     },
     subHeaders: [
       { en: 'Transaction Summary', ar: 'ملخص المعاملات' },

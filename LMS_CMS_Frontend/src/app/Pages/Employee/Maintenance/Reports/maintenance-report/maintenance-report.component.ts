@@ -235,15 +235,31 @@ onEmployeeChange() {
     return this.maintenanceEmployees.find(e => e.id === this.selectedEmployeeId)?.en_Name || 'All Employees';
   }
 
-  getInfoRows(): any[] {
-    return [
-      { keyEn: 'From Date: ' + this.dateFrom },
-      { keyEn: 'To Date: ' + this.dateTo },
-      { keyEn: 'Item: ' + this.getItemName() },
-      { keyEn: 'Company: ' + this.getCompanyName() },
-      { keyEn: 'Employee: ' + this.getEmployeeName() }
-    ];
+// In maintenance-report.component.ts - update the getInfoRows method and related helper methods
+
+getInfoRows(): any[] {
+  const infoRows = [
+    { keyEn: 'From Date: ' + this.dateFrom },
+    { keyEn: 'To Date: ' + this.dateTo },
+    { keyEn: 'Item: ' + this.getItemName() }
+  ];
+
+  // Handle Company/Employee display logic
+  if (this.selectedCompanyId) {
+    infoRows.push({ keyEn: 'Company: ' + this.getCompanyName() });
+    // infoRows.push({ keyEn: 'Employee: All Employees' });
+  } else if (this.selectedEmployeeId) {
+    // infoRows.push({ keyEn: 'Company: All Companies' });
+    infoRows.push({ keyEn: 'Employee: ' + this.getEmployeeName() });
+  } else {
+    // Neither is selected
+    infoRows.push({ keyEn: 'Company: All Companies' });
+    infoRows.push({ keyEn: 'Employee: All Employees' });
   }
+
+  return infoRows;
+}
+
 
   DownloadAsPDF() {
     if (this.reportsForExport.length === 0) {
@@ -307,47 +323,61 @@ onEmployeeChange() {
     }, 500);
   }
 
-  async exportExcel() {
-    if (this.reportsForExcel.length === 0) {
-      Swal.fire('Warning', 'No data to export!', 'warning');
-      return;
+async exportExcel() {
+  if (this.reportsForExcel.length === 0) {
+    Swal.fire('Warning', 'No data to export!', 'warning');
+    return;
+  }
+
+  this.isExporting = true;
+  
+  try {
+    // Prepare info rows with the same logic as getInfoRows
+    const infoRows = [
+      { key: 'From Date', value: this.dateFrom },
+      { key: 'To Date', value: this.dateTo },
+      { key: 'Item', value: this.getItemName() }
+    ];
+
+    // Handle Company/Employee display logic
+    if (this.selectedCompanyId) {
+      infoRows.push({ key: 'Company', value: this.getCompanyName() });
+      // infoRows.push({ key: 'Employee', value: 'All Employees' });
+    } else if (this.selectedEmployeeId) {
+      // infoRows.push({ key: 'Company', value: 'All Companies' });
+      infoRows.push({ key: 'Employee', value: this.getEmployeeName() });
+    } else {
+      // Neither is selected
+      infoRows.push({ key: 'Company', value: 'All Companies' });
+      infoRows.push({ key: 'Employee', value: 'All Employees' });
     }
 
-    this.isExporting = true;
-    
-    try {
-      await this.reportsService.generateExcelReport({
-        mainHeader: {
-          en: 'Maintenance Report',
-          ar: 'تقرير الصيانة'
-        },
-        subHeaders: [
-          {
-            en: 'Maintenance Records',
-            ar: 'سجلات الصيانة'
-          }
-        ],
-        infoRows: [
-          { key: 'From Date', value: this.dateFrom },
-          { key: 'To Date', value: this.dateTo },
-          { key: 'Item', value: this.getItemName() },
-          { key: 'Company', value: this.getCompanyName() },
-          { key: 'Employee', value: this.getEmployeeName() }
-        ],
-        tables: [
-          {
-            title: 'Maintenance Report Data',
-            headers: ['Date', 'Item', 'Company', 'Employee', 'Cost', 'Notes'],
-            data: this.reportsForExcel
-          }
-        ],
-        filename: `Maintenance_Report_${new Date().toISOString().slice(0, 10)}.xlsx`
-      });
-    } catch (error) {
-      console.error('Error exporting to Excel:', error);
-      Swal.fire('Error', 'Failed to export to Excel', 'error');
-    } finally {
-      this.isExporting = false;
-    }
+    await this.reportsService.generateExcelReport({
+      mainHeader: {
+        en: 'Maintenance Report',
+        ar: 'تقرير الصيانة'
+      },
+      subHeaders: [
+        {
+          en: 'Maintenance Records',
+          ar: 'سجلات الصيانة'
+        }
+      ],
+      infoRows: infoRows,
+      tables: [
+        {
+          title: 'Maintenance Report Data',
+          headers: ['Date', 'Item', 'Company', 'Employee', 'Cost', 'Notes'],
+          data: this.reportsForExcel
+        }
+      ],
+      filename: `Maintenance_Report_${new Date().toISOString().slice(0, 10)}.xlsx`
+    });
+  } catch (error) {
+    console.error('Error exporting to Excel:', error);
+    Swal.fire('Error', 'Failed to export to Excel', 'error');
+  } finally {
+    this.isExporting = false;
   }
+}
 }
