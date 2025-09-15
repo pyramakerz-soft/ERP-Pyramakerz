@@ -1096,7 +1096,7 @@ namespace LMS_CMS_BL.Config
             CreateMap<Assignment, AssignmentReportDTO>()
                 .ForMember(dest => dest.AssignmentName, opt => opt.MapFrom(src => src.EnglishName))
                 .ForMember(dest => dest.SubjectName, opt => opt.MapFrom(src => src.Subject.en_name))
-                // Counts (AttendanceNumber, NumberSuccessful, NumberFailed) will be computed manually in the controller, so ignore them here
+             
                 .ForMember(dest => dest.AttendanceNumber, opt => opt.Ignore())
                 .ForMember(dest => dest.NumberSuccessful, opt => opt.Ignore())
                 .ForMember(dest => dest.NumberFailed, opt => opt.Ignore());
