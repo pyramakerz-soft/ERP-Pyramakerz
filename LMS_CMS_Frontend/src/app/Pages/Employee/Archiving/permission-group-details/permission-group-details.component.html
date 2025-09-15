@@ -27,8 +27,12 @@
             </p>
         </div>
 
-        <div *ngIf="archivingTrees.length != 0" class="w-full"> 
-            <app-permission-group-archiving-item [archivingData]="archivingTrees" (Selected)="SelectData($event)"></app-permission-group-archiving-item>
+        <div *ngIf="archivingTrees.length != 0" class="w-full">  
+            <app-permission-group-archiving-item 
+                [archivingData]="archivingTrees" 
+                [permissionGroupID]="permissionGroupID" 
+                (Selected)="SelectData($event)">
+            </app-permission-group-archiving-item>
         </div>
     </div> 
 </div>

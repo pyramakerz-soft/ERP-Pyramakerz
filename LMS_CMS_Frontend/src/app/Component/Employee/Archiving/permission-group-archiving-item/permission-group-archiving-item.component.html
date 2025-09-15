@@ -1,41 +1,50 @@
-<div *ngFor="let archiving of archivingData" [ngClass]="{ 'ml-11': archiving.archivingTreeParentID != 0, 'my-4':  archiving.fileLink == '' }">
+<div *ngFor="let archiving of archivingData"
+    [ngClass]="{ 'ml-11': archiving.archivingTreeParentID != 0, 'my-4': archiving.fileLink == '' }">
     <div>
-        <div class="flex items-center justify-between space-x-3 rtl:space-x-reverse p-2 rounded" [ngClass]="{'primaryBg text-white': archiving.fileLink == ''}">
+        <div class="flex items-center justify-between space-x-3 rtl:space-x-reverse p-2 rounded"
+            [ngClass]="{'primaryBg text-white': archiving.fileLink == ''}">
             <div class="flex items-center space-x-2 rtl:space-x-reverse">
-                <div class="cursor-pointer">
-                     <input type="checkbox"  [(ngModel)]="archiving.selected" (change)="selectData(archiving); $event.stopPropagation()">
-                </div>  
-                <div [class.cursor-pointer]="archiving.fileLink === '' || archiving.fileLink == null" class="flex items-center space-x-2">
-                    <i *ngIf="archiving.fileLink === '' || archiving.fileLink == null" class="fa-solid fa-folder-open text-white text-lg"></i>
-                    <i *ngIf="archiving.fileLink !== '' && archiving.fileLink != null" class="fa-regular fa-file primaryTxt text-2xl"></i>
+                <div class="cursor-pointer"> 
+                    <input type="checkbox" [(ngModel)]="archiving.selected" (change)="selectData(archiving, 'selected'); $event.stopPropagation()">
+                </div>
+                <div [class.cursor-pointer]="archiving.fileLink === '' || archiving.fileLink == null"
+                    class="flex items-center space-x-2">
+                    <i *ngIf="archiving.fileLink === '' || archiving.fileLink == null"
+                        class="fa-solid fa-folder-open text-white text-lg"></i>
+                    <i *ngIf="archiving.fileLink !== '' && archiving.fileLink != null"
+                        class="fa-regular fa-file primaryTxt text-2xl"></i>
                     <div class="flex items-center gap-1">
-                        <p>{{archiving.name}}</p>
-                        <span *ngIf="archiving.fileLink !== '' && archiving.fileLink != null" class="text-gray-500 text-sm">
-                            {{getFileExtension(archiving.fileLink)}}
+                        <p>{{ archiving.name }}</p>
+                        <span *ngIf="archiving.fileLink !== '' && archiving.fileLink != null"
+                            class="text-gray-500 text-sm">
+                            {{ getFileExtension(archiving.fileLink) }}
                         </span>
                     </div>
                 </div>
             </div>
+
             <div class="flex items-center">
-                <input type="checkbox" [(ngModel)]="archiving.allow_Delete" [disabled]="!archiving.selected" (change)="selectData(archiving); $event.stopPropagation()">
+                 <input type="checkbox" [(ngModel)]="archiving.allow_Delete" [disabled]="!archiving.selected" 
+                 (change)="selectData(archiving, 'allowDelete'); $event.stopPropagation()">
                 <label>Allow Delete</label>
             </div>
- 
-            <div class="flex items-center">
-                <input type="checkbox" [(ngModel)]="archiving.allow_Delete_For_Others" [disabled]="!archiving.selected" (change)="selectData(archiving); $event.stopPropagation()">
+
+            <div class="flex items-center"> 
+                    <input type="checkbox" [(ngModel)]="archiving.allow_Delete_For_Others"
+       [disabled]="!archiving.selected"
+       (change)="selectData(archiving, 'allowDeleteForOthers'); $event.stopPropagation()">
                 <label>Allow Delete for Others</label>
             </div>
 
-            <div *ngIf="archiving.fileLink == ''" class="px-3 py-[6px] rounded bg-white secondaryTxt" 
-            (click)="toggleChildren(archiving)">
-                <i class="fa-solid" [ngClass]="{
-                    'fa-chevron-down': !archiving.isOpen,
-                    'fa-chevron-up': archiving.isOpen
-                  }"></i>
-            </div>  
+            <div *ngIf="archiving.fileLink == ''" class="px-3 py-[6px] rounded bg-white secondaryTxt"
+                (click)="toggleChildren(archiving)">
+                <i class="fa-solid"
+                    [ngClass]="{ 'fa-chevron-down': !archiving.isOpen, 'fa-chevron-up': archiving.isOpen }"></i>
+            </div>
         </div>
 
-        <app-permission-group-archiving-item *ngIf="archiving.isOpen && archiving.children && archiving.children.length > 0"
+        <app-permission-group-archiving-item
+            *ngIf="archiving.isOpen && archiving.children && archiving.children.length > 0"
             [archivingData]="archiving.children" (Selected)="Selected.emit($event)">
         </app-permission-group-archiving-item>
     </div>

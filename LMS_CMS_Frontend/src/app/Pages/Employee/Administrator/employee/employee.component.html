@@ -68,9 +68,7 @@
                 <tr *ngFor="let row of TableData; let i = index"
                     [ngClass]="{'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1}"
                     class="border-t border-gray-300 text-xs md:text-sm">
-                    <td
-                        class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#30462e] hover:bg-gray-200">
-                        {{ row.id }}</td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#30462e]">{{ row.id }}</td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.user_Name }}</td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.en_name }}</td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{ row.ar_name }}</td>
