@@ -29,16 +29,7 @@ export interface MaintenanceCreate {
   note: string;
 }
 
-export interface MaintenanceReportRequest {
-  fromDate: string;
-  toDate: string;
-  itemId: number;
-  maintenanceEmployeeId: number;
-  companyId: number;
-}
-
 export interface MaintenanceReport {
-  getMaintenanceReport(domainName: string, request: MaintenanceReportRequest): Observable<unknown>;
   id: number;
   date: string;
   itemID: number;
@@ -52,6 +43,14 @@ export interface MaintenanceReport {
   maintenanceEmployeeID: number;
   cost: number;
   note: string;
+}
+
+export interface MaintenanceReportRequest {
+  fromDate: string;
+  toDate: string;
+  itemId: number;
+  maintenanceEmployeeId: number | null;
+  companyId: number | null;
 }
 
 @Injectable({
@@ -144,19 +143,16 @@ export class MaintenanceService {
     const headers = new HttpHeaders()
       .set('Domain-Name', this.header)
       .set('Authorization', `Bearer ${token}`)
-      .set('accept', '*/*');
+      .set('accept', '*/*')
+      .set('Content-Type', 'application/json');
 
-    // Convert the request object to query parameters
-    let params = new HttpParams();
-    if (request.fromDate) params = params.set('fromDate', request.fromDate);
-    if (request.toDate) params = params.set('toDate', request.toDate);
-    if (request.itemId) params = params.set('itemId', request.itemId.toString());
-    if (request.maintenanceEmployeeId) params = params.set('maintenanceEmployeeId', request.maintenanceEmployeeId.toString());
-    if (request.companyId) params = params.set('companyId', request.companyId.toString());
-
-    return this.http.get<MaintenanceReport[]>(
+    // Send as POST request with parameters in the body
+    return this.http.post<MaintenanceReport[]>(
       `${this.baseUrl}/Maintenance/report`,
-      { headers, params }
+      request,
+      { headers }
     );
   }
+  //https://localhost:7205/api/with-domain/Maintenance/report?fromDate=2025-07-07&toDate=2025-09-15&itemId=1&maintenanceEmployeeId=1&companyId=1
+  //https://localhost:7205/api/with-domain/Maintenance/report
 }

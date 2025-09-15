@@ -28,7 +28,7 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   styleUrls: ['./hygiene-types.component.css'],
 })
 export class HygieneTypesComponent implements OnInit {
-  hygieneType: HygieneTypes = new HygieneTypes(0, '', new Date(), 0);
+  hygieneType: HygieneTypes = new HygieneTypes(0, '', 0);
   editHygieneType = false;
 
   validationErrors: { [key: string]: string } = {};
@@ -68,21 +68,22 @@ isRtl: boolean = false;
       const data = await firstValueFrom(
         this.hygieneTypesService.Get(this.DomainName)
       );
+      console.log('Fetched hygiene types:', data);
       this.hygieneTypes = data.map((item) => {
-        const insertedAtDate = new Date(item.insertedAt);
-        const options: Intl.DateTimeFormatOptions = {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-        };
-        const formattedDate: string = insertedAtDate.toLocaleDateString(
-          undefined,
-          options
-        );
+        // const insertedAtDate = new Date(item.insertedAt);
+        // const options: Intl.DateTimeFormatOptions = {
+        //   year: 'numeric',
+        //   month: 'long',
+        //   day: 'numeric',
+        // };
+        // const formattedDate: string = insertedAtDate.toLocaleDateString(
+        //   undefined,
+        //   options
+        // );
 
         return {
           ...item,
-          insertedAt: formattedDate,
+          // insertedAt: formattedDate,
           actions: { delete: true, edit: true },
         };
       });
@@ -100,11 +101,11 @@ isRtl: boolean = false;
       this.hygieneType = new HygieneTypes(
         originalHygieneType.id,
         originalHygieneType.type,
-        new Date(originalHygieneType.insertedAt),
+        // new Date(originalHygieneType.insertedAt),
         originalHygieneType.insertedByUserId
       );
     } else {
-      this.hygieneType = new HygieneTypes(0, '', new Date(), 0);
+      this.hygieneType = new HygieneTypes(0, '', 0);
       this.editHygieneType = false;
     }
     this.isModalVisible = true;
@@ -112,7 +113,7 @@ isRtl: boolean = false;
 
   closeModal() {
     this.isModalVisible = false;
-    this.hygieneType = new HygieneTypes(0, '', new Date(), 0);
+    this.hygieneType = new HygieneTypes(0, '', 0);
     this.editHygieneType = false;
     this.validationErrors = {};
   }
@@ -234,9 +235,9 @@ isRtl: boolean = false;
   GetTableHeaders(){
    
 if(!this.isRtl){
-  return ['ID', 'Hygiene Type', 'Date', 'Actions']
+  return ['ID', 'Hygiene Type', 'Actions']
 }else{
-  return ['المعرف', 'نوع النظافة', 'التاريخ', 'الإجراءات']
+  return ['المعرف', 'نوع النظافة', 'الإجراءات']
 }
 }
 }

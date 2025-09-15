@@ -261,6 +261,7 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<EmployeeClocks> EmployeeClocks { get; set; }
         public DbSet<Location> Location { get; set; }
         public DbSet<EmployeeLocation> EmployeeLocation { get; set; }
+        public DbSet<SalaryConfigration> SalaryConfigration { get; set; }
 
 
         public LMS_CMS_Context(DbContextOptions<LMS_CMS_Context> options)
@@ -440,6 +441,10 @@ namespace LMS_CMS_DAL.Models.Domains
                 .ValueGeneratedNever();
 
             modelBuilder.Entity<DeductionType>()
+                .Property(p => p.ID)
+                .ValueGeneratedNever();
+
+            modelBuilder.Entity<SalaryConfigration>()
                 .Property(p => p.ID)
                 .ValueGeneratedNever();
 

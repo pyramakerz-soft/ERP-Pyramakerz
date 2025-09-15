@@ -123,6 +123,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                                 .ThenInclude(subCategory => subCategory.InventoryCategories)
                     .Include(x => x.Save)
                     .Include(x => x.Bank)
+
             );
             var filteredData = data.Where(f =>
                 f.Date >= dateFrom && f.Date <= dateTo &&
@@ -132,7 +133,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                     (obj.SubCategoryId == null || detail.ShopItem.InventorySubCategoriesID == obj.SubCategoryId) &&
                     (obj.ItemId == null || detail.ShopItemID == obj.ItemId)
                 )
-            ).ToList();
+            )
+             .OrderBy(x => x.Date)
+                .ToList();
 
             if (!filteredData.Any())
                 return NotFound("No records found matching the search criteria.");
@@ -231,7 +234,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 f.SaveID,
                 f.BankID,
                 f.Notes
-            }).ToList();
+            })
+              .OrderBy(x => x.Date)
+                .ToList();
 
             return Ok(new
             {

@@ -379,18 +379,18 @@ getBalanceFiltersInfo(): string {
     }, 500);
   }
 
-  exportExcel() {
-    if (!this.reportForExport.length) {
-      Swal.fire('Warning', 'No data to export!', 'warning');
-      return;
-    }
-    const worksheet = XLSX.utils.json_to_sheet(this.reportForExport);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Report');
-    const dateStr = new Date().toISOString().slice(0, 10);
-    XLSX.writeFile(
-      workbook,
-      `${this.pageTitle.replace(/\s+/g, '_')}_${dateStr}.xlsx`
-    );
-  }
+  // exportExcel() {
+  //   if (!this.reportForExport.length) {
+  //     Swal.fire('Warning', 'No data to export!', 'warning');
+  //     return;
+  //   }
+  //   const worksheet = XLSX.utils.json_to_sheet(this.reportForExport);
+  //   const workbook = XLSX.utils.book_new();
+  //   XLSX.utils.book_append_sheet(workbook, worksheet, 'Report');
+  //   const dateStr = new Date().toISOString().slice(0, 10);
+  //   XLSX.writeFile(
+  //     workbook,
+  //     `${this.pageTitle.replace(/\s+/g, '_')}_${dateStr}.xlsx`
+  //   );
+  // }
 }

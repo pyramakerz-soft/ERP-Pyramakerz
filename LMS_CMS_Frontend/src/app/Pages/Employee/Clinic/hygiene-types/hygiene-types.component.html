@@ -11,7 +11,7 @@
   </div>
 
 <app-table [headers]="GetTableHeaders()" [data]="hygieneTypes"
-  [keys]="['id', 'type', 'insertedAt']" (delete)="deleteHygieneType($event)" (edit)="openModal($event.id)">
+  [keys]="['id', 'type']" (delete)="deleteHygieneType($event)" (edit)="openModal($event.id)">
 </app-table>
 
   <!-- Reusable Modal -->
