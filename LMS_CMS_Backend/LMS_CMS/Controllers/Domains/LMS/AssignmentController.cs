@@ -1408,7 +1408,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
                 //    : await Unit_Of_Work.studentGrade_Repository.CountAsync(sg =>
                 //        sg.GradeID == gradeId && sg.AcademicYearID == academicYearId);
 
-                int attendanceNumber = assignment.AssignmentStudents.Count();  //-77
+                int attendanceNumber = assignment.AssignmentStudents.Count(); 
 
                 int numberSuccessful = assignment.AssignmentStudents.Count(ag => ag.Degree.GetValueOrDefault(00) >= assignment.PassMark);
                 int numberFailed = assignment.AssignmentStudents.Count(ag => ag.Degree.GetValueOrDefault(00) < assignment.PassMark);
