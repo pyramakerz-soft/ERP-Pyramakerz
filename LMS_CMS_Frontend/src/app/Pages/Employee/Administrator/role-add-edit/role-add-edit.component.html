@@ -12,8 +12,7 @@
             <button
             [disabled]="isLoading"
             class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2"
-            (click)="Save()"
-          >
+            (click)="Save()">
             <span *ngIf="!isLoading">  {{ 'Save' | translate }}</span>
             <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
           </button>
@@ -23,7 +22,7 @@
     <h6 class="font-medium text-base leading-6 mb-4">  {{ 'Role Name' | translate }}</h6>
     <div class="flex flex-col mb-4">
         <input type="text" class="rounded-lg border border-solid border-gray-300 block w-full p-2.5"  (ngModelChange)="onInputValueChange({ field: 'name', value: $event })"
-            [(ngModel)]="RoleName" placeholder="{{ 'Enter new role' | translate }}" />
+            [(ngModel)]="RoleName" placeholder="{{ 'Enter new role' | translate }}"/>
             <span *ngIf="validationErrors['name']" class="text-red-500 ml-3 font-normal">{{ validationErrors['name'] }}</span>
     </div>
 

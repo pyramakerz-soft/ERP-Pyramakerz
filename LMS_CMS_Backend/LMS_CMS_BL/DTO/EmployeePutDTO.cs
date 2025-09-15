@@ -33,6 +33,7 @@ namespace LMS_CMS_BL.DTO
         public bool? CanReceiveRequest { get; set; } 
         public bool? CanReceiveRequestFromParent { get; set; }
         public bool? CanReceiveMessageFromParent { get; set; }
+        public bool IsRestrictedForLoctaion { get; set; }
 
         [Required]
         public long Role_ID { get; set; }
@@ -43,6 +44,9 @@ namespace LMS_CMS_BL.DTO
 
         public List<long>? NewFloorsSelected { get; set; } = new();
         public List<long>? DeletedFloorsSelected { get; set; } = new();
+
+        public List<long>? NewLocationSelected { get; set; } = new();
+        public List<long>? DeletedLocationSelected { get; set; } = new();
 
         public List<long>? NewGradesSelected { get; set; } = new();
         public List<long>? DeletedGradesSelected { get; set; } = new();

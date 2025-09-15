@@ -489,6 +489,19 @@ namespace LMS_CMS_PL.Controllers.Domains
                 employeeDTO.GradeSelected = new List<long>();
 
 
+            List<EmployeeLocation> employeeLocations = Unit_Of_Work.employeeLocation_Repository
+              .FindBy(s => s.EmployeeID == employeeDTO.ID && s.IsDeleted != true);
+
+            var locationIds = employeeLocations.Select(ss => ss.LocationID).ToList();
+
+            List<Location> locations = Unit_Of_Work.location_Repository
+                .FindBy(s => locationIds.Contains(s.ID) && s.IsDeleted != true);
+
+            if (locations != null && locations.Any())
+                employeeDTO.LocationSelected = locations.Select(v => v.ID).ToList();
+            else
+                employeeDTO.LocationSelected = new List<long>();
+
             return Ok(employeeDTO); 
         }
         private string GetMimeType(string filePath)
@@ -893,6 +906,47 @@ namespace LMS_CMS_PL.Controllers.Domains
                     existingAttachment.Name = filee.Name;
                     Unit_Of_Work.employeeAttachment_Repository.Update(existingAttachment);
                 }
+            }
+
+            //// Create LcationEmployee
+            if (newEmployee.NewLocationSelected != null && newEmployee.NewLocationSelected.Count > 0)
+            {
+                foreach (var item in newEmployee.NewLocationSelected)
+                {
+                    Location location = Unit_Of_Work.location_Repository.First_Or_Default(s => s.ID == item && s.IsDeleted != true);
+                    if (location != null)
+                    {
+                        EmployeeLocation employeeLocation = Unit_Of_Work.employeeLocation_Repository.First_Or_Default(s => s.LocationID == location.ID && s.EmployeeID == oldEmp.ID && s.IsDeleted == true);
+                        if (employeeLocation != null)
+                        {
+                            employeeLocation.IsDeleted = null;
+                            Unit_Of_Work.employeeLocation_Repository.Update(employeeLocation);
+                        }
+                        else
+                        {
+                            employeeLocation = new EmployeeLocation();
+                            employeeLocation.LocationID = item;
+                            employeeLocation.EmployeeID = oldEmp.ID;
+                            Unit_Of_Work.employeeLocation_Repository.Add(employeeLocation);
+                        }
+                    }
+                }
+                Unit_Of_Work.SaveChanges();
+            }
+
+            //// Delete LcationEmployee
+            if (newEmployee.DeletedLocationSelected != null && newEmployee.DeletedLocationSelected.Count > 0)
+            {
+                foreach (var item in newEmployee.DeletedLocationSelected)
+                {
+                    EmployeeLocation employeeLocation = Unit_Of_Work.employeeLocation_Repository.First_Or_Default(s => s.LocationID == item && s.EmployeeID == oldEmp.ID && s.IsDeleted != true);
+                    if (employeeLocation != null)
+                    {
+                        employeeLocation.IsDeleted = true;
+                        Unit_Of_Work.employeeLocation_Repository.Update(employeeLocation);
+                    }
+                }
+                Unit_Of_Work.SaveChanges();
             }
 
             //// Create floorMonitor

@@ -69,8 +69,14 @@ export class PermissionGroupDetailsComponent {
     this.archivingService.Get(this.DomainName).subscribe(
       data => {
         this.archivingTrees = data 
+        this.archivingTrees.forEach(node => this.setParents(node, null));
       }
     )
+  }
+
+  private setParents(node: ArchivingTree, parent: ArchivingTree | null) {
+    node.parent = parent || undefined;
+    node.children?.forEach(child => this.setParents(child, node));
   }
    
   SelectData($event: { data: PermissionGroupDetails; selected: boolean }) {

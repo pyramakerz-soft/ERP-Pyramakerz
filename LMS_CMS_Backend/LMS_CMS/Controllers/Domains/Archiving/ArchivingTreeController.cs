@@ -65,6 +65,37 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
         public async Task<IActionResult> GetAll()
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+             
+            List<long> ArchivingTreeIDs = new List<long>();
+             
+            List<ArchivingTree> allArchivingTrees = await Unit_Of_Work.archivingTree_Repository.Select_All_With_IncludesById<ArchivingTree>(
+                f => f.IsDeleted != true,
+                query => query.Include(ac => ac.ArchivingTreeParent),
+                query => query.Include(ac => ac.ChildArchivingTrees)
+                );
+             
+            if (allArchivingTrees == null || allArchivingTrees.Count == 0 || !allArchivingTrees.Any())
+            {
+                return NotFound();
+            }
+
+            ArchivingTreeIDs = allArchivingTrees.Select(d => d.ID).ToList();
+
+            List<ArchivingTreeGetDTO> archivingTreesDTO = BuildHierarchy(allArchivingTrees, ArchivingTreeIDs);
+
+            return Ok(archivingTreesDTO);
+        }
+        
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpGet("GetAllPerUser")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Archiving" }
+        )]
+        public async Task<IActionResult> GetAllPerUser()
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
             long.TryParse(userIdClaim, out long userId);
 
@@ -192,6 +223,18 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
                 accountingTreeChartGetDTO.FileLink = $"{serverUrl}{accountingTreeChartGetDTO.FileLink.Replace("\\", "/")}";
             }
 
+            if(accountingTreeChartGetDTO.Children.Count > 0)
+            {
+                foreach(var child in accountingTreeChartGetDTO.Children)
+                {
+                    if (child.FileLink != null)
+                    {
+                        string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+                        child.FileLink = $"{serverUrl}{child.FileLink.Replace("\\", "/")}";
+                    }
+                }
+            }
+
             return Ok(accountingTreeChartGetDTO);
         }
         
@@ -265,6 +308,18 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
             {
                 string serverUrl = $"{Request.Scheme}://{Request.Host}/";
                 accountingTreeChartGetDTO.FileLink = $"{serverUrl}{accountingTreeChartGetDTO.FileLink.Replace("\\", "/")}";
+            }
+
+            if (accountingTreeChartGetDTO.Children.Count > 0)
+            {
+                foreach (var child in accountingTreeChartGetDTO.Children)
+                {
+                    if (child.FileLink != null)
+                    {
+                        string serverUrl = $"{Request.Scheme}://{Request.Host}/";
+                        child.FileLink = $"{serverUrl}{child.FileLink.Replace("\\", "/")}";
+                    }
+                }
             }
 
             return Ok(accountingTreeChartGetDTO);
@@ -402,7 +457,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
                     }
                 }
 
-                archivingTree.FileLink = Path.Combine("Uploads", "Request", archivingTree.ID.ToString(), NewArchiving.FileFile.FileName);
+                archivingTree.FileLink = Path.Combine("Uploads", "Archiving", archivingTree.ID.ToString(), NewArchiving.FileFile.FileName);
                 Unit_Of_Work.archivingTree_Repository.Update(archivingTree);
             }
             Unit_Of_Work.SaveChanges();

@@ -258,7 +258,9 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<PermissionGroupDetails> PermissionGroupDetails { get; set; }
         public DbSet<PermissionGroupEmployee> PermissionGroupEmployee { get; set; }
         public DbSet<AnnualVacationEmployee> AnnualVacationEmployee { get; set; }
-
+        public DbSet<EmployeeClocks> EmployeeClocks { get; set; }
+        public DbSet<Location> Location { get; set; }
+        public DbSet<EmployeeLocation> EmployeeLocation { get; set; }
 
 
         public LMS_CMS_Context(DbContextOptions<LMS_CMS_Context> options)
@@ -2313,6 +2315,30 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasForeignKey(m => m.VacationTypesID)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<EmployeeClocks>()
+                .HasOne(m => m.Employee)
+                .WithMany(m => m.EmployeeClocks)
+                .HasForeignKey(m => m.EmployeeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<EmployeeClocks>()
+                .HasOne(m => m.Location)
+                .WithMany(m => m.EmployeeClocks)
+                .HasForeignKey(m => m.LocationID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<EmployeeLocation>()
+                .HasOne(m => m.Employee)
+                .WithMany(m => m.EmployeeLocation)
+                .HasForeignKey(m => m.EmployeeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<EmployeeLocation>()
+                .HasOne(m => m.Location)
+                .WithMany(m => m.EmployeeLocation)
+                .HasForeignKey(m => m.LocationID)
+                .OnDelete(DeleteBehavior.Restrict);
+
             ///////////////////////// Exception: /////////////////////////
             modelBuilder.Entity<Bus>()
                 .HasOne(b => b.DeletedByEmployee)
@@ -2460,6 +2486,24 @@ namespace LMS_CMS_DAL.Models.Domains
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<AnnualVacationEmployee>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<EmployeeClocks>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<EmployeeLocation>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Location>()
                 .HasOne(v => v.DeletedByEmployee)
                 .WithMany()
                 .HasForeignKey(v => v.DeletedByUserId)

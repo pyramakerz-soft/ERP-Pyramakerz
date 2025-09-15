@@ -17,6 +17,7 @@ using LMS_CMS_DAL.Models.Domains.SocialWorker;
 using LMS_CMS_DAL.Models.Domains.ViolationModule;
 using LMS_CMS_DAL.Models.Domains.Zatca;
 using LMS_CMS_DAL.Models.Octa;
+using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -268,6 +269,10 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<PermissionGroupEmployee> PermissionGroupEmployee_Repository;
         GenericRepo<PermissionGroupDetails> PermissionGroupDetails_Repository; 
         GenericRepo<AnnualVacationEmployee> AnnualVacationEmployee_Repository;
+        GenericRepo<EmployeeClocks> EmployeeClocks_Repository;
+        GenericRepo<EmployeeLocation> EmployeeLocation_Repository;
+        GenericRepo<Location> Location_Repository;
+
 
 
         public UOW(Octa_DbContext octa_Db)
@@ -3067,7 +3072,6 @@ namespace LMS_CMS_BL.UOW
                 return PermissionGroupDetails_Repository;
             }
         }
-
         public GenericRepo<AnnualVacationEmployee> annualVacationEmployee_Repository
         {
             get
@@ -3077,6 +3081,39 @@ namespace LMS_CMS_BL.UOW
                     AnnualVacationEmployee_Repository = new GenericRepo<AnnualVacationEmployee>(db);
                 }
                 return AnnualVacationEmployee_Repository;
+            }
+        }
+        public GenericRepo<EmployeeClocks> employeeClocks_Repository
+        {
+            get
+            {
+                if (EmployeeClocks_Repository == null)
+                {
+                    EmployeeClocks_Repository = new GenericRepo<EmployeeClocks>(db);
+                }
+                return EmployeeClocks_Repository;
+            }
+        }
+        public GenericRepo<EmployeeLocation> employeeLocation_Repository
+        {
+            get
+            {
+                if (EmployeeLocation_Repository == null)
+                {
+                    EmployeeLocation_Repository = new GenericRepo<EmployeeLocation>(db);
+                }
+                return EmployeeLocation_Repository;
+            }
+        }
+        public GenericRepo<Location> location_Repository
+        {
+            get
+            {
+                if (Location_Repository == null)
+                {
+                    Location_Repository = new GenericRepo<Location>(db);
+                }
+                return Location_Repository;
             }
         }
 

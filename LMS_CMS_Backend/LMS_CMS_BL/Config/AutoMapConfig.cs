@@ -1495,6 +1495,9 @@ namespace LMS_CMS_BL.Config
                 .ForMember(dest => dest.EmployeeEnName, opt => opt.MapFrom(src => src.Employee.en_name))
                 .ForMember(dest => dest.EmployeeArName, opt => opt.MapFrom(src => src.Employee.ar_name));
             CreateMap<VacationEmployeeAddDTO, VacationEmployee>();
+
+            CreateMap<Location, LocationGetDTO>();
+            CreateMap<LocationAddDTO, Location>();
         }
     } 
 }

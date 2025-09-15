@@ -152,7 +152,7 @@
             </div>
 
             <div *ngIf="deduction.deductionTypeID==1" class="flex flex-col mb-4 w-[49%]">
-                <label class="mb-2 primaryTxt" for="minutes"> {{ 'minutes' | translate }}</label>
+                <label class="mb-2 primaryTxt" for="minutes"> {{ 'Minutes' | translate }}</label>
                 <input id="minutes" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                     placeholder="{{ 'Enter minutes' | translate }}" [(ngModel)]="deduction.minutes" (input)="validateNumber($event,'minutes')"
                     (ngModelChange)="onInputValueChange({ field: 'minutes', value: $event })" />

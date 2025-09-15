@@ -803,8 +803,8 @@ export class StockingDetailsComponent {
         const price = foundItem?.purchasePrice ?? 0;
         const quantity = item.theDifference ?? 0;
 
-        const adjustedQuantity = flagId === 4 ? -1 * quantity : quantity;
-        const adjustedTotalPrice = flagId === 4 ? -1 * price * quantity : price * quantity;
+        const adjustedQuantity = flagId === 5 ? -1 * quantity : quantity;
+        const adjustedTotalPrice = flagId === 5 ? -1 * price * quantity : price * quantity;
 
         return {
           id: Date.now() + Math.floor(Math.random() * 1000),
@@ -890,7 +890,6 @@ export class StockingDetailsComponent {
       }, 300)
     );
   }
-
 
   async Differences(): Promise<void> {
     const isEditMode = this.mode === 'Edit';

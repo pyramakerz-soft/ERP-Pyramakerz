@@ -278,6 +278,7 @@ namespace LMS_CMS
                 app.UseSwaggerUI();
             }
 
+            // Redirects http:// requests to https://.
             app.UseHttpsRedirection();
 
 
