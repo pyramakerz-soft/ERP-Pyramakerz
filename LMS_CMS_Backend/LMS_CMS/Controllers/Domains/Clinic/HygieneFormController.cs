@@ -88,13 +88,14 @@ namespace LMS_CMS_PL.Controllers.Domains.Clinic
             }
 
             HygieneForm hygieneForm = await Unit_Of_Work.hygieneForm_Repository.FindByIncludesAsync(
-                    h => h.Id == id && h.IsDeleted != true,
-                    query => query.Include(x => x.Classroom),
-                    query => query.Include(x => x.School),
-                    query => query.Include(x => x.Grade),
-                    query => query.Include(x => x.StudentHygieneTypes)?.ThenInclude(x => x.HygieneTypes.Where(d => d.IsDeleted != true)),
-                    query => query.Include(x => x.InsertedByEmployee)
-                );
+                h => h.Id == id && h.IsDeleted != true,
+                query => query.Include(x => x.Classroom),
+                query => query.Include(x => x.School),
+                query => query.Include(x => x.Grade),
+                query => query.Include(x => x.StudentHygieneTypes)?.ThenInclude(x => x.HygieneTypes.Where(d => d.IsDeleted != true)),
+                query => query.Include(h => h.StudentHygieneTypes)?.ThenInclude(sht => sht.Student),
+                query => query.Include(x => x.InsertedByEmployee)
+            );
 
             if (hygieneForm == null)
             {
