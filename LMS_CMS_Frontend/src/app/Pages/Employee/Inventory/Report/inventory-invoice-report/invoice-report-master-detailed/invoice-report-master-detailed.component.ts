@@ -51,12 +51,12 @@ export class InvoiceReportMasterDetailedComponent implements OnInit {
   showPDF = false;
   transactionsForExport: any[] = [];
 
-  school = {
-    reportHeaderOneEn: 'Inventory Report',
-    reportHeaderTwoEn: 'Transaction Details',
-    reportHeaderOneAr: 'تقرير المخزون',
-    reportHeaderTwoAr: 'تفاصيل المعاملة',
-  };
+school = {
+  reportHeaderOneEn: '',
+  reportHeaderTwoEn: 'Transaction Details',
+  reportHeaderOneAr: '',
+  reportHeaderTwoAr: 'تفاصيل المعاملة',
+};
 
   availableFlags: { [key: string]: FlagOption[] } = {
     inventory: [
@@ -87,6 +87,7 @@ export class InvoiceReportMasterDetailedComponent implements OnInit {
   categories: any[] = [];
   subCategories: any[] = [];
   items: any[] = [];
+  showViewReportBtn: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -99,11 +100,14 @@ export class InvoiceReportMasterDetailedComponent implements OnInit {
     private realTimeService: RealTimeNotificationServiceService
   ) {}
 
-  ngOnInit() {
-    this.route.data.subscribe((data) => {
-      this.reportType = data['reportType'];
-      this.currentFlags = this.availableFlags[this.reportType];
-      this.selectedFlagIds = this.currentFlags.map((flag) => flag.id);
+ngOnInit() {
+  this.route.data.subscribe((data) => {
+    this.reportType = data['reportType'];
+    this.currentFlags = this.availableFlags[this.reportType];
+    this.selectedFlagIds = this.currentFlags.map((flag) => flag.id);
+    
+    // Set school header based on report type
+    this.setSchoolHeader();
     });
     this.loadStores();
 
@@ -113,6 +117,26 @@ export class InvoiceReportMasterDetailedComponent implements OnInit {
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
+
+  private setSchoolHeader(): void {
+  switch (this.reportType) {
+    case 'inventory':
+      this.school.reportHeaderOneEn = 'Inventory Transactions Report';
+      this.school.reportHeaderOneAr = 'تقرير معاملات المخزون';
+      break;
+    case 'sales':
+      this.school.reportHeaderOneEn = 'Sales Transactions Report';
+      this.school.reportHeaderOneAr = 'تقرير معاملات المبيعات';
+      break;
+    case 'purchase':
+      this.school.reportHeaderOneEn = 'Purchase Transactions Report';
+      this.school.reportHeaderOneAr = 'تقرير معاملات المشتريات';
+      break;
+    default:
+      this.school.reportHeaderOneEn = 'Transactions Report';
+      this.school.reportHeaderOneAr = 'تقرير المعاملات';
+  }
+}
 
  ngOnDestroy(): void {
       this.realTimeService.stopConnection(); 
@@ -134,39 +158,38 @@ export class InvoiceReportMasterDetailedComponent implements OnInit {
         },
       });
   }
-  onCategorySelected() {
-    this.selectedSubCategoryId = null;
-    this.selectedItemId = null;
-    this.items = [];
 
-    if (this.selectedCategoryId === null) {
-      this.subCategories = [];
-      // Explicitly disable the dependent dropdowns
-      this.selectedSubCategoryId = null;
-      this.selectedItemId = null;
-    } else {
-      this.subCategoryService
-        .GetByCategoryId(
-          this.selectedCategoryId,
-          this.subCategoryService.ApiServ.GetHeader()
-        )
-        .subscribe({
-          next: (subCategories) => {
-            this.subCategories = subCategories;
-          },
-          error: (error) => {
-            console.error('Error loading subcategories:', error);
-          },
-        });
-    }
+
+onCategorySelected() {
+  this.selectedSubCategoryId = null;
+  this.selectedItemId = null;
+  this.items = [];
+
+  if (this.selectedCategoryId) {
+    this.subCategoryService
+      .GetByCategoryId(
+        this.selectedCategoryId,
+        this.subCategoryService.ApiServ.GetHeader()
+      )
+      .subscribe({
+        next: (subCategories) => {
+          this.subCategories = subCategories;
+        },
+        error: (error) => {
+          console.error('Error loading subcategories:', error);
+          this.subCategories = [];
+        },
+      });
+  } else {
+    this.subCategories = [];
   }
+}
 
   onSubCategorySelected() {
     this.selectedItemId = null;
+    this.items = [];
 
-    if (this.selectedSubCategoryId === null) {
-      this.items = [];
-    } else {
+    if (this.selectedSubCategoryId) {
       this.shopItemService
         .GetBySubCategory(
           this.selectedSubCategoryId,
@@ -180,6 +203,8 @@ export class InvoiceReportMasterDetailedComponent implements OnInit {
             console.error('Error loading items:', error);
           },
         });
+    } else {
+      this.items = [];
     }
   }
 
@@ -280,48 +305,58 @@ export class InvoiceReportMasterDetailedComponent implements OnInit {
       });
   }
 
+    onFilterChange() {
+    this.showTable = false;
+    this.showViewReportBtn = this.dateFrom !== '' && this.dateTo !== '';
+    this.transactions = [];
+  }
+
   cachedTableDataForPDF: any[] = [];
-  private prepareExportData(): void {
-    this.transactionsForExport = this.transactions.map((t) => ({
-      header: `Invoice #${t.invoiceNumber}`,
-      summary: [
-        { key: 'Date', value: new Date(t.date).toLocaleDateString() },
-        { key: 'Store', value: t.storeName },
-        ...(this.reportType === 'sales'
-          ? [{ key: 'Student', value: t.studentName || '-' }]
-          : []),
-        ...(this.reportType === 'purchase'
-          ? [{ key: 'Supplier', value: t.supplierName || '-' }]
-          : []),
-        { key: 'Transaction Type', value: t.flagEnName },
-        { key: 'Invoice Number', value: t.invoiceNumber },
-        { key: 'Total Price', value: t.total },
-        { key: 'Notes', value: t.notes || '-' },
+
+private prepareExportData(): void {
+  this.transactionsForExport = this.transactions.map((t) => ({
+    header: `Invoice #${t.invoiceNumber}`,
+    summary: [
+      { key: 'Date', value: new Date(t.date).toLocaleDateString() },
+      { key: 'Store', value: t.storeName },
+      // Add student/supplier based on report type
+      ...(this.reportType === 'sales'
+        ? [{ key: 'Student', value: t.studentName || '-' }]
+        : []),
+      ...(this.reportType === 'purchase'
+        ? [{ key: 'Supplier', value: t.supplierName || '-' }]
+        : []),
+      { key: 'Transaction Type', value: t.flagEnName },
+      { key: 'Invoice Number', value: t.invoiceNumber },
+      { key: 'Total Price', value: t.total },
+      { key: 'Notes', value: t.notes || '-' },
+    ],
+    table: {
+      headers: [
+        'ID',
+        'Item ID',
+        'Name',
+        'Quantity',
+        'Price',
+        'Total Price',
+        'Notes',
       ],
-      table: {
-        headers: [
-          'ID',
-          'Item ID',
-          'Name',
-          'Quantity',
-          'Price',
-          'Total Price',
-          'Notes',
-        ],
-        data:
-          t.inventoryDetails?.map((d) => ({
-            ID: d.id,
-            'Item ID': d.shopItemID,
-            Name: d.shopItemName || d.name || '-',
-            Quantity: d.quantity,
-            Price: d.price,
-            'Total Price': d.totalPrice,
-            Notes: d.notes || '-',
-          })) || [],
-      },
-    }));
+      data:
+        t.inventoryDetails?.map((d) => ({
+          ID: d.id,
+          'Item ID': d.shopItemID,
+          Name: d.shopItemName || d.name || '-',
+          Quantity: d.quantity,
+          Price: d.price,
+          'Total Price': d.totalPrice,
+          Notes: d.notes || '-',
+        })) || [],
+    },
+  }));
   this.cachedTableDataForPDF = this.getTableDataWithHeader();
 }
+
+
   getTableDataWithHeader(): any[] {
     return this.transactionsForExport.map((item) => ({
       header: item.header,
@@ -353,35 +388,35 @@ trackByTableRow(index: number, item: any): number {
   //   }));
   // }
 
-  // getInfoRows(): any[] {
-  //   const rows = [
-  //     { keyEn: 'From Date: ' + this.dateFrom, valueEn: '' },
-  //     { keyEn: 'To Date: ' + this.dateTo, valueEn: '' },
-  //     { keyEn: 'Store: ' + this.getStoreName(), valueEn: '' },
-  //   ];
+getInfoRows(): any[] {
+  const rows = [
+    { keyEn: 'From Date: ' + this.dateFrom, valueEn: '' },
+    { keyEn: 'To Date: ' + this.dateTo, valueEn: '' },
+    { keyEn: 'Store: ' + this.getStoreName(), valueEn: '' },
+  ];
 
-  //   // Add student/supplier info if available
-  //   if (
-  //     this.reportType === 'sales' &&
-  //     this.transactions.some((t) => t.studentName)
-  //   ) {
-  //     rows.push({
-  //       keyEn: 'Student: ' + (this.transactions[0]?.studentName || '-'),
-  //       valueEn: '',
-  //     });
-  //   }
-  //   if (
-  //     this.reportType === 'purchase' &&
-  //     this.transactions.some((t) => t.supplierName)
-  //   ) {
-  //     rows.push({
-  //       keyEn: 'Supplier: ' + (this.transactions[0]?.supplierName || '-'),
-  //       valueEn: '',
-  //     });
-  //   }
+  // Add student/supplier info if available
+  if (
+    this.reportType === 'sales' &&
+    this.transactions.some((t) => t.studentName)
+  ) {
+    rows.push({
+      keyEn: 'Student: ' + (this.transactions[0]?.studentName || '-'),
+      valueEn: '',
+    });
+  }
+  if (
+    this.reportType === 'purchase' &&
+    this.transactions.some((t) => t.supplierName)
+  ) {
+    rows.push({
+      keyEn: 'Supplier: ' + (this.transactions[0]?.supplierName || '-'),
+      valueEn: '',
+    });
+  }
 
-  //   return rows;
-  // }
+  return rows;
+}
 
   getStoreName(): string {
     return (
@@ -523,6 +558,20 @@ exportExcel() {
     { v: 'Store:', s: { font: { bold: true } } },
     { v: this.getStoreName(), s: { font: { bold: true } } }
   ]);
+  
+  // Add student/supplier info if available
+  // if (this.reportType === 'sales') {
+  //   excelData.push([
+  //     { v: 'Student:', s: { font: { bold: true } } },
+  //     { v: this.transactions[0]?.studentName || '-', s: { font: { bold: true } } }
+  //   ]);
+  // } else if (this.reportType === 'purchase') {
+  //   excelData.push([
+  //     { v: 'Supplier:', s: { font: { bold: true } } },
+  //     { v: this.transactions[0]?.supplierName || '-', s: { font: { bold: true } } }
+  //   ]);
+  // }
+  
   excelData.push([]); // empty row
 
   // Add transaction data
@@ -536,9 +585,10 @@ exportExcel() {
     const details = [
       ['Date:', new Date(transaction.date).toLocaleDateString()],
       ['Store:', transaction.storeName],
+      // Add student/supplier based on report type
       ...(this.reportType === 'sales' ? [['Student:', transaction.studentName || '-']] : []),
       ...(this.reportType === 'purchase' ? [['Supplier:', transaction.supplierName || '-']] : []),
-      ['Transaction Type:', transaction.flagEnName],
+      // ['Transaction Type:', transaction.flagEnName],
       ['Total Price:', transaction.total],
       ['Notes:', transaction.notes || '-']
     ];

@@ -100,6 +100,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                     !flagsToExclude.Contains(d.InventoryMaster.FlagId) &&
                     d.InventoryMaster.InventoryFlags != null &&
                     d.InventoryMaster.InventoryFlags.ItemInOut != 0)
+                    .OrderBy(d => d.InventoryMaster.Date)
                 .ToList();
 
             var inQuantity = filteredData
@@ -373,7 +374,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                     (overdrawnBalance && x.Quantity < 0) ||
                     (zeroBalances && x.Quantity == 0)
                 )
-
                 .ToList();
 
                 object result;
@@ -435,7 +435,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 return Ok(result);
          }
 
-        /////////////////////////////////////////////////////////////////////////////////////-777
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////-777
 
         [HttpGet("AllStoresBalanceHorizontal")]
         [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, 
@@ -631,7 +631,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             };
         }
 
-        /// //////////////////////////////////////////////////////////////////////////////-777
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////-777
 
         [HttpGet("BySaleId/{id}")]
         [Authorize_Endpoint_(
@@ -659,7 +659,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             return Ok(DTO);
         }
 
-        /// //////////////////////////////////////////////////////////////////////////////-777
+        /// /////////////////////////////////////////////////////////////////////////////////////////////
 
 
         [HttpGet("{id}")]
