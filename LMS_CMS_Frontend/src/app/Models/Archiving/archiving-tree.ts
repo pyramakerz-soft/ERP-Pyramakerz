@@ -11,8 +11,9 @@ export class ArchivingTree {
 
         public allow_Delete: boolean = false,  
         public allow_Delete_For_Others: boolean = false,
-        public selected: boolean = false, 
-        public parent?: ArchivingTree,
-        public isOpen: boolean = false
+        public selected: boolean = false,  
+        public isOpen: boolean = false,
+
+        public parent: ArchivingTree | null = null
     ) {}
 }

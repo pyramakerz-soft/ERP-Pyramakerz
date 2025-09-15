@@ -10,6 +10,7 @@ import { PermissionGroupDetailsService } from '../../../../Services/Employee/Arc
 import { PermissionGroupDetails } from '../../../../Models/Archiving/permission-group-details';
 import { ArchivingService } from '../../../../Services/Employee/Archiving/archiving.service';
 import { PermissionGroupArchivingItemComponent } from '../../../../Component/Employee/Archiving/permission-group-archiving-item/permission-group-archiving-item.component';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-permission-group-details',
@@ -60,6 +61,7 @@ export class PermissionGroupDetailsComponent {
     this.permissionGroupDetailsService.GetByPermissionGroupID(this.permissionGroupID, this.DomainName).subscribe(
       data => {
         this.PermissionGroupDetailsData = data 
+        this.matchPermissionGroups();
       }
     )
   }
@@ -69,16 +71,49 @@ export class PermissionGroupDetailsComponent {
     this.archivingService.Get(this.DomainName).subscribe(
       data => {
         this.archivingTrees = data 
-        this.archivingTrees.forEach(node => this.setParents(node, null));
+        this.setParents(this.archivingTrees, null);
+        this.matchPermissionGroups();
       }
     )
+  } 
+
+  private setParents(nodes: ArchivingTree[], parent: ArchivingTree | null) {
+    nodes.forEach(node => {
+      node.parent = parent;
+      if (node.children && node.children.length > 0) {
+        this.setParents(node.children, node);
+      }
+    });
   }
 
-  private setParents(node: ArchivingTree, parent: ArchivingTree | null) {
-    node.parent = parent || undefined;
-    node.children?.forEach(child => this.setParents(child, node));
+  matchPermissionGroups() {
+    if (this.archivingTrees.length > 0 && this.PermissionGroupDetailsData.length > 0) {
+      this.archivingTrees.forEach(tree => {
+        this.applyPermissions(tree);
+      });
+ 
+      this.SelectedPermissionGroupDetails = [...this.PermissionGroupDetailsData];
+    }
   }
-   
+
+  applyPermissions(node: ArchivingTree) {
+    const matchingPermission = this.PermissionGroupDetailsData.find(
+      permission => permission.archivingTreeID === node.id
+    );
+
+    if (matchingPermission) {
+      node.selected = true;
+      node.allow_Delete = matchingPermission.allow_Delete;
+      node.allow_Delete_For_Others = matchingPermission.allow_Delete_For_Others;
+    } else {
+      node.selected = false;
+    }
+
+    if (node.children && node.children.length > 0) {
+      node.children.forEach(child => this.applyPermissions(child));
+    }
+  }
+ 
   SelectData($event: { data: PermissionGroupDetails; selected: boolean }) {
     if ($event.selected) {
       const existingItemIndex = this.SelectedPermissionGroupDetails.findIndex(
@@ -100,5 +135,24 @@ export class PermissionGroupDetailsComponent {
   }
  
   Save() { 
+    if(this.SelectedPermissionGroupDetails.length > 0){
+      let PermissionGroupDetail = new PermissionGroupDetails()
+      PermissionGroupDetail.permissionGroupID = this.permissionGroupID
+      PermissionGroupDetail.archivingTreeDetails = this.SelectedPermissionGroupDetails
+
+      this.isLoading = true
+      this.permissionGroupDetailsService.Add(PermissionGroupDetail, this.DomainName).subscribe(
+        data => {
+          Swal.fire({
+            icon: 'success',
+            title: 'Done',
+            text: 'Saved Successfully',
+            confirmButtonColor: '#089B41',
+          });
+          this.isLoading = false
+        }
+      )
+      this.MoveToPermissionGroup()
+    }
   } 
 }
