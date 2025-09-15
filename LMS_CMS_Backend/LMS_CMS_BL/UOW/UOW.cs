@@ -272,6 +272,7 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<EmployeeClocks> EmployeeClocks_Repository;
         GenericRepo<EmployeeLocation> EmployeeLocation_Repository;
         GenericRepo<Location> Location_Repository;
+        GenericRepo<SalaryConfigration> SalaryConfigration_Repository;
 
 
 
@@ -3116,6 +3117,19 @@ namespace LMS_CMS_BL.UOW
                 return Location_Repository;
             }
         }
+
+        public GenericRepo<SalaryConfigration> salaryConfigration_Repository
+        {
+            get
+            {
+                if (SalaryConfigration_Repository == null)
+                {
+                    SalaryConfigration_Repository = new GenericRepo<SalaryConfigration>(db);
+                }
+                return SalaryConfigration_Repository;
+            }
+        }
+
 
 
         public void SaveChanges()

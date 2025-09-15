@@ -264,6 +264,7 @@ import { VacationEmployeeComponent } from './Pages/Employee/HR/vacation-employee
 import { LocationComponent } from './Pages/Employee/HR/location/location.component';
 import { AssignmentReportComponent } from './Pages/Employee/LMS/reports/assignment-report/assignment-report.component';
 import { MaintenanceComponent } from './Pages/Employee/Maintenance/maintenance/maintenance.component';
+import { EmployeeClocksComponent } from './Pages/Employee/HR/employee-clocks/employee-clocks.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -572,6 +573,7 @@ export const routes: Routes = [
             { path: "Archiving", component: ArchivingComponent, title: "Archiving", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Vacation Employee", component: VacationEmployeeComponent, title: "Vacation Employee", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Location", component: LocationComponent, title: "Location", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Edit Attendance", component: EmployeeClocksComponent, title: "Edit Attendance", canActivate: [noNavigateWithoutLoginGuard] },
         ]
     },
     {

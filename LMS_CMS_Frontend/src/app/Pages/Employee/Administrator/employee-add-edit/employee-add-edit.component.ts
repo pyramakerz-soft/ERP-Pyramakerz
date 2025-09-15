@@ -323,12 +323,12 @@ export class EmployeeAddEditComponent {
       isValid = false;
     }
 
-    if (this.Data.en_name.length > 100) {
+    if (this.Data.en_name && this.Data.en_name.length > 100) {
       this.validationErrors['en_name'] = `*English Name cannot be longer than 100 characters`;
       isValid = false;
     }
 
-    if (this.Data.ar_name.length > 100) {
+    if (this.Data.ar_name && this.Data.ar_name.length > 100) {
       this.validationErrors['ar_name'] = `*Arabic Name cannot be longer than 100 characters`;
       isValid = false;
     }

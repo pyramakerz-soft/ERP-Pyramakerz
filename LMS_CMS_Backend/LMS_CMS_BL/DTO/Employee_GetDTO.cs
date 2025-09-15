@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using LMS_CMS_BL.DTO.LMS;
+using LMS_CMS_BL.DTO.HR;
 
 namespace LMS_CMS_BL.DTO
 {
@@ -45,10 +46,12 @@ namespace LMS_CMS_BL.DTO
         public decimal? MonthlyLeaveRequestUsed { get; set; }
         public bool IsSuspended { get; set; }
         public bool IsRestrictedForLoctaion { get; set; }
+        public bool IsClockedIn { get; set; }
         public List<EmployeeAttachmentDTO>? Files { get; set; }
         public List<long>? FloorsSelected { get; set; }
         public List<long>? GradeSelected { get; set; }
         public List<long>? LocationSelected { get; set; }
+        public List<LocationGetDTO> Locations { get; set; }
         public List<long>? SubjectSelected { get; set; }
         public long? InsertedByUserId { get; set; }
     }

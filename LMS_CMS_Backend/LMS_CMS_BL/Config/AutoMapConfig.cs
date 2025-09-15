@@ -1498,6 +1498,9 @@ namespace LMS_CMS_BL.Config
 
             CreateMap<Location, LocationGetDTO>();
             CreateMap<LocationAddDTO, Location>();
+
+            CreateMap<EmployeeClocks, EmployeeClocksGetDTO>();
+            CreateMap<EmployeeClocksAddDTO, EmployeeClocks>();
         }
     } 
 }

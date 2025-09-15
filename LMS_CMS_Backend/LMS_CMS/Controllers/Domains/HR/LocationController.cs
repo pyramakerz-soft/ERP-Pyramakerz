@@ -33,8 +33,9 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
         [HttpGet]
         [Authorize_Endpoint_(
-          allowedTypes: new[] { "octa", "employee" },
-          pages: new[] { "Bonus" }
+          allowedTypes: new[] { "octa", "employee" }
+          //,
+          //pages: new[] { "Bonus" }
          )]
         public async Task<IActionResult> GetAsync()
         {
@@ -66,8 +67,9 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
-          allowedTypes: new[] { "octa", "employee" },
-          pages: new[] { "Bonus" }
+          allowedTypes: new[] { "octa", "employee" }
+          //,
+          //pages: new[] { "Bonus" }
         )]
         public async Task<IActionResult> GetById(long id)
         {
@@ -99,8 +101,9 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
         [HttpPost]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Bonus" }
+            allowedTypes: new[] { "octa", "employee" }
+            //,
+            //pages: new[] { "Bonus" }
          )]
         public async Task<IActionResult> Add(LocationAddDTO newLocation)
         {
