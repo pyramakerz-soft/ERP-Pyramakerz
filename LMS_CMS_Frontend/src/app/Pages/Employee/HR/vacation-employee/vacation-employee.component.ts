@@ -224,27 +224,53 @@ export class VacationEmployeeComponent {
   }
 
   CalculateRemains() {
-    console.log(11, this.vacationEmployee, this.OldVacationEmployee)
+    console.log("Before:", this.vacationEmployee, this.OldVacationEmployee);
+
     let usedDays = this.OldVacationEmployee.used || 0;
-    if (this.vacationEmployee.halfDay) {
-      // Half day request
-      usedDays += 0.5;
+
+    if (this.mode === "Edit") {
+      // --- Remove old vacation days first ---
+      let oldDays = 0;
+      if (this.OldVacationEmployee.halfDay) {
+        oldDays = 0.5;
+      } else {
+        const from = new Date(this.OldVacationEmployee.dateFrom);
+        const to = new Date(this.OldVacationEmployee.dateTo || this.OldVacationEmployee.dateFrom);
+        const diffMs = to.getTime() - from.getTime();
+        oldDays = Math.floor(diffMs / (1000 * 60 * 60 * 24)) + 1;
+      }
+      usedDays -= oldDays;
+
+      // --- Add new vacation days ---
+      let newDays = 0;
+      if (this.vacationEmployee.halfDay) {
+        newDays = 0.5;
+      } else if (this.vacationEmployee.dateFrom) {
+        const from = new Date(this.vacationEmployee.dateFrom);
+        const to = new Date(this.vacationEmployee.dateTo || this.vacationEmployee.dateFrom);
+        const diffMs = to.getTime() - from.getTime();
+        newDays = Math.floor(diffMs / (1000 * 60 * 60 * 24)) + 1;
+      }
+      usedDays += newDays;
+
     } else {
-      // Calculate number of days inclusive
-      const from = new Date(this.vacationEmployee.dateFrom);
-      const to = new Date(this.vacationEmployee.dateTo || this.vacationEmployee.dateFrom);
-
-      const diffTime = to.getTime() - from.getTime();
-      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
-
-      usedDays += diffDays;
+      // --- Add new vacation when creating ---
+      if (this.vacationEmployee.halfDay) {
+        usedDays += 0.5;
+      } else if (this.vacationEmployee.dateFrom) {
+        const from = new Date(this.vacationEmployee.dateFrom);
+        const to = new Date(this.vacationEmployee.dateTo || this.vacationEmployee.dateFrom);
+        const diffMs = to.getTime() - from.getTime();
+        usedDays += Math.floor(diffMs / (1000 * 60 * 60 * 24)) + 1;
+      }
     }
 
     this.vacationEmployee.used = usedDays;
-    this.vacationEmployee.remains = this.vacationEmployee.balance - this.vacationEmployee.used;
-    console.log(22, this.vacationEmployee, this.OldVacationEmployee)
+    this.vacationEmployee.remains = this.vacationEmployee.balance - usedDays;
 
+    console.log("After:", this.vacationEmployee, this.OldVacationEmployee);
   }
+
 
   onIshalfDayChange(event: Event) {
     const isChecked = (event.target as HTMLInputElement).checked;

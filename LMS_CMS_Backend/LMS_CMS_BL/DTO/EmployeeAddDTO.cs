@@ -35,6 +35,7 @@ namespace LMS_CMS_BL.DTO
         public bool? CanReceiveRequest { get; set; } 
         public bool? CanReceiveRequestFromParent { get; set; }
         public bool? CanReceiveMessageFromParent { get; set; }
+        public bool IsRestrictedForLoctaion { get; set; }
         public List<long>? FloorsSelected { get; set; } = new();
         public List<long>? GradeSelected { get; set; } = new();
         public List<long>? SubjectSelected { get; set; } = new();

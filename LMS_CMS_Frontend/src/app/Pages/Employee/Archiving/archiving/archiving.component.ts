@@ -72,7 +72,7 @@ export class ArchivingComponent {
   }
 
   GetAllData(){
-    this.archivingService.Get(this.DomainName).subscribe(
+    this.archivingService.GetAllPerUser(this.DomainName).subscribe(
       (data) => { 
         this.TableData = data 
       }
@@ -82,6 +82,15 @@ export class ArchivingComponent {
   GetDataByID(archivingTreeID: number){
     this.archiving = new ArchivingTree()
     this.archivingService.GetById(archivingTreeID, this.DomainName).subscribe(
+      (data) => { 
+        this.archiving = data  
+      }
+    )
+  }
+
+  GetContent(){
+    this.archiving = new ArchivingTree()
+    this.archivingService.GetContent(this.DomainName).subscribe(
       (data) => { 
         this.archiving = data  
       }
@@ -200,6 +209,8 @@ export class ArchivingComponent {
             this.closeAddFolderOrFileModal();
             if(this.archiving.id){ 
               this.GetDataByID(this.archiving.id)
+            }else{
+              this.GetContent()
             }
             this.GetAllData()
             this.isLoading = false;
@@ -225,9 +236,27 @@ export class ArchivingComponent {
         customClass: { confirmButton: 'secondaryBg' },
       });
     } 
-  } 
+  }  
 
-  RemoveArchiving() {
-    this.archiving = new ArchivingTree()
-  } 
+  getFileExtension(filename: string): string {
+    if (!filename) return '';
+    
+    const lastDotIndex = filename.lastIndexOf('.');
+    if (lastDotIndex === -1) return '';
+    
+    return filename.slice(lastDotIndex).toLowerCase();
+  }
+
+  downloadFile(fileUrl: string, fileName: string) {
+    fetch(fileUrl)
+      .then(response => response.blob())
+      .then(blob => {
+        const link = document.createElement('a');
+        const url = window.URL.createObjectURL(blob);
+        link.href = url;
+        link.download = fileName;
+        link.click();
+        window.URL.revokeObjectURL(url);
+      });
+  }
 }

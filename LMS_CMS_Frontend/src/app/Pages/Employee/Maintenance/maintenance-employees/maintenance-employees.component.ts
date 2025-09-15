@@ -5,7 +5,6 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
 import { firstValueFrom, Subscription } from 'rxjs';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { TokenData } from '../../../../Models/token-data';
-import { EmployeeGet } from '../../../../Models/Employee/employee-get';
 import { ActivatedRoute, Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { FormsModule } from '@angular/forms';
@@ -15,6 +14,7 @@ import { MaintenanceEmployeesService } from '../../../../Services/Employee/Maint
 import { EmployeeService } from '../../../../Services/Employee/employee.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { AccountService } from '../../../../Services/account.service';
+import { MaintenanceEmployees } from '../../../../Models/Maintenance/maintenance-employees';
 
 @Component({
   selector: 'app-maintenance-employees',
@@ -28,18 +28,18 @@ export class MaintenanceEmployeesComponent {
   UserID: number = 0;
   AllowDeleteForOthers: boolean = false;
   AllowDelete: boolean = true;
-  validationErrors: { [key in keyof EmployeeGet]?: string } = {};
+  validationErrors: { [key in keyof MaintenanceEmployees]?: string } = {};
   isRtl: boolean = false;
   subscription!: Subscription;
   TableData: any[] = [];       
-  employees: EmployeeGet[] = []; 
+  employees: MaintenanceEmployees[] = []; 
   selectedEmployeeId: number=0;
   keysArray: string[] = ['id', 'en_Name', 'ar_Name'];
   key: string= "id";
   DomainName: string = '';
   EditDeleteServ: any;
   value: any;
-  selectedEmployee: EmployeeGet | null = null;
+  selectedEmployee: MaintenanceEmployees | null = null;
   isLoading = false;
   isModalOpen= false;
   path: string = "";
@@ -52,7 +52,7 @@ export class MaintenanceEmployeesComponent {
       public mainServ: MaintenanceEmployeesService,
       private deleteEditPermissionServ: DeleteEditPermissionService,
       public account: AccountService,
-      public EmpServ: EmployeeService,
+      public EmpServ: MaintenanceEmployeesService,
       private activeRoute: ActivatedRoute,
       private realTimeService: RealTimeNotificationServiceService){}
 
@@ -81,8 +81,6 @@ ngOnInit() {
     if (this.subscription) this.subscription.unsubscribe();
   }
 
-
-
   IsAllowDelete(InsertedByID: number): boolean {
   return this.deleteEditPermissionServ.IsAllowDelete(
     InsertedByID,
@@ -105,7 +103,7 @@ ngOnInit() {
   async GetSelectData() {
     this.employees = [];
     try {
-      const data = await firstValueFrom(this.EmpServ.Get_Employees(this.DomainName)); 
+      const data = await firstValueFrom(this.EmpServ.Get(this.DomainName)); 
       this.employees = data;
     } catch (error) {
       this.employees = [];
@@ -156,7 +154,7 @@ Delete(id: number) {
     let isValid = true;
     for (const key in this.selectedEmployee) { 
       if (this.selectedEmployee.hasOwnProperty(key)) {
-        const field = key as keyof EmployeeGet;
+        const field = key as keyof MaintenanceEmployees;
         if (!this.selectedEmployee[field]) {
           if (field == 'id') {
             this.validationErrors[field] = `*${this.capitalizeField( field )} is required`;
@@ -176,7 +174,7 @@ Delete(id: number) {
       this.key = event.key;
       this.value = event.value;
       try {
-        const data: EmployeeGet[] = await firstValueFrom( this.mainServ.Get(this.DomainName));  
+        const data: MaintenanceEmployees[] = await firstValueFrom( this.mainServ.Get(this.DomainName));  
         this.TableData = data || [];
     
         if (this.value !== "") {
@@ -199,14 +197,14 @@ Delete(id: number) {
     }
 
 
-  onInputValueChange(event: { field: keyof EmployeeGet; value: any }) {
+  onInputValueChange(event: { field: keyof MaintenanceEmployees; value: any }) {
     const { field, value } = event;
     (this.selectedEmployee as any)[field] = value;
     if (value) {
       this.validationErrors[field] = '';
     } 
   }
-    capitalizeField(field: keyof EmployeeGet): string {
+    capitalizeField(field: keyof MaintenanceEmployees): string {
       return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
     }
 

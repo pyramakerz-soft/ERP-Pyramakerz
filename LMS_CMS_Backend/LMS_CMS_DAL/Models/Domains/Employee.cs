@@ -62,6 +62,7 @@ namespace LMS_CMS_DAL.Models.Domains
         public bool? CanReceiveRequestFromParent { get; set; }
         public bool? CanReceiveMessageFromParent { get; set; }
         public bool IsSuspended { get; set; }
+        public bool IsRestrictedForLoctaion { get; set; }
 
         [ForeignKey("Role")]
         [Required]
@@ -134,5 +135,7 @@ namespace LMS_CMS_DAL.Models.Domains
         public ICollection<VacationEmployee> VacationEmployee { get; set; } = new HashSet<VacationEmployee>();
         public ICollection<AnnualVacationEmployee> AnnualVacationEmployee { get; set; } = new HashSet<AnnualVacationEmployee>();
         public ICollection<PermissionGroupEmployee> PermissionGroupEmployees { get; set; } = new HashSet<PermissionGroupEmployee>();
+        public ICollection<EmployeeClocks> EmployeeClocks { get; set; } = new HashSet<EmployeeClocks>();
+        public ICollection<EmployeeLocation> EmployeeLocation { get; set; } = new HashSet<EmployeeLocation>();
     }
 }
