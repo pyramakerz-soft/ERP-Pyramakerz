@@ -46,6 +46,7 @@ export class EmployeeClocksComponent {
   TableData: EmployeeClocks[] = [];
   employeeClocks: EmployeeClocks = new EmployeeClocks();
   isLoading = false;
+  isLoadingWhenEdit = false;
   year: number = 0;
   month: number = 0;
   validationErrors: { [key in keyof EmployeeClocks]?: string } = {};
@@ -95,7 +96,7 @@ export class EmployeeClocksComponent {
     });
   }
 
-  formatTime(value: string): string {
+  formatTime(value: string | null): string {
     if (!value) return '';
     // Take only HH:mm:ss part
     return value.split('.')[0];
@@ -143,10 +144,10 @@ export class EmployeeClocksComponent {
 
   save(): void {
     if (this.isFormValidForCreate()) {
-      this.isLoading = true;
+      this.isLoadingWhenEdit = true;
       console.log(this.TableData)
       this.EmployeeClocksServ.Edit(this.TableData, this.DomainName).subscribe((d) => {
-        this.isLoading = false;
+        this.isLoadingWhenEdit = false;
         this.GetAllData();
         Swal.fire({
           icon: 'success',
@@ -156,7 +157,7 @@ export class EmployeeClocksComponent {
         });
       }, error => {
         console.log(error)
-        this.isLoading = false; // Hide spinner
+        this.isLoadingWhenEdit = false; // Hide spinner
         Swal.fire({
           icon: 'error',
           title: 'Oops...',
@@ -169,9 +170,15 @@ export class EmployeeClocksComponent {
   }
 
   AddClockIn() {
-    if (this.isFormValidForCreate()) {
+    if (this.isFormValid()) {
       this.isLoading = true;
-      console.log(this.TableData)
+      if (this.employeeClocks.clockIn && this.employeeClocks.clockIn.length === 5) {
+        this.employeeClocks.clockIn = this.employeeClocks.clockIn + ":00"; // convert "13:11" -> "13:11:00"
+      }
+      if (this.employeeClocks.clockOut && this.employeeClocks.clockOut.length === 5) {
+        this.employeeClocks.clockOut = this.employeeClocks.clockOut + ":00";
+      }
+      console.log(this.employeeClocks)
       this.EmployeeClocksServ.Add(this.employeeClocks, this.DomainName).subscribe((d) => {
         this.isLoading = false;
         this.GetAllData();
@@ -200,6 +207,7 @@ export class EmployeeClocksComponent {
   }
 
   openModal() {
+    this.employeeClocks = new EmployeeClocks()
     this.validationErrors = {};
     this.isModalVisible = true;
   }
@@ -211,7 +219,8 @@ export class EmployeeClocksComponent {
         const field = key as keyof EmployeeClocks;
         if (!this.employeeClocks[field]) {
           if (
-            field == 'date'
+            field == 'date' ||
+            field == 'employeeID'
           ) {
             this.validationErrors[field] = `*${this.capitalizeField(
               field
@@ -221,11 +230,16 @@ export class EmployeeClocksComponent {
         }
       }
     }
+    if (this.employeeClocks.clockOut && this.employeeClocks.clockIn && this.employeeClocks.clockOut < this.employeeClocks.clockIn) {
+      this.validationErrors['clockOut'] = "Clock out time cannot be earlier than clock in time.";
+      isValid = false;
+    }
     return isValid;
   }
 
   isFormValidForCreate(): boolean {
     let isValid = true;
+    isValid = !this.TableData.some(element => element.clockIn&& element.clockOut&& element.clockOut < element.clockIn);
     return isValid;
   }
 
