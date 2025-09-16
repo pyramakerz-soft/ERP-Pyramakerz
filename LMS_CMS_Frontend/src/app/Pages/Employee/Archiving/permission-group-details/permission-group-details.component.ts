@@ -129,9 +129,7 @@ export class PermissionGroupDetailsComponent {
       this.SelectedPermissionGroupDetails = this.SelectedPermissionGroupDetails.filter(
         item => item.archivingTreeID !== $event.data.archivingTreeID
       );
-    }
-
-    console.log('Selected Items to Save:', this.SelectedPermissionGroupDetails);
+    } 
   }
  
   Save() { 

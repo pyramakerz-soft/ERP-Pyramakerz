@@ -1,4 +1,6 @@
-﻿using LMS_CMS_PL.Attribute;
+﻿using LMS_CMS_DAL.Models.Domains.LMS;
+using LMS_CMS_DAL.Models.Domains;
+using LMS_CMS_PL.Attribute;
 using LMS_CMS_PL.Services;
 
 namespace LMS_CMS_PL.Middleware
@@ -15,18 +17,7 @@ namespace LMS_CMS_PL.Middleware
         }
 
         public async Task InvokeAsync(HttpContext context)
-        {
-            Console.WriteLine("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh");
-
-            var endpoint = context.GetEndpoint();
-            var attribute = endpoint?.Metadata.GetMetadata<CheckSuspensionAttribute>();
-             
-            if (attribute == null)
-            {
-                await _next(context);
-                return;
-            }
-
+        { 
             var userIdClaim = context.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
             var userType = context.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
 
@@ -51,8 +42,14 @@ namespace LMS_CMS_PL.Middleware
 
                 if (user != null)
                 {
-                    dynamic dynamicUser = user;
-                    if (dynamicUser.IsSuspended == true)
+                    if (userType == "employee" && user is Employee emp && emp.IsSuspended)
+                    {
+                        context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                        await context.Response.WriteAsync("User is suspended.");
+                        return;
+                    }
+
+                    if (userType == "student" && user is Student stu && stu.IsSuspended)
                     {
                         context.Response.StatusCode = StatusCodes.Status403Forbidden;
                         await context.Response.WriteAsync("User is suspended.");

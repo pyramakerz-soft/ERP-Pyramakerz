@@ -1,0 +1,23 @@
+<div class="flex justify-between items-center">
+    <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Salary Configuration' | translate }}</h1>
+    <div class="flex justify-between items-center">
+        <button (click)="save()"
+            class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
+            {{ 'Save' | translate }}
+        </button>
+    </div>
+</div>
+
+<div class="mt-6 mb-4 rounded-3xl flex justify-between flex-wrap py-3">
+    <div class="flex flex-col mb-4 w-[49%]">
+        <label class="mb-2 primaryTxt" for="startDay"> {{ 'Start Day' | translate }}</label>
+        <input id="startDay" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+            (input)="validateNumber($event,'startDay')" placeholder="{{ 'Enter User startDay' | translate }}"
+            [(ngModel)]="salaryConfiguration.startDay" />
+    </div>
+
+    <div class="flex align-middle space-x-2 rtl:space-x-reverse mb-4 w-[49%]">
+        <input type="checkbox" id="frompreviousmonth" class="w-5 h-5" [(ngModel)]="salaryConfiguration.frompreviousmonth">
+        <label class="mb-2" for="frompreviousmonth">  {{ 'From Previous Month' | translate }}</label>
+    </div> 
+</div>

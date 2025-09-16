@@ -207,14 +207,23 @@ export class SubjectCategoryComponent {
             this.getSubjectCategoryData()
           },
           error => {
+            if (error.status === 403 && error.error === 'User is suspended.') {  
+              Swal.fire({
+                icon: 'warning',
+                title: 'Account suspended',
+                text: 'Your account has been suspended. You will be logged out.',
+                confirmButtonText: 'OK'
+              })
+            }else{
+              Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: error.error,
+                confirmButtonText: 'Okay',
+                customClass: { confirmButton: 'secondaryBg' },
+              });
+            }
             this.isLoading = false;
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: 'Try Again Later!',
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' },
-            });
           }
         );
       } else{
@@ -226,13 +235,22 @@ export class SubjectCategoryComponent {
           },
           error => {
             this.isLoading = false;
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: 'Try Again Later!',
-              confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' },
-            });
+            if (error.status === 403 && error.error === 'User is suspended.') {  
+              Swal.fire({
+                icon: 'warning',
+                title: 'Account suspended',
+                text: 'Your account has been suspended. You will be logged out.',
+                confirmButtonText: 'OK'
+              })
+            }else{
+              Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: error.error,
+                confirmButtonText: 'Okay',
+                customClass: { confirmButton: 'secondaryBg' },
+              });
+            }
           }
         );
       }  

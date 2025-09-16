@@ -170,6 +170,10 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 return BadRequest("Clock is empty");
             }
 
+            if (NewClock.LocationID == 0)
+            {
+                NewClock.LocationID = null;
+            }
             EmployeeClocks clock = mapper.Map<EmployeeClocks>(NewClock);
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
@@ -474,6 +478,10 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 {
                     return BadRequest("Location Id Is Required");
                 }
+            }
+            else
+            {
+                NewClock.LocationID = null;
             }
 
             EmployeeClocks clock = Unit_Of_Work.employeeClocks_Repository
