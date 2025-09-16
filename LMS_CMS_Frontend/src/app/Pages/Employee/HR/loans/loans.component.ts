@@ -282,14 +282,26 @@ export class LoansComponent {
   }
 
   validateNumber(event: any, field: keyof Loans): void {
-    const value = event.target.value;
+    let value = event.target.value;
+    // If empty or not a number → reset
     if (isNaN(value) || value === '') {
       event.target.value = '';
-      if (typeof this.loan[field] === 'string') {
-        this.loan[field] = '' as never;
+      this.loan[field] = '' as never;
+      return;
+    }
+    // Convert string → number
+    const numericValue = Number(value);
+    if (field === 'numberOfDeduction') {
+      // If not integer or less than 1 → reset to 1
+      if (!Number.isInteger(numericValue) || numericValue < 1) {
+        this.loan.numberOfDeduction = 1;
+        event.target.value = '1'; // force UI sync
+      } else {
+        this.loan.numberOfDeduction = numericValue;
       }
     }
   }
+
 
   isFormValid(): boolean {
     let isValid = true;

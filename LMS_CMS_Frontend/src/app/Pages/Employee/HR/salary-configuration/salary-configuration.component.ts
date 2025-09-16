@@ -15,11 +15,12 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-salary-configuration',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
+  imports: [FormsModule, CommonModule, TranslateModule],
   templateUrl: './salary-configuration.component.html',
   styleUrl: './salary-configuration.component.css'
 })
@@ -100,10 +101,47 @@ export class SalaryConfigurationComponent {
     });
   }
 
+  isFormValid(): boolean {
+    let isValid = true;
+    if (this.salaryConfiguration.startDay > 28 || this.salaryConfiguration.startDay < 1) {
+      isValid = false
+      this.validationErrors["startDay"] = " Start Day should be from 1 to 28"
+    }
+    return isValid;
+  }
+
+  onInputValueChange(event: { field: keyof SalaryConfiguration; value: any }) {
+    const { field, value } = event;
+    (this.salaryConfiguration as any)[field] = value;
+    if (value) {
+      this.validationErrors[field] = '';
+    }
+  }
+
   save() {
-    this.SalaryConfigurationServ.Edit(this.salaryConfiguration, this.DomainName).subscribe((d) => {
-      this.salaryConfiguration = d;
-    });
+    if (this.isFormValid()) {
+      this.isLoading = true;
+      this.SalaryConfigurationServ.Edit(this.salaryConfiguration, this.DomainName).subscribe((d) => {
+        this.salaryConfiguration = d;
+        Swal.fire({
+          icon: 'success',
+          title: 'Done',
+          text: 'Updatedd Successfully',
+          confirmButtonColor: '#089B41',
+        });
+        this.GetAllData();
+        this.isLoading = false;
+      }, error => {
+        this.isLoading = false; // Hide spinner
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'Try Again Later!',
+          confirmButtonText: 'Okay',
+          customClass: { confirmButton: 'secondaryBg' }
+        });
+      });
+    }
   }
 
   validateNumber(event: any, field: keyof SalaryConfiguration): void {
@@ -115,6 +153,5 @@ export class SalaryConfigurationComponent {
       }
     }
   }
-
 
 }
