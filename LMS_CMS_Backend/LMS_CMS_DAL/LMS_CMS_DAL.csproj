@@ -19,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="DbScripts\EntriesFunV02.sql" />
     <EmbeddedResource Include="DbScripts\EntriesFun.sql" />
     <EmbeddedResource Include="DbScripts\FilterEntries.sql" />
     <EmbeddedResource Include="DbScripts\GetAccountingEntries.sql" />
