@@ -15,7 +15,7 @@ namespace LMS_CMS_BL.DTO.HR
         public long ID { get; set; }
         public DateOnly Date { get; set; }
         public DateOnly DeductionStartMonth { get; set; }
-        public long Amount { get; set; }
+        public double Amount { get; set; }
         public int NumberOfDeduction { get; set; }
         public string? Notes { get; set; }
         public long EmployeeID { get; set; }

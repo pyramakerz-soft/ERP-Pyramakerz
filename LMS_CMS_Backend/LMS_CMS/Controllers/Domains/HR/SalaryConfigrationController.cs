@@ -30,9 +30,8 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
         [HttpGet]
         [Authorize_Endpoint_(
-         allowedTypes: new[] { "octa", "employee" }
-         ,
-         pages: new[] { "Vacation Types" }
+         allowedTypes: new[] { "octa", "employee" },
+         pages: new[] { "Salary Configuration" }
         )]
         public IActionResult Get()
         {
@@ -64,7 +63,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee" },
            allowEdit: 1,
-           pages: new[] { "Vacation Types" }
+           pages: new[] { "Salary Configuration" }
         )]
         public async Task<IActionResult> EditAsync(SalaryConfigration salaryConfigration)
         {

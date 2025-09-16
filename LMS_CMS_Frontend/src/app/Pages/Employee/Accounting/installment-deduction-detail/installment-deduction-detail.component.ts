@@ -235,12 +235,12 @@ export class InstallmentDeductionDetailComponent {
 
           this.router.navigateByUrl(`Employee/Installment Deduction Details/Edit/${this.MasterId}`)
         },
-          err => {
+          error => {
             this.isLoading = false
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
@@ -251,12 +251,12 @@ export class InstallmentDeductionDetailComponent {
           this.GetMasterInfo()
           this.isLoading = false
         },
-          err => {
+          error => {
             this.isLoading = false
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });

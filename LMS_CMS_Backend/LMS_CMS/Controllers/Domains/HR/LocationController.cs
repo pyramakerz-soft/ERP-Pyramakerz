@@ -34,8 +34,8 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         [HttpGet]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" }
-          //,
-          //pages: new[] { "Bonus" }
+          ,
+          pages: new[] { "Location" }
          )]
         public async Task<IActionResult> GetAsync()
         {
@@ -68,8 +68,8 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         [HttpGet("{id}")]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" }
-          //,
-          //pages: new[] { "Bonus" }
+          ,
+          pages: new[] { "Location" }
         )]
         public async Task<IActionResult> GetById(long id)
         {
@@ -102,8 +102,8 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         [HttpPost]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" }
-            //,
-            //pages: new[] { "Bonus" }
+            ,
+            pages: new[] { "Location" }
          )]
         public async Task<IActionResult> Add(LocationAddDTO newLocation)
         {
@@ -146,7 +146,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee" },
            allowEdit: 1,
-           pages: new[] { "Bonus" }
+           pages: new[] { "Location" }
        )]
         public async Task<IActionResult> EditAsync(LocationAddDTO newLocation)
         {
@@ -181,7 +181,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Bonus", roleId, userId, location);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Location", roleId, userId, location);
                 if (accessCheck != null)
                 {
                     return accessCheck;
@@ -218,7 +218,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
           allowDelete: 1,
-          pages: new[] { "Bonus" }
+          pages: new[] { "Location" }
         )]
         public IActionResult Delete(long id)
         {
@@ -247,7 +247,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             }
             if (userTypeClaim == "employee")
             {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Bonus", roleId, userId, location);
+                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Location", roleId, userId, location);
                 if (accessCheck != null)
                 {
                     return accessCheck;

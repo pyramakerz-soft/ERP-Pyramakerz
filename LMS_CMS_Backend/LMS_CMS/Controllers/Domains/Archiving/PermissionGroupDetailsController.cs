@@ -12,8 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 
 namespace LMS_CMS_PL.Controllers.Domains.Archiving
-{
-    [CheckSuspension]
+{ 
     [Route("api/with-domain/[controller]")]
     [ApiController]
     [Authorize]

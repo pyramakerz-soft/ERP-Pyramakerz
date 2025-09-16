@@ -34,7 +34,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         [HttpGet("ByMonth/{EmpId}/{year}/{month}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Vacation Types" }
+            pages: new[] { "Edit Attendance" }
         )]
         public IActionResult GetByMonth(long EmpId ,int year, int month)
         {
@@ -62,7 +62,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             DateOnly periodStart = new DateOnly();
             DateOnly periodEnd = new DateOnly();
 
-            if (startDay == 1)
+            if (salaryConfigration.FromPreviousMonth == false)
             {
                 periodStart = new DateOnly(year, month, 1);
                 periodEnd = periodStart.AddMonths(1).AddDays(-1); // last day of month
@@ -90,8 +90,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
         [HttpGet("GetByMonthByToken/{year}/{month}")]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Vacation Types" }
+            allowedTypes: new[] { "octa", "employee" }
         )]
         public IActionResult GetByMonthByToken(int year, int month)
         {
@@ -148,9 +147,8 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
         [HttpPost]
         [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" }
-            ,
-            pages: new[] { "Vacation Types" }
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Edit Attendance" }
          )]
         public async Task<IActionResult> Add(EmployeeClocksAddDTO NewClock)
         {
@@ -197,8 +195,8 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         [HttpPut]
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee" },
-           allowEdit: 1,
-           pages: new[] { "Vacation Types" }
+            allowEdit: 1,
+            pages: new[] { "Edit Attendance" }
         )]
         public async Task<IActionResult> EditAsync(List<EmployeeClocksAddDTO> NewClocks)
         {
@@ -236,7 +234,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
                 if (userTypeClaim == "employee")
                 {
-                    IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Vacation Types", roleId, userId, clock);
+                    IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Edit Attendance", roleId, userId, clock);
                     if (accessCheck != null)
                     {
                         return accessCheck;
@@ -276,8 +274,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
         [HttpPost("AddClockIn")]
         [Authorize_Endpoint_(
-         allowedTypes: new[] { "octa", "employee" },
-         pages: new[] { "Vacation Types" }
+         allowedTypes: new[] { "octa", "employee" }
       )]
         public async Task<IActionResult> AddClockIn(EmployeeClocksAddDTO NewClock)
         {
@@ -394,8 +391,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
         [HttpPost("AddClockOut")]
         [Authorize_Endpoint_(
-         allowedTypes: new[] { "octa", "employee" },
-         pages: new[] { "Vacation Types" }
+         allowedTypes: new[] { "octa", "employee" }
         )]
         public async Task<IActionResult> AddClockOut(EmployeeClocksAddDTO NewClock)
         {
