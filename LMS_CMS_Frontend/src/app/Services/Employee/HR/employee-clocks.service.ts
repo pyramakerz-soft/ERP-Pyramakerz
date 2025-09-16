@@ -40,7 +40,7 @@ export class EmployeeClocksService {
     return this.http.post<any>(`${this.baseUrl}/EmployeeClocks`, EmployeeClocks, { headers, responseType: 'text' as 'json' });
   }
 
-  Edit(EmployeeClocks: EmployeeClocks, DomainName: string) {
+  Edit(EmployeeClocks: EmployeeClocks[], DomainName: string) {
     if (DomainName != null) {
       this.header = DomainName
     }
@@ -49,7 +49,7 @@ export class EmployeeClocksService {
       .set('domain-name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('Content-Type', 'application/json');
-    return this.http.put<EmployeeClocks>(`${this.baseUrl}/EmployeeClocks`, EmployeeClocks, { headers });
+    return this.http.put<EmployeeClocks[]>(`${this.baseUrl}/EmployeeClocks`, EmployeeClocks, { headers });
   }
 
 }

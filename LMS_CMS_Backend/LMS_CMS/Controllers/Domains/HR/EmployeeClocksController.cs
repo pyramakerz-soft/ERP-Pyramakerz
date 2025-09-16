@@ -196,7 +196,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
            allowEdit: 1,
            pages: new[] { "Vacation Types" }
         )]
-        public async Task<IActionResult> EditAsync(EmployeeClocksAddDTO NewClock)
+        public async Task<IActionResult> EditAsync(List<EmployeeClocksAddDTO> NewClocks)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -212,52 +212,60 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            if (NewClock == null)
+            foreach (var NewClock in NewClocks)
             {
-                return BadRequest("NewClock cannot be null");
-            }
-            if (NewClock.ID == null)
-            {
-                return BadRequest("id can not be null");
+                if (NewClock == null)
+                {
+                    return BadRequest("NewClock cannot be null");
+                }
+
+                if (NewClock.ID == null)
+                {
+                    return BadRequest("id can not be null");
+                }
+
+                EmployeeClocks clock = Unit_Of_Work.employeeClocks_Repository.First_Or_Default(s => s.ID == NewClock.ID && s.IsDeleted != true);
+                if (clock == null)
+                {
+                    return BadRequest("clock not exist");
+                }
+
+                if (userTypeClaim == "employee")
+                {
+                    IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Vacation Types", roleId, userId, clock);
+                    if (accessCheck != null)
+                    {
+                        return accessCheck;
+                    }
+                }
+                if ( NewClock.LocationID == 0)
+                {
+                    NewClock.LocationID = null;
+                }
+                mapper.Map(NewClock, clock);
+                TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+                clock.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                if (userTypeClaim == "octa")
+                {
+                    clock.UpdatedByOctaId = userId;
+                    if (clock.UpdatedByUserId != null)
+                    {
+                        clock.UpdatedByUserId = null;
+                    }
+                }
+                else if (userTypeClaim == "employee")
+                {
+                    clock.UpdatedByUserId = userId;
+                    if (clock.UpdatedByOctaId != null)
+                    {
+                        clock.UpdatedByOctaId = null;
+                    }
+                }
+                Unit_Of_Work.employeeClocks_Repository.Update(clock);
+                Unit_Of_Work.SaveChanges();
             }
 
-            EmployeeClocks clock = Unit_Of_Work.employeeClocks_Repository.First_Or_Default(s => s.ID == NewClock.ID && s.IsDeleted != true);
-            if (clock == null)
-            {
-                return BadRequest("clock not exist");
-            }
-
-            if (userTypeClaim == "employee")
-            {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Vacation Types", roleId, userId, clock);
-                if (accessCheck != null)
-                {
-                    return accessCheck;
-                }
-            }
-
-            mapper.Map(NewClock, clock);
-            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-            clock.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
-            if (userTypeClaim == "octa")
-            {
-                clock.UpdatedByOctaId = userId;
-                if (clock.UpdatedByUserId != null)
-                {
-                    clock.UpdatedByUserId = null;
-                }
-            }
-            else if (userTypeClaim == "employee")
-            {
-                clock.UpdatedByUserId = userId;
-                if (clock.UpdatedByOctaId != null)
-                {
-                    clock.UpdatedByOctaId = null;
-                }
-            }
-            Unit_Of_Work.employeeClocks_Repository.Update(clock);
-            Unit_Of_Work.SaveChanges();
-            return Ok(NewClock);
+            return Ok(NewClocks);
         }
 
         ////////////////////////////////
