@@ -17,6 +17,7 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-employee-clocks',
@@ -26,18 +27,7 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   styleUrl: './employee-clocks.component.css',
 })
 export class EmployeeClocksComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   isRtl: boolean = false;
   subscription!: Subscription;
@@ -50,7 +40,7 @@ export class EmployeeClocksComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-
+  SelectedEmployeeId: number = 0;
   IsShowTabls: boolean = false;
   employees: Employee[] = [];
   TableData: EmployeeClocks[] = [];
@@ -58,6 +48,7 @@ export class EmployeeClocksComponent {
   isLoading = false;
   year: number = 0;
   month: number = 0;
+  validationErrors: { [key in keyof EmployeeClocks]?: string } = {};
 
   constructor(
     private router: Router,
@@ -72,7 +63,7 @@ export class EmployeeClocksComponent {
     public EmployeeClocksServ: EmployeeClocksService,
     private languageService: LanguageService,
     private realTimeService: RealTimeNotificationServiceService
-  ) {}
+  ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
@@ -109,21 +100,35 @@ export class EmployeeClocksComponent {
     // Take only HH:mm:ss part
     return value.split('.')[0];
   }
-  
+
+  onTimeChange(row: any, field: 'clockIn' | 'clockOut', event: string) {
+    row[field] = event.length === 5 ? event + ":00" : event; // save as "HH:mm:ss"
+  }
+
   GetAllData() {
     this.TableData = [];
-    this.EmployeeClocksServ.Get(
-      this.employeeClocks.employeeID,
-      this.year,
-      this.month,
-      this.DomainName
-    ).subscribe(
-      (data) => {
-        this.TableData = data;
-        console.log(this.TableData);
-      },
-      (error) => {}
-    );
+    if (this.SelectedEmployeeId && this.year && this.month) {
+      this.EmployeeClocksServ.Get(
+        this.SelectedEmployeeId,
+        this.year,
+        this.month,
+        this.DomainName
+      ).subscribe(
+        (data) => {
+          this.TableData = data;
+          console.log(this.TableData);
+        },
+        (error) => {
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Try Again Later!',
+            confirmButtonText: 'Okay',
+            customClass: { confirmButton: 'secondaryBg' }
+          });
+        }
+      );
+    }
   }
 
   Apply() {
@@ -137,17 +142,108 @@ export class EmployeeClocksComponent {
   }
 
   save(): void {
-    if (this.isFormValid()) {
+    if (this.isFormValidForCreate()) {
+      this.isLoading = true;
+      console.log(this.TableData)
+      this.EmployeeClocksServ.Edit(this.TableData, this.DomainName).subscribe((d) => {
+        this.isLoading = false;
+        this.GetAllData();
+        Swal.fire({
+          icon: 'success',
+          title: 'Done',
+          text: 'Saved Successfully',
+          confirmButtonColor: '#089B41',
+        });
+      }, error => {
+        console.log(error)
+        this.isLoading = false; // Hide spinner
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'Try Again Later!',
+          confirmButtonText: 'Okay',
+          customClass: { confirmButton: 'secondaryBg' }
+        });
+      })
     }
+  }
+
+  AddClockIn() {
+    if (this.isFormValidForCreate()) {
+      this.isLoading = true;
+      console.log(this.TableData)
+      this.EmployeeClocksServ.Add(this.employeeClocks, this.DomainName).subscribe((d) => {
+        this.isLoading = false;
+        this.GetAllData();
+        Swal.fire({
+          icon: 'success',
+          title: 'Done',
+          text: 'Saved Successfully',
+          confirmButtonColor: '#089B41',
+        });
+      }, error => {
+        console.log(error)
+        this.isLoading = false; // Hide spinner
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'Try Again Later!',
+          confirmButtonText: 'Okay',
+          customClass: { confirmButton: 'secondaryBg' }
+        });
+      })
+    }
+  }
+
+  closeModal() {
+    this.isModalVisible = false;
+  }
+
+  openModal() {
+    this.validationErrors = {};
+    this.isModalVisible = true;
   }
 
   isFormValid(): boolean {
     let isValid = true;
-
+    for (const key in this.employeeClocks) {
+      if (this.employeeClocks.hasOwnProperty(key)) {
+        const field = key as keyof EmployeeClocks;
+        if (!this.employeeClocks[field]) {
+          if (
+            field == 'date'
+          ) {
+            this.validationErrors[field] = `*${this.capitalizeField(
+              field
+            )} is required`;
+            isValid = false;
+          }
+        }
+      }
+    }
     return isValid;
   }
 
+  isFormValidForCreate(): boolean {
+    let isValid = true;
+    return isValid;
+  }
+
+  capitalizeField(field: keyof EmployeeClocks): string {
+    return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
+  }
+
+  onInputValueChange(event: { field: keyof EmployeeClocks; value: any }) {
+    const { field, value } = event;
+    (this.employeeClocks as any)[field] = value;
+    if (value) {
+      this.validationErrors[field] = '';
+    }
+  }
+
   onMonthChange(event: Event) {
+    this.IsShowTabls = false;
+    this.TableData = [];
     const input = event.target as HTMLInputElement;
     const value = input.value; // e.g. "2025-08"
 
