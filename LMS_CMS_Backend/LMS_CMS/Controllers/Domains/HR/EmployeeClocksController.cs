@@ -217,6 +217,8 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 return BadRequest("Clock is empty");
             }
 
+            NewClock.EmployeeID = long.Parse(userIdClaim);
+
             Employee employee = Unit_Of_Work.employee_Repository.First_Or_Default(s=>s.ID == NewClock.EmployeeID && s.IsDeleted != true);
             if (employee == null)
             {
@@ -328,6 +330,8 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             {
                 return BadRequest("Clock is empty");
             }
+
+            NewClock.EmployeeID = long.Parse(userIdClaim);
 
             Employee employee = Unit_Of_Work.employee_Repository.First_Or_Default(s => s.ID == NewClock.EmployeeID && s.IsDeleted != true);
             if (employee == null)
