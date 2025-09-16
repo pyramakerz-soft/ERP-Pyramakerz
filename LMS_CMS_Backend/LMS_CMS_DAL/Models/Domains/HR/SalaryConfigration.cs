@@ -12,5 +12,6 @@ namespace LMS_CMS_DAL.Models.Domains.HR
         [Key]
         public long ID { get; set; }
         public int StartDay { get; set; }
+        public bool FromPreviousMonth { get; set; }
     }
 }
