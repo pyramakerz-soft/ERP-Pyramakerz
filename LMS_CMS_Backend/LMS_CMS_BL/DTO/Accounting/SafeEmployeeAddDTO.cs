@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 namespace LMS_CMS_BL.DTO.Accounting
 {
     public class SafeEmployeeAddDTO
-    {
-        public long EmployeeID { get; set; } 
+    { 
+        public List<long> EmployeeIDs { get; set; }
         public long SaveID { get; set; }
     }
 }

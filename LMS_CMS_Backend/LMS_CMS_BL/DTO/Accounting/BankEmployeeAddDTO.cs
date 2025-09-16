@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 namespace LMS_CMS_BL.DTO.Accounting
 {
     public class BankEmployeeAddDTO
-    { 
-        public long EmployeeID { get; set; } 
+    {  
+        public List<long> EmployeeIDs { get; set; }
         public long BankID { get; set; }
     }
 }

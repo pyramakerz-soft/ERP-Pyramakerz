@@ -8,6 +8,7 @@ using LMS_CMS_PL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace LMS_CMS_PL.Controllers.Domains.Accounting
 {
@@ -34,7 +35,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Safe" }
         )]
-        public IActionResult GetBySafeID(long safeID)
+        public async Task<IActionResult> GetBySafeIDAsync(long safeID)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -44,8 +45,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 return BadRequest("No Safe With this ID");
             }
 
-            List<SafeEmployee> safeEmployees = Unit_Of_Work.safeEmployee_Repository.FindBy(
-                    f => f.IsDeleted != true && f.SaveID == safeID);
+            List<SafeEmployee> safeEmployees = await Unit_Of_Work.safeEmployee_Repository.Select_All_With_IncludesById<SafeEmployee>(
+                    f => f.IsDeleted != true && f.SaveID == safeID, 
+                    query => query.Include(d => d.Employee));
 
             if (safeEmployees == null || safeEmployees.Count == 0)
             {
@@ -88,98 +90,73 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 return BadRequest("No Safe With this ID");
             }
 
-            Employee employee = Unit_Of_Work.employee_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == NewSafeEmployee.EmployeeID);
-            if (employee == null)
-            {
-                return BadRequest("No Employee With this ID");
-            }
+            List<SafeEmployee> safeEmployees = Unit_Of_Work.safeEmployee_Repository.FindBy(d => d.IsDeleted != true && d.SaveID == NewSafeEmployee.SaveID);
+            List<long> safeEmployeeIDs = new List<long>();
 
-            SafeEmployee safeEmployee = mapper.Map<SafeEmployee>(NewSafeEmployee);
+            safeEmployeeIDs = safeEmployees.Select(d => d.EmployeeID).ToList();
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-            safeEmployee.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
-            if (userTypeClaim == "octa")
+
+            foreach (long EmployeeID in NewSafeEmployee.EmployeeIDs)
             {
-                safeEmployee.InsertedByOctaId = userId;
-            }
-            else if (userTypeClaim == "employee")
-            {
-                safeEmployee.InsertedByUserId = userId;
+                Employee employee = Unit_Of_Work.employee_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == EmployeeID);
+                if (employee == null)
+                {
+                    return BadRequest("No Employee With this ID");
+                }
+
+                SafeEmployee safeEmployeeExist = Unit_Of_Work.safeEmployee_Repository.First_Or_Default(
+                    d => d.SaveID == NewSafeEmployee.SaveID && d.EmployeeID == EmployeeID && d.IsDeleted != true);
+
+                if (!safeEmployeeIDs.Contains(EmployeeID))
+                {
+                    SafeEmployee newEmp = new SafeEmployee();
+                    newEmp.SaveID = NewSafeEmployee.SaveID;
+                    newEmp.EmployeeID = EmployeeID;
+                    newEmp.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                    if (userTypeClaim == "octa")
+                    {
+                        newEmp.InsertedByOctaId = userId;
+                    }
+                    else if (userTypeClaim == "employee")
+                    {
+                        newEmp.InsertedByUserId = userId;
+                    }
+
+                    Unit_Of_Work.safeEmployee_Repository.Add(newEmp);
+                }
             }
 
-            Unit_Of_Work.safeEmployee_Repository.Add(safeEmployee);
+            List<SafeEmployee> employeesToRemove = safeEmployees
+                .Where(be => !NewSafeEmployee.EmployeeIDs.Contains(be.EmployeeID))
+                .ToList();
+
+            foreach (SafeEmployee emp in employeesToRemove)
+            {
+                emp.IsDeleted = true;
+                emp.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                if (userTypeClaim == "octa")
+                {
+                    emp.DeletedByOctaId = userId;
+                    if (emp.DeletedByUserId != null)
+                    {
+                        emp.DeletedByUserId = null;
+                    }
+                }
+                else if (userTypeClaim == "employee")
+                {
+                    emp.DeletedByUserId = userId;
+                    if (emp.DeletedByOctaId != null)
+                    {
+                        emp.DeletedByOctaId = null;
+                    }
+                }
+
+                Unit_Of_Work.safeEmployee_Repository.Update(emp);
+            }
+
             Unit_Of_Work.SaveChanges();
             return Ok();
-        }
-
-        /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        [HttpDelete("{id}")]
-        [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
-            allowDelete: 1,
-            pages: new[] { "Safe" }
-        )]
-        public IActionResult Delete(long id)
-        {
-            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-
-            var userClaims = HttpContext.User.Claims;
-            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-            long.TryParse(userIdClaim, out long userId);
-            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
-            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
-            long.TryParse(userRoleClaim, out long roleId);
-
-            if (userIdClaim == null || userTypeClaim == null)
-            {
-                return Unauthorized("User ID or Type claim not found.");
-            }
-
-            if (id == 0)
-            {
-                return BadRequest("Enter Safe Employee ID");
-            }
-
-            SafeEmployee safeEmployee = Unit_Of_Work.safeEmployee_Repository.First_Or_Default(t => t.IsDeleted != true && t.ID == id);
-
-            if (safeEmployee == null)
-            {
-                return NotFound();
-            }
-
-            if (userTypeClaim == "employee")
-            {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Safe", roleId, userId, safeEmployee);
-                if (accessCheck != null)
-                {
-                    return accessCheck;
-                }
-            }
-
-            safeEmployee.IsDeleted = true;
-            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-            safeEmployee.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
-            if (userTypeClaim == "octa")
-            {
-                safeEmployee.DeletedByOctaId = userId;
-                if (safeEmployee.DeletedByUserId != null)
-                {
-                    safeEmployee.DeletedByUserId = null;
-                }
-            }
-            else if (userTypeClaim == "employee")
-            {
-                safeEmployee.DeletedByUserId = userId;
-                if (safeEmployee.DeletedByOctaId != null)
-                {
-                    safeEmployee.DeletedByOctaId = null;
-                }
-            }
-
-            Unit_Of_Work.safeEmployee_Repository.Update(safeEmployee);
-            Unit_Of_Work.SaveChanges();
-            return Ok();
-        }
+        } 
     }
 }

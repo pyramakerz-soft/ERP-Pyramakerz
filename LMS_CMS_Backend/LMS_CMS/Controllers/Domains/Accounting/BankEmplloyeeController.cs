@@ -10,6 +10,7 @@ using LMS_CMS_PL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace LMS_CMS_PL.Controllers.Domains.Accounting
 {
@@ -34,7 +35,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Bank" }
         )]
-        public IActionResult GetByBankID(long bankID)
+        public async Task<IActionResult> GetByBankIDAsync(long bankID)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -43,9 +44,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             {
                 return BadRequest("No Bank With this ID");
             }
-
-            List<BankEmployee> bankEmployees = Unit_Of_Work.bankEmployee_Repository.FindBy(
-                    f => f.IsDeleted != true && f.BankID == bankID);
+             
+            List<BankEmployee> bankEmployees = await Unit_Of_Work.bankEmployee_Repository.Select_All_With_IncludesById<BankEmployee>(
+                   f => f.IsDeleted != true && f.BankID == bankID,
+                   query => query.Include(d => d.Employee));
 
             if (bankEmployees == null || bankEmployees.Count == 0)
             {
@@ -88,98 +90,73 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 return BadRequest("No Bank With this ID");
             }
 
-            Employee employee = Unit_Of_Work.employee_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == NewBankEmployee.EmployeeID);
-            if (employee == null)
-            {
-                return BadRequest("No Employee With this ID");
-            }
+            List<BankEmployee> bankEmployees = Unit_Of_Work.bankEmployee_Repository.FindBy(d => d.IsDeleted != true && d.BankID == NewBankEmployee.BankID);
+            List<long> bankEmployeeIDs = new List<long>();
 
-            BankEmployee bankEmployee = mapper.Map<BankEmployee>(NewBankEmployee);
+            bankEmployeeIDs = bankEmployees.Select(d => d.EmployeeID).ToList();
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-            bankEmployee.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
-            if (userTypeClaim == "octa")
+
+            foreach (long EmployeeID in NewBankEmployee.EmployeeIDs)
             {
-                bankEmployee.InsertedByOctaId = userId;
-            }
-            else if (userTypeClaim == "employee")
-            {
-                bankEmployee.InsertedByUserId = userId;
+                Employee employee = Unit_Of_Work.employee_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == EmployeeID);
+                if (employee == null)
+                {
+                    return BadRequest("No Employee With this ID");
+                }
+
+                BankEmployee bankEmployeeExist = Unit_Of_Work.bankEmployee_Repository.First_Or_Default(
+                    d => d.BankID == NewBankEmployee.BankID && d.EmployeeID == EmployeeID && d.IsDeleted != true);
+
+                if (!bankEmployeeIDs.Contains(EmployeeID))
+                {
+                    BankEmployee newEmp = new BankEmployee();
+                    newEmp.BankID = NewBankEmployee.BankID;
+                    newEmp.EmployeeID = EmployeeID;
+                    newEmp.InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                    if (userTypeClaim == "octa")
+                    {
+                        newEmp.InsertedByOctaId = userId;
+                    }
+                    else if (userTypeClaim == "employee")
+                    {
+                        newEmp.InsertedByUserId = userId;
+                    }
+
+                    Unit_Of_Work.bankEmployee_Repository.Add(newEmp);
+                }
             }
 
-            Unit_Of_Work.bankEmployee_Repository.Add(bankEmployee);
+            List<BankEmployee> employeesToRemove = bankEmployees
+                .Where(be => !NewBankEmployee.EmployeeIDs.Contains(be.EmployeeID))
+                .ToList();
+
+            foreach (BankEmployee emp in employeesToRemove)
+            { 
+                emp.IsDeleted = true; 
+                emp.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                if (userTypeClaim == "octa")
+                {
+                    emp.DeletedByOctaId = userId;
+                    if (emp.DeletedByUserId != null)
+                    {
+                        emp.DeletedByUserId = null;
+                    }
+                }
+                else if (userTypeClaim == "employee")
+                {
+                    emp.DeletedByUserId = userId;
+                    if (emp.DeletedByOctaId != null)
+                    {
+                        emp.DeletedByOctaId = null;
+                    }
+                }
+
+                Unit_Of_Work.bankEmployee_Repository.Update(emp);
+            }
+
             Unit_Of_Work.SaveChanges();
             return Ok();
-        } 
-
-        ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-        
-        [HttpDelete("{id}")]
-        [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
-            allowDelete: 1,
-            pages: new[] { "Bank" }
-        )]
-        public IActionResult Delete(long id)
-        {
-            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-
-            var userClaims = HttpContext.User.Claims;
-            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-            long.TryParse(userIdClaim, out long userId);
-            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
-            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
-            long.TryParse(userRoleClaim, out long roleId);
-
-            if (userIdClaim == null || userTypeClaim == null)
-            {
-                return Unauthorized("User ID or Type claim not found.");
-            }
-
-            if (id == 0)
-            {
-                return BadRequest("Enter Bank Employee ID");
-            }
-
-            BankEmployee bankEmployee = Unit_Of_Work.bankEmployee_Repository.First_Or_Default(t => t.IsDeleted != true && t.ID == id);
-
-            if (bankEmployee == null)
-            {
-                return NotFound();
-            }
-
-            if (userTypeClaim == "employee")
-            {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfDeletePageAvailable(Unit_Of_Work, "Bank", roleId, userId, bankEmployee);
-                if (accessCheck != null)
-                {
-                    return accessCheck;
-                }
-            }
-
-            bankEmployee.IsDeleted = true;
-            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-            bankEmployee.DeletedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
-            if (userTypeClaim == "octa")
-            {
-                bankEmployee.DeletedByOctaId = userId;
-                if (bankEmployee.DeletedByUserId != null)
-                {
-                    bankEmployee.DeletedByUserId = null;
-                }
-            }
-            else if (userTypeClaim == "employee")
-            {
-                bankEmployee.DeletedByUserId = userId;
-                if (bankEmployee.DeletedByOctaId != null)
-                {
-                    bankEmployee.DeletedByOctaId = null;
-                }
-            }
-
-            Unit_Of_Work.bankEmployee_Repository.Update(bankEmployee);
-            Unit_Of_Work.SaveChanges();
-            return Ok();
-        }
+        }  
     }
 }
