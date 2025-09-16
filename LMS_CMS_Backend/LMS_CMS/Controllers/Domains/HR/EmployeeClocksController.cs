@@ -59,12 +59,80 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             }
 
             int startDay = salaryConfigration.StartDay;
+            DateOnly periodStart = new DateOnly();
+            DateOnly periodEnd = new DateOnly();
 
-            DateOnly periodStart = new DateOnly(year, month, startDay).AddMonths(-1);
-            DateOnly periodEnd = new DateOnly(year, month, startDay).AddDays(-1);
+            if (startDay == 1)
+            {
+                periodStart = new DateOnly(year, month, 1);
+                periodEnd = periodStart.AddMonths(1).AddDays(-1); // last day of month
+            }
+            else
+            {
+                 periodStart = new DateOnly(year, month, startDay).AddMonths(-1);
+                 periodEnd = new DateOnly(year, month, startDay).AddDays(-1);
+            }
 
             var employeeClocks = Unit_Of_Work.employeeClocks_Repository
                 .FindBy(t => t.IsDeleted != true && t.Date >= periodStart && t.Date <= periodEnd && t.EmployeeID == EmpId );
+
+            if (employeeClocks == null || employeeClocks.Count == 0)
+            {
+                return NotFound("No employee clocks found for this period.");
+            }
+
+            List<EmployeeClocksGetDTO> dto = mapper.Map<List<EmployeeClocksGetDTO>>(employeeClocks);
+
+            return Ok(dto);
+        }
+
+        ////////////////////////////////
+
+        [HttpGet("GetByMonthByToken/{year}/{month}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Vacation Types" }
+        )]
+        public IActionResult GetByMonthByToken(int year, int month)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            long EmpId = long.Parse(userIdClaim);
+            SalaryConfigration salaryConfigration = Unit_Of_Work.salaryConfigration_Repository
+                 .First_Or_Default(s => s.ID == 1);
+
+            if (salaryConfigration == null)
+            {
+                return BadRequest("Salary configuration not found.");
+            }
+
+            int startDay = salaryConfigration.StartDay;
+            DateOnly periodStart = new DateOnly();
+            DateOnly periodEnd = new DateOnly();
+
+            if (startDay == 1)
+            {
+                periodStart = new DateOnly(year, month, 1);
+                periodEnd = periodStart.AddMonths(1).AddDays(-1); // last day of month
+            }
+            else
+            {
+                periodStart = new DateOnly(year, month, startDay).AddMonths(-1);
+                periodEnd = new DateOnly(year, month, startDay).AddDays(-1);
+            }
+
+            var employeeClocks = Unit_Of_Work.employeeClocks_Repository
+                .FindBy(t => t.IsDeleted != true && t.Date >= periodStart && t.Date <= periodEnd && t.EmployeeID == EmpId);
 
             if (employeeClocks == null || employeeClocks.Count == 0)
             {
@@ -282,6 +350,10 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 {
                     return BadRequest("Location Id Is Required");
                 }
+            }
+            else
+            {
+                NewClock.LocationID= null;
             }
 
             EmployeeClocks clock = mapper.Map<EmployeeClocks>(NewClock);
