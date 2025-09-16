@@ -143,12 +143,12 @@ export class RemedialClassroomStudentComponent {
             text: 'Created Successfully',
             confirmButtonColor: '#089B41',
           });
-      },err=>{
+      },error=>{
         this.closeModal()
         Swal.fire({
           icon: 'error',
           title: 'Oops...',
-          text: 'Try Again Later!',
+          text: error.error,
           confirmButtonText: 'Okay',
           customClass: { confirmButton: 'secondaryBg' }
         });

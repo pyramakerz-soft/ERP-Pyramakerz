@@ -243,7 +243,7 @@ Save() {
           Swal.fire({
             icon: 'error',
             title: 'Oops...',
-            text: error.error || 'Try Again Later!',
+            text: error.error || error.error,
             confirmButtonText: 'Okay',
             customClass: { confirmButton: 'secondaryBg' },
           });

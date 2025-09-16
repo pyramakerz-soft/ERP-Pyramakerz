@@ -193,14 +193,22 @@ export class LoginComponent {
             this.somthingError = "Username, Password or Type maybe wrong"
           }else if (error.status == 404) {
             this.somthingError = "Username, Password or Type maybe wrong"
-          } else {
+          } else if (error.status === 403 && error.error === 'User is suspended.') {  
+            Swal.fire({
+              icon: 'warning',
+              title: 'Account suspended',
+              text: 'Your account has been suspended.',
+              confirmButtonText: 'OK'
+            })
+          }
+          else {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: {
-                confirmButton: 'secondaryBg' // Add your custom class here
+                confirmButton: 'secondaryBg' 
               }
             });
           }

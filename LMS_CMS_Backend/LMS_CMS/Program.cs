@@ -244,15 +244,15 @@ namespace LMS_CMS
             app.UseRouting();
             app.UseCors("AllowAllOrigins"); // you can keep it permissive; same-origin won’t need it
 
+            app.UseAuthentication();
+
             //////// Get Connection String
             app.UseWhen(context => context.Request.Path.StartsWithSegments("/api/with-domain"),
                 appBuilder =>
                 {
                     appBuilder.UseMiddleware<GetConnectionStringMiddleware>();
-                    //app.UseMiddleware<SuspendMiddleware>();
+                    appBuilder.UseMiddleware<SuspendMiddleware>();
                 });
-
-            app.UseAuthentication();
 
             /// For Endpoint, to check if the user has access for this endpoint or not
             /// Make sure to be here before UseAuthorization

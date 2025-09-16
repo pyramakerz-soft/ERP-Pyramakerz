@@ -44,29 +44,46 @@ export class PermissionGroupArchivingItemComponent {
     // 🔽 cascade to children
     if (archiving.children && archiving.children.length > 0) {
       archiving.children.forEach(child => {
-        if (archiving.selected) {
-          child.selected = true;
-          child.allow_Delete = archiving.allow_Delete;
-          child.allow_Delete_For_Others = archiving.allow_Delete_For_Others;
+        if (archiving.selected) {  
+          if ((type === 'allowDelete' && archiving.allow_Delete) || (type === 'allowDeleteForOthers' && archiving.allow_Delete_For_Others) || type === 'selected') {
+            child.selected = true;
+          }
+            
+          if(archiving.allow_Delete){
+            child.allow_Delete = archiving.allow_Delete;
+          }
+          if(archiving.allow_Delete_For_Others){
+            child.allow_Delete_For_Others = archiving.allow_Delete_For_Others;
+          }
+
+          if(child.selected){
+            this.selectData(child, type);  
+          }
         } else {
           child.selected = false;
           child.allow_Delete = false;
           child.allow_Delete_For_Others = false;
+          this.selectData(child, type);  
         }
-        this.selectData(child, type);  
       });
     }
-
-    // 🔼 climb up to parents
-    if (archiving.selected) {
-      let current = archiving.parent;
-      while (current) {
-        current.selected = true; 
-        
-        emitSelection(current); 
-
-        current = current.parent;
+ 
+    let current = archiving.parent;
+    while (current) { 
+      if (archiving.selected) {
+        current.selected = true;
       }
+ 
+      if (type === 'allowDelete' && !archiving.allow_Delete) {
+        current.allow_Delete = false;
+      }
+ 
+      if (type === 'allowDeleteForOthers' && !archiving.allow_Delete_For_Others) {
+        current.allow_Delete_For_Others = false;
+      }
+
+      emitSelection(current);
+      current = current.parent;
     }
   }
  

@@ -181,9 +181,9 @@ export class DutyComponent {
           this.closeModal()
           this.isLoading = false
         },
-          err => {
+          error => {
             this.isLoading = false;
-            const errorMsg = err?.error ?? ''; // extract error message
+            const errorMsg = error?.error ?? ''; // extract error message
             if (errorMsg.includes("This Day doesn`t exist in current time table")) {
               Swal.fire({
                 icon: 'warning',
@@ -196,7 +196,7 @@ export class DutyComponent {
               Swal.fire({
                 icon: 'error',
                 title: 'Oops...',
-                text: 'Try Again Later!',
+                text: error.error,
                 confirmButtonText: 'Okay',
                 customClass: { confirmButton: 'secondaryBg' },
               });
@@ -209,12 +209,12 @@ export class DutyComponent {
           this.closeModal()
           this.isLoading = false
         },
-          err => {
+          error => {
             this.isLoading = false
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });

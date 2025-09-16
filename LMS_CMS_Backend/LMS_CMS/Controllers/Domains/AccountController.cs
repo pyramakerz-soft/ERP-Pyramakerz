@@ -72,6 +72,11 @@ namespace LMS_CMS_PL.Controllers.Domains
             {
                 return BadRequest("UserName or Password is Invalid");
             }
+            if(UserInfo.Type == "employee" || UserInfo.Type == "student")
+            {
+                if(user.IsSuspended == true)
+                    return StatusCode(StatusCodes.Status403Forbidden, "User is suspended.");
+            }
             if (UserInfo.Type == "employee" && user is Employee emp)
             {
                 var tokenEmp = _generateJWT.Generate_Jwt_Token(emp.User_Name, emp.ID.ToString(), UserInfo.Type, emp.Role_ID.ToString());
