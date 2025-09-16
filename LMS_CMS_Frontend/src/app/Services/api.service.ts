@@ -4,6 +4,7 @@ import { Injectable } from '@angular/core';
   providedIn: 'root',
 })
 export class ApiService {
+
   BaseUrl = 'https://localhost:7205/api/with-domain';
   BaseUrlOcta = 'https://localhost:7205/api';
   BaseUrlSignalR = 'https://localhost:7205/';
@@ -19,10 +20,11 @@ export class ApiService {
   constructor() { }
 
   GetHeader() {
+
     // const hostname = window.location.hostname; 
     // var Header = hostname.split('.')[0] 
  
-    var Header = 'domain'; 
+    var Header = 'Domain_One'; 
     return Header;
   }
 }
