@@ -5,7 +5,7 @@ export class Loans {
         public notes: string = '',
         public deductionStartMonth: string = '',
         public amount: number = 0,
-        public numberOfDeduction: number = 0,
+        public numberOfDeduction: number =1,
         public employeeID: number = 0,
         public employeeEnName: string = '',
         public employeeArName: string = '',

@@ -14,7 +14,7 @@ export class SalaryConfigurationService {
   constructor(public http: HttpClient, public ApiServ: ApiService) {
     this.baseUrl = ApiServ.BaseUrl
   }
-  
+
   Get(DomainName: string) {
     if (DomainName != null) {
       this.header = DomainName

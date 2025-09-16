@@ -30,9 +30,8 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
         [HttpGet]
         [Authorize_Endpoint_(
-         allowedTypes: new[] { "octa", "employee" }
-         ,
-         pages: new[] { "Vacation Types" }
+         allowedTypes: new[] { "octa", "employee" },
+         pages: new[] { "Salary Configuration" }
         )]
         public IActionResult Get()
         {
@@ -64,9 +63,9 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         [Authorize_Endpoint_(
            allowedTypes: new[] { "octa", "employee" },
            allowEdit: 1,
-           pages: new[] { "Vacation Types" }
+           pages: new[] { "Salary Configuration" }
         )]
-        public async Task<IActionResult> EditAsync(int salarystartDay)
+        public async Task<IActionResult> EditAsync(SalaryConfigration salaryConfigration)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -82,17 +81,17 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            SalaryConfigration salary = Unit_Of_Work.salaryConfigration_Repository.First_Or_Default(s => s.ID == 1 );
-            if (salary == null)
-            {
-                return BadRequest("salaryConfiguration not exist");
-            }
+            //SalaryConfigration salary = Unit_Of_Work.salaryConfigration_Repository.First_Or_Default(s => s.ID == 1 );
+            //if (salary == null)
+            //{
+            //    return BadRequest("salaryConfiguration not exist");
+            //}
 
-            salary.StartDay = salarystartDay;
+            //salary.StartDay = salarystartDay;
 
-            Unit_Of_Work.salaryConfigration_Repository.Update(salary);
+            Unit_Of_Work.salaryConfigration_Repository.Update(salaryConfigration);
             Unit_Of_Work.SaveChanges();
-            return Ok(salary); 
+            return Ok(salaryConfigration); 
         }
     }
 }
