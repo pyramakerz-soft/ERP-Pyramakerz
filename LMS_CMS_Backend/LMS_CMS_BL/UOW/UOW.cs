@@ -273,9 +273,10 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<EmployeeLocation> EmployeeLocation_Repository;
         GenericRepo<Location> Location_Repository;
         GenericRepo<SalaryConfigration> SalaryConfigration_Repository;
+        GenericRepo<BankEmployee> BankEmployee_Repository;
+        GenericRepo<SafeEmployee> SafeEmployee_Repository;
 
-
-
+         
         public UOW(Octa_DbContext octa_Db)
         {
             this.octa_Db = octa_Db;
@@ -3130,8 +3131,30 @@ namespace LMS_CMS_BL.UOW
             }
         }
 
-
-
+        public GenericRepo<SafeEmployee> safeEmployee_Repository
+        {
+            get
+            {
+                if (SafeEmployee_Repository == null)
+                {
+                    SafeEmployee_Repository = new GenericRepo<SafeEmployee>(db);
+                }
+                return SafeEmployee_Repository;
+            }
+        }
+         
+        public GenericRepo<BankEmployee> bankEmployee_Repository
+        {
+            get
+            {
+                if (BankEmployee_Repository == null)
+                {
+                    BankEmployee_Repository = new GenericRepo<BankEmployee>(db);
+                }
+                return BankEmployee_Repository;
+            }
+        }
+         
         public void SaveChanges()
         {
             db.SaveChanges();

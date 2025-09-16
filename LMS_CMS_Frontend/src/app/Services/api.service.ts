@@ -19,6 +19,7 @@ export class ApiService {
   constructor() { }
 
   GetHeader() {
+
     // const hostname = window.location.hostname; 
     // var Header = hostname.split('.')[0] 
  

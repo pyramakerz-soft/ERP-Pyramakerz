@@ -59,12 +59,80 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             }
 
             int startDay = salaryConfigration.StartDay;
+            DateOnly periodStart = new DateOnly();
+            DateOnly periodEnd = new DateOnly();
 
-            DateOnly periodStart = new DateOnly(year, month, startDay).AddMonths(-1);
-            DateOnly periodEnd = new DateOnly(year, month, startDay).AddDays(-1);
+            if (startDay == 1)
+            {
+                periodStart = new DateOnly(year, month, 1);
+                periodEnd = periodStart.AddMonths(1).AddDays(-1); // last day of month
+            }
+            else
+            {
+                 periodStart = new DateOnly(year, month, startDay).AddMonths(-1);
+                 periodEnd = new DateOnly(year, month, startDay).AddDays(-1);
+            }
 
             var employeeClocks = Unit_Of_Work.employeeClocks_Repository
                 .FindBy(t => t.IsDeleted != true && t.Date >= periodStart && t.Date <= periodEnd && t.EmployeeID == EmpId );
+
+            if (employeeClocks == null || employeeClocks.Count == 0)
+            {
+                return NotFound("No employee clocks found for this period.");
+            }
+
+            List<EmployeeClocksGetDTO> dto = mapper.Map<List<EmployeeClocksGetDTO>>(employeeClocks);
+
+            return Ok(dto);
+        }
+
+        ////////////////////////////////
+
+        [HttpGet("GetByMonthByToken/{year}/{month}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Vacation Types" }
+        )]
+        public IActionResult GetByMonthByToken(int year, int month)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            long EmpId = long.Parse(userIdClaim);
+            SalaryConfigration salaryConfigration = Unit_Of_Work.salaryConfigration_Repository
+                 .First_Or_Default(s => s.ID == 1);
+
+            if (salaryConfigration == null)
+            {
+                return BadRequest("Salary configuration not found.");
+            }
+
+            int startDay = salaryConfigration.StartDay;
+            DateOnly periodStart = new DateOnly();
+            DateOnly periodEnd = new DateOnly();
+
+            if (startDay == 1)
+            {
+                periodStart = new DateOnly(year, month, 1);
+                periodEnd = periodStart.AddMonths(1).AddDays(-1); // last day of month
+            }
+            else
+            {
+                periodStart = new DateOnly(year, month, startDay).AddMonths(-1);
+                periodEnd = new DateOnly(year, month, startDay).AddDays(-1);
+            }
+
+            var employeeClocks = Unit_Of_Work.employeeClocks_Repository
+                .FindBy(t => t.IsDeleted != true && t.Date >= periodStart && t.Date <= periodEnd && t.EmployeeID == EmpId);
 
             if (employeeClocks == null || employeeClocks.Count == 0)
             {
@@ -128,7 +196,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
            allowEdit: 1,
            pages: new[] { "Vacation Types" }
         )]
-        public async Task<IActionResult> EditAsync(EmployeeClocksAddDTO NewClock)
+        public async Task<IActionResult> EditAsync(List<EmployeeClocksAddDTO> NewClocks)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
@@ -144,52 +212,60 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            if (NewClock == null)
+            foreach (var NewClock in NewClocks)
             {
-                return BadRequest("NewClock cannot be null");
-            }
-            if (NewClock.ID == null)
-            {
-                return BadRequest("id can not be null");
+                if (NewClock == null)
+                {
+                    return BadRequest("NewClock cannot be null");
+                }
+
+                if (NewClock.ID == null)
+                {
+                    return BadRequest("id can not be null");
+                }
+
+                EmployeeClocks clock = Unit_Of_Work.employeeClocks_Repository.First_Or_Default(s => s.ID == NewClock.ID && s.IsDeleted != true);
+                if (clock == null)
+                {
+                    return BadRequest("clock not exist");
+                }
+
+                if (userTypeClaim == "employee")
+                {
+                    IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Vacation Types", roleId, userId, clock);
+                    if (accessCheck != null)
+                    {
+                        return accessCheck;
+                    }
+                }
+                if ( NewClock.LocationID == 0)
+                {
+                    NewClock.LocationID = null;
+                }
+                mapper.Map(NewClock, clock);
+                TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+                clock.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
+                if (userTypeClaim == "octa")
+                {
+                    clock.UpdatedByOctaId = userId;
+                    if (clock.UpdatedByUserId != null)
+                    {
+                        clock.UpdatedByUserId = null;
+                    }
+                }
+                else if (userTypeClaim == "employee")
+                {
+                    clock.UpdatedByUserId = userId;
+                    if (clock.UpdatedByOctaId != null)
+                    {
+                        clock.UpdatedByOctaId = null;
+                    }
+                }
+                Unit_Of_Work.employeeClocks_Repository.Update(clock);
+                Unit_Of_Work.SaveChanges();
             }
 
-            EmployeeClocks clock = Unit_Of_Work.employeeClocks_Repository.First_Or_Default(s => s.ID == NewClock.ID && s.IsDeleted != true);
-            if (clock == null)
-            {
-                return BadRequest("clock not exist");
-            }
-
-            if (userTypeClaim == "employee")
-            {
-                IActionResult? accessCheck = _checkPageAccessService.CheckIfEditPageAvailable(Unit_Of_Work, "Vacation Types", roleId, userId, clock);
-                if (accessCheck != null)
-                {
-                    return accessCheck;
-                }
-            }
-
-            mapper.Map(NewClock, clock);
-            TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-            clock.UpdatedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone);
-            if (userTypeClaim == "octa")
-            {
-                clock.UpdatedByOctaId = userId;
-                if (clock.UpdatedByUserId != null)
-                {
-                    clock.UpdatedByUserId = null;
-                }
-            }
-            else if (userTypeClaim == "employee")
-            {
-                clock.UpdatedByUserId = userId;
-                if (clock.UpdatedByOctaId != null)
-                {
-                    clock.UpdatedByOctaId = null;
-                }
-            }
-            Unit_Of_Work.employeeClocks_Repository.Update(clock);
-            Unit_Of_Work.SaveChanges();
-            return Ok(NewClock);
+            return Ok(NewClocks);
         }
 
         ////////////////////////////////
@@ -216,6 +292,8 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             {
                 return BadRequest("Clock is empty");
             }
+
+            NewClock.EmployeeID = long.Parse(userIdClaim);
 
             Employee employee = Unit_Of_Work.employee_Repository.First_Or_Default(s=>s.ID == NewClock.EmployeeID && s.IsDeleted != true);
             if (employee == null)
@@ -281,6 +359,10 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                     return BadRequest("Location Id Is Required");
                 }
             }
+            else
+            {
+                NewClock.LocationID= null;
+            }
 
             EmployeeClocks clock = mapper.Map<EmployeeClocks>(NewClock);
 
@@ -328,6 +410,8 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             {
                 return BadRequest("Clock is empty");
             }
+
+            NewClock.EmployeeID = long.Parse(userIdClaim);
 
             Employee employee = Unit_Of_Work.employee_Repository.First_Or_Default(s => s.ID == NewClock.EmployeeID && s.IsDeleted != true);
             if (employee == null)

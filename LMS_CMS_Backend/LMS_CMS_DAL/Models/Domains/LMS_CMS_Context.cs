@@ -262,6 +262,8 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<Location> Location { get; set; }
         public DbSet<EmployeeLocation> EmployeeLocation { get; set; }
         public DbSet<SalaryConfigration> SalaryConfigration { get; set; }
+        public DbSet<BankEmployee> BankEmployee { get; set; }
+        public DbSet<SafeEmployee> SafeEmployee { get; set; }
 
 
         public LMS_CMS_Context(DbContextOptions<LMS_CMS_Context> options)
@@ -2342,6 +2344,30 @@ namespace LMS_CMS_DAL.Models.Domains
                 .HasOne(m => m.Location)
                 .WithMany(m => m.EmployeeLocation)
                 .HasForeignKey(m => m.LocationID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<BankEmployee>()
+                .HasOne(m => m.Bank)
+                .WithMany(m => m.BankEmployees)
+                .HasForeignKey(m => m.BankID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<BankEmployee>()
+                .HasOne(m => m.Employee)
+                .WithMany(m => m.BankEmployees)
+                .HasForeignKey(m => m.EmployeeID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<SafeEmployee>()
+                .HasOne(m => m.Save)
+                .WithMany(m => m.SafeEmployee)
+                .HasForeignKey(m => m.SaveID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<SafeEmployee>()
+                .HasOne(m => m.Employee)
+                .WithMany(m => m.SafeEmployee)
+                .HasForeignKey(m => m.EmployeeID)
                 .OnDelete(DeleteBehavior.Restrict);
 
             ///////////////////////// Exception: /////////////////////////
