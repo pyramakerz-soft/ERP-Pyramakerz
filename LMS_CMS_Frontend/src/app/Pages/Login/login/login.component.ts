@@ -18,8 +18,7 @@ import { RealTimeNotificationServiceService } from '../../../Services/shared/rea
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
-export class LoginComponent {
-
+export class LoginComponent { 
   userInfo: Login = new Login("", "", "", "");
   User_Data_After_Login = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
 
