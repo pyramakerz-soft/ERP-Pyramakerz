@@ -30,7 +30,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
 
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        [HttpGet("GetBySafeID/{bankID}")]
+        [HttpGet("GetBySafeID/{safeID}")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Safe" }

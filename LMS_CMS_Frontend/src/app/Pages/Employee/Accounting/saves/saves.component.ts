@@ -21,6 +21,10 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { SafeEmployee } from '../../../../Models/Accounting/safe-employee';
+import { Employee } from '../../../../Models/Employee/employee';
+import { SafeEmployeeService } from '../../../../Services/Employee/Accounting/safe-employee.service';
+import { EmployeeService } from '../../../../Services/Employee/employee.service';
 
 @Component({
   selector: 'app-saves',
@@ -58,6 +62,11 @@ export class SavesComponent {
   AccountNumbers: AccountingTreeChart[] = [];
   isLoading = false
 
+  safeId = 0
+  Employees: Employee[] = [];
+  safeEmployees: SafeEmployee[] = [];
+  selectedEmployees: any[] = [];
+
   constructor(
     private router: Router,
     private menuService: MenuService,
@@ -70,7 +79,9 @@ export class SavesComponent {
     public SaveServ: SaveService,
     public accountServ: AccountingTreeChartService,
     private languageService: LanguageService,
-    private realTimeService: RealTimeNotificationServiceService
+    private realTimeService: RealTimeNotificationServiceService,
+    private employeeService: EmployeeService,
+    private safeEmployeeService: SafeEmployeeService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -286,5 +297,81 @@ export class SavesComponent {
     } catch (error) {
       this.TableData = [];
     }
+  }
+  
+  getEmployees(){
+    this.Employees = [] 
+    this.employeeService.Get_Employees(this.DomainName).subscribe(
+      data => {
+        this.Employees = data
+      }
+    )
+  }
+
+  getBankEmployees(){
+    this.safeEmployees = [] 
+    this.safeEmployeeService.Get(this.safeId, this.DomainName).subscribe(
+      data => {
+        this.safeEmployees = data 
+
+        this.selectedEmployees = this.safeEmployees.map(emp => ({
+          employeeID: emp.employeeID,
+          employeeEnglishName: emp.employeeEnglishName,
+          employeeArabicName: emp.employeeArabicName
+        }));
+      }
+    )
+  }
+
+  AddEmployee(safeId: number) { 
+    document.getElementById('Add_Employee')?.classList.remove('hidden');
+    document.getElementById('Add_Employee')?.classList.add('flex');
+
+    this.safeId = safeId
+    this.getEmployees()
+    this.getBankEmployees()
+  }
+
+  closeAddModal() {
+    document.getElementById('Add_Employee')?.classList.remove('flex');
+    document.getElementById('Add_Employee')?.classList.add('hidden'); 
+    this.safeId = 0
+    this.Employees = [] 
+    this.selectedEmployees = [] 
+  }
+ 
+  onEmployeeSelect(event: any) {
+    const selectedId = +event.target.value;
+    const emp = this.Employees.find(e => e.id === selectedId); 
+    
+    if (emp && !this.selectedEmployees.some(e => e.employeeID === emp.id)) {
+      const newEmp = {
+        employeeID: emp.id,
+        employeeEnglishName: emp.en_name,
+        employeeArabicName: emp.ar_name
+      };
+      this.selectedEmployees.push(newEmp);
+    }
+ 
+    event.target.value = "";
+  }
+
+  removeEmployee(emp: any) {
+    this.selectedEmployees = this.selectedEmployees.filter(e => e.employeeID !== emp.employeeID);
+  }
+
+  Save() {
+    this.isLoading = true;
+    
+    let safeEmp = new SafeEmployee()
+    safeEmp.saveID = this.safeId
+    safeEmp.employeeIDs = this.selectedEmployees.map(e => e.employeeID)
+    
+    this.safeEmployeeService.Add(safeEmp, this.DomainName).subscribe(
+      data =>{
+        this.isLoading = false;
+        this.closeAddModal()
+      }
+    ) 
   }
 }

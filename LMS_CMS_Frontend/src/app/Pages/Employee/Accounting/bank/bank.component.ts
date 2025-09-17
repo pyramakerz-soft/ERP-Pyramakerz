@@ -62,6 +62,7 @@ export class BankComponent {
   bankId = 0
   Employees: Employee[] = [];
   BankEmployees: BankEmployee[] = [];
+  selectedEmployees: any[] = [];
 
   constructor(
     private router: Router,
@@ -336,7 +337,13 @@ export class BankComponent {
     this.BankEmployees = [] 
     this.bankEmployeeService.Get(this.bankId, this.DomainName).subscribe(
       data => {
-        this.BankEmployees = data
+        this.BankEmployees = data 
+
+        this.selectedEmployees = this.BankEmployees.map(emp => ({
+          employeeID: emp.employeeID,
+          employeeEnglishName: emp.employeeEnglishName,
+          employeeArabicName: emp.employeeArabicName
+        }));
       }
     )
   }
@@ -347,6 +354,7 @@ export class BankComponent {
 
     this.bankId = bankId
     this.getEmployees()
+    this.getBankEmployees()
   }
 
   closeAddModal() {
@@ -354,9 +362,42 @@ export class BankComponent {
     document.getElementById('Add_Employee')?.classList.add('hidden'); 
     this.bankId = 0
     this.Employees = [] 
+    this.selectedEmployees = [] 
   }
 
-  Save(){
+  
+  onEmployeeSelect(event: any) {
+    const selectedId = +event.target.value;
+    const emp = this.Employees.find(e => e.id === selectedId); 
+    
+    if (emp && !this.selectedEmployees.some(e => e.employeeID === emp.id)) {
+      const newEmp = {
+        employeeID: emp.id,
+        employeeEnglishName: emp.en_name,
+        employeeArabicName: emp.ar_name
+      };
+      this.selectedEmployees.push(newEmp);
+    }
+ 
+    event.target.value = "";
+  }
 
+  removeEmployee(emp: any) {
+    this.selectedEmployees = this.selectedEmployees.filter(e => e.employeeID !== emp.employeeID);
+  }
+
+  Save() {
+    this.isLoading = true;
+    
+    let bankEmp = new BankEmployee()
+    bankEmp.bankID = this.bankId
+    bankEmp.employeeIDs = this.selectedEmployees.map(e => e.employeeID)
+    
+    this.bankEmployeeService.Add(bankEmp, this.DomainName).subscribe(
+      data =>{
+        this.isLoading = false;
+        this.closeAddModal()
+      }
+    ) 
   }
 }

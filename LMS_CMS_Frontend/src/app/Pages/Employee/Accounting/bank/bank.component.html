@@ -207,16 +207,31 @@
       <button (click)="closeAddModal()" type="button"
         class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
     </div>
-      
+
+    <div class="mt-6">
+      <label class="mb-2">{{ 'Employees' | translate }}</label> 
+      <select class="border rounded-lg p-2 w-full" (change)="onEmployeeSelect($event)">
+        <option value="" disabled selected>{{ 'Select' | translate }} {{ 'Employee' | translate }}</option>
+        <option *ngFor="let emp of Employees" [value]="emp.id">
+          {{ emp.en_name }} ({{ emp.ar_name }})
+        </option>
+      </select> 
+      <div class="flex flex-wrap gap-2 mt-4">
+        <div *ngFor="let emp of selectedEmployees" class="flex items-center bg-gray-200 px-3 py-1 rounded-lg space-x-2 rtl:space-x-reverse">
+          <span>{{ emp.employeeEnglishName }} ({{ emp.employeeArabicName }})</span>
+          <button (click)="removeEmployee(emp)" class="text-red-600 font-semibold">x</button>
+        </div>
+      </div>
+    </div>
+
 
     <div class="flex justify-end">
       <div class="flex justify-end mt-4">
-          <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg"
-            (click)="Save()">
-            <span *ngIf="!isLoading">{{ 'Save' | translate }}</span>
-            <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
-          </button>
-        </div>
+        <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg" (click)="Save()">
+          <span *ngIf="!isLoading">{{ 'Save' | translate }}</span>
+          <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+        </button>
+      </div>
     </div>
   </div>
 </div>

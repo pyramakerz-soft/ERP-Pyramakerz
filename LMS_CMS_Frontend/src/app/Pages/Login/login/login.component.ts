@@ -200,18 +200,7 @@ export class LoginComponent {
               text: 'Your account has been suspended.',
               confirmButtonText: 'OK'
             })
-          }
-          else {
-            Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: error.error,
-              confirmButtonText: 'Okay',
-              customClass: {
-                confirmButton: 'secondaryBg' 
-              }
-            });
-          }
+          } 
         }
       );
     }
