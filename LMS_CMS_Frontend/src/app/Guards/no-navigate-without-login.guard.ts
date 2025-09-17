@@ -32,10 +32,9 @@ export const noNavigateWithoutLoginGuard: CanActivateFn = (route, state) => {
       return true;
 
     case 'employee':
-      return employeeService.Get_Employee_By_ID(userId).pipe(
+      return employeeService.GetMyData().pipe(
         map(() => true), 
-        catchError((error) => {
-          console.error('Error fetching employee dataaaaaa:', error);
+        catchError((error) => { 
           logOutService.logOut();
           router.navigateByUrl('');
           return of(false); 
@@ -45,8 +44,7 @@ export const noNavigateWithoutLoginGuard: CanActivateFn = (route, state) => {
     case 'parent':
       return parentService.GetByID(userId).pipe(
         map(() => true), 
-        catchError((error) => {
-          console.error('Error fetching parent data:', error); 
+        catchError((error) => { 
           logOutService.logOut();
           router.navigateByUrl('');
           return of(false);
@@ -56,8 +54,7 @@ export const noNavigateWithoutLoginGuard: CanActivateFn = (route, state) => {
     case 'student':
       return studentSer.GetByID(userId).pipe(
         map(() => true), 
-        catchError((error) => {
-          console.error('Error fetching parent data:', error); 
+        catchError((error) => { 
           logOutService.logOut();
           router.navigateByUrl('');
           return of(false);

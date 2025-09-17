@@ -64,9 +64,9 @@ export class SubjectCoTeacherComponent {
     this.DomainName = this.ApiServ.GetHeader();
      
     this.SupjectCoTeacher.coTeacherID = Number(this.activeRoute.snapshot.paramMap.get('id'));
-     this.EmpServ.Get_Employee_By_ID(this.SupjectCoTeacher.coTeacherID, this.DomainName).subscribe(async (data) => {
-          this.employee = data; 
-        })
+    this.EmpServ.Get_Employee_By_ID(this.SupjectCoTeacher.coTeacherID, this.DomainName).subscribe(async (data) => {
+        this.employee = data; 
+      })
      
     this.GetData();
     this.GetAllClassrooms();

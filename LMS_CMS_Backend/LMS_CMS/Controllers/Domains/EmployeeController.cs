@@ -414,9 +414,37 @@ namespace LMS_CMS_PL.Controllers.Domains
 
         ///////////////////////////////////////////////////////////////////////////////////////
 
-        [HttpGet("{empId}")]
+        [HttpGet("GetMyData")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" }
+        )]
+        public async Task<IActionResult> GetByIDAsync()
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+
+            Employee employee = await Unit_Of_Work.employee_Repository.FindByIncludesAsync(
+                    emp => emp.IsDeleted != true && emp.ID == userId,
+                    query => query.Include(emp => emp.BusCompany),
+                    query => query.Include(emp => emp.EmployeeType),
+                    query => query.Include(emp => emp.Role));
+
+            if (employee == null || employee.IsDeleted == true)
+            {
+                return NotFound("No employee found");
+            }
+
+            Employee_GetDTO employeeDTO = mapper.Map<Employee_GetDTO>(employee);  
+              
+            return Ok(employeeDTO); 
+        }
+        ///////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpGet("{empId}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Employee" }
         )]
         public async Task<IActionResult> GetByIDAsync(long empId)
         {
