@@ -141,10 +141,7 @@ namespace LMS_CMS_PL.Controllers.Domains
                 3 => "parent",
                 _ => null
             };
-
-            if (refreshTokenEntity == null || refreshTokenEntity.IsRevoked || refreshTokenEntity.ExpiresAt < DateTime.UtcNow)
-                return Unauthorized("Invalid or expired refresh token");
-
+             
             // 2. Get the user
             dynamic user = userType switch
             {

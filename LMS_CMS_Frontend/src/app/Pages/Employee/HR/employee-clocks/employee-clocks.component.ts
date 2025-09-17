@@ -182,7 +182,6 @@ export class EmployeeClocksComponent {
       this.EmployeeClocksServ.Add(this.employeeClocks, this.DomainName).subscribe((d) => {
         this.isLoading = false;
         this.GetAllData();
-        this.closeModal()
         Swal.fire({
           icon: 'success',
           title: 'Done',

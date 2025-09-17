@@ -1,20 +1,29 @@
-import { Component, OnInit } from '@angular/core';
-import { Maintenance, MaintenanceCreate, MaintenanceService } from '../../../../Services/Employee/Maintenance/maintenance.services';
-import { firstValueFrom, Subscription } from 'rxjs';
-import { LanguageService } from '../../../../Services/shared/language.service';
-import { ApiService } from '../../../../Services/api.service';
-import Swal from 'sweetalert2';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { TranslateModule } from '@ngx-translate/core';
+import { firstValueFrom, Subscription } from 'rxjs';
+import Swal from 'sweetalert2';
+
+// Services
+import { MaintenanceService } from '../../../../Services/Employee/Maintenance/maintenance.services';
+import { LanguageService } from '../../../../Services/shared/language.service';
+import { ApiService } from '../../../../Services/api.service';
+import { MenuService } from '../../../../Services/shared/menu.service';
+import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
+import { AccountService } from '../../../../Services/account.service';
+
+// Components
 import { TableComponent } from '../../../../Component/reuse-table/reuse-table.component';
 import { SearchComponent } from '../../../../Component/search/search.component';
-import { TranslateModule } from '@ngx-translate/core';
-import { MaintenanceItem } from '../../../../Models/Maintenance/maintenance-item';
-import { MaintenanceCompanies } from '../../../../Models/Maintenance/maintenance-companies';
-import { EmployeeGet } from '../../../../Models/Employee/employee-get';
+
+import { TokenData } from '../../../../Models/token-data';
+import { MaintenanceItemService } from '../../../../Services/Employee/Maintenance/maintenance-item.service';
 import { MaintenanceCompaniesService } from '../../../../Services/Employee/Maintenance/maintenance-companies.service';
 import { MaintenanceEmployeesService } from '../../../../Services/Employee/Maintenance/maintenance-employees.service';
-import { MaintenanceItemService } from '../../../../Services/Employee/Maintenance/maintenance-item.service';
+import { MaintenanceItem } from '../../../../Models/Maintenance/maintenance-item';
+import { Maintenance } from '../../../../Models/Maintenance/maintenance';
+import { MaintenanceCompanies } from '../../../../Models/Maintenance/maintenance-companies';
 import { MaintenanceEmployees } from '../../../../Models/Maintenance/maintenance-employees';
 
 @Component({
@@ -22,276 +31,303 @@ import { MaintenanceEmployees } from '../../../../Models/Maintenance/maintenance
   standalone: true,
   imports: [FormsModule, CommonModule, TableComponent, SearchComponent, TranslateModule],
   templateUrl: './maintenance.component.html',
-  styleUrl: './maintenance.component.css'
+  styleUrls: ['./maintenance.component.css']
 })
-export class MaintenanceComponent implements OnInit {
+export class MaintenanceComponent implements OnInit, OnDestroy {
+  // Table configuration
   headers: string[] = ['ID', 'Date', 'Item', 'Company', 'Employee', 'Cost', 'Note', 'Actions'];
-  keys: string[] = ['id', 'date', 'itemEnglishName' , 'companyEnglishName', 'employeeEnglishName', 'cost', 'note'];
+  keys: string[] = ['id', 'date', 'itemEnglishName', 'companyEnglishName', 'employeeEnglishName', 'cost', 'note'];
   keysArray: string[] = ['id', 'itemEnglishName', 'companyEnglishName', 'employeeEnglishName', 'note'];
-  maintenanceList: Maintenance[] = [];
-  isModalVisible = false;
-  searchKey: string = 'id';
-  searchValue: string = '';
-  selectedMaintenance: Maintenance | null = null;
-  isRtl: boolean = false;
-  subscription!: Subscription;
   
-  // Dropdown data
+  // Data
+  maintenanceList: any[] = []; // Changed to any[] to include actions property
   maintenanceItems: MaintenanceItem[] = [];
   maintenanceCompanies: MaintenanceCompanies[] = [];
   maintenanceEmployees: MaintenanceEmployees[] = [];
   
-  // Form model
-  maintenanceForm: MaintenanceCreate = {
-    date: new Date().toISOString().split('T')[0],
-    itemID: 0,
-    companyID: 0,
-    maintenanceEmployeeID: 0,
-    cost: 0,
-    note: ''
-  };
-  
-  // Radio button selection
+  // Form state
+  isModalVisible = false;
+  isSaving = false;
+  editMode = false;
+  searchKey = 'id';
+  searchValue = '';
+  selectedMaintenance: Maintenance | null = null;
   maintenanceType: 'company' | 'employee' = 'company';
-  
   validationErrors: { [key: string]: string } = {};
-  isSaving: boolean = false;
-  editMode: boolean = false;
+  
+  // Permissions
+  AllowEdit = false;
+  AllowDelete = false;
+  AllowEditForOthers = false;
+  AllowDeleteForOthers = false;
+  path = 'maintenance';
+  
+  // User and language
+  isRtl = false;
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
+  UserID = 0;
+  
+  // Subscriptions
+  private subscriptions: Subscription[] = [];
+  
+  maintenanceForm: Maintenance = new Maintenance();
 
   constructor(
     private maintenanceService: MaintenanceService,
+    private languageService: LanguageService,
+    private maintenanceItemService: MaintenanceItemService,
     private maintenanceCompaniesService: MaintenanceCompaniesService,
     private maintenanceEmployeesService: MaintenanceEmployeesService,
-    private maintenanceItemService: MaintenanceItemService,
-    private languageService: LanguageService,
     private apiService: ApiService,
+    private menuService: MenuService,
+    private editDeleteService: DeleteEditPermissionService,
+    private accountService: AccountService
   ) {}
 
   ngOnInit(): void {
+    this.User_Data_After_Login = this.accountService.Get_Data_Form_Token();
+    this.UserID = this.User_Data_After_Login.id;
+    
     this.loadMaintenance();
     this.loadDropdownData();
-    this.subscription = this.languageService.language$.subscribe(direction => {
-      this.isRtl = direction === 'rtl';
-    });
-    this.isRtl = document.documentElement.dir === 'rtl';
+    this.setupPermissions();
+    this.setupLanguage();
   }
 
   ngOnDestroy(): void {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
+    this.subscriptions.forEach(sub => sub.unsubscribe());
   }
 
-  async loadDropdownData() {
+  private setupLanguage(): void {
+    const langSub = this.languageService.language$.subscribe(direction => {
+      this.isRtl = direction === 'rtl';
+    });
+    this.subscriptions.push(langSub);
+    this.isRtl = document.documentElement.dir === 'rtl';
+  }
+
+  private setupPermissions(): void {
+    const menuSub = this.menuService.menuItemsForEmployee$.subscribe(items => {
+      const maintenancePage = this.menuService.findByPageName(this.path, items);
+      if (maintenancePage) {
+        this.AllowEdit = maintenancePage.allow_Edit;
+        this.AllowDelete = maintenancePage.allow_Delete;
+        this.AllowDeleteForOthers = maintenancePage.allow_Delete_For_Others;
+        this.AllowEditForOthers = maintenancePage.allow_Edit_For_Others;
+      }
+    });
+    this.subscriptions.push(menuSub);
+  }
+
+  async loadDropdownData(): Promise<void> {
     try {
       const domainName = this.apiService.GetHeader();
-      
-      // Load maintenance items
-      this.maintenanceItems = await firstValueFrom(this.maintenanceItemService.Get(domainName));
-      
-      // Load maintenance companies
-      this.maintenanceCompanies = await firstValueFrom(this.maintenanceCompaniesService.Get(domainName));
-      
-      // Load maintenance employees
-      this.maintenanceEmployees = await firstValueFrom(this.maintenanceEmployeesService.Get(domainName));
-      console.log(this.maintenanceEmployees)
-      console.log('this.maintenanceEmployees')
+      const itemsSub = this.maintenanceItemService.Get(domainName).subscribe(
+        items => this.maintenanceItems = items
+      );
+      this.subscriptions.push(itemsSub);
+
+      const companiesSub = this.maintenanceCompaniesService.Get(domainName).subscribe(
+        companies => this.maintenanceCompanies = companies
+      );
+      this.subscriptions.push(companiesSub);
+
+      const employeesSub = this.maintenanceEmployeesService.Get(domainName).subscribe(
+        employees => this.maintenanceEmployees = employees
+      );
+      this.subscriptions.push(employeesSub);
+
     } catch (error) {
       console.error('Error loading dropdown data:', error);
     }
   }
 
-  async onSearchEvent(event: { key: string, value: any }) {
+  async loadMaintenance(): Promise<void> {
+    try {
+      const domainName = this.apiService.GetHeader();
+      const data = await firstValueFrom(this.maintenanceService.getAll(domainName));
+      
+      this.maintenanceList = data.map(item => {
+        // Create a new object with all the properties from the API response
+        const maintenanceItem: any = {
+          ...item,
+          // Ensure date is properly handled (convert string to Date if needed)
+          date: typeof item.date === 'string' ? new Date(item.date) : item.date,
+          fromDate: typeof item.fromDate === 'string' ? new Date(item.fromDate) : item.fromDate,
+          toDate: typeof item.toDate === 'string' ? new Date(item.toDate) : item.toDate,
+          // Handle null values for display purposes
+          companyEnglishName: item.companyEnglishName || '-',
+          companyArabicName: item.companyArabicName || '-',
+          employeeEnglishName: item.employeeEnglishName || '-',
+          employeeArabicName: item.employeeArabicName || '-',
+          // Ensure numeric fields have proper values
+          cost: item.cost ?? null,
+          companyID: item.companyID ?? null,
+          maintenanceEmployeeID: item.maintenanceEmployeeID ?? null,
+          insertedByUserId: item.insertedByUserId ?? undefined,
+          // Add actions property for the table component
+          actions: {
+            edit: this.IsAllowEdit(item.insertedByUserId || 0),
+            delete: this.IsAllowDelete(item.insertedByUserId || 0),
+            view: false // Set to true if you want view action
+          }
+        };
+        
+        return maintenanceItem;
+      });
+
+      this.applySearchFilter();
+    } catch (error) {
+      console.error('Error loading maintenance data:', error);
+      Swal.fire('Error', 'Failed to load maintenance records', 'error');
+    }
+  }
+
+  private applySearchFilter(): void {
+    if (this.searchValue) {
+      this.maintenanceList = this.maintenanceList.filter(item => {
+        const fieldValue = item[this.searchKey as keyof Maintenance]?.toString().toLowerCase() || '';
+        return fieldValue.includes(this.searchValue.toLowerCase());
+      });
+    }
+  }
+
+  async onSearchEvent(event: { key: string, value: any }): Promise<void> {
     this.searchKey = event.key;
     this.searchValue = event.value;
     await this.loadMaintenance();
-    
-    if (this.searchValue) {
-      this.maintenanceList = this.maintenanceList.filter(item => {
-        const fieldValue = item[this.searchKey as keyof typeof item]?.toString().toLowerCase() || '';
-        return fieldValue.includes(this.searchValue.toString().toLowerCase());
-      });
-    }
   }
 
-
-async loadMaintenance() {
-  try {
-    const domainName = this.apiService.GetHeader();
-    const data = await firstValueFrom(this.maintenanceService.getAll(domainName));
-    this.maintenanceList = data.map(item => ({
-      ...item,
-      date: new Date(item.date).toLocaleDateString(),
-      companyEnglishName: item.companyEnglishName || '-',
-      employeeEnglishName: item.employeeEnglishName || '-',
-      actions: { edit: true, delete: true },
-    }));
-
-    if (this.searchValue) {
-      this.maintenanceList = this.maintenanceList.filter(item => {
-        const fieldValue = item[this.searchKey as keyof typeof item]?.toString().toLowerCase() || '';
-        return fieldValue.includes(this.searchValue.toString().toLowerCase());
-      });
-    }
-  } catch (error) {
-    console.error('Error loading maintenance data:', error);
-  }
-}
-
-  openModal(item?: Maintenance) {
+  openModal(item?: any): void {
     this.isModalVisible = true;
     this.editMode = !!item;
+    this.validationErrors = {};
     
     if (item) {
       this.selectedMaintenance = item;
       this.maintenanceForm = {
+        id: item.id,
         date: item.date,
+        fromDate: item.fromDate,
+        toDate: item.toDate,
         itemID: item.itemID,
-        companyID: item.companyID,
-        maintenanceEmployeeID: item.maintenanceEmployeeID,
+        itemArabicName: item.itemArabicName,
+        itemEnglishName: item.itemEnglishName,
+        companyEnglishName: item.companyEnglishName,
+        companyArabicName: item.companyArabicName,
+        companyID: item.companyID && item.companyID > 0 ? item.companyID : null,
+        employeeEnglishName: item.employeeEnglishName,
+        employeeArabicName: item.employeeArabicName,
+        maintenanceEmployeeID: item.maintenanceEmployeeID && item.maintenanceEmployeeID > 0 ? item.maintenanceEmployeeID : null,
         cost: item.cost,
-        note: item.note
+        note: item.note,
+        en_Name: item.en_Name,
+        ar_Name: item.ar_Name,
+        insertedByUserId: item.insertedByUserId
       };
-      
-      // Set maintenance type based on which ID is present
-      if (item.companyID > 0) {
-        this.maintenanceType = 'company';
-      } else if (item.maintenanceEmployeeID > 0) {
-        this.maintenanceType = 'employee';
-      }
+
+      // Set maintenance type - safely check if companyID exists and is greater than 0
+      this.maintenanceType = item.companyID && item.companyID > 0 ? 'company' : 'employee';
     } else {
       this.resetForm();
     }
   }
 
-  closeModal() {
+  closeModal(): void {
     this.isModalVisible = false;
     this.selectedMaintenance = null;
     this.resetForm();
     this.validationErrors = {};
   }
 
-validateNumber(event: any, field: string) {
-  const input = event.target as HTMLInputElement;
-  let value = input.value;
-  
-  // Remove any non-digit characters
-  value = value.replace(/[^0-9]/g, '');
-  
-  // Update the input value to only contain digits
-  input.value = value;
-  
-  // Update the form value - set to null if empty, otherwise parse as number
-  if (field === 'cost') {
-    this.maintenanceForm.cost = value ? parseInt(value, 10) : null;
+  private resetForm(): void {
+    this.maintenanceForm = new Maintenance();
+    this.maintenanceType = 'company';
   }
-  
-  // Clear validation error
-  this.clearValidationError(field);
-}
 
-// Also update the clearValidationError call for cost input
-clearValidationError(field: string) {
-  if (this.validationErrors[field]) {
-    delete this.validationErrors[field];
-  }
-}
-
-resetForm() {
-  this.maintenanceForm = {
-    date: '',
-    itemID: 0,
-    companyID: 0,
-    maintenanceEmployeeID: 0,
-    cost: null,
-    note: ''
-  };
-  this.maintenanceType = 'company';
-}
-
-  onMaintenanceTypeChange(type: 'company' | 'employee') {
+  onMaintenanceTypeChange(type: 'company' | 'employee'): void {
     this.maintenanceType = type;
-    // Clear the other field when switching types
+    // Clear the other field
     if (type === 'company') {
-      this.maintenanceForm.maintenanceEmployeeID = 0;
+      this.maintenanceForm.maintenanceEmployeeID = null;
     } else {
-      this.maintenanceForm.companyID = 0;
+      this.maintenanceForm.companyID = null;
     }
     this.clearValidationError('maintenanceType');
   }
 
-    isFormValid(): boolean {
-      this.validationErrors = {};
-      let isValid = true;
+  validateNumber(event: any, field: string): void {
+    const input = event.target as HTMLInputElement;
+    let value = input.value.replace(/[^0-9]/g, '');
+    input.value = value;
+    
+    if (field === 'cost') {
+      this.maintenanceForm.cost = value ? parseInt(value, 10) : null;
+    }
+    
+    this.clearValidationError(field);
+  }
 
-      if (!this.maintenanceForm.date || this.maintenanceForm.date.trim() === '') {
-        this.validationErrors['date'] = '*Date is required';
-        isValid = false;
-      }
+  clearValidationError(field: string): void {
+    if (this.validationErrors[field]) {
+      delete this.validationErrors[field];
+    }
+  }
 
-      if (this.maintenanceForm.itemID <= 0) {
-        this.validationErrors['itemID'] = '*Item is required';
-        isValid = false;
-      }
+  isFormValid(): boolean {
+    this.validationErrors = {};
+    let isValid = true;
 
-      if (this.maintenanceType === 'company' && this.maintenanceForm.companyID <= 0) {
-        this.validationErrors['companyID'] = '*Company is required';
-        isValid = false;
-      }
-
-      if (this.maintenanceType === 'employee' && this.maintenanceForm.maintenanceEmployeeID <= 0) {
-        this.validationErrors['maintenanceEmployeeID'] = '*Employee is required';
-        isValid = false;
-      }
-
-      // Update cost validation to handle null values
-      if (this.maintenanceForm.cost === null || this.maintenanceForm.cost === undefined) {
-        this.validationErrors['cost'] = '*Cost is required';
-        isValid = false;
-      } else if (this.maintenanceForm.cost <= 0) {
-        this.validationErrors['cost'] = '*Cost must be greater than 0';
-        isValid = false;
-      } else if (isNaN(this.maintenanceForm.cost)) {
-        this.validationErrors['cost'] = '*Cost must be a valid number';
-        isValid = false;
-      }
-
-      return isValid;
+    // Check if date is valid - Date objects don't have trim()
+    if (!this.maintenanceForm.date) {
+      this.validationErrors['date'] = '*Date is required';
+      isValid = false;
     }
 
+    if (!this.maintenanceForm.itemID || this.maintenanceForm.itemID <= 0) {
+      this.validationErrors['itemID'] = '*Item is required';
+      isValid = false;
+    }
 
-async saveMaintenance() {
-  if (this.isFormValid()) {
+    if (this.maintenanceType === 'company' && (!this.maintenanceForm.companyID || this.maintenanceForm.companyID <= 0)) {
+      this.validationErrors['companyID'] = '*Company is required';
+      isValid = false;
+    }
+
+    if (this.maintenanceType === 'employee' && (!this.maintenanceForm.maintenanceEmployeeID || this.maintenanceForm.maintenanceEmployeeID <= 0)) {
+      this.validationErrors['maintenanceEmployeeID'] = '*Employee is required';
+      isValid = false;
+    }
+
+    if (this.maintenanceForm.cost === null || this.maintenanceForm.cost === undefined) {
+      this.validationErrors['cost'] = '*Cost is required';
+      isValid = false;
+    } else if (this.maintenanceForm.cost <= 0) {
+      this.validationErrors['cost'] = '*Cost must be greater than 0';
+      isValid = false;
+    }
+
+    return isValid;
+  }
+
+  async saveMaintenance(): Promise<void> {
+    if (!this.isFormValid()) return;
+
     try {
       this.isSaving = true;
       const domainName = this.apiService.GetHeader();
 
-      // Prepare the data based on selected type - only include the relevant ID
-      const submitData: any = {
-        date: this.maintenanceForm.date,
-        itemID: this.maintenanceForm.itemID,
-        cost: this.maintenanceForm.cost,
-        note: this.maintenanceForm.note
+      const submitData: Maintenance = {
+        ...this.maintenanceForm,
+        companyID: this.maintenanceType === 'company' ? this.maintenanceForm.companyID : null,
+        maintenanceEmployeeID: this.maintenanceType === 'employee' ? this.maintenanceForm.maintenanceEmployeeID : null
       };
 
-      // Only include the relevant ID based on maintenance type
-      if (this.maintenanceType === 'company') {
-        submitData.companyID = this.maintenanceForm.companyID;
-        // Don't include maintenanceEmployeeID at all
-      } else {
-        submitData.maintenanceEmployeeID = this.maintenanceForm.maintenanceEmployeeID;
-        // Don't include companyID at all
-      }
-
-      if (this.editMode && this.selectedMaintenance) {
-        await firstValueFrom(
-          this.maintenanceService.update(this.selectedMaintenance.id, submitData, domainName)
-        );
+      if (this.editMode && this.maintenanceForm.id) {
+        await firstValueFrom(this.maintenanceService.update(submitData, domainName));
         Swal.fire('Success', 'Maintenance record updated successfully!', 'success');
       } else {
-        await firstValueFrom(
-          this.maintenanceService.create(submitData, domainName)
-        );
+        await firstValueFrom(this.maintenanceService.create(submitData, domainName));
         Swal.fire('Success', 'Maintenance record created successfully!', 'success');
       }
 
@@ -299,14 +335,18 @@ async saveMaintenance() {
       this.closeModal();
     } catch (error) {
       console.error('Error saving maintenance record:', error);
-      Swal.fire('Error', 'Failed to save maintenance record. Please try again later.', 'error');
+      Swal.fire('Error', 'Failed to save maintenance record', 'error');
     } finally {
       this.isSaving = false;
     }
   }
-}
 
-  deleteMaintenance(row: any) {
+  deleteMaintenance(row: any): void {
+    if (!this.IsAllowDelete(row.insertedByUserId || 0)) {
+      Swal.fire('Error', 'You do not have permission to delete this record', 'error');
+      return;
+    }
+
     Swal.fire({
       title: 'Are you sure?',
       text: 'You will not be able to recover this maintenance record!',
@@ -315,24 +355,37 @@ async saveMaintenance() {
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#2E3646',
       confirmButtonText: 'Yes, delete it!',
-      cancelButtonText: 'No, keep it',
+      cancelButtonText: 'Cancel',
     }).then((result) => {
       if (result.isConfirmed) {
         const domainName = this.apiService.GetHeader();
         this.maintenanceService.delete(row.id, domainName).subscribe({
           next: () => {
-            if (this.maintenanceList.length === 1) {
-              this.maintenanceList = [];
-            }
             this.loadMaintenance();
             Swal.fire('Deleted!', 'The maintenance record has been deleted.', 'success');
           },
           error: (error) => {
             console.error('Error deleting maintenance record:', error);
-            Swal.fire('Error', 'Failed to delete maintenance record. Please try again later.', 'error');
+            Swal.fire('Error', 'Failed to delete maintenance record', 'error');
           },
         });
       }
     });
+  }
+
+  IsAllowDelete(insertedByID: number): boolean {
+    return this.editDeleteService.IsAllowDelete(
+      insertedByID,
+      this.UserID,
+      this.AllowDeleteForOthers
+    );
+  }
+
+  IsAllowEdit(insertedByID: number): boolean {
+    return this.editDeleteService.IsAllowEdit(
+      insertedByID,
+      this.UserID,
+      this.AllowEditForOthers
+    );
   }
 }

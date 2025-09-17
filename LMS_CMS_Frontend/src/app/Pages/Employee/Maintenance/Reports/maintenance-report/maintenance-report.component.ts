@@ -2,7 +2,6 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { MaintenanceItem } from '../../../../../Models/Maintenance/maintenance-item';
 import { MaintenanceCompanies } from '../../../../../Models/Maintenance/maintenance-companies';
 import { MaintenanceEmployees } from '../../../../../Models/Maintenance/maintenance-employees';
-import { MaintenanceReport, MaintenanceReportRequest, MaintenanceService } from '../../../../../Services/Employee/Maintenance/maintenance.services';
 import { Subscription } from 'rxjs/internal/Subscription';
 import { PdfPrintComponent } from '../../../../../Component/pdf-print/pdf-print.component';
 import { MaintenanceItemService } from '../../../../../Services/Employee/Maintenance/maintenance-item.service';
@@ -17,6 +16,8 @@ import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
+import { Maintenance } from '../../../../../Models/Maintenance/maintenance';
+import { MaintenanceService } from '../../../../../Services/Employee/Maintenance/maintenance.services';
 
 @Component({
   selector: 'app-maintenance-report',
@@ -39,7 +40,7 @@ export class MaintenanceReportComponent implements OnInit {
   maintenanceEmployees: MaintenanceEmployees[] = [];
 
   // Report data
-  maintenanceReports: MaintenanceReport[] = [];
+  maintenanceReports: Maintenance[] = [];
   showTable: boolean = false;
   isLoading: boolean = false;
   showViewReportBtn: boolean = false;
@@ -139,13 +140,24 @@ async viewReport() {
 
   try {
     const domainName = this.apiService.GetHeader();
-    const request: MaintenanceReportRequest = {
-      fromDate: this.dateFrom,
-      toDate: this.dateTo,
+    
+    // Create proper request object with actual filter values
+    const request: any = {
+      fromDate: this.dateFrom ? new Date(this.dateFrom).toISOString().split('T')[0] : null,
+      toDate: this.dateTo ? new Date(this.dateTo).toISOString().split('T')[0] : null,
       itemId: this.selectedItemId || 0,
-      maintenanceEmployeeId: this.selectedEmployeeId || null,
-      companyId: this.selectedCompanyId || null
+      companyId: this.selectedCompanyId || 0,
+      maintenanceEmployeeId: this.selectedEmployeeId || 0
     };
+
+    // Remove properties with 0 values (optional, depending on backend requirements)
+    Object.keys(request).forEach(key => {
+      if (request[key] === 0 || request[key] === null || request[key] === undefined) {
+        delete request[key];
+      }
+    });
+
+    console.log('Sending request:', request);
 
     const response = await firstValueFrom(
       this.maintenanceReportService.getMaintenanceReport(domainName, request)

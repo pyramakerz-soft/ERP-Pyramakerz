@@ -1,8 +1,8 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ApiService } from '../../api.service';  
-import { Drug } from '../../../Models/Clinic/drug';
+import { ApiService } from '../../api.service'; 
+import { DrugClass } from '../../../Models/Clinic/drug-class';
 
 @Injectable({
   providedIn: 'root',
@@ -16,7 +16,7 @@ export class DrugService {
   }
 
   
-  Get(DomainName: string): Observable<Drug[]> {
+  Get(DomainName: string): Observable<DrugClass[]> {
     if (DomainName != null) {
       this.header = DomainName;
     }
@@ -25,11 +25,11 @@ export class DrugService {
       .set('Domain-Name', this.header)
       .set('Authorization', `Bearer ${token}`)
       .set('accept', '*/*');
-    return this.http.get<Drug[]>(`${this.baseUrl}/Drug`, { headers });
+    return this.http.get<DrugClass[]>(`${this.baseUrl}/Drug`, { headers });
   }
 
   
-  Add(drug: Drug, DomainName: string): Observable<any> {
+  Add(drug: DrugClass, DomainName: string): Observable<any> {
     if (DomainName != null) {
       this.header = DomainName;
     }
@@ -46,7 +46,7 @@ export class DrugService {
   }
 
   
-  Edit(drug: Drug, DomainName: string): Observable<Drug> {
+  Edit(drug: DrugClass, DomainName: string): Observable<DrugClass> {
     if (DomainName != null) {
       this.header = DomainName;
     }
@@ -56,7 +56,7 @@ export class DrugService {
       .set('Authorization', `Bearer ${token}`)
       .set('accept', '*/*')
       .set('Content-Type', 'application/json');
-    return this.http.put<Drug>(`${this.baseUrl}/Drug`, drug, { headers });
+    return this.http.put<DrugClass>(`${this.baseUrl}/Drug`, drug, { headers });
   }
 
   

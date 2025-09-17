@@ -143,7 +143,6 @@ export class SignUpEmployeeComponent {
             confirmButtonColor: '#089B41',
           });
 
-          this.isLoading = false; 
           this.employee = new RegisteredEmployee()
           this.confirmPassword = ''
           this.captchaRef.reset();

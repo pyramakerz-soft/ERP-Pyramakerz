@@ -61,7 +61,7 @@ export class EmployeeHomeComponent {
   }
 
   getEmployeeByID(){
-    this.employeeService.GetMyData(this.DomainName).subscribe(
+    this.employeeService.Get_Employee_By_ID(this.User_Data_After_Login.id, this.DomainName).subscribe(
       data =>{
         this.employee = data 
       }

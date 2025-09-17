@@ -17,7 +17,7 @@ using System.Text.RegularExpressions;
 namespace LMS_CMS_PL.Controllers.Domains.Administration
 {
     [Route("api/with-domain/[controller]")]
-    [ApiController] 
+    [ApiController]
     public class RegisteredEmployeeController : ControllerBase
     {
         private readonly DbContextFactoryService _dbContextFactory;
@@ -84,12 +84,21 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////
-         
-        [HttpPost]
+
+        [HttpPost] 
         public async Task<IActionResult> Add(RegisteredEmployeeAddDTO NewRegistrationEmployee)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-             
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
             if (NewRegistrationEmployee == null)
             {
                 return BadRequest("Employee data is required.");
