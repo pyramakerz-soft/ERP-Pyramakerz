@@ -17,7 +17,7 @@ import { ClassroomService } from '../../../../Services/Employee/LMS/classroom.se
 import { FollowUp } from '../../../../Models/Clinic/FollowUp';
 import { Dose } from '../../../../Models/Clinic/dose';
 import { ModalComponent } from '../../../../Component/modal/modal.component';
-import { Drug } from '../../../../Models/Clinic/drug';
+import { Drug } from '../../../../Models/Clinic/Drug';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';

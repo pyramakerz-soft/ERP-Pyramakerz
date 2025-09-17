@@ -8,7 +8,7 @@ import Swal from 'sweetalert2';
 import { TableComponent } from '../../../../Component/reuse-table/reuse-table.component';
 import { ApiService } from '../../../../Services/api.service';
 import { DrugService } from '../../../../Services/Employee/Clinic/drug.service';
-import { Drug } from '../../../../Models/Clinic/drug';
+import { Drug } from '../../../../Models/Clinic/Drug';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';

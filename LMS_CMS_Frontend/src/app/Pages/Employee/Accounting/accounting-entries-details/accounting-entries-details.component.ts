@@ -27,13 +27,13 @@ import { PdfPrintComponent } from '../../../../Component/pdf-print/pdf-print.com
 import { ReportsService } from '../../../../Services/shared/reports.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
   selector: 'app-accounting-entries-details',
   standalone: true,
-  imports: [CommonModule, FormsModule, PdfPrintComponent,TranslateModule],
+  imports: [CommonModule, FormsModule, PdfPrintComponent, TranslateModule],
   templateUrl: './accounting-entries-details.component.html',
   styleUrl: './accounting-entries-details.component.css'
 })
@@ -43,7 +43,7 @@ export class AccountingEntriesDetailsComponent {
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
   AllowEditForOthers: boolean = false;
-  AllowDeleteForOthers: boolean = false; 
+  AllowDeleteForOthers: boolean = false;
 
   DomainName: string = '';
   UserID: number = 0;
@@ -51,29 +51,29 @@ export class AccountingEntriesDetailsComponent {
   path: string = '';
   AccountingEntriesID: number = 0;
 
-  isCreate:boolean = false
-  isEdit:boolean = false
-  isView:boolean = false
+  isCreate: boolean = false
+  isEdit: boolean = false
+  isView: boolean = false
 
-  accountingEntries:AccountingEntries = new AccountingEntries()
+  accountingEntries: AccountingEntries = new AccountingEntries()
   validationErrors: { [key in keyof AccountingEntries]?: string } = {};
   validationErrorsForDetails: { [key in keyof AccountingEntriesDetails]?: string } = {};
-   
+
   dataTypesData: AccountingEntriesDocType[] = []
   bankOrSaveData: any[] = []
   accountingEntriesDetailsData: AccountingEntriesDetails[] = []
   AccountingTreeChartData: AccountingTreeChart[] = []
   subAccountData: any[] = []
-  newDetails:AccountingEntriesDetails = new AccountingEntriesDetails()
+  newDetails: AccountingEntriesDetails = new AccountingEntriesDetails()
   totalCredit: number = 0;
   totalDebit: number = 0;
   theDifference: number = 0;
 
-  isNewDetails:boolean = false
-  isDetailsValid:boolean = false
+  isNewDetails: boolean = false
+  isDetailsValid: boolean = false
 
   editingRowId: number | null = null;
-  editedRowData:AccountingEntriesDetails = new AccountingEntriesDetails() 
+  editedRowData: AccountingEntriesDetails = new AccountingEntriesDetails()
 
   isLoading = false;
   isSaveLoading = false;
@@ -82,28 +82,28 @@ export class AccountingEntriesDetailsComponent {
 
   @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;
   showPDF = false;
-  
+
   constructor(
     private router: Router,
-     private menuService: MenuService, 
-     public activeRoute: ActivatedRoute,
-      public account: AccountService,
-       public accountingEntriesDocTypeService:AccountingEntriesDocTypeService,
+    private menuService: MenuService,
+    public activeRoute: ActivatedRoute,
+    public account: AccountService,
+    public accountingEntriesDocTypeService: AccountingEntriesDocTypeService,
     public DomainServ: DomainService,
-     public EditDeleteServ: DeleteEditPermissionService, 
-     public ApiServ: ApiService,
-      public accountingEntriesService:AccountingEntriesService,
-    public bankService:BankService,
-     public saveService:SaveService,
-      public accountingEntriesDetailsService:AccountingEntriesDetailsService, 
-      public linkFileService:LinkFileService,
+    public EditDeleteServ: DeleteEditPermissionService,
+    public ApiServ: ApiService,
+    public accountingEntriesService: AccountingEntriesService,
+    public bankService: BankService,
+    public saveService: SaveService,
+    public accountingEntriesDetailsService: AccountingEntriesDetailsService,
+    public linkFileService: LinkFileService,
     public dataAccordingToLinkFileService: DataAccordingToLinkFileService,
-     public accountingTreeChartService:AccountingTreeChartService, 
-     public reportsService: ReportsService , private languageService: LanguageService,
+    public accountingTreeChartService: AccountingTreeChartService,
+    public reportsService: ReportsService, private languageService: LanguageService,
     private realTimeService: RealTimeNotificationServiceService
-    ){}
-    
-  ngOnInit(){
+  ) { }
+
+  ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
 
@@ -111,24 +111,24 @@ export class AccountingEntriesDetailsComponent {
 
     this.AccountingEntriesID = Number(this.activeRoute.snapshot.paramMap.get('id'))
 
-    if(!this.AccountingEntriesID){
+    if (!this.AccountingEntriesID) {
       this.isCreate = true
-    }else{
+    } else {
       this.GetAccountingEntriesByID()
       this.GetAccountingEntriesDetails()
     }
 
     this.activeRoute.url.subscribe(url => {
       this.path = url[0].path
-      if(url[1].path == "View"){ 
+      if (url[1].path == "View") {
         this.isView = true
-      } else{
-        if(this.AccountingEntriesID){
+      } else {
+        if (this.AccountingEntriesID) {
           this.isEdit = true
         }
-      } 
+      }
     });
-  
+
     this.menuService.menuItemsForEmployee$.subscribe((items) => {
       const settingsPage = this.menuService.findByPageName(this.path, items);
       if (settingsPage) {
@@ -141,36 +141,36 @@ export class AccountingEntriesDetailsComponent {
 
     this.GetDocType()
 
-        this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
-     
+
 
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-      ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
-     if (this.subscription) {
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
       this.subscription.unsubscribe();
     }
-  } 
+  }
 
   moveToAccountingEntries() {
     this.router.navigateByUrl("Employee/Accounting Entries")
   }
 
-  GetDocType(){
+  GetDocType() {
     this.accountingEntriesDocTypeService.Get(this.DomainName).subscribe(
-      (data) => { 
+      (data) => {
         this.dataTypesData = data
       }
     )
   }
 
-  GetAccountingTreeChartData(){
+  GetAccountingTreeChartData() {
     this.accountingTreeChartService.GetBySubID(this.DomainName).subscribe(
-      (data) => { 
+      (data) => {
         this.AccountingTreeChartData = data
       }
     )
@@ -183,16 +183,16 @@ export class AccountingEntriesDetailsComponent {
     const target = event.target as HTMLSelectElement;
     const selectedValue = target ? target.value : null;
 
-    if (selectedValue) { 
+    if (selectedValue) {
       this.accountingTreeChartService.GetByID(+selectedValue, this.DomainName).subscribe(
-        (data) => {  
-          if(data.linkFileID && data.id){
+        (data) => {
+          if (data.linkFileID && data.id) {
             this.dataAccordingToLinkFileService.GetTableDataAccordingToLinkFileAndSubAccount(this.DomainName, data.linkFileID, data.id).subscribe(
-              (data) => {  
+              (data) => {
                 this.subAccountData = data
               }
             )
-          } else{
+          } else {
             this.newDetails.subAccountingID = null
             this.editedRowData.subAccountingID = null
           }
@@ -200,15 +200,15 @@ export class AccountingEntriesDetailsComponent {
       )
     }
   }
-  
-  GetAccountingEntriesByID(){
+
+  GetAccountingEntriesByID() {
     this.accountingEntriesService.GetByID(this.AccountingEntriesID, this.DomainName).subscribe(
       (data) => {
-        this.accountingEntries = data 
+        this.accountingEntries = data
       }
     )
-  } 
-  
+  }
+
   IsAllowDelete(InsertedByID: number) {
     const IsAllow = this.EditDeleteServ.IsAllowDelete(InsertedByID, this.UserID, this.AllowDeleteForOthers);
     return IsAllow;
@@ -229,11 +229,11 @@ export class AccountingEntriesDetailsComponent {
       if (this.accountingEntries.hasOwnProperty(key)) {
         const field = key as keyof AccountingEntries;
         if (!this.accountingEntries[field]) {
-          if(field == "accountingEntriesDocTypeID" || field == "date" || field == "docNumber"){
+          if (field == "accountingEntriesDocTypeID" || field == "date" || field == "docNumber") {
             this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
             isValid = false;
           }
-        } else { 
+        } else {
           this.validationErrors[field] = '';
         }
       }
@@ -246,7 +246,7 @@ export class AccountingEntriesDetailsComponent {
     (this.accountingEntries as any)[field] = value;
     if (value) {
       this.validationErrors[field] = '';
-    } 
+    }
   }
 
   onInputValueChangeForDetails(event: { field: keyof AccountingEntriesDetails, value: any }) {
@@ -255,25 +255,25 @@ export class AccountingEntriesDetailsComponent {
     if (value) {
       this.validationErrorsForDetails[field] = '';
     }
-     
-    if(((this.newDetails.creditAmount || this.editedRowData.creditAmount) ||
-    (this.newDetails.debitAmount || this.editedRowData.debitAmount)) && 
-    (this.newDetails.subAccountingID || this.editedRowData.subAccountingID) &&
-    (!isNaN(this.newDetails.creditAmount?this.newDetails.creditAmount:0) && !isNaN(this.newDetails.debitAmount?this.newDetails.debitAmount:0)) && 
-    (!isNaN(this.editedRowData.creditAmount? this.editedRowData.creditAmount:0) && !isNaN(this.editedRowData.debitAmount?this.editedRowData.debitAmount:0)) &&  
-    (this.newDetails.accountingTreeChartID || this.editedRowData.accountingTreeChartID)){
+
+    if (((this.newDetails.creditAmount || this.editedRowData.creditAmount) ||
+      (this.newDetails.debitAmount || this.editedRowData.debitAmount)) &&
+      (this.newDetails.subAccountingID || this.editedRowData.subAccountingID) &&
+      (!isNaN(this.newDetails.creditAmount ? this.newDetails.creditAmount : 0) && !isNaN(this.newDetails.debitAmount ? this.newDetails.debitAmount : 0)) &&
+      (!isNaN(this.editedRowData.creditAmount ? this.editedRowData.creditAmount : 0) && !isNaN(this.editedRowData.debitAmount ? this.editedRowData.debitAmount : 0)) &&
+      (this.newDetails.accountingTreeChartID || this.editedRowData.accountingTreeChartID)) {
       this.isDetailsValid = true
-    } else{
+    } else {
       this.isDetailsValid = false
-    } 
+    }
   }
 
   validateNumber(event: any, field: keyof AccountingEntries): void {
     const value = event.target.value;
     if (isNaN(value) || value === '') {
-      event.target.value = ''; 
+      event.target.value = '';
       if (typeof this.accountingEntries[field] === 'string') {
-        this.accountingEntries[field] = '' as never;  
+        this.accountingEntries[field] = '' as never;
       }
     }
   }
@@ -281,9 +281,9 @@ export class AccountingEntriesDetailsComponent {
   validateNumberNewDetails(event: any, field: keyof AccountingEntriesDetails): void {
     const value = event.target.value;
     if (isNaN(value) || value === '') {
-      event.target.value = ''; 
+      event.target.value = '';
       if (typeof this.newDetails[field] === 'string') {
-        this.newDetails[field] = null as never;  
+        this.newDetails[field] = null as never;
       }
     }
   }
@@ -291,28 +291,28 @@ export class AccountingEntriesDetailsComponent {
   validateNumberEditedRowData(event: any, field: keyof AccountingEntriesDetails): void {
     const value = event.target.value;
     if (isNaN(value) || value === '') {
-      event.target.value = ''; 
+      event.target.value = '';
       if (typeof this.editedRowData[field] === 'string') {
-        this.editedRowData[field] = null as never;  
+        this.editedRowData[field] = null as never;
       }
     }
   }
 
-  Save() { 
+  Save() {
     if (this.isFormValid()) {
       this.isSaveLoading = true;
-  
+
       if (this.isCreate) {
         this.accountingEntriesService.Add(this.accountingEntries, this.DomainName).subscribe(
           (data) => {
             let id = JSON.parse(data).id;
             this.router.navigateByUrl(`Employee/Accounting Entries Details/${id}`);
             this.isSaveLoading = false;
-  
+
             Swal.fire({
               title: 'Saved Successfully',
-              icon: 'success', 
-              confirmButtonColor: '#089B41',  
+              icon: 'success',
+              confirmButtonColor: '#089B41',
             });
           },
           (error) => {
@@ -322,14 +322,14 @@ export class AccountingEntriesDetailsComponent {
       } else if (this.isEdit) {
         this.accountingEntriesService.Edit(this.accountingEntries, this.DomainName).subscribe(
           (data) => {
-            this.GetAccountingEntriesByID(); 
+            this.GetAccountingEntriesByID();
             this.router.navigateByUrl(`Employee/Accounting Entries Details/${this.AccountingEntriesID}`);
             this.isSaveLoading = false;
-  
+
             Swal.fire({
               title: 'Updated Successfully',
-              icon: 'success', 
-              confirmButtonColor: '#089B41',  
+              icon: 'success',
+              confirmButtonColor: '#089B41',
             });
           },
           (error) => {
@@ -340,16 +340,16 @@ export class AccountingEntriesDetailsComponent {
     }
   }
 
-  GetAccountingEntriesDetails(){
+  GetAccountingEntriesDetails() {
     this.accountingEntriesDetailsData = []
     this.accountingEntriesDetailsService.Get(this.DomainName, this.AccountingEntriesID).subscribe(
       (data) => {
-        this.accountingEntriesDetailsData = data 
+        this.accountingEntriesDetailsData = data
         let totalCredit = 0
         let totalDebit = 0
         this.accountingEntriesDetailsData.forEach(element => {
-          totalCredit = totalCredit + (element.creditAmount?element.creditAmount:0)
-          totalDebit = totalDebit + (element.debitAmount?element.debitAmount:0)
+          totalCredit = totalCredit + (element.creditAmount ? element.creditAmount : 0)
+          totalDebit = totalDebit + (element.debitAmount ? element.debitAmount : 0)
         });
         this.totalCredit = totalCredit
         this.totalDebit = totalDebit
@@ -358,16 +358,16 @@ export class AccountingEntriesDetailsComponent {
     )
   }
 
-  AddAccountingEntriesDetails(){
+  AddAccountingEntriesDetails() {
     this.isDetailsValid = false
-    this.editingRowId = null; 
-    this.editedRowData = new AccountingEntriesDetails(); 
-    this.isNewDetails = true 
+    this.editingRowId = null;
+    this.editedRowData = new AccountingEntriesDetails();
+    this.isNewDetails = true
     this.GetAccountingTreeChartData()
   }
 
-  SaveNewDetails(){
-    if(this.isDetailsValid){
+  SaveNewDetails() {
+    if (this.isDetailsValid) {
       this.isLoading = true;
       this.newDetails.accountingEntriesMasterID = this.AccountingEntriesID
       this.accountingEntriesDetailsService.Add(this.newDetails, this.DomainName).subscribe(
@@ -376,14 +376,14 @@ export class AccountingEntriesDetailsComponent {
           this.isNewDetails = false
           this.newDetails = new AccountingEntriesDetails()
           this.GetAccountingEntriesDetails()
-          this.editingRowId = null; 
-          this.editedRowData = new AccountingEntriesDetails(); 
+          this.editingRowId = null;
+          this.editedRowData = new AccountingEntriesDetails();
           this.isDetailsValid = false
-        }, 
+        },
         (error) => {
-          this.isLoading = false; 
+          this.isLoading = false;
           Swal.fire({
-            icon: 'warning', 
+            icon: 'warning',
             title: error.error,
             confirmButtonText: 'Okay'
           });
@@ -395,20 +395,20 @@ export class AccountingEntriesDetailsComponent {
   EditDetail(row: AccountingEntriesDetails) {
     this.isNewDetails = false
     this.isDetailsValid = true
-    this.newDetails = new AccountingEntriesDetails() 
+    this.newDetails = new AccountingEntriesDetails()
     this.editingRowId = row.id
     this.editedRowData = { ...row }
-    this.GetAccountingTreeChartData() 
+    this.GetAccountingTreeChartData()
     if (this.editedRowData.accountingTreeChartID) {
       this.accountingTreeChartService.GetByID(+this.editedRowData.accountingTreeChartID, this.DomainName).subscribe(
-        (data) => { 
-          if(data.linkFileID && data.id){
+        (data) => {
+          if (data.linkFileID && data.id) {
             this.dataAccordingToLinkFileService.GetTableDataAccordingToLinkFileAndSubAccount(this.DomainName, data.linkFileID, data.id).subscribe(
               (data) => {
                 this.subAccountData = data
               }
             )
-          } else{
+          } else {
             this.newDetails.subAccountingID = null
             this.editedRowData.subAccountingID = null
           }
@@ -417,30 +417,30 @@ export class AccountingEntriesDetailsComponent {
     }
   }
 
-  SaveEditedDetail() { 
-    if(this.isDetailsValid){
+  SaveEditedDetail() {
+    if (this.isDetailsValid) {
       this.isLoading = true;
       this.accountingEntriesDetailsService.Edit(this.editedRowData, this.DomainName).subscribe(
-        (data) =>{
+        (data) => {
           this.isLoading = false;
-          this.editingRowId = null; 
-          this.editedRowData = new AccountingEntriesDetails(); 
+          this.editingRowId = null;
+          this.editedRowData = new AccountingEntriesDetails();
           this.isDetailsValid = false
           this.isNewDetails = false
           this.newDetails = new AccountingEntriesDetails()
           this.GetAccountingEntriesDetails()
-        }, 
+        },
         (error) => {
-          this.isLoading = false; 
+          this.isLoading = false;
           Swal.fire({
-            icon: 'warning', 
+            icon: 'warning',
             title: error.error,
             confirmButtonText: 'Okay'
           });
         }
       )
     }
-  } 
+  }
 
   DeleteDetail(id: number) {
     Swal.fire({
@@ -502,7 +502,7 @@ export class AccountingEntriesDetailsComponent {
     this.showPDF = true;
     setTimeout(() => {
       const printContents = document.getElementById("Data")?.innerHTML;
-      if (!printContents) { 
+      if (!printContents) {
         return;
       }
 
@@ -535,7 +535,7 @@ export class AccountingEntriesDetailsComponent {
 
       document.body.appendChild(printContainer);
       window.print();
-      
+
       setTimeout(() => {
         document.body.removeChild(printContainer);
         this.showPDF = false;
@@ -568,15 +568,32 @@ export class AccountingEntriesDetailsComponent {
           title: "Accounting Entries Details",
           headers: ['id', 'debitAmount', 'creditAmount', 'accountingTreeChartName', 'subAccountingName', 'note'],
           data: this.accountingEntriesDetailsData.map((row) => [
-            row.id || 0, 
-            row.debitAmount || 0, 
-            row.creditAmount || 0, 
-            row.accountingTreeChartName || '', 
-            row.subAccountingName || '', 
+            row.id || 0,
+            row.debitAmount || 0,
+            row.creditAmount || 0,
+            row.accountingTreeChartName || '',
+            row.subAccountingName || '',
             row.note || ''
           ])
         }
       ]
     });
+  }
+
+  get infoRows() {
+    const rows = [
+      { keyEn: 'Document Type: ' + this.accountingEntries.accountingEntriesDocTypeName },
+      { keyEn: 'Document Number: ' + this.accountingEntries.docNumber },
+      { keyEn: 'Date: ' + this.accountingEntries.date },
+      { keyEn: 'Total Credit: ' + this.totalCredit },
+      { keyEn: 'Total Debit: ' + this.totalDebit },
+      { keyEn: 'Difference: ' + this.theDifference },
+    ];
+
+    if (this.accountingEntries.notes) {
+      rows.push({ keyEn: 'Note: ' + this.accountingEntries.notes });
+    }
+
+    return rows;
   }
 }
