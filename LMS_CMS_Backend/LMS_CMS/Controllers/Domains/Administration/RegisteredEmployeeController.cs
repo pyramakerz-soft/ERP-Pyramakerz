@@ -86,9 +86,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
         //////////////////////////////////////////////////////////////////////////////////////////
          
         [HttpPost]
-        //[Authorize_Endpoint_(
-        //    allowedTypes: new[] { "octa", "employee" }
-        //)]
         public async Task<IActionResult> Add(RegisteredEmployeeAddDTO NewRegistrationEmployee)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);

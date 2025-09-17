@@ -34,10 +34,7 @@ export class LoginComponent {
   userNameError: string = ""; 
   passwordError: string = "";
   somthingError: string = "";
-
-  token1 = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
-  token2 = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
-
+  
   allTokens: { id: number, key: string; KeyInLocal: string; value: string; UserType:string}[] = [];
   User_Data_After_Login2 = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   isLoading: boolean = false
