@@ -225,17 +225,17 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
             Unit_Of_Work.violations_Repository.Add(violation);
             Unit_Of_Work.SaveChanges();
 
-            var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Violation");
-            var violationFolder = Path.Combine(baseFolder, violation.ID.ToString());
-            if (!Directory.Exists(violationFolder))
+            var baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Violation");  // Ensure the base directory exists
+            var violationFolder = Path.Combine(baseFolder, violation.ID.ToString());   // Create a subdirectory for this specific violation
+            if (!Directory.Exists(violationFolder))     // Create the directory if it doesn't exist
             {
                 Directory.CreateDirectory(violationFolder);
             }
 
-            if (Newviolation.AttachFile != null)
+            if (Newviolation.AttachFile != null)             // Handle file upload if a file is provided
             {
 
-                var allowedMimeTypes = new[] {
+                var allowedMimeTypes = new[] {        // Define allowed MIME types
                     "application/pdf",
                     "application/msword", // .doc
                     "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // .docx
@@ -243,21 +243,21 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
                     "image/png",
                 };
 
-                var contentType = Newviolation.AttachFile.ContentType;
-                var fileExtension = Path.GetExtension(Newviolation.AttachFile.FileName).ToLower();
+                var contentType = Newviolation.AttachFile.ContentType;   // Get the content type of the uploaded file
+                var fileExtension = Path.GetExtension(Newviolation.AttachFile.FileName).ToLower();      // Get the file extension
 
-                if (!allowedMimeTypes.Contains(contentType))
+                if (!allowedMimeTypes.Contains(contentType))         // Validate the MIME type
                 {
                     return BadRequest("Only image, PDF, or Word files are allowed.");
                 }
 
-                var allowedExtensions = new[] { ".pdf", ".doc", ".docx", ".jpg", ".jpeg", ".png" };
+                var allowedExtensions = new[] { ".pdf", ".doc", ".docx", ".jpg", ".jpeg", ".png" };   // Define allowed file extensions
                 if (!allowedExtensions.Contains(fileExtension))
                 {
                     return BadRequest("File extension is not supported.");
                 } 
 
-                if (Newviolation.AttachFile.Length > 0)
+                if (Newviolation.AttachFile.Length > 0)      // Save the file to the server
                 {
                     var filePath = Path.Combine(violationFolder, Newviolation.AttachFile.FileName);
                     using (var stream = new FileStream(filePath, FileMode.Create))
@@ -265,7 +265,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
                         await Newviolation.AttachFile.CopyToAsync(stream);
                     }
                 }
-
                 violation.Attach = $"Uploads/Violation/{violation.ID.ToString()}/{Newviolation.AttachFile.FileName}";
 
                 Unit_Of_Work.violations_Repository.Update(violation);
@@ -274,7 +273,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
 
             return Ok(Newviolation);
         }
-        ////////////////////////////////////////////////////
+        /////////////////////////////////////////////////////////////////////////////
 
         [HttpPut]
         [Authorize_Endpoint_(
