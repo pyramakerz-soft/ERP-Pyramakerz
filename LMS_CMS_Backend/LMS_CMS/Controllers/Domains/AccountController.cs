@@ -145,6 +145,5 @@ namespace LMS_CMS_PL.Controllers.Domains
             await Unit_Of_Work.SaveChangesAsync();
             return Ok();
         }
-    }
-        
+    } 
  }

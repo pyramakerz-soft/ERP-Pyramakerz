@@ -17,8 +17,7 @@ using System.Text.RegularExpressions;
 namespace LMS_CMS_PL.Controllers.Domains.Administration
 {
     [Route("api/with-domain/[controller]")]
-    [ApiController]
-    [Authorize]
+    [ApiController] 
     public class RegisteredEmployeeController : ControllerBase
     {
         private readonly DbContextFactoryService _dbContextFactory;
@@ -41,6 +40,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Registered Employee" }
         )]
+        [Authorize]
         public IActionResult Get()
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -65,6 +65,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Registered Employee" }
         )]
+        [Authorize]
         public IActionResult GetByID(long id)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -83,25 +84,15 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////
-
+         
         [HttpPost]
-        [Authorize_Endpoint_(
-            allowedTypes: new[] { "octa", "employee" },
-            pages: new[] { "Registered Employee" }
-        )]
+        //[Authorize_Endpoint_(
+        //    allowedTypes: new[] { "octa", "employee" }
+        //)]
         public async Task<IActionResult> Add(RegisteredEmployeeAddDTO NewRegistrationEmployee)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
-
-            var userClaims = HttpContext.User.Claims;
-            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-            long.TryParse(userIdClaim, out long userId);
-            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
-
-            if (userIdClaim == null || userTypeClaim == null)
-            {
-                return Unauthorized("User ID or Type claim not found.");
-            }
+             
             if (NewRegistrationEmployee == null)
             {
                 return BadRequest("Employee data is required.");
@@ -161,6 +152,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
             allowEdit: 1,
             pages: new[] { "Registered Employee" }
         )]
+        [Authorize]
         public async Task<IActionResult> Reject(long id)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
@@ -212,6 +204,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Administration
             allowEdit: 1,
             pages: new[] { "Registered Employee" }
         )]
+        [Authorize]
         public async Task<IActionResult> Accept(RegistrationEmployeeAcceptDTO acceptedEmployeeDto)
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);

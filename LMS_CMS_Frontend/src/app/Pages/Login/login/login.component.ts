@@ -31,7 +31,7 @@ export class LoginComponent {
   isStudentHovered = false;
   isParentHovered = false;
 
-  userNameError: string = "";
+  userNameError: string = ""; 
   passwordError: string = "";
   somthingError: string = "";
 
