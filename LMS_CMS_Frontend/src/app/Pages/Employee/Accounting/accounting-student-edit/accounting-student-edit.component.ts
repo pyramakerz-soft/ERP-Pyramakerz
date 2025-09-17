@@ -171,10 +171,9 @@ export class AccountingStudentEditComponent {
       this.router.navigateByUrl(`Employee/Student Accounting`)
       this.isLoading = false
     },
-      err => {
-        this.isLoading = false
-        console.log(err.error)
-        if (typeof err.error === 'string' && err.error.includes("Email Already Taken")) {
+      error => {
+        this.isLoading = false 
+        if (typeof error.error === 'string' && error.error.includes("Email Already Taken")) {
           Swal.fire({
             icon: 'error',
             title: 'Oops...',
@@ -186,7 +185,7 @@ export class AccountingStudentEditComponent {
           Swal.fire({
             icon: 'error',
             title: 'Oops...',
-            text: 'Try Again Later!',
+            text: error.error,
             confirmButtonText: 'Okay',
             customClass: { confirmButton: 'secondaryBg' },
           });

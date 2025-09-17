@@ -266,6 +266,7 @@ import { AssignmentReportComponent } from './Pages/Employee/LMS/reports/assignme
 import { MaintenanceComponent } from './Pages/Employee/Maintenance/maintenance/maintenance.component';
 import { EmployeeClocksComponent } from './Pages/Employee/HR/employee-clocks/employee-clocks.component';
 import { MaintenanceReportComponent } from './Pages/Employee/Maintenance/Reports/maintenance-report/maintenance-report.component';
+import { SalaryConfigurationComponent } from './Pages/Employee/HR/salary-configuration/salary-configuration.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -346,7 +347,7 @@ export const routes: Routes = [
             { path: "Department", component: DepartmentComponent, title: "Department", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Outcome", component: OutcomesComponent, title: "Outcome", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Income", component: IncomesComponent, title: "Income", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Safe", component: SavesComponent, title: "Save", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
+            { path: "Safe", component: SavesComponent, title: "Safe", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Accounting Tree", component: AccountingTreeComponent, title: "Accounting Tree", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Bank", component: BankComponent, title: "Bank", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Employee Accounting", component: AccountingEmployeeComponent, title: "Employee Accounting", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
@@ -576,6 +577,7 @@ export const routes: Routes = [
             { path: "Vacation Employee", component: VacationEmployeeComponent, title: "Vacation Employee", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Location", component: LocationComponent, title: "Location", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Edit Attendance", component: EmployeeClocksComponent, title: "Edit Attendance", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Salary Configuration", component: SalaryConfigurationComponent, title: "Salary Configuration", canActivate: [noNavigateWithoutLoginGuard] },
         ]
     },
     {
