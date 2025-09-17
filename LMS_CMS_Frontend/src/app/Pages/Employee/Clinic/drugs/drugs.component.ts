@@ -8,11 +8,11 @@ import Swal from 'sweetalert2';
 import { TableComponent } from '../../../../Component/reuse-table/reuse-table.component';
 import { ApiService } from '../../../../Services/api.service';
 import { DrugService } from '../../../../Services/Employee/Clinic/drug.service';
-import { Drug } from '../../../../Models/Clinic/Drug';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { DrugClass } from '../../../../Models/Clinic/drug-class';
 @Component({
   selector: 'app-drugs',
   standalone: true,
@@ -28,14 +28,14 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   styleUrls: ['./drugs.component.css'],
 })
 export class DrugsComponent implements OnInit {
-  drug: Drug = new Drug(0, '', new Date());
+  drug: DrugClass = new DrugClass(0, '', new Date());
   editDrug = false;
   validationErrors: { [key: string]: string } = {};
   keysArray: string[] = ['id', 'name'];
   key: string = 'id';
   value: any = '';
   isModalVisible = false;
-  drugs: Drug[] = [];
+  drugs: DrugClass[] = [];
   DomainName: string = '';
  isRtl: boolean = false;
   subscription!: Subscription;
@@ -92,7 +92,7 @@ export class DrugsComponent implements OnInit {
 
   closeModal() {
     this.isModalVisible = false;
-    this.drug = new Drug(0, '', new Date());
+    this.drug = new DrugClass(0, '', new Date());
     this.editDrug = false;
     this.validationErrors = {};
   }
@@ -101,13 +101,13 @@ export class DrugsComponent implements OnInit {
     if (id) {
       this.editDrug = true;
       const originalDrug = this.drugs.find((drug) => drug.id === id)!;
-      this.drug = new Drug(
+      this.drug = new DrugClass(
         originalDrug.id,
         originalDrug.name,
         new Date(originalDrug.insertedAt)
       );
     } else {
-      this.drug = new Drug(0, '', new Date());
+      this.drug = new DrugClass(0, '', new Date());
       this.editDrug = false;
     }
     this.isModalVisible = true;

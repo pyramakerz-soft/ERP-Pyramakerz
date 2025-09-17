@@ -21,5 +21,7 @@ namespace LMS_CMS_BL.DTO.Maintenance
         public long MaintenanceEmployeeID { get; set; } 
         public decimal Cost { get; set; }
         public string? Note { get; set; }
+        public long? InsertedByUserId { get; set; }
+
     }
 }

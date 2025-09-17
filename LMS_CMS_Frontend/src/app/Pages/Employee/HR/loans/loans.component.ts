@@ -195,6 +195,10 @@ export class LoansComponent {
     return IsAllow;
   }
 
+  GetdeductionStartMonth() {
+
+  }
+
   CreateOREdit() {
     if (this.isFormValid()) {
       this.isLoading = true;
