@@ -215,38 +215,63 @@
             </div>
             <!-- Tags -->
             <div class="w-[48%]">
-                <label class="block mb-2 text-sm font-medium text-gray-900">{{ 'Tags' | translate }}</label>
+                <label class="block mb-2 text-sm font-medium text-gray-900">
+                    {{ 'Tagsdfd' | translate }}
+                </label>
+
                 <div class="relative">
-                    <div class="border border-gray-300 rounded-lg px-3 py-2 w-full cursor-pointer min-h-[42px]"
-                        (click)="toggleDropdown()" tabindex="0">
-                        <ng-container *ngIf="tagsSelected.length > 0; else placeholder">
-                            <div class="flex flex-wrap">
-                                <span class="mr-2 mb-1 bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center"
-                                    *ngFor="let selected of tagsSelected">
-                                    {{ selected.name }}
-                                    <span class="ml-2 cursor-pointer text-red-500"
-                                        (click)="removeSelected(selected.id)">
-                                        &times;
-                                    </span>
-                                </span>
-                            </div>
-                        </ng-container>
-                        <ng-template #placeholder>
-                            <span class="text-gray-400">{{ 'Choose' | translate }}  {{ 'Tag' | translate }}</span>
-                        </ng-template>
+                    <!-- Tags Box -->
+                    <div
+                    class="border border-gray-300 rounded-lg px-3 py-2 w-full cursor-pointer min-h-[42px] flex flex-wrap gap-2 items-center"
+                    (click)="toggleDropdown()"
+                    tabindex="0">
+                    <ng-container *ngIf="tagsSelected.length > 0; else placeholder">
+                        <span
+                        class="bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center max-w-[150px] truncate"
+                        *ngFor="let selected of tagsSelected">
+                        {{ selected.name }}
+                        <span
+                            class="ml-2 cursor-pointer text-red-500"
+                            (click)="removeSelected(selected.id)">
+                            &times;
+                        </span>
+                        </span>
+                    </ng-container>
+
+                    <ng-template #placeholder>
+                        <span class="text-gray-400">
+                        {{ 'Choose' | translate }} {{ 'Tags' | translate }}
+                        </span>
+                    </ng-template>
                     </div>
-                    <div class="absolute bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10"
-                        *ngIf="dropdownOpen">
-                        <ul *ngIf="tags.length > 0">
-                            <li *ngFor="let Type of tags" class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                                (click)="selectType(Type)">
-                                {{ Type.name }}
-                            </li>
-                        </ul>
-                        <div *ngIf="tags.length === 0" class="px-4 py-2 text-gray-400">{{ 'No Data Found' | translate }}</div>
+
+                    <!-- Dropdown -->
+                    <div
+                    class="absolute bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10"
+                    *ngIf="dropdownOpen">
+                    <ul *ngIf="tags.length > 0">
+                        <li
+                        *ngFor="let Type of tags"
+                        class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                        (click)="selectType(Type)">
+                        {{ Type.name }}
+                        </li>
+                    </ul>
+                    <div
+                        *ngIf="tags.length === 0"
+                        class="px-4 py-2 text-gray-400">
+                        {{ 'No Data Found' | translate }}
+                    </div>
                     </div>
                 </div>
-                <span *ngIf="validationErrors['tag']" class="text-red-500 ml-3">{{ validationErrors['tag'] }}</span>
+
+                <!-- Validation -->
+                <span
+                    *ngIf="validationErrors['tag']"
+                    class="text-red-500 ml-3"
+                >
+                    {{ validationErrors['tag'] }}
+                </span>                                                         
             </div>
 
             <!-- Number of Questions -->
@@ -406,40 +431,64 @@
                     }}</span>
             </div>
 
-            <!-- Tags -->
+          <!-- Tags -->
             <div class="w-[48%]">
-                <label class="block mb-2 text-sm font-medium text-gray-900">{{ 'Tags' | translate }}</label>
+                <label class="block mb-2 text-sm font-medium text-gray-900">
+                    {{ 'Tags' | translate }}
+                </label>
+
                 <div class="relative">
-                    <div class="border border-gray-300 rounded-lg px-3 h-[42px] flex items-center w-full cursor-pointer"
-                        (click)="toggleDropdown()" tabindex="0">
-                        <ng-container *ngIf="tagsSelected.length > 0; else placeholder">
-                            <div class="flex flex-wrap">
-                                <span class="mr-2 mb-1 bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center"
-                                    *ngFor="let selected of tagsSelected">
-                                    {{ selected.name }}
-                                    <span class="ml-2 cursor-pointer text-red-500"
-                                        (click)="removeSelected(selected.id)">
-                                        &times;
-                                    </span>
-                                </span>
-                            </div>
-                        </ng-container>
-                        <ng-template #placeholder>
-                            <span class="text-gray-400">{{ 'Choose' | translate }} {{ 'Tag' | translate }}</span>
-                        </ng-template>
+                    <!-- Tags Box -->
+                    <div
+                    class="border border-gray-300 rounded-lg px-3 py-2 w-full cursor-pointer min-h-[42px] flex flex-wrap gap-2 items-center"
+                    (click)="toggleDropdown()"
+                    tabindex="0">
+                    <ng-container *ngIf="tagsSelected.length > 0; else placeholder">
+                        <span
+                        class="bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center max-w-[150px] truncate"
+                        *ngFor="let selected of tagsSelected">
+                        {{ selected.name }}
+                        <span
+                            class="ml-2 cursor-pointer text-red-500"
+                            (click)="removeSelected(selected.id)">
+                            &times;
+                        </span>
+                        </span>
+                    </ng-container>
+
+                    <ng-template #placeholder>
+                        <span class="text-gray-400">
+                        {{ 'Choose' | translate }} {{ 'Tags' | translate }}
+                        </span>
+                    </ng-template>
                     </div>
-                    <div class="absolute bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10"
-                        *ngIf="dropdownOpen && SelectedLessonID">
-                        <ul *ngIf="tags.length > 0">
-                            <li *ngFor="let Type of tags" class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                                (click)="selectType(Type)">
-                                {{ Type.name }}
-                            </li>
-                        </ul>
-                        <div *ngIf="tags.length === 0" class="px-4 py-2 text-gray-400">  {{ 'No Data Found' | translate }}</div>
+
+                    <!-- Dropdown -->
+                    <div
+                    class="absolute bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10"
+                    *ngIf="dropdownOpen">
+                    <ul *ngIf="tags.length > 0">
+                        <li
+                        *ngFor="let Type of tags"
+                        class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                        (click)="selectType(Type)">
+                        {{ Type.name }}
+                        </li>
+                    </ul>
+                    <div
+                        *ngIf="tags.length === 0"
+                        class="px-4 py-2 text-gray-400">
+                        {{ 'No Data Found' | translate }}
                     </div>
-                </div>
-                <span *ngIf="validationErrors['tag']" class="text-red-500 ml-3">{{ validationErrors['tag'] }}</span>
+              </div>
+            </div>
+
+            <!-- Validation -->
+            <span
+                *ngIf="validationErrors['tag']"
+                class="text-red-500 ml-3">
+                {{ validationErrors['tag'] }}
+            </span>
             </div>
         </div>
 
@@ -462,7 +511,7 @@
                 <!-- Number Input -->
                 <div class="w-[48%]">
                     <label class="block mb-2 text-sm font-medium text-gray-900">{{ 'Number Of' | translate }}  {{ 'Questions' | translate }}</label>
-                    <input type="number" class="rounded-lg border border-solid px-4 py-3 w-full"
+                    <input type="text" class="rounded-lg border border-solid px-4 py-3 w-full"
                         [ngClass]="{ 'input-error': !option.numberOfQuestion || option.numberOfQuestion <= 0 }"
                         [(ngModel)]="option.numberOfQuestion" (focus)="validationErrors['count-' + i] = ''"
                         (input)="validateNumberQuestionAssignmentTypeCount($event, i, 'numberOfQuestion')"

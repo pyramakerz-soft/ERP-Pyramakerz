@@ -929,7 +929,7 @@ export class InventoryDetailsComponent {
       }
     }
     if (this.FlagId == 8) {
-      rows.push({ keyEn: 'Store To Transform: ' + this.Data.storeToTransformName });
+      rows.push({ keyEn: 'Transformed Store: ' + this.Data.storeToTransformName });
     }
     return rows;
   }
@@ -1053,7 +1053,7 @@ export class InventoryDetailsComponent {
     }
 
     if (this.FlagId === 8) {
-      infoRows.push({ key: 'Store To Transform', value: safe(this.Data?.storeToTransformName) });
+      infoRows.push({ key: 'Transformed Store', value: safe(this.Data?.storeToTransformName) });
     }
 
     // Pass everything to the service

@@ -13,6 +13,7 @@ namespace LMS_CMS_BL.DTO.Accounting
         public string EmployeeEnglishName { get; set; }
         public string EmployeeArabicName { get; set; }
         public long SaveID { get; set; }
+        public string SaveName { get; set; }
         public long? InsertedByUserId { get; set; }
     }
 }
