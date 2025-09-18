@@ -5,6 +5,7 @@ export class SafeEmployee {
         public employeeID: number = 0,
         public insertedByUserId: number = 0,
         public employeeIDs: number[] = [],
+        public saveName: string = '', 
         public employeeEnglishName: string = '', 
         public employeeArabicName: string = '', 
     ) {}

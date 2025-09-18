@@ -1,4 +1,4 @@
-<div class="flex justify-between items-center">
+<div class="flex justify-between items-center mb-4">
     <div class="flex justify-between items-center space-x-5 rtl:space-x-reverse">
         <i class="fa-solid fa-chevron-left cursor-pointer" (click)="moveToBack()"></i>
         <h1 class="font-semibold text-2xl leading-9">
@@ -79,39 +79,63 @@
 
     <div class="flex justify-between mt-4 gap-2 items-center">
         <!-- Types -->
-        <div class="w-[35%]">
-            <label class="block mb-2 text-sm font-medium text-gray-900" for="ac">  {{ 'Types' | translate }}</label>
+       <div class="w-[35%]" #dropdownContainer>
+            <label class="block mb-2 text-sm font-medium text-gray-900" for="ac">
+                {{ 'Types' | translate }}
+            </label>
             <div class="relative">
-                <div class="border border-gray-300 rounded-lg px-4 py-3 cursor-pointer min-h-[48px]"
-                    (click)="toggleDropdown()" tabindex="0">
-                    <ng-container *ngIf="PerformanceTypesSelected.length > 0; else placeholder">
-                        <div class="flex flex-wrap">
-                            <span class="mr-2 mb-1 bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center"
-                                *ngFor="let selected of PerformanceTypesSelected">
-                                {{ selected.englishName }}
-                                <span class="ml-2 cursor-pointer text-red-500" (click)="removeSelected(selected.id)">
-                                    &times;
-                                </span>
-                            </span>
-                        </div>
-                    </ng-container>
-                    <ng-template #placeholder>
-                        <span class="text-gray-400">  {{ 'Choose' | translate }} {{ 'Type' | translate }}</span>
-                    </ng-template>
+                <div
+                class="border border-gray-300 rounded-lg px-4 py-3 cursor-pointer min-h-[48px]"
+                (click)="toggleDropdown($event)"
+                tabindex="0"
+                >
+                <ng-container *ngIf="PerformanceTypesSelected.length > 0; else placeholder">
+                    <div class="flex flex-wrap">
+                    <span
+                        class="mr-2 mb-1 bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center"
+                        *ngFor="let selected of PerformanceTypesSelected"
+                    >
+                        {{ selected.englishName }}
+                        <span
+                        class="ml-2 cursor-pointer text-red-500"
+                        (click)="removeSelected(selected.id); $event.stopPropagation()"
+                        >
+                        &times;
+                        </span>
+                    </span>
+                    </div>
+                </ng-container>
+                <ng-template #placeholder>
+                    <span class="text-gray-400">
+                    {{ 'Choose' | translate }} {{ 'Type' | translate }}
+                    </span>
+                </ng-template>
                 </div>
-                <div class="absolute bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10"
-                    *ngIf="dropdownOpen">
-                    <ul *ngIf="PerformanceTypes.length > 0">
-                        <li *ngFor="let Type of PerformanceTypes" class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                            (click)="selectType(Type)">
-                            {{ Type.englishName }}
-                        </li>
-                    </ul>
-                    <div *ngIf="PerformanceTypes.length === 0" disabled selected>  {{ 'No Data Found' | translate }}</div>
+
+                <!-- Dropdown list -->
+                <div
+                class="absolute bg-white border border-gray-300 rounded-lg mt-1 w-full shadow-md z-10"
+                *ngIf="dropdownOpen"
+                >
+                <ul *ngIf="PerformanceTypes.length > 0">
+                    <li
+                    *ngFor="let Type of PerformanceTypes"
+                    class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                    (click)="selectType(Type)"
+                    >
+                    {{ Type.englishName }}
+                    </li>
+                </ul>
+                <div *ngIf="PerformanceTypes.length === 0" class="px-4 py-2 text-gray-400">
+                    {{ 'No Data Found' | translate }}
                 </div>
-            <span *ngIf="!IsStudentPerformance" class="text-red-500 ml-3 font-normal"> {{ 'Performance Type is Requiered' | translate }}</span>
+                </div>
+
+                <span *ngIf="!IsStudentPerformance" class="text-red-500 ml-3 font-normal">
+                {{ 'Performance Type is Requiered' | translate }}
+                </span>
             </div>
-        </div>
+        </div>                      
 
         <!-- Stars -->
         <div class="w-[35%]">

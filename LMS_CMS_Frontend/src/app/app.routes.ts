@@ -457,7 +457,7 @@ export const routes: Routes = [
             { path: "Lesson Resources Types", component: LessonResourcesTypeComponent, title: "Lesson Resource Type", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Student Medal", component: StudentMedalComponent, title: "Student Medal", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Lessons", component: LessonComponent, title: "Lesson", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Create Daily Performance", component: DailyPerformanceComponent, title: "Daily Performance", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
+            { path: "Create Daily Performance", component: DailyPerformanceComponent, title: "Daily Performance", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Performance Type", component: PerformanceTypeComponent, title: "Performance Type", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Lesson Activity/:id", component: LessonActivityComponent, title: "Lesson Activity", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Lesson Resource/:id", component: LessonResourceComponent, title: "Lesson Resource", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },

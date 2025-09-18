@@ -46,7 +46,40 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             }
 
             List<SafeEmployee> safeEmployees = await Unit_Of_Work.safeEmployee_Repository.Select_All_With_IncludesById<SafeEmployee>(
-                    f => f.IsDeleted != true && f.SaveID == safeID, 
+                    f => f.IsDeleted != true && f.SaveID == safeID,
+                    query => query.Include(d => d.Save),
+                    query => query.Include(d => d.Employee));
+
+            if (safeEmployees == null || safeEmployees.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<SafeEmployeeGetDTO> safeEmployeesDTO = mapper.Map<List<SafeEmployeeGetDTO>>(safeEmployees);
+
+            return Ok(safeEmployeesDTO);
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpGet("GetByEmployeeID/{EmpId}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Safe" }
+        )]
+        public async Task<IActionResult> GetByEmployeeID(long EmpId)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            Employee employee = Unit_Of_Work.employee_Repository.First_Or_Default(d => d.IsDeleted != true && d.ID == EmpId);
+            if (employee == null)
+            {
+                return BadRequest("No employee With this ID");
+            }
+
+            List<SafeEmployee> safeEmployees = await Unit_Of_Work.safeEmployee_Repository.Select_All_With_IncludesById<SafeEmployee>(
+                    f => f.IsDeleted != true && f.EmployeeID == EmpId,
+                    query => query.Include(d => d.Save),
                     query => query.Include(d => d.Employee));
 
             if (safeEmployees == null || safeEmployees.Count == 0)
