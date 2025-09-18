@@ -75,51 +75,51 @@ namespace LMS_CMS_PL.Controllers.Domains
                 return BadRequest("UserName or Password is Invalid");
             }
 
-            var accessToken = _generateJWT.Generate_Jwt_Token(
-                user.User_Name,
-                user.ID.ToString(),
-                UserInfo.Type,
-                user.Role_ID?.ToString()
-            );
+            //var accessToken = _generateJWT.Generate_Jwt_Token(
+            //    user.User_Name,
+            //    user.ID.ToString(),
+            //    UserInfo.Type,
+            //    user.Role_ID?.ToString()
+            //);
 
-            var refreshToken = _generateJWT.GenerateRefreshToken();
+            //var refreshToken = _generateJWT.GenerateRefreshToken();
 
-            // Save refresh token in DB
-            var refreshTokenEntity = new RefreshTokens
+            //// Save refresh token in DB
+            //var refreshTokenEntity = new RefreshTokens
+            //{
+            //    Token = refreshToken,
+            //    UserID = user.ID,
+            //    UserTypeID = UserInfo.Type == "employee" ? 1 : UserInfo.Type == "parent" ? 3 : 2,
+            //    ExpiresAt = DateTime.UtcNow.AddDays(7),
+            //    IsRevoked = false
+            //};
+
+            //Unit_Of_Work.refreshTokens_Repository.Add(refreshTokenEntity);
+            //Unit_Of_Work.SaveChanges();
+
+            //return Ok(new
+            //{
+            //    AccessToken = accessToken,
+            //    RefreshToken = refreshToken
+            //});
+
+            if (UserInfo.Type == "employee" && user is Employee emp)
             {
-                Token = refreshToken,
-                UserID = user.ID,
-                UserTypeID = UserInfo.Type == "employee" ? 1 : UserInfo.Type == "parent" ? 3 : 2,
-                ExpiresAt = DateTime.UtcNow.AddDays(7), 
-                IsRevoked = false
-            };
-
-            Unit_Of_Work.refreshTokens_Repository.Add(refreshTokenEntity);
-            Unit_Of_Work.SaveChanges();
-
-            return Ok(new
+                var tokenEmp = _generateJWT.Generate_Jwt_Token(emp.User_Name, emp.ID.ToString(), UserInfo.Type, emp.Role_ID.ToString());
+                return Ok(new { Token = tokenEmp });
+            }
+            else if (UserInfo.Type == "student" && user is Student stu)
             {
-                AccessToken = accessToken,
-                RefreshToken = refreshToken
-            });
+                var token = _generateJWT.Generate_Jwt_Token(stu.User_Name, stu.ID.ToString(), UserInfo.Type);
+                return Ok(new { Token = token });
+            }
+            else if (UserInfo.Type == "parent" && user is Parent par)
+            {
+                var token = _generateJWT.Generate_Jwt_Token(par.User_Name, par.ID.ToString(), UserInfo.Type);
+                return Ok(new { Token = token });
+            }
 
-            //if (UserInfo.Type == "employee" && user is Employee emp)
-            //{
-            //    var tokenEmp = _generateJWT.Generate_Jwt_Token(emp.User_Name, emp.ID.ToString(), UserInfo.Type, emp.Role_ID.ToString());
-            //    return Ok(new { Token = tokenEmp });
-            //}
-            //else if (UserInfo.Type == "student" && user is Student stu)
-            //{
-            //    var token = _generateJWT.Generate_Jwt_Token(stu.User_Name, stu.ID.ToString(), UserInfo.Type);
-            //    return Ok(new { Token = token });
-            //}
-            //else if (UserInfo.Type == "parent" && user is Parent par)
-            //{
-            //    var token = _generateJWT.Generate_Jwt_Token(par.User_Name, par.ID.ToString(), UserInfo.Type);
-            //    return Ok(new { Token = token });
-            //}
-
-            //return BadRequest("Unexpected user type.");
+            return BadRequest("Unexpected user type.");
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////
