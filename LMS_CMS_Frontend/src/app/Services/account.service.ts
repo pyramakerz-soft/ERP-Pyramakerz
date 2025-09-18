@@ -66,7 +66,7 @@ export class AccountService {
       User_Data_After_Login = jwtDecode(token)  
  
       if(User_Data_After_Login.type == 'employee'){
-        this.employeeService.Get_Employee_By_ID(User_Data_After_Login.id, this.header).subscribe(
+        this.employeeService.GetMyData(this.header).subscribe(
           data => {  
             if(User_Data_After_Login.user_Name != data.user_Name || User_Data_After_Login.role != data.role_ID){ 
               this.logOutService.logOut()  
