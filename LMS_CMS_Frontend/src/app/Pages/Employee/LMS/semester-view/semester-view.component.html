@@ -37,7 +37,7 @@
     <i *ngIf="!semester.isActive" class="text-[#BDBDBD] text-2xl fa-regular fa-square"></i>
     <label class="text-sm">{{ 'Is Active' | translate }}</label>
 </div>
-<div class="flex space-x-5rtl:space-x-reverse items-center w-[30%] mb-4 p-3">
+<div class="flex space-x-5 rtl:space-x-reverse items-center w-[30%] mb-4 p-3">
     <i *ngIf="semester.isCurrent" class="secondaryTxt text-2xl fa-regular fa-square-check"></i>
     <i *ngIf="!semester.isCurrent" class="text-[#BDBDBD] text-2xl fa-regular fa-square"></i>
     <label class="text-sm"> {{ 'Is Current' | translate }}</label>

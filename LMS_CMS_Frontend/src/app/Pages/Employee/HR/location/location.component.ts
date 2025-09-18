@@ -19,17 +19,26 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
 import 'leaflet-control-geocoder';
 import * as L from 'leaflet';
 
-
 @Component({
   selector: 'app-location',
   standalone: true,
   imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './location.component.html',
-  styleUrl: './location.component.css'
+  styleUrl: './location.component.css',
 })
 export class LocationComponent {
-
-  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
+  User_Data_After_Login: TokenData = new TokenData(
+    '',
+    0,
+    0,
+    0,
+    0,
+    '',
+    '',
+    '',
+    '',
+    ''
+  );
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -55,6 +64,7 @@ export class LocationComponent {
   isLoading = false;
   private map!: L.Map;
   private marker!: L.Marker;
+  private circle: any; // for range circle
 
   constructor(
     private router: Router,
@@ -66,8 +76,8 @@ export class LocationComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public LocationServ: LocationService,
-    private realTimeService: RealTimeNotificationServiceService,
-  ) { }
+    private realTimeService: RealTimeNotificationServiceService
+  ) {}
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
@@ -88,9 +98,11 @@ export class LocationComponent {
 
     this.GetAllData();
 
-    this.subscription = this.languageService.language$.subscribe(direction => {
-      this.isRtl = direction === 'rtl';
-    });
+    this.subscription = this.languageService.language$.subscribe(
+      (direction) => {
+        this.isRtl = direction === 'rtl';
+      }
+    );
     this.isRtl = document.documentElement.dir === 'rtl';
   }
   ngOnDestroy(): void {
@@ -99,7 +111,6 @@ export class LocationComponent {
       this.subscription.unsubscribe();
     }
   }
-
 
   GetAllData() {
     this.TableData = [];
@@ -137,10 +148,14 @@ export class LocationComponent {
     this.mode = 'Edit';
     this.LocationServ.GetByID(id, this.DomainName).subscribe((d) => {
       this.location = d;
+      this.onRangeChange();
       this.openModal();
       setTimeout(() => {
         if (this.map && this.location.latitude && this.location.longitude) {
-          const latlng = L.latLng(this.location.latitude, this.location.longitude);
+          const latlng = L.latLng(
+            this.location.latitude,
+            this.location.longitude
+          );
           this.map.setView(latlng, 13); // center map
           this.marker.setLatLng(latlng); // move marker
         }
@@ -189,7 +204,7 @@ export class LocationComponent {
               title: 'Oops...',
               text: error.error,
               confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' }
+              customClass: { confirmButton: 'secondaryBg' },
             });
           }
         );
@@ -214,7 +229,7 @@ export class LocationComponent {
               title: 'Oops...',
               text: error.error,
               confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' }
+              customClass: { confirmButton: 'secondaryBg' },
             });
           }
         );
@@ -253,9 +268,7 @@ export class LocationComponent {
       if (this.location.hasOwnProperty(key)) {
         const field = key as keyof Location;
         if (!this.location[field]) {
-          if (
-            field == 'name'
-          ) {
+          if (field == 'name') {
             this.validationErrors[field] = `*${this.capitalizeField(
               field
             )} is required`;
@@ -299,7 +312,7 @@ export class LocationComponent {
             return fieldValue.toLowerCase().includes(this.value.toLowerCase());
           }
           if (typeof fieldValue === 'number') {
-            return fieldValue.toString().includes(numericValue.toString())
+            return fieldValue.toString().includes(numericValue.toString());
           }
           return fieldValue == this.value;
         });
@@ -317,22 +330,69 @@ export class LocationComponent {
     this.map = L.map('map').setView([30.0444, 31.2357], 13); // Default Cairo
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
+      attribution: '© OpenStreetMap contributors',
     }).addTo(this.map);
 
     // Marker
-    this.marker = L.marker([30.0444, 31.2357], { draggable: true }).addTo(this.map);
+    this.marker = L.marker([30.0444, 31.2357], { draggable: true }).addTo(
+      this.map
+    );
+
+    // Drag marker updates lat/lng
+    this.marker.on('dragend', (e: any) => {
+      const pos = e.target.getLatLng();
+      this.location.latitude = pos.lat;
+      this.location.longitude = pos.lng;
+    });
 
     // Click event to update lat/lng
     this.map.on('click', (e: any) => {
       this.marker.setLatLng(e.latlng);
       this.location.latitude = e.latlng.lat;
       this.location.longitude = e.latlng.lng;
-      console.log('Selected:', this.location);
+      this.updateCircle(); // update circle when map clicked
     });
 
     // Add search bar
     // @ts-ignore
     L.Control.geocoder().addTo(this.map);
+  }
+
+  /** Called when latitude or longitude inputs change */
+  onLatLngChange(): void {
+    if (this.location.latitude && this.location.longitude) {
+      const latlng = L.latLng(this.location.latitude, this.location.longitude);
+      this.marker.setLatLng(latlng);
+      this.map.setView(latlng, 13);
+      this.updateCircle();
+    }
+  }
+
+  /** Called when range input changes */
+  onRangeChange(): void {
+    this.updateCircle();
+  }
+
+  /** Draw / update circle */
+  updateCircle(): void {
+    if (this.circle) {
+      this.map.removeLayer(this.circle);
+    }
+
+    if (
+      this.location.range &&
+      this.location.latitude &&
+      this.location.longitude
+    ) {
+      this.circle = L.circle(
+        [this.location.latitude, this.location.longitude],
+        {
+          radius: +this.location.range, // in meters
+          color: 'red',
+          fillColor: '#f03',
+          fillOpacity: 0.2,
+        }
+      ).addTo(this.map);
+    }
   }
 }

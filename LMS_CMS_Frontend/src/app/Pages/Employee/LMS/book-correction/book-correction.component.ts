@@ -204,7 +204,6 @@ export class BookCorrectionComponent {
         );
       }
     }
-    this.GetAllData();
   }
 
   closeModal() {
