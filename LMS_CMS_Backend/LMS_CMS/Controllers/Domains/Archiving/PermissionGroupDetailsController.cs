@@ -9,9 +9,10 @@ using LMS_CMS_PL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
 
 namespace LMS_CMS_PL.Controllers.Domains.Archiving
-{
+{ 
     [Route("api/with-domain/[controller]")]
     [ApiController]
     [Authorize]
@@ -101,11 +102,111 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
             {
                 ArchivingTree archivingTree = Unit_Of_Work.archivingTree_Repository.First_Or_Default(r => r.ID == item.ArchivingTreeID && r.IsDeleted != true);
                 if (archivingTree == null) { return NotFound("There is no archiving Tree with this ID."); }
+                 
+                treesToKeep.Add(item.ArchivingTreeID);
 
-                // Add current tree and all its ancestors to the keep list
-                await CollectTreeAndAncestors(Unit_Of_Work, archivingTree, treesToKeep);
+                PermissionGroupDetails existingPermission = Unit_Of_Work.permissionGroupDetails_Repository.First_Or_Default(p => p.ArchivingTreeID == archivingTree.ID && p.PermissionGroupID == NewDetails.PermissionGroupID && p.IsDeleted != true);
+
+                if (existingPermission == null)
+                {
+                    PermissionGroupDetails permissionGroupDetails = new PermissionGroupDetails
+                    {
+                        ArchivingTreeID = item.ArchivingTreeID,
+                        PermissionGroupID = NewDetails.PermissionGroupID,
+                        Allow_Delete = item.Allow_Delete,
+                        Allow_Delete_For_Others = item.Allow_Delete_For_Others,
+                        InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone),
+                        InsertedByOctaId = userTypeClaim == "octa" ? userId : (long?)null,
+                        InsertedByUserId = userTypeClaim == "employee" ? userId : (long?)null
+                    };
+                    await Unit_Of_Work.permissionGroupDetails_Repository.AddAsync(permissionGroupDetails);
+
+                    List<ArchivingTree> fileArchivingTree = Unit_Of_Work.archivingTree_Repository.FindBy(
+                        d => d.IsDeleted != true && d.ArchivingTreeParentID == item.ArchivingTreeID && d.FileLink != null && d.FileLink != "");
+                    if (fileArchivingTree.Count > 0)
+                    {
+                        foreach (var file in fileArchivingTree)
+                        {
+                            treesToKeep.Add(file.ID);
+
+                            PermissionGroupDetails existingFilePermission = Unit_Of_Work.permissionGroupDetails_Repository.First_Or_Default(
+                                p => p.ArchivingTreeID == file.ID && p.PermissionGroupID == NewDetails.PermissionGroupID && p.IsDeleted != true);
+                            if (existingPermission == null)
+                            {
+                                PermissionGroupDetails permissionFileGroupDetails = new PermissionGroupDetails
+                                {
+                                    ArchivingTreeID = file.ID,
+                                    PermissionGroupID = NewDetails.PermissionGroupID,
+                                    Allow_Delete = item.Allow_Delete,
+                                    Allow_Delete_For_Others = item.Allow_Delete_For_Others,
+                                    InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone),
+                                    InsertedByOctaId = userTypeClaim == "octa" ? userId : (long?)null,
+                                    InsertedByUserId = userTypeClaim == "employee" ? userId : (long?)null
+                                };
+                                await Unit_Of_Work.permissionGroupDetails_Repository.AddAsync(permissionFileGroupDetails);
+                            }
+                            else
+                            {
+                                if (existingFilePermission.Allow_Delete != item.Allow_Delete || existingFilePermission.Allow_Delete_For_Others != item.Allow_Delete_For_Others)
+                                {
+                                    existingFilePermission.Allow_Delete = item.Allow_Delete;
+                                    existingFilePermission.Allow_Delete_For_Others = item.Allow_Delete_For_Others;
+                                    Unit_Of_Work.permissionGroupDetails_Repository.Update(existingFilePermission);
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    if (existingPermission.Allow_Delete != item.Allow_Delete || existingPermission.Allow_Delete_For_Others != item.Allow_Delete_For_Others)
+                    {
+                        existingPermission.Allow_Delete = item.Allow_Delete;
+                        existingPermission.Allow_Delete_For_Others = item.Allow_Delete_For_Others;
+                        Unit_Of_Work.permissionGroupDetails_Repository.Update(existingPermission);
+
+                        List<ArchivingTree> fileArchivingTree = Unit_Of_Work.archivingTree_Repository.FindBy(
+                            d => d.IsDeleted != true && d.ArchivingTreeParentID == existingPermission.ArchivingTreeID && d.FileLink != null && d.FileLink != "");
+                        if (fileArchivingTree.Count > 0)
+                        {
+                            foreach (var file in fileArchivingTree)
+                            {
+                                treesToKeep.Add(file.ID);
+
+                                PermissionGroupDetails existingFilePermission = Unit_Of_Work.permissionGroupDetails_Repository.First_Or_Default(
+                                    p => p.ArchivingTreeID == file.ID && p.PermissionGroupID == NewDetails.PermissionGroupID && p.IsDeleted != true);
+                                if (existingPermission == null)
+                                {
+                                    PermissionGroupDetails permissionFileGroupDetails = new PermissionGroupDetails
+                                    {
+                                        ArchivingTreeID = file.ID,
+                                        PermissionGroupID = NewDetails.PermissionGroupID,
+                                        Allow_Delete = item.Allow_Delete,
+                                        Allow_Delete_For_Others = item.Allow_Delete_For_Others,
+                                        InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, cairoZone),
+                                        InsertedByOctaId = userTypeClaim == "octa" ? userId : (long?)null,
+                                        InsertedByUserId = userTypeClaim == "employee" ? userId : (long?)null
+                                    };
+                                    await Unit_Of_Work.permissionGroupDetails_Repository.AddAsync(permissionFileGroupDetails);
+                                }
+                                else
+                                {
+                                    if (existingFilePermission.Allow_Delete != item.Allow_Delete || existingFilePermission.Allow_Delete_For_Others != item.Allow_Delete_For_Others)
+                                    {
+                                        existingFilePermission.Allow_Delete = item.Allow_Delete;
+                                        existingFilePermission.Allow_Delete_For_Others = item.Allow_Delete_For_Others;
+                                        Unit_Of_Work.permissionGroupDetails_Repository.Update(existingFilePermission);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
             }
-             
+
+            await Unit_Of_Work.SaveChangesAsync();
+
             List<PermissionGroupDetails> existingPermissions = Unit_Of_Work.permissionGroupDetails_Repository.FindBy(p => p.PermissionGroupID == NewDetails.PermissionGroupID && p.IsDeleted != true);
 
             foreach (PermissionGroupDetails existingPermission in existingPermissions)
@@ -115,81 +216,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
                     existingPermission.IsDeleted = true;
                     Unit_Of_Work.permissionGroupDetails_Repository.Update(existingPermission);
                 }
-            }
-
-
-            foreach (var item in NewDetails.ArchivingTreeDetails)
-            {
-                ArchivingTree archivingTree = Unit_Of_Work.archivingTree_Repository.First_Or_Default(r => r.ID == item.ArchivingTreeID && r.IsDeleted != true);
-                if (archivingTree == null) { return NotFound("There is no archiving Tree with this ID."); }
-                 
-                await ProcessArchivingTreeAndAncestors(Unit_Of_Work, archivingTree, NewDetails.PermissionGroupID, item, userId, userTypeClaim, cairoZone);
             } 
 
             await Unit_Of_Work.SaveChangesAsync();
             return Ok();
-        } 
-
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        private async Task ProcessArchivingTreeAndAncestors(UOW unitOfWork, ArchivingTree archivingTree, long permissionGroupId, ArchivingTreeDetailsDTO item, long userId, string userType, TimeZoneInfo timeZone)
-        {  
-            PermissionGroupDetails existingPermission = unitOfWork.permissionGroupDetails_Repository.First_Or_Default(p => p.ArchivingTreeID == archivingTree.ID && p.PermissionGroupID == permissionGroupId);
-
-            if (existingPermission == null)
-            {
-                PermissionGroupDetails permissionGroupDetails = new PermissionGroupDetails
-                {
-                    ArchivingTreeID = archivingTree.ID,
-                    PermissionGroupID = permissionGroupId,
-                    Allow_Delete = item.Allow_Delete,
-                    Allow_Delete_For_Others = item.Allow_Delete_For_Others,
-                    InsertedAt = TimeZoneInfo.ConvertTime(DateTime.Now, timeZone),
-                    InsertedByOctaId = userType == "octa" ? userId : (long?)null,
-                    InsertedByUserId = userType == "employee" ? userId : (long?)null
-                };
-                await unitOfWork.permissionGroupDetails_Repository.AddAsync(permissionGroupDetails);
-            }
-            else
-            {
-                if (existingPermission.Allow_Delete != item.Allow_Delete || existingPermission.Allow_Delete_For_Others != item.Allow_Delete_For_Others)
-                {
-                    existingPermission.Allow_Delete = item.Allow_Delete;
-                    existingPermission.Allow_Delete_For_Others = item.Allow_Delete_For_Others;
-                    unitOfWork.permissionGroupDetails_Repository.Update(existingPermission);
-                }
-            }
-             
-            if (archivingTree.ArchivingTreeParentID.HasValue)
-            {
-                ArchivingTree parentTree = unitOfWork.archivingTree_Repository.First_Or_Default(a => a.IsDeleted != true && a.ID == archivingTree.ArchivingTreeParentID.Value);
-
-                if (parentTree != null)
-                {
-                    await ProcessArchivingTreeAndAncestors(unitOfWork, parentTree, permissionGroupId, item, userId, userType, timeZone);
-                }
-            }
-        }
-
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        private async Task CollectTreeAndAncestors(UOW unitOfWork, ArchivingTree archivingTree, HashSet<long> treesToKeep)
-        {
-            var currentTree = archivingTree;
-
-            while (currentTree != null)
-            {
-                treesToKeep.Add(currentTree.ID);
-
-                if (currentTree.ArchivingTreeParentID.HasValue)
-                {
-                    currentTree = unitOfWork.archivingTree_Repository.First_Or_Default(a => a.IsDeleted != true && a.ID == currentTree.ArchivingTreeParentID.Value);
-                }
-                else
-                {
-                    currentTree = null;
-                }
-            }
-        }
+        }  
     }
 }

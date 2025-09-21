@@ -137,5 +137,7 @@ namespace LMS_CMS_DAL.Models.Domains
         public ICollection<PermissionGroupEmployee> PermissionGroupEmployees { get; set; } = new HashSet<PermissionGroupEmployee>();
         public ICollection<EmployeeClocks> EmployeeClocks { get; set; } = new HashSet<EmployeeClocks>();
         public ICollection<EmployeeLocation> EmployeeLocation { get; set; } = new HashSet<EmployeeLocation>();
+        public ICollection<BankEmployee> BankEmployees { get; set; } = new HashSet<BankEmployee>();
+        public ICollection<SafeEmployee> SafeEmployee { get; set; } = new HashSet<SafeEmployee>();
     }
 }

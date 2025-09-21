@@ -14,69 +14,83 @@ import { ArchivingTree } from '../../../../Models/Archiving/archiving-tree';
 export class PermissionGroupArchivingItemComponent {
   @Input() archivingData: any;
   @Output() Selected: EventEmitter<{ data: PermissionGroupDetails; selected: boolean }> = new EventEmitter<{ data: PermissionGroupDetails; selected: boolean }>();
- 
+  @Input() permissionGroupID: number = 0;
+
   toggleChildren(archiving: ArchivingTree) {
     archiving.isOpen = !archiving.isOpen;
   }
-
-  selectData(archiving: ArchivingTree, parent?: ArchivingTree) {
-  let PGD = new PermissionGroupDetails();
-  PGD.archivingTreeID = archiving.id;
-  PGD.allow_Delete = archiving.allow_Delete ?? false;
-  PGD.allow_Delete_For_Others = archiving.allow_Delete_For_Others ?? false;
-
-  this.Selected.emit({ data: PGD, selected: archiving.selected });
-
-  // propagate parent selection to children
-  if (archiving.children && archiving.children.length > 0) {
-    this.updateChildrenSelection(archiving, archiving.selected);
-    this.updateChildrenPermissions(
-      archiving,
-      archiving.allow_Delete,
-      archiving.allow_Delete_For_Others
-    );
-  }
-
-  // 🔥 NEW: check if parent should be updated
-  if (parent) {
-    this.updateParentPermissions(parent);
-  }
-}
  
-private updateParentPermissions(parent: ArchivingTree) {
-  if (parent.children && parent.children.length > 0) {
-    // Parent is selected if any child is selected
-    parent.selected = parent.children.some(ch => ch.selected);
+  selectData(archiving: ArchivingTree, type: 'selected' | 'allowDelete' | 'allowDeleteForOthers' = 'selected') {
+    if (type === 'selected' && archiving.selected) {
+      archiving.allow_Delete = true;
+      archiving.allow_Delete_For_Others = true;
+    }
 
-    // Parent allow_Delete is true if ANY child has it
-    parent.allow_Delete = parent.children.some(ch => ch.allow_Delete);
+    // 🔽 helper function to emit event
+    const emitSelection = (node: ArchivingTree) => {
+      const selectedPermission: PermissionGroupDetails = {
+        id: 0,
+        permissionGroupID: this.permissionGroupID,
+        archivingTreeID: node.id,
+        allow_Delete: node.allow_Delete,
+        allow_Delete_For_Others: node.allow_Delete_For_Others,
+        archivingTreeDetails: []
+      };
+      this.Selected.emit({ data: selectedPermission, selected: node.selected });
+    };
+ 
+    emitSelection(archiving);
 
-    // Parent allow_Delete_For_Others is true if ANY child has it
-    parent.allow_Delete_For_Others = parent.children.some(ch => ch.allow_Delete_For_Others);
+    // 🔽 cascade to children
+    if (archiving.children && archiving.children.length > 0) {
+      archiving.children.forEach(child => {
+        if (archiving.selected) {  
+          if ((type === 'allowDelete' && archiving.allow_Delete) || (type === 'allowDeleteForOthers' && archiving.allow_Delete_For_Others) || type === 'selected') {
+            child.selected = true;
+          }
+            
+          if(archiving.allow_Delete){
+            child.allow_Delete = archiving.allow_Delete;
+          }
+          if(archiving.allow_Delete_For_Others){
+            child.allow_Delete_For_Others = archiving.allow_Delete_For_Others;
+          }
 
-    // Re-emit parent state
-    this.selectData(parent);
-  }
-}
-  private updateChildrenSelection(parent: ArchivingTree, selected: boolean) {
-    parent.children.forEach(child => {
-      child.selected = selected;
-      this.selectData(child);  
-    });
+          if(child.selected){
+            this.selectData(child, type);  
+          }
+        } else {
+          child.selected = false;
+          child.allow_Delete = false;
+          child.allow_Delete_For_Others = false;
+          this.selectData(child, type);  
+        }
+      });
+    }
+ 
+    let current = archiving.parent;
+    while (current) { 
+      if (archiving.selected) {
+        current.selected = true;
+      }
+ 
+      if (type === 'allowDelete' && !archiving.allow_Delete) {
+        current.allow_Delete = false;
+      }
+ 
+      if (type === 'allowDeleteForOthers' && !archiving.allow_Delete_For_Others) {
+        current.allow_Delete_For_Others = false;
+      }
+
+      emitSelection(current);
+      current = current.parent;
+    }
   }
  
-  private updateChildrenPermissions(parent: ArchivingTree, allowDelete: boolean, allowDeleteOthers: boolean) {
-    parent.children.forEach(child => {
-      child.allow_Delete = allowDelete;
-      child.allow_Delete_For_Others = allowDeleteOthers;
-      this.selectData(child); 
-    });
-  }
-
   getFileExtension(filename: string): string {
     if (!filename) return '';
     const lastDotIndex = filename.lastIndexOf('.');
     if (lastDotIndex === -1) return '';
     return filename.slice(lastDotIndex).toLowerCase();
-  } 
+  }
 }

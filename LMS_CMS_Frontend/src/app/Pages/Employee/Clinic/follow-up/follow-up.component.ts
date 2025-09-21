@@ -17,11 +17,11 @@ import { ClassroomService } from '../../../../Services/Employee/LMS/classroom.se
 import { FollowUp } from '../../../../Models/Clinic/FollowUp';
 import { Dose } from '../../../../Models/Clinic/dose';
 import { ModalComponent } from '../../../../Component/modal/modal.component';
-import { Drug } from '../../../../Models/Clinic/drug';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { DrugClass } from '../../../../Models/Clinic/drug-class';
 @Component({
   selector: 'app-follow-up',
   standalone: true,
@@ -88,7 +88,7 @@ export class FollowUpComponent implements OnInit {
   validationErrors: { [key: string]: string } = {};
 
   isDrugModalVisible: boolean = false;
-  drug: Drug = new Drug(0, '', new Date().toISOString());
+  drug: DrugClass = new DrugClass(0, '', new Date().toISOString());
   editDrug: boolean = false;
   drugValidationErrors: { [key: string]: string } = {};
 
@@ -308,7 +308,7 @@ export class FollowUpComponent implements OnInit {
 
   openDrugModal() {
     this.isDrugModalVisible = true;
-    this.drug = new Drug(0, '', new Date().toISOString());
+    this.drug = new DrugClass(0, '', new Date().toISOString());
     this.editDrug = false;
     this.drugValidationErrors = {};
   }
@@ -491,7 +491,7 @@ export class FollowUpComponent implements OnInit {
 
   addDrugAndDose() {
     if (this.selectedDrugId && this.selectedDoseId) {
-      let selectedDrug = new Drug();
+      let selectedDrug = new DrugClass();
       let selectedDose = new Dose();
 
       this.drugs.forEach((element) => {

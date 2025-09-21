@@ -1500,9 +1500,22 @@ namespace LMS_CMS_BL.Config
             CreateMap<LocationAddDTO, Location>();
 
 
+
             CreateMap<Employee, EmployeeReportDto>();
 
 
+
+            CreateMap<EmployeeClocks, EmployeeClocksGetDTO>();
+            CreateMap<EmployeeClocksAddDTO, EmployeeClocks>();
+
+            CreateMap<BankEmployee, BankEmployeeGetDTO>()
+                .ForMember(dest => dest.EmployeeEnglishName, opt => opt.MapFrom(src => src.Employee.en_name))
+                .ForMember(dest => dest.EmployeeArabicName, opt => opt.MapFrom(src => src.Employee.ar_name));
+
+            CreateMap<SafeEmployee, SafeEmployeeGetDTO>()
+                .ForMember(dest => dest.SaveName, opt => opt.MapFrom(src => src.Save.Name))
+                .ForMember(dest => dest.EmployeeEnglishName, opt => opt.MapFrom(src => src.Employee.en_name))
+                .ForMember(dest => dest.EmployeeArabicName, opt => opt.MapFrom(src => src.Employee.ar_name));
         }
     } 
 }

@@ -14,15 +14,15 @@ namespace LMS_CMS_DAL.Migrations.Domains
             migrationBuilder.DropTable(
                 name: "EmployeeVacationCount");
 
-            migrationBuilder.DropColumn(
-                name: "DateOfAppointment",
-                table: "Employee");
+            //migrationBuilder.DropColumn(
+            //    name: "DateOfAppointment",
+            //    table: "Employee");
 
-            migrationBuilder.AddColumn<DateOnly>(
-                name: "HireDate",
-                table: "Employee",
-                type: "date",
-                nullable: true);
+            //migrationBuilder.AddColumn<DateOnly>(
+            //    name: "HireDate",
+            //    table: "Employee",
+            //    type: "date",
+            //    nullable: true);
         }
 
         /// <inheritdoc />
@@ -32,11 +32,11 @@ namespace LMS_CMS_DAL.Migrations.Domains
                 name: "HireDate",
                 table: "Employee");
 
-            migrationBuilder.AddColumn<string>(
-                name: "DateOfAppointment",
-                table: "Employee",
-                type: "nvarchar(max)",
-                nullable: true);
+            //migrationBuilder.AddColumn<string>(
+            //    name: "DateOfAppointment",
+            //    table: "Employee",
+            //    type: "nvarchar(max)",
+            //    nullable: true);
 
             migrationBuilder.CreateTable(
                 name: "EmployeeVacationCount",

@@ -18,8 +18,12 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
+import { Employee } from '../../../../Models/Employee/employee';
+import { EmployeeService } from '../../../../Services/Employee/employee.service';
+import { BankEmployeeService } from '../../../../Services/Employee/Accounting/bank-employee.service';
+import { BankEmployee } from '../../../../Models/Accounting/bank-employee';
 @Component({
   selector: 'app-bank',
   standalone: true,
@@ -36,7 +40,7 @@ export class BankComponent {
   AllowDeleteForOthers: boolean = false;
 
   TableData: Bank[] = [];
-isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   DomainName: string = '';
   UserID: number = 0;
@@ -55,6 +59,11 @@ isRtl: boolean = false;
   AccountNumbers: AccountingTreeChart[] = [];
   isLoading = false
 
+  bankId = 0
+  Employees: Employee[] = [];
+  BankEmployees: BankEmployee[] = [];
+  selectedEmployees: any[] = [];
+
   constructor(
     private router: Router,
     private menuService: MenuService,
@@ -67,7 +76,9 @@ isRtl: boolean = false;
     public BankServ: BankService,
     public accountServ: AccountingTreeChartService,
     private languageService: LanguageService,
-      private realTimeService: RealTimeNotificationServiceService
+    private realTimeService: RealTimeNotificationServiceService,
+    private employeeService: EmployeeService,
+    private bankEmployeeService: BankEmployeeService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -90,26 +101,24 @@ isRtl: boolean = false;
     this.GetAllData();
     this.GetAllAccount();
 
-    
+
     this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-      ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
-     if (this.subscription) {
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
       this.subscription.unsubscribe();
     }
-  } 
-
-
-
+  }
+ 
   GetAllData() {
     this.TableData = []
     this.BankServ.Get(this.DomainName).subscribe((d) => {
-      this.TableData = d; 
+      this.TableData = d;
     })
   }
 
@@ -190,12 +199,12 @@ isRtl: boolean = false;
           this.GetAllData()
           this.isLoading = false
         },
-          err => {
+          error => {
             this.isLoading = false
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
@@ -206,12 +215,12 @@ isRtl: boolean = false;
           this.GetAllData()
           this.isLoading = false
         },
-          err => {
+          error => {
             this.isLoading = false
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' },
             });
@@ -269,9 +278,9 @@ isRtl: boolean = false;
 
     if (this.bank.name.length > 100) {
       isValid = false;
-      this.validationErrors['name']='Name cannot be longer than 100 characters.'
+      this.validationErrors['name'] = 'Name cannot be longer than 100 characters.'
     }
-    
+
     return isValid;
   }
   capitalizeField(field: keyof Bank): string {
@@ -313,5 +322,82 @@ isRtl: boolean = false;
     } catch (error) {
       this.TableData = [];
     }
+  }
+
+  getEmployees(){
+    this.Employees = [] 
+    this.employeeService.Get_Employees(this.DomainName).subscribe(
+      data => {
+        this.Employees = data
+      }
+    )
+  }
+
+  getBankEmployees(){
+    this.BankEmployees = [] 
+    this.bankEmployeeService.Get(this.bankId, this.DomainName).subscribe(
+      data => {
+        this.BankEmployees = data 
+
+        this.selectedEmployees = this.BankEmployees.map(emp => ({
+          employeeID: emp.employeeID,
+          employeeEnglishName: emp.employeeEnglishName,
+          employeeArabicName: emp.employeeArabicName
+        }));
+      }
+    )
+  }
+
+  AddEmployee(bankId: number) { 
+    document.getElementById('Add_Employee')?.classList.remove('hidden');
+    document.getElementById('Add_Employee')?.classList.add('flex');
+
+    this.bankId = bankId
+    this.getEmployees()
+    this.getBankEmployees()
+  }
+
+  closeAddModal() {
+    document.getElementById('Add_Employee')?.classList.remove('flex');
+    document.getElementById('Add_Employee')?.classList.add('hidden'); 
+    this.bankId = 0
+    this.Employees = [] 
+    this.selectedEmployees = [] 
+  }
+
+  
+  onEmployeeSelect(event: any) {
+    const selectedId = +event.target.value;
+    const emp = this.Employees.find(e => e.id === selectedId); 
+    
+    if (emp && !this.selectedEmployees.some(e => e.employeeID === emp.id)) {
+      const newEmp = {
+        employeeID: emp.id,
+        employeeEnglishName: emp.en_name,
+        employeeArabicName: emp.ar_name
+      };
+      this.selectedEmployees.push(newEmp);
+    }
+ 
+    event.target.value = "";
+  }
+
+  removeEmployee(emp: any) {
+    this.selectedEmployees = this.selectedEmployees.filter(e => e.employeeID !== emp.employeeID);
+  }
+
+  Save() {
+    this.isLoading = true;
+    
+    let bankEmp = new BankEmployee()
+    bankEmp.bankID = this.bankId
+    bankEmp.employeeIDs = this.selectedEmployees.map(e => e.employeeID)
+    
+    this.bankEmployeeService.Add(bankEmp, this.DomainName).subscribe(
+      data =>{
+        this.isLoading = false;
+        this.closeAddModal()
+      }
+    ) 
   }
 }

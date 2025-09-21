@@ -20,6 +20,8 @@ import { Employee } from '../../../../Models/Employee/employee';
 import { Saves } from '../../../../Models/Accounting/saves';
 import { EmployeeService } from '../../../../Services/Employee/employee.service';
 import { SaveService } from '../../../../Services/Employee/Accounting/save.service';
+import { SafeEmployeeService } from '../../../../Services/Employee/Accounting/safe-employee.service';
+import { SafeEmployee } from '../../../../Models/Accounting/safe-employee';
 
 @Component({
   selector: 'app-loans',
@@ -56,7 +58,7 @@ export class LoansComponent {
   isLoading = false;
 
   employees: Employee[] = [];
-  safes: Saves[] = [];
+  safes: SafeEmployee[] = [];
   CurrentPage: number = 1
   PageSize: number = 10
   TotalPages: number = 1
@@ -73,7 +75,7 @@ export class LoansComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public LoansServ: LoansService,
-    public SaveServ: SaveService,
+    public SafeEmployeeServ: SafeEmployeeService,
     public EmployeeServ: EmployeeService,
     private realTimeService: RealTimeNotificationServiceService,
   ) { }
@@ -173,6 +175,10 @@ export class LoansComponent {
     this.mode = 'Edit';
     this.LoansServ.GetByID(id, this.DomainName).subscribe((d) => {
       this.loan = d;
+      this.safes = []
+      this.SafeEmployeeServ.GetByEmployeeId(this.loan.employeeID,this.DomainName).subscribe((d) => {
+        this.safes = d
+      })
     });
     this.openModal();
   }
@@ -193,10 +199,6 @@ export class LoansComponent {
       this.AllowEditForOthers
     );
     return IsAllow;
-  }
-
-  GetdeductionStartMonth() {
-
   }
 
   CreateOREdit() {
@@ -223,7 +225,7 @@ export class LoansComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' }
             });
@@ -248,7 +250,7 @@ export class LoansComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' }
             });
@@ -266,7 +268,7 @@ export class LoansComponent {
     this.validationErrors = {};
     this.isModalVisible = true;
     this.getAllEmployees()
-    this.getAllSaves()
+    // this.getAllSaves()
   }
 
   getAllEmployees() {
@@ -276,20 +278,35 @@ export class LoansComponent {
   }
 
   getAllSaves() {
-    this.SaveServ.Get(this.DomainName).subscribe((d) => {
+    this.safes = []
+    this.loan.safeID = 0
+    this.SafeEmployeeServ.GetByEmployeeId(this.loan.employeeID,this.DomainName).subscribe((d) => {
       this.safes = d
+      console.log(this.safes)
     })
   }
 
   validateNumber(event: any, field: keyof Loans): void {
-    const value = event.target.value;
+    let value = event.target.value;
+    // If empty or not a number → reset
     if (isNaN(value) || value === '') {
       event.target.value = '';
-      if (typeof this.loan[field] === 'string') {
-        this.loan[field] = '' as never;
+      this.loan[field] = '' as never;
+      return;
+    }
+    // Convert string → number
+    const numericValue = Number(value);
+    if (field === 'numberOfDeduction') {
+      // If not integer or less than 1 → reset to 1
+      if (!Number.isInteger(numericValue) || numericValue < 1) {
+        this.loan.numberOfDeduction = 1;
+        event.target.value = '1'; // force UI sync
+      } else {
+        this.loan.numberOfDeduction = numericValue;
       }
     }
   }
+
 
   isFormValid(): boolean {
     let isValid = true;

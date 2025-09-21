@@ -19,6 +19,8 @@
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full">
             <option [ngValue]="null"> {{ 'All' | translate }} {{ 'Categories' | translate }}</option>
             <option *ngFor="let category of categories" [ngValue]="category.id">{{ category.name }}</option>
+            <option value="null" *ngIf="categories.length == 0" disabled>{{'No Categories Available'| translate }}</option>
+
         </select>
     </div>
 

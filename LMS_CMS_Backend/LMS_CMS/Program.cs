@@ -243,10 +243,30 @@ namespace LMS_CMS
 
             app.UseRouting();
             app.UseCors("AllowAllOrigins"); // you can keep it permissive; same-origin won’t need it
+
             app.UseAuthentication();
+
+            //////// Get Connection String
+            app.UseWhen(context => context.Request.Path.StartsWithSegments("/api/with-domain"),
+                appBuilder =>
+                {
+                    appBuilder.UseMiddleware<GetConnectionStringMiddleware>();
+                    appBuilder.UseMiddleware<SuspendMiddleware>();
+                });
+
+            /// For Endpoint, to check if the user has access for this endpoint or not
+            /// Make sure to be here before UseAuthorization
+            app.UseMiddleware<Endpoint_Authorization_Middleware>();
+
             app.UseAuthorization();
 
             app.MapControllers();
+            // 2) SignalR
+            app.MapHub<NotificationHub>("/notificationHub").RequireAuthorization();
+            app.MapHub<RequestHub>("/requestHub").RequireAuthorization();
+            app.MapHub<ChatMessageHub>("/chatMessageHub").RequireAuthorization();
+
+
             app.MapFallbackToFile("index.html");
 
 
@@ -261,15 +281,7 @@ namespace LMS_CMS
                     ctx.Context.Response.Headers.Append("Access-Control-Allow-Origin", "*");
                 }
             });
-
-
-
-            //////// Get Connection String
-            app.UseWhen(context => context.Request.Path.StartsWithSegments("/api/with-domain"),
-                appBuilder =>
-            {
-                appBuilder.UseMiddleware<GetConnectionStringMiddleware>();
-            });
+             
              
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -280,28 +292,14 @@ namespace LMS_CMS
 
             // Redirects http:// requests to https://.
             app.UseHttpsRedirection();
-
-
-            /// For Endpoint, to check if the user has access for this endpoint or not
-            /// Make sure to be here before UseAuthorization
-            app.UseMiddleware<Endpoint_Authorization_Middleware>();
-        
-
-
-            // 2) SignalR
-            app.MapHub<NotificationHub>("/notificationHub").RequireAuthorization();
-            app.MapHub<RequestHub>("/requestHub").RequireAuthorization();
-            app.MapHub<ChatMessageHub>("/chatMessageHub").RequireAuthorization();
-            
+              
 
             //app.Urls.Add("http://0.0.0.0:5000");
             //app.UseCors(builder =>
             //    builder.AllowAnyOrigin()
             //   .AllowAnyMethod()
             //   .AllowAnyHeader()
-            //);
-
-            app.MapControllers();
+            //); 
 
             app.Run();
         }

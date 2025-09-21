@@ -1,123 +1,107 @@
 <div class="">
-    <div class="flex justify-between">
-      <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Safe' | translate }}</h1>
-      <div class="flex justify-between items-center">
-        <app-search
-          [keysArray]="keysArray"
-          (searchEvent)="onSearchEvent($event)"
-        ></app-search>
-        <button
-          (click)="Create()"
-          class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2"
-        >
-           {{ 'Create Safe' | translate }}
-        </button>
-      </div>
-    </div>
-  
-    <div>
-      <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
-        <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
-          <thead
-            class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
-            <tr>
-              <th
-                class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-             {{ 'ID' | translate }}
-              </th>
-              <th
-                class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                {{ 'Name' | translate }}
-              </th>
-              <th
-                class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                {{ 'Account Number' | translate }}
-              </th>
-              <th
-                class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                  {{ 'Actions' | translate }}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- No Data Row -->
-            <tr *ngIf="TableData.length === 0">
-              <td
-                colspan="11"
-                class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm"
-              >
-                {{ 'No Data Found' | translate }}
-              </td>
-            </tr>
-  
-            <!-- Data Rows -->
-            <tr
-              *ngFor="let row of TableData; let i = index"
-              [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
-              class="border-t border-gray-300 text-xs md:text-sm"
-            >
-              <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                {{ row.id }}
-              </td>
-              <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                {{ row.name }}
-              </td>
-              <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                  {{ row.accountNumberName }}
-              </td>
-              <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                <div class="flex space-x-4 rtl:space-x-reverse">
-                  <button
-                    *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)"
-                    (click)="Delete(row.id)"
-                  >
-                    <i class="fa-regular fa-trash-can"></i>
-                  </button>
-                  <button
-                    *ngIf="AllowEdit && IsAllowEdit(row.insertedByUserId)"
-                    (click)="Edit(row.id)"
-                  >
-                    <i class="fa-solid fa-pencil"></i>
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+  <div class="flex justify-between">
+    <h1 class="primaryTxt font-semibold text-2xl leading-9"> {{ 'Safe' | translate }}</h1>
+    <div class="flex justify-between items-center">
+      <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
+      <button (click)="Create()"
+        class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
+        {{ 'Create Safe' | translate }}
+      </button>
     </div>
   </div>
-  
-  
+
+  <div>
+    <div class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
+      <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
+        <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+          <tr>
+            <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+              {{ 'ID' | translate }}
+            </th>
+            <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+              {{ 'Name' | translate }}
+            </th>
+            <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+              {{ 'Account Number' | translate }}
+            </th>
+            <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+              {{ 'Actions' | translate }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- No Data Row -->
+          <tr *ngIf="TableData.length === 0">
+            <td colspan="11"
+              class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+              {{ 'No Data Found' | translate }}
+            </td>
+          </tr>
+
+          <!-- Data Rows -->
+          <tr *ngFor="let row of TableData; let i = index"
+            [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
+            class="border-t border-gray-300 text-xs md:text-sm">
+            <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+              {{ row.id }}
+            </td>
+            <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+              {{ row.name }}
+            </td>
+            <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+              {{ row.accountNumberName }}
+            </td>
+            <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+              <div class="flex space-x-4 rtl:space-x-reverse">
+                <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)" (click)="Delete(row.id)">
+                  <i class="fa-regular fa-trash-can"></i>
+                </button>
+                <button *ngIf="AllowEdit && IsAllowEdit(row.insertedByUserId)" (click)="Edit(row.id)">
+                  <i class="fa-solid fa-pencil"></i>
+                </button>
+                <button (click)="AddEmployee(row.id)" title="Add Employee">
+                  <i class="fa-solid fa-user-plus"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
 <!-- Modal -->
 <div id="default-modal" tabindex="-1" aria-hidden="true" [ngClass]="{ hidden: !isModalVisible }"
-class="fixed top-0 left-0 right-0 z-50 flex justify-center items-center w-full h-full bg-black/50">
-<div class="relative bg-white w-[669px] h-auto rounded-2xl p-12 gap-4 shadow-md">
-  <!-- Close Icon -->
-  <button (click)="closeModal()"
-    class="absolute top-4 right-4 text-gray-400 hover:text-gray-900 transition duration-200">
-    <i class="fa-solid fa-xmark text-2xl"></i>
-  </button>
+  class="fixed top-0 left-0 right-0 z-50 flex justify-center items-center w-full h-full bg-black/50">
+  <div class="relative bg-white w-[669px] h-auto rounded-2xl p-12 gap-4 shadow-md">
+    <!-- Close Icon -->
+    <button (click)="closeModal()"
+      class="absolute top-4 right-4 text-gray-400 hover:text-gray-900 transition duration-200">
+      <i class="fa-solid fa-xmark text-2xl"></i>
+    </button>
 
-  <h1 *ngIf="mode == 'Create'" class="font-semibold text-2xl leading-9">
-     {{ 'Create Safe' | translate }}
-  </h1>
-  <h1 *ngIf="mode == 'Edit'" class="font-semibold text-2xl leading-9">
-     {{ 'Edit Safe' | translate }}
-  </h1>
-  <div class="mt-4 bg-[#F7F7F7] w-[573px] h-auto rounded-[24px] p-[16px_24px] gap-[20px]">
-    <div class="flex flex-col mt-2 gap-2 items-start">
-      <h6 class="font-medium text-base leading-6"> {{ 'Safe Name' | translate }}</h6>
-      <input type="text" class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2"
-        [(ngModel)]="save.name" placeholder="{{ 'Enter name' | translate }}" (ngModelChange)="
+    <h1 *ngIf="mode == 'Create'" class="font-semibold text-2xl leading-9">
+      {{ 'Create Safe' | translate }}
+    </h1>
+    <h1 *ngIf="mode == 'Edit'" class="font-semibold text-2xl leading-9">
+      {{ 'Edit Safe' | translate }}
+    </h1>
+    <div class="mt-4 bg-[#F7F7F7] w-[573px] h-auto rounded-[24px] p-[16px_24px] gap-[20px]">
+      <div class="flex flex-col mt-2 gap-2 items-start">
+        <h6 class="font-medium text-base leading-6"> {{ 'Safe Name' | translate }}</h6>
+        <input type="text" class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2"
+          [(ngModel)]="save.name" placeholder="{{ 'Enter name' | translate }}" (ngModelChange)="
               onInputValueChange({ field: 'name', value: $event })" />
-      <span *ngIf="validationErrors['name']" class="text-red-500 ml-3 font-normal">{{ validationErrors["name"]}}</span>
-    </div>
+        <span *ngIf="validationErrors['name']" class="text-red-500 ml-3 font-normal">{{
+          validationErrors["name"]}}</span>
+      </div>
       <div class="flex flex-col my-4">
         <label class="mb-2 " for="Account Number"> {{ 'Account Number' | translate }}</label>
         <select (ngModelChange)="onInputValueChange({ field: 'accountNumberID', value: $event })"
-          class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto w-full h-[45px]"  id="accountNumberID"
-          [(ngModel)]="save.accountNumberID">
+          class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto w-full h-[45px]"
+          id="accountNumberID" [(ngModel)]="save.accountNumberID">
           <option [value]="0" disabled selected hidden>{{ 'Choose Account Number' | translate }}</option>
           <option *ngFor="let num of AccountNumbers" [value]="num.id">{{ num.name }}</option>
           <option *ngIf="AccountNumbers.length === 0" disabled selected>{{ 'No Data Found' | translate }}</option>
@@ -127,11 +111,49 @@ class="fixed top-0 left-0 right-0 z-50 flex justify-center items-center w-full h
       </div>
       <div class="flex justify-end">
         <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg mt-2"
-        (click)="CreateOREdit()">
-        <span *ngIf="!isLoading">{{ 'Save' | translate }}</span>
-        <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
-      </button>
+          (click)="CreateOREdit()">
+          <span *ngIf="!isLoading">{{ 'Save' | translate }}</span>
+          <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+        </button>
       </div>
+    </div>
   </div>
 </div>
+
+
+
+<div id="Add_Employee" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
+  <div class="bg-white rounded-2xl p-12 w-[669px] max-h-[90%] overflow-y-auto">
+    <div class="flex justify-between items-center">
+      <h1 class="font-semibold text-2xl leading-9">{{ 'Employee' | translate }}</h1>
+      <button (click)="closeAddModal()" type="button"
+        class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
+    </div>
+
+    <div class="mt-6">
+      <label class="mb-2">{{ 'Employees' | translate }}</label> 
+      <select class="border rounded-lg p-2 w-full" (change)="onEmployeeSelect($event)">
+        <option value="" disabled selected>{{ 'Select' | translate }} {{ 'Employee' | translate }}</option>
+        <option *ngFor="let emp of Employees" [value]="emp.id">
+          {{ emp.en_name }} ({{ emp.ar_name }})
+        </option>
+      </select> 
+      <div class="flex flex-wrap gap-2 mt-4">
+        <div *ngFor="let emp of selectedEmployees" class="flex items-center bg-gray-200 px-3 py-1 rounded-lg space-x-2 rtl:space-x-reverse">
+          <span>{{ emp.employeeEnglishName }} ({{ emp.employeeArabicName }})</span>
+          <button (click)="removeEmployee(emp)" class="text-red-600 font-semibold">x</button>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="flex justify-end">
+      <div class="flex justify-end mt-4">
+        <button [disabled]="isLoading" class="secondaryBg text-white font-medium px-4 py-2 rounded-lg" (click)="Save()">
+          <span *ngIf="!isLoading">{{ 'Save' | translate }}</span>
+          <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+        </button>
+      </div>
+    </div>
+  </div>
 </div>

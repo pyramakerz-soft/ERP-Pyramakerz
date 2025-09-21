@@ -97,14 +97,17 @@
             <div class="flex flex-col mb-4 w-full">
                 <label class="mb-2 primaryTxt" for="employeeID">{{ 'Employee' | translate }}</label>
                 <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="employeeID"
-                    [(ngModel)]="loan.employeeID"(ngModelChange)="onInputValueChange({ field: 'employeeID', value: $event })">
-                    <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Employee' |translate }}</option>
+                    [(ngModel)]="loan.employeeID"
+                    (ngModelChange)="onInputValueChange({ field: 'employeeID', value: $event }); getAllSaves()">
+                    <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Employee' |translate }}
+                    </option>
                     <option *ngFor="let emp of employees" [value]="emp.id">{{ emp.en_name }}
                     </option>
                     <option *ngIf="employees.length === 0" disabled selected> {{ 'No Data Found' |translate }}
                     </option>
                 </select>
-                <span *ngIf="validationErrors['employeeID']" class="text-red-500 ml-3 font-normal">{{validationErrors["employeeID"]}}</span>
+                <span *ngIf="validationErrors['employeeID']"
+                    class="text-red-500 ml-3 font-normal">{{validationErrors["employeeID"]}}</span>
             </div>
 
             <div class="flex flex-col mb-4 w-full">
@@ -112,48 +115,58 @@
                 <input id="date" type="date" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                     placeholder="{{ 'Enter Date' | translate }}" [(ngModel)]="loan.date"
                     (ngModelChange)="onInputValueChange({ field: 'date', value: $event })" />
-                <span *ngIf="validationErrors['date']" class="text-red-500 ml-3 font-normal">{{validationErrors['date']}}</span>
+                <span *ngIf="validationErrors['date']"
+                    class="text-red-500 ml-3 font-normal">{{validationErrors['date']}}</span>
             </div>
 
             <div class="flex flex-col mb-4 w-[49%]">
                 <label class="mb-2" for="safeID">{{ 'Safe' | translate }}</label>
-                <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="safeID"
+                <select class="rounded-lg border border-solid border-gray-300 px-4 py-3 overflow-y-auto" id="safeID" [disabled]="!loan.employeeID"
                     [(ngModel)]="loan.safeID" (ngModelChange)="onInputValueChange({ field: 'safeID', value: $event })">
-                    <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Safe' |translate }} </option>
-                    <option *ngFor="let safe of safes" [value]="safe.id">{{ safe.name }}</option>
+                    <option [value]="0" disabled selected hidden> {{ 'Choose' | translate }} {{ 'Safe' |translate }}
+                    </option>
+                    <option *ngFor="let safe of safes" [value]="safe.saveID">{{ safe.saveName }}</option>
                     <option *ngIf="safes.length === 0" disabled selected> {{ 'No Data Found' | translate }} </option>
                 </select>
-                <span *ngIf="validationErrors['safeID']"class="text-red-500 ml-3 font-normal">{{validationErrors["safeID"]}}</span>
+                <span *ngIf="validationErrors['safeID']"
+                    class="text-red-500 ml-3 font-normal">{{validationErrors["safeID"]}}</span>
             </div>
 
             <div class="flex flex-col mb-4 w-[49%]">
                 <label class="mb-2 primaryTxt" for="amount"> {{ 'Amount' | translate }}</label>
                 <input id="amount" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                    placeholder="{{ 'Enter Amount' | translate }}" [(ngModel)]="loan.amount" (input)="validateNumber($event,'amount')"
+                    placeholder="{{ 'Enter Amount' | translate }}" [(ngModel)]="loan.amount"
+                    (input)="validateNumber($event,'amount')"
                     (ngModelChange)="onInputValueChange({ field: 'amount', value: $event })" />
-                <span *ngIf="validationErrors['amount']" class="text-red-500 ml-3 font-normal">{{validationErrors['amount']}}</span>
+                <span *ngIf="validationErrors['amount']"
+                    class="text-red-500 ml-3 font-normal">{{validationErrors['amount']}}</span>
             </div>
 
             <div class="flex flex-col mb-4 w-[49%]">
-                <label for="deductionStartMonth" class="mb-2 primaryTxt"> {{ 'Deduction Start Month' | translate }} </label>
-                <input id="deductionStartMonth" type="month" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+                <label for="deductionStartMonth" class="mb-2 primaryTxt"> {{ 'Deduction Start Month' | translate }}
+                </label>
+                <input id="deductionStartMonth" type="month"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
                     placeholder="{{ 'Enter Deduction Start Month' | translate }}" [(ngModel)]="displayMonth" />
-                <span *ngIf="validationErrors['deductionStartMonth']" class="text-red-500 ml-3 font-normal">{{validationErrors['deductionStartMonth']}}</span>
+                <span *ngIf="validationErrors['deductionStartMonth']"
+                    class="text-red-500 ml-3 font-normal">{{validationErrors['deductionStartMonth']}}</span>
             </div>
 
             <div class="flex flex-col mb-4 w-[49%]">
                 <label class="mb-2 primaryTxt" for="numberOfDeduction"> {{ 'Number Of Deduction' | translate }}</label>
-                <input id="numberOfDeduction" type="text" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                    placeholder="{{ 'Enter Number Of Deduction' | translate }}" [(ngModel)]="loan.numberOfDeduction" (input)="validateNumber($event,'numberOfDeduction')"
-                    (ngModelChange)="onInputValueChange({ field: 'numberOfDeduction', value: $event })" />
-                <span *ngIf="validationErrors['numberOfDeduction']" class="text-red-500 ml-3 font-normal">{{validationErrors['numberOfDeduction']}}</span>
+                <input id="numberOfDeduction" type="number"
+                    class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                    [(ngModel)]="loan.numberOfDeduction" (input)="validateNumber($event,'numberOfDeduction')"
+                    (ngModelChange)="onInputValueChange({ field: 'numberOfDeduction', value: $event })" min="1"
+                    step="1" />
+                <span *ngIf="validationErrors['numberOfDeduction']"
+                    class="text-red-500 ml-3 font-normal">{{validationErrors['numberOfDeduction']}}</span>
             </div>
 
             <div class="flex flex-col mb-4 w-full">
                 <label class="mb-2 primaryTxt" for="notes"> {{ 'Notes' | translate }}</label>
                 <textarea id="notes" class="w-full rounded-lg border border-solid border-gr ay-300 px-4 py-3"
-                    placeholder="{{ 'Add Notes' | translate }}"
-                    [(ngModel)]="loan.notes">
+                    placeholder="{{ 'Add Notes' | translate }}" [(ngModel)]="loan.notes">
                 </textarea>
             </div>
 
@@ -170,34 +183,35 @@
 
 <div class="mt-8 flex justify-between items-center">
     <div class="flex items-center space-x-4  rtl:space-x-reverse">
-        <button class="flex items-center space-x-2 rounded-lg border py-3 px-4  rtl:space-x-reverse" (click)="changeCurrentPage(CurrentPage-1)"
-        [disabled]="CurrentPage === 1 || TableData.length == 0"
-        [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === 1 || TableData.length == 0}">
+        <button class="flex items-center space-x-2 rounded-lg border py-3 px-4  rtl:space-x-reverse"
+            (click)="changeCurrentPage(CurrentPage-1)" [disabled]="CurrentPage === 1 || TableData.length == 0"
+            [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === 1 || TableData.length == 0}">
             <i class="fa-solid fa-arrow-left"></i>
             <p> {{'Previous'| translate }}</p>
         </button>
         <div class="flex">
-            <div *ngFor="let page of visiblePages"
-                class="rounded-lg py-[10px] w-[40px]"
+            <div *ngFor="let page of visiblePages" class="rounded-lg py-[10px] w-[40px]"
                 [ngClass]="{ 'border': page === CurrentPage, 'hover:bg-gray-100': page !== CurrentPage }"
                 (click)="changeCurrentPage(page)">
                 <p class="cursor-pointer text-center">{{ page }}</p>
             </div>
         </div>
-        <button class="flex items-center space-x-2 rounded-lg border py-3 px-4  rtl:space-x-reverse" (click)="changeCurrentPage(CurrentPage+1)"
-        [disabled]="CurrentPage === TotalPages || TableData.length == 0"
-        [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === TotalPages || TableData.length == 0}">
-            <p> {{'Next'| translate }}</p> 
+        <button class="flex items-center space-x-2 rounded-lg border py-3 px-4  rtl:space-x-reverse"
+            (click)="changeCurrentPage(CurrentPage+1)" [disabled]="CurrentPage === TotalPages || TableData.length == 0"
+            [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === TotalPages || TableData.length == 0}">
+            <p> {{'Next'| translate }}</p>
             <i class="fa-solid fa-arrow-right"></i>
         </button>
     </div>
 
     <div class="flex items-center space-x-2 rtl:space-x-reverse">
-        <input  (input)="validateNumberPage($event)" class="rounded-lg border py-3 px-4 w-[73px]" [(ngModel)]="PageSize" min="1" (input)="validatePageSize($event)" (ngModelChange)="changeCurrentPage(CurrentPage)">
+        <input (input)="validateNumberPage($event)" class="rounded-lg border py-3 px-4 w-[73px]" [(ngModel)]="PageSize"
+            min="1" (input)="validatePageSize($event)" (ngModelChange)="changeCurrentPage(CurrentPage)">
         <p> {{'items Per Page'| translate }}</p>
     </div>
 
     <div>
-        <p>{{CurrentPage}}  {{'of'| translate }} {{TotalPages}} {{'pages'| translate }} ({{TotalRecords}}  {{'Item'| translate }})</p>
+        <p>{{CurrentPage}} {{'of'| translate }} {{TotalPages}} {{'pages'| translate }} ({{TotalRecords}} {{'Item'|
+            translate }})</p>
     </div>
 </div>

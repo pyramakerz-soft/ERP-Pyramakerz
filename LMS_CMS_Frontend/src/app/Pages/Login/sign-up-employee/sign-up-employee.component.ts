@@ -9,7 +9,7 @@ import { RecaptchaComponent, RecaptchaModule } from 'ng-recaptcha';
 import Swal from 'sweetalert2';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../Services/shared/real-time-notification-service.service';
 
 @Component({
@@ -21,38 +21,38 @@ import { RealTimeNotificationServiceService } from '../../../Services/shared/rea
 })
 export class SignUpEmployeeComponent {
   DomainName: string = '';
-  employee:RegisteredEmployee = new RegisteredEmployee()
+  employee: RegisteredEmployee = new RegisteredEmployee()
   confirmPassword: string = '';
-    isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   validationErrors: { [key in keyof RegisteredEmployee]?: string } = {};
-  isLoading = false;  
+  isLoading = false;
   IsConfimPassEmpty = false
 
   @ViewChild(RecaptchaComponent) captchaRef!: RecaptchaComponent;
-  
-  constructor(private router: Router, private languageService: LanguageService,private realTimeService: RealTimeNotificationServiceService, public registeredEmployeeService: RegisteredEmployeeService, public ApiServ: ApiService) { }
-  
+
+  constructor(private router: Router, private languageService: LanguageService, private realTimeService: RealTimeNotificationServiceService, public registeredEmployeeService: RegisteredEmployeeService, public ApiServ: ApiService) { }
+
   ngOnInit() {
-    this.DomainName = this.ApiServ.GetHeader(); 
-        this.subscription = this.languageService.language$.subscribe(direction => {
+    this.DomainName = this.ApiServ.GetHeader();
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void { 
-          this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
- 
+
   onCaptchaResolved(token: string | null): void {
     if (token) {
       this.employee.recaptchaToken = token;
       this.validationErrors['recaptchaToken'] = ''
-    } else { 
+    } else {
       this.employee.recaptchaToken = '';
     }
   }
@@ -62,7 +62,7 @@ export class SignUpEmployeeComponent {
     value = value.replace(/[^0-9]/g, '')
     event.target.value = value;
     if (!/^\d+$/.test(value)) {
-      event.target.value = ''; 
+      event.target.value = '';
       if (typeof this.employee[field] === 'string') {
         this.employee[field] = '' as never;
       }
@@ -94,20 +94,20 @@ export class SignUpEmployeeComponent {
       isValid = false;
     }
 
-    if(this.confirmPassword != ""){
+    if (this.confirmPassword != "") {
       if (this.employee.password != this.confirmPassword) {
         this.validationErrors['password'] = 'Password And Confirm Password are not The Same';
         isValid = false;
       }
-    } else{
+    } else {
       this.IsConfimPassEmpty = true
       isValid = false;
     }
 
-    if(this.employee.recaptchaToken == ""){ 
+    if (this.employee.recaptchaToken == "") {
       this.validationErrors['recaptchaToken'] = 'You Need To Confirm That You are not a Robot';
       isValid = false;
-    } else{
+    } else {
       this.validationErrors['recaptchaToken'] = '';
     }
 
@@ -125,14 +125,14 @@ export class SignUpEmployeeComponent {
       this.validationErrors[field] = '';
     }
   }
-  
+
   onConfirmPasswordChange() {
     this.validationErrors['password'] = '';
     this.IsConfimPassEmpty = false
   }
 
-  SignUp(){ 
-    if(this.isFormValid()){
+  SignUp() {
+    if (this.isFormValid()) {
       this.isLoading = true;
       this.registeredEmployeeService.Add(this.employee, this.DomainName).subscribe(
         data => {
@@ -147,9 +147,9 @@ export class SignUpEmployeeComponent {
           this.confirmPassword = ''
           this.captchaRef.reset();
         },
-        error => { 
-          this.employee.recaptchaToken = ''; 
-          this.isLoading = false; 
+        error => {
+          this.employee.recaptchaToken = '';
+          this.isLoading = false;
           if (this.captchaRef) {
             this.captchaRef.reset();
           }

@@ -414,9 +414,37 @@ namespace LMS_CMS_PL.Controllers.Domains
 
         ///////////////////////////////////////////////////////////////////////////////////////
 
-        [HttpGet("{empId}")]
+        [HttpGet("GetMyData")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" }
+        )]
+        public async Task<IActionResult> GetMyData()
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            Employee employee = await Unit_Of_Work.employee_Repository.FindByIncludesAsync(
+                    emp => emp.IsDeleted != true && emp.ID == userId,
+                    query => query.Include(emp => emp.BusCompany),
+                    query => query.Include(emp => emp.EmployeeType),
+                    query => query.Include(emp => emp.Role));
+
+            if (employee == null || employee.IsDeleted == true)
+            {
+                return NotFound("No employee found");
+            }
+
+            Employee_GetDTO employeeDTO = mapper.Map<Employee_GetDTO>(employee);
+              
+            return Ok(employeeDTO); 
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpGet("{empId}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Employee" }
         )]
         public async Task<IActionResult> GetByIDAsync(long empId)
         {
@@ -515,6 +543,63 @@ namespace LMS_CMS_PL.Controllers.Domains
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpGet("getInfoByToken")]
+        [Authorize_Endpoint_(
+         allowedTypes: new[] { "octa", "employee" }
+        )]
+        public async Task<IActionResult> GetByTokenAsync()
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userClaims = HttpContext.User.Claims;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+
+            if (userIdClaim == null || userTypeClaim == null)
+            {
+                return Unauthorized("User ID or Type claim not found.");
+            }
+
+            long empId = long.Parse(userIdClaim);
+
+            Employee employee = await Unit_Of_Work.employee_Repository.FindByIncludesAsync(
+                    emp => emp.IsDeleted != true && emp.ID == empId,
+                    query => query.Include(emp => emp.BusCompany),
+                    query => query.Include(emp => emp.EmployeeType),
+                    query => query.Include(emp => emp.Role));
+
+            if (employee == null || employee.IsDeleted == true)
+            {
+                return NotFound("No employee found");
+            }
+
+            Employee_GetDTO employeeDTO = mapper.Map<Employee_GetDTO>(employee);
+
+            List<EmployeeLocation> employeeLocations = Unit_Of_Work.employeeLocation_Repository
+              .FindBy(s => s.EmployeeID == employeeDTO.ID && s.IsDeleted != true);
+
+            var locationIds = employeeLocations.Select(ss => ss.LocationID).ToList();
+
+            List<Location> locations = Unit_Of_Work.location_Repository
+                .FindBy(s => locationIds.Contains(s.ID) && s.IsDeleted != true);
+
+            employeeDTO.Locations = mapper.Map<List<LocationGetDTO>>(locations);
+
+            EmployeeClocks lastClock = Unit_Of_Work.employeeClocks_Repository
+              .FindBy(e => e.IsDeleted != true && e.EmployeeID == employee.ID)
+              .OrderByDescending(e => e.Date)
+              .ThenByDescending(e => e.ClockIn)
+              .FirstOrDefault();
+
+            employeeDTO.IsClockedIn = lastClock != null && lastClock.ClockOut == null;
+
+            return Ok(employeeDTO);
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////////////
+
 
         [HttpPost]
         [Authorize_Endpoint_(

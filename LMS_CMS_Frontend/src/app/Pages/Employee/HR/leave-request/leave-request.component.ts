@@ -178,6 +178,7 @@ export class LeaveRequestComponent {
     this.LeaveRequestServ.GetByID(id, this.DomainName).subscribe((d) => {
       this.leaveRequest = { ...d };
       this.OldleaveRequest = { ...d };
+      this.leaveRequest.remains=this.leaveRequest.monthlyLeaveRequestBalance-this.leaveRequest.used
     });
     this.openModal();
   }
@@ -236,7 +237,7 @@ export class LeaveRequestComponent {
   formatHours(value: number): string {
     const hours = Math.floor(value);
     const minutes = Math.round((value - hours) * 60);
-    return `${hours}.${minutes.toString().padStart(2, '0')}`;
+    return `${hours}:${minutes.toString().padStart(2, '0')}`;
   }
 
   validateNumber(event: any, field: keyof LeaveRequest): void {
@@ -315,7 +316,7 @@ export class LeaveRequestComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' }
             });
@@ -340,7 +341,7 @@ export class LeaveRequestComponent {
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: 'Try Again Later!',
+              text: error.error,
               confirmButtonText: 'Okay',
               customClass: { confirmButton: 'secondaryBg' }
             });

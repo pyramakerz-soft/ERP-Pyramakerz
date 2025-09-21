@@ -35,10 +35,7 @@ export class LoginComponent {
   userNameError: string = "";
   passwordError: string = "";
   somthingError: string = "";
-
-  token1 = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
-  token2 = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
-
+  
   allTokens: { id: number, key: string; KeyInLocal: string; value: string; UserType:string}[] = [];
   User_Data_After_Login2 = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
   isLoading: boolean = false
@@ -193,17 +190,14 @@ export class LoginComponent {
             this.somthingError = "Username, Password or Type maybe wrong"
           }else if (error.status == 404) {
             this.somthingError = "Username, Password or Type maybe wrong"
-          } else {
+          } else if (error.status === 403 && error.error === 'User is suspended.') {  
             Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: 'Try Again Later!',
-              confirmButtonText: 'Okay',
-              customClass: {
-                confirmButton: 'secondaryBg' // Add your custom class here
-              }
-            });
-          }
+              icon: 'warning',
+              title: 'Account suspended',
+              text: 'Your account has been suspended.',
+              confirmButtonText: 'OK'
+            })
+          } 
         }
       );
     }
@@ -215,16 +209,22 @@ export class LoginComponent {
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       const value = localStorage.getItem(key || '');
-
+      
       if (key && key.includes('token') && key != "current_token"&& key != "token") {
         if (value) {
+          console.log("Key: ", key)
+          console.log("Value: ", value)
           this.User_Data_After_Login2 = jwtDecode(value)
-
-          this.allTokens.push({ id: count, key: this.User_Data_After_Login2.user_Name, KeyInLocal: key, value: value || '' ,UserType:this.User_Data_After_Login2.type});
-          count++;
+          
+          this.allTokens.push({ id: count, 
+            key: this.User_Data_After_Login2.user_Name, 
+            KeyInLocal: key, value: value || '' ,
+            UserType:this.User_Data_After_Login2.type});
+            count++;
+          }
         }
       }
-    }
+    console.log("allTokens: ", this.allTokens)
   }
 
   selectType(type: string) {
