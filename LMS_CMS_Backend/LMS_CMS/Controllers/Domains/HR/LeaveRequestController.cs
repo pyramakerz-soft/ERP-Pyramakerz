@@ -475,7 +475,8 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                     .First_Or_Default(e => e.ID == request.EmployeeId.Value && e.IsDeleted != true);
 
                 if (employee == null)
-                    return NotFound("No employee found with this ID");
+                    return NotFound("No employee found with this ID.");
+
             }
 
             if (request.JobId.HasValue && request.JobId.Value > 0)
@@ -484,7 +485,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                     .First_Or_Default(j => j.ID == request.JobId.Value && j.IsDeleted != true);
 
                 if (job == null)
-                    return NotFound("No job found with this ID");
+                    return NotFound("No job found with this ID.");
             }
 
             if (request.CategoryId.HasValue && request.CategoryId.Value > 0)
@@ -548,7 +549,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             );
 
             if (!leaveRequests.Any())
-                return NotFound("No leaveRequests found");
+                return NotFound("No leaveRequests found.");
 
             var leaveRequestDtos = mapper.Map<List<leaveRequestsGetDTO>>(leaveRequests);
             foreach (var dto in leaveRequestDtos)
