@@ -13,7 +13,8 @@ export class Maintenance {
   public employeeEnglishName: string | null = null ,
   public employeeArabicName: string | null = null ,
   public maintenanceEmployeeID: number | null = null ,
-  public cost: number | null = null ,
+  public cost: number | null = null,
+  public costRawString: string = '', // Add this line to store the raw string
   public note: string = '',
   public en_Name: string = '',
   public ar_Name: string = '',

@@ -38,7 +38,9 @@ export class MaintenanceComponent implements OnInit, OnDestroy {
   headers: string[] = ['ID', 'Date', 'Item', 'Company', 'Employee', 'Cost', 'Note', 'Actions'];
   keys: string[] = ['id', 'date', 'itemEnglishName', 'companyEnglishName', 'employeeEnglishName', 'cost', 'note'];
   keysArray: string[] = ['id', 'itemEnglishName', 'companyEnglishName', 'employeeEnglishName', 'note'];
-  
+  formattedCost: string = '';
+
+
   // Data
   maintenanceList: any[] = []; // Changed to any[] to include actions property
   maintenanceItems: MaintenanceItem[] = [];
@@ -142,46 +144,46 @@ export class MaintenanceComponent implements OnInit, OnDestroy {
     }
   }
 
-  async loadMaintenance(): Promise<void> {
-    try {
-      const domainName = this.apiService.GetHeader();
-      const data = await firstValueFrom(this.maintenanceService.getAll(domainName));
+async loadMaintenance(): Promise<void> {
+  try {
+    const domainName = this.apiService.GetHeader();
+    const data = await firstValueFrom(this.maintenanceService.getAll(domainName));
+    
+    this.maintenanceList = data.map(item => {
+      // Keep dates as strings for proper binding to HTML date input
+      const maintenanceItem: any = {
+        ...item,
+        // Remove Date object conversion - keep as strings
+        date: item.date, // Keep as string for proper date input binding
+        fromDate: item.fromDate,
+        toDate: item.toDate,
+        // Handle null values for display purposes
+        companyEnglishName: item.companyEnglishName || '-',
+        companyArabicName: item.companyArabicName || '-',
+        employeeEnglishName: item.employeeEnglishName || '-',
+        employeeArabicName: item.employeeArabicName || '-',
+        // Ensure numeric fields have proper values
+        cost: item.cost ?? null,
+        companyID: item.companyID ?? null,
+        maintenanceEmployeeID: item.maintenanceEmployeeID ?? null,
+        insertedByUserId: item.insertedByUserId ?? undefined,
+        // Add actions property for the table component
+        actions: {
+          edit: this.IsAllowEdit(item.insertedByUserId || 0),
+          delete: this.IsAllowDelete(item.insertedByUserId || 0),
+          view: false
+        }
+      };
       
-      this.maintenanceList = data.map(item => {
-        // Create a new object with all the properties from the API response
-        const maintenanceItem: any = {
-          ...item,
-          // Ensure date is properly handled (convert string to Date if needed)
-          date: typeof item.date === 'string' ? new Date(item.date) : item.date,
-          fromDate: typeof item.fromDate === 'string' ? new Date(item.fromDate) : item.fromDate,
-          toDate: typeof item.toDate === 'string' ? new Date(item.toDate) : item.toDate,
-          // Handle null values for display purposes
-          companyEnglishName: item.companyEnglishName || '-',
-          companyArabicName: item.companyArabicName || '-',
-          employeeEnglishName: item.employeeEnglishName || '-',
-          employeeArabicName: item.employeeArabicName || '-',
-          // Ensure numeric fields have proper values
-          cost: item.cost ?? null,
-          companyID: item.companyID ?? null,
-          maintenanceEmployeeID: item.maintenanceEmployeeID ?? null,
-          insertedByUserId: item.insertedByUserId ?? undefined,
-          // Add actions property for the table component
-          actions: {
-            edit: this.IsAllowEdit(item.insertedByUserId || 0),
-            delete: this.IsAllowDelete(item.insertedByUserId || 0),
-            view: false // Set to true if you want view action
-          }
-        };
-        
-        return maintenanceItem;
-      });
+      return maintenanceItem;
+    });
 
-      this.applySearchFilter();
-    } catch (error) {
-      console.error('Error loading maintenance data:', error);
-      Swal.fire('Error', 'Failed to load maintenance records', 'error');
-    }
+    this.applySearchFilter();
+  } catch (error) {
+    console.error('Error loading maintenance data:', error);
+    Swal.fire('Error', 'Failed to load maintenance records', 'error');
   }
+}
 
   private applySearchFilter(): void {
     if (this.searchValue) {
@@ -198,40 +200,47 @@ export class MaintenanceComponent implements OnInit, OnDestroy {
     await this.loadMaintenance();
   }
 
-  openModal(item?: any): void {
-    this.isModalVisible = true;
-    this.editMode = !!item;
-    this.validationErrors = {};
-    
-    if (item) {
-      this.selectedMaintenance = item;
-      this.maintenanceForm = {
-        id: item.id,
-        date: item.date,
-        fromDate: item.fromDate,
-        toDate: item.toDate,
-        itemID: item.itemID,
-        itemArabicName: item.itemArabicName,
-        itemEnglishName: item.itemEnglishName,
-        companyEnglishName: item.companyEnglishName,
-        companyArabicName: item.companyArabicName,
-        companyID: item.companyID && item.companyID > 0 ? item.companyID : null,
-        employeeEnglishName: item.employeeEnglishName,
-        employeeArabicName: item.employeeArabicName,
-        maintenanceEmployeeID: item.maintenanceEmployeeID && item.maintenanceEmployeeID > 0 ? item.maintenanceEmployeeID : null,
-        cost: item.cost,
-        note: item.note,
-        en_Name: item.en_Name,
-        ar_Name: item.ar_Name,
-        insertedByUserId: item.insertedByUserId
-      };
+openModal(item?: any): void {
+  this.isModalVisible = true;
+  this.editMode = !!item;
+  this.validationErrors = {};
+  
+  if (item) {
+    this.selectedMaintenance = item;
+    this.maintenanceForm = {
+      id: item.id,
+      date: item.date,
+      fromDate: item.fromDate,
+      toDate: item.toDate,
+      itemID: item.itemID,
+      itemArabicName: item.itemArabicName,
+      itemEnglishName: item.itemEnglishName,
+      companyEnglishName: item.companyEnglishName,
+      companyArabicName: item.companyArabicName,
+      companyID: item.companyID && item.companyID > 0 ? item.companyID : null,
+      employeeEnglishName: item.employeeEnglishName,
+      employeeArabicName: item.employeeArabicName,
+      maintenanceEmployeeID: item.maintenanceEmployeeID && item.maintenanceEmployeeID > 0 ? item.maintenanceEmployeeID : null,
+      cost: item.cost,
+      costRawString: item.cost ? item.cost.toString() : '', // Initialize costRawString
+      note: item.note,
+      en_Name: item.en_Name,
+      ar_Name: item.ar_Name,
+      insertedByUserId: item.insertedByUserId,
+    };
 
-      // Set maintenance type - safely check if companyID exists and is greater than 0
-      this.maintenanceType = item.companyID && item.companyID > 0 ? 'company' : 'employee';
+    // Set maintenance type based on which ID is present
+    if (item.companyID && item.companyID > 0) {
+      this.maintenanceType = 'company';
+    } else if (item.maintenanceEmployeeID && item.maintenanceEmployeeID > 0) {
+      this.maintenanceType = 'employee';
     } else {
-      this.resetForm();
+      this.maintenanceType = 'company'; // default
     }
+  } else {
+    this.resetForm();
   }
+}
 
   closeModal(): void {
     this.isModalVisible = false;
@@ -274,72 +283,130 @@ export class MaintenanceComponent implements OnInit, OnDestroy {
     }
   }
 
-  isFormValid(): boolean {
-    this.validationErrors = {};
-    let isValid = true;
+isFormValid(): boolean {
+  this.validationErrors = {};
+  let isValid = true;
 
-    // Check if date is valid - Date objects don't have trim()
-    if (!this.maintenanceForm.date) {
-      this.validationErrors['date'] = '*Date is required';
-      isValid = false;
-    }
-
-    if (!this.maintenanceForm.itemID || this.maintenanceForm.itemID <= 0) {
-      this.validationErrors['itemID'] = '*Item is required';
-      isValid = false;
-    }
-
-    if (this.maintenanceType === 'company' && (!this.maintenanceForm.companyID || this.maintenanceForm.companyID <= 0)) {
-      this.validationErrors['companyID'] = '*Company is required';
-      isValid = false;
-    }
-
-    if (this.maintenanceType === 'employee' && (!this.maintenanceForm.maintenanceEmployeeID || this.maintenanceForm.maintenanceEmployeeID <= 0)) {
-      this.validationErrors['maintenanceEmployeeID'] = '*Employee is required';
-      isValid = false;
-    }
-
-    if (this.maintenanceForm.cost === null || this.maintenanceForm.cost === undefined) {
-      this.validationErrors['cost'] = '*Cost is required';
-      isValid = false;
-    } else if (this.maintenanceForm.cost <= 0) {
-      this.validationErrors['cost'] = '*Cost must be greater than 0';
-      isValid = false;
-    }
-
-    return isValid;
+  // Check if date is valid
+  if (!this.maintenanceForm.date) {
+    this.validationErrors['date'] = '*Date is required';
+    isValid = false;
   }
 
-  async saveMaintenance(): Promise<void> {
-    if (!this.isFormValid()) return;
+  if (!this.maintenanceForm.itemID || this.maintenanceForm.itemID <= 0) {
+    this.validationErrors['itemID'] = '*Item is required';
+    isValid = false;
+  }
 
-    try {
-      this.isSaving = true;
-      const domainName = this.apiService.GetHeader();
+  if (this.maintenanceType === 'company' && (!this.maintenanceForm.companyID || this.maintenanceForm.companyID <= 0)) {
+    this.validationErrors['companyID'] = '*Company is required';
+    isValid = false;
+  }
 
-      const submitData: Maintenance = {
-        ...this.maintenanceForm,
-        companyID: this.maintenanceType === 'company' ? this.maintenanceForm.companyID : null,
-        maintenanceEmployeeID: this.maintenanceType === 'employee' ? this.maintenanceForm.maintenanceEmployeeID : null
-      };
+  if (this.maintenanceType === 'employee' && (!this.maintenanceForm.maintenanceEmployeeID || this.maintenanceForm.maintenanceEmployeeID <= 0)) {
+    this.validationErrors['maintenanceEmployeeID'] = '*Employee is required';
+    isValid = false;
+  }
 
-      if (this.editMode && this.maintenanceForm.id) {
-        await firstValueFrom(this.maintenanceService.update(submitData, domainName));
-        Swal.fire('Success', 'Maintenance record updated successfully!', 'success');
-      } else {
-        await firstValueFrom(this.maintenanceService.create(submitData, domainName));
-        Swal.fire('Success', 'Maintenance record created successfully!', 'success');
-      }
+  // Updated cost validation for decimals
+  if (this.maintenanceForm.cost === null || this.maintenanceForm.cost === undefined) {
+    this.validationErrors['cost'] = '*Cost is required';
+    isValid = false;
+  } else if (isNaN(this.maintenanceForm.cost)) {
+    this.validationErrors['cost'] = '*Cost must be a valid number';
+    isValid = false;
+  } else if (this.maintenanceForm.cost <= 0) {
+    this.validationErrors['cost'] = '*Cost must be greater than 0';
+    isValid = false;
+  }
 
-      this.loadMaintenance();
-      this.closeModal();
-    } catch (error) {
-      console.error('Error saving maintenance record:', error);
-      Swal.fire('Error', 'Failed to save maintenance record', 'error');
-    } finally {
-      this.isSaving = false;
+  return isValid;
+}
+
+async saveMaintenance(): Promise<void> {
+  if (!this.isFormValid()) return;
+
+  try {
+    this.isSaving = true;
+    const domainName = this.apiService.GetHeader();
+
+    // Ensure date is properly formatted as YYYY-MM-DD
+    // Since date is always a string in the form, we can use it directly
+    const submitData: Maintenance = {
+      ...this.maintenanceForm,
+      companyID: this.maintenanceType === 'company' ? this.maintenanceForm.companyID : null,
+      maintenanceEmployeeID: this.maintenanceType === 'employee' ? this.maintenanceForm.maintenanceEmployeeID : null
+    };
+
+    if (this.editMode && this.maintenanceForm.id) {
+      await firstValueFrom(this.maintenanceService.update(submitData, domainName));
+      Swal.fire('Success', 'Maintenance record updated successfully!', 'success');
+    } else {
+      await firstValueFrom(this.maintenanceService.create(submitData, domainName));
+      Swal.fire('Success', 'Maintenance record created successfully!', 'success');
+    }
+
+    this.loadMaintenance();
+    this.closeModal();
+  } catch (error) {
+    console.error('Error saving maintenance record:', error);
+    Swal.fire('Error', 'Failed to save maintenance record', 'error');
+  } finally {
+    this.isSaving = false;
+  }
+}
+
+validateDecimal(event: any, field: string): void {
+  const input = event.target as HTMLInputElement;
+  let value = input.value;
+  
+  // Store cursor position to restore it after manipulation
+  const cursorPosition = input.selectionStart;
+  
+  // Remove any characters that are not digits or decimal points
+  value = value.replace(/[^0-9.]/g, '');
+  
+  // Prevent multiple decimal points
+  const decimalCount = (value.match(/\./g) || []).length;
+  if (decimalCount > 1) {
+    // Remove extra decimal points by keeping only the first one
+    const parts = value.split('.');
+    value = parts[0] + '.' + parts.slice(1).join('');
+  }
+  
+  // Remove scientific notation (e, E, e+, e-, E+, E-)
+  value = value.replace(/[eE][+-]?/g, '');
+  
+  // Update the input value
+  input.value = value;
+  
+  // Restore cursor position (adjust for any removed characters)
+  setTimeout(() => {
+    input.setSelectionRange(cursorPosition, cursorPosition);
+  }, 0);
+  
+  // Convert to number for the form model
+  if (field === 'cost') {
+    if (value === '' || value === '.') {
+      this.maintenanceForm.cost = null;
+      this.maintenanceForm.costRawString = '';
+    } else {
+      // Parse as float to maintain decimal precision
+      this.maintenanceForm.cost = parseFloat(value);
+      // Store the raw string to avoid scientific notation issues
+      this.maintenanceForm.costRawString = value;
     }
   }
+  
+  this.clearValidationError(field);
+}
+
+// private formatDate(date: Date): string {
+//   const year = date.getFullYear();
+//   const month = (date.getMonth() + 1).toString().padStart(2, '0');
+//   const day = date.getDate().toString().padStart(2, '0');
+//   return `${year}-${month}-${day}`;
+// }
 
   deleteMaintenance(row: any): void {
     if (!this.IsAllowDelete(row.insertedByUserId || 0)) {

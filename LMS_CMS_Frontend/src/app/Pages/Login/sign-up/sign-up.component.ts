@@ -13,17 +13,17 @@ import { jwtDecode } from 'jwt-decode';
 import { RecaptchaComponent, RecaptchaModule } from 'ng-recaptcha';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-sign-up',
   standalone: true,
-  imports: [CommonModule, FormsModule, RecaptchaModule , TranslateModule],
+  imports: [CommonModule, FormsModule, RecaptchaModule, TranslateModule],
   templateUrl: './sign-up.component.html',
   styleUrl: './sign-up.component.css'
 })
-export class SignUpComponent { 
-  User_Data_After_Login = new TokenData("", 0, 0, 0, 0, "", "", "", "", "") 
+export class SignUpComponent {
+  User_Data_After_Login = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
 
   DomainName: string = '';
 
@@ -44,25 +44,25 @@ export class SignUpComponent {
   validationErrors: { [key in keyof ParentAdd]?: string } = {};
 
   parentInfo: ParentAdd = new ParentAdd()
-  isLoading = false; // Initialize loading state
+  isLoading = false;
 
   IsConfimPassEmpty = false
   @ViewChild(RecaptchaComponent) captchaRef!: RecaptchaComponent;
 
-  constructor(private router: Router,private languageService: LanguageService,private realTimeService: RealTimeNotificationServiceService, public accountService: AccountService, public ParentServ: ParentService , public ApiServ: ApiService) { }
+  constructor(private router: Router, private languageService: LanguageService, private realTimeService: RealTimeNotificationServiceService, public accountService: AccountService, public ParentServ: ParentService, public ApiServ: ApiService) { }
   ngOnInit() {
-    this.DomainName = this.ApiServ.GetHeader(); 
-        this.subscription = this.languageService.language$.subscribe(direction => {
+    this.DomainName = this.ApiServ.GetHeader();
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-  ngOnDestroy(): void { 
-          this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   onUserNameChange() {
@@ -85,17 +85,17 @@ export class SignUpComponent {
     if (token) {
       this.parentInfo.recaptchaToken = token;
       this.validationErrors['recaptchaToken'] = ''
-    } else { 
+    } else {
       this.parentInfo.recaptchaToken = '';
     }
   }
 
   SignUp() {
     if (this.isFormValid()) {
-      this.isLoading = true; // Start loading
+      this.isLoading = true;
       this.ParentServ.AddParent(this.parentInfo, this.DomainName).subscribe(() => {
-        this.isLoading = false; // Stop loading 
-        let tologin:Login = new Login(this.parentInfo.user_Name, "", this.parentInfo.password, "parent");
+        this.isLoading = false;
+        let tologin: Login = new Login(this.parentInfo.user_Name, "", this.parentInfo.password, "parent");
         this.accountService.Login(tologin).subscribe(
           (d: any) => {
             localStorage.removeItem("GoToLogin");
@@ -103,30 +103,30 @@ export class SignUpComponent {
             localStorage.removeItem("current_token");
             let count = localStorage.getItem("count")
             this.getAllTokens();
-  
+
             this.accountService.isAuthenticated = true;
             const token = JSON.parse(d).token;
             let add = true;
-            let Counter=0;
+            let Counter = 0;
             for (let i = 0; i < localStorage.length; i++) {
               const key = localStorage.key(i);
               const value = localStorage.getItem(key || '');
-              if (key && value && key.includes('token') && key != "current_token"&&key != "token") {
+              if (key && value && key.includes('token') && key != "current_token" && key != "token") {
                 let decodedToken1: TokenData = jwtDecode(token);
                 let decodedToken2: TokenData = jwtDecode(value);
                 if (decodedToken1.user_Name === decodedToken2.user_Name && decodedToken1.type === decodedToken2.type)
                   add = false;
               }
             }
-            
+
             localStorage.setItem("current_token", token);
-  
+
             if (add == true) {
-              if (count === null) { 
+              if (count === null) {
                 localStorage.setItem("token 1", token);
-  
+
               } else {
-                let countNum = parseInt(count) + 1; 
+                let countNum = parseInt(count) + 1;
                 let T = localStorage.getItem("token " + countNum)
                 if (T != null) {
                   let i = countNum + 1;
@@ -145,30 +145,30 @@ export class SignUpComponent {
                 }
               }
             }
-            else if(add == false) {
+            else if (add == false) {
               this.User_Data_After_Login = this.accountService.Get_Data_Form_Token()
-              const currentIndex = this.allTokens.findIndex(token => token.UserType === this.User_Data_After_Login.type && token.key===this.User_Data_After_Login.user_Name);
+              const currentIndex = this.allTokens.findIndex(token => token.UserType === this.User_Data_After_Login.type && token.key === this.User_Data_After_Login.user_Name);
               const currentToken = this.allTokens[currentIndex];
               localStorage.setItem(currentToken.KeyInLocal, token);
             }
-            
+
             for (let i = 0; i < localStorage.length; i++) {
               const key = localStorage.key(i);
               const value = localStorage.getItem(key || '');
-              if (key && value && key.includes('token') && key != "current_token"&&key != "token") {
-              Counter++;
+              if (key && value && key.includes('token') && key != "current_token" && key != "token") {
+                Counter++;
               }
             }
             localStorage.removeItem("count");
             localStorage.setItem("count", Counter.toString());
             this.User_Data_After_Login = this.accountService.Get_Data_Form_Token()
-          
-            this.router.navigateByUrl("/Parent") 
+
+            this.router.navigateByUrl("/Parent")
           }
         );
-      }, (error) => { 
-        this.parentInfo.recaptchaToken = ''; 
-        this.isLoading = false; 
+      }, (error) => {
+        this.parentInfo.recaptchaToken = '';
+        this.isLoading = false;
         if (this.captchaRef) {
           this.captchaRef.reset();
         }
@@ -187,16 +187,19 @@ export class SignUpComponent {
 
   getAllTokens(): void {
     let count = 0;
-    this.allTokens=[];
+    this.allTokens = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       const value = localStorage.getItem(key || '');
 
-      if (key && key.includes('token') && key != "current_token"&& key != "token") {
+      if (key && key.includes('token') && key != "current_token" && key != "token") {
         if (value) {
           this.User_Data_After_Login2 = jwtDecode(value)
 
-          this.allTokens.push({ id: count, key: this.User_Data_After_Login2.user_Name, KeyInLocal: key, value: value || '' ,UserType:this.User_Data_After_Login2.type});
+          this.allTokens.push({ id: count, 
+            key: this.User_Data_After_Login2.user_Name, 
+            KeyInLocal: key, value: value || '', 
+            UserType: this.User_Data_After_Login2.type });
           count++;
         }
       }
@@ -221,10 +224,10 @@ export class SignUpComponent {
         }
       }
 
-      if(this.parentInfo.recaptchaToken == ""){ 
+      if (this.parentInfo.recaptchaToken == "") {
         this.validationErrors['recaptchaToken'] = 'You Need To Confirm That You are not a Robot';
         isValid = false;
-      } else{
+      } else {
         this.validationErrors['recaptchaToken'] = '';
       }
     }
@@ -237,12 +240,12 @@ export class SignUpComponent {
       this.validationErrors['password'] = 'Password must be between 6 and 100 characters ';
       isValid = false;
     }
-    if(this.ConfirmPassword != ""){
+    if (this.ConfirmPassword != "") {
       if (this.parentInfo.password != this.ConfirmPassword) {
         this.validationErrors['password'] = 'Password And Confirm Password are not The Same';
         isValid = false;
       }
-    } else{
+    } else {
       this.IsConfimPassEmpty = true
       isValid = false;
     }
