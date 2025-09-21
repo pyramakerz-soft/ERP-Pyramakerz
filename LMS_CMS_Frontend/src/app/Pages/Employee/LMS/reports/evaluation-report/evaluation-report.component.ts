@@ -340,7 +340,6 @@ private prepareExportData(): void {
 collapsedEmployees: Set<number> = new Set();
 evaluationCollapsedState: Map<number, Set<number>> = new Map();
 
-// Add these methods to your component class
 toggleEmployeeCollapse(index: number) {
   if (this.collapsedEmployees.has(index)) {
     this.collapsedEmployees.delete(index);
