@@ -549,7 +549,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             );
 
             if (!leaveRequests.Any())
-                return NotFound("No leaveRequests found");
+                return NotFound("No leaveRequests found.");
 
             var leaveRequestDtos = mapper.Map<List<leaveRequestsGetDTO>>(leaveRequests);
             foreach (var dto in leaveRequestDtos)
