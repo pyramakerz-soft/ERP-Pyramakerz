@@ -12,7 +12,7 @@ namespace LMS_CMS_BL.DTO.HR
         public string EmployeeEnName { get; set; }
         public string EmployeeArName { get; set; }
 
-        public decimal TotalAmount { get; set; }
+        public double TotalAmount { get; set; }
         public List<loansGetDTO> Loans { get; set; } = new List<loansGetDTO>();
     }
 }
