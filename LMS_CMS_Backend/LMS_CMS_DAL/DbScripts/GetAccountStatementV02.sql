@@ -10,8 +10,8 @@ BEGIN
 		MATC.Name Account,
 		Serial, 
 		CASE WHEN E.SubSubAccNo = 0 THEN '-' ELSE SA.SubAccountName END AS SubAccount, 
-		Credit, 
-		Debit, 
+		CAST(Debit AS DECIMAL) Debit, 
+		CAST(Credit AS DECIMAL) Credit,
 		CAST(0 AS DECIMAL(18,2)) AS Balance,
 		Notes
     FROM dbo.EntriesFun(@DateFrom, @DateTo) E 
