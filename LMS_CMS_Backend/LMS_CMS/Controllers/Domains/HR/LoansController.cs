@@ -322,5 +322,127 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             Unit_Of_Work.SaveChanges();
             return Ok();
         }
+
+        [HttpPost("report")]
+        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Loans Report" })]
+        public async Task<IActionResult> GetLoansReport([FromBody] ReportRequestDto request)
+        {
+            if (request == null)
+                return BadRequest("Invalid request.");
+            if (request.DateFrom == default || request.DateTo == default)
+                return BadRequest("DateFrom and DateTo are required.");
+
+            UOW uow = _dbContextFactory.CreateOneDbContext(HttpContext);
+            var filterService = new EmployeeFilterService(uow);
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
+
+            if (userIdClaim == null || userTypeClaim == null)
+                return Unauthorized("User ID or Type claim not found.");
+
+            if (request == null)
+                return BadRequest("Invalid request.");
+
+            if (request.EmployeeId.HasValue && request.EmployeeId.Value > 0)
+            {
+                var employee = uow.employee_Repository
+                    .First_Or_Default(e => e.ID == request.EmployeeId.Value && e.IsDeleted != true);
+
+                if (employee == null)
+                    return NotFound("No employee found with this ID");
+            }
+
+            if (request.JobId.HasValue && request.JobId.Value > 0)
+            {
+                var job = uow.job_Repository
+                    .First_Or_Default(j => j.ID == request.JobId.Value && j.IsDeleted != true);
+
+                if (job == null)
+                    return NotFound("No job found with this ID");
+            }
+
+            if (request.CategoryId.HasValue && request.CategoryId.Value > 0)
+            {
+                var category = uow.jobCategory_Repository
+                    .First_Or_Default(c => c.ID == request.CategoryId.Value && c.IsDeleted != true);
+
+                if (category == null)
+                    return NotFound("No category found with this ID");
+            }
+
+            if (request.EmployeeId > 0 && request.JobId > 0)
+            {
+                var employeeJob = await uow.employee_Repository.FindByIncludesAsync(
+                    e => e.ID == request.EmployeeId && e.JobID == request.JobId,
+                    q => q.Include(e => e.Job)
+                );
+
+                if (employeeJob == null)
+                    return BadRequest("The employee does not belong to the given job.");
+            }
+
+            if (request.EmployeeId > 0 && request.CategoryId > 0)
+            {
+                var employeeCategory = await uow.employee_Repository.FindByIncludesAsync(
+                    e => e.ID == request.EmployeeId && e.Job.JobCategoryID == request.CategoryId,
+                    q => q.Include(e => e.Job)
+                );
+
+                if (employeeCategory == null)
+                    return BadRequest("The employee’s job does not belong to the given category.");
+            }
+
+            if (request.JobId > 0 && request.CategoryId > 0)
+            {
+                var jobCategory = uow.job_Repository.First_Or_Default(
+                    j => j.ID == request.JobId && j.JobCategoryID == request.CategoryId
+                );
+
+                if (jobCategory == null)
+                    return BadRequest("The job does not belong to the given category.");
+            }
+
+            var employees = await filterService.GetEmployees(
+                      request.CategoryId,
+                      request.JobId,
+                      request.EmployeeId
+                  );
+
+            if (!employees.Any())
+                return NotFound("No employees found for the given filters.");
+
+
+            var employeeIds = employees.Select(e => e.ID).ToList();
+
+         
+            var loans = await uow.loans_Repository.Select_All_With_IncludesById<Loans>(
+                l => employeeIds.Contains(l.EmployeeID)
+                     && l.Date >= request.DateFrom
+                     && l.Date <= request.DateTo,
+                q => q.Include(l => l.Employee).ThenInclude(e => e.Job).ThenInclude(j => j.JobCategory),
+                q => q.Include(l => l.Save)
+            );
+            if (!loans.Any())
+                return NotFound("No loans found");
+
+            var loanDtos = mapper.Map<List<loansGetDTO>>(loans);
+            var report = loanDtos
+                .GroupBy(l => new { l.EmployeeID, l.EmployeeEnName, l.EmployeeArName })
+                .Select(g => new LoansReportDto
+                 {
+                      EmployeeId = g.Key.EmployeeID,
+                      EmployeeEnName = g.Key.EmployeeEnName,
+                      EmployeeArName = g.Key.EmployeeArName,
+                      TotalAmount = g.Sum(x => x.Amount),
+                      Loans = g.ToList()
+                 })
+                 .ToList();
+
+            return Ok(report); 
+        }
     }
 }
