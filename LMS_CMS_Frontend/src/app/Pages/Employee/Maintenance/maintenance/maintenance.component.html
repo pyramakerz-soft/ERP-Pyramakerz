@@ -38,7 +38,7 @@
                 <!-- Date -->
                 <h6 class="font-medium text-base leading-6 mb-1 mt-3">{{ 'Date' | translate }}</h6>
                 <div class="flex flex-col">
-                    <input type="date" [ngModel]="maintenanceForm.date | date:'yyyy-MM-dd'"  (input)="clearValidationError('date')"
+                    <input type="date" [(ngModel)]="maintenanceForm.date" (input)="clearValidationError('date')"
                         class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3" />
                     <span *ngIf="validationErrors['date']" class="text-red-500 ml-3 font-normal">
                         {{ validationErrors['date'] }}
@@ -108,18 +108,17 @@
                         {{ validationErrors['maintenanceEmployeeID'] }}
                     </span>
                 </div>
-
-                <!-- Cost -->
-                <h6 class="font-medium text-base leading-6 mb-1 mt-3">{{ 'Cost' | translate }}</h6>
-                <div class="flex flex-col">
-                <input type="text" [(ngModel)]="maintenanceForm.cost" 
-                        (input)="validateNumber($event, 'cost')"
-                        class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"
-                        placeholder="{{ 'Enter' | translate }} {{ 'Cost' | translate }}" />
-                <span *ngIf="validationErrors['cost']" class="text-red-500 ml-3 font-normal">
-                    {{ validationErrors['cost'] }}
-                </span>
-                </div>
+<!-- Cost -->
+<h6 class="font-medium text-base leading-6 mb-1 mt-3">{{ 'Cost' | translate }}</h6>
+<div class="flex flex-col">
+  <input type="text" [(ngModel)]="maintenanceForm.costRawString" 
+         (input)="validateDecimal($event, 'cost')"
+         class="w-full h-[45px] rounded-lg border border-solid border-gray-300 px-2 mb-3"
+         placeholder="{{ 'Enter' | translate }} {{ 'Cost' | translate }}" />
+  <span *ngIf="validationErrors['cost']" class="text-red-500 ml-3 font-normal">
+    {{ validationErrors['cost'] }}
+  </span>
+</div>
 
                 <!-- Note -->
                 <h6 class="font-medium text-base leading-6 mb-1 mt-3">{{ 'Note' | translate }}</h6>
