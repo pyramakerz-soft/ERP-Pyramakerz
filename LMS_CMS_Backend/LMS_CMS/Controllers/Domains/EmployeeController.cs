@@ -1548,7 +1548,75 @@ namespace LMS_CMS_PL.Controllers.Domains
 
             return Ok(newEmployee);
         }
-    }   
+        [HttpPost("report")]
+        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Employee Report" })]
+        public async Task<IActionResult> GetReport([FromBody] EmployeeReportRequestDto request)
+        {
+            UOW uow = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            long.TryParse(userIdClaim, out long userId);
+            var userTypeClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
+            var userRoleClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            long.TryParse(userRoleClaim, out long roleId);
+
+            if (userIdClaim == null || userTypeClaim == null)
+                return Unauthorized("User ID or Type claim not found.");
+
+            if (request == null)
+                return BadRequest("Invalid request.");
+
+            // repos
+            var employeeRepo = uow.employee_Repository;
+            var jobRepo = uow.job_Repository;
+            var jobCategoryRepo = uow.jobCategory_Repository;
+
+            IQueryable<Employee> query = employeeRepo.Query().Where(e => e.IsDeleted != true);
+
+            if (request.JobId.HasValue && request.JobCategoryId.HasValue)
+            {
+                var job = await jobRepo.Select_By_IdAsync(request.JobId.Value);
+                if (job == null)
+                    return NotFound("Job with this ID not found.");
+
+                var category = await jobCategoryRepo.Select_By_IdAsync(request.JobCategoryId.Value);
+                if (category == null)
+                    return NotFound("JobCategory with this ID not found.");
+
+                if (job.JobCategoryID != request.JobCategoryId.Value)
+                    return BadRequest("The provided JobId does not belong to the given JobCategoryId.");
+
+                query = query.Where(e => e.JobID == request.JobId.Value);
+            }
+         
+            else if (request.JobId.HasValue)
+            {
+                var job = await jobRepo.Select_By_IdAsync(request.JobId.Value);
+                if (job == null)
+                    return NotFound("Job with this ID not found.");
+
+                query = query.Where(e => e.JobID == request.JobId.Value);
+            }
+            
+            else if (request.JobCategoryId.HasValue)
+            {
+                var category = await jobCategoryRepo.Select_By_IdAsync(request.JobCategoryId.Value);
+                if (category == null)
+                    return NotFound("JobCategory with this ID not found.");
+
+                query = query.Where(e => e.Job.JobCategoryID == request.JobCategoryId.Value);
+            }
+
+            var employees = await query.ToListAsync();
+
+            if (!employees.Any())
+                return NotFound("No employees found for the given filters.");
+
+            var dtoList = mapper.Map<List<EmployeeReportDto>>(employees);
+            return Ok(dtoList);
+        }
+
+    }
 }
 
 
