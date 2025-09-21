@@ -260,96 +260,69 @@ export class EvaluationReportComponent {
     );
   }
 
+
 private prepareExportData(): void {
   this.cachedTableDataForPDF = [];
 
-  this.reportData.forEach((evaluation: any) => {
-    const evaluationDate = evaluation.date;
+  this.reportData.forEach((employee: any) => {
+    employee.reportsByDate.forEach((evaluation: any) => {
+      const evaluationDate = evaluation.date;
 
-    // Process question groups
-    if (
-      evaluation.evaluationEmployeeQuestionGroups &&
-      evaluation.evaluationEmployeeQuestionGroups.length > 0
-    ) {
-      evaluation.evaluationEmployeeQuestionGroups.forEach((group: any) => {
+      // Process question groups
+      if (evaluation.evaluationEmployeeQuestionGroups && evaluation.evaluationEmployeeQuestionGroups.length > 0) {
+        evaluation.evaluationEmployeeQuestionGroups.forEach((group: any) => {
+          const section = {
+            header: `Employee: ${employee.employeeEnglishName || employee.employeeArabicName} - Evaluation: ${evaluationDate} - ${group.englishTitle || group.arabicTitle || 'Question Group'}`,
+            data: [
+              { key: 'Employee', value: employee.employeeEnglishName || employee.employeeArabicName || '-' },
+              { key: 'Evaluation Date', value: evaluationDate },
+              { key: 'Question Group', value: group.englishTitle || group.arabicTitle || '-' },
+            ],
+            tableHeaders: ['Question', 'Rating', 'Notes', 'Average'],
+            tableData: [] as any[],
+          };
+
+          // Add questions
+          if (group.evaluationEmployeeQuestions && group.evaluationEmployeeQuestions.length > 0) {
+            group.evaluationEmployeeQuestions.forEach((question: any) => {
+              section.tableData.push({
+                Question: question.questionEnglishTitle || question.questionArabicTitle || '-',
+                Rating: question.mark || 0,
+                Notes: question.note || '-',
+                Average: question.average || '-',
+              });
+            });
+          }
+
+          this.cachedTableDataForPDF.push(section);
+        });
+      }
+
+      // Process student corrections
+      if (evaluation.evaluationEmployeeStudentBookCorrections && evaluation.evaluationEmployeeStudentBookCorrections.length > 0) {
         const section = {
-          header: `Evaluation: ${evaluationDate} - ${
-            group.englishTitle || group.arabicTitle || 'Question Group'
-          }`,
+          header: `Employee: ${employee.employeeEnglishName || employee.employeeArabicName} - Evaluation: ${evaluationDate} - Student Corrections`,
           data: [
+            { key: 'Employee', value: employee.employeeEnglishName || employee.employeeArabicName || '-' },
             { key: 'Evaluation Date', value: evaluationDate },
-            {
-              key: 'Question Group',
-              value: group.englishTitle || group.arabicTitle || '-',
-            },
           ],
-          tableHeaders: ['Question', 'Rating', 'Notes' /*, 'Average'*/],
-          tableData: [] as {
-            Question: string;
-            Rating: number;
-            Notes: string;
-            // Average: string;
-          }[],
+          tableHeaders: ['Student', 'Correction Book', 'Status', 'Notes', 'Average'],
+          tableData: [] as any[],
         };
 
-        // Add questions
-        if (
-          group.evaluationEmployeeQuestions &&
-          group.evaluationEmployeeQuestions.length > 0
-        ) {
-          group.evaluationEmployeeQuestions.forEach((question: any) => {
-            section.tableData.push({
-              Question:
-                question.questionEnglishTitle ||
-                question.questionArabicTitle ||
-                '-',
-              Rating: question.mark || 0,
-              Notes: question.note || '-',
-              // Average: question.average || '-',
-            });
-          });
-        }
-
-        this.cachedTableDataForPDF.push(section);
-      });
-    }
-
-    // Process student corrections - GROUP THEM TOGETHER like in the UI
-    if (
-      evaluation.evaluationEmployeeStudentBookCorrections &&
-      evaluation.evaluationEmployeeStudentBookCorrections.length > 0
-    ) {
-      const section = {
-        header: `Evaluation: ${evaluationDate} - Student Corrections`,
-        data: [
-          { key: 'Evaluation Date', value: evaluationDate },
-        ],
-        tableHeaders: ['Student', 'Correction Book', 'Status', 'Notes' /*, 'Average'*/],
-        tableData: [] as {
-          Student: string;
-          'Correction Book': string;
-          Status: number;
-          Notes: string;
-          // Average: string;
-        }[],
-      };
-
-      // Add all student corrections to the same table (like in UI)
-      evaluation.evaluationEmployeeStudentBookCorrections.forEach(
-        (correction: any) => {
+        evaluation.evaluationEmployeeStudentBookCorrections.forEach((correction: any) => {
           section.tableData.push({
             Student: correction.studentEnglishName || correction.studentArabicName || '-',
-            'Correction Book': correction.evaluationBookCorrectionEnglishName || 
-                              correction.evaluationBookCorrectionArabicName || '-',
+            'Correction Book': correction.evaluationBookCorrectionEnglishName || correction.evaluationBookCorrectionArabicName || '-',
             Status: correction.state || 0,
             Notes: correction.note || '-',
-            // Average: correction.averageStudent || '-',
+            Average: correction.averageStudent || '-',
           });
-        }
-      );
+        });
 
-      this.cachedTableDataForPDF.push(section);
-    }
+        this.cachedTableDataForPDF.push(section);
+      }
+    });
   });
 
   if (this.cachedTableDataForPDF.length === 0) {
@@ -362,9 +335,38 @@ private prepareExportData(): void {
       },
     ];
   }
-
-  console.log('Cached PDF Data:', this.cachedTableDataForPDF);
 }
+
+collapsedEmployees: Set<number> = new Set();
+evaluationCollapsedState: Map<number, Set<number>> = new Map();
+
+// Add these methods to your component class
+toggleEmployeeCollapse(index: number) {
+  if (this.collapsedEmployees.has(index)) {
+    this.collapsedEmployees.delete(index);
+  } else {
+    this.collapsedEmployees.add(index);
+  }
+}
+
+toggleEvaluationCollapse(empIndex: number, evalIndex: number) {
+  if (!this.evaluationCollapsedState.has(empIndex)) {
+    this.evaluationCollapsedState.set(empIndex, new Set());
+  }
+  
+  const evalSet = this.evaluationCollapsedState.get(empIndex);
+  if (evalSet?.has(evalIndex)) {
+    evalSet.delete(evalIndex);
+  } else {
+    evalSet?.add(evalIndex);
+  }
+}
+
+isEvaluationCollapsed(empIndex: number, evalIndex: number): boolean {
+  const evalSet = this.evaluationCollapsedState.get(empIndex);
+  return !!evalSet && evalSet.has(evalIndex);
+} 
+
 
   toggleCollapse(index: number) {
     if (this.collapsedItems.has(index)) {

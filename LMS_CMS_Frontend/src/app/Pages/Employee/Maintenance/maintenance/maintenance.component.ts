@@ -350,7 +350,7 @@ async saveMaintenance(): Promise<void> {
     this.closeModal();
   } catch (error) {
     console.error('Error saving maintenance record:', error);
-    Swal.fire('Error', 'Failed to save maintenance record', 'error');
+    Swal.fire('Error', String(error), 'error');
   } finally {
     this.isSaving = false;
   }
