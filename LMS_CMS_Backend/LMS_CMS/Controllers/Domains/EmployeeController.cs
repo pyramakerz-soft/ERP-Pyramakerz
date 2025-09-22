@@ -1634,7 +1634,7 @@ namespace LMS_CMS_PL.Controllers.Domains
             return Ok(newEmployee);
         }
         [HttpPost("report")]
-        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Employee Report" })]
+        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Employee Report" , "Employee Accounting" })]
         public async Task<IActionResult> GetReport([FromBody] EmployeeReportRequestDto request)
         {
             UOW uow = _dbContextFactory.CreateOneDbContext(HttpContext);
