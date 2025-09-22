@@ -93,7 +93,7 @@
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         <input type="time" [ngModel]="formatTime(row.clockOut )"
                             (ngModelChange)="onTimeChange(row, 'clockOut', $event)" class="border rounded p-1 w-full" />
-                        <span *ngIf="row.clockOut && row.clockIn && row.clockOut < row.clockIn" class="text-red-500 ml-3 font-normal">Clock out time cannot be earlier than clock in time</span>
+                        <span *ngIf="row.clockOut!='00:00:00' && row.clockIn!='00:00:00' && row.clockOut!=null && row.clockIn!=null && row.clockOut < row.clockIn" class="text-red-500 ml-3 font-normal">Clock out time cannot be earlier than clock in time</span>
                     </td>
                 </tr>
             </tbody>

@@ -316,7 +316,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                     return BadRequest("Latitude is Required");
                 }
 
-                if (NewClock.LocationID == null && NewClock.LocationID == 0)
+                if (NewClock.LocationID == null || NewClock.LocationID == 0)
                 {
                     return BadRequest("LocationID is Required");
                 }
@@ -431,7 +431,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                     return BadRequest("Latitude is Required");
                 }
 
-                if (NewClock.LocationID == null && NewClock.LocationID == 0)
+                if (NewClock.LocationID == null || NewClock.LocationID == 0)
                 {
                     return BadRequest("LocationID is Required");
                 }
