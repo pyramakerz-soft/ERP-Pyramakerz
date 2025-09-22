@@ -46,6 +46,10 @@ export class AssignmentReportComponent implements OnInit {
   isExporting: boolean = false;
   reportsForExcel: any[] = [];
 
+  // Chart data
+  chartData: any[] = [];
+  maxChartValue: number = 0;
+
   // Language and RTL
   isRtl: boolean = false;
   subscription!: Subscription;
@@ -155,7 +159,7 @@ export class AssignmentReportComponent implements OnInit {
           this.subjectService.GetByGradeId(this.selectedGradeId, domainName)
         );
         this.subjects = data;
-        this.selectedSubjectId = null;
+        // Don't reset selectedSubjectId here - let the user choose
       } catch (error) {
         console.error('Error loading subjects:', error);
       }
@@ -176,7 +180,15 @@ export class AssignmentReportComponent implements OnInit {
   }
 
   onGradeChange() {
-    this.loadSubjects();
+    // Reset subject filter when grade changes
+    this.selectedSubjectId = null;
+    this.subjects = [];
+    
+    // Only load subjects if a grade is selected
+    if (this.selectedGradeId) {
+      this.loadSubjects();
+    }
+    
     this.onFilterChange();
   }
 
@@ -193,6 +205,7 @@ export class AssignmentReportComponent implements OnInit {
                             this.selectedGradeId !== null && 
                             this.selectedSubjectId !== null;
     this.assignmentReports = [];
+    this.chartData = [];
   }
 
   async viewReport() {
@@ -244,6 +257,7 @@ export class AssignmentReportComponent implements OnInit {
       }
 
       this.prepareExportData();
+      this.prepareChartData();
       this.showTable = true;
     } catch (error) {
       console.error('Error loading assignment reports:', error);
@@ -255,11 +269,30 @@ export class AssignmentReportComponent implements OnInit {
     }
   }
 
+  private prepareChartData(): void {
+    this.chartData = this.assignmentReports.map(report => ({
+      name: report.assignmentName,
+      successful: report.numberSuccessful,
+      failed: report.numberFailed,
+      total: report.attendanceNumber
+    }));
+
+    // Calculate max value for chart scaling
+    this.maxChartValue = Math.max(
+      ...this.chartData.map(item => Math.max(item.successful, item.failed)),
+      100 // Minimum scale
+    );
+  }
+
+  getBarHeight(value: number): number {
+    return this.maxChartValue > 0 ? (value / this.maxChartValue) * 100 : 0;
+  }
+
   private prepareExportData(): void {
     // For PDF (object format)
     this.reportsForExport = this.assignmentReports.map((report) => ({
       'Assignment Name': report.assignmentName,
-      'Subject Name': report.subjectName,
+      'Subject': report.subjectName,
       'Attendance Number': report.attendanceNumber,
       'Successful': report.numberSuccessful,
       'Failed': report.numberFailed,
@@ -368,6 +401,23 @@ export class AssignmentReportComponent implements OnInit {
     }, 500);
   }
 
+  // Helper methods for template calculations
+  getTotalSuccessful(): number {
+    return this.assignmentReports.reduce((sum, report) => sum + report.numberSuccessful, 0);
+  }
+
+  getTotalFailed(): number {
+    return this.assignmentReports.reduce((sum, report) => sum + report.numberFailed, 0);
+  }
+
+  getTotalAttendance(): number {
+    return this.assignmentReports.reduce((sum, report) => sum + report.attendanceNumber, 0);
+  }
+
+  getTotalAssignments(): number {
+    return this.assignmentReports.length;
+  }
+
   async exportExcel() {
     if (this.reportsForExcel.length === 0) {
       Swal.fire('Warning', 'No data to export!', 'warning');
@@ -399,7 +449,7 @@ export class AssignmentReportComponent implements OnInit {
         tables: [
           {
             title: 'Assignment Report Data',
-            headers: ['Assignment Name', 'Subject Name', 'Attendance', 'Successful', 'Failed', 'Success Rate'],
+            headers: ['Assignment Name', 'Subject', 'Attendance', 'Successful', 'Failed', 'Success Rate'],
             data: this.reportsForExcel
           }
         ],
