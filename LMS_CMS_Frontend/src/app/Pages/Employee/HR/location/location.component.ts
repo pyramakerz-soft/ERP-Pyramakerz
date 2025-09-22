@@ -27,18 +27,7 @@ import * as L from 'leaflet';
   styleUrl: './location.component.css',
 })
 export class LocationComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -77,7 +66,7 @@ export class LocationComponent {
     public ApiServ: ApiService,
     public LocationServ: LocationService,
     private realTimeService: RealTimeNotificationServiceService
-  ) {}
+  ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
@@ -156,7 +145,12 @@ export class LocationComponent {
             this.location.latitude,
             this.location.longitude
           );
-          this.map.setView(latlng, 13); // center map
+          if(this.location.zoom){
+            this.map.setView(latlng, this.location.zoom); // center map
+          }
+          else{
+            this.map.setView(latlng, 13); // center map
+          }
           this.marker.setLatLng(latlng); // move marker
         }
       }, 200);
@@ -353,6 +347,9 @@ export class LocationComponent {
       this.updateCircle(); // update circle when map clicked
     });
 
+    this.map.on('zoomend', () => {
+      this.location.zoom = this.map.getZoom();
+    });
     // Add search bar
     // @ts-ignore
     L.Control.geocoder().addTo(this.map);
@@ -363,7 +360,7 @@ export class LocationComponent {
     if (this.location.latitude && this.location.longitude) {
       const latlng = L.latLng(this.location.latitude, this.location.longitude);
       this.marker.setLatLng(latlng);
-      this.map.setView(latlng, 13);
+      this.map.setView(latlng, this.location.zoom || 13); // use saved zoom
       this.updateCircle();
     }
   }

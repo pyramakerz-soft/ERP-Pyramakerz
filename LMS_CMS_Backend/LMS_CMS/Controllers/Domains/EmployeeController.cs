@@ -559,7 +559,7 @@ namespace LMS_CMS_PL.Controllers.Domains
 
             if (userIdClaim == null || userTypeClaim == null)
             {
-                return Unauthorized("User ID or Type claim not found.");
+                return Unauthorized(new { error = "User ID or Type claim not found." });
             }
 
             long empId = long.Parse(userIdClaim);
@@ -572,7 +572,7 @@ namespace LMS_CMS_PL.Controllers.Domains
 
             if (employee == null || employee.IsDeleted == true)
             {
-                return NotFound("No employee found");
+                return NotFound(new { error = "No employee found" });
             }
 
             Employee_GetDTO employeeDTO = mapper.Map<Employee_GetDTO>(employee);

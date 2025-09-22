@@ -13,6 +13,7 @@ namespace LMS_CMS_DAL.Models.Domains.HR
         public long ID { get; set; }
         public string Name { get; set; }
         public double Range { get; set; }
+        public int Zoom { get; set; }
         public double Latitude { get; set; }
         public double Longitude { get; set; }
         public ICollection<EmployeeClocks> EmployeeClocks { get; set; } = new HashSet<EmployeeClocks>();
