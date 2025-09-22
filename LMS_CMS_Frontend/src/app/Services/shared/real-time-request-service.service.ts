@@ -35,7 +35,8 @@ export class RealTimeRequestServiceService {
           Math.min(retryContext.previousRetryCount * 1000, 10000)
       })
       .build();
-
+   
+      
     // Connection state handlers
     this.requestHubConnection.onreconnecting(() => {
       this.isConnected = false; 

@@ -682,10 +682,7 @@ export class MyMessagesComponent {
               connectionStatusForConversation: this.connectionStatusForConversation,
           },
           queryParamsHandling: 'merge' 
-        });
-
-        // call the subscribe again for the other pages
-        this.chatMessageService.notifyMessageOpened();
+        }); 
       },
       error => {
         this.isLoading = false;
@@ -722,7 +719,7 @@ export class MyMessagesComponent {
           }  
   
           // call the subscribe again for the other pages
-          this.chatMessageService.notifyMessageOpened();
+          // this.chatMessageService.notifyMessageOpened();
         },
         error => {
           this.isLoading = false;
