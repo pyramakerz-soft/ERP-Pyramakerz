@@ -211,7 +211,7 @@ getStoreData(item: StoreBalanceItem, storeName: string): {
       price = store.PurchasePrice ?? null;
       break;
     case 'SalesPrice':
-      price = store.SalePrice ?? null;
+      price = store.SalesPrice ?? null;
       break;
     case 'Cost':
       price = store.AverageCost ?? null;

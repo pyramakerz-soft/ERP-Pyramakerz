@@ -11,6 +11,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../Services/shared/real-time-notification-service.service';
+import { EmployeeService } from '../../../Services/Employee/employee.service';
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -41,7 +42,7 @@ export class LoginComponent {
   isLoading: boolean = false
  
   constructor(private router: Router, private languageService: LanguageService, public accountService: AccountService,
-    private realTimeService: RealTimeNotificationServiceService,) { }
+    private realTimeService: RealTimeNotificationServiceService, private employeeService:EmployeeService) { }
 
   ngOnInit() {
     window.addEventListener('popstate', this.checkLocalStorageOnNavigate);
@@ -105,7 +106,8 @@ export class LoginComponent {
     if (this.isFormValid()) {
       this.isLoading = true
       this.accountService.Login(this.userInfo).subscribe(
-        (d: any) => {
+        (d: any) => {  
+          console.log(d)
           localStorage.removeItem("GoToLogin");
           localStorage.setItem("GoToLogin", "false");
           localStorage.removeItem("current_token");
@@ -127,18 +129,17 @@ export class LoginComponent {
             }
           }
           
-          localStorage.setItem("current_token", token);
-
+          localStorage.setItem("current_token", token); 
           if (add == true) {
             if (count === null) {
               // localStorage.removeItem("count");
               // localStorage.setItem("count", "1");
               localStorage.setItem("token 1", token);
-
+              
             } else {
               let countNum = parseInt(count) + 1;
               // localStorage.setItem("count", countNum.toString());
-              let T = localStorage.getItem("token " + countNum)
+              let T = localStorage.getItem("token " + countNum) 
               if (T != null) {
                 let i = countNum + 1;
                 let Continue = true;
@@ -155,9 +156,10 @@ export class LoginComponent {
                 localStorage.setItem("token " + countNum, token);
               }
             }
+            this.User_Data_After_Login = this.accountService.Get_Data_Form_Token(true)    
           }
           else if(add == false) {
-            this.User_Data_After_Login = this.accountService.Get_Data_Form_Token()
+            this.User_Data_After_Login = this.accountService.Get_Data_Form_Token(true)
             const currentIndex = this.allTokens.findIndex(token => token.UserType === this.User_Data_After_Login.type && token.key===this.User_Data_After_Login.user_Name);
             const currentToken = this.allTokens[currentIndex];
             localStorage.setItem(currentToken.KeyInLocal, token);
@@ -172,7 +174,6 @@ export class LoginComponent {
           }
           localStorage.removeItem("count");
           localStorage.setItem("count", Counter.toString());
-          this.User_Data_After_Login = this.accountService.Get_Data_Form_Token()
         
           if (this.User_Data_After_Login.type == "parent") {
             this.router.navigateByUrl("/Parent")
@@ -181,6 +182,7 @@ export class LoginComponent {
           } else if (this.User_Data_After_Login.type == "employee") {
             this.router.navigateByUrl("/Employee")
           }
+          this.isLoading = false
 
         }, (error) => {
           this.isLoading = false
@@ -190,7 +192,7 @@ export class LoginComponent {
             this.somthingError = "Username, Password or Type maybe wrong"
           }else if (error.status == 404) {
             this.somthingError = "Username, Password or Type maybe wrong"
-          } else if (error.status === 403 && error.error === 'User is suspended.') {  
+          } else if (error.status === 403) {  
             Swal.fire({
               icon: 'warning',
               title: 'Account suspended',
@@ -211,9 +213,7 @@ export class LoginComponent {
       const value = localStorage.getItem(key || '');
       
       if (key && key.includes('token') && key != "current_token"&& key != "token") {
-        if (value) {
-          console.log("Key: ", key)
-          console.log("Value: ", value)
+        if (value) { 
           this.User_Data_After_Login2 = jwtDecode(value)
           
           this.allTokens.push({ id: count, 
@@ -223,8 +223,7 @@ export class LoginComponent {
             count++;
           }
         }
-      }
-    console.log("allTokens: ", this.allTokens)
+      } 
   }
 
   selectType(type: string) {

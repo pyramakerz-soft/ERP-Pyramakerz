@@ -8,7 +8,7 @@
                 class="lg:w-[543px] lg:h-[53px] rounded-[8px] border border-gray-300 px-3 lg:px-4 py-2 lg:py-3"
                 placeholder="{{ 'Enter Key Word' | translate }}" />
         </div> 
-        <div class="flex space-x-4 rtl:space-x-reverse items-center"> 
+        <div *ngIf="this.User_Data_After_Login.type != 'octa'" class="flex space-x-4 rtl:space-x-reverse items-center"> 
             <div class="relative dropdown-container"> 
                 <div class="relative cursor-pointer hover:opacity-80 hover:scale-110 transition-all" (click)="toggleMessagePopup()" >
                     <i class="fi fi-rr-comment-alt-dots text-white text-3xl flex items-center"></i> 
@@ -255,7 +255,7 @@
                 <div class="flex items-center justify-between space-x-3 rtl:space-x-reverse" (click)="togglePopup()">
                     <div class="relative">
                         <img src="Images/person-dummy.jpg" class="rounded-full w-14" alt="Profile Photo">   
-                        <span class="absolute bottom-0 right-0 w-4 h-4 border-white rounded-full border-2" [ngClass]="{
+                        <span *ngIf="this.User_Data_After_Login.type != 'octa'" class="absolute bottom-0 right-0 w-4 h-4 border-white rounded-full border-2" [ngClass]="{
                             'bg-green-500': currentState.id === 1,
                             'bg-red-500': currentState.id === 2,
                             'bg-yellow-500': currentState.id === 3,
@@ -274,7 +274,7 @@
                     class="absolute ltr:right-0 rtl:left-0 mt-2 w-60 max-w-xs bg-white rounded-lg shadow-lg p-4 z-50">
                     <h3 class="font-semibold text-gray-700"> {{ 'Account Options' | translate }}</h3>
 
-                    <div class="relative mt-4">  
+                    <div *ngIf="this.User_Data_After_Login.type != 'octa'" class="relative mt-4">  
                         <button (click)="toggleStateDropdown()"
                             class="text-start w-full hover:bg-gray-100 p-2 rounded-md flex justify-between items-center"> 
                             <span class="flex items-center">

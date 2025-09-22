@@ -103,6 +103,15 @@ namespace LMS_CMS_PL.Controllers.Domains
             //    RefreshToken = refreshToken
             //});
 
+            if (UserInfo.Type == "employee" && user.IsSuspended)
+            { 
+                return Forbid();
+            }
+            else if (UserInfo.Type == "student" && user.IsSuspended)
+            {
+                return Forbid();
+            }
+
             if (UserInfo.Type == "employee" && user is Employee emp)
             {
                 var tokenEmp = _generateJWT.Generate_Jwt_Token(emp.User_Name, emp.ID.ToString(), UserInfo.Type, emp.Role_ID.ToString());

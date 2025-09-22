@@ -63,11 +63,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
                 return NotFound("Main account number not found.");
 
             var results = await context.Set<AccountStatementReport>().FromSqlRaw(
-                "EXEC dbo.GetAccountStatement @DateFrom, @DateTo, @MainAccNo, @SubAccNo",
+                "EXEC dbo.GetAccountStatement @DateFrom, @DateTo, @MainAccNo, @SubAccNo, @PageNumber, @PageSize",
                 new SqlParameter("@DateFrom", fromDate ?? (object)DBNull.Value),
                 new SqlParameter("@DateTo", toDate ?? (object)DBNull.Value),
                 new SqlParameter("@MainAccNo", accountId),
-                new SqlParameter("@SubAccNo", SubAccountID)
+                new SqlParameter("@SubAccNo", SubAccountID),
+                new SqlParameter("@PageNumber", pageNumber),
+                new SqlParameter("@PageSize", pageSize)
             )
                 .AsNoTracking()
                 .ToListAsync();
@@ -83,7 +85,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Accounting
             var dateToValue = fromDate.Value.AddDays(-1);
 
             calcFirstPeriod = await context.Set<AccountStatementReport>().FromSqlRaw(
-                "EXEC dbo.GetAccountStatement @DateFrom, @DateTo, @MainAccNo, @SubAccNo",
+                "EXEC dbo.GetAccountStatement @DateFrom, @DateTo, @MainAccNo, @SubAccNo, 1, 10000000",
                 new SqlParameter("@DateFrom", "1900-1-1" ?? (object)DBNull.Value),
                 new SqlParameter("@DateTo", (object)dateToValue ?? DBNull.Value),
                 new SqlParameter("@MainAccNo", accountId),
