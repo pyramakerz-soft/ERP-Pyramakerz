@@ -269,7 +269,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Violations
 
                 Unit_Of_Work.violations_Repository.Update(violation);
                 Unit_Of_Work.SaveChanges();
-            }
+            } 
 
             return Ok(Newviolation);
         }
