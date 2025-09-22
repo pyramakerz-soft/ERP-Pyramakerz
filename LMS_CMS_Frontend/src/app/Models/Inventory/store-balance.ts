@@ -24,10 +24,10 @@ export interface StoreBalanceItem {
 }
 
 export interface StoreBalanceDetail {
+  SalesPrice: null;
   storeName: string;
   quantity: number;
   PurchasePrice?: number;
-  SalePrice?: number;
   value?: number;
   AverageCost?: number;
 }

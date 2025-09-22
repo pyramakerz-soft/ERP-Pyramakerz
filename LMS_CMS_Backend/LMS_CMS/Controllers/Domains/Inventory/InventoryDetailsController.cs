@@ -374,9 +374,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                     (overdrawnBalance && x.Quantity < 0) ||
                     (zeroBalances && x.Quantity == 0)
                 )
+               .OrderBy(x => x.ItemCode) 
                 .ToList();
 
-                object result;
+               object result;
                 switch (ReportFlagType)
                 {
                 case 1:
@@ -520,13 +521,16 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 .ToList();
 
             var uniqueStores = storeItems.Select(x => new { x.StoreId, x.StoreName }).Distinct().ToList();
-            var uniqueItems = storeItems.Select(x => new { x.ItemId, x.ItemName }).Distinct().ToList();
+            var uniqueItems = storeItems.Select(
+                x => new 
+                { x.ItemId, x.ItemName }).Distinct().OrderBy(x => x.ItemId).ToList();
 
             var horizontalReport = new List<object>();
 
             foreach (var item in uniqueItems)
             {
-                var itemStores = storeItems.Where(x => x.ItemId == item.ItemId).ToList();
+                var itemStores = storeItems.Where(
+                    x => x.ItemId == item.ItemId).ToList();
                 var itemReport = new Dictionary<string, object>
                 {
                     { "itemCode", item.ItemId },

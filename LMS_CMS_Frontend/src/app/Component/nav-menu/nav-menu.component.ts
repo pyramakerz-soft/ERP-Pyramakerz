@@ -135,27 +135,29 @@ export class NavMenuComponent {
     });
     this.DomainName = this.ApiServ.GetHeader();
     
-    this.getConnectionStatus()
-    this.getUserStatus()
-    
-    this.loadUnseenNotifications()
-    this.loadUnseenRequests()
-    this.loadUnseenMessages()
-
-    // Subscribe to notification opened events
-    this.notificationService.notificationOpened$.subscribe(() => {
-      this.loadUnseenNotifications();
-    });
-
-    // Subscribe to request opened events
-    this.requestService.requestOpened$.subscribe(() => {
-      this.loadUnseenRequests();
-    });
-
-    // Subscribe to message opened events
-    this.chatMessageService.messageOpened$.subscribe(() => {
-      this.loadUnseenMessages();
-    });
+    if(this.User_Data_After_Login.type != 'octa'){
+      this.getConnectionStatus()
+      this.getUserStatus()
+      
+      this.loadUnseenNotifications()
+      this.loadUnseenRequests()
+      this.loadUnseenMessages()
+  
+      // Subscribe to notification opened events
+      this.notificationService.notificationOpened$.subscribe(() => {
+        this.loadUnseenNotifications();
+      });
+  
+      // Subscribe to request opened events
+      this.requestService.requestOpened$.subscribe(() => {
+        this.loadUnseenRequests();
+      });
+  
+      // Subscribe to message opened events
+      this.chatMessageService.messageOpened$.subscribe(() => {
+        this.loadUnseenMessages();
+      });
+    }
   }
 
   getConnectionStatus() {
@@ -368,6 +370,7 @@ export class NavMenuComponent {
     localStorage.removeItem("count");
     this.router.navigateByUrl("")
 
+    this.employeeService.clearMyDataCache()
   }
 
   async logOut() {
@@ -403,6 +406,7 @@ export class NavMenuComponent {
     await this.logOutService.logOut();
     this.GetUserInfo();
     this.getAllTokens();
+    this.employeeService.clearMyDataCache()
   }
 
   openModal() {
