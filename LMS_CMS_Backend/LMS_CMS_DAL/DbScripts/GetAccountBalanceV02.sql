@@ -30,8 +30,8 @@ BEGIN
         GROUP BY SA.SubAccountNo, SA.SubAccountName
     )
     SELECT ID, Name, 
-	Debit, 
-	Credit
+	CAST(Debit AS DECIMAL) Debit, 
+	CAST(Credit AS DECIMAL) Credit
     FROM CTE
     WHERE 
           (@ZeroBalance = 1 AND Balance = 0)

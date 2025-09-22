@@ -27,7 +27,18 @@ import Swal from 'sweetalert2';
   styleUrl: './employee-clocks.component.css',
 })
 export class EmployeeClocksComponent {
-  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
+  User_Data_After_Login: TokenData = new TokenData(
+    '',
+    0,
+    0,
+    0,
+    0,
+    '',
+    '',
+    '',
+    '',
+    ''
+  );
 
   isRtl: boolean = false;
   subscription!: Subscription;
@@ -64,7 +75,7 @@ export class EmployeeClocksComponent {
     public EmployeeClocksServ: EmployeeClocksService,
     private languageService: LanguageService,
     private realTimeService: RealTimeNotificationServiceService
-  ) { }
+  ) {}
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
@@ -103,7 +114,7 @@ export class EmployeeClocksComponent {
   }
 
   onTimeChange(row: any, field: 'clockIn' | 'clockOut', event: string) {
-    row[field] = event.length === 5 ? event + ":00" : event; // save as "HH:mm:ss"
+    row[field] = event.length === 5 ? event + ':00' : event; // save as "HH:mm:ss"
   }
 
   GetAllData() {
@@ -125,7 +136,7 @@ export class EmployeeClocksComponent {
             title: 'Oops...',
             text: 'Try Again Later!',
             confirmButtonText: 'Okay',
-            customClass: { confirmButton: 'secondaryBg' }
+            customClass: { confirmButton: 'secondaryBg' },
           });
         }
       );
@@ -145,60 +156,77 @@ export class EmployeeClocksComponent {
   save(): void {
     if (this.isFormValidForCreate()) {
       this.isLoadingWhenEdit = true;
-      console.log(this.TableData)
-      this.EmployeeClocksServ.Edit(this.TableData, this.DomainName).subscribe((d) => {
-        this.isLoadingWhenEdit = false;
-        this.GetAllData();
-        Swal.fire({
-          icon: 'success',
-          title: 'Done',
-          text: 'Saved Successfully',
-          confirmButtonColor: '#089B41',
-        });
-      }, error => {
-        console.log(error)
-        this.isLoadingWhenEdit = false; // Hide spinner
-        Swal.fire({
-          icon: 'error',
-          title: 'Oops...',
-          text: 'Try Again Later!',
-          confirmButtonText: 'Okay',
-          customClass: { confirmButton: 'secondaryBg' }
-        });
-      })
+      console.log(this.TableData);
+      this.EmployeeClocksServ.Edit(this.TableData, this.DomainName).subscribe(
+        (d) => {
+          this.isLoadingWhenEdit = false;
+          this.GetAllData();
+          Swal.fire({
+            icon: 'success',
+            title: 'Done',
+            text: 'Saved Successfully',
+            confirmButtonColor: '#089B41',
+          });
+        },
+        (error) => {
+          console.log(error);
+          this.isLoadingWhenEdit = false; // Hide spinner
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Try Again Later!',
+            confirmButtonText: 'Okay',
+            customClass: { confirmButton: 'secondaryBg' },
+          });
+        }
+      );
     }
   }
 
   AddClockIn() {
     if (this.isFormValid()) {
       this.isLoading = true;
-      if (this.employeeClocks.clockIn && this.employeeClocks.clockIn.length === 5) {
-        this.employeeClocks.clockIn = this.employeeClocks.clockIn + ":00"; // convert "13:11" -> "13:11:00"
+      if (
+        this.employeeClocks.clockIn &&
+        this.employeeClocks.clockIn.length === 5
+      ) {
+        this.employeeClocks.clockIn = this.employeeClocks.clockIn + ':00'; // convert "13:11" -> "13:11:00"
       }
-      if (this.employeeClocks.clockOut && this.employeeClocks.clockOut.length === 5) {
-        this.employeeClocks.clockOut = this.employeeClocks.clockOut + ":00";
+      if (
+        this.employeeClocks.clockOut &&
+        this.employeeClocks.clockOut.length === 5
+      ) {
+        this.employeeClocks.clockOut = this.employeeClocks.clockOut + ':00';
       }
-      console.log(this.employeeClocks)
-      this.EmployeeClocksServ.Add(this.employeeClocks, this.DomainName).subscribe((d) => {
-        this.isLoading = false;
-        this.GetAllData();
-        Swal.fire({
-          icon: 'success',
-          title: 'Done',
-          text: 'Saved Successfully',
-          confirmButtonColor: '#089B41',
-        });
-      }, error => {
-        console.log(error)
-        this.isLoading = false; // Hide spinner
-        Swal.fire({
-          icon: 'error',
-          title: 'Oops...',
-          text: 'Try Again Later!',
-          confirmButtonText: 'Okay',
-          customClass: { confirmButton: 'secondaryBg' }
-        });
-      })
+      console.log(this.employeeClocks);
+      this.EmployeeClocksServ.Add(
+        this.employeeClocks,
+        this.DomainName
+      ).subscribe(
+        (d) => {
+          this.isLoading = false;
+          this.GetAllData();
+          this.closeModal();
+          Swal.fire({
+            icon: 'success',
+            title: 'Done',
+            text: 'Saved Successfully',
+            confirmButtonColor: '#089B41',
+          });
+        },
+        (error) => {
+          console.log(error);
+          this.isLoading = false; // Hide spinner
+          this.closeModal();
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Try Again Later!',
+            confirmButtonText: 'Okay',
+            customClass: { confirmButton: 'secondaryBg' },
+          });
+        }
+      );
     }
   }
 
@@ -207,7 +235,7 @@ export class EmployeeClocksComponent {
   }
 
   openModal() {
-    this.employeeClocks = new EmployeeClocks()
+    this.employeeClocks = new EmployeeClocks();
     this.validationErrors = {};
     this.isModalVisible = true;
   }
@@ -218,10 +246,7 @@ export class EmployeeClocksComponent {
       if (this.employeeClocks.hasOwnProperty(key)) {
         const field = key as keyof EmployeeClocks;
         if (!this.employeeClocks[field]) {
-          if (
-            field == 'date' ||
-            field == 'employeeID'
-          ) {
+          if (field == 'date' || field == 'employeeID') {
             this.validationErrors[field] = `*${this.capitalizeField(
               field
             )} is required`;
@@ -230,8 +255,13 @@ export class EmployeeClocksComponent {
         }
       }
     }
-    if (this.employeeClocks.clockOut && this.employeeClocks.clockIn && this.employeeClocks.clockOut < this.employeeClocks.clockIn) {
-      this.validationErrors['clockOut'] = "Clock out time cannot be earlier than clock in time.";
+    if (
+      this.employeeClocks.clockOut &&
+      this.employeeClocks.clockIn &&
+      this.employeeClocks.clockOut < this.employeeClocks.clockIn
+    ) {
+      this.validationErrors['clockOut'] =
+        'Clock out time cannot be earlier than clock in time.';
       isValid = false;
     }
     return isValid;
@@ -239,7 +269,12 @@ export class EmployeeClocksComponent {
 
   isFormValidForCreate(): boolean {
     let isValid = true;
-    isValid = !this.TableData.some(element => element.clockIn&& element.clockOut&& element.clockOut < element.clockIn);
+    isValid = !this.TableData.some(
+      (element) =>
+        element.clockIn &&
+        element.clockOut &&
+        element.clockOut < element.clockIn
+    );
     return isValid;
   }
 

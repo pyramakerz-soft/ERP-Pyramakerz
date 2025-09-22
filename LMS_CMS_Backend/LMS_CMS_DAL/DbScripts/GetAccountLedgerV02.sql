@@ -25,8 +25,8 @@ BEGIN
     SELECT 
         ID,
         Name,
-        Debit,
-        Credit
+	CAST(Debit AS DECIMAL) Debit, 
+	CAST(Credit AS DECIMAL) Credit
     FROM LedgerCTE
     ORDER BY ID
     OFFSET (@PageNumber - 1) * @PageSize ROWS

@@ -12046,6 +12046,37 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.ToTable("Parent");
                 });
 
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.RefreshTokens", b =>
+                {
+                    b.Property<long>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("ID"));
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRevoked")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("UserID")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("UserTypeID")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("UserTypeID");
+
+                    b.ToTable("RefreshTokens");
+                });
+
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.RegisterationModule.CategoryField", b =>
                 {
                     b.Property<long>("ID")
@@ -20366,6 +20397,17 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Navigation("UpdatedByEmployee");
                 });
 
+            modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.RefreshTokens", b =>
+                {
+                    b.HasOne("LMS_CMS_DAL.Models.Domains.UserType", "UserType")
+                        .WithMany("RefreshTokens")
+                        .HasForeignKey("UserTypeID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("UserType");
+                });
+
             modelBuilder.Entity("LMS_CMS_DAL.Models.Domains.RegisterationModule.CategoryField", b =>
                 {
                     b.HasOne("LMS_CMS_DAL.Models.Domains.Employee", "DeletedByEmployee")
@@ -22706,6 +22748,8 @@ namespace LMS_CMS_DAL.Migrations.Domains
                     b.Navigation("ReceiverChatMessages");
 
                     b.Navigation("ReceiverRequests");
+
+                    b.Navigation("RefreshTokens");
 
                     b.Navigation("SenderChatMessages");
 

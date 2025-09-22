@@ -54,26 +54,39 @@
     </div>
 </div>
 
-<!-- Replace the export buttons section with this: -->
-<div *ngIf="hasData && !isLoading" class="mt-5 flex justify-end space-x-4 rtl:space-x-reverse">
-    <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="downloadAsPDF()" [title]="'Download PDF' | translate">
-    <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="print()" [title]="'Print' | translate">
+<!-- Export Buttons -->
+<div *ngIf="hasData && !isLoading" class="mt-4 flex items-center justify-end space-x-4">
+    <button (click)="downloadAsPDF()" [disabled]="isExporting" >
+    <img class="w-5 cursor-pointer" src="Icons/PDF.png"  title="Export to PDF">
+    </button>
+    <button (click)="printReport()" [disabled]="isExporting" >
+    <img class="w-5 cursor-pointer" src="Icons/Print.png" title="Print Report">
+    </button>
 </div>
 
-<!-- Update the chart section to match the store balance report style -->
-<div #reportContent *ngIf="hasData && !isLoading" class="mt-8 bg-white p-6 rounded-2xl border border-[#BDBDBD]">
+<!--     <button (click)="downloadAsPDF()" [disabled]="isExporting" 
+ -->
+
+<!-- Report Content (hidden, used for PDF generation) -->
+<div #reportContent style="display: none;">
+    <h1>Teacher Evaluation Report</h1>
+    <h2>Performance Analysis</h2>
+</div>
+
+<!-- Chart Section -->
+<div *ngIf="hasData && !isLoading" class="mt-8 bg-white p-6 rounded-lg shadow-md">
     <div class="chart-container" style="position: relative; height: 400px;">
         <canvas #chartCanvas id="evaluationChart"></canvas>
     </div>
 </div>
 
-<!-- Update the loading indicator to match the store balance report style -->
-<div *ngIf="isLoading" class="mt-8 bg-white p-6 rounded-2xl border border-[#BDBDBD] text-center">
+<!-- Loading Indicator -->
+<div *ngIf="isLoading" class="mt-8 bg-white p-6 rounded-lg shadow-md text-center">
     <i class="fas fa-spinner fa-spin text-2xl text-blue-600"></i>
     <p class="mt-2 text-gray-600">{{'Loading evaluation data...' | translate }}</p>
 </div>
 
-<!-- Update the exporting indicator -->
+<!-- Exporting Indicator -->
 <div *ngIf="isExporting" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div class="bg-white p-6 rounded-lg shadow-lg text-center">
         <i class="fas fa-spinner fa-spin text-2xl text-blue-600 mb-2"></i>

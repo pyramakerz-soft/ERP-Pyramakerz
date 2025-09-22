@@ -267,6 +267,7 @@ import { MaintenanceComponent } from './Pages/Employee/Maintenance/maintenance/m
 import { EmployeeClocksComponent } from './Pages/Employee/HR/employee-clocks/employee-clocks.component';
 import { MaintenanceReportComponent } from './Pages/Employee/Maintenance/Reports/maintenance-report/maintenance-report.component';
 import { SalaryConfigurationComponent } from './Pages/Employee/HR/salary-configuration/salary-configuration.component';
+import { EmployeeJobReportComponent } from './Pages/Employee/HR/Reports/employee-job-report/employee-job-report.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -457,7 +458,7 @@ export const routes: Routes = [
             { path: "Lesson Resources Types", component: LessonResourcesTypeComponent, title: "Lesson Resource Type", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Student Medal", component: StudentMedalComponent, title: "Student Medal", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Lessons", component: LessonComponent, title: "Lesson", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Create Daily Performance", component: DailyPerformanceComponent, title: "Daily Performance", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
+            { path: "Create Daily Performance", component: DailyPerformanceComponent, title: "Daily Performance", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Performance Type", component: PerformanceTypeComponent, title: "Performance Type", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Lesson Activity/:id", component: LessonActivityComponent, title: "Lesson Activity", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Lesson Resource/:id", component: LessonResourceComponent, title: "Lesson Resource", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
@@ -576,6 +577,7 @@ export const routes: Routes = [
             { path: "Archiving", component: ArchivingComponent, title: "Archiving", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Vacation Employee", component: VacationEmployeeComponent, title: "Vacation Employee", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Location", component: LocationComponent, title: "Location", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Employee Job Report", component: EmployeeJobReportComponent, title: "Employee Job Report", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Edit Attendance", component: EmployeeClocksComponent, title: "Edit Attendance", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Salary Configuration", component: SalaryConfigurationComponent, title: "Salary Configuration", canActivate: [noNavigateWithoutLoginGuard] },
         ]

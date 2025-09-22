@@ -228,7 +228,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             foreach (var item in allInventoryData.SelectMany(im => im.InventoryDetails))
             {
                 item.AverageCost = 0;
-                //Unit_Of_Work.inventoryDetails_Repository.Update(item);
+                Unit_Of_Work.inventoryDetails_Repository.Update(item);
             }
 
             // ========== المرحلة 2: Opening Balance & Purchases ==========
@@ -237,11 +237,10 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                         .SelectMany(im => im.InventoryDetails))
             {
                 item.AverageCost = item.TotalPrice;
-                //Unit_Of_Work.inventoryDetails_Repository.Update(item);
+                Unit_Of_Work.inventoryDetails_Repository.Update(item);
             }
             await Unit_Of_Work.SaveChangesAsync();
             // ========== المرحلة 3: الحركات اليومية ==========
-      
             var currentDate = parsedFromDate;
             while (currentDate <= parsedToDate)
             {
@@ -253,14 +252,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 {
                     decimal? averageCost = await CalculateAverageCostForItem(item.ShopItemID, currentDate);
                     item.AverageCost = (averageCost * item.Quantity) ?? 0;
-                    //Unit_Of_Work.inventoryDetails_Repository.Update(item);
+                    Unit_Of_Work.inventoryDetails_Repository.Update(item);
                 }
                 await Unit_Of_Work.SaveChangesAsync();
-                //currentDate = currentDate;
-                currentDate = currentDate.AddDays(1);
-
+                currentDate = currentDate;
             }
-            return Ok("Average cost calculation completed successfully");
+
+            return Ok();
         }
         // /////////////////////////////////////////////////////////////-7
         private async Task<decimal> CalculateAverageCostForItem(long shopItemId, DateOnly targetDate)

@@ -149,6 +149,7 @@
                                 <option *ngFor="let ac of AcademicYears" [value]="ac.id">
                                     {{ ac.name }}
                                 </option>
+                                <option *ngIf="AcademicYears.length === 0" disabled selected>No Data Found</option>
                             </select>
 
                             <!-- Grade Dropdown -->
@@ -164,6 +165,7 @@
                                 <option *ngFor="let g of Grades" [value]="g.id">
                                     {{ g.name }}
                                 </option>
+                                <option *ngIf="Grades.length === 0" disabled selected>No Data Found</option>
                             </select>
                             }
 

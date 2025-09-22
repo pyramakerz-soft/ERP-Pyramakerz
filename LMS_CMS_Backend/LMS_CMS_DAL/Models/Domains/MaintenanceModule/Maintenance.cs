@@ -8,11 +8,8 @@ using System.Threading.Tasks;
 namespace LMS_CMS_DAL.Models.Domains.MaintenanceModule
 {
     public class Maintenance : AuditableEntity
-    {
-
-        public long ID { get; set; }
-
-
+    { 
+        public long ID { get; set; } 
         public DateOnly Date { get; set; }
 
         [ForeignKey("Item")]
@@ -25,12 +22,8 @@ namespace LMS_CMS_DAL.Models.Domains.MaintenanceModule
 
         [ForeignKey("Company")]
         public long? CompanyID { get; set; }
-        public MaintenanceCompany? Company { get; set; }
-
-      
-        public decimal Cost { get; set; }
-
-    
+        public MaintenanceCompany? Company { get; set; } 
+        public decimal Cost { get; set; } 
         public string? Note { get; set; }
 
     }

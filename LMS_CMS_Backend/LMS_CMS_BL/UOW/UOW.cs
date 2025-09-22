@@ -275,6 +275,7 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<SalaryConfigration> SalaryConfigration_Repository;
         GenericRepo<BankEmployee> BankEmployee_Repository;
         GenericRepo<SafeEmployee> SafeEmployee_Repository;
+        GenericRepo<RefreshTokens> RefreshTokens_Repository;
 
          
         public UOW(Octa_DbContext octa_Db)
@@ -3152,6 +3153,18 @@ namespace LMS_CMS_BL.UOW
                     BankEmployee_Repository = new GenericRepo<BankEmployee>(db);
                 }
                 return BankEmployee_Repository;
+            }
+        }
+         
+        public GenericRepo<RefreshTokens> refreshTokens_Repository
+        {
+            get
+            {
+                if (RefreshTokens_Repository == null)
+                {
+                    RefreshTokens_Repository = new GenericRepo<RefreshTokens>(db);
+                }
+                return RefreshTokens_Repository;
             }
         }
          
