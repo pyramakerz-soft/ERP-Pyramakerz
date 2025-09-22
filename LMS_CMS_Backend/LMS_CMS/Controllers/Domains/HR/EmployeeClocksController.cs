@@ -119,7 +119,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             DateOnly periodStart = new DateOnly();
             DateOnly periodEnd = new DateOnly();
 
-            if (startDay == 1)
+            if (salaryConfigration.FromPreviousMonth == false)
             {
                 periodStart = new DateOnly(year, month, 1);
                 periodEnd = periodStart.AddMonths(1).AddDays(-1); // last day of month
@@ -172,6 +172,17 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             {
                 NewClock.LocationID = null;
             }
+
+            if(NewClock.ClockIn == null || NewClock.ClockOut== null)
+            {
+                return BadRequest("ClockIn and ClockOut are required");
+            }
+
+            if (NewClock.ClockIn > NewClock.ClockOut)
+            {
+                return BadRequest("ClockIn and ClockOut are required");
+            }
+
             EmployeeClocks clock = mapper.Map<EmployeeClocks>(NewClock);
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
@@ -302,6 +313,16 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 return BadRequest("No Employee With This Id");
             }
 
+            EmployeeClocks employeeClocks = Unit_Of_Work.employeeClocks_Repository
+                .FindBy(e => e.IsDeleted != true && e.EmployeeID == NewClock.EmployeeID && e.ClockOut == null)   // still open, no clock out
+                .OrderByDescending(e => e.Date)
+                .ThenByDescending(e => e.ClockIn)
+                .FirstOrDefault();
+
+            if (employeeClocks != null)
+            {
+                return BadRequest("this user already clocked In");
+            }
 
             if (employee.IsRestrictedForLoctaion)
             {
