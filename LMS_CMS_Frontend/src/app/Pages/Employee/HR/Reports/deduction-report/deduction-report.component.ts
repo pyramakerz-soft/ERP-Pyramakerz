@@ -3,25 +3,25 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { PdfPrintComponent } from '../../../../../Component/pdf-print/pdf-print.component';
-import { firstValueFrom, Subscription } from 'rxjs';
-import { LoansService } from '../../../../../Services/Employee/HR/loans.service';
+import { Subscription, firstValueFrom } from 'rxjs';
+import Swal from 'sweetalert2';
+import { ApiService } from '../../../../../Services/api.service';
 import { JobCategoriesService } from '../../../../../Services/Employee/Administration/job-categories.service';
 import { JobService } from '../../../../../Services/Employee/Administration/job.service';
 import { EmployeeService } from '../../../../../Services/Employee/employee.service';
-import { ApiService } from '../../../../../Services/api.service';
+import { DeductionService } from '../../../../../Services/Employee/HR/deduction.service';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
 import { ReportsService } from '../../../../../Services/shared/reports.service';
-import Swal from 'sweetalert2';
 
 @Component({
-  selector: 'app-loans-report',
+  selector: 'app-deduction-report',
   standalone: true,
   imports: [CommonModule, FormsModule, TranslateModule, PdfPrintComponent],
-  templateUrl: './loans-report.component.html',
-  styleUrl: './loans-report.component.css'
+  templateUrl: './deduction-report.component.html',
+  styleUrl: './deduction-report.component.css'
 })
-export class LoansReportComponent implements OnInit {
+export class DeductionReportComponent  implements OnInit {
   // Filter properties
   selectedJobCategoryId: number = 0;
   selectedJobId: number = 0;
@@ -35,7 +35,7 @@ export class LoansReportComponent implements OnInit {
   employees: any[] = [];
 
   // Report data
-  loansReports: any[] = [];
+  deductionReports: any[] = [];
   showTable: boolean = false;
   isLoading: boolean = false;
   showViewReportBtn: boolean = false;
@@ -51,14 +51,14 @@ export class LoansReportComponent implements OnInit {
   showPDF = false;
   reportsForExport: any[] = [];
   school = {
-    reportHeaderOneEn: 'Loans Report',
-    reportHeaderTwoEn: 'Employee Loans Records',
-    reportHeaderOneAr: 'تقرير السلف',
-    reportHeaderTwoAr: 'سجلات سلف الموظفين'
+    reportHeaderOneEn: 'Deduction Report',
+    reportHeaderTwoEn: 'Employee Deduction Records',
+    reportHeaderOneAr: 'تقرير الخصومات',
+    reportHeaderTwoAr: 'سجلات خصومات الموظفين'
   };
 
   constructor(
-    private loansService: LoansService,
+    private deductionService: DeductionService,
     private jobCategoriesService: JobCategoriesService,
     private jobService: JobService,
     private employeeService: EmployeeService,
@@ -122,7 +122,6 @@ export class LoansReportComponent implements OnInit {
     if (this.selectedJobId) {
       try {
         const domainName = this.apiService.GetHeader();
-        // Assuming you have a method to get employees by job ID
         const data = await firstValueFrom(
           this.employeeService.GetWithJobId(this.selectedJobId, domainName)
         );
@@ -144,8 +143,8 @@ export class LoansReportComponent implements OnInit {
 
   onFilterChange() {
     this.showTable = false;
-    this.showViewReportBtn = !!this.dateFrom && !!this.dateTo && !!this.selectedJobCategoryId && !!this.selectedJobId && !! this.selectedEmployeeId;
-    this.loansReports = [];
+    this.showViewReportBtn = !!this.dateFrom && !!this.dateTo && !!this.selectedJobCategoryId && !!this.selectedJobId && !!this.selectedEmployeeId;
+    this.deductionReports = [];
   }
 
   async viewReport() {
@@ -175,7 +174,7 @@ export class LoansReportComponent implements OnInit {
     try {
       const domainName = this.apiService.GetHeader();
       const response = await firstValueFrom(
-        this.loansService.GetLoansReport(
+        this.deductionService.GetDeductionReport(
           this.selectedJobCategoryId || 0,
           this.selectedJobId || 0,
           this.selectedEmployeeId || 0,
@@ -188,25 +187,19 @@ export class LoansReportComponent implements OnInit {
       console.log('API Response:', response);
       
       if (Array.isArray(response)) {
-        this.loansReports = response;
-        console.log('Loans reports loaded:', this.loansReports.length);
+        this.deductionReports = response;
+        console.log('Deduction reports loaded:', this.deductionReports.length);
       } else {
         console.log('Response is not an array:', response);
-        this.loansReports = [];
+        this.deductionReports = [];
       }
 
       this.prepareExportData();
       this.showTable = true;
     } catch (error) {
-      console.error('Error loading loans reports:', error);
-      this.loansReports = [];
+      console.error('Error loading deduction reports:', error);
+      this.deductionReports = [];
       this.showTable = true;
-      // Swal.fire({
-      //   title: 'Error',
-      //   text: 'Failed to load loans reports',
-      //   icon: 'error',
-      //   confirmButtonText: 'OK',
-      // });
     } finally {
       this.isLoading = false;
     }
@@ -215,34 +208,36 @@ export class LoansReportComponent implements OnInit {
   private prepareExportData(): void {
     // For PDF (object format) - Flatten the data for the table
     this.reportsForExport = [];
-    this.loansReports.forEach(employeeLoan => {
-      if (employeeLoan.loans && employeeLoan.loans.length > 0) {
-        employeeLoan.loans.forEach((loan: any) => {
+    this.deductionReports.forEach(employeeDeduction => {
+      if (employeeDeduction.deductions && employeeDeduction.deductions.length > 0) {
+        employeeDeduction.deductions.forEach((deduction: any) => {
           this.reportsForExport.push({
-            'Employee ID': employeeLoan.employeeId,
-            'Employee Name': employeeLoan.employeeEnName || employeeLoan.employeeArName || 'Unknown',
-            'Total Amount': employeeLoan.totalAmount,
-            'Loan ID': loan.id,
-            'Loan Date': new Date(loan.date).toLocaleDateString(),
-            'Deduction Start': new Date(loan.deductionStartMonth).toLocaleDateString(),
-            'Loan Amount': loan.amount,
-            'Number of Deductions': loan.numberOfDeduction,
-            'Safe Name': loan.saveName,
-            'Notes': loan.notes || '-'
+            'Employee ID': employeeDeduction.employeeId,
+            'Employee Name': employeeDeduction.employeeEnName || employeeDeduction.employeeArName || 'Unknown',
+            'Total Amount': employeeDeduction.totalAmount,
+            'Deduction ID': deduction.id,
+            'Deduction Date': new Date(deduction.date).toLocaleDateString(),
+            'Deduction Type': deduction.deductionTypeName,
+            'Hours': deduction.hours || '-',
+            'Minutes': deduction.minutes || '-',
+            'Number of Deduction Days': deduction.numberOfDeductionDays || '-',
+            'Amount': deduction.amount || '-',
+            'Notes': deduction.notes || '-'
           });
         });
       } else {
-        // If no loans, still show employee summary
+        // If no deductions, still show employee summary
         this.reportsForExport.push({
-          'Employee ID': employeeLoan.employeeId,
-          'Employee Name': employeeLoan.employeeEnName || employeeLoan.employeeArName || 'Unknown',
-          'Total Amount': employeeLoan.totalAmount,
-          'Loan ID': '-',
-          'Loan Date': '-',
-          'Deduction Start': '-',
-          'Loan Amount': '-',
-          'Number of Deductions': '-',
-          'Safe Name': '-',
+          'Employee ID': employeeDeduction.employeeId,
+          'Employee Name': employeeDeduction.employeeEnName || employeeDeduction.employeeArName || 'Unknown',
+          'Total Amount': employeeDeduction.totalAmount,
+          'Deduction ID': '-',
+          'Deduction Date': '-',
+          'Deduction Type': '-',
+          'Hours': '-',
+          'Minutes': '-',
+          'Number of Deduction Days': '-',
+          'Amount': '-',
           'Notes': '-'
         });
       }
@@ -250,27 +245,29 @@ export class LoansReportComponent implements OnInit {
 
     // For Excel (array format)
     this.reportsForExcel = [];
-    this.loansReports.forEach(employeeLoan => {
-      if (employeeLoan.loans && employeeLoan.loans.length > 0) {
-        employeeLoan.loans.forEach((loan: any) => {
+    this.deductionReports.forEach(employeeDeduction => {
+      if (employeeDeduction.deductions && employeeDeduction.deductions.length > 0) {
+        employeeDeduction.deductions.forEach((deduction: any) => {
           this.reportsForExcel.push([
-            employeeLoan.employeeId,
-            employeeLoan.employeeEnName || employeeLoan.employeeArName || 'Unknown',
-            employeeLoan.totalAmount,
-            loan.id,
-            new Date(loan.date).toLocaleDateString(),
-            new Date(loan.deductionStartMonth).toLocaleDateString(),
-            loan.amount,
-            loan.numberOfDeduction,
-            loan.saveName,
-            loan.notes || '-'
+            employeeDeduction.employeeId,
+            employeeDeduction.employeeEnName || employeeDeduction.employeeArName || 'Unknown',
+            employeeDeduction.totalAmount,
+            deduction.id,
+            new Date(deduction.date).toLocaleDateString(),
+            deduction.deductionTypeName,
+            deduction.hours || '-',
+            deduction.minutes || '-',
+            deduction.numberOfDeductionDays || '-',
+            deduction.amount || '-',
+            deduction.notes || '-'
           ]);
         });
       } else {
         this.reportsForExcel.push([
-          employeeLoan.employeeId,
-          employeeLoan.employeeEnName || employeeLoan.employeeArName || 'Unknown',
-          employeeLoan.totalAmount,
+          employeeDeduction.employeeId,
+          employeeDeduction.employeeEnName || employeeDeduction.employeeArName || 'Unknown',
+          employeeDeduction.totalAmount,
+          '-',
           '-',
           '-',
           '-',
@@ -384,13 +381,13 @@ export class LoansReportComponent implements OnInit {
     try {
       await this.reportsService.generateExcelReport({
         mainHeader: {
-          en: 'Loans Report',
-          ar: 'تقرير السلف'
+          en: 'Deduction Report',
+          ar: 'تقرير الخصومات'
         },
         subHeaders: [
           {
-            en: 'Employee Loans Records',
-            ar: 'سجلات سلف الموظفين'
+            en: 'Employee Deduction Records',
+            ar: 'سجلات خصومات الموظفين'
           }
         ],
         infoRows: [
@@ -402,23 +399,24 @@ export class LoansReportComponent implements OnInit {
         ],
         tables: [
           {
-            title: 'Loans Report Data',
+            title: 'Deduction Report Data',
             headers: [
               'Employee ID', 
               'Employee Name', 
               'Total Amount', 
-              'Loan ID', 
-              'Loan Date', 
-              'Deduction Start', 
-              'Loan Amount', 
-              'Number of Deductions', 
-              'Safe Name', 
+              'Deduction ID', 
+              'Deduction Date', 
+              'Deduction Type',
+              'Hours',
+              'Minutes', 
+              'Number of Deduction Days', 
+              'Amount', 
               'Notes'
             ],
             data: this.reportsForExcel
           }
         ],
-        filename: `Loans_Report_${new Date().toISOString().slice(0, 10)}.xlsx`
+        filename: `Deduction_Report_${new Date().toISOString().slice(0, 10)}.xlsx`
       });
     } catch (error) {
       console.error('Error exporting to Excel:', error);
@@ -428,13 +426,13 @@ export class LoansReportComponent implements OnInit {
     }
   }
 
-  // Helper method to check if employee has loans
-  hasLoans(employeeLoan: any): boolean {
-    return employeeLoan.loans && employeeLoan.loans.length > 0;
+  // Helper method to check if employee has deductions
+  hasDeductions(employeeDeduction: any): boolean {
+    return employeeDeduction.deductions && employeeDeduction.deductions.length > 0;
   }
 
-  // Helper method to get loan count
-  getLoanCount(employeeLoan: any): number {
-    return employeeLoan.loans ? employeeLoan.loans.length : 0;
+  // Helper method to get deduction count
+  getDeductionCount(employeeDeduction: any): number {
+    return employeeDeduction.deductions ? employeeDeduction.deductions.length : 0;
   }
 }
