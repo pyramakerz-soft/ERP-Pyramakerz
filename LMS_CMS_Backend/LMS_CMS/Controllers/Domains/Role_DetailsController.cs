@@ -26,6 +26,34 @@ namespace LMS_CMS_PL.Controllers.Domains
             this.mapper = mapper;
         }
 
+        [HttpGet("CheckPageAccess")]
+        public IActionResult CheckPageAccess([FromQuery] long roleId, [FromQuery] string pageName)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            Page page = Unit_Of_Work.page_Repository.First_Or_Default(d => d.en_name == pageName);
+            if (page == null)
+            {
+                return BadRequest("No Page with this ID");
+            }
+
+            Role role = Unit_Of_Work.role_Repository.First_Or_Default(d => d.ID == roleId && d.IsDeleted != true);
+            if (role == null)
+            {
+                return BadRequest("No Role with this ID");
+            }
+
+            Role_Detailes role_Detaile = Unit_Of_Work.role_Detailes_Repository.First_Or_Default(d => d.IsDeleted != true && d.Page_ID == page.ID && d.Role_ID == roleId);
+            if (role_Detaile == null)
+            {
+                return BadRequest("You don't have access to this page");
+            }
+            else
+            {
+                return Ok();
+            }
+        }
+
         [HttpGet("Get_With_RoleID_Group_By/{roleId}")]
         public async Task<IActionResult> Get_With_RoleID_Group_By(long roleId)
         {

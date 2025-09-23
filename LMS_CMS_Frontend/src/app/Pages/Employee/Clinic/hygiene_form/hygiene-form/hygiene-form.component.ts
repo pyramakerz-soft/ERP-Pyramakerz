@@ -117,7 +117,7 @@ async onSearchEvent(event: { key: string, value: any }) {
   // }
 
   navigateToCreateHygieneForm() {
-    this.router.navigate(['/Employee/Create Hygiene Form']);
+    this.router.navigate(['/Employee/Hygiene Form']);
   }
 
   openModal(id?: number) {
@@ -206,7 +206,7 @@ deleteHygieneForm(row: any) {
   }
 
   onView(row: any) {
-    this.router.navigate(['/Employee/view hygiene form', row.id]);
+    this.router.navigate(['/Employee/Hygiene Form', row.id]);
   }
 
 

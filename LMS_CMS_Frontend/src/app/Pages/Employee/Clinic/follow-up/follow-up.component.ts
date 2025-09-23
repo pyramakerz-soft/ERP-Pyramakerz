@@ -74,6 +74,7 @@ export class FollowUpComponent implements OnInit {
   selectedDrugId: number | null = null;
   selectedDoseId: number | null = null;
   drugDoseList: any[] = [];
+  isAddingDrugDose: boolean = false;
   keysArray: string[] = [
     'id',
     'schoolName',
@@ -96,6 +97,10 @@ export class FollowUpComponent implements OnInit {
   dose: Dose = new Dose(0, '', new Date().toISOString());
   editDose: boolean = false;
   doseValidationErrors: { [key: string]: string } = {};
+
+  isSavingDrug: boolean = false;
+  isSavingDose: boolean = false;
+
 
   constructor(
     private followUpService: FollowUpService,
@@ -320,24 +325,31 @@ export class FollowUpComponent implements OnInit {
     this.doseValidationErrors = {};
   }
 
-  async saveDrug() {
-    this.drugValidationErrors = {};
-    if (!this.drug.name) {
-      this.drugValidationErrors['name'] = '*Name is required';
-      return;
-    }
-
-    try {
-      const domainName = this.apiService.GetHeader();
-      await firstValueFrom(this.drugService.Add(this.drug, domainName));
-      this.loadDropdownOptions();
-      this.closeDrugModal();
-      Swal.fire('Success', 'Drug saved successfully', 'success');
-    } catch (error) {
-      console.error('Error saving drug:', error);
-      Swal.fire('Error', 'Failed to save drug', 'error');
-    }
+async saveDrug() {
+  this.drugValidationErrors = {};
+  if (!this.drug.name) {
+    this.drugValidationErrors['name'] = '*Name is required';
+    return;
   }
+
+  // Prevent multiple clicks
+  if (this.isSavingDrug) return;
+  
+  this.isSavingDrug = true;
+
+  try {
+    const domainName = this.apiService.GetHeader();
+    await firstValueFrom(this.drugService.Add(this.drug, domainName));
+    this.loadDropdownOptions();
+    this.closeDrugModal();
+    Swal.fire('Success', 'Drug saved successfully', 'success');
+  } catch (error) {
+    console.error('Error saving drug:', error);
+    Swal.fire('Error', 'Failed to save drug', 'error');
+  } finally {
+    this.isSavingDrug = false;
+  }
+}
 
   openDoseModal() {
     this.isDoseModalVisible = true;
@@ -360,6 +372,11 @@ export class FollowUpComponent implements OnInit {
       return;
     }
 
+    // Prevent multiple clicks
+    if (this.isSavingDose) return;
+    
+    this.isSavingDose = true;
+
     try {
       const domainName = this.apiService.GetHeader();
       await firstValueFrom(this.doseService.Add(this.dose, domainName));
@@ -369,6 +386,8 @@ export class FollowUpComponent implements OnInit {
     } catch (error) {
       console.error('Error saving dose:', error);
       Swal.fire('Error', 'Failed to save dose', 'error');
+    } finally {
+      this.isSavingDose = false;
     }
   }
 
@@ -490,36 +509,41 @@ export class FollowUpComponent implements OnInit {
   }
 
   addDrugAndDose() {
+    if (this.isAddingDrugDose) return;
     if (this.selectedDrugId && this.selectedDoseId) {
-      let selectedDrug = new DrugClass();
-      let selectedDose = new Dose();
+      this.isAddingDrugDose = true;
+      setTimeout(() => {
+        let selectedDrug = new DrugClass();
+        let selectedDose = new Dose();
 
-      this.drugs.forEach((element) => {
-        if (element.id == this.selectedDrugId) {
-          selectedDrug = element;
-        }
-      });
-
-      this.doses.forEach((element) => {
-        if (element.id == this.selectedDoseId) {
-          selectedDose = element;
-        }
-      });
-
-      if (selectedDrug && selectedDose) {
-        this.drugDoseList.push({
-          drugName: selectedDrug.name,
-          doseTimes: selectedDose.doseTimes,
+        this.drugs.forEach((element) => {
+          if (element.id == this.selectedDrugId) {
+            selectedDrug = element;
+          }
         });
 
-        this.followUp.followUpDrugs.push({
-          drugId: selectedDrug.id,
-          doseId: selectedDose.id,
+        this.doses.forEach((element) => {
+          if (element.id == this.selectedDoseId) {
+            selectedDose = element;
+          }
         });
 
-        this.selectedDrugId = null;
-        this.selectedDoseId = null;
-      }
+        if (selectedDrug && selectedDose) {
+          this.drugDoseList.push({
+            drugName: selectedDrug.name,
+            doseTimes: selectedDose.doseTimes,
+          });
+
+          this.followUp.followUpDrugs.push({
+            drugId: selectedDrug.id,
+            doseId: selectedDose.id,
+          });
+
+          this.selectedDrugId = null;
+          this.selectedDoseId = null;
+        }
+        this.isAddingDrugDose = false;
+      }, 500); // simulate async, can be removed if not needed
     } else {
       Swal.fire('Error', 'Please select both a drug and a dose.', 'error');
     }

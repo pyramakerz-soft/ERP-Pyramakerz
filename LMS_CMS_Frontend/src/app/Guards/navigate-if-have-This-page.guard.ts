@@ -3,7 +3,7 @@ import { CanActivateFn, Router } from '@angular/router';
 import { AccountService } from '../Services/account.service';
 import { RoleDetailsService } from '../Services/Employee/role-details.service';
 import { MenuService } from '../Services/shared/menu.service';
-import { map, switchMap } from 'rxjs';
+import { catchError, map, of, switchMap } from 'rxjs';
 import Swal from 'sweetalert2';
 
 export const navigateIfHaveSettingPageGuard: CanActivateFn = (route, state) => {
@@ -29,29 +29,23 @@ export const navigateIfHaveSettingPageGuard: CanActivateFn = (route, state) => {
     router.navigateByUrl('');
     return false;
   }
-  return roleDetailsService.Get_Pages_With_RoleID(userData.role).pipe(
-    map((accessiblePages: any) => {
-      return Array.isArray(accessiblePages) ? accessiblePages : [];
-    }),
-    switchMap((accessiblePages: any[]) => {
-      const currentPage: string = route.routeConfig?.path || '';
-      const baseRoute: string = currentPage.split('/')[0];
-      const page = menuService.findByPageName(baseRoute, accessiblePages);
-      if (page) {
-        return [true];  
-      } else{
-        Swal.fire({
-          icon: 'error',
-          title: 'Oops...',
-          text: 'You Have No Access To This Page',
-          confirmButtonText: 'Okay',
-          customClass: { confirmButton: 'secondaryBg' },
-        });
-        router.navigateByUrl('');
-        return [false];  
-      }
-      
 
+  const rawPath = route.routeConfig?.path || '';
+  const firstSegment = rawPath.split('/')[0]
+  const pageName = decodeURIComponent(firstSegment); 
+  
+  return roleDetailsService.CheckPageAccess(userData.role, pageName).pipe(
+    map(() => true),
+    catchError(() => {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'You Have No Access To This Page',
+        confirmButtonText: 'Okay',
+        customClass: { confirmButton: 'secondaryBg' },
+      });
+      router.navigateByUrl('');
+      return of(false);
     })
   );
 };

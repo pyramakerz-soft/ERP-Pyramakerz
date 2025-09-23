@@ -289,6 +289,6 @@ saveHygieneForm() {
   }
 }
   onView(row: any) {
-    this.router.navigate(['/view hygiene form', row.id]);
+    this.router.navigate(['/Hygiene Form', row.id]);
   }
 }

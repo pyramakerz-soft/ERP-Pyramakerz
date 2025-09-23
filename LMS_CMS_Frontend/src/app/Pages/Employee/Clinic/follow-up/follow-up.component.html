@@ -92,11 +92,11 @@
 
             <div class="flex flex-col">
                 <label class="mb-1 primaryTxt" for="diagnosis"> {{ 'Diagnosis' | translate }}</label>
-<select id="diagnosis" [(ngModel)]="followUp.diagnosisId" (change)="onDiagnosisChange($event)"
-    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5">
-    <option [value]="0" disabled selected hidden>{{ 'Choose' | translate }}  {{ 'Diagnosis' | translate }}</option>
-    <option *ngFor="let diagnosis of diagnoses" [value]="diagnosis.id">{{ diagnosis.name }}</option>
-</select>
+                    <select id="diagnosis" [(ngModel)]="followUp.diagnosisId" (change)="onDiagnosisChange($event)"
+                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5">
+                        <option [value]=null disabled selected hidden>{{ 'Choose' | translate }}  {{ 'Diagnosis' | translate }}</option>
+                        <option *ngFor="let diagnosis of diagnoses" [value]="diagnosis.id">{{ diagnosis.name }}</option>
+                    </select>
                 <span *ngIf="validationErrors['diagnosisId']" class="text-red-500 ml-3 font-normal text-sm">
                     {{ validationErrors['diagnosisId'] }}
                 </span>
@@ -135,8 +135,10 @@
 
                 <div class="flex flex-col self-end">
                     <button (click)="addDrugAndDose()"
-                        class="secondaryBg text-white font-medium rounded-lg w-[64px] h-[40px]">
-                         {{ 'Add' | translate }}
+                        class="secondaryBg text-white font-medium rounded-lg w-[64px] h-[40px]"
+                        [disabled]="isAddingDrugDose">
+                <span *ngIf="!isAddingDrugDose">{{ 'Save' | translate }}</span>
+                <i *ngIf="isAddingDrugDose" class="fas fa-spinner fa-spin"></i>
                     </button>
                 </div>
             </div>
@@ -205,24 +207,32 @@
     </div>
 </div>
 
-<app-modal [title]="editDrug ? (isRtl? 'تعديل دواء':'Edit Drug') : (isRtl? 'إنشاء دواء':'Create Drug')" [isEditMode]="editDrug"
-    [buttonText]="editDrug ? (isRtl? 'حفظ':'Save') :  (isRtl? 'إنشاء':'Create')" (save)="saveDrug()" (close)="closeDrugModal()"
-    [ngClass]="{ 'hidden': !isDrugModalVisible }">
+<app-modal [title]="editDrug ? (isRtl? 'تعديل دواء':'Edit Drug') : (isRtl? 'إنشاء دواء':'Create Drug')" 
+           [isEditMode]="editDrug"
+           [buttonText]="editDrug ? (isRtl? 'حفظ':'Save') : (isRtl? 'إنشاء':'Create')" 
+           [isLoading]="isSavingDrug"
+           (save)="saveDrug()" 
+           (close)="closeDrugModal()"
+           [ngClass]="{ 'hidden': !isDrugModalVisible }">
     <div class="flex flex-col w-full mb-4">
-        <label class="mb-2 primaryTxt" for="drugName"> {{ 'Drug' | translate }} {{ 'Name' | translate }}</label>
+        <label class="mb-2 primaryTxt" for="drugName">{{ 'Drug' | translate }} {{ 'Name' | translate }}</label>
         <input id="drugName" type="text" class="rounded-lg border border-gray-300 px-4 py-3" [(ngModel)]="drug.name"
-            placeholder=" {{ 'Enter' | translate }} {{ 'Drug' | translate }} {{ 'Name' | translate }}">
+            placeholder="{{ 'Enter' | translate }} {{ 'Drug' | translate }} {{ 'Name' | translate }}">
         <span *ngIf="drugValidationErrors['name']" class="text-red-500 ml-3 font-normal text-sm">
             {{ drugValidationErrors['name'] }}
         </span>
     </div>
 </app-modal>
 
-<app-modal [title]="editDose ?  (isRtl? 'تعديل الجرعة ' : 'Edit Dose') : (isRtl? 'إنشاء جرعة':'Create Dose')" [isEditMode]="editDose"
-    [buttonText]="editDose ? (isRtl? 'حفظ':'Save') :  (isRtl? 'إنشاء':'Create')" (save)="saveDose()" (close)="closeDoseModal()"
-    [ngClass]="{ 'hidden': !isDoseModalVisible }">
+<app-modal [title]="editDose ? (isRtl? 'تعديل الجرعة ' : 'Edit Dose') : (isRtl? 'إنشاء جرعة':'Create Dose')" 
+           [isEditMode]="editDose"
+           [buttonText]="editDose ? (isRtl? 'حفظ':'Save') : (isRtl? 'إنشاء':'Create')" 
+           [isLoading]="isSavingDose"
+           (save)="saveDose()" 
+           (close)="closeDoseModal()"
+           [ngClass]="{ 'hidden': !isDoseModalVisible }">
     <div class="flex flex-col w-full mb-4">
-        <label class="mb-2 primaryTxt" for="doseTimes">{{ 'Dose' | translate }} {{ 'Times' | translate }} </label>
+        <label class="mb-2 primaryTxt" for="doseTimes">{{ 'Dose' | translate }} {{ 'Times' | translate }}</label>
         <input id="doseTimes" type="text" class="rounded-lg border border-gray-300 px-4 py-3"
             [(ngModel)]="dose.doseTimes" placeholder="Enter Dose Times">
         <span *ngIf="doseValidationErrors['doseTimes']" class="text-red-500 ml-3 font-normal text-sm">

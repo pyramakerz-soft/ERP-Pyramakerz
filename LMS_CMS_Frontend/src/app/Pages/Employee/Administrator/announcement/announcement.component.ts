@@ -307,16 +307,23 @@ export class AnnouncementComponent {
         );
       } 
     }
-  } 
+  }  
 
-  async onSearchEvent(event: { key: string; value: any }) { 
+  async onSearchEvent(event: { key: string; value: any }) {
     this.key = event.key;
     this.value = event.value;
     try {
-      const data: any = await firstValueFrom(
-        this.announcementService.Get(this.DomainName)
-      );
-      this.TableData = data.data || [];
+      var data: Announcement[]
+      if(this.selectedUserTypeId == 0){
+        data = await firstValueFrom(
+          this.announcementService.Get(this.DomainName)
+        );
+      }else{
+        data = await firstValueFrom(
+          this.announcementService.GetByUserTypeID(this.selectedUserTypeId, this.DomainName)
+        );
+      }
+      this.TableData = data || [];
 
       if (this.value !== '') {
         const numericValue = isNaN(Number(this.value))
@@ -342,6 +349,7 @@ export class AnnouncementComponent {
   filterByTypeID($event: Event) {
     const selectedId = ($event.target as HTMLSelectElement).value; 
     this.TableData = []
+    this.selectedUserTypeId = +selectedId
     this.announcementService.GetByUserTypeID(+selectedId, this.DomainName).subscribe(
       data => {
         this.TableData = data

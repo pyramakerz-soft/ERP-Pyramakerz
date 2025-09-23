@@ -43,7 +43,7 @@
             <option [ngValue]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Sub Account' | translate }}</option>
             <!-- <option [ngValue]="0">{{ 'All' | translate }} {{ 'Accounts' | translate }}</option> -->
             <option *ngFor="let account of accountOptions" [ngValue]="account.id">
-                {{ account.name || account.en_name }}
+                {{ account.name }}
             </option>
             <option *ngIf="accountOptions.length === 0 && !isAccountsLoading" disabled>
                 {{ 'No accounts available' | translate }}
@@ -140,7 +140,7 @@
                         {{ item.serial }}
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ item.subAccount }}
+                        {{ item.subAccount || '-'}}
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ item.debit | number:'1.2-2' }}
@@ -219,9 +219,74 @@
     <div id="accountStatementData" class="hidden">
         <app-pdf-print *ngIf="showPDF" [school]="school"
             [fileName]="'Account Statement Report'"
-            [infoRows]="getInfoRows()"
+            [infoRows]="[
+     {
+        keyEn: 'Date From: ' + this.fromDate,
+        keyAr: 'التاريخ من: ' + this.fromDate
+      },
+      {
+        keyEn: 'Date To: ' + this.toDate,
+        keyAr: 'التاريخ إلى: ' + this.toDate
+      },
+      {
+        keyEn: 'Account Type: ' + this.getLinkFileName(this.linkFileID),
+        keyAr: 'نوع الحساب: ' + this.getLinkFileName(this.linkFileID)
+      },
+      {
+        keyEn: 'Account: ' + this.getAccountName(this.subAccountID),
+        keyAr: 'الحساب: ' + this.getAccountName(this.subAccountID)
+      },
+            ]"
             [tableDataWithHeaderArray]="cachedTableDataForPDF"
             #pdfComponentRef>
         </app-pdf-print>
     </div>
 </div>
+
+<!-- <div class="absolute -top-[9999px] -left-[9999px]">
+  <div id="accountSubledgerData" class="hidden">
+    <app-pdf-print *ngIf="showPDF" [school]="school" 
+                   [fileName]="'Accounts Subledger Report'"
+[infoRows]="[
+     {
+        keyEn: 'Date From: ' + this.fromDate,
+        keyAr: 'التاريخ من: ' + this.fromDate
+      },
+      {
+        keyEn: 'Date To: ' + this.toDate,
+        keyAr: 'التاريخ إلى: ' + this.toDate
+      },
+      {
+        keyEn: 'Account Type: ' + this.getLinkFileName(this.linkFileID),
+        keyAr: 'نوع الحساب: ' + this.getLinkFileName(this.linkFileID)
+      },
+      {
+        keyEn: 'Account: ' + this.getAccountName(this.accountID),
+        keyAr: 'الحساب: ' + this.getAccountName(this.accountID)
+      },
+      ]"                   [tableDataWithHeaderArray]="cachedTableDataForPDF"
+                   #pdfComponentRef>
+    </app-pdf-print>
+  </div>
+</div> -->
+
+<!--       {
+        keyEn: 'Date From: ' + this.fromDate,
+        keyAr: 'التاريخ من: ' + this.fromDate
+      },
+      {
+        keyEn: 'Date To: ' + this.toDate,
+        keyAr: 'التاريخ إلى: ' + this.toDate
+      },
+      {
+        keyEn: 'Account Type: ' + this.getLinkFileName(this.linkFileID),
+        keyAr: 'نوع الحساب: ' + this.getLinkFileName(this.linkFileID)
+      },
+      {
+        keyEn: 'Account: ' + this.getAccountName(this.subAccountID),
+        keyAr: 'الحساب: ' + this.getAccountName(this.subAccountID)
+      },
+      {
+        keyEn: 'Generated On: ' + new Date().toLocaleDateString(),
+        keyAr: 'تم الإنشاء في: ' + new Date().toLocaleDateString()
+      } -->
