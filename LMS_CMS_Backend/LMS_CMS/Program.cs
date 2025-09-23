@@ -47,6 +47,8 @@ using Zatca.EInvoice.SDK.Contracts;
 using static Org.BouncyCastle.Math.EC.ECCurve;
 using LMS_CMS_PL.Services.FileValidations;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Cors.Infrastructure;
+using Microsoft.AspNetCore.Diagnostics;
 
 namespace LMS_CMS
 {
@@ -56,13 +58,18 @@ namespace LMS_CMS
         {
             //////// TO Open The Cors for the other domains:
             /// 1)
-            string txt = "AllowAllOrigins";
 
             var builder = WebApplication.CreateBuilder(args);
-
+            const string CorsPolicy = "AllowAllOrigins";
 
             // Add services to the container.
-            builder.Services.AddControllers();
+            //builder.Services.AddControllers();
+            /// Json String Enum Converter:
+            builder.Services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                });
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -121,7 +128,6 @@ namespace LMS_CMS
                         ValidAudience = builder.Configuration["JWT:Audience"],
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]))
                     };
-
                     // Add these for SignalR
                     option.Events = new JwtBearerEvents
                     {
@@ -133,7 +139,7 @@ namespace LMS_CMS
                             var path = context.HttpContext.Request.Path;
                             if (!string.IsNullOrEmpty(accessToken) &&
                                  (path.StartsWithSegments("/notificationHub") || path.StartsWithSegments("/requestHub") || path.StartsWithSegments("/chatMessageHub")))
-                            { 
+                            {
                                 context.Token = accessToken;
                             }
                             return Task.CompletedTask;
@@ -156,8 +162,8 @@ namespace LMS_CMS
             builder.Services.AddScoped<FileValidationService>();
             builder.Services.AddScoped<CancelInterviewDayMessageService>();
             builder.Services.AddScoped<EmailService>();
-            builder.Services.AddScoped<GenerateBarCodeEan13>(); 
-            builder.Services.AddScoped<CheckPageAccessService>(); 
+            builder.Services.AddScoped<GenerateBarCodeEan13>();
+            builder.Services.AddScoped<CheckPageAccessService>();
             builder.Services.AddScoped<InVoiceNumberCreate>();
             builder.Services.AddScoped<CalculateCurrentStock>();
             builder.Services.AddScoped<CreateStudentService>();
@@ -176,26 +182,38 @@ namespace LMS_CMS
             builder.Services.AddScoped<SendNotificationService>();
             builder.Services.AddScoped<ValidTeachersForStudentService>();
 
-
             builder.Services.AddAWSService<IAmazonSecretsManager>(new Amazon.Extensions.NETCore.Setup.AWSOptions
             {
-                Region = RegionEndpoint.USEast1 
+                Region = RegionEndpoint.USEast1
             });
 
-            var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
             /// 2)
-            builder.Services.AddCors(option =>
+            // builder.Services.AddCors(options =>
+            // {
+            //     options.AddPolicy(CorsPolicy, b =>
+            //         b
+            //             .AllowAnyOrigin()
+            //             .AllowAnyMethod()
+            //             .AllowAnyHeader()
+            //             .WithExposedHeaders("Content-Disposition")
+            //     );
+            // });
+
+            var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
+
+            builder.Services.AddCors(options =>
             {
-                option.AddPolicy(txt, builder =>
+                options.AddPolicy(CorsPolicy, policy =>
                 {
-                    builder.WithOrigins(allowedOrigins)
-                           .AllowAnyMethod()
-                           .AllowAnyHeader()
-                           .WithHeaders("content-type", "Domain-Name")
-                           .WithExposedHeaders("Content-Disposition")
-                           .AllowCredentials();
+                    policy
+                        .WithOrigins(allowedOrigins)
+                        .SetIsOriginAllowedToAllowWildcardSubdomains()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .WithExposedHeaders("Content-Disposition")
+                        .AllowCredentials();
                 });
-            }); 
+            });
 
             /// For generic repo:
             builder.Services.AddScoped<UOW>();
@@ -203,14 +221,7 @@ namespace LMS_CMS
 
             /// For Auto Mapper:
             builder.Services.AddAutoMapper(typeof(AutoMapConfig).Assembly);
-
-
-            /// Json String Enum Converter:
-            builder.Services.AddControllers()
-                .AddJsonOptions(options =>
-                {
-                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-            });
+             
 
             builder.Services.Configure<IISServerOptions>(options =>
             {
@@ -223,11 +234,23 @@ namespace LMS_CMS
             });
 
 
-            // 1) SignalR 
-            //builder.Services.AddSignalR();
+            builder.Services.AddResponseCompression(options =>
+            {
+                options.EnableForHttps = true;
+                options.Providers.Add<BrotliCompressionProvider>();
+                options.Providers.Add<GzipCompressionProvider>();
+                // Optionally, restrict to certain mime types (Angular outputs are text-based)
+                options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
+                    new[] { "application/json", "application/javascript", "text/css" });
+            });
+
+            builder.Services.AddMemoryCache();
+
+            // SignalR for real-time features
             builder.Services.AddSignalR(hubOptions =>
             {
-                hubOptions.EnableDetailedErrors = true;
+                //hubOptions.EnableDetailedErrors = true;
+                hubOptions.EnableDetailedErrors = builder.Environment.IsDevelopment();
                 hubOptions.KeepAliveInterval = TimeSpan.FromMinutes(1);
             });
 
@@ -235,73 +258,109 @@ namespace LMS_CMS
 
             /// 1) For DB Check
             //app.UseMiddleware<DbConnection_Check_Middleware>(); 
-
             /// 3)
-            app.UseForwardedHeaders(new ForwardedHeadersOptions {
-                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
-            });
+            /// 
+
+            app.UseResponseCompression();
+            app.UseDefaultFiles();
+            app.UseStaticFiles();
 
             app.UseRouting();
-            app.UseCors("AllowAllOrigins"); // you can keep it permissive; same-origin won’t need it
 
-            app.UseAuthentication();
+            // CORS must be after routing and before auth/authorization
+            app.UseCors(CorsPolicy);
 
-            //////// Get Connection String
-            app.UseWhen(context => context.Request.Path.StartsWithSegments("/api/with-domain"),
-                appBuilder =>
+            // <— OPTIONAL but recommended: built-in exception handler that also stamps 
+            //app.UseExceptionHandler(errorApp =>
+            //{
+            //    errorApp.Run(async context =>
+            //    {
+            //        // always add permissive CORS on error responses:
+            //        var h = context.Response.Headers;
+            //        h["Access-Control-Allow-Origin"] = "*";
+            //        h["Access-Control-Allow-Headers"] = "Authorization, Content-Type, Domain-Name";
+            //        h["Access-Control-Allow-Methods"] = "GET, POST, PUT, PATCH, DELETE, OPTIONS";
+            //        h["Access-Control-Expose-Headers"] = "Content-Disposition";
+
+            //        // log & return minimal JSON
+            //        var feature = context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerFeature>();
+            //        var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+            //        if (feature?.Error is not null)
+            //            logger.LogError(feature.Error, "Unhandled exception for {Path}", context.Request.Path);
+
+            //        // don’t overwrite a specific status set by downstream, but default to 500
+            //        if (context.Response.StatusCode < 400) context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+            //        context.Response.ContentType = "application/json";
+            //        await context.Response.WriteAsync("{\"error\":\"unhandled_server_error\"}");
+            //    });
+            //});
+            app.UseExceptionHandler(errorApp =>
+            {
+                errorApp.Run(async context =>
                 {
-                    appBuilder.UseMiddleware<GetConnectionStringMiddleware>();
-                    appBuilder.UseMiddleware<SuspendMiddleware>();
+                    var h = context.Response.Headers;
+                    h["Access-Control-Allow-Origin"] = "*";
+                    h["Access-Control-Allow-Headers"] = "Authorization, Content-Type, Domain-Name";
+                    h["Access-Control-Allow-Methods"] = "GET, POST, PUT, PATCH, DELETE, OPTIONS";
+                    h["Access-Control-Expose-Headers"] = "Content-Disposition";
+
+                    var feature = context.Features.Get<IExceptionHandlerFeature>();
+                    var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+
+                    if (feature?.Error is not null && feature.Error is not OperationCanceledException)
+                    {
+                        if (app.Environment.IsDevelopment())
+                        {
+                            logger.LogError(feature.Error, "Unhandled exception for {Path}", context.Request.Path);
+                        }
+                        else
+                        {
+                            logger.LogError("Unhandled exception at {Path}", context.Request.Path);
+                        }
+                    }
+
+                    if (context.Response.StatusCode < 400)
+                        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+
+                    context.Response.ContentType = "application/json";
+                    await context.Response.WriteAsync("{\"error\":\"unhandled_server_error\"}");
+                });
+            });
+
+            app.UseHttpsRedirection();
+
+            // Resolve tenant for /api/with-domain *after* CORS, *before* auth:
+            app.UseWhen(ctx =>
+                ctx.Request.Path.StartsWithSegments("/api/with-domain", StringComparison.OrdinalIgnoreCase) ||
+                ctx.Request.Path.StartsWithSegments("/notificationHub", StringComparison.OrdinalIgnoreCase) ||
+                ctx.Request.Path.StartsWithSegments("/requestHub", StringComparison.OrdinalIgnoreCase) ||
+                ctx.Request.Path.StartsWithSegments("/chatMessageHub", StringComparison.OrdinalIgnoreCase),
+                branch =>
+                {
+                    branch.UseMiddleware<GetConnectionStringMiddleware>();
                 });
 
-            /// For Endpoint, to check if the user has access for this endpoint or not
-            /// Make sure to be here before UseAuthorization
+            app.UseAuthentication();
             app.UseMiddleware<Endpoint_Authorization_Middleware>();
-
             app.UseAuthorization();
-
-            app.MapControllers();
-            // 2) SignalR
-            app.MapHub<NotificationHub>("/notificationHub").RequireAuthorization();
-            app.MapHub<RequestHub>("/requestHub").RequireAuthorization();
-            app.MapHub<ChatMessageHub>("/chatMessageHub").RequireAuthorization();
-
-
-            app.MapFallbackToFile("index.html");
-
-
-            ///////// send files
-            app.UseStaticFiles();
-            app.UseStaticFiles(new StaticFileOptions
-            {
-                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Uploads")),
-                RequestPath = "/Uploads",
-                OnPrepareResponse = ctx =>
-                {
-                    ctx.Context.Response.Headers.Append("Access-Control-Allow-Origin", "*");
-                }
-            });
-             
-             
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
 
-            // Redirects http:// requests to https://.
-            app.UseHttpsRedirection();
-              
+            app.Urls.Add("http://0.0.0.0:5000");
 
-            //app.Urls.Add("http://0.0.0.0:5000");
-            //app.UseCors(builder =>
-            //    builder.AllowAnyOrigin()
-            //   .AllowAnyMethod()
-            //   .AllowAnyHeader()
-            //); 
+            app.MapControllers();
 
-            app.Run();
-        }
+            // Real-time hubs
+            app.MapHub<NotificationHub>("/notificationHub").RequireAuthorization();
+            app.MapHub<RequestHub>("/requestHub").RequireAuthorization();
+            app.MapHub<ChatMessageHub>("/chatMessageHub").RequireAuthorization();
+
+            app.MapFallbackToFile("index.html");
+
+            app.Run(); 
+        } 
     }
 }

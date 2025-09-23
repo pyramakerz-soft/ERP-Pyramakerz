@@ -388,6 +388,6 @@ export class ViolationComponent {
   }
 
   view(Id: number) {
-    this.router.navigateByUrl('Employee/Violation/' + Id);
+    this.router.navigateByUrl('Employee/violation/' + Id);
   }
 }

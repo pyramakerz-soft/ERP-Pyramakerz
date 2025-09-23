@@ -4,7 +4,7 @@ import { ApiService } from '../api.service';
 import { Employee } from '../../Models/Employee/employee';
 import { EmployeeGet } from '../../Models/Employee/employee-get';
 import { EditPass } from '../../Models/Employee/edit-pass';
-import { AccountingEmployee } from '../../Models/Accounting/accounting-employee';
+import { AccountingEmployee } from '../../Models/Accounting/accounting-employee'; 
 import { Observable, shareReplay } from 'rxjs';
 
 @Injectable({
@@ -14,10 +14,9 @@ export class EmployeeService {
 
   baseUrl = ""
   header = ""
-
   private cachedDomainForMyData?: string;
   private myData$?: Observable<EmployeeGet>;
-
+ 
   constructor(public http: HttpClient, public ApiServ: ApiService) {
     this.baseUrl = ApiServ.BaseUrl
     this.header = ApiServ.GetHeader();
@@ -251,7 +250,7 @@ export class EmployeeService {
       .set('Content-Type', 'application/json');
     return this.http.get<EmployeeGet>(`${this.baseUrl}/Employee/${id}`, { headers });
   }
-
+ 
   // GetMyData(DomainName?: string) {
   //   if (DomainName != null) {
   //     this.header = DomainName
