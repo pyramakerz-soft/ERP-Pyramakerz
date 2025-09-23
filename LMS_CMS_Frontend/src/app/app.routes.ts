@@ -271,6 +271,8 @@ import { EmployeeJobReportComponent } from './Pages/Employee/HR/Reports/employee
 import { LoansReportComponent } from './Pages/Employee/HR/Reports/loans-report/loans-report.component';
 import { BonusReportComponent } from './Pages/Employee/HR/Reports/bonus-report/bonus-report.component';
 import { DeductionReportComponent } from './Pages/Employee/HR/Reports/deduction-report/deduction-report.component';
+import { LeaveRequestReportComponent } from './Pages/Employee/HR/Reports/leave-request-report/leave-request-report.component';
+import { VacationEmployeeReportComponent } from './Pages/Employee/HR/Reports/vacation-employee-report/vacation-employee-report.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -577,11 +579,13 @@ export const routes: Routes = [
             { path: "Deduction", component: DeductionComponent, title: "Deduction", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Deduction Reports", component: DeductionReportComponent, title: "Deduction Reports", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Leave Request", component: LeaveRequestComponent, title: "Leave Request", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Leave Request Report", component: LeaveRequestReportComponent, title: "Leave Request Report", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Permissions Groups", component: PermissionGroupComponent, title: "Permissions Groups", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Permissions Group Employee/:id", component: PermissionGroupEmployeeComponent, title: "Permissions Group Employee", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Permissions Group Archiving/:id", component: PermissionGroupDetailsComponent, title: "Permissions Group Archiving", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Archiving", component: ArchivingComponent, title: "Archiving", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Vacation Employee", component: VacationEmployeeComponent, title: "Vacation Employee", canActivate: [noNavigateWithoutLoginGuard] },
+            { path: "Vacation Employee Report", component: VacationEmployeeReportComponent, title: "Vacation Employee Report", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Location", component: LocationComponent, title: "Location", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Employee Job Report", component: EmployeeJobReportComponent, title: "Employee Job Report", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Edit Attendance", component: EmployeeClocksComponent, title: "Edit Attendance", canActivate: [noNavigateWithoutLoginGuard] },

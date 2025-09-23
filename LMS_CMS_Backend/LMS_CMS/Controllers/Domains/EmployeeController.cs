@@ -211,6 +211,35 @@ namespace LMS_CMS_PL.Controllers.Domains
             return Ok(employeeDTOs);
         }
         
+
+        ///////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpGet("GetByJobId/{JobId}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Employee" }
+        )]
+        public IActionResult GetByJobId(long JobId)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+            Job job = Unit_Of_Work.job_Repository.First_Or_Default(d => d.ID == JobId && d.IsDeleted != true);
+            if (job == null)
+            {
+                return NotFound("No Job with this Id");
+            }
+            List<Employee> employees = Unit_Of_Work.employee_Repository.FindBy(
+                    sem => sem.IsDeleted != true && sem.JobID == JobId);
+
+            if (employees == null || employees.Count == 0)
+            {
+                return NotFound("There is no employees with this job Id");
+            }
+
+            List<Employee_GetDTO> employeeDTOs = mapper.Map<List<Employee_GetDTO>>(employees);
+             
+            return Ok(employeeDTOs);
+        }
+        
         ///////////////////////////////////////////////////////////////////////////////////////
 
         [HttpGet("GetByDepartmentId/{DepartmentId}")]
