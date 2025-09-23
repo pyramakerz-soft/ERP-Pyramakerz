@@ -13,9 +13,9 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-payable',
@@ -25,18 +25,18 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
   styleUrl: './payable.component.css'
 })
 export class PayableComponent {
-User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
+  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
   AllowEditForOthers: boolean = false;
-  AllowDeleteForOthers: boolean = false; 
+  AllowDeleteForOthers: boolean = false;
 
   DomainName: string = '';
   UserID: number = 0;
- isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
-  keysArray: string[] = ['id', 'docNumber' , "payableDocTypesName" ,"linkFileName"];
+  keysArray: string[] = ['id', 'docNumber', "payableDocTypesName", "linkFileName"];
 
   path: string = '';
   key: string = 'id';
@@ -44,25 +44,26 @@ User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '',
 
   payableData: Payable[] = []
 
-  CurrentPage:number = 1
-  PageSize:number = 10
-  TotalPages:number = 1
-  TotalRecords:number = 0
+  CurrentPage: number = 1
+  PageSize: number = 10
+  TotalPages: number = 1
+  TotalRecords: number = 0
 
-  isDeleting:boolean = false;
+  isDeleting: boolean = false;
 
   constructor(
     private router: Router,
-     private menuService: MenuService,
-      public activeRoute: ActivatedRoute,
-       public account: AccountService, 
+    private menuService: MenuService,
+    public activeRoute: ActivatedRoute,
+    private translate: TranslateService,
+    public account: AccountService,
     public DomainServ: DomainService,
-     public EditDeleteServ: DeleteEditPermissionService,
-      public ApiServ: ApiService,
-       public payableService:PayableService,
-        private languageService: LanguageService,
+    public EditDeleteServ: DeleteEditPermissionService,
+    public ApiServ: ApiService,
+    public payableService: PayableService,
+    private languageService: LanguageService,
     private realTimeService: RealTimeNotificationServiceService
-      ){}
+  ) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -83,7 +84,7 @@ User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '',
     });
 
     this.GetPayableDate(this.DomainName, this.CurrentPage, this.PageSize)
-        this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
@@ -123,11 +124,11 @@ User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '',
   }
 
   ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
-     if (this.subscription) {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
       this.subscription.unsubscribe();
     }
-  } 
+  }
 
   IsAllowDelete(InsertedByID: number) {
     const IsAllow = this.EditDeleteServ.IsAllowDelete(
@@ -150,53 +151,53 @@ User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '',
   validateNumber(event: any): void {
     const value = event.target.value;
     if (isNaN(value) || value === '') {
-      event.target.value = ''; 
+      event.target.value = '';
       this.PageSize = 0
     }
   }
-  
-  GetPayableDate(DomainName: string, pageNumber:number, pageSize:number){
+
+  GetPayableDate(DomainName: string, pageNumber: number, pageSize: number) {
     this.payableService.Get(DomainName, pageNumber, pageSize).subscribe(
       (data) => {
         this.CurrentPage = data.pagination.currentPage
         this.PageSize = data.pagination.pageSize
         this.TotalPages = data.pagination.totalPages
-        this.TotalRecords = data.pagination.totalRecords 
+        this.TotalRecords = data.pagination.totalRecords
         this.payableData = data.data
-      }, 
-      (error) => { 
-        if(error.status == 404){
-          if(this.TotalRecords != 0){ 
-            let lastPage 
-            if(this.isDeleting){
-              lastPage = (this.TotalRecords - 1) / this.PageSize 
-            }else{
-              lastPage = this.TotalRecords / this.PageSize 
-            } 
-            if(lastPage >= 1){
-              if(this.isDeleting){
-                this.CurrentPage = Math.floor(lastPage) 
+      },
+      (error) => {
+        if (error.status == 404) {
+          if (this.TotalRecords != 0) {
+            let lastPage
+            if (this.isDeleting) {
+              lastPage = (this.TotalRecords - 1) / this.PageSize
+            } else {
+              lastPage = this.TotalRecords / this.PageSize
+            }
+            if (lastPage >= 1) {
+              if (this.isDeleting) {
+                this.CurrentPage = Math.floor(lastPage)
                 this.isDeleting = false
-              } else{
-                this.CurrentPage = Math.ceil(lastPage) 
+              } else {
+                this.CurrentPage = Math.ceil(lastPage)
               }
               this.GetPayableDate(this.DomainName, this.CurrentPage, this.PageSize)
             }
-          } 
+          }
         }
       }
     )
   }
 
-  changeCurrentPage(currentPage:number){
+  changeCurrentPage(currentPage: number) {
     this.CurrentPage = currentPage
     this.GetPayableDate(this.DomainName, this.CurrentPage, this.PageSize)
   }
 
-  validatePageSize(event: any) { 
+  validatePageSize(event: any) {
     const value = event.target.value;
     if (isNaN(value) || value === '') {
-        event.target.value = '';
+      event.target.value = '';
     }
   }
 
@@ -223,34 +224,34 @@ User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '',
 
     return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   }
-  
-  Create(id?:number, isEdit?:boolean){
-    if(id){
-      if(isEdit){
+
+  Create(id?: number, isEdit?: boolean) {
+    if (id) {
+      if (isEdit) {
         this.router.navigateByUrl(`Employee/Payable Details/${id}`)
-      }else{
+      } else {
         this.router.navigateByUrl(`Employee/Payable Details/View/${id}`)
       }
-    } else{
+    } else {
       this.router.navigateByUrl("Employee/Payable Details")
     }
   }
 
-  Delete(id:number){
+  Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Payable?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('Payable') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
-        this.payableService.Delete(id,this.DomainName).subscribe((D)=>{
+        this.payableService.Delete(id, this.DomainName).subscribe((D) => {
           this.isDeleting = true
           this.GetPayableDate(this.DomainName, this.CurrentPage, this.PageSize);
-          if(this.TotalRecords == 1){
+          if (this.TotalRecords == 1) {
             this.TotalRecords = 0
             this.payableData = []
           }

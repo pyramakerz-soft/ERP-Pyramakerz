@@ -117,7 +117,7 @@ export class AssignmentComponent {
     });
 
     // this.GetAllData(this.CurrentPage, this.PageSize)
-    this.getSubjectData();
+    // this.getSubjectData();
 
     this.menuService.menuItemsForEmployee$.subscribe((items) => {
       const settingsPage = this.menuService.findByPageName(this.path, items);
@@ -286,7 +286,7 @@ export class AssignmentComponent {
     }
 
     this.assignment = new Assignment();
-    this.getSubjectData();
+    // this.getSubjectData();
     this.getAssignmentTypeData();
 
     document.getElementById('Add_Modal')?.classList.remove('hidden');
@@ -333,14 +333,14 @@ export class AssignmentComponent {
     )
   }
 
-  getSubjectData() {
-    this.subjects = []
-    this.subjectService.Get(this.DomainName).subscribe(
-      data => {
-        this.subjects = data
-      }
-    )
-  }
+  // getSubjectData() {
+  //   this.subjects = []
+  //   this.subjectService.Get(this.DomainName).subscribe(
+  //     data => {
+  //       this.subjects = data
+  //     }
+  //   )
+  // }
 
   getSubjectWeightData() {
     this.subjectWeights = []

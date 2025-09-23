@@ -14,9 +14,9 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { AccountingEntriesDocTypeService } from '../../../../Services/Employee/Accounting/accounting-entries-doc-type.service';
 import { firstValueFrom } from 'rxjs';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-accounting-entries-doc-type',
@@ -45,7 +45,7 @@ export class AccountingEntriesDocTypeComponent {
   key: string = 'id';
   value: any = '';
   keysArray: string[] = ['id', 'name'];
- isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   accountingEntriesDocType: AccountingEntriesDocType = new AccountingEntriesDocType();
 
@@ -56,14 +56,15 @@ export class AccountingEntriesDocTypeComponent {
     private router: Router,
     private menuService: MenuService,
     public activeRoute: ActivatedRoute,
+    private translate: TranslateService,
     public account: AccountService,
     public BusTypeServ: BusTypeService,
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public AccountingEntriesDocTypeServ: AccountingEntriesDocTypeService,
-     private languageService: LanguageService,
-      private realTimeService: RealTimeNotificationServiceService
+    private languageService: LanguageService,
+    private realTimeService: RealTimeNotificationServiceService
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -73,7 +74,7 @@ export class AccountingEntriesDocTypeComponent {
       this.path = url[0].path;
 
     }
-  );
+    );
 
     this.menuService.menuItemsForEmployee$.subscribe((items) => {
       const settingsPage = this.menuService.findByPageName(this.path, items);
@@ -87,17 +88,17 @@ export class AccountingEntriesDocTypeComponent {
 
     this.GetAllData();
 
-      this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-        ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
-     if (this.subscription) {
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
       this.subscription.unsubscribe();
     }
-  } 
+  }
 
 
   GetAllData() {
@@ -115,13 +116,13 @@ export class AccountingEntriesDocTypeComponent {
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Doc Type?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('Type'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.AccountingEntriesDocTypeServ.Delete(id, this.DomainName).subscribe((d) => {
@@ -227,7 +228,7 @@ export class AccountingEntriesDocTypeComponent {
 
     if (this.accountingEntriesDocType.name.length > 100) {
       isValid = false;
-      this.validationErrors['name']='Name cannot be longer than 100 characters.'
+      this.validationErrors['name'] = 'Name cannot be longer than 100 characters.'
     }
     return isValid;
   }
@@ -235,7 +236,7 @@ export class AccountingEntriesDocTypeComponent {
   capitalizeField(field: keyof AccountingEntriesDocType): string {
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
-  
+
   onInputValueChange(event: { field: keyof AccountingEntriesDocType; value: any }) {
     const { field, value } = event;
     (this.accountingEntriesDocType as any)[field] = value;

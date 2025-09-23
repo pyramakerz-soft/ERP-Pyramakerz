@@ -520,7 +520,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             }
 
             StudentClassroom studentClassroom = Unit_Of_Work.studentClassroom_Repository
-                .First_Or_Default(s => s.StudentID == StudentId && s.IsDeleted != true && s.Classroom.IsDeleted != true && s.Classroom.AcademicYear.IsActive == true);
+                .First_Or_Default(s => s.StudentID == StudentId && s.IsDeleted != true && s.Classroom.IsDeleted != true && s.Classroom.AcademicYear.IsActive == true );
 
             if (studentClassroom == null)
             {
@@ -529,7 +529,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             List<StudentClassroomSubject> studentClassroomSubject = await Unit_Of_Work.studentClassroomSubject_Repository
                 .Select_All_With_IncludesById<StudentClassroomSubject>(
-                    f => f.IsDeleted != true && f.StudentClassroomID == studentClassroom.ID && f.Hide != true
+                    f => f.IsDeleted != true && f.StudentClassroomID == studentClassroom.ID && f.Subject.IsDeleted != true && f.Hide != true
                 );
 
             if (studentClassroomSubject == null || studentClassroomSubject.Count == 0)
@@ -551,6 +551,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
 
             return Ok(subjectsDTO);
         }
+
         ////////////////////////////////////////////////////////////////////////////////
 
         [HttpGet("GetClassroomAndRemedialSubjectsByStudent/{StudentId}")]

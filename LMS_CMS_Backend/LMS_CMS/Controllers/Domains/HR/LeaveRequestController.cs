@@ -187,11 +187,16 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            Employee Employee = Unit_Of_Work.employee_Repository.First_Or_Default(sem => sem.IsDeleted != true);
+            Employee Employee = Unit_Of_Work.employee_Repository.First_Or_Default(sem => sem.IsDeleted != true && sem.ID == Empid);
 
             if (Employee == null )
             {
                 return NotFound();
+            }
+
+            if(Employee.MonthlyLeaveRequestBalance == null || Employee.MonthlyLeaveRequestBalance == 0)
+            {
+                return BadRequest("Monthly leave request for this employee is required.");
             }
 
             Employee_GetDTO EmployeeDTO = mapper.Map<Employee_GetDTO>(Employee);

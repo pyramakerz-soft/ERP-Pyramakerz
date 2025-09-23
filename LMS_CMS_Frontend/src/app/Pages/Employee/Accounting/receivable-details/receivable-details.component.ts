@@ -24,7 +24,7 @@ import html2pdf from 'html2pdf.js';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import { PdfPrintComponent } from '../../../../Component/pdf-print/pdf-print.component';
 import { ReportsService } from '../../../../Services/shared/reports.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 
@@ -80,7 +80,7 @@ export class ReceivableDetailsComponent {
     private router: Router, private menuService: MenuService, public activeRoute: ActivatedRoute, public account: AccountService, public receivableDocTypeService: ReceivableDocTypeService,
     public DomainServ: DomainService, public EditDeleteServ: DeleteEditPermissionService, public ApiServ: ApiService, public receivableService: ReceivableService,
     public bankService: BankService, public saveService: SaveService, public receivableDetailsService: ReceivableDetailsService, public linkFileService: LinkFileService,
-
+    private translate: TranslateService,
     public dataAccordingToLinkFileService: DataAccordingToLinkFileService, public reportsService: ReportsService,
   private languageService: LanguageService,
     private realTimeService: RealTimeNotificationServiceService
@@ -201,12 +201,15 @@ export class ReceivableDetailsComponent {
       if (this.receivable.hasOwnProperty(key)) {
         const field = key as keyof Receivable;
         if (!this.receivable[field]) {
-          if (field == "receivableDocTypesID" || field == "linkFileID" || field == "bankOrSaveID" || field == "date" || field == "docNumber") {
+          if (field == "receivableDocTypesID" || field == "linkFileID"  || field == "date" || field == "docNumber") {
             this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
             isValid = false;
           }
         } else {
           this.validationErrors[field] = '';
+        }
+        if(field == "bankOrSaveID"){
+          this.validationErrors[field] = `*bankOrSafeID is required`
         }
       }
     }
@@ -462,13 +465,13 @@ export class ReceivableDetailsComponent {
 
   DeleteDetail(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Receivable Detail?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('Receivable Detail') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.receivableDetailsService.Delete(id, this.DomainName).subscribe(
@@ -566,7 +569,7 @@ export class ReceivableDetailsComponent {
     await this.reportsService.generateExcelReport({
       mainHeader: {
         en: "Receivable Report",
-        ar: "تقرير القبض"
+        ar: "تقرير المستحقات"
       },
       subHeaders: [
         { en: "Detailed receivable information", ar: "معلومات تفصيلية عن القبض" },

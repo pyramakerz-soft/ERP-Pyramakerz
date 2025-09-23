@@ -19,9 +19,9 @@ import { SupplierService } from '../../../../Services/Employee/Accounting/suppli
 import { AccountingTreeChartService } from '../../../../Services/Employee/Accounting/accounting-tree-chart.service';
 import { Country } from '../../../../Models/Accounting/country';
 import { CountryService } from '../../../../Services/Employee/Accounting/country.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 
 @Component({
@@ -43,7 +43,7 @@ export class SuppliersComponent {
 
   DomainName: string = '';
   UserID: number = 0;
- isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   isModalVisible: boolean = false;
   mode: string = '';
@@ -68,10 +68,11 @@ export class SuppliersComponent {
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
+    private translate: TranslateService,
     public SupplierServ: SupplierService,
     public accountServ: AccountingTreeChartService,
     public countryServ: CountryService,
-     private languageService: LanguageService,
+    private languageService: LanguageService,
     private realTimeService: RealTimeNotificationServiceService
   ) { }
   ngOnInit() {
@@ -95,19 +96,19 @@ export class SuppliersComponent {
     this.GetAllData();
     this.GetAllAccount();
     this.GetAllCountries();
-          this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
 
-        ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
-     if (this.subscription) {
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
       this.subscription.unsubscribe();
     }
-  } 
+  }
 
   GetAllData() {
     this.TableData = []
@@ -135,13 +136,13 @@ export class SuppliersComponent {
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Supplier?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('Supplier') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.SupplierServ.Delete(id, this.DomainName).subscribe((d) => {
@@ -227,7 +228,7 @@ export class SuppliersComponent {
           })
       }
       this.closeModal()
-    } 
+    }
   }
 
   closeModal() {
@@ -267,12 +268,12 @@ export class SuppliersComponent {
     const emailPattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
     if (this.Supplier.email && !emailPattern.test(this.Supplier.email)) {
       isValid = false;
-      this.validationErrors['email']='Email is not valid.'
+      this.validationErrors['email'] = 'Email is not valid.'
     }
-    
+
     if (this.Supplier.name.length > 100) {
       isValid = false;
-      this.validationErrors['name']='Name cannot be longer than 100 characters.'
+      this.validationErrors['name'] = 'Name cannot be longer than 100 characters.'
     }
 
     return isValid;

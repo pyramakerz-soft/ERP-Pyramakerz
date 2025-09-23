@@ -14,7 +14,7 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
@@ -57,6 +57,7 @@ export class AnnouncementComponent {
     private menuService: MenuService, 
     public activeRoute: ActivatedRoute,  
     public router: Router,
+    private translate: TranslateService,
     public announcementService: AnnouncementService,
     public userTypeService: UserTypeService,
     private languageService: LanguageService,
@@ -170,13 +171,13 @@ export class AnnouncementComponent {
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this announcement?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('the') + this.translate.instant('Announcement') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: "Yes, I'm sure",
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.announcementService.Delete(id, this.DomainName).subscribe((d) => {

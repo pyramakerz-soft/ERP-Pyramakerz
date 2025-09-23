@@ -32,7 +32,7 @@ import { EmployeeStudentService } from '../../../../Services/Employee/Accounting
 import { StudentService } from '../../../../Services/student.service';
 import Swal from 'sweetalert2';
 import { Student } from '../../../../Models/student';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
@@ -107,6 +107,7 @@ export class AccountingEmployeeEditComponent {
     public activeRoute: ActivatedRoute,
     public account: AccountService,
     public BusTypeServ: BusTypeService,
+    private translate: TranslateService,
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
@@ -159,12 +160,12 @@ export class AccountingEmployeeEditComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-      ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
-     if (this.subscription) {
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
       this.subscription.unsubscribe();
     }
-  } 
+  }
 
 
   GetAllData() {
@@ -419,13 +420,13 @@ export class AccountingEmployeeEditComponent {
 
   DeleteChild(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Child?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete')+ " " + this.translate.instant('هذا') + " " + this.translate.instant('Child'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.TableData = []
@@ -440,7 +441,7 @@ export class AccountingEmployeeEditComponent {
   }
 
   validateNumber(event: any, field?: keyof AccountingEmployee): void {
-    let value = event.target.value; 
+    let value = event.target.value;
     if (isNaN(value) || value === '') {
       event.target.value = '';
       if (field) {

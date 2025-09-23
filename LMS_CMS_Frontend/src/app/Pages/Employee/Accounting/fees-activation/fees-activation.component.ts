@@ -29,7 +29,7 @@ import { AcadimicYearService } from '../../../../Services/Employee/LMS/academic-
 import { FeesActivationAddPut } from '../../../../Models/Accounting/fees-activation-add-put';
 import { firstValueFrom, lastValueFrom } from 'rxjs';
 import { StudentService } from '../../../../Services/student.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
@@ -97,6 +97,7 @@ export class FeesActivationComponent {
     private languageService: LanguageService,
     public activeRoute: ActivatedRoute,
     public account: AccountService,
+    private translate: TranslateService,
     public ApiServ: ApiService,
     public accountServ: AccountingTreeChartService,
     public EditDeleteServ: DeleteEditPermissionService,
@@ -158,14 +159,14 @@ export class FeesActivationComponent {
   }
 
   Delete(id: number) {
-    Swal.fire({
-      title: 'Are you sure you want to delete this Fees Activation?',
+     Swal.fire({
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " "+ this.translate.instant('Fees Activation') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.feesActivationServ.Delete(id, this.DomainName).subscribe((D) => {

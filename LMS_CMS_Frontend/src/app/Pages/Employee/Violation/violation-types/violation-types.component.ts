@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule, formatCurrency } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -24,7 +24,7 @@ import { RealTimeNotificationServiceService } from '../../../../Services/shared/
 @Component({
   selector: 'app-violation-types',
   standalone: true,
-  imports: [CommonModule, FormsModule,TranslateModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
   templateUrl: './violation-types.component.html',
   styleUrl: './violation-types.component.css',
 })
@@ -99,11 +99,11 @@ export class ViolationTypesComponent {
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   GetViolation() {
@@ -179,7 +179,7 @@ export class ViolationTypesComponent {
 
   closeModal() {
     this.isModalVisible = false;
-    this.validationErrors={}
+    this.validationErrors = {}
   }
 
   CreateOREdit() {
@@ -276,6 +276,16 @@ export class ViolationTypesComponent {
     this.violationType.employeeTypeIds = this.violationType.employeeTypeIds.filter(
       (i) => i !== id
     );
+  }
+
+  @HostListener('document:click', ['$event'])
+  clickOutside(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+
+    // if the clicked element is not inside your dropdown, close it
+    if (!target.closest('.employee-type-dropdown')) {
+      this.dropdownOpen = false;
+    }
   }
 
   IsAllowDelete(InsertedByID: number) {
