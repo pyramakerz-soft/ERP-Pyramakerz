@@ -611,7 +611,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
 
         [HttpPost("report")]
-        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "LeaveRequest Report" , "Leave Request" })]
+        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "LeaveRequest Report" })]
         public async Task<IActionResult> GetLeaveRequestReport([FromBody] ReportRequestDto request)
         {
             if (request == null)
