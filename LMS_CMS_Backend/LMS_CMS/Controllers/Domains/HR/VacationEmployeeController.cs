@@ -643,7 +643,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
         }
 
         [HttpPost("report")]
-        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "VacationEmployee Report" })]
+        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "VacationEmployee Report"})]
         public async Task<IActionResult> GetVacationEmployeeReport([FromBody] ReportRequestDto request)
         {
             if (request == null)
