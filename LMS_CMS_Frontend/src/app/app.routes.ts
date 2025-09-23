@@ -281,7 +281,7 @@ export const routes: Routes = [
         canActivate: [navigateIfEmployeeGuard, noNavigateWithoutLoginGuard],
         children: [
             { path: "", component: EmployeeHomeComponent, title: "EmployeeHome" },
-            { path: "Hygiene Types", component: HygieneTypesComponent, title: "Hygiene Types", canActivate: [noNavigateWithoutLoginGuard, ] },
+            { path: "Hygiene Types", component: HygieneTypesComponent, title: "Hygiene Types", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard ] },
             { path: "Diagnosis", component: DiagnosisComponent, title: "Diagnosis", canActivate: [noNavigateWithoutLoginGuard, ] },
             { path: "Drugs", component: DrugsComponent, title: "Drugs", canActivate: [noNavigateWithoutLoginGuard, ] },
             { path: "Hygiene Form Medical Report", component: HygieneFormComponent, title: "Hygiene Form", canActivate: [noNavigateWithoutLoginGuard, ] },
