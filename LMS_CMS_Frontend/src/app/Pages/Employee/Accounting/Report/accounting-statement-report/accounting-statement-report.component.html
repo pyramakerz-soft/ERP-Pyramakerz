@@ -57,7 +57,7 @@
     <div class="w-full md:w-1/6 flex justify-end mt-4 md:mt-0">
         <button class="p-4 font-medium text-xl rounded-lg" (click)="viewReport()"
             [disabled]="!fromDate || !toDate || !linkFileID || !subAccountID || isLoading" [ngClass]="{
-                'bg-gray-100 text-gray-300': !fromDate || !toDate || !linkFileID || subAccountID ||  isLoading,
+                'bg-gray-100 text-gray-300': !fromDate || !toDate || !linkFileID || !subAccountID || isLoading,
                 'secondaryBg text-white': fromDate && toDate && linkFileID && subAccountID && !isLoading
             }">
             <span *ngIf="!isLoading">{{ 'View Report' | translate }}</span>
@@ -72,8 +72,14 @@
 </div>
 
 <div *ngIf="showTable && reportData" class="mb-5">
+    <!-- Export Buttons -->
+    <div class="mt-5 flex justify-end space-x-4 rtl:space-x-reverse">
+        <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="DownloadAsExcel()" [title]="'Download Excel' | translate">
+        <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()" [title]="'Download PDF' | translate">
+        <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()" [title]="'Print' | translate">
+    </div>
     <!-- Opening Balance -->
-    <div class="bg-gray-50 p-4 rounded-lg mb-4">
+    <div class="bg-gray-50 p-4 rounded-lg mb-4 mt-6">
         <h3 class="font-semibold text-lg mb-2">{{ 'Opening Balance' | translate }}</h3>
         <div class="text-lg">
             {{ reportData.firstPeriodBalance | number:'1.2-2' }}
@@ -169,44 +175,53 @@
         </div>
     </div>
 
+
     <!-- Pagination -->
-    <div *ngIf="reportData.pagination.totalPages > 1" class="flex justify-between items-center mt-4">
-        <div class="text-sm text-gray-600">
-            {{ 'Showing' | translate }} {{ (pageNumber - 1) * pageSize + 1 }} - {{ Math.min(pageNumber * pageSize, reportData.pagination.totalRecords) }} 
-            {{ 'of' | translate }} {{ reportData.pagination.totalRecords }} {{ 'records' | translate }}
+    <div *ngIf="showTable && reportData" class="mt-8 flex justify-between items-center">
+        <div class="flex items-center space-x-4 rtl:space-x-reverse">
+            <button class="flex items-center space-x-2 rounded-lg border py-3 px-4 rtl:space-x-reverse"
+                (click)="changeCurrentPage(CurrentPage-1)" [disabled]="CurrentPage === 1 || !reportData.data.length"
+                [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === 1 || !reportData.data.length}">
+                <i class="fa-solid fa-arrow-left"></i>
+                <p>{{'Previous'| translate }}</p>
+            </button>
+            <div class="flex">
+                <div *ngFor="let page of visiblePages"
+                    class="rounded-lg py-[10px] w-[40px]"
+                    [ngClass]="{ 'border': page === CurrentPage, 'hover:bg-gray-100': page !== CurrentPage }"
+                    (click)="changeCurrentPage(page)">
+                    <p class="cursor-pointer text-center">{{ page }}</p>
+                </div>
+            </div>
+            <button class="flex items-center space-x-2 rounded-lg border py-3 px-4 rtl:space-x-reverse"
+                (click)="changeCurrentPage(CurrentPage+1)" [disabled]="CurrentPage === TotalPages || !reportData.data.length"
+                [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === TotalPages || !reportData.data.length}">
+                <p>{{'Next'| translate }}</p>
+                <i class="fa-solid fa-arrow-right"></i>
+            </button>
         </div>
-        <div class="flex space-x-2 rtl:space-x-reverse">
-            <button (click)="changePage(1)" [disabled]="pageNumber === 1" 
-                class="px-3 py-1 rounded border" [ngClass]="{'bg-gray-200': pageNumber === 1, 'bg-white': pageNumber !== 1}">
-                &laquo;
-            </button>
-            <button (click)="changePage(pageNumber - 1)" [disabled]="pageNumber === 1" 
-                class="px-3 py-1 rounded border" [ngClass]="{'bg-gray-200': pageNumber === 1, 'bg-white': pageNumber !== 1}">
-                &lsaquo;
-            </button>
-            
-            <span class="px-3 py-1">{{ pageNumber }} / {{ reportData.pagination.totalPages }}</span>
-            
-            <button (click)="changePage(pageNumber + 1)" [disabled]="pageNumber === reportData.pagination.totalPages" 
-                class="px-3 py-1 rounded border" [ngClass]="{'bg-gray-200': pageNumber === reportData.pagination.totalPages, 'bg-white': pageNumber !== reportData.pagination.totalPages}">
-                &rsaquo;
-            </button>
-            <button (click)="changePage(reportData.pagination.totalPages)" [disabled]="pageNumber === reportData.pagination.totalPages" 
-                class="px-3 py-1 rounded border" [ngClass]="{'bg-gray-200': pageNumber === reportData.pagination.totalPages, 'bg-white': pageNumber !== reportData.pagination.totalPages}">
-                &raquo;
-            </button>
+        <div class="flex items-center space-x-2 rtl:space-x-reverse">
+            <input type="number" (input)="validateNumberForPagination($event)"
+                class="rounded-lg border py-3 px-4 w-[73px]"
+                [(ngModel)]="PageSize" min="1"
+                (input)="validatePageSize($event)"
+                (ngModelChange)="changeCurrentPage(CurrentPage)">
+            <p>{{'items Per Page'| translate }}</p>
+        </div>
+        <div>
+            <p>{{CurrentPage}} {{'of'| translate }} {{TotalPages}} {{'pages'| translate }} ({{TotalRecords}} {{'Item'| translate }})</p>
         </div>
     </div>
 </div>
 
-<!-- Update the PDF container section -->
-<!-- <div class="absolute -top-[9999px] -left-[9999px]">
-  <div id="accountStatementData" class="hidden">
-    <app-pdf-print *ngIf="showPDF" [school]="school" 
-                   [fileName]="type"
-                   [infoRows]="getInfoRows()"
-                   [tableDataWithHeaderArray]="getTableDataWithHeader()"
-                   #pdfComponentRef>
-    </app-pdf-print>
-  </div>
-</div> -->
+<!-- PDF container (keep at the bottom) -->
+<div class="absolute -top-[9999px] -left-[9999px]">
+    <div id="accountStatementData" class="hidden">
+        <app-pdf-print *ngIf="showPDF" [school]="school"
+            [fileName]="'Account Statement Report'"
+            [infoRows]="getInfoRows()"
+            [tableDataWithHeaderArray]="cachedTableDataForPDF"
+            #pdfComponentRef>
+        </app-pdf-print>
+    </div>
+</div>

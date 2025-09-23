@@ -10,7 +10,8 @@ namespace LMS_CMS_BL.DTO
     {
         public string User_Name { get; set; }
         public string Password { get; set; }
-        public string Type { get; set; }
+        public string? Type { get; set; }
+        public string? SerialNumber { get; set; }
 
     }
 }

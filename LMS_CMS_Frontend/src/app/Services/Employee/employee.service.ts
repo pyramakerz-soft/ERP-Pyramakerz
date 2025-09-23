@@ -36,6 +36,19 @@ export class EmployeeService {
     return this.http.get<Employee[]>(`${this.baseUrl}/Employee/GetByTypeId/${typeId}`, { headers })
   }
 
+  GetWithJobId(jobId: number, DomainName?: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('Authorization', `Bearer ${token}`)
+      .set('domain-name', this.header)
+      .set('Content-Type', 'application/json');
+
+    return this.http.get<Employee[]>(`${this.baseUrl}/Employee/GetByJobId/${jobId}`, { headers })
+  }
+
   GetByDepartmentId(departmentID: number, DomainName?: string) {
     if (DomainName != null) {
       this.header = DomainName

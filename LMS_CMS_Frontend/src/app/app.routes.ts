@@ -268,6 +268,9 @@ import { EmployeeClocksComponent } from './Pages/Employee/HR/employee-clocks/emp
 import { MaintenanceReportComponent } from './Pages/Employee/Maintenance/Reports/maintenance-report/maintenance-report.component';
 import { SalaryConfigurationComponent } from './Pages/Employee/HR/salary-configuration/salary-configuration.component';
 import { EmployeeJobReportComponent } from './Pages/Employee/HR/Reports/employee-job-report/employee-job-report.component';
+import { LoansReportComponent } from './Pages/Employee/HR/Reports/loans-report/loans-report.component';
+import { BonusReportComponent } from './Pages/Employee/HR/Reports/bonus-report/bonus-report.component';
+import { DeductionReportComponent } from './Pages/Employee/HR/Reports/deduction-report/deduction-report.component';
 
 export const routes: Routes = [
     { path: "", component: LoginComponent, title: "Login", canActivate: [noNavigateToLoginIfLoginGuard] },
@@ -568,8 +571,11 @@ export const routes: Routes = [
             { path: "Official Holidays", component: OfficialHolidaysComponent, title: "Official Holidays", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Vacation Types", component: VacationTypesComponent, title: "Vacation Types", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Loans", component: LoansComponent, title: "Loans", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
+            { path: "Loans Report", component: LoansReportComponent, title: "Loans Reports", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Bonus", component: BonusComponent, title: "Bonus", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
+            { path: "Bonus Report", component: BonusReportComponent, title: "Bonus Reports", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Deduction", component: DeductionComponent, title: "Deduction", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
+            { path: "Deduction Report", component: DeductionReportComponent, title: "Deduction Reports", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Leave Request", component: LeaveRequestComponent, title: "Leave Request", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Permissions Groups", component: PermissionGroupComponent, title: "Permissions Groups", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Permissions Group Employee/:id", component: PermissionGroupEmployeeComponent, title: "Permissions Group Employee", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
