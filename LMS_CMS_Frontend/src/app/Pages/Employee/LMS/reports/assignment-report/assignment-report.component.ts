@@ -467,7 +467,7 @@ export class AssignmentReportComponent implements OnInit {
   //   }
   // }
 
-  async downloadAsPDFWithChart() {
+async downloadAsPDFWithChart() {
   if (this.assignmentReports.length === 0) {
     Swal.fire('Warning', 'No data to export!', 'warning');
     return;
@@ -493,6 +493,7 @@ export class AssignmentReportComponent implements OnInit {
     title.style.marginBottom = '20px';
     title.style.color = '#333';
     title.style.fontSize = '24px';
+    title.style.fontWeight = 'bold';
     reportElement.appendChild(title);
     
     // Convert chart to image
@@ -510,83 +511,51 @@ export class AssignmentReportComponent implements OnInit {
       chartImg.src = chartImage;
       chartImg.style.width = '100%';
       chartImg.style.marginBottom = '20px';
-      chartImg.style.border = '1px solid #ddd';
-      chartImg.style.borderRadius = '8px';
       reportElement.appendChild(chartImg);
     }
     
-    // Add report details
+    // Add report details - match the HTML table styling
     const detailsDiv = document.createElement('div');
     detailsDiv.innerHTML = `
       <div style="margin-top: 20px; margin-bottom: 20px;">
-        <h3 style="color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px;">Report Details</h3>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+        <h3 style="color: #333; padding-bottom: 10px; font-size: 18px; font-weight: 600;">Report Details</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; font-size: 14px;">
           <div><strong>Date Range:</strong> ${this.dateFrom} to ${this.dateTo}</div>
           <div><strong>School:</strong> ${this.getSchoolName()}</div>
           <div><strong>Academic Year:</strong> ${this.getAcademicYearName()}</div>
           <div><strong>Grade:</strong> ${this.getGradeName()}</div>
           <div><strong>Subject:</strong> ${this.getSubjectName()}</div>
           <div><strong>Generated On:</strong> ${new Date().toLocaleDateString()}</div>
-          <div><strong>Total Assignments:</strong> ${this.assignmentReports.length}</div>
-          <div><strong>Total Attendance:</strong> ${this.getTotalAttendance()}</div>
         </div>
       </div>
     `;
     reportElement.appendChild(detailsDiv);
     
-    // Add summary statistics
-    const summaryDiv = document.createElement('div');
-    summaryDiv.innerHTML = `
-      <div style="margin-bottom: 20px;">
-        <h3 style="color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px;">Summary Statistics</h3>
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-top: 15px; text-align: center;">
-          <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #dee2e6;">
-            <div style="font-size: 24px; font-weight: bold; color: #3b82f6;">${this.getTotalSuccessful()}</div>
-            <div style="font-size: 12px; color: #6c757d;">Total Successful</div>
-          </div>
-          <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #dee2e6;">
-            <div style="font-size: 24px; font-weight: bold; color: #f97316;">${this.getTotalFailed()}</div>
-            <div style="font-size: 12px; color: #6c757d;">Total Failed</div>
-          </div>
-          <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #dee2e6;">
-            <div style="font-size: 24px; font-weight: bold; color: #10b981;">${this.getTotalAttendance()}</div>
-            <div style="font-size: 12px; color: #6c757d;">Total Attendance</div>
-          </div>
-          <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #dee2e6;">
-            <div style="font-size: 24px; font-weight: bold; color: #8b5cf6;">${this.getTotalAssignments()}</div>
-            <div style="font-size: 12px; color: #6c757d;">Total Assignments</div>
-          </div>
-        </div>
-      </div>
-    `;
-    reportElement.appendChild(summaryDiv);
-    
-    // Add data table
+    // Add data table - match exact HTML styling
     if (this.assignmentReports.length > 0) {
       const tableDiv = document.createElement('div');
       tableDiv.innerHTML = `
         <div style="margin-top: 20px;">
-          <h3 style="color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px;">Assignment Details</h3>
-          <table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12px;">
+          <table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12px; border: 1px solid #BDBDBD; border-radius: 16px; overflow: hidden;">
             <thead>
-              <tr style="background-color: #f8f9fa;">
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Assignment Name</th>
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Subject</th>
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Attendance</th>
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Successful</th>
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Failed</th>
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Success Rate</th>
+              <tr style="background-color: #EBEBEB;">
+                <th style="border: 1px solid #EAECF0; padding: 12px 16px; text-align: left; font-weight: 600; color: #6F6F6F;">Assignment Name</th>
+                <th style="border: 1px solid #EAECF0; padding: 12px 16px; text-align: left; font-weight: 600; color: #6F6F6F;">Subject</th>
+                <th style="border: 1px solid #EAECF0; padding: 12px 16px; text-align: left; font-weight: 600; color: #6F6F6F;">Attendance</th>
+                <th style="border: 1px solid #EAECF0; padding: 12px 16px; text-align: left; font-weight: 600; color: #6F6F6F;">Successful</th>
+                <th style="border: 1px solid #EAECF0; padding: 12px 16px; text-align: left; font-weight: 600; color: #6F6F6F;">Failed</th>
+                <th style="border: 1px solid #EAECF0; padding: 12px 16px; text-align: left; font-weight: 600; color: #6F6F6F;">Success Rate</th>
               </tr>
             </thead>
             <tbody>
-              ${this.assignmentReports.map(report => `
-                <tr>
-                  <td style="border: 1px solid #ddd; padding: 8px;">${report.assignmentName}</td>
-                  <td style="border: 1px solid #ddd; padding: 8px;">${report.subjectName}</td>
-                  <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${report.attendanceNumber}</td>
-                  <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${report.numberSuccessful}</td>
-                  <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${report.numberFailed}</td>
-                  <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${report.attendanceNumber > 0 ? ((report.numberSuccessful / report.attendanceNumber) * 100).toFixed(2) + '%' : '0%'}</td>
+              ${this.assignmentReports.map((report, i) => `
+                <tr style="${i % 2 === 1 ? 'background-color: #F7F7F7;' : 'background-color: white;'}">
+                  <td style="border: 1px solid #EAECF0; padding: 20px 16px; color: #6F6F6F;">${report.assignmentName}</td>
+                  <td style="border: 1px solid #EAECF0; padding: 20px 16px; color: #6F6F6F;">${report.subjectName}</td>
+                  <td style="border: 1px solid #EAECF0; padding: 20px 16px; color: #6F6F6F;">${report.attendanceNumber}</td>
+                  <td style="border: 1px solid #EAECF0; padding: 20px 16px; color: #6F6F6F;">${report.numberSuccessful}</td>
+                  <td style="border: 1px solid #EAECF0; padding: 20px 16px; color: #6F6F6F;">${report.numberFailed}</td>
+                  <td style="border: 1px solid #EAECF0; padding: 20px 16px; color: #6F6F6F;">${report.attendanceNumber > 0 ? ((report.numberSuccessful / report.attendanceNumber) * 100).toFixed(2) + '%' : '0%'}</td>
                 </tr>
               `).join('')}
             </tbody>
@@ -657,7 +626,7 @@ async printReportWithChart() {
       return;
     }
 
-    // Create print content
+    // Create print content that matches HTML exactly
     const printContent = `
       <!DOCTYPE html>
       <html>
@@ -668,73 +637,73 @@ async printReportWithChart() {
             font-family: Arial, sans-serif; 
             margin: 20px; 
             color: #333;
+            background: white;
           }
           .header { 
             text-align: center; 
             margin-bottom: 20px; 
-            border-bottom: 2px solid #333;
-            padding-bottom: 10px;
+          }
+          .header h1 {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
           }
           .chart-container { 
-            text-align: center; 
             margin: 20px 0; 
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 15px;
           }
           .details { 
             margin: 20px 0; 
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
           }
-          .summary { 
-            margin: 20px 0; 
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-          }
-          .summary-grid { 
-            display: grid; 
-            grid-template-columns: repeat(4, 1fr); 
-            gap: 15px; 
-            margin-top: 15px;
-          }
-          .summary-item {
-            text-align: center;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            border: 1px solid #dee2e6;
+          .details h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
           }
           .details-grid { 
             display: grid; 
             grid-template-columns: 1fr 1fr; 
             gap: 10px; 
             margin-top: 15px;
+            font-size: 14px;
           }
           table {
             width: 100%;
             border-collapse: collapse;
             margin: 20px 0;
             font-size: 12px;
+            border: 1px solid #BDBDBD;
+            border-radius: 16px;
+            overflow: hidden;
           }
           th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
+            border: 1px solid #EAECF0;
+            padding: 12px 16px;
             text-align: left;
           }
           th {
-            background-color: #f8f9fa;
-            text-align: center;
+            background-color: #EBEBEB;
+            font-weight: 600;
+            color: #6F6F6F;
+          }
+          td {
+            color: #6F6F6F;
+          }
+          tr:nth-child(even) {
+            background-color: #F7F7F7;
+          }
+          tr:nth-child(odd) {
+            background-color: white;
           }
           .no-print { 
             display: none; 
           }
           @media print {
-            body { margin: 0; padding: 15px; }
+            body { 
+              margin: 0; 
+              padding: 15px; 
+              background: white;
+            }
             .no-print { display: none; }
-            .header { margin-top: 0; }
           }
         </style>
       </head>
@@ -745,7 +714,6 @@ async printReportWithChart() {
         
         ${chartImage ? `
         <div class="chart-container">
-          <h3>Performance Chart</h3>
           <img src="${chartImage}" style="max-width: 100%; height: auto;" />
         </div>
         ` : ''}
@@ -759,28 +727,6 @@ async printReportWithChart() {
             <div><strong>Grade:</strong> ${this.getGradeName()}</div>
             <div><strong>Subject:</strong> ${this.getSubjectName()}</div>
             <div><strong>Generated On:</strong> ${new Date().toLocaleDateString()}</div>
-          </div>
-        </div>
-        
-        <div class="summary">
-          <h3>Summary Statistics</h3>
-          <div class="summary-grid">
-            <div class="summary-item">
-              <div style="font-size: 24px; font-weight: bold; color: #3b82f6;">${this.getTotalSuccessful()}</div>
-              <div>Total Successful</div>
-            </div>
-            <div class="summary-item">
-              <div style="font-size: 24px; font-weight: bold; color: #f97316;">${this.getTotalFailed()}</div>
-              <div>Total Failed</div>
-            </div>
-            <div class="summary-item">
-              <div style="font-size: 24px; font-weight: bold; color: #10b981;">${this.getTotalAttendance()}</div>
-              <div>Total Attendance</div>
-            </div>
-            <div class="summary-item">
-              <div style="font-size: 24px; font-weight: bold; color: #8b5cf6;">${this.getTotalAssignments()}</div>
-              <div>Total Assignments</div>
-            </div>
           </div>
         </div>
         
@@ -798,14 +744,14 @@ async printReportWithChart() {
               </tr>
             </thead>
             <tbody>
-              ${this.assignmentReports.map(report => `
+              ${this.assignmentReports.map((report, i) => `
                 <tr>
                   <td>${report.assignmentName}</td>
                   <td>${report.subjectName}</td>
-                  <td style="text-align: center;">${report.attendanceNumber}</td>
-                  <td style="text-align: center;">${report.numberSuccessful}</td>
-                  <td style="text-align: center;">${report.numberFailed}</td>
-                  <td style="text-align: center;">${report.attendanceNumber > 0 ? ((report.numberSuccessful / report.attendanceNumber) * 100).toFixed(2) + '%' : '0%'}</td>
+                  <td>${report.attendanceNumber}</td>
+                  <td>${report.numberSuccessful}</td>
+                  <td>${report.numberFailed}</td>
+                  <td>${report.attendanceNumber > 0 ? ((report.numberSuccessful / report.attendanceNumber) * 100).toFixed(2) + '%' : '0%'}</td>
                 </tr>
               `).join('')}
             </tbody>
@@ -824,7 +770,9 @@ async printReportWithChart() {
         <script>
           // Auto-print when window loads
           window.onload = function() {
-            window.print();
+            setTimeout(() => {
+              window.print();
+            }, 500);
             
             // Listen for afterprint event to close the window
             window.addEventListener('afterprint', function() {
@@ -849,7 +797,6 @@ async printReportWithChart() {
   }
 }
 
-// Enhanced Excel export with chart summary
 async exportExcelWithChartSummary() {
   if (this.reportsForExcel.length === 0) {
     Swal.fire('Warning', 'No data to export!', 'warning');
