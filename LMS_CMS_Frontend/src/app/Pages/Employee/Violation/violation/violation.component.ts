@@ -19,14 +19,14 @@ import { ViolationTypeService } from '../../../../Services/Employee/Violation/vi
 import { Employee } from '../../../../Models/Employee/employee';
 import { ViolationType } from '../../../../Models/Violation/violation-type';
 import { EmployeeService } from '../../../../Services/Employee/employee.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-violation',
   standalone: true,
-  imports: [FormsModule, CommonModule, SearchComponent , TranslateModule],
+  imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './violation.component.html',
   styleUrl: './violation.component.css'
 })
@@ -53,7 +53,7 @@ export class ViolationComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'violationTypeName', 'employeeEnglishName', 'date'];
+  keysArray: string[] = ['id', 'violationTypeName', 'employeeEnglishName'];
 
   violation: Violation = new Violation();
 
@@ -65,6 +65,7 @@ export class ViolationComponent {
     private menuService: MenuService,
     public activeRoute: ActivatedRoute,
     public account: AccountService,
+    private translate: TranslateService,
     private languageService: LanguageService,
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
@@ -94,17 +95,17 @@ export class ViolationComponent {
     });
 
     this.GetAllData();
-        this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   GetAllData() {
@@ -183,18 +184,36 @@ export class ViolationComponent {
     this.openModal();
   }
 
+  // Delete(id: number) {
+  //   Swal.fire({
+  //     title: 'Are you sure you want to delete this Violation?',
+  //     icon: 'warning',
+  //     showCancelButton: true,
+  //     confirmButtonColor: '#089B41',
+  //     cancelButtonColor: '#17253E',
+  //     confirmButtonText: 'Delete',
+  //     cancelButtonText: 'Cancel',
+  //   }).then((result) => {
+  //     if (result.isConfirmed) {
+  //       this.violationServ.Delete(id, this.DomainName).subscribe((d) => {
+  //         this.GetAllData();
+  //       });
+  //     }
+  //   });
+  // }
+
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Violation?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete')+ " " + this.translate.instant('هذه') + " " + this.translate.instant('the') + this.translate.instant('Violation')+ this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
-        this.violationServ.Delete(id, this.DomainName).subscribe((d) => {
+        this.violationServ.Delete(id, this.DomainName).subscribe(() => {
           this.GetAllData();
         });
       }

@@ -17,7 +17,7 @@ import { StoresService } from '../../../../Services/Employee/Inventory/stores.se
 import { InventoryCategoryService } from '../../../../Services/Employee/Inventory/inventory-category.service';
 import { StoreAdd } from '../../../../Models/Inventory/store-add';
 import { firstValueFrom } from 'rxjs';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
@@ -65,6 +65,7 @@ export class StoresComponent {
     public activeRoute: ActivatedRoute,
     public account: AccountService,
     public ApiServ: ApiService,
+    private translate: TranslateService,
     private menuService: MenuService,
     public EditDeleteServ: DeleteEditPermissionService,
     private router: Router,
@@ -156,13 +157,13 @@ export class StoresComponent {
 
   Delete(id: number): void {
     Swal.fire({
-      title: 'Are you sure you want to delete this Store?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('Store') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.StoresServ.Delete(id, this.DomainName).subscribe((d) => {

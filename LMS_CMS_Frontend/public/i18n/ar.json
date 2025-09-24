@@ -339,6 +339,7 @@
   "Enter new Violation": "أدخل مخالفة جديدة",
   "Edit Violation": "تعديل المخالفة",
   "Violation": "مخالفة",
+  "the": "ال",
   "Create Violation": "إنشاء مخالفة",
   "Supject Teacher": "معلم المادة",
   "Create Test": "إنشاء اختبار",
@@ -590,6 +591,7 @@
   "No Link File": "لا يوجد ملف ربط",
   "Children": "الأبناء",
   "Assets": "الأصول",
+  "Asset": "الاصل",
   "Create Asset": "إنشاء أصل",
   "Edit Asset": "تعديل الأصل",
   "Asset Name": "اسم الأصل",
@@ -1156,5 +1158,16 @@
   "En_ Name": "الاسم بالإنجليزية",
   "Ar_ Name": "الاسم بالعربية",
   "company": "شركة",
-  "Companies": "الشركات"
+  "Companies": "الشركات",
+  "Installment Deduction Details": "تفاصيل خصم الأقساط",
+  "Delete": "حذف",
+  "delete": "حذف",
+  "هذا": "هذا",
+  "هذه": "هذه",
+  "Receivable Detail": "التفصيل المستحق",
+  "Payable Detail": "التفصيل المستحق",
+  "SubCategory": "الفئة الفرعية",
+  "Accounting Entries Detail": "القيود المحاسبية التفصيلية",
+  "Are you sure you want to": "هل أنت متأكد أنك تريد" ,
+  "?": "؟"
 }

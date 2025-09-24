@@ -24,9 +24,9 @@ import Swal from 'sweetalert2';
 import html2pdf from 'html2pdf.js';
 import { PdfPrintComponent } from '../../../../Component/pdf-print/pdf-print.component';
 import { ReportsService } from '../../../../Services/shared/reports.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-payable-details',
@@ -45,7 +45,7 @@ export class PayableDetailsComponent {
 
   DomainName: string = '';
   UserID: number = 0;
-isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   path: string = '';
   PayableID: number = 0;
@@ -77,26 +77,27 @@ isRtl: boolean = false;
 
   @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;
   showPDF = false;
-  
+
   constructor(
-    private router: Router, 
-    private menuService: MenuService, 
+    private router: Router,
+    private menuService: MenuService,
     public activeRoute: ActivatedRoute,
-     public account: AccountService,
-      public payableDocTypeService: PayableDocTypeService,
+    public account: AccountService,
+    public payableDocTypeService: PayableDocTypeService,
     public DomainServ: DomainService,
-     public EditDeleteServ: DeleteEditPermissionService,
-      public ApiServ: ApiService, 
-      public payableService: PayableService,
+    public EditDeleteServ: DeleteEditPermissionService,
+    public ApiServ: ApiService,
+    public payableService: PayableService,
     public bankService: BankService,
-     public saveService: SaveService,
-      public payableDetailsService: PayableDetailsService,
-       public linkFileService: LinkFileService,
-    public dataAccordingToLinkFileService: DataAccordingToLinkFileService, 
+    private translate: TranslateService,
+    public saveService: SaveService,
+    public payableDetailsService: PayableDetailsService,
+    public linkFileService: LinkFileService,
+    public dataAccordingToLinkFileService: DataAccordingToLinkFileService,
     public reportsService: ReportsService,
     private languageService: LanguageService,
     private realTimeService: RealTimeNotificationServiceService
-  
+
   ) { }
 
   ngOnInit() {
@@ -137,19 +138,19 @@ isRtl: boolean = false;
 
     this.GetDocType()
 
-          this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
 
-    ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
-     if (this.subscription) {
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
       this.subscription.unsubscribe();
     }
-  } 
+  }
 
   moveToPayable() {
     this.router.navigateByUrl("Employee/Payable")
@@ -218,7 +219,7 @@ isRtl: boolean = false;
       if (this.payable.hasOwnProperty(key)) {
         const field = key as keyof Payable;
         if (!this.payable[field]) {
-          if (field == "payableDocTypeID" || field == "linkFileID" ||  field == "date" || field == "docNumber") {
+          if (field == "payableDocTypeID" || field == "linkFileID" || field == "date" || field == "docNumber") {
             this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
             isValid = false;
           }
@@ -352,14 +353,14 @@ isRtl: boolean = false;
   Save() {
     if (this.isFormValid()) {
       this.isSaveLoading = true;
-  
+
       if (this.isCreate) {
         this.payableService.Add(this.payable, this.DomainName).subscribe(
           (data) => {
             let id = JSON.parse(data).id;
             this.router.navigateByUrl(`Employee/Payable Details/${id}`);
             this.isSaveLoading = false;
-  
+
             Swal.fire({
               title: 'Saved Successfully',
               icon: 'success',
@@ -375,7 +376,7 @@ isRtl: boolean = false;
           (data) => {
             this.GetPayableByID();
             this.isSaveLoading = false;
-  
+
             Swal.fire({
               icon: 'success',
               title: 'Done!',
@@ -413,7 +414,7 @@ isRtl: boolean = false;
     )
   }
 
-  GetLinkFilesTypeData(id:number) {
+  GetLinkFilesTypeData(id: number) {
     this.linkFileTypesData = []
     this.dataAccordingToLinkFileService.GetTableDataAccordingToLinkFile(this.DomainName, id).subscribe(
       (data) => {
@@ -482,13 +483,13 @@ isRtl: boolean = false;
 
   DeleteDetail(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Payable Detail?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('Payable Detail') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.payableDetailsService.Delete(id, this.DomainName).subscribe(
@@ -574,7 +575,7 @@ isRtl: boolean = false;
 
       document.body.appendChild(printContainer);
       window.print();
-      
+
       setTimeout(() => {
         document.body.removeChild(printContainer);
         this.showPDF = false;
@@ -604,10 +605,10 @@ isRtl: boolean = false;
           title: "Payable Details",
           headers: ['id', 'amount', 'linkFileName', 'linkFileTypeName', 'notes'],
           data: this.payableDetailsData.map((row) => [
-            row.id || 0, 
-            row.amount || 0, 
-            row.linkFileName || '', 
-            row.linkFileTypeName || '', 
+            row.id || 0,
+            row.amount || 0,
+            row.linkFileName || '',
+            row.linkFileTypeName || '',
             row.notes || ''
           ])
         }

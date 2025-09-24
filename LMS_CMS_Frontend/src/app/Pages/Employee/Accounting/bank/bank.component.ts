@@ -16,7 +16,7 @@ import { BusTypeService } from '../../../../Services/Employee/Bus/bus-type.servi
 import { DomainService } from '../../../../Services/Employee/domain.service';
 import { DeleteEditPermissionService } from '../../../../Services/shared/delete-edit-permission.service';
 import { MenuService } from '../../../../Services/shared/menu.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
@@ -70,6 +70,7 @@ export class BankComponent {
     public activeRoute: ActivatedRoute,
     public account: AccountService,
     public BusTypeServ: BusTypeService,
+    private translate: TranslateService,
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
@@ -114,7 +115,7 @@ export class BankComponent {
       this.subscription.unsubscribe();
     }
   }
- 
+
   GetAllData() {
     this.TableData = []
     this.BankServ.Get(this.DomainName).subscribe((d) => {
@@ -137,13 +138,13 @@ export class BankComponent {
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Bank?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('Bank'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.BankServ.Delete(id, this.DomainName).subscribe((d) => {
@@ -324,8 +325,8 @@ export class BankComponent {
     }
   }
 
-  getEmployees(){
-    this.Employees = [] 
+  getEmployees() {
+    this.Employees = []
     this.employeeService.Get_Employees(this.DomainName).subscribe(
       data => {
         this.Employees = data
@@ -333,11 +334,11 @@ export class BankComponent {
     )
   }
 
-  getBankEmployees(){
-    this.BankEmployees = [] 
+  getBankEmployees() {
+    this.BankEmployees = []
     this.bankEmployeeService.Get(this.bankId, this.DomainName).subscribe(
       data => {
-        this.BankEmployees = data 
+        this.BankEmployees = data
 
         this.selectedEmployees = this.BankEmployees.map(emp => ({
           employeeID: emp.employeeID,
@@ -348,7 +349,7 @@ export class BankComponent {
     )
   }
 
-  AddEmployee(bankId: number) { 
+  AddEmployee(bankId: number) {
     document.getElementById('Add_Employee')?.classList.remove('hidden');
     document.getElementById('Add_Employee')?.classList.add('flex');
 
@@ -359,17 +360,17 @@ export class BankComponent {
 
   closeAddModal() {
     document.getElementById('Add_Employee')?.classList.remove('flex');
-    document.getElementById('Add_Employee')?.classList.add('hidden'); 
+    document.getElementById('Add_Employee')?.classList.add('hidden');
     this.bankId = 0
-    this.Employees = [] 
-    this.selectedEmployees = [] 
+    this.Employees = []
+    this.selectedEmployees = []
   }
 
-  
+
   onEmployeeSelect(event: any) {
     const selectedId = +event.target.value;
-    const emp = this.Employees.find(e => e.id === selectedId); 
-    
+    const emp = this.Employees.find(e => e.id === selectedId);
+
     if (emp && !this.selectedEmployees.some(e => e.employeeID === emp.id)) {
       const newEmp = {
         employeeID: emp.id,
@@ -378,7 +379,7 @@ export class BankComponent {
       };
       this.selectedEmployees.push(newEmp);
     }
- 
+
     event.target.value = "";
   }
 
@@ -388,16 +389,16 @@ export class BankComponent {
 
   Save() {
     this.isLoading = true;
-    
+
     let bankEmp = new BankEmployee()
     bankEmp.bankID = this.bankId
     bankEmp.employeeIDs = this.selectedEmployees.map(e => e.employeeID)
-    
+
     this.bankEmployeeService.Add(bankEmp, this.DomainName).subscribe(
-      data =>{
+      data => {
         this.isLoading = false;
         this.closeAddModal()
       }
-    ) 
+    )
   }
 }
