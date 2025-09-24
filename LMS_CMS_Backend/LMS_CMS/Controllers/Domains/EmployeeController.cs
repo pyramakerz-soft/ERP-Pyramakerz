@@ -447,13 +447,15 @@ namespace LMS_CMS_PL.Controllers.Domains
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee" }
         )]
-        public IActionResult GetMyData()
+        public async Task<IActionResult> GetMyData()
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
             long.TryParse(userIdClaim, out long userId);
-            Employee employee = Unit_Of_Work.employee_Repository.First_Or_Default(
-                    emp => emp.IsDeleted != true && emp.ID == userId);
+            Employee employee = await Unit_Of_Work.employee_Repository.FindByIncludesAsync(
+                    emp => emp.IsDeleted != true && emp.ID == userId, 
+                    query => query.Include(emp => emp.EmployeeType),
+                    query => query.Include(emp => emp.Role));
 
             if (employee == null || employee.IsDeleted == true)
             {
