@@ -133,10 +133,12 @@ export class EvaluationReportComponent {
       this.subscription.unsubscribe();
     }
   }
+
   onFilterChange() {
   this.showTable = false;
   this.reportData = [];
   this.cachedTableDataForPDF = [];
+  this.collapsedEmployees.clear();
 }
 
   getClassData() {
@@ -213,7 +215,7 @@ export class EvaluationReportComponent {
     this.GetData();
   }
 
-  GetData() {
+ GetData() {
     this.reportData = [];
 
     // Prepare parameters
@@ -237,10 +239,10 @@ export class EvaluationReportComponent {
       this.DomainName
     ).subscribe(
       (data: any) => {
-        this.reportData = Array.isArray(data) ? data : [];  
-        // Initialize collapsed items
-        this.collapsedItems.clear();
-        this.reportData.forEach((_, index) => this.collapsedItems.add(index));
+        this.reportData = Array.isArray(data) ? data : [];
+        // Expand all employees by default after filtering
+        this.collapsedEmployees.clear();
+        this.reportData.forEach((_, index) => this.collapsedEmployees.add(index));
 
         // Prepare data for export
         this.prepareExportData();
