@@ -90,23 +90,23 @@
 <!-- <div #chartContainer> -->
     <!-- <h3 class="text-lg font-semibold text-gray-800 mb-4 text-center">{{ 'Assignment Performance Chart' | translate }}</h3> -->
     
-    <div #chartContainer class="flex justify-center items-end space-x-10 h-80 p-6 rounded-lg overflow-x-auto">
+    <div #chartContainer class="flex justify-center items-end space-x-10">
         <ng-container *ngFor="let item of chartData; let i = index">
             <div class="flex flex-col items-center space-y-3 min-w-[140px]">
                 <!-- Assignment Name -->
-                <div class="text-sm text-gray-700 font-medium text-center max-w-[120px] truncate">
+                <div class="text-sm text-gray-700 font-medium text-center max-w-[120px] truncate mb-2">
                     {{ item.name }}
                 </div>
 
                 <!-- Bars -->
-                <div class="flex items-end justify-center space-x-6 h-56">
+                <div class="flex items-end justify-center space-x-6 h-[275px]">
                     <!-- Successful -->
                     <div class="flex flex-col items-center">
                         <div class="relative group">
                             <div
-                                class="bg-green-400 rounded-t-2xl pt-6 transition-all duration-300 w-12 flex items-end justify-center"
-                                [style.height.px]="getBarHeight(item.successful) * 2"
-                                [style.min-height.px]="item.successful > 0 ? 20 : 0">
+                                class="secondaryBg rounded-t-2xl transition-all duration-300 w-12 flex items-end justify-center"
+                                [style.height.px]="getBarHeight(item.successful, item.total) * 2.5"
+                                [style.min-height.px]="item.successful > 0 ? 30 : 0">
                                 <span class="text-white text-xs font-semibold mb-2" *ngIf="item.successful > 0">
                                     {{ item.successful }}
                                 </span>
@@ -117,7 +117,7 @@
                                 {{ 'Successful' | translate }}: {{ item.successful }}
                             </div>
                         </div>
-                        <span class="text-xs text-green-400 mt-1 font-semibold">
+                        <span class="text-xs secondaryTxt mt-1 font-semibold">
                             {{ 'Successful' | translate }}
                         </span>
                     </div>
@@ -126,9 +126,9 @@
                     <div class="flex flex-col items-center">
                         <div class="relative group">
                             <div
-                                class="bg-[#F97316] rounded-t-2xl pt-6 transition-all duration-300 w-12 flex items-end justify-center"
-                                [style.height.px]="getBarHeight(item.failed) * 2"
-                                [style.min-height.px]="item.failed > 0 ? 20 : 0">
+                                class="bg-[#F97316] rounded-t-2xl transition-all duration-300 w-12 flex items-end justify-center"
+                                [style.height.px]="getBarHeight(item.failed, item.total) * 2.5"
+                                [style.min-height.px]="item.failed > 0 ? 30 : 0">
                                 <span class="text-white text-xs font-semibold mb-2" *ngIf="item.failed > 0">
                                     {{ item.failed }}
                                 </span>

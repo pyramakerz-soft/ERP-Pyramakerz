@@ -185,7 +185,13 @@
 <div class="absolute -top-[9999px] -left-[9999px]">
     <div id="Data" class="hidden">
         <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'Loans Report'"
-            [infoRows]="getInfoRows()"
+            [infoRows]="[
+      { keyEn: 'Date From: ' + this.dateFrom },
+      { keyEn: 'Date To: ' + this.dateTo },
+      { keyEn: 'Job Category: ' + this.getJobCategoryName() },
+      { keyEn: 'Job: ' + this.getJobName() },
+      { keyEn: 'Employee: ' + this.getEmployeeName() }
+    ]"
             [tableHeaders]="[
                 'Employee ID', 
                 'Employee Name', 

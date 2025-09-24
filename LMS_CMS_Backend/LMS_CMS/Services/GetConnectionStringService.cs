@@ -9,7 +9,8 @@
         //    var initialCatalog = domainName; 
         //    var userId = "admin";
         //    var password = "PyraDev1*";
-        //    var trustServerCertificate = "TrustServerCertificate=True";
+        //    var trustServerCertificate = "TrustServerCertificate=True
+
 
         //    return $"Data Source={dataSource};Initial Catalog={initialCatalog};User ID={userId};Password={password};{trustServerCertificate}";
         //}

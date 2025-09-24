@@ -453,8 +453,7 @@ namespace LMS_CMS_PL.Controllers.Domains
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
             long.TryParse(userIdClaim, out long userId);
             Employee employee = await Unit_Of_Work.employee_Repository.FindByIncludesAsync(
-                    emp => emp.IsDeleted != true && emp.ID == userId,
-                    query => query.Include(emp => emp.BusCompany),
+                    emp => emp.IsDeleted != true && emp.ID == userId, 
                     query => query.Include(emp => emp.EmployeeType),
                     query => query.Include(emp => emp.Role));
 

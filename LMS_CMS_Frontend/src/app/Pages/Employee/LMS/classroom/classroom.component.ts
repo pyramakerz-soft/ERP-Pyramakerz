@@ -376,9 +376,11 @@ export class ClassroomComponent {
       if(this.editClassroom == false){
         this.classroomService.Add(this.classroom, this.DomainName).subscribe(
           (result: any) => {
+            this.SelectedSchoolIdForFilteration = this.selectedSchool ? this.selectedSchool : 0
+            this.activeAcademicYearID = this.classroom.academicYearID
             this.closeModal()
             this.isLoadingSaveClassroom=false
-            this.getClassroomData()
+            this.getClassroomDataByYearID()
           },
           error => {
             this.isLoadingSaveClassroom=false
@@ -394,9 +396,11 @@ export class ClassroomComponent {
       } else{
         this.classroomService.Edit(this.classroom, this.DomainName).subscribe(
           (result: any) => {
+            this.SelectedSchoolIdForFilteration = this.selectedSchool ? this.selectedSchool : 0
+            this.activeAcademicYearID = this.classroom.academicYearID
             this.closeModal()
-            this.getClassroomData()
             this.isLoadingSaveClassroom=false
+            this.getClassroomDataByYearID()
           },
           error => {
             this.isLoadingSaveClassroom=false
@@ -427,7 +431,7 @@ export class ClassroomComponent {
         this.classroomService.Delete(id, this.DomainName).subscribe(
           (data: any) => {
             this.classroomData=[]
-            this.getClassroomData()
+            this.getClassroomDataByYearID()
           }
         );
       }

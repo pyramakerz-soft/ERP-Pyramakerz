@@ -209,14 +209,113 @@ export class PdfPrintComponent {
     }
   }
 
-  printPDF() {
-    const opt = {
-      margin: 0.5,
-      filename: `${this.fileName}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
-    };
-    html2pdf().from(this.printContainer.nativeElement).set(opt).save();
+
+printPDF() {
+  const opt = {
+    margin: [0.5, 0.5, 0.5, 0.5], // top, left, bottom, right margins in inches
+    filename: `${this.fileName}.pdf`,
+    image: { 
+      type: 'jpeg', 
+      quality: 0.98 
+    },
+    html2canvas: { 
+      scale: 2,
+      useCORS: true,
+      letterRendering: true,
+      allowTaint: false
+    },
+    jsPDF: { 
+      unit: 'in', 
+      format: 'a4', 
+      orientation: 'portrait',
+      compress: true
+    },
+    pagebreak: {
+      mode: ['avoid-all', 'css', 'legacy'],
+      before: '.page-break-before',
+      after: '.page-break-after',
+      avoid: '.page-break-avoid'
+    }
+  };
+
+  // Apply temporary styles for better PDF rendering
+  const printContainer = this.printContainer.nativeElement;
+  const originalStyle = printContainer.style.cssText;
+  
+  // Temporarily apply print-optimized styles
+  printContainer.style.cssText += `
+    font-size: 12px !important;
+    line-height: 1.4 !important;
+    color: #000 !important;
+  `;
+
+  html2pdf()
+    .from(printContainer)
+    .set(opt)
+    .save()
+    .then(() => {
+      // Restore original styles
+      printContainer.style.cssText = originalStyle;
+    })
+    .catch((error: any) => {
+      console.error('PDF generation failed:', error);
+      // Restore original styles even if PDF generation fails
+      printContainer.style.cssText = originalStyle;
+    });
+}
+getColumnWidth(header: string, totalColumns: number): any {
+  // Define special cases for columns that need more space
+  const wideColumns = ['details', 'description', 'notes', 'comments', 'permanent drug'];
+  const mediumColumns = ['name', 'title', 'address'];
+  
+  const headerLower = header.toLowerCase();
+  
+  // Check if this is a wide column that needs more space
+  const isWideColumn = wideColumns.some(col => headerLower.includes(col));
+  const isMediumColumn = mediumColumns.some(col => headerLower.includes(col));
+  
+  if (isWideColumn) {
+    // Give wide columns 40% of the table width
+    return { width: '40%', 'min-width': '200px' };
+  } else if (isMediumColumn) {
+    // Give medium columns 25% of the table width
+    return { width: '25%', 'min-width': '150px' };
+  } else {
+    // Distribute remaining space equally among other columns
+    const remainingColumns = totalColumns - 
+      (wideColumns.filter(col => this.hasColumnWithName(col)).length * 1) -
+      (mediumColumns.filter(col => this.hasColumnWithName(col)).length * 1);
+    
+    if (remainingColumns > 0) {
+      const remainingWidth = 100 - 
+        (wideColumns.filter(col => this.hasColumnWithName(col)).length * 40) -
+        (mediumColumns.filter(col => this.hasColumnWithName(col)).length * 25);
+      
+      return { width: `${remainingWidth / remainingColumns}%`, 'min-width': '100px' };
+    } else {
+      return { width: 'auto', 'min-width': '100px' };
+    }
   }
+}
+
+// Helper method to check if any column contains a specific name
+private hasColumnWithName(columnName: string): boolean {
+  if (this.tableHeaders) {
+    return this.tableHeaders.some(header => 
+      header.toLowerCase().includes(columnName.toLowerCase())
+    );
+  }
+  return false;
+}
+
+// Method to determine table size for page break control
+isSmallTable(data: any[]): boolean {
+  // Only consider very small tables (≤5 rows) for strict page-break-avoid
+  return data && data.length <= 5;
+}
+
+isLargeTable(data: any[]): boolean {
+  // Consider a table large if it has more than 10 rows
+  return data && data.length > 10;
+}
 }

@@ -572,7 +572,7 @@ export const routes: Routes = [
             { path: "Certificate", component: CertificateComponent, title: "Certificate", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Official Holidays", component: OfficialHolidaysComponent, title: "Official Holidays", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Vacation Types", component: VacationTypesComponent, title: "Vacation Types", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
-            { path: "Loans", component: LoansComponent, title: "Loans", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
+            { path: "Loans", component: LoansComponent, title: "Loans", canActivate: [noNavigateWithoutLoginGuard] },
             { path: "Loans Report", component: LoansReportComponent, title: "Loans Reports", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Bonus", component: BonusComponent, title: "Bonus", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
             { path: "Bonus Report", component: BonusReportComponent, title: "Bonus Reports", canActivate: [noNavigateWithoutLoginGuard, navigateIfHaveSettingPageGuard] },
