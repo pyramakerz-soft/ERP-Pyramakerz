@@ -5,7 +5,7 @@ import { VacationEmployeeService } from '../../../../Services/Employee/HR/vacati
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subscription, firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
 import { SearchComponent } from '../../../../Component/search/search.component';
@@ -79,6 +79,7 @@ export class VacationEmployeeComponent {
     public ApiServ: ApiService,
     public VacationEmployeeServ: VacationEmployeeService,
     public EmployeeServ: EmployeeService,
+    private translate: TranslateService,
     public VacationTypesServ: VacationTypesService,
     private realTimeService: RealTimeNotificationServiceService,
   ) { }
@@ -159,13 +160,13 @@ export class VacationEmployeeComponent {
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this vacation?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذه') + " " +this.translate.instant('Vacation') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.VacationEmployeeServ.Delete(id, this.DomainName).subscribe((d) => {

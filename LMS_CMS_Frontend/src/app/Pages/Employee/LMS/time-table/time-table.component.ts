@@ -18,9 +18,9 @@ import Swal from 'sweetalert2';
 import { Classroom } from '../../../../Models/LMS/classroom';
 import { Employee } from '../../../../Models/Employee/employee';
 import { TimeTableDayGroupDTO } from '../../../../Models/LMS/time-table-day-group-dto';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-time-table',
@@ -74,7 +74,8 @@ export class TimeTableComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public SchoolServ: SchoolService,
-    public TimeTableServ: TimeTableService ,
+    private translate: TranslateService,
+    public TimeTableServ: TimeTableService,
     private cdRef: ChangeDetectorRef,
     private languageService: LanguageService,
     private realTimeService: RealTimeNotificationServiceService,
@@ -97,19 +98,19 @@ export class TimeTableComponent {
       }
     });
     this.GetAllSchools();
-        this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
-  } 
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
 
 
   GetAllSchools() {
@@ -273,13 +274,13 @@ export class TimeTableComponent {
 
   delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Time Table?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('Time Table') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel'
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.TimeTableServ.Delete(id, this.DomainName).subscribe(

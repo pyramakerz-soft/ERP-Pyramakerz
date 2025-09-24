@@ -17,7 +17,7 @@ import { SearchComponent } from '../../../../Component/search/search.component';
 import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
 import { Employee } from '../../../../Models/Employee/employee';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
@@ -61,6 +61,7 @@ export class FloorComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     private menuService: MenuService,
     public activeRoute: ActivatedRoute,
+    private translate: TranslateService,
     public floorService: FloorService,
     public employeeService: EmployeeService,
     public router: Router,
@@ -305,13 +306,13 @@ export class FloorComponent {
 
   deleteFloor(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Floor?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " +this.translate.instant('Floor') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.floorService.Delete(id, this.DomainName).subscribe((data: any) => {

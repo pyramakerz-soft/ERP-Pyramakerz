@@ -43,7 +43,7 @@ import { School } from '../../../../Models/school';
 import { SchoolService } from '../../../../Services/Employee/school.service';
 import { SchoolPCs } from '../../../../Models/Inventory/school-pcs';
 import { SchoolPCsService } from '../../../../Services/Employee/Inventory/school-pcs.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
@@ -152,6 +152,7 @@ export class InventoryDetailsComponent {
     public salesServ: InventoryMasterService,
     public storeServ: StoresService,
     public SaveServ: SaveService,
+    private translate: TranslateService,
     public bankServ: BankService,
     public CategoriesServ: InventoryCategoryService,
     public SubCategoriesServ: InventorySubCategoriesService,
@@ -249,11 +250,11 @@ export class InventoryDetailsComponent {
   }
 
 
- ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   moveToMaster() {
@@ -331,15 +332,17 @@ export class InventoryDetailsComponent {
     this.onInputValueChange({ field: 'supplierId', value: supplier.id });
   }
 
-  SearchStudents = (search: string, page: number) => { this.validationErrors['studentID'] = '' ,this.Data.studentID = 0 ,this.Data.studentName = '',this.studentSearch = ''; ;
+  SearchStudents = (search: string, page: number) => {
+    this.validationErrors['studentID'] = '', this.Data.studentID = 0, this.Data.studentName = '', this.studentSearch = '';;
     return this.StudentServ.GetAllWithSearch(this.Data.schoolId, search, page, 10, this.DomainName).pipe(
       map(res => ({ items: res.students, totalPages: res.totalPages }))
     );
   };
 
-  SearchSuppliers = (search: string, page: number) => { this.validationErrors['supplierId'] = '';
+  SearchSuppliers = (search: string, page: number) => {
+    this.validationErrors['supplierId'] = '';
     return this.SupplierServ.GetAllWithSearch(search, page, 10, this.DomainName).pipe(
-      map(res => ({ items: res.suppliers, totalPages: res.totalPages } ))
+      map(res => ({ items: res.suppliers, totalPages: res.totalPages }))
     );
   };
 
@@ -568,13 +571,13 @@ export class InventoryDetailsComponent {
   Delete(row: InventoryDetails) {
     if (this.mode == 'Edit') {
       Swal.fire({
-        title: 'Are you sure you want to delete this Item?',
+        title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('the') + this.translate.instant('Item') + this.translate.instant('?'),
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#089B41',
         cancelButtonColor: '#17253E',
-        confirmButtonText: 'Delete',
-        cancelButtonText: 'Cancel',
+        confirmButtonText: this.translate.instant('Delete'),
+        cancelButtonText: this.translate.instant('Cancel'),
       }).then((result) => {
         if (result.isConfirmed) {
           if (!this.NewDetailsWhenEdit.find((s) => s.id == row.id)) {
@@ -594,13 +597,13 @@ export class InventoryDetailsComponent {
       });
     } else if (this.mode == 'Create') {
       Swal.fire({
-        title: 'Are you sure you want to delete this Item?',
+        title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('the') + this.translate.instant('Item') + this.translate.instant('?'),
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#089B41',
         cancelButtonColor: '#17253E',
-        confirmButtonText: 'Delete',
-        cancelButtonText: 'Cancel',
+        confirmButtonText: this.translate.instant('Delete'),
+        cancelButtonText: this.translate.instant('Cancel'),
       }).then((result) => {
         if (result.isConfirmed) {
           this.Data.inventoryDetails = this.Data.inventoryDetails.filter(
