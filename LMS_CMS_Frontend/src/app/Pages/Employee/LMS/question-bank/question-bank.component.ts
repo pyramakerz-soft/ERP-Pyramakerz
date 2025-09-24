@@ -327,8 +327,8 @@ export class QuestionBankComponent {
   }
 
   Delete(id: number) {
-        Swal.fire({
-      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " "  + this.translate.instant('Question Bank') + this.translate.instant('?'),
+    Swal.fire({
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('Question Bank') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
