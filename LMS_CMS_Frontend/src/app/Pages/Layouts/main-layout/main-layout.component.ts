@@ -114,11 +114,11 @@ export class MainLayoutComponent {
     return this.isRtl && translation.ar ? translation.ar : translation.en;
   }
 
-  async GetInfo() {
+  GetInfo() {
     this.User_Data_After_Login = this.accountService.Get_Data_Form_Token();
 
     if (this.User_Data_After_Login.type == "employee") {
-      await this.Get_Pages_With_RoleID();
+      this.Get_Pages_With_RoleID();
     } else if (this.User_Data_After_Login.type == "student") {
       this.menuItems = [
         {

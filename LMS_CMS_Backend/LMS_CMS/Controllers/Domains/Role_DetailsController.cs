@@ -59,9 +59,7 @@ namespace LMS_CMS_PL.Controllers.Domains
         {
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
-            // When to use .AsNoTracking() ==> You are only reading data and will not update it in the same context
             var roleDetailsList = await Unit_Of_Work.role_Detailes_Repository.Database().Role_Detailes
-                .AsNoTracking()
                 .Where(rd => rd.IsDeleted != true && rd.Role_ID== roleId)
                 .Include(rd => rd.Page)  // Include the related Page entity
                 .ThenInclude(p => p.ChildPages) // Include the child pages
