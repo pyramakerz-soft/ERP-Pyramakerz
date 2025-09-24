@@ -267,7 +267,7 @@ export class AssignmentReportComponent implements OnInit {
       console.error('Error loading assignment reports:', error);
       this.assignmentReports = [];
       this.showTable = true;
-      Swal.fire('Error', 'Failed to load assignment report', 'error');
+      // Swal.fire('Error', 'Failed to load assignment report', 'error');
     } finally {
       this.isLoading = false;
     }
@@ -288,8 +288,8 @@ export class AssignmentReportComponent implements OnInit {
     );
   }
 
-  getBarHeight(value: number): number {
-    return this.maxChartValue > 0 ? (value / this.maxChartValue) * 100 : 0;
+  getBarHeight(value: number, total: number): number {
+    return total > 0 ? (value / total) * 100 : 0;
   }
 
   private prepareExportData(): void {
@@ -468,291 +468,84 @@ export class AssignmentReportComponent implements OnInit {
   // }
 
   async downloadAsPDFWithChart() {
-  if (this.assignmentReports.length === 0) {
-    Swal.fire('Warning', 'No data to export!', 'warning');
-    return;
-  }
-
-  this.isExporting = true;
-
-  try {
-    // Wait for the chart to be fully rendered
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    // Create a temporary container for the report
-    const reportElement = document.createElement('div');
-    reportElement.style.width = '800px';
-    reportElement.style.padding = '20px';
-    reportElement.style.backgroundColor = 'white';
-    reportElement.style.fontFamily = 'Arial, sans-serif';
-    
-    // Add title
-    const title = document.createElement('h1');
-    title.textContent = 'Assignment Report';
-    title.style.textAlign = 'center';
-    title.style.marginBottom = '20px';
-    title.style.color = '#333';
-    title.style.fontSize = '24px';
-    reportElement.appendChild(title);
-    
-    // Convert chart to image
-    if (this.chartContainer) {
-      const chartCanvas = await html2canvas(this.chartContainer.nativeElement, {
-        scale: 2,
-        backgroundColor: '#ffffff',
-        logging: false,
-        width: this.chartContainer.nativeElement.scrollWidth,
-        height: this.chartContainer.nativeElement.scrollHeight
-      });
-      
-      const chartImage = chartCanvas.toDataURL('image/png');
-      const chartImg = document.createElement('img');
-      chartImg.src = chartImage;
-      chartImg.style.width = '100%';
-      chartImg.style.marginBottom = '20px';
-      chartImg.style.border = '1px solid #ddd';
-      chartImg.style.borderRadius = '8px';
-      reportElement.appendChild(chartImg);
-    }
-    
-    // Add report details
-    const detailsDiv = document.createElement('div');
-    detailsDiv.innerHTML = `
-      <div style="margin-top: 20px; margin-bottom: 20px;">
-        <h3 style="color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px;">Report Details</h3>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
-          <div><strong>Date Range:</strong> ${this.dateFrom} to ${this.dateTo}</div>
-          <div><strong>School:</strong> ${this.getSchoolName()}</div>
-          <div><strong>Academic Year:</strong> ${this.getAcademicYearName()}</div>
-          <div><strong>Grade:</strong> ${this.getGradeName()}</div>
-          <div><strong>Subject:</strong> ${this.getSubjectName()}</div>
-          <div><strong>Generated On:</strong> ${new Date().toLocaleDateString()}</div>
-          <div><strong>Total Assignments:</strong> ${this.assignmentReports.length}</div>
-          <div><strong>Total Attendance:</strong> ${this.getTotalAttendance()}</div>
-        </div>
-      </div>
-    `;
-    reportElement.appendChild(detailsDiv);
-    
-    // Add summary statistics
-    const summaryDiv = document.createElement('div');
-    summaryDiv.innerHTML = `
-      <div style="margin-bottom: 20px;">
-        <h3 style="color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px;">Summary Statistics</h3>
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-top: 15px; text-align: center;">
-          <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #dee2e6;">
-            <div style="font-size: 24px; font-weight: bold; color: #3b82f6;">${this.getTotalSuccessful()}</div>
-            <div style="font-size: 12px; color: #6c757d;">Total Successful</div>
-          </div>
-          <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #dee2e6;">
-            <div style="font-size: 24px; font-weight: bold; color: #f97316;">${this.getTotalFailed()}</div>
-            <div style="font-size: 12px; color: #6c757d;">Total Failed</div>
-          </div>
-          <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #dee2e6;">
-            <div style="font-size: 24px; font-weight: bold; color: #10b981;">${this.getTotalAttendance()}</div>
-            <div style="font-size: 12px; color: #6c757d;">Total Attendance</div>
-          </div>
-          <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #dee2e6;">
-            <div style="font-size: 24px; font-weight: bold; color: #8b5cf6;">${this.getTotalAssignments()}</div>
-            <div style="font-size: 12px; color: #6c757d;">Total Assignments</div>
-          </div>
-        </div>
-      </div>
-    `;
-    reportElement.appendChild(summaryDiv);
-    
-    // Add data table
-    if (this.assignmentReports.length > 0) {
-      const tableDiv = document.createElement('div');
-      tableDiv.innerHTML = `
-        <div style="margin-top: 20px;">
-          <h3 style="color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px;">Assignment Details</h3>
-          <table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12px;">
-            <thead>
-              <tr style="background-color: #f8f9fa;">
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Assignment Name</th>
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Subject</th>
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Attendance</th>
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Successful</th>
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Failed</th>
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Success Rate</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${this.assignmentReports.map(report => `
-                <tr>
-                  <td style="border: 1px solid #ddd; padding: 8px;">${report.assignmentName}</td>
-                  <td style="border: 1px solid #ddd; padding: 8px;">${report.subjectName}</td>
-                  <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${report.attendanceNumber}</td>
-                  <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${report.numberSuccessful}</td>
-                  <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${report.numberFailed}</td>
-                  <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${report.attendanceNumber > 0 ? ((report.numberSuccessful / report.attendanceNumber) * 100).toFixed(2) + '%' : '0%'}</td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        </div>
-      `;
-      reportElement.appendChild(tableDiv);
-    }
-    
-    // Create PDF
-    const pdf = new jsPDF('landscape', 'px', 'a4');
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
-    
-    // Convert report to image
-    const reportImage = await html2canvas(reportElement, {
-      scale: 2,
-      backgroundColor: '#ffffff',
-      logging: false,
-      width: reportElement.scrollWidth,
-      height: reportElement.scrollHeight
-    });
-    
-    const imgData = reportImage.toDataURL('image/png');
-    const imgWidth = pdfWidth;
-    const imgHeight = (reportImage.height * pdfWidth) / reportImage.width;
-    
-    // Add image to PDF
-    pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-    
-    // Save PDF
-    pdf.save(`Assignment_Report_${new Date().toISOString().slice(0, 10)}.pdf`);
-    
-  } catch (error) {
-    console.error('Error generating PDF:', error);
-    Swal.fire('Error', 'Failed to generate PDF', 'error');
-  } finally {
-    this.isExporting = false;
-  }
-}
-
-// Enhanced print method that includes the chart
-async printReportWithChart() {
-  if (this.assignmentReports.length === 0) {
-    Swal.fire('Warning', 'No data to print!', 'warning');
-    return;
-  }
-
-  this.isExporting = true;
-
-  try {
-    // Convert chart to image
-    let chartImage = '';
-    if (this.chartContainer) {
-      const chartCanvas = await html2canvas(this.chartContainer.nativeElement, {
-        scale: 2,
-        backgroundColor: '#ffffff',
-        logging: false
-      });
-      chartImage = chartCanvas.toDataURL('image/png');
-    }
-
-    // Create print-friendly version
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) {
-      Swal.fire('Error', 'Please allow popups for printing', 'error');
-      this.isExporting = false;
+    if (this.assignmentReports.length === 0) {
+      Swal.fire('Warning', 'No data to export!', 'warning');
       return;
     }
 
-    // Create print content
-    const printContent = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Assignment Report</title>
-        <style>
-          body { 
-            font-family: Arial, sans-serif; 
-            margin: 20px; 
-            color: #333;
-          }
-          .header { 
-            text-align: center; 
-            margin-bottom: 20px; 
-            border-bottom: 2px solid #333;
-            padding-bottom: 10px;
-          }
-          .chart-container { 
-            text-align: center; 
-            margin: 20px 0; 
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 15px;
-          }
-          .details { 
-            margin: 20px 0; 
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-          }
-          .summary { 
-            margin: 20px 0; 
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-          }
-          .summary-grid { 
-            display: grid; 
-            grid-template-columns: repeat(4, 1fr); 
-            gap: 15px; 
-            margin-top: 15px;
-          }
-          .summary-item {
-            text-align: center;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            border: 1px solid #dee2e6;
-          }
-          .details-grid { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 10px; 
-            margin-top: 15px;
-          }
-          table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-            font-size: 12px;
-          }
-          th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-          }
-          th {
-            background-color: #f8f9fa;
-            text-align: center;
-          }
-          .no-print { 
-            display: none; 
-          }
-          @media print {
-            body { margin: 0; padding: 15px; }
-            .no-print { display: none; }
-            .header { margin-top: 0; }
-          }
-        </style>
-      </head>
-      <body>
-        <div class="header">
-          <h1>Assignment Report</h1>
+    this.isExporting = true;
+    let reportElement: HTMLElement | null = null;
+
+    try {
+      // Wait for the chart to be fully rendered
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Create a temporary container for the report
+      reportElement = document.createElement('div');
+      reportElement.style.width = '794px'; // A4 width in pixels (210mm)
+      reportElement.style.padding = '20px';
+      reportElement.style.backgroundColor = 'white';
+      reportElement.style.fontFamily = 'Arial, sans-serif';
+      reportElement.style.position = 'fixed';
+      reportElement.style.left = '-9999px';
+      reportElement.style.top = '0';
+      reportElement.style.color = '#333';
+      
+      // Add header (matches print layout)
+      const headerDiv = document.createElement('div');
+      headerDiv.className = 'header';
+      headerDiv.innerHTML = `
+        <div style="text-align: center; margin-bottom: 20px;">
+          <h1 style="font-size: 24px; font-weight: bold; color: #333; margin: 0;">
+            Assignment Report
+          </h1>
         </div>
-        
-        ${chartImage ? `
-        <div class="chart-container">
-          <h3>Performance Chart</h3>
-          <img src="${chartImage}" style="max-width: 100%; height: auto;" />
-        </div>
-        ` : ''}
-        
-        <div class="details">
-          <h3>Report Details</h3>
-          <div class="details-grid">
+      `;
+      reportElement.appendChild(headerDiv);
+      
+      // Convert chart to image (if available)
+      if (this.chartContainer && this.chartContainer.nativeElement) {
+        try {
+          const chartElement = this.chartContainer.nativeElement;
+          chartElement.style.visibility = 'visible';
+          chartElement.style.display = 'block';
+          
+          await new Promise(resolve => setTimeout(resolve, 100));
+          
+          const chartCanvas = await html2canvas(chartElement, {
+            scale: 2,
+            backgroundColor: '#ffffff',
+            logging: false,
+            useCORS: true,
+            allowTaint: false,
+            width: chartElement.scrollWidth,
+            height: chartElement.scrollHeight
+          });
+          
+          const chartImage = chartCanvas.toDataURL('image/png');
+          const chartContainerDiv = document.createElement('div');
+          chartContainerDiv.className = 'chart-container';
+          chartContainerDiv.innerHTML = `
+            <div style="margin: 20px 0;">
+              <img src="${chartImage}" style="max-width: 100%; height: auto;" />
+            </div>
+          `;
+          reportElement.appendChild(chartContainerDiv);
+        } catch (chartError) {
+          console.error('Error capturing chart:', chartError);
+          // Continue without chart
+        }
+      }
+      
+      // Add report details (matches print layout)
+      const detailsDiv = document.createElement('div');
+      detailsDiv.className = 'details';
+      detailsDiv.innerHTML = `
+        <div style="margin: 20px 0;">
+          <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 10px; color: #333;">
+            Report Details
+          </h3>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; font-size: 14px;">
             <div><strong>Date Range:</strong> ${this.dateFrom} to ${this.dateTo}</div>
             <div><strong>School:</strong> ${this.getSchoolName()}</div>
             <div><strong>Academic Year:</strong> ${this.getAcademicYearName()}</div>
@@ -761,95 +554,328 @@ async printReportWithChart() {
             <div><strong>Generated On:</strong> ${new Date().toLocaleDateString()}</div>
           </div>
         </div>
-        
-        <div class="summary">
-          <h3>Summary Statistics</h3>
-          <div class="summary-grid">
-            <div class="summary-item">
-              <div style="font-size: 24px; font-weight: bold; color: #3b82f6;">${this.getTotalSuccessful()}</div>
-              <div>Total Successful</div>
+      `;
+      reportElement.appendChild(detailsDiv);
+      
+      // Add summary statistics (similar to your commented HTML)
+      const summaryDiv = document.createElement('div');
+      summaryDiv.innerHTML = `
+        <div style="background: white; padding: 16px; border-radius: 16px; border: 1px solid #BDBDBD; margin: 20px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+          <h3 style="font-size: 18px; font-weight: 600; color: #333; margin-bottom: 16px; text-align: center;">
+            Summary Statistics
+          </h3>
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 16px;">
+            <div style="text-align: center;">
+              <div style="font-size: 24px; font-weight: bold; color: #10B981;">${this.getTotalSuccessful()}</div>
+              <div style="font-size: 14px; color: #6B7280;">Total Successful</div>
             </div>
-            <div class="summary-item">
-              <div style="font-size: 24px; font-weight: bold; color: #f97316;">${this.getTotalFailed()}</div>
-              <div>Total Failed</div>
+            <div style="text-align: center;">
+              <div style="font-size: 24px; font-weight: bold; color: #F97316;">${this.getTotalFailed()}</div>
+              <div style="font-size: 14px; color: #6B7280;">Total Failed</div>
             </div>
-            <div class="summary-item">
-              <div style="font-size: 24px; font-weight: bold; color: #10b981;">${this.getTotalAttendance()}</div>
-              <div>Total Attendance</div>
+            <div style="text-align: center;">
+              <div style="font-size: 24px; font-weight: bold; color: #3B82F6;">${this.getTotalAttendance()}</div>
+              <div style="font-size: 14px; color: #6B7280;">Total Attendance</div>
             </div>
-            <div class="summary-item">
-              <div style="font-size: 24px; font-weight: bold; color: #8b5cf6;">${this.getTotalAssignments()}</div>
-              <div>Total Assignments</div>
+            <div style="text-align: center;">
+              <div style="font-size: 24px; font-weight: bold; color: #8B5CF6;">${this.getTotalAssignments()}</div>
+              <div style="font-size: 14px; color: #6B7280;">Total Assignments</div>
             </div>
           </div>
         </div>
-        
-        <div class="table-container">
-          <h3>Assignment Details</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>Assignment Name</th>
-                <th>Subject</th>
-                <th>Attendance</th>
-                <th>Successful</th>
-                <th>Failed</th>
-                <th>Success Rate</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${this.assignmentReports.map(report => `
-                <tr>
-                  <td>${report.assignmentName}</td>
-                  <td>${report.subjectName}</td>
-                  <td style="text-align: center;">${report.attendanceNumber}</td>
-                  <td style="text-align: center;">${report.numberSuccessful}</td>
-                  <td style="text-align: center;">${report.numberFailed}</td>
-                  <td style="text-align: center;">${report.attendanceNumber > 0 ? ((report.numberSuccessful / report.attendanceNumber) * 100).toFixed(2) + '%' : '0%'}</td>
+      `;
+      reportElement.appendChild(summaryDiv);
+      
+      // Add data table (matches print layout exactly)
+      if (this.assignmentReports.length > 0) {
+        const tableContainer = document.createElement('div');
+        tableContainer.className = 'table-container';
+        tableContainer.innerHTML = `
+          <div style="margin-top: 20px;">
+            <h3 style="font-size: 18px; font-weight: 600; color: #333; margin-bottom: 10px;">
+              Assignment Details
+            </h3>
+            <table style="width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 12px; border: 1px solid #BDBDBD; border-radius: 16px; overflow: hidden;">
+              <thead>
+                <tr style="background-color: #EBEBEB;">
+                  <th style="border: 1px solid #EAECF0; padding: 12px 16px; text-align: left; font-weight: 600; color: #6F6F6F;">Assignment Name</th>
+                  <th style="border: 1px solid #EAECF0; padding: 12px 16px; text-align: left; font-weight: 600; color: #6F6F6F;">Subject</th>
+                  <th style="border: 1px solid #EAECF0; padding: 12px 16px; text-align: left; font-weight: 600; color: #6F6F6F;">Attendance</th>
+                  <th style="border: 1px solid #EAECF0; padding: 12px 16px; text-align: left; font-weight: 600; color: #6F6F6F;">Successful</th>
+                  <th style="border: 1px solid #EAECF0; padding: 12px 16px; text-align: left; font-weight: 600; color: #6F6F6F;">Failed</th>
+                  <th style="border: 1px solid #EAECF0; padding: 12px 16px; text-align: left; font-weight: 600; color: #6F6F6F;">Success Rate</th>
                 </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        </div>
-        
-        <div class="no-print" style="margin-top: 20px; text-align: center;">
-          <button onclick="window.print()" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
-            Print Report
-          </button>
-          <button onclick="window.close()" style="padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer; margin-left: 10px;">
-            Close
-          </button>
-        </div>
-        
-        <script>
-          // Auto-print when window loads
-          window.onload = function() {
-            window.print();
-            
-            // Listen for afterprint event to close the window
-            window.addEventListener('afterprint', function() {
-              setTimeout(function() {
-                window.close();
-              }, 500);
-            });
-          };
-        </script>
-      </body>
-      </html>
-    `;
+              </thead>
+              <tbody>
+                ${this.assignmentReports.map((report, i) => `
+                  <tr style="${i % 2 === 1 ? 'background-color: #F7F7F7;' : 'background-color: white;'}">
+                    <td style="border: 1px solid #EAECF0; padding: 12px 16px; color: #6F6F6F;">${report.assignmentName}</td>
+                    <td style="border: 1px solid #EAECF0; padding: 12px 16px; color: #6F6F6F;">${report.subjectName}</td>
+                    <td style="border: 1px solid #EAECF0; padding: 12px 16px; color: #6F6F6F;">${report.attendanceNumber}</td>
+                    <td style="border: 1px solid #EAECF0; padding: 12px 16px; color: #6F6F6F;">${report.numberSuccessful}</td>
+                    <td style="border: 1px solid #EAECF0; padding: 12px 16px; color: #6F6F6F;">${report.numberFailed}</td>
+                    <td style="border: 1px solid #EAECF0; padding: 12px 16px; color: #6F6F6F;">${report.attendanceNumber > 0 ? ((report.numberSuccessful / report.attendanceNumber) * 100).toFixed(2) + '%' : '0%'}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+        reportElement.appendChild(tableContainer);
+      }
 
-    printWindow.document.write(printContent);
-    printWindow.document.close();
+      // Append to document body
+      document.body.appendChild(reportElement);
 
-  } catch (error) {
-    console.error('Error printing report:', error);
-    Swal.fire('Error', 'Failed to print report', 'error');
-  } finally {
-    this.isExporting = false;
+      // Wait for rendering
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      // Convert to image
+      const reportImage = await html2canvas(reportElement, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        logging: false,
+        useCORS: true,
+        allowTaint: false,
+        width: reportElement.scrollWidth,
+        height: reportElement.scrollHeight
+      });
+      
+      // Clean up
+      if (reportElement.parentNode) {
+        document.body.removeChild(reportElement);
+      }
+      
+      const imgData = reportImage.toDataURL('image/png');
+      
+      // Create PDF in portrait mode (like a standard document)
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      
+      // Calculate image dimensions to fit the page
+      const imgWidth = pdfWidth - 20; // 10mm margins on each side
+      const imgHeight = (reportImage.height * imgWidth) / reportImage.width;
+      
+      // Add image to PDF with centered margins
+      pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+      
+      // Save PDF
+      pdf.save(`Assignment_Report_${new Date().toISOString().slice(0, 10)}.pdf`);
+      
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      Swal.fire('Error', 'Failed to generate PDF. Please try again.', 'error');
+    } finally {
+      this.isExporting = false;
+      
+      // Safety cleanup
+      if (reportElement && reportElement.parentNode === document.body) {
+        document.body.removeChild(reportElement);
+      }
+    }
   }
-}
 
-// Enhanced Excel export with chart summary
+// Enhanced print method that includes the chart
+  async printReportWithChart() {
+    if (this.assignmentReports.length === 0) {
+      Swal.fire('Warning', 'No data to print!', 'warning');
+      return;
+    }
+
+    this.isExporting = true;
+
+    try {
+      // Convert chart to image
+      let chartImage = '';
+      if (this.chartContainer) {
+        const chartCanvas = await html2canvas(this.chartContainer.nativeElement, {
+          scale: 2,
+          backgroundColor: '#ffffff',
+          logging: false
+        });
+        chartImage = chartCanvas.toDataURL('image/png');
+      }
+
+      // Create print-friendly version
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        Swal.fire('Error', 'Please allow popups for printing', 'error');
+        this.isExporting = false;
+        return;
+      }
+
+      // Create print content that matches HTML exactly
+      const printContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Assignment Report</title>
+          <style>
+            body { 
+              font-family: Arial, sans-serif; 
+              margin: 20px; 
+              color: #333;
+              background: white;
+            }
+            .header { 
+              text-align: center; 
+              margin-bottom: 20px; 
+            }
+            .header h1 {
+              font-size: 24px;
+              font-weight: bold;
+              color: #333;
+            }
+            .chart-container { 
+              margin: 20px 0; 
+            }
+            .details { 
+              margin: 20px 0; 
+            }
+            .details h3 {
+              font-size: 18px;
+              font-weight: 600;
+              margin-bottom: 10px;
+            }
+            .details-grid { 
+              display: grid; 
+              grid-template-columns: 1fr 1fr; 
+              gap: 10px; 
+              margin-top: 15px;
+              font-size: 14px;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin: 20px 0;
+              font-size: 12px;
+              border: 1px solid #BDBDBD;
+              border-radius: 16px;
+              overflow: hidden;
+            }
+            th, td {
+              border: 1px solid #EAECF0;
+              padding: 12px 16px;
+              text-align: left;
+            }
+            th {
+              background-color: #EBEBEB;
+              font-weight: 600;
+              color: #6F6F6F;
+            }
+            td {
+              color: #6F6F6F;
+            }
+            tr:nth-child(even) {
+              background-color: #F7F7F7;
+            }
+            tr:nth-child(odd) {
+              background-color: white;
+            }
+            .no-print { 
+              display: none; 
+            }
+            @media print {
+              body { 
+                margin: 0; 
+                padding: 15px; 
+                background: white;
+              }
+              .no-print { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>Assignment Report</h1>
+          </div>
+          
+          ${chartImage ? `
+          <div class="chart-container">
+            <img src="${chartImage}" style="max-width: 100%; height: auto;" />
+          </div>
+          ` : ''}
+          
+          <div class="details">
+            <h3>Report Details</h3>
+            <div class="details-grid">
+              <div><strong>Date Range:</strong> ${this.dateFrom} to ${this.dateTo}</div>
+              <div><strong>School:</strong> ${this.getSchoolName()}</div>
+              <div><strong>Academic Year:</strong> ${this.getAcademicYearName()}</div>
+              <div><strong>Grade:</strong> ${this.getGradeName()}</div>
+              <div><strong>Subject:</strong> ${this.getSubjectName()}</div>
+              <div><strong>Generated On:</strong> ${new Date().toLocaleDateString()}</div>
+            </div>
+          </div>
+          
+          <div class="table-container">
+            <h3>Assignment Details</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Assignment Name</th>
+                  <th>Subject</th>
+                  <th>Attendance</th>
+                  <th>Successful</th>
+                  <th>Failed</th>
+                  <th>Success Rate</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${this.assignmentReports.map((report, i) => `
+                  <tr>
+                    <td>${report.assignmentName}</td>
+                    <td>${report.subjectName}</td>
+                    <td>${report.attendanceNumber}</td>
+                    <td>${report.numberSuccessful}</td>
+                    <td>${report.numberFailed}</td>
+                    <td>${report.attendanceNumber > 0 ? ((report.numberSuccessful / report.attendanceNumber) * 100).toFixed(2) + '%' : '0%'}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+          
+          <div class="no-print" style="margin-top: 20px; text-align: center;">
+            <button onclick="window.print()" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+              Print Report
+            </button>
+            <button onclick="window.close()" style="padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer; margin-left: 10px;">
+              Close
+            </button>
+          </div>
+          
+          <script>
+            // Auto-print when window loads
+            window.onload = function() {
+              setTimeout(() => {
+                window.print();
+              }, 500);
+              
+              // Listen for afterprint event to close the window
+              window.addEventListener('afterprint', function() {
+                setTimeout(function() {
+                  window.close();
+                }, 500);
+              });
+            };
+          </script>
+        </body>
+        </html>
+      `;
+
+      printWindow.document.write(printContent);
+      printWindow.document.close();
+
+    } catch (error) {
+      console.error('Error printing report:', error);
+      Swal.fire('Error', 'Failed to print report', 'error');
+    } finally {
+      this.isExporting = false;
+    }
+  }
+
 async exportExcelWithChartSummary() {
   if (this.reportsForExcel.length === 0) {
     Swal.fire('Warning', 'No data to export!', 'warning');

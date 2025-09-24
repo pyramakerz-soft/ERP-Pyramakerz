@@ -284,19 +284,19 @@ export class LoansReportComponent implements OnInit {
   }
 
   getJobCategoryName(): string {
-    return this.jobCategories.find(jc => jc.id == this.selectedJobCategoryId)?.en_name || 
+    return this.jobCategories.find(jc => jc.id == this.selectedJobCategoryId)?.name || 
            this.jobCategories.find(jc => jc.id == this.selectedJobCategoryId)?.ar_name || 
            'All Job Categories';
   }
 
   getJobName(): string {
-    return this.jobs.find(j => j.id == this.selectedJobId)?.en_name || 
+    return this.jobs.find(j => j.id == this.selectedJobId)?.name || 
            this.jobs.find(j => j.id == this.selectedJobId)?.ar_name || 
            'All Jobs';
   }
 
   getEmployeeName(): string {
-    return this.employees.find(e => e.id == this.selectedEmployeeId)?.en_name || 
+    return this.employees.find(e => e.id == this.selectedEmployeeId)?.employeeEnName || 
            this.employees.find(e => e.id == this.selectedEmployeeId)?.ar_name || 
            'All Employees';
   }
