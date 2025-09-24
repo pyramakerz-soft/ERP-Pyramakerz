@@ -28,7 +28,8 @@ export class MainLayoutComponent {
   menuItems: { label: string; route?: string; icon?: string; subItems?: { label: string; route: string; icon?: string }[] }[] = [];
   menuItemsForEmployee?: PagesWithRoleId[];
   isRtl: boolean = false;
-  subscription!: Subscription;
+  // subscription!: Subscription;
+  private subscriptions = new Subscription();
   User_Data_After_Login = new TokenData("", 0, 0, 0, 0, "", "", "", "", "")
 
   isLanguageInitialized = false
@@ -36,25 +37,36 @@ export class MainLayoutComponent {
     private communicationService: NewTokenService, private translate: TranslateService, private realTimeService: RealTimeNotificationServiceService,
     private realTimeRequestService: RealTimeRequestServiceService, private realTimeChatServiceService: RealTimeChatServiceService) { }
 
-  async ngOnInit() {
+  ngOnInit() {
     const currentDir = document.documentElement.dir === 'rtl' ? 'rtl' : 'ltr';
     this.languageService.setLanguage(currentDir);
     this.isRtl = document.documentElement.dir === 'rtl';
 
-    this.communicationService.action$.subscribe(async (state) => {
-      await this.GetInfo();
-    });
+    // this.communicationService.action$.subscribe((state) => {
+    //   this.GetInfo();
+    // });
 
-    this.realTimeService.startConnection();
-    this.realTimeRequestService.startRequestConnection();
-    this.realTimeChatServiceService.startChatMessageConnection();
+    this.subscriptions.add(
+      this.communicationService.action$.subscribe(() => this.GetInfo())
+    );
 
-    this.subscription = this.languageService.language$.subscribe(async (direction) => {
-      this.isRtl = direction === 'rtl';
-      await this.GetInfo();
-    });
+    this.subscriptions.add(
+      this.languageService.language$.subscribe(direction => {
+        this.isRtl = direction === 'rtl';
+        this.GetInfo();
+      })
+    );
 
-    await this.GetInfo();
+    // this.realTimeService.startConnection();
+    // this.realTimeRequestService.startRequestConnection();
+    // this.realTimeChatServiceService.startChatMessageConnection();
+
+    // this.subscription = this.languageService.language$.subscribe((direction) => {
+    //   this.isRtl = direction === 'rtl';
+    //   this.GetInfo();
+    // });
+
+    this.GetInfo();
   }
 
   ngOnDestroy(): void {
@@ -62,8 +74,8 @@ export class MainLayoutComponent {
     this.realTimeRequestService.stopConnection();
     this.realTimeChatServiceService.stopConnection();
 
-    if (this.subscription) {
-      this.subscription.unsubscribe();
+    if (this.subscriptions) {
+      this.subscriptions.unsubscribe();
     }
   }
 
