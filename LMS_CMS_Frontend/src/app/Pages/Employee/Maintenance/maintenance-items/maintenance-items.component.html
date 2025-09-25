@@ -91,6 +91,7 @@
                     id="englishName"
                     type="text"
                     [(ngModel)]="selectedItem.en_Name"
+                    placeholder="{{ 'Enter' | translate }} {{ 'English Name' | translate }}"
                     (ngModelChange)="onInputValueChange({ field: 'en_Name', value: $event })" />
 
                 <span *ngIf="validationErrors['en_Name']"
@@ -104,6 +105,7 @@
                     class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                     type="text"
                     [(ngModel)]="selectedItem.ar_Name" 
+                    placeholder="{{ 'Enter' | translate }} {{ 'Arabic Name' | translate }}"
                     (ngModelChange)="onInputValueChange({ field: 'ar_Name', value: $event })"/>
 
                 <span *ngIf="validationErrors['ar_Name']"

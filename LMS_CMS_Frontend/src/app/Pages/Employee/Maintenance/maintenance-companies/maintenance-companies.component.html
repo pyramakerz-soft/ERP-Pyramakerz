@@ -6,7 +6,7 @@
 
             <button (click)="openModal()"
                 class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
-                 {{ 'Create' | translate }} {{ 'company' | translate }}
+                {{ 'Create' | translate }} {{ 'company' | translate }}
             </button>
         </div>
     </div>
@@ -17,18 +17,18 @@
             <thead class="bg-[##EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
                 <tr>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ 'ID' | translate }} 
+                        {{ 'ID' | translate }}
                     </th>
                     <th
                         class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
-                         {{ 'Company English Name' | translate }}
+                        {{ 'Company English Name' | translate }}
                     </th>
-                      <th
+                    <th
                         class="py-3 px-4 min-w-[120px] whitespace-nowrap  border border-[#EAECF0] border-t-0 border-l-0">
-                         {{ 'Company Arabic Name' | translate }}
+                        {{ 'Company Arabic Name' | translate }}
                     </th>
                     <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
-                       {{ 'Actions' | translate }}
+                        {{ 'Actions' | translate }}
                     </th>
                 </tr>
             </thead>
@@ -37,34 +37,30 @@
                 <tr *ngIf="TableData.length === 0">
                     <td colspan="4"
                         class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-                    {{ 'No Data Found' | translate }}
+                        {{ 'No Data Found' | translate }}
                     </td>
                 </tr>
 
                 <!-- Data Rows -->
-                <tr 
-                    *ngFor="let row of TableData; let i = index"
+                <tr *ngFor="let row of TableData; let i = index"
                     [ngClass]="{'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1}"
                     class="border-t border-gray-300 text-xs md:text-sm">
-                    <td
-                        class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#30462e]">
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-[#30462e]">
                         {{row.id}}</td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{row.en_Name}}</td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">{{row.ar_Name}}</td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         <div class="flex space-x-4 rtl:space-x-reverse">
-                            <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)"
-                                    (click)="Delete(row.id)">
-                            <i class="fa-regular fa-trash-can"></i>
+                            <button *ngIf="AllowDelete && IsAllowDelete(row.insertedByUserId)" (click)="Delete(row.id)">
+                                <i class="fa-regular fa-trash-can"></i>
                             </button>
-                            <button *ngIf="AllowEdit && IsAllowEdit(row.insertedByUserId)"
-                                    (click)="Edit(row.id)">
-                            <i class="fa-solid fa-pencil"></i>
+                            <button *ngIf="AllowEdit && IsAllowEdit(row.insertedByUserId)" (click)="Edit(row.id)">
+                                <i class="fa-solid fa-pencil"></i>
                             </button>
                             <!-- <button (click)="Edit(row.id)">
                             <i class="fa-solid fa-pencil"></i>
                             </button> -->
-                               
+
                         </div>
                     </td>
                 </tr>
@@ -76,51 +72,47 @@
 
 
 <div id="Add_Modal" class="fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/50 hidden">
-    
+
     <div class="bg-white rounded-2xl p-12 w-[669px] max-h-[90%] overflow-y-auto">
-        <div class="flex justify-between items-center"> 
+        <div class="flex justify-between items-center">
             <h1 class="font-semibold text-2xl leading-9"> {{ 'company' | translate }}</h1>
-            <button (click)="closeModal()" type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
+            <button (click)="closeModal()" type="button"
+                class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
         </div>
-        
-<div class="flex flex-col mt-6 mb-4 bg-[#F7F7F7] rounded-3xl p-4">
+
+        <div class="flex flex-col mt-6 mb-4 bg-[#F7F7F7] rounded-3xl p-4">
             <div class="flex w-full flex-col mb-4">
                 <label class="mb-2 primaryTxt" for="englishName">{{ 'English Name' | translate }}</label>
-                <input *ngIf="selectedCompany"
-                class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                    id="englishName"
-                    type="text"
-                    [(ngModel)]="selectedCompany.en_Name"
-                     (ngModelChange)="onInputValueChange({ field: 'en_Name', value: $event })" />
+                <input *ngIf="selectedCompany" class="rounded-lg border border-solid border-gray-300 px-4 py-3"
+                    id="englishName" type="text" [(ngModel)]="selectedCompany.en_Name"
+                    placeholder="{{ 'Enter' | translate }} {{ 'English Name' | translate }}"
+                    (ngModelChange)="onInputValueChange({ field: 'en_Name', value: $event })" />
 
-                <span *ngIf="validationErrors['en_Name']"
-                    class="text-red-500 ml-3 font-normal">{{ validationErrors['en_Name'] }}</span>
-                </div>
+                <span *ngIf="validationErrors['en_Name']" class="text-red-500 ml-3 font-normal">{{
+                    validationErrors['en_Name'] }}</span>
+            </div>
 
-                <div class="flex w-full flex-col mb-4">
+            <div class="flex w-full flex-col mb-4">
                 <label class="mb-2 primaryTxt" for="arabicName">{{ 'Arabic Name' | translate }}</label>
-                <input *ngIf="selectedCompany"
-                    id="arabicName"
-                    class="rounded-lg border border-solid border-gray-300 px-4 py-3"
-                    type="text"
-                    [(ngModel)]="selectedCompany.ar_Name" 
-                     (ngModelChange)="onInputValueChange({ field: 'ar_Name', value: $event })"/>
+                <input *ngIf="selectedCompany" id="arabicName"
+                    class="rounded-lg border border-solid border-gray-300 px-4 py-3" type="text"
+                    [(ngModel)]="selectedCompany.ar_Name"
+                    placeholder="{{ 'Enter' | translate }} {{ 'Arabic Name' | translate }}"
+                    (ngModelChange)="onInputValueChange({ field: 'ar_Name', value: $event })" />
 
-                <span *ngIf="validationErrors['ar_Name']"
-                     class="text-red-500 ml-3 font-normal">{{ validationErrors['ar_Name'] }}</span>
-                </div>
+                <span *ngIf="validationErrors['ar_Name']" class="text-red-500 ml-3 font-normal">{{
+                    validationErrors['ar_Name'] }}</span>
+            </div>
 
-</div>
+        </div>
 
 
         <div class="flex justify-end">
-            <button
-                [disabled]="isLoading"
-                class="secondaryBg text-white font-medium px-4 py-2 rounded-lg cursor-pointer"
-                (click)="Save()">
+            <button [disabled]="isLoading"
+                class="secondaryBg text-white font-medium px-4 py-2 rounded-lg cursor-pointer" (click)="Save()">
                 <span *ngIf="!isLoading">{{'Save'| translate }}</span>
                 <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
             </button>
         </div>
-    </div> 
-</div> 
+    </div>
+</div>

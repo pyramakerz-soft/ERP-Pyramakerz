@@ -32,7 +32,7 @@ import { GradeService } from '../../../../Services/Employee/LMS/grade.service';
 import { ClassroomService } from '../../../../Services/Employee/LMS/classroom.service';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-bus-student',
@@ -50,7 +50,7 @@ export class BusStudentComponent {
   busStudentData: BusStudent[] = []
   editBusStudent = false
   exception = false
-   isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -64,10 +64,12 @@ export class BusStudentComponent {
 
   selectedSchool: number | null = null;
   selectedGrade: number | null = null;
+  selectedYear: number | null = null;
   selectedClass: number | null = null;
   selectedSection: number | null = null;
 
   filteredGrades: Grade[] = [];
+  filteredYears: AcademicYear[] = [];
   filteredClasses: Classroom[] = [];
   filteredSections: Section[] = [];
   Students: Student[] = [];
@@ -89,24 +91,24 @@ export class BusStudentComponent {
 
   id: number = 0;
 
-  constructor(public busService: BusService, 
-    public busStudentService: BusStudentService, 
-    public account: AccountService, 
-    public activeRoute: ActivatedRoute, 
-    public EditDeleteServ: DeleteEditPermissionService,
+  constructor(public busService: BusService,
+    public busStudentService: BusStudentService,
+    public account: AccountService,
+    public activeRoute: ActivatedRoute,
+    public EditDeleteServ: DeleteEditPermissionService, 
     public menuService: MenuService, 
     public ApiServ: ApiService, 
     public schoolService: SchoolService, 
     private translate: TranslateService,
-    public busCategoryService: BusCategoryService, 
+    public busCategoryService: BusCategoryService,  
     public sectionService: SectionService,
-    public gradeService: GradeService, 
-    public classroomService: ClassroomService, 
-    public semesterService: SemesterService, 
-    public studentService: StudentService, 
-    public router: Router, 
+    public gradeService: GradeService,
+    public classroomService: ClassroomService,
+    public semesterService: SemesterService,
+    public studentService: StudentService,
+    public router: Router,
     public AcademicServ: AcadimicYearService,
-      private languageService: LanguageService, private realTimeService: RealTimeNotificationServiceService) { }
+    private languageService: LanguageService, private realTimeService: RealTimeNotificationServiceService) { }
 
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -134,55 +136,64 @@ export class BusStudentComponent {
     this.GetSchoolsGroupByGradeGroupByClass()
     this.GetBusCategories()
     this.GetSemesters()
-      this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
 
   }
 
-              ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
-    } 
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
 
   GetBusById(busId: number) {
     this.busService.GetbyBusId(busId, this.DomainName).subscribe((data) => {
-      this.bus = data; 
+      this.bus = data;
     });
   }
 
   GetbyId(busStuId: number) {
     this.busStudentService.GetbyId(busStuId, this.DomainName).subscribe((data) => {
       this.id = data.studentID
-      this.busStudent = data; 
-      if(this.busStudent.isException == true){
+      this.busStudent = data;
+      if (this.busStudent.isException == true) {
         this.exception = true
       }
       this.selectedSchool = this.busStudent.schoolID
       this.selectedSection = this.busStudent.sectionID
       this.selectedGrade = this.busStudent.gradeID
-      this.selectedClass = this.busStudent.classID 
-      this.sectionService.GetBySchoolId(this.selectedSchool?this.selectedSchool:0, this.DomainName).subscribe(
+      this.selectedClass = this.busStudent.classID
+      this.selectedYear = this.busStudent.academicYearID
+      this.sectionService.GetBySchoolId(this.selectedSchool ? this.selectedSchool : 0, this.DomainName).subscribe(
         (data) => {
           this.filteredSections = data.filter((section) => this.checkSchool(section))
           this.gradeService.Get(this.DomainName).subscribe(
             (data) => {
               this.filteredGrades = data.filter((grade) => this.checkSection(grade))
-              this.classroomService.Get(this.DomainName).subscribe(
-                (data) => {
-                  this.filteredClasses = data.filter((cls) => this.checkGrade(cls))
-                  this.studentService.GetByClassID(this.selectedClass?this.selectedClass:0, this.DomainName).subscribe((data) => {
-                    this.Students = data
-                  });
-                }
-              )
             }
           )
         }
-      )  
+      )
+      this.AcademicServ.GetBySchoolId(this.selectedSchool ? this.selectedSchool : 0, this.DomainName).subscribe(
+        (data) => {
+          this.filteredYears = data
+        }
+      )
+
+      if (this.selectedGrade && this.selectedYear) {
+        this.classroomService.GetByGradeAndAcYearId(this.selectedGrade, this.selectedYear, this.DomainName).subscribe(
+          (data) => {
+            this.filteredClasses = data
+            this.studentService.GetByClassID(this.selectedClass ? this.selectedClass : 0, this.DomainName).subscribe((data) => {
+              this.Students = data
+            });
+          }
+        )
+      }
     });
   }
 
@@ -190,7 +201,7 @@ export class BusStudentComponent {
     this.busStudentData = []
     this.OriginBusStudent = []
     this.busStudentService.GetbyBusId(busId, this.DomainName).subscribe((data) => {
-      this.busStudentData = data;   
+      this.busStudentData = data;
       this.OriginBusStudent = data;
     });
   }
@@ -258,12 +269,14 @@ export class BusStudentComponent {
     this.selectedGrade = null;
     this.selectedClass = null;
     this.selectedSection = null;
+    this.selectedYear = null;
 
     this.filteredGrades = [];
+    this.filteredYears = [];
     this.filteredSections = [];
     this.filteredClasses = [];
     this.Students = [];
-    this.validationErrors = {}; 
+    this.validationErrors = {};
   }
 
   onIsExceptionChange(event: Event) {
@@ -290,16 +303,23 @@ export class BusStudentComponent {
 
   onSchoolChange() {
     const selectedSchool = this.SchoolGroupByGradeGroupByClass.find((element) => element.id == this.selectedSchool)
-    if (this.selectedSchool)
+    if (this.selectedSchool) {
       this.sectionService.GetBySchoolId(this.selectedSchool, this.DomainName).subscribe(
         (data) => {
           this.filteredSections = data.filter((section) => this.checkSchool(section))
         }
       )
-      
+      this.AcademicServ.GetBySchoolId(this.selectedSchool, this.DomainName).subscribe(
+        (data) => {
+          this.filteredYears = data.filter((year) => this.checkSchool(year))
+        }
+      )
+    }
+
     this.selectedGrade = null;
     this.selectedClass = null;
     this.selectedSection = null;
+    this.selectedYear = null;
     this.filteredClasses = [];
     this.filteredGrades = [];
     this.Students = [];
@@ -329,11 +349,29 @@ export class BusStudentComponent {
   }
 
   onGradeChange() {
-    this.classroomService.Get(this.DomainName).subscribe(
-      (data) => {
-        this.filteredClasses = data.filter((cls) => this.checkGrade(cls))
-      }
-    )
+    this.filteredClasses = []
+    if (this.selectedGrade && this.selectedYear) {
+      this.classroomService.GetByGradeAndAcYearId(this.selectedGrade, this.selectedYear, this.DomainName).subscribe(
+        (data) => {
+          this.filteredClasses = data
+        }
+      )
+    }
+
+    this.selectedClass = null;
+    this.Students = [];
+    this.busStudent.studentID = 0
+  }
+
+  onYearChange() {
+    this.filteredClasses = []
+    if (this.selectedGrade && this.selectedYear) {
+      this.classroomService.GetByGradeAndAcYearId(this.selectedGrade, this.selectedYear, this.DomainName).subscribe(
+        (data) => {
+          this.filteredClasses = data
+        }
+      )
+    }
 
     this.selectedClass = null;
     this.Students = [];
@@ -385,14 +423,14 @@ export class BusStudentComponent {
           }
         }
 
-        if(field == 'studentID'){
+        if (field == 'studentID') {
           const stu = this.OriginBusStudent.filter(s => s.studentID == this.busStudent.studentID && s.semseterID == this.busStudent.semseterID && s.id != this.busStudent.id)
-           
+
           if (stu.length != 0) {
             this.validationErrors[field] = `This student already exists in this bus for this semester.`
             isValid = false;
           }
-        } 
+        }
       }
     }
     return isValid;
@@ -420,16 +458,16 @@ export class BusStudentComponent {
     }
   }
 
-  save(){
+  save() {
     this.isLoading = true;
     if (this.editBusStudent == false) {
       this.busStudentService.Add(this.busStudent, this.DomainName).subscribe((data) => {
         this.closeModal()
-        this.isLoading = false; 
+        this.isLoading = false;
         this.GetStudentsByBusId(this.busId);
       },
         error => {
-          this.isLoading = false;  
+          this.isLoading = false;
           Swal.fire({
             icon: 'error',
             text: error.error,
@@ -440,11 +478,11 @@ export class BusStudentComponent {
     } else {
       this.busStudentService.Edit(this.busStudent, this.DomainName).subscribe((data) => {
         this.closeModal()
-        this.isLoading = false; 
+        this.isLoading = false;
         this.GetStudentsByBusId(this.busId);
       },
         error => {
-          this.isLoading = false;  
+          this.isLoading = false;
           Swal.fire({
             icon: 'error',
             text: error.error,
@@ -456,7 +494,7 @@ export class BusStudentComponent {
     }
   }
 
-  SaveBusStudent() {  
+  SaveBusStudent() {
     this.busStudent.busID = this.busId
     if (this.editBusStudent == true) {
       this.busStudent.studentID = this.id
@@ -466,34 +504,34 @@ export class BusStudentComponent {
       this.busStudent.exceptionFromDate = null
       this.busStudent.exceptionToDate = null
     }
-     
-    if (this.isFormValid()) { 
-      if(this.busStudent.isException == true){ 
-        let semesteer = this.Semesters.filter(s => s.id == this.busStudent.semseterID) 
 
-        const fromDate = new Date(this.busStudent.exceptionFromDate?this.busStudent.exceptionFromDate:0);
-        const toDate = new Date(this.busStudent.exceptionToDate?this.busStudent.exceptionToDate:0);
+    if (this.isFormValid()) {
+      if (this.busStudent.isException == true) {
+        let semesteer = this.Semesters.filter(s => s.id == this.busStudent.semseterID)
+
+        const fromDate = new Date(this.busStudent.exceptionFromDate ? this.busStudent.exceptionFromDate : 0);
+        const toDate = new Date(this.busStudent.exceptionToDate ? this.busStudent.exceptionToDate : 0);
         const semesterStart = new Date(semesteer[0].dateFrom);
         const semesterEnd = new Date(semesteer[0].dateTo);
 
-        if (fromDate > toDate) { 
+        if (fromDate > toDate) {
           Swal.fire({
             title: 'Date From can not be after Date To',
             icon: 'warning',
             confirmButtonColor: '#089B41',
             confirmButtonText: 'Ok',
           });
-        }else if (fromDate < semesterStart || fromDate > semesterEnd || toDate < semesterStart || toDate > semesterEnd) { 
+        } else if (fromDate < semesterStart || fromDate > semesterEnd || toDate < semesterStart || toDate > semesterEnd) {
           Swal.fire({
             title: `Exception Date must be within the Semester Year Range from ${semesteer[0].dateFrom} to ${semesteer[0].dateTo}`,
             icon: 'warning',
             confirmButtonColor: '#089B41',
             confirmButtonText: 'Ok',
           });
-        } else{
+        } else {
           this.save()
         }
-      }else{
+      } else {
         this.save()
       }
     }
@@ -540,7 +578,7 @@ export class BusStudentComponent {
     this.getBusesForTransfer()
 
     this.busStudentService.GetbyId(busStudentId, this.DomainName).subscribe((data) => {
-      this.busStudentTransfer = data 
+      this.busStudentTransfer = data
     });
   }
 
@@ -557,20 +595,20 @@ export class BusStudentComponent {
     this.isTransfer = true
   }
 
-  SaveTransfer() { 
+  SaveTransfer() {
     this.busStudentService.Edit(this.busStudentTransfer, this.DomainName).subscribe((data) => {
       this.closeTransferBusStudentModal()
       this.GetStudentsByBusId(this.busId)
     },
-    error => { 
-      Swal.fire({
-        icon: 'error',
-        text: error.error,
-        confirmButtonText: 'Okay',
-        customClass: { confirmButton: 'secondaryBg' },
-      });
-    }
-  );
+      error => {
+        Swal.fire({
+          icon: 'error',
+          text: error.error,
+          confirmButtonText: 'Okay',
+          customClass: { confirmButton: 'secondaryBg' },
+        });
+      }
+    );
   }
 
   GetAllAcademicYears() {
@@ -580,7 +618,7 @@ export class BusStudentComponent {
   }
 
   async getDataByAcademicYear(event: Event) {
-    const selectedValue: string = ((event.target as HTMLSelectElement).value); 
+    const selectedValue: string = ((event.target as HTMLSelectElement).value);
     this.busStudentData = this.OriginBusStudent
     if (selectedValue != "default") {
       this.busStudentData = this.OriginBusStudent.filter(t => t.studentAcademicYear == selectedValue)
