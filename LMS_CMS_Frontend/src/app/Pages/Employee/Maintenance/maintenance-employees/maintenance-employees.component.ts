@@ -34,7 +34,7 @@ export class MaintenanceEmployeesComponent {
   TableData: any[] = [];       
   employees: MaintenanceEmployees[] = []; 
   selectedEmployeeId: number=0;
-  keysArray: string[] = ['id', 'en_Name', 'ar_Name'];
+  keysArray: string[] = ['id', 'en_Name'];
   key: string= "id";
   DomainName: string = '';
   EditDeleteServ: any;

@@ -3,7 +3,7 @@ import { DirectMark } from '../../../../Models/LMS/direct-mark';
 import { DirectMarkService } from '../../../../Services/Employee/LMS/direct-mark.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import { School } from '../../../../Models/school';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -98,6 +98,7 @@ export class DirectMarkComponent {
     public classroomSubjectService: ClassroomSubjectService,
     public DirectMarkServ: DirectMarkService,
     public router: Router,
+    private translate: TranslateService,
     private languageService: LanguageService,
     private realTimeService: RealTimeNotificationServiceService
   ) { }
@@ -505,13 +506,13 @@ export class DirectMarkComponent {
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Direct Mark?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذه') + " " +this.translate.instant('Direct Mark') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.DirectMarkServ.Delete(id, this.DomainName).subscribe((D) => {

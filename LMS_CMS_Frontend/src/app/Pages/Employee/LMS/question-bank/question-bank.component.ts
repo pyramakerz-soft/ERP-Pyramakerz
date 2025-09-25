@@ -29,7 +29,7 @@ import { QuillEditorComponent, QuillModule } from 'ngx-quill';
 import { FormsModule } from '@angular/forms';
 import { QuestionBankOption } from '../../../../Models/LMS/question-bank-option';
 import { SubBankQuestion } from '../../../../Models/LMS/sub-bank-question';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { School } from '../../../../Models/school';
@@ -145,6 +145,7 @@ export class QuestionBankComponent {
     public DokLevelServ: DokLevelService,
     public QuestionBankTypeServ: QuestionBankTypeService,
     private languageService: LanguageService,
+    private translate: TranslateService,
     private realTimeService: RealTimeNotificationServiceService,
   ) { }
 
@@ -327,13 +328,13 @@ export class QuestionBankComponent {
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Question Bank?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('Question Bank') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.QuestionBankServ.Delete(id, this.DomainName).subscribe((D) => {

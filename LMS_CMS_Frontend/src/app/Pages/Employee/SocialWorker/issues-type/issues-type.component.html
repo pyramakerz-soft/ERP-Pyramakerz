@@ -1,11 +1,11 @@
 <div class="">
     <div class="flex justify-between items-center">
-        <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ 'Issue Type' | translate }}</h1>
+        <h1 class="primaryTxt font-semibold text-2xl leading-9">{{ 'Issue Types' | translate }}</h1>
         <div class="flex justify-between items-center">
             <app-search [keysArray]="keysArray" (searchEvent)="onSearchEvent($event)"></app-search>
             <button (click)="Create()"
                 class="rounded-lg secondaryBorder secondaryTxt px-4 py-3 flex items-center justify-center gap-2">
-                 {{ 'Create' | translate }} {{ 'Issue Type' | translate }}
+                 {{ 'Create' | translate }} {{ 'type' | translate }}
             </button>
         </div>
     </div>
@@ -70,8 +70,8 @@
     class="fixed top-0 left-0 right-0 z-50 flex justify-center items-center w-full h-full bg-black/50">
     <div class="bg-white rounded-2xl p-12 w-1/2 max-h-[95%] overflow-y-auto">
         <div class="flex justify-between items-center">
-            <h1 *ngIf="mode == 'Create'" class="font-semibold text-2xl leading-9">{{ 'Create' | translate }} {{ 'Issue Type' | translate }}</h1>
-            <h1 *ngIf="mode == 'Edit'" class="font-semibold text-2xl leading-9">{{ 'Edit' | translate }} {{ 'Issue Type' | translate }}</h1>
+            <h1 *ngIf="mode == 'Create'" class="font-semibold text-2xl leading-9">{{ 'Create' | translate }} {{ 'type' | translate }}</h1>
+            <h1 *ngIf="mode == 'Edit'" class="font-semibold text-2xl leading-9">{{ 'Edit' | translate }} {{ 'Type' | translate }}</h1>
             <button (click)="closeModal()" type="button"
                 class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg">X</button>
         </div>

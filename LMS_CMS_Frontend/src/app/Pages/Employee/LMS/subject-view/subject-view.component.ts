@@ -17,7 +17,7 @@ import { SubjectResourceService } from '../../../../Services/Employee/LMS/subjec
 import Swal from 'sweetalert2';
 import { FormsModule } from '@angular/forms';
 import { WeightTypeService } from '../../../../Services/Employee/LMS/weight-type.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
@@ -55,7 +55,7 @@ export class SubjectViewComponent {
   isWeightPart: boolean = true
 
   constructor(private languageService: LanguageService, public subjectService: SubjectService, public activeRoute: ActivatedRoute, public router: Router, public EditDeleteServ: DeleteEditPermissionService,
-    public account: AccountService, private menuService: MenuService, public dialog: MatDialog, public subjectWeightService: SubjectWeightService,
+    public account: AccountService, private menuService: MenuService, public dialog: MatDialog, public subjectWeightService: SubjectWeightService,private translate: TranslateService,
     public subjectResourceService: SubjectResourceService, private realTimeService: RealTimeNotificationServiceService, public weightTypeService: WeightTypeService) { }
 
   async ngOnInit() {
@@ -213,13 +213,13 @@ export class SubjectViewComponent {
 
   DeleteSubjectWeight(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Subject Weight?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('Weight') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel'
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.subjectWeightService.Delete(id, this.DomainName).subscribe(
@@ -233,14 +233,14 @@ export class SubjectViewComponent {
 
   DeleteSubjecResource(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Subject Resource?',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#089B41',
-      cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel'
-    }).then((result) => {
+        title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('Resource') + this.translate.instant('?'),
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#089B41',
+        cancelButtonColor: '#17253E',
+        confirmButtonText: this.translate.instant('Delete'),
+        cancelButtonText: this.translate.instant('Cancel'),
+      }).then((result) => {
       if (result.isConfirmed) {
         this.subjectResourceService.Delete(id, this.DomainName).subscribe(
           (data: any) => {

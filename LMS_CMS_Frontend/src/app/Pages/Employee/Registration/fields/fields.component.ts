@@ -18,7 +18,7 @@ import { FieldTypeService } from '../../../../Services/Employee/Registration/fie
 import { FieldAddEdit } from '../../../../Models/Registration/field-add-edit';
 import { firstValueFrom } from 'rxjs';
 import { SearchComponent } from '../../../../Component/search/search.component';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
@@ -76,6 +76,7 @@ export class FieldsComponent {
     private menuService: MenuService,
     public EditDeleteServ: DeleteEditPermissionService,
     private router: Router,
+    private translate: TranslateService,
     public CategoryServ: RegistrationCategoryService,
     public fieldServ: FieldsService,
     public fieldTypeServ: FieldTypeService,
@@ -153,13 +154,13 @@ export class FieldsComponent {
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Field?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " "  +this.translate.instant('Field') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.fieldServ.Delete(id, this.DomainName).subscribe((data: any) => {

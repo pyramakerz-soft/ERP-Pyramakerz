@@ -26,10 +26,10 @@ import { ClassroomSubjectService } from '../../../../Services/Employee/LMS/class
 import { SearchStudentComponent } from '../../../../Component/Employee/search-student/search-student.component';
 import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-remedial-classroom',
@@ -52,7 +52,7 @@ export class RemedialClassroomComponent {
   path: string = '';
   key: string = 'id';
   value: any = '';
-  keysArray: string[] = ['id', 'name' ,'numberOfSession' , 'insertedAt' ,'schoolName' ,'gradeName' ,"subjectEnglishName" ,'teacherEnName'];
+  keysArray: string[] = ['id', 'name', 'numberOfSession', 'insertedAt', 'schoolName', 'gradeName', "subjectEnglishName", 'teacherEnName'];
 
   TableData: RemedialClassroom[] = [];
   schools: School[] = [];
@@ -71,7 +71,7 @@ export class RemedialClassroomComponent {
   isModalOpen: boolean = false;
   hiddenInputs: string[] = [];
   hiddenColumns: string[] = ['Actions'];
-   isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   constructor(
     private router: Router,
@@ -89,8 +89,9 @@ export class RemedialClassroomComponent {
     public EmployeeServ: EmployeeService,
     public ClassroomSubjectServ: ClassroomSubjectService,
     private cdRef: ChangeDetectorRef,
-    private realTimeService: RealTimeNotificationServiceService,    
+    private realTimeService: RealTimeNotificationServiceService,
     private languageService: LanguageService,
+    private translate: TranslateService,
   ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
@@ -110,17 +111,17 @@ export class RemedialClassroomComponent {
       }
     });
     this.GetAllSchools();
-          this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
-      ngOnDestroy(): void {
-    this.realTimeService.stopConnection(); 
-     if (this.subscription) {
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
       this.subscription.unsubscribe();
     }
-  } 
+  }
 
 
 
@@ -278,13 +279,13 @@ export class RemedialClassroomComponent {
 
   delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Remedial Classroom?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('the') + this.translate.instant('Remedial Classroom') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.remedialClassroomServ.Delete(id, this.DomainName).subscribe({
@@ -316,7 +317,7 @@ export class RemedialClassroomComponent {
 
   closeModal() {
     this.remedialClassroom = new RemedialClassroom();
-    this.validationErrors={}
+    this.validationErrors = {}
     document.getElementById('Add_Modal')?.classList.remove('flex');
     document.getElementById('Add_Modal')?.classList.add('hidden');
     this.isModalOpen = false;
@@ -427,7 +428,7 @@ export class RemedialClassroomComponent {
     this.openModal()
   }
 
-  Create(){
+  Create() {
     this.mode = "Create"
     this.GetAllTeachers()
     this.openModal()

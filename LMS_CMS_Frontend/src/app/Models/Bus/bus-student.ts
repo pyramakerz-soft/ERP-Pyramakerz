@@ -23,7 +23,7 @@ export class BusStudent {
         public gradeName: string | null = null,
         public sectionID: number | null = null,
         public sectionName: string | null = null,
-        public studentAcademicYear: string | null = null,
-
+        public academicYearID: number | null = null,
+        public studentAcademicYear: string | null = null, 
     ) {}
 }
