@@ -26,6 +26,18 @@ export class PermissionGroupArchivingItemComponent {
       archiving.allow_Delete_For_Others = true;
     }
 
+    if(type == 'allowDeleteForOthers'){
+      if(archiving.allow_Delete_For_Others){
+        archiving.allow_Delete = true;
+      }
+    }
+
+    if(type == 'allowDelete'){
+      if(!archiving.allow_Delete){
+        archiving.allow_Delete_For_Others = false;
+      }
+    }
+
     // 🔽 helper function to emit event
     const emitSelection = (node: ArchivingTree) => {
       const selectedPermission: PermissionGroupDetails = {
