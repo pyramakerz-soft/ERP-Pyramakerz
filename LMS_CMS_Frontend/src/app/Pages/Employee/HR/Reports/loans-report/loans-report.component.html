@@ -87,30 +87,33 @@
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Employee ID' | translate }}
                 </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                <!-- tmm -->
+                <!-- <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Employee Name' | translate }}
-                </th>
+                </th> -->
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Total Amount' | translate }}
                 </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                <!-- tmm -->
+                <!-- <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Loan ID' | translate }}
-                </th>
+                </th> -->
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Loan Date' | translate }}
-                </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                </th> 
+                <!-- tmm -->
+                <!-- <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Deduction Start' | translate }}
-                </th>
+                </th> -->
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Loan Amount' | translate }}
                 </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                <!-- <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Number of Deductions' | translate }}
-                </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                </th> -->
+                <!-- <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Safe Name' | translate }}
-                </th>
+                </th> -->
                 <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
                     {{ 'Notes' | translate }}
                 </th>
@@ -130,15 +133,15 @@
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ employeeLoan.employeeId }}
                     </td>
-                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                    <!-- <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ employeeLoan.employeeEnName || employeeLoan.employeeArName || 'Unknown' }}
-                    </td>
+                    </td> -->
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ employeeLoan.totalAmount }}
                     </td>
-                    <td colspan="7" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-center">
+                    <!-- <td colspan="7" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-center">
                         {{ 'No loans found' | translate }}
-                    </td>
+                    </td> -->
                 </tr>
                 
                 <ng-container *ngFor="let loan of employeeLoan.loans; let j = index">
@@ -147,30 +150,30 @@
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0" *ngIf="j === 0" [attr.rowspan]="getLoanCount(employeeLoan)">
                             {{ employeeLoan.employeeId }}
                         </td>
-                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0" *ngIf="j === 0" [attr.rowspan]="getLoanCount(employeeLoan)">
+                        <!-- <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0" *ngIf="j === 0" [attr.rowspan]="getLoanCount(employeeLoan)">
                             {{ employeeLoan.employeeEnName || employeeLoan.employeeArName || 'Unknown' }}
-                        </td>
+                        </td> -->
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0" *ngIf="j === 0" [attr.rowspan]="getLoanCount(employeeLoan)">
                             {{ employeeLoan.totalAmount }}
                         </td>
-                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        <!-- <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             {{ loan.id }}
-                        </td>
+                        </td> -->
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             {{ loan.date | date:'mediumDate' }}
                         </td>
-                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        <!-- <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             {{ loan.deductionStartMonth | date:'mediumDate' }}
-                        </td>
+                        </td> -->
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             {{ loan.amount }}
                         </td>
-                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        <!-- <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             {{ loan.numberOfDeduction }}
                         </td>
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             {{ loan.saveName }}
-                        </td>
+                        </td> -->
                         <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                             {{ loan.notes || '-' }}
                         </td>
@@ -194,17 +197,20 @@
     ]"
             [tableHeaders]="[
                 'Employee ID', 
-                'Employee Name', 
                 'Total Amount', 
-                'Loan ID', 
                 'Loan Date', 
-                'Deduction Start', 
                 'Loan Amount', 
-                'Number of Deductions', 
-                'Safe Name', 
                 'Notes'
             ]"
             [tableData]="reportsForExport" #pdfComponentRef>
         </app-pdf-print>
     </div>
 </div>
+
+<!--
+'Employee Name', 
+'Loan ID', 
+'Deduction Start', 
+'Number of Deductions', 
+'Safe Name', 
+ -->

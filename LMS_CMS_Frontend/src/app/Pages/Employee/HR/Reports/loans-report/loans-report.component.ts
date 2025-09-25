@@ -201,33 +201,22 @@ export class LoansReportComponent implements OnInit {
       console.error('Error loading loans reports:', error);
       this.loansReports = [];
       this.showTable = true;
-      // Swal.fire({
-      //   title: 'Error',
-      //   text: 'Failed to load loans reports',
-      //   icon: 'error',
-      //   confirmButtonText: 'OK',
-      // });
     } finally {
       this.isLoading = false;
     }
   }
 
   private prepareExportData(): void {
-    // For PDF (object format) - Flatten the data for the table
+    // For PDF (object format) - Only include visible columns
     this.reportsForExport = [];
     this.loansReports.forEach(employeeLoan => {
       if (employeeLoan.loans && employeeLoan.loans.length > 0) {
         employeeLoan.loans.forEach((loan: any) => {
           this.reportsForExport.push({
             'Employee ID': employeeLoan.employeeId,
-            'Employee Name': employeeLoan.employeeEnName || employeeLoan.employeeArName || 'Unknown',
             'Total Amount': employeeLoan.totalAmount,
-            'Loan ID': loan.id,
             'Loan Date': new Date(loan.date).toLocaleDateString(),
-            'Deduction Start': new Date(loan.deductionStartMonth).toLocaleDateString(),
             'Loan Amount': loan.amount,
-            'Number of Deductions': loan.numberOfDeduction,
-            'Safe Name': loan.saveName,
             'Notes': loan.notes || '-'
           });
         });
@@ -235,46 +224,31 @@ export class LoansReportComponent implements OnInit {
         // If no loans, still show employee summary
         this.reportsForExport.push({
           'Employee ID': employeeLoan.employeeId,
-          'Employee Name': employeeLoan.employeeEnName || employeeLoan.employeeArName || 'Unknown',
           'Total Amount': employeeLoan.totalAmount,
-          'Loan ID': '-',
           'Loan Date': '-',
-          'Deduction Start': '-',
           'Loan Amount': '-',
-          'Number of Deductions': '-',
-          'Safe Name': '-',
           'Notes': '-'
         });
       }
     });
 
-    // For Excel (array format)
+    // For Excel (array format) - Only include visible columns
     this.reportsForExcel = [];
     this.loansReports.forEach(employeeLoan => {
       if (employeeLoan.loans && employeeLoan.loans.length > 0) {
         employeeLoan.loans.forEach((loan: any) => {
           this.reportsForExcel.push([
             employeeLoan.employeeId,
-            employeeLoan.employeeEnName || employeeLoan.employeeArName || 'Unknown',
             employeeLoan.totalAmount,
-            loan.id,
             new Date(loan.date).toLocaleDateString(),
-            new Date(loan.deductionStartMonth).toLocaleDateString(),
             loan.amount,
-            loan.numberOfDeduction,
-            loan.saveName,
             loan.notes || '-'
           ]);
         });
       } else {
         this.reportsForExcel.push([
           employeeLoan.employeeId,
-          employeeLoan.employeeEnName || employeeLoan.employeeArName || 'Unknown',
           employeeLoan.totalAmount,
-          '-',
-          '-',
-          '-',
-          '-',
           '-',
           '-',
           '-'
@@ -296,7 +270,7 @@ export class LoansReportComponent implements OnInit {
   }
 
   getEmployeeName(): string {
-    return this.employees.find(e => e.id == this.selectedEmployeeId)?.employeeEnName || 
+    return this.employees.find(e => e.id == this.selectedEmployeeId)?.en_name || 
            this.employees.find(e => e.id == this.selectedEmployeeId)?.ar_name || 
            'All Employees';
   }
@@ -405,14 +379,9 @@ export class LoansReportComponent implements OnInit {
             title: 'Loans Report Data',
             headers: [
               'Employee ID', 
-              'Employee Name', 
               'Total Amount', 
-              'Loan ID', 
               'Loan Date', 
-              'Deduction Start', 
               'Loan Amount', 
-              'Number of Deductions', 
-              'Safe Name', 
               'Notes'
             ],
             data: this.reportsForExcel
@@ -428,12 +397,10 @@ export class LoansReportComponent implements OnInit {
     }
   }
 
-  // Helper method to check if employee has loans
   hasLoans(employeeLoan: any): boolean {
     return employeeLoan.loans && employeeLoan.loans.length > 0;
   }
 
-  // Helper method to get loan count
   getLoanCount(employeeLoan: any): number {
     return employeeLoan.loans ? employeeLoan.loans.length : 0;
   }
