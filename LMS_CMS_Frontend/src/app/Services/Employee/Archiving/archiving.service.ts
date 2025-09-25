@@ -14,17 +14,17 @@ export class ArchivingService {
     this.baseUrl = ApiServ.BaseUrl
   } 
 
-  // Get(DomainName:string) {
-  //   if (DomainName != null) {
-  //     this.header = DomainName
-  //   }
-  //   const token = localStorage.getItem("current_token");
-  //   const headers = new HttpHeaders()
-  //     .set('domain-name', this.header)
-  //     .set('Authorization', `Bearer ${token}`)
-  //     .set('Content-Type', 'application/json');
-  //     return this.http.get<ArchivingTree[]>(`${this.baseUrl}/ArchivingTree`, { headers });
-  // }
+  Get(DomainName:string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('domain-name', this.header)
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+      return this.http.get<ArchivingTree[]>(`${this.baseUrl}/ArchivingTree`, { headers });
+  }
 
   GetAllPerUser(DomainName:string) {
     if (DomainName != null) {
