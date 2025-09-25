@@ -180,8 +180,7 @@ async loadMaintenance(): Promise<void> {
 
     this.applySearchFilter();
   } catch (error) {
-    console.error('Error loading maintenance data:', error);
-    Swal.fire('Error', 'Failed to load maintenance records', 'error');
+     
   }
 }
 

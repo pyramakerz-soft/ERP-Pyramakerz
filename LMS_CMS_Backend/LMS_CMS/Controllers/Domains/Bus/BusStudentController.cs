@@ -234,6 +234,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Bus
 
             if (studentGrade != null)
             {
+                busStudentDTO.AcademicYearID = studentGrade.AcademicYearID;
                 busStudentDTO.GradeID = studentGrade.GradeID;
                 var grade = Unit_Of_Work.grade_Repository.Select_By_Id(busStudentDTO.GradeID);
                 busStudentDTO.GradeName = grade.Name;
