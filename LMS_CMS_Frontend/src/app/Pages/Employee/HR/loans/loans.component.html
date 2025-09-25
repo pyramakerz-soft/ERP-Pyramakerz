@@ -147,9 +147,19 @@
                 </label>
                 <input id="deductionStartMonth" type="month"
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
-                    placeholder="{{ 'Enter Deduction Start Month' | translate }}" [(ngModel)]="displayMonth" />
+                    placeholder="{{ 'Enter Deduction Start Month' | translate }}" [(ngModel)]="displayStartMonth" />
                 <span *ngIf="validationErrors['deductionStartMonth']"
                     class="text-red-500 ml-3 font-normal">{{validationErrors['deductionStartMonth']}}</span>
+            </div>
+
+            <div class="flex flex-col mb-4 w-[49%]">
+                <label for="dedu" class="mb-2 primaryTxt"> {{ 'Deduction End Month' | translate }}
+                </label>
+                <input id="deductionEndMonth" type="month"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" readonly 
+                    placeholder="{{ 'Enter Deduction End Month' | translate }}" [(ngModel)]="displayEndMonth" />
+                <span *ngIf="validationErrors['deductionEndMonth']"
+                    class="text-red-500 ml-3 font-normal">{{validationErrors['deductionEndMonth']}}</span>
             </div>
 
             <div class="flex flex-col mb-4 w-[49%]">
@@ -157,7 +167,7 @@
                 <input id="numberOfDeduction" type="number"
                     class="rounded-lg border border-solid border-gray-300 px-4 py-3"
                     [(ngModel)]="loan.numberOfDeduction" (input)="validateNumber($event,'numberOfDeduction')"
-                    (ngModelChange)="onInputValueChange({ field: 'numberOfDeduction', value: $event })" min="1"
+                    (ngModelChange)="onInputValueChange({ field: 'numberOfDeduction', value: $event }); onNumberOfDeductionChange()" min="1"
                     step="1" />
                 <span *ngIf="validationErrors['numberOfDeduction']"
                     class="text-red-500 ml-3 font-normal">{{validationErrors['numberOfDeduction']}}</span>

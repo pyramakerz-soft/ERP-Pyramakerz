@@ -265,6 +265,9 @@ namespace LMS_CMS_DAL.Models.Domains
         public DbSet<BankEmployee> BankEmployee { get; set; }
         public DbSet<SafeEmployee> SafeEmployee { get; set; }
         public DbSet<RefreshTokens> RefreshTokens { get; set; }
+        public DbSet<DayStatus> DayStatus { get; set; }
+        public DbSet<MonthlyAttendance> MonthlyAttendance { get; set; }
+        public DbSet<SalaryHistory> SalaryHistory { get; set; }
 
 
         public LMS_CMS_Context(DbContextOptions<LMS_CMS_Context> options)
@@ -448,6 +451,10 @@ namespace LMS_CMS_DAL.Models.Domains
                 .ValueGeneratedNever();
 
             modelBuilder.Entity<SalaryConfigration>()
+                .Property(p => p.ID)
+                .ValueGeneratedNever();
+
+            modelBuilder.Entity<DayStatus>()
                 .Property(p => p.ID)
                 .ValueGeneratedNever();
 
@@ -2378,6 +2385,25 @@ namespace LMS_CMS_DAL.Models.Domains
                 .OnDelete(DeleteBehavior.Restrict);
 
 
+            modelBuilder.Entity<MonthlyAttendance>()
+                .HasOne(m => m.Employee)
+                .WithMany(m => m.MonthlyAttendance)
+                .HasForeignKey(m => m.EmployeeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MonthlyAttendance>()
+                .HasOne(m => m.DayStatus)
+                .WithMany(m => m.MonthlyAttendance)
+                .HasForeignKey(m => m.DayStatusId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<SalaryHistory>()
+                .HasOne(m => m.Employee)
+                .WithMany(m => m.SalaryHistory)
+                .HasForeignKey(m => m.EmployeeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
             ///////////////////////// Exception: /////////////////////////
             modelBuilder.Entity<Bus>()
                 .HasOne(b => b.DeletedByEmployee)
@@ -2555,6 +2581,18 @@ namespace LMS_CMS_DAL.Models.Domains
                 .OnDelete(DeleteBehavior.Restrict);
             
             modelBuilder.Entity<SafeEmployee>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MonthlyAttendance>()
+                .HasOne(v => v.DeletedByEmployee)
+                .WithMany()
+                .HasForeignKey(v => v.DeletedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<SalaryHistory>()
                 .HasOne(v => v.DeletedByEmployee)
                 .WithMany()
                 .HasForeignKey(v => v.DeletedByUserId)

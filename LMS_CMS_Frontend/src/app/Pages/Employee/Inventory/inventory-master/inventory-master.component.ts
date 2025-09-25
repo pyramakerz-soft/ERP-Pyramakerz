@@ -15,7 +15,7 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { InventoryFlag } from '../../../../Models/Inventory/inventory-flag';
 import { InventoryMasterService } from '../../../../Services/Employee/Inventory/inventory-master.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
@@ -68,6 +68,7 @@ export class InventoryMasterComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public salesServ: InventoryMasterService,
+    private translate: TranslateService,
     private languageService: LanguageService,
     private realTimeService: RealTimeNotificationServiceService
   ) { }
@@ -96,15 +97,12 @@ export class InventoryMasterComponent {
     this.isRtl = document.documentElement.dir === 'rtl';    
   }
 
-
-
  ngOnDestroy(): void {
       this.realTimeService.stopConnection(); 
        if (this.subscription) {
         this.subscription.unsubscribe();
       }
   }
-
 
   Create() {
     this.mode = 'Create';
@@ -113,13 +111,13 @@ export class InventoryMasterComponent {
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Invoice?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذه') + " " +this.translate.instant('Invoice') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.salesServ.Delete(id, this.DomainName).subscribe((D) => {
