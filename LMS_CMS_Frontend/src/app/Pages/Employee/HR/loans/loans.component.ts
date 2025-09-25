@@ -28,11 +28,21 @@ import { SafeEmployee } from '../../../../Models/Accounting/safe-employee';
   standalone: true,
   imports: [FormsModule, CommonModule, SearchComponent, TranslateModule],
   templateUrl: './loans.component.html',
-  styleUrl: './loans.component.css'
+  styleUrl: './loans.component.css',
 })
 export class LoansComponent {
-
-  User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
+  User_Data_After_Login: TokenData = new TokenData(
+    '',
+    0,
+    0,
+    0,
+    0,
+    '',
+    '',
+    '',
+    '',
+    ''
+  );
 
   AllowEdit: boolean = false;
   AllowDelete: boolean = false;
@@ -59,10 +69,10 @@ export class LoansComponent {
 
   employees: Employee[] = [];
   safes: SafeEmployee[] = [];
-  CurrentPage: number = 1
-  PageSize: number = 10
-  TotalPages: number = 1
-  TotalRecords: number = 0
+  CurrentPage: number = 1;
+  PageSize: number = 10;
+  TotalPages: number = 1;
+  TotalRecords: number = 0;
   isDeleting: boolean = false;
 
   constructor(
@@ -78,8 +88,8 @@ export class LoansComponent {
     public LoansServ: LoansService,
     public SafeEmployeeServ: SafeEmployeeService,
     public EmployeeServ: EmployeeService,
-    private realTimeService: RealTimeNotificationServiceService,
-  ) { }
+    private realTimeService: RealTimeNotificationServiceService
+  ) {}
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
@@ -98,11 +108,13 @@ export class LoansComponent {
       }
     });
 
-    this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize)
+    this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
 
-    this.subscription = this.languageService.language$.subscribe(direction => {
-      this.isRtl = direction === 'rtl';
-    });
+    this.subscription = this.languageService.language$.subscribe(
+      (direction) => {
+        this.isRtl = direction === 'rtl';
+      }
+    );
     this.isRtl = document.documentElement.dir === 'rtl';
   }
   ngOnDestroy(): void {
@@ -112,39 +124,38 @@ export class LoansComponent {
     }
   }
 
-
   GetAllData(DomainName: string, pageNumber: number, pageSize: number) {
     this.TableData = [];
     this.LoansServ.Get(DomainName, pageNumber, pageSize).subscribe(
       (data) => {
-        this.CurrentPage = data.pagination.currentPage
-        this.PageSize = data.pagination.pageSize
-        this.TotalPages = data.pagination.totalPages
-        this.TotalRecords = data.pagination.totalRecords
-        this.TableData = data.data
+        this.CurrentPage = data.pagination.currentPage;
+        this.PageSize = data.pagination.pageSize;
+        this.TotalPages = data.pagination.totalPages;
+        this.TotalRecords = data.pagination.totalRecords;
+        this.TableData = data.data;
       },
       (error) => {
         if (error.status == 404) {
           if (this.TotalRecords != 0) {
-            let lastPage
+            let lastPage;
             if (this.isDeleting) {
-              lastPage = (this.TotalRecords - 1) / this.PageSize
+              lastPage = (this.TotalRecords - 1) / this.PageSize;
             } else {
-              lastPage = this.TotalRecords / this.PageSize
+              lastPage = this.TotalRecords / this.PageSize;
             }
             if (lastPage >= 1) {
               if (this.isDeleting) {
-                this.CurrentPage = Math.floor(lastPage)
-                this.isDeleting = false
+                this.CurrentPage = Math.floor(lastPage);
+                this.isDeleting = false;
               } else {
-                this.CurrentPage = Math.ceil(lastPage)
+                this.CurrentPage = Math.ceil(lastPage);
               }
-              this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize)
+              this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
             }
           }
         }
       }
-    )
+    );
   }
 
   Create() {
@@ -155,8 +166,17 @@ export class LoansComponent {
   }
 
   Delete(id: number) {
-   Swal.fire({
-      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('the') +this.translate.instant('Loan') + this.translate.instant('?'),
+    Swal.fire({
+      title:
+        this.translate.instant('Are you sure you want to') +
+        ' ' +
+        this.translate.instant('delete') +
+        ' ' +
+        this.translate.instant('هذا') +
+        ' ' +
+        this.translate.instant('the') +
+        this.translate.instant('Loan') +
+        this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
@@ -166,7 +186,7 @@ export class LoansComponent {
     }).then((result) => {
       if (result.isConfirmed) {
         this.LoansServ.Delete(id, this.DomainName).subscribe((d) => {
-          this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize)
+          this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
         });
       }
     });
@@ -176,10 +196,13 @@ export class LoansComponent {
     this.mode = 'Edit';
     this.LoansServ.GetByID(id, this.DomainName).subscribe((d) => {
       this.loan = d;
-      this.safes = []
-      this.SafeEmployeeServ.GetByEmployeeId(this.loan.employeeID,this.DomainName).subscribe((d) => {
-        this.safes = d
-      })
+      this.safes = [];
+      this.SafeEmployeeServ.GetByEmployeeId(
+        this.loan.employeeID,
+        this.DomainName
+      ).subscribe((d) => {
+        this.safes = d;
+      });
     });
     this.openModal();
   }
@@ -205,11 +228,11 @@ export class LoansComponent {
   CreateOREdit() {
     if (this.isFormValid()) {
       this.isLoading = true;
-      console.log(this.loan)
+      console.log(this.loan);
       if (this.mode == 'Create') {
         this.LoansServ.Add(this.loan, this.DomainName).subscribe(
           (d) => {
-            this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize)
+            this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
             this.isLoading = false;
             this.closeModal();
             Swal.fire({
@@ -220,7 +243,7 @@ export class LoansComponent {
             });
           },
           (error) => {
-            console.log(error)
+            console.log(error);
 
             this.isLoading = false; // Hide spinner
             Swal.fire({
@@ -228,7 +251,7 @@ export class LoansComponent {
               title: 'Oops...',
               text: error.error,
               confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' }
+              customClass: { confirmButton: 'secondaryBg' },
             });
           }
         );
@@ -242,7 +265,7 @@ export class LoansComponent {
               text: 'Updatedd Successfully',
               confirmButtonColor: '#089B41',
             });
-            this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize)
+            this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
             this.isLoading = false;
             this.closeModal();
           },
@@ -253,7 +276,7 @@ export class LoansComponent {
               title: 'Oops...',
               text: error.error,
               confirmButtonText: 'Okay',
-              customClass: { confirmButton: 'secondaryBg' }
+              customClass: { confirmButton: 'secondaryBg' },
             });
           }
         );
@@ -268,23 +291,26 @@ export class LoansComponent {
   openModal() {
     this.validationErrors = {};
     this.isModalVisible = true;
-    this.getAllEmployees()
+    this.getAllEmployees();
     // this.getAllSaves()
   }
 
   getAllEmployees() {
     this.EmployeeServ.Get_Employees(this.DomainName).subscribe((d) => {
-      this.employees = d
-    })
+      this.employees = d;
+    });
   }
 
   getAllSaves() {
-    this.safes = []
-    this.loan.safeID = 0
-    this.SafeEmployeeServ.GetByEmployeeId(this.loan.employeeID,this.DomainName).subscribe((d) => {
-      this.safes = d
-      console.log(this.safes)
-    })
+    this.safes = [];
+    this.loan.safeID = 0;
+    this.SafeEmployeeServ.GetByEmployeeId(
+      this.loan.employeeID,
+      this.DomainName
+    ).subscribe((d) => {
+      this.safes = d;
+      console.log(this.safes);
+    });
   }
 
   validateNumber(event: any, field: keyof Loans): void {
@@ -307,7 +333,6 @@ export class LoansComponent {
       }
     }
   }
-
 
   isFormValid(): boolean {
     let isValid = true;
@@ -346,29 +371,50 @@ export class LoansComponent {
     }
   }
 
-  get displayMonth(): string {
-    // Convert yyyy-MM-dd to yyyy-MM for the input
-    return this.loan.deductionStartMonth
-      ? this.loan.deductionStartMonth.slice(0, 7)
-      : '';
+get displayStartMonth(): string {
+    if (this.loan.deductionStartYear && this.loan.deductionStartMonth) {
+      return `${this.loan.deductionStartYear}-${this.loan.deductionStartMonth.toString().padStart(2, '0')}`;
+    }
+    return '';
   }
 
-  set displayMonth(value: string) {
-    this.validationErrors['deductionStartMonth'] = '';
+  set displayStartMonth(value: string) {
     if (value) {
       const [year, month] = value.split('-').map(Number);
-      const firstDay = new Date(year, month - 1, 1);
-      // Format as YYYY-MM-DD
-      this.loan.deductionStartMonth = `${year}-${String(month).padStart(2, '0')}-01`;
-    } else {
-      this.loan.deductionStartMonth = '';
+      this.loan.deductionStartYear = year;
+      this.loan.deductionStartMonth = month;
+      this.calculateEndMonth(); // auto-calc when start month changes
     }
   }
 
+  // End Month binding (read-only)
+  get displayEndMonth(): string {
+    if (this.loan.deductionEndYear && this.loan.deductionEndMonth) {
+      return `${this.loan.deductionEndYear}-${this.loan.deductionEndMonth.toString().padStart(2, '0')}`;
+    }
+    return '';
+  }
+
+  private calculateEndMonth(): void {
+    if (this.loan.deductionStartYear && this.loan.deductionStartMonth && this.loan.numberOfDeduction) {
+      const start = new Date(this.loan.deductionStartYear, this.loan.deductionStartMonth - 1); // months are 0-based
+      const end = new Date(start);
+      end.setMonth(start.getMonth() + this.loan.numberOfDeduction - 1); // inclusive
+
+      this.loan.deductionEndYear = end.getFullYear();
+      this.loan.deductionEndMonth = end.getMonth() + 1; // back to 1-based
+    }
+  }
+
+  // Recalculate when number of deduction changes
+  onNumberOfDeductionChange() {
+    this.calculateEndMonth();
+  }
+
   async onSearchEvent(event: { key: string; value: any }) {
-    this.PageSize = this.TotalRecords
-    this.CurrentPage = 1
-    this.TotalPages = 1
+    this.PageSize = this.TotalRecords;
+    this.CurrentPage = 1;
+    this.TotalPages = 1;
     this.key = event.key;
     this.value = event.value;
     try {
@@ -388,7 +434,7 @@ export class LoansComponent {
             return fieldValue.toLowerCase().includes(this.value.toLowerCase());
           }
           if (typeof fieldValue === 'number') {
-            return fieldValue.toString().includes(numericValue.toString())
+            return fieldValue.toString().includes(numericValue.toString());
           }
           return fieldValue == this.value;
         });
@@ -399,8 +445,8 @@ export class LoansComponent {
   }
 
   changeCurrentPage(currentPage: number) {
-    this.CurrentPage = currentPage
-    this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize)
+    this.CurrentPage = currentPage;
+    this.GetAllData(this.DomainName, this.CurrentPage, this.PageSize);
   }
 
   validatePageSize(event: any) {
@@ -438,8 +484,7 @@ export class LoansComponent {
     const value = event.target.value;
     if (isNaN(value) || value === '') {
       event.target.value = '';
-      this.PageSize = 0
+      this.PageSize = 0;
     }
   }
-
 }
