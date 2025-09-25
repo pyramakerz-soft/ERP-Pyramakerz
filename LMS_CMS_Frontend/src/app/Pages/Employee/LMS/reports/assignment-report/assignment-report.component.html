@@ -81,84 +81,84 @@
 
 <!-- Export Buttons -->
 <div *ngIf="showTable" class="mb-5 flex justify-end space-x-4 rtl:space-x-reverse">
-    <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="exportExcelWithChartSummary()" title="Export to Excel with Chart">
+<img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="exportChartToExcel()" title="Export to Excel with Chart">
     <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="downloadAsPDFWithChart()" title="Export to PDF with Chart">
     <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="printReportWithChart()" title="Print Report with Chart">
 </div>
 
-<!-- Chart Container with reference -->
-<!-- <div #chartContainer> -->
-    <!-- <h3 class="text-lg font-semibold text-gray-800 mb-4 text-center">{{ 'Assignment Performance Chart' | translate }}</h3> -->
-    
-    <div #chartContainer class="flex justify-center items-end space-x-10">
-        <ng-container *ngFor="let item of chartData; let i = index">
-            <div class="flex flex-col items-center space-y-3 min-w-[140px]">
-                <!-- Assignment Name -->
-                <div class="text-sm text-gray-700 font-medium text-center max-w-[120px] truncate mb-2">
-                    {{ item.name }}
+<!-- Chart Container with dynamic height and responsive wrapping -->
+<div #chartContainer 
+     class="flex flex-wrap justify-center items-end gap-x-16 gap-y-10"
+     [style.minHeight.px]="maxChartValue * 2.5 + 60">
+    <ng-container *ngFor="let item of chartData; let i = index">
+        <div class="flex flex-col items-center space-y-3 min-w-[140px] max-w-[180px] mx-4 my-2">
+            <!-- Assignment Name -->
+            <div class="text-sm text-gray-700 font-medium text-center max-w-[120px] truncate mb-2">
+                {{ item.name }}
+            </div>
+
+            <!-- Bars -->
+            <div class="flex items-end justify-center gap-x-10"
+                 [style.height.px]="maxChartValue * 2.5">
+                <!-- Successful -->
+                <div class="flex flex-col items-center">
+                    <div class="relative group">
+                        <div
+                            class="secondaryBg rounded-t-2xl transition-all duration-300 w-12 flex items-end justify-center"
+                            [style.height.px]="getBarHeight(item.successful, item.total) * 2.5"
+                            [style.minHeight.px]="item.successful > 0 ? 30 : 0">
+                            <span class="text-white text-xs font-semibold mb-2" *ngIf="item.successful > 0">
+                                {{ item.successful }}
+                            </span>
+                        </div>
+                        <!-- Tooltip -->
+                        <div class="absolute bottom-full mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 
+                                    group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                            {{ 'Successful' | translate }}: {{ item.successful }}
+                        </div>
+                    </div>
+                    <span class="text-xs secondaryTxt mt-1 font-semibold">
+                        {{ 'Successful' | translate }}
+                    </span>
                 </div>
 
-                <!-- Bars -->
-                <div class="flex items-end justify-center space-x-6 h-[275px]">
-                    <!-- Successful -->
-                    <div class="flex flex-col items-center">
-                        <div class="relative group">
-                            <div
-                                class="secondaryBg rounded-t-2xl transition-all duration-300 w-12 flex items-end justify-center"
-                                [style.height.px]="getBarHeight(item.successful, item.total) * 2.5"
-                                [style.min-height.px]="item.successful > 0 ? 30 : 0">
-                                <span class="text-white text-xs font-semibold mb-2" *ngIf="item.successful > 0">
-                                    {{ item.successful }}
-                                </span>
-                            </div>
-                            <!-- Tooltip -->
-                            <div class="absolute bottom-full mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 
-                                        group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                                {{ 'Successful' | translate }}: {{ item.successful }}
-                            </div>
+                <!-- Failed -->
+                <div class="flex flex-col items-center">
+                    <div class="relative group">
+                        <div
+                            class="bg-red-600 rounded-t-2xl transition-all duration-300 w-12 flex items-end justify-center"
+                            [style.height.px]="getBarHeight(item.failed, item.total) * 2.5"
+                            [style.minHeight.px]="item.failed > 0 ? 30 : 0">
+                            <span class="text-white text-xs font-semibold mb-2" *ngIf="item.failed > 0">
+                                {{ item.failed }}
+                            </span>
                         </div>
-                        <span class="text-xs secondaryTxt mt-1 font-semibold">
-                            {{ 'Successful' | translate }}
-                        </span>
-                    </div>
-
-                    <!-- Failed -->
-                    <div class="flex flex-col items-center">
-                        <div class="relative group">
-                            <div
-                                class="bg-[#F97316] rounded-t-2xl transition-all duration-300 w-12 flex items-end justify-center"
-                                [style.height.px]="getBarHeight(item.failed, item.total) * 2.5"
-                                [style.min-height.px]="item.failed > 0 ? 30 : 0">
-                                <span class="text-white text-xs font-semibold mb-2" *ngIf="item.failed > 0">
-                                    {{ item.failed }}
-                                </span>
-                            </div>
-                            <!-- Tooltip -->
-                            <div class="absolute bottom-full mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 
-                                        group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                                {{ 'Failed' | translate }}: {{ item.failed }}
-                            </div>
+                        <!-- Tooltip -->
+                        <div class="absolute bottom-full mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 
+                                    group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                            {{ 'Failed' | translate }}: {{ item.failed }}
                         </div>
-                        <span class="text-xs text-orange-400 mt-1 font-semibold">
-                            {{ 'Failed' | translate }}
-                        </span>
                     </div>
+                    <span class="text-xs text-red-600 mt-1 font-semibold">
+                        {{ 'Failed' | translate }}
+                    </span>
                 </div>
             </div>
-        </ng-container>
-    </div>
+        </div>
+    </ng-container>
+</div>
 
-    <!-- Legend -->
-    <!-- <div class="flex justify-center items-center space-x-8 mt-6">
-        <div class="flex items-center space-x-2">
-            <div class="w-4 h-4 bg-green-400 rounded"></div>
-            <span class="text-sm text-gray-700">{{ 'Successful' | translate }}</span>
-        </div>
-        <div class="flex items-center space-x-2">
-            <div class="w-4 h-4 bg-[#F97316] rounded"></div>
-            <span class="text-sm text-gray-700">{{ 'Failed' | translate }}</span>
-        </div>
-    </div> -->
+<!-- Legend -->
+<!-- <div class="flex justify-center items-center space-x-8 mt-6">
+    <div class="flex items-center space-x-2">
+        <div class="w-4 h-4 bg-green-400 rounded"></div>
+        <span class="text-sm text-gray-700">{{ 'Successful' | translate }}</span>
+    </div>
+    <div class="flex items-center space-x-2">
+        <div class="w-4 h-4 bg-[#F97316] rounded"></div>
+        <span class="text-sm text-gray-700">{{ 'Failed' | translate }}</span>
+    </div>
+</div> -->
 <!-- </div> -->
 
 <!-- Summary Statistics -->
