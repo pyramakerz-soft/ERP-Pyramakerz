@@ -13,7 +13,7 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import { WeightTypeService } from '../../../../Services/Employee/LMS/weight-type.service';
 import { firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
@@ -59,6 +59,7 @@ export class WeightTypeComponent {
     public EditDeleteServ: DeleteEditPermissionService,
     public weightTypeService: WeightTypeService,
     public ApiServ: ApiService ,
+    private translate: TranslateService,
     private languageService: LanguageService,
     private realTimeService: RealTimeNotificationServiceService,
   ) { }
@@ -181,13 +182,13 @@ export class WeightTypeComponent {
 
   Delete(id: number){
     Swal.fire({
-      title: 'Are you sure you want to delete this Weight Type?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " +this.translate.instant('Type') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel'
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.weightTypeService.Delete(id, this.DomainName).subscribe(

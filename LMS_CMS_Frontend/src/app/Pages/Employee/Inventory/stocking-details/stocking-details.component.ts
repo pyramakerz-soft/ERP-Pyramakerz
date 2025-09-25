@@ -28,7 +28,7 @@ import html2pdf from 'html2pdf.js';
 import { ReportsService } from '../../../../Services/shared/reports.service';
 import { PdfPrintComponent } from '../../../../Component/pdf-print/pdf-print.component';
 import { SearchDropdownComponent } from '../../../../Component/search-dropdown/search-dropdown.component';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { School } from '../../../../Models/school';
@@ -127,6 +127,7 @@ export class StockingDetailsComponent {
     private cdr: ChangeDetectorRef,
     public printservice: ReportsService,
     private languageService: LanguageService,
+    private translate: TranslateService,
     private realTimeService: RealTimeNotificationServiceService
   ) { }
   async ngOnInit() {
@@ -171,11 +172,11 @@ export class StockingDetailsComponent {
   }
 
 
- ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   moveToMaster() {
@@ -590,13 +591,13 @@ export class StockingDetailsComponent {
   Delete(row: StockingDetails) {
     if (this.mode == 'Edit') {
       Swal.fire({
-        title: 'Are you sure you want to delete this Item?',
+        title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('the') + this.translate.instant('Item') + this.translate.instant('?'),
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#089B41',
         cancelButtonColor: '#17253E',
-        confirmButtonText: 'Delete',
-        cancelButtonText: 'Cancel',
+        confirmButtonText: this.translate.instant('Delete'),
+        cancelButtonText: this.translate.instant('Cancel'),
       }).then((result) => {
         if (result.isConfirmed) {
           if (!this.NewDetailsWhenEdit.find((s) => s.id == row.id)) {
@@ -615,13 +616,13 @@ export class StockingDetailsComponent {
       });
     } else if (this.mode == 'Create') {
       Swal.fire({
-        title: 'Are you sure you want to delete this Item?',
+        title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('the') + this.translate.instant('Item') + this.translate.instant('?'),
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#089B41',
         cancelButtonColor: '#17253E',
-        confirmButtonText: 'Delete',
-        cancelButtonText: 'Cancel',
+        confirmButtonText: this.translate.instant('Delete'),
+        cancelButtonText: this.translate.instant('Cancel'),
       }).then((result) => {
         if (result.isConfirmed) {
           this.Data.stockingDetails = this.Data.stockingDetails.filter(

@@ -184,24 +184,6 @@ export class ViolationComponent {
     this.openModal();
   }
 
-  // Delete(id: number) {
-  //   Swal.fire({
-  //     title: 'Are you sure you want to delete this Violation?',
-  //     icon: 'warning',
-  //     showCancelButton: true,
-  //     confirmButtonColor: '#089B41',
-  //     cancelButtonColor: '#17253E',
-  //     confirmButtonText: 'Delete',
-  //     cancelButtonText: 'Cancel',
-  //   }).then((result) => {
-  //     if (result.isConfirmed) {
-  //       this.violationServ.Delete(id, this.DomainName).subscribe((d) => {
-  //         this.GetAllData();
-  //       });
-  //     }
-  //   });
-  // }
-
   Delete(id: number) {
     Swal.fire({
       title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete')+ " " + this.translate.instant('هذه') + " " + this.translate.instant('the') + this.translate.instant('Violation')+ this.translate.instant('?'),

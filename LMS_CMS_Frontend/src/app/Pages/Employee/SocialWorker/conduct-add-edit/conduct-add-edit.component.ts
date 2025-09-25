@@ -87,13 +87,14 @@ export class ConductAddEditComponent {
       this.activeRoute.url.subscribe((url: { path: string; }[]) => {
         this.path = url[0].path;
 
-        if (this.path == 'Conduct Create') {
+        this.ConductID = Number(this.activeRoute.snapshot.paramMap.get('id'));
+        console.log(1243,this.ConductID)
+        if (!this.ConductID) {
           this.mode = 'Create';
           this.GetAllSchools()
           this.GetProceduresTypes()
-        } else if (this.path == 'Conduct Edit') {
+        } else if (this.ConductID) {
           this.mode = 'Edit';
-          this.ConductID = Number(this.activeRoute.snapshot.paramMap.get('id'));
           this.ConductServ.GetByID(this.ConductID, this.DomainName).subscribe((data) => {
             this.Data = data;
             console.log(this.Data)

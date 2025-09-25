@@ -16,7 +16,7 @@ import { InterviewTimeTableService } from '../../../../Services/Employee/Registr
 import { InterviewTimeTable } from '../../../../Models/Registration/interview-time-table';
 import Swal from 'sweetalert2';
 import { firstValueFrom, lastValueFrom } from 'rxjs';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
@@ -75,7 +75,7 @@ export class InterviewTimeTableComponent {
   isLoading = false
 
   constructor(public account: AccountService,
-    private realTimeService: RealTimeNotificationServiceService,
+    private realTimeService: RealTimeNotificationServiceService,private translate: TranslateService,
     private languageService: LanguageService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService,
     private menuService: MenuService, public activeRoute: ActivatedRoute, public router: Router,
     public yearService: AcadimicYearService, public interviewTimeTableService: InterviewTimeTableService,
@@ -536,13 +536,13 @@ export class InterviewTimeTableComponent {
 
   deleteInterview(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Interview Time?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('the') +this.translate.instant('Time') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel'
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.interviewTimeTableService.Delete(id, this.DomainName).subscribe(

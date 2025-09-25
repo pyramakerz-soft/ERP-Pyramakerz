@@ -30,7 +30,7 @@ import { Section } from '../../../../Models/LMS/section';
 import { SectionService } from '../../../../Services/Employee/LMS/section.service';
 import { GradeService } from '../../../../Services/Employee/LMS/grade.service';
 import { ClassroomService } from '../../../../Services/Employee/LMS/classroom.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
@@ -95,11 +95,12 @@ export class BusStudentComponent {
     public busStudentService: BusStudentService,
     public account: AccountService,
     public activeRoute: ActivatedRoute,
-    public EditDeleteServ: DeleteEditPermissionService,
-    public menuService: MenuService,
-    public ApiServ: ApiService,
-    public schoolService: SchoolService,
-    public busCategoryService: BusCategoryService,
+    public EditDeleteServ: DeleteEditPermissionService, 
+    public menuService: MenuService, 
+    public ApiServ: ApiService, 
+    public schoolService: SchoolService, 
+    private translate: TranslateService,
+    public busCategoryService: BusCategoryService,  
     public sectionService: SectionService,
     public gradeService: GradeService,
     public classroomService: ClassroomService,
@@ -224,15 +225,15 @@ export class BusStudentComponent {
   }
 
   deleteBusStudent(busStudentId: number) {
-    Swal.fire({
-      title: 'Are you sure you want to delete this student?',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#089B41',
-      cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel'
-    }).then((result) => {
+     Swal.fire({
+          title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('the') +this.translate.instant('Student') + this.translate.instant('?'),
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#089B41',
+          cancelButtonColor: '#17253E',
+          confirmButtonText: this.translate.instant('Delete'),
+          cancelButtonText: this.translate.instant('Cancel'),
+        }).then((result) => {
       if (result.isConfirmed) {
         this.busStudentService.DeleteBusStudent(busStudentId, this.DomainName).subscribe(
           (data: any) => {

@@ -16,7 +16,7 @@ import { MenuService } from '../../../../Services/shared/menu.service';
 import Swal from 'sweetalert2';
 import { TimeTable } from '../../../../Models/LMS/time-table';
 import { firstValueFrom } from 'rxjs';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 import {  Subscription } from 'rxjs';
@@ -61,6 +61,7 @@ export class RemedialTimeTableComponent {
     public RemedialTimeTableServ: RemedialTimeTableService,
     private cdRef: ChangeDetectorRef,    
     private languageService: LanguageService,
+    private translate: TranslateService,
     private realTimeService: RealTimeNotificationServiceService
   ) { }
   ngOnInit() {
@@ -248,14 +249,14 @@ export class RemedialTimeTableComponent {
 
   delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Remedial TimeTable?',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#089B41',
-      cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
-    }).then((result) => {
+        title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " +  this.translate.instant('Remedial Time Table') + this.translate.instant('?'),
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#089B41',
+        cancelButtonColor: '#17253E',
+        confirmButtonText: this.translate.instant('Delete'),
+        cancelButtonText: this.translate.instant('Cancel'),
+      }).then((result) => {
       if (result.isConfirmed) {
         this.RemedialTimeTableServ.Delete(id, this.DomainName).subscribe((d) => {
           this.GetAllData();

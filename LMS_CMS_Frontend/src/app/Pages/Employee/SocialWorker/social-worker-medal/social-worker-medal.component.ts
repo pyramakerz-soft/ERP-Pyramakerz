@@ -3,7 +3,7 @@ import { SocialWorkerMedal } from '../../../../Models/SocialWorker/social-worker
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subscription, firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
 import { SearchComponent } from '../../../../Component/search/search.component';
@@ -58,6 +58,7 @@ export class SocialWorkerMedalComponent {
     public activeRoute: ActivatedRoute,
     public account: AccountService,
     public DomainServ: DomainService,
+    private translate: TranslateService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public SocialWorkerMedalServ: SocialWorkerMedalService,
@@ -81,20 +82,19 @@ export class SocialWorkerMedalComponent {
         this.AllowEditForOthers = settingsPage.allow_Edit_For_Others;
       }
     });
-
     this.GetAllData();
 
     this.subscription = this.languageService.language$.subscribe(direction => {
-    this.isRtl = direction === 'rtl';
+      this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
   }
 
-   ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   GetAllData() {
@@ -113,13 +113,13 @@ export class SocialWorkerMedalComponent {
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Medal?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذه') + " " + this.translate.instant('the') + this.translate.instant('Medal') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.SocialWorkerMedalServ.Delete(id, this.DomainName).subscribe((d) => {
@@ -202,7 +202,7 @@ export class SocialWorkerMedalComponent {
           }
         );
       }
-    } 
+    }
   }
 
   closeModal() {
@@ -222,7 +222,7 @@ export class SocialWorkerMedalComponent {
         if (!this.socialWorkerMedal[field]) {
           if (
             field == 'name' ||
-           (this.socialWorkerMedal.id == 0 && field == "newFile")
+            (this.socialWorkerMedal.id == 0 && field == "newFile")
           ) {
             this.validationErrors[field] = `*${this.capitalizeField(
               field
@@ -281,23 +281,23 @@ export class SocialWorkerMedalComponent {
     const file: File = event.target.files[0];
     const input = event.target as HTMLInputElement;
 
-    this.socialWorkerMedal.file=""
+    this.socialWorkerMedal.file = ""
     if (file) {
       if (file.size > 25 * 1024 * 1024) {
         this.validationErrors['newFile'] = 'The file size exceeds the maximum limit of 25 MB.';
         this.socialWorkerMedal.newFile = null;
-        return; 
+        return;
       }
       if (file.type === 'image/jpeg' || file.type === 'image/png') {
-        this.socialWorkerMedal.newFile = file; 
-        this.validationErrors['newFile'] = ''; 
+        this.socialWorkerMedal.newFile = file;
+        this.validationErrors['newFile'] = '';
 
         const reader = new FileReader();
         reader.readAsDataURL(file);
       } else {
         this.validationErrors['newFile'] = 'Invalid file type. Only JPEG, JPG and PNG are allowed.';
         this.socialWorkerMedal.newFile = null;
-        return; 
+        return;
       }
     }
 
