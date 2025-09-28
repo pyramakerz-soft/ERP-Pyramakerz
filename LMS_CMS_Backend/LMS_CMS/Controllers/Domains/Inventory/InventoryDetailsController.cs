@@ -39,7 +39,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             List<InventoryDetails> salesItems = await Unit_Of_Work.inventoryDetails_Repository.Select_All_With_IncludesById<InventoryDetails>(
                     f => f.IsDeleted != true,
                     query => query.Include(s => s.ShopItem),
-                    query => query.Include(s => s.InventoryMaster)
+                    query => query.Include(s => s.InventoryMaster) 
                     );
 
             if (salesItems == null || salesItems.Count == 0)
@@ -154,14 +154,14 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                     q => q.Include(d => d.InventoryMaster.Store),
                     q => q.Include(d => d.InventoryMaster.StoreToTransform));
 
-            var previousBalance = allData
+                var previousBalance = allData
                 .Where(d =>
                     d.InventoryMaster.Date < parsedFromDate &&
                     !flagsToExclude.Contains(d.InventoryMaster.FlagId) &&
                     d.InventoryMaster.InventoryFlags.ItemInOut != 0)
                 .Sum(d => d.Quantity * d.InventoryMaster.InventoryFlags.ItemInOut);
 
-            var transactionData = allData
+                var transactionData = allData
                 .Where(d =>
                     d.InventoryMaster.Date >= parsedFromDate &&
                     d.InventoryMaster.Date <= parsedToDate)
@@ -207,10 +207,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             allowedTypes: new[] { "octa", "employee" },
             pages: new[] { "Average Cost Calculation" }
         )]
-        public async Task<IActionResult> CalculateAverageCostAsync(DateOnly fromDate, DateOnly toDate)
+        public async Task<IActionResult> CalculateAverageCostAsync(DateOnly? fromDate, DateOnly? toDate)
         {
-            var parsedFromDate = fromDate;
-            var parsedToDate = toDate;
+            if (!fromDate.HasValue || !toDate.HasValue)
+                return BadRequest(new { message = "You should plan a starting date." });
+
+            var parsedFromDate = fromDate.Value;
+            var parsedToDate = toDate.Value;
 
             if (parsedFromDate > parsedToDate)
                 return BadRequest("The start date cannot be after the end date.");
@@ -222,13 +225,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             im.Date >= parsedFromDate && im.Date <= parsedToDate,
             query => query
             .Include(im => im.InventoryDetails)
-            .Include(im => im.InventoryFlags)
-          );
+            .Include(im => im.InventoryFlags));
+
             // ========== المرحلة 1: تصفير AverageCost ==========
             foreach (var item in allInventoryData.SelectMany(im => im.InventoryDetails))
             {
                 item.AverageCost = 0;
-                Unit_Of_Work.inventoryDetails_Repository.Update(item);
+                //Unit_Of_Work.inventoryDetails_Repository.Update(item);
             }
 
             // ========== المرحلة 2: Opening Balance & Purchases ==========
@@ -237,7 +240,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                         .SelectMany(im => im.InventoryDetails))
             {
                 item.AverageCost = item.TotalPrice;
-                Unit_Of_Work.inventoryDetails_Repository.Update(item);
+                //Unit_Of_Work.inventoryDetails_Repository.Update(item);
             }
             await Unit_Of_Work.SaveChangesAsync();
             // ========== المرحلة 3: الحركات اليومية ==========
@@ -255,11 +258,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                     Unit_Of_Work.inventoryDetails_Repository.Update(item);
                 }
                 await Unit_Of_Work.SaveChangesAsync();
-                currentDate = currentDate;
+                currentDate = currentDate.AddDays(1);
             }
-
-            return Ok();
+            return Ok(new { message = "Average cost calculation completed." });
         }
+
         // /////////////////////////////////////////////////////////////-7
         private async Task<decimal> CalculateAverageCostForItem(long shopItemId, DateOnly targetDate)
         {
@@ -352,8 +355,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                     var totalCost = g.Sum(id => id.AverageCost * id.InventoryMaster.InventoryFlags.ItemInOut);
                     var averageCost = quantity != 0 ? totalCost / quantity : (decimal?)null;
                     var limit = g.Key.Limit;
-                    var alertMessage = (quantity <= limit) ? " The quantity is below the permissible limit" : null;
-
+                  
                     return new StoreBalanceReportDto
                     {
                         ItemCode = g.Key.ID,
@@ -366,7 +368,6 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                         TotalSales = quantity * g.Key.SalesPrice,
                         TotalCost = totalCost,
                         Limit = g.Key.Limit,
-                        AlertMessage = alertMessage
                     };
                 })
                .Where(x =>
@@ -430,7 +431,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                     break;
 
                 default:
-                    return BadRequest("Invalid ReportFlagType value.");
+                    return BadRequest("Invalid Report Flag Type value.");
                 }
 
                 return Ok(result);
@@ -473,7 +474,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 .Where(sc => sc.IsDeleted != true)
                 .ToList();
 
-            var filtered = data.Where(id =>
+                var filtered = data.Where(id =>
                 (categoryId == 0 || id.ShopItem.InventorySubCategories.InventoryCategoriesID == categoryId) &&
                 (typeId == 0 || id.ShopItem.InventorySubCategoriesID == typeId) &&
                 (typeId != 0 || storeCategories
@@ -482,7 +483,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                     .Contains(id.ShopItem.InventorySubCategories.InventoryCategoriesID)) &&
                 (id.InventoryMaster.InventoryFlags.ItemInOut == 1 || id.InventoryMaster.InventoryFlags.ItemInOut == -1));
 
-            var storeItems = filtered
+                var storeItems = filtered
                 .GroupBy(id => new
                 {
                     ItemId = id.ShopItem.ID,
@@ -534,7 +535,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
                 var itemReport = new Dictionary<string, object>
                 {
                     { "itemCode", item.ItemId },
-                    { "itemName", item.ItemName}};
+                    { "itemName", item.ItemName}
+                };
 
 
                 var stores = new List<object>();
@@ -602,10 +604,11 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             }
 
             var grandTotals = new Dictionary<string, object>
-                {
+            {
                     { "TotalQuantity", horizontalReport.Sum(x => ((List<object>)((Dictionary<string, object>)x)["stores"]).Sum(s =>
-                        (decimal)((Dictionary<string, object>)s)["quantity"])) }
-                };
+                        (decimal)((Dictionary<string, object>)s)["quantity"]))
+                    }
+            };
 
             if (reportType != 1)
             {

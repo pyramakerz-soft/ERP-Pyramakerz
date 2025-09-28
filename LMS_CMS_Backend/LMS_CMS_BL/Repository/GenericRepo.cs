@@ -97,11 +97,11 @@ namespace LMS_CMS_BL.Repository
                 db.Entry(entity).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
             }
         }
-        /// /////////////-777
+           /// /////////////-777
          public IQueryable<TEntity> Query()
-        {
+         {
             return db.Set<TEntity>().AsQueryable();
-        }
+         }
 
 
         public void Delete(long id)
