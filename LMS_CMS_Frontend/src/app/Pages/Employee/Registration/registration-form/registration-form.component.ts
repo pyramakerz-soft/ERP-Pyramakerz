@@ -207,7 +207,7 @@ export class RegistrationFormComponent {
   getSelectedOption(fieldId: number): any | null {
     const entry = this.registrationForm.registerationFormSubmittions.find(
       (e) => e.categoryFieldID === fieldId
-    );
+    ); 
     if (fieldId == 6 || fieldId == 14) {
       return entry?.textAnswer ?? null;
     }
@@ -327,13 +327,12 @@ export class RegistrationFormComponent {
     let option: number | null = null;
 
     if (fieldTypeId == 1 ||fieldTypeId == 2 ||fieldTypeId == 3 ||
-      (fieldTypeId == 7 &&(fieldId == 3 ||fieldId == 5 ||fieldId == 6 ||fieldId == 7 ||fieldId == 8 ||fieldId == 9 ||fieldId == 14))) {
+      (fieldTypeId == 7 &&(fieldId == 3 || fieldId == 5 ||fieldId == 6 ||fieldId == 7 ||fieldId == 8 ||fieldId == 9 ||fieldId == 14))) {
       answer = selectedValue;
       option = null;
     } else if (fieldTypeId == 5 || fieldTypeId == 7) {
       option = parseInt(selectedValue);
-      answer = null;
-      console.log(option)
+      answer = null; 
     }
 
     const existingElement =
@@ -349,7 +348,7 @@ export class RegistrationFormComponent {
         existingElement.selectedFieldOptionID = option;
         existingElement.textAnswer = null;
       }
-      if (this.path == 'Edit Student') {
+      if (this.path == 'Edit Student') { 
         this.registrationFormSubmissionEdited.push({
           id: existingElement.id,
           registerationFormParentID: this.RegistrationParentID,
@@ -375,7 +374,7 @@ export class RegistrationFormComponent {
           textAnswer: answer,
         });
       }
-    }
+    } 
   }
 
   MultiOptionDataPush(

@@ -155,14 +155,14 @@ export class LessonResourceComponent {
 
   GetClasses(){
     this.classes = []
-    this.classroomService.Get(this.DomainName).subscribe((data) => {
+    this.classroomService.GetByLessonID(this.lessonId, this.DomainName).subscribe((data) => {
       this.classes = data 
     });
   }
 
   GetLessonResourceById(id:number){
     this.lessonResourceService.GetByID(id, this.DomainName).subscribe((data) => {
-      this.lessonResource = data; 
+      this.lessonResource = data;  
       if(this.lessonResource.attachmentLink != null && this.lessonResource.attachmentLink != ''){
         if (this.lessonResource.attachmentLink?.includes('Uploads/')) {
           this.selectedAttachmentType = 'file'
