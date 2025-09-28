@@ -118,6 +118,14 @@ namespace LMS_CMS_BL.Repository
             }
         }
 
+        public async Task DeleteListAsync(IEnumerable<TEntity> entities)
+        {
+            if (entities != null && entities.Any())
+            {
+                db.Set<TEntity>().RemoveRange(entities);
+            }
+        }
+
         public TEntity First_Or_Default(Expression<Func<TEntity, bool>> predicate)
         {
             return db.Set<TEntity>().FirstOrDefault(predicate);

@@ -64,7 +64,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
             if (salaryConfigration.FromPreviousMonth == false)
             {
-                periodStart = new DateOnly(year, month, 1);
+                periodStart = new DateOnly(year, month, startDay);
                 periodEnd = periodStart.AddMonths(1).AddDays(-1); // last day of month
             }
             else
@@ -121,7 +121,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
             if (salaryConfigration.FromPreviousMonth == false)
             {
-                periodStart = new DateOnly(year, month, 1);
+                periodStart = new DateOnly(year, month, startDay);
                 periodEnd = periodStart.AddMonths(1).AddDays(-1); // last day of month
             }
             else
