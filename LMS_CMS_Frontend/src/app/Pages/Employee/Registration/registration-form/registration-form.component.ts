@@ -207,7 +207,8 @@ export class RegistrationFormComponent {
   getSelectedOption(fieldId: number): any | null {
     const entry = this.registrationForm.registerationFormSubmittions.find(
       (e) => e.categoryFieldID === fieldId
-    ); 
+    );
+     
     if (fieldId == 6 || fieldId == 14) {
       return entry?.textAnswer ?? null;
     }
@@ -334,6 +335,20 @@ export class RegistrationFormComponent {
       option = parseInt(selectedValue);
       answer = null; 
     }
+
+    // if (fieldId == 3 || fieldId == 5) {
+    //   option = parseInt(selectedValue);
+    //   answer = null;
+    // } else if (fieldId == 6 || fieldId == 14) {
+    //   answer = selectedValue;
+    //   option = null;
+    // } else if (fieldTypeId == 5 || fieldTypeId == 7) {
+    //   option = parseInt(selectedValue);
+    //   answer = null;
+    // } else {
+    //   answer = selectedValue;
+    //   option = null;
+    // }
 
     const existingElement =
       this.registrationForm.registerationFormSubmittions.find(
@@ -632,16 +647,35 @@ export class RegistrationFormComponent {
               }
             );
           } else if (this.mode == 'Edit') {
-            this.RegisterationFormSubmittionServ.Edit(this.StudentId, this.registrationFormSubmissionEdited, this.DomainName).subscribe((s) => {
-              this.RegisterationFormSubmittionServ.Add(this.registrationFormSubmissionNew, this.DomainName).subscribe((s) => {
+            this.RegisterationFormSubmittionServ.Edit(this.StudentId, this.registrationFormSubmissionEdited, this.DomainName).subscribe(
+              (s) => {
+                this.RegisterationFormSubmittionServ.Add(this.registrationFormSubmissionNew, this.DomainName).subscribe((s) => {
+                  Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: 'Student updated successfully',
+                    confirmButtonText: 'Okay'
+                  });
+                  this.router.navigateByUrl(`Employee/Student`);
+                },
+                (error) => {
+                  this.isLoading = false;
+                  Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: error.error,
+                    confirmButtonColor: '#089B41',
+                  });
+                })
+              },
+              (error) => {
+                this.isLoading = false;
                 Swal.fire({
-                  icon: 'success',
-                  title: 'Success',
-                  text: 'Student updated successfully',
-                  confirmButtonText: 'Okay'
+                  icon: 'error',
+                  title: 'Error!',
+                  text: error.error,
+                  confirmButtonColor: '#089B41',
                 });
-                this.router.navigateByUrl(`Employee/Student`);
-              })
             })
           }
         }
