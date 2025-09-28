@@ -4,7 +4,8 @@ import { ApiService } from '../api.service';
 import { Employee } from '../../Models/Employee/employee';
 import { EmployeeGet } from '../../Models/Employee/employee-get';
 import { EditPass } from '../../Models/Employee/edit-pass';
-import { AccountingEmployee } from '../../Models/Accounting/accounting-employee';
+import { AccountingEmployee } from '../../Models/Accounting/accounting-employee'; 
+import { Observable, shareReplay } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +14,9 @@ export class EmployeeService {
 
   baseUrl = ""
   header = ""
-
+  private cachedDomainForMyData?: string;
+  private myData$?: Observable<EmployeeGet>;
+ 
   constructor(public http: HttpClient, public ApiServ: ApiService) {
     this.baseUrl = ApiServ.BaseUrl
     this.header = ApiServ.GetHeader();
@@ -30,6 +33,19 @@ export class EmployeeService {
       .set('Content-Type', 'application/json');
 
     return this.http.get<Employee[]>(`${this.baseUrl}/Employee/GetByTypeId/${typeId}`, { headers })
+  }
+
+  GetWithJobId(jobId: number, DomainName?: string) {
+    if (DomainName != null) {
+      this.header = DomainName
+    }
+    const token = localStorage.getItem("current_token");
+    const headers = new HttpHeaders()
+      .set('Authorization', `Bearer ${token}`)
+      .set('domain-name', this.header)
+      .set('Content-Type', 'application/json');
+
+    return this.http.get<Employee[]>(`${this.baseUrl}/Employee/GetByJobId/${jobId}`, { headers })
   }
 
   GetByDepartmentId(departmentID: number, DomainName?: string) {
@@ -234,17 +250,45 @@ export class EmployeeService {
       .set('Content-Type', 'application/json');
     return this.http.get<EmployeeGet>(`${this.baseUrl}/Employee/${id}`, { headers });
   }
+ 
+  // GetMyData(DomainName?: string) {
+  //   if (DomainName != null) {
+  //     this.header = DomainName
+  //   }
+  //   const token = localStorage.getItem("current_token");
+  //   const headers = new HttpHeaders()
+  //     .set('domain-name', this.header)
+  //     .set('Authorization', `Bearer ${token}`)
+  //     .set('Content-Type', 'application/json');
+  //   return this.http.get<EmployeeGet>(`${this.baseUrl}/Employee/GetMyData`, { headers });
+  // }
 
-  GetMyData(DomainName?: string) {
+  GetMyData(DomainName?: string, options?: { forceRefresh?: boolean }): Observable<EmployeeGet> {
     if (DomainName != null) {
-      this.header = DomainName
+      this.header = DomainName;
     }
-    const token = localStorage.getItem("current_token");
-    const headers = new HttpHeaders()
-      .set('domain-name', this.header)
-      .set('Authorization', `Bearer ${token}`)
-      .set('Content-Type', 'application/json');
-    return this.http.get<EmployeeGet>(`${this.baseUrl}/Employee/GetMyData`, { headers });
+
+    const activeDomain = this.header;
+    const forceRefresh = options?.forceRefresh ?? false;
+
+    if (forceRefresh || !this.myData$ || this.cachedDomainForMyData !== activeDomain) {
+      const token = localStorage.getItem("current_token");
+      const headers = new HttpHeaders()
+        .set('domain-name', activeDomain)
+        .set('Authorization', `Bearer ${token}`)
+        .set('Content-Type', 'application/json');
+
+      this.cachedDomainForMyData = activeDomain;
+      this.myData$ = this.http.get<EmployeeGet>(`${this.baseUrl}/Employee/GetMyData`, { headers })
+        .pipe(shareReplay({ bufferSize: 1, refCount: false }));
+    }
+
+    return this.myData$!;
+  }
+
+  clearMyDataCache(): void {
+    this.cachedDomainForMyData = undefined;
+    this.myData$ = undefined;
   }
 
   DeleteFile(id: number, DomainName?: string) {

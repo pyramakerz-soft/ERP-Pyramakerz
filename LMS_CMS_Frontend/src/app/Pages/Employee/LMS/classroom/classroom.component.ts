@@ -27,7 +27,7 @@ import { Grade } from '../../../../Models/LMS/grade';
 import { firstValueFrom } from 'rxjs';
 import { Employee } from '../../../../Models/Employee/employee';
 import { EmployeeService } from '../../../../Services/Employee/employee.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
@@ -86,7 +86,7 @@ export class ClassroomComponent {
 
   constructor(public account: AccountService,
     private realTimeService: RealTimeNotificationServiceService,private languageService: LanguageService, public buildingService: BuildingService, public ApiServ: ApiService, public EditDeleteServ: DeleteEditPermissionService, 
-      private menuService: MenuService, public activeRoute: ActivatedRoute, public schoolService: SchoolService, public classroomService: ClassroomService, public employeeServ : EmployeeService ,
+      private menuService: MenuService, public activeRoute: ActivatedRoute, public schoolService: SchoolService, public classroomService: ClassroomService,    private translate: TranslateService, public employeeServ : EmployeeService ,
       public sectionService:SectionService, public gradeService:GradeService, public acadimicYearService:AcadimicYearService, public floorService: FloorService, public router:Router){}
       
   ngOnInit(){
@@ -376,9 +376,11 @@ export class ClassroomComponent {
       if(this.editClassroom == false){
         this.classroomService.Add(this.classroom, this.DomainName).subscribe(
           (result: any) => {
+            this.SelectedSchoolIdForFilteration = this.selectedSchool ? this.selectedSchool : 0
+            this.activeAcademicYearID = this.classroom.academicYearID
             this.closeModal()
             this.isLoadingSaveClassroom=false
-            this.getClassroomData()
+            this.getClassroomDataByYearID()
           },
           error => {
             this.isLoadingSaveClassroom=false
@@ -394,9 +396,11 @@ export class ClassroomComponent {
       } else{
         this.classroomService.Edit(this.classroom, this.DomainName).subscribe(
           (result: any) => {
+            this.SelectedSchoolIdForFilteration = this.selectedSchool ? this.selectedSchool : 0
+            this.activeAcademicYearID = this.classroom.academicYearID
             this.closeModal()
-            this.getClassroomData()
             this.isLoadingSaveClassroom=false
+            this.getClassroomDataByYearID()
           },
           error => {
             this.isLoadingSaveClassroom=false
@@ -415,19 +419,19 @@ export class ClassroomComponent {
 
   deleteClassroom(id:number){
     Swal.fire({
-      title: 'Are you sure you want to delete this Classroom?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('the') +this.translate.instant('Classroom') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel'
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.classroomService.Delete(id, this.DomainName).subscribe(
           (data: any) => {
             this.classroomData=[]
-            this.getClassroomData()
+            this.getClassroomDataByYearID()
           }
         );
       }

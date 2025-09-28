@@ -25,7 +25,7 @@ import { AccountingTreeChartService } from '../../../../Services/Employee/Accoun
 import html2pdf from 'html2pdf.js';
 import { PdfPrintComponent } from '../../../../Component/pdf-print/pdf-print.component';
 import { ReportsService } from '../../../../Services/shared/reports.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
@@ -86,6 +86,7 @@ export class AccountingEntriesDetailsComponent {
   constructor(
     private router: Router,
     private menuService: MenuService,
+    private translate: TranslateService,
     public activeRoute: ActivatedRoute,
     public account: AccountService,
     public accountingEntriesDocTypeService: AccountingEntriesDocTypeService,
@@ -444,13 +445,13 @@ export class AccountingEntriesDetailsComponent {
 
   DeleteDetail(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Accounting Entries Detail?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذه') + " " + this.translate.instant('Accounting Entries Detail'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.accountingEntriesDetailsService.Delete(id, this.DomainName).subscribe(

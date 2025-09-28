@@ -68,7 +68,7 @@ export class PermissionGroupDetailsComponent {
 
   GetArchivingTree(){
     this.archivingTrees = []
-    this.archivingService.Get(this.DomainName).subscribe(
+    this.archivingService .Get(this.DomainName).subscribe(
       data => {
         this.archivingTrees = data 
         this.setParents(this.archivingTrees, null);

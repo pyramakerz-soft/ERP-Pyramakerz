@@ -276,8 +276,10 @@ namespace LMS_CMS_BL.UOW
         GenericRepo<BankEmployee> BankEmployee_Repository;
         GenericRepo<SafeEmployee> SafeEmployee_Repository;
         GenericRepo<RefreshTokens> RefreshTokens_Repository;
+        GenericRepo<MonthlyAttendance> MonthlyAttendance_Repository;
+        GenericRepo<DayStatus> DayStatus_Repository;
+        GenericRepo<SalaryHistory> SalaryHistory_Repository;
 
-         
         public UOW(Octa_DbContext octa_Db)
         {
             this.octa_Db = octa_Db;
@@ -3155,7 +3157,41 @@ namespace LMS_CMS_BL.UOW
                 return BankEmployee_Repository;
             }
         }
-         
+
+        public GenericRepo<MonthlyAttendance> monthlyAttendance_Repository
+        {
+            get
+            {
+                if (MonthlyAttendance_Repository == null)
+                {
+                    MonthlyAttendance_Repository = new GenericRepo<MonthlyAttendance>(db);
+                }
+                return MonthlyAttendance_Repository;
+            }
+        }
+        public GenericRepo<DayStatus> dayStatus_Repository
+        {
+            get
+            {
+                if (DayStatus_Repository == null)
+                {
+                    DayStatus_Repository = new GenericRepo<DayStatus>(db);
+                }
+                return DayStatus_Repository;
+            }
+        }
+        public GenericRepo<SalaryHistory> salaryHistory_Repository
+        {
+            get
+            {
+                if (SalaryHistory_Repository == null)
+                {
+                    SalaryHistory_Repository = new GenericRepo<SalaryHistory>(db);
+                }
+                return SalaryHistory_Repository;
+            }
+        }
+
         public GenericRepo<RefreshTokens> refreshTokens_Repository
         {
             get

@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Drawing.Printing;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using LMS_CMS_BL.DTO;
+using System.Net;
 
 namespace LMS_CMS_PL.Controllers.Domains.HR
 {
@@ -144,6 +145,29 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
         ////////////////////////////////
 
+        private DateOnly SafeDateOnly(int year, int month, int day)
+        {
+            if (day <= 0)
+            {
+                // Go back one month
+                if (month == 1)
+                {
+                    year -= 1;
+                    month = 12;
+                }
+                else
+                {
+                    month -= 1;
+                }
+
+                day = DateTime.DaysInMonth(year, month); // last day of prev month
+            }
+
+            int daysInMonth = DateTime.DaysInMonth(year, month);
+            int safeDay = Math.Min(day, daysInMonth);
+            return new DateOnly(year, month, safeDay);
+        }
+
         [HttpGet("getRemainLeavRequestsByEmployeeId/{Empid}/{date}")]
         [Authorize_Endpoint_(
           allowedTypes: new[] { "octa", "employee" },
@@ -163,28 +187,77 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 return Unauthorized("User ID or Type claim not found.");
             }
 
-            Employee Employee = Unit_Of_Work.employee_Repository.First_Or_Default(sem => sem.IsDeleted != true);
+            Employee Employee = Unit_Of_Work.employee_Repository.First_Or_Default(sem => sem.IsDeleted != true && sem.ID == Empid);
 
             if (Employee == null )
             {
                 return NotFound();
             }
 
+            if(Employee.MonthlyLeaveRequestBalance == null || Employee.MonthlyLeaveRequestBalance == 0)
+            {
+                return BadRequest("Monthly leave request for this employee is required.");
+            }
+
             Employee_GetDTO EmployeeDTO = mapper.Map<Employee_GetDTO>(Employee);
 
 
+            SalaryConfigration salaryConfigration = Unit_Of_Work.salaryConfigration_Repository
+             .First_Or_Default(s => s.ID == 1);
 
-            // Get current month and year
+            if (salaryConfigration == null)
+            {
+                return BadRequest("Salary configuration not found.");
+            }
+
             var currentDate = date;
-            var currentMonth = currentDate.Month;
-            var currentYear = currentDate.Year;
+            var startDay = salaryConfigration.StartDay;
+            var fromPrevious = salaryConfigration.FromPreviousMonth;
 
-            // Filter leave requests for the current month only
+            DateOnly periodStart;
+            DateOnly periodEnd;
+
+            // Case 1: Salary cycle starts from current month
+            if (!fromPrevious)
+            {
+                if (currentDate.Day >= startDay)
+                {
+                    periodStart = SafeDateOnly(currentDate.Year, currentDate.Month, startDay);
+                    var endMonth = currentDate.Month == 12 ? 1 : currentDate.Month + 1;
+                    var endYear = currentDate.Month == 12 ? currentDate.Year + 1 : currentDate.Year;
+                    periodEnd = SafeDateOnly(endYear, endMonth, startDay - 1);
+                }
+                else
+                {
+                    var prevMonth = currentDate.Month == 1 ? 12 : currentDate.Month - 1;
+                    var prevYear = currentDate.Month == 1 ? currentDate.Year - 1 : currentDate.Year;
+                    periodStart = SafeDateOnly(prevYear, prevMonth, startDay);
+                    periodEnd = SafeDateOnly(currentDate.Year, currentDate.Month, startDay - 1);
+                }
+            }
+            else
+            {
+                if (currentDate.Day >= startDay)
+                {
+                    periodStart = SafeDateOnly(currentDate.Year, currentDate.Month, startDay);
+                    var endMonth = currentDate.Month == 12 ? 1 : currentDate.Month + 1;
+                    var endYear = currentDate.Month == 12 ? currentDate.Year + 1 : currentDate.Year;
+                    periodEnd = SafeDateOnly(endYear, endMonth, startDay - 1);
+                }
+                else
+                {
+                    var prevMonth = currentDate.Month == 1 ? 12 : currentDate.Month - 1;
+                    var prevYear = currentDate.Month == 1 ? currentDate.Year - 1 : currentDate.Year;
+                    periodStart = SafeDateOnly(prevYear, prevMonth, startDay);
+                    periodEnd = SafeDateOnly(currentDate.Year, currentDate.Month, startDay - 1);
+                }
+            }
+
             List<LeaveRequest> leaveRequests = Unit_Of_Work.leaveRequest_Repository
-                .FindBy(l => l.EmployeeID == Empid
-                          && l.IsDeleted != true
-                          && l.Date.Month == currentMonth
-                          && l.Date.Year == currentYear);
+                 .FindBy(l => l.EmployeeID == Empid
+                           && l.IsDeleted != true
+                           && l.Date >= periodStart
+                           && l.Date <= periodEnd);
 
             // Sum up hours and minutes
             var allHours = leaveRequests.Sum(l => l.Hours);
@@ -232,16 +305,62 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             }
 
 
-            var currentDate = newRequest.Date;
-            var currentMonth = currentDate.Month;
-            var currentYear = currentDate.Year;
+            SalaryConfigration salaryConfigration = Unit_Of_Work.salaryConfigration_Repository
+               .First_Or_Default(s => s.ID == 1);
 
-            // Filter leave requests for the current month only
+            if (salaryConfigration == null)
+            {
+                return BadRequest("Salary configuration not found.");
+            }
+
+            var currentDate = newRequest.Date;
+            var startDay = salaryConfigration.StartDay;
+            var fromPrevious = salaryConfigration.FromPreviousMonth;
+
+            DateOnly periodStart;
+            DateOnly periodEnd;
+
+            // Case 1: Salary cycle starts from current month
+            if (!fromPrevious)
+            {
+                if (currentDate.Day >= startDay)
+                {
+                    periodStart = SafeDateOnly(currentDate.Year, currentDate.Month, startDay);
+                    var endMonth = currentDate.Month == 12 ? 1 : currentDate.Month + 1;
+                    var endYear = currentDate.Month == 12 ? currentDate.Year + 1 : currentDate.Year;
+                    periodEnd = SafeDateOnly(endYear, endMonth, startDay - 1);
+                }
+                else
+                {
+                    var prevMonth = currentDate.Month == 1 ? 12 : currentDate.Month - 1;
+                    var prevYear = currentDate.Month == 1 ? currentDate.Year - 1 : currentDate.Year;
+                    periodStart = SafeDateOnly(prevYear, prevMonth, startDay);
+                    periodEnd = SafeDateOnly(currentDate.Year, currentDate.Month, startDay - 1);
+                }
+            }
+            else
+            {
+                if (currentDate.Day >= startDay)
+                {
+                    periodStart = SafeDateOnly(currentDate.Year, currentDate.Month, startDay);
+                    var endMonth = currentDate.Month == 12 ? 1 : currentDate.Month + 1;
+                    var endYear = currentDate.Month == 12 ? currentDate.Year + 1 : currentDate.Year;
+                    periodEnd = SafeDateOnly(endYear, endMonth, startDay - 1);
+                }
+                else
+                {
+                    var prevMonth = currentDate.Month == 1 ? 12 : currentDate.Month - 1;
+                    var prevYear = currentDate.Month == 1 ? currentDate.Year - 1 : currentDate.Year;
+                    periodStart = SafeDateOnly(prevYear, prevMonth, startDay);
+                    periodEnd = SafeDateOnly(currentDate.Year, currentDate.Month, startDay - 1);
+                }
+            }
+
             List<LeaveRequest> leaveRequests = Unit_Of_Work.leaveRequest_Repository
-                .FindBy(l => l.EmployeeID == newRequest.EmployeeID
-                          && l.IsDeleted != true
-                          && l.Date.Month == currentMonth
-                          && l.Date.Year == currentYear);
+                 .FindBy(l => l.EmployeeID == newRequest.EmployeeID
+                           && l.IsDeleted != true
+                           && l.Date >= periodStart
+                           && l.Date <= periodEnd);
 
             var allHours = leaveRequests.Sum(l => l.Hours);
             var allMinutes = leaveRequests.Sum(l => l.Minutes);
@@ -321,17 +440,63 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                 return BadRequest("leaveRequest not exist");
             }
 
-            var currentDate = newRequest.Date;
-            var currentMonth = currentDate.Month;
-            var currentYear = currentDate.Year;
+            SalaryConfigration salaryConfigration = Unit_Of_Work.salaryConfigration_Repository
+        .First_Or_Default(s => s.ID == 1);
 
-            // Filter leave requests for the current month only
+            if (salaryConfigration == null)
+            {
+                return BadRequest("Salary configuration not found.");
+            }
+
+            var currentDate = newRequest.Date;
+            var startDay = salaryConfigration.StartDay;
+            var fromPrevious = salaryConfigration.FromPreviousMonth;
+
+            DateOnly periodStart;
+            DateOnly periodEnd;
+
+            // Case 1: Salary cycle starts from current month
+            if (!fromPrevious)
+            {
+                if (currentDate.Day >= startDay)
+                {
+                    periodStart = SafeDateOnly(currentDate.Year, currentDate.Month, startDay);
+                    var endMonth = currentDate.Month == 12 ? 1 : currentDate.Month + 1;
+                    var endYear = currentDate.Month == 12 ? currentDate.Year + 1 : currentDate.Year;
+                    periodEnd = SafeDateOnly(endYear, endMonth, startDay - 1);
+                }
+                else
+                {
+                    var prevMonth = currentDate.Month == 1 ? 12 : currentDate.Month - 1;
+                    var prevYear = currentDate.Month == 1 ? currentDate.Year - 1 : currentDate.Year;
+                    periodStart = SafeDateOnly(prevYear, prevMonth, startDay);
+                    periodEnd = SafeDateOnly(currentDate.Year, currentDate.Month, startDay - 1);
+                }
+            }
+            else
+            {
+                if (currentDate.Day >= startDay)
+                {
+                    periodStart = SafeDateOnly(currentDate.Year, currentDate.Month, startDay);
+                    var endMonth = currentDate.Month == 12 ? 1 : currentDate.Month + 1;
+                    var endYear = currentDate.Month == 12 ? currentDate.Year + 1 : currentDate.Year;
+                    periodEnd = SafeDateOnly(endYear, endMonth, startDay - 1);
+                }
+                else
+                {
+                    var prevMonth = currentDate.Month == 1 ? 12 : currentDate.Month - 1;
+                    var prevYear = currentDate.Month == 1 ? currentDate.Year - 1 : currentDate.Year;
+                    periodStart = SafeDateOnly(prevYear, prevMonth, startDay);
+                    periodEnd = SafeDateOnly(currentDate.Year, currentDate.Month, startDay - 1);
+                }
+            }
+
             List<LeaveRequest> leaveRequests = Unit_Of_Work.leaveRequest_Repository
-                .FindBy(l => l.EmployeeID == newRequest.EmployeeID
-                          && l.ID != newRequest.ID
-                          && l.IsDeleted != true
-                          && l.Date.Month == currentMonth
-                          && l.Date.Year == currentYear);
+               .FindBy(l => l.EmployeeID == newRequest.EmployeeID
+                         && l.ID != newRequest.ID
+                         && l.IsDeleted != true
+                         && l.Date >= periodStart
+                         && l.Date <= periodEnd);
 
             var allHours = leaveRequests.Sum(l => l.Hours);
             var allMinutes = leaveRequests.Sum(l => l.Minutes);
@@ -448,8 +613,10 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             Unit_Of_Work.SaveChanges();
             return Ok();
         }
+
+
         [HttpPost("report")]
-        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "LeaveRequest Report" })]
+        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Leave Request Report" })]
         public async Task<IActionResult> GetLeaveRequestReport([FromBody] ReportRequestDto request)
         {
             if (request == null)

@@ -347,9 +347,9 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
              
             return Ok(notificationSharedToGetDTO);
         }
-        
+
         //////////////////////////////////////////////////////////////////////////////////////////
-        
+
         [HttpGet("GetNotNotifiedYetByUserID")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee", "parent", "student" }
@@ -366,29 +366,45 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
             if (userTypeClaim == "employee")
             {
                 userTypeID = 1;
-            } 
-            else if(userTypeClaim == "student")
+            }
+            else if (userTypeClaim == "student")
             {
-                userTypeID= 2;
+                userTypeID = 2;
             }
             else if (userTypeClaim == "parent")
             {
                 userTypeID = 3;
             }
 
-            List<NotificationSharedTo> notificationSharedTos = await Unit_Of_Work.notificationSharedTo_Repository.Select_All_With_IncludesById<NotificationSharedTo>(
-                    f => f.IsDeleted != true && f.Notification.IsDeleted != true && !f.NotifiedOrNot && f.UserID == userId && f.UserTypeID == userTypeID,
-                    query => query.Include(d => d.Notification),
-                    query => query.Include(d => d.InsertedByEmployee)
-                    );
+            //List<NotificationSharedTo> notificationSharedTos = await Unit_Of_Work.notificationSharedTo_Repository.Select_All_With_IncludesById<NotificationSharedTo>(
+            //        f => f.IsDeleted != true && f.Notification.IsDeleted != true && !f.NotifiedOrNot && f.UserID == userId && f.UserTypeID == userTypeID,
+            //        query => query.Include(d => d.Notification),
+            //        query => query.Include(d => d.InsertedByEmployee)
+            //        );
 
-            notificationSharedTos = notificationSharedTos
-                .OrderByDescending(d => d.InsertedAt) 
-                .ToList();
+            //notificationSharedTos = notificationSharedTos
+            //    .OrderByDescending(d => d.InsertedAt)
+            //    .ToList();
 
-            if (notificationSharedTos == null || notificationSharedTos.Count == 0)
+            //if (notificationSharedTos == null || notificationSharedTos.Count == 0)
+            //{
+            //    return NotFound();
+            //}
+
+            var dbContext = Unit_Of_Work.DbContext;
+
+            var notificationsQuery = dbContext.NotificationSharedTo
+                .AsNoTracking()
+                .Where(f => f.IsDeleted != true && f.Notification.IsDeleted != true && !f.NotifiedOrNot && f.UserID == userId && f.UserTypeID == userTypeID)
+                .Include(d => d.Notification)
+                .Include(d => d.InsertedByEmployee)
+                .OrderByDescending(d => d.InsertedAt);
+
+            var notificationSharedTos = await notificationsQuery.ToListAsync();
+
+            if (notificationSharedTos.Count == 0)
             {
-                return NotFound();
+                return Ok(Array.Empty<NotificationSharedToGetDTO>());
             }
 
             List<NotificationSharedToGetDTO> notificationSharedToGetDTO = mapper.Map<List<NotificationSharedToGetDTO>>(notificationSharedTos);
@@ -400,13 +416,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Communication
                 {
                     notificationSharedTo.ImageLink = $"{serverUrl}{notificationSharedTo.ImageLink.Replace("\\", "/")}";
                 }
-            } 
+            }
 
             return Ok(notificationSharedToGetDTO);
         }
-        
+         
         //////////////////////////////////////////////////////////////////////////////////////////
-        
+
         [HttpGet("UnSeenNotificationCount")]
         [Authorize_Endpoint_(
             allowedTypes: new[] { "octa", "employee", "parent", "student" }

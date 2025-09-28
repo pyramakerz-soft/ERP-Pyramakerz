@@ -103,7 +103,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
             if (userIdClaim == null || userTypeClaim == null)
             {
-                return Unauthorized("User ID or Type claim not found.");
+                return Unauthorized(new { error = "User ID or Type claim not found." });
             }
 
             long EmpId = long.Parse(userIdClaim);
@@ -112,14 +112,14 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
             if (salaryConfigration == null)
             {
-                return BadRequest("Salary configuration not found.");
+                return BadRequest(new { error = "Salary configuration not found." });
             }
 
             int startDay = salaryConfigration.StartDay;
             DateOnly periodStart = new DateOnly();
             DateOnly periodEnd = new DateOnly();
 
-            if (startDay == 1)
+            if (salaryConfigration.FromPreviousMonth == false)
             {
                 periodStart = new DateOnly(year, month, 1);
                 periodEnd = periodStart.AddMonths(1).AddDays(-1); // last day of month
@@ -135,7 +135,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
             if (employeeClocks == null || employeeClocks.Count == 0)
             {
-                return NotFound("No employee clocks found for this period.");
+                return NotFound(new { error = "No employee clocks found for this period." });
             }
 
             List<EmployeeClocksGetDTO> dto = mapper.Map<List<EmployeeClocksGetDTO>>(employeeClocks);
@@ -172,6 +172,17 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             {
                 NewClock.LocationID = null;
             }
+
+            if(NewClock.ClockIn == null || NewClock.ClockOut== null)
+            {
+                return BadRequest("ClockIn and ClockOut are required");
+            }
+
+            if (NewClock.ClockIn > NewClock.ClockOut)
+            {
+                return BadRequest("ClockIn and ClockOut are required");
+            }
+
             EmployeeClocks clock = mapper.Map<EmployeeClocks>(NewClock);
 
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
@@ -287,11 +298,11 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
             if (userIdClaim == null || userTypeClaim == null)
             {
-                return Unauthorized("User ID or Type claim not found.");
+                return Unauthorized(new { error = "User ID or Type claim not found." });
             }
             if (NewClock == null)
             {
-                return BadRequest("Clock is empty");
+                return  BadRequest(new { error = "Clock is empty" });
             }
 
             NewClock.EmployeeID = long.Parse(userIdClaim);
@@ -299,38 +310,48 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             Employee employee = Unit_Of_Work.employee_Repository.First_Or_Default(s=>s.ID == NewClock.EmployeeID && s.IsDeleted != true);
             if (employee == null)
             {
-                return BadRequest("No Employee With This Id");
+                return BadRequest(new { error = "No Employee With This Id" });
             }
 
+            EmployeeClocks employeeClocks = Unit_Of_Work.employeeClocks_Repository
+                .FindBy(e => e.IsDeleted != true && e.EmployeeID == NewClock.EmployeeID && e.ClockOut == null)   // still open, no clock out
+                .OrderByDescending(e => e.Date)
+                .ThenByDescending(e => e.ClockIn)
+                .FirstOrDefault();
+
+            if (employeeClocks != null)
+            {
+                return BadRequest(new { error = "this user already clocked In" });
+            }
 
             if (employee.IsRestrictedForLoctaion)
             {
 
                 if(NewClock.Latitude == null)
                 {
-                    return BadRequest("Latitude is Required");
+                    return BadRequest(new { error = "Latitude is Required" });
                 }
 
                 if (NewClock.Latitude == null)
                 {
-                    return BadRequest("Latitude is Required");
+                    return BadRequest(new { error = "Latitude is Required" });
                 }
 
                 if (NewClock.LocationID == null || NewClock.LocationID == 0)
                 {
-                    return BadRequest("LocationID is Required");
+                    return BadRequest(new { error = "LocationID is Required" });
                 }
 
                 Location location = Unit_Of_Work.location_Repository.First_Or_Default(s => s.ID == NewClock.LocationID && s.IsDeleted != true);
                 if (location == null)
                 {
-                    return BadRequest("No location With This Id");
+                    return BadRequest(new { error = "No location With This Id" });
                 }
 
                 List<EmployeeLocation> employeeLocations = Unit_Of_Work.employeeLocation_Repository.FindBy(e => e.EmployeeID == employee.ID && e.IsDeleted != true);
                 if (employeeLocations == null || employeeLocations.Count == 0)
                 {
-                    return BadRequest("this employee not assigned for any location");
+                    return BadRequest(new { error = "this employee not assigned for any location" });
                 }
 
                 List<long> locationsIds= employeeLocations.Select(e=>e.LocationID).Distinct().ToList();
@@ -347,17 +368,17 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
                         if (distance > location.Range)
                         {
-                            return BadRequest($"Employee is out of range. Allowed: {location.Range} meters, Current: {distance:F2} meters");
+                            return BadRequest(new { error = $"Employee is out of range. Allowed: {location.Range} meters, Current: {distance:F2} meters" });
                         }
                     }
                     else
                     {
-                        return BadRequest("this employee not assigned for this location");
+                        return BadRequest(new { error = "this employee not assigned for this location" });
                     }
                 }
                 else
                 {
-                    return BadRequest("Location Id Is Required");
+                    return BadRequest(new { error = "Location Id Is Required" });
                 }
             }
             else
@@ -404,11 +425,11 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
             if (userIdClaim == null || userTypeClaim == null)
             {
-                return Unauthorized("User ID or Type claim not found.");
+                return Unauthorized(new { error = "User ID or Type claim not found." });
             }
             if (NewClock == null)
             {
-                return BadRequest("Clock is empty");
+                return BadRequest(new { error = "Clock is empty" });
             }
 
             NewClock.EmployeeID = long.Parse(userIdClaim);
@@ -416,36 +437,36 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             Employee employee = Unit_Of_Work.employee_Repository.First_Or_Default(s => s.ID == NewClock.EmployeeID && s.IsDeleted != true);
             if (employee == null)
             {
-                return BadRequest("No Employee With This Id");
+                return BadRequest(new { error = "No Employee With This Id" });
             }
 
             if (employee.IsRestrictedForLoctaion)
             {
                 if (NewClock.Latitude == null)
                 {
-                    return BadRequest("Latitude is Required");
+                    return BadRequest(new { error = "Latitude is Required" });
                 }
 
                 if (NewClock.Latitude == null)
                 {
-                    return BadRequest("Latitude is Required");
+                    return BadRequest(new { error = "Latitude is Required" });
                 }
 
                 if (NewClock.LocationID == null || NewClock.LocationID == 0)
                 {
-                    return BadRequest("LocationID is Required");
+                    return BadRequest(new { error = "LocationID is Required" });
                 }
 
                 Location location = Unit_Of_Work.location_Repository.First_Or_Default(s => s.ID == NewClock.LocationID && s.IsDeleted != true);
                 if (location == null)
                 {
-                    return BadRequest("No location With This Id");
+                    return BadRequest(new { error = "No location With This Id" });
                 }
 
                 List<EmployeeLocation> employeeLocations = Unit_Of_Work.employeeLocation_Repository.FindBy(e => e.EmployeeID == employee.ID && e.IsDeleted != true);
                 if (employeeLocations == null || employeeLocations.Count == 0)
                 {
-                    return BadRequest("this employee not assigned for any location");
+                    return BadRequest(new { error = "this employee not assigned for any location" });
                 }
 
                 List<long> locationsIds = employeeLocations.Select(e => e.LocationID).Distinct().ToList();
@@ -462,17 +483,17 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
                         if (distance > location.Range)
                         {
-                            return BadRequest($"Employee is out of range. Allowed: {location.Range} meters, Current: {distance:F2} meters");
+                            return BadRequest(new { error = $"Employee is out of range. Allowed: {location.Range} meters, Current: {distance:F2} meters" });
                         }
                     }
                     else
                     {
-                        return BadRequest("this employee not assigned for this location");
+                        return BadRequest(new { error = "this employee not assigned for this location" });
                     }
                 }
                 else
                 {
-                    return BadRequest("Location Id Is Required");
+                    return BadRequest(new { error = "Location Id Is Required" });
                 }
             }
             else
@@ -488,7 +509,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
             if(clock == null)
             {
-                return BadRequest("this user already clock out");
+                return BadRequest(new { error = "this user already clock out" });
             }
 
             clock.ClockOut = DateTime.Now.TimeOfDay;             // current time

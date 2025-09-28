@@ -103,6 +103,15 @@ namespace LMS_CMS_PL.Controllers.Domains
             //    RefreshToken = refreshToken
             //});
 
+            if (UserInfo.Type == "employee" && user.IsSuspended)
+            { 
+                return Forbid();
+            }
+            else if (UserInfo.Type == "student" && user.IsSuspended)
+            {
+                return Forbid();
+            }
+
             if (UserInfo.Type == "employee" && user is Employee emp)
             {
                 var tokenEmp = _generateJWT.Generate_Jwt_Token(emp.User_Name, emp.ID.ToString(), UserInfo.Type, emp.Role_ID.ToString());
@@ -264,5 +273,74 @@ namespace LMS_CMS_PL.Controllers.Domains
             await Unit_Of_Work.SaveChangesAsync();
             return Ok();
         }
-    } 
- }
+        ///////////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpPost("LoginMobile")]
+        public IActionResult LoginMobile([FromBody] LoginDTO UserInfo)
+        {
+            // bool isPasswordValid = BCrypt.Net.BCrypt.Verify(enteredPassword, storedHashedPassword);
+
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+
+            if (UserInfo == null)
+            {
+                return BadRequest(new { error = "Data Can't be null" });
+            }
+            if (UserInfo.User_Name.Length == 0)
+            {
+                return BadRequest(new { error = "User_Name Can't be null" });
+            }
+
+            if (UserInfo.SerialNumber.Length == 0)
+            {
+                return BadRequest(new { error = "SerialNumber Can't be null" });
+            }
+
+            if (UserInfo.Password.Length == 0)
+            {
+                return BadRequest(new { error = "Password Can't be null" });
+            }
+
+            UserInfo.Type = "employee";
+
+            var user = Unit_Of_Work.employee_Repository.First_Or_Default(emp => emp.User_Name == UserInfo.User_Name && emp.IsDeleted != true);
+
+            if (user == null)
+            {
+                return BadRequest(new { error = "UserName or Password is Invalid" });;
+            }
+            bool isMatch = BCrypt.Net.BCrypt.Verify(UserInfo.Password, user.Password);
+            if (isMatch == false)
+            {
+                return BadRequest(new { error = "UserName or Password is Invalid" });
+            }
+
+            if(user.SerialNumber != null && user.SerialNumber != UserInfo.SerialNumber)
+            {
+                return BadRequest(new { error = "SerialNumber is Invalid" });
+            }
+
+            if (user.SerialNumber == null)
+            {
+                user.SerialNumber = UserInfo.SerialNumber;
+                Unit_Of_Work.employee_Repository.Update(user);
+                Unit_Of_Work.SaveChanges();
+            }
+
+            if (user.IsSuspended)
+            {
+                return Forbid();
+            }
+
+            if (user is Employee emp)
+            {
+                var tokenEmp = _generateJWT.Generate_Jwt_Token(emp.User_Name, emp.ID.ToString(), UserInfo.Type, emp.Role_ID.ToString());
+                return Ok(new { Token = tokenEmp });
+            }
+
+            return BadRequest(new { error = "Unexpected user type." });
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+    }
+}

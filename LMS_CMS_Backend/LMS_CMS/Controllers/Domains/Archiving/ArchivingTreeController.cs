@@ -69,7 +69,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
             List<long> ArchivingTreeIDs = new List<long>();
              
             List<ArchivingTree> allArchivingTrees = await Unit_Of_Work.archivingTree_Repository.Select_All_With_IncludesById<ArchivingTree>(
-                f => f.IsDeleted != true,
+                f => f.IsDeleted != true && (f.FileLink == "" || f.FileLink == null),
                 query => query.Include(ac => ac.ArchivingTreeParent),
                 query => query.Include(ac => ac.ChildArchivingTrees)
                 );
@@ -561,29 +561,21 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
                     return accessCheck;
                 }
             }
+             
+            List<long> permissionGroupIDsForUser = new List<long>();
+            permissionGroupIDsForUser = permissionGroupsEmployee.Select(d => d.PermissionGroupID).ToList();
 
-            List<PermissionGroupEmployee> permissionGroupEmployees = Unit_Of_Work.permissionGroupEmployee_Repository.FindBy(d => d.IsDeleted != true && d.EmployeeID == userId && d.PermissionGroup.IsDeleted != true);
-            if (permissionGroupEmployees == null)
+            bool hasDeletePermission = Unit_Of_Work.permissionGroupDetails_Repository.FindBy(d => d.IsDeleted != true && permissionGroupIDsForUser.Contains(d.PermissionGroupID) && d.ArchivingTreeID == id)
+                .Any(permissionGroupDetail =>
+                    permissionGroupDetail.Allow_Delete == true && (
+                    permissionGroupDetail.Allow_Delete_For_Others == true ||
+                    (permissionGroupDetail.Allow_Delete_For_Others == false &&
+                        permissionGroupDetail.InsertedByUserId == userId)));
+
+            if (!hasDeletePermission)
             {
-                return BadRequest("You Don't have any permission to delete this");
-            }
-            else
-            {
-                List<long> permissionGroupIDsForUser = new List<long>();
-                permissionGroupIDsForUser = permissionGroupEmployees.Select(d => d.PermissionGroupID).ToList();
-
-                bool hasDeletePermission = Unit_Of_Work.permissionGroupDetails_Repository.FindBy(d => d.IsDeleted != true && permissionGroupIDsForUser.Contains(d.PermissionGroupID) && d.ArchivingTreeID == id)
-                    .Any(permissionGroupDetail =>
-                        permissionGroupDetail.Allow_Delete == true ||
-                        permissionGroupDetail.Allow_Delete_For_Others == true ||
-                        (permissionGroupDetail.Allow_Delete_For_Others == false &&
-                         permissionGroupDetail.InsertedByUserId == userId));
-
-                if (!hasDeletePermission)
-                {
-                    return BadRequest("You don't have permission to delete this");
-                } 
-            }
+                return BadRequest("You don't have permission to delete this");
+            } 
 
             archivingTreeExist.IsDeleted = true;
             TimeZoneInfo cairoZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");

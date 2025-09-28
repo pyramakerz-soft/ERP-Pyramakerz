@@ -12,7 +12,7 @@ import { ApiService } from '../../../Services/api.service';
 import { StudentService } from '../../../Services/student.service';
 import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 @Component({
@@ -58,7 +58,7 @@ export class SearchStudentComponent {
   TotalRecords:number = 0
 
 
-  constructor(public acadimicYearService:AcadimicYearService,private languageService: LanguageService, public gradeservice:GradeService, public StudentService: StudentService , public classroomService:ClassroomService, public studentService:StudentService, public ApiServ: ApiService , public router: Router){}
+  constructor(public acadimicYearService:AcadimicYearService,private languageService: LanguageService,private translate: TranslateService, public gradeservice:GradeService, public StudentService: StudentService , public classroomService:ClassroomService, public studentService:StudentService, public ApiServ: ApiService , public router: Router){}
 
   ngOnInit(){ 
     this.DomainName = this.ApiServ.GetHeader(); 
@@ -323,15 +323,15 @@ export class SearchStudentComponent {
     }
   
     Delete(id: number) {
-      Swal.fire({
-        title: 'Are you sure you want to delete this Student?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#089B41',
-        cancelButtonColor: '#17253E',
-        confirmButtonText: 'Delete',
-        cancelButtonText: 'Cancel',
-      }).then((result) => {
+     Swal.fire({
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete')+ " " + this.translate.instant('هذا') + " " + this.translate.instant('the') + this.translate.instant('Student'),
+           icon: 'warning',
+           showCancelButton: true,
+           confirmButtonColor: '#089B41',
+           cancelButtonColor: '#17253E',
+           confirmButtonText: this.translate.instant('Delete'),
+           cancelButtonText: this.translate.instant('Cancel'),
+         }).then((result) => {
         if (result.isConfirmed) {
           this.StudentService.Delete(id, this.DomainName).subscribe((d) => {
             this.Search();

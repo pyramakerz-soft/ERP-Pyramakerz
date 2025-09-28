@@ -211,6 +211,35 @@ namespace LMS_CMS_PL.Controllers.Domains
             return Ok(employeeDTOs);
         }
         
+
+        ///////////////////////////////////////////////////////////////////////////////////////
+
+        [HttpGet("GetByJobId/{JobId}")]
+        [Authorize_Endpoint_(
+            allowedTypes: new[] { "octa", "employee" },
+            pages: new[] { "Employee" }
+        )]
+        public IActionResult GetByJobId(long JobId)
+        {
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+            Job job = Unit_Of_Work.job_Repository.First_Or_Default(d => d.ID == JobId && d.IsDeleted != true);
+            if (job == null)
+            {
+                return NotFound("No Job with this Id");
+            }
+            List<Employee> employees = Unit_Of_Work.employee_Repository.FindBy(
+                    sem => sem.IsDeleted != true && sem.JobID == JobId);
+
+            if (employees == null || employees.Count == 0)
+            {
+                return NotFound("There is no employees with this job Id");
+            }
+
+            List<Employee_GetDTO> employeeDTOs = mapper.Map<List<Employee_GetDTO>>(employees);
+             
+            return Ok(employeeDTOs);
+        }
+        
         ///////////////////////////////////////////////////////////////////////////////////////
 
         [HttpGet("GetByDepartmentId/{DepartmentId}")]
@@ -424,8 +453,7 @@ namespace LMS_CMS_PL.Controllers.Domains
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
             long.TryParse(userIdClaim, out long userId);
             Employee employee = await Unit_Of_Work.employee_Repository.FindByIncludesAsync(
-                    emp => emp.IsDeleted != true && emp.ID == userId,
-                    query => query.Include(emp => emp.BusCompany),
+                    emp => emp.IsDeleted != true && emp.ID == userId, 
                     query => query.Include(emp => emp.EmployeeType),
                     query => query.Include(emp => emp.Role));
 
@@ -559,7 +587,7 @@ namespace LMS_CMS_PL.Controllers.Domains
 
             if (userIdClaim == null || userTypeClaim == null)
             {
-                return Unauthorized("User ID or Type claim not found.");
+                return Unauthorized(new { error = "User ID or Type claim not found." });
             }
 
             long empId = long.Parse(userIdClaim);
@@ -572,7 +600,7 @@ namespace LMS_CMS_PL.Controllers.Domains
 
             if (employee == null || employee.IsDeleted == true)
             {
-                return NotFound("No employee found");
+                return NotFound(new { error = "No employee found" });
             }
 
             Employee_GetDTO employeeDTO = mapper.Map<Employee_GetDTO>(employee);
@@ -1634,7 +1662,7 @@ namespace LMS_CMS_PL.Controllers.Domains
             return Ok(newEmployee);
         }
         [HttpPost("report")]
-        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Employee Report" , "Employee Accounting" })]
+        [Authorize_Endpoint_(allowedTypes: new[] { "octa", "employee" }, pages: new[] { "Employee Job Report"})]
         public async Task<IActionResult> GetReport([FromBody] EmployeeReportRequestDto request)
         {
             UOW uow = _dbContextFactory.CreateOneDbContext(HttpContext);

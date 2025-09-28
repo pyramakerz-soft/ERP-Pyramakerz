@@ -14,5 +14,105 @@
     font-size: 12px;
     word-break: break-word;
   }
+
+  /* Add this to your pdf-print.component.css file */
+
+/* Page break control for PDF generation */
+@media print {
+  /* Force page break before element */
+  .page-break-before {
+    page-break-before: always;
+    break-before: page;
+  }
+  
+  /* Force page break after element */
+  .page-break-after {
+    page-break-after: always;
+    break-after: page;
+  }
+  
+  /* Table-specific page break rules */
+  table {
+    page-break-inside: auto;
+    break-inside: auto;
+  }
+  
+  thead {
+    display: table-header-group;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  
+  tbody {
+    display: table-row-group;
+    page-break-inside: auto;
+    break-inside: auto;
+  }
+  
+  tr {
+    page-break-inside: avoid;
+    break-inside: avoid;
+    page-break-after: auto;
+    break-after: auto;
+  }
+  
+  /* Ensure table headers repeat on each page */
+  thead tr {
+    display: table-row;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  
+  /* Small table sections - try to keep together but allow breaks if needed */
+  .table-section {
+    page-break-inside: auto;
+    break-inside: auto;
+    margin-bottom: 20px;
+  }
+  
+  /* Only avoid breaks for very small tables */
+  .small-table-section {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  
+  /* Large table sections - always allow breaks */
+  .large-table-section {
+    page-break-inside: auto;
+    break-inside: auto;
+  }
+  
+  .large-table-section thead {
+    display: table-header-group;
+  }
+  
+  /* Keep summary sections with their tables when possible */
+  .summary-section {
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+}
+
+/* General styles for better PDF layout */
+.pdf-table-container {
+  margin-bottom: 30px;
+  position: relative;
+}
+
+.pdf-table-container:last-child {
+  margin-bottom: 0;
+}
+
+/* Minimum height for table rows to prevent cramping */
+.pdf-table-row {
+  min-height: 40px;
+}
+
+/* Better spacing for table sections */
+.table-section-separator {
+  height: 30px;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
   
   

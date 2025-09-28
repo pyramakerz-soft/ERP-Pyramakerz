@@ -21,5 +21,7 @@ namespace LMS_CMS_DAL.Models.Domains.HR
         public long EmployeeID { get; set; }
         public Employee Employee { get; set; }
 
+
+
     }
 }

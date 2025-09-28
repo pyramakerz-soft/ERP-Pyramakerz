@@ -58,6 +58,7 @@ namespace LMS_CMS_DAL.Models.Domains
         public decimal? MonthlyLeaveRequestBalance { get; set; }
         public int? GraduationYear { get; set; }
         public string? Note { get; set; }
+        public string? SerialNumber { get; set; }
         public bool? CanReceiveRequest { get; set; } 
         public bool? CanReceiveRequestFromParent { get; set; }
         public bool? CanReceiveMessageFromParent { get; set; }
@@ -139,5 +140,7 @@ namespace LMS_CMS_DAL.Models.Domains
         public ICollection<EmployeeLocation> EmployeeLocation { get; set; } = new HashSet<EmployeeLocation>();
         public ICollection<BankEmployee> BankEmployees { get; set; } = new HashSet<BankEmployee>();
         public ICollection<SafeEmployee> SafeEmployee { get; set; } = new HashSet<SafeEmployee>();
+        public ICollection<MonthlyAttendance> MonthlyAttendance { get; set; } = new HashSet<MonthlyAttendance>();
+        public ICollection<SalaryHistory> SalaryHistory { get; set; } = new HashSet<SalaryHistory>();
     }
 }

@@ -4,7 +4,7 @@ import { OfficialHolidaysService } from '../../../../Services/Employee/HR/offici
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subscription, firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
 import { SearchComponent } from '../../../../Component/search/search.component';
@@ -58,6 +58,7 @@ export class OfficialHolidaysComponent {
     public account: AccountService,
     private languageService: LanguageService,
     public DomainServ: DomainService,
+    private translate: TranslateService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public OfficialHolidaysServ: OfficialHolidaysService,
@@ -111,14 +112,14 @@ export class OfficialHolidaysComponent {
   }
 
   Delete(id: number) {
-    Swal.fire({
-      title: 'Are you sure you want to delete this Official Holiday?',
+   Swal.fire({
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذه') + " " +this.translate.instant('Official Holiday') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.OfficialHolidaysServ.Delete(id, this.DomainName).subscribe((d) => {

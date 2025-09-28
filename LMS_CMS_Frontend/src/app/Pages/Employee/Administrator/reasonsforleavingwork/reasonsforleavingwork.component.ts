@@ -14,7 +14,7 @@ import { DeleteEditPermissionService } from '../../../../Services/shared/delete-
 import { MenuService } from '../../../../Services/shared/menu.service';
 import { ReasonsforleavingworkService } from '../../../../Services/Employee/Administration/reasonsforleavingwork.service';
 import { firstValueFrom } from 'rxjs';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
@@ -58,11 +58,12 @@ export class ReasonsforleavingworkComponent {
     public activeRoute: ActivatedRoute,
     public account: AccountService,
     public BusTypeServ: BusTypeService,
+    private translate: TranslateService,
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
     public reasonServ: ReasonsforleavingworkService,
-      private languageService: LanguageService,
+    private languageService: LanguageService,
     private realTimeService: RealTimeNotificationServiceService
   ) {}
   ngOnInit() {
@@ -116,13 +117,13 @@ export class ReasonsforleavingworkComponent {
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Reason?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('Reason') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.reasonServ.Delete(id, this.DomainName).subscribe((d) => {

@@ -1,33 +1,36 @@
-export interface StoreBalanceReport {
-  reportType: 'QuantityOnly' | 'PurchasePrice' | 'SalesPrice' | 'Cost' | 'ItemsUnderLimit';
-  data: StoreBalanceItem[];
-  grandTotals?: {
-    TotalQuantity: number;
-    TotalValue?: number;
-  };
+export class StoreBalanceReport {
+  constructor(
+    public reportType: 'QuantityOnly' | 'PurchasePrice' | 'SalesPrice' | 'Cost' | 'ItemsUnderLimit' = 'QuantityOnly',
+    public data: StoreBalanceItem[] = [],
+    public grandTotals?: { TotalQuantity: number; TotalValue?: number }
+  ) {}
 }
 
-export interface StoreBalanceItem {
-  itemCode: number;
-  itemName: string;
-  stores: StoreBalanceDetail[];
-  quantity: number;
-  purchasePrice?: number;
-  totalPurchase?: number;
-  totalPurchaseValue?: number;
-  salesPrice?: number;
-  totalSales?: number;
-  totalSalesValue?: number;
-  averageCost?: number;
-  totalCost?: number;
-  limit?: number;
+export class StoreBalanceItem {
+  constructor(
+    public itemCode: number = 0,
+    public itemName: string = '',
+    public stores: StoreBalanceDetail[] = [],
+    public quantity: number = 0,
+    public purchasePrice?: number,
+    public totalPurchase?: number,
+    public totalPurchaseValue?: number,
+    public salesPrice?: number,
+    public totalSales?: number,
+    public totalSalesValue?: number,
+    public averageCost?: number,
+    public totalCost?: number,
+    public limit?: number
+  ) {}
 }
 
-export interface StoreBalanceDetail {
-  SalesPrice: null;
-  storeName: string;
-  quantity: number;
-  PurchasePrice?: number;
-  value?: number;
-  AverageCost?: number;
+export class StoreBalanceDetail {
+  constructor(
+    public SalesPrice: null = null,
+    public storeName: string = '',
+    public quantity: number = 0,
+    public PurchasePrice?: number,
+    public value?: number,
+    public AverageCost?: number
+  ) {}
 }

@@ -43,7 +43,7 @@
             <option [ngValue]="0" disabled selected hidden>{{ 'Choose' | translate }} {{ 'Sub Account' | translate }}</option>
             <!-- <option [ngValue]="0">{{ 'All' | translate }} {{ 'Accounts' | translate }}</option> -->
             <option *ngFor="let account of accountOptions" [ngValue]="account.id">
-                {{ account.name || account.en_name }}
+                {{ account.name }}
             </option>
             <option *ngIf="accountOptions.length === 0 && !isAccountsLoading" disabled>
                 {{ 'No accounts available' | translate }}
@@ -57,7 +57,7 @@
     <div class="w-full md:w-1/6 flex justify-end mt-4 md:mt-0">
         <button class="p-4 font-medium text-xl rounded-lg" (click)="viewReport()"
             [disabled]="!fromDate || !toDate || !linkFileID || !subAccountID || isLoading" [ngClass]="{
-                'bg-gray-100 text-gray-300': !fromDate || !toDate || !linkFileID || subAccountID ||  isLoading,
+                'bg-gray-100 text-gray-300': !fromDate || !toDate || !linkFileID || !subAccountID || isLoading,
                 'secondaryBg text-white': fromDate && toDate && linkFileID && subAccountID && !isLoading
             }">
             <span *ngIf="!isLoading">{{ 'View Report' | translate }}</span>
@@ -72,8 +72,14 @@
 </div>
 
 <div *ngIf="showTable && reportData" class="mb-5">
+    <!-- Export Buttons -->
+    <div class="mt-5 flex justify-end space-x-4 rtl:space-x-reverse">
+        <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="DownloadAsExcel()" [title]="'Download Excel' | translate">
+        <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()" [title]="'Download PDF' | translate">
+        <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()" [title]="'Print' | translate">
+    </div>
     <!-- Opening Balance -->
-    <div class="bg-gray-50 p-4 rounded-lg mb-4">
+    <div class="bg-gray-50 p-4 rounded-lg mb-4 mt-6">
         <h3 class="font-semibold text-lg mb-2">{{ 'Opening Balance' | translate }}</h3>
         <div class="text-lg">
             {{ reportData.firstPeriodBalance | number:'1.2-2' }}
@@ -134,7 +140,7 @@
                         {{ item.serial }}
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                        {{ item.subAccount }}
+                        {{ item.subAccount || '-'}}
                     </td>
                     <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                         {{ item.debit | number:'1.2-2' }}
@@ -169,44 +175,118 @@
         </div>
     </div>
 
+
     <!-- Pagination -->
-    <div *ngIf="reportData.pagination.totalPages > 1" class="flex justify-between items-center mt-4">
-        <div class="text-sm text-gray-600">
-            {{ 'Showing' | translate }} {{ (pageNumber - 1) * pageSize + 1 }} - {{ Math.min(pageNumber * pageSize, reportData.pagination.totalRecords) }} 
-            {{ 'of' | translate }} {{ reportData.pagination.totalRecords }} {{ 'records' | translate }}
+    <div *ngIf="showTable && reportData" class="mt-8 flex justify-between items-center">
+        <div class="flex items-center space-x-4 rtl:space-x-reverse">
+            <button class="flex items-center space-x-2 rounded-lg border py-3 px-4 rtl:space-x-reverse"
+                (click)="changeCurrentPage(CurrentPage-1)" [disabled]="CurrentPage === 1 || !reportData.data.length"
+                [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === 1 || !reportData.data.length}">
+                <i class="fa-solid fa-arrow-left"></i>
+                <p>{{'Previous'| translate }}</p>
+            </button>
+            <div class="flex">
+                <div *ngFor="let page of visiblePages"
+                    class="rounded-lg py-[10px] w-[40px]"
+                    [ngClass]="{ 'border': page === CurrentPage, 'hover:bg-gray-100': page !== CurrentPage }"
+                    (click)="changeCurrentPage(page)">
+                    <p class="cursor-pointer text-center">{{ page }}</p>
+                </div>
+            </div>
+            <button class="flex items-center space-x-2 rounded-lg border py-3 px-4 rtl:space-x-reverse"
+                (click)="changeCurrentPage(CurrentPage+1)" [disabled]="CurrentPage === TotalPages || !reportData.data.length"
+                [ngClass]="{'cursor-not-allowed opacity-50': CurrentPage === TotalPages || !reportData.data.length}">
+                <p>{{'Next'| translate }}</p>
+                <i class="fa-solid fa-arrow-right"></i>
+            </button>
         </div>
-        <div class="flex space-x-2 rtl:space-x-reverse">
-            <button (click)="changePage(1)" [disabled]="pageNumber === 1" 
-                class="px-3 py-1 rounded border" [ngClass]="{'bg-gray-200': pageNumber === 1, 'bg-white': pageNumber !== 1}">
-                &laquo;
-            </button>
-            <button (click)="changePage(pageNumber - 1)" [disabled]="pageNumber === 1" 
-                class="px-3 py-1 rounded border" [ngClass]="{'bg-gray-200': pageNumber === 1, 'bg-white': pageNumber !== 1}">
-                &lsaquo;
-            </button>
-            
-            <span class="px-3 py-1">{{ pageNumber }} / {{ reportData.pagination.totalPages }}</span>
-            
-            <button (click)="changePage(pageNumber + 1)" [disabled]="pageNumber === reportData.pagination.totalPages" 
-                class="px-3 py-1 rounded border" [ngClass]="{'bg-gray-200': pageNumber === reportData.pagination.totalPages, 'bg-white': pageNumber !== reportData.pagination.totalPages}">
-                &rsaquo;
-            </button>
-            <button (click)="changePage(reportData.pagination.totalPages)" [disabled]="pageNumber === reportData.pagination.totalPages" 
-                class="px-3 py-1 rounded border" [ngClass]="{'bg-gray-200': pageNumber === reportData.pagination.totalPages, 'bg-white': pageNumber !== reportData.pagination.totalPages}">
-                &raquo;
-            </button>
+        <div class="flex items-center space-x-2 rtl:space-x-reverse">
+            <input type="number" (input)="validateNumberForPagination($event)"
+                class="rounded-lg border py-3 px-4 w-[73px]"
+                [(ngModel)]="PageSize" min="1"
+                (input)="validatePageSize($event)"
+                (ngModelChange)="changeCurrentPage(CurrentPage)">
+            <p>{{'items Per Page'| translate }}</p>
+        </div>
+        <div>
+            <p>{{CurrentPage}} {{'of'| translate }} {{TotalPages}} {{'pages'| translate }} ({{TotalRecords}} {{'Item'| translate }})</p>
         </div>
     </div>
 </div>
 
-<!-- Update the PDF container section -->
+<!-- PDF container (keep at the bottom) -->
+<div class="absolute -top-[9999px] -left-[9999px]">
+    <div id="accountStatementData" class="hidden">
+        <app-pdf-print *ngIf="showPDF" [school]="school"
+            [fileName]="'Account Statement Report'"
+            [infoRows]="[
+     {
+        keyEn: 'Date From: ' + this.fromDate,
+        keyAr: 'التاريخ من: ' + this.fromDate
+      },
+      {
+        keyEn: 'Date To: ' + this.toDate,
+        keyAr: 'التاريخ إلى: ' + this.toDate
+      },
+      {
+        keyEn: 'Account Type: ' + this.getLinkFileName(this.linkFileID),
+        keyAr: 'نوع الحساب: ' + this.getLinkFileName(this.linkFileID)
+      },
+      {
+        keyEn: 'Account: ' + this.getAccountName(this.subAccountID),
+        keyAr: 'الحساب: ' + this.getAccountName(this.subAccountID)
+      },
+            ]"
+            [tableDataWithHeaderArray]="cachedTableDataForPDF"
+            #pdfComponentRef>
+        </app-pdf-print>
+    </div>
+</div>
+
 <!-- <div class="absolute -top-[9999px] -left-[9999px]">
-  <div id="accountStatementData" class="hidden">
+  <div id="accountSubledgerData" class="hidden">
     <app-pdf-print *ngIf="showPDF" [school]="school" 
-                   [fileName]="type"
-                   [infoRows]="getInfoRows()"
-                   [tableDataWithHeaderArray]="getTableDataWithHeader()"
+                   [fileName]="'Accounts Subledger Report'"
+[infoRows]="[
+     {
+        keyEn: 'Date From: ' + this.fromDate,
+        keyAr: 'التاريخ من: ' + this.fromDate
+      },
+      {
+        keyEn: 'Date To: ' + this.toDate,
+        keyAr: 'التاريخ إلى: ' + this.toDate
+      },
+      {
+        keyEn: 'Account Type: ' + this.getLinkFileName(this.linkFileID),
+        keyAr: 'نوع الحساب: ' + this.getLinkFileName(this.linkFileID)
+      },
+      {
+        keyEn: 'Account: ' + this.getAccountName(this.accountID),
+        keyAr: 'الحساب: ' + this.getAccountName(this.accountID)
+      },
+      ]"                   [tableDataWithHeaderArray]="cachedTableDataForPDF"
                    #pdfComponentRef>
     </app-pdf-print>
   </div>
 </div> -->
+
+<!--       {
+        keyEn: 'Date From: ' + this.fromDate,
+        keyAr: 'التاريخ من: ' + this.fromDate
+      },
+      {
+        keyEn: 'Date To: ' + this.toDate,
+        keyAr: 'التاريخ إلى: ' + this.toDate
+      },
+      {
+        keyEn: 'Account Type: ' + this.getLinkFileName(this.linkFileID),
+        keyAr: 'نوع الحساب: ' + this.getLinkFileName(this.linkFileID)
+      },
+      {
+        keyEn: 'Account: ' + this.getAccountName(this.subAccountID),
+        keyAr: 'الحساب: ' + this.getAccountName(this.subAccountID)
+      },
+      {
+        keyEn: 'Generated On: ' + new Date().toLocaleDateString(),
+        keyAr: 'تم الإنشاء في: ' + new Date().toLocaleDateString()
+      } -->

@@ -33,7 +33,7 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
   SelectedStudentId: number = 0;
   SelectedStartDate: string = '';
   SelectedEndDate: string = '';
-  reportType: string = 'student'; // Default to student report
+  reportType: string = 'student';
 
   showTable: boolean = false;
   showViewReportBtn: boolean = false;
@@ -53,7 +53,7 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
     reportHeaderTwoEn: 'Detailed Daily Performance Summary',
     reportHeaderOneAr: 'تقرير الأداء اليومي',
     reportHeaderTwoAr: 'ملخص الأداء اليومي التفصيلي',
-    reportImage: 'assets/images/logo.png',
+    // reportImage: 'assets/images/logo.png',
   };
 
   @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;
@@ -346,14 +346,14 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
         'Name': item.englishNameStudent,
         'Ar Name': item.arabicNameStudent,
         'Student ID': item.studentId,
-        'Performance Type': item.performanceTypeEn,
+        'Performance Type': item.performanceTypeEn || item.performanceTypeAr ,
         Comment: item.comment || '-',
       }));
     } else {
       this.tableDataForExport = this.tableData.map((item) => ({
         Date: item.date,
         'Avg Score': item.averageScore || '-',
-        'Performance Type': item.performanceTypeEn,
+        'Performance Type': item.performanceTypeEn || item.performanceTypeAr ,
         Comment: item.comment || '-',
       }));
     }
@@ -377,7 +377,7 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
               Date: item.date,
               'Name': item.englishNameStudent,
               'Student ID': item.studentId,
-              'Performance Type': item.performanceTypeEn,
+              'Performance Type': item.performanceTypeEn || item.performanceTypeAr ,
               Comment: item.comment,
             })),
           },
@@ -398,7 +398,7 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
             data: this.tableData.map((item) => ({
               Date: item.date,
               'Avg Score': item.averageScore,
-              'Performance Type': item.performanceTypeEn,
+              'Performance Type': item.performanceTypeEn || item.performanceTypeAr ,
               Comment: item.comment,
             })),
           },
@@ -485,14 +485,14 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
             item.date,
             item.englishNameStudent,
             item.studentId,
-            item.performanceTypeEn,
+            item.performanceTypeEn || item.performanceTypeAr ,
             item.comment || '-',
           ];
         } else {
           return [
             item.date,
             item.averageScore || '-',
-            item.performanceTypeEn,
+            item.performanceTypeEn || item.performanceTypeAr ,
             item.comment || '-',
           ];
         }

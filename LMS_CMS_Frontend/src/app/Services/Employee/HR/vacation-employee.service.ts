@@ -88,5 +88,27 @@ export class VacationEmployeeService {
     return this.http.delete(`${this.baseUrl}/VacationEmployee/${id}`, { headers })
   }
 
+  GetVacationReport(jobCategoryId: number, jobId: number, employeeId: number, dateFrom: string, dateTo: string, DomainName: string) {
+  if (DomainName != null) {
+    this.header = DomainName;
+  }
+  
+  const token = localStorage.getItem("current_token");
+  const headers = new HttpHeaders()
+    .set('domain-name', this.header)
+    .set('Authorization', `Bearer ${token}`)
+    .set('Content-Type', 'application/json');
+  
+  const requestBody = {
+    jobCategoryId: jobCategoryId,
+    jobId: jobId,
+    employeeId: employeeId,
+    dateFrom: dateFrom,
+    dateTo: dateTo
+  };
+  
+  return this.http.post<any[]>(`${this.baseUrl}/VacationEmployee/report`, requestBody, { headers });
+}
+
 }
 

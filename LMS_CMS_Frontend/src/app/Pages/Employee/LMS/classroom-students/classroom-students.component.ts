@@ -16,7 +16,7 @@ import Swal from 'sweetalert2';
 import { Classroom } from '../../../../Models/LMS/classroom';
 import { SearchStudentComponent } from '../../../../Component/Employee/search-student/search-student.component';
 import { Student } from '../../../../Models/student';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
@@ -69,6 +69,7 @@ export class ClassroomStudentsComponent {
     private menuService: MenuService,
     private classroomStudentService: ClassroomStudentService, 
     public router: Router,
+    private translate: TranslateService,
     private languageService: LanguageService,
     private realTimeService: RealTimeNotificationServiceService,
   ) {}
@@ -265,14 +266,14 @@ export class ClassroomStudentsComponent {
 
   deleteStudent(id:number){
     Swal.fire({
-      title: 'Are you sure you want to delete this Student Classroom?',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#089B41',
-      cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel'
-    }).then((result) => {
+        title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذا') + " " + this.translate.instant('the') +this.translate.instant('Student') + this.translate.instant('?'),
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#089B41',
+        cancelButtonColor: '#17253E',
+        confirmButtonText: this.translate.instant('Delete'),
+        cancelButtonText: this.translate.instant('Cancel'),
+      }).then((result) => {
       if (result.isConfirmed) {
         this.classroomStudentService.Delete(id, this.DomainName).subscribe(
           (data: any) => { 

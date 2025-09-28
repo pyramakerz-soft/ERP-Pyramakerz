@@ -8,6 +8,7 @@ import { Notification } from '../../Models/Communication/notification';
 import { HttpClient } from '@angular/common/http';
 import { AccountService } from '../account.service';
 import { TokenData } from '../../Models/token-data';
+import { catchError, of } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -92,18 +93,40 @@ export class RealTimeNotificationServiceService {
     }
   }
 
-  private loadOldNotifications() {
-    this.notificationService.GetNotNotifiedYetByUserID(this.DomainName).subscribe((data) => {
-      if (data && data.length > 0) {
-        this.dialogRef = this.dialog.open(NotificationPopUpComponent, {
-          data: { notification: data },
-          disableClose: true,
-          panelClass: 'fullscreen-notification-modal',
-        });
-      }
-    });
-  }  
+  // private loadOldNotifications() {
+  //   this.notificationService.GetNotNotifiedYetByUserID(this.DomainName).subscribe((data) => {
+  //     if (data && data.length > 0) {
+  //       this.dialogRef = this.dialog.open(NotificationPopUpComponent, {
+  //         data: { notification: data },
+  //         disableClose: true,
+  //         panelClass: 'fullscreen-notification-modal',
+  //       });
+  //     }
+  //   });
+  // }  
 
+  private loadOldNotifications() {
+    this.notificationService.GetNotNotifiedYetByUserID(this.DomainName)
+      .pipe(
+        catchError(error => {
+          if (error?.status === 404) {
+            return of([]);
+          }
+          console.error('GetNotNotifiedYetByUserID failed', error);
+          return of([]);
+        })
+      )
+      .subscribe((data) => {
+        if (data && data.length > 0) {
+          this.dialogRef = this.dialog.open(NotificationPopUpComponent, {
+            data: { notification: data },
+            disableClose: true,
+            panelClass: 'fullscreen-notification-modal',
+          });
+        }
+      });
+  }  
+  
   private joinNotificationGroup() { 
     const groupName = `${this.DomainName}_${this.User_Data_After_Login.type}_${this.User_Data_After_Login.id}`;
     

@@ -16,9 +16,9 @@ import { JobService } from '../../../../Services/Employee/Administration/job.ser
 import { firstValueFrom } from 'rxjs';
 import { JobCategoriesService } from '../../../../Services/Employee/Administration/job-categories.service';
 import { JobCategories } from '../../../../Models/Administrator/job-categories';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-job',
@@ -39,7 +39,7 @@ export class JobComponent {
 
   DomainName: string = '';
   UserID: number = 0;
- isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   isModalVisible: boolean = false;
   mode: string = '';
@@ -62,6 +62,7 @@ export class JobComponent {
     public activeRoute: ActivatedRoute,
     public account: AccountService,
     public BusTypeServ: BusTypeService,
+    private translate: TranslateService,
     public DomainServ: DomainService,
     public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
@@ -69,7 +70,7 @@ export class JobComponent {
     public JobCategoryServ: JobCategoriesService,
     private languageService: LanguageService,
     private realTimeService: RealTimeNotificationServiceService
-  ) {}
+  ) { }
   ngOnInit() {
     this.User_Data_After_Login = this.account.Get_Data_Form_Token();
     this.UserID = this.User_Data_After_Login.id;
@@ -94,16 +95,16 @@ export class JobComponent {
     this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
-    this.isRtl = document.documentElement.dir === 'rtl';  
+    this.isRtl = document.documentElement.dir === 'rtl';
   }
 
 
-        ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
-    } 
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
 
 
 
@@ -133,13 +134,13 @@ export class JobComponent {
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this Job ?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذه') + " " + this.translate.instant('Job') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.jobServ.Delete(id, this.DomainName).subscribe((d) => {
@@ -149,7 +150,7 @@ export class JobComponent {
     });
   }
 
-  Edit(rowId:number) {
+  Edit(rowId: number) {
     this.mode = 'Edit';
     this.jobServ.GetById(rowId, this.DomainName).subscribe((d) => {
       this.job = d;
@@ -190,7 +191,7 @@ export class JobComponent {
           },
           (error) => {
             this.isLoading = false;
-            if(error.error.includes("Name cannot be longer than 100 characters")){
+            if (error.error.includes("Name cannot be longer than 100 characters")) {
               Swal.fire({
                 icon: 'error',
                 title: 'Oops...',
@@ -198,14 +199,14 @@ export class JobComponent {
                 confirmButtonText: 'Okay',
                 customClass: { confirmButton: 'secondaryBg' },
               });
-            }else{ 
+            } else {
               Swal.fire({
                 icon: 'error',
                 title: 'Error',
                 text: error.error || 'An unexpected error occurred',
                 confirmButtonColor: '#089B41',
               });
-            } 
+            }
           }
         );
       }
@@ -218,7 +219,7 @@ export class JobComponent {
           },
           (error) => {
             this.isLoading = false;
-            if(error.error.includes("Name cannot be longer than 100 characters")){
+            if (error.error.includes("Name cannot be longer than 100 characters")) {
               Swal.fire({
                 icon: 'error',
                 title: 'Oops...',
@@ -226,14 +227,14 @@ export class JobComponent {
                 confirmButtonText: 'Okay',
                 customClass: { confirmButton: 'secondaryBg' },
               });
-            }else{ 
+            } else {
               Swal.fire({
                 icon: 'error',
                 title: 'Error',
                 text: error.error || 'An unexpected error occurred',
                 confirmButtonColor: '#089B41',
               });
-            } 
+            }
           }
         );
       }

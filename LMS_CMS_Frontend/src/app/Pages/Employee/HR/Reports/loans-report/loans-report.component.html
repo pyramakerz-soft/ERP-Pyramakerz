@@ -1,0 +1,210 @@
+<!-- loans-report.component.html -->
+<div class="flex justify-between">
+    <h1 class="primaryTxt font-bold text-2xl leading-9">
+        {{ 'Loans Report' | translate }}
+    </h1>
+</div>
+
+<div class="my-5 flex flex-wrap justify-between items-center">
+    <!-- Date From -->
+    <div class="w-[24%] mb-4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="dateFrom">{{ 'Date From' | translate }}</label>
+        <input type="date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="dateFrom"
+            [(ngModel)]="dateFrom" (ngModelChange)="onFilterChange()" required>
+    </div>
+
+    <!-- Date To -->
+    <div class="w-[24%] mb-4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="dateTo">{{ 'Date To' | translate }}</label>
+        <input type="date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="dateTo"
+            [(ngModel)]="dateTo" (ngModelChange)="onFilterChange()" required>
+    </div>
+
+    <!-- Job Category Selector -->
+    <div class="w-[24%] mb-4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="jobCategory">{{ 'Job Category' | translate }}</label>
+        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="jobCategory"
+            [(ngModel)]="selectedJobCategoryId" (change)="loadJobs()">
+            <option [value]="0" selected hidden>{{ 'Choose' | translate }} {{ 'Job Category' | translate }}</option>
+            <option *ngIf="jobCategories.length === 0" disabled>{{ 'No Data' | translate }}</option>
+            <option *ngFor="let category of jobCategories" [value]="category.id">
+                {{ category.name || category.ar_name }}
+            </option>
+        </select>
+    </div>
+
+    <!-- Job Selector -->
+    <div class="w-[24%] mb-4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="job">{{ 'Job' | translate }}</label>
+        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="job"
+            [(ngModel)]="selectedJobId" (change)="loadEmployees()" [disabled]="!selectedJobCategoryId">
+            <option [value]="0" selected hidden>{{ 'Choose' | translate }} {{ 'Job' | translate }}</option>
+            <option *ngIf="jobs.length === 0" disabled>{{ 'No Data' | translate }}</option>
+            <option *ngFor="let job of jobs" [value]="job.id">
+                {{ job.name || job.ar_name }}
+            </option>
+        </select>
+    </div>
+
+    <!-- Employee Selector -->
+    <div class="w-[24%] mb-4">
+        <label class="block mb-2 text-sm font-medium text-gray-900" for="employee">{{ 'Employee' | translate }}</label>
+        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full" id="employee"
+            [(ngModel)]="selectedEmployeeId" (ngModelChange)="onFilterChange()" [disabled]="!selectedJobId">
+            <option [value]="0" selected hidden>{{ 'Choose' | translate }} {{ 'Employee' | translate }}</option>
+            <option *ngIf="employees.length === 0" disabled>{{ 'No Data' | translate }}</option>
+            <option *ngFor="let employee of employees" [value]="employee.id">
+                {{ employee.en_name || employee.ar_name || 'Unknown' }}
+            </option>
+        </select>
+    </div>
+
+    <!-- View Report Button -->
+    <div class="w-[24%] flex justify-end">
+        <button class="p-4 font-medium text-xl rounded-lg" (click)="viewReport()"
+            [disabled]="!showViewReportBtn || isLoading" [ngClass]="{ 
+            'bg-gray-100 text-gray-300 cursor-not-allowed': !showViewReportBtn || isLoading, 
+            'secondaryBg text-white': showViewReportBtn && !isLoading
+        }">
+            <span *ngIf="!isLoading">{{ 'View Report' | translate }}</span>
+            <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+        </button>
+    </div>
+</div>
+
+<!-- Export Buttons -->
+<div *ngIf="showTable" class="mb-5 flex justify-end space-x-4 rtl:space-x-reverse">
+    <img class="w-5 cursor-pointer" src="Icons/Excel.png" (click)="exportExcel()" title="Export to Excel">
+    <img class="w-5 cursor-pointer" src="Icons/PDF.png" (click)="DownloadAsPDF()" title="Export to PDF">
+    <img class="w-5 cursor-pointer" src="Icons/Print.png" (click)="Print()" title="Print Report">
+</div>
+
+<!-- Results Table -->
+<div *ngIf="showTable" class="mt-5 overflow-x-auto rounded-2xl border border-[#BDBDBD]">
+    <table class="w-full tabe inset-0 bg-[#EBEBEB] text-left rtl:text-right text-[#6F6F6F]">
+        <thead class="bg-[#EBEBEB] text-sm md:text-base border border-[#BDBDBD] border-t-0 border-l-0">
+            <tr>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Employee ID' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Employee Name' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Total Amount' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Loan ID' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Loan Date' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Deduction Start' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Loan Amount' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Number of Deductions' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Safe Name' | translate }}
+                </th>
+                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap border border-[#EAECF0] border-t-0 border-l-0">
+                    {{ 'Notes' | translate }}
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngIf="loansReports.length === 0">
+                <td colspan="10" class="bg-white px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                    {{ 'No Data Found' | translate }}
+                </td>
+            </tr>
+
+            <ng-container *ngFor="let employeeLoan of loansReports; let i = index">
+                <tr *ngIf="!hasLoans(employeeLoan)" 
+                    [ngClass]="{ 'bg-[#F7F7F7]': i % 2 === 1, 'bg-white': i % 2 !== 1 }"
+                    class="border-t border-gray-300 text-xs md:text-sm">
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ employeeLoan.employeeId }}
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ employeeLoan.employeeEnName || employeeLoan.employeeArName || 'Unknown' }}
+                    </td>
+                    <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                        {{ employeeLoan.totalAmount }}
+                    </td>
+                    <td colspan="7" class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0 text-center">
+                        {{ 'No loans found' | translate }}
+                    </td>
+                </tr>
+                
+                <ng-container *ngFor="let loan of employeeLoan.loans; let j = index">
+                    <tr [ngClass]="{ 'bg-[#F7F7F7]': (i + j) % 2 === 1, 'bg-white': (i + j) % 2 !== 1 }"
+                        class="border-t border-gray-300 text-xs md:text-sm">
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0" *ngIf="j === 0" [attr.rowspan]="getLoanCount(employeeLoan)">
+                            {{ employeeLoan.employeeId }}
+                        </td>
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0" *ngIf="j === 0" [attr.rowspan]="getLoanCount(employeeLoan)">
+                            {{ employeeLoan.employeeEnName || employeeLoan.employeeArName || 'Unknown' }}
+                        </td>
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0" *ngIf="j === 0" [attr.rowspan]="getLoanCount(employeeLoan)">
+                            {{ employeeLoan.totalAmount }}
+                        </td>
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ loan.id }}
+                        </td>
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ loan.date | date:'mediumDate' }}
+                        </td>
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ loan.deductionStartMonth | date:'mediumDate' }}
+                        </td>
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ loan.amount }}
+                        </td>
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ loan.numberOfDeduction }}
+                        </td>
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ loan.saveName }}
+                        </td>
+                        <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
+                            {{ loan.notes || '-' }}
+                        </td>
+                    </tr>
+                </ng-container>
+            </ng-container>
+        </tbody>
+    </table>
+</div>
+
+<!-- Hidden PDF Container -->
+<div class="absolute -top-[9999px] -left-[9999px]">
+    <div id="Data" class="hidden">
+        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'Loans Report'"
+            [infoRows]="[
+      { keyEn: 'Date From: ' + this.dateFrom },
+      { keyEn: 'Date To: ' + this.dateTo },
+      { keyEn: 'Job Category: ' + this.getJobCategoryName() },
+      { keyEn: 'Job: ' + this.getJobName() },
+      { keyEn: 'Employee: ' + this.getEmployeeName() }
+    ]"
+            [tableHeaders]="[
+                'Employee ID', 
+                'Employee Name', 
+                'Total Amount', 
+                'Loan ID', 
+                'Loan Date', 
+                'Deduction Start', 
+                'Loan Amount', 
+                'Number of Deductions', 
+                'Safe Name', 
+                'Notes'
+            ]"
+            [tableData]="reportsForExport" #pdfComponentRef>
+        </app-pdf-print>
+    </div>
+</div>

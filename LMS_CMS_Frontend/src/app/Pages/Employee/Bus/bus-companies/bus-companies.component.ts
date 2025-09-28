@@ -14,9 +14,9 @@ import { ApiService } from '../../../../Services/api.service';
 import { firstValueFrom } from 'rxjs';
 import { SearchComponent } from '../../../../Component/search/search.component';
 import Swal from 'sweetalert2';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../../Services/shared/language.service';
-import {  Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../Services/shared/real-time-notification-service.service';
 @Component({
   selector: 'app-bus-companies',
@@ -33,7 +33,7 @@ export class BusCompaniesComponent {
   AllowDelete: boolean = false;
   AllowEditForOthers: boolean = false;
   AllowDeleteForOthers: boolean = false;
- isRtl: boolean = false;
+  isRtl: boolean = false;
   subscription!: Subscription;
   TableData: BusType[] = []
   OriginData: BusType[] = []
@@ -59,15 +59,16 @@ export class BusCompaniesComponent {
   isLoading = false;
 
 
-  constructor(private router: Router, 
-    private menuService: MenuService, 
-    public activeRoute: ActivatedRoute, 
-    public account: AccountService, 
-    public BusTypeServ: BusCompanyService, 
-    public DomainServ: DomainService, 
-    public EditDeleteServ: DeleteEditPermissionService, 
+  constructor(private router: Router,
+    private menuService: MenuService,
+    public activeRoute: ActivatedRoute,
+    public account: AccountService,
+    public BusTypeServ: BusCompanyService,
+    public DomainServ: DomainService,
+    private translate: TranslateService,
+    public EditDeleteServ: DeleteEditPermissionService,
     public ApiServ: ApiService,
-      private languageService: LanguageService, private realTimeService: RealTimeNotificationServiceService) { }
+    private languageService: LanguageService, private realTimeService: RealTimeNotificationServiceService) { }
 
   ngOnInit() {
 
@@ -98,7 +99,7 @@ export class BusCompaniesComponent {
       this.AllowEdit = true;
       this.AllowDelete = true;
     }
-      this.subscription = this.languageService.language$.subscribe(direction => {
+    this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
     this.isRtl = document.documentElement.dir === 'rtl';
@@ -107,12 +108,12 @@ export class BusCompaniesComponent {
   }
 
 
-          ngOnDestroy(): void {
-      this.realTimeService.stopConnection(); 
-       if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
-    } 
+  ngOnDestroy(): void {
+    this.realTimeService.stopConnection();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
 
 
   Create() {
@@ -128,7 +129,7 @@ export class BusCompaniesComponent {
   }
 
   async GetTableData() {
-    this.TableData=[]
+    this.TableData = []
     try {
       const data = await firstValueFrom(this.BusTypeServ.Get(this.DomainName));
       this.TableData = data;
@@ -149,13 +150,13 @@ export class BusCompaniesComponent {
 
   Delete(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to delete this bus company?',
+      title: this.translate.instant('Are you sure you want to') + " " + this.translate.instant('delete') + " " + this.translate.instant('هذه') + " " + this.translate.instant('the') + this.translate.instant('Company') + this.translate.instant('?'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#089B41',
       cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel'
+      confirmButtonText: this.translate.instant('Delete'),
+      cancelButtonText: this.translate.instant('Cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         this.BusTypeServ.Delete(id, this.DomainName).subscribe((data) => {
@@ -187,7 +188,7 @@ export class BusCompaniesComponent {
       if (this.busCompany.hasOwnProperty(key)) {
         const field = key as keyof BusType;
         if (!this.busCompany[field]) {
-          if(field == "name"){
+          if (field == "name") {
             this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
             isValid = false;
           }
@@ -199,7 +200,7 @@ export class BusCompaniesComponent {
 
     if (this.busCompany.name.length > 100) {
       isValid = false;
-      this.validationErrors['name']='Name cannot be longer than 100 characters.'
+      this.validationErrors['name'] = 'Name cannot be longer than 100 characters.'
     }
 
     return isValid;
@@ -254,7 +255,7 @@ export class BusCompaniesComponent {
   }
 
   CreateOREdit() {
-    if(this.isFormValid()){
+    if (this.isFormValid()) {
       if (this.mode === "add") {
         this.AddNewType();
       }

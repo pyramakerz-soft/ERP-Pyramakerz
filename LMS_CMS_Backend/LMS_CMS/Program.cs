@@ -133,7 +133,7 @@ namespace LMS_CMS
                             var path = context.HttpContext.Request.Path;
                             if (!string.IsNullOrEmpty(accessToken) &&
                                  (path.StartsWithSegments("/notificationHub") || path.StartsWithSegments("/requestHub") || path.StartsWithSegments("/chatMessageHub")))
-                            { 
+                            {
                                 context.Token = accessToken;
                             }
                             return Task.CompletedTask;
@@ -156,8 +156,8 @@ namespace LMS_CMS
             builder.Services.AddScoped<FileValidationService>();
             builder.Services.AddScoped<CancelInterviewDayMessageService>();
             builder.Services.AddScoped<EmailService>();
-            builder.Services.AddScoped<GenerateBarCodeEan13>(); 
-            builder.Services.AddScoped<CheckPageAccessService>(); 
+            builder.Services.AddScoped<GenerateBarCodeEan13>();
+            builder.Services.AddScoped<CheckPageAccessService>();
             builder.Services.AddScoped<InVoiceNumberCreate>();
             builder.Services.AddScoped<CalculateCurrentStock>();
             builder.Services.AddScoped<CreateStudentService>();
@@ -179,7 +179,7 @@ namespace LMS_CMS
 
             builder.Services.AddAWSService<IAmazonSecretsManager>(new Amazon.Extensions.NETCore.Setup.AWSOptions
             {
-                Region = RegionEndpoint.USEast1 
+                Region = RegionEndpoint.USEast1
             });
 
             var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
@@ -195,7 +195,7 @@ namespace LMS_CMS
                            .WithExposedHeaders("Content-Disposition")
                            .AllowCredentials();
                 });
-            }); 
+            });
 
             /// For generic repo:
             builder.Services.AddScoped<UOW>();
@@ -210,7 +210,7 @@ namespace LMS_CMS
                 .AddJsonOptions(options =>
                 {
                     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-            });
+                });
 
             builder.Services.Configure<IISServerOptions>(options =>
             {
@@ -237,7 +237,8 @@ namespace LMS_CMS
             //app.UseMiddleware<DbConnection_Check_Middleware>(); 
 
             /// 3)
-            app.UseForwardedHeaders(new ForwardedHeadersOptions {
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
             });
 
@@ -281,8 +282,8 @@ namespace LMS_CMS
                     ctx.Context.Response.Headers.Append("Access-Control-Allow-Origin", "*");
                 }
             });
-             
-             
+
+
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
@@ -292,7 +293,7 @@ namespace LMS_CMS
 
             // Redirects http:// requests to https://.
             app.UseHttpsRedirection();
-              
+
 
             //app.Urls.Add("http://0.0.0.0:5000");
             //app.UseCors(builder =>

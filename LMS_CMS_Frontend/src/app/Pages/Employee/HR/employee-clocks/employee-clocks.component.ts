@@ -27,18 +27,7 @@ import Swal from 'sweetalert2';
   styleUrl: './employee-clocks.component.css',
 })
 export class EmployeeClocksComponent {
-  User_Data_After_Login: TokenData = new TokenData(
-    '',
-    0,
-    0,
-    0,
-    0,
-    '',
-    '',
-    '',
-    '',
-    ''
-  );
+  User_Data_After_Login: TokenData = new TokenData('',0,0,0,0,'','','','','');
 
   isRtl: boolean = false;
   subscription!: Subscription;
@@ -120,12 +109,7 @@ export class EmployeeClocksComponent {
   GetAllData() {
     this.TableData = [];
     if (this.SelectedEmployeeId && this.year && this.month) {
-      this.EmployeeClocksServ.Get(
-        this.SelectedEmployeeId,
-        this.year,
-        this.month,
-        this.DomainName
-      ).subscribe(
+      this.EmployeeClocksServ.Get(this.SelectedEmployeeId,this.year,this.month,this.DomainName).subscribe(
         (data) => {
           this.TableData = data;
           console.log(this.TableData);
@@ -246,7 +230,7 @@ export class EmployeeClocksComponent {
       if (this.employeeClocks.hasOwnProperty(key)) {
         const field = key as keyof EmployeeClocks;
         if (!this.employeeClocks[field]) {
-          if (field == 'date' || field == 'employeeID') {
+          if (field == 'date' || field == 'employeeID' || field == 'clockIn' || field == 'clockOut' ) {
             this.validationErrors[field] = `*${this.capitalizeField(
               field
             )} is required`;
