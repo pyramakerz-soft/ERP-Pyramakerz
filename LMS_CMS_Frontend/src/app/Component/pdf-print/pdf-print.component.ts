@@ -263,38 +263,49 @@ printPDF() {
       printContainer.style.cssText = originalStyle;
     });
 }
+
+
 getColumnWidth(header: string, totalColumns: number): any {
-  // Define special cases for columns that need more space
-  const wideColumns = ['details', 'description', 'notes', 'comments', 'permanent drug'];
-  const mediumColumns = ['name', 'title', 'address'];
-  
   const headerLower = header.toLowerCase();
   
-  // Check if this is a wide column that needs more space
+  // Give more space to Details column specifically
+  if (headerLower.includes('details')) {
+    return { 
+      width: '35%', 
+      'min-width': '200px',
+      'max-width': '400px',
+      'word-wrap': 'break-word',
+      'white-space': 'normal'
+    };
+  }
+  
+  const wideColumns = ['details', 'description', 'notes', 'comments', 'permanent drug'];
+  const mediumColumns = ['name', 'title', 'address', 'employee name'];
+  
   const isWideColumn = wideColumns.some(col => headerLower.includes(col));
   const isMediumColumn = mediumColumns.some(col => headerLower.includes(col));
   
   if (isWideColumn) {
-    // Give wide columns 40% of the table width
-    return { width: '40%', 'min-width': '200px' };
+    return { 
+      width: '30%', 
+      'min-width': '150px',
+      'word-wrap': 'break-word',
+      'white-space': 'normal'
+    };
   } else if (isMediumColumn) {
-    // Give medium columns 25% of the table width
-    return { width: '25%', 'min-width': '150px' };
+    return { 
+      width: '15%', 
+      'min-width': '100px',
+      'word-wrap': 'break-word',
+      'white-space': 'normal'
+    };
   } else {
-    // Distribute remaining space equally among other columns
-    const remainingColumns = totalColumns - 
-      (wideColumns.filter(col => this.hasColumnWithName(col)).length * 1) -
-      (mediumColumns.filter(col => this.hasColumnWithName(col)).length * 1);
-    
-    if (remainingColumns > 0) {
-      const remainingWidth = 100 - 
-        (wideColumns.filter(col => this.hasColumnWithName(col)).length * 40) -
-        (mediumColumns.filter(col => this.hasColumnWithName(col)).length * 25);
-      
-      return { width: `${remainingWidth / remainingColumns}%`, 'min-width': '100px' };
-    } else {
-      return { width: 'auto', 'min-width': '100px' };
-    }
+    return { 
+      width: 'auto', 
+      'min-width': '80px',
+      'word-wrap': 'break-word',
+      'white-space': 'normal'
+    };
   }
 }
 

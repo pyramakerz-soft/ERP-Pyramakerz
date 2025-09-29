@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Student } from '../../../../../Models/student';
@@ -6,6 +6,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
+
 @Component({
   selector: 'app-hygiene-form-table',
   standalone: true,
@@ -21,9 +22,11 @@ export class HygieneFormTableComponent {
 
   @Input() isRtl: boolean = false;
   @Input() subscription!: Subscription; 
+  
+  // Add output event to notify parent when hygiene types change
+  @Output() hygieneTypeChange = new EventEmitter<void>();
+
   private previousAttendanceStates: { [key: number]: boolean | null } = {};
-
-
 
   constructor(
       private languageService: LanguageService,
@@ -58,6 +61,8 @@ export class HygieneFormTableComponent {
       this.resetHygieneTypes(student);
     }
     this.previousAttendanceStates[student.id] = student['attendance'];
+    // Emit change event when attendance changes
+    this.hygieneTypeChange.emit();
   }
 
   private resetHygieneTypes(student: Student) {
@@ -73,6 +78,8 @@ export class HygieneFormTableComponent {
     }
     student[`hygieneType_${hygieneTypeId}`] = value;
     this.updateSelectAllState(student);
+    // Emit change event when hygiene type is changed
+    this.hygieneTypeChange.emit();
   }
 
   setAllHygieneTypesForStudent(student: Student, value: boolean) {
@@ -83,6 +90,8 @@ export class HygieneFormTableComponent {
       student[`hygieneType_${hygieneType.id}`] = value;
     });
     student['hygieneTypeSelectAll'] = value;
+    // Emit change event when all hygiene types are changed
+    this.hygieneTypeChange.emit();
   }
 
   private updateSelectAllState(student: Student) {
