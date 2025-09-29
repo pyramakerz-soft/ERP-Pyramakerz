@@ -270,7 +270,7 @@ onCategorySelected() {
       )
       .subscribe({
         next: (response: any) => {
-          console.log(response);
+          console.log('resres' , response);
           if (Array.isArray(response)) {
             console.log('Response is an array');
             this.transactions = response;

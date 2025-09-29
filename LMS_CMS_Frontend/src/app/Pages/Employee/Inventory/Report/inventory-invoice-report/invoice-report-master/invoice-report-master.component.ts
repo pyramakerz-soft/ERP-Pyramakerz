@@ -529,23 +529,23 @@ getSelectedFlagNames(): string {
 
 async exportExcel() {
   const tableData = this.transactions.map((t) => {
-    const baseData = {
+    const baseData: any = {
       'Invoice #': t.invoiceNumber,
       Date: new Date(t.date).toLocaleDateString(),
       Store: t.storeName,
-      'Transaction Type': t.flagEnName,
-      'Total Amount': t.total,
-      // 'Payment Type': t.isCash ? 'Cash' : t.isVisa ? 'Visa' : 'Other',
-      // Notes: t.notes || '-',
     };
-    
-    // Add student/supplier based on report type
+
     if (this.reportType === 'sales') {
-      return {...baseData, 'Student': t.studentName || '-'};
+      baseData['Student'] = t.studentName || '-';
     } else if (this.reportType === 'purchase') {
-      return {...baseData, 'Supplier': t.supplierName || '-'};
+      baseData['Supplier'] = t.supplierName || '-';
     }
-    
+
+    baseData['Transaction Type'] = t.flagEnName;
+    baseData['Total Amount'] = t.total;
+    // baseData['Payment Type'] = t.isCash ? 'Cash' : t.isVisa ? 'Visa' : 'Other';
+    // baseData['Notes'] = t.notes || '-';
+
     return baseData;
   });
 
@@ -563,7 +563,7 @@ async exportExcel() {
       { key: 'Store', value: this.getStoreName() },
       { key: 'Transaction Types', value: this.getSelectedFlagNames() }
     ],
-    reportImage: '', // You can add an image URL if needed
+    reportImage: '',
     filename: `${this.reportType}_Transactions_Report.xlsx`,
     tables: [{
       // title: 'Transactions',
@@ -572,4 +572,5 @@ async exportExcel() {
     }]
   });
 }
+
 }
