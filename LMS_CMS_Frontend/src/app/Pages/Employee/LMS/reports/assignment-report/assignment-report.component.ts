@@ -15,8 +15,10 @@ import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
-import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+
+
 
 @Component({
   selector: 'app-assignment-report',
@@ -343,69 +345,6 @@ export class AssignmentReportComponent implements OnInit {
     ];
   }
 
-  // DownloadAsPDF() {
-  //   if (this.reportsForExport.length === 0) {
-  //     Swal.fire('Warning', 'No data to export!', 'warning');
-  //     return;
-  //   }
-
-  //   this.showPDF = true;
-  //   setTimeout(() => {
-  //     this.pdfComponentRef.downloadPDF();
-  //     setTimeout(() => (this.showPDF = false), 2000);
-  //   }, 500);
-  // }
-
-  // Print() {
-  //   if (this.reportsForExport.length === 0) {
-  //     Swal.fire('Warning', 'No data to print!', 'warning');
-  //     return;
-  //   }
-    
-  //   this.showPDF = true;
-  //   setTimeout(() => {
-  //     const printContents = document.getElementById('Data')?.innerHTML;
-  //     if (!printContents) {
-  //       console.error('Element not found!');
-  //       return;
-  //     }
-      
-  //     const printStyle = `
-  //       <style>
-  //         @page { size: auto; margin: 0mm; }
-  //         body { margin: 0; }
-  //         @media print {
-  //           body > *:not(#print-container) { display: none !important; }
-  //           #print-container {
-  //             display: block !important;
-  //             position: static !important;
-  //             top: auto !important;
-  //             left: auto !important;
-  //             width: 100% !important;
-  //             height: auto !important;
-  //             background: white !important;
-  //             box-shadow: none !important;
-  //             margin: 0 !important;
-  //           }
-  //         }
-  //       </style>
-  //     `;
-      
-  //     const printContainer = document.createElement('div');
-  //     printContainer.id = 'print-container';
-  //     printContainer.innerHTML = printStyle + printContents;
-      
-  //     document.body.appendChild(printContainer);
-  //     window.print();
-      
-  //     setTimeout(() => {
-  //       document.body.removeChild(printContainer);
-  //       this.showPDF = false;
-  //     }, 100);
-  //   }, 500);
-  // }
-
-  // Helper methods for template calculations
   getTotalSuccessful(): number {
     return this.assignmentReports.reduce((sum, report) => sum + report.numberSuccessful, 0);
   }
@@ -479,70 +418,55 @@ export class AssignmentReportComponent implements OnInit {
     try {
       // Wait for the chart to be fully rendered
       await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Create a temporary container for the report
+
+      // Create a temporary container for the report (same as print)
       reportElement = document.createElement('div');
-      reportElement.style.width = '794px'; // A4 width in pixels (210mm)
-      reportElement.style.padding = '20px';
-      reportElement.style.backgroundColor = 'white';
+      reportElement.style.width = '900px';
+      reportElement.style.padding = '32px';
+      reportElement.style.backgroundColor = '#fff';
       reportElement.style.fontFamily = 'Arial, sans-serif';
       reportElement.style.position = 'fixed';
       reportElement.style.left = '-9999px';
       reportElement.style.top = '0';
       reportElement.style.color = '#333';
-      
-      // Add header (matches print layout)
+      reportElement.style.boxSizing = 'border-box';
+
+      // Header
       const headerDiv = document.createElement('div');
-      headerDiv.className = 'header';
       headerDiv.innerHTML = `
-        <div style="text-align: center; margin-bottom: 20px;">
-          <h1 style="font-size: 24px; font-weight: bold; color: #333; margin: 0;">
+        <div style="text-align: center; margin-bottom: 24px;">
+          <h1 style="font-size: 2rem; font-weight: bold; color: #333; margin: 0;">
             Assignment Report
           </h1>
         </div>
       `;
       reportElement.appendChild(headerDiv);
-      
-      // Convert chart to image (if available)
+
+      // Chart image
       if (this.chartContainer && this.chartContainer.nativeElement) {
-        try {
-          const chartElement = this.chartContainer.nativeElement;
-          chartElement.style.visibility = 'visible';
-          chartElement.style.display = 'block';
-          
-          await new Promise(resolve => setTimeout(resolve, 100));
-          
-          const chartCanvas = await html2canvas(chartElement, {
-            scale: 2,
-            backgroundColor: '#ffffff',
-            logging: false,
-            useCORS: true,
-            allowTaint: false,
-            width: chartElement.scrollWidth,
-            height: chartElement.scrollHeight
-          });
-          
-          const chartImage = chartCanvas.toDataURL('image/png');
-          const chartContainerDiv = document.createElement('div');
-          chartContainerDiv.className = 'chart-container';
-          chartContainerDiv.innerHTML = `
-            <div style="margin: 20px 0;">
-              <img src="${chartImage}" style="max-width: 100%; height: auto;" />
-            </div>
-          `;
-          reportElement.appendChild(chartContainerDiv);
-        } catch (chartError) {
-          console.error('Error capturing chart:', chartError);
-          // Continue without chart
-        }
+        const chartCanvas = await html2canvas(this.chartContainer.nativeElement, {
+          scale: 2,
+          backgroundColor: '#fff',
+          logging: false,
+          useCORS: true,
+          allowTaint: false,
+          width: this.chartContainer.nativeElement.scrollWidth,
+          height: this.chartContainer.nativeElement.scrollHeight
+        });
+        const chartImg = document.createElement('img');
+        chartImg.src = chartCanvas.toDataURL('image/png');
+        chartImg.style.display = 'block';
+        chartImg.style.margin = '0 auto 32px auto';
+        chartImg.style.maxWidth = '100%';
+        chartImg.style.height = 'auto';
+        reportElement.appendChild(chartImg);
       }
-      
-      // Add report details (matches print layout)
+
+      // Details
       const detailsDiv = document.createElement('div');
-      detailsDiv.className = 'details';
       detailsDiv.innerHTML = `
-        <div style="margin: 20px 0;">
-          <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 10px; color: #333;">
+        <div style="margin: 24px 0;">
+          <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 10px; color: #333;">
             Report Details
           </h3>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; font-size: 14px;">
@@ -556,72 +480,70 @@ export class AssignmentReportComponent implements OnInit {
         </div>
       `;
       reportElement.appendChild(detailsDiv);
-      
-      // Add summary statistics (similar to your commented HTML)
-      const summaryDiv = document.createElement('div');
-      summaryDiv.innerHTML = `
-        <div style="background: white; padding: 16px; border-radius: 16px; border: 1px solid #BDBDBD; margin: 20px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-          <h3 style="font-size: 18px; font-weight: 600; color: #333; margin-bottom: 16px; text-align: center;">
-            Summary Statistics
-          </h3>
-          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 16px;">
-            <div style="text-align: center;">
-              <div style="font-size: 24px; font-weight: bold; color: #10B981;">${this.getTotalSuccessful()}</div>
-              <div style="font-size: 14px; color: #6B7280;">Total Successful</div>
-            </div>
-            <div style="text-align: center;">
-              <div style="font-size: 24px; font-weight: bold; color: #F97316;">${this.getTotalFailed()}</div>
-              <div style="font-size: 14px; color: #6B7280;">Total Failed</div>
-            </div>
-            <div style="text-align: center;">
-              <div style="font-size: 24px; font-weight: bold; color: #3B82F6;">${this.getTotalAttendance()}</div>
-              <div style="font-size: 14px; color: #6B7280;">Total Attendance</div>
-            </div>
-            <div style="text-align: center;">
-              <div style="font-size: 24px; font-weight: bold; color: #8B5CF6;">${this.getTotalAssignments()}</div>
-              <div style="font-size: 14px; color: #6B7280;">Total Assignments</div>
-            </div>
-          </div>
-        </div>
-      `;
-      reportElement.appendChild(summaryDiv);
-      
-      // Add data table (matches print layout exactly)
+
+      // Summary statistics
+      // const summaryDiv = document.createElement('div');
+      // summaryDiv.innerHTML = `
+      //   <div style="background: white; padding: 16px; border-radius: 16px; border: 1px solid #BDBDBD; margin: 24px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.07);">
+      //     <h3 style="font-size: 1.125rem; font-weight: 600; color: #333; margin-bottom: 16px; text-align: center;">
+      //       Summary Statistics
+      //     </h3>
+      //     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 16px;">
+      //       <div style="text-align: center;">
+      //         <div style="font-size: 1.5rem; font-weight: bold; color: #10B981;">${this.getTotalSuccessful()}</div>
+      //         <div style="font-size: 14px; color: #6B7280;">Total Successful</div>
+      //       </div>
+      //       <div style="text-align: center;">
+      //         <div style="font-size: 1.5rem; font-weight: bold; color: #F97316;">${this.getTotalFailed()}</div>
+      //         <div style="font-size: 14px; color: #6B7280;">Total Failed</div>
+      //       </div>
+      //       <div style="text-align: center;">
+      //         <div style="font-size: 1.5rem; font-weight: bold; color: #3B82F6;">${this.getTotalAttendance()}</div>
+      //         <div style="font-size: 14px; color: #6B7280;">Total Attendance</div>
+      //       </div>
+      //       <div style="text-align: center;">
+      //         <div style="font-size: 1.5rem; font-weight: bold; color: #8B5CF6;">${this.getTotalAssignments()}</div>
+      //         <div style="font-size: 14px; color: #6B7280;">Total Assignments</div>
+      //       </div>
+      //     </div>
+      //   </div>
+      // `;
+      // reportElement.appendChild(summaryDiv);
+
+      // Data table
       if (this.assignmentReports.length > 0) {
-        const tableContainer = document.createElement('div');
-        tableContainer.className = 'table-container';
-        tableContainer.innerHTML = `
-          <div style="margin-top: 20px;">
-            <h3 style="font-size: 18px; font-weight: 600; color: #333; margin-bottom: 10px;">
-              Assignment Details
-            </h3>
-            <table style="width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 12px; border: 1px solid #BDBDBD; border-radius: 16px; overflow: hidden;">
+        const tableDiv = document.createElement('div');
+        tableDiv.innerHTML = `
+          <div style="margin-top: 24px;">
+            <table style="width: 100%; border-collapse: collapse; background: #EBEBEB; color: #6F6F6F; font-size: 14px;">
               <thead>
-                <tr style="background-color: #EBEBEB;">
-                  <th style="border: 1px solid #EAECF0; padding: 12px 16px; text-align: left; font-weight: 600; color: #6F6F6F;">Assignment Name</th>
-                  <th style="border: 1px solid #EAECF0; padding: 12px 16px; text-align: left; font-weight: 600; color: #6F6F6F;">Subject</th>
-                  <th style="border: 1px solid #EAECF0; padding: 12px 16px; text-align: left; font-weight: 600; color: #6F6F6F;">Attendance</th>
-                  <th style="border: 1px solid #EAECF0; padding: 12px 16px; text-align: left; font-weight: 600; color: #6F6F6F;">Successful</th>
-                  <th style="border: 1px solid #EAECF0; padding: 12px 16px; text-align: left; font-weight: 600; color: #6F6F6F;">Failed</th>
-                  <th style="border: 1px solid #EAECF0; padding: 12px 16px; text-align: left; font-weight: 600; color: #6F6F6F;">Success Rate</th>
+                <tr style="background: #EBEBEB;">
+                  <th style="padding: 12px 8px; border: 1px solid #EAECF0;">Assignment Name</th>
+                  <th style="padding: 12px 8px; border: 1px solid #EAECF0;">Subject Name</th>
+                  <th style="padding: 12px 8px; border: 1px solid #EAECF0;">Attendance</th>
+                  <th style="padding: 12px 8px; border: 1px solid #EAECF0;">Successful</th>
+                  <th style="padding: 12px 8px; border: 1px solid #EAECF0;">Failed</th>
+                  <th style="padding: 12px 8px; border: 1px solid #EAECF0;">Success Rate</th>
                 </tr>
               </thead>
               <tbody>
                 ${this.assignmentReports.map((report, i) => `
-                  <tr style="${i % 2 === 1 ? 'background-color: #F7F7F7;' : 'background-color: white;'}">
-                    <td style="border: 1px solid #EAECF0; padding: 12px 16px; color: #6F6F6F;">${report.assignmentName}</td>
-                    <td style="border: 1px solid #EAECF0; padding: 12px 16px; color: #6F6F6F;">${report.subjectName}</td>
-                    <td style="border: 1px solid #EAECF0; padding: 12px 16px; color: #6F6F6F;">${report.attendanceNumber}</td>
-                    <td style="border: 1px solid #EAECF0; padding: 12px 16px; color: #6F6F6F;">${report.numberSuccessful}</td>
-                    <td style="border: 1px solid #EAECF0; padding: 12px 16px; color: #6F6F6F;">${report.numberFailed}</td>
-                    <td style="border: 1px solid #EAECF0; padding: 12px 16px; color: #6F6F6F;">${report.attendanceNumber > 0 ? ((report.numberSuccessful / report.attendanceNumber) * 100).toFixed(2) + '%' : '0%'}</td>
+                  <tr style="background: ${i % 2 === 1 ? '#F7F7F7' : '#fff'};">
+                    <td style="padding: 16px 8px; border: 1px solid #EAECF0;">${report.assignmentName}</td>
+                    <td style="padding: 16px 8px; border: 1px solid #EAECF0;">${report.subjectName}</td>
+                    <td style="padding: 16px 8px; border: 1px solid #EAECF0;">${report.attendanceNumber}</td>
+                    <td style="padding: 16px 8px; border: 1px solid #EAECF0;">${report.numberSuccessful}</td>
+                    <td style="padding: 16px 8px; border: 1px solid #EAECF0;">${report.numberFailed}</td>
+                    <td style="padding: 16px 8px; border: 1px solid #EAECF0;">
+                      ${report.attendanceNumber > 0 ? ((report.numberSuccessful / report.attendanceNumber) * 100).toFixed(2) + '%' : '0%'}
+                    </td>
                   </tr>
                 `).join('')}
               </tbody>
             </table>
           </div>
         `;
-        reportElement.appendChild(tableContainer);
+        reportElement.appendChild(tableDiv);
       }
 
       // Append to document body
@@ -633,42 +555,41 @@ export class AssignmentReportComponent implements OnInit {
       // Convert to image
       const reportImage = await html2canvas(reportElement, {
         scale: 2,
-        backgroundColor: '#ffffff',
+        backgroundColor: '#fff',
         logging: false,
         useCORS: true,
         allowTaint: false,
         width: reportElement.scrollWidth,
         height: reportElement.scrollHeight
       });
-      
+
       // Clean up
       if (reportElement.parentNode) {
         document.body.removeChild(reportElement);
       }
-      
+
       const imgData = reportImage.toDataURL('image/png');
-      
+
       // Create PDF in portrait mode (like a standard document)
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
-      
+
       // Calculate image dimensions to fit the page
       const imgWidth = pdfWidth - 20; // 10mm margins on each side
       const imgHeight = (reportImage.height * imgWidth) / reportImage.width;
-      
+
       // Add image to PDF with centered margins
       pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
-      
+
       // Save PDF
       pdf.save(`Assignment_Report_${new Date().toISOString().slice(0, 10)}.pdf`);
-      
+
     } catch (error) {
       console.error('Error generating PDF:', error);
       Swal.fire('Error', 'Failed to generate PDF. Please try again.', 'error');
     } finally {
       this.isExporting = false;
-      
       // Safety cleanup
       if (reportElement && reportElement.parentNode === document.body) {
         document.body.removeChild(reportElement);
@@ -676,7 +597,6 @@ export class AssignmentReportComponent implements OnInit {
     }
   }
 
-// Enhanced print method that includes the chart
   async printReportWithChart() {
     if (this.assignmentReports.length === 0) {
       Swal.fire('Warning', 'No data to print!', 'warning');
@@ -876,66 +796,68 @@ export class AssignmentReportComponent implements OnInit {
     }
   }
 
-async exportExcelWithChartSummary() {
-  if (this.reportsForExcel.length === 0) {
+async exportChartToExcel() {
+  if (this.assignmentReports.length === 0) {
     Swal.fire('Warning', 'No data to export!', 'warning');
     return;
   }
 
   this.isExporting = true;
-  
-  try {
-    // Prepare chart summary data for Excel
-    const chartSummary = this.chartData.map(item => [
-      item.name,
-      item.successful,
-      item.failed,
-      item.total,
-      item.total > 0 ? ((item.successful / item.total) * 100).toFixed(2) + '%' : '0%'
-    ]);
 
-    await this.reportsService.generateExcelReport({
-      mainHeader: {
-        en: 'Assignment Report',
-        ar: 'تقرير الواجبات'
-      },
-      subHeaders: [
-        {
-          en: 'Assignment Performance Statistics with Chart Summary',
-          ar: 'إحصائيات أداء الواجبات مع ملخص الرسم البياني'
-        }
-      ],
-      infoRows: [
-        { key: 'From Date', value: this.dateFrom },
-        { key: 'To Date', value: this.dateTo },
-        { key: 'School', value: this.getSchoolName() },
-        { key: 'Academic Year', value: this.getAcademicYearName() },
-        { key: 'Grade', value: this.getGradeName() },
-        { key: 'Subject', value: this.getSubjectName() },
-        { key: 'Total Assignments', value: this.getTotalAssignments().toString() },
-        { key: 'Total Successful', value: this.getTotalSuccessful().toString() },
-        { key: 'Total Failed', value: this.getTotalFailed().toString() },
-        { key: 'Total Attendance', value: this.getTotalAttendance().toString() }
-      ],
-      tables: [
-        {
-          title: 'Chart Summary',
-          headers: ['Assignment Name', 'Successful', 'Failed', 'Total Attendance', 'Success Rate'],
-          data: chartSummary
-        },
-        {
-          title: 'Assignment Report Data',
-          headers: ['Assignment Name', 'Subject', 'Attendance', 'Successful', 'Failed', 'Success Rate'],
-          data: this.reportsForExcel
-        }
-      ],
-      filename: `Assignment_Report_With_Chart_${new Date().toISOString().slice(0, 10)}.xlsx`
-    });
+  try {
+    const ExcelJS = await import('exceljs');
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Assignment Chart');
+
+    // Prepare data
+    const chartData = this.assignmentReports.map(report => ({
+      name: report.assignmentName,
+      successful: report.numberSuccessful,
+      failed: report.numberFailed
+    }));
+
+    // Add data to worksheet
+    worksheet.addRow(['Assignment Name', 'Successful', 'Failed']);
+    chartData.forEach(item => worksheet.addRow([item.name, item.successful, item.failed]));
+
+    // Create chart using the most compatible method
+    // This creates the data structure that ExcelJS expects
+    const chart = {
+      type: 'column' as const,
+      title: 'Assignment Performance Chart',
+      data: chartData.map(item => ({
+        name: item.name,
+        values: [item.successful, item.failed]
+      }))
+    };
+
+    // ExcelJS does not support adding charts directly; only data will be exported.
+    // If chart export is needed, consider using a library that supports chart embedding or export chart as image separately.
+
+    // Generate file
+    const buffer = await workbook.xlsx.writeBuffer();
+    this.downloadExcelFile(buffer, `Assignment_Chart_${new Date().toISOString().slice(0, 10)}.xlsx`);
+
   } catch (error) {
-    console.error('Error exporting to Excel:', error);
-    Swal.fire('Error', 'Failed to export to Excel', 'error');
+    console.error('Error exporting chart to Excel:', error);
+    Swal.fire('Error', 'Failed to export chart to Excel', 'error');
   } finally {
     this.isExporting = false;
   }
+}
+
+private downloadExcelFile(buffer: ArrayBuffer, filename: string) {
+  const blob = new Blob([buffer], { 
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+  });
+  
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  window.URL.revokeObjectURL(url);
 }
 }

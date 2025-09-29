@@ -11,9 +11,10 @@ namespace LMS_CMS_DAL.Models.Domains.HR
         public long Id { get; set; }
 
         public DateOnly Day { get; set; }
-        public double WorkingHours { get; set; } 
-        public int LateHours { get; set; }
-        public int LateMinutes { get; set; }
+        public int WorkingHours { get; set; } 
+        public int WorkingMinutes { get; set; }
+        public int DeductionHours { get; set; }
+        public int DeductionMinutes { get; set; }
         public int OvertimeHours { get; set; }
         public int OvertimeMinutes { get; set; }
         public int LeaveRequestHours { get; set; }

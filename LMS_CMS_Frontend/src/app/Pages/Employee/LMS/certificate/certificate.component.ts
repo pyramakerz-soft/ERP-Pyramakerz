@@ -570,7 +570,7 @@ export class CertificateComponent {
       reportImage: this.SelectedSchool.reportImage,
       tables: [
         {
-          title: '',
+          // title: '',
           headers: headerKeyMap.map(h => h.header),
           data: dataMatrix
         }

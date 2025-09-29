@@ -235,15 +235,20 @@ onCategorySelected() {
     }
   }
 
-  onFlagSelected() {
-    this.selectedFlagIds = [];
-    if (this.selectedFlagId == -1) {
-      this.selectedFlagIds = this.getAllFlagsForReportType();
-    } else {
-      this.selectedFlagIds = [this.selectedFlagId];
-    }
-    this.onFilterChange();
+onFlagSelected() {
+  this.selectedFlagIds = [];
+  
+  const flagId = Number(this.selectedFlagId);
+  
+  if (flagId === -1) {
+    this.selectedFlagIds = this.getAllFlagsForReportType();
+  } else {
+    this.selectedFlagIds = [flagId];
   }
+  
+  console.log('After onFlagSelected - Flag ID:', flagId, 'Flag IDs:', this.selectedFlagIds);
+  this.onFilterChange();
+}
 
   getAllFlagsForReportType(): number[] {
     if (this.reportType === 'inventory') {
@@ -445,19 +450,18 @@ private prepareExportData(): void {
     return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   }
 
-  DownloadAsPDF() {
-    console.log('Downloading PDF with transactions:', this.transactionsForExport);
-    // if (this.transactionsForExport.length === 0) {
-    //   Swal.fire('Warning', 'No data to export!', 'warning');
-    //   return;
-    // }
-
-    this.showPDF = true;
-    setTimeout(() => {
-      this.pdfComponentRef.downloadPDF(); // Call manual download
-      setTimeout(() => (this.showPDF = false), 2000);
-    }, 500);
-  }
+DownloadAsPDF() {
+  console.log('Selected Flag ID:', this.selectedFlagId);
+  console.log('Selected Flag IDs:', this.selectedFlagIds);
+  console.log('Selected Flag Names:', this.getSelectedFlagNames());
+  console.log('Current Flags:', this.currentFlags);
+  
+  this.showPDF = true;
+  setTimeout(() => {
+    this.pdfComponentRef.downloadPDF();
+    setTimeout(() => (this.showPDF = false), 2000);
+  }, 500);
+}
 
   Print() {
     if (this.transactionsForExport.length === 0) {
@@ -511,15 +515,17 @@ private prepareExportData(): void {
     }, 500);
   }
 
-  getSelectedFlagNames(): string {
-    if (this.selectedFlagIds.includes(20)) {
-      return 'All Types';
-    }
-    return this.currentFlags
-      .filter((flag) => this.selectedFlagIds.includes(flag.id))
-      .map((flag) => flag.name)
-      .join(', ');
+getSelectedFlagNames(): string {
+  if (this.selectedFlagId === -1 || this.selectedFlagIds.length === this.getAllFlagsForReportType().length) {
+    return 'All Types';
   }
+  
+  const selectedNames = this.currentFlags
+    .filter((flag) => this.selectedFlagIds.includes(flag.id))
+    .map((flag) => flag.name);
+  
+  return selectedNames.length > 0 ? selectedNames.join(', ') : 'No types selected';
+}
 
 async exportExcel() {
   const tableData = this.transactions.map((t) => {
@@ -529,8 +535,8 @@ async exportExcel() {
       Store: t.storeName,
       'Transaction Type': t.flagEnName,
       'Total Amount': t.total,
-      'Payment Type': t.isCash ? 'Cash' : t.isVisa ? 'Visa' : 'Other',
-      Notes: t.notes || '-',
+      // 'Payment Type': t.isCash ? 'Cash' : t.isVisa ? 'Visa' : 'Other',
+      // Notes: t.notes || '-',
     };
     
     // Add student/supplier based on report type
@@ -560,7 +566,7 @@ async exportExcel() {
     reportImage: '', // You can add an image URL if needed
     filename: `${this.reportType}_Transactions_Report.xlsx`,
     tables: [{
-      title: 'Transactions',
+      // title: 'Transactions',
       headers: Object.keys(tableData[0] || {}),
       data: tableData.map(item => Object.values(item))
     }]

@@ -286,7 +286,7 @@ export class StudentsInformationFormReportComponent {
       filename: 'Student Information Report.xlsx',
       tables: [
         {
-          title: 'Students List',
+          // title: 'Students List',
           headers,
           data: dataRows,
         },

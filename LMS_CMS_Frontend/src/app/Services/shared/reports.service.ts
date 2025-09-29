@@ -101,7 +101,7 @@ export class ReportsService {
     infoRows?: { key: string; value: string | number | boolean }[]; // 👈 NEW
     reportImage?: string;
     tables: {
-      title: string;
+      // title: string;
       headers: string[];
       data: (string | number | boolean)[][];
     }[];
@@ -182,7 +182,7 @@ export class ReportsService {
   
     // Tables
     for (const table of options.tables) {
-      worksheet.addRow([table.title]).font = { bold: true, size: 13 };
+      // worksheet.addRow([table.title]).font = { bold: true, size: 13 };
   
       const headerRow = worksheet.addRow(table.headers);
       headerRow.font = { bold: true, color: { argb: 'FFFFFF' } };

@@ -76,5 +76,9 @@
     </div>
 
     <!-- Table Section -->
-    <app-hygiene-form-table [students]="students" [hygieneTypes]="hygieneTypes"></app-hygiene-form-table>
+    <app-hygiene-form-table 
+        [students]="students" 
+        [hygieneTypes]="hygieneTypes"
+        (hygieneTypeChange)="onHygieneTypeChange()">
+    </app-hygiene-form-table>
 </div>

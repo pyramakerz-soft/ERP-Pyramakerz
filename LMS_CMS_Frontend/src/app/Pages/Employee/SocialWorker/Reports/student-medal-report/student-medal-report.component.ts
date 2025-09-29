@@ -340,7 +340,7 @@ async exportExcel() {
       ],
       tables: [
         {
-          title: 'Medal Report Data',
+          // title: 'Medal Report Data',
           headers: ['Medal ID', 'Medal Name', 'Added At', 'Added By'],
           data: this.reportsForExcel
         }

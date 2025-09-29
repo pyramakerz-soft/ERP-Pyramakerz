@@ -59,6 +59,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             }
 
             int startDay = salaryConfigration.StartDay;
+            TimeSpan OvertimeStartAfterMinutes = TimeSpan.FromMinutes(salaryConfigration.OvertimeStartAfterMinutes);
             DateOnly periodStart = new DateOnly();
             DateOnly periodEnd = new DateOnly();
 
@@ -130,7 +131,6 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                                         totalWorked += clock.ClockOut.Value - clock.ClockIn.Value;
                                     }
                                 }
-
                                 monthlyAttendance.OvertimeHours = (int)totalWorked.TotalHours;
                                 monthlyAttendance.OvertimeMinutes = totalWorked.Minutes;
                             }
@@ -178,19 +178,23 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                                     if (totalWorked >= requiredWork) // overTime
                                     {
                                         TimeSpan OverTime = totalWorked - requiredWork;
-                                        monthlyAttendance.OvertimeHours = OverTime.Hours;
-                                        monthlyAttendance.OvertimeMinutes = OverTime.Minutes;
+                                        if(OverTime >= OvertimeStartAfterMinutes)
+                                        {
+                                            monthlyAttendance.OvertimeHours = OverTime.Hours;
+                                            monthlyAttendance.OvertimeMinutes = OverTime.Minutes;
+                                        }
 
 
                                     }
                                     else if((totalWorked.Add(TimeSpan.FromMinutes((double)employee.DelayAllowance))) < requiredWork)
                                     {
                                         TimeSpan deduction = requiredWork - totalWorked;
-                                        monthlyAttendance.LateHours = deduction.Hours;
-                                        monthlyAttendance.LateMinutes = deduction.Minutes;
+                                        monthlyAttendance.DeductionHours = deduction.Hours;
+                                        monthlyAttendance.DeductionMinutes = deduction.Minutes;
                                     }
 
-                                    monthlyAttendance.WorkingHours = totalWorked.Hours + (totalWorked.Minutes / 100.0);
+                                    monthlyAttendance.WorkingHours = totalWorked.Hours;
+                                    monthlyAttendance.WorkingMinutes = totalWorked.Minutes;
                                     Unit_Of_Work.monthlyAttendance_Repository.Add(monthlyAttendance);
                                     Unit_Of_Work.SaveChanges();
 
@@ -209,8 +213,8 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                                         }
 
                                         TimeSpan deduction = halfDayHours - totalLeave;
-                                        monthlyAttendance.LateHours = deduction.Hours;
-                                        monthlyAttendance.LateMinutes = deduction.Minutes;
+                                        monthlyAttendance.DeductionHours = deduction.Hours;
+                                        monthlyAttendance.DeductionMinutes = deduction.Minutes;
                                         monthlyAttendance.LeaveRequestHours = totalLeave.Hours;
                                         monthlyAttendance.LeaveRequestMinutes = totalLeave.Minutes;
                                         Unit_Of_Work.monthlyAttendance_Repository.Add(monthlyAttendance);
@@ -219,8 +223,8 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                                     else
                                     {
                                         TimeSpan deduction = halfDayHours;
-                                        monthlyAttendance.LateHours = deduction.Hours;
-                                        monthlyAttendance.LateMinutes = deduction.Minutes;
+                                        monthlyAttendance.DeductionHours = deduction.Hours;
+                                        monthlyAttendance.DeductionMinutes = deduction.Minutes;
                                         Unit_Of_Work.monthlyAttendance_Repository.Add(monthlyAttendance);
                                         Unit_Of_Work.SaveChanges();
                                     }
@@ -283,20 +287,24 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                                         {
                                             // Missing hours => late
                                             TimeSpan diff = requiredWork - totalWorked;
-                                            monthlyAttendance.LateHours = diff.Hours;
-                                            monthlyAttendance.LateMinutes = diff.Minutes;
+                                            monthlyAttendance.DeductionHours = diff.Hours;
+                                            monthlyAttendance.DeductionMinutes = diff.Minutes;
                                         }
                                         else if (totalWorked > requiredWork)
                                         {
                                             // Overtime
                                             TimeSpan overtime = totalWorked - requiredWork;
-                                            monthlyAttendance.OvertimeHours = overtime.Hours;
-                                            monthlyAttendance.OvertimeMinutes = overtime.Minutes;
+                                            if (overtime >= OvertimeStartAfterMinutes)
+                                            {
+                                                monthlyAttendance.OvertimeHours = overtime.Hours;
+                                                monthlyAttendance.OvertimeMinutes = overtime.Minutes;
+                                            }
                                         }
                                         monthlyAttendance.LeaveRequestHours = totalLeave.Hours;
                                         monthlyAttendance.LeaveRequestMinutes = totalLeave.Minutes;
                                         monthlyAttendance.DayStatusId = 1;  ///////////////////////////////////////////////////////////////////////////////////// Present
-                                        monthlyAttendance.WorkingHours = totalWorked.Hours + (totalWorked.Minutes / 100.0);
+                                        monthlyAttendance.WorkingHours = totalWorked.Hours;
+                                        monthlyAttendance.WorkingMinutes = totalWorked.Minutes ;
                                     }
                                     else
                                     {
@@ -316,8 +324,8 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                                             {
                                                 // Employee came late
                                                 lateTime = actualStart - attendanceTime;
-                                                monthlyAttendance.LateHours = lateTime.Hours;
-                                                monthlyAttendance.LateMinutes = lateTime.Minutes;
+                                                monthlyAttendance.DeductionHours = lateTime.Hours;
+                                                monthlyAttendance.DeductionMinutes = lateTime.Minutes;
                                             }
                                             else if (actualStart < allowedStart && actualStart > attendanceTime)
                                             {
@@ -332,19 +340,22 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                                         {
                                             // Missing hours => late
                                             TimeSpan diff = requiredWork - totalWorked;
-                                            monthlyAttendance.LateHours += diff.Hours;
-                                            monthlyAttendance.LateMinutes += diff.Minutes;
+                                            monthlyAttendance.DeductionHours += diff.Hours;
+                                            monthlyAttendance.DeductionMinutes += diff.Minutes;
                                         }
                                         else if (totalWorked > requiredWork)
                                         {
                                             // Overtime
                                             TimeSpan overtime = totalWorked - requiredWork;
-                                            monthlyAttendance.OvertimeHours = overtime.Hours;
-                                            monthlyAttendance.OvertimeMinutes = overtime.Minutes;
+                                            if (overtime >= OvertimeStartAfterMinutes)
+                                            {
+                                                monthlyAttendance.OvertimeHours = overtime.Hours;
+                                                monthlyAttendance.OvertimeMinutes = overtime.Minutes;
+                                            }
                                         }
                                         monthlyAttendance.DayStatusId = 1;  ///////////////////////////////////////////////////////////////////////////////////// Present
-                                        monthlyAttendance.WorkingHours = totalWorked.Hours + (totalWorked.Minutes / 100.0);
-
+                                        monthlyAttendance.WorkingHours = totalWorked.Hours;
+                                        monthlyAttendance.WorkingMinutes = totalWorked.Minutes;
                                     }
 
                                     Unit_Of_Work.monthlyAttendance_Repository.Add(monthlyAttendance);

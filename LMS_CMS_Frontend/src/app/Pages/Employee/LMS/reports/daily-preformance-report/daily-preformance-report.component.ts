@@ -536,9 +536,9 @@ export class DailyPreformanceReportComponent implements OnInit, OnDestroy {
         infoRows: infoRows,
         tables: [
           {
-            title: this.reportType === 'student'
-              ? 'Student Performance Data'
-              : 'Classroom Performance Data',
+            // title: this.reportType === 'student'
+              // ? 'Student Performance Data'
+              // : 'Classroom Performance Data',
             headers: headers,
             data: tableData,
           },

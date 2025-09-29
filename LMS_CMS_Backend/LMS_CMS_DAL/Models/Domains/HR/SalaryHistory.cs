@@ -18,7 +18,6 @@ namespace LMS_CMS_DAL.Models.Domains.HR
         public decimal TotalOvertime { get; set; }
         public decimal TotalDeductions { get; set; }
         public decimal TotalLoans { get; set; }
-        public decimal TotalAbsencePenalty { get; set; }
 
         // Final Calculated Salary
         public decimal NetSalary { get; set; }
