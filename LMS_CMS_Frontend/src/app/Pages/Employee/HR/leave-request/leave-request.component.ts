@@ -115,7 +115,6 @@ export class LeaveRequestComponent {
     }
   }
 
-
   GetAllData(DomainName: string, pageNumber: number, pageSize: number) {
     this.TableData = [];
     this.LeaveRequestServ.Get(DomainName, pageNumber, pageSize).subscribe(
@@ -180,7 +179,7 @@ export class LeaveRequestComponent {
     this.LeaveRequestServ.GetByID(id, this.DomainName).subscribe((d) => {
       this.leaveRequest = { ...d };
       this.OldleaveRequest = { ...d };
-      this.leaveRequest.remains = this.leaveRequest.monthlyLeaveRequestBalance - this.leaveRequest.used
+      // this.leaveRequest.remains = this.leaveRequest.monthlyLeaveRequestBalance - this.leaveRequest.used
     });
     this.openModal();
   }

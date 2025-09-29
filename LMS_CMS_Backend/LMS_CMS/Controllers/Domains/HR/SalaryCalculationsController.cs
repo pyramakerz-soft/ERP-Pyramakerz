@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using LMS_CMS_PL.Services;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace LMS_CMS_PL.Controllers.Domains.HR
 {
@@ -64,7 +65,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
             if (salaryConfigration.FromPreviousMonth == false)
             {
                 periodStart = new DateOnly(year, month, startDay);
-                periodEnd = periodStart.AddMonths(1).AddDays(-1); // last day of month
+                periodEnd = periodStart.AddMonths(1).AddDays(-1);
             }
             else
             {
@@ -100,7 +101,6 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
 
                 for (var day = periodStart; day <= periodEnd; day = day.AddDays(1))
                 {
-                    Console.WriteLine($"Processing day: {day}");
 
                     MonthlyAttendance monthlyAttendance = new MonthlyAttendance();  
                     monthlyAttendance.EmployeeId = employee.ID;    
@@ -139,9 +139,13 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                         }
                         else // vacation
                         {
-                            VacationEmployee vacationEmployee = Unit_Of_Work.vacationEmployee_Repository.First_Or_Default(o => ( o.DateFrom <= day && o.HalfDay == true) || (o.DateFrom <= day && o.DateTo >= day && o.HalfDay == false));
-                            if(vacationEmployee != null && vacationEmployee.HalfDay == true) // half day vacation
+                            VacationEmployee vacationEmployee = Unit_Of_Work.vacationEmployee_Repository
+                                .First_Or_Default(o =>(o.HalfDay == true && o.DateFrom == day) ||   // half-day vacation applies only on that exact day
+                                    (o.HalfDay == false && o.DateFrom <= day && o.DateTo >= day));
+
+                            if (vacationEmployee != null && vacationEmployee.HalfDay == true) // half day vacation
                             {
+                                monthlyAttendance.DayStatusId = 3; ///////////////////////////////////////////////////////////////////////////////////// Vacation without deduction
                                 List<EmployeeClocks> employeeClocks = Unit_Of_Work.employeeClocks_Repository.FindBy(c => c.EmployeeID == employee.ID && c.Date == day && c.IsDeleted != true);
                                 if (employeeClocks != null && employeeClocks.Count > 0)
                                 {
@@ -155,35 +159,103 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                                         }
                                     }
 
+                                    List<LeaveRequest> leaveRequests = Unit_Of_Work.leaveRequest_Repository.FindBy(l => l.EmployeeID == employee.ID && l.IsDeleted != true && l.Date == day);
 
-                                    if (totalWorked >= halfDayHours)
+                                    // Sum all leave request hours and minutes
+                                    TimeSpan totalLeave = TimeSpan.Zero;
+                                    if (leaveRequests != null && leaveRequests.Count > 0)
                                     {
-                                        monthlyAttendance.DayStatusId = 3; ///////////////////////////////////////////////////////////////////////////////////// Vacation with out deduction
-                                        monthlyAttendance.WorkingHours = totalWorked.Hours + (totalWorked.Minutes / 100.0);
+                                        foreach (var req in leaveRequests)
+                                        {
+                                            totalLeave += new TimeSpan(req.Hours, req.Minutes, 0);
+                                        }
+                                        monthlyAttendance.LeaveRequestHours = totalLeave.Hours;
+                                        monthlyAttendance.LeaveRequestMinutes = totalLeave.Minutes;
+                                    }
+
+                                    TimeSpan requiredWork = halfDayHours - totalLeave;
+
+                                    if (totalWorked >= requiredWork) // overTime
+                                    {
+                                        TimeSpan OverTime = totalWorked - requiredWork;
+                                        monthlyAttendance.OvertimeHours = OverTime.Hours;
+                                        monthlyAttendance.OvertimeMinutes = OverTime.Minutes;
+
+
+                                    }
+                                    else if((totalWorked.Add(TimeSpan.FromMinutes((double)employee.DelayAllowance))) < requiredWork)
+                                    {
+                                        TimeSpan deduction = requiredWork - totalWorked;
+                                        monthlyAttendance.LateHours = deduction.Hours;
+                                        monthlyAttendance.LateMinutes = deduction.Minutes;
+                                    }
+
+                                    monthlyAttendance.WorkingHours = totalWorked.Hours + (totalWorked.Minutes / 100.0);
+                                    Unit_Of_Work.monthlyAttendance_Repository.Add(monthlyAttendance);
+                                    Unit_Of_Work.SaveChanges();
+
+                                }
+                                else // he did not make any clock in halfday vacation 
+                                {
+                                    List<LeaveRequest> leaveRequests = Unit_Of_Work.leaveRequest_Repository.FindBy(l => l.EmployeeID == employee.ID && l.IsDeleted != true && l.Date == day);
+
+                                    // Sum all leave request hours and minutes
+                                    TimeSpan totalLeave = TimeSpan.Zero;
+                                    if (leaveRequests != null && leaveRequests.Count > 0)
+                                    {
+                                        foreach (var req in leaveRequests)
+                                        {
+                                            totalLeave += new TimeSpan(req.Hours, req.Minutes, 0);
+                                        }
+
+                                        TimeSpan deduction = halfDayHours - totalLeave;
+                                        monthlyAttendance.LateHours = deduction.Hours;
+                                        monthlyAttendance.LateMinutes = deduction.Minutes;
+                                        monthlyAttendance.LeaveRequestHours = totalLeave.Hours;
+                                        monthlyAttendance.LeaveRequestMinutes = totalLeave.Minutes;
                                         Unit_Of_Work.monthlyAttendance_Repository.Add(monthlyAttendance);
                                         Unit_Of_Work.SaveChanges();
                                     }
                                     else
                                     {
-
+                                        TimeSpan deduction = halfDayHours;
+                                        monthlyAttendance.LateHours = deduction.Hours;
+                                        monthlyAttendance.LateMinutes = deduction.Minutes;
+                                        Unit_Of_Work.monthlyAttendance_Repository.Add(monthlyAttendance);
+                                        Unit_Of_Work.SaveChanges();
                                     }
-
-                                    Unit_Of_Work.monthlyAttendance_Repository.Add(monthlyAttendance);
-                                    Unit_Of_Work.SaveChanges();
-
                                 }
-                            }else if(vacationEmployee != null && vacationEmployee.HalfDay == false)
+                            }
+                            else if(vacationEmployee != null && vacationEmployee.HalfDay == false)
                             {
                                 monthlyAttendance.DayStatusId = 3; ///////////////////////////////////////////////////////////////////////////////////// Vacation with out deduction
+                                List<EmployeeClocks> employeeClocks = Unit_Of_Work.employeeClocks_Repository.FindBy(c => c.EmployeeID == employee.ID && c.Date == day && c.IsDeleted != true);
+                                if (employeeClocks != null && employeeClocks.Count > 0)
+                                {
+                                    TimeSpan totalWorked = TimeSpan.Zero;
+
+                                    foreach (var clock in employeeClocks)
+                                    {
+                                        if (clock.ClockIn != null && clock.ClockOut != null)
+                                        {
+                                            totalWorked += clock.ClockOut.Value - clock.ClockIn.Value;
+                                        }
+                                    }
+
+                                    monthlyAttendance.OvertimeHours = (int)totalWorked.TotalHours;
+                                    monthlyAttendance.OvertimeMinutes = totalWorked.Minutes;
+
+                                }
+
                                 Unit_Of_Work.monthlyAttendance_Repository.Add(monthlyAttendance);
                                 Unit_Of_Work.SaveChanges();
                             }
                             else // he should be present
                             {
-                                // check if he work in weekend 
                                 List<EmployeeClocks> employeeClocks = Unit_Of_Work.employeeClocks_Repository.FindBy(c => c.EmployeeID == employee.ID && c.Date == day && c.IsDeleted != true);
                                 if (employeeClocks != null && employeeClocks.Count > 0)
                                 {
+                                    Console.WriteLine(day + "/");
                                     TimeSpan totalWorked = TimeSpan.Zero;
 
                                     foreach (var clock in employeeClocks)
@@ -204,49 +276,77 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                                         {
                                             totalLeave += new TimeSpan(req.Hours, req.Minutes, 0);
                                         }
-                                    }
+                                        TimeSpan requiredWork = fullDayHours - totalLeave;
 
-                                    // Expected working duration (e.g. 8h - leave)
-                                    TimeSpan requiredWork = fullDayHours - totalLeave;
-
-                                    // First actual ClockIn
-                                    var firstClockIn = employeeClocks
-                                        .Where(c => c.ClockIn.HasValue)
-                                        .OrderBy(c => c.ClockIn)
-                                        .FirstOrDefault()?.ClockIn;
-
-                                    if (firstClockIn.HasValue)
-                                    {
-                                        TimeSpan actualStart = firstClockIn.Value;
-
-                                        if (actualStart > allowedStart)
+                                        // Compare worked vs required
+                                        if (totalWorked < requiredWork)
                                         {
-                                            // Employee came late
-                                            TimeSpan lateTime = actualStart - allowedStart;
-                                            monthlyAttendance.LateHours = lateTime.Hours;
-                                            monthlyAttendance.LateMinutes = lateTime.Minutes;
+                                            // Missing hours => late
+                                            TimeSpan diff = requiredWork - totalWorked;
+                                            monthlyAttendance.LateHours = diff.Hours;
+                                            monthlyAttendance.LateMinutes = diff.Minutes;
                                         }
+                                        else if (totalWorked > requiredWork)
+                                        {
+                                            // Overtime
+                                            TimeSpan overtime = totalWorked - requiredWork;
+                                            monthlyAttendance.OvertimeHours = overtime.Hours;
+                                            monthlyAttendance.OvertimeMinutes = overtime.Minutes;
+                                        }
+                                        monthlyAttendance.LeaveRequestHours = totalLeave.Hours;
+                                        monthlyAttendance.LeaveRequestMinutes = totalLeave.Minutes;
+                                        monthlyAttendance.DayStatusId = 1;  ///////////////////////////////////////////////////////////////////////////////////// Present
+                                        monthlyAttendance.WorkingHours = totalWorked.Hours + (totalWorked.Minutes / 100.0);
+                                    }
+                                    else
+                                    {
+                                        // First actual ClockIn
+                                        var firstClockIn = employeeClocks
+                                            .Where(c => c.ClockIn.HasValue)
+                                            .OrderBy(c => c.ClockIn)
+                                            .FirstOrDefault()?.ClockIn;
+
+                                        TimeSpan lateTime = TimeSpan.Zero;
+
+                                        if (firstClockIn.HasValue)
+                                        {
+                                            TimeSpan actualStart = firstClockIn.Value;
+
+                                            if (actualStart > allowedStart)
+                                            {
+                                                // Employee came late
+                                                lateTime = actualStart - attendanceTime;
+                                                monthlyAttendance.LateHours = lateTime.Hours;
+                                                monthlyAttendance.LateMinutes = lateTime.Minutes;
+                                            }
+                                            else if (actualStart < allowedStart && actualStart > attendanceTime)
+                                            {
+                                                lateTime = actualStart - attendanceTime;
+                                            }
+                                        }
+
+                                        TimeSpan requiredWork = fullDayHours - lateTime;
+
+                                        // Compare worked vs required
+                                        if (totalWorked < requiredWork)
+                                        {
+                                            // Missing hours => late
+                                            TimeSpan diff = requiredWork - totalWorked;
+                                            monthlyAttendance.LateHours += diff.Hours;
+                                            monthlyAttendance.LateMinutes += diff.Minutes;
+                                        }
+                                        else if (totalWorked > requiredWork)
+                                        {
+                                            // Overtime
+                                            TimeSpan overtime = totalWorked - requiredWork;
+                                            monthlyAttendance.OvertimeHours = overtime.Hours;
+                                            monthlyAttendance.OvertimeMinutes = overtime.Minutes;
+                                        }
+                                        monthlyAttendance.DayStatusId = 1;  ///////////////////////////////////////////////////////////////////////////////////// Present
+                                        monthlyAttendance.WorkingHours = totalWorked.Hours + (totalWorked.Minutes / 100.0);
+
                                     }
 
-                                    // Compare worked vs required
-                                    if (totalWorked < requiredWork)
-                                    {
-                                        // Missing hours => late
-                                        TimeSpan diff = requiredWork - totalWorked;
-                                        monthlyAttendance.LateHours = diff.Hours;
-                                        monthlyAttendance.LateMinutes = diff.Minutes;
-                                    }
-                                    else if (totalWorked > requiredWork)
-                                    {
-                                        // Overtime
-                                        TimeSpan overtime = totalWorked - requiredWork;
-                                        monthlyAttendance.OvertimeHours = overtime.Hours;
-                                        monthlyAttendance.OvertimeMinutes = overtime.Minutes;
-                                    }
-                                    monthlyAttendance.LeaveRequestHours = totalLeave.Hours;
-                                    monthlyAttendance.LeaveRequestMinutes = totalLeave.Minutes;
-                                    monthlyAttendance.DayStatusId = 1;  ///////////////////////////////////////////////////////////////////////////////////// Present
-                                    monthlyAttendance.WorkingHours = totalWorked.Hours + (totalWorked.Minutes / 100.0);
                                     Unit_Of_Work.monthlyAttendance_Repository.Add(monthlyAttendance);
                                     Unit_Of_Work.SaveChanges();
 
@@ -254,6 +354,7 @@ namespace LMS_CMS_PL.Controllers.Domains.HR
                                 else
                                 {
                                     // No clock-in: Absent
+                                    Console.WriteLine(day + "/");
                                     monthlyAttendance.DayStatusId = 2; ///////////////////////////////////////////////////////////////////////////////////// Absent
                                     Unit_Of_Work.monthlyAttendance_Repository.Add(monthlyAttendance);
                                     Unit_Of_Work.SaveChanges();
