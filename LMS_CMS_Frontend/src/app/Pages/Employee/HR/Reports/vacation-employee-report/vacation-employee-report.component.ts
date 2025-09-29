@@ -368,7 +368,7 @@ async viewReport() {
         ],
         tables: [
           {
-            title: 'Vacation Employee Report Data',
+            // title: 'Vacation Employee Report Data',
             headers: [
               'Employee ID',
               'Employee Name',

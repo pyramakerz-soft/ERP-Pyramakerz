@@ -391,12 +391,12 @@ viewReport() {
         ],
         tables: [
           {
-            title: 'Account Balances',
+            // title: 'Account Balances',
             headers: ['ID', 'Name', 'Debit', 'Credit'],
             data: tableData
           },
           {
-            title: 'Totals',
+            // title: 'Totals',
             headers: ['Description', 'Amount'],
             data: totalsData
           }

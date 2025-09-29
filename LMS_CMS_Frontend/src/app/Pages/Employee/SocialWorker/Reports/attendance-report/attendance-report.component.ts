@@ -425,7 +425,7 @@ async exportExcel() {
       ],
       tables: [
         {
-          title: 'Attendance Report Data',
+          // title: 'Attendance Report Data',
           headers: ['Date', 'Student Name', 'Status', 'Late Time (minutes)', 'Notes'],
           data: this.reportsForExcel
         }

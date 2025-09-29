@@ -419,7 +419,7 @@ async viewReport() {
         ],
         tables: [
           {
-            title: 'Bonus Report Data',
+            // title: 'Bonus Report Data',
             headers: [
               'Employee ID', 
               'Employee Name', 

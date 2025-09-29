@@ -236,7 +236,7 @@ export class AccountigConstraintsComponent implements OnDestroy {
         filename: 'Accounting Constraints Report.xlsx',
         tables: [
           {
-            title: 'Accounting Constraints Report',
+            // title: 'Accounting Constraints Report',
             headers,
             data: dataRows,
           },

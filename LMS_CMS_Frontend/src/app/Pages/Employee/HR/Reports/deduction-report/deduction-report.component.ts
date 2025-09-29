@@ -399,7 +399,7 @@ export class DeductionReportComponent  implements OnInit {
         ],
         tables: [
           {
-            title: 'Deduction Report Data',
+            // title: 'Deduction Report Data',
             headers: [
               'Employee ID', 
               'Employee Name', 

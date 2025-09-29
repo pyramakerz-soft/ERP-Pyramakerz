@@ -396,7 +396,7 @@ async viewReport() {
         ],
         tables: [
           {
-            title: 'Loans Report Data',
+            // title: 'Loans Report Data',
             headers: [
               'Employee ID', 
               'Total Amount', 

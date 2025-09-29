@@ -466,7 +466,7 @@ export class RemedialTimeTableViewComponent {
       filename: `${this.remedialTimeTable?.name ?? 'RemedialTimeTable'}.xlsx`,
       tables: [
         {
-          title: this.remedialTimeTable?.name ?? 'Remedial Time Table',
+          // title: this.remedialTimeTable?.name ?? 'Remedial Time Table',
           headers: headerKeyMap.map(h => h.header),
           data: dataMatrix   // ✅ array of arrays
         }

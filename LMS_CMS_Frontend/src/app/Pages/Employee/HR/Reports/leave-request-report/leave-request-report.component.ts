@@ -419,7 +419,7 @@ async viewReport() {
         ],
         tables: [
           {
-            title: 'Leave Request Report Data',
+            // title: 'Leave Request Report Data',
             headers: [
               'Employee ID', 
               'Employee Name', 
