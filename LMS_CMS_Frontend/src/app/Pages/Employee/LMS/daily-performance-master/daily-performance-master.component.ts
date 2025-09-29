@@ -163,7 +163,7 @@ export class DailyPerformanceMasterComponent {
   }
 
   Create() {
-    this.router.navigateByUrl('Employee/Create Daily Performance')
+    this.router.navigateByUrl('Employee/Daily Performance')
   }
 
   View(id: number) {

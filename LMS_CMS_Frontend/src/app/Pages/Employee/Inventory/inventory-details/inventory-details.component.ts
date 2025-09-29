@@ -1065,7 +1065,7 @@ export class InventoryDetailsComponent {
       filename: "Inventory.xlsx",
       tables: [
         {
-          title: this.Data?.flagEnName ?? 'Inventory',
+          // title: this.Data?.flagEnName ?? 'Inventory',
           headers: headerKeyMap.map(h => h.header),
           data: dataRows,
         }

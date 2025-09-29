@@ -133,67 +133,87 @@ export class VacationEmployeeReportComponent implements OnInit {
 
   onFilterChange() {
     this.showTable = false;
-    this.showViewReportBtn = !!this.dateFrom && !!this.dateTo && !!this.selectedJobCategoryId && !!this.selectedJobId && !!this.selectedEmployeeId;
+    this.showViewReportBtn = !!this.dateFrom && !!this.dateTo;
     this.vacationEmployeeReports = [];
   }
 
-  async viewReport() {
-    if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
-      Swal.fire({
-        title: 'Invalid Date Range',
-        text: 'Start date cannot be later than end date.',
-        icon: 'warning',
-        confirmButtonText: 'OK',
-      });
-      return;
-    }
-
-    if (!this.dateFrom || !this.dateTo) {
-      Swal.fire({
-        title: 'Incomplete Selection',
-        text: 'Please select both Date From and Date To to generate the report.',
-        icon: 'warning',
-        confirmButtonText: 'OK',
-      });
-      return;
-    }
-
-    this.isLoading = true;
-    this.showTable = false;
-
-    try {
-      const domainName = this.apiService.GetHeader();
-      const response = await firstValueFrom(
-        this.vacationEmployeeService.GetVacationReport(
-          this.selectedJobCategoryId || 0,
-          this.selectedJobId || 0,
-          this.selectedEmployeeId || 0,
-          this.dateFrom,
-          this.dateTo,
-          domainName
-        )
-      );
-
-      console.log('API Response:', response);
-      
-      if (Array.isArray(response)) {
-        this.vacationEmployeeReports = response;
-        console.log('Leave request reports loaded:', this.vacationEmployeeReports.length);
-      } else {
-        console.log('Response is not an array:', response);
-        this.vacationEmployeeReports = [];
-      }
-
-      this.prepareExportData();
-      this.showTable = true;
-    } catch (error) {
-      console.error('Error loading leave request reports:', error);
-      this.vacationEmployeeReports = [];
-      this.showTable = true;
-    } finally {
-      this.isLoading = false;
-    }
+async viewReport() {
+  if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
+    Swal.fire({
+      title: 'Invalid Date Range',
+      text: 'Start date cannot be later than end date.',
+      icon: 'warning',
+      confirmButtonText: 'OK',
+    });
+    return;
   }
+
+  if (!this.dateFrom || !this.dateTo) {
+    Swal.fire({
+      title: 'Incomplete Selection',
+      text: 'Please select both Date From and Date To to generate the report.',
+      icon: 'warning',
+      confirmButtonText: 'OK',
+    });
+    return;
+  }
+
+  this.isLoading = true;
+  this.showTable = false;
+
+  try {
+    const domainName = this.apiService.GetHeader();
+    
+    // Create parameters object with only non-zero values
+    const params: any = {
+      dateFrom: this.dateFrom,
+      dateTo: this.dateTo
+    };
+
+    // Only add optional parameters if they have meaningful values
+    if (this.selectedEmployeeId && this.selectedEmployeeId !== 0) {
+      params.employeeId = this.selectedEmployeeId;
+    }
+    if (this.selectedJobId && this.selectedJobId !== 0) {
+      params.jobId = this.selectedJobId;
+    }
+    if (this.selectedJobCategoryId && this.selectedJobCategoryId !== 0) {
+      params.categoryId = this.selectedJobCategoryId;
+    }
+
+    console.log('Sending parameters:', params);
+
+    const response = await firstValueFrom(
+      this.vacationEmployeeService.GetVacationReport(
+        params.categoryId,    // Will be undefined if not provided
+        params.jobId,         // Will be undefined if not provided  
+        params.employeeId,    // Will be undefined if not provided
+        params.dateFrom,      // Always provided (mandatory)
+        params.dateTo,        // Always provided (mandatory)
+        domainName
+      )
+    );
+
+    console.log('API Response:', response);
+    
+    if (Array.isArray(response)) {
+      this.vacationEmployeeReports = response;
+      console.log('Leave request reports loaded:', this.vacationEmployeeReports.length);
+    } else {
+      console.log('Response is not an array:', response);
+      this.vacationEmployeeReports = [];
+    }
+
+    this.prepareExportData();
+    this.showTable = true;
+  } catch (error) {
+    console.error('Error loading leave request reports:', error);
+    this.vacationEmployeeReports = [];
+    this.showTable = true;
+  } finally {
+    this.isLoading = false;
+  }
+}
 
   private prepareExportData(): void {
     this.reportsForExport = [];
@@ -348,7 +368,7 @@ export class VacationEmployeeReportComponent implements OnInit {
         ],
         tables: [
           {
-            title: 'Vacation Employee Report Data',
+            // title: 'Vacation Employee Report Data',
             headers: [
               'Employee ID',
               'Employee Name',

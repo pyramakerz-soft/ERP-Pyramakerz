@@ -451,12 +451,12 @@ export class AccountingStatementReportComponent implements OnInit {
         ],
         tables: [
           {
-            title: 'Account Statement',
+            // title: 'Account Statement',
             headers: ['Date', 'Account', 'Serial', 'Sub Account', 'Debit', 'Credit', 'Balance', 'Notes'],
             data: tableData
           },
           {
-            title: 'Totals',
+            // title: 'Totals',
             headers: ['Description', 'Amount'],
             data: totalsData
           }

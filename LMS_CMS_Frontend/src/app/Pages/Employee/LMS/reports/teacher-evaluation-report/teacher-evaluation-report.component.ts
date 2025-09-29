@@ -280,126 +280,143 @@ export class TeacherEvaluationReportComponent implements OnInit {
 
   // ========== EXPORT METHODS ==========
 
-  async downloadAsPDF() {
-    if (!this.hasData) {
-      Swal.fire('Warning', 'No data available to export', 'warning');
-      return;
-    }
+async downloadAsPDF() {
+  if (!this.hasData) {
+    Swal.fire('Warning', 'No data available to export', 'warning');
+    return;
+  }
 
-    this.isExporting = true;
+  this.isExporting = true;
+  let reportElement: HTMLElement | null = null;
 
-    try {
-      // Wait for the chart to be fully rendered
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Create a temporary container for the report
-      const reportElement = document.createElement('div');
-      reportElement.style.width = '800px';
-      reportElement.style.padding = '20px';
-      reportElement.style.backgroundColor = 'white';
-      reportElement.style.fontFamily = 'Arial, sans-serif';
-      
-      // Add title
-      const title = document.createElement('h1');
-      title.textContent = 'Teacher Evaluation Report';
-      title.style.textAlign = 'center';
-      title.style.marginBottom = '20px';
-      title.style.color = '#333';
-      reportElement.appendChild(title);
-      
-      // Convert chart to image
+  try {
+    // Wait for the chart to be fully rendered
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Create a temporary container for the report (same as assignment report)
+    reportElement = document.createElement('div');
+    reportElement.style.width = '900px';
+    reportElement.style.padding = '32px';
+    reportElement.style.backgroundColor = '#fff';
+    reportElement.style.fontFamily = 'Arial, sans-serif';
+    reportElement.style.position = 'fixed';
+    reportElement.style.left = '-9999px';
+    reportElement.style.top = '0';
+    reportElement.style.color = '#333';
+    reportElement.style.boxSizing = 'border-box';
+
+    // Header
+    const headerDiv = document.createElement('div');
+    headerDiv.innerHTML = `
+      <div style="text-align: center; margin-bottom: 24px;">
+        <h1 style="font-size: 2rem; font-weight: bold; color: #333; margin: 0;">
+          Teacher Evaluation Report
+        </h1>
+        <h2 style="font-size: 1.25rem; color: #666; margin: 8px 0 0 0;">
+          Performance Analysis Over Time
+        </h2>
+      </div>
+    `;
+    reportElement.appendChild(headerDiv);
+
+    // Chart image
+    if (this.chartCanvas && this.chartCanvas.nativeElement) {
       const chartCanvas = await html2canvas(this.chartCanvas.nativeElement, {
         scale: 2,
-        backgroundColor: '#ffffff',
-        logging: false
+        backgroundColor: '#fff',
+        logging: false,
+        useCORS: true,
+        allowTaint: false,
+        width: this.chartCanvas.nativeElement.scrollWidth,
+        height: this.chartCanvas.nativeElement.scrollHeight
       });
-      
-      const chartImage = chartCanvas.toDataURL('image/png');
       const chartImg = document.createElement('img');
-      chartImg.src = chartImage;
-      chartImg.style.width = '100%';
-      chartImg.style.marginBottom = '20px';
+      chartImg.src = chartCanvas.toDataURL('image/png');
+      chartImg.style.display = 'block';
+      chartImg.style.margin = '0 auto 32px auto';
+      chartImg.style.maxWidth = '100%';
+      chartImg.style.height = 'auto';
       reportElement.appendChild(chartImg);
-      
-      // Add report details
-      const detailsDiv = document.createElement('div');
-      detailsDiv.innerHTML = `
-        <div style="margin-top: 20px;">
-          <h3 style="color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px;">Report Details</h3>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
-            <div><strong>Date Range:</strong> ${this.filterParams.fromDate} to ${this.filterParams.toDate}</div>
-            <div><strong>Department:</strong> ${this.getDepartmentName()}</div>
-            <div><strong>Employee:</strong> ${this.getEmployeeName()}</div>
-            <div><strong>Generated On:</strong> ${new Date().toLocaleDateString()}</div>
-            <div><strong>Total Records:</strong> ${this.evaluationData.length}</div>
-          </div>
+    }
+
+    // Details
+    const detailsDiv = document.createElement('div');
+    detailsDiv.innerHTML = `
+      <div style="margin: 24px 0;">
+        <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 10px; color: #333;">
+          Report Details
+        </h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; font-size: 14px;">
+          <div><strong>Date Range:</strong> ${this.filterParams.fromDate} to ${this.filterParams.toDate}</div>
+          <div><strong>Department:</strong> ${this.getDepartmentName()}</div>
+          <div><strong>Employee:</strong> ${this.getEmployeeName()}</div>
+          <div><strong>Generated On:</strong> ${new Date().toLocaleDateString()}</div>
+          <div><strong>Total Records:</strong> ${this.evaluationData.length}</div>
+          <div><strong>Employees Evaluated:</strong> ${this.getUniqueEmployeeCount()}</div>
         </div>
-      `;
-      reportElement.appendChild(detailsDiv);
-      
-      // Add summary table if available
-      const summaryData = this.getSummaryData();
-      if (summaryData.length > 0) {
-        const summaryDiv = document.createElement('div');
-        summaryDiv.innerHTML = `
-          <div style="margin-top: 30px;">
-            <h3 style="color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px;">Performance Summary</h3>
-            <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
-              <thead>
-                <tr style="background-color: #f8f9fa;">
-                  <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Employee</th>
-                  <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Evaluations</th>
-                  <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Average Score</th>
-                  <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Min Score</th>
-                  <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Max Score</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${summaryData.map(employee => `
-                  <tr>
-                    <td style="border: 1px solid #ddd; padding: 8px;">${employee.employeeName}</td>
-                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${employee.evaluations}</td>
-                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${employee.averageScore.toFixed(2)}</td>
-                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${employee.minScore.toFixed(2)}</td>
-                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${employee.maxScore.toFixed(2)}</td>
-                  </tr>
-                `).join('')}
-              </tbody>
-            </table>
-          </div>
-        `;
-        reportElement.appendChild(summaryDiv);
-      }
-      
-      // Create PDF
-      const pdf = new jsPDF('landscape', 'px', 'a4');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      
-      // Convert report to image
-      const reportImage = await html2canvas(reportElement, {
-        scale: 2,
-        backgroundColor: '#ffffff',
-        logging: false
-      });
-      
-      const imgData = reportImage.toDataURL('image/png');
-      const imgWidth = pdfWidth;
-      const imgHeight = (reportImage.height * pdfWidth) / reportImage.width;
-      
-      // Add image to PDF
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-      
-      // Save PDF
-      pdf.save(`Teacher_Evaluation_Report_${new Date().toISOString().slice(0, 10)}.pdf`);
-      
-    } catch (error) {
-      console.error('Error generating PDF:', error);
-      Swal.fire('Error', 'Failed to generate PDF', 'error');
-    } finally {
-      this.isExporting = false;
+      </div>
+    `;
+    reportElement.appendChild(detailsDiv);
+
+    
+
+    // Append to document body
+    document.body.appendChild(reportElement);
+
+    // Wait for rendering
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    // Convert to image
+    const reportImage = await html2canvas(reportElement, {
+      scale: 2,
+      backgroundColor: '#fff',
+      logging: false,
+      useCORS: true,
+      allowTaint: false,
+      width: reportElement.scrollWidth,
+      height: reportElement.scrollHeight
+    });
+
+    // Clean up
+    if (reportElement.parentNode) {
+      document.body.removeChild(reportElement);
+    }
+
+    const imgData = reportImage.toDataURL('image/png');
+
+    // Create PDF in portrait mode (like a standard document)
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+
+    // Calculate image dimensions to fit the page
+    const imgWidth = pdfWidth - 20; // 10mm margins on each side
+    const imgHeight = (reportImage.height * imgWidth) / reportImage.width;
+
+    // Add image to PDF with centered margins
+    pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+
+    // Save PDF
+    pdf.save(`Teacher_Evaluation_Report_${new Date().toISOString().slice(0, 10)}.pdf`);
+
+  } catch (error) {
+    console.error('Error generating PDF:', error);
+    Swal.fire('Error', 'Failed to generate PDF. Please try again.', 'error');
+  } finally {
+    this.isExporting = false;
+    // Safety cleanup
+    if (reportElement && reportElement.parentNode === document.body) {
+      document.body.removeChild(reportElement);
     }
   }
+}
+
+// Add this helper method to get unique employee count
+private getUniqueEmployeeCount(): number {
+  if (!this.hasData) return 0;
+  const uniqueEmployees = new Set(this.evaluationData.map(item => item.employeeId));
+  return uniqueEmployees.size;
+}
 
   private setupPrintWindowCloseDetection(printWindow: Window) {
     // Check if print window is closed

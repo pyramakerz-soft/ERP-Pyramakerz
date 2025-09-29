@@ -355,7 +355,7 @@ async exportExcel() {
       ],
       tables: [
         {
-          title: 'Certificate Report Data',
+          // title: 'Certificate Report Data',
           headers: ['Medal ID', 'Medal Name', 'Added At', 'Added By'],
           data: this.reportsForExcel
         }

@@ -291,7 +291,7 @@ export class StudentsNamesInClassComponent {
       filename: "List of students' names in class.xlsx",
       tables: [
         {
-          title: "Students List",
+          // title: "Students List",
           headers: ['id', 'en_name', 'mobile', 'nationalityName', 'genderName'],
           data: this.StudentData.map((row) => [row.id, row.en_name, row.mobile, row.nationalityEnName, row.genderName])
         }

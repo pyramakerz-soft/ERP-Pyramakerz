@@ -602,7 +602,7 @@ export class PayableDetailsComponent {
       filename: "Payable_Report.xlsx",
       tables: [
         {
-          title: "Payable Details",
+          // title: "Payable Details",
           headers: ['id', 'amount', 'linkFileName', 'linkFileTypeName', 'notes'],
           data: this.payableDetailsData.map((row) => [
             row.id || 0,

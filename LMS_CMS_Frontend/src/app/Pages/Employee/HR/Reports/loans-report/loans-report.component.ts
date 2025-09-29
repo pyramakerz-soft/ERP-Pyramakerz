@@ -144,90 +144,99 @@ export class LoansReportComponent implements OnInit {
 
   onFilterChange() {
     this.showTable = false;
-    this.showViewReportBtn = !!this.dateFrom && !!this.dateTo && !!this.selectedJobCategoryId && !!this.selectedJobId && !! this.selectedEmployeeId;
+    this.showViewReportBtn = !!this.dateFrom && !!this.dateTo;
     this.loansReports = [];
   }
 
-  async viewReport() {
-    if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
-      Swal.fire({
-        title: 'Invalid Date Range',
-        text: 'Start date cannot be later than end date.',
-        icon: 'warning',
-        confirmButtonText: 'OK',
-      });
-      return;
-    }
-
-    if (!this.dateFrom || !this.dateTo) {
-      Swal.fire({
-        title: 'Incomplete Selection',
-        text: 'Please select both Date From and Date To to generate the report.',
-        icon: 'warning',
-        confirmButtonText: 'OK',
-      });
-      return;
-    }
-
-    this.isLoading = true;
-    this.showTable = false;
-
-    try {
-      const domainName = this.apiService.GetHeader();
-      const response = await firstValueFrom(
-        this.loansService.GetLoansReport(
-          this.selectedJobCategoryId || 0,
-          this.selectedJobId || 0,
-          this.selectedEmployeeId || 0,
-          this.dateFrom,
-          this.dateTo,
-          domainName
-        )
-      );
-
-      console.log('API Response:', response);
-      
-      if (Array.isArray(response)) {
-        this.loansReports = response;
-        console.log('Loans reports loaded:', this.loansReports.length);
-      } else {
-        console.log('Response is not an array:', response);
-        this.loansReports = [];
-      }
-
-      this.prepareExportData();
-      this.showTable = true;
-    } catch (error) {
-      console.error('Error loading loans reports:', error);
-      this.loansReports = [];
-      this.showTable = true;
-      // Swal.fire({
-      //   title: 'Error',
-      //   text: 'Failed to load loans reports',
-      //   icon: 'error',
-      //   confirmButtonText: 'OK',
-      // });
-    } finally {
-      this.isLoading = false;
-    }
+async viewReport() {
+  if (this.dateFrom && this.dateTo && this.dateFrom > this.dateTo) {
+    Swal.fire({
+      title: 'Invalid Date Range',
+      text: 'Start date cannot be later than end date.',
+      icon: 'warning',
+      confirmButtonText: 'OK',
+    });
+    return;
   }
 
+  if (!this.dateFrom || !this.dateTo) {
+    Swal.fire({
+      title: 'Incomplete Selection',
+      text: 'Please select both Date From and Date To to generate the report.',
+      icon: 'warning',
+      confirmButtonText: 'OK',
+    });
+    return;
+  }
+
+  this.isLoading = true;
+  this.showTable = false;
+
+  try {
+    const domainName = this.apiService.GetHeader();
+    
+    // Create parameters object with only non-zero values
+    const params: any = {
+      dateFrom: this.dateFrom,
+      dateTo: this.dateTo
+    };
+
+    // Only add optional parameters if they have meaningful values
+    if (this.selectedEmployeeId && this.selectedEmployeeId !== 0) {
+      params.employeeId = this.selectedEmployeeId;
+    }
+    if (this.selectedJobId && this.selectedJobId !== 0) {
+      params.jobId = this.selectedJobId;
+    }
+    if (this.selectedJobCategoryId && this.selectedJobCategoryId !== 0) {
+      params.categoryId = this.selectedJobCategoryId;
+    }
+
+    console.log('Sending parameters:', params);
+
+    const response = await firstValueFrom(
+      this.loansService.GetLoansReport(
+        params.categoryId,    // Will be undefined if not provided
+        params.jobId,         // Will be undefined if not provided  
+        params.employeeId,    // Will be undefined if not provided
+        params.dateFrom,      // Always provided (mandatory)
+        params.dateTo,        // Always provided (mandatory)
+        domainName
+      )
+    );
+
+    console.log('API Response:', response);
+    
+    if (Array.isArray(response)) {
+      this.loansReports = response;
+      console.log('Loans reports loaded:', this.loansReports.length);
+    } else {
+      console.log('Response is not an array:', response);
+      this.loansReports = [];
+    }
+
+    this.prepareExportData();
+    this.showTable = true;
+  } catch (error) {
+    console.error('Error loading loans reports:', error);
+    this.loansReports = [];
+    this.showTable = true;
+  } finally {
+    this.isLoading = false;
+  }
+}
+
   private prepareExportData(): void {
-    // For PDF (object format) - Flatten the data for the table
+    // For PDF (object format) - Only include visible columns
     this.reportsForExport = [];
     this.loansReports.forEach(employeeLoan => {
       if (employeeLoan.loans && employeeLoan.loans.length > 0) {
         employeeLoan.loans.forEach((loan: any) => {
           this.reportsForExport.push({
             'Employee ID': employeeLoan.employeeId,
-            'Employee Name': employeeLoan.employeeEnName || employeeLoan.employeeArName || 'Unknown',
             'Total Amount': employeeLoan.totalAmount,
-            'Loan ID': loan.id,
             'Loan Date': new Date(loan.date).toLocaleDateString(),
-            'Deduction Start': new Date(loan.deductionStartMonth).toLocaleDateString(),
             'Loan Amount': loan.amount,
-            'Number of Deductions': loan.numberOfDeduction,
-            'Safe Name': loan.saveName,
             'Notes': loan.notes || '-'
           });
         });
@@ -235,46 +244,31 @@ export class LoansReportComponent implements OnInit {
         // If no loans, still show employee summary
         this.reportsForExport.push({
           'Employee ID': employeeLoan.employeeId,
-          'Employee Name': employeeLoan.employeeEnName || employeeLoan.employeeArName || 'Unknown',
           'Total Amount': employeeLoan.totalAmount,
-          'Loan ID': '-',
           'Loan Date': '-',
-          'Deduction Start': '-',
           'Loan Amount': '-',
-          'Number of Deductions': '-',
-          'Safe Name': '-',
           'Notes': '-'
         });
       }
     });
 
-    // For Excel (array format)
+    // For Excel (array format) - Only include visible columns
     this.reportsForExcel = [];
     this.loansReports.forEach(employeeLoan => {
       if (employeeLoan.loans && employeeLoan.loans.length > 0) {
         employeeLoan.loans.forEach((loan: any) => {
           this.reportsForExcel.push([
             employeeLoan.employeeId,
-            employeeLoan.employeeEnName || employeeLoan.employeeArName || 'Unknown',
             employeeLoan.totalAmount,
-            loan.id,
             new Date(loan.date).toLocaleDateString(),
-            new Date(loan.deductionStartMonth).toLocaleDateString(),
             loan.amount,
-            loan.numberOfDeduction,
-            loan.saveName,
             loan.notes || '-'
           ]);
         });
       } else {
         this.reportsForExcel.push([
           employeeLoan.employeeId,
-          employeeLoan.employeeEnName || employeeLoan.employeeArName || 'Unknown',
           employeeLoan.totalAmount,
-          '-',
-          '-',
-          '-',
-          '-',
           '-',
           '-',
           '-'
@@ -296,7 +290,7 @@ export class LoansReportComponent implements OnInit {
   }
 
   getEmployeeName(): string {
-    return this.employees.find(e => e.id == this.selectedEmployeeId)?.employeeEnName || 
+    return this.employees.find(e => e.id == this.selectedEmployeeId)?.en_name || 
            this.employees.find(e => e.id == this.selectedEmployeeId)?.ar_name || 
            'All Employees';
   }
@@ -402,17 +396,12 @@ export class LoansReportComponent implements OnInit {
         ],
         tables: [
           {
-            title: 'Loans Report Data',
+            // title: 'Loans Report Data',
             headers: [
               'Employee ID', 
-              'Employee Name', 
               'Total Amount', 
-              'Loan ID', 
               'Loan Date', 
-              'Deduction Start', 
               'Loan Amount', 
-              'Number of Deductions', 
-              'Safe Name', 
               'Notes'
             ],
             data: this.reportsForExcel
@@ -428,12 +417,10 @@ export class LoansReportComponent implements OnInit {
     }
   }
 
-  // Helper method to check if employee has loans
   hasLoans(employeeLoan: any): boolean {
     return employeeLoan.loans && employeeLoan.loans.length > 0;
   }
 
-  // Helper method to get loan count
   getLoanCount(employeeLoan: any): number {
     return employeeLoan.loans ? employeeLoan.loans.length : 0;
   }

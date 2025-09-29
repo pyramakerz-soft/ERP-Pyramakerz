@@ -388,7 +388,7 @@ export class ViolationReportComponent {
         reportImage: undefined, // Skip the image to avoid the "Unsupported media" error
         tables: [
           {
-            title: 'Violation Data',
+            // title: 'Violation Data',
             headers: headers,
             data: tableData,
           },
