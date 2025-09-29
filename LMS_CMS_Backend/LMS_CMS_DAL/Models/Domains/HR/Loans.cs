@@ -14,7 +14,10 @@ namespace LMS_CMS_DAL.Models.Domains.HR
         [Key]
         public long ID { get; set; }
         public DateOnly Date { get; set; }
-        public DateOnly DeductionStartMonth { get; set; }
+        public int DeductionStartMonth { get; set; }
+        public int DeductionStartYear { get; set; }
+        public int DeductionEndMonth { get; set; }
+        public int DeductionEndYear { get; set; }
         public double Amount { get; set; }
         public int NumberOfDeduction { get; set; }
         public string? Notes { get; set; }

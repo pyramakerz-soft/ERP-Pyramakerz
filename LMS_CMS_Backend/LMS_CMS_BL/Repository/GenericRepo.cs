@@ -97,11 +97,11 @@ namespace LMS_CMS_BL.Repository
                 db.Entry(entity).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
             }
         }
-        /// /////////////-777
+           /// /////////////-777
          public IQueryable<TEntity> Query()
-        {
+         {
             return db.Set<TEntity>().AsQueryable();
-        }
+         }
 
 
         public void Delete(long id)
@@ -115,6 +115,14 @@ namespace LMS_CMS_BL.Repository
             if (obj != null)
             {
                 db.Set<TEntity>().Remove(obj); 
+            }
+        }
+
+        public async Task DeleteListAsync(IEnumerable<TEntity> entities)
+        {
+            if (entities != null && entities.Any())
+            {
+                db.Set<TEntity>().RemoveRange(entities);
             }
         }
 

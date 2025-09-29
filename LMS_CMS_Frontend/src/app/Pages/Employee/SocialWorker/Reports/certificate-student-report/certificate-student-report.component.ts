@@ -71,7 +71,7 @@ export class CertificateStudentReportComponent implements OnInit {
     private apiService: ApiService,
     private languageService: LanguageService,
     private realTimeService: RealTimeNotificationServiceService,
-      private reportsService: ReportsService 
+    private reportsService: ReportsService 
 
   ) {}
 

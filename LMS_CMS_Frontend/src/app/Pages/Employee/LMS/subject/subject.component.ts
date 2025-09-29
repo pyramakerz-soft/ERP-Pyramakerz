@@ -121,6 +121,7 @@ export class SubjectComponent {
   GetDate() {
     if(this.SelectedGradeId){
       this.IsView = true
+      this.subjectData = []
       this.subjectService.GetByGradeId(this.SelectedGradeId, this.DomainName).subscribe((d) => {
         this.subjectData = d;
       })

@@ -105,7 +105,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Archiving
                  
                 treesToKeep.Add(item.ArchivingTreeID);
 
-                PermissionGroupDetails existingPermission = Unit_Of_Work.permissionGroupDetails_Repository.First_Or_Default(p => p.ArchivingTreeID == archivingTree.ID && p.PermissionGroupID == NewDetails.PermissionGroupID && p.IsDeleted != true);
+                PermissionGroupDetails existingPermission = Unit_Of_Work.permissionGroupDetails_Repository.First_Or_Default(
+                    p => p.ArchivingTreeID == archivingTree.ID && p.PermissionGroupID == NewDetails.PermissionGroupID && p.IsDeleted != true);
 
                 if (existingPermission == null)
                 {
