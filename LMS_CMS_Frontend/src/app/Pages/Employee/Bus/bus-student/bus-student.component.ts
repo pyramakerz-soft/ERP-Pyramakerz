@@ -134,8 +134,7 @@ export class BusStudentComponent {
     });
 
     this.GetSchoolsGroupByGradeGroupByClass()
-    this.GetBusCategories()
-    this.GetSemesters()
+    this.GetBusCategories() 
     this.subscription = this.languageService.language$.subscribe(direction => {
       this.isRtl = direction === 'rtl';
     });
@@ -181,6 +180,7 @@ export class BusStudentComponent {
       this.AcademicServ.GetBySchoolId(this.selectedSchool ? this.selectedSchool : 0, this.DomainName).subscribe(
         (data) => {
           this.filteredYears = data
+          this.GetSemesters()
         }
       )
 
@@ -207,19 +207,22 @@ export class BusStudentComponent {
   }
 
   GetSchoolsGroupByGradeGroupByClass() {
+    this.SchoolGroupByGradeGroupByClass = []
     this.schoolService.Get(this.DomainName).subscribe((data) => {
       this.SchoolGroupByGradeGroupByClass = data;
     });
   }
 
   GetBusCategories() {
+    this.BusCategories = []
     this.busCategoryService.Get(this.DomainName).subscribe((data) => {
       this.BusCategories = data;
     });
   }
 
   GetSemesters() {
-    this.semesterService.Get(this.DomainName).subscribe((data) => {
+    this.Semesters = []
+    this.semesterService.GetByAcademicYearId(this.selectedYear ? this.selectedYear : 0, this.DomainName).subscribe((data) => {
       this.Semesters = data;
     });
   }
@@ -276,6 +279,7 @@ export class BusStudentComponent {
     this.filteredSections = [];
     this.filteredClasses = [];
     this.Students = [];
+    this.Semesters = [];
     this.validationErrors = {};
   }
 
@@ -323,7 +327,9 @@ export class BusStudentComponent {
     this.filteredClasses = [];
     this.filteredGrades = [];
     this.Students = [];
+    this.Semesters = [];
     this.busStudent.studentID = 0
+    this.busStudent.semseterID = null
   }
 
   checkSchool(element: any) {
@@ -373,9 +379,11 @@ export class BusStudentComponent {
       )
     }
 
+    this.GetSemesters()
     this.selectedClass = null;
     this.Students = [];
     this.busStudent.studentID = 0
+    this.busStudent.semseterID = null
   }
 
   checkGrade(element: any) {

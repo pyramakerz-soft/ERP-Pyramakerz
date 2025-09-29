@@ -46,7 +46,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Inventory
             if (pageNumber < 1) pageNumber = 1;
             if (pageSize < 1) pageSize = 10;
 
-            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
+            UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext); 
 
             // Get total record count
             int totalRecords = await Unit_Of_Work.inventoryMaster_Repository

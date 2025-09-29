@@ -43,23 +43,23 @@ export class ViolationReportComponent {
 
   empTypes: EmployeeTypeGet[] = [];
   violationTypes: ViolationType[] = [];
-  tableDataForExport: any[] = []; // Added for PDF export
-
+  tableDataForExport: any[] = []; // Added for PDF export 
+           
   school = {
     reportHeaderOneEn: 'Violation Report',
     reportHeaderTwoEn: 'Detailed Violation Summary',
     reportHeaderOneAr: 'تقرير المخالفات',
     reportHeaderTwoAr: 'ملخص المخالفات التفصيلي',
     reportImage: 'assets/images/logo.png',
-  };
+  };  
 
   @ViewChild(PdfPrintComponent) pdfComponentRef!: PdfPrintComponent;
 
   constructor(
     public violationService: ViolationService,
     public employeeTypeService: EmployeeTypeService,
-    public violationTypeService: ViolationTypeService,
-    public apiService: ApiService,
+    public violationTypeService: ViolationTypeService,  
+    public apiService: ApiService, 
     public accountService: AccountService,
     private languageService: LanguageService,
     private realTimeService: RealTimeNotificationServiceService,

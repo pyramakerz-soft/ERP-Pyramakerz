@@ -351,7 +351,7 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
             }
             else if (userTypeClaim == "employee")
             {
-                registerationFormParent.InsertedByOctaId = userId;
+                registerationFormParent.InsertedByUserId = userId;
             }
 
             Unit_Of_Work.registerationFormParent_Repository.Add(registerationFormParent); ////////////////////////////////////////////////////////////////////////////////////
@@ -366,6 +366,8 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
             long newRegisterationFormParentID = registerationFormParent.ID;
 
             var fileFolder = "";
+
+            List<long> fieldIDs = new List<long>();
 
             /// If File
             RegisterationFormSubmittion registerationFormSubmittion = new RegisterationFormSubmittion();
@@ -430,9 +432,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                     }
                     else if (userTypeClaim == "employee")
                     {
-                        registerationFormSubmittion.InsertedByOctaId = userId;
+                        registerationFormSubmittion.InsertedByUserId = userId;
+                    } 
+                    if (!fieldIDs.Contains(registerationFormParentAddDTO.RegisterationFormSubmittions[i].CategoryFieldID))
+                    {
+                        Unit_Of_Work.registerationFormSubmittion_Repository.Add(registerationFormSubmittion);
                     }
-                    Unit_Of_Work.registerationFormSubmittion_Repository.Add(registerationFormSubmittion);
+                    fieldIDs.Add(registerationFormParentAddDTO.RegisterationFormSubmittions[i].CategoryFieldID);
                 }
             }
             else
@@ -453,9 +459,13 @@ namespace LMS_CMS_PL.Controllers.Domains.Registeration
                     }
                     else if (userTypeClaim == "employee")
                     {
-                        registerationFormSubmittion.InsertedByOctaId = userId;
+                        registerationFormSubmittion.InsertedByUserId = userId;
                     }
-                    Unit_Of_Work.registerationFormSubmittion_Repository.Add(registerationFormSubmittion);
+                    if (!fieldIDs.Contains(registerationFormParentAddDTO.RegisterationFormSubmittions[i].CategoryFieldID))
+                    {
+                        Unit_Of_Work.registerationFormSubmittion_Repository.Add(registerationFormSubmittion);
+                    }
+                    fieldIDs.Add(registerationFormParentAddDTO.RegisterationFormSubmittions[i].CategoryFieldID);
                 }
             }
 
