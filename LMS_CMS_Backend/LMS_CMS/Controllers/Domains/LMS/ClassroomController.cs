@@ -303,7 +303,7 @@ namespace LMS_CMS_PL.Controllers.Domains.LMS
             UOW Unit_Of_Work = _dbContextFactory.CreateOneDbContext(HttpContext);
 
             List<Classroom> classrooms = await Unit_Of_Work.classroom_Repository.Select_All_With_IncludesById<Classroom>(
-                    f => f.IsDeleted != true && f.AcademicYearID == AcYeaId,
+                    f => f.IsDeleted != true && f.AcademicYearID == AcYeaId && f.Grade.IsDeleted != true && f.AcademicYear.IsDeleted != true,
                     query => query.Include(emp => emp.Grade),
                     query => query.Include(emp => emp.HomeroomTeacher),
                     query => query.Include(emp => emp.AcademicYear),
