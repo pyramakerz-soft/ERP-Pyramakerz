@@ -93,7 +93,7 @@
                     {{ SelectedStudent.en_name }}
                 </td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
-                    {{ SelectedStudent.mobile }}
+                    {{ SelectedStudent.mobile  || '-'}}
                 </td>
                 <td class="py-5 px-4 border border-[#EAECF0] border-t-0 border-l-0">
                     {{ SelectedStudent.nationalityEnName }}
@@ -105,19 +105,16 @@
         </tbody>
     </table>
 </div>
-
 <div class="absolute -top-[9999px] -left-[9999px]">
-    <div id="Data" class="hidden">
-        <app-pdf-print *ngIf="showPDF" [school]="school" [fileName]="'List of students names in class'" [infoRows]="[
-        {
-          keyEn: 'School :' + this.school.name,
-        },
-        {
-          keyEn: 'Student : ' + this.SelectedStudent.user_Name,
-        },
-        {
-          keyEn: 'Date : ' + this.CurrentDate,
-        }
-      ]" [tableDataWithHeader]="DataToPrint" #pdfComponentRef></app-pdf-print>
+    <div id="studentData" class="hidden">
+        <app-pdf-print *ngIf="showPDF" 
+            [school]="school" 
+            [fileName]="'Student Information Report'"
+            [infoRows]="getInfoRows()"
+            [tableHeaders]="['Field', 'Value']"
+            [tableData]="preparePDFData()" 
+            #pdfComponentRef>
+        </app-pdf-print>
     </div>
 </div>
+

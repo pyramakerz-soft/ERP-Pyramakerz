@@ -19,6 +19,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../Services/shared/language.service';
 import {  Subscription } from 'rxjs';
 import { RealTimeNotificationServiceService } from '../../../../../Services/shared/real-time-notification-service.service';
+import Swal from 'sweetalert2';
 @Component({
   selector: 'app-student-information',
   standalone: true,
@@ -30,6 +31,10 @@ export class StudentInformationComponent {
   User_Data_After_Login: TokenData = new TokenData('', 0, 0, 0, 0, '', '', '', '', '');
 
   showViewReportBtn = false;
+
+reportsForExcel: any[] = [];
+reportsForExport: any[] = [];
+
 
   File: any;
   DomainName: string = '';
@@ -186,72 +191,13 @@ export class StudentInformationComponent {
       });
   }
 
-  async ViewReport() {
-    await this.GetData();
-    this.showTable = true;
-    this.GetStudentById();
-  }
+async ViewReport() {
+  await this.GetData();
+  this.showTable = true;
+  this.GetStudentById();
+  this.prepareExportData();
+}
 
-  Print() {
-    this.showPDF = true;
-    setTimeout(() => {
-      const printContents = document.getElementById('Data')?.innerHTML;
-      if (!printContents) {
-        console.error('Element not found!');
-        return;
-      }
-
-      // Create a print-specific stylesheet
-      const printStyle = `
-        <style>
-          @page { size: auto; margin: 0mm; }
-          body { 
-            margin: 0; 
-          }
-  
-          @media print {
-            body > *:not(#print-container) {
-              display: none !important;
-            }
-            #print-container {
-              display: block !important;
-              position: static !important;
-              top: auto !important;
-              left: auto !important;
-              width: 100% !important;
-              height: auto !important;
-              background: white !important;
-              box-shadow: none !important;
-              margin: 0 !important;
-            }
-          }
-        </style>
-      `;
-
-      // Create a container for printing
-      const printContainer = document.createElement('div');
-      printContainer.id = 'print-container';
-      printContainer.innerHTML = printStyle + printContents;
-
-      // Add to body and print
-      document.body.appendChild(printContainer);
-      window.print();
-
-      // Clean up
-      setTimeout(() => {
-        document.body.removeChild(printContainer);
-        this.showPDF = false;
-      }, 100);
-    }, 500);
-  }
-
-  DownloadAsPDF() {
-    this.showPDF = true;
-    setTimeout(() => {
-      this.pdfComponentRef.downloadPDF(); // Call manual download
-      setTimeout(() => (this.showPDF = false), 2000);
-    }, 500);
-  }
 
   formatDate(dateString: string, dir: string): string {
     const date = new Date(dateString);
@@ -264,19 +210,18 @@ export class StudentInformationComponent {
     });
   }
 
-  async DownloadAsExcel() {
-    // Transform DataToPrint into Excel tables
-    const tables = this.DataToPrint.map(
-      (section: { header: any; data: any[] }) => ({
-        title: section.header,
-        headers: ['Field', 'Value'],
-        data: section.data.map((item: { key: any; value: any }) => [
-          item.key,
-          item.value,
-        ]),
-      })
-    );
+async DownloadAsExcel() {
+  if (this.reportsForExcel.length === 0) {
+    Swal.fire({
+      title: 'Warning',
+      text: 'No data to export!',
+      icon: 'warning',
+      confirmButtonText: 'OK',
+    });
+    return;
+  }
 
+  try {
     await this.reportsService.generateExcelReport({
       mainHeader: {
         en: this.school.reportHeaderOneEn,
@@ -295,216 +240,380 @@ export class StudentInformationComponent {
       ],
       reportImage: this.school.reportImage,
       filename: 'Student Information Report.xlsx',
-      tables: tables, // ✅ dynamic table sections from your actual data
+      tables: [
+        {
+          headers: ['Field', 'Value'],
+          data: this.reportsForExcel
+        }
+      ],
+    });
+  } catch (error) {
+    console.error('Error exporting to Excel:', error);
+    Swal.fire({
+      title: 'Error',
+      text: 'Failed to export to Excel',
+      icon: 'error',
+      confirmButtonText: 'OK',
     });
   }
+}
 
-  GetData(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this.studentServ
-        .GetByYear(
-          this.SelectedYearId,
-          this.SelectedStudentId,
-          this.SelectedSchoolId,
-          this.DomainName
-        )
-        .subscribe({
-          next: (d) => {
-            this.DataToPrint = []; // Clear existing data
-            this.school = d.school;
-            this.CurrentDate = d.date;
-            this.CurrentDate = this.formatDate(
-              this.CurrentDate,
-              this.direction
-            );
-            const generalInfo = {
-              header: 'General Information',
-              data: [
-                {
-                  key: 'Student Full Name',
-                  value: d.student?.en_name || 'N/A',
-                },
-                { key: 'Arabic Name', value: d.student?.ar_name || 'N/A' },
-                {
-                  key: 'Admission Date',
-                  value: d.student?.insertedAt || 'N/A',
-                },
-                { key: 'Mobile', value: d.student?.mobile || 'N/A' },
-                { key: 'Alternative Mobile', value: d.student?.phone || 'N/A' },
-                {
-                  key: 'Date of Birth',
-                  value: d.student?.dateOfBirth || 'N/A',
-                },
-                { key: 'Gender', value: d.student?.genderName || 'N/A' },
-                {
-                  key: 'Nationality',
-                  value: d.student?.nationalityEnName || 'N/A',
-                },
-                {
-                  key: "Student' Passport Number",
-                  value: d.student?.passportNo || 'N/A',
-                },
-                {
-                  key: "Student's Id Number",
-                  value: d.student?.idNumber || 'N/A',
-                },
-                { key: 'Religion', value: d.student?.religion || 'N/A' },
-                {
-                  key: 'Place To Birth',
-                  value: d.student?.placeOfBirth || 'N/A',
-                },
-                {
-                  key: 'Pre-School',
-                  value: d.student?.previousSchool || 'N/A',
-                },
-              ],
-            };
-            this.DataToPrint.push(generalInfo);
 
-            const classInfo = {
-              header: 'Class Information',
-              data: [{ key: 'Class', value: d.class?.name || 'N/A' }],
-            };
-            this.DataToPrint.push(classInfo);
-
-            const GuardianInformation = {
-              header: 'Guardian Information',
-              data: [
-                {
-                  key: "Guardian's Name",
-                  value: d.student?.guardianName || 'N/A',
-                },
-                {
-                  key: 'Relationship',
-                  value: d.student?.guardianRelation || 'N/A',
-                },
-                {
-                  key: 'Passport',
-                  value: d.student?.guardianPassportNo || 'N/A',
-                },
-                {
-                  key: 'Identity',
-                  value: d.student?.guardianNationalID || 'N/A',
-                },
-                {
-                  key: 'Qualification',
-                  value: d.student?.guardianQualification || 'N/A',
-                },
-                {
-                  key: 'Profession',
-                  value: d.student?.guardianProfession || 'N/A',
-                },
-                {
-                  key: 'WorkPlace',
-                  value: d.student?.guardianWorkPlace || 'N/A',
-                },
-                {
-                  key: 'E-mail Address',
-                  value: d.student?.guardianEmail || 'N/A',
-                },
-                {
-                  key: 'Identity Expiration',
-                  value: d.student?.guardianNationalIDExpiredDate || 'N/A',
-                },
-                {
-                  key: 'Passport Expiration',
-                  value: d.student?.guardianPassportExpireDate || 'N/A',
-                },
-              ],
-            };
-            this.DataToPrint.push(GuardianInformation);
-
-            const MotherInformation = {
-              header: 'Mother Information',
-              data: [
-                { key: "Mother's Name", value: d.student?.motherName || 'N/A' },
-                {
-                  key: 'Passport',
-                  value: d.student?.motherPassportNo || 'N/A',
-                },
-                {
-                  key: 'Identity',
-                  value: d.student?.motherNationalID || 'N/A',
-                },
-                {
-                  key: 'Passport Expiration',
-                  value: d.student?.motherPassportExpireDate || 'N/A',
-                },
-                {
-                  key: 'Qualification',
-                  value: d.student?.motherQualification || 'N/A',
-                },
-                {
-                  key: 'Profession',
-                  value: d.student?.motherProfession || 'N/A',
-                },
-                {
-                  key: 'WorkPlace',
-                  value: d.student?.motherWorkPlace || 'N/A',
-                },
-                {
-                  key: 'E-mail Address',
-                  value: d.student?.motherEmail || 'N/A',
-                },
-                {
-                  key: 'Experiences',
-                  value: d.student?.motherExperiences || 'N/A',
-                },
-              ],
-            };
-            this.DataToPrint.push(MotherInformation);
-
-            const EmergencyContactPerson = {
-              header: 'Emergency Contact Person',
-              data: [
-                {
-                  key: 'Name',
-                  value: d.student?.emergencyContactName || 'N/A',
-                },
-                {
-                  key: 'RelationShip',
-                  value: d.student?.emergencyContactRelation || 'N/A',
-                },
-                {
-                  key: 'Mobile',
-                  value: d.student?.emergencyContactMobile || 'N/A',
-                },
-              ],
-            };
-            this.DataToPrint.push(EmergencyContactPerson);
-
-            const AddressInformation = {
-              header: 'Address Information',
-              data: [{ key: 'Address', value: d.student?.address || 'N/A' }],
-            };
-            this.DataToPrint.push(AddressInformation);
-
-            const PersonResponsibleToPickUpAndReceiveTheStudent = {
-              header: 'Person Responsible To Pick Up And Receive The Student',
-              data: [
-                {
-                  key: 'Pick_name',
-                  value: d.student?.pickUpContactName || 'N/A',
-                },
-                {
-                  key: 'Pick_Relation',
-                  value: d.student?.pickUpContactRelation || 'N/A',
-                },
-                {
-                  key: 'Pick_mobile',
-                  value: d.student?.pickUpContactMobile || 'N/A',
-                },
-              ],
-            };
-            this.DataToPrint.push(
-              PersonResponsibleToPickUpAndReceiveTheStudent
-            );
-            resolve();
-          },
-          error: (err) => {
-            reject(err);
-          },
-        });
+DownloadAsPDF() {
+  if (this.reportsForExport.length === 0) {
+    Swal.fire({
+      title: 'Warning',
+      text: 'No data to export!',
+      icon: 'warning',
+      confirmButtonText: 'OK',
     });
+    return;
   }
+
+  this.showPDF = true;
+  setTimeout(() => {
+    this.pdfComponentRef.downloadPDF();
+    setTimeout(() => (this.showPDF = false), 2000);
+  }, 500);
+}
+
+Print() {
+  if (!this.DataToPrint || this.DataToPrint.length === 0) {
+    Swal.fire({
+      title: 'Warning',
+      text: 'No data to print!',
+      icon: 'warning',
+      confirmButtonText: 'OK',
+    });
+    return;
+  }
+  
+  this.showPDF = true;
+  setTimeout(() => {
+    const printContents = document.getElementById('studentData')?.innerHTML;
+    if (!printContents) {
+      console.error('Print element not found!');
+      return;
+    }
+    
+    const printStyle = `
+      <style>
+        @page { size: auto; margin: 0mm; }
+        body { margin: 0; }
+        @media print {
+          body > *:not(#print-container) { display: none !important; }
+          #print-container {
+            display: block !important;
+            position: static !important;
+            top: auto !important;
+            left: auto !important;
+            width: 100% !important;
+            height: auto !important;
+            background: white !important;
+            box-shadow: none !important;
+            margin: 0 !important;
+          }
+        }
+      </style>
+    `;
+    
+    const printContainer = document.createElement('div');
+    printContainer.id = 'print-container';
+    printContainer.innerHTML = printStyle + printContents;
+    
+    document.body.appendChild(printContainer);
+    window.print();
+    
+    setTimeout(() => {
+      document.body.removeChild(printContainer);
+      this.showPDF = false;
+    }, 100);
+  }, 500);
+}
+
+private prepareExportData(): void {
+  // For PDF (object format)
+  this.reportsForExport = [];
+  
+  if (!this.DataToPrint || this.DataToPrint.length === 0) {
+    return;
+  }
+
+  this.DataToPrint.forEach((section: any) => {
+    // Add section header as a separate row
+    this.reportsForExport.push({
+      'Field': section.header,
+      'Value': '' // Empty value for header row
+    });
+    
+    // Add each data item in the section
+    section.data.forEach((item: any) => {
+      this.reportsForExport.push({
+        'Field': item.key,
+        'Value': item.value || 'N/A'
+      });
+    });
+    
+    // Add empty row as separator between sections
+    this.reportsForExport.push({
+      'Field': '',
+      'Value': ''
+    });
+  });
+
+  // For Excel (array format) - similar structure but as arrays
+  this.reportsForExcel = [];
+  
+  this.DataToPrint.forEach((section: any) => {
+    // Add section header row
+    this.reportsForExcel.push([section.header, '']);
+    
+    // Add each data item
+    section.data.forEach((item: any) => {
+      this.reportsForExcel.push([item.key, item.value || 'N/A']);
+    });
+    
+    // Add empty separator row
+    this.reportsForExcel.push(['', '']);
+  });
+}
+
+getInfoRows(): any[] {
+  return [
+    { 
+      keyEn: 'Date', 
+      valueEn: this.CurrentDate,
+      keyAr: 'التاريخ',
+      valueAr: this.CurrentDate
+    },
+    { 
+      keyEn: 'Student', 
+      valueEn: this.SelectedStudent?.user_Name || 'N/A',
+      keyAr: 'الطالب',
+      valueAr: this.SelectedStudent?.ar_name || 'N/A'
+    },
+    { 
+      keyEn: 'School', 
+      valueEn: this.school?.name || 'N/A',
+      keyAr: 'المدرسة', 
+      valueAr: this.school?.name || 'N/A'
+    }
+  ];
+}
+
+GetData(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    this.studentServ
+      .GetByYear(
+        this.SelectedYearId,
+        this.SelectedStudentId,
+        this.SelectedSchoolId,
+        this.DomainName
+      )
+      .subscribe({
+        next: (d) => {
+          this.DataToPrint = []; // Clear existing data
+          this.school = d.school;
+          this.CurrentDate = d.date;
+          this.CurrentDate = this.formatDate(
+            this.CurrentDate,
+            this.direction
+          );
+          
+          // ... (rest of your existing DataToPrint population code)
+          
+          const generalInfo = {
+            header: 'General Information',
+            data: [
+              {
+                key: 'Student Full Name',
+                value: d.student?.en_name || 'N/A',
+              },
+              { key: 'Arabic Name', value: d.student?.ar_name || 'N/A' },
+              {
+                key: 'Admission Date',
+                value: d.student?.insertedAt || 'N/A',
+              },
+              { key: 'Mobile', value: d.student?.mobile || 'N/A' },
+              { key: 'Alternative Mobile', value: d.student?.phone || 'N/A' },
+              {
+                key: 'Date of Birth',
+                value: d.student?.dateOfBirth || 'N/A',
+              },
+              { key: 'Gender', value: d.student?.genderName || 'N/A' },
+              {
+                key: 'Nationality',
+                value: d.student?.nationalityEnName || 'N/A',
+              },
+              {
+                key: "Student' Passport Number",
+                value: d.student?.passportNo || 'N/A',
+              },
+              {
+                key: "Student's Id Number",
+                value: d.student?.idNumber || 'N/A',
+              },
+              { key: 'Religion', value: d.student?.religion || 'N/A' },
+              {
+                key: 'Place To Birth',
+                value: d.student?.placeOfBirth || 'N/A',
+              },
+              {
+                key: 'Pre-School',
+                value: d.student?.previousSchool || 'N/A',
+              },
+            ],
+          };
+          this.DataToPrint.push(generalInfo);
+
+          const classInfo = {
+            header: 'Class Information',
+            data: [{ key: 'Class', value: d.class?.name || 'N/A' }],
+          };
+          this.DataToPrint.push(classInfo);
+
+          const GuardianInformation = {
+            header: 'Guardian Information',
+            data: [
+              {
+                key: "Guardian's Name",
+                value: d.student?.guardianName || 'N/A',
+              },
+              {
+                key: 'Relationship',
+                value: d.student?.guardianRelation || 'N/A',
+              },
+              {
+                key: 'Passport',
+                value: d.student?.guardianPassportNo || 'N/A',
+              },
+              {
+                key: 'Identity',
+                value: d.student?.guardianNationalID || 'N/A',
+              },
+              {
+                key: 'Qualification',
+                value: d.student?.guardianQualification || 'N/A',
+              },
+              {
+                key: 'Profession',
+                value: d.student?.guardianProfession || 'N/A',
+              },
+              {
+                key: 'WorkPlace',
+                value: d.student?.guardianWorkPlace || 'N/A',
+              },
+              {
+                key: 'E-mail Address',
+                value: d.student?.guardianEmail || 'N/A',
+              },
+              {
+                key: 'Identity Expiration',
+                value: d.student?.guardianNationalIDExpiredDate || 'N/A',
+              },
+              {
+                key: 'Passport Expiration',
+                value: d.student?.guardianPassportExpireDate || 'N/A',
+              },
+            ],
+          };
+          this.DataToPrint.push(GuardianInformation);
+
+          const MotherInformation = {
+            header: 'Mother Information',
+            data: [
+              { key: "Mother's Name", value: d.student?.motherName || 'N/A' },
+              {
+                key: 'Passport',
+                value: d.student?.motherPassportNo || 'N/A',
+              },
+              {
+                key: 'Identity',
+                value: d.student?.motherNationalID || 'N/A',
+              },
+              {
+                key: 'Passport Expiration',
+                value: d.student?.motherPassportExpireDate || 'N/A',
+              },
+              {
+                key: 'Qualification',
+                value: d.student?.motherQualification || 'N/A',
+              },
+              {
+                key: 'Profession',
+                value: d.student?.motherProfession || 'N/A',
+              },
+              {
+                key: 'WorkPlace',
+                value: d.student?.motherWorkPlace || 'N/A',
+              },
+              {
+                key: 'E-mail Address',
+                value: d.student?.motherEmail || 'N/A',
+              },
+              {
+                key: 'Experiences',
+                value: d.student?.motherExperiences || 'N/A',
+              },
+            ],
+          };
+          this.DataToPrint.push(MotherInformation);
+
+          const EmergencyContactPerson = {
+            header: 'Emergency Contact Person',
+            data: [
+              {
+                key: 'Name',
+                value: d.student?.emergencyContactName || 'N/A',
+              },
+              {
+                key: 'RelationShip',
+                value: d.student?.emergencyContactRelation || 'N/A',
+              },
+              {
+                key: 'Mobile',
+                value: d.student?.emergencyContactMobile || 'N/A',
+              },
+            ],
+          };
+          this.DataToPrint.push(EmergencyContactPerson);
+
+          const AddressInformation = {
+            header: 'Address Information',
+            data: [{ key: 'Address', value: d.student?.address || 'N/A' }],
+          };
+          this.DataToPrint.push(AddressInformation);
+
+          const PersonResponsibleToPickUpAndReceiveTheStudent = {
+            header: 'Person Responsible To Pick Up And Receive The Student',
+            data: [
+              {
+                key: 'Pick_name',
+                value: d.student?.pickUpContactName || 'N/A',
+              },
+              {
+                key: 'Pick_Relation',
+                value: d.student?.pickUpContactRelation || 'N/A',
+              },
+              {
+                key: 'Pick_mobile',
+                value: d.student?.pickUpContactMobile || 'N/A',
+              },
+            ],
+          };
+          this.DataToPrint.push(
+            PersonResponsibleToPickUpAndReceiveTheStudent
+          );
+          
+          resolve();
+        },
+        error: (err) => {
+          reject(err);
+        },
+      });
+  });
+}
+preparePDFData(): any[] {
+  return this.reportsForExport;
+}
 }
