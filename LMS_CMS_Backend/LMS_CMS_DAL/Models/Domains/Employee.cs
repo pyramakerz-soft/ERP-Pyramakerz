@@ -142,5 +142,6 @@ namespace LMS_CMS_DAL.Models.Domains
         public ICollection<SafeEmployee> SafeEmployee { get; set; } = new HashSet<SafeEmployee>();
         public ICollection<MonthlyAttendance> MonthlyAttendance { get; set; } = new HashSet<MonthlyAttendance>();
         public ICollection<SalaryHistory> SalaryHistory { get; set; } = new HashSet<SalaryHistory>();
+        public ICollection<EmployeeLoans> EmployeeLoans { get; set; } = new HashSet<EmployeeLoans>();
     }
 }
